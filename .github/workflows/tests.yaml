@@ -1,0 +1,46 @@
+name: Run tests
+on: [push, pull_request]
+
+jobs:
+  run_pytests:
+    runs-on: ubuntu-latest
+    name: Install and run tests with pytests
+
+    steps:
+
+    - name: Install ubuntu dependencies
+      run: |
+        echo "Install ubuntu dependencies (if any)"
+
+    - name: Install (upgrade) dependencies
+      run: |
+        pip install --upgrade pip
+        pip install pytest
+        pip install pdoc
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        path: uwtools
+
+    - name: Install uwtools
+      run: |
+        cd $GITHUB_WORKSPACE/uwtools
+        pip install .
+
+    - name: Run pytests
+      run: |
+        cd $GITHUB_WORKSPACE/uwtools
+        pytest -v src/tests
+
+    - name: Generate documentation
+      run: |
+        cd $GITHUB_WORKSPACE
+        pdoc --docformat "google" -o docs uwtools
+        ls -lR docs/
+
+    - name: Upload documentation
+      uses: actions/upload-artifact@v2
+      with:
+        name: docs
+        path: docs

@@ -1,0 +1,39 @@
+name: Build and Deploy Documentation
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  create_documentation:
+    runs-on: ubuntu-latest
+    name: Deploy documentation
+
+    steps:
+
+    - name: Install ubuntu dependencies
+      run: |
+        echo "Install ubuntu dependencies (if any)"
+
+    - name: Install (upgrade) dependencies
+      run: |
+        pip install --upgrade pip
+        pip install pdoc
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Install uwtools
+      run: |
+        pip install .
+
+    - name: Generate documentation
+      run: |
+        pdoc --docformat "google" -o docs uwtools
+        ls -lR docs/
+
+    - name: Deploy documentation
+      uses: JamesIves/github-pages-deploy-action@4.1.4
+      with:
+        branch: gh-pages
+        folder: docs
