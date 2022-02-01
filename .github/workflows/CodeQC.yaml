@@ -1,7 +1,7 @@
 name: Run Pylint
 on: [pull_request, push, workflow_dispatch]
 jobs:
-  Code Quality Check:
+  CodeQualityCheck:
 
     runs-on: ubuntu-latest
 
