@@ -1,14 +1,7 @@
-name: Pylint
-on:
-  pull_request:
-    branches:
-    - develop
-  push:
-    branches:
-    - develop
-  workflow_dispatch:
+name: Run Pylint
+on: [pull_request, push, workflow_dispatch]
 jobs:
-  build:
+  Code Quality Check:
 
     runs-on: ubuntu-latest
 
