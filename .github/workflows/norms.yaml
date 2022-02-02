@@ -4,25 +4,19 @@ on: [push, pull_request]
 jobs:
   check_norms:
     runs-on: ubuntu-latest
-    name: Check Python coding norms with pycodestyle and pylint
+    name: Check Python coding norms with pylint
 
     steps:
 
     - name: Install dependencies
       run: |
         pip install --upgrade pip
-        pip install pycodestyle
         pip install pylint
 
     - name: Checkout
       uses: actions/checkout@v2
       with:
         path: uwtools
-
-    - name: Run pycodestyle
-      run: |
-        cd $GITHUB_WORKSPACE/uwtools
-        pycodestyle -v --config ./.pycodestyle . | tee pycodestyle.txt
 
     - name: Run pylint
       run: |
@@ -34,6 +28,5 @@ jobs:
       with:
         name: linter reports
         path: |
-              pycodestyle.txt
               pylint.txt
 

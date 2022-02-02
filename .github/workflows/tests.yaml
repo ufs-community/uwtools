@@ -31,7 +31,7 @@ jobs:
     - name: Run pytests
       run: |
         cd $GITHUB_WORKSPACE/uwtools
-        #pytest -v src/tests
+        pytest -v
 
     - name: Generate documentation
       run: |
