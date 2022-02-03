@@ -17,4 +17,4 @@ jobs:
         pip install pylint
     - name: Analysing the code with pylint
       run: |
-        find . -name '*.py' -exec pylint {} \;
+        pylint *.py;
