@@ -1,0 +1,32 @@
+name: Check Norms
+on: [push, pull_request]
+
+jobs:
+  check_norms:
+    runs-on: ubuntu-latest
+    name: Check Python coding norms with pylint
+
+    steps:
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install pylint
+
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        path: uwtools
+
+    - name: Run pylint
+      run: |
+        cd $GITHUB_WORKSPACE/uwtools
+        pylint `find . -name '*.py'` | tee pylint.txt
+
+    - name: Upload linter results as artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: linter reports
+        path: |
+              pylint.txt
+
