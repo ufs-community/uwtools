@@ -4,9 +4,11 @@ jobs:
   CodeQualityCheck:
 
     runs-on: ubuntu-latest
+    name: Check Python code quality with Pylint
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: Set up Python 3.8
       uses: actions/setup-python@v1
       with:
