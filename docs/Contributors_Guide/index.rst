@@ -7,8 +7,12 @@ Contributor's Guide
    :titlesonly:
    :numbered:
 
-   coding_standards
-   documentation
+   introduction
+   code_coverage
+   github_workflow
+   code_quality
+   testing
+   code_format
 
 Indices and tables
 ==================
