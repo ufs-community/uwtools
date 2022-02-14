@@ -23,14 +23,13 @@ applications, such as observation processing and ingest, post-processing of
 model and data assimilation generated data, reanalysis, verification and
 validation, deployment of products and graphics to web servers.
 
-A schematic of the vision above is shown in Figure
-:numref:`Schematic_Layout_United_Workflow_Framework` below.
+A schematic of the vision above is shown in Figure 1 below.
 
 .. _Schematic_Layout_United_Workflow_Framework:
 	
 .. figure:: figure/Schematic_Layout_United_Workflow_Framework.png
 
-   Schematic layout of the various components of the United Workflow Framework.
+   *Figure 1: Schematic layout of the various components of the United Workflow Framework.*
 
 The tools on the right are developed as stand alone packages that can be
 deployed independently on different platforms (like libraries). On the left
