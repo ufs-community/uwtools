@@ -1,8 +1,15 @@
-name: Build and Deploy Documentation
+name: Documentation
 on:
   push:
     branches:
       - develop
+      - feature/*
+      - main/*
+      - bugix/*
+    paths:
+      - docs/**
+  pull_request:
+    types: [opened, reopened, synchronize]
 
 jobs:
   create_documentation:
@@ -10,6 +17,10 @@ jobs:
     name: Deploy documentation
 
     steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
 
     - name: Install ubuntu dependencies
       run: |
@@ -17,17 +28,24 @@ jobs:
 
     - name: Install (upgrade) dependencies
       run: |
-        pip install --upgrade pip
-        pip install pdoc
-
-    - name: Checkout
-      uses: actions/checkout@v2
+        python -m pip install --upgrade pip sphinx sphinx-gallery sphinx_rtd_theme
 
     - name: Install uwtools
       run: |
-        pip install .
+        python -m pip install .
 
-    - name: Generate documentation
+    - name: Build documentation
       run: |
-        pdoc --docformat "google" -o docs uwtools
-        ls -lR docs/
+        ./.github/jobs/build_documentation.sh
+    - uses: actions/upload-artifact@v2
+      if: always()
+      with:
+        name: documentation
+        path: artifact/documentation
+    - uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: documentation_warnings.log
+        path: artifact/doc_warnings.log
+        if-no-files-found: ignore
+
