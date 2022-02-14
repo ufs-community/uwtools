@@ -35,56 +35,6 @@ copyright = f'{release_year}, {author}'
 # Adding 'sphinx_panels' to use drop-down menus in appendixA.                                                                                                              
 extensions = ['sphinx.ext.autodoc','sphinx.ext.intersphinx','sphinx_panels',]
 
-# settings for ReadTheDocs PDF creation                                                                                                                                    
-latex_engine = 'pdflatex'
-latex_theme = 'manual'
-latex_logo = os.path.join('_static','UFS_image.png')
-latex_show_pagerefs = True
-latex_master_doc = 'Users_Guide/index'
-
-latex_elements = {
-   # The paper size ('letterpaper' or 'a4paper').                                                                                                                          
-   #                                                                                                                                                                       
-   'papersize': 'letterpaper',
-   'releasename':"{version}",
-   'fncychap': '\\usepackage{fncychap}',
-   'fontpkg': '\\usepackage{amsmath,amsfonts,amssymb,amsthm,float}',
-   'inputenc': '\\usepackage[utf8]{inputenc}',
-   'fontenc': '\\usepackage[LGR,T1]{fontenc}',
-
-   'figure_align':'H',
-   'pointsize': '11pt',
-
-   'preamble': r'''
-       \usepackage{charter}                                                                                                                                                
-       \usepackage[defaultsans]{lato}                                                                                                                                      
-       \usepackage{inconsolata}                                                                                                                                            
-       \setcounter{secnumdepth}{4}                                                                                                                                         
-       \setcounter{tocdepth}{4}                                                                                                                                            
-    ''',
-
-    'sphinxsetup': \
-        'hmargin={0.7in,0.7in}, vmargin={1in,1in}, \                                                                                                                       
-        verbatimwithframe=true, \                                                                                                                                          
-        TitleColor={rgb}{0,0,0}, \                                                                                                                                         
-        HeaderFamily=\\rmfamily\\bfseries, \                                                                                                                               
-        InnerLinkColor={rgb}{0,0,1}, \                                                                                                                                     
-        OuterLinkColor={rgb}{0,0,1}',
-        'maketitle': '\\sphinxmaketitle',
-        'printindex': ' '
-}
-
-# Grouping the document tree into LaTeX files. List of tuples                                                                                                              
-# (source start file, target name, title,                                                                                                                                  
-#  author, documentclass [howto, manual, or own class]).                                                                                                                   
-latex_documents = [
-    (latex_master_doc,
-     'users_guide.tex',
-     'United Workflow User\'s Guide',
-     ' ',
-     'manual')
-]
-
 # Add any paths that contain templates here, relative to this directory.                                                                                                   
 templates_path = ['_templates']
 
