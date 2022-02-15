@@ -2,10 +2,8 @@ name: Run Pylint
 on: [pull_request, push, workflow_dispatch]
 jobs:
   CodeQualityCheck:
-
     runs-on: ubuntu-latest
     name: Check Python code quality with Pylint
-
     steps:
     - name: Checkout
       uses: actions/checkout@v2
