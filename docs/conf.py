@@ -23,8 +23,10 @@ author_list = 'Mahajan, R., C. Holt, B. Cash, F. Gabelmann, O. Adejumo, and J. P
 version = '0.0.0'
 verinfo = version
 release = f'{version}'
-release_year = '2022'
-release_date = f'{release_year}-03-31'
+release_date = '2022-03-31'
+release_year = release_date.split("-")[0]
+release_month = release_date.split("-")[1]
+release_day = release_date.split("-")[2]
 copyright = f'{release_year}, {author}'
 
 # -- General configuration ---------------------------------------------------                                                                                             
