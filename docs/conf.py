@@ -17,7 +17,7 @@ print(sys.path)
 
 # -- Project information -----------------------------------------------------                                                                                             
 
-project = 'United Workflow'
+project = 'Unified Workflow'
 author = 'NOAA/EMC, NOAA/GSL, GMU, CIRES, and UCAR/NCAR'
 author_list = 'Mahajan, R., C. Holt, B. Cash, F. Gabelmann, O. Adejumo, and J. Prestopnik'
 version = '0.0.0'

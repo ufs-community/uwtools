@@ -1,5 +1,5 @@
 ###############
-United Workflow
+Unified Workflow
 ###############
 
 ======
@@ -25,11 +25,11 @@ validation, deployment of products and graphics to web servers.
 
 A schematic of the vision above is shown in Figure 1 below.
 
-.. _Schematic_Layout_United_Workflow_Framework:
+.. _Schematic_Layout_Unified_Workflow_Framework:
 	
-.. figure:: figure/Schematic_Layout_United_Workflow_Framework.png
+.. figure:: figure/Schematic_Layout_Unified_Workflow_Framework.png
 
-   *Figure 1: Schematic layout of the various components of the United Workflow Framework.*
+   *Figure 1: Schematic layout of the various components of the Unified Workflow Framework.*
 
 The tools on the right are developed as stand alone packages that can be
 deployed independently on different platforms (like libraries). On the left
@@ -45,7 +45,7 @@ the implementation.
 
 .. toctree::
    :hidden:
-   :caption: United Workflow
+   :caption: Unified Workflow
 
    Users_Guide/index
    Contributors_Guide/index
