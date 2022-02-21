@@ -5,8 +5,11 @@ Continous Integration
 We utilize GitHub Actions to run processes automatically when changes are pushed to GitHub. These tasks include:
 
 * Checking code quality
+
 * Running unit tests
+
 * Build and deploy documentation
+
 -----------------
  Workflow Control
 -----------------
