@@ -227,7 +227,7 @@ Open a pull request using a browser
     * When everything looks satisfactory, click on the green 'Create pull
       request' button.
 
-    * An authorized METplus developer will accept the pull request (if
+    * An authorized developer will accept the pull request (if
       everything meets acceptance criteria) and merge your code into the remote
       repository's develop branch.
 
@@ -257,8 +257,6 @@ Creating a pull request
     passed.  See "All checks have passed" in the figure below. If the tests
     were not successful or if there are conflicts with the base branch,
     ask the requestor make changes.
-
-    .. figure:: figure/checks_pass_no_conflicts.png
     
 3.  Take a look at the description of the testing already performed for
     these changes and then see what the recommended testing is for the
@@ -274,11 +272,9 @@ Creating a pull request
     
     a. Mousing over the line to comment on.
 
-       .. figure:: figure/add_comment_on_line.png
-
+    
          A blue box with a plus will appear. Click on the blue box.
 
-       .. figure:: figure/insert_suggestion.png
     
          Click on the icon of a paper with +/- to “Insert a Suggestion”.  The line
          will be quoted and the reviewer can enter their suggestion below. Then, click on
@@ -289,7 +285,6 @@ Creating a pull request
        “...” icon (three dots) in the right hand corner next to
        “Viewed” icon and select “Edit file”. 	
 
-       .. figure:: figure/how_to_edit_file.png
 
 8.  Ensure the requestor has made all necessary documentation updates.
 
@@ -312,7 +307,6 @@ Creating a pull request
      * **Request changes**: Submit feedback that must be addressed before the
        pull request can be merged.
 	    
-     .. figure:: figure/review_approve_changes.png
 
      A reviewer should click on: "Review changes", add comments to
      the "Write box", and select either  "Comment", "Approve",
@@ -337,7 +331,6 @@ method.
 
 After merging, the requestor can then decide whether or not to delete the branch.
 
-.. figure:: figure/delete_branch.png
 
 If the requestor wishes to delete the “compare” branch, the “Delete branch”
 button should be selected and the corresponding GitHub issue should be closed.
