@@ -339,7 +339,7 @@ button should be selected and the corresponding GitHub issue should be closed.
 Clean up after a successfully merged pull request
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* After an authorized METplus developer has accepted your changes and merged
+* After an authorized developer has accepted your changes and merged
   them into the develop repository, update your local clone by pulling changes
   from the original repository's (i.e. the `Unified Workflow develop branch <https://github.com/ufs-community/workflow-tools/tree/develop>`_):
 
