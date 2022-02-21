@@ -37,43 +37,46 @@ Job Control
 Default Behavior
 ^^^^^^^^^^^^^^^^
 On Push
+
 When a push to a feature_*, bugfix_*, main_v*, or develop* branch occurs the default behavior is to run the following:
 
-Build documentation
+* Build documentation
 
-Update Docker image
+* Update Docker image
 
-Look for new input data
+* Look for new input data
 
-Run unit tests
+* Run unit tests
 
-Run any new use cases
+* Run any new use cases
 
 On Pull Request
+
 When a pull request is created into the develop branch or a main_v* branch, additional jobs are run in automation. In addition to the jobs run for a push, the scripts will:
 
-Run all use cases
+* Run all use cases
 
-Compare use case output to truth data
+* Compare use case output to truth data
 
 On Push to Reference Branch
+
 Branches with a name that ends with “-ref” contain the state of the repository that will generate output that is considered “truth” data. In addition to the jobs run for a normal push, the scripts will:
 
-Run all use cases
+* Run all use cases
 
-Create/Update Docker data volumes that store truth data with the use case output
+* Create/Update Docker data volumes that store truth data with the use case output
 
 ^^^^^^^^^^^^^^^^^^^^^^^
 Commit Message Keywords
 ^^^^^^^^^^^^^^^^^^^^^^^
 The automation logic reads the commit message for the last commit before a push. Keywords in the commit message can override the default behavior. Here is a list of the currently supported keywords and what they control:
 
-ci-skip-all: Don’t run anything - skip all automation jobs
+* ci-skip-all: Don’t run anything - skip all automation jobs
 
-ci-skip-use-cases: Don’t run any use cases
+* ci-skip-use-cases: Don’t run any use cases
 
-ci-run-all-cases: Run all use cases
+* ci-run-all-cases: Run all use cases
 
-ci-run-diff: Obtain truth data and run diffing logic
+* ci-run-diff: Obtain truth data and run diffing logic
 
-ci-only-docs: Only run build documentation job - skip the rest
+* ci-only-docs: Only run build documentation job - skip the rest

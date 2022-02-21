@@ -222,10 +222,7 @@ Open a pull request using a browser
       Select: **Reviewer(s), Project(s)**, and **Milestone**" When selecting a
       reviewer, internal contributors submitting pull requests should select
       the appropriate reviewer(s) and let the reviewer know that the pull
-      request has been assigned to them. If external contributors are unsure
-      who to assign as a reviewer, create a post in the 
-      `METplus GitHub Discussions Forum <https://github.com/ufs-community/workflow-tools/discussions>`_
-      asking for help with the assignment of a reviewer.
+      request has been assigned to them.
       
     * When everything looks satisfactory, click on the green 'Create pull
       request' button.
