@@ -11,7 +11,7 @@ that described in
 where new or updated code is created on a 'feature' branch that is based on
 the `workflow-tools GitHub 'develop' branch <https://github.com/ufs-community/workflow-tools/tree/develop>`_.
 
-The feature branch is named after the corresponding GitHub issue:
+The feature branch is named after the corresponding Jira issue:
 
 *feature/<Github Issue number>_<some_descriptive_name>*
 
@@ -21,7 +21,7 @@ Sequence of Events - Contributing Code
 
 *Pre-requisite:*
 
-The user must set up a GitHub repository account if one does not already have exhist.
+The user must set up a GitHub repository account if one does not already have exist.
 Log into the account.  For more information about GitHub accounts, please refer
 to the GitHub Documentation on
 `GitHub accounts <https://help.github.com/en/github/getting-started-with-github/signing-up-for-a-new-github-account>`_.
