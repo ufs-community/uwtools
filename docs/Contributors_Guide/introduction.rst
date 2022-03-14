@@ -5,7 +5,7 @@ Check out our Contributors Guide to see all the ways you can participate in the 
 
 Here, you'll find additional information that might be helpful as you work on a pull request in this repo.
 
-* `Code Coverage <./code_coverage.rst>`_ - Code coverage and analysis
+* :ref:`Code Coverage <code_coverage>` - Code coverage and analysis
 * `Code Format <./code_format.rst>`_ - How our code documentation is done 
 * `Code Quality <./code_quality.rst>`_ - Code Quality Check
 * `GitHub Workflow <./github_workflow.rst>`_ - GitHub Workflow
