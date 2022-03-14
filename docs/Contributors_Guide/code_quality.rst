@@ -1,9 +1,9 @@
 
 .. _code_quality:
 
-============
+************
 Code Quality
-============
+************
 
 * The inline-documentation docstring standard (using the
   `NumPy <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_

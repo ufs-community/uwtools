@@ -1,9 +1,9 @@
 
 .. _continuous_integration:
 
-=====================
+*********************
 Continous Integration
-=====================
+*********************
 
 We utilize GitHub Actions To run processes automatically when changes are
 pushed to GitHub. These tasks include:
@@ -14,8 +14,8 @@ pushed to GitHub. These tasks include:
 
 * Build and deploy documentation
 
- Workflow Control
------------------
+Workflow Control
+================
 GitHub Actions is controlled by a file in the .github/workflow directory
 called tests.yaml. If this file exists and is valid (no errors), GitHub
 Actions will read this file and trigger a workflow run if the triggering
@@ -28,7 +28,7 @@ complex tasks to simplify a workflow.
 
 
 Name
-^^^^
+----
 The name of a workflow can be specified to describe an overview of what is run.
 Currently workflow-tools only has 1 workflow, but others can be added. The
 following line in the tests.yml file:
@@ -37,21 +37,21 @@ name: Run tests
 defines the workflow that runs all of the jobs.
 
 Event Control
-^^^^^^^^^^^^^
+-------------
 The “on” keyword is used to determine which events will trigger the workflow
 to run: on: [push, pull_request]
 
 Jobs
-^^^^
+----
 The “jobs” keyword is used to define the jobs that are run in the workflow.
 Each item under “jobs” is a string that defines the ID of the job. This value
 can be referenced within the workflow as needed.
 
 Job Control
------------
+===========
 
 Default Behavior
-^^^^^^^^^^^^^^^^
+----------------
 On Push
 
 When a push to a feature_*, bugfix_*, main_v*, or develop* branch occurs the
@@ -89,7 +89,7 @@ jobs run for a normal push, the scripts will:
 
 
 Commit Message Keywords
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 The automation logic reads the commit message for the last commit before a push.
 Keywords in the commit message can override the default behavior. Here is a list
 of the currently supported keywords and what they control:
