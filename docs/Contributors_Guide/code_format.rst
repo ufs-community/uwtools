@@ -1,3 +1,6 @@
+
+.. _code_format:
+
 ===========
 Code Format
 ===========
