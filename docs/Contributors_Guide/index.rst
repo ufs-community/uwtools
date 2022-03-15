@@ -1,6 +1,6 @@
-===================
+###################
 Contributor's Guide
-===================
+###################
 
 
 .. toctree::
@@ -14,7 +14,8 @@ Contributor's Guide
    testing
    code_format
    ci
-
+   documentation
+   
 Indices and tables
 ==================
 

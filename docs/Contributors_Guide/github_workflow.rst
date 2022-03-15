@@ -1,9 +1,12 @@
-===============
+
+.. _github_workflow:
+
+***************
 GitHub Workflow
-===============
+***************
 
 How Unified Workflow releases are created
------------------------------------------
+=========================================
 
 The branching model employed by the workflow-tools GitHub repository is similar to
 that described in
@@ -17,7 +20,7 @@ The feature branch is named after the corresponding Jira issue:
 
 
 Sequence of Events - Contributing Code
---------------------------------------
+======================================
 
 *Pre-requisite:*
 
@@ -28,7 +31,8 @@ to the GitHub Documentation on
 
 
 Workflow Overview
-~~~~~~~~~~~~~~~~~
+-----------------
+
 A contributor to Unified Workflow will do the following:
 
 1.  Create a GitHub Issue to track the new contribution.
@@ -44,8 +48,6 @@ A contributor to Unified Workflow will do the following:
 6.  Open a pull request from feature branch to develop branch.
 
 7.  Clean up after pull request has been merged by an authorized developer.
-
-
 
 
 Create a GitHub Issue that reflects what needs to be done
@@ -140,17 +142,18 @@ local repository.
     git merge origin develop
 
   The first command pulls changes from the original repository (the
-  `workflow-tools GitHub repository <https://github.com/ufs-community/workflow-tools>`_ that you see when you
-  run *git remote -v* and that you set to upstream in step 4 above).  The second command
-  pushes those changes to your forked repository.  The third command will merge the local
-  develop branch into the feature branch.
+  `workflow-tools GitHub repository <https://github.com/ufs-community/workflow-tools>`_
+  that you see when you run *git remote -v* and that you set to upstream in
+  step 4 above).  The second command pushes those changes to your forked
+  repository.  The third command will merge the local develop branch into
+  the feature branch.
 
 
 Commit changes to feature branch
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* Commit any new files by running the following.  Run the *'git add'* command only if this file is
-  newly created and does not yet exist in your repository.
+* Commit any new files by running the following.  Run the *'git add'* command
+  only if this file is newly created and does not yet exist in your repository.
 
   .. code-block:: ini
 
@@ -159,17 +162,19 @@ Commit changes to feature branch
 
   replacing <filename> with the filename.
 
-  A popup window will appear, where you will enter a description of this commit, using the
-  editor you selected when you set up your Git account.  Please refer to the
+  A popup window will appear, where you will enter a description of this
+  commit, using the editor you selected when you set up your Git account.
+  Please refer to the
   `Git Setup <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_
   documentation on configuring your Git account.
 
-  For the first line of your commit comment, enter a brief description, such as the GitHub
-  Issue number and a brief description.  On the second and subsequent lines, provide a
-  detailed description of the changes/additions you made.
+  For the first line of your commit comment, enter a brief description, such
+  as the GitHub Issue number and a brief description.  On the second and
+  subsequent lines, provide a detailed description of the changes/additions
+  you made.
 
-  **Note**: It is a best practice to commit one change per commit, rather than wait
-  until you have multiple changes to include in one commit.
+  **Note**: It is a best practice to commit one change per commit, rather than
+  wait until you have multiple changes to include in one commit.
 
 Push the feature branch to GitHub
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -180,8 +185,9 @@ Push the feature branch to GitHub
 
     git push origin <feature_777_wrapper_xyz>
 
-  replacing *feature_777_wrapper_xyz* with your feature branch name, to push your changes to
-  the origin (i.e. to your *https://github.com/<your-github-user>/ufs-community/workflow-tools* repository)
+  replacing *feature_777_wrapper_xyz* with your feature branch name, to push
+  your changes to the origin (i.e. to your
+  *https://github.com/<your-github-user>/ufs-community/workflow-tools* repository)
 
 Open a pull request using a browser
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -189,29 +195,31 @@ Open a pull request using a browser
 * To request to have your changes be incorporated into the remote repository
   (i.e. the `GitHub Unified Workflow repository <https://github.com/ufs-community/workflow-tools>`_).
 
-* An authorized Unified Workflow developer will need to approve the request and then merge your files
-  into the repository's develop branch.  The develop branch will be used to create a future
-  Unified Workflow release.
+* An authorized Unified Workflow developer will need to approve the request and
+  then merge your files into the repository's develop branch.  The develop
+  branch will be used to create a future Unified Workflow release.
 
-* In your browser, navigate to *https://github.com/<your-github-user>/ufs-community/workflow-tools* replacing
+* In your browser, navigate to
+  *https://github.com/<your-github-user>/ufs-community/workflow-tools* replacing
   <your-github-user> with your GitHub username.
 
 * Click on the green 'Compare & pull request' button
 
   * A web page with four grey buttons should appear:
 
-    * On the left-most button (for setting the base repository), make sure you have selected
-      'base repository:ufs-community/workflow-tools'
+    * On the left-most button (for setting the base repository), make sure
+      you have selected 'base repository:ufs-community/workflow-tools'
 
     * For the base button, make sure you have selected 'base:develop'
 
     * For the head repository button, make sure you have selected
-      'head repository:<your-github-user>/workflow-tools' where <your-github-user> is your GitHub
-      account name.
+      'head repository:<your-github-user>/workflow-tools' where
+      <your-github-user> is your GitHub account name.
 
-    * For the compare button, make sure you have selected 'compare:<your_feature_branch>'
-      where <your_feature_branch> corresponds to the feature branch where you have been
-      making your changes (e.g. feature_777_wrapper_xyz).
+    * For the compare button, make sure you have selected
+      'compare:<your_feature_branch>' where <your_feature_branch> corresponds
+      to the feature branch where you have been making your changes
+      (e.g. feature_777_wrapper_xyz).
 
     * In the 'write' window, follow the directions and fill in the template
       add any additional comments/details.  When filling in the template,
@@ -229,7 +237,7 @@ Open a pull request using a browser
       repository's develop branch.
 
 Approve a pull request using a browser
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 
 Submitting a pull request allows a user to propose changes, request a
 review of the contributions and have the proposed changes merged into a
