@@ -1,11 +1,37 @@
-class Scheduler:
+#!/usr/bin/env python
 
- def __init__(self, JOB_NAME, PATH_TO_STDOUT, PATH_TO_STDERR, WALLTIME, QUEUE_NAME, ACCOUNT_NAME, TOTAL_NODES, CORES_PER_NODE):
-    self.JOB_NAME = JOB_NAME
-    self.PATH_TO_STDOUT = PATH_TO_STDOUT
-    self.PATH_TO_STDERR = PATH_TO_STDERR
-    self.WALLTIME = WALLTIME
-    self.QUEUE_NAME = QUEUE_NAME
-    self.ACCOUNT_NAME = ACCOUNT_NAME
-    self.TOTAL_NODES = TOTAL_NODES
-    self.CORES_PER_NODE = CORES_PER_NODE    
+import os
+
+def mkdir_p(dir):
+    '''make a directory (dir) if it doesn't exist'''
+    if not os.path.exists(dir):
+        os.mkdir(dir)
+
+job_directory = "%s/jobCards" %os.getcwd()
+home = os.environ['HOMEPATH']
+
+# Make top level directories
+mkdir_p(job_directory)
+
+jobname = input("Enter Name of Job: \n")
+std_out = input("Enter Path to STDOUT: \n")
+std_err = input("Enter Path to STD_Error: \n")
+walltime = input("Enter Wall Time: \n")
+queue_name = input("Enter Queue Name: \n")
+acc_name = input("Enter Account Name: \n")
+node_count = input("Enter Node Count: \n")
+core_node = input("Enter Cores Per node: \n")
+
+job_file = os.path.join(job_directory,"%s.sh" %jobname)
+
+with open(job_file, 'w') as fh:
+        fh.writelines("#!/bin/bash\n")
+        fh.writelines("#SBATCH --job-name=%s\n" % jobname)
+        fh.writelines("#SBATCH --output=.out/%s.out\n" % std_out)
+        fh.writelines("#SBATCH --error=.out/%s.err\n" % std_err)
+        fh.writelines("#SBATCH --time=%s\n" % walltime)
+        fh.writelines("#SBATCH --partition=%s\n" % queue_name)
+        fh.writelines("#SBATCH --account=%s\n" % acc_name)
+        fh.writelines("#SBATCH --nodes=%s\n" % node_count)
+        fh.writelines("#SBATCH --ntasks-per-node=%s\n" % core_node)
+        fh.writelines("echo Hello World \n")
