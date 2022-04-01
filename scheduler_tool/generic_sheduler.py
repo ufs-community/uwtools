@@ -13,14 +13,29 @@ home = os.environ['HOMEPATH']
 # Make top level directories
 mkdir_p(job_directory)
 
+def get_non_negative_int(prompt):
+    while True:
+        try:
+            value = int(input(prompt))
+        except ValueError:
+            print("Sorry, Enter an integer.")
+            continue
+
+        if value < 0:
+            print("Sorry, your response must not be negative.")
+            continue
+        else:
+            break
+    return value
+
 jobname = input("Enter Name of Job: \n")
 std_out = input("Enter Path to STDOUT: \n")
 std_err = input("Enter Path to STD_Error: \n")
 walltime = input("Enter Wall Time: \n")
 queue_name = input("Enter Queue Name: \n")
 acc_name = input("Enter Account Name: \n")
-node_count = input("Enter Node Count: \n")
-core_node = input("Enter Cores Per node: \n")
+node_count = get_non_negative_int("Enter Node Count: \n")
+core_node = get_non_negative_int("Enter Cores Per node: \n")
 
 job_file = os.path.join(job_directory,"%s.sh" %jobname)
 
