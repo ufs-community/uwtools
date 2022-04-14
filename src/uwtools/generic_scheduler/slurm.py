@@ -1,14 +1,19 @@
-from io import StringIO
-from .scheduler import Scheduler
+"""
+Slurm scheduler representation
+"""
+from src.uwtools.generic_scheduler import Scheduler
 
-__all__ = ['Slurm']
+# __all__ = ["Slurm"]  # pylint
 
 
 class Slurm(Scheduler):
-    pass
-def map_flags():
-    return
-def add_native_flag(flag):
-    pass
-def create_directive_list():
-    pass
+    """Slurm scheduler representation"""
+
+    def map_flags(self):
+        raise NotImplementedError
+
+    def add_native_flag(self, flag):
+        raise NotImplementedError
+
+    def create_directive_list(self):
+        raise NotImplementedError
