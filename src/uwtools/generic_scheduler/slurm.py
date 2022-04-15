@@ -42,3 +42,8 @@ class Slurm(Scheduler):
             if 'stderr' in specs:
                 strings.append(f"{self._DIRECTIVE} --error {specs.stderr}")
         return "\n".join(strings)
+
+    def join_output(self):
+        if self.join:
+            if '-e' in self.map_flags:
+                self.map_flags.pop('-e')
