@@ -11,7 +11,7 @@ class Slurm(Scheduler):
         super().__init__(scheduler, job_name, partition, qos, output, error, walltime, account, nodes, ntasks_per_node, ntasks, cpus_per_task, reservation, join, native_flags, run_command)
         
     def map_flags():
-        mappings = {'account': '-A', 'partition': '-p', 'wallclock': '-t', 'job_name': '-J', 'nodes': '-N', 'ntasks_per_node': '-n', 'output': '-o', 'error': '-e'}
+        mappings = {'-A': 'account', '-p': 'partition', '-t': 'wallclock', '-J':'job_name', '-N': 'nodes', '-n': 'tasks_per_node', '-o': 'output', '-e': 'error'}
         return mappings
 
     def add_native_flag(flag):
@@ -22,18 +22,8 @@ class Slurm(Scheduler):
         Generate the account specific items of the job card.
         '''
         strings = []
-        if 'jobname' in specs:
-            strings.append(f"{self._DIRECTIVE} --job-name {specs.jobname}")
-        if 'account' in specs:
-            strings.append(f"{self._DIRECTIVE} --account {specs.account}")
-        if 'walltime' in specs:
-            strings.append(f"{self._DIRECTIVE} --time {specs.walltime}")
-        if 'partition' in specs and specs.partition:
-            strings.append(f"{self._DIRECTIVE} --partition={specs.partition}")
-        if 'nodes' in specs:
-            strings.append(f"{self._DIRECTIVE} --nodes={specs.nodes}")
-        if 'ntasks_per_node' in specs:
-            strings.append(f"{self._DIRECTIVE} --ntasks_per_node={specs.ntasks_per_node}")
+        for flag, setting in self.map_flags.items():
+            strings.append(f"{self._DIRECTIVE} --{flag}={setting}")
         if 'join' in specs:
             strings.append(f"{self._DIRECTIVE} --error {specs.join}")
         else:
