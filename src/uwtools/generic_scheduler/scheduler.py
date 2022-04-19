@@ -53,7 +53,7 @@ class Scheduler(ABC):
     def directives(self):
         ret = self._create_directive_list()
         if self.native_flags:
-            self.add_native_flags()
+            self.add_native_flag()
 
         if self.join:
             self.join_output()
