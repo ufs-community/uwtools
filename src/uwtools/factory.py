@@ -1,3 +1,6 @@
+import sys
+
+
 __all__ = ['Factory']
 
 
@@ -12,7 +15,8 @@ class Factory:
 
     def __init__(self, name: str):
         """
-        Initialize the Factory and its Builders
+        Initialize an empty {name}Factory with no Builders
+
 
         Parameters
         ----------
@@ -20,6 +24,11 @@ class Factory:
         """
         self._name = f'{name}Factory'
         self._builders = {}
+
+        # Register {name}Factory as importable from uwtools.factory
+        me = sys.modules[__name__]
+        if not hasattr(me, self._name):
+            setattr(me, self._name, self)
 
     def register(self, key: str, builder: object):
         """
@@ -92,3 +101,21 @@ class Factory:
         True/False if builder is registered in the Factory
         """
         return key in self._builders.keys()
+
+    @classmethod
+    def get_factory(cls, name: str):
+        """
+
+        Parameters
+        ----------
+        name
+
+        Returns
+        -------
+
+        """
+        me = sys.modules[__name__]
+        try:
+            return getattr(me, name)
+        except AttributeError:
+            raise AttributeError(f"{name} is not a Factory in {me}")

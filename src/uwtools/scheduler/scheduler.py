@@ -23,9 +23,6 @@ class Scheduler:
 
         pass
 
-    def echo(self):
-        print(f'Base directive is {self._DIRECTIVE}')
-
     @property
     def _config_to_specs(self):
         specs = self._config

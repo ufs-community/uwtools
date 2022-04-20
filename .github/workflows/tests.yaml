@@ -4,7 +4,7 @@ on: [push, pull_request]
 jobs:
   run_pytests:
     runs-on: ubuntu-latest
-    name: Install and run tests with pytests
+    name: Install and run tests with pytest
 
     steps:
 
@@ -16,7 +16,6 @@ jobs:
       run: |
         pip install --upgrade pip
         pip install pytest
-        pip install pdoc
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -28,19 +27,7 @@ jobs:
         cd $GITHUB_WORKSPACE/uwtools
         pip install .
 
-    - name: Run pytests
+    - name: Run pytest
       run: |
         cd $GITHUB_WORKSPACE/uwtools
         pytest -v
-
-    - name: Generate documentation
-      run: |
-        cd $GITHUB_WORKSPACE
-        pdoc --docformat "google" -o docs uwtools
-        ls -lR docs/
-
-    - name: Upload documentation
-      uses: actions/upload-artifact@v2
-      with:
-        name: docs
-        path: docs
