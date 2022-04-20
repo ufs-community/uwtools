@@ -131,6 +131,10 @@ dmypy.json
 # Sphinx documentation
 docs/_build/
 
-# Editor backup files (Emacs, vim)
+# Editor/IDE backup files (Emacs, vim, PyCharm)
 *~
 *.sw[a-p]
+.idea/
+
+# Ignore these output files anywhere in the tree
+*.out

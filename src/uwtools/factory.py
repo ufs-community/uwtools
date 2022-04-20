@@ -29,6 +29,8 @@ class Factory:
         me = sys.modules[__name__]
         if not hasattr(me, self._name):
             setattr(me, self._name, self)
+        else:
+            raise AttributeError(f"{self._name} is already an importable object from {me}")
 
     def register(self, key: str, builder: object):
         """
