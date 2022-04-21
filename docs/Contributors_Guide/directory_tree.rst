@@ -1,0 +1,60 @@
+**************
+Directory Tree
+**************
+Goals
+=====
+* No conflicts between different packages in their external packages
+* No circular dependencies
+* If a user/dev introduces a new dependency. Needs to add an entry in environment.yaml and setup.cfg (to be added to contributor's guide).
+Action Items
+============
+Need GitHub Actions that test the setup.cfg and environment.yml to ensure that our code runs within
+Python and follows this type of generic structure:
+.. code-block::ini
+  pkg
+  ├── __init__.py
+  ├── module1.py
+  └── subpkg
+      ├── __init__.py
+      └── module2.py
+What are modules and subpkg?
+* Tests follow similar structure as code.
+* Workflow tools are standalone pieces of code that can be used with other tools
+  helpers can be utilized by any tool/code at any level.
+* New tools should be added as subpkgs of uwtools.
+* New helpers should be added as modules of helpers(?)
+.. code-block::ini  
+  tests
+    test_utils
+      __init__.py
+      test_logger.py
+      test_errors.py
+    test_scheduler
+      __init__.py
+      test_slurm.py
+    test_runners
+      __init__.py
+      test_forecast.py
+  uwtools
+    __init__.py
+    scheduler
+      __init__.py
+      scheduler.py
+      slurm.py
+    config_parser
+      __init__.py
+      config_parser.py
+  runners
+    __init__.py
+    forecast.py
+  helpers
+    __init__.py
+    logger.py
+    errors.py
+Examples of how to import this structure
+In **scheduler.py**
+.. code-block::ini
+  import ..helpers.logger as logger
+From an external source:
+.. code-block::ini
+  import uwtools.helpers.logger as logger
