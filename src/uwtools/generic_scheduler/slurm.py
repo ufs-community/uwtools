@@ -7,15 +7,20 @@ __all__ = ['Slurm']
 class Slurm(Scheduler):
     _DIRECTIVE = '#SBATCH'
 
-    def __init__(self, scheduler: str, job_name: str, partition: list, qos: str, output: Path, error: Path, walltime: datetime, account: str, nodes: int, ntasks_per_node: int, ntasks: int, cpus_per_task: int, reservation: str, join: bool, native_flags: list, run_command: str):
+    def __init__(self, scheduler: str, job_name: str, partition: list, qos: str, output: Path, error: Path, walltime: datetime, account: str, nodes: int, ntasks_per_node: int, ntasks: int, cpus_per_task: int, reservation: str, join: bool, native_flags: list, run_command: str, mappings: object):
         super().__init__(scheduler, job_name, partition, qos, output, error, walltime, account, nodes, ntasks_per_node, ntasks, cpus_per_task, reservation, join, native_flags, run_command)
         
-    def map_flags():
-        mappings = {'-A': 'account', '-p': 'partition', '-t': 'wallclock', '-J':'job_name', '-N': 'nodes', '-n': 'tasks_per_node', '-o': 'output', '-e': 'error'}
-        return mappings
+    
+    mappings = {'-A': 'account', '-p': 'partition', '-t': 'wallclock', '-J':'job_name', '-N': 'nodes', '-n': 'tasks_per_node', '-o': 'output', '-e': 'error'}
 
     def add_native_flag(flag):
-        pass
+
+        strings = []
+        if 'native' in self.specs:
+            for item in self.specs.native:
+                strings.append(f"{self._DIRECTIVE} {item}")
+
+        return strings
 
     def create_directive_list(self,specs):
         '''

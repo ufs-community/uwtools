@@ -27,6 +27,7 @@ class Scheduler(ABC):
         self.job_card_path = job_card_path
 
     def add_native_flag(self, flag):
+        self.flag = flag
         self.directives.append(self.native_flags)
 
     def check_required_options(self):
@@ -38,7 +39,7 @@ class Scheduler(ABC):
         ''' Uses the map_flags dict from subclass to build a directives list.
         '''
         # Add in dict logic from PR comment here.
-        pass
+        
 
     @abstractmethod
     def join_output(self):
@@ -47,6 +48,7 @@ class Scheduler(ABC):
         of flags and/or the addition of other flags. PBS, for example,
         requires the addition of "-j oe" to join output, and Slurm
         requires that only the -o flag is provided. '''
+
         pass
 
     @property
@@ -62,6 +64,6 @@ class Scheduler(ABC):
     def write_job_card(self):
 
         with open(self.job_card_path) as fn:
-            fn.write(self.directives.join('\n'))
+            fn.write('\n'.join(self.directives))
             fn.write(self.run_command)
 
