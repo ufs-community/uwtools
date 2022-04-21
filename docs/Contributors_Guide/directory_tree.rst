@@ -10,6 +10,7 @@ Action Items
 ============
 Need GitHub Actions that test the setup.cfg and environment.yml to ensure that our code runs within
 Python and follows this type of generic structure:
+
 .. code-block::ini
   pkg
   ├── __init__.py
@@ -17,13 +18,19 @@ Python and follows this type of generic structure:
   └── subpkg
       ├── __init__.py
       └── module2.py
+      
 What are modules and subpkg?
 * Tests follow similar structure as code.
+
 * Workflow tools are standalone pieces of code that can be used with other tools
   helpers can be utilized by any tool/code at any level.
+  
 * New tools should be added as subpkgs of uwtools.
+
 * New helpers should be added as modules of helpers(?)
+
 .. code-block::ini  
+
   tests
     test_utils
       __init__.py
@@ -51,6 +58,7 @@ What are modules and subpkg?
     __init__.py
     logger.py
     errors.py
+    
 Examples of how to import this structure
 In **scheduler.py**
 .. code-block::ini
