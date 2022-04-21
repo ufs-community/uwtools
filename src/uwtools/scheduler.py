@@ -1,6 +1,5 @@
 """
 Job Scheduling
-author: Ryan Long <ryan.long@noaa.gov>
 """
 
 import logging
@@ -18,11 +17,18 @@ class JobCard(collections.UserList):
     """represents a job card to submit to a scheduler"""
 
     def content(self, line_separator: str = "\n") -> str:
-        """returns the formatted content of the job card"""
+        """returns the formatted content of the job cards
+
+        Parameters
+        ----------
+        line_separator : str
+            the character or characters to join the content lines on.
+        """
         return line_separator.join(self)
 
 
 class JobScheduler(collections.UserDict):
+    """object that creates JobCard"""
 
     _map = {}
     prefix = ""
@@ -44,6 +50,11 @@ class JobScheduler(collections.UserDict):
     @classmethod
     def get_scheduler(cls, props: Dict[str, str]) -> "JobScheduler":
         """returns the appropriate scheduler
+
+        Parameters
+        ----------
+        props : dict
+            must contain a scheduler key or raise KeyError
 
         TODO: map_schedulers should be hoisted up out of the method
         """
@@ -80,7 +91,7 @@ class PBS(JobScheduler):
     prefix = "#PBS"
 
     _map = {
-        "bash": "-S",
+        "shell": "-S",
         "job_name": "-N",
         "output": "-o",
         "job_name": "-j",  # TODO 2 job name defs
@@ -98,7 +109,7 @@ class LSF(JobScheduler):
     """represents a LSF based scheduler"""
 
     _map = {
-        "bash": "-L",
+        "shell": "-L",
         "job_name": "-J",
         "output": "-o",
         "queue": "-q",
