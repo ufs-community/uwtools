@@ -13,12 +13,12 @@ class Slurm(Scheduler):
     
     mappings = {'-A': 'account', '-p': 'partition', '-t': 'wallclock', '-J':'job_name', '-N': 'nodes', '-n': 'tasks_per_node', '-o': 'output', '-e': 'error'}
 
-    def add_native_flag(flag):
+    def add_native_flag(self, flag):
 
         strings = []
-        if 'native' in self.specs:
-            for item in self.specs.native:
-                strings.append(f"{self._DIRECTIVE} {item}")
+        if 'native' in self.flag:
+            for item in self.flag.native:
+                strings.append(f"{self.native_flags {item}}")
 
         return strings
 
