@@ -1,6 +1,6 @@
 from uwtools.scheduler import Scheduler
 
-schedulers = ['Slurm', 'PBS']
+
 config = {'account': 'ACCOUNT_NAME',
           'queue': 'QUEUE_NAME',
           'jobname': 'JOB_NAME',
@@ -49,33 +49,32 @@ slurm2_ref = """#SBATCH --job-name=JOB_NAME
 #SBATCH --export=ARG1=test"""
 
 
-def compare_jobcards(reference, test):
-    try:
-        with open(test, 'r') as fh:
-            test_out = fh.readlines()
-    except Exception as e:
-        raise AssertionError(f"failed reading {test} as {e}")
+def test_slurm1(tmp_path, read_file):
+    """
+    Test for slurm1 configuration
+    Parameters
+    ----------
+    tmp_path - pytest fixture
+    read_file - custom pytest fixture in conftest.py
 
-    reference_out = reference.splitlines()
-    for ref, tst in zip(reference_out, test_out):
+    Returns
+    -------
+
+    """
+    factory = Scheduler.scheduler_factory
+    sched = factory.create('Slurm', slurm1)
+    testfile = tmp_path / 'slurm1.out'
+    sched.dump(filename=testfile)
+    test_card = read_file(testfile)
+    for ref, tst in zip(slurm1_ref.splitlines(), test_card):
         assert ref.strip() == tst.strip(), f"Incorrect match {ref} /= {tst}"
 
 
-def test_registered_schedulers():
-    factory = Scheduler.scheduler_factory
-    for sched in schedulers:
-        assert factory.is_registered(sched), f"{sched} is not a registered Scheduler"
-
-
-def test_slurm1():
-    factory = Scheduler.scheduler_factory
-    sched = factory.create('Slurm', slurm1)
-    sched.dump(filename='slurm1.out')
-    compare_jobcards(slurm1_ref, 'slurm1.out')
-
-
-def test_slurm2():
+def test_slurm2(tmp_path, read_file):
     factory = Scheduler.scheduler_factory
     sched = factory.create('Slurm', slurm2)
-    sched.dump(filename='slurm2.out')
-    compare_jobcards(slurm2_ref, 'slurm2.out')
+    testfile = tmp_path / 'slurm2.out'
+    sched.dump(filename=testfile)
+    test_card = read_file(testfile)
+    for ref, tst in zip(slurm2_ref.splitlines(), test_card):
+        assert ref.strip() == tst.strip(), f"Incorrect match {ref} /= {tst}"

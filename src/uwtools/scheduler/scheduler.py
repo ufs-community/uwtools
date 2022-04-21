@@ -72,6 +72,43 @@ class Scheduler:
     def get_batch_card(self):
         return '\n'.join(self.batch_card)
 
+    @property
+    def get_accounting(self):
+        """
+        Generate the accounting specific items of the job card.
+        E.g. jobname, queuing, partitions, accounts etc.
+        """
+        return []
+
+    @property
+    def get_resources(self):
+        """
+        Generate the resource specific items of the job card.
+        E.g. nodes, memory, walltime, exclusive, etc.
+        """
+
+        return []
+
+    @property
+    def get_env(self):
+        """
+        Export environment variables
+        """
+
+        return []
+
+    @property
+    def get_native(self):
+        #    """
+        #    Generate the scheduler specific native directives verbatim from the user input.
+        #    """
+
+        strings = []
+        if 'native' in self.specs:
+            for item in self.specs.native:
+                strings.append(f"{self._DIRECTIVE} {item}")
+
+        return strings
 
     @classmethod
     def memory_in_bytes(cls, memory: str):
