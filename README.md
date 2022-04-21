@@ -23,3 +23,6 @@ With coverage
 
 With coverage report in html
 `python -m pytest --cov=src --cov-report html`
+
+Run python server to view html test report
+`python -m http.server`
