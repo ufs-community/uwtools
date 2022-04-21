@@ -1,11 +1,13 @@
 **************
 Directory Tree
 **************
+
 Goals
 =====
 * No conflicts between different packages in their external packages
 * No circular dependencies
-* If a user/dev introduces a new dependency. Needs to add an entry in environment.yaml and setup.cfg (to be added to contributor's guide).
+* If a user/dev introduces a new dependency they need to add an entry in environment.yaml and setup.cfg 
+
 Action Items
 ============
 Need GitHub Actions that test the setup.cfg and environment.yml to ensure that our code runs within
@@ -29,7 +31,7 @@ What are modules and subpkg?
   
 * New tools should be added as subpkgs of uwtools.
 
-* New helpers should be added as modules of helpers(?)
+* New helpers should be added as modules of helpers
 
 
 Sample Structure::
