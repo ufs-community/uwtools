@@ -13,6 +13,7 @@ Contributor's Guide
    code_quality
    testing
    code_format
+   directory_tree
    ci
    documentation
    
