@@ -1,7 +1,7 @@
 # pylint: disable=all
 import pytest
 
-from src.uwtools.scheduler import JobScheduler
+from uwtools.scheduler import JobScheduler
 
 
 def test_scheduler():
@@ -15,8 +15,6 @@ def test_scheduler():
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
 
-    print(actual)
-    print(expected)
     assert actual == expected
 
 
