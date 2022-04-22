@@ -62,7 +62,7 @@ Sample Structure::
   helpers
     __init__.py
     logger.py
-    errors.py
+    exceptions.py
     
 Examples of how to import this structure
 In **scheduler.py**::
