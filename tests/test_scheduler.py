@@ -4,11 +4,6 @@ import pytest
 from uwtools.scheduler import JobScheduler
 
 
-def test_dummy():
-    """Skip the test. Used only as a placeholder."""
-    return True
-
-
 def test_scheduler():
 
     expected = """#SBATCH scheduler=slurm
