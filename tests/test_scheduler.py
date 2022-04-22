@@ -1,7 +1,7 @@
 # pylint: disable=all
 import pytest
 
-from src.uwtools.scheduler import JobScheduler
+from uwtools.scheduler import JobScheduler
 
 
 def test_dummy():
