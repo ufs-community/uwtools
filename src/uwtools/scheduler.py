@@ -42,7 +42,7 @@ class JobScheduler(collections.UserDict):
         """returns a job card representation"""
         return JobCard(
             [
-                f"{self.prefix} {self._map[key] if key in self._map else key + '='}{value}"
+                f"{self.prefix} {self._map[key] if key in self._map else key}{value}"
                 for (key, value) in self.items()
             ]
         )
@@ -94,7 +94,7 @@ class PBS(JobScheduler):
         "shell": "-S",
         "job_name": "-N",
         "output": "-o",
-        "job_name": "-j",  # TODO 2 job name defs
+        "job_name2": "-j",  # TODO 2 job name defs
         "queue": "-q",
         "account": "-A",
         "wall_time": "-l walltime=",
