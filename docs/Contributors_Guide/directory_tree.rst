@@ -7,11 +7,8 @@ Goals
 * No conflicts between different packages in their external packages
 * No circular dependencies
 * If a user/dev introduces a new dependency they need to add an entry in environment.yaml and setup.cfg 
-
-Action Items
-============
-Need GitHub Actions that test the setup.cfg and environment.yml to ensure that our code runs within
-Python and follows this type of generic structure:
+* GitHub actions should test setup.cfg and environment.yml to ensure that our code runs correctly 
+* Packages should adhere to the following generic structure as appropriate:
 
 Python structure::
 
@@ -22,17 +19,15 @@ Python structure::
      ├── __init__.py
      └── module2.py
       
-What are modules and subpkg?
-
 * Tests follow similar structure as code.
 
 * Workflow tools are standalone pieces of code that can be used with other tools
-  helpers can be utilized by any tool/code at any level.
+  
+* Helpers can be utilized by any tool/code at any level.
   
 * New tools should be added as subpkgs of uwtools.
 
 * New helpers should be added as modules of helpers
-
 
 Sample Structure::
 
