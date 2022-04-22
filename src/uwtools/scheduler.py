@@ -108,6 +108,8 @@ class PBS(JobScheduler):
 class LSF(JobScheduler):
     """represents a LSF based scheduler"""
 
+    prefix = "#BSUB"
+
     _map = {
         "shell": "-L",
         "job_name": "-J",
@@ -120,8 +122,6 @@ class LSF(JobScheduler):
         "number_tasks": "-R span[ptile=]",  # TODO
         "change_dir": "-cwd /tmp",
     }
-
-    prefix = "#BSUB"
 
 
 if __name__ == "__main__":
