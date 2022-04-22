@@ -1,20 +1,22 @@
 # pylint: disable=all
 import pytest
 
-from uwtools.scheduler import JobScheduler
+from src.uwtools.scheduler import JobScheduler
 
 
 def test_scheduler():
 
-    expected = """#SBATCH scheduler=slurm
-#SBATCH --job-name=abcd
-#SBATCH extra_stuff=12345"""
+    expected = """#SBATCH --job-name=abcd
+#SBATCH extra_stuff=12345
+#SBATCH scheduler=slurm"""
 
     props = {"scheduler": "slurm", "job_name": "abcd", "extra_stuff": "12345"}
 
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
 
+    print(actual)
+    print(expected)
     assert actual == expected
 
 
@@ -40,3 +42,23 @@ def test_scheduler_prop_not_defined_raises_key_error():
     expected = "no scheduler defined in props: [job_name, extra_stuff]"
     actual = str(error.value)
     assert expected in actual
+
+
+def test_scheduler_known_args():
+
+    expected = """#SBATCH --extra-flags
+#SBATCH --extra_arg=12345
+#SBATCH --job-name=abcd
+#SBATCH scheduler=slurm"""
+
+    props = {
+        "scheduler": "slurm",
+        "job_name": "abcd",
+        "--extra_arg": "12345",
+        "--extra-flags": "",
+    }
+
+    js = JobScheduler.get_scheduler(props)
+    actual = js.job_card.content()
+
+    assert actual == expected

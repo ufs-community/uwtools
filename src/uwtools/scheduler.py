@@ -2,6 +2,7 @@
 Job Scheduling
 """
 
+from abc import abstractmethod
 import logging
 import collections
 from typing import Dict
@@ -24,6 +25,7 @@ class JobCard(collections.UserList):
         line_separator : str
             the character or characters to join the content lines on.
         """
+        print(self)
         return line_separator.join(self)
 
 
@@ -38,14 +40,9 @@ class JobScheduler(collections.UserDict):
             return self[name]
 
     @property
+    @abstractmethod
     def job_card(self) -> JobCard:
-        """returns a job card representation"""
-        return JobCard(
-            [
-                f"{self.prefix} {self._map[key] if key in self._map else key}{value}"
-                for (key, value) in self.items()
-            ]
-        )
+        raise NotImplementedError
 
     @classmethod
     def get_scheduler(cls, props: Dict[str, str]) -> "JobScheduler":
@@ -74,15 +71,38 @@ class Slurm(JobScheduler):
     prefix = "#SBATCH"
 
     _map = {
-        "job_name": "--job-name=",
-        "output": "--output=",
-        "error": "--error=",
-        "wall_time": "--time=",
-        "partition": "--partition=",
-        "account": "--account=",
-        "nodes": "--nodes=",
-        "number_tasks": "--ntasks-per-node=",
+        "job_name": "--job-name",
+        "output": "--output",
+        "error": "--error",
+        "wall_time": "--time",
+        "partition": "--partition",
+        "account": "--account",
+        "nodes": "--nodes",
+        "number_tasks": "--ntasks-per-node",
     }
+
+    @property
+    def job_card(self):
+
+        known = [
+            f"{self.prefix} {self._map[key]}={value}"
+            for (key, value) in self.items()
+            if key in self._map
+        ]
+
+        unknown = [
+            f"{self.prefix} {key}={value}"
+            for (key, value) in self.items()
+            if key not in self._map and value not in [None, "", " ", "None", "none"]
+        ]
+
+        flags = [
+            f"{self.prefix} {key}"
+            for (key, value) in self.items()
+            if key not in self._map and value in [None, "", " ", "None", "none"]
+        ]
+
+        return JobCard(sorted(known + unknown + flags))
 
 
 class PBS(JobScheduler):
