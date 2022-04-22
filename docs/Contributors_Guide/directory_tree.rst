@@ -10,7 +10,7 @@ Goals
 * GitHub actions should test setup.cfg and environment.yml to ensure that our code runs correctly 
 * Packages should adhere to the following generic structure as appropriate:
 
-Python structure::
+Sample package structure::
 
    pkg
    ├── __init__.py
