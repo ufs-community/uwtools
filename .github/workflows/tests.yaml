@@ -18,7 +18,6 @@ jobs:
       - name: Install (upgrade) dependencies
         run: |
           pip install --upgrade pip
-          pip install pdoc
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -34,12 +33,6 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/uwtools
           tox -e py
-
-      - name: Generate documentation
-        run: |
-          cd $GITHUB_WORKSPACE
-          pdoc --docformat "google" -o docs uwtools
-          ls -lR docs/
 
       - name: Upload documentation
         uses: actions/upload-artifact@v2
