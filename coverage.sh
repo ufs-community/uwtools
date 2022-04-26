@@ -1,0 +1,1 @@
+python -m pytest --cov-report html:htmlcov --cov=uwtools tests/
