@@ -173,7 +173,7 @@ def submit_job_card(content) -> int:
     stdout, stderr = p.communicate(input=content.encode())
     job_id = stdout.decode().split(" ")[-1]
     if stderr:
-        raise BadJobCardError(stderr)
+        raise BadJobCardError(stderr.decode().split("\n", maxsplit=1)[0])
     return int(job_id)
 
 
