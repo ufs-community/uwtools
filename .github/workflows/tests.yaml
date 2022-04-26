@@ -33,7 +33,7 @@ jobs:
       - name: Run pytests
         run: |
           cd $GITHUB_WORKSPACE/uwtools
-          tox
+          tox -e py
 
       - name: Generate documentation
         run: |
