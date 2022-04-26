@@ -5,13 +5,30 @@ Job Scheduling
 from abc import abstractmethod
 import logging
 import collections
+import subprocess
 from typing import Dict
+import shelve
 
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
     handlers=[logging.StreamHandler()],
 )
+
+
+def shelve_it(file_name):
+    """persistent memoization"""
+    d = shelve.open(file_name)
+
+    def decorator(func):
+        def new_func(param):
+            if param not in d:
+                d[param] = func(param)
+            return d[param]
+
+        return new_func
+
+    return decorator
 
 
 class JobCard(collections.UserList):
@@ -25,7 +42,6 @@ class JobCard(collections.UserList):
         line_separator : str
             the character or characters to join the content lines on.
         """
-        print(self)
         return line_separator.join(self)
 
 
@@ -82,7 +98,8 @@ class Slurm(JobScheduler):
     }
 
     @property
-    def job_card(self):
+    def job_card(self) -> JobCard:
+        """returns a JobCard object"""
 
         known = [
             f"{self.prefix} {self._map[key]}={value}"
@@ -142,6 +159,34 @@ class LSF(JobScheduler):
         "number_tasks": "-R span[ptile=]",  # TODO
         "change_dir": "-cwd /tmp",
     }
+
+
+@shelve_it("cache.shelve")
+def submit_job_card(content) -> int:
+    """sends the job card to the scheduler for processing"""
+    p = subprocess.Popen(
+        ["sbatch", "--deadline=now+1"],
+        stdin=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+    )
+    stdout, stderr = p.communicate(input=content.encode())
+    job_id = stdout.decode().split(" ")[-1]
+    if stderr:
+        raise BadJobCardError(stderr)
+    return int(job_id)
+
+
+class Error(Exception):
+    """base error"""
+
+
+class BadJobCardError(Error):
+    """unrecognized job card key/values"""
+
+    def __init__(self, message):
+        self.message = message
+        super().__init__(self.message)
 
 
 if __name__ == "__main__":
