@@ -5,41 +5,44 @@ jobs:
   run_pytests:
     runs-on: ubuntu-latest
     name: Install and run tests with pytests
+    strategy:
+      matrix:
+        python: ["3.7", "3.8", "3.9", "3.10"]
 
     steps:
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python }}
 
-    - name: Install ubuntu dependencies
-      run: |
-        echo "Install ubuntu dependencies (if any)"
+      - name: Install (upgrade) dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pdoc
 
-    - name: Install (upgrade) dependencies
-      run: |
-        pip install --upgrade pip
-        pip install pdoc
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: uwtools
 
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        path: uwtools
-
-    - name: Install uwtools
-      run: |
-        cd $GITHUB_WORKSPACE/uwtools
+      - name: Install uwtools
+        run: |
+          cd $GITHUB_WORKSPACE/uwtools
           pip install .[dev]
 
-    - name: Run pytests
-      run: |
-        cd $GITHUB_WORKSPACE/uwtools
-        python -m pytest -v
+      - name: Run pytests
+        run: |
+          cd $GITHUB_WORKSPACE/uwtools
+          tox
 
-    - name: Generate documentation
-      run: |
-        cd $GITHUB_WORKSPACE
-        pdoc --docformat "google" -o docs uwtools
-        ls -lR docs/
+      - name: Generate documentation
+        run: |
+          cd $GITHUB_WORKSPACE
+          pdoc --docformat "google" -o docs uwtools
+          ls -lR docs/
 
-    - name: Upload documentation
-      uses: actions/upload-artifact@v2
-      with:
-        name: docs
-        path: docs
+      - name: Upload documentation
+        uses: actions/upload-artifact@v2
+        with:
+          name: docs
+          path: docs
