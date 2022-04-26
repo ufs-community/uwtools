@@ -2,7 +2,6 @@
 Job Scheduling
 """
 
-from abc import abstractmethod
 import logging
 import collections
 from typing import Dict
@@ -25,7 +24,6 @@ class JobCard(collections.UserList):
         line_separator : str
             the character or characters to join the content lines on.
         """
-        print(self)
         return line_separator.join(self)
 
 
@@ -34,15 +32,41 @@ class JobScheduler(collections.UserDict):
 
     _map = {}
     prefix = ""
+    key_value_separator = "="
 
     def __getattr__(self, name):
         if name in self:
             return self[name]
+        raise AttributeError(name)
 
     @property
-    @abstractmethod
-    def job_card(self) -> JobCard:
-        raise NotImplementedError
+    def job_card(self):
+        """returns the job card to be fed to external scheduler"""
+        ignored_keys = ["scheduler"]
+
+        known = [
+            f"{self.prefix} {self._map[key]}{self.key_value_separator}{value}"
+            for (key, value) in self.items()
+            if key in self._map and key not in ignored_keys
+        ]
+
+        unknown = [
+            f"{self.prefix} {key}{self.key_value_separator}{value}"
+            for (key, value) in self.items()
+            if key not in self._map
+            and value not in [None, "", " ", "None", "none"]
+            and key not in ignored_keys
+        ]
+
+        flags = [
+            f"{self.prefix} {key}"
+            for (key, value) in self.items()
+            if key not in self._map
+            and value in [None, "", " ", "None", "none"]
+            and key not in ignored_keys
+        ]
+
+        return JobCard(sorted(known + unknown + flags))
 
     @classmethod
     def get_scheduler(cls, props: Dict[str, str]) -> "JobScheduler":
@@ -60,7 +84,12 @@ class JobScheduler(collections.UserDict):
                 f"no scheduler defined in props: [{', '.join(props.keys())}]"
             )
 
-        map_schedulers = {"slurm": Slurm, "pbs": PBS, "lsf": LSF, object: None}
+        map_schedulers = {
+            "slurm": Slurm,
+            "pbs": PBS,
+            "lsf": LSF,
+            object: None,
+        }  # TODO Does this need a default?
         logging.debug("getting scheduler type %s", map_schedulers[props["scheduler"]])
         return map_schedulers[props["scheduler"]](props)
 
@@ -81,34 +110,12 @@ class Slurm(JobScheduler):
         "number_tasks": "--ntasks-per-node",
     }
 
-    @property
-    def job_card(self):
-
-        known = [
-            f"{self.prefix} {self._map[key]}={value}"
-            for (key, value) in self.items()
-            if key in self._map
-        ]
-
-        unknown = [
-            f"{self.prefix} {key}={value}"
-            for (key, value) in self.items()
-            if key not in self._map and value not in [None, "", " ", "None", "none"]
-        ]
-
-        flags = [
-            f"{self.prefix} {key}"
-            for (key, value) in self.items()
-            if key not in self._map and value in [None, "", " ", "None", "none"]
-        ]
-
-        return JobCard(sorted(known + unknown + flags))
-
 
 class PBS(JobScheduler):
     """represents a PBS based scheduler"""
 
     prefix = "#PBS"
+    key_value_separator = " "
 
     _map = {
         "shell": "-S",
@@ -129,6 +136,7 @@ class LSF(JobScheduler):
     """represents a LSF based scheduler"""
 
     prefix = "#BSUB"
+    key_value_separator = " "
 
     _map = {
         "shell": "-L",
