@@ -17,7 +17,7 @@ def test_scheduler_slurm():
     assert actual == expected
 
 
-def test_scheduler_lfs():
+def test_scheduler_lsf():
 
     expected = """#BSUB -J abcd
 #BSUB extra_stuff 12345"""
