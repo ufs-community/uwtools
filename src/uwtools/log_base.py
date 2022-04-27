@@ -29,7 +29,7 @@ LEVELS = {
 
 def handle_logging(**kwargs):  # pylint: disable=unused-variable
     """handles default logging"""
-    level = LEVELS["DEFAULT"]
+    level = LEVELS["default"]
     if "args" in kwargs:
         level = LEVELS.get(kwargs["args"].log.lower())
     if level is None:
