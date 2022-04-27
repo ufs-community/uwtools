@@ -91,7 +91,12 @@ class JobScheduler(collections.UserDict):
             object: None,
         }  # TODO Does this need a default?
         logging.debug("getting scheduler type %s", map_schedulers[props["scheduler"]])
-        return map_schedulers[props["scheduler"]](props)
+        try:
+             return map_schedulers[props["scheduler"]](props)
+        except KeyError:
+             raise KeyError(f"{props['scheduler']} is not a supported scheduler" +
+                           "Currently supported schedulers are:\n" + 
+                           f'{" | ".join(map_schedulers.keys())}"')
 
 
 class Slurm(JobScheduler):
