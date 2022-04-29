@@ -4,13 +4,58 @@ Job Scheduling
 
 import logging
 import collections
-from typing import Dict
+from typing import Any, Callable, Dict, List
+
 
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
     handlers=[logging.StreamHandler()],
 )
+
+
+class RequiredAttribs:  # pylint: disable=too-few-public-methods
+    """key for required attributes"""
+
+    ACCOUNT = "account"
+    QUEUE = "queue"
+    WALLTIME = "wall_time"
+    NODES = "nodes"
+    TASKS_PER_NODE = "tasks_per_node"
+
+
+class OptionalAttribs:  # pylint: disable=too-few-public-methods
+    """key for optional attributes"""
+
+    SHELL = "shell"
+    JOB_NAME = "job_name"
+    STDOUT = "stdout"
+    STDERR = "stderr"
+    JOIN = "join"
+    PARTITION = "partition"
+    THREADS = "threads"
+    MEMORY = "memory"
+    DEBUG = "debug"
+    EXCLUSIVE = "exclusive"
+    NATIVE = "native"
+    CPUS = "cpus"
+
+
+class AttributeMap(collections.UserDict):
+    def __init__(self, _map):
+        super().__init__()
+        self.update(self._parsed(_map))
+
+    def _parsed(self, raw_map):
+
+        return {
+            raw_map[key](value)
+            if callable(raw_map[key])
+            else key: value
+            if not callable(value)
+            else ""
+            for (key, value) in raw_map.items()
+        }
 
 
 class JobCard(collections.UserList):
@@ -39,20 +84,31 @@ class JobScheduler(collections.UserDict):
             return self[name]
         raise AttributeError(name)
 
+    def pre_process(self):
+        """pre process attributes before converting to job card"""
+        return self
+
+    @staticmethod
+    def post_process(items: List[Any]):
+        """post process attributes before converting to job card"""
+        return items
+
     @property
     def job_card(self):
         """returns the job card to be fed to external scheduler"""
         ignored_keys = ["scheduler"]
+        sanitized_attribs = AttributeMap(self.pre_process())
+        print(sanitized_attribs)
 
         known = [
             f"{self.prefix} {self._map[key]}{self.key_value_separator}{value}"
-            for (key, value) in self.items()
+            for (key, value) in sanitized_attribs.items()
             if key in self._map and key not in ignored_keys
         ]
 
         unknown = [
             f"{self.prefix} {key}{self.key_value_separator}{value}"
-            for (key, value) in self.items()
+            for (key, value) in sanitized_attribs.items()
             if key not in self._map
             and value not in [None, "", " ", "None", "none"]
             and key not in ignored_keys
@@ -60,13 +116,15 @@ class JobScheduler(collections.UserDict):
 
         flags = [
             f"{self.prefix} {key}"
-            for (key, value) in self.items()
+            for (key, value) in sanitized_attribs.items()
             if key not in self._map
             and value in [None, "", " ", "None", "none"]
             and key not in ignored_keys
         ]
 
-        return JobCard(sorted(known + unknown + flags))
+        processed = sorted(known + unknown + flags)
+
+        return JobCard(processed)
 
     @classmethod
     def get_scheduler(cls, props: Dict[str, str]) -> "JobScheduler":
@@ -88,8 +146,7 @@ class JobScheduler(collections.UserDict):
             "slurm": Slurm,
             "pbs": PBS,
             "lsf": LSF,
-            object: None,
-        }  # TODO Does this need a default?
+        }
         logging.debug("getting scheduler type %s", map_schedulers[props["scheduler"]])
         try:
              return map_schedulers[props["scheduler"]](props)
@@ -104,16 +161,19 @@ class Slurm(JobScheduler):
 
     prefix = "#SBATCH"
 
-    _map = {
-        "job_name": "--job-name",
-        "output": "--output",
-        "error": "--error",
-        "wall_time": "--time",
-        "partition": "--partition",
-        "account": "--account",
-        "nodes": "--nodes",
-        "number_tasks": "--ntasks-per-node",
-    }
+    _map = AttributeMap(
+        {
+            RequiredAttribs.ACCOUNT: "--account",
+            RequiredAttribs.NODES: "--nodes",
+            RequiredAttribs.QUEUE: "--qos",  # TODO verify, placeholder
+            RequiredAttribs.TASKS_PER_NODE: "--ntasks-per-node",
+            RequiredAttribs.WALLTIME: "--time",
+            OptionalAttribs.JOB_NAME: "--job-name",
+            OptionalAttribs.STDOUT: "--output",
+            OptionalAttribs.STDERR: "--error",
+            OptionalAttribs.PARTITION: "--partition",
+        }
+    )
 
 
 class PBS(JobScheduler):
@@ -122,19 +182,27 @@ class PBS(JobScheduler):
     prefix = "#PBS"
     key_value_separator = " "
 
-    _map = {
-        "shell": "-S",
-        "job_name": "-N",
-        "output": "-o",
-        "job_name2": "-j",  # TODO 2 job name defs
-        "queue": "-q",
-        "account": "-A",
-        "wall_time": "-l walltime=",
-        "total_nodes": "-l select=",
-        "cpus": "cpus=",
-        "place": "-l place=",
-        "debug": "-l debug=",
-    }
+    _map = AttributeMap(
+        {
+            RequiredAttribs.ACCOUNT: "-A",
+            RequiredAttribs.NODES: (lambda x: f"-l select={x}"),
+            RequiredAttribs.QUEUE: "-q",
+            RequiredAttribs.TASKS_PER_NODE: "ncpus=",
+            RequiredAttribs.WALLTIME: "-l walltime=",
+            OptionalAttribs.SHELL: "-S",
+            OptionalAttribs.JOB_NAME: "-N",
+            OptionalAttribs.STDOUT: "-o",
+            OptionalAttribs.DEBUG: "-l debug=",
+            OptionalAttribs.CPUS: ":mpiprocs=",
+            OptionalAttribs.THREADS: ":ompthreads=",
+        }
+    )
+
+    def post_process(self, items):
+        print(items)
+        select = f"{items.pop(RequiredAttribs.NODES)}{items.pop(OptionalAttribs.CPUS)}{items.pop(OptionalAttribs.THREADS)}{items.pop(RequiredAttribs.TASKS_PER_NODE)}"
+        items.append(select)
+        return items
 
 
 class LSF(JobScheduler):
@@ -143,18 +211,19 @@ class LSF(JobScheduler):
     prefix = "#BSUB"
     key_value_separator = " "
 
-    _map = {
-        "shell": "-L",
-        "job_name": "-J",
-        "output": "-o",
-        "queue": "-q",
-        "account": "-P",
-        "wall_time": "-W",
-        "total_nodes": "-n",
-        "cpus": "-R affinity[core()]",  # TODO
-        "number_tasks": "-R span[ptile=]",  # TODO
-        "change_dir": "-cwd /tmp",
-    }
+    _map = AttributeMap(
+        {
+            RequiredAttribs.QUEUE: "-q",
+            RequiredAttribs.ACCOUNT: "-P",
+            RequiredAttribs.WALLTIME: "-W",
+            RequiredAttribs.NODES: "-n",
+            RequiredAttribs.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
+            OptionalAttribs.SHELL: "-L",
+            OptionalAttribs.JOB_NAME: "-J",
+            OptionalAttribs.STDOUT: "-o",
+            OptionalAttribs.CPUS: lambda x: f"-R affinity[core({x})]",
+        }
+    )
 
 
 if __name__ == "__main__":

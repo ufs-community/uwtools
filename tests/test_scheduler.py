@@ -35,7 +35,14 @@ def test_scheduler_pbs():
     expected = """#PBS -N abcd
 #PBS extra_stuff 12345"""
 
-    props = {"scheduler": "pbs", "job_name": "abcd", "extra_stuff": "12345"}
+    props = {
+        "scheduler": "pbs",
+        "nodes": "4",
+        "threads": "12345",
+        "cpus": "2",
+        "threads": "4",
+        "tasks_per_node": "4",
+    }
 
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
