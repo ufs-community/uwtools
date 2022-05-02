@@ -180,24 +180,7 @@ class Slurm(JobScheduler):
 
 
 class PBS(JobScheduler):
-    """represents a PBS based scheduler
-
-    #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ompthreads=THREADS_PER_CORE:ncpus=TOTAL_CORES
-
-    TOTAL_NODES=nodes
-    CORES_PER_NODE=tasks_per_node
-    #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ncpus=CORES_PER_NODE
-
-    TOTAL_NODES=nodes
-    CORES_PER_NODE=tasks_per_node
-    THREADS_PER_CORE=threads
-    #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ompthreads=THREADS_PER_CORE:ncpus=<CORES_PER_NODE*THREADS_PER_NODE>
-
-    TOTAL_NODES=nodes
-    CORES_PER_NODE=tasks_per_node
-    MEMORY=memory
-    #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ncpus=CORES_PER_NODE:mem=MEMORY
-    """
+    """represents a PBS based scheduler"""
 
     prefix = "#PBS"
     key_value_separator = " "
@@ -219,35 +202,55 @@ class PBS(JobScheduler):
     )
 
     def pre_process(self) -> Dict[str, Any]:
-        output = self.__dict__
+        output = self.__dict__["data"]
         output.update(self.select(output))
         output.update(self.placement(output))
+
         output.pop(RequiredAttribs.TASKS_PER_NODE)
+        output.pop(RequiredAttribs.NODES)
+        output.pop(OptionalAttribs.THREADS)
+        output.pop(OptionalAttribs.MEMORY)
         return output
 
-    @staticmethod
-    def select(items) -> Dict[str, Any]:
+    def select(self, items) -> Dict[str, Any]:
         """select logic"""
-        # Place logic line concat here
-        # to implement
+        # #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ompthreads=THREADS_PER_CORE:ncpus=TOTAL_CORES
+
+        # TOTAL_NODES=nodes
+        # CORES_PER_NODE=tasks_per_node
+        # #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ncpus=CORES_PER_NODE
+
+        # TOTAL_NODES=nodes
+        # CORES_PER_NODE=tasks_per_node
+        # THREADS_PER_CORE=threads
+        # #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ompthreads=THREADS_PER_CORE:ncpus=<CORES_PER_NODE*THREADS_PER_NODE>
+
+        # TOTAL_NODES=nodes
+        # CORES_PER_NODE=tasks_per_node
+        # MEMORY=memory
+        # PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ncpus=CORES_PER_NODE:mem=MEMORY
+
+        total_nodes = items.get(RequiredAttribs.NODES, "")
+        cores_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
+        threads_per_core = items.get(OptionalAttribs.THREADS, "")
+        memory = items.get(OptionalAttribs.MEMORY, "")
+
+        items[
+            "select"
+        ] = f"{self.prefix} -l select={total_nodes}:mpiprocs={cores_per_node}"
+        if threads_per_core not in NONEISH:
+            items[
+                "select"
+            ] = f"{items['select']}:ompthreads={threads_per_core}:ncpus={int(cores_per_node) * int(threads_per_core)}"
+        elif memory not in NONEISH:
+            items["select"] = f"{items['select']}:ncpus={cores_per_node}:mem={memory}"
         return items
 
     def placement(self, items) -> Dict[str, Any]:
-        """
-        If ALL(PLACEMNT OR EXCL) in NONEISH
-             return items
+        """placement logic"""
 
-        output = ''
-        If Placement
-             string.append(placement)
-        if Excl
-            string.append(exclusive)
-        if len(strings):
-            output = '#PBS -l place=' + ":".join(strings)
-        """
-
-        exclusive = OptionalAttribs.EXCLUSIVE
-        placement = OptionalAttribs.PLACEMENT
+        exclusive = items.get(OptionalAttribs.EXCLUSIVE, "")
+        placement = items.get(OptionalAttribs.PLACEMENT, "")
 
         if all(
             [
@@ -290,7 +293,7 @@ class LSF(JobScheduler):
     )
 
     def pre_process(self):
-        items = self.__dict__
+        items = self.__dict__["data"]
         items = self.select(items)
 
         items.pop(RequiredAttribs.TASKS_PER_NODE)
@@ -298,9 +301,10 @@ class LSF(JobScheduler):
 
     def select(self, items: Dict[str, Any]):
         """select logic"""
-        items[RequiredAttribs.NODES] = (
-            items[RequiredAttribs.NODES] * items[RequiredAttribs.TASKS_PER_NODE]
-        )
+
+        nodes = items.get(RequiredAttribs.NODES, "")
+        tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE)
+        items[RequiredAttribs.NODES] = int(nodes) * int(tasks_per_node)
         return items
 
 
