@@ -21,7 +21,7 @@ class RequiredAttribs:  # pylint: disable=too-few-public-methods
 
     ACCOUNT = "account"
     QUEUE = "queue"
-    WALLTIME = "wall_time"
+    WALLTIME = "walltime"
     NODES = "nodes"
     TASKS_PER_NODE = "tasks_per_node"
 
@@ -40,7 +40,7 @@ class OptionalAttribs:  # pylint: disable=too-few-public-methods
     DEBUG = "debug"
     EXCLUSIVE = "exclusive"
     CPUS = "cpus"
-    PLACEMENT = "place"
+    PLACEMENT = "placement"
 
 
 class AttributeMap(collections.UserDict):
@@ -96,7 +96,11 @@ class JobScheduler(collections.UserDict):
     @staticmethod
     def post_process(items: List[str]):
         """post process attributes before converting to job card"""
-        return items
+        output = items
+        output = [x.replace("= ", "=") for x in output]
+        output = [x.replace(" =", "=") for x in output]
+        output = [x.replace(" = ", "=") for x in output]
+        return output
 
     @property
     def job_card(self):
@@ -123,12 +127,12 @@ class JobScheduler(collections.UserDict):
             if key not in self._map and value in NONEISH and key not in IGNORED_ATTRIBS
         ]
 
-        processed = self.post_process(known) + unknown + flags
+        processed = self.post_process(known + unknown + flags)
 
         return JobCard(processed)
 
     @classmethod
-    def get_scheduler(cls, props: Dict[str, str]) -> "JobScheduler":
+    def get_scheduler(cls, props: Dict[str, Any]) -> "JobScheduler":
         """returns the appropriate scheduler
 
         Parameters
@@ -206,44 +210,29 @@ class PBS(JobScheduler):
         output.update(self.select(output))
         output.update(self.placement(output))
 
-        output.pop(RequiredAttribs.TASKS_PER_NODE)
-        output.pop(RequiredAttribs.NODES)
-        output.pop(OptionalAttribs.THREADS)
-        output.pop(OptionalAttribs.MEMORY)
+        output.pop(RequiredAttribs.TASKS_PER_NODE, None)
+        output.pop(RequiredAttribs.NODES, None)
+        output.pop(OptionalAttribs.THREADS, None)
+        output.pop(OptionalAttribs.MEMORY, None)
+        output.pop("exclusive", None)
+        output.pop("placement", None)
+        output.pop("select", None)
         return output
 
     def select(self, items) -> Dict[str, Any]:
         """select logic"""
-        # #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ompthreads=THREADS_PER_CORE:ncpus=TOTAL_CORES
-
-        # TOTAL_NODES=nodes
-        # CORES_PER_NODE=tasks_per_node
-        # #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ncpus=CORES_PER_NODE
-
-        # TOTAL_NODES=nodes
-        # CORES_PER_NODE=tasks_per_node
-        # THREADS_PER_CORE=threads
-        # #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ompthreads=THREADS_PER_CORE:ncpus=<CORES_PER_NODE*THREADS_PER_NODE>
-
-        # TOTAL_NODES=nodes
-        # CORES_PER_NODE=tasks_per_node
-        # MEMORY=memory
-        # PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ncpus=CORES_PER_NODE:mem=MEMORY
-
         total_nodes = items.get(RequiredAttribs.NODES, "")
         cores_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
         threads_per_core = items.get(OptionalAttribs.THREADS, "")
         memory = items.get(OptionalAttribs.MEMORY, "")
 
-        items[
-            "select"
-        ] = f"{self.prefix} -l select={total_nodes}:mpiprocs={cores_per_node}"
+        items["-l select"] = f"={total_nodes}:mpiprocs={cores_per_node}"
         if threads_per_core not in NONEISH:
             items[
-                "select"
-            ] = f"{items['select']}:ompthreads={threads_per_core}:ncpus={int(cores_per_node) * int(threads_per_core)}"
-        elif memory not in NONEISH:
-            items["select"] = f"{items['select']}:ncpus={cores_per_node}:mem={memory}"
+                "-l select"
+            ] = f"{items['-l select']}:ompthreads={threads_per_core}:ncpus={int(cores_per_node) * int(threads_per_core)}"
+        if memory not in NONEISH:
+            items["-l select"] = f"{items['-l select']}:mem={memory}"
         return items
 
     def placement(self, items) -> Dict[str, Any]:
@@ -262,13 +251,12 @@ class PBS(JobScheduler):
 
         output = []
         if placement not in NONEISH:
-            output.append(placement)
+            output.append(str(placement))
         if exclusive not in NONEISH:
-            output.append(exclusive)
+            output.append("excl")
         if len(output) > 0:
-            items[OptionalAttribs.PLACEMENT] = f"{self.prefix} -l place=" + ":".join(
-                output
-            )
+            print(output)
+            items["-l place="] = ":".join(output)
         return items
 
 
@@ -296,7 +284,7 @@ class LSF(JobScheduler):
         items = self.__dict__["data"]
         items = self.select(items)
 
-        items.pop(RequiredAttribs.TASKS_PER_NODE)
+        items.pop(RequiredAttribs.TASKS_PER_NODE, None)
         return items
 
     def select(self, items: Dict[str, Any]):
