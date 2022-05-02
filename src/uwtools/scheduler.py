@@ -2,16 +2,18 @@
 Job Scheduling
 """
 
-import logging
 import collections
-from typing import Any, Callable, Dict, List
-
+import logging
+from typing import Any, Dict, List
 
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
     handlers=[logging.StreamHandler()],
 )
+
+NONEISH = [None, "", " ", "None", "none", False]
+IGNORED_ATTRIBS = ["scheduler"]
 
 
 class RequiredAttribs:  # pylint: disable=too-few-public-methods
@@ -37,11 +39,14 @@ class OptionalAttribs:  # pylint: disable=too-few-public-methods
     MEMORY = "memory"
     DEBUG = "debug"
     EXCLUSIVE = "exclusive"
-    NATIVE = "native"
     CPUS = "cpus"
+    PLACEMENT = "place"
 
 
 class AttributeMap(collections.UserDict):
+    """represents a dict that parses callables to their values
+    on instantiation"""
+
     def __init__(self, _map):
         super().__init__()
         self.update(self._parsed(_map))
@@ -89,40 +94,36 @@ class JobScheduler(collections.UserDict):
         return self
 
     @staticmethod
-    def post_process(items: List[Any]):
+    def post_process(items: List[str]):
         """post process attributes before converting to job card"""
         return items
 
     @property
     def job_card(self):
         """returns the job card to be fed to external scheduler"""
-        ignored_keys = ["scheduler"]
         sanitized_attribs = AttributeMap(self.pre_process())
-        print(sanitized_attribs)
 
         known = [
             f"{self.prefix} {self._map[key]}{self.key_value_separator}{value}"
             for (key, value) in sanitized_attribs.items()
-            if key in self._map and key not in ignored_keys
+            if key in self._map and key not in IGNORED_ATTRIBS
         ]
 
         unknown = [
             f"{self.prefix} {key}{self.key_value_separator}{value}"
             for (key, value) in sanitized_attribs.items()
             if key not in self._map
-            and value not in [None, "", " ", "None", "none"]
-            and key not in ignored_keys
+            and value not in NONEISH
+            and key not in IGNORED_ATTRIBS
         ]
 
         flags = [
             f"{self.prefix} {key}"
             for (key, value) in sanitized_attribs.items()
-            if key not in self._map
-            and value in [None, "", " ", "None", "none"]
-            and key not in ignored_keys
+            if key not in self._map and value in NONEISH and key not in IGNORED_ATTRIBS
         ]
 
-        processed = sorted(known + unknown + flags)
+        processed = self.post_process(known) + unknown + flags
 
         return JobCard(processed)
 
@@ -149,11 +150,13 @@ class JobScheduler(collections.UserDict):
         }
         logging.debug("getting scheduler type %s", map_schedulers[props["scheduler"]])
         try:
-             return map_schedulers[props["scheduler"]](props)
-        except KeyError:
-             raise KeyError(f"{props['scheduler']} is not a supported scheduler" +
-                           "Currently supported schedulers are:\n" + 
-                           f'{" | ".join(map_schedulers.keys())}"')
+            return map_schedulers[props["scheduler"]](props)
+        except KeyError as error:
+            raise KeyError(
+                f"{props['scheduler']} is not a supported scheduler"
+                + "Currently supported schedulers are:\n"
+                + f'{" | ".join(map_schedulers.keys())}"'
+            ) from error
 
 
 class Slurm(JobScheduler):
@@ -165,7 +168,7 @@ class Slurm(JobScheduler):
         {
             RequiredAttribs.ACCOUNT: "--account",
             RequiredAttribs.NODES: "--nodes",
-            RequiredAttribs.QUEUE: "--qos",  # TODO verify, placeholder
+            RequiredAttribs.QUEUE: "--qos",
             RequiredAttribs.TASKS_PER_NODE: "--ntasks-per-node",
             RequiredAttribs.WALLTIME: "--time",
             OptionalAttribs.JOB_NAME: "--job-name",
@@ -177,7 +180,24 @@ class Slurm(JobScheduler):
 
 
 class PBS(JobScheduler):
-    """represents a PBS based scheduler"""
+    """represents a PBS based scheduler
+
+    #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ompthreads=THREADS_PER_CORE:ncpus=TOTAL_CORES
+
+    TOTAL_NODES=nodes
+    CORES_PER_NODE=tasks_per_node
+    #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ncpus=CORES_PER_NODE
+
+    TOTAL_NODES=nodes
+    CORES_PER_NODE=tasks_per_node
+    THREADS_PER_CORE=threads
+    #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ompthreads=THREADS_PER_CORE:ncpus=<CORES_PER_NODE*THREADS_PER_NODE>
+
+    TOTAL_NODES=nodes
+    CORES_PER_NODE=tasks_per_node
+    MEMORY=memory
+    #PBS -l select=TOTAL_NODES:mpiprocs=CORES_PER_NODE:ncpus=CORES_PER_NODE:mem=MEMORY
+    """
 
     prefix = "#PBS"
     key_value_separator = " "
@@ -185,23 +205,67 @@ class PBS(JobScheduler):
     _map = AttributeMap(
         {
             RequiredAttribs.ACCOUNT: "-A",
-            RequiredAttribs.NODES: (lambda x: f"-l select={x}"),
+            RequiredAttribs.NODES: lambda x: f"-l select={x}",
             RequiredAttribs.QUEUE: "-q",
-            RequiredAttribs.TASKS_PER_NODE: "ncpus=",
             RequiredAttribs.WALLTIME: "-l walltime=",
+            RequiredAttribs.TASKS_PER_NODE: ":mpiprocs=",
             OptionalAttribs.SHELL: "-S",
             OptionalAttribs.JOB_NAME: "-N",
             OptionalAttribs.STDOUT: "-o",
             OptionalAttribs.DEBUG: "-l debug=",
-            OptionalAttribs.CPUS: ":mpiprocs=",
             OptionalAttribs.THREADS: ":ompthreads=",
         }
+        # #PBS :exc
     )
 
-    def post_process(self, items):
-        print(items)
-        select = f"{items.pop(RequiredAttribs.NODES)}{items.pop(OptionalAttribs.CPUS)}{items.pop(OptionalAttribs.THREADS)}{items.pop(RequiredAttribs.TASKS_PER_NODE)}"
-        items.append(select)
+    def pre_process(self) -> Dict[str, Any]:
+        output = self.__dict__
+        output.update(self.select(output))
+        output.update(self.placement(output))
+        output.pop(RequiredAttribs.TASKS_PER_NODE)
+        return output
+
+    @staticmethod
+    def select(items) -> Dict[str, Any]:
+        """select logic"""
+        # Place logic line concat here
+        # to implement
+        return items
+
+    def placement(self, items) -> Dict[str, Any]:
+        """
+        If ALL(PLACEMNT OR EXCL) in NONEISH
+             return items
+
+        output = ''
+        If Placement
+             string.append(placement)
+        if Excl
+            string.append(exclusive)
+        if len(strings):
+            output = '#PBS -l place=' + ":".join(strings)
+        """
+
+        exclusive = OptionalAttribs.EXCLUSIVE
+        placement = OptionalAttribs.PLACEMENT
+
+        if all(
+            [
+                exclusive in NONEISH,
+                placement in NONEISH,
+            ]
+        ):
+            return items
+
+        output = []
+        if placement not in NONEISH:
+            output.append(placement)
+        if exclusive not in NONEISH:
+            output.append(exclusive)
+        if len(output) > 0:
+            items[OptionalAttribs.PLACEMENT] = f"{self.prefix} -l place=" + ":".join(
+                output
+            )
         return items
 
 
@@ -224,6 +288,20 @@ class LSF(JobScheduler):
             OptionalAttribs.CPUS: lambda x: f"-R affinity[core({x})]",
         }
     )
+
+    def pre_process(self):
+        items = self.__dict__
+        items = self.select(items)
+
+        items.pop(RequiredAttribs.TASKS_PER_NODE)
+        return items
+
+    def select(self, items: Dict[str, Any]):
+        """select logic"""
+        items[RequiredAttribs.NODES] = (
+            items[RequiredAttribs.NODES] * items[RequiredAttribs.TASKS_PER_NODE]
+        )
+        return items
 
 
 if __name__ == "__main__":
