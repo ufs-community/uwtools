@@ -6,10 +6,22 @@ from uwtools.scheduler import JobScheduler
 
 def test_scheduler_slurm():
 
-    expected = """#SBATCH --job-name=abcd
+    expected = """#SBATCH --account=user_account
+#SBATCH --qos=batch
+#SBATCH --time=00:01:00
+#SBATCH --ntasks-per-node=1
+#SBATCH --nodes=1
 #SBATCH extra_stuff=12345"""
 
-    props = {"scheduler": "slurm", "job_name": "abcd", "extra_stuff": "12345"}
+    props = {
+        "account": "user_account",
+        "scheduler": "slurm",
+        "queue": "batch",
+        "walltime": "00:01:00",
+        "tasks_per_node": 1,
+        "extra_stuff": "12345",
+        "nodes": 1,
+    }
 
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
@@ -19,16 +31,20 @@ def test_scheduler_slurm():
 
 def test_scheduler_lsf():
 
-    expected = """#BSUB -J abcd
-#BSUB -n 48
+    expected = """#BSUB -P user_account
+#BSUB -q batch
+#BSUB -W 00:01:00
+#BSUB -n 1
 #BSUB extra_stuff 12345"""
 
     props = {
+        "account": "user_account",
         "scheduler": "lsf",
-        "job_name": "abcd",
+        "queue": "batch",
+        "walltime": "00:01:00",
+        "tasks_per_node": 1,
         "extra_stuff": "12345",
-        "nodes": "12",
-        "tasks_per_node": "4",
+        "nodes": 1,
     }
 
     js = JobScheduler.get_scheduler(props)
@@ -39,17 +55,20 @@ def test_scheduler_lsf():
 
 def test_scheduler_pbs():
 
-    expected = """#PBS cpus 2
-#PBS -l select=4:mpiprocs=4:ompthreads=4:ncpus=16:mem=8gb"""
+    expected = """#PBS -A user_account
+#PBS -q batch
+#PBS -l walltime=00:01:00
+#PBS extra_stuff 12345
+#PBS -l select=1:mpiprocs=1"""
 
     props = {
+        "account": "user_account",
         "scheduler": "pbs",
-        "nodes": "4",
-        "threads": "12345",
-        "cpus": "2",
-        "threads": "4",
-        "tasks_per_node": "4",
-        "memory": "8gb",
+        "queue": "batch",
+        "walltime": "00:01:00",
+        "tasks_per_node": 1,
+        "extra_stuff": "12345",
+        "nodes": 1,
     }
 
     js = JobScheduler.get_scheduler(props)
@@ -63,11 +82,19 @@ def test_scheduler_pbs():
 
 def test_scheduler_dot_notation():
 
-    props = {"scheduler": "slurm", "job_name": "abcd", "extra_stuff": "12345"}
+    props = {
+        "account": "user_account",
+        "scheduler": "lsf",
+        "queue": "batch",
+        "walltime": "00:01:00",
+        "tasks_per_node": 1,
+        "extra_stuff": "12345",
+        "nodes": 1,
+    }
 
     js = JobScheduler.get_scheduler(props)
-    expected = "abcd"
-    actual = js.job_name
+    expected = "user_account"
+    actual = js.account
 
     assert actual == expected
 
@@ -75,35 +102,37 @@ def test_scheduler_dot_notation():
 def test_scheduler_prop_not_defined_raises_key_error():
     with pytest.raises(KeyError) as error:
         props = {
-            "job_name": "abcd",
+            "account": "user_account",
+            "queue": "batch",
+            "walltime": "00:01:00",
+            "tasks_per_node": 1,
             "extra_stuff": "12345",
+            "nodes": 1,
         }
 
         JobScheduler.get_scheduler(props)
-    expected = "no scheduler defined in props: [job_name, extra_stuff]"
+    expected = (
+        "no scheduler defined in props: [account, queue, walltime, tasks_per_node"
+    )
     actual = str(error.value)
     assert expected in actual
 
 
-def test_scheduler_known_args():
+def test_scheduler_raises_exception_when_missing_required_attribs():
+    with pytest.raises(ValueError) as error:
+        props = {
+            "scheduler": "pbs",
+            "queue": "batch",
+            "walltime": "00:01:00",
+            "nodes": 1,
+            "tasks_per_node": 1,
+            "debug": True,
+        }
 
-    expected = """#SBATCH --nodes=12
-#SBATCH --job-name=abcd
-#SBATCH --extra_arg=12345
-#SBATCH --extra-flags"""
-
-    props = {
-        "nodes": "12",
-        "scheduler": "slurm",
-        "job_name": "abcd",
-        "--extra_arg": "12345",
-        "--extra-flags": "",
-    }
-
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
-
-    assert actual == expected
+        JobScheduler.get_scheduler(props)
+    expected = "missing required attributes: [account]"
+    actual = str(error.value)
+    assert expected in actual
 
 
 def test_pbs1():
@@ -288,4 +317,7 @@ def test_pbs8():
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
 
+    print(actual)
+    print("****")
+    print(expected)
     assert actual == expected

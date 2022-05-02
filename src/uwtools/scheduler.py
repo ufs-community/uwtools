@@ -84,10 +84,29 @@ class JobScheduler(collections.UserDict):
     prefix = ""
     key_value_separator = "="
 
+    def __init__(self, props):
+        super().__init__()
+        self.validate_props(props)
+        self.update(props)
+
     def __getattr__(self, name):
         if name in self:
             return self[name]
         raise AttributeError(name)
+
+    def validate_props(self, props):
+        members = [
+            getattr(RequiredAttribs, attr)
+            for attr in dir(RequiredAttribs)
+            if not callable(getattr(RequiredAttribs, attr))
+            and not attr.startswith("__")
+        ]
+
+        diff = [x for x in members if x not in props]
+        print(props)
+        print(diff)
+        if len(diff):
+            raise ValueError(f"missing required attributes: [{', '.join(diff)}]")
 
     def pre_process(self):
         """pre process attributes before converting to job card"""
