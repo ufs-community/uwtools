@@ -217,9 +217,6 @@ def test_pbs4():
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
 
-    print(actual)
-    print("*" * 8)
-    print(expected)
     assert actual == expected
 
 
