@@ -1,9 +1,9 @@
 """
 Job Scheduling
 """
-
 import collections
 import logging
+
 from typing import Any, Dict, List
 
 logging.basicConfig(
@@ -198,6 +198,7 @@ class Slurm(JobScheduler):
             OptionalAttribs.STDOUT: "--output",
             OptionalAttribs.STDERR: "--error",
             OptionalAttribs.PARTITION: "--partition",
+            OptionalAttribs.THREADS: "----cpus-per-task",
         }
     )
 
