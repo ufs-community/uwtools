@@ -1,26 +1,14 @@
 # pylint: disable=all
+import pathlib
 import pytest
 
 from uwtools.scheduler import JobScheduler
-
-
-def test_scheduler():
-
-    expected = """#SBATCH --job-name=abcd
-#SBATCH extra_stuff=12345
-#SBATCH scheduler=slurm"""
-
-    props = {"scheduler": "slurm", "job_name": "abcd", "extra_stuff": "12345"}
-
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
-
-    assert actual == expected
+from uwtools.loaders import load_yaml
 
 
 def test_scheduler_dot_notation():
 
-    props = {"scheduler": "slurm", "job_name": "abcd", "extra_stuff": "12345"}
+    props = load_yaml(pathlib.Path("tests/fixtures/simple.yaml"))
 
     js = JobScheduler.get_scheduler(props)
     expected = "abcd"

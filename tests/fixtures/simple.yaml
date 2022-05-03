@@ -1,0 +1,3 @@
+scheduler: slurm
+job_name: abcd
+extra_stuff: 12345
