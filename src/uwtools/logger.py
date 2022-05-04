@@ -1,15 +1,17 @@
 import sys
+import functools
 from pathlib import Path
+from typing import Union
 import logging
 
 __all__ = ['Logger']
 
 
 class ColoredFormatter(logging.Formatter):
-    '''
+    """
     Logging colored formatter
     adapted from https://stackoverflow.com/a/56944256/3638629
-    '''
+    """
 
     grey = '\x1b[38;21m'
     blue = '\x1b[38;5;39m'
@@ -36,48 +38,72 @@ class ColoredFormatter(logging.Formatter):
 
 
 class Logger:
-
-    '''
+    """
     Improved logging
-    '''
-
-    __all__ = ['get_logger']
+    """
 
     LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
-    DEFAULT_LOG_LEVEL = 'INFO'
-    FORMAT = '%(asctime)s [%(levelname)s] - %(name)s: %(message)s'
+    DEFAULT_LEVEL = 'INFO'
+    DEFAULT_FORMAT = '%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s'
 
-    def __init__(self, name, level=DEFAULT_LOG_LEVEL, logfile_path=None, *args):
-        '''
+    def __init__(self, name: str = None,
+                 level: str = DEFAULT_LEVEL,
+                 format: str = DEFAULT_FORMAT,
+                 colored_log: bool = False,
+                 logfile_path: Union[str, Path] = None):
+        """
         Constructor for Logger
-        '''
+        """
 
         self.name = name
         self.level = level.upper()
+        self.format = format
+        self.colored_log = colored_log
 
         if self.level not in Logger.LOG_LEVELS:
             raise LookupError('{self.level} is unknown logging level\n' +
                               'Currently supported log levels are:\n' +
                               f'{" | ".join(Logger.LOG_LEVELS)}')
 
-        self._logger = logging.getLogger(name)
+        # Initialize the root logger if no name is present
+        self._logger = logging.getLogger(name) if name else logging.getLogger()
 
         self._logger.setLevel(self.level)
 
-        # Create console handler for logger
-        ch = self.console_handler()
-        self._logger.addHandler(ch)
+        _handlers = []
+        # Add console handler for logger
+        _handler = Logger.add_stream_handler(level=self.level, format=self.format, colored_log=self.colored_log)
+        _handlers.append(_handler)
+        self._logger.addHandler(_handler)
 
-        # Create file handler for logger
+        # Add file handler for logger
         if logfile_path is not None:
-            self.logfile_path = Path(logfile_path)
-            fh = self.file_handler()
-            self._logger.addHandler(fh)
+            _handler = Logger.add_file_handler(logfile_path, level=self.level, format=self.format)
+            self._logger.addHandler(_handler)
+            _handlers.append(_handler)
+
+    @classmethod
+    def add_handlers(cls, logger: logging.Logger, handlers: list[logging.Handler]):
+        """
+        Add a list of handlers to a logger
+        Parameters
+        ----------
+        logger
+        handlers
+
+        Returns
+        -------
+        logger
+        """
+        for hh in handlers:
+            logger.addHandler(hh)
+
+        return logger
 
     def __getattr__(self, attribute):
-        '''
+        """
         Allows calling logging module methods directly
-        '''
+        """
         return getattr(self._logger, attribute)
 
     def get_logger(self):
@@ -86,28 +112,73 @@ class Logger:
         '''
         return self._logger
 
-    def console_handler(self):
-        '''
-        Create console handler for Logger with Colored output
-        '''
+    @classmethod
+    def add_stream_handler(cls, level: str = DEFAULT_LEVEL,
+                            format: str = DEFAULT_FORMAT,
+                            colored_log: bool = False):
+        """
+        Create stream handler
+        This classmethod will allow setting a custom stream handler on children
+        """
 
         handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(self.level)
-        handler.setFormatter(ColoredFormatter(Logger.FORMAT))
+        handler.setLevel(level)
+        _format = ColoredFormatter(format) if colored_log else logging.Formatter(format)
+        handler.setFormatter(_format)
 
         return handler
 
-    def file_handler(self):
-        '''
-        Create file handler for Logger with standard output
-        '''
+    @classmethod
+    def add_file_handler(cls, logfile_path: Union[str, Path],
+                         level: str = DEFAULT_LEVEL,
+                         format: str = DEFAULT_FORMAT):
+        """
+        Create file handler.
+        This classmethod will allow setting custom file handler on children
+        """
 
+        logfile_path = Path(logfile_path)
         # Create the directory containing the logfile_path
-        if not self.logfile_path.parent.is_dir():
-            self.logfile_path.mkdir(parents=True, exist_ok=True)
+        if not logfile_path.parent.is_dir():
+            logfile_path.mkdir(parents=True, exist_ok=True)
 
-        handler = logging.FileHandler(str(self.logfile_path))
-        handler.setLevel(self.level)
-        handler.setFormatter(logging.Formatter(Logger.FORMAT))
+        handler = logging.FileHandler(str(logfile_path))
+        handler.setLevel(level)
+        handler.setFormatter(logging.Formatter(format))
 
         return handler
+
+def get_default_logger():
+    return Logger('default').get_logger()
+
+
+def log(_func=None, *, my_logger: Union[Logger, logging.Logger] = None):
+    def decorator_log(func):
+        @functools.wrap(func)
+        def wrapper(*args, **kwargs):
+            if my_logger is None:
+                logger = get_default_logger()
+            else:
+                if isinstance(my_logger, Logger):
+                    logger = my_logger.get_logger(func.__name__)
+                else:
+                    logger = my_logger
+            logger.debug(f"Entering {func.__name__}")
+            args_repr = [repr(a) for a in args]
+            kwargs_repr = [f"{k}={v!r}" for k, v in kwargs.items()]
+            signature = ", ".join(args_repr + kwargs_repr)
+            logger.debug(f"function {func.__name__} called with args {signature}")
+            try:
+                result = func(*args, **kwargs)
+                return result
+            except Exception as e:
+                logger.exception(f"Exception raised in {func.__name__}. exception: {str(e)}")
+                raise e
+            logger.debug(f"Leaving {func.__name__}")
+
+        return wrapper
+
+    if _func is None:
+        return decorator_log
+    else:
+        return decorator_log(_func)

@@ -134,3 +134,6 @@ docs/_build/
 # Editor backup files (Emacs, vim)
 *~
 *.sw[a-p]
+
+# Pycharm IDE files
+.idea/
