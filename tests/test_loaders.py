@@ -8,7 +8,16 @@ from uwtools.loaders import load_yaml
 def test_yaml_loader_loads_correctly():
     actual = load_yaml(pathlib.Path("tests/fixtures/simple.yaml"))
 
-    expected = {"scheduler": "slurm", "job_name": "abcd", "extra_stuff": 12345}
+    expected = {
+        "scheduler": "slurm", 
+        "job_name": "abcd", 
+        "extra_stuff": 12345, 
+        "account": "user_account",
+        "nodes": 1,
+        "queue": "bos",
+        "tasks_per_node": 4,
+        "walltime": "00:01:00"
+        }
     assert actual == expected
 
 
