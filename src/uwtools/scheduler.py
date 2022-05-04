@@ -39,7 +39,7 @@ class OptionalAttribs:  # pylint: disable=too-few-public-methods
     MEMORY = "memory"
     DEBUG = "debug"
     EXCLUSIVE = "exclusive"
-    CPUS = "cpus"
+    CPUS = "cpus-per-task"
     PLACEMENT = "placement"
 
 
@@ -103,8 +103,6 @@ class JobScheduler(collections.UserDict):
         ]
 
         diff = [x for x in members if x not in props]
-        print(props)
-        print(diff)
         if len(diff):
             raise ValueError(f"missing required attributes: [{', '.join(diff)}]")
 
