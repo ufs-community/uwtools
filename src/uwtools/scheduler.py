@@ -197,7 +197,9 @@ class Slurm(JobScheduler):
             OptionalAttribs.STDOUT: "--output",
             OptionalAttribs.STDERR: "--error",
             OptionalAttribs.PARTITION: "--partition",
-            OptionalAttribs.THREADS: "----cpus-per-task",
+            OptionalAttribs.THREADS: "--cpus-per-task",
+            OptionalAttribs.MEMORY: "--mem",
+            OptionalAttribs.EXCLUSIVE: "--exclusive"
         }
     )
 

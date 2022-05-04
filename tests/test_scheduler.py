@@ -4,79 +4,6 @@ import pytest
 from uwtools.scheduler import JobScheduler
 
 
-def test_scheduler_slurm():
-
-    expected = """#SBATCH --account=user_account
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-#SBATCH --ntasks-per-node=1
-#SBATCH --nodes=1
-#SBATCH extra_stuff=12345"""
-
-    props = {
-        "account": "user_account",
-        "scheduler": "slurm",
-        "queue": "batch",
-        "walltime": "00:01:00",
-        "tasks_per_node": 1,
-        "extra_stuff": "12345",
-        "nodes": 1,
-    }
-
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
-
-    assert actual == expected
-
-
-def test_scheduler_lsf():
-
-    expected = """#BSUB -P user_account
-#BSUB -q batch
-#BSUB -W 00:01:00
-#BSUB -n 1
-#BSUB extra_stuff 12345"""
-
-    props = {
-        "account": "user_account",
-        "scheduler": "lsf",
-        "queue": "batch",
-        "walltime": "00:01:00",
-        "tasks_per_node": 1,
-        "extra_stuff": "12345",
-        "nodes": 1,
-    }
-
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
-
-    assert actual == expected
-
-
-def test_scheduler_pbs():
-
-    expected = """#PBS -A user_account
-#PBS -q batch
-#PBS -l walltime=00:01:00
-#PBS extra_stuff 12345
-#PBS -l select=1:mpiprocs=1"""
-
-    props = {
-        "account": "user_account",
-        "scheduler": "pbs",
-        "queue": "batch",
-        "walltime": "00:01:00",
-        "tasks_per_node": 1,
-        "extra_stuff": "12345",
-        "nodes": 1,
-    }
-
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
-
-    assert actual == expected
-
-
 def test_scheduler_dot_notation():
 
     props = {
@@ -384,9 +311,6 @@ def test_slurm3():
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
 
-    print(actual)
-    print("***************")
-    print(expected)
     assert actual == expected
 
 
@@ -435,6 +359,10 @@ def test_slurm5():
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
 
+    
+    print(actual)
+    print("***************")
+    print(expected)
     assert actual == expected
 
 
