@@ -113,7 +113,7 @@ class JobScheduler(collections.UserDict):
             f"{self.prefix} {self._map[key](value) if callable(self._map[key]) else self._map[key]}{self.key_value_separator}{value if not callable(self._map[key]) else ''}".strip()
             for (key, value) in sanitized_attribs.items()
             if key in self._map and key not in IGNORED_ATTRIBS
-        ]
+        ]  # TODO seems bloated
 
         unknown = [
             f"{self.prefix} {key}{self.key_value_separator}{value}".strip()
@@ -288,10 +288,6 @@ class LSF(JobScheduler):
         items[
             f"-n {int(items[RequiredAttribs.TASKS_PER_NODE] * int(items[RequiredAttribs.NODES]))}"
         ] = ""
-        # items.pop(OptionalAttribs.THREADS, None)
-        # items.pop(RequiredAttribs.TASKS_PER_NODE, None)
-        # items.pop(RequiredAttribs.NODES, None)
-
         return items
 
     def select(self, items: Dict[str, Any]):
