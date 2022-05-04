@@ -27,58 +27,7 @@ def test_scheduler_slurm():
     actual = js.job_card.content()
 
     assert actual == expected
-    
-def test_scheduler_slurm2():
 
-    expected = """#SBATCH --account=user_account
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-#SBATCH --ntasks-per-node=1
-#SBATCH --nodes=1
-#SBATCH --partition=xjet
-#SBATCH extra_stuff=12345"""
-
-    props = {
-        "account": "user_account",
-        "scheduler": "slurm",
-        "queue": "batch",
-        "walltime": "00:01:00",
-        "tasks_per_node": 1,
-        "partition": "xjet",
-        "extra_stuff": "12345",
-        "nodes": 1,
-    }
-
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
-
-    assert actual == expected
-
-def test_scheduler_slurm3():
-
-    expected = """#SBATCH --account=user_account
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-#SBATCH --ntasks-per-node=1
-#SBATCH --nodes=1
-#SBATCH --cpus-per-task=7
-#SBATCH extra_stuff=12345"""
-
-    props = {
-        "account": "user_account",
-        "scheduler": "slurm",
-        "queue": "batch",
-        "walltime": "00:01:00",
-        "tasks_per_node": 4,
-        "threads": 7,
-        "extra_stuff": "12345",
-        "nodes": 5,
-    }
-
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
-
-    assert actual == expected
 
 def test_scheduler_lsf():
 
