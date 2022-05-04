@@ -113,6 +113,7 @@ class JobScheduler(collections.UserDict):
     @staticmethod
     def post_process(items: List[str]):
         """post process attributes before converting to job card"""
+        # TODO use regex
         output = items
         output = [x.replace("= ", "=") for x in output]
         output = [x.replace(" =", "=") for x in output]
@@ -273,7 +274,6 @@ class PBS(JobScheduler):
         if exclusive not in NONEISH:
             output.append("excl")
         if len(output) > 0:
-            print(output)
             items["-l place="] = ":".join(output)
         return items
 
@@ -284,25 +284,33 @@ class LSF(JobScheduler):
     prefix = "#BSUB"
     key_value_separator = " "
 
-    _map = AttributeMap(
-        {
-            RequiredAttribs.QUEUE: "-q",
-            RequiredAttribs.ACCOUNT: "-P",
-            RequiredAttribs.WALLTIME: "-W",
-            RequiredAttribs.NODES: "-n",
-            RequiredAttribs.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
-            OptionalAttribs.SHELL: "-L",
-            OptionalAttribs.JOB_NAME: "-J",
-            OptionalAttribs.STDOUT: "-o",
-            OptionalAttribs.CPUS: lambda x: f"-R affinity[core({x})]",
-        }
-    )
+    _map = {
+        RequiredAttribs.QUEUE: "-q",
+        RequiredAttribs.ACCOUNT: "-P",
+        RequiredAttribs.WALLTIME: "-W",
+        RequiredAttribs.NODES: "-n",
+        RequiredAttribs.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
+        OptionalAttribs.SHELL: "-L",
+        OptionalAttribs.JOB_NAME: "-J",
+        OptionalAttribs.STDOUT: "-o",
+        OptionalAttribs.THREADS: lambda x: f"-R affinity[core({x})]",
+    }
 
     def pre_process(self):
         items = self.__dict__["data"]
-        items = self.select(items)
-
+        items[self._map[OptionalAttribs.THREADS](items[OptionalAttribs.THREADS])] = ""
+        items[
+            self._map[RequiredAttribs.TASKS_PER_NODE](
+                items[RequiredAttribs.TASKS_PER_NODE]
+            )
+        ] = ""
+        items[
+            f"-n {int(items[RequiredAttribs.TASKS_PER_NODE] * int(items[RequiredAttribs.NODES]))}"
+        ] = ""
+        items.pop(OptionalAttribs.THREADS, None)
         items.pop(RequiredAttribs.TASKS_PER_NODE, None)
+        items.pop(RequiredAttribs.NODES, None)
+
         return items
 
     def select(self, items: Dict[str, Any]):

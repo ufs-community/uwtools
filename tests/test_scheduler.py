@@ -487,3 +487,81 @@ def test_slurm5():
     actual = js.job_card.content()
 
     assert actual == expected
+
+
+def test_lsf1():
+    expected = """#BSUB -P account_name
+#BSUB -q batch
+#BSUB -W 00:01:00
+#BSUB -R affinity[core(1)]
+#BSUB -R span[ptile=1]
+#BSUB -n 1"""
+
+    props = {
+        "scheduler": "lsf",
+        "account": "account_name",
+        "queue": "batch",
+        "walltime": "00:01:00",
+        "nodes": 1,
+        "tasks_per_node": 1,
+        "threads": 1,
+    }
+
+    js = JobScheduler.get_scheduler(props)
+    actual = js.job_card.content()
+
+    print(actual)
+    print("***************")
+    print(expected)
+    assert actual == expected
+
+
+def test_lsf2():
+    expected = """#BSUB -P account_name
+#BSUB -q batch
+#BSUB -W 00:01:00
+#BSUB -R affinity[core(1)]
+#BSUB -R span[ptile=12]
+#BSUB -n 12"""
+
+    props = {
+        "scheduler": "lsf",
+        "account": "account_name",
+        "queue": "batch",
+        "walltime": "00:01:00",
+        "nodes": 1,
+        "tasks_per_node": 12,
+        "threads": 1,
+    }
+
+    js = JobScheduler.get_scheduler(props)
+    actual = js.job_card.content()
+
+    assert actual == expected
+
+
+def test_lsf3():
+    expected = """#BSUB -P account_name
+#BSUB -q batch
+#BSUB -W 00:01:00
+#BSUB -R affinity[core(1)]
+#BSUB -R span[ptile=6]
+#BSUB -n 12"""
+
+    props = {
+        "scheduler": "lsf",
+        "account": "account_name",
+        "queue": "batch",
+        "walltime": "00:01:00",
+        "nodes": 2,
+        "tasks_per_node": 6,
+        "threads": 1,
+    }
+
+    js = JobScheduler.get_scheduler(props)
+    actual = js.job_card.content()
+
+    print(actual)
+    print("***************")
+    print(expected)
+    assert actual == expected
