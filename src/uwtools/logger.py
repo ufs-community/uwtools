@@ -1,7 +1,7 @@
 import sys
 import functools
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 import logging
 
 __all__ = ['Logger']
@@ -82,8 +82,20 @@ class Logger:
             self._logger.addHandler(_handler)
             _handlers.append(_handler)
 
+    def __getattr__(self, attribute):
+        """
+        Allows calling logging module methods directly
+        """
+        return getattr(self._logger, attribute)
+
+    def get_logger(self):
+        '''
+        Return the logging object
+        '''
+        return self._logger
+
     @classmethod
-    def add_handlers(cls, logger: logging.Logger, handlers: list[logging.Handler]):
+    def add_handlers(cls, logger: logging.Logger, handlers: List[logging.Handler]):
         """
         Add a list of handlers to a logger
         Parameters
@@ -99,18 +111,6 @@ class Logger:
             logger.addHandler(hh)
 
         return logger
-
-    def __getattr__(self, attribute):
-        """
-        Allows calling logging module methods directly
-        """
-        return getattr(self._logger, attribute)
-
-    def get_logger(self):
-        '''
-        Return the logging object
-        '''
-        return self._logger
 
     @classmethod
     def add_stream_handler(cls, level: str = DEFAULT_LEVEL,
@@ -138,6 +138,7 @@ class Logger:
         """
 
         logfile_path = Path(logfile_path)
+
         # Create the directory containing the logfile_path
         if not logfile_path.parent.is_dir():
             logfile_path.mkdir(parents=True, exist_ok=True)
@@ -148,37 +149,3 @@ class Logger:
 
         return handler
 
-def get_default_logger():
-    return Logger('default').get_logger()
-
-
-def log(_func=None, *, my_logger: Union[Logger, logging.Logger] = None):
-    def decorator_log(func):
-        @functools.wrap(func)
-        def wrapper(*args, **kwargs):
-            if my_logger is None:
-                logger = get_default_logger()
-            else:
-                if isinstance(my_logger, Logger):
-                    logger = my_logger.get_logger(func.__name__)
-                else:
-                    logger = my_logger
-            logger.debug(f"Entering {func.__name__}")
-            args_repr = [repr(a) for a in args]
-            kwargs_repr = [f"{k}={v!r}" for k, v in kwargs.items()]
-            signature = ", ".join(args_repr + kwargs_repr)
-            logger.debug(f"function {func.__name__} called with args {signature}")
-            try:
-                result = func(*args, **kwargs)
-                return result
-            except Exception as e:
-                logger.exception(f"Exception raised in {func.__name__}. exception: {str(e)}")
-                raise e
-            logger.debug(f"Leaving {func.__name__}")
-
-        return wrapper
-
-    if _func is None:
-        return decorator_log
-    else:
-        return decorator_log(_func)

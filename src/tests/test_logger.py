@@ -1,4 +1,4 @@
-from uwtools.logger import Logger, log
+from uwtools.logger import Logger
 
 level = 'debug'
 number_of_log_msgs = 5
