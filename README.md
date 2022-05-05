@@ -1,4 +1,7 @@
+[![Run tests](https://github.com/ufs-community/workflow-tools/actions/workflows/tests.yaml/badge.svg)](https://github.com/ufs-community/workflow-tools/actions/workflows/tests.yaml)
+[![Documentation](https://github.com/ufs-community/workflow-tools/actions/workflows/docs.yaml/badge.svg)](https://github.com/ufs-community/workflow-tools/actions/workflows/docs.yaml)
 # workflow-tools
+
 Unified Workflow tools for use with applications with UFS and beyond
 
 ## Installation
