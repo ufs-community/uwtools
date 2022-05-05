@@ -6,6 +6,9 @@ import logging
 
 __all__ = ['Logger']
 
+LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+DEFAULT_LEVEL = 'INFO'
+DEFAULT_FORMAT = '%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s'
 
 class ColoredFormatter(logging.Formatter):
     """
@@ -41,11 +44,6 @@ class Logger:
     """
     Improved logging
     """
-
-    LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
-    DEFAULT_LEVEL = 'INFO'
-    DEFAULT_FORMAT = '%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s'
-
     def __init__(self, name: str = None,
                  level: str = DEFAULT_LEVEL,
                  format: str = DEFAULT_FORMAT,
