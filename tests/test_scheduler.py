@@ -6,11 +6,10 @@ from uwtools.scheduler import JobScheduler
 from uwtools.loaders import load_yaml
 
 
-
 def test_scheduler_dot_notation():
     props = load_yaml(pathlib.Path("tests/fixtures/simple.yaml"))
 
-    js = JobScheduler.get_scheduler(props)
+    js = JobScheduler.get_scheduler(dict(props))
     expected = "user_account"
     actual = js.account
 
@@ -353,10 +352,6 @@ def test_slurm5():
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
 
-    
-    print(actual)
-    print("***************")
-    print(expected)
     assert actual == expected
 
 
@@ -364,9 +359,9 @@ def test_lsf1():
     expected = """#BSUB -P account_name
 #BSUB -q batch
 #BSUB -W 00:01:00
-#BSUB -R affinity[core(1)]
+#BSUB -n 1
 #BSUB -R span[ptile=1]
-#BSUB -n 1"""
+#BSUB -R affinity[core(1)]"""
 
     props = {
         "scheduler": "lsf",
@@ -391,16 +386,16 @@ def test_lsf2():
     expected = """#BSUB -P account_name
 #BSUB -q batch
 #BSUB -W 00:01:00
-#BSUB -R affinity[core(1)]
+#BSUB -n 12
 #BSUB -R span[ptile=12]
-#BSUB -n 12"""
+#BSUB -R affinity[core(1)]"""
 
     props = {
         "scheduler": "lsf",
         "account": "account_name",
         "queue": "batch",
         "walltime": "00:01:00",
-        "nodes": 1,
+        "nodes": 12,
         "tasks_per_node": 12,
         "threads": 1,
     }
@@ -415,9 +410,9 @@ def test_lsf3():
     expected = """#BSUB -P account_name
 #BSUB -q batch
 #BSUB -W 00:01:00
-#BSUB -R affinity[core(1)]
+#BSUB -n 2
 #BSUB -R span[ptile=6]
-#BSUB -n 12"""
+#BSUB -R affinity[core(1)]"""
 
     props = {
         "scheduler": "lsf",
@@ -432,7 +427,4 @@ def test_lsf3():
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
 
-    print(actual)
-    print("***************")
-    print(expected)
     assert actual == expected

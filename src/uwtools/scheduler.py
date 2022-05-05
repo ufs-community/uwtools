@@ -43,26 +43,6 @@ class OptionalAttribs:  # pylint: disable=too-few-public-methods
     PLACEMENT = "placement"
 
 
-class AttributeMap(collections.UserDict):
-    """represents a dict that parses callables to their values
-    on instantiation"""
-
-    def __init__(self, _map):
-        super().__init__()
-        self.update(self._parsed(_map))
-
-    def _parsed(self, raw_map):
-
-        return {
-            raw_map[key](value)
-            if callable(raw_map[key])
-            else key: value
-            if not callable(value)
-            else ""
-            for (key, value) in raw_map.items()
-        }
-
-
 class JobCard(collections.UserList):
     """represents a job card to submit to a scheduler"""
 
@@ -106,9 +86,13 @@ class JobScheduler(collections.UserDict):
         if len(diff):
             raise ValueError(f"missing required attributes: [{', '.join(diff)}]")
 
+    @property
+    def _data(self):
+        return self.__dict__["data"]
+
     def pre_process(self):
         """pre process attributes before converting to job card"""
-        return self
+        return self._data
 
     @staticmethod
     def post_process(items: List[str]):
@@ -123,16 +107,16 @@ class JobScheduler(collections.UserDict):
     @property
     def job_card(self):
         """returns the job card to be fed to external scheduler"""
-        sanitized_attribs = AttributeMap(self.pre_process())
+        sanitized_attribs = self.pre_process()
 
         known = [
-            f"{self.prefix} {self._map[key]}{self.key_value_separator}{value}"
+            f"{self.prefix} {self._map[key](value) if callable(self._map[key]) else self._map[key]}{self.key_value_separator}{value if not callable(self._map[key]) else ''}".strip()
             for (key, value) in sanitized_attribs.items()
             if key in self._map and key not in IGNORED_ATTRIBS
-        ]
+        ]  # TODO seems bloated
 
         unknown = [
-            f"{self.prefix} {key}{self.key_value_separator}{value}"
+            f"{self.prefix} {key}{self.key_value_separator}{value}".strip()
             for (key, value) in sanitized_attribs.items()
             if key not in self._map
             and value not in NONEISH
@@ -140,9 +124,9 @@ class JobScheduler(collections.UserDict):
         ]
 
         flags = [
-            f"{self.prefix} {key}"
+            f"{self.prefix} {value}".strip()
             for (key, value) in sanitized_attribs.items()
-            if key not in self._map and value in NONEISH and key not in IGNORED_ATTRIBS
+            if key in NONEISH
         ]
 
         processed = self.post_process(known + unknown + flags)
@@ -186,22 +170,20 @@ class Slurm(JobScheduler):
 
     prefix = "#SBATCH"
 
-    _map = AttributeMap(
-        {
-            RequiredAttribs.ACCOUNT: "--account",
-            RequiredAttribs.NODES: "--nodes",
-            RequiredAttribs.QUEUE: "--qos",
-            RequiredAttribs.TASKS_PER_NODE: "--ntasks-per-node",
-            RequiredAttribs.WALLTIME: "--time",
-            OptionalAttribs.JOB_NAME: "--job-name",
-            OptionalAttribs.STDOUT: "--output",
-            OptionalAttribs.STDERR: "--error",
-            OptionalAttribs.PARTITION: "--partition",
-            OptionalAttribs.THREADS: "--cpus-per-task",
-            OptionalAttribs.MEMORY: "--mem",
-            OptionalAttribs.EXCLUSIVE: "--exclusive"
-        }
-    )
+    _map = {
+        RequiredAttribs.ACCOUNT: "--account",
+        RequiredAttribs.NODES: "--nodes",
+        RequiredAttribs.QUEUE: "--qos",
+        RequiredAttribs.TASKS_PER_NODE: "--ntasks-per-node",
+        RequiredAttribs.WALLTIME: "--time",
+        OptionalAttribs.JOB_NAME: "--job-name",
+        OptionalAttribs.STDOUT: "--output",
+        OptionalAttribs.STDERR: "--error",
+        OptionalAttribs.PARTITION: "--partition",
+        OptionalAttribs.THREADS: "--cpus-per-task",
+        OptionalAttribs.MEMORY: "--mem",
+        OptionalAttribs.EXCLUSIVE: "--exclusive",
+    }
 
 
 class PBS(JobScheduler):
@@ -210,24 +192,21 @@ class PBS(JobScheduler):
     prefix = "#PBS"
     key_value_separator = " "
 
-    _map = AttributeMap(
-        {
-            RequiredAttribs.ACCOUNT: "-A",
-            RequiredAttribs.NODES: lambda x: f"-l select={x}",
-            RequiredAttribs.QUEUE: "-q",
-            RequiredAttribs.WALLTIME: "-l walltime=",
-            RequiredAttribs.TASKS_PER_NODE: ":mpiprocs=",
-            OptionalAttribs.SHELL: "-S",
-            OptionalAttribs.JOB_NAME: "-N",
-            OptionalAttribs.STDOUT: "-o",
-            OptionalAttribs.DEBUG: "-l debug=",
-            OptionalAttribs.THREADS: ":ompthreads=",
-        }
-        # #PBS :exc
-    )
+    _map = {
+        RequiredAttribs.ACCOUNT: "-A",
+        RequiredAttribs.NODES: lambda x: f"-l select={x}",
+        RequiredAttribs.QUEUE: "-q",
+        RequiredAttribs.WALLTIME: "-l walltime=",
+        RequiredAttribs.TASKS_PER_NODE: ":mpiprocs=",
+        OptionalAttribs.SHELL: "-S",
+        OptionalAttribs.JOB_NAME: "-N",
+        OptionalAttribs.STDOUT: "-o",
+        OptionalAttribs.DEBUG: "-l debug=",
+        OptionalAttribs.THREADS: ":ompthreads=",
+    }
 
     def pre_process(self) -> Dict[str, Any]:
-        output = self.__dict__["data"]
+        output = self._data
         output.update(self.select(output))
         output.update(self.placement(output))
 
@@ -238,7 +217,7 @@ class PBS(JobScheduler):
         output.pop("exclusive", None)
         output.pop("placement", None)
         output.pop("select", None)
-        return output
+        return dict(output)
 
     def select(self, items) -> Dict[str, Any]:
         """select logic"""
@@ -299,7 +278,7 @@ class LSF(JobScheduler):
     }
 
     def pre_process(self):
-        items = self.__dict__["data"]
+        items = self._data
         items[self._map[OptionalAttribs.THREADS](items[OptionalAttribs.THREADS])] = ""
         items[
             self._map[RequiredAttribs.TASKS_PER_NODE](
@@ -309,10 +288,6 @@ class LSF(JobScheduler):
         items[
             f"-n {int(items[RequiredAttribs.TASKS_PER_NODE] * int(items[RequiredAttribs.NODES]))}"
         ] = ""
-        items.pop(OptionalAttribs.THREADS, None)
-        items.pop(RequiredAttribs.TASKS_PER_NODE, None)
-        items.pop(RequiredAttribs.NODES, None)
-
         return items
 
     def select(self, items: Dict[str, Any]):
