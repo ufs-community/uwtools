@@ -215,7 +215,7 @@ def test_pbs8():
     expected = """#PBS -A account_name
 #PBS -q batch
 #PBS -l walltime=00:01:00
-#PBS -l debug=True
+#PBS -l debug=true
 #PBS -l select=1:mpiprocs=1"""
 
     props = {
@@ -231,9 +231,6 @@ def test_pbs8():
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
 
-    print(actual)
-    print("****")
-    print(expected)
     assert actual == expected
 
 
@@ -376,9 +373,6 @@ def test_lsf1():
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
 
-    print(actual)
-    print("***************")
-    print(expected)
     assert actual == expected
 
 
@@ -395,14 +389,13 @@ def test_lsf2():
         "account": "account_name",
         "queue": "batch",
         "walltime": "00:01:00",
-        "nodes": 12,
+        "nodes": 1,
         "tasks_per_node": 12,
         "threads": 1,
     }
 
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
-
     assert actual == expected
 
 
@@ -410,7 +403,7 @@ def test_lsf3():
     expected = """#BSUB -P account_name
 #BSUB -q batch
 #BSUB -W 00:01:00
-#BSUB -n 2
+#BSUB -n 12
 #BSUB -R span[ptile=6]
 #BSUB -R affinity[core(1)]"""
 
@@ -422,6 +415,31 @@ def test_lsf3():
         "nodes": 2,
         "tasks_per_node": 6,
         "threads": 1,
+    }
+
+    js = JobScheduler.get_scheduler(props)
+    actual = js.job_card.content()
+
+    assert actual == expected
+
+def test_lsf4():
+    expected = """#BSUB -P account_name
+#BSUB -q batch
+#BSUB -W 00:01:00
+#BSUB -n 6
+#BSUB -R span[ptile=3]
+#BSUB -R affinity[core(2)]
+#BSUB -R rusage[mem=1MB]"""
+
+    props = {
+        "scheduler": "lsf",
+        "account": "account_name",
+        "queue": "batch",
+        "walltime": "00:01:00",
+        "nodes": 2,
+        "tasks_per_node": 3,
+        "threads": 2,
+        "memory": "1MB"
     }
 
     js = JobScheduler.get_scheduler(props)
