@@ -223,19 +223,22 @@ class PBS(JobScheduler):
         """select logic"""
         total_nodes = items.get(RequiredAttribs.NODES, "")
         tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
-        threads_per_core = items.get(OptionalAttribs.THREADS, "")
+        # Set default threads=1 to address job variability with PBS
+        threads = items.get(OptionalAttribs.THREADS, 1)
         memory = items.get(OptionalAttribs.MEMORY, "")
 
-        items["-l select"] = f"={total_nodes}:{self._map[RequiredAttribs.TASKS_PER_NODE]}={tasks_per_node}"
-        if threads_per_core not in NONEISH:
-            items[
-                "-l select"
-            ] = f"{items['-l select']}:{self._map[OptionalAttribs.THREADS]}={threads_per_core}:ncpus={int(tasks_per_node) * int(threads_per_core)}"
+        select = [f"{total_nodes}",
+                  f"{self._map[RequiredAttribs.TASKS_PER_NODE]}={tasks_per_node}",
+                  f"{self._map[OptionalAttribs.THREADS]}={threads}",
+                  f"ncpus={int(tasks_per_node) * int(threads)}"]
         if memory not in NONEISH:
-            items["-l select"] = f"{items['-l select']}:{self._map[OptionalAttribs.MEMORY]}={memory}"
+            select.append(f"{self._map[OptionalAttribs.MEMORY]}={memory}")
+        items["-l select="] = ':'.join(select)
+
         return items
 
-    def placement(self, items) -> Dict[str, Any]:
+    @staticmethod
+    def placement(items) -> Dict[str, Any]:
         """placement logic"""
 
         exclusive = items.get(OptionalAttribs.EXCLUSIVE, "")
@@ -278,9 +281,10 @@ class LSF(JobScheduler):
         OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
     }
 
-    def pre_process(self):
+    def pre_process(self) -> Dict[str, Any]:
         items = self._data
-        items[self._map[OptionalAttribs.THREADS](items[OptionalAttribs.THREADS])] = ""
+        # LSF requires threads to be set (if None is provided, default to 1)
+        items[OptionalAttribs.THREADS] = items.get(OptionalAttribs.THREADS, 1)
         memory = items.get(OptionalAttribs.MEMORY, "")
         if memory not in NONEISH:
             items[self._map[OptionalAttribs.MEMORY](items[OptionalAttribs.MEMORY])] = ""
