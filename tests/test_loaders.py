@@ -9,9 +9,9 @@ def test_yaml_loader_loads_correctly():
     actual = load_yaml(pathlib.Path("tests/fixtures/simple.yaml"))
 
     expected = {
-        "scheduler": "slurm", 
-        "job_name": "abcd", 
-        "extra_stuff": 12345, 
+        "scheduler": "slurm",
+        "jobname": "abcd",
+        "extra_stuff": 12345,
         "account": "user_account",
         "nodes": 1,
         "queue": "bos",
@@ -26,6 +26,6 @@ def test_loader_dot_notation():
     props = load_yaml(pathlib.Path("tests/fixtures/simple.yaml"))
 
     expected = "abcd"
-    actual = props.job_name
+    actual = props.jobname
 
     assert actual == expected
