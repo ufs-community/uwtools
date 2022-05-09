@@ -293,7 +293,7 @@ class LSF(JobScheduler):
                 items[RequiredAttribs.TASKS_PER_NODE]
             )
         ] = ""
-        items[RequiredAttribs.NODES] = int(items[RequiredAttribs.TASKS_PER_NODE] * int(items[RequiredAttribs.NODES]))
+        items[RequiredAttribs.NODES] = int(items[RequiredAttribs.TASKS_PER_NODE]) * int(items[RequiredAttribs.NODES])
         return items
 
 
