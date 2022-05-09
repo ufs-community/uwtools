@@ -1,0 +1,38 @@
+name: Pytest Coverage
+on: 
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  run_pytest_coverage:
+    runs-on: ubuntu-latest
+    name: Run Pytest Coverage
+    strategy:
+      matrix:
+        python: ["3.7", "3.8", "3.9", "3.10"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+
+      - name: Install pytest-cov
+        run: |
+          pip install pytest-cov
+
+      - name: Run pytest-cov
+        run: |
+          pytest --cov-report html:cov_html
+                 --cov-fail-under 50
+                 --cov=uwtools
+
