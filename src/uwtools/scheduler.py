@@ -207,8 +207,8 @@ class PBS(JobScheduler):
 
     def pre_process(self) -> Dict[str, Any]:
         output = self._data
-        output.update(self.select(output))
-        output.update(self.placement(output))
+        output.update(self._select(output))
+        output.update(self._placement(output))
 
         output.pop(RequiredAttribs.TASKS_PER_NODE, None)
         output.pop(RequiredAttribs.NODES, None)
@@ -219,7 +219,7 @@ class PBS(JobScheduler):
         output.pop("select", None)
         return dict(output)
 
-    def select(self, items) -> Dict[str, Any]:
+    def _select(self, items) -> Dict[str, Any]:
         """select logic"""
         total_nodes = items.get(RequiredAttribs.NODES, "")
         tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
@@ -238,7 +238,7 @@ class PBS(JobScheduler):
         return items
 
     @staticmethod
-    def placement(items) -> Dict[str, Any]:
+    def _placement(items) -> Dict[str, Any]:
         """placement logic"""
 
         exclusive = items.get(OptionalAttribs.EXCLUSIVE, "")
