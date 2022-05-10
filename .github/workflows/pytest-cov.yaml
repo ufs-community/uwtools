@@ -25,16 +25,18 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-
-      - name: Install pytest-cov
-        run: |
-          pip install pytest-cov
+          pip install -e .[dev]
 
       - name: Run pytest-cov
         run: |
-          pytest --cov-config=.coveragerc
-                 --cov-report html:cov_html
-                 --cov-fail-under 50
+          pytest --cov-report html:cov_html
+                 --cov-fail-under 5
                  --cov=src/uwtools
-                 workflow-tools/tests/
+
+      - name: Upload Reports
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage-report
+        path: docs/cov_html
 
