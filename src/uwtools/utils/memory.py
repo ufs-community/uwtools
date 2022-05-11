@@ -2,8 +2,6 @@
 Encapsulates string based memory conversions
 """
 
-import math
-
 
 MAP = {"KB": 1000, "MB": 1000 * 1000, "GB": 1000 * 1000 * 1000}
 
@@ -21,11 +19,12 @@ class Memory:
 
     def __str__(self):
         if float.is_integer(self.quantity):
-            return str(self.quantity).replace(f".0", "") + self.measurement
+            return str(self.quantity).replace(".0", "") + self.measurement
         return str(self.quantity) + self.measurement
 
     @property
     def measurement(self):
+        """returns the measurement (MB, KB, etc.)"""
         if self._measurement is None:
             self._measurement = self._value[-2:]
         return self._measurement
@@ -42,11 +41,6 @@ class Memory:
         quantity = (MAP[self.measurement] / MAP[measurement.upper()]) * self.quantity
 
         return Memory(str(quantity) + measurement.upper())
-
-
-def round_up(n, decimals=0):
-    multiplier = 10**decimals
-    return math.ceil(n * multiplier) / multiplier
 
 
 if __name__ == "__main__":
