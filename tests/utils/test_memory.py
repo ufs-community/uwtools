@@ -1,7 +1,4 @@
 # pylint: disable=all
-import pathlib
-import pytest
-
 from uwtools.utils import Memory
 
 
