@@ -29,12 +29,12 @@ jobs:
 
       - name: Run pytest-cov
         run: |
-          pytest --cov=src/uwtools/ --cov-fail-under=5 --cov-report=html
+          pytest --cov=src/uwtools/ --cov-fail-under=5 --cov-report=html:cov_html
 
       - name: Upload Reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
           name: coverage-report
-          path: .
+          path: ./cov_html
 
