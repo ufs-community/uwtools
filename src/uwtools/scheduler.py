@@ -68,12 +68,13 @@ class JobScheduler(collections.UserDict):
         self.validate_props(props)
         self.update(props)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> Any:
         if name in self:
             return self[name]
         raise AttributeError(name)
 
-    def validate_props(self, props):
+    def validate_props(self, props) -> None:
+        """raises ValueError if invalid"""
         members = [
             getattr(RequiredAttribs, attr)
             for attr in dir(RequiredAttribs)
@@ -86,15 +87,15 @@ class JobScheduler(collections.UserDict):
             raise ValueError(f"missing required attributes: [{', '.join(diff)}]")
 
     @property
-    def _data(self):
+    def _data(self) -> Dict[Any, Any]:
         return self.__dict__["data"]
 
-    def pre_process(self):
+    def pre_process(self) -> Dict[Any, Any]:
         """pre process attributes before converting to job card"""
         return self._data
 
     @staticmethod
-    def post_process(items: List[str]):
+    def post_process(items: List[str]) -> List[str]:
         """post process attributes before converting to job card"""
         # TODO use regex
         output = items
@@ -104,7 +105,7 @@ class JobScheduler(collections.UserDict):
         return output
 
     @property
-    def job_card(self):
+    def job_card(self) -> JobCard:
         """returns the job card to be fed to external scheduler"""
         sanitized_attribs = self.pre_process()
 
@@ -227,13 +228,15 @@ class PBS(JobScheduler):
         threads = items.get(OptionalAttribs.THREADS, 1)
         memory = items.get(OptionalAttribs.MEMORY, "")
 
-        select = [f"{total_nodes}",
-                  f"{self._map[RequiredAttribs.TASKS_PER_NODE]}={tasks_per_node}",
-                  f"{self._map[OptionalAttribs.THREADS]}={threads}",
-                  f"ncpus={int(tasks_per_node) * int(threads)}"]
+        select = [
+            f"{total_nodes}",
+            f"{self._map[RequiredAttribs.TASKS_PER_NODE]}={tasks_per_node}",
+            f"{self._map[OptionalAttribs.THREADS]}={threads}",
+            f"ncpus={int(tasks_per_node) * int(threads)}",
+        ]
         if memory not in NONEISH:
             select.append(f"{self._map[OptionalAttribs.MEMORY]}={memory}")
-        items["-l select="] = ':'.join(select)
+        items["-l select="] = ":".join(select)
 
         return items
 
@@ -293,7 +296,9 @@ class LSF(JobScheduler):
                 items[RequiredAttribs.TASKS_PER_NODE]
             )
         ] = ""
-        items[RequiredAttribs.NODES] = int(items[RequiredAttribs.TASKS_PER_NODE]) * int(items[RequiredAttribs.NODES])
+        items[RequiredAttribs.NODES] = int(items[RequiredAttribs.TASKS_PER_NODE]) * int(
+            items[RequiredAttribs.NODES]
+        )
         return items
 
 
