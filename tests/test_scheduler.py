@@ -444,7 +444,4 @@ def test_lsf4():
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
 
-    print(actual)
-    print("*************")
-    print(expected)
     assert actual == expected
