@@ -3,6 +3,7 @@ Job Scheduling
 """
 import collections
 import logging
+import re
 
 from typing import Any, Dict, List
 
@@ -97,12 +98,7 @@ class JobScheduler(collections.UserDict):
     @staticmethod
     def post_process(items: List[str]) -> List[str]:
         """post process attributes before converting to job card"""
-        # TODO use regex
-        output = items
-        output = [x.replace("= ", "=") for x in output]
-        output = [x.replace(" =", "=") for x in output]
-        output = [x.replace(" = ", "=") for x in output]
-        return output
+        return [re.sub(r"\s{0,}\=\s{0,}", "=", x, count=0, flags=0) for x in items]
 
     @property
     def job_card(self) -> JobCard:
