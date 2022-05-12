@@ -3,6 +3,7 @@ Job Scheduling
 """
 import collections
 import logging
+import re
 
 from typing import Any, Dict, List
 
@@ -70,12 +71,13 @@ class JobScheduler(collections.UserDict):
         self.validate_props(props)
         self.update(props)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> Any:
         if name in self:
             return self[name]
         raise AttributeError(name)
 
-    def validate_props(self, props):
+    def validate_props(self, props) -> None:
+        """raises ValueError if invalid"""
         members = [
             getattr(RequiredAttribs, attr)
             for attr in dir(RequiredAttribs)
@@ -88,25 +90,20 @@ class JobScheduler(collections.UserDict):
             raise ValueError(f"missing required attributes: [{', '.join(diff)}]")
 
     @property
-    def _data(self):
+    def _data(self) -> Dict[Any, Any]:
         return self.__dict__["data"]
 
-    def pre_process(self):
+    def pre_process(self) -> Dict[Any, Any]:
         """pre process attributes before converting to job card"""
         return self._data
 
     @staticmethod
-    def post_process(items: List[str]):
+    def post_process(items: List[str]) -> List[str]:
         """post process attributes before converting to job card"""
-        # TODO use regex
-        output = items
-        output = [x.replace("= ", "=") for x in output]
-        output = [x.replace(" =", "=") for x in output]
-        output = [x.replace(" = ", "=") for x in output]
-        return output
+        return [re.sub(r"\s{0,}\=\s{0,}", "=", x, count=0, flags=0) for x in items]
 
     @property
-    def job_card(self):
+    def job_card(self) -> JobCard:
         """returns the job card to be fed to external scheduler"""
         sanitized_attribs = self.pre_process()
 
@@ -229,13 +226,15 @@ class PBS(JobScheduler):
         threads = items.get(OptionalAttribs.THREADS, 1)
         memory = items.get(OptionalAttribs.MEMORY, "")
 
-        select = [f"{total_nodes}",
-                  f"{self._map[RequiredAttribs.TASKS_PER_NODE]}={tasks_per_node}",
-                  f"{self._map[OptionalAttribs.THREADS]}={threads}",
-                  f"ncpus={int(tasks_per_node) * int(threads)}"]
+        select = [
+            f"{total_nodes}",
+            f"{self._map[RequiredAttribs.TASKS_PER_NODE]}={tasks_per_node}",
+            f"{self._map[OptionalAttribs.THREADS]}={threads}",
+            f"ncpus={int(tasks_per_node) * int(threads)}",
+        ]
         if memory not in NONEISH:
             select.append(f"{self._map[OptionalAttribs.MEMORY]}={memory}")
-        items["-l select="] = ':'.join(select)
+        items["-l select="] = ":".join(select)
 
         return items
 
@@ -288,12 +287,10 @@ class LSF(JobScheduler):
         # LSF requires threads to be set (if None is provided, default to 1)
         items[OptionalAttribs.THREADS] = items.get(OptionalAttribs.THREADS, 1)
         memory = items.get(OptionalAttribs.MEMORY, None)
-        if memory not in NONEISH:
-            mem_value = Memory(items[OptionalAttribs.MEMORY]).convert("KB")
-            items[self._map[OptionalAttribs.MEMORY](mem_value)] = ""
-        items[RequiredAttribs.NODES] = int(items[RequiredAttribs.TASKS_PER_NODE]) * int(
-            items[RequiredAttribs.NODES]
-            )
+        nodes = items.get(RequiredAttribs.NODES, "")
+        tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
+        items[self._map[RequiredAttribs.TASKS_PER_NODE](tasks_per_node)] = ""
+        items[RequiredAttribs.NODES] = int(tasks_per_node) * int(nodes)
         items.pop(OptionalAttribs.MEMORY, "")
         return items
 
