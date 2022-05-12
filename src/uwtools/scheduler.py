@@ -6,6 +6,8 @@ import logging
 
 from typing import Any, Dict, List
 
+from uwtools.utils import Memory
+
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
@@ -285,15 +287,14 @@ class LSF(JobScheduler):
         items = self._data
         # LSF requires threads to be set (if None is provided, default to 1)
         items[OptionalAttribs.THREADS] = items.get(OptionalAttribs.THREADS, 1)
-        memory = items.get(OptionalAttribs.MEMORY, "")
+        memory = items.get(OptionalAttribs.MEMORY, None)
         if memory not in NONEISH:
-            items[self._map[OptionalAttribs.MEMORY](items[OptionalAttribs.MEMORY])] = ""
-        items[
-            self._map[RequiredAttribs.TASKS_PER_NODE](
-                items[RequiredAttribs.TASKS_PER_NODE]
+            mem_value = Memory(items[OptionalAttribs.MEMORY]).convert("KB")
+            items[self._map[OptionalAttribs.MEMORY](mem_value)] = ""
+        items[RequiredAttribs.NODES] = int(items[RequiredAttribs.TASKS_PER_NODE]) * int(
+            items[RequiredAttribs.NODES]
             )
-        ] = ""
-        items[RequiredAttribs.NODES] = int(items[RequiredAttribs.TASKS_PER_NODE]) * int(items[RequiredAttribs.NODES])
+        items.pop(OptionalAttribs.MEMORY, "")
         return items
 
 
