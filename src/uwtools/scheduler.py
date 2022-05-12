@@ -286,12 +286,16 @@ class LSF(JobScheduler):
         items = self._data
         # LSF requires threads to be set (if None is provided, default to 1)
         items[OptionalAttribs.THREADS] = items.get(OptionalAttribs.THREADS, 1)
-        memory = items.get(OptionalAttribs.MEMORY, None)
         nodes = items.get(RequiredAttribs.NODES, "")
         tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
-        items[self._map[RequiredAttribs.TASKS_PER_NODE](tasks_per_node)] = ""
+
+        memory = items.get(OptionalAttribs.MEMORY, None)
+        if memory is not None:
+            mem_value = Memory(memory).convert("KB")
+            items[self._map[OptionalAttribs.MEMORY](mem_value)] = ""
+
         items[RequiredAttribs.NODES] = int(tasks_per_node) * int(nodes)
-        items.pop(OptionalAttribs.MEMORY, "")
+        items.pop(OptionalAttribs.MEMORY, None)
         return items
 
 
