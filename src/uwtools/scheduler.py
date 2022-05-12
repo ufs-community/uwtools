@@ -123,9 +123,9 @@ class JobScheduler(collections.UserDict):
         ]
 
         flags = [
-            f"{self.prefix} {value}".strip()
+            f"{self.prefix} {key}".strip()
             for (key, value) in sanitized_attribs.items()
-            if key in NONEISH
+            if value in NONEISH
         ]
 
         processed = self.post_process(known + unknown + flags)
