@@ -38,3 +38,10 @@ jobs:
           name: coverage-report
           path: ./cov_html
 
+      - name: Download Reports for GitHub pages
+        if: ${{ always() }}
+        uses: actions/download-artifact@v2
+        with:
+          name: coverage-report
+          path: ./cov_html
+
