@@ -1,0 +1,14 @@
+LICENSE
+README.md
+setup.cfg
+setup.py
+src/uwtools/__init__.py
+src/uwtools/loaders.py
+src/uwtools/logger.py
+src/uwtools/scheduler.py
+src/uwtools.egg-info/PKG-INFO
+src/uwtools.egg-info/SOURCES.txt
+src/uwtools.egg-info/dependency_links.txt
+src/uwtools.egg-info/not-zip-safe
+src/uwtools.egg-info/requires.txt
+src/uwtools.egg-info/top_level.txt
