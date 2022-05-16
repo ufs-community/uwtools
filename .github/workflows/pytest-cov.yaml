@@ -31,10 +31,6 @@ jobs:
         run: |
           pytest --cov=src/uwtools/ --cov-fail-under=5 --cov-report=html:cov_html
 
-      - name: Display structure of downloaded files
-        run: ls -R
-        working-directory: path/to/artifact
-
       - name: Upload Reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
