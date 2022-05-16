@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python 3.10
         uses: actions/setup-python@v1
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
       - name: Install App
         run: |
@@ -28,9 +28,17 @@ jobs:
         run: |
           pytest --cov-fail-under=5 --cov-report=html --cov=uwtools
 
-      - name: Generate Report
+      - name: Upload Reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: htmlcov
+      - name: Upload to pages
         run: |
-          pip install coverage
-          coverage run -m pytest
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v2
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "update code coverage"
+          git push
+      
