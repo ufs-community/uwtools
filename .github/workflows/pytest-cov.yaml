@@ -38,7 +38,6 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          mv htmlcov/* .
           git add -f .
           git commit -m "update code coverage"
           git push
