@@ -1,7 +1,7 @@
 name: Pytest Coverage
 on:
   push:
-    branches: [develop]
+    branches: [develop, 53-create-git-actions-workflow-pytest-cov]
   pull_request:
     branches: [develop]
 
