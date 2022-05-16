@@ -46,10 +46,9 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: coverage-report
-          
+
       - name: Display structure of downloaded files
         run: ls -R
-        working-directory: path/to/artifact
 
       - name: Deploy Coverage Reports to GitHub pages
         uses: JamesIves/github-pages-deploy-action@4.1.4
