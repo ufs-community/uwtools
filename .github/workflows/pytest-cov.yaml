@@ -38,10 +38,9 @@ jobs:
           name: coverage-report
           path: ./cov_html
 
-      - name: Download Reports for GitHub pages
-        if: ${{ always() }}
-        uses: actions/download-artifact@v2
+      - name: Deploy Coverage Reports to GitHub pages
+        uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
-          name: coverage-report
-          path: ./cov_html
+          branch: gh-pages
+          folder: cov_html
 
