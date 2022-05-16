@@ -31,6 +31,10 @@ jobs:
         run: |
           pytest --cov=src/uwtools/ --cov-fail-under=5 --cov-report=html:cov_html
 
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: path/to/artifact
+
       - name: Upload Reports
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
@@ -38,9 +42,18 @@ jobs:
           name: coverage-report
           path: ./cov_html
 
+      - name: Download Artifact 
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-report
+          
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: path/to/artifact
+
       - name: Deploy Coverage Reports to GitHub pages
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: gh-pages
-          folder: cov_html
+          folder: coverage-report
 
