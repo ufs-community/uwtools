@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python 3.10
         uses: actions/setup-python@v1
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
       - name: Install App
         run: |
@@ -38,7 +38,6 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add -A
+          git add htmlcov
           git commit -m "update code coverage"
           git push
-      
