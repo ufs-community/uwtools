@@ -38,11 +38,6 @@ jobs:
           name: coverage-report
           path: ./cov_html
 
-      - name: Download Artifact 
-        uses: actions/download-artifact@v3
-        with:
-          name: coverage-report
-
       - name: Display structure of downloaded files
         run: ls -R
 
@@ -50,5 +45,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: gh-pages
-          folder: coverage-report
+          folder: cov_html
 
