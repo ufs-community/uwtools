@@ -45,11 +45,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: report
-          path: htmlcov
 
       - name: Run pytest-cov
         run: |
           pwd
+          ls -lah
           cd htmlcov
           pwd
           ls -lah
@@ -58,5 +58,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
           branch: gh-pages # The branch the action should deploy to.
-          folder: /home/runner/work/workflow-tools/workflow-tools/htmlcov # The folder the action should deploy.
+          folder: "report" # The folder the action should deploy.
           force: true
