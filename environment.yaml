@@ -1,7 +1,0 @@
-name: uwtools
-channels:
-  - defaults
-dependencies:
-  - pylint
-  - pytest
-  
