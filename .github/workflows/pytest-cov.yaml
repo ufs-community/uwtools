@@ -35,7 +35,7 @@ jobs:
           path: htmlcov
 
   deploy_to_pages:
-    needs: "run_pytest_coverage"
+    needs: [run_pytest_coverage]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
