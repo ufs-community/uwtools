@@ -47,11 +47,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: coverage-report
-          path: htmlcov
+          path: htmlcov/
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
           branch: gh-pages # The branch the action should deploy to.
-          folder: htmlcov # The folder the action should deploy.
+          folder: downloads/htmlcov # The folder the action should deploy.
 
