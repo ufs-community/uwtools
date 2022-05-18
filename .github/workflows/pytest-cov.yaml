@@ -61,4 +61,3 @@ jobs:
           folder: htmlcov # The folder the action should deploy.
           target-folder: ./
           force: true
-          clean: true
