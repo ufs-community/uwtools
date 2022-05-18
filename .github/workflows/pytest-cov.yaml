@@ -32,7 +32,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
-          path: htmlcov
+          path: htmlcov/
 
   deploy_to_pages:
     needs: "run_pytest_coverage"
@@ -47,10 +47,14 @@ jobs:
           name: coverage-report
           path: htmlcov
 
+      - name: Run pytest-cov
+        run: |
+          pwd
+          ls -lah
+
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
           branch: gh-pages # The branch the action should deploy to.
-          folder: htmlcov/cov-report # The folder the action should deploy.
+          folder: htmlcov # The folder the action should deploy.
           clean: true
-
