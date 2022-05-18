@@ -41,17 +41,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v2.3.1
+        uses: actions/checkout@v3
 
       - name: Download Reports
         uses: actions/download-artifact@v3
         with:
           name: coverage-report
-          path: htmlcov/
+          path: htmlcov
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
           branch: gh-pages # The branch the action should deploy to.
-          folder: htmlcov/ # The folder the action should deploy.
+          folder: htmlcov # The folder the action should deploy.
 
