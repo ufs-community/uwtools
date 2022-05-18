@@ -40,10 +40,3 @@ jobs:
           branch: gh-pages # The branch the action should deploy to.
           folder: ../htmcov # The folder the action should deploy.
 
-      - name: Upload to pages
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f .
-          git commit -m "update code coverage"
-          git push
