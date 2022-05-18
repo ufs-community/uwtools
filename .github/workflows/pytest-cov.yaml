@@ -48,10 +48,6 @@ jobs:
           name: report
           path: report
 
-      - name: Run pytest-cov
-        run: |
-          ls -lah ./report
-
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
