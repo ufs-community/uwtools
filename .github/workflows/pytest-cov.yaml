@@ -31,7 +31,7 @@ jobs:
           ls -lah
 
       - name: Upload Reports
-        uses: actions/upload-artifact@v3
+        uses: actions/download-artifact@v3
         with:
           name: coverage-report
           path: htmlcov
