@@ -45,6 +45,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: report
+          path: report
 
       - name: Run pytest-cov
         run: |
