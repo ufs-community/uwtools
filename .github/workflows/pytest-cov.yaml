@@ -32,10 +32,18 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage-report
-          path: docs/coverage
+          path: htmlcov
 
-      - name: Deploy Coverage Reports to GitHub pages
-        uses: JamesIves/github-pages-deploy-action@4.1.4
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
-          branch: gh-pages
-          folder: htmlcov
+          branch: gh-pages # The branch the action should deploy to.
+          folder: htmcov # The folder the action should deploy.
+
+      - name: Upload to pages
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f .
+          git commit -m "update code coverage"
+          git push
