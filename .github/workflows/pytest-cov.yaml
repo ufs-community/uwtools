@@ -28,12 +28,6 @@ jobs:
         run: |
           pytest --cov-fail-under=5 --cov-report=html --cov=uwtools
 
-      - name: Upload Reports
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-report
-          path: htmlcov
-
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
