@@ -137,3 +137,6 @@ docs/_build/
 
 # Pycharm IDE files
 .idea/
+
+# Reports
+htmlcov
