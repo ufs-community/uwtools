@@ -27,6 +27,8 @@ jobs:
       - name: Run pytest-cov
         run: |
           pytest --cov-fail-under=5 --cov-report=html --cov=uwtools
+          pwd 
+          ls -lah
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.3
