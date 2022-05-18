@@ -31,8 +31,8 @@ jobs:
       - name: Upload Reports
         uses: actions/upload-artifact@v3
         with:
-          name: coverage-report
-          path: htmlcov/
+          name: report
+          path: htmlcov
 
   deploy_to_pages:
     needs: "run_pytest_coverage"
@@ -44,7 +44,7 @@ jobs:
       - name: Download Reports
         uses: actions/download-artifact@v3
         with:
-          name: coverage-report
+          name: report
           path: htmlcov
 
       - name: Run pytest-cov
