@@ -1,5 +1,5 @@
 scheduler: slurm
-job_name: abcd
+jobname: abcd
 extra_stuff: 12345
 account: user_account
 nodes: 1
