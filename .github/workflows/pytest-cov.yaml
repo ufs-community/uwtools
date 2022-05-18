@@ -46,14 +46,6 @@ jobs:
         with:
           name: report
 
-      - name: Run pytest-cov
-        run: |
-          pwd
-          ls -lah
-          cd htmlcov
-          pwd
-          ls -lah
-
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
