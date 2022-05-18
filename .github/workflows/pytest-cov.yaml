@@ -40,5 +40,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
           branch: gh-pages # The branch the action should deploy to.
-          folder: htmcov # The folder the action should deploy.
+          folder: coverage-report # The folder the action should deploy.
 
