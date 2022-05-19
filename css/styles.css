@@ -12398,3 +12398,8 @@ video.bg-video {
     width: auto;
   }
 }
+
+.repo-card img {
+  border-radius: 25px;
+  border: 2px solid black;
+}
