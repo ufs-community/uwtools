@@ -1,7 +1,7 @@
 name: Pytest Coverage
 on:
   push:
-    branches: [develop, 53-create-git-actions-workflow-pytest-cov]
+    branches: ["*"]
   pull_request:
     branches: [develop]
 
@@ -56,4 +56,3 @@ jobs:
           target-folder: "./coverage"
           force: true
           clean: true
-
