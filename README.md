@@ -18,4 +18,6 @@ The inline-documentation docstring standard (using the [NumPy](https://numpydoc.
 
 Documentation is automatically generated through [Read the Docs](https://readthedocs.org/) when [develop](https://github.com/ufs-community/workflow-tools/tree/develop) is updated and available [here](https://unified-workflow.readthedocs.io/en/latest/).
 
-[Code Coverage]("https://ufs-community.github.io/workflow-tools/coverage/")
+* [Developer Status](https://github.com/orgs/ufs-community/projects/1)
+* [UW Tools Github Pages Site](https://ufs-community.github.io/workflow-tools/)
+
