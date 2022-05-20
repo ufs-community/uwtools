@@ -48,6 +48,10 @@ class OptionalAttribs:  # pylint: disable=too-few-public-methods
 class JobCard(collections.UserList):
     """represents a job card to submit to a scheduler"""
 
+    def __str__(self):
+        """returns string representation"""
+        return str(self.content)
+
     def content(self, line_separator: str = "\n") -> str:
         """returns the formatted content of the job cards
 
