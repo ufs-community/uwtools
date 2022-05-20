@@ -1,7 +1,7 @@
 name: Pytest Coverage
 on:
   push:
-    branches: ["*"]
+    branches: [develop, 53-create-git-actions-workflow-pytest-cov]
   pull_request:
     branches: [develop]
 
@@ -9,15 +9,13 @@ jobs:
   run_pytest_coverage:
     name: Run Pytest Coverage
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v3
-
       - name: Set up Python 3.10
         uses: actions/setup-python@v1
         with:
           python-version: "3.10"
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
 
       - name: Install App
         run: |
