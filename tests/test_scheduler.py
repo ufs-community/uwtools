@@ -454,8 +454,7 @@ def test_string_output():
 #BSUB -n 6
 #BSUB -R span[ptile=3]
 #BSUB -R affinity[core(2)]
-#BSUB -R rusage[mem=1000KB]
-""".strip()
+#BSUB -R rusage[mem=1000KB]"""
 
     props = {
         "scheduler": "lsf",
@@ -470,4 +469,4 @@ def test_string_output():
 
     js = JobScheduler.get_scheduler(props)
     actual = js.job_card.content()
-    assert actual.strip() == expected.strip()
+    assert actual == expected
