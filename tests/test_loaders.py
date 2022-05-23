@@ -16,8 +16,8 @@ def test_yaml_loader_loads_correctly():
         "nodes": 1,
         "queue": "bos",
         "tasks_per_node": 4,
-        "walltime": "00:01:00"
-        }
+        "walltime": "00:01:00",
+    }
     assert actual == expected
 
 
@@ -29,3 +29,6 @@ def test_loader_dot_notation():
     actual = props.jobname
 
     assert actual == expected
+
+
+# test 1
