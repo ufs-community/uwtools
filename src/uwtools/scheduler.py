@@ -3,8 +3,11 @@ Job Scheduling
 """
 import collections
 import logging
+import re
 
 from typing import Any, Dict, List
+
+from uwtools.utils import Memory
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -30,7 +33,7 @@ class OptionalAttribs:  # pylint: disable=too-few-public-methods
     """key for optional attributes"""
 
     SHELL = "shell"
-    JOB_NAME = "job_name"
+    JOB_NAME = "jobname"
     STDOUT = "stdout"
     STDERR = "stderr"
     JOIN = "join"
@@ -39,12 +42,15 @@ class OptionalAttribs:  # pylint: disable=too-few-public-methods
     MEMORY = "memory"
     DEBUG = "debug"
     EXCLUSIVE = "exclusive"
-    CPUS = "cpus-per-task"
     PLACEMENT = "placement"
 
 
 class JobCard(collections.UserList):
     """represents a job card to submit to a scheduler"""
+
+    def __str__(self):
+        """returns string representation"""
+        return str(self.content)
 
     def content(self, line_separator: str = "\n") -> str:
         """returns the formatted content of the job cards
@@ -69,12 +75,13 @@ class JobScheduler(collections.UserDict):
         self.validate_props(props)
         self.update(props)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name) -> Any:
         if name in self:
             return self[name]
         raise AttributeError(name)
 
-    def validate_props(self, props):
+    def validate_props(self, props) -> None:
+        """raises ValueError if invalid"""
         members = [
             getattr(RequiredAttribs, attr)
             for attr in dir(RequiredAttribs)
@@ -87,25 +94,20 @@ class JobScheduler(collections.UserDict):
             raise ValueError(f"missing required attributes: [{', '.join(diff)}]")
 
     @property
-    def _data(self):
+    def _data(self) -> Dict[Any, Any]:
         return self.__dict__["data"]
 
-    def pre_process(self):
+    def pre_process(self) -> Dict[Any, Any]:
         """pre process attributes before converting to job card"""
         return self._data
 
     @staticmethod
-    def post_process(items: List[str]):
+    def post_process(items: List[str]) -> List[str]:
         """post process attributes before converting to job card"""
-        # TODO use regex
-        output = items
-        output = [x.replace("= ", "=") for x in output]
-        output = [x.replace(" =", "=") for x in output]
-        output = [x.replace(" = ", "=") for x in output]
-        return output
+        return [re.sub(r"\s{0,}\=\s{0,}", "=", x, count=0, flags=0) for x in items]
 
     @property
-    def job_card(self):
+    def job_card(self) -> JobCard:
         """returns the job card to be fed to external scheduler"""
         sanitized_attribs = self.pre_process()
 
@@ -124,9 +126,9 @@ class JobScheduler(collections.UserDict):
         ]
 
         flags = [
-            f"{self.prefix} {value}".strip()
+            f"{self.prefix} {key}".strip()
             for (key, value) in sanitized_attribs.items()
-            if key in NONEISH
+            if value in NONEISH
         ]
 
         processed = self.post_process(known + unknown + flags)
@@ -197,18 +199,19 @@ class PBS(JobScheduler):
         RequiredAttribs.NODES: lambda x: f"-l select={x}",
         RequiredAttribs.QUEUE: "-q",
         RequiredAttribs.WALLTIME: "-l walltime=",
-        RequiredAttribs.TASKS_PER_NODE: ":mpiprocs=",
+        RequiredAttribs.TASKS_PER_NODE: "mpiprocs",
         OptionalAttribs.SHELL: "-S",
         OptionalAttribs.JOB_NAME: "-N",
         OptionalAttribs.STDOUT: "-o",
-        OptionalAttribs.DEBUG: "-l debug=",
-        OptionalAttribs.THREADS: ":ompthreads=",
+        OptionalAttribs.DEBUG: lambda x: f"-l debug={str(x).lower()}",
+        OptionalAttribs.THREADS: "ompthreads",
+        OptionalAttribs.MEMORY: "mem",
     }
 
     def pre_process(self) -> Dict[str, Any]:
         output = self._data
-        output.update(self.select(output))
-        output.update(self.placement(output))
+        output.update(self._select(output))
+        output.update(self._placement(output))
 
         output.pop(RequiredAttribs.TASKS_PER_NODE, None)
         output.pop(RequiredAttribs.NODES, None)
@@ -219,23 +222,28 @@ class PBS(JobScheduler):
         output.pop("select", None)
         return dict(output)
 
-    def select(self, items) -> Dict[str, Any]:
+    def _select(self, items) -> Dict[str, Any]:
         """select logic"""
         total_nodes = items.get(RequiredAttribs.NODES, "")
-        cores_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
-        threads_per_core = items.get(OptionalAttribs.THREADS, "")
+        tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
+        # Set default threads=1 to address job variability with PBS
+        threads = items.get(OptionalAttribs.THREADS, 1)
         memory = items.get(OptionalAttribs.MEMORY, "")
 
-        items["-l select"] = f"={total_nodes}:mpiprocs={cores_per_node}"
-        if threads_per_core not in NONEISH:
-            items[
-                "-l select"
-            ] = f"{items['-l select']}:ompthreads={threads_per_core}:ncpus={int(cores_per_node) * int(threads_per_core)}"
+        select = [
+            f"{total_nodes}",
+            f"{self._map[RequiredAttribs.TASKS_PER_NODE]}={tasks_per_node}",
+            f"{self._map[OptionalAttribs.THREADS]}={threads}",
+            f"ncpus={int(tasks_per_node) * int(threads)}",
+        ]
         if memory not in NONEISH:
-            items["-l select"] = f"{items['-l select']}:mem={memory}"
+            select.append(f"{self._map[OptionalAttribs.MEMORY]}={memory}")
+        items["-l select="] = ":".join(select)
+
         return items
 
-    def placement(self, items) -> Dict[str, Any]:
+    @staticmethod
+    def _placement(items) -> Dict[str, Any]:
         """placement logic"""
 
         exclusive = items.get(OptionalAttribs.EXCLUSIVE, "")
@@ -269,33 +277,29 @@ class LSF(JobScheduler):
         RequiredAttribs.QUEUE: "-q",
         RequiredAttribs.ACCOUNT: "-P",
         RequiredAttribs.WALLTIME: "-W",
-        RequiredAttribs.NODES: "-n",
+        RequiredAttribs.NODES: lambda x: f"-n {x}",
         RequiredAttribs.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
         OptionalAttribs.SHELL: "-L",
         OptionalAttribs.JOB_NAME: "-J",
         OptionalAttribs.STDOUT: "-o",
         OptionalAttribs.THREADS: lambda x: f"-R affinity[core({x})]",
+        OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
     }
 
-    def pre_process(self):
+    def pre_process(self) -> Dict[str, Any]:
         items = self._data
-        items[self._map[OptionalAttribs.THREADS](items[OptionalAttribs.THREADS])] = ""
-        items[
-            self._map[RequiredAttribs.TASKS_PER_NODE](
-                items[RequiredAttribs.TASKS_PER_NODE]
-            )
-        ] = ""
-        items[
-            f"-n {int(items[RequiredAttribs.TASKS_PER_NODE] * int(items[RequiredAttribs.NODES]))}"
-        ] = ""
-        return items
-
-    def select(self, items: Dict[str, Any]):
-        """select logic"""
-
+        # LSF requires threads to be set (if None is provided, default to 1)
+        items[OptionalAttribs.THREADS] = items.get(OptionalAttribs.THREADS, 1)
         nodes = items.get(RequiredAttribs.NODES, "")
-        tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE)
-        items[RequiredAttribs.NODES] = int(nodes) * int(tasks_per_node)
+        tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
+
+        memory = items.get(OptionalAttribs.MEMORY, None)
+        if memory is not None:
+            mem_value = Memory(memory).convert("KB")
+            items[self._map[OptionalAttribs.MEMORY](mem_value)] = ""
+
+        items[RequiredAttribs.NODES] = int(tasks_per_node) * int(nodes)
+        items.pop(OptionalAttribs.MEMORY, None)
         return items
 
 
