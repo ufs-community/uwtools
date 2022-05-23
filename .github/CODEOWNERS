@@ -7,6 +7,6 @@
 # review when someone opens a pull request.
 *       @aerorahul @benjamin-cash @christinaholtNOAA @fgabelmannjr
 
-*.py    @aerorahul @ryanlong1004 @ope-adejumo
+*.py    @aerorahul @ryanlong1004 @ope-adejumo @christinaholtNOAA
 
 docs/*   @aerorahul @jprestop
