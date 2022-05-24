@@ -7,6 +7,8 @@ import re
 
 from typing import Any, Dict, List
 
+from uwtools.utils import Memory
+
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
@@ -120,9 +122,9 @@ class JobScheduler(collections.UserDict):
         ]
 
         flags = [
-            f"{self.prefix} {value}".strip()
+            f"{self.prefix} {key}".strip()
             for (key, value) in sanitized_attribs.items()
-            if key in NONEISH
+            if value in NONEISH
         ]
 
         processed = self.post_process(known + unknown + flags)
@@ -284,15 +286,16 @@ class LSF(JobScheduler):
         items = self._data
         # LSF requires threads to be set (if None is provided, default to 1)
         items[OptionalAttribs.THREADS] = items.get(OptionalAttribs.THREADS, 1)
-        memory = items.get(OptionalAttribs.MEMORY, "")
         nodes = items.get(RequiredAttribs.NODES, "")
         tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
 
-        if memory not in NONEISH:
-            items[self._map[OptionalAttribs.MEMORY](memory)] = ""
+        memory = items.get(OptionalAttribs.MEMORY, None)
+        if memory is not None:
+            mem_value = Memory(memory).convert("KB")
+            items[self._map[OptionalAttribs.MEMORY](mem_value)] = ""
 
-        items[self._map[RequiredAttribs.TASKS_PER_NODE](tasks_per_node)] = ""
         items[RequiredAttribs.NODES] = int(tasks_per_node) * int(nodes)
+        items.pop(OptionalAttribs.MEMORY, None)
         return items
 
 

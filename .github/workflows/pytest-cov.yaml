@@ -11,7 +11,7 @@ jobs:
     name: Run Pytest Coverage
     strategy:
       matrix:
-        python: ["3.7", "3.8", "3.9", "3.10"]
+        python: ["3.7"]
 
     steps:
       - name: Checkout
@@ -37,4 +37,13 @@ jobs:
         with:
           name: coverage-report
           path: ./cov_html
+
+      - name: Display structure of downloaded files
+        run: ls -R
+
+      - name: Deploy Coverage Reports to GitHub pages
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          folder: cov_html
 
