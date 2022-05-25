@@ -50,8 +50,8 @@ def test_Unix_FileManager_Threaded():
     fm: UnixFileManager = FileManager.get_file_manager(Prefixes.UNIX)
     fm.copy([source], [destination.path])
 
-    print(os.listdir(temp_dir))
-    print(temp_dir)
-    assert os.listdir(temp_dir) == ""
+    actual = len(os.listdir(temp_dir))
+    expected = 6
+    assert actual == expected
 
     # assert os.path.exists()
