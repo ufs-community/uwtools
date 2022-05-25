@@ -1,12 +1,11 @@
 # pylint: disable=too-few-public-methods, unused-variable
 
 import os
-import shutil
 from abc import ABC, abstractmethod
+import pathlib
 from typing import Any, List
 
-from uwtools.files.gateway import s3
-
+from uwtools.files.gateway import s3, unix
 from uwtools.files.model import File, Prefixes, Unix, S3
 
 
@@ -40,7 +39,5 @@ class S3FileManager(FileManager):
 class UnixFileManager(FileManager):
     """unix based file operations"""
 
-    def copy(self, source: List[File], destination: List[Unix]):
-        for (src, dest) in zip(source, destination):
-            shutil.copy(src.path, dest.path)
-
+    def copy(self, source: List[File], destination: List[str]):
+        unix.copy(source, [pathlib.Path(x) for x in destination])

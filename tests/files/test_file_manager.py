@@ -1,5 +1,8 @@
 # pylint: disable=all
+import os
 import shutil
+
+import tempfile
 from unittest.mock import patch
 
 from uwtools.files import FileManager, S3FileManager, UnixFileManager
@@ -33,5 +36,22 @@ def test_Unix_FileManager(mock_file_manager):
     destination = Unix("file://tests/fixtures/files/b.txt")
 
     fm: UnixFileManager = FileManager.get_file_manager(Prefixes.UNIX)
-    fm.copy([source], [destination])
+    fm.copy([source], [destination.path])
     assert mock_file_manager.copy.called_once_with([source], [destination])
+
+
+def test_Unix_FileManager_Threaded():
+
+    temp_dir = tempfile.mkdtemp()
+
+    source = Unix("file://tests/fixtures/files")
+    destination = Unix(f"file://{temp_dir}")
+
+    fm: UnixFileManager = FileManager.get_file_manager(Prefixes.UNIX)
+    fm.copy([source], [destination.path])
+
+    print(os.listdir(temp_dir))
+    print(temp_dir)
+    assert os.listdir(temp_dir) == ""
+
+    # assert os.path.exists()
