@@ -45,5 +45,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: gh-pages
-          folder: ./cov_html
-          target-folder: ./cov_html
+          folder: cov_html
+          target-folder: coverage
