@@ -9,18 +9,14 @@ jobs:
   run_pytest_coverage:
     runs-on: ubuntu-latest
     name: Run Pytest Coverage
-    strategy:
-      matrix:
-        python: ["3.7"]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup Python
-        uses: actions/setup-python@v3
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python }}
+          python-version: 3.8
 
       - name: Install dependencies
         run: |
@@ -31,13 +27,6 @@ jobs:
         run: |
           pytest --cov=src/uwtools/ --cov-fail-under=5 --cov-report=html:cov_html
 
-      - name: Upload Reports
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage-report
-          path: ./cov_html
-
       - name: Display structure of downloaded files
         run: ls -R
 
@@ -45,5 +34,5 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@4.1.4
         with:
           branch: gh-pages
-          folder: cov_html
-          target-folder: coverage
+          folder: ./cov_html
+          target-folder: ./coverage
