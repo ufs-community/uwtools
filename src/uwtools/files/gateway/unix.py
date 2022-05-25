@@ -48,3 +48,16 @@ class Copier:
         # wait for the threads to complete
         for thread in threads:
             thread.join()
+
+
+def _copy(source: pathlib.Path, destination: pathlib.Path):
+    """copies file or directory from src to destination.
+
+    Directories are coppied recursively.
+    """
+    logging.debug("copying %s to %s", source, destination)
+    if os.path.exists(destination) and os.path.isdir(destination):
+        shutil.rmtree(destination)
+        shutil.copytree(source, destination)
+        return
+    shutil.copy(source, destination)
