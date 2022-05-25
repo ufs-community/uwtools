@@ -1,9 +1,9 @@
 name: Pytest Coverage
-on: 
+on:
   push:
-    branches: [ develop ]
+    branches: [develop]
   pull_request:
-    branches: [ develop ]
+    branches: [develop]
 
 jobs:
   run_pytest_coverage:
@@ -46,4 +46,4 @@ jobs:
         with:
           branch: gh-pages
           folder: ./cov_html
-
+          target-folder: ./cov_html
