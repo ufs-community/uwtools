@@ -13,16 +13,16 @@ def test_Unix():
 def test_Unix_validation():
 
     with pytest.raises(AttributeError) as error:
-        _file = Unix("ile://tests/fixtures/files/a.txt")
+        Unix("ile://tests/fixtures/files/a.txt")
 
     assert "attribute unknown: [ile://]" in str(error)
 
     with pytest.raises(AttributeError) as error:
-        _file = Unix("//tests/fixtures/files/a.txt")
+        Unix("//tests/fixtures/files/a.txt")
 
     assert "prefix not found in: [//tests/fixtures/files/a.txt]" in str(error)
 
     with pytest.raises(FileNotFoundError) as error:
-        _file = Unix("file://ests/fixtures/files/a.txt")
+        Unix("file://ests/fixtures/files/a.txt")
 
     assert "File not found [file://ests/fixtures/files/a.txt]" in str(error)
