@@ -1,12 +1,19 @@
-# pylint: disable=too-few-public-methods, unused-variable
+# pylint: disable=too-few-public-methods
+"""
+Unix based local file copying, threaded
+"""
 
+import logging
+import os
 import pathlib
-from queue import Empty, Queue
 import shutil
+from queue import Empty, Queue
 from threading import Thread
 from typing import List
 
-from uwtools.files.model import File, Unix
+from uwtools.files.model import File
+
+logging.getLogger(__name__)
 
 
 def copy(source: List[File], destination: List[pathlib.Path]):
@@ -25,27 +32,27 @@ class Copier:
 
     def __iter__(self):
         try:
-            yield from self.queue.get_nowait()
+            yield self.queue.get_nowait()
         except Empty:
             return
 
     def append(self, source, destination):
+        """append a task to the queue"""
         for (src, dest) in zip(list(source), list(destination)):
             self.queue.put((src, dest))
 
     def run(self):
-        for x in self:
-            print(x)
+        """ runs all tasks in queue threaded"""
+
         threads = [
-            Thread(target=shutil.copy, args=(source.path, destination.path))
+            Thread(target=_copy, args=(source.path, destination))
             for (source, destination) in self
         ]
 
-        # start the threads
         for thread in threads:
             thread.start()
 
-        # wait for the threads to complete
+        # wait to complete
         for thread in threads:
             thread.join()
 
