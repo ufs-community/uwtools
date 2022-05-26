@@ -468,5 +468,7 @@ def test_string_output():
     }
 
     js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
+    jc = js.job_card
+    actual = str(jc)
+    print(jc)
     assert actual == expected
