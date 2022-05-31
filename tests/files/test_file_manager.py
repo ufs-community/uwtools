@@ -51,5 +51,5 @@ def test_Unix_FileManager_Threaded():
     fm.copy([source], [destination.path])
 
     actual = len(os.listdir(temp_dir))
-    expected = 6
+    expected = 3
     assert actual == expected
