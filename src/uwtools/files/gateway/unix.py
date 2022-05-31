@@ -60,7 +60,7 @@ class Copier:
 def _copy(source: pathlib.Path, destination: pathlib.Path):
     """copies file or directory from src to destination.
 
-    Directories are coppied recursively.
+    Directories are copied recursively.
     """
     logging.debug("copying %s to %s", source, destination)
     if os.path.exists(destination) and os.path.isdir(destination):
