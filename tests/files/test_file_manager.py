@@ -53,5 +53,3 @@ def test_Unix_FileManager_Threaded():
     actual = len(os.listdir(temp_dir))
     expected = 6
     assert actual == expected
-
-    # assert os.path.exists()
