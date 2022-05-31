@@ -40,4 +40,4 @@ class UnixFileManager(FileManager):
     """unix based file operations"""
 
     def copy(self, source: List[File], destination: List[str]):
-        unix.copy(source, [pathlib.Path(x) for x in destination])
+        unix.copy(list(source), [pathlib.Path(x) for x in list(destination)])
