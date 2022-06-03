@@ -21,5 +21,3 @@ Documentation is automatically generated through [Read the Docs](https://readthe
 [Developer Status](https://github.com/orgs/ufs-community/projects/1)
 
 [UW Tools Github Pages Site](https://ufs-community.github.io/workflow-tools/)
- 
- This is new stuff
