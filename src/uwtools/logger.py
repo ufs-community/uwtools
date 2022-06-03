@@ -106,8 +106,8 @@ class Logger:
         -------
         logger
         """
-        for h_h in handlers:
-            logger.addHandler(h_h)
+        for handler in handlers:
+            logger.addHandler(handler)
 
         return logger
 
