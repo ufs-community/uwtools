@@ -1,49 +1,54 @@
 name: Pytest Coverage
-on: 
+on:
   push:
-    branches: [ develop ]
+    branches: [develop, 53-create-git-actions-workflow-pytest-cov]
   pull_request:
-    branches: [ develop ]
+    branches: [develop]
 
 jobs:
   run_pytest_coverage:
-    runs-on: ubuntu-latest
     name: Run Pytest Coverage
-    strategy:
-      matrix:
-        python: ["3.7"]
-
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Python
-        uses: actions/setup-python@v3
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python }}
+          python-version: "3.10"
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
 
-      - name: Install dependencies
+      - name: Install App
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -e .[dev]
 
       - name: Run pytest-cov
         run: |
-          pytest --cov=src/uwtools/ --cov-fail-under=5 --cov-report=html:cov_html
+          pytest --cov-fail-under=70 --cov-report=html --cov=uwtools
+          rm ./htmlcov/.gitignore
 
       - name: Upload Reports
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: coverage-report
-          path: ./cov_html
+          name: report
+          path: htmlcov
 
-      - name: Display structure of downloaded files
-        run: ls -R
+  deploy_to_pages:
+    needs: [run_pytest_coverage]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
 
-      - name: Deploy Coverage Reports to GitHub pages
-        uses: JamesIves/github-pages-deploy-action@4.1.4
+      - name: Download Reports
+        uses: actions/download-artifact@v3
         with:
-          branch: gh-pages
-          folder: cov_html
+          name: report
+          path: report
 
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.3.3
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: "./report" # The folder the action should deploy.
+          target-folder: "./coverage"
