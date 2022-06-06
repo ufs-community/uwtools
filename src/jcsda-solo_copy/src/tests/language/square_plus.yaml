@@ -1,0 +1,7 @@
+schema: square_plus
+items:
+  side:
+    type: int
+  dummy:
+    unique: false
+

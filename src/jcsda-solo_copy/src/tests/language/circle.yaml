@@ -1,0 +1,4 @@
+schema: circle
+items:
+  radius:
+    type: int

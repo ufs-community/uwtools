@@ -1,0 +1,9 @@
+schema: 3d_plus
+inherit: 2d
+items:
+  z:
+    type: int
+  colour:
+    default: green
+  dummy: {}
+

@@ -1,0 +1,6 @@
+schema: rectangle
+items:
+  length:
+    type: int
+  width:
+    type: int

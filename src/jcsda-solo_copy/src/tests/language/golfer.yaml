@@ -1,0 +1,5 @@
+schema: golfer
+items:
+  handicap:
+    type: int
+

@@ -1,0 +1,6 @@
+schema: 2d
+items:
+  x:
+    type: int
+  y: 
+    type: int

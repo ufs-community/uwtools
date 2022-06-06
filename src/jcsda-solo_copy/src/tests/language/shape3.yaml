@@ -1,0 +1,13 @@
+schema: shape3
+merge: 
+  - dimension
+  - shape
+items:
+  colour:
+    default: black
+    lowercase: true
+  dimension:
+    default: 2d
+    validate: [ set-choices, 2d, 3d, 3d_plus ]
+  shape:
+    validate: [ set-choices, square, square_plus, circle, rectangle ]

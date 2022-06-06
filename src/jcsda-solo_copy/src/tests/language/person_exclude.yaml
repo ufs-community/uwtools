@@ -1,0 +1,19 @@
+schema: person_exclude
+items:
+  name:
+    unique: true
+  first_names:
+    alias: firsts
+    unique: false
+  employed:
+    type: boolean
+    exclude_when: name == 'Claude'
+  education:
+    default: postgrad
+  married:
+    required: false
+    type: boolean
+  house_status:
+    validate: [ set-choices, owner, mortgage, rental ]
+  age:
+    type: int

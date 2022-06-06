@@ -1,0 +1,18 @@
+schema: person
+items:
+  name:
+    unique: true
+  first_names:
+    alias: firsts
+    unique: false
+  employed:
+    type: boolean
+  education:
+    default: postgrad
+  married:
+    required: false
+    type: boolean
+  house_status:
+    validate: [ set-choices, owner, mortgage, rental ]
+  age:
+    type: int
