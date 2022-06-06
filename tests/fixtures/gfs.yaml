@@ -1,0 +1,18 @@
+# Model-related definitions
+# -------------------------
+
+model: gfs
+target: ufs-weather-model
+
+horizontal_resolution: c768
+vertical_resolution: 64
+
+executable: ${UFSEXEC}
+
+filetype: gfs
+datapath: '$(experiment_dir)/{{current_cycle}}'
+filename_core: 'fv_core.res.nc'
+
+updatethis: 'testpassed'
+testupdate: $(updatethis)
+updated_datapath: '$(experiment_dir)/{{my_current_cycle}}'
