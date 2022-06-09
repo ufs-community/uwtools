@@ -13,6 +13,7 @@ filetype: gfs
 datapath: '$(experiment_dir)/{{current_cycle}}'
 filename_core: 'fv_core.res.nc'
 
+updated_datapath: '$(experiment_dir)/{{my_current_cycle}}'
+
 updatethis: 'testpassed'
 testupdate: $(updatethis)
-updated_datapath: '$(experiment_dir)/{{my_current_cycle}}'

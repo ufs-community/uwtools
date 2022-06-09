@@ -22,5 +22,5 @@ experiment_dir: /home/myexpid
 
 
 # Environment
-user: ${USER}
+test_env: ${HOME}
 my_current_cycle: 10102022
