@@ -1,13 +1,14 @@
 # pylint: disable=all
-import pathlib
+import pathlib,os
 import pytest
 
 from uwtools.scheduler import JobScheduler
 from uwtools.loaders import load_yaml
 
+uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 def test_scheduler_dot_notation():
-    props = load_yaml(pathlib.Path("tests/fixtures/simple.yaml"))
+    props = load_yaml(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/simple.yaml")))
 
     js = JobScheduler.get_scheduler(dict(props))
     expected = "user_account"
