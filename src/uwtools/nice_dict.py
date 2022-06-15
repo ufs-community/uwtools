@@ -1,3 +1,12 @@
+# (C) Copyright 2020-2022 UCAR
+#
+# This software is licensed under the terms of the Apache Licence Version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+#
+# Part of this software is developed by the Joint Center for Satellite Data Assimilation (JCSDA) together with its partners.
+#
+# (C) Copyright 2022-2022 NOAA
+
 import re
 import yaml
 from .basic import traverse_structure

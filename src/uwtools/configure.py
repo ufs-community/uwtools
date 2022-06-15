@@ -20,14 +20,14 @@ class Configure(NiceDict):
     def __init__(self, config_file=None):
         super().__init__()
         if config_file is not None:
-            config = self.load(os.path.abspath(config_file))
+            config = self.include(os.path.abspath(config_file))
             if config is None:
                 config = {}
         else:
             config = {}        
         self.update(config)
         
-    def load(self,config_file=None,data=None):
+    def include(self,config_file=None,data=None):
         if config_file is not None:
             config = load_yaml(os.path.abspath(config_file))
         else:
