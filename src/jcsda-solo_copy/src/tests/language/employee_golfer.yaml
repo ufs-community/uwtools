@@ -1,6 +1,0 @@
-schema: employee_golfer
-inherit: 
-  - employee
-  - golfer
-items: {}
-

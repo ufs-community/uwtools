@@ -1,9 +1,0 @@
-schema: neighbour
-inherit: person
-items:
-  friendly:
-    type: boolean
-    default: True
-  house_status:
-    delete: True
-

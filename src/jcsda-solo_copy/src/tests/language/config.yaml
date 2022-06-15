@@ -1,4 +1,0 @@
-name: 'myConfig'
-network: 'eth0'
-hosts:
- - backup: 123.456.789.123

@@ -1,5 +1,0 @@
-schema: 3d
-inherit: 2d
-items:
-  z:
-    type: int

@@ -1,9 +1,0 @@
-schema: config_schema
-items:
-  name:
-    unique: True
-  protocol:
-    default: 'https'
-  network:
-  hosts:
-    unique: false

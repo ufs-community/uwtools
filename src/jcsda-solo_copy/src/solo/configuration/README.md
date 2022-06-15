@@ -1,2 +1,0 @@
-# Configuration
-Please see the documentation in the Language module for the definition of schemas and how to nest configuration files [here](https://github.com/JCSDA-internal/solo/blob/develop/src/solo/language/README.md).
