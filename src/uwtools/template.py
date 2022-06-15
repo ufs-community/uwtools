@@ -12,8 +12,7 @@ import re
 import os
 import copy
 from collections import namedtuple
-from .basic import is_single_type_or_string, is_sequence_and_not_string
-
+from collections.abc import Sequence
 
 class TemplateConstants:
     DOLLAR_CURLY_BRACE = '${}'
@@ -54,6 +53,16 @@ class Template:
         TemplateConstants.AT_ANGLE_BRACKETS: TemplateConstants.SubPair(re.compile('@\<.*?\>+'), slice(2, -1))
     }
 
+    def is_single_type_or_string(s):
+        if isinstance(s, str):
+            return True
+        try:
+            len(s)
+        except TypeError:
+            return True
+        else:
+            return False    
+
     @classmethod
     def find_variables(cls, variable_to_substitute: str, var_type: str):
         pair = cls.substitutions[var_type]
@@ -77,7 +86,7 @@ class Template:
                 var = variable[pair.slice]
                 v = get_value(var)
                 if v is not None:
-                    if not is_single_type_or_string(v):
+                    if not cls.is_single_type_or_string(v):
                         if len(variable_names) == 1:
                             # v could be a list or a dictionary (complex structure and not a string).
                             # If there is one variable that is the whole
@@ -107,7 +116,7 @@ class Template:
         if isinstance(structure_to_substitute, dict):
             for key, item in structure_to_substitute.items():
                 structure_to_substitute[key] = cls.substitute_structure(item, var_type, get_value)
-        elif is_sequence_and_not_string(structure_to_substitute):
+        elif isinstance(structure_to_substitute, Sequence) and not isinstance(structure_to_substitute, str):
             for i, item in enumerate(structure_to_substitute):
                 structure_to_substitute[i] = cls.substitute_structure(item, var_type, get_value)
         else:
@@ -153,7 +162,7 @@ class Template:
                     if ((k not in variables) or (k in variables and not shallow_precedence)) and k not in excluded:
                         variables[k] = i
                         build(i, variables)
-            elif is_sequence_and_not_string(structure):
+            elif isinstance(structure, Sequence) and not isinstance(structure, str):
                 for v in structure:
                     build(v, variables)
         var = {}
