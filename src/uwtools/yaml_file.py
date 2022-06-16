@@ -9,18 +9,36 @@ import yaml
 # (C) Copyright 2022-2022 NOAA
 
 from .nice_dict import NiceDict
-from .basic import traverse_structure
+
+def traverse_structure(structure, visitor, *args, **kwargs):
+    """
+    The visitor receives a basic item (not list or dictionary)
+    and returns it potentially transformed.
+    The structure is duplicated into plain dicts in the process
+    """
+    new = structure
+    if isinstance(structure, dict):
+        new = {}
+        for key, item in structure.items():
+            new[key] = traverse_structure(item, visitor)
+    elif isinstance(structure, list):
+        new = []
+        for item in structure:
+            new.append(traverse_structure(item, visitor))
+    else:
+        new = visitor(structure, *args, **kwargs)
+    return 
+
+def visitor(value):
+    if isinstance(value, bool):
+        return value
+    return str(value)
 
 def stringify(structure):
     """
     Converts all basic elements of a structure into strings
     """
     return traverse_structure(structure, visitor)
-
-def visitor(value):
-    if isinstance(value, bool):
-        return value
-    return str(value)
 
 class YAMLFile(NiceDict):
 

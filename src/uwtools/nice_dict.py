@@ -9,8 +9,25 @@
 
 import re
 import yaml
-from .basic import traverse_structure
 
+def traverse_structure(structure, visitor, *args, **kwargs):
+    """
+    The visitor receives a basic item (not list or dictionary)
+    and returns it potentially transformed.
+    The structure is duplicated into plain dicts in the process
+    """
+    new = structure
+    if isinstance(structure, dict):
+        new = {}
+        for key, item in structure.items():
+            new[key] = traverse_structure(item, visitor)
+    elif isinstance(structure, list):
+        new = []
+        for item in structure:
+            new.append(traverse_structure(item, visitor))
+    else:
+        new = visitor(structure, *args, **kwargs)
+    return 
 
 class NiceDict(dict):
 
