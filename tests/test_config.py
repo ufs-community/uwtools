@@ -10,9 +10,10 @@ uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 def test_configuation_parse_env():
 
+    os.environ['TEST'] = 'TEST_TRUE'
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
 
-    expected = os.environ.get('HOME')
+    expected = os.environ.get('TEST')
     actual = config.test_env
     assert actual == expected
 
