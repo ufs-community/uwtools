@@ -76,7 +76,7 @@ def test_substitute_string_from_dict_at_square():
                                          dictionary.get) == final
 
 
-def test_substitute_string_from_dict_at_carrots():
+def test_substitute_string_from_dict_at_anglebrackets():
     """
         Substitute with @<v>
     """
