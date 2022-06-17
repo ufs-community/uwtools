@@ -1,5 +1,6 @@
 # pylint: disable=all
-import pathlib,os
+import os
+import pathlib
 import pytest
 
 from uwtools.scheduler import JobScheduler
