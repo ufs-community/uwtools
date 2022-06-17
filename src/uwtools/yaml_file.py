@@ -1,4 +1,3 @@
-import yaml
 # (C) Copyright 2020-2022 UCAR
 #
 # This software is licensed under the terms of the Apache Licence Version 2.0
@@ -7,7 +6,7 @@ import yaml
 # Part of this software is developed by the Joint Center for Satellite Data Assimilation (JCSDA) together with its partners.
 #
 # (C) Copyright 2022-2022 NOAA
-
+import yaml
 from .nice_dict import NiceDict
 
 def traverse_structure(structure, visitor, *args, **kwargs):
