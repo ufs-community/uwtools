@@ -10,6 +10,8 @@ uwtools_file_base = os.path.join(os.path.dirname(__file__))
 def test_yaml_loader_loads_correctly():
     actual = load_yaml(os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.yaml")))
 
+    #TODO developer's note: we had to update integers to strings for this to pass we
+    # need to find out why this is the case and fix the issue in PI5
     expected = {
         "scheduler": "slurm",
         "jobname": "abcd",

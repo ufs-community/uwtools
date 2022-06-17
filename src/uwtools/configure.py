@@ -26,7 +26,8 @@ class Configure(NiceDict):
         else:
             config = {}        
         self.update(config)
-        
+    
+    # This method is the sample code needed to implement the !INCLUDE tag    
     def include(self,config_file=None,data=None):
         if config_file is not None:
             config = load_yaml(os.path.abspath(config_file))

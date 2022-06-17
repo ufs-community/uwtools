@@ -1,4 +1,15 @@
 # pylint: disable=all
+
+'''
+test_config.py has a few of the inital functional tests for the extending a YAML configuration tool to include:
+1. variable subsitution
+2. ENV varirable strigigication
+3. A MOC include method to be implemented in PI5 as a YAML Tag !INCLUDE
+
+NOTE: These are not to be intended as a representation of a final API user interface and
+are packaged under the Configure Class for containment.
+'''
+
 import pathlib
 import pytest
 import os
@@ -8,6 +19,7 @@ from uwtools.template import Template,TemplateConstants
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
+# A basic test to check for env varibles with the designator ${KEY} are relized
 def test_configuation_parse_env():
 
     os.environ['TEST'] = 'TEST_TRUE'
@@ -17,7 +29,9 @@ def test_configuation_parse_env():
     actual = config.test_env
     assert actual == expected
 
-
+# A test to see the ${KEY} desginator is left untouched as $(KEY)
+# is expanced from a key valule pair from a second YAML file
+# In the following PI5 this include method will be implented as an !INCLUDE tag
 def test_configuation_update():
 
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
@@ -28,7 +42,8 @@ def test_configuation_update():
 
     assert actual == expected
 
-
+# A similar test to see if a configure object (in this case a NiceDict Object) can also be updated
+# Notice the optional agrment designaged by the keywork data is being tested here
 def test_configuation_update_object():
 
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
@@ -40,7 +55,7 @@ def test_configuation_update_object():
 
     assert actual == expected
 
-
+# A test that a $(KEY) designator can be expanded from a key value pair that is in the same file
 def test_configuration_inplace_update():
 
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
@@ -50,6 +65,9 @@ def test_configuration_inplace_update():
 
     assert actual == expected
 
+# A test to check that the ${KEY} works this does not represent the user interface to souch a capablity
+# this is a functional test that on how to use the Template Class for when this is implemented
+# in the Confiuration Manger work to be for fully developed in PI5
 def test_configuration_realtime_update():
 
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
