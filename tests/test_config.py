@@ -3,7 +3,7 @@
 '''
 test_config.py has a few of the inital functional tests for the extending a YAML configuration tool to include:
 1. variable subsitution
-2. ENV varirable strigigication
+2. ENV varirable strigification
 3. A MOC include method to be implemented in PI5 as a YAML Tag !INCLUDE
 
 NOTE: These are not to be intended as a representation of a final API user interface and
