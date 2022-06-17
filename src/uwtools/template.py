@@ -73,7 +73,7 @@ class Template:
         """
             Substitutes variables under the form var_type (e.g. DOLLAR_CURLY_BRACE), looks for a value returned
             by function get_value and if found, substitutes the variable. Convert floats and int to string
-            before substitution.I f the value in the dictionary is a complex type, just assign it instead
+            before substitution. If the value in the dictionary is a complex type, just assign it instead
             of substituting.
                 get_value is a function that returns the value to substitute:
                 signature: get_value(variable_name).
