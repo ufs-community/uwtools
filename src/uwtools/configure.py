@@ -20,7 +20,7 @@ class Configure(NiceDict):
     def __init__(self, config_file=None):
         super().__init__()
         if config_file is not None:
-            config = self.include(os.path.abspath(config_file))
+            config = self.include(config_file=os.path.abspath(config_file))
             if config is None:
                 config = {}
         else:
