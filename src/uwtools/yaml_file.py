@@ -9,36 +9,6 @@
 import yaml
 from .nice_dict import NiceDict
 
-def traverse_structure(structure, visitor, *args, **kwargs):
-    """
-    The visitor receives a basic item (not list or dictionary)
-    and returns it potentially transformed.
-    The structure is duplicated into plain dicts in the process
-    """
-    new = structure
-    if isinstance(structure, dict):
-        new = {}
-        for key, item in structure.items():
-            new[key] = traverse_structure(item, visitor)
-    elif isinstance(structure, list):
-        new = []
-        for item in structure:
-            new.append(traverse_structure(item, visitor))
-    else:
-        new = visitor(structure, *args, **kwargs)
-    return 
-
-def visitor(value):
-    if isinstance(value, bool):
-        return value
-    return str(value)
-
-def stringify(structure):
-    """
-    Converts all basic elements of a structure into strings
-    """
-    return traverse_structure(structure, visitor)
-
 class YAMLFile(NiceDict):
 
     """
@@ -51,7 +21,7 @@ class YAMLFile(NiceDict):
         super().__init__()
         if config_file is not None:
             with open(config_file) as f:
-                config = yaml.load(f, Loader=yaml.BaseLoader)
+                config = yaml.load(f, Loader=yaml.Loader)
         else:
             config = data
         if config is not None:
@@ -72,9 +42,9 @@ class YAMLFile(NiceDict):
     def save(self, target):
         with open(target, 'w') as f:
             # specifies a wide file so that long strings are on one line.
-            yaml.dump(stringify(self), f, width=100000)
+            yaml.dump(self, f, width=100000)
         return target
 
     def dump(self):
-        return yaml.dump(stringify(self), width=100000)
+        return yaml.dump(self, width=100000)
 
