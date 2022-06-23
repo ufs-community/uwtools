@@ -71,7 +71,11 @@ class Logger:
 
         _handlers = []
         # Add console handler for logger
-        _handler = Logger.add_stream_handler(level=self.level, _format=self.format, colored_log=self.colored_log)
+        _handler = Logger.add_stream_handler(
+            level=self.level,
+            _format=self.format,
+            colored_log=self.colored_log,
+            )
         _handlers.append(_handler)
         self._logger.addHandler(_handler)
 
@@ -147,4 +151,3 @@ class Logger:
         handler.setFormatter(logging.Formatter(_format))
 
         return handler
-    

@@ -1,3 +1,4 @@
+#pylint: disable=missing-class-docstring,missing-function-docstring
 """
 Loads yaml configuration files as python objects
 
@@ -6,7 +7,6 @@ https://pyyaml.org/wiki/PyYAMLDocumentation
 
 import collections
 import pathlib
-from typing import Any, Dict
 from yaml import load
 
 try:
@@ -21,6 +21,7 @@ class Config(collections.UserDict):
 
 
 def load_yaml(_path: pathlib.Path):
+    #pylint: disable=unspecified-encoding
     with open(_path, "r") as _file:
         props = load(_file, Loader=Loader)
         return Config(props)

@@ -1,4 +1,4 @@
-# pylint: disable=all
+#pylint: disable=invalid-name, missing-module-docstring, missing-function-docstring
 import pytest
 from uwtools.files import Unix
 
