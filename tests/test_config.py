@@ -30,8 +30,8 @@ def test_configuation_parse_env():
     assert actual == expected
 
 # A test to see the ${KEY} desginator is left untouched as $(KEY)
-# is expanced from a key valule pair from a second YAML file
-# In the following PI5 this include method will be implented as an !INCLUDE tag
+# is expanded from a key valule pair from a second YAML file.
+# In the following PI5 this include method will be implemented as an !INCLUDE tag
 def test_configuation_update():
 
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
