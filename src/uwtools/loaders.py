@@ -7,10 +7,10 @@ Prior to this update load_yaml returned a Config object
 but we have not devloped the use case for such a Class
 
 Here we have chaged this to a simple function, load_yaml, call because
-returning Config(config) in it's prevouse carnation did not work with
-the YAML parcing extentions as it return a Class Object before it was needed.
-For now we have move the specfics of the YAML extentions into configure.py Configure Class
-for containment as we begin to developt a Configuration Manager
+returning Config(config) in it's previous incarnation did not work with
+the YAML parsing extentions as it return a Class Object before it was needed.
+For now we have moved the specfics of the YAML extensions into configure.py Configure Class
+for containment as we begin to develop a Configuration Manager
 
 Note: it's just a function and the Class Oject is left here for historical reason as
 it used to use UserDict from collections and we are now using NiceDict
