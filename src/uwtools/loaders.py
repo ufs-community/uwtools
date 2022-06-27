@@ -4,7 +4,7 @@ Loads yaml configuration files as python objects
 Developer Notes:
 
 Prior to this update load_yaml returned a Config object
-but we have not devloped the use case for such and Class
+but we have not devloped the use case for such a Class
 
 Here we have chaged this to a simple function, load_yaml, call because
 returning Config(config) in it's prevouse carnation did not work with
