@@ -14,7 +14,7 @@ from uwtools.template import Template, TemplateConstants
 class Configure(NiceDict):
 
     """
-        A class that reads a yaml file and checks the contents against all vaules for subsitutions
+        A class that reads a yaml file and checks the contents against all values for substitutions
     """
 
     def __init__(self, config_file=None):
