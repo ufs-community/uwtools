@@ -19,8 +19,8 @@ from uwtools.template import Template,TemplateConstants
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
-# A basic test to check for env varibles with the designator ${KEY} are relized
 def test_configuation_parse_env():
+    '''A basic test to check for env variables with the designator ${KEY} are realized'''
 
     os.environ['TEST'] = 'TEST_TRUE'
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
@@ -43,8 +43,9 @@ def test_configuation_update():
     assert actual == expected
 
 # A similar test to see if a configure object (in this case a NiceDict Object) can also be updated
-# Notice the optional agrment designaged by the keywork data is being tested here
+# Notice the optional argument designed by the keyword data is being tested here
 def test_configuation_update_object():
+    '''Test to see if a configure object can also be updated'''
 
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
     config2 = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
