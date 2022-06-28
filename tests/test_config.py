@@ -6,8 +6,8 @@ test_config.py has a few of the initial functional tests for the extending a YAM
 2. ENV variable strigification
 3. A MOC include method to be implemented in PI5 as a YAML Tag !INCLUDE
 
-NOTE: These are not to be intended as a representation of a final API user interface and
-are packaged under the Configure Class for containment.
+NOTE: The generic YAML parsing tests using the Template Class  are not to be intended as a representation of a final user interface and
+are packaged under the Configure Class for containment
 '''
 
 import pathlib
