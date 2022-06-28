@@ -1,10 +1,12 @@
+"""
+Logger
+"""
+
 import sys
-import functools
 from pathlib import Path
 from typing import Union, List
 import logging
 
-__all__ = ['Logger']
 
 class ColoredFormatter(logging.Formatter):
     """
@@ -22,7 +24,7 @@ class ColoredFormatter(logging.Formatter):
     def __init__(self, fmt):
         super().__init__()
         self.fmt = fmt
-        self.FORMATS = {
+        self.formats = {
             logging.DEBUG: self.blue + self.fmt + self.reset,
             logging.INFO: self.grey + self.fmt + self.reset,
             logging.WARNING: self.yellow + self.fmt + self.reset,
@@ -31,7 +33,7 @@ class ColoredFormatter(logging.Formatter):
         }
 
     def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno)
+        log_fmt = self.formats.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
@@ -43,10 +45,9 @@ class Logger:
     LOG_LEVELS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
     DEFAULT_LEVEL = 'INFO'
     DEFAULT_FORMAT = '%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s'
-    
     def __init__(self, name: str = None,
                  level: str = DEFAULT_LEVEL,
-                 format: str = DEFAULT_FORMAT,
+                 _format: str = DEFAULT_FORMAT,
                  colored_log: bool = False,
                  logfile_path: Union[str, Path] = None):
         """
@@ -55,7 +56,7 @@ class Logger:
 
         self.name = name
         self.level = level.upper()
-        self.format = format
+        self.format = _format
         self.colored_log = colored_log
 
         if self.level not in Logger.LOG_LEVELS:
@@ -70,13 +71,13 @@ class Logger:
 
         _handlers = []
         # Add console handler for logger
-        _handler = Logger.add_stream_handler(level=self.level, format=self.format, colored_log=self.colored_log)
+        _handler = Logger.add_stream_handler(level=self.level, _format=self.format, colored_log=self.colored_log)
         _handlers.append(_handler)
         self._logger.addHandler(_handler)
 
         # Add file handler for logger
         if logfile_path is not None:
-            _handler = Logger.add_file_handler(logfile_path, level=self.level, format=self.format)
+            _handler = Logger.add_file_handler(logfile_path, level=self.level, _format=self.format)
             self._logger.addHandler(_handler)
             _handlers.append(_handler)
 
@@ -105,14 +106,14 @@ class Logger:
         -------
         logger
         """
-        for hh in handlers:
-            logger.addHandler(hh)
+        for handler in handlers:
+            logger.addHandler(handler)
 
         return logger
 
     @classmethod
     def add_stream_handler(cls, level: str = DEFAULT_LEVEL,
-                            format: str = DEFAULT_FORMAT,
+                            _format: str = DEFAULT_FORMAT,
                             colored_log: bool = False):
         """
         Create stream handler
@@ -121,7 +122,7 @@ class Logger:
 
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(level)
-        _format = ColoredFormatter(format) if colored_log else logging.Formatter(format)
+        _format = ColoredFormatter(_format) if colored_log else logging.Formatter(_format)
         handler.setFormatter(_format)
 
         return handler
@@ -129,7 +130,7 @@ class Logger:
     @classmethod
     def add_file_handler(cls, logfile_path: Union[str, Path],
                          level: str = DEFAULT_LEVEL,
-                         format: str = DEFAULT_FORMAT):
+                         _format: str = DEFAULT_FORMAT):
         """
         Create file handler.
         This classmethod will allow setting custom file handler on children
@@ -143,7 +144,7 @@ class Logger:
 
         handler = logging.FileHandler(str(logfile_path))
         handler.setLevel(level)
-        handler.setFormatter(logging.Formatter(format))
+        handler.setFormatter(logging.Formatter(_format))
 
         return handler
-
+    
