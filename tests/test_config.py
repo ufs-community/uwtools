@@ -33,6 +33,7 @@ def test_configuration_parse_env():
 # is expanded from a key value pair from a second YAML file.
 # In the following PI5 this include method will be implemented as an !INCLUDE tag
 def test_configuration_update():
+    '''A test to see the ${KEY} designator is left untouched as $(KEY)'''
 
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
     config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
@@ -58,6 +59,7 @@ def test_configuration_update_object():
 
 # A test that a $(KEY) designator can be expanded from a key value pair that is in the same file
 def test_configuration_inplace_update():
+    '''A test that a $(KEY) designator can be expanded from a key value pair that is in the same file'''
 
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
 
@@ -66,10 +68,11 @@ def test_configuration_inplace_update():
 
     assert actual == expected
 
-# A test to check that the ${KEY} works this does not represent the user interface to souch a capablity
+# A test to check that the ${KEY} works this does not represent the user interface to such a capability
 # this is a functional test that on how to use the Template Class for when this is implemented
 # in the Configuration Manger work to be for fully developed in PI5
 def test_configuration_realtime_update():
+    '''A test to check that the ${KEY} works this does not represent the user interface to such a capability'''
 
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
     config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
