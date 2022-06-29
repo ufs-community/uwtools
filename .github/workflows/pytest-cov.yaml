@@ -36,6 +36,8 @@ jobs:
   deploy_to_pages:
     needs: [run_pytest_coverage]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3

@@ -50,7 +50,7 @@ class JobCard(collections.UserList):
 
     def __str__(self):
         """returns string representation"""
-        return str(self.content)
+        return str(self.content())
 
     def content(self, line_separator: str = "\n") -> str:
         """returns the formatted content of the job cards
@@ -306,6 +306,4 @@ class LSF(JobScheduler):
         items.pop(OptionalAttribs.MEMORY, None)
         return items
 
-
-if __name__ == "__main__":
-    pass
+    
