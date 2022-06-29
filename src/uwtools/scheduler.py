@@ -305,5 +305,3 @@ class LSF(JobScheduler):
         items[RequiredAttribs.NODES] = int(tasks_per_node) * int(nodes)
         items.pop(OptionalAttribs.MEMORY, None)
         return items
-
-    
