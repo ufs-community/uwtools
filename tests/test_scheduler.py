@@ -8,6 +8,7 @@ from uwtools.loaders import load_yaml
 
 def test_scheduler_dot_notation():
     props = load_yaml(pathlib.Path("tests/fixtures/simple.yaml"))
+    '''Test dot notation on Scheduler YAML file'''
 
     js = JobScheduler.get_scheduler(dict(props))
     expected = "user_account"
