@@ -9,6 +9,7 @@ from uwtools.loaders import load_yaml
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 def test_scheduler_dot_notation():
+    '''Testing dot notation from when loading scheduler config from YAML'''
     props = load_yaml(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/simple.yaml")))
 
     js = JobScheduler.get_scheduler(dict(props))
