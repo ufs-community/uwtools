@@ -8,9 +8,10 @@ from uwtools.loaders import load_yaml
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 def test_yaml_loader_loads_correctly():
-    actual = load_yaml(os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.yaml")))
     '''Simple test to load a YAML file with basic value pairs of various types and check its results'''
-
+    
+    actual = load_yaml(os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.yaml")))
+    
     expected = {
         "scheduler": "slurm",
         "jobname": "abcd",
