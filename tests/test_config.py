@@ -1,5 +1,3 @@
-# pylint: disable=all
-
 '''
 test_config.py has a few of the initial functional tests for the extending a YAML configuration tool to include:
 1. variable substitution
