@@ -57,7 +57,6 @@ def test_configuration_update_object():
 
     assert actual == expected
 
-# A test that a $(KEY) designator can be expanded from a key value pair that is in the same file
 def test_configuration_inplace_update():
     '''A test that a $(KEY) designator can be expanded from a key value pair that is in the same file'''
 
