@@ -67,12 +67,13 @@ def test_configuration_inplace_update():
 
     assert actual == expected
 
-# A test to check that the ${KEY} works this does not represent the user interface to such a capability
-# this is a functional test that on how to use the Template Class for when this is implemented
-# in the Configuration Manger work to be for fully developed in PI5
-def test_configuration_realtime_update():
-    '''A test to check that the ${KEY} works this does not represent the user interface to such a capability'''
 
+# Developer's Note:
+#    this is a functional test that demonstrates how to use the Template Class for when this is implemented for runtime updates
+#    when we do further development with the Configuration Manger and is not be evaluated as User Interface at this time.
+def test_configuration_realtime_update():
+    '''A test to check that the {{KEY}} works as expected'''
+    
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
     config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
     config = Template.substitute_structure( config, TemplateConstants.DOUBLE_CURLY_BRACES, config.get)
