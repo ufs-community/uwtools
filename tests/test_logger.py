@@ -1,3 +1,5 @@
+#pylint: disable=invalid-name, missing-module-docstring, missing-function-docstring
+#pylint: disable=unused-variable
 from uwtools.logger import Logger
 
 level = 'debug'
@@ -10,6 +12,8 @@ reference = {'debug': "Logging test has started",
 
 
 def test_logger(tmp_path):
+
+    #pylint: disable=raise-missing-from
     """Test log file"""
 
     logfile = tmp_path / "logger.log"
@@ -26,6 +30,7 @@ def test_logger(tmp_path):
 
     # Make sure log to file created messages
     try:
+        #pylint: disable=unspecified-encoding
         with open(logfile, 'r') as fh:
             log_msgs = fh.readlines()
     except Exception as e:
@@ -36,7 +41,7 @@ def test_logger(tmp_path):
     assert log_msgs_in_logfile == number_of_log_msgs
 
     # Ensure messages themselves are same
-    for count, line in enumerate(log_msgs):
+    for line in log_msgs:
         lev = line.split('-')[3].strip().lower()
         message = line.split(':')[-1].strip()
         assert reference[lev] == message

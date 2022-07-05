@@ -80,7 +80,8 @@ class JobScheduler(collections.UserDict):
             return self[name]
         raise AttributeError(name)
 
-    def validate_props(self, props) -> None:
+    @staticmethod
+    def validate_props(props) -> None:
         """raises ValueError if invalid"""
         members = [
             getattr(RequiredAttribs, attr)
@@ -111,11 +112,14 @@ class JobScheduler(collections.UserDict):
         """returns the job card to be fed to external scheduler"""
         sanitized_attribs = self.pre_process()
 
-        known = [
-            f"{self.prefix} {self._map[key](value) if callable(self._map[key]) else self._map[key]}{self.key_value_separator}{value if not callable(self._map[key]) else ''}".strip()
-            for (key, value) in sanitized_attribs.items()
-            if key in self._map and key not in IGNORED_ATTRIBS
-        ]  # TODO seems bloated
+        known = []
+        for (key, value) in sanitized_attribs.items():
+            if key in self._map and key not in IGNORED_ATTRIBS:
+                #pylint: disable=line-too-long
+                scheduler_flag = self._map[key](value) if callable(self._map[key]) else self._map[key]
+                scheduler_value = value if not callable(self._map[key]) else ''
+                directive = f"{self.prefix} {scheduler_flag}{self.key_value_separator}{scheduler_value}"
+                known.append(directive.strip())
 
         unknown = [
             f"{self.prefix} {key}{self.key_value_separator}{value}".strip()
@@ -301,5 +305,3 @@ class LSF(JobScheduler):
         items[RequiredAttribs.NODES] = int(tasks_per_node) * int(nodes)
         items.pop(OptionalAttribs.MEMORY, None)
         return items
-
-    
