@@ -32,6 +32,6 @@ class Config(collections.UserDict):
 def load_yaml(config_file: pathlib.Path):
     if config_file is not None:
         config = YAMLFile(os.path.abspath(config_file))
-        if config is None:
-            config = NiceDict
+    else: 
+        config = NiceDict()
     return config

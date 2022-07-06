@@ -24,16 +24,16 @@ class Configure(NiceDict):
             if config is None:
                 config = {}
         else:
-            config = {}        
+            config = {}
         self.update(config)
-    
-    # This method is the sample code needed to implement the !INCLUDE tag    
+
     def include(self,config_file=None,data=None):
+        ''' Sample code needed to implement the !INCLUDE tag '''
         if config_file is not None:
             config = load_yaml(os.path.abspath(config_file))
         else:
             config = data
         config = Template.substitute_structure_from_environment(config)
-        config = Template.substitute_structure( config, TemplateConstants.DOLLAR_PARENTHESES, self.get)
+        config = Template.substitute_structure(config,TemplateConstants.DOLLAR_PARENTHESES,self.get)
         config = Template.substitute_with_dependencies(config,config,TemplateConstants.DOLLAR_PARENTHESES,shallow_precedence=False)
-        return(self.update(config))
+        return self.update(config)

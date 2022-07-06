@@ -1,3 +1,7 @@
+'''
+Unit tests for testing Template Class
+'''
+
 import os
 from uwtools.template import TemplateConstants, Template
 
@@ -13,8 +17,7 @@ def test_substitute_string_from_dict():
     }
     final = 'Hello to the world'
     assert Template.substitute_structure(template,
-                                         TemplateConstants.DOLLAR_CURLY_BRACE, dictionary.get) == final
-
+           TemplateConstants.DOLLAR_CURLY_BRACE, dictionary.get) == final
 
 def test_substitute_string_from_dict_paren():
     """
@@ -27,7 +30,7 @@ def test_substitute_string_from_dict_paren():
     }
     final = 'Hello to the world'
     assert Template.substitute_structure(template,
-                                         TemplateConstants.DOLLAR_PARENTHESES, dictionary.get) == final
+           TemplateConstants.DOLLAR_PARENTHESES, dictionary.get) == final
 
 
 def test_assign_string_from_dict_paren():
@@ -103,7 +106,10 @@ def test_substitute_string_from_environment():
 
 
 def test_substitute_with_dependencies():
-    input = {
+    """
+         Substitute from environment with dependencies
+    """
+    inputs = {
         'root': '/home/user',
         'config_file': 'config.yaml',
         'config': '$(root)/config/$(config_file)',
@@ -144,5 +150,4 @@ def test_substitute_with_dependencies():
                  'root': '/home/user',
                  'world': 'world'}
 
-
-    assert Template.substitute_with_dependencies(input,input, TemplateConstants.DOLLAR_PARENTHESES) == output
+    assert Template.substitute_with_dependencies(inputs,inputs,TemplateConstants.DOLLAR_PARENTHESES)==output

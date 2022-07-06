@@ -1,18 +1,15 @@
-# pylint: disable=all
-
 '''
-test_config.py has a few of the initial functional tests for the extending a YAML configuration tool to include:
+test_config.py are the initial functional tests for the extending a YAML configuration tool:
 1. variable substitution
 2. ENV variable strigification
 3. A MOC include method to be implemented in PI5 as a YAML Tag !INCLUDE
 
-NOTE: The generic YAML parsing tests using the Template Class  are not to be intended as a representation of a final user interface and
-are packaged under the Configure Class for containment
+NOTE: The generic YAML parsing tests using the Template Class  are not to be intended as a
+representation of a final user interface and are packaged under the Configure Class for containment
 '''
 
-import pathlib
-import pytest
 import os
+import pathlib
 
 from uwtools.configure import Configure
 from uwtools.template import Template,TemplateConstants
@@ -59,7 +56,7 @@ def test_configuration_update_object():
 
 # A test that a $(KEY) designator can be expanded from a key value pair that is in the same file
 def test_configuration_inplace_update():
-    '''A test that a $(KEY) designator can be expanded from a key value pair that is in the same file'''
+    '''A test the $(KEY) designator is expanded from a key value pair that is in the same file'''
 
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
 
@@ -68,15 +65,14 @@ def test_configuration_inplace_update():
 
     assert actual == expected
 
-# A test to check that the ${KEY} works this does not represent the user interface to such a capability
+# A test to check that the {{KEY}} works. Note this does not represent the user interface
 # this is a functional test that on how to use the Template Class for when this is implemented
-# in the Configuration Manger work to be for fully developed in PI5
 def test_configuration_realtime_update():
-    '''A test to check that the ${KEY} works this does not represent the user interface to such a capability'''
+    '''A test to check that the {{KEY}} works'''
 
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
     config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
-    config = Template.substitute_structure( config, TemplateConstants.DOUBLE_CURLY_BRACES, config.get)
+    config = Template.substitute_structure(config,TemplateConstants.DOUBLE_CURLY_BRACES,config.get)
 
     expected =  "/home/myexpid/10102022"
     actual = config.updated_datapath
