@@ -1,3 +1,4 @@
+#pylint: disable=missing-class-docstring,missing-function-docstring
 """
 Loads yaml configuration files as python objects
 
@@ -20,6 +21,7 @@ https://pyyaml.org/wiki/PyYAMLDocumentation
 import os
 import collections
 import pathlib
+
 from typing import Any, Dict
 
 from uwtools.yaml_file import YAMLFile

@@ -1,3 +1,4 @@
+# pylint: disable=unused-variable,missing-class-docstring,missing-module-docstring
 class UWException(Exception):
     pass
 
