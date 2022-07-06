@@ -1,5 +1,5 @@
 '''
-test_config.py are the initial functional tests for the extending a YAML configuration tool:
+test_config.py are the initial unit tests for the extending a YAML configuration tool:
 1. variable substitution
 2. ENV variable strigification
 3. A MOC include method to be implemented in PI5 as a YAML Tag !INCLUDE
@@ -25,6 +25,15 @@ def test_configuration_parse_env():
     expected = os.environ.get('TEST')
     actual = config.test_env
     assert actual == expected
+
+def test_configuration_parse_env_no_var_present():
+    '''Tests case when no environment variable is present and KEY designator is preserved'''
+    config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
+
+    expected = "${TEST_NOCHANGE}"
+    actual = config.test_noenv
+    assert actual == expected
+
 
 # A test to see the ${KEY} designator is left untouched as $(KEY)
 # is expanded from a key value pair from a second YAML file.

@@ -23,4 +23,5 @@ experiment_dir: /home/myexpid
 
 # Environment
 test_env: ${TEST}
+test_noenv: ${TEST_NOCHANGE}
 my_current_cycle: 10102022
