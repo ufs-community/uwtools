@@ -54,7 +54,6 @@ def test_configuration_update_object():
 
     assert actual == expected
 
-# A test that a $(KEY) designator can be expanded from a key value pair that is in the same file
 def test_configuration_inplace_update():
     '''A test the $(KEY) designator is expanded from a key value pair that is in the same file'''
 
@@ -66,10 +65,10 @@ def test_configuration_inplace_update():
     assert actual == expected
 
 # A test to check that the {{KEY}} works. Note this does not represent the user interface
-# this is a functional test that on how to use the Template Class for when this is implemented
+# this is a test that shows how to use the Template Class for when this is implemented
 def test_configuration_realtime_update():
     '''A test to check that the {{KEY}} works'''
-
+    
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
     config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
     config = Template.substitute_structure(config,TemplateConstants.DOUBLE_CURLY_BRACES,config.get)
