@@ -1,3 +1,4 @@
+#pylint: disable=missing-module-docstring
 from abc import ABC, abstractmethod
 from enum import Enum
 import os
@@ -30,9 +31,13 @@ class File(ABC):
 
     def validate(self) -> None:
         """validates the File"""
-        # TODO this path and prefix validation is weird
-        self.path
-        self.prefix
+        path_is_string = isinstance(self.path, str)
+        prefix_is_set = self.prefix
+
+        if not path_is_string:
+            raise TypeError(f"Path expects a str, and is type {type(self.path)}.")
+        if not prefix_is_set:
+            raise TypeError("Prefix could not be set by File class")
         if not self.exists:
             raise FileNotFoundError(f"File not found [{self._path}]")
 

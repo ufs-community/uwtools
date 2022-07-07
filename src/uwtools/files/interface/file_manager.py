@@ -1,4 +1,4 @@
-# pylint: disable=too-few-public-methods, unused-variable
+# pylint: disable=too-few-public-methods,missing-module-docstring
 
 import os
 from abc import ABC, abstractmethod
@@ -6,7 +6,7 @@ import pathlib
 from typing import Any, List
 
 from uwtools.files.gateway import s3, unix
-from uwtools.files.model import File, Prefixes, Unix, S3
+from uwtools.files.model import File, Prefixes, S3
 
 
 class FileManager(ABC):

@@ -8,17 +8,24 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    
+
     - name: Set up Python 3.8
       uses: actions/setup-python@v1
       with:
         python-version: 3.8
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pylint
-    
-    - name: Analysing the code with pylint
+        pip install pytest
+        pip install .
+
+    - name: Analyzing uwtools with pylint
       run: |
-        pylint *.py;
+        cd src
+        pylint uwtools
+
+    - name: Analyzing tests with pylint
+      run: |
+        pylint tests

@@ -1,3 +1,4 @@
+#pylint: disable=missing-class-docstring,missing-function-docstring
 """
 Loads yaml configuration files as python objects
 
