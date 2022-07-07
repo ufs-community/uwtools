@@ -1,12 +1,18 @@
-# pylint: disable=invalid-name, missing-module-docstring, missing-function-docstring
-# pylint: disable=unused-variable
+'''
+Set of test for loading YAML files using the function call load_yaml
+'''
+#pylint: disable=unused-variable
+import os
 import pathlib
 
 from uwtools.loaders import load_yaml
+from uwtools.nice_dict import NiceDict
 
+uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 def test_yaml_loader_loads_correctly():
-    actual = load_yaml(pathlib.Path("tests/fixtures/simple.yaml"))
+    '''Test to load a YAML file with basic value pairs of various types and check its results'''
+    actual = load_yaml(os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.yaml")))
 
     expected = {
         "scheduler": "slurm",
@@ -20,12 +26,24 @@ def test_yaml_loader_loads_correctly():
     }
     assert actual == expected
 
+def test_loader_dot_notation():
+    '''Test to check the dot shortcut for resolving a dictionary element from a YAML load'''
 
-# def test_loader_dot_notation():
+    props = load_yaml(os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.yaml")))
 
-#     props = load_yaml(pathlib.Path("tests/fixtures/simple.yaml"))
+    expected = "abcd"
+    actual = props.jobname
 
-#     expected = "abcd"
-#     actual = props.jobname
+    assert actual == expected
 
-#     assert actual == expected
+def test_loader_none():
+    '''Test case for when path to file name to load_yaml is None'''
+
+    props = load_yaml(None)
+    assert isinstance(props,NiceDict)
+
+def test_loader_returntype():
+    '''Tests for return type for load_yaml'''
+
+    props = load_yaml(os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.yaml")))
+    assert isinstance(props,NiceDict)
