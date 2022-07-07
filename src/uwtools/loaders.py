@@ -20,18 +20,19 @@ https://pyyaml.org/wiki/PyYAMLDocumentation
 import os
 import collections
 import pathlib
-from typing import Any, Dict
 
 from uwtools.yaml_file import YAMLFile
 from uwtools.nice_dict import NiceDict
 
 class Config(collections.UserDict):
+    '''Config Class embeded in loader fuction (TODO: not used)'''
     def __getattr__(self, name):
         return self.__dict__["data"][name]
 
 def load_yaml(config_file: pathlib.Path):
+    '''Function for reading YAML files that supports concatenation'''
     if config_file is not None:
         config = YAMLFile(os.path.abspath(config_file))
-    else: 
+    else:
         config = NiceDict()
     return config

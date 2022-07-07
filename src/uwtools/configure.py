@@ -35,5 +35,6 @@ class Configure(NiceDict):
             config = data
         config = Template.substitute_structure_from_environment(config)
         config = Template.substitute_structure(config,TemplateConstants.DOLLAR_PARENTHESES,self.get)
-        config = Template.substitute_with_dependencies(config,config,TemplateConstants.DOLLAR_PARENTHESES,shallow_precedence=False)
+        config = Template.substitute_with_dependencies(config,config,
+                 TemplateConstants.DOLLAR_PARENTHESES,shallow_precedence=False)
         return self.update(config)

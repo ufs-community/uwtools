@@ -5,6 +5,8 @@
 #
 # Part of this software is developed by the Joint Center for Satellite Data Assimilation (JCSDA) together with its partners.
 
+# pylint: disable=all
+
 import re
 import yaml
 
