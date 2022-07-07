@@ -1,7 +1,7 @@
 '''
 Unit tests for testing Template Class
 '''
-
+#pylint: disable=unused-variable
 import os
 from uwtools.template import TemplateConstants, Template
 

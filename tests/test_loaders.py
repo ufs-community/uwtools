@@ -1,7 +1,7 @@
 '''
 Set of test for loading YAML files using the function call load_yaml
 '''
-
+#pylint: disable=unused-variable
 import os
 import pathlib
 

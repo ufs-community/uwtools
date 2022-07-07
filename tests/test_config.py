@@ -8,6 +8,7 @@ NOTE: The generic YAML parsing tests using the Template Class  are not to be int
 representation of a final user interface and are packaged under the Configure Class for containment
 '''
 
+#pylint: disable=unused-variable
 import os
 import pathlib
 
@@ -77,7 +78,7 @@ def test_configuration_inplace_update():
 # this is a test that shows how to use the Template Class for when this is implemented
 def test_configuration_realtime_update():
     '''A test to check that the {{KEY}} works'''
-    
+
     config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
     config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
     config = Template.substitute_structure(config,TemplateConstants.DOUBLE_CURLY_BRACES,config.get)
