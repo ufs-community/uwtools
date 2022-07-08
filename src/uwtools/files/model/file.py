@@ -1,7 +1,9 @@
 #pylint: disable=missing-module-docstring
 from abc import ABC, abstractmethod
 from enum import Enum
+import glob
 import os
+from pathlib import Path
 import re
 from typing import Any, List
 
@@ -99,4 +101,8 @@ class Unix(File):
     @property
     def dir(self) -> List[Any]:
         """returns the contents of the directory recursively"""
-        raise NotImplementedError
+        if Path(self.path).is_file():
+            return glob.glob(self.path)
+        else:
+            return glob.glob(os.path.join(self.path, '*'))
+            
