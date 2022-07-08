@@ -104,3 +104,4 @@ class Unix(File):
         if Path(self.path).is_file():
             return glob.glob(self.path)
         return glob.glob(os.path.join(self.path, '*'))
+    
