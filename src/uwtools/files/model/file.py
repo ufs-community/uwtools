@@ -103,6 +103,4 @@ class Unix(File):
         """returns the contents of the directory recursively"""
         if Path(self.path).is_file():
             return glob.glob(self.path)
-        else:
-            return glob.glob(os.path.join(self.path, '*'))
-            
+        return glob.glob(os.path.join(self.path, '*'))
