@@ -5,7 +5,7 @@ on:
       - develop
       - feature/*
       - main/*
-      - bugix/*
+      - bugfix/*
     paths:
       - docs/**
   pull_request:

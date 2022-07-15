@@ -1,5 +1,11 @@
 name: Tests
-on: [push, pull_request]
+on:
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
 
 jobs:
   run_pytests:

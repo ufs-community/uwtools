@@ -1,5 +1,15 @@
 name: Run Pylint
-on: [pull_request, push, workflow_dispatch]
+on:
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+    branches:
+      - develop
+
 jobs:
   CodeQualityCheck:
     name: Check Python code quality with Pylint
