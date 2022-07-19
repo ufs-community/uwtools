@@ -1,0 +1,7 @@
+&salad
+  base = kale
+  fruit = {{ fruit }}  
+  vegetable = {{ vegetable }}
+  how_many = {{ how_many }}
+  dressing = balsamic
+/
