@@ -32,10 +32,11 @@ def parse_args(argv):
      parser.add_argument('-o', '--outfile',
                         help='Full path to output file. This is a \
                         namelist by default.',
-                        required=True,
+                        required=False,
                         )
      # Jinja2 user input file as a template to moc f90 name list file
      parser.add_argument('-i', '--input_nml',
+                        required=True,
                         help='Path to a templated user namelist.',
                         )
      # single switch for printing to stdout the f90 namelist output file
