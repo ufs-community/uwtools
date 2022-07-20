@@ -27,17 +27,18 @@ def parse_args(argv):
      parser = argparse.ArgumentParser(
         description='Update a Fortran namelist with user-defined settings.'
      )
-
+     # output file (must be fully qualified path) true to
+     # spec f90 name list file from python lib f90nml
      parser.add_argument('-o', '--outfile',
                         help='Full path to output file. This is a \
                         namelist by default.',
                         required=True,
                         )
-
+     # Jinja2 user input file as a template to moc f90 name list file
      parser.add_argument('-i', '--input_nml',
                         help='Path to a templated user namelist.',
                         )
-
+     # single switch for printing to stdout the f90 namelist output file
      parser.add_argument('-d', '--dry_run',
                         action='store_true',
                         help='If provided, suppress all output.',
@@ -53,13 +54,19 @@ def set_namelist_ingest(argv):
      f90nml_file = cla.outfile
 
      cla = parse_args(argv)
-
+     
+     # instantiate Jinja2 to environment and set template input files to the top of the filesystem
      env = Environment(loader = FileSystemLoader(searchpath='/'), trim_blocks=True, lstrip_blocks=True)
+     # retrieve user jinja2 input file for specific model namelist
      template = env.get_template(jinja_template_file)
+     # for simplicity we render the fields for namelist file from user environment variables
      f90nml_object = template.render(**os.environ)
+     # instantiate Python lib's f90nml Parser Object
      parser = f90nml.Parser()
+     # write out fully qualified and populated f90 namelist file
      nml = parser.reads(f90nml_object)
 
+     # apply switch to allow user to view the results of namelist instead of writing to disk
      if cla.dry_run:
           print(nml)
      else:
