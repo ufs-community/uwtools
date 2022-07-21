@@ -73,16 +73,16 @@ def set_namelist_ingest(argv):
 
     if cla.dry_run or cla.values_needed:
         if cla.outfile:
-          print(f'warning file {f90nml_file} not written when using --dry_run or --values_needed')
+            print(f'warning file {f90nml_file} not written when using --dry_run or --values_needed')
     # apply switch to allow user to view the results of namelist instead of writing to disk
     if cla.dry_run:
         print(nml)
     # apply switch to print out required template values
     if cla.values_needed:
-        with open(jinja_template_file) as file:
+        with open(jinja_template_file,encoding='utf-8') as file:
             j2_parsed = env.parse(file.read())
             for each_var in meta.find_undeclared_variables(j2_parsed):
-               print(each_var)
+                print(each_var)
     # write out f90 name list
     if not cla.dry_run and not cla.values_needed:
         with open(f90nml_file, 'w+', encoding='utf-8') as nml_file:
