@@ -10,7 +10,7 @@ import os
 import sys
 import argparse
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, meta
 import f90nml
 
 def parse_args(argv):
@@ -36,8 +36,13 @@ def parse_args(argv):
                        required=True,
                        help='Path to a templated user namelist.',
                        )
-    # single switch for printing to stdout the f90 namelist output file
+    # switch for printing to stdout the f90 namelist output file
     parser.add_argument('-d', '--dry_run',
+                       action='store_true',
+                       help='If provided, suppress all output.',
+                       )
+    # switch for printing to stdout the required values needed to filled in by the template
+    parser.add_argument('-v', '--values_needed',
                        action='store_true',
                        help='If provided, suppress all output.',
                        )
@@ -65,10 +70,21 @@ def set_namelist_ingest(argv):
     # write out fully qualified and populated f90 namelist file
     nml = parser.reads(f90nml_object)
 
+
+    if cla.dry_run or cla.values_needed:
+        if cla.outfile:
+          print(f'warning file {f90nml_file} not written when using --dry_run or --values_needed')
     # apply switch to allow user to view the results of namelist instead of writing to disk
     if cla.dry_run:
         print(nml)
-    else:
+    # apply switch to print out required template values
+    if cla.values_needed:
+        with open(jinja_template_file) as file:
+            j2_parsed = env.parse(file.read())
+            for each_var in meta.find_undeclared_variables(j2_parsed):
+               print(each_var)
+    # write out f90 name list
+    if not cla.dry_run and not cla.values_needed:
         with open(f90nml_file, 'w+', encoding='utf-8') as nml_file:
             f90nml.write(nml, nml_file)
 
