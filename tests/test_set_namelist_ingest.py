@@ -1,3 +1,4 @@
+#pylint: disable=unused-variable
 """
 Tests set_namelist_ingest using dry-run
 """
