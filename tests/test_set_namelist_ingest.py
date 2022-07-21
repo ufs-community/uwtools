@@ -7,7 +7,7 @@ import pathlib
 import subprocess
 
 def test_set_namelist_ingest_dryrun():
-    """Unit test for checkout dry-run output of ingest namelist tool"""
+    """Unit test for checking dry-run output of ingest namelist tool"""
 
     outcome=\
 """&salad
@@ -31,7 +31,7 @@ def test_set_namelist_ingest_dryrun():
     assert result == outcome
 
 def test_set_namelist_ingest_listvalues():
-    """Unit test for checkout dry-run output of ingest namelist tool"""
+    """Unit test for checking view_values output of ingest namelist tool"""
 
     outcome=\
 '''vegetable
