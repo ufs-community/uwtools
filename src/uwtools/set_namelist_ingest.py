@@ -42,7 +42,7 @@ def parse_args(argv):
                        help='If provided, suppress all output.',
                        )
     # switch for printing to stdout the required values needed to filled in by the template
-    parser.add_argument('-v', '--values_needed',
+    parser.add_argument('--values_needed',
                        action='store_true',
                        help='If provided, suppress all output.',
                        )

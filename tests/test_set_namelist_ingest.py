@@ -31,7 +31,7 @@ def test_set_namelist_ingest_dryrun():
     assert result == outcome
 
 def test_set_namelist_ingest_listvalues():
-    """Unit test for checking view_values output of ingest namelist tool"""
+    """Unit test for checking values_needed output of ingest namelist tool"""
 
     outcome=\
 '''vegetable
@@ -46,4 +46,4 @@ how_many
     exec_test= pathlib.Path(os.path.join(uwtools_pwd,"../src/uwtools/set_namelist_ingest.py"))
     input_file = pathlib.Path(os.path.join(uwtools_pwd,"fixtures/nml.IN"))
 
-    result = str(subprocess.check_output([exec_test,'-i',input_file,'-v']),'utf-8')
+    result = str(subprocess.check_output([exec_test,'-i',input_file,'--values_needed']),'utf-8')
