@@ -122,7 +122,7 @@ class NiceDict(dict):
         if attribute_list[0] == 'config':
             attribute_list = attribute_list[1:]
         for attribute in attribute_list:
-            index = re.findall('\[(\d*?)\]', attribute)
+            index = re.findall(r'\[(\d*?)\]', attribute)
             if len(index):
                 if len(index) > 1:
                     raise ValueError(f'unable to process multiple indexes: {attribute}')
@@ -143,7 +143,7 @@ class NiceDict(dict):
         if len(attribute_list) > 1:
             item = cls.reach_attribute(where, '.'.join(attribute_list[:-1]))
         attribute = attribute_list[-1]
-        index = re.findall('\[(\d*?)\]', attribute)
+        index = re.findall(r'\[(\d*?)\]', attribute)
         if len(index):
             if len(index) > 1:
                 raise ValueError(f'unable to process multiple indexes: {attribute}')
@@ -167,7 +167,7 @@ class NiceDict(dict):
             Returns the attributes without indexes for list:
             a.b.[0].c.[1].d -> a.b.[].c.[].d
         """
-        lists = re.findall('\[\d*?\]', attributes)
+        lists = re.findall(r'\[\d*?\]', attributes)
         for v in lists:
             attributes = attributes.replace(v, '[]')
         return attributes

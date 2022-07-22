@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#pylint: disable=duplicate-code
 
 '''
 This utility updates a Fortran namelist file using the f90nml package. The
@@ -80,7 +81,7 @@ def parse_args(argv):
     # single switch for printing to stdout the f90 namelist output file
     parser.add_argument('-d', '--dry_run',
                        action='store_true',
-                       help='If provided, suppress all output.',
+                       help='If provided, suppress writing out file and redirect to stdout.',
                        )
 
     # switch for printing to stdout the required values needed to filled in by the template
