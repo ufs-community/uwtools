@@ -6,9 +6,10 @@
 # Part of this software is developed by the Joint Center for Satellite Data Assimilation (JCSDA) together with its partners.
 
 # pylint: disable=all
-
+import os
 import yaml
 from .nice_dict import NiceDict
+from uwtools.template import Template, TemplateConstants
 
 class YAMLFile(NiceDict):
 
@@ -21,8 +22,7 @@ class YAMLFile(NiceDict):
     def __init__(self, config_file=None, data=None):
         super().__init__()
         if config_file is not None:
-            with open(config_file) as f:
-                config = yaml.load(f, Loader=yaml.Loader)
+            config = self.include(config_file=os.path.abspath(config_file))
         else:
             config = data
         if config is not None:
@@ -40,11 +40,17 @@ class YAMLFile(NiceDict):
                         self._configure(v)
         return config
 
-    def save(self, target):
-        with open(target, 'w') as f:
-            # specifies a wide file so that long strings are on one line.
-            yaml.dump(self, f, width=100000)
-        return target
-
-    def dump(self):
-        return yaml.dump(self, width=100000)
+    def include(self,config_file=None,data=None,replace_realtime=False):
+        ''' Sample code needed to implement the !INCLUDE tag '''
+        if config_file is not None:
+            with open(config_file) as _file:
+                config = NiceDict(yaml.load(_file, Loader=yaml.Loader))
+        else:
+            config = data
+        config = Template.substitute_structure_from_environment(config)
+        config = Template.substitute_structure(config,TemplateConstants.DOLLAR_PARENTHESES,self.get)
+        if replace_realtime == True:
+            config = Template.substitute_structure(config,TemplateConstants.DOUBLE_CURLY_BRACES,self.get)
+        config = Template.substitute_with_dependencies(config,config,
+                 TemplateConstants.DOLLAR_PARENTHESES,shallow_precedence=False)
+        return self.update(config)    

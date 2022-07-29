@@ -12,78 +12,74 @@ representation of a final user interface and are packaged under the Configure Cl
 import os
 import pathlib
 
-from uwtools.configure import Configure
-from uwtools.template import Template,TemplateConstants
+from uwtools.yaml_file import YAMLFile
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
-def test_configuration_parse_env():
+def test_yaml_parse_env():
     '''A basic test to check for env variables with the designator ${KEY} are realized'''
 
     os.environ['TEST'] = 'TEST_TRUE'
-    config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
+    yaml_config = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
 
     expected = os.environ.get('TEST')
-    actual = config.test_env
+    actual = yaml_config.test_env
     assert actual == expected
 
-def test_configuration_parse_env_no_var_present():
+def test_yaml_parse_env_no_var_present():
     '''Tests case when no environment variable is present and KEY designator is preserved'''
-    config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
+    yaml_config = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
 
     expected = "${TEST_NOCHANGE}"
-    actual = config.test_noenv
+    actual = yaml_config.test_noenv
     assert actual == expected
 
 
 # A test to see the ${KEY} designator is left untouched as $(KEY)
 # is expanded from a key value pair from a second YAML file.
 # In the following PI5 this include method will be implemented as an !INCLUDE tag
-def test_configuration_update():
+def test_yaml_update():
     '''A test to see the ${KEY} designator is left untouched as $(KEY)'''
 
-    config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-    config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
+    yaml_config = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
+    yaml_config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
 
     expected =  "/home/myexpid/{{current_cycle}}"
-    actual = config.datapath
+    actual = yaml_config.datapath
 
     assert actual == expected
 
 # A similar test to see if a configure object (in this case a NiceDict Object) can also be updated
 # Notice the optional argument designed by the keyword data is being tested here
-def test_configuration_update_object():
+def test_yaml_update_object():
     '''Test to see if a configure object can also be updated'''
 
-    config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-    config2 = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
-    config.include(data=config2)
+    yaml_config = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
+    yaml_config2 = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
+    yaml_config.include(data=yaml_config2)
 
     expected =  "/home/myexpid/{{current_cycle}}"
-    actual = config.datapath
+    actual = yaml_config.datapath
 
     assert actual == expected
 
 def test_configuration_inplace_update():
     '''A test the $(KEY) designator is expanded from a key value pair that is in the same file'''
 
-    config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
+    yaml_config = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
 
     expected =  "testpassed"
-    actual = config.testupdate
+    actual = yaml_config.testupdate
 
     assert actual == expected
 
-# A test to check that the {{KEY}} works. Note this does not represent the user interface
-# this is a test that shows how to use the Template Class for when this is implemented
 def test_configuration_realtime_update():
     '''A test to check that the {{KEY}} works'''
 
-    config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-    config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
-    config = Template.substitute_structure(config,TemplateConstants.DOUBLE_CURLY_BRACES,config.get)
+    yaml_config = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
+    yaml_config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")),replace_realtime=True)
 
     expected =  "/home/myexpid/10102022"
-    actual = config.updated_datapath
+    actual = yaml_config.updated_datapath
 
     assert actual == expected
