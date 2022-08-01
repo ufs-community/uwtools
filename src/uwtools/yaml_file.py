@@ -44,7 +44,7 @@ class YAMLFile(NiceDict):
                     if isinstance(var, dict):
                         value[i] = NiceDict(var)
                         self._configure(var)
-        self.yaml_config = config            
+        self.yaml_config = config
         return config
 
     def include(self,config_file=None,data=None,replace_realtime=False):
@@ -62,5 +62,5 @@ class YAMLFile(NiceDict):
         config = Template.substitute_with_dependencies(config,config,
                  TemplateConstants.DOLLAR_PARENTHESES,shallow_precedence=False)
         self.update(config)
-        self.yaml_config = config         
+        self.yaml_config = config
         return config
