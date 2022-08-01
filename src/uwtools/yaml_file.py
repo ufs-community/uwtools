@@ -53,4 +53,6 @@ class YAMLFile(NiceDict):
             config = Template.substitute_structure(config,TemplateConstants.DOUBLE_CURLY_BRACES,self.get)
         config = Template.substitute_with_dependencies(config,config,
                  TemplateConstants.DOLLAR_PARENTHESES,shallow_precedence=False)
-        return self.update(config)    
+        return self.update(config)
+
+

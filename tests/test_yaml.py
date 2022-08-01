@@ -77,7 +77,8 @@ def test_configuration_realtime_update():
     '''A test to check that the {{KEY}} works'''
 
     yaml_config = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-    yaml_config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")),replace_realtime=True)
+    yaml_config.include(pathlib.Path(
+                        os.path.join(uwtools_file_base,"fixtures/gfs.yaml")),replace_realtime=True)
 
     expected =  "/home/myexpid/10102022"
     actual = yaml_config.updated_datapath

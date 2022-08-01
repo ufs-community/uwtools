@@ -150,4 +150,5 @@ def test_substitute_with_dependencies():
                  'root': '/home/user',
                  'world': 'world'}
 
-    assert Template.substitute_with_dependencies(inputs,inputs,TemplateConstants.DOLLAR_PARENTHESES)==output
+    assert Template.substitute_with_dependencies(inputs,inputs,
+           TemplateConstants.DOLLAR_PARENTHESES)==output
