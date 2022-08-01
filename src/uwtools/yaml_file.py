@@ -32,6 +32,7 @@ class YAMLFile(NiceDict):
             config = data
         if config is not None:
             self.update(self._configure(config))
+            self.yaml_config = config
 
     def _configure(self, config):
         for key, value in config.items():
@@ -43,6 +44,7 @@ class YAMLFile(NiceDict):
                     if isinstance(var, dict):
                         value[i] = NiceDict(var)
                         self._configure(var)
+        self.yaml_config = config            
         return config
 
     def include(self,config_file=None,data=None,replace_realtime=False):
@@ -59,4 +61,6 @@ class YAMLFile(NiceDict):
                      TemplateConstants.DOUBLE_CURLY_BRACES,self.get)
         config = Template.substitute_with_dependencies(config,config,
                  TemplateConstants.DOLLAR_PARENTHESES,shallow_precedence=False)
-        return self.update(config)
+        self.update(config)
+        self.yaml_config = config         
+        return config
