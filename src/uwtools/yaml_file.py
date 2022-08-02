@@ -13,7 +13,7 @@ variable substituion with file inclustion support
 import os
 import yaml
 from uwtools.template import Template, TemplateConstants
-from .nice_dict import NiceDict
+from uwtools.nice_dict import NiceDict
 
 class YAMLFile(NiceDict):
 
@@ -24,10 +24,12 @@ class YAMLFile(NiceDict):
         after modification or not.
     """
 
-    def __init__(self, config_file=None, data=None):
+    def __init__(self, config_file=None, data=None, from_environment=True,replace_realtime=False):
         super().__init__()
         if config_file is not None:
-            config = self.include(config_file=os.path.abspath(config_file))
+            config = self.yaml_include(config_file=os.path.abspath(config_file),
+                                  from_environment=from_environment,
+                                  replace_realtime=replace_realtime)
         else:
             config = data
         if config is not None:
@@ -47,16 +49,17 @@ class YAMLFile(NiceDict):
         self.yaml_config = config
         return config
 
-    def include(self,config_file=None,data=None,replace_realtime=False):
+    def yaml_include(self,config_file=None,data=None, from_environment=True, replace_realtime=False):
         ''' Sample code needed to implement the !INCLUDE tag '''
         if config_file is not None:
             with open(config_file,encoding='utf-8') as _file:
                 config = NiceDict(yaml.load(_file, Loader=yaml.Loader))
         else:
             config = data
-        config = Template.substitute_structure_from_environment(config)
+        if from_environment: 
+            config = Template.substitute_structure_from_environment(config)
         config = Template.substitute_structure(config,TemplateConstants.DOLLAR_PARENTHESES,self.get)
-        if replace_realtime is True:
+        if replace_realtime:
             config = Template.substitute_structure(config,
                      TemplateConstants.DOUBLE_CURLY_BRACES,self.get)
         config = Template.substitute_with_dependencies(config,config,

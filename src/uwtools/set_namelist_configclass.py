@@ -13,35 +13,17 @@ file using python f90nml
 
 import sys
 import argparse
-import pathlib
 
 import f90nml
-from jinja2 import Environment, FileSystemLoader, meta
 
-from uwtools.yaml_file import YAMLFile
+from uwtools.jinja_config import Jinja2Config
 
-class NlConfig(YAMLFile):
+class NlConfig(Jinja2Config):
     '''Name List Configure Class to support Name List Generation Utility Code'''
     def __init__(self, template_file=None, config_file=None):
         '''instantiate Jinja2 environment and set template input from files top of the filesystem'''
-        super().__init__()
-        self.j2env=Environment(loader=FileSystemLoader(searchpath='/'),
-                               trim_blocks=True,lstrip_blocks=True)
-        if config_file is not None:
-            self.yaml_config = YAMLFile(config_file=config_file)
-        else:
-            self.yaml_config = None
-        if template_file is not None:
-            self.template_file = template_file
-            self.nl_template = self.load_nl_j2_template(template_file)
-        else:
-            self.nl_template = None
-
-    def load_nl_j2_template(self, _file: pathlib.Path):
-        '''load jinja2 template file for a nl specific name list'''
-        self.nl_template= self.j2env.get_template(_file)
-        return self.nl_template
-
+        super().__init__(template_file=template_file,config_file=config_file)
+        self.nl_template = self.template
 
 def parse_args(argv):
 
@@ -94,7 +76,7 @@ def set_namelist_ingest(argv):
     # inherited the YAMLFile Class and its methods such as include
     name_list = NlConfig(template_file=cla.template_input_nml)
     # using inherited include method from YAMLFile get YAML configure file
-    yaml_config = name_list.include(config_file=cla.config)
+    yaml_config = name_list.yaml_include(config_file=cla.config)
     # get the Jinja2 template object from NlConfig attribute created by init
     template = name_list.nl_template
     # apply yaml_config and stringify Jinja2 template
@@ -114,7 +96,7 @@ def set_namelist_ingest(argv):
     if cla.values_needed:
         with open(name_list.template_file ,encoding='utf-8') as file:
             j2_parsed = name_list.j2env.parse(file.read())
-            for each_var in meta.find_undeclared_variables(j2_parsed):
+            for each_var in name_list.meta.find_undeclared_variables(j2_parsed):
                 print(each_var)
     # write out f90 name list when not using query
     if not cla.dry_run and not cla.values_needed:
