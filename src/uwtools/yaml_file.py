@@ -49,14 +49,14 @@ class YAMLFile(NiceDict):
         self.yaml_config = config
         return config
 
-    def yaml_include(self,config_file=None,data=None, from_environment=True, replace_realtime=False):
+    def yaml_include(self,config_file=None,data=None,from_environment=True,replace_realtime=False):
         ''' Sample code needed to implement the !INCLUDE tag '''
         if config_file is not None:
             with open(config_file,encoding='utf-8') as _file:
                 config = NiceDict(yaml.load(_file, Loader=yaml.Loader))
         else:
             config = data
-        if from_environment: 
+        if from_environment:
             config = Template.substitute_structure_from_environment(config)
         config = Template.substitute_structure(config,TemplateConstants.DOLLAR_PARENTHESES,self.get)
         if replace_realtime:
