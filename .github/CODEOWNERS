@@ -6,6 +6,6 @@
 # @global-owner1 and @global-owner2 will be requested for
 # review when someone opens a pull request.
 *       @benjamin-cash @christinaholtNOAA @fgabelmannjr @TerrenceMcGuinness-NOAA
-*.py    @ryanlong1004 @ope-adejumo @christinaholtNOAA @TerrenceMcGuinness-NOAA
+*.py    @christinaholtNOAA @TerrenceMcGuinness-NOAA
 
 docs/*  @jprestop
