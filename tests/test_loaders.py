@@ -32,7 +32,7 @@ def test_loader_dot_notation():
     props = load_yaml(os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.yaml")))
 
     expected = "abcd"
-    actual = props.jobname
+    actual = props.jobname # pylint: disable=maybe-no-member
 
     assert actual == expected
 
