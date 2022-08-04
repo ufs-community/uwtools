@@ -19,8 +19,8 @@ from uwtools.template import Template, TemplateConstants
 class YAMLFile(UserDict):
 
     """
-        Reads a YAML file as a NiceDict and recursively converts
-        nested dictionaries into NiceDict.
+        Reads a YAML file as a UserDict and recursively converts
+        nested dictionaries into UserDict.
         Provides a way of saving the dictionary issued from the yaml file,
         after modification or not.
     """
@@ -62,7 +62,8 @@ class YAMLFile(UserDict):
                 config = yaml.load(_file, Loader=yaml.Loader)
             if from_environment:
                 config = Template.substitute_structure_from_environment(config)
-            config = Template.substitute_structure(config,TemplateConstants.DOLLAR_PARENTHESES,self.get)
+            config = Template.substitute_structure(config,TemplateConstants.
+                                                   DOLLAR_PARENTHESES,self.get)
             if replace_realtime:
                 config = Template.substitute_structure(config,
                     TemplateConstants.DOUBLE_CURLY_BRACES,self.get)

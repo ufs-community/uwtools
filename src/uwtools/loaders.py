@@ -19,8 +19,8 @@ import os
 import collections
 import pathlib
 
-from uwtools.yaml_file import YAMLFile
 from collections import UserDict
+from uwtools.yaml_file import YAMLFile
 
 class Config(collections.UserDict):
     '''Config Class embeded in loader fuction (TODO: not used)'''
