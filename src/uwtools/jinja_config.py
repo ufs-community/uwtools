@@ -11,7 +11,7 @@ class Jinja2Config(YAMLFile):
     '''Name List Configure Class to support Name List Generation Utility Code'''
     def __init__(self, template_file=None, config_file=None):
         '''instantiate Jinja2 environment and set template input from files top of the filesystem'''
-        super().__init__()
+        super().__init__(config_file=config_file)
         self.j2env=Environment(loader=FileSystemLoader(searchpath='/'),
                                trim_blocks=True,lstrip_blocks=True)
         if config_file is not None:

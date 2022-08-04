@@ -49,20 +49,6 @@ def test_yaml_update():
 
     assert actual == expected
 
-# A similar test to see if a configure object (in this case a NiceDict Object) can also be updated
-# Notice the optional argument designed by the keyword data is being tested here
-def test_yaml_update_object():
-    '''Test to see if a configure object can also be updated'''
-
-    yaml_config = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-    yaml_config2 = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
-    yaml_config.yaml_include(data=yaml_config2)
-
-    expected =  "/home/myexpid/{{current_cycle}}"
-    actual = yaml_config.datapath
-
-    assert actual == expected
-
 def test_configuration_inplace_update():
     '''A test the $(KEY) designator is expanded from a key value pair that is in the same file'''
 
