@@ -42,7 +42,7 @@ def test_yaml_update():
     '''A test to see the ${KEY} designator is left untouched as $(KEY)'''
 
     yaml_config = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-    yaml_config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
+    yaml_config.yaml_include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
 
     expected =  "/home/myexpid/{{current_cycle}}"
     actual = yaml_config.datapath
@@ -56,12 +56,10 @@ def test_yaml_update_object():
 
     yaml_config = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
     yaml_config2 = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
-    yaml_config.include(data=yaml_config2)
-
+    yaml_config.yaml_include(data=yaml_config2.yaml_config)
     expected =  "/home/myexpid/{{current_cycle}}"
-    actual = yaml_config.datapath
 
-    assert actual == expected
+    assert expected == yaml_config.datapath
 
 def test_configuration_inplace_update():
     '''A test the $(KEY) designator is expanded from a key value pair that is in the same file'''
@@ -77,7 +75,7 @@ def test_configuration_realtime_update():
     '''A test to check that the {{KEY}} works'''
 
     yaml_config = YAMLFile(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-    yaml_config.include(pathlib.Path(
+    yaml_config.yaml_include(pathlib.Path(
                         os.path.join(uwtools_file_base,"fixtures/gfs.yaml")),replace_realtime=True)
 
     expected =  "/home/myexpid/10102022"

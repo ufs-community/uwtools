@@ -5,8 +5,8 @@ Set of test for loading YAML files using the function call load_yaml
 import os
 import pathlib
 
+from collections import UserDict
 from uwtools.loaders import load_yaml
-from uwtools.nice_dict import NiceDict
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -32,7 +32,7 @@ def test_loader_dot_notation():
     props = load_yaml(os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.yaml")))
 
     expected = "abcd"
-    actual = props.jobname
+    actual = props.jobname # pylint: disable=maybe-no-member
 
     assert actual == expected
 
@@ -40,10 +40,11 @@ def test_loader_none():
     '''Test case for when path to file name to load_yaml is None'''
 
     props = load_yaml(None)
-    assert isinstance(props,NiceDict)
+    print(props)
+    assert isinstance(props,UserDict)
 
 def test_loader_returntype():
     '''Tests for return type for load_yaml'''
 
     props = load_yaml(os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.yaml")))
-    assert isinstance(props,NiceDict)
+    assert isinstance(props,UserDict)
