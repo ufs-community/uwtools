@@ -11,12 +11,12 @@ variable substituion with file inclustion support
 # Satellite Data Assimilation (JCSDA) together with its partners.
 
 import os
-from collections import UserDict
 
 import yaml
+from uwtools.config import Config
 from uwtools.template import Template, TemplateConstants
 
-class YAMLFile(UserDict):
+class YAMLFile(Config):
 
     """
         Reads a YAML file as a UserDict and recursively converts
@@ -28,20 +28,26 @@ class YAMLFile(UserDict):
     def __init__(self, config_file=None, data=None, from_environment=True,replace_realtime=False):
         super().__init__()
         print('running YAMLFile init')
+        print(config_file)
         if config_file is not None:
-            config = self.yaml_include(config_file=os.path.abspath(config_file),
+            config = self._load_file(config_file=os.path.abspath(config_file),data=None,
                                        from_environment=from_environment,
                                        replace_realtime=replace_realtime)
         else:
-            config = data
+            config = self._load_file(config_file=None,data=data,
+                                     from_environment=from_environment,
+                                     replace_realtime=replace_realtime)
+        # TODO check this may be redundant
         if config is not None:
+            self.config_path = config_file
             self.update(self._configure(config))
 
-    def __getattr__(self, item):
-        if item in self:
-            return self.__dict__["data"][item]
-            #return self[item]
-        raise AttributeError(f"'{type(self)}' object has no attribute '{item}'")
+    # Moved this back to a Config class which is now a Abstract Class (not sure if that will work)
+    #def __getattr__(self, item):
+    #    if item in self:
+    #        return self.__dict__["data"][item]
+    #        #return self[item]
+    #    raise AttributeError(f"'{type(self)}' object has no attribute '{item}'")
 
     def _configure(self, config):
         for key, value in config.items():
@@ -53,10 +59,9 @@ class YAMLFile(UserDict):
                     if isinstance(var, dict):
                         value[i] = var
                         self._configure(var)
-        self.yaml_config = config
         return config
 
-    def yaml_include(self,config_file=None,data=None,from_environment=True,replace_realtime=False):
+    def _load_file(self,config_file=None,data=None,from_environment=True,replace_realtime=False):
         ''' Sample code needed to implement the !INCLUDE tag '''
         if config_file is not None:
             with open(config_file,encoding='utf-8') as _file:
@@ -74,4 +79,14 @@ class YAMLFile(UserDict):
                  TemplateConstants.DOLLAR_PARENTHESES,shallow_precedence=False)
         if config is not None:
             self.update(self._configure(config))
+        self.config_obj = config   
         return config
+
+    def config_path(self):
+        self.config_path = self.config_path
+
+    def config_obj(self):
+        self.config_obj = self.config_obj
+
+    def dump_file(self):
+        print('write out YAML file')

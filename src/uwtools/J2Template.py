@@ -2,6 +2,8 @@
 J2Template Class
 '''
 
+from yaml_file import YAMLFile
+
 from jinja2 import Environment, BaseLoader, FileSystemLoader, meta
 
 class J2Template():
@@ -40,7 +42,7 @@ class J2Template():
 
     '''
 
-    def __init__(self, configure_obj, template_path=None, template_str=None):
+    def __init__(self, configure_path=None, template_path=None, template_str=None):
         '''
         Parameters
         ----------
@@ -50,9 +52,10 @@ class J2Template():
         template_str : str
             A Jinja2 template string
         '''
-
-        self.configure_obj = configure_obj
+        if configure_path is not None:
+             self.configure_obj = YAMLFile(config_file=configure_path)
         if template_path is not None:
+            self.template_file = template_path
             self.template = self.__load_file(template_path)
         elif template_str is not None:
             self.template = self.__load_string(template_str)
@@ -60,68 +63,38 @@ class J2Template():
             print('usr logger for error statment')
 
     def __load_file(self,template_path):
-        j2env=Environment(loader=FileSystemLoader(searchpath='/'),
+        '''Loads the Jinja2 template template from file and returns obj'''
+        self.__j2env=Environment(loader=FileSystemLoader(searchpath='/'),
                                trim_blocks=True,lstrip_blocks=True)
-        return j2env.get_template(template_path)
+        return self.__j2env.get_template(template_path)
 
     def __load_string(self,template_str):
+        '''Loads the Jinja2 template object from a string'''
         return Environment(loader=BaseLoader()).from_string(template_str)
 
-
-    def dump_file(self,utput_path):
-
-        '''
-        Write rendered template to the output_path provided
-
-        Parameters
-        ----------
-        output_path : Path
-
-        '''
-        pass
-
-    def _load_file(self, template_file):
-        '''
-        Load the Jinja2 template from the file provided.
-
-        Returns
-        -------
-        Jinja2 Template object
-        '''
-        pass
-
-    def _load_string(self):
-        '''
-        Load the Jinja2 template from the string provided.
-
-        Returns
-        -------
-        Jinja2 Template object
-        '''
-        pass
-
     def render_template(self):
-        ''' Render the Jinja2 template so that it's available in memory
-
-        Returns
-        -------
-        A string containing a rendered Jinja2 template.
-        '''
-        pass
+        ''' Render the Jinja2 template so that it's available in memory'''
+        return self.template.render(self.configure_obj)
 
     def undeclared_variables(self):
-
         ''' Generates a list of variables needed for self.template '''
-        pass
+        with open(self.template_file ,encoding='utf-8') as __file:
+            j2_parsed = self.__j2env.parse(__file.read())
+            return meta.find_undeclared_variables(j2_parsed)
+
+    def dump_file(self,output_path):
+        '''
+        Write rendered template to the output_path provided
+        '''
+        __render = self.render_template()
+        with open(output_path,'w+',encoding='utf-8') as __file:
+            __file.write(__render)
+
 
     def validate_config(self):
-
         '''
         Match the provided configure_obj with the undeclared variables.
         Provide user feedback about variables that should be provided
         before exiting.
         '''
         pass
-
-
-

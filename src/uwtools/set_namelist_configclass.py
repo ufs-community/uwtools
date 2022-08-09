@@ -16,14 +16,7 @@ import argparse
 
 import f90nml
 
-from uwtools.jinja_config import Jinja2Config
-
-class NlConfig(Jinja2Config):
-    '''Name List Configure Class to support Name List Generation Utility Code'''
-    def __init__(self, template_file=None, config_file=None):
-        '''instantiate Jinja2 environment and set template input from files top of the filesystem'''
-        super().__init__(template_file=template_file,config_file=config_file)
-        self.nl_template = self.template
+from uwtools.J2Template import J2Template
 
 def parse_args(argv):
 
@@ -70,38 +63,12 @@ def parse_args(argv):
 def set_namelist_ingest(argv):
     '''Main section for set_namelist ingest utility'''
 
-    # get values of command line arguments into cla
     cla = parse_args(argv)
-    # instantiate a Name List Configuration Class which has already
-    # inherited the YAMLFile Class and its methods such as include
-    name_list = NlConfig(template_file=cla.template_input_nml)
-    # using inherited include method from YAMLFile get YAML configure file
-    yaml_config = name_list.yaml_include(config_file=cla.config)
-    # get the Jinja2 template object from NlConfig attribute created by init
-    template = name_list.nl_template
-    # apply yaml_config and stringify Jinja2 template
-    f90nml_object = template.render(yaml_config)
-    # instantiate Python lib's f90nml Parser Object
-    parser = f90nml.Parser()
-    # write out fully qualified and populated f90 namelist file
-    nml = parser.reads(f90nml_object)
-
-    if cla.dry_run or cla.values_needed:
-        if cla.outfile:
-            print(f'warning file {cla.outfile} not written when using --dry_run or --values_needed')
-    # apply switch to allow user to view the results of namelist instead of writing to disk
-    if cla.dry_run:
-        print(nml)
-    # apply switch to print out required template values
-    if cla.values_needed:
-        with open(name_list.template_file ,encoding='utf-8') as file:
-            j2_parsed = name_list.j2env.parse(file.read())
-            for each_var in name_list.meta.find_undeclared_variables(j2_parsed):
-                print(each_var)
-    # write out f90 name list when not using query
-    if not cla.dry_run and not cla.values_needed:
-        with open(cla.outfile, 'w+', encoding='utf-8') as nml_file:
-            f90nml.write(nml, nml_file)
+    J2T_obj = J2Template(configure_path=cla.config,template_path=cla.template_input_nml)
+    print(J2T_obj.render_template())
+    print(J2T_obj.undeclared_variables())
+    print('wrote to',cla.outfile)
+    J2T_obj.dump_file(cla.outfile)
 
 if __name__ == '__main__':
     set_namelist_ingest(sys.argv[1:])
