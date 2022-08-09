@@ -25,20 +25,20 @@ class Config(ConfigABC, UserDict):
 
     @property
     @abstractclassmethod
-    def config_path(self, _path):
-        return _path
+    def config_path(self):
+        pass
 
     @property
     @abstractclassmethod
     def config_obj(self):
-        return self.config_obj
+        pass
 
     @abstractclassmethod
     def _load_file(self, _path=None, data=None):
         pass
 
     @abstractclassmethod
-    def dump_file(self,_path, data=None):
+    def dump_file(self, _path, data=None):
         pass
 
     def __replace_templates(self):

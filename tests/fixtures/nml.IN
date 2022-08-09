@@ -1,6 +1,6 @@
 &salad
   base = kale
-  fruit = {{ fruit }}  
+  fruit = {{ fruit }}
   vegetable = {{ vegetable }}
   how_many = {{ how_many }}
   dressing = balsamic

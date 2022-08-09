@@ -2,7 +2,7 @@
 J2Template Class
 '''
 
-from yaml_file import YAMLFile
+from uwtools.yaml_file import YAMLFile
 
 from jinja2 import Environment, BaseLoader, FileSystemLoader, meta
 

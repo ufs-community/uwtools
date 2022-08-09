@@ -10,14 +10,13 @@ variable substituion with file inclustion support
 # Part of this software is developed by the Joint Center for
 # Satellite Data Assimilation (JCSDA) together with its partners.
 
-import os
+from pathlib import PurePath
 
 import yaml
 from uwtools.config import Config
 from uwtools.template import Template, TemplateConstants
 
 class YAMLFile(Config):
-
     """
         Reads a YAML file as a UserDict and recursively converts
         nested dictionaries into UserDict.
@@ -27,22 +26,23 @@ class YAMLFile(Config):
 
     def __init__(self, config_file=None, data=None, from_environment=True,replace_realtime=False):
         super().__init__()
-        print('running YAMLFile init')
-        print(config_file)
         if config_file is not None:
-            config = self._load_file(config_file=os.path.abspath(config_file),data=None,
+            config = self._load_file(config_file=PurePath(config_file),data=None,
                                        from_environment=from_environment,
                                        replace_realtime=replace_realtime)
+            self.config_path = config_file
         else:
             config = self._load_file(config_file=None,data=data,
                                      from_environment=from_environment,
                                      replace_realtime=replace_realtime)
-        # TODO check this may be redundant
-        if config is not None:
-            self.config_path = config_file
-            self.update(self._configure(config))
 
-    # Moved this back to a Config class which is now a Abstract Class (not sure if that will work)
+        # TODO check this may be redundant
+        #if config is not None:
+        #    self.config_path = config_file
+        #    self.update(self._configure(config))
+ 
+    # This is the overloaded method for UserDict to realize dot notation resolution
+    # it has moved this back to a Config class which is now a Abstract Class
     #def __getattr__(self, item):
     #    if item in self:
     #        return self.__dict__["data"][item]
@@ -88,5 +88,7 @@ class YAMLFile(Config):
     def config_obj(self):
         self.config_obj = self.config_obj
 
-    def dump_file(self):
-        print('write out YAML file')
+    def dump_file(self, outputpath):
+        if self.config_obj is not None:
+            with open(PurePath(outputpath), 'w+', encoding='utf-8') as __file:
+                yaml.dump(self.config_obj, __file)

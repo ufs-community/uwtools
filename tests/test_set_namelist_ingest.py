@@ -6,6 +6,9 @@ import os
 import pathlib
 import subprocess
 
+uwtools_pwd = pathlib.PurePosixPath(__file__).parents[0]
+exec_test= pathlib.PurePath().joinpath(uwtools_pwd,'../src/uwtools/set_namelist_ingest.py')
+
 def test_set_namelist_ingest_dryrun():
     """Unit test for checking dry-run output of ingest namelist tool"""
 
@@ -22,10 +25,7 @@ def test_set_namelist_ingest_dryrun():
     os.environ['vegetable'] = 'tomato'
     os.environ['how_many'] = 'much'
 
-    uwtools_pwd = os.path.join(os.path.dirname(__file__))
-    exec_test= pathlib.Path(os.path.join(uwtools_pwd,"../src/uwtools/set_namelist_ingest.py"))
-    input_file = pathlib.Path(os.path.join(uwtools_pwd,"fixtures/nml.IN"))
-
+    input_file = pathlib.PurePath().joinpath(uwtools_pwd,'fixtures/nml.IN')
     result = str(subprocess.check_output([exec_test,'-i',input_file,'-d']),'utf-8')
 
     assert result == outcome
@@ -42,8 +42,5 @@ how_many
     os.environ['vegetable'] = 'tomato'
     os.environ['how_many'] = 'much'
 
-    uwtools_pwd = os.path.join(os.path.dirname(__file__))
-    exec_test= pathlib.Path(os.path.join(uwtools_pwd,"../src/uwtools/set_namelist_ingest.py"))
-    input_file = pathlib.Path(os.path.join(uwtools_pwd,"fixtures/nml.IN"))
-
+    input_file = pathlib.PurePath().joinpath(uwtools_pwd,'fixtures/nml.IN')
     result = str(subprocess.check_output([exec_test,'-i',input_file,'--values_needed']),'utf-8')

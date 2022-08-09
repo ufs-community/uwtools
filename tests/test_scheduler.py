@@ -5,10 +5,10 @@ import pytest
 from uwtools.scheduler import JobScheduler
 from uwtools.loaders import load_yaml
 
+uwtools_file_base = pathlib.PurePosixPath(__file__).parents[0]
 
 def test_scheduler_dot_notation():
-    props = load_yaml(pathlib.Path("tests/fixtures/simple.yaml"))
-
+    props = load_yaml(pathlib.PurePath().joinpath(uwtools_file_base,'fixtures/simple.yaml'))
     js = JobScheduler.get_scheduler(dict(props))
     expected = "user_account"
     actual = js.account
