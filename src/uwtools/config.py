@@ -26,7 +26,7 @@ class Config(ABC, UserDict):
         pass
 
     @abstractclassmethod
-    def _load_file(self, _path=None, data=None):
+    def _load_file(self, _path=None, data=None, from_environment=True,replace_realtime=False):
         pass
 
     @abstractclassmethod

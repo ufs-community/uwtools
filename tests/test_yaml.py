@@ -20,7 +20,7 @@ def test_yaml_parse_env():
     '''A basic test to check for env variables with the designator ${KEY} are realized'''
 
     os.environ['TEST'] = 'TEST_TRUE'
-    yaml_config = YAMLConfig(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
+    yaml_config = YAMLConfig(config_file=pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
 
     expected = os.environ.get('TEST')
     actual = yaml_config.test_env
@@ -28,7 +28,7 @@ def test_yaml_parse_env():
 
 def test_yaml_parse_env_no_var_present():
     '''Tests case when no environment variable is present and KEY designator is preserved'''
-    yaml_config = YAMLConfig(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
+    yaml_config = YAMLConfig(config_file=pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
 
     expected = "${TEST_NOCHANGE}"
     actual = yaml_config.test_noenv
