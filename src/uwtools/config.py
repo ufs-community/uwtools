@@ -2,20 +2,12 @@
 from collections import UserDict
 
 from abc import ABC, abstractclassmethod
-from telnetlib import NOOPT
 
-class ConfigABC(ABC):
-    
-    @abstractclassmethod
-    def _init(self):
-        NOOPT
+class Config(ABC, UserDict):
 
-class Config(ConfigABC, UserDict):
-
-    def _init(self, config_file=None, data=None, from_environment=True,replace_realtime=False):
-        super().__init()
+    def __init__(self, config_file=None, data=None, from_environment=True,replace_realtime=False):
         super().__init__()
-        self.config_path(config_file)
+        self.config_pah = config_file
 
     def __getattr__(self, item):
         if item in self:
