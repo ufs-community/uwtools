@@ -9,7 +9,7 @@ but we have not developed the use case for such a Class
 
 Here we have changed load_yaml to a simple function call because
 the UserDict overloaded __getattr__ for dot resolution is now in the
-YAMLFile class that inherits UserDict
+Abstract Base Class Config class that inherits UserDict
 
 https://pyyaml.org/wiki/PyYAMLDocumentation
 """
@@ -17,7 +17,7 @@ import os
 import collections
 import pathlib
 
-from uwtools.yaml_file import YAMLFile
+from uwtools.YAMLConfig import YAMLConfig
 
 class Config(collections.UserDict):
     '''Config Class embeded in loader fuction (TODO: not used)'''
@@ -27,7 +27,7 @@ class Config(collections.UserDict):
 def load_yaml(config_file: pathlib.Path):
     '''Function for reading YAML files that supports concatenation'''
     if config_file is not None:
-        config = YAMLFile(os.path.abspath(config_file))
+        config = YAMLConfig(os.path.abspath(config_file))
     else:
         config = collections.UserDict()
     return config

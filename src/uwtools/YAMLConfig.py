@@ -16,7 +16,7 @@ import yaml
 from uwtools.config import Config
 from uwtools.template import Template, TemplateConstants
 
-class YAMLFile(Config):
+class YAMLConfig(Config):
     """
         Reads a YAML file as a UserDict and recursively converts
         nested dictionaries into UserDict.
