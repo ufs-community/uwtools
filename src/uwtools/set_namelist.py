@@ -61,11 +61,10 @@ def parse_args(argv):
 
     return parser.parse_args(argv)
 
-def set_namelist_ingest(argv):
+def set_namelist(argv):
     '''Main section for set_namelist ingest utility'''
 
     cla = parse_args(argv)
-
     J2T_obj = J2Template(configure_path=cla.config,template_path=cla.template_input_nml)
     nml = F90Config(data=J2T_obj.render_template())
 
@@ -79,4 +78,4 @@ def set_namelist_ingest(argv):
         nml.dump_file(cla.outfile)
 
 if __name__ == '__main__':
-    set_namelist_ingest(sys.argv[1:])
+    set_namelist(sys.argv[1:])
