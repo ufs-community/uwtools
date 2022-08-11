@@ -52,10 +52,10 @@ def test_set_namelist_ingest_outputfile():
     dressing = 'balsamic'
 /
 '''
-    Path.unlink(output_file,missing_ok=True)
+    #Path.unlink(output_file,missing_ok=True)
     result = str(subprocess.check_output([exec_test,'-i',input_file,
                                          '-c',config_file,'-o',output_file]),'utf-8')
     with open(output_file,'r',encoding='utf-8') as file:
         outfile_contents = file.read()
     assert outcome == outfile_contents
-    Path.unlink(output_file,missing_ok=True)
+    #Path.unlink(output_file,missing_ok=True)
