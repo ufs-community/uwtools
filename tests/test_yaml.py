@@ -9,7 +9,6 @@ representation of a final user interface and are packaged under the Configure Cl
 '''
 
 #pylint: disable=unused-variable
-from calendar import c
 import os
 from pathlib import PurePath
 
@@ -79,8 +78,10 @@ def test_configuration_realtime_update():
     actual = yaml_config.updated_datapath
 
     assert actual == expected
- 
+
 def test_configuration_config_path():
+    '''A test to check if config_path attribute is being set'''
+
     yaml_config_check = YAMLConfig(PurePath().joinpath(uwtools_pwd,'fixtures/experiment.yaml'))
     name = PurePath(yaml_config_check.config_path).name
     assert name == 'experiment.yaml'
