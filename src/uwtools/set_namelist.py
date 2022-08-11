@@ -14,8 +14,6 @@ file using python f90nml
 import sys
 import argparse
 
-import f90nml
-
 from uwtools.J2Template import J2Template
 from uwtools.F90Config import F90Config
 
@@ -62,14 +60,14 @@ def parse_args(argv):
     return parser.parse_args(argv)
 
 def set_namelist(argv):
-    '''Main section for set_namelist ingest utility'''
+    '''Main section for set_namelist utility'''
 
     cla = parse_args(argv)
-    J2T_obj = J2Template(configure_path=cla.config,template_path=cla.template_input_nml)
-    nml = F90Config(data=J2T_obj.render_template())
+    j2t_obj = J2Template(configure_path=cla.config,template_path=cla.template_input_nml)
+    nml = F90Config(data=j2t_obj.render_template())
 
     if cla.values_needed:
-       for values in J2T_obj.undeclared_variables():
+        for values in j2t_obj.undeclared_variables():
             print(values)
     if cla.dry_run:
         print(nml.config_obj)

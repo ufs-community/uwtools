@@ -1,11 +1,11 @@
+
+#pylint: disable=invalid-name
 '''
 J2Template Class
 '''
 
-from uwtools.YAMLConfig import YAMLConfig
-
 from jinja2 import Environment, BaseLoader, FileSystemLoader, meta
-
+from uwtools.YAMLConfig import YAMLConfig
 class J2Template():
     '''
     This class reads in Jinja templates from files or strings, and
@@ -53,7 +53,7 @@ class J2Template():
             A Jinja2 template string
         '''
         if configure_path is not None:
-             self.configure_obj = YAMLConfig(config_file=configure_path)
+            self.configure_obj = YAMLConfig(config_file=configure_path)
         if template_path is not None:
             self.template_file = template_path
             self.template = self.__load_file(template_path)
@@ -97,4 +97,3 @@ class J2Template():
         Provide user feedback about variables that should be provided
         before exiting.
         '''
-        pass

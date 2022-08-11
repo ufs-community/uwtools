@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 '''
 Class for managing YAML files with inline and envitionmenti
 variable substituion with file inclustion support
@@ -27,9 +28,8 @@ class YAMLConfig(Config):
     def __init__(self, config_file=None, data=None, from_environment=True,replace_realtime=False):
         super().__init__()
         if config_file is not None:
-            self._load_file(config_file=PurePath(config_file),data=None,
-                                       from_environment=from_environment,
-                                       replace_realtime=replace_realtime)
+            self.config_file = PurePath(config_file)
+            self._load_file(self.config_file,data,from_environment,replace_realtime)
             self.config_path = config_file
         else:
             self._load_file(config_file=None,data=data,
@@ -56,11 +56,13 @@ class YAMLConfig(Config):
                         self._configure(var)
         return config
 
-    def _load_file(self,config_file=None,data=None,from_environment=True,replace_realtime=False):
+     #pylint: disable=arguments-differ
+    def _load_file(self,config_file,data,from_environment,replace_realtime):
         ''' Sample code needed to implement the !INCLUDE tag '''
         if config_file is not None:
             with open(config_file,encoding='utf-8') as _file:
                 config = yaml.load(_file, Loader=yaml.Loader)
+            self.config_path = config_file
         else:
             config = data
         if from_environment:
@@ -74,8 +76,14 @@ class YAMLConfig(Config):
                  TemplateConstants.DOLLAR_PARENTHESES,shallow_precedence=False)
         if config is not None:
             self.update(self._configure(config))
-        self.config_obj = config   
+        self.config_obj = config
         return config
+
+    def include(self,config_file=None,data=None,from_environment=True,replace_realtime=False):
+        '''wrapper for exposing _load_file as include functionality to concatinate YAML files'''
+        self._load_file(config_file=config_file,data=data,
+                        from_environment=from_environment,
+                        replace_realtime=replace_realtime)
 
     def config_path(self):
         self.config_path = self.config_path

@@ -1,13 +1,9 @@
-
+#pylint: disable=unused-variable
+'''Abstract Base Class for consolidating Configure Classes for each configurable subsystem'''
 from collections import UserDict
-
-from abc import ABC, abstractclassmethod
-
+from abc import ABC, abstractmethod
 class Config(ABC, UserDict):
-
-    def __init__(self, config_file=None, data=None, from_environment=True,replace_realtime=False):
-        super().__init__()
-        self.config_pah = config_file
+    '''Abstract Base Class for consolidating Configure Classes for each configurable subsystem'''
 
     def __getattr__(self, item):
         if item in self:
@@ -15,23 +11,30 @@ class Config(ABC, UserDict):
             #return self[item]
         raise AttributeError(f"'{type(self)}' object has no attribute '{item}'")
 
-    @property
-    @abstractclassmethod
+    #@property TO DO (make a property)
+    @abstractmethod
     def config_path(self):
-        pass
+        '''required attribute for path to configure file'''
+        return self.config_file
 
-    @property
-    @abstractclassmethod
+    #@config_path.setter
+    #def config_path(self,config_file):
+    #    self.config_path = config_file
+
+    @abstractmethod
     def config_obj(self):
+        '''required attribute of python obj pointer to how the config file is used'''
+        return self.config_obj
+
+    @classmethod
+    @abstractmethod
+    def _load_file(cls,config_file=None):
         pass
 
-    @abstractclassmethod
-    def _load_file(self, _path=None, data=None, from_environment=True,replace_realtime=False):
-        pass
+    @classmethod
+    @abstractmethod
+    def dump_file(cls,outputpath):
+        '''required method to same configuration file'''
 
-    @abstractclassmethod
-    def dump_file(self, _path, data=None):
-        pass
-
-    def __replace_templates(self):
-        pass
+    def __replace_templates(self): #pylint: disable=unused-private-member
+        '''TODO not sure of requirement yet'''

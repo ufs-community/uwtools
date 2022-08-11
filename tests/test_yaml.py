@@ -9,26 +9,27 @@ representation of a final user interface and are packaged under the Configure Cl
 '''
 
 #pylint: disable=unused-variable
+from calendar import c
 import os
-import pathlib
+from pathlib import PurePath
 
 from uwtools.YAMLConfig import YAMLConfig
 
-uwtools_file_base = os.path.join(os.path.dirname(__file__))
+uwtools_pwd = PurePath(__file__).parents[0]
+yaml_config = YAMLConfig(config_file=PurePath().joinpath(uwtools_pwd,"fixtures/experiment.yaml"))
+yaml_config2 = YAMLConfig(config_file=PurePath().joinpath(uwtools_pwd,"fixtures/gfs.yaml"))
 
 def test_yaml_parse_env():
     '''A basic test to check for env variables with the designator ${KEY} are realized'''
 
     os.environ['TEST'] = 'TEST_TRUE'
-    yaml_config = YAMLConfig(config_file=pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-
+    yaml_config_env = YAMLConfig(PurePath().joinpath(uwtools_pwd,"fixtures/experiment.yaml"))
     expected = os.environ.get('TEST')
-    actual = yaml_config.test_env
+    actual = yaml_config_env.test_env
     assert actual == expected
 
 def test_yaml_parse_env_no_var_present():
     '''Tests case when no environment variable is present and KEY designator is preserved'''
-    yaml_config = YAMLConfig(config_file=pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
 
     expected = "${TEST_NOCHANGE}"
     actual = yaml_config.test_noenv
@@ -41,11 +42,12 @@ def test_yaml_parse_env_no_var_present():
 def test_yaml_update():
     '''A test to see the ${KEY} designator is left untouched as $(KEY)'''
 
-    yaml_config = YAMLConfig(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-    yaml_config._load_file(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
+    #yaml_config = YAMLConfig(pathlib.Path(os.path.join(uwtools_pwd,"fixtures/experiment.yaml")))
+    yaml_config_update = YAMLConfig(PurePath().joinpath(uwtools_pwd,'fixtures/experiment.yaml'))
+    yaml_config_update.include(config_file=PurePath().joinpath(uwtools_pwd,'fixtures/gfs.yaml'))
 
     expected =  "/home/myexpid/{{current_cycle}}"
-    actual = yaml_config.datapath
+    actual = yaml_config_update.datapath
 
     assert actual == expected
 
@@ -54,17 +56,13 @@ def test_yaml_update():
 def test_yaml_update_object():
     '''Test to see if a configure object can also be updated'''
 
-    yaml_config = YAMLConfig(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-    yaml_config2 = YAMLConfig(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
-    yaml_config._load_file(data=yaml_config2.config_obj)
+    yaml_config.include(data=yaml_config2.config_obj)
     expected =  "/home/myexpid/{{current_cycle}}"
 
     assert expected == yaml_config.datapath
 
 def test_configuration_inplace_update():
     '''A test the $(KEY) designator is expanded from a key value pair that is in the same file'''
-
-    yaml_config = YAMLConfig(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
 
     expected =  "testpassed"
     actual = yaml_config.testupdate
@@ -74,11 +72,15 @@ def test_configuration_inplace_update():
 def test_configuration_realtime_update():
     '''A test to check that the {{KEY}} works'''
 
-    yaml_config = YAMLConfig(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-    yaml_config._load_file(pathlib.Path(
-                        os.path.join(uwtools_file_base,"fixtures/gfs.yaml")),replace_realtime=True)
+    yaml_config.include(PurePath().joinpath(uwtools_pwd,
+                           'fixtures/gfs.yaml'),replace_realtime=True)
 
     expected =  "/home/myexpid/10102022"
     actual = yaml_config.updated_datapath
 
     assert actual == expected
+ 
+def test_configuration_config_path():
+    yaml_config_check = YAMLConfig(PurePath().joinpath(uwtools_pwd,'fixtures/experiment.yaml'))
+    name = PurePath(yaml_config_check.config_path).name
+    assert name == 'experiment.yaml'
