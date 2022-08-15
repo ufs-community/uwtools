@@ -1,0 +1,147 @@
+'''
+Set of test for loading YAML files using the function call load_yaml
+'''
+#pylint: disable=unused-variable
+import filecmp
+import os
+import pathlib
+import tempfile
+
+import uwtools.config as config
+
+uwtools_file_base = os.path.join(os.path.dirname(__file__))
+
+def test_yaml_config_simple():
+    '''Test that YAML load, update, and dump work with a basic YAML file. '''
+
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.yaml"))
+    cfg = config.YAMLConfig(test_yaml)
+
+    expected = {
+        "scheduler": "slurm",
+        "jobname": "abcd",
+        "extra_stuff": 12345,
+        "account": "user_account",
+        "nodes": 1,
+        "queue": "bos",
+        "tasks_per_node": 4,
+        "walltime": "00:01:00",
+    }
+    assert cfg == expected
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/test_yaml_dump.yml'
+        cfg.dump_file(out_file)
+
+        assert filecmp.cmp(test_yaml, out_file)
+
+    cfg.update({'nodes': 12})
+    expected['nodes'] = 12
+
+    assert cfg == expected
+
+def test_yaml_config_composite_types():
+    ''' Test that YAML load and dump work with a YAML file that has
+    multiple data structures and levels. '''
+
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/result4.yaml"))
+    cfg = config.YAMLConfig(test_yaml)
+
+    assert cfg.get('init_cycle') == '2020-12-15T00:00:00Z'
+    assert isinstance(cfg.get('step_cycle'), str)
+
+    generic_repos = cfg.get('generic_repos')
+    assert isinstance(generic_repos, list)
+    assert isinstance(generic_repos[0], dict)
+    assert generic_repos[0].get('branch') == 'develop'
+
+    models = cfg.get('models')
+    assert models[0].get('config').get('vertical_resolution') == 64
+
+
+def test_f90nml_config_simple():
+    '''Test that f90nml load, update, and dump work with a basic f90 namelist file. '''
+
+    test_nml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.nml"))
+    cfg = config.F90Config(test_nml)
+
+    expected = {
+        "salad": {
+            "base": "kale",
+            "fruit": "banana",
+            "vegetable": "tomato",
+            "how_many": 12,
+            "dressing": "balsamic",
+            }
+    }
+    assert cfg == expected
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/test_nml_dump.nml'
+        cfg.dump_file(out_file)
+
+        assert filecmp.cmp(test_nml, out_file)
+
+    cfg.update({'dressing': ['ranch', 'italian']})
+    expected['dressing'] = ['ranch', 'italian']
+
+    assert cfg == expected
+
+
+def test_INI_config_simple():
+    '''Test that INI config load and dump work with a basic INI file.
+    '''
+
+    test_ini = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.ini"))
+    cfg = config.INIConfig(test_ini)
+
+    expected = {
+        "salad": {
+            "base": "kale",
+            "fruit": "banana",
+            "vegetable": "tomato",
+            "how_many": 12,
+            "dressing": "balsamic",
+            }
+    }
+    assert cfg == expected
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/test_ini_dump.ini'
+        cfg.dump_file(out_file)
+
+        assert filecmp.cmp(test_ini, out_file)
+
+    cfg.update({'dressing': ['ranch', 'italian']})
+    expected['dressing'] = ['ranch', 'italian']
+    assert cfg == expected
+
+def test_INI_config_bash():
+
+    '''Test that INI config load and dump work with a basic bash file.
+    '''
+
+    test_bash = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.sh"))
+    cfg = config.INIConfig(test_bash, space_around_delimiters=False)
+
+    expected = {
+        "salad": {
+            "base": "kale",
+            "fruit": "banana",
+            "vegetable": "tomato",
+            "how_many": 12,
+            "dressing": "balsamic",
+            }
+    }
+    assert cfg == expected
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/test_bash_dump.sh'
+        cfg.dump_file(out_file)
+
+        assert filecmp.cmp(test_bash, out_file)
+
+    cfg.update({'dressing': ['ranch', 'italian']})
+    expected['dressing'] = ['ranch', 'italian']
+    assert cfg == expected
+
