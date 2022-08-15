@@ -112,9 +112,6 @@ def test_ini_config_simple():
         out_file = f'{tmp_dir}/test_ini_dump.ini'
         cfg.dump_file(out_file)
 
-        with open(out_file, 'r') as fn:
-            print(fn.read())
-
         assert filecmp.cmp(test_ini, out_file)
 
     cfg.update({'dressing': ['ranch', 'italian']})
@@ -141,9 +138,6 @@ def test_ini_config_bash():
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
         out_file = f'{tmp_dir}/test_bash_dump.sh'
         cfg.dump_file(out_file)
-
-        with open(out_file, 'r') as fn:
-            print(fn.read())
 
         assert filecmp.cmp(test_bash, out_file)
 

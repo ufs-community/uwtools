@@ -6,8 +6,6 @@ from contextlib import redirect_stdout
 import filecmp
 import io
 import os
-import pathlib
-import subprocess
 import tempfile
 
 from uwtools import templater
@@ -87,8 +85,5 @@ def test_set_template_yaml_config():
              ]
 
         templater.set_template(args)
-
-        with open(out_file, 'r') as fn:
-            print(fn.read())
 
         assert filecmp.cmp(expected_file, out_file)
