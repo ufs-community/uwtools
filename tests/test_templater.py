@@ -1,12 +1,20 @@
 #pylint: disable=unused-variable
 """
-Tests set_namelist_ingest using dry-run
+Tests for templater tool.
 """
+from contextlib import redirect_stdout
+import filecmp
+import io
 import os
 import pathlib
 import subprocess
+import tempfile
 
-def test_set_namelist_ingest_dryrun():
+from uwtools import templater
+
+uwtools_file_base = os.path.join(os.path.dirname(__file__))
+
+def test_set_template_dryrun():
     """Unit test for checking dry-run output of ingest namelist tool"""
 
     outcome=\
@@ -22,28 +30,65 @@ def test_set_namelist_ingest_dryrun():
     os.environ['vegetable'] = 'tomato'
     os.environ['how_many'] = 'much'
 
-    uwtools_pwd = os.path.join(os.path.dirname(__file__))
-    exec_test= pathlib.Path(os.path.join(uwtools_pwd,"../src/uwtools/set_namelist_ingest.py"))
-    input_file = pathlib.Path(os.path.join(uwtools_pwd,"fixtures/nml.IN"))
+    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
-    result = str(subprocess.check_output([exec_test,'-i',input_file,'-d']),'utf-8')
+    args = [
+         '-i', input_file,
+         '--dry_run',
+         ]
+
+    # Capture stdout for the dry run
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        templater.set_template(args)
+    result = outstring.getvalue()
 
     assert result == outcome
 
-def test_set_namelist_ingest_listvalues():
+def test_set_template_listvalues():
     """Unit test for checking values_needed output of ingest namelist tool"""
 
     outcome=\
-'''vegetable
+'''Values needed for this template are:
 fruit
 how_many
+vegetable
 '''
-    os.environ['fruit'] = 'banana'
-    os.environ['vegetable'] = 'tomato'
-    os.environ['how_many'] = 'much'
+    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
-    uwtools_pwd = os.path.join(os.path.dirname(__file__))
-    exec_test= pathlib.Path(os.path.join(uwtools_pwd,"../src/uwtools/set_namelist_ingest.py"))
-    input_file = pathlib.Path(os.path.join(uwtools_pwd,"fixtures/nml.IN"))
+    args = [
+         '-i', input_file,
+         '--values_needed',
+         ]
 
-    result = str(subprocess.check_output([exec_test,'-i',input_file,'--values_needed']),'utf-8')
+    # Capture stdout for the dry run
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        templater.set_template(args)
+    result = outstring.getvalue()
+
+    assert result == outcome
+
+def test_set_template_yaml_config():
+    ''' Test that providing a YAML file with necessary settings works to fill in
+    the Jinja template. Test the writing mechanism, too '''
+
+    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+    config_file = os.path.join(uwtools_file_base, "fixtures/fruit_config.yaml")
+    expected_file = os.path.join(uwtools_file_base, "fixtures/simple2.nml")
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/test_render_from_yaml.nml'
+
+        args = [
+             '-i', input_file,
+             '-c', config_file,
+             '-o', out_file,
+             ]
+
+        templater.set_template(args)
+
+        with open(out_file, 'r') as fn:
+            print(fn.read())
+
+        assert filecmp.cmp(expected_file, out_file)

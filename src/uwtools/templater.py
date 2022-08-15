@@ -79,6 +79,12 @@ def set_template(argv):
     j2_parsed = env.parse(env.loader.get_source(env, ''))
     undeclared_variables = meta.find_undeclared_variables(j2_parsed)
 
+    if cla.values_needed:
+        print('Values needed for this template are:')
+        for var in sorted(undeclared_variables):
+            print(var)
+
+        return
 
     # Render the template with the specified config object
     rendered_template = template.render(**cfg)
@@ -87,16 +93,13 @@ def set_template(argv):
     # write out fully qualified and populated f90 namelist file
     nml = parser.reads(rendered_template)
 
-    if cla.dry_run or cla.values_needed:
+    if cla.dry_run:
         if cla.outfile:
             print(f'warning file {cla.outfile} not written when using --dry_run or --values_needed')
     # apply switch to allow user to view the results of namelist instead of writing to disk
     if cla.dry_run:
         print(nml)
     # apply switch to print out required template values
-    if cla.values_needed:
-        for var in undeclared_variables:
-            print(var)
     # write out f90 name list
     if not cla.dry_run and not cla.values_needed:
         with open(cla.outfile, 'w+', encoding='utf-8') as nml_file:
