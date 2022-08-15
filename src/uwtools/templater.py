@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
 '''
-This utility demonstrates the ingest functions to update a Fortran namelist file
-using the f90nml package while using a Jinja2 templated input file that is
-filled in from the user environment
+This utility renders a Jinja2 template using user-supplied configuration options
+via YAML or environment variables.
 '''
 
 import os
@@ -12,6 +11,15 @@ import argparse
 
 from jinja2 import Environment, FileSystemLoader, meta
 import f90nml
+
+from uwtools import config
+
+def file_exists(arg):
+    ''' Checks whether a file exists, and returns the path if it does. '''
+    if not os.path.exists(arg):
+        msg = f'{arg} does not exist!'
+        raise argparse.ArgumentTypeError(msg)
+    return arg
 
 def parse_args(argv):
 
@@ -22,71 +30,77 @@ def parse_args(argv):
     '''
 
     parser = argparse.ArgumentParser(
-       description='Update a Fortran namelist with user-defined settings.'
+       description='Update a Jinja2 Template with user-defined settings.'
     )
-    # output file (must be fully qualified path) true to
-    # spec f90 name list file from python lib f90nml
-    parser.add_argument('-o', '--outfile',
-                       help='Full path to output file. This is a \
-                       namelist by default.',
-                       required=False,
-                       )
-    # Jinja2 user input file as a template to moc f90 name list file
-    parser.add_argument('-i', '--input_nml',
-                       required=True,
-                       help='Path to a templated user namelist.',
-                       )
-    # switch for printing to stdout the f90 namelist output file
-    parser.add_argument('-d', '--dry_run',
-                       action='store_true',
-                       help='If provided, suppress all output.',
-                       )
-    # switch for printing to stdout the required values needed to filled in by the template
-    parser.add_argument('--values_needed',
-                       action='store_true',
-                       help='If provided, suppress all output.',
-                       )
-
+    parser.add_argument(
+        '-o', '--outfile',
+        help='Full path to output file',
+        )
+    parser.add_argument(
+        '-i', '--input_template',
+        help='Path to a Jinja2 template file.',
+        required=True,
+        type=file_exists,
+        )
+    parser.add_argument(
+        '-c', '--config_file',
+        help='Optional path to a YAML configuration file. If not provided, '
+        'os.environ is used to configure.',
+        type=file_exists,
+        )
+    parser.add_argument(
+        '-d', '--dry_run',
+        action='store_true',
+        help='If provided, print rendered template to stdout only',
+        )
+    parser.add_argument(
+        '--values_needed',
+        action='store_true',
+        help='If provided, print a list of required configuration settings to stdout',
+        )
     return parser.parse_args(argv)
 
-def set_namelist_ingest(argv):
+def set_template(argv):
     '''Main section for set_namelist ingest utility'''
 
     cla = parse_args(argv)
 
-    jinja_template_file = cla.input_nml
-    f90nml_file = cla.outfile
+    if cla.config_file:
+        cfg = config.YAMLConfig(cla.config_file)
+    else:
+        cfg = os.environ
 
-    cla = parse_args(argv)
 
-    # instantiate Jinja2 to environment and set template input files to the top of the filesystem
-    env = Environment(loader=FileSystemLoader(searchpath='/'), trim_blocks=True, lstrip_blocks=True)
-    # retrieve user jinja2 input file for specific model namelist
-    template = env.get_template(jinja_template_file)
-    # for simplicity we render the fields for namelist file from user environment variables
-    f90nml_object = template.render(**os.environ)
-    # instantiate Python lib's f90nml Parser Object
+    # instantiate Jinja2 environment and template
+    env = Environment(loader=FileSystemLoader(cla.input_template))
+    template = env.get_template('')
+
+    # Gather the undefined template variables
+    j2_parsed = env.parse(env.loader.get_source(env, ''))
+    undeclared_variables = meta.find_undeclared_variables(j2_parsed)
+
+
+    # Render the template with the specified config object
+    rendered_template = template.render(**cfg)
+
     parser = f90nml.Parser()
     # write out fully qualified and populated f90 namelist file
-    nml = parser.reads(f90nml_object)
-
+    nml = parser.reads(rendered_template)
 
     if cla.dry_run or cla.values_needed:
         if cla.outfile:
-            print(f'warning file {f90nml_file} not written when using --dry_run or --values_needed')
+            print(f'warning file {cla.outfile} not written when using --dry_run or --values_needed')
     # apply switch to allow user to view the results of namelist instead of writing to disk
     if cla.dry_run:
         print(nml)
     # apply switch to print out required template values
     if cla.values_needed:
-        with open(jinja_template_file,encoding='utf-8') as file:
-            j2_parsed = env.parse(file.read())
-            for each_var in meta.find_undeclared_variables(j2_parsed):
-                print(each_var)
+        for var in undeclared_variables:
+            print(var)
     # write out f90 name list
     if not cla.dry_run and not cla.values_needed:
-        with open(f90nml_file, 'w+', encoding='utf-8') as nml_file:
+        with open(cla.outfile, 'w+', encoding='utf-8') as nml_file:
             f90nml.write(nml, nml_file)
 
 if __name__ == '__main__':
-    set_namelist_ingest(sys.argv[1:])
+    set_template(sys.argv[1:])
