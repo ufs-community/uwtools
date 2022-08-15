@@ -58,13 +58,11 @@ class Config(collections.UserDict):
     def _load(self):
         ''' Interface to load a config file given the config_path
         attribute. Returns a dict object. '''
-        pass
 
     @abc.abstractmethod
     def dump_file(self, output_path):
         ''' Interface to write a config object to a file at the
         output_path provided. '''
-        pass
 
     def parse_include(self):
         '''Borrowing from pyyaml, traverse the dict to treat the
@@ -72,14 +70,12 @@ class Config(collections.UserDict):
         is left for further exploration and design in PI6, and applies
         to any non-YAML config file types, so putting it in the base
         class for now.'''
-        pass
 
     def replace_templates(self):
         ''' This method will be used as a method by which any Config
         object can cycle through its key/value pairs recursively,
         replacing Jinja2 templates as necessary. This is a placeholder
         until more details are fleshed out in work scheduled for PI6.'''
-        pass
 
 
 class YAMLConfig(Config):
@@ -98,15 +94,15 @@ class YAMLConfig(Config):
         ''' Load the user-provided YAML config file path into a dict
         object. '''
 
-        with open(file_name, 'r') as fn:
-            cfg = yaml.load(fn, Loader=yaml.SafeLoader)
+        with open(self.config_path, 'r', encoding="utf-8") as file_name:
+            cfg = yaml.load(file_name, Loader=yaml.SafeLoader)
         return cfg
 
     def dump_file(self, output_path):
         ''' Write the dictionary to a YAML file '''
 
-        with open(output_path, 'w') as fn:
-            yaml.dump(self, fn)
+        with open(output_path, 'w', encoding="utf-8") as file_name:
+            yaml.dump(self.data, file_name, sort_keys=False)
 
 
 class F90Config(Config):
@@ -123,14 +119,14 @@ class F90Config(Config):
     def _load(self):
         ''' Load the user-provided Fortran namelist path into a dict
         object. '''
-        with open(file_name, 'r') as fn:
-            cfg = f90nml.read(fn)
-        return cfg.todict()
+        with open(self.config_path, 'r', encoding="utf-8") as file_name:
+            cfg = f90nml.read(file_name)
+        return cfg.todict(complex_tuple=False)
 
     def dump_file(self, output_path):
         ''' Write the dict to a namelist file. '''
-        with open(output_path, 'w') as fn:
-            f90nml.Namelist(self).write(fn)
+        with open(output_path, 'w', encoding="utf-8") as file_name:
+            f90nml.Namelist(self.data).write(file_name)
 
 class INIConfig(Config):
 
@@ -154,18 +150,28 @@ class INIConfig(Config):
         object. '''
 
         cfg = configparser.ConfigParser()
-        cfg.read_file(self.config_path)
-        return cfg
+        try:
+            cfg.read(self.config_path)
+        except configparser.MissingSectionHeaderError:
+            with open(self.config_path, 'r', encoding="utf-8") as file_name:
+                cfg.read_string("[top]\n" + file_name.read())
+                return cfg._sections.get('top')
+
+        return cfg._sections
 
     def dump_file(self, output_path):
 
         ''' Write the dict to an INI file '''
 
         parser = configparser.ConfigParser()
-        parser.read_dict(self)
 
-        with open(output_path, 'w') as fn:
-            parser.write(fn, space_around_delimiters=self.space_around_delimiters)
+        with open(output_path, 'w', encoding="utf-8") as file_name:
+            try:
+                parser.read_dict(self.data)
+                parser.write(file_name, space_around_delimiters=self.space_around_delimiters)
+            except AttributeError:
+                for key, value in self.data.items():
+                    file_name.write(f'{key}={value}\n')
 
 class FieldTableConfig(YAMLConfig):
 
@@ -182,11 +188,8 @@ class FieldTableConfig(YAMLConfig):
     def _format_output(self):
         ''' Format the output of the dictionary into a string that
         matches that necessary for a field_table. Return the string'''
-        pass
 
-    def dump_file(self):
+    def dump_file(self, output_path):
         ''' Write the formatted output to a text file. '''
-        with open(output_path, 'w') as fn:
-            fn.write(self._format_output()1)
-
-
+        with open(output_path, 'w', encoding="utf-8") as file_name:
+            file_name.write(self._format_output())

@@ -3,13 +3,13 @@ import pathlib
 import pytest
 
 from uwtools.scheduler import JobScheduler
-from uwtools.loaders import load_yaml
+from uwtools import config
 
 
 def test_scheduler_dot_notation():
-    props = load_yaml(pathlib.Path("tests/fixtures/simple.yaml"))
+    props = config.YAMLConfig(pathlib.Path("tests/fixtures/simple.yaml"))
 
-    js = JobScheduler.get_scheduler(dict(props))
+    js = JobScheduler.get_scheduler(props)
     expected = "user_account"
     actual = js.account
 
