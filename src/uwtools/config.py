@@ -149,6 +149,9 @@ class INIConfig(Config):
         ''' Load the user-provided INI config file path into a dict
         object. '''
 
+        # The protected _sections method is the most straightroward way to get
+        # at the dict representation of the parse config.
+        # pylint: disable=protected-access
         cfg = configparser.ConfigParser()
         try:
             cfg.read(self.config_path)
