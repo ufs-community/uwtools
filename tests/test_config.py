@@ -2,7 +2,6 @@
 Set of test for loading YAML files using the function call load_yaml
 '''
 #pylint: disable=unused-variable
-from collections import OrderedDict
 import datetime
 import filecmp
 import os
@@ -48,15 +47,20 @@ def test_yaml_config_composite_types():
     test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/result4.yaml"))
     cfg = config.YAMLConfig(test_yaml)
 
-    assert cfg.get('step_cycle') == 'PT6H'
-    assert isinstance(cfg.get('init_cycle'), datetime.datetime)
 
-    generic_repos = cfg.get('generic_repos')
+    #assert cfg.get('step_cycle') == 'PT6H'
+    #assert isinstance(cfg.get('init_cycle'), datetime.datetime)
+    assert cfg.step_cycle == 'PT6H'
+    assert isinstance(cfg.init_cycle, datetime.datetime)
+
+    #generic_repos = cfg.get('generic_repos')
+    generic_repos = cfg.generic_repos
     assert isinstance(generic_repos, list)
     assert isinstance(generic_repos[0], dict)
     assert generic_repos[0].get('branch') == 'develop'
 
-    models = cfg.get('models')
+    #models = cfg.get('models')
+    models = cfg.models
     assert models[0].get('config').get('vertical_resolution') == 64
 
 
@@ -64,18 +68,20 @@ def test_f90nml_config_simple():
     '''Test that f90nml load, update, and dump work with a basic f90 namelist file. '''
 
     test_nml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.nml"))
-    cfg = config.F90Config(test_nml)
+    cfg = config.F90Config(config_path=test_nml)
+    result = cfg.config_obj
 
     expected = {
-        "salad": OrderedDict({
+        "salad": {
             "base": "kale",
             "fruit": "banana",
             "vegetable": "tomato",
             "how_many": 12,
             "dressing": "balsamic",
-            })
-    }
-    assert cfg == expected
+            }
+        }
+
+    assert result == expected
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
         out_file = f'{tmp_dir}/test_nml_dump.nml'
@@ -83,10 +89,10 @@ def test_f90nml_config_simple():
 
         assert filecmp.cmp(test_nml, out_file)
 
-    cfg.update({'dressing': ['ranch', 'italian']})
+    cfg.config_obj.update({'dressing': ['ranch', 'italian']})
     expected['dressing'] = ['ranch', 'italian']
 
-    assert cfg == expected
+    assert cfg.config_obj == expected
 
 
 def test_ini_config_simple():

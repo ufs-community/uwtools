@@ -3,8 +3,7 @@ Unit tests for testing Template Class
 '''
 #pylint: disable=unused-variable
 import os
-from uwtools.template import TemplateConstants, Template
-
+from uwtools.config import TemplateConstants, Template
 
 def test_substitute_string_from_dict():
     """
@@ -150,4 +149,5 @@ def test_substitute_with_dependencies():
                  'root': '/home/user',
                  'world': 'world'}
 
-    assert Template.substitute_with_dependencies(inputs,inputs,TemplateConstants.DOLLAR_PARENTHESES)==output
+    assert Template.substitute_with_dependencies(inputs,inputs,
+           TemplateConstants.DOLLAR_PARENTHESES)==output
