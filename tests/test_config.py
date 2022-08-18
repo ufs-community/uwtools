@@ -1,89 +1,146 @@
 '''
-test_config.py are the initial unit tests for the extending a YAML configuration tool:
-1. variable substitution
-2. ENV variable strigification
-3. A MOC include method to be implemented in PI5 as a YAML Tag !INCLUDE
-
-NOTE: The generic YAML parsing tests using the Template Class  are not to be intended as a
-representation of a final user interface and are packaged under the Configure Class for containment
+Set of test for loading YAML files using the function call load_yaml
 '''
-
 #pylint: disable=unused-variable
+from collections import OrderedDict
+import datetime
+import filecmp
 import os
 import pathlib
+import tempfile
 
-from uwtools.configure import Configure
-from uwtools.template import Template,TemplateConstants
+from uwtools import config
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
-def test_configuration_parse_env():
-    '''A basic test to check for env variables with the designator ${KEY} are realized'''
+def test_yaml_config_simple():
+    '''Test that YAML load, update, and dump work with a basic YAML file. '''
 
-    os.environ['TEST'] = 'TEST_TRUE'
-    config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.yaml"))
+    cfg = config.YAMLConfig(test_yaml)
 
-    expected = os.environ.get('TEST')
-    actual = config.test_env
-    assert actual == expected
+    expected = {
+        "scheduler": "slurm",
+        "jobname": "abcd",
+        "extra_stuff": 12345,
+        "account": "user_account",
+        "nodes": 1,
+        "queue": "bos",
+        "tasks_per_node": 4,
+        "walltime": "00:01:00",
+    }
+    assert cfg == expected
 
-def test_configuration_parse_env_no_var_present():
-    '''Tests case when no environment variable is present and KEY designator is preserved'''
-    config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/test_yaml_dump.yml'
+        cfg.dump_file(out_file)
+        assert filecmp.cmp(test_yaml, out_file)
 
-    expected = "${TEST_NOCHANGE}"
-    actual = config.test_noenv
-    assert actual == expected
+    cfg.update({'nodes': 12})
+    expected['nodes'] = 12
+
+    assert cfg == expected
+
+def test_yaml_config_composite_types():
+    ''' Test that YAML load and dump work with a YAML file that has
+    multiple data structures and levels. '''
+
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/result4.yaml"))
+    cfg = config.YAMLConfig(test_yaml)
+
+    assert cfg.get('step_cycle') == 'PT6H'
+    assert isinstance(cfg.get('init_cycle'), datetime.datetime)
+
+    generic_repos = cfg.get('generic_repos')
+    assert isinstance(generic_repos, list)
+    assert isinstance(generic_repos[0], dict)
+    assert generic_repos[0].get('branch') == 'develop'
+
+    models = cfg.get('models')
+    assert models[0].get('config').get('vertical_resolution') == 64
 
 
-# A test to see the ${KEY} designator is left untouched as $(KEY)
-# is expanded from a key value pair from a second YAML file.
-# In the following PI5 this include method will be implemented as an !INCLUDE tag
-def test_configuration_update():
-    '''A test to see the ${KEY} designator is left untouched as $(KEY)'''
+def test_f90nml_config_simple():
+    '''Test that f90nml load, update, and dump work with a basic f90 namelist file. '''
 
-    config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-    config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
+    test_nml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.nml"))
+    cfg = config.F90Config(test_nml)
 
-    expected =  "/home/myexpid/{{current_cycle}}"
-    actual = config.datapath
+    expected = {
+        "salad": OrderedDict({
+            "base": "kale",
+            "fruit": "banana",
+            "vegetable": "tomato",
+            "how_many": 12,
+            "dressing": "balsamic",
+            })
+    }
+    assert cfg == expected
 
-    assert actual == expected
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/test_nml_dump.nml'
+        cfg.dump_file(out_file)
 
-# A similar test to see if a configure object (in this case a NiceDict Object) can also be updated
-# Notice the optional argument designed by the keyword data is being tested here
-def test_configuration_update_object():
-    '''Test to see if a configure object can also be updated'''
+        assert filecmp.cmp(test_nml, out_file)
 
-    config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-    config2 = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
-    config.include(data=config2)
+    cfg.update({'dressing': ['ranch', 'italian']})
+    expected['dressing'] = ['ranch', 'italian']
 
-    expected =  "/home/myexpid/{{current_cycle}}"
-    actual = config.datapath
+    assert cfg == expected
 
-    assert actual == expected
 
-def test_configuration_inplace_update():
-    '''A test the $(KEY) designator is expanded from a key value pair that is in the same file'''
+def test_ini_config_simple():
+    '''Test that INI config load and dump work with a basic INI file.
+    Everything in INI is treated as a string!
+    '''
 
-    config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
+    test_ini = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.ini"))
+    cfg = config.INIConfig(test_ini)
 
-    expected =  "testpassed"
-    actual = config.testupdate
+    expected = {
+        "salad": {
+            "base": "kale",
+            "fruit": "banana",
+            "vegetable": "tomato",
+            "how_many": "12",
+            "dressing": "balsamic",
+            }
+    }
+    assert cfg == expected
 
-    assert actual == expected
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/test_ini_dump.ini'
+        cfg.dump_file(out_file)
 
-# A test to check that the {{KEY}} works. Note this does not represent the user interface
-# this is a test that shows how to use the Template Class for when this is implemented
-def test_configuration_realtime_update():
-    '''A test to check that the {{KEY}} works'''
+        assert filecmp.cmp(test_ini, out_file)
 
-    config = Configure(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/experiment.yaml")))
-    config.include(pathlib.Path(os.path.join(uwtools_file_base,"fixtures/gfs.yaml")))
-    config = Template.substitute_structure(config,TemplateConstants.DOUBLE_CURLY_BRACES,config.get)
+    cfg.update({'dressing': ['ranch', 'italian']})
+    expected['dressing'] = ['ranch', 'italian']
+    assert cfg == expected
 
-    expected =  "/home/myexpid/10102022"
-    actual = config.updated_datapath
+def test_ini_config_bash():
 
-    assert actual == expected
+    '''Test that INI config load and dump work with a basic bash file.
+    '''
+
+    test_bash = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.sh"))
+    cfg = config.INIConfig(test_bash, space_around_delimiters=False)
+
+    expected = {
+        "base": "kale",
+        "fruit": "banana",
+        "vegetable": "tomato",
+        "how_many": "12",
+        "dressing": "balsamic",
+    }
+    assert cfg == expected
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/test_bash_dump.sh'
+        cfg.dump_file(out_file)
+
+        assert filecmp.cmp(test_bash, out_file)
+
+    cfg.update({'dressing': ['ranch', 'italian']})
+    expected['dressing'] = ['ranch', 'italian']
+    assert cfg == expected
