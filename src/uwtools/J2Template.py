@@ -43,7 +43,7 @@ class J2Template():
 
     '''
 
-    def __init__(self, configure_path=None, template_path=None, template_str=None):
+    def __init__(self, configure_path=None, data=None, template_path=None, template_str=None):
         '''
         Parameters
         ----------
@@ -55,6 +55,8 @@ class J2Template():
         '''
         if configure_path is not None:
             self.configure_obj = YAMLConfig(configure_path)
+        elif data is not None:
+            self.configure_obj = data
         if template_path is not None:
             self.template_file = template_path
             self.template = self.__load_file(template_path)

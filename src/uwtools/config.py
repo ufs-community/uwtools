@@ -106,7 +106,7 @@ class YAMLConfig(Config):
         with open(self.config_path, 'r', encoding="utf-8") as file_name:
             config = yaml.load(file_name, Loader=yaml.Loader)
             self.config_obj = config
-            self.update(self._configure(config))
+            self.update(config)
         return config
 
     # This is the overloaded method for UserDict to realize dot notation resolution
@@ -116,18 +116,6 @@ class YAMLConfig(Config):
             return self.__dict__["data"][item]
             #return self[item]
         raise AttributeError(f"'{type(self)}' object has no attribute '{item}'")
-
-    def _configure(self, config):
-        for key, value in config.items():
-            if isinstance(value, dict):
-                config[key] = value
-                self._configure(value)
-            elif isinstance(value, list):
-                for i, var in enumerate(value):
-                    if isinstance(var, dict):
-                        value[i] = var
-                        self._configure(var)
-        return config
 
     def parse_include(self,config_file=None,data=None,from_environment=None,replace_realtime=None):
         ''' Sample code needed to implement the !INCLUDE tag '''
@@ -147,7 +135,7 @@ class YAMLConfig(Config):
         config = Template.substitute_with_dependencies(config,config,
                  TemplateConstants.DOLLAR_PARENTHESES,shallow_precedence=False)
         if config is not None:
-            self.update(self._configure(config))
+            self.update(config)
         self.config_obj = config
         return config
 

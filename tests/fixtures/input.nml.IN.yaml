@@ -1,0 +1,24 @@
+ FDIAG : 6
+ INPES : 3
+ JNPES : 8
+ NPX : 97
+ NPY : 97
+ NPZ : 64
+ MAKE_NH : '.T.'
+ NA_INIT : 1
+ EXTERNAL_IC : '.T.'
+ NGGPS_IC : '.T.'
+ MOUNTAIN : '.F.'
+ WARM_START : '.F.'
+ READ_INCREMENT : '.F.'
+ NPZP : 65
+ NSTF_NAME : '0,1,1,0,5'
+ IAU_INC_FILES : 'placeholder.txt'
+ FNALBC : 'global_snowfree_albedo.bosu.t126.384.190.rg.grb'
+ FNVETC : 'global_vegtype.igbp.t126.384.190.rg.grb'
+ FNSOTC : 'global_soiltype.statsgo.t126.384.190.rg.grb'
+ FNSMCC : 'global_soilmgldas.t126.384.190.grb'
+ FNABSC : 'global_mxsnoalb.uariz.t126.384.190.rg.grb'
+ SKEB: ${SKEB}
+ SHUM: ${SHUM}
+ SPPT: ${SPPT}

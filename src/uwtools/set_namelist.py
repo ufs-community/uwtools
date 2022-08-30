@@ -11,10 +11,11 @@ in turn populates a Name List Jinja2 template and generates and Fortran Name Lis
 file using python f90nml
 '''
 
+from calendar import c
 import sys
 import argparse
 
-from uwtools.config import F90Config
+from uwtools import config
 from uwtools.J2Template import J2Template
 
 def parse_args(argv):
@@ -57,14 +58,33 @@ def parse_args(argv):
                        help='If provided, suppress all output.',
                        )
 
+
+    parser.add_argument("--set",
+                        metavar="KEY=VALUE",
+                        nargs='*',
+                        help="Set a number of key-value pairs "
+                             "(do not put spaces before or after the = sign). "
+                        )
+
+    args = parser.parse_args()
+
     return parser.parse_args(argv)
 
 def set_namelist(argv):
     '''Main section for set_namelist utility'''
 
     cla = parse_args(argv)
-    j2t_obj = J2Template(configure_path=cla.config,template_path=cla.template_input_nml)
-    nml = F90Config(data=j2t_obj.render_template())
+
+    if cla.config is not None:
+        nl_values_yaml = config.YAMLConfig(config_path=cla.config)
+        nl_values_yaml.parse_include(config_file=cla.config,from_environment=True)
+
+    if cla.set is not None:
+        nl_commandline_values = dict(map(lambda s: s.split('='), cla.set))
+        nl_values_yaml.parse_include(data=nl_commandline_values)
+ 
+    j2t_obj = J2Template(data=nl_values_yaml,template_path=cla.template_input_nml)
+    nml = config.F90Config(data=j2t_obj.render_template())
 
     if cla.values_needed:
         for values in j2t_obj.undeclared_variables():
