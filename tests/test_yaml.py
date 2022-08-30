@@ -23,7 +23,8 @@ def test_yaml_parse_env():
 
     os.environ['TEST'] = 'TEST_TRUE'
     yaml_config3 = config.YAMLConfig(PurePath().joinpath(uwtools_pwd,"fixtures/experiment.yaml"))
-    yaml_config_env = yaml_config3.parse_include(config_file=yaml_config.config_path, from_environment=True)
+    yaml_config_env = yaml_config3.parse_include(config_file=yaml_config.config_path,
+                                                 from_environment=True)
     expected = os.environ.get('TEST')
     actual = yaml_config_env.get('test_env')
     assert actual == expected

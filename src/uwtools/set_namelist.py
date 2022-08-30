@@ -11,7 +11,6 @@ in turn populates a Name List Jinja2 template and generates and Fortran Name Lis
 file using python f90nml
 '''
 
-from calendar import c
 import sys
 import argparse
 
@@ -66,8 +65,6 @@ def parse_args(argv):
                              "(do not put spaces before or after the = sign). "
                         )
 
-    args = parser.parse_args()
-
     return parser.parse_args(argv)
 
 def set_namelist(argv):
@@ -82,7 +79,7 @@ def set_namelist(argv):
     if cla.set is not None:
         nl_commandline_values = dict(map(lambda s: s.split('='), cla.set))
         nl_values_yaml.parse_include(data=nl_commandline_values)
- 
+
     j2t_obj = J2Template(data=nl_values_yaml,template_path=cla.template_input_nml)
     nml = config.F90Config(data=j2t_obj.render_template())
 
