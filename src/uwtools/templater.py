@@ -14,7 +14,7 @@ import f90nml
 
 from uwtools import config
 
-def file_exists(arg):
+def path_if_file_exists(arg):
     ''' Checks whether a file exists, and returns the path if it does. '''
     if not os.path.exists(arg):
         msg = f'{arg} does not exist!'
@@ -40,13 +40,13 @@ def parse_args(argv):
         '-i', '--input_template',
         help='Path to a Jinja2 template file.',
         required=True,
-        type=file_exists,
+        type=path_if_file_exists,
         )
     parser.add_argument(
         '-c', '--config_file',
         help='Optional path to a YAML configuration file. If not provided, '
         'os.environ is used to configure.',
-        type=file_exists,
+        type=path_if_file_exists,
         )
     parser.add_argument(
         '-d', '--dry_run',
@@ -63,23 +63,23 @@ def parse_args(argv):
 def set_template(argv):
     '''Main section for set_namelist ingest utility'''
 
-    cla = parse_args(argv)
+    user_args = parse_args(argv)
 
-    if cla.config_file:
-        cfg = config.YAMLConfig(cla.config_file)
+    if user_args.config_file:
+        cfg = config.YAMLConfig(user_args.config_file)
     else:
         cfg = os.environ
 
 
     # instantiate Jinja2 environment and template
-    env = Environment(loader=FileSystemLoader(cla.input_template))
+    env = Environment(loader=FileSystemLoader(user_args.input_template))
     template = env.get_template('')
 
     # Gather the undefined template variables
     j2_parsed = env.parse(env.loader.get_source(env, ''))
     undeclared_variables = meta.find_undeclared_variables(j2_parsed)
 
-    if cla.values_needed:
+    if user_args.values_needed:
         print('Values needed for this template are:')
         for var in sorted(undeclared_variables):
             print(var)
@@ -93,16 +93,14 @@ def set_template(argv):
     # write out fully qualified and populated f90 namelist file
     nml = parser.reads(rendered_template)
 
-    if cla.dry_run:
-        if cla.outfile:
-            print(f'warning file {cla.outfile} not written when using --dry_run or --values_needed')
-    # apply switch to allow user to view the results of namelist instead of writing to disk
-    if cla.dry_run:
+    if user_args.dry_run:
+        if user_args.outfile:
+            print(f'warning file {user_args.outfile} not written when using --dry_run')
+        # apply switch to allow user to view the results of namelist instead of writing to disk
         print(nml)
-    # apply switch to print out required template values
-    # write out f90 name list
-    if not cla.dry_run and not cla.values_needed:
-        with open(cla.outfile, 'w+', encoding='utf-8') as nml_file:
+    else:
+        # write out f90 name list
+        with open(user_args.outfile, 'w+', encoding='utf-8') as nml_file:
             f90nml.write(nml, nml_file)
 
 if __name__ == '__main__':

@@ -47,7 +47,6 @@ def test_yaml_config_composite_types():
     test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/result4.yaml"))
     cfg = config.YAMLConfig(test_yaml)
 
-
     #assert cfg.get('step_cycle') == 'PT6H'
     #assert isinstance(cfg.get('init_cycle'), datetime.datetime)
     assert cfg.step_cycle == 'PT6H'
@@ -62,7 +61,6 @@ def test_yaml_config_composite_types():
     #models = cfg.get('models')
     models = cfg.models
     assert models[0].get('config').get('vertical_resolution') == 64
-
 
 def test_f90nml_config_simple():
     '''Test that f90nml load, update, and dump work with a basic f90 namelist file. '''

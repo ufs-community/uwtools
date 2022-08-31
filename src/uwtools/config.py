@@ -1,6 +1,6 @@
 '''
 This file contains the Config file and its subclasses for a variety of
-dicatable file types. 
+dicatable file types.
 '''
 
 import abc
@@ -42,7 +42,6 @@ class Config(collections.UserDict):
 
     '''
 
-
     def __init__(self, config_path):
 
         '''
@@ -78,7 +77,6 @@ class Config(collections.UserDict):
         object can cycle through its key/value pairs recursively,
         replacing Jinja2 templates as necessary. This is a placeholder
         until more details are fleshed out in work scheduled for PI6.'''
-
 
 class YAMLConfig(Config):
     '''Class for YAML loader and support for in place value subsitution and include'''
@@ -132,7 +130,6 @@ class YAMLConfig(Config):
         with open(output_path, 'w+', encoding="utf-8") as file_name:
             if self.config_obj is not None:
                 yaml.dump(self.config_obj, file_name, sort_keys=False)
-
 class F90Config(Config):
 
     ''' Concrete class to handle Fortran namelist files. '''
@@ -163,7 +160,6 @@ class F90Config(Config):
         with open(output_path, 'w+', encoding="utf-8") as file_name:
             f90nml.write(self.config_obj,file_name)
             #f90nml.Namelist(self.data).write(file_name)
-
 class INIConfig(Config):
 
     ''' Concrete class to handle INI config files. '''
