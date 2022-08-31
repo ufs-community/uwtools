@@ -84,8 +84,9 @@ def set_namelist(argv):
     nml = config.F90Config(data=j2t_obj.render_template())
 
     if cla.values_needed:
-        for values in j2t_obj.undeclared_variables():
-            print(values)
+        #for values in j2t_obj.undeclared_variables():
+        #    print(values)
+        j2t_obj.validate_config()
     if cla.dry_run:
         print(nml.config_obj)
         print(cla.outfile)

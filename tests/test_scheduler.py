@@ -5,9 +5,10 @@ import pytest
 from uwtools.scheduler import JobScheduler
 from uwtools import config
 
+uwtools_pwd = pathlib.PurePath(__file__).parents[0]
 
 def test_scheduler_dot_notation():
-    props = config.YAMLConfig(pathlib.Path("tests/fixtures/simple.yaml"))
+    props = config.YAMLConfig(pathlib.PurePath.joinpath(uwtools_pwd,"fixtures/simple.yaml"))
 
     js = JobScheduler.get_scheduler(props)
     expected = "user_account"

@@ -58,7 +58,7 @@ class J2Template():
         elif data is not None:
             self.configure_obj = data
         if template_path is not None:
-            self.template_file = template_path
+            self.template_path = template_path
             self.template = self.__load_file(template_path)
         elif template_str is not None:
             self.template = self.__load_string(template_str)
@@ -81,7 +81,7 @@ class J2Template():
 
     def undeclared_variables(self):
         ''' Generates a list of variables needed for self.template '''
-        with open(self.template_file ,encoding='utf-8') as __file:
+        with open(self.template_path ,encoding='utf-8') as __file:
             j2_parsed = self.__j2env.parse(__file.read())
             return meta.find_undeclared_variables(j2_parsed)
 
@@ -93,10 +93,21 @@ class J2Template():
         with open(output_path,'w+',encoding='utf-8') as __file:
             __file.write(__render)
 
-
     def validate_config(self):
         '''
         Match the provided configure_obj with the undeclared variables.
         Provide user feedback about variables that should be provided
         before exiting.
         '''
+
+        values_needed = self.undeclared_variables()
+
+        for key,value in self.configure_obj.items():
+            if key in values_needed:
+                print(f"SET     {key} : {value}")
+            else:
+                print(f"Value   {key} : {value} not in template")
+
+        for value in values_needed:
+            if value not in self.configure_obj:
+                print(f"SET NOT {value}")

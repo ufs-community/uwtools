@@ -6,6 +6,7 @@ import os
 from pathlib import Path,PurePath
 import subprocess
 import tempfile
+import filecmp
 
 uwtools_pwd = PurePath(__file__).parents[0]
 exec_test = PurePath().joinpath(uwtools_pwd,'../src/uwtools/set_namelist.py')
@@ -62,3 +63,18 @@ def test_set_namelist_ingest_outputfile():
     assert outcome == outfile_contents
 
     out_file.close()
+
+def test_set_namelest_functional():
+    '''functional test for set_namelist'''
+    input_nml_yaml = Path().joinpath(uwtools_pwd,'fixtures/input.nml.IN.yaml')
+    input_nml_in   = Path().joinpath(uwtools_pwd,'fixtures/input.nml.IN')
+    check_nml_output_file = Path().joinpath(uwtools_pwd,'fixtures/input.nml.f90')
+
+    the_env = os.environ.copy()
+    the_env['SKEB']='999'
+    with tempfile.NamedTemporaryFile(suffix='.f90',prefix='input_nml',dir='/tmp') as output_nml_f90:
+        subprocess.check_output([exec_test,'-i',input_nml_in,'-c',input_nml_yaml,
+                                           '--set','SHUM=-99.0','SPPT=-979.0',
+                                           '-o',output_nml_f90.name],env=the_env)
+
+        assert filecmp.cmp( output_nml_f90.name, check_nml_output_file )

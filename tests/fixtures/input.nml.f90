@@ -221,15 +221,15 @@
     skeb = 999
     skeb_tau = 21600.0
     skeb_lscale = 1000000.0
-    shum = ,
-/
-
-&{
+    shum = -99.0
+    shum_tau = 21600
+    shum_lscale = 500000
+    sppt = -979.0
     sppt_tau = 21600
     sppt_lscale = 500000
     sppt_logit = .true.
     sppt_sfclimit = .true.
     iseed_shum = 1
     iseed_skeb = 2
-    iseed_sppt = ,
+    iseed_sppt = 3
 /
