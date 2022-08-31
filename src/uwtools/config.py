@@ -2,9 +2,6 @@
 This file contains the Config file and its subclasses for a variety of
 dicatable file types.
 '''
-import re
-import os
-import copy
 
 import abc
 import collections
@@ -12,6 +9,7 @@ import configparser
 
 import f90nml
 import yaml
+
 class Config(collections.UserDict):
 
     '''
@@ -50,19 +48,12 @@ class Config(collections.UserDict):
         Parameters
         ----------
         config_path : Path (See Above)
+
         '''
 
         super().__init__()
 
         self.config_path = config_path
-
-    # Moved back into YAMLConifig to suppor polymorphisms
-    #def __getattr__(self, item):
-    #    '''overloaded function to UserDict to support dot resolution'''
-    #    if item in self:
-    #        return self.__dict__["data"][item]
-    #        #return self[item]
-    #    raise AttributeError(f"'{type(self)}' object has no attribute '{item}'")
 
     @abc.abstractmethod
     def _load(self):
@@ -249,6 +240,11 @@ class FieldTableConfig(YAMLConfig):
 #
 # Part of this software is developed by the Joint Center for Satellite Data
 # Assimilation (JCSDA) together with its partners.
+
+#pylint: disable=wrong-import-position,wrong-import-order
+import re
+import os
+import copy
 
 from collections.abc import Sequence
 from dataclasses import dataclass
