@@ -10,7 +10,7 @@ import configparser
 import f90nml
 import yaml
 
-from uwtools.yaml_file import Template, TemplateConstants 
+from uwtools.yaml_file import Template, TemplateConstants
 class Config(collections.UserDict):
 
     '''

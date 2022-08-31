@@ -5,7 +5,7 @@
 #
 # Part of this software is developed by the Joint Center for Satellite Data
 # Assimilation (JCSDA) together with its partners.
-
+'''module to support YAML value foward stingfication substitusions and inclusion'''
 import re
 import os
 import copy
