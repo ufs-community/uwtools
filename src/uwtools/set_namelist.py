@@ -12,6 +12,7 @@ file using python f90nml
 '''
 
 import sys
+import os
 import argparse
 
 from uwtools import config
@@ -42,7 +43,7 @@ def parse_args(argv):
                        )
     # YAML config file for name list generation containing name list values
     parser.add_argument('-c', '--config',
-                       required=True,
+                       required=False,
                        help='Path ito yaml configuration file for setting f90 name list generation',
                        )
     # single switch for printing to stdout the f90 namelist output file
@@ -67,20 +68,45 @@ def parse_args(argv):
 
     return parser.parse_args(argv)
 
+def get_nl_values(cla):
+    '''get name list values to be filled designated by command line'''
+
+    def file_exists_and_readable(check_file):
+        if os.path.isfile(check_file):
+            if not os.access(check_file, os.R_OK):
+                print(f"File {check_file} exists but is is not readable")
+                sys.exit(-1)
+        else:
+            print(f"File {check_file} does not exist")
+            sys.exit(-1)
+
+    file_exists_and_readable(cla.template_input_nml)
+    if cla.config is not None:
+        file_exists_and_readable(cla.config)
+
+        nl_values_yaml = config.YAMLConfig(config_path=cla.config)
+        nl_values_yaml.parse_include(config_file=cla.config,from_environment=True)
+        if cla.set is not None:
+            nl_commandline_values = dict(map(lambda s: s.split('='), cla.set))
+            nl_values_yaml.parse_include(data=nl_commandline_values)
+
+    if cla.config is None and cla.set is not None:
+        nl_values_yaml = dict(map(lambda s: s.split('='), cla.set))
+
+    if cla.config is None and cla.set is None:
+        print("No values for templating name list were given. Defaultng to environment variables only") #pylint: disable=line-too-long
+        nl_values_yaml = os.environ.copy()
+
+    return nl_values_yaml
+
+
 def set_namelist(argv):
     '''Main section for set_namelist utility'''
 
     cla = parse_args(argv)
+    nl_values = get_nl_values(cla)
 
-    if cla.config is not None:
-        nl_values_yaml = config.YAMLConfig(config_path=cla.config)
-        nl_values_yaml.parse_include(config_file=cla.config,from_environment=True)
-
-    if cla.set is not None:
-        nl_commandline_values = dict(map(lambda s: s.split('='), cla.set))
-        nl_values_yaml.parse_include(data=nl_commandline_values)
-
-    j2t_obj = J2Template(data=nl_values_yaml,template_path=cla.template_input_nml)
+    j2t_obj = J2Template(data=nl_values,template_path=cla.template_input_nml)
     nml = config.F90Config(data=j2t_obj.render_template())
 
     if cla.values_needed:

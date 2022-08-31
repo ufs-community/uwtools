@@ -4,6 +4,7 @@
 J2Template Class
 '''
 
+from os import environ
 from jinja2 import Environment, BaseLoader, FileSystemLoader, meta
 from uwtools.config import YAMLConfig
 
@@ -106,7 +107,8 @@ class J2Template():
             if key in values_needed:
                 print(f"SET     {key} : {value}")
             else:
-                print(f"Value   {key} : {value} not in template")
+                if key not in environ:
+                    print(f"Value   {key} : {value} not in template")
 
         for value in values_needed:
             if value not in self.configure_obj:
