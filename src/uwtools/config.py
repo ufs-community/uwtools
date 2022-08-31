@@ -2,21 +2,17 @@
 This file contains the Config file and its subclasses for a variety of
 dicatable file types.
 '''
-
 import re
 import os
 import copy
 
-from abc import abstractmethod
+import abc
+import collections
 import configparser
-
-from collections import namedtuple, UserDict
-from collections.abc import Sequence
-from dataclasses import dataclass
 
 import f90nml
 import yaml
-class Config(UserDict):
+class Config(collections.UserDict):
 
     '''
     This base class provides the interface to methods used to read in
@@ -68,12 +64,12 @@ class Config(UserDict):
     #        #return self[item]
     #    raise AttributeError(f"'{type(self)}' object has no attribute '{item}'")
 
-    @abstractmethod
+    @abc.abstractmethod
     def _load(self):
         ''' Interface to load a config file given the config_path
         attribute. Returns a dict object. '''
 
-    @abstractmethod
+    @abc.abstractmethod
     def dump_file(self, output_path):
         ''' Interface to write a config object to a file at the
         output_path provided. '''
@@ -254,7 +250,8 @@ class FieldTableConfig(YAMLConfig):
 # Part of this software is developed by the Joint Center for Satellite Data
 # Assimilation (JCSDA) together with its partners.
 
-
+from collections.abc import Sequence
+from dataclasses import dataclass
 @dataclass
 class TemplateConstants:
     '''Supported identifiers for variable substitution'''
@@ -264,8 +261,7 @@ class TemplateConstants:
     AT_SQUARE_BRACES = '@[]'
     AT_ANGLE_BRACKETS = '@<>'
 
-    SubPair = namedtuple('SubPair', ['regex', 'slice'])
-
+    SubPair = collections.namedtuple('SubPair', ['regex', 'slice'])
 class Template:
 
     """
@@ -374,7 +370,7 @@ class Template:
         if isinstance(structure_to_substitute, dict):
             for key, item in structure_to_substitute.items():
                 structure_to_substitute[key] = cls.substitute_structure(item, var_type, get_value)
-        elif isinstance(structure_to_substitute,Sequence)\
+        elif isinstance(structure_to_substitute, Sequence)\
         and not isinstance(structure_to_substitute,str):
             for i, item in enumerate(structure_to_substitute):
                 structure_to_substitute[i] = cls.substitute_structure(item, var_type, get_value)
