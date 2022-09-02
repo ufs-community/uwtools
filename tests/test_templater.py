@@ -110,3 +110,28 @@ def test_set_template_yaml_config():
         templater.set_template(args)
 
         assert filecmp.cmp(expected_file, out_file)
+
+def test_set_template_yaml_config_model_configure():
+    '''Tests that the templater will work as expected for a simple model_configure
+    file. '''
+
+    input_file = os.path.join(uwtools_file_base,
+                              "fixtures/model_configure.sample.IN")
+    config_file = os.path.join(uwtools_file_base,
+                               "fixtures/model_configure.values.yaml")
+    expected_file = os.path.join(uwtools_file_base,
+                                 "fixtures/model_configure.sample")
+
+    # Make sure the output file matches the expected output
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/test_render_from_yaml.nml'
+
+        args = [
+             '-i', input_file,
+             '-c', config_file,
+             '-o', out_file,
+             ]
+
+        templater.set_template(args)
+
+        assert filecmp.cmp(expected_file, out_file)
