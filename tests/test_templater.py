@@ -15,6 +15,16 @@ from uwtools import templater
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
+def show_files(expected, actual):
+    '''Prints the contents of two compared files to std out'''
+    print('The expected file looks like:')
+    with open(expected, 'r') as expected_file:
+        print(expected_file.read)
+    print('*' * 80)
+    print('The rendered file looks like:')
+    with open(actual, 'r') as actual_file:
+        print(actual_file.read)
+
 def test_path_if_file_exists():
     """ Make sure the function works as expected. It is used as a type in
     argparse, so raises an argparse exception when the user provides a
@@ -109,7 +119,10 @@ def test_set_template_yaml_config():
 
         templater.set_template(args)
 
-        assert filecmp.cmp(expected_file, out_file)
+        files_match = filecmp.cmp(expected_file, out_file)
+        if not files_match:
+            show_files(expected_file, out_file)
+        assert files_match
 
 def test_set_template_yaml_config_model_configure():
     '''Tests that the templater will work as expected for a simple model_configure
@@ -133,5 +146,7 @@ def test_set_template_yaml_config_model_configure():
              ]
 
         templater.set_template(args)
-
-        assert filecmp.cmp(expected_file, out_file)
+        files_match = filecmp.cmp(expected_file, out_file)
+        if not files_match:
+            show_files(expected_file, out_file)
+        assert files_match
