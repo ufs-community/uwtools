@@ -4,7 +4,6 @@ Tests for templater tool.
 """
 from contextlib import redirect_stdout
 import argparse
-import filecmp
 import io
 import os
 import tempfile
