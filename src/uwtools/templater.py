@@ -91,7 +91,8 @@ def set_template(argv):
     if user_args.dry_run:
         if user_args.outfile:
             print(f'warning file {user_args.outfile} not written when using --dry_run')
-        # apply switch to allow user to view the results of rendered template instead of writing to disk
+        # apply switch to allow user to view the results of rendered template
+        # instead of writing to disk
         print(rendered_template)
     else:
         # write out rendered template to file
