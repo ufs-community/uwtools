@@ -15,15 +15,24 @@ from uwtools import templater
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
-def show_files(expected, actual):
-    '''Prints the contents of two compared files to std out'''
-    print('The expected file looks like:')
+def compare_files(expected, actual):
+    '''Compares the content of two files. Doing this over filecmp.cmp since we
+    may not be able to handle end-of-file character differences with it.
+    Prints the contents of two compared files to std out if they do not match.'''
     with open(expected, 'r', encoding='utf-8') as expected_file:
-        print(expected_file.read())
-    print('*' * 80)
-    print('The rendered file looks like:')
+        expected_content = expected_file.read()
     with open(actual, 'r', encoding='utf-8') as actual_file:
-        print(actual_file.read())
+        actual_content = actual_file.read()
+
+    if expected_content != actual_content:
+        print('The expected file looks like:')
+        print(expected_content)
+        print('*' * 80)
+        print('The rendered file looks like:')
+        print(actual_content)
+        return False
+
+    return True
 
 def test_path_if_file_exists():
     """ Make sure the function works as expected. It is used as a type in
@@ -119,10 +128,7 @@ def test_set_template_yaml_config():
 
         templater.set_template(args)
 
-        files_match = filecmp.cmp(expected_file, out_file)
-        if not files_match:
-            show_files(expected_file, out_file)
-        assert files_match
+        assert compare_files(expected_file, out_file)
 
 def test_set_template_yaml_config_model_configure():
     '''Tests that the templater will work as expected for a simple model_configure
@@ -146,7 +152,4 @@ def test_set_template_yaml_config_model_configure():
              ]
 
         templater.set_template(args)
-        files_match = filecmp.cmp(expected_file, out_file)
-        if not files_match:
-            show_files(expected_file, out_file)
-        assert files_match
+        assert compare_files(expected_file, out_file)
