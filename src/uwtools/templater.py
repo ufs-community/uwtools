@@ -9,10 +9,15 @@ import os
 import sys
 import argparse
 
-from jinja2 import Environment, FileSystemLoader, meta
+from jinja2 import Environment, FileSystemLoader, meta, StrictUndefined
 import f90nml
 
 from uwtools import config
+
+def dict_from_config_args(args):
+    '''Given a list of command line arguments in the form key=value, return a
+    dictionary of key/value pairs.'''
+    return dict([arg.split('=') for arg in args])
 
 def path_if_file_exists(arg):
     ''' Checks whether a file exists, and returns the path if it does. '''
@@ -49,6 +54,13 @@ def parse_args(argv):
         type=path_if_file_exists,
         )
     parser.add_argument(
+        'config_items',
+        help='Any number of configuration settings that will override values '
+        'found in YAML or user environment.',
+        metavar='KEY=VALUE',
+        nargs='*',
+        )
+    parser.add_argument(
         '-d', '--dry_run',
         action='store_true',
         help='If provided, print rendered template to stdout only',
@@ -70,9 +82,15 @@ def set_template(argv):
     else:
         cfg = os.environ
 
+    if user_args.config_items:
+        user_settings = dict_from_config_args(user_args.config_items)
+        cfg.update(user_settings)
 
     # instantiate Jinja2 environment and template
-    env = Environment(loader=FileSystemLoader(user_args.input_template))
+    env = Environment(
+        loader=FileSystemLoader(user_args.input_template),
+        undefined=StrictUndefined,
+    )
     template = env.get_template('')
 
     # Gather the undefined template variables

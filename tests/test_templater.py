@@ -110,3 +110,33 @@ def test_set_template_yaml_config():
         templater.set_template(args)
 
         assert filecmp.cmp(expected_file, out_file)
+
+def test_set_template_command_line_config():
+    '''Test that values provided on the command line produce the appropriate
+    output.'''
+
+    outcome=\
+"""&salad
+    base = 'kale'
+    fruit = 'pear'
+    vegetable = 'squash'
+    how_many = 22
+    dressing = 'balsamic'
+/
+"""
+    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+
+    args = [
+         '-i', input_file,
+         '--dry_run',
+         'fruit=pear',
+         'vegetable=squash',
+         'how_many=22',
+         ]
+
+    # Capture stdout for the dry run
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        templater.set_template(args)
+    result = outstring.getvalue()
+    assert result == outcome
