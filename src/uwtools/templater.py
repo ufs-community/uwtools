@@ -10,7 +10,6 @@ import sys
 import argparse
 
 from jinja2 import Environment, FileSystemLoader, meta
-import f90nml
 
 from uwtools import config
 
@@ -61,7 +60,7 @@ def parse_args(argv):
     return parser.parse_args(argv)
 
 def set_template(argv):
-    '''Main section for set_namelist ingest utility'''
+    '''Main section for rendering and writing a template file'''
 
     user_args = parse_args(argv)
 
@@ -89,19 +88,15 @@ def set_template(argv):
     # Render the template with the specified config object
     rendered_template = template.render(**cfg)
 
-    parser = f90nml.Parser()
-    # write out fully qualified and populated f90 namelist file
-    nml = parser.reads(rendered_template)
-
     if user_args.dry_run:
         if user_args.outfile:
             print(f'warning file {user_args.outfile} not written when using --dry_run')
-        # apply switch to allow user to view the results of namelist instead of writing to disk
-        print(nml)
+        # apply switch to allow user to view the results of rendered template instead of writing to disk
+        print(rendered_template)
     else:
-        # write out f90 name list
-        with open(user_args.outfile, 'w+', encoding='utf-8') as nml_file:
-            f90nml.write(nml, nml_file)
+        # write out rendered template to file
+        with open(user_args.outfile, 'w+', encoding='utf-8') as out_file:
+            out_file.write(f'{rendered_template}')
 
 if __name__ == '__main__':
     set_template(sys.argv[1:])

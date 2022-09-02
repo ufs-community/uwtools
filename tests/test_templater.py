@@ -32,16 +32,16 @@ def test_set_template_dryrun():
 
     outcome=\
 """&salad
-    base = 'kale'
-    fruit = 'banana'
-    vegetable = 'tomato'
-    how_many = 'much'
-    dressing = 'balsamic'
+  base = 'kale'
+  fruit = 'banana'
+  vegetable = 'tomato'
+  how_many = 22
+  dressing = 'balsamic'
 /
 """
     os.environ['fruit'] = 'banana'
     os.environ['vegetable'] = 'tomato'
-    os.environ['how_many'] = 'much'
+    os.environ['how_many'] = '22'
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
