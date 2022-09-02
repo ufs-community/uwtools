@@ -18,12 +18,12 @@ uwtools_file_base = os.path.join(os.path.dirname(__file__))
 def show_files(expected, actual):
     '''Prints the contents of two compared files to std out'''
     print('The expected file looks like:')
-    with open(expected, 'r') as expected_file:
-        print(expected_file.read)
+    with open(expected, 'r', encoding='utf-8') as expected_file:
+        print(expected_file.read())
     print('*' * 80)
     print('The rendered file looks like:')
-    with open(actual, 'r') as actual_file:
-        print(actual_file.read)
+    with open(actual, 'r', encoding='utf-8') as actual_file:
+        print(actual_file.read())
 
 def test_path_if_file_exists():
     """ Make sure the function works as expected. It is used as a type in
