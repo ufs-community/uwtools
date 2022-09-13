@@ -126,7 +126,7 @@ def test_set_template_yaml_config():
              ]
 
         templater.set_template(args)
-        assert filecmp.cmp(expected_file, out_file)
+        assert compare_files(expected_file, out_file)
 
 def test_set_template_command_line_config():
     '''Test that values provided on the command line produce the appropriate
