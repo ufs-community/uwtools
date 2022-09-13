@@ -134,11 +134,11 @@ def test_set_template_command_line_config():
 
     outcome=\
 """&salad
-    base = 'kale'
-    fruit = 'pear'
-    vegetable = 'squash'
-    how_many = 22
-    dressing = 'balsamic'
+  base = 'kale'
+  fruit = 'pear'
+  vegetable = 'squash'
+  how_many = 22
+  dressing = 'balsamic'
 /
 """
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
