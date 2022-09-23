@@ -109,18 +109,22 @@ class F90Config(Config):
 
     ''' Concrete class to handle Fortran namelist files. '''
 
-    def __init__(self, config_path):
+    def __init__(self, config_path=None, string=None):
 
         ''' Load the file and update the dictionary '''
+        self.string = string
         super().__init__(config_path)
-
         self.update(self._load())
 
     def _load(self):
         ''' Load the user-provided Fortran namelist path into a dict
         object. '''
-        with open(self.config_path, 'r', encoding="utf-8") as file_name:
-            cfg = f90nml.read(file_name)
+        if self.string is not None:
+            cfg = f90nml.reads(self.string)
+        else:
+            with open(self.config_path, 'r', encoding="utf-8") as file_name:
+                cfg = f90nml.read(file_name)
+        self.config_obj = cfg
         return cfg.todict(complex_tuple=False)
 
     def dump_file(self, output_path):
