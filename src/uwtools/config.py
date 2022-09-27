@@ -2,14 +2,16 @@
 This file contains the Config file and its subclasses for a variety of
 dicatable file types.
 '''
-
+import os
 import abc
+from typing import Any, IO
 import collections
 import configparser
 
 import f90nml
 import yaml
 
+#pylint: disable=unused-variable
 class Config(collections.UserDict):
 
     '''
@@ -95,7 +97,7 @@ class YAMLConfig(Config):
         object. '''
 
         with open(self.config_path, 'r', encoding="utf-8") as file_name:
-            cfg = yaml.load(file_name, Loader=yaml.SafeLoader)
+            cfg = yaml.load(file_name, self.Loader)
         return cfg
 
     def dump_file(self, output_path):
@@ -103,6 +105,26 @@ class YAMLConfig(Config):
 
         with open(output_path, 'w', encoding="utf-8") as file_name:
             yaml.dump(self.data, file_name, sort_keys=False)
+
+    class Loader(yaml.SafeLoader): #pylint: disable=too-many-ancestors
+        '''Yaml loader to add INCLUDE tag for yaml file concatenation'''
+
+        def __init__(self, stream: IO) -> None:
+            try:
+                self._root = os.path.split(stream.name)[0]
+            except AttributeError:
+                self._root = os.path.curdir
+
+            super().__init__(stream)
+
+    def add_include(loader: Loader, node: yaml.Node) -> Any: #pylint: disable=no-self-argument
+        '''method to implement INCLUDE tag for yaml file concatenation'''
+        #pylint: disable=no-member
+        filename = os.path.abspath(os.path.join(loader._root, loader.construct_scalar(node)))
+        with open(filename, 'r', encoding="utf-8") as _file:
+            return yaml.load(_file, YAMLConfig.Loader)
+
+    yaml.add_constructor('!INCLUDE', add_include, Loader )
 
 
 class F90Config(Config):

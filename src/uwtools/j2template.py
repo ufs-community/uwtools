@@ -5,6 +5,7 @@ Template classes
 
 from jinja2 import Environment, BaseLoader, FileSystemLoader, meta
 
+#pylint: disable=unused-variable
 class J2Template():
 
     '''

@@ -18,7 +18,7 @@ generic_repos:
 
 #models:
 experiment_dir: /home/myexpid
-#  - config: !INCLUDE ./gfs.yaml
+config: !INCLUDE ./gfs.yaml
 
 
 # Environment

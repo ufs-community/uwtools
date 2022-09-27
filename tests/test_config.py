@@ -59,6 +59,14 @@ def test_yaml_config_composite_types():
     models = cfg.get('models')
     assert models[0].get('config').get('vertical_resolution') == 64
 
+def test_yaml_config_include_function():
+    ''' Test that YAML loads a secondary yaml files from with in
+    a yaml file using the INCLUDE tag'''
+
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/experiment.yaml"))
+    cfg = config.YAMLConfig(test_yaml)
+    gfs = cfg.get('config').get('model')
+    assert gfs == 'gfs'
 
 def test_f90nml_config_simple():
     '''Test that f90nml load, update, and dump work with a basic f90 namelist file. '''
