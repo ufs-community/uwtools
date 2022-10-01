@@ -59,6 +59,29 @@ def test_yaml_config_composite_types():
     models = cfg.get('models')
     assert models[0].get('config').get('vertical_resolution') == 64
 
+def test_yaml_config_include_files():
+
+    ''' Test that including files via the !INCLUDE constructor works as
+    expected. '''
+
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/include_files.yaml"))
+    cfg = config.YAMLConfig(test_yaml)
+
+    # salad key tests loading one file. there should be 4 items under salad
+    assert cfg['salad'].get('fruit') == 'papaya'
+    assert cfg['salad'].get('how_many') == 17
+    assert len(cfg['salad']) == 4
+
+
+    # two_files key tests loading a list of files, and that values are updated
+    # to the last read in. There should be 7 items under two_files
+    assert cfg['two_files'].get('fruit') == 'papaya'
+    assert cfg['two_files'].get('vegetable') == 'peas'
+    assert len(cfg['two_files']) == 7
+
+    # reverse_files tests loading a list of files in the reverse order as above,
+    # and that the values are updated to the last read in.
+    assert cfg['reverse_files'].get('vegetable') == 'eggplant'
 
 def test_f90nml_config_simple():
     '''Test that f90nml load, update, and dump work with a basic f90 namelist file. '''
