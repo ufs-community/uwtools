@@ -5,6 +5,6 @@
 # the repo. Unless a later match takes precedence,
 # @global-owner1 and @global-owner2 will be requested for
 # review when someone opens a pull request.
-*       @benjamin-cash @christinaholtNOAA @fgabelmannjr @TerrenceMcGuinness-NOAA @nbharwani11 @elcarpenter
+*       @benjamin-cash @christinaholtNOAA @fgabelmannjr @nbharwani11 @elcarpenter
 
 docs/*  @jprestop
