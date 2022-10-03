@@ -3,8 +3,9 @@ Unit tests for testing Template Class
 '''
 #pylint: disable=unused-variable
 import os
+import Environment, BaseLoader, FileSystemLoader, meta
 from uwtools.template import TemplateConstants, Template
-
+from uwtools.j2template import J2Template
 
 def test_substitute_string_from_dict():
     """
@@ -151,3 +152,31 @@ def test_substitute_with_dependencies():
                  'world': 'world'}
 
     assert Template.substitute_with_dependencies(inputs,inputs,TemplateConstants.DOLLAR_PARENTHESES)==output
+
+def test_dump_file():
+   test_config = {'greeting': 'Hello'
+   		  'the_world': 'the world'
+   		 }
+   template = J2Template(test_config, template_str="{{greeting}} to {{the_world}}")
+   assert template.configure_obj.get('greeting') == 'Hello'    
+   assert template.configure_obj.get('the_world') == 'the world'
+   output = 'Hello to the world'
+   assert template.configure_obj.get('the_world') == 'the world'   
+
+def test_load_file():
+   template_path = /hello/world/file.py
+   dictionary = {
+   	'greeting': 'Hello',
+	'the_world': 'the world'
+   }
+   template = ......
+   assert J2Template.load_file(template_path) == template
+
+def test_load_string():
+   template_str = 'Hello to the world'
+   dictonary = {
+   	'greeting': 'Hello'
+   	'the_world': 'the world'
+   }
+   template = ......
+   assert J2Template.load_string(template_str) == template 
