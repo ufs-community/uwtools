@@ -3,7 +3,6 @@ Unit tests for testing Template Class
 '''
 #pylint: disable=unused-variable
 import os
-import Environment, BaseLoader, FileSystemLoader, meta
 from uwtools.template import TemplateConstants, Template
 from uwtools.j2template import J2Template
 
@@ -153,23 +152,42 @@ def test_substitute_with_dependencies():
 
     assert Template.substitute_with_dependencies(inputs,inputs,TemplateConstants.DOLLAR_PARENTHESES)==output
 
+
+
+
+
 def test_dump_file():
-   test_config = {'greeting': 'Hello'
+   # create a config dict
+   test_config = {'greeting': 'Hello',
    		  'the_world': 'the world'
    		 }
+   # final string we expect from dump file contents
+   final = 'Hello to the world'
+   
+   # uses our J2Template and config dict get file contents 
    template = J2Template(test_config, template_str="{{greeting}} to {{the_world}}")
+   # test template is equal to final str output
+   assert template.render_template() == final
+
+
+   # create a temp file to dump our contents
+   with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+   	out_file = f'{tmp_dir}/test_IN_dump.IN
+   	test_config.dump_file(out_file)
+   	
+   	assert .....
+
+   # other tests to confirm config was created correctly
    assert template.configure_obj.get('greeting') == 'Hello'    
    assert template.configure_obj.get('the_world') == 'the world'
-   output = 'Hello to the world'
-   assert template.configure_obj.get('the_world') == 'the world'   
 
 def test_load_file():
-   template_path = /hello/world/file.py
-   dictionary = {
+   template_path = J2Template(template_path="/path/to/test/file")
+   test_config = {
    	'greeting': 'Hello',
 	'the_world': 'the world'
    }
-   template = ......
+   template = J2Template(test_config, template_str="{{greeting}} to {{the_world}}")
    assert J2Template.load_file(template_path) == template
 
 def test_load_string():
@@ -179,4 +197,4 @@ def test_load_string():
    	'the_world': 'the world'
    }
    template = ......
-   assert J2Template.load_string(template_str) == template 
+   assert J2Template.load_string(template_str) == template
