@@ -3,8 +3,11 @@ Unit tests for testing Template Class
 '''
 #pylint: disable=unused-variable
 import os
+import pathlib
 from uwtools.template import TemplateConstants, Template
 from uwtools.j2template import J2Template
+
+uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 def test_substitute_string_from_dict():
     """
@@ -155,46 +158,59 @@ def test_substitute_with_dependencies():
 
 
 
+"""
+Unit tests for testing J2Template Class
+"""
+
 
 def test_dump_file():
-   # create a config dict
-   test_config = {'greeting': 'Hello',
-   		  'the_world': 'the world'
-   		 }
-   # final string we expect from dump file contents
-   final = 'Hello to the world'
-   
-   # uses our J2Template and config dict get file contents 
-   template = J2Template(test_config, template_str="{{greeting}} to {{the_world}}")
-   # test template is equal to final str output
-   assert template.render_template() == final
-
-
-   # create a temp file to dump our contents
-   with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
-   	out_file = f'{tmp_dir}/test_IN_dump.IN
-   	test_config.dump_file(out_file)
-   	
-   	assert .....
-
-   # other tests to confirm config was created correctly
-   assert template.configure_obj.get('greeting') == 'Hello'    
-   assert template.configure_obj.get('the_world') == 'the world'
+    """
+         Write rendered template to the output_path provided
+         Parameters
+         ----------
+         output_path : Path
+    """
+    test_config = {'greeting': 'Hello',
+    		  'the_world': 'the world'
+    }
+    final = 'Hello to the world'
+    template = J2Template(test_config, template_str="{{greeting}} to {{the_world}}")
+    assert template.configure_obj.get('greeting') == 'Hello'
+    assert template.configure_obj.get('the_world') == 'the world'
+    assert template.render_template() == final
+    """ 
+    test_undeclared = template.undeclared_variables
+    assert ['greeting'] in test_undeclared()
+    """
+    assert template.undeclared_variables == ['greeting']
 
 def test_load_file():
-   template_path = J2Template(template_path="/path/to/test/file")
-   test_config = {
-   	'greeting': 'Hello',
-	'the_world': 'the world'
-   }
-   template = J2Template(test_config, template_str="{{greeting}} to {{the_world}}")
-   assert J2Template.load_file(template_path) == template
+    """
+         Load the Jinja2 template from the file provided.
+         Returns
+         -------
+         Jinja2 Template object
+    """
+    test_config = {
+    	'greeting': 'Hello',
+ 	'the_world': 'the world'
+    }
+    template_str = 'Hello to the world'
+    test_path = os.path.join(uwtools_file_base,pathlib.Path("fixtures/J2Template.IN"))
+    template = J2Template(test_config, template_path=test_path)
+    assert template.render_template() == template_str
 
 def test_load_string():
-   template_str = 'Hello to the world'
-   dictonary = {
-   	'greeting': 'Hello'
-   	'the_world': 'the world'
-   }
-   template = ......
-   assert J2Template.load_string(template_str) == template
+    """
+         Load the Jinja2 template from the string provided.
+         Returns
+         -------
+         Jinja2 Template object
+    """
+    template_str = 'Hello to the world'
+    test_config  = {
+    	'greeting': 'Hello',
+    	'the_world': 'the world'
+    }
+    template = J2Template(test_config, template_str="{{greeting}} to {{the_world}}")
+    assert template.render_template() == template_str
