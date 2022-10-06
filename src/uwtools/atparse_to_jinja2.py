@@ -40,9 +40,9 @@ def parse_args(argv):
 
 def atparse_replace(atline):
     ''' Function to replace @[] with {{}} in a line of text.
-    NOTE - This function assumes that the file does NOT have any entries of ] outside of 
-    what is being used by the atparse template. I believe this is correct for UFS but that 
-    is not something the code is checking for '''
+    NOTE - This function assumes that the file does NOT have any entries of ] outside of
+    what is being used by the atparse template. I believe this is correct for UFS but that
+    is not something the code is checking for. '''
 
     atvar = re.search(r'\@\[.*?\]',atline)
     if atvar:
