@@ -168,8 +168,9 @@ def test_dump_file():
     """
     template_str = 'Hello to the world'
     output = {'greeting', 'the_world'}
-    test_config = {'greeting': 'Hello',
-    		  'the_world': 'the world'
+    test_config  = {
+    	'greeting': 'Hello',
+    	'the_world': 'the world'
     }
     template = J2Template(test_config, template_str="{{greeting}} to {{the_world}}")
     assert template.configure_obj.get('greeting') == 'Hello'
@@ -186,9 +187,9 @@ def test_load_file():
     """
     template_str = 'Hello to the world'
     output = {'greeting', 'the_world'}
-    test_config = {
+    test_config  = {
     	'greeting': 'Hello',
- 	'the_world': 'the world'
+    	'the_world': 'the world'
     }
     test_path = os.path.join(uwtools_file_base,pathlib.Path("fixtures/J2Template.IN"))
     template = J2Template(test_config, template_path=test_path)
