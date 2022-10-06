@@ -62,7 +62,7 @@ class J2Template():
         elif template_str is not None:
             self.template = self._load_string(template_str)
         else:
-            # Error here. Must provide a templateA
+            # Error here. Must provide a template
             pass
 
     def dump_file(self,output_path):
@@ -75,9 +75,8 @@ class J2Template():
         output_path : Path
 
         '''
-        _render = self.render_template()
-        with open(output_path,'w+',encoding='utf-8') as _file:
-            _file.write(_render)
+        with open(output_path,'w+',encoding='utf-8') as file_:
+            file_.write(self.render_template())
 
     def _load_file(self, template_path):
         '''
@@ -103,7 +102,6 @@ class J2Template():
 
         self._j2env=Environment(loader=BaseLoader())
         return self._j2env.from_string(template_str)
-        #return Environment(loader=BaseLoader()).from_string(template_str)
 
     def render_template(self):
         ''' Render the Jinja2 template so that it's available in memory

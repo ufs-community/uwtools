@@ -166,15 +166,15 @@ def test_dump_file():
         Render template from input string provided.
     	Check undeclared_variables returns expected list
     """
+    template_str = 'Hello to the world'
+    output = {'greeting', 'the_world'}
     test_config = {'greeting': 'Hello',
     		  'the_world': 'the world'
     }
-    final = 'Hello to the world'
     template = J2Template(test_config, template_str="{{greeting}} to {{the_world}}")
     assert template.configure_obj.get('greeting') == 'Hello'
     assert template.configure_obj.get('the_world') == 'the world'
-    assert template.render_template() == final
-    output = {'greeting', 'the_world'}
+    assert template.render_template() == template_str
     assert template.undeclared_variables == output
 
 def test_load_file():
@@ -184,15 +184,15 @@ def test_load_file():
          -------
          Jinja2 Template object
     """
+    template_str = 'Hello to the world'
+    output = {'greeting', 'the_world'}
     test_config = {
     	'greeting': 'Hello',
  	'the_world': 'the world'
     }
-    template_str = 'Hello to the world'
     test_path = os.path.join(uwtools_file_base,pathlib.Path("fixtures/J2Template.IN"))
     template = J2Template(test_config, template_path=test_path)
     assert template.render_template() == template_str
-    output = {'greeting', 'the_world'}
     assert template.undeclared_variables == output
 
 def test_load_string():
