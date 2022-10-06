@@ -22,7 +22,7 @@ def parse_args(argv):
     )
     parser.add_argument(
         '-o', '--outfile',
-        help='Full path to output file',
+        help='Full path to new jinja2 template',
         )
     parser.add_argument(
         '-i', '--input_template',
