@@ -158,17 +158,13 @@ def test_substitute_with_dependencies():
 
 
 
-"""
-Unit tests for testing J2Template Class
-"""
+#Unit tests for testing J2Template Class
 
 
 def test_dump_file():
     """
-         Write rendered template to the output_path provided
-         Parameters
-         ----------
-         output_path : Path
+        Render template from input string provided.
+    	Check undeclared_variables returns expected list
     """
     test_config = {'greeting': 'Hello',
     		  'the_world': 'the world'
@@ -178,11 +174,8 @@ def test_dump_file():
     assert template.configure_obj.get('greeting') == 'Hello'
     assert template.configure_obj.get('the_world') == 'the world'
     assert template.render_template() == final
-    """ 
-    test_undeclared = template.undeclared_variables
-    assert ['greeting'] in test_undeclared()
-    """
-    assert template.undeclared_variables == ['greeting']
+    output = {'greeting', 'the_world'}
+    assert template.undeclared_variables == output
 
 def test_load_file():
     """
@@ -199,6 +192,8 @@ def test_load_file():
     test_path = os.path.join(uwtools_file_base,pathlib.Path("fixtures/J2Template.IN"))
     template = J2Template(test_config, template_path=test_path)
     assert template.render_template() == template_str
+    output = {'greeting', 'the_world'}
+    assert template.undeclared_variables == output
 
 def test_load_string():
     """

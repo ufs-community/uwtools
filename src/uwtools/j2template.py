@@ -100,7 +100,10 @@ class J2Template():
         -------
         Jinja2 Template object
         '''
-        return Environment(loader=BaseLoader()).from_string(template_str)
+
+        self._j2env=Environment(loader=BaseLoader())
+        return self._j2env.from_string(template_str)
+        #return Environment(loader=BaseLoader()).from_string(template_str)
 
     def render_template(self):
         ''' Render the Jinja2 template so that it's available in memory
@@ -110,7 +113,7 @@ class J2Template():
         A string containing a rendered Jinja2 template.
         '''
         return self.template.render(self.configure_obj)
-    
+
     @property
     def undeclared_variables(self):
 
