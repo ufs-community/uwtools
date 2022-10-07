@@ -46,7 +46,13 @@ def atparse_replace(atline):
 
     atvar = re.search(r'\@\[.*?\]',atline)
     if atvar:
-        jinja2line = atline.replace('@[','{{').replace(']','}}')
+        before_atparse = atline.split("@[")[0]
+        within_atparse = atline.split("@[")[1].split("]")[0]
+
+        #Set maxsplits to 1 so only first ] is captured, which 
+        #should be the bracket closing @[ 
+        after_atparse = atline.split("@[")[1].split("]",1)[1]  #Set maxsplits to 1 so only first 
+        jinja2line = ''.join([before_atparse,"{{",within_atparse,"}}", after_atparse])
     else:
         jinja2line = atline
     return jinja2line
@@ -66,8 +72,8 @@ def convert_template(argv):
             with open(user_args.outfile, "wt", encoding="utf-8") as jinja2template:
                 for line in atparsetemplate:
                     jinja2template.write(atparse_replace(line))
+            jinja2template.close()
     atparsetemplate.close()
-    jinja2template.close()
 
 if __name__ == '__main__':
     convert_template(sys.argv[1:])
