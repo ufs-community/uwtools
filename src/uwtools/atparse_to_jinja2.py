@@ -72,8 +72,6 @@ def convert_template(argv):
             with open(user_args.outfile, "wt", encoding="utf-8") as jinja2template:
                 for line in atparsetemplate:
                     jinja2template.write(atparse_replace(line))
-            jinja2template.close()
-    atparsetemplate.close()
 
 if __name__ == '__main__':
     convert_template(sys.argv[1:])
