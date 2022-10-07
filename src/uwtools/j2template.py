@@ -75,12 +75,8 @@ class J2Template():
         output_path : Path
 
         '''
-        try:
-             file_ = open(output_path,'w+',encoding='utf-8')
-             file_.write(self.render_template())
-        
-        finally:
-             file_.close()
+        with open(output_path,'w+',encoding='utf-8') as file_:
+            file_.write(self.render_template())
 
     def _load_file(self, template_path):
         '''
@@ -123,9 +119,6 @@ class J2Template():
         if self.template_str is not None:
             j2_parsed = self._j2env.parse(self.template_str)
         else:
-            try:
-                 file_ = open(self.template_path,encoding='utf-8')
-                 j2_parsed = self._j2env.parse(file_.read())
-            finally:
-                 file_.close()
+            with open(self.template_path,encoding='utf-8') as file_:
+                j2_parsed = self._j2env.parse(file_.read())
         return meta.find_undeclared_variables(j2_parsed)
