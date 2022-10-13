@@ -9,8 +9,7 @@ import os
 import sys
 import argparse
 
-from jinja2 import Environment, FileSystemLoader, meta, StrictUndefined
-
+from uwtools.j2template import J2Template
 from uwtools import config
 
 def dict_from_config_args(args):
@@ -86,25 +85,19 @@ def set_template(argv):
         cfg.update(user_settings)
 
     # instantiate Jinja2 environment and template
-    env = Environment(
-        loader=FileSystemLoader(user_args.input_template),
-        undefined=StrictUndefined,
-    )
-    template = env.get_template('')
+    template = J2Template(cfg, user_args.input_template)
 
     # Gather the undefined template variables
-    j2_parsed = env.parse(env.loader.get_source(env, ''))
-    undeclared_variables = meta.find_undeclared_variables(j2_parsed)
+    undeclared_variables = template.undeclared_variables
 
     if user_args.values_needed:
         print('Values needed for this template are:')
         for var in sorted(undeclared_variables):
             print(var)
-
         return
 
     # Render the template with the specified config object
-    rendered_template = template.render(**cfg)
+    rendered_template = template.render_template()
 
     if user_args.dry_run:
         if user_args.outfile:
@@ -114,8 +107,7 @@ def set_template(argv):
         print(rendered_template)
     else:
         # write out rendered template to file
-        with open(user_args.outfile, 'w+', encoding='utf-8') as out_file:
-            out_file.write(f'{rendered_template}')
+        template.dump_file(user_args.outfile)
 
 if __name__ == '__main__':
     set_template(sys.argv[1:])
