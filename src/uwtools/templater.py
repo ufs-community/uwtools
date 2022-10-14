@@ -87,23 +87,21 @@ def set_template(argv):
     # instantiate Jinja2 environment and template
     template = J2Template(cfg, user_args.input_template)
 
-    # Gather the undefined template variables
-    undeclared_variables = template.undeclared_variables
-
     if user_args.values_needed:
+        # Gather the undefined template variables
+        undeclared_variables = template.undeclared_variables
         print('Values needed for this template are:')
         for var in sorted(undeclared_variables):
             print(var)
         return
-
-    # Render the template with the specified config object
-    rendered_template = template.render_template()
 
     if user_args.dry_run:
         if user_args.outfile:
             print(f'warning file {user_args.outfile} not written when using --dry_run')
         # apply switch to allow user to view the results of rendered template
         # instead of writing to disk
+        # Render the template with the specified config object
+        rendered_template = template.render_template()
         print(rendered_template)
     else:
         # write out rendered template to file
