@@ -130,10 +130,9 @@ class YAMLConfig(Config):
         filepaths = loader.construct_sequence(node)
         cfg = {}
         for filepath in filepaths:
-            abs_path = filepath
             if not os.path.isabs(filepath):
-                abs_path = os.path.join(os.path.dirname(self.config_path), filepath)
-            cfg.update(self._load(config_path=abs_path))
+                filepath = os.path.join(os.path.dirname(self.config_path), filepath)
+            cfg.update(self._load(config_path=filepath))
         return cfg
 
     @property
