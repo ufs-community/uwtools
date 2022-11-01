@@ -6,6 +6,7 @@ dicatable file types.
 import abc
 import collections
 import configparser
+import os
 
 import json
 import f90nml
@@ -59,9 +60,10 @@ class Config(collections.UserDict):
         return f'Config("{self.config_path}")'
 
     @abc.abstractmethod
-    def _load(self):
+    def _load(self, config_path=None):
         ''' Interface to load a config file given the config_path
-        attribute. Returns a dict object. '''
+        attribute, or optional config_path argument. Returns a dict
+        object. '''
 
     @abc.abstractmethod
     def dump_file(self, output_path):
@@ -87,7 +89,22 @@ class Config(collections.UserDict):
 
 class YAMLConfig(Config):
 
-    ''' Concrete class to handle YAML configure files. '''
+    '''
+    Concrete class to handle YAML configure files.
+
+    Attributes
+    ----------
+
+    _yaml_loader : Loader
+        The PyYAML Loader that's been extended with constructors
+
+    Methods
+    -------
+
+    _yaml_include()
+        Static method used to define a constructor function for PyYAML.
+
+    '''
 
     def __init__(self, config_path):
 
@@ -97,12 +114,14 @@ class YAMLConfig(Config):
 
         self.update(self._load())
 
-    def _load(self):
+    def _load(self, config_path=None):
         ''' Load the user-provided YAML config file path into a dict
         object. '''
 
-        with open(self.config_path, 'r', encoding="utf-8") as file_name:
-            cfg = yaml.load(file_name, Loader=yaml.SafeLoader)
+        loader = self._yaml_loader
+        config_path = config_path or self.config_path
+        with open(config_path, 'r', encoding="utf-8") as file_name:
+            cfg = yaml.load(file_name, Loader=loader)
         return cfg
 
     def dump_file(self, output_path):
@@ -111,6 +130,24 @@ class YAMLConfig(Config):
         with open(output_path, 'w', encoding="utf-8") as file_name:
             yaml.dump(self.data, file_name, sort_keys=False)
 
+    def _yaml_include(self, loader, node):
+        ''' Returns a dictionary that includes the contents of the referenced
+        YAML files, and is used as a contructor method for PyYAML'''
+
+        filepaths = loader.construct_sequence(node)
+        cfg = {}
+        for filepath in filepaths:
+            if not os.path.isabs(filepath):
+                filepath = os.path.join(os.path.dirname(self.config_path), filepath)
+            cfg.update(self._load(config_path=filepath))
+        return cfg
+
+    @property
+    def _yaml_loader(self):
+        ''' Set up the loader with the appropriate constructors. '''
+        loader = yaml.SafeLoader
+        loader.add_constructor('!INCLUDE', self._yaml_include)
+        return loader
 
 class F90Config(Config):
 
@@ -123,10 +160,11 @@ class F90Config(Config):
 
         self.update(self._load())
 
-    def _load(self):
+    def _load(self, config_path=None):
         ''' Load the user-provided Fortran namelist path into a dict
         object. '''
-        with open(self.config_path, 'r', encoding="utf-8") as file_name:
+        config_path = config_path or self.config_path
+        with open(config_path, 'r', encoding="utf-8") as file_name:
             cfg = f90nml.read(file_name)
         return cfg.todict(complex_tuple=False)
 
@@ -152,18 +190,20 @@ class INIConfig(Config):
         self.space_around_delimiters = space_around_delimiters
         self.update(self._load())
 
-    def _load(self):
+    def _load(self, config_path=None):
         ''' Load the user-provided INI config file path into a dict
         object. '''
+
+        config_path = config_path or self.config_path
 
         # The protected _sections method is the most straightroward way to get
         # at the dict representation of the parse config.
         # pylint: disable=protected-access
         cfg = configparser.ConfigParser()
         try:
-            cfg.read(self.config_path)
+            cfg.read(config_path)
         except configparser.MissingSectionHeaderError:
-            with open(self.config_path, 'r', encoding="utf-8") as file_name:
+            with open(config_path, 'r', encoding="utf-8") as file_name:
                 cfg.read_string("[top]\n" + file_name.read())
                 return cfg._sections.get('top')
 
