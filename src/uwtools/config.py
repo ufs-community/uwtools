@@ -56,7 +56,8 @@ class Config(collections.UserDict):
         self.config_path = config_path
 
     def __repr__(self):
-        return f'Config("{self.config_path}")'
+        ''' This method will return configure contents'''
+        return json.dumps(self.data)
 
     @abc.abstractmethod
     def _load(self):
@@ -81,9 +82,6 @@ class Config(collections.UserDict):
         replacing Jinja2 templates as necessary. This is a placeholder
         until more details are fleshed out in work scheduled for PI6.'''
 
-    def config_dump(self):
-        ''' This method will print configure contents'''
-        print(json.dumps(self.data))
 
 class YAMLConfig(Config):
 

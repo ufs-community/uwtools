@@ -32,7 +32,6 @@ def test_yaml_config_simple():
     }
     assert cfg == expected
     assert repr(cfg.data) == json.dumps(expected).replace('"', "'")
-    assert cfg.config_dump() == print(json.dumps(expected))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
         out_file = f'{tmp_dir}/test_yaml_dump.yml'
