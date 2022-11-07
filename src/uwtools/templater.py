@@ -74,6 +74,11 @@ def set_template(argv):
     '''Main section for rendering and writing a template file'''
 
     user_args = parse_args(argv)
+    print("Running script templater.py with args:n", f"{('-' * 70)}\n{('-' * 70)}")
+    for name, val in user_args.__dict__.items():
+        if name not in ["config"]:
+            print(f"{name:>15s}: {val}")
+    print(f"{('-' * 70)}\n{('-' * 70)}")
 
     if user_args.config_file:
         cfg = config.YAMLConfig(user_args.config_file)
