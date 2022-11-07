@@ -8,6 +8,7 @@ import filecmp
 import os
 import pathlib
 import tempfile
+import json
 
 from uwtools import config
 
@@ -30,6 +31,7 @@ def test_yaml_config_simple():
         "walltime": "00:01:00",
     }
     assert cfg == expected
+    assert repr(cfg.data) == json.dumps(expected).replace('"', "'")
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
         out_file = f'{tmp_dir}/test_yaml_dump.yml'

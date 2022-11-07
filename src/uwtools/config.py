@@ -8,6 +8,7 @@ import collections
 import configparser
 import os
 
+import json
 import f90nml
 import yaml
 
@@ -54,6 +55,10 @@ class Config(collections.UserDict):
         super().__init__()
 
         self.config_path = config_path
+
+    def __repr__(self):
+        ''' This method will return configure contents'''
+        return json.dumps(self.data)
 
     @abc.abstractmethod
     def _load(self, config_path=None):
