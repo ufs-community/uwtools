@@ -48,8 +48,19 @@ def test_path_if_file_exists():
 def test_set_template_dryrun():
     """Unit test for checking dry-run output of ingest namelist tool"""
 
+    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
     outcome=\
-"""&salad
+    """Running script templater.py with args:n ----------------------------------------------------------------------
+----------------------------------------------------------------------
+        outfile: None
+ input_template: """ + input_file  + """
+    config_file: None
+   config_items: []
+        dry_run: True
+  values_needed: False
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+&salad
   base = 'kale'
   fruit = 'banana'
   vegetable = 'tomato'
@@ -60,8 +71,6 @@ def test_set_template_dryrun():
     os.environ['fruit'] = 'banana'
     os.environ['vegetable'] = 'tomato'
     os.environ['how_many'] = '22'
-
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     args = [
          '-i', input_file,
@@ -79,13 +88,24 @@ def test_set_template_dryrun():
 def test_set_template_listvalues():
     """Unit test for checking values_needed output of ingest namelist tool"""
 
+    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+
     outcome=\
-'''Values needed for this template are:
+    """Running script templater.py with args:n ----------------------------------------------------------------------
+----------------------------------------------------------------------
+        outfile: None
+ input_template: """ + input_file  + """
+    config_file: None
+   config_items: []
+        dry_run: False
+  values_needed: True
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+Values needed for this template are:
 fruit
 how_many
 vegetable
-'''
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+"""
 
     args = [
          '-i', input_file,
@@ -132,8 +152,20 @@ def test_set_template_command_line_config():
     '''Test that values provided on the command line produce the appropriate
     output.'''
 
+    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+
     outcome=\
-"""&salad
+    """Running script templater.py with args:n ----------------------------------------------------------------------
+----------------------------------------------------------------------
+        outfile: None
+ input_template: """ + input_file  + """
+    config_file: None
+   config_items: ['fruit=pear', 'vegetable=squash', 'how_many=22']
+        dry_run: True
+  values_needed: False
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+&salad
   base = 'kale'
   fruit = 'pear'
   vegetable = 'squash'
@@ -141,7 +173,6 @@ def test_set_template_command_line_config():
   dressing = 'balsamic'
 /
 """
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     args = [
          '-i', input_file,
