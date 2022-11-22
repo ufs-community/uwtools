@@ -14,6 +14,25 @@ from uwtools import config
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
+def test_parse_include():
+    '''Test that non-YAML handles !INCLUDE Tags properly'''
+    
+    test_nml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/include_files.nml"))
+    cfg = config.F90Config(test_nml)
+    
+    # salad key tests loading one file. there should be 4 items under salad
+    assert cfg['salad'].get('fruit') == 'papaya'
+    assert cfg['salad'].get('how_many') == 17
+    assert len(cfg['salad']) == 4
+        
+        
+    # two_files key tests loading a list of files, and that values are updated
+    # to the last read in. There should be 7 items under two_files
+    assert cfg['two_files'].get('fruit') == 'papaya'
+    assert cfg['two_files'].get('vegetable') == 'peas'
+    assert len(cfg['two_files']) == 7
+    assert cfg == expected
+    
 def test_yaml_config_simple():
     '''Test that YAML load, update, and dump work with a basic YAML file. '''
 

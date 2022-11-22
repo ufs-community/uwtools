@@ -71,13 +71,22 @@ class Config(collections.UserDict):
         ''' Interface to write a config object to a file at the
         output_path provided. '''
 
-    def parse_include(self):
+    def parse_include(self, config_path):
         '''Borrowing from pyyaml, traverse the dict to treat the
         !INCLUDE  tag just the same as it would be treated in YAML. This
         is left for further exploration and design in PI6, and applies
         to any non-YAML config file types, so putting it in the base
         class for now.'''
-
+                
+        filepaths = _load(self, self.config_path)
+        cfg = {}
+        for key, filepath in filepaths:
+            for value in filepath:
+                if not os.path.isabs(value):
+                    filepath = os.path.join(os.path.dirname(self.config_path), value)
+            cfg.update(self._load(config_path=filepath))
+        return cfg
+    
     def replace_templates(self):
         ''' This method will be used as a method by which any Config
         object can cycle through its key/value pairs recursively,
