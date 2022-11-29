@@ -125,13 +125,13 @@ def set_template(argv):
 
     if user_args.verbose:
         #call logger and print debug messages to stdout
-        logger.logger(level='DEBUG')
+        logger.Logger(level='DEBUG')
     elif user_args.quiet:
         #do not call logger at all
-        print(f'warning no logging output when using --quiet')
+        print('warning no logging output when using --quiet')
     else:
         #if not specified, default to logger default print
-        logger.logger(level='INFO')
+        logger.Logger(level='INFO')
 
 
 if __name__ == '__main__':
