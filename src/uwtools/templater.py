@@ -11,6 +11,7 @@ import argparse
 
 from uwtools.j2template import J2Template
 from uwtools import config
+from uwtools import logger
 
 def dict_from_config_args(args):
     '''Given a list of command line arguments in the form key=value, return a
@@ -68,6 +69,16 @@ def parse_args(argv):
         action='store_true',
         help='If provided, print a list of required configuration settings to stdout',
         )
+    parser.add_argument(
+        '-v', '--verbose',
+        action='store_true',
+        help='If provided, print all logging messages to stdout.',
+        )
+    parser.add_argument(
+        '-q', '--quiet',
+        action='store_true',
+        help='If provided, print no logging messages',
+        )
     return parser.parse_args(argv)
 
 def set_template(argv):
@@ -111,6 +122,17 @@ def set_template(argv):
     else:
         # write out rendered template to file
         template.dump_file(user_args.outfile)
+
+    if user_args.verbose:
+        #call logger and print debug messages to stdout
+        logger.logger(level='DEBUG')
+    elif user_args.quiet:
+        #do not call logger at all
+        print(f'warning no logging output when using --quiet')
+    else:
+        #if not specified, default to logger default print
+        logger.logger(level='INFO')
+
 
 if __name__ == '__main__':
     set_template(sys.argv[1:])
