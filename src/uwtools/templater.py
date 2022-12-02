@@ -11,7 +11,7 @@ import argparse
 
 from uwtools.j2template import J2Template
 from uwtools import config
-from uwtools import logger
+from uwtools.logger import Logger
 
 def dict_from_config_args(args):
     '''Given a list of command line arguments in the form key=value, return a
@@ -83,13 +83,22 @@ def parse_args(argv):
 
 def set_template(argv):
     '''Main section for rendering and writing a template file'''
+    logfile = os.path.join(os.path.dirname(__file__), "templater.log")
+    log = Logger(level='info', logfile_path=logfile)
+
 
     user_args = parse_args(argv)
-    print("Running script templater.py with args:n", f"{('-' * 70)}\n{('-' * 70)}")
+
+    if user_args.verbose:
+        log = Logger(level='debug', logfile_path=logfile, colored_log=True)
+    elif user_args.quiet:
+        log.propagate = False
+
+    log.info("Running script templater.py with args:n", f"{('-' * 70)}\n{('-' * 70)}")
     for name, val in user_args.__dict__.items():
         if name not in ["config"]:
-            print(f"{name:>15s}: {val}")
-    print(f"{('-' * 70)}\n{('-' * 70)}")
+            log.info(f"{name:>15s}: {val}")
+    log.info(f"{('-' * 70)}\n{('-' * 70)}")
 
     if user_args.config_file:
         cfg = config.YAMLConfig(user_args.config_file)
@@ -106,32 +115,24 @@ def set_template(argv):
     if user_args.values_needed:
         # Gather the undefined template variables
         undeclared_variables = template.undeclared_variables
-        print('Values needed for this template are:')
+        log.info('Values needed for this template are:')
         for var in sorted(undeclared_variables):
-            print(var)
+            log.info(var)
         return
 
     if user_args.dry_run:
         if user_args.outfile:
-            print(f'warning file {user_args.outfile} not written when using --dry_run')
+            #print(f'warning file {user_args.outfile} not written when using --dry_run')
+            log.info(f'warning file {user_args.outfile} not written when using --dry_run')
         # apply switch to allow user to view the results of rendered template
         # instead of writing to disk
         # Render the template with the specified config object
         rendered_template = template.render_template()
-        print(rendered_template)
+        log.info(rendered_template)
     else:
         # write out rendered template to file
         template.dump_file(user_args.outfile)
 
-    if user_args.verbose:
-        #call logger and print debug messages to stdout
-        logger.Logger(level='DEBUG')
-    elif user_args.quiet:
-        #do not call logger at all
-        print('warning no logging output when using --quiet')
-    else:
-        #if not specified, default to logger default print
-        logger.Logger(level='INFO')
 
 
 if __name__ == '__main__':
