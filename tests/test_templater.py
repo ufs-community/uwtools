@@ -58,6 +58,8 @@ def test_set_template_dryrun():
    config_items: []
         dry_run: True
   values_needed: False
+        verbose: False
+          quiet: False
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 &salad
@@ -99,6 +101,8 @@ def test_set_template_listvalues():
    config_items: []
         dry_run: False
   values_needed: True
+        verbose: False
+          quiet: False
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 Values needed for this template are:
@@ -163,6 +167,8 @@ def test_set_template_command_line_config():
    config_items: ['fruit=pear', 'vegetable=squash', 'how_many=22']
         dry_run: True
   values_needed: False
+        verbose: False
+          quiet: False
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 &salad
