@@ -6,6 +6,7 @@ dicatable file types.
 import abc
 import collections
 import configparser
+import copy
 import os
 
 import json
@@ -41,6 +42,10 @@ class Config(collections.UserDict):
         Traverses the dictionary and renders any Jinja2 templated
         fields.
 
+    update_values()
+        Update the values in an existing dictionary with values provided
+        by a second dictionary. Keep any of the values that are not
+        present in the second dictionary.
     '''
 
     def __init__(self, config_path):
@@ -71,27 +76,68 @@ class Config(collections.UserDict):
         ''' Interface to write a config object to a file at the
         output_path provided. '''
 
-    def parse_include(self, config_path):
-        '''Borrowing from pyyaml, traverse the dict to treat the
-        !INCLUDE  tag just the same as it would be treated in YAML. This
-        is left for further exploration and design in PI6, and applies
-        to any non-YAML config file types, so putting it in the base
-        class for now.'''
-                
-        filepaths = _load(self, self.config_path)
+    def _load_paths(self, filepaths):
+        '''
+        Given a list of filepaths, load each file in the list and return
+        a dictionary that includes the parsed contents of the collection
+        of files.
+        '''
+
         cfg = {}
-        for key, filepath in filepaths:
-            for value in filepath:
-                if not os.path.isabs(value):
-                    filepath = os.path.join(os.path.dirname(self.config_path), value)
+        for filepath in filepaths:
+            if not os.path.isabs(filepath):
+                filepath = os.path.join(os.path.dirname(self.config_path), filepath)
             cfg.update(self._load(config_path=filepath))
         return cfg
-    
+
+    def parse_include(self, ref_dict=None):
+        '''
+        Assuming a section, key/value structure of configuration types
+        (other than YAML, which handles this in its own loader), update
+        the dictionary with the values stored in the external 
+
+        Recursively traverse the stored dictionary, finding any !INCLUDE
+        tags. Update the dictionary with the contents of the files to be
+        included.
+        '''
+
+        if ref_dict is None:
+            ref_dict = self.data
+
+        for key, value in copy.deepcopy(ref_dict).items():
+            if isinstance(value, dict):
+                self.parse_include(ref_dict[key])
+            elif isinstance(value, str) and '!INCLUDE' in value:
+                filepaths = value.lstrip('!INCLUDE [').rstrip(']').split(',')
+
+                # Update the dictionary with the values in the
+                # included file
+                self.update_values(self._load_paths(filepaths))
+                del ref_dict[key]
+
     def replace_templates(self):
         ''' This method will be used as a method by which any Config
         object can cycle through its key/value pairs recursively,
         replacing Jinja2 templates as necessary. This is a placeholder
         until more details are fleshed out in work scheduled for PI6.'''
+
+    def update_values(self, new_dict, dict_to_update=None):
+        '''
+        Update the values stored in the class's data (a dict) with
+        the values provided by the new_dict.
+        '''
+
+        if dict_to_update is None:
+            dict_to_update = self.data
+
+        for key, new_val in new_dict.items():
+            if isinstance(new_val, dict):
+                if isinstance(dict_to_update.get(key), dict):
+                    self.update_values(new_val, dict_to_update[key])
+                else:
+                    dict_to_update[key] = new_val
+            else:
+                dict_to_update[key] = new_val
 
 
 class YAMLConfig(Config):
@@ -142,12 +188,7 @@ class YAMLConfig(Config):
         YAML files, and is used as a contructor method for PyYAML'''
 
         filepaths = loader.construct_sequence(node)
-        cfg = {}
-        for filepath in filepaths:
-            if not os.path.isabs(filepath):
-                filepath = os.path.join(os.path.dirname(self.config_path), filepath)
-            cfg.update(self._load(config_path=filepath))
-        return cfg
+        return self._load_paths(filepaths)
 
     @property
     def _yaml_loader(self):
@@ -166,6 +207,7 @@ class F90Config(Config):
         super().__init__(config_path)
 
         self.update(self._load())
+        self.parse_include()
 
     def _load(self, config_path=None):
         ''' Load the user-provided Fortran namelist path into a dict
@@ -195,7 +237,9 @@ class INIConfig(Config):
         '''
         super().__init__(config_path)
         self.space_around_delimiters = space_around_delimiters
+
         self.update(self._load())
+        self.parse_include()
 
     def _load(self, config_path=None):
         ''' Load the user-provided INI config file path into a dict
