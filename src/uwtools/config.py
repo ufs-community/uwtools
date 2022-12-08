@@ -94,7 +94,7 @@ class Config(collections.UserDict):
         '''
         Assuming a section, key/value structure of configuration types
         (other than YAML, which handles this in its own loader), update
-        the dictionary with the values stored in the external 
+        the dictionary with the values stored in the external file.
 
         Recursively traverse the stored dictionary, finding any !INCLUDE
         tags. Update the dictionary with the contents of the files to be
