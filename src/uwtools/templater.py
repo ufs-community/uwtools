@@ -9,8 +9,6 @@ import os
 import sys
 import argparse
 
-#from logutils import BraceMessage as F
-
 from uwtools.j2template import J2Template
 from uwtools import config
 from uwtools.logger import Logger
@@ -74,7 +72,7 @@ def parse_args(argv):
     parser.add_argument(
         '-v', '--verbose',
         action='store_true',
-        help='If provided, print all logging messages to stdout.',
+        help='If provided, print all logging messages.',
         )
     parser.add_argument(
         '-q', '--quiet',
@@ -91,20 +89,15 @@ def set_template(argv):
     log = Logger(level='info', logfile_path=logfile)
     if user_args.verbose:
         log = Logger(level='debug', logfile_path=logfile, colored_log=True)
-        #print(f"Finished setting up debug file logging in {logfile}")
         log.debug('Finished setting up debug file logging in %(logfile)s')
     elif user_args.quiet:
         log.propagate = False
 
 
-    #print("Running script templater.py with args:n", f"{('-' * 70)}\n{('-' * 70)}")
     log.info('Running script templater.py with args:n '+('-' * 70)+'\n'+('-' * 70))
     for name, val in user_args.__dict__.items():
         if name not in ["config"]:
-            #print(f"{name:>15s}: {val}")
-            #log.info(eval(f"{name:>15s}: {val}"))
             log.info(format(name).rjust(15) + ': ' + str.format(val))
-    #print(f"{('-' * 70)}\n{('-' * 70)}")
     log.info(('-' * 70)+'\n'+('-' * 70))
 
     if user_args.config_file:
@@ -129,7 +122,6 @@ def set_template(argv):
 
     if user_args.dry_run:
         if user_args.outfile:
-            #print(f'warning file {user_args.outfile} not written when using --dry_run')
             log.info('warning file %(user_args.outfile)s not written when using --dry_run')
         # apply switch to allow user to view the results of rendered template
         # instead of writing to disk
@@ -139,7 +131,6 @@ def set_template(argv):
     else:
         # write out rendered template to file
         template.dump_file(user_args.outfile)
-
 
 
 if __name__ == '__main__':
