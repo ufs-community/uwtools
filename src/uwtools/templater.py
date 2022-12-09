@@ -85,7 +85,7 @@ def set_template(argv):
     '''Main section for rendering and writing a template file'''
     user_args = parse_args(argv)
 
-    logfile = os.path.join(os.path.dirname(__file__), ".logtemplater")
+    logfile = os.path.join(os.path.dirname(__file__), "templater.log")
     log = Logger(level='info', logfile_path=logfile)
     if user_args.verbose:
         log = Logger(level='debug', logfile_path=logfile, colored_log=True)
@@ -97,7 +97,7 @@ def set_template(argv):
     log.info('Running script templater.py with args:n '+('-' * 70)+'\n'+('-' * 70))
     for name, val in user_args.__dict__.items():
         if name not in ["config"]:
-            log.info(format(name).rjust(15) + ': ' + str.format(val))
+            log.info("{name:>15s}: {val}".format(name=name, val=val))
     log.info(('-' * 70)+'\n'+('-' * 70))
 
     if user_args.config_file:
