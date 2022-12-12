@@ -11,6 +11,7 @@ import argparse
 
 from uwtools.j2template import J2Template
 from uwtools import config
+from uwtools.logger import Logger
 
 def dict_from_config_args(args):
     '''Given a list of command line arguments in the form key=value, return a
@@ -78,6 +79,7 @@ def parse_args(argv):
         action='store_true',
         help='If provided, print no logging messages',
         )
+        return parser.parse_args(argv)
 
 def set_template(argv):
     '''Main section for rendering and writing a template file'''
