@@ -79,7 +79,7 @@ def parse_args(argv):
         action='store_true',
         help='If provided, print no logging messages',
         )
-        return parser.parse_args(argv)
+    return parser.parse_args(argv)
 
 def set_template(argv):
     '''Main section for rendering and writing a template file'''
