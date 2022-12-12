@@ -1,0 +1,4 @@
+fruit=papaya
+vegetable=eggplant
+how_many=17
+dressing=ranch
