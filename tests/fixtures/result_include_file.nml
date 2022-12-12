@@ -1,0 +1,7 @@
+&config
+  fruit = papaya
+  vegetable = eggplant
+  how_many = 17
+  meat = beef
+  dressing = ranch
+/

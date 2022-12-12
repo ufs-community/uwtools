@@ -11,7 +11,6 @@ import argparse
 
 from uwtools.j2template import J2Template
 from uwtools import config
-from uwtools.logger import Logger
 
 def dict_from_config_args(args):
     '''Given a list of command line arguments in the form key=value, return a
@@ -79,7 +78,6 @@ def parse_args(argv):
         action='store_true',
         help='If provided, print no logging messages',
         )
-    return parser.parse_args(argv)
 
 def set_template(argv):
     '''Main section for rendering and writing a template file'''
@@ -115,23 +113,23 @@ def set_template(argv):
     if user_args.values_needed:
         # Gather the undefined template variables
         undeclared_variables = template.undeclared_variables
-        log.info('Values needed for this template are:')
+        print('Values needed for this template are:')
         for var in sorted(undeclared_variables):
-            log.info(var)
+            print(var)
         return
 
     if user_args.dry_run:
         if user_args.outfile:
             log.info('warning file %(user_args.outfile)s not written when using --dry_run')
+
         # apply switch to allow user to view the results of rendered template
         # instead of writing to disk
         # Render the template with the specified config object
         rendered_template = template.render_template()
-        log.info(rendered_template)
+        print(rendered_template)
     else:
         # write out rendered template to file
         template.dump_file(user_args.outfile)
-
 
 if __name__ == '__main__':
     set_template(sys.argv[1:])
