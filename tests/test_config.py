@@ -10,6 +10,7 @@ import pathlib
 import tempfile
 import json
 import itertools
+from difflib import Differ
 
 from uwtools import config
 
@@ -18,7 +19,7 @@ uwtools_file_base = os.path.join(os.path.dirname(__file__))
 def test_yaml_config_simple():
     '''Test that YAML load, update, and dump work with a basic YAML file. '''
 
-    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.yaml"))
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple2.yaml"))
     cfg = config.YAMLConfig(test_yaml)
 
     expected = {
@@ -190,4 +191,10 @@ def test_transform_config():
             out_file = f'{tmp_dir}/test_{test1.lower()}to{test2.lower()}_dump.{test2file.lower()}'
             cfgout.dump_file(cfg, out_file)
 
-            assert filecmp.cmp(ref, out_file)
+            #assert filecmp.cmp(ref, out_file)
+            print(f"{test1} vs {test2}")
+            with open(ref) as file_1, open(out_file) as file_2:
+                differ = Differ()
+
+                for line in differ.compare(file_1.readlines(), file_2.readlines()):
+                    print(line)
