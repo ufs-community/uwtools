@@ -43,7 +43,7 @@ class Config(collections.UserDict):
 
     '''
 
-    def __init__(self, config_path):
+    def __init__(self, config_path=None):
 
         '''
         Parameters
@@ -104,7 +104,7 @@ class YAMLConfig(Config):
 
     '''
 
-    def __init__(self, config_path):
+    def __init__(self, config_path=None):
 
         ''' Load the file and update the dictionary '''
 
@@ -151,7 +151,7 @@ class F90Config(Config):
 
     ''' Concrete class to handle Fortran namelist files. '''
 
-    def __init__(self, config_path):
+    def __init__(self, config_path=None):
 
         ''' Load the file and update the dictionary '''
         super().__init__(config_path)
@@ -175,7 +175,7 @@ class INIConfig(Config):
 
     ''' Concrete class to handle INI config files. '''
 
-    def __init__(self, config_path, space_around_delimiters=True):
+    def __init__(self, config_path=None, space_around_delimiters=True):
 
         ''' Load the file and update the dictionary
 
@@ -226,7 +226,7 @@ class FieldTableConfig(YAMLConfig):
     ''' This class will exist only to write out field_table format given
     that its configuration has been set by an input YAML file. '''
 
-    def __init__(self, config_path):
+    def __init__(self, config_path=None):
 
         ''' Load the file and update the dictionary '''
         super().__init__(config_path)

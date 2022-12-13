@@ -9,6 +9,7 @@ import os
 import pathlib
 import tempfile
 import json
+import itertools
 
 from uwtools import config
 
@@ -169,3 +170,24 @@ def test_ini_config_bash():
     cfg.update({'dressing': ['ranch', 'italian']})
     expected['dressing'] = ['ranch', 'italian']
     assert cfg == expected
+
+def test_transform_config():
+    '''Test that transforms work as intended.
+
+    '''
+    for test1, test2 in itertools.permutations(["INI", "YAML", "F90"],2):
+        test1file = "NML" if test1 == "F90" else test1
+        test2file = "NML" if test2 == "F90" else test2
+
+        test = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{test1file.lower()}"))
+        ref = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{test2file.lower()}"))
+
+        cfgin = getattr(config, f"{test1}Config")
+        cfg = cfgin(test)
+        cfgout = getattr(config, f"{test2}Config")
+
+        with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+            out_file = f'{tmp_dir}/test_{test1.lower()}to{test2.lower()}_dump.{test2file.lower()}'
+            cfgout.dump_file(cfg, out_file)
+
+            assert filecmp.cmp(ref, out_file)
