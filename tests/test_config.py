@@ -16,6 +16,49 @@ from uwtools import config
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
+def test_parse_include():
+    '''Test that non-YAML handles !INCLUDE Tags properly'''
+
+    test_nml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/include_files.nml"))
+    cfg = config.F90Config(test_nml)
+
+    # salad key tests loading one file.
+    assert cfg['config'].get('fruit') == 'papaya'
+    assert cfg['config'].get('how_many') == 17
+    assert cfg['config'].get('meat') == 'beef'
+    assert len(cfg['config']) == 5
+
+
+def test_parse_include_mult_sect():
+
+    ''' Test that non-YAML handles !INCLUDE tags with files that have
+    multiple sections in separate file. '''
+
+    test_nml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/include_files_with_sect.nml"))
+    cfg = config.F90Config(test_nml)
+
+    # salad key tests loading one file.
+    assert cfg['config'].get('fruit') == 'papaya'
+    assert cfg['config'].get('how_many') == 17
+    assert cfg['config'].get('meat') == 'beef'
+    assert cfg['config'].get('dressing') == 'ranch'
+    assert cfg['setting'].get('size') == 'large'
+    assert len(cfg['config']) == 5
+    assert len(cfg['setting']) == 3
+
+def test_parse_include_ini():
+    '''Test that non-YAML handles !INCLUDE Tags properly for INI with no
+    sections'''
+
+    test_file = os.path.join(uwtools_file_base,pathlib.Path("fixtures/include_files.sh"))
+    cfg = config.INIConfig(test_file, space_around_delimiters=False)
+
+    # salad key tests loading one file.
+    assert cfg.get('fruit') == 'papaya'
+    assert cfg.get('how_many') == '17'
+    assert cfg.get('meat') == 'beef'
+    assert len(cfg) == 5
+
 def test_yaml_config_simple():
     '''Test that YAML load, update, and dump work with a basic YAML file. '''
 
