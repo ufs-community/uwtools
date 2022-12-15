@@ -11,6 +11,7 @@ import tempfile
 import pytest
 
 from uwtools import templater
+from uwtools.logger import Logger
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -50,7 +51,8 @@ def test_set_template_dryrun():
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
     outcome=\
-    """Running script templater.py with args:n ----------------------------------------------------------------------
+    """Running script templater.py with args: 
+----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
  input_template: """ + input_file  + """
@@ -93,7 +95,8 @@ def test_set_template_listvalues():
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     outcome=\
-    """Running script templater.py with args:n ----------------------------------------------------------------------
+    """Running script templater.py with args: 
+----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
  input_template: """ + input_file  + """
@@ -159,7 +162,8 @@ def test_set_template_command_line_config():
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     outcome=\
-    """Running script templater.py with args:n ----------------------------------------------------------------------
+    """Running script templater.py with args: 
+----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
  input_template: """ + input_file  + """
@@ -218,3 +222,67 @@ def test_set_template_yaml_config_model_configure():
 
         templater.set_template(args)
         assert compare_files(expected_file, out_file)
+
+def test_set_template_verbosity():
+    """Unit test for checking dry-run output of ingest namelist tool"""
+
+    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+    logfile = os.path.join(os.path.dirname(__file__), "templater.log")
+
+    outcome=\
+    """Finished setting up debug file logging in """ + logfile  + """
+Running script templater.py with args: 
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+        outfile: None
+ input_template: """ + input_file  + """
+    config_file: None
+   config_items: []
+        dry_run: True
+  values_needed: False
+        verbose: True
+          quiet: False
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+&salad
+  base = 'kale'
+  fruit = 'pear'
+  vegetable = 'squash'
+  how_many = 22
+  dressing = 'balsamic'
+/
+"""
+
+    #test verbose level
+    args = [
+         '-i', input_file,
+         '--dry_run',
+         '-v'
+         ]
+
+    # Capture verbose stdout
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        templater.set_template(args)
+    result = outstring.getvalue()
+    for line in result.splitlines(True):
+        trim_result = trim_result + line[59:]
+    # Check that only the correct messages were logged
+    assert trim_result == outcome
+
+    #test quiet level
+    args = [
+         '-i', input_file,
+         '--dry_run',
+         '-q'
+         ]
+
+    # Capture quiet stdout
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        templater.set_template(args)
+    result = outstring.getvalue()
+
+    outcome = ''
+    # Check that only the correct messages were logged
+    assert result == outcome
