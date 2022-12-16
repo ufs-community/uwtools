@@ -7,6 +7,7 @@ import argparse
 import io
 import os
 import tempfile
+import re
 
 import pytest
 
@@ -228,6 +229,7 @@ def test_set_template_verbosity():
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
     logfile = os.path.join(os.path.dirname(__file__), "templater.log")
+    trim_result = ''
 
     outcome=\
     """Finished setting up debug file logging in """ + logfile  + """
@@ -266,7 +268,11 @@ Running script templater.py with args:
         templater.set_template(args)
     result = outstring.getvalue()
     for line in result.splitlines(True):
-        trim_result = trim_result + line[59:]
+        if re.match(r'^\d', line):
+            ltrim = re.split(r'\s:\s', line)
+            trim_result = trim_result + ltrim[1]
+        else:
+            trim_result = trim_result + line
     # Check that only the correct messages were logged
     assert trim_result == outcome
 
