@@ -247,8 +247,8 @@ Running script templater.py with args:
 ----------------------------------------------------------------------
 &salad
   base = 'kale'
-  fruit = 'pear'
-  vegetable = 'squash'
+  fruit = 'banana'
+  vegetable = 'tomato'
   how_many = 22
   dressing = 'balsamic'
 /
