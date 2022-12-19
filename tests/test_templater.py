@@ -7,7 +7,6 @@ import argparse
 import io
 import os
 import tempfile
-import re
 
 import pytest
 
@@ -228,7 +227,7 @@ def test_set_template_verbosity():
     """Unit test for checking dry-run output of ingest namelist tool"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
-    logfile = os.path.join(os.path.dirname(__file__), "templater.log")
+    logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
     trim_result = ''
 
     outcome=\
@@ -255,6 +254,10 @@ Running script templater.py with args:
 /
 """
 
+    os.environ['fruit'] = 'banana'
+    os.environ['vegetable'] = 'tomato'
+    os.environ['how_many'] = '22'
+
     #test verbose level
     args = [
          '-i', input_file,
@@ -267,14 +270,11 @@ Running script templater.py with args:
     with redirect_stdout(outstring):
         templater.set_template(args)
     result = outstring.getvalue()
-    for line in result.splitlines(True):
-        if re.match(r'^\d', line):
-            ltrim = re.split(r'\s:\s', line)
-            trim_result = trim_result + ltrim[1]
-        else:
-            trim_result = trim_result + line
-    # Check that only the correct messages were logged
-    assert trim_result == outcome
+
+    lines = zip(outcome.split('\n'), result.split('\n'))
+    for outcome_line, result_line in lines:
+        # Check that only the correct messages were logged
+        assert outcome_line in result_line
 
     #test quiet level
     args = [

@@ -92,6 +92,7 @@ def set_template(argv):
         logfile_path=logfile
         )
     if user_args.verbose:
+        log.handlers.clear()
         log = Logger(level='debug',
             _format='%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s',
             colored_log= True,
