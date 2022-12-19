@@ -51,7 +51,7 @@ def test_set_template_dryrun():
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
     outcome=\
-    """Running script templater.py with args: 
+    """Running script templater.py with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
@@ -95,7 +95,7 @@ def test_set_template_listvalues():
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     outcome=\
-    """Running script templater.py with args: 
+    """Running script templater.py with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
@@ -162,7 +162,7 @@ def test_set_template_command_line_config():
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     outcome=\
-    """Running script templater.py with args: 
+    """Running script templater.py with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
@@ -232,7 +232,7 @@ def test_set_template_verbosity():
 
     outcome=\
     """Finished setting up debug file logging in """ + logfile  + """
-Running script templater.py with args: 
+Running script templater.py with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
