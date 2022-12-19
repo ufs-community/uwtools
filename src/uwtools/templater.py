@@ -142,7 +142,7 @@ def set_template(argv):
         # instead of writing to disk
         # Render the template with the specified config object
         rendered_template = template.render_template()
-        print(rendered_template)
+        log.info(rendered_template)
     else:
         # write out rendered template to file
         template.dump_file(user_args.outfile)
