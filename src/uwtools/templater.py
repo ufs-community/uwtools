@@ -130,9 +130,9 @@ def set_template(argv):
     if user_args.values_needed:
         # Gather the undefined template variables
         undeclared_variables = template.undeclared_variables
-        print('Values needed for this template are:')
+        log.info('Values needed for this template are:')
         for var in sorted(undeclared_variables):
-            print(var)
+            log.info(var)
         return
 
     if user_args.dry_run:
