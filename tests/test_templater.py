@@ -11,7 +11,6 @@ import tempfile
 import pytest
 
 from uwtools import templater
-from uwtools.logger import Logger
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
