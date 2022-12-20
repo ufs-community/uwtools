@@ -1,7 +1,7 @@
 '''
 Set of test for loading YAML files using the function call load_yaml
 '''
-#pylint: disable=unused-variable
+#pylint: disable=unused-variable, unspecified-encoding
 from collections import OrderedDict
 import datetime
 import filecmp
