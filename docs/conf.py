@@ -27,7 +27,7 @@ release_date = '2022-03-31'
 release_year = release_date.split("-")[0]
 release_month = release_date.split("-")[1]
 release_day = release_date.split("-")[2]
-copyright = f'{release_year}, {author}'
+copyright = f'{release_year}, {author_list}'
 
 # -- General configuration ---------------------------------------------------                                                                                             
 

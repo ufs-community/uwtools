@@ -44,9 +44,8 @@ The citation for this User's Guide should be:
 |author_list|, |release_year|: The Unified Workflow Version |version| User's Guide.
 Available at: https://github.com/ufs-community/workflow-tools
 
-**Acknowledgments**
-
-ACKNOWLEDGEMENTS HERE
+Table of Contents
+==================
 
 .. toctree::
    :titlesonly:
@@ -54,7 +53,7 @@ ACKNOWLEDGEMENTS HERE
 
    installation
 
-Indices and tables
+Indices and Tables
 ==================
 
 * :ref:`genindex`
