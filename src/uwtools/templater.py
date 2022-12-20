@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#pylint: disable=consider-using-f-string
 
 '''
 This utility renders a Jinja2 template using user-supplied configuration options
@@ -137,7 +138,8 @@ def set_template(argv):
 
     if user_args.dry_run:
         if user_args.outfile:
-            log.info(r"warning file {outfile} not written when using --dry_run".format(outfile=user_args.outfile))
+            log.info(r"warning file {outfile} ".format(outfile=user_args.outfile),
+                 r"not written when using --dry_run")
         # apply switch to allow user to view the results of rendered template
         # instead of writing to disk
         # Render the template with the specified config object
