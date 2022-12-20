@@ -9,6 +9,7 @@ import os
 import pathlib
 import tempfile
 import json
+import itertools
 
 from uwtools import config
 
@@ -212,3 +213,37 @@ def test_ini_config_bash():
     cfg.update({'dressing': ['ranch', 'italian']})
     expected['dressing'] = ['ranch', 'italian']
     assert cfg == expected
+
+def test_compare_files():
+    '''Compare two config objects: base and user-provided
+    '''
+
+    for base, user in itertools.product(["INI", "YAML", "F90"],repeat=2):
+        basefile = "NML" if base == "F90" else base
+        userfile = "NML" if user == "F90" else user
+
+        print(f'Comparing config of {base} and {user}...')
+
+        basepath = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{basefile.lower()}"))
+        userpath = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{userfile.lower()}"))
+
+        cfgbase = getattr(config, f"{base}Config")
+        cfgbaserun = dict(cfgbase(basepath))
+        cfguser = getattr(config, f"{user}Config")
+        cfguserrun = dict(cfguser(userpath))
+
+        #clean any resulting OrderedDicts
+        cleanbase = json.loads(json.dumps(cfgbaserun['salad']))
+        cleanuser = json.loads(json.dumps(cfguserrun['salad']))
+
+        # insure both files have the same depth of sections.
+        if len(cfgbaserun['salad']) == len(cfguserrun['salad']):
+            # If similar, compare keys and their values.
+            miskey = {key for key in cleanbase.keys() & cleanuser if cleanbase[key] != cleanuser[key]}
+            misval = {value for value in cleanbase.values() & cleanuser if cleanbase[value] != cleanuser[value]}
+            print('The following keys do not match: ', ', '.join(map(str,miskey)))
+            print('The following values do not match: ', ', '.join(map(str,misval)))
+            if miskey == '' & misval == '':
+                print('All config keys and values match!')
+        else:
+            print(f'{base} and {user} have different ranges of keys!')
