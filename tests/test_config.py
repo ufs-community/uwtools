@@ -216,9 +216,11 @@ def test_ini_config_bash():
     assert cfg == expected
 
 def test_transform_config():
-    '''Test that transforms work as intended.
+    '''Test that transforms config objects to objects of other config subclasses.
 
     '''
+    # Use itertools to iterate through unique pairs of config subcasses
+    # the transforms here ensure consistent file subscripts and config calls
     for test1, test2 in itertools.permutations(["INI", "YAML", "F90"],2):
         test1file = "NML" if test1 == "F90" else test1
         test2file = "NML" if test2 == "F90" else test2
