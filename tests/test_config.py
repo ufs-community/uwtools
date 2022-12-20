@@ -1,7 +1,7 @@
 '''
 Set of test for loading YAML files using the function call load_yaml
 '''
-#pylint: disable=unused-variable, unspecified-encoding
+#pylint: disable=unused-variable
 from collections import OrderedDict
 import datetime
 import filecmp
@@ -238,7 +238,7 @@ def test_transform_config():
 
             #assert filecmp.cmp(ref, out_file)
             print(f"{test1} vs {test2}")
-            with open(ref) as file_1, open(out_file) as file_2:
+            with open(ref, encoding="utf-8") as file_1, open(out_file, encoding="utf-8") as file_2:
                 differ = Differ()
 
                 for line in differ.compare(file_1.readlines(), file_2.readlines()):
