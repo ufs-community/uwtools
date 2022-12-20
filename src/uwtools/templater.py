@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#pylint: disable=consider-using-f-string
 
 '''
 This utility renders a Jinja2 template using user-supplied configuration options
