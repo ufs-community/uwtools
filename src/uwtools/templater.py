@@ -99,8 +99,8 @@ def set_template(argv):
             colored_log= True,
             logfile_path=logfile
             )
-        log.debug(r"Finished setting up debug file logging in \
-            {logfile}".format(logfile=logfile))
+        log.debug(r"Finished setting up debug file logging in" \
+            r"{logfile}".format(logfile=logfile))
     elif user_args.quiet:
         log.handlers.clear()
         log.propagate = False
@@ -139,8 +139,8 @@ def set_template(argv):
 
     if user_args.dry_run:
         if user_args.outfile:
-            log.info(r"warning file {outfile} not written when using \
-            --dry_run".format(outfile=user_args.outfile))
+            log.info(r"warning file {outfile} not written when using" \
+            r"--dry_run".format(outfile=user_args.outfile))
         # apply switch to allow user to view the results of rendered template
         # instead of writing to disk
         # Render the template with the specified config object
