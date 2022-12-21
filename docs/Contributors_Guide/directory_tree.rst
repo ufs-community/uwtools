@@ -32,32 +32,32 @@ Sample package structure::
 Sample Structure::
 
   tests
-    test_utils
-      __init__.py
-      test_logger.py
-      test_errors.py
-    test_scheduler
-      __init__.py
-      test_slurm.py
-    test_runners
-      __init__.py
-      test_forecast.py
+   ├── test_utils
+   │    ├── __init__.py
+   │    ├── test_logger.py
+   │    └── test_errors.py
+   ├── test_scheduler
+   │    ├── __init__.py
+   │    └── test_slurm.py
+   ├── test_runners
+   │    ├── __init__.py
+   │    └── test_forecast.py
   uwtools
-    __init__.py
-    scheduler
-      __init__.py
-      scheduler.py
-      slurm.py
-    config_parser
-      __init__.py
-      config_parser.py
+   ├── __init__.py
+   ├── scheduler
+   │    ├── __init__.py
+   │    ├── scheduler.py
+   │    └── slurm.py
+   ├── config_parser
+   │    ├── __init__.py
+   │    └── config_parser.py 
   runners
-    __init__.py
-    forecast.py
+   ├── __init__.py
+   │    └── forecast.py
   helpers
-    __init__.py
-    logger.py
-    exceptions.py
+   └── __init__.py
+        ├──logger.py
+        └──exceptions.py
 
 .. COMMENT: Any reason this directory tree doesn't use the same structure 
    as the one above with "├──" and "└──"?
