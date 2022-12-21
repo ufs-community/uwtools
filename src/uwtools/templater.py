@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#pylint: disable=consider-using-f-string
 
 '''
 This utility renders a Jinja2 template using user-supplied configuration options
@@ -11,6 +12,7 @@ import argparse
 
 from uwtools.j2template import J2Template
 from uwtools import config
+from uwtools.logger import Logger
 
 def dict_from_config_args(args):
     '''Given a list of command line arguments in the form key=value, return a
@@ -68,17 +70,51 @@ def parse_args(argv):
         action='store_true',
         help='If provided, print a list of required configuration settings to stdout',
         )
+    parser.add_argument(
+        '-v', '--verbose',
+        action='store_true',
+        help='If provided, print all logging messages.',
+        )
+    parser.add_argument(
+        '-q', '--quiet',
+        action='store_true',
+        help='If provided, print no logging messages',
+        )
     return parser.parse_args(argv)
 
 def set_template(argv):
     '''Main section for rendering and writing a template file'''
-
     user_args = parse_args(argv)
-    print("Running script templater.py with args:n", f"{('-' * 70)}\n{('-' * 70)}")
+
+    logfile = os.path.join(os.path.dirname(__file__), "templater.log")
+    log = Logger(level='info',
+        _format='%(message)s',
+        colored_log= False,
+        logfile_path=logfile
+        )
+    if user_args.verbose:
+        log.handlers.clear()
+        log = Logger(level='debug',
+            _format='%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s',
+            colored_log= True,
+            logfile_path=logfile
+            )
+        log.debug(r"Finished setting up debug file logging in {logfile}".format(logfile=logfile))
+    elif user_args.quiet:
+        log.handlers.clear()
+        log.propagate = False
+
+
+
+    log.info(f"""Running script templater.py with args:
+{('-' * 70)}
+{('-' * 70)}""")
     for name, val in user_args.__dict__.items():
         if name not in ["config"]:
-            print(f"{name:>15s}: {val}")
-    print(f"{('-' * 70)}\n{('-' * 70)}")
+            log.info("{name:>15s}: {val}".format(name=name, val=val))
+    log.info(f"""{('-' * 70)}
+{('-' * 70)}""")
+
 
     if user_args.config_file:
         cfg = config.YAMLConfig(user_args.config_file)
@@ -95,19 +131,20 @@ def set_template(argv):
     if user_args.values_needed:
         # Gather the undefined template variables
         undeclared_variables = template.undeclared_variables
-        print('Values needed for this template are:')
+        log.info('Values needed for this template are:')
         for var in sorted(undeclared_variables):
-            print(var)
+            log.info(var)
         return
 
     if user_args.dry_run:
         if user_args.outfile:
-            print(f'warning file {user_args.outfile} not written when using --dry_run')
+            log.info(r"warning file {outfile} ".format(outfile=user_args.outfile),
+                 r"not written when using --dry_run")
         # apply switch to allow user to view the results of rendered template
         # instead of writing to disk
         # Render the template with the specified config object
         rendered_template = template.render_template()
-        print(rendered_template)
+        log.info(rendered_template)
     else:
         # write out rendered template to file
         template.dump_file(user_args.outfile)
