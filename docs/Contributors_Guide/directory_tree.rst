@@ -6,8 +6,8 @@ Goals
 =====
 * No conflicts between different packages in their external packages
 * No circular dependencies
-* If a user/dev introduces a new dependency they need to add an entry in environment.yaml and setup.cfg 
-* GitHub actions should test setup.cfg and environment.yml to ensure that our code runs correctly 
+* If a user/developer introduces a new dependency, they need to add an entry in `environment.yaml` and `setup.cfg`. 
+* GitHub actions should test `setup.cfg` and `environment.yml` to ensure that our code runs correctly. 
 * Packages should adhere to the following generic structure as appropriate:
 
 Sample package structure::
@@ -19,15 +19,15 @@ Sample package structure::
      ├── __init__.py
      └── module2.py
       
-* Tests follow similar structure as code.
+* Tests follow a similar structure to code.
 
-* Workflow tools are standalone pieces of code that can be used with other tools
+* Workflow tools are standalone pieces of code that can be used with other tools.
   
 * Helpers can be utilized by any tool/code at any level.
   
-* New tools should be added as subpkgs of uwtools.
+* New tools should be added as subpackages of `uwtools`.
 
-* New helpers should be added as modules of helpers
+* New helpers should be added as modules of helpers.
 
 Sample Structure::
 
@@ -58,6 +58,9 @@ Sample Structure::
     __init__.py
     logger.py
     exceptions.py
+
+.. COMMENT: Any reason this directory tree doesn't use the same structure 
+   as the one above with "├──" and "└──"?
     
 Examples of how to import this structure
 In **scheduler.py**::
