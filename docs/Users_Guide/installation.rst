@@ -8,10 +8,52 @@ Installation [#f1]_
 Using a Python Environment
 --------------------------
 
+Users may follow the instructions provided in this section to install conda and/or create virtual environments for their projects. These steps are not required to install or run the Unified Workflow Tools package (`uwtools`). However, use of conda virtual environments can make it easier to work on multiple projects with conflicting dependencies on the same machine. Go to :numref:`Section %s <uwinstall>` to skip directly to `uwtools` installation. 
+
+^^^^^
+conda
+^^^^^
+
+Conda is a package manager and environment management system for Python and other programming languages. You can use conda to create isolated environments for your projects, which can help you manage dependencies and package versions. 
+
+To create a conda environment, follow these steps:
+
+#. Make sure you have conda installed on your system. If not, you can install it from the official website (https://docs.conda.io/en/latest/miniconda.html) or using your operating system's package manager.
+
+#. Open a terminal or command prompt and navigate to the directory where you want to create the conda environment.
+
+#. Use the `conda create` command to create a new conda environment. Replace `myenv` with the name you want to give to your environment, and `python=3.8` with the desired version of Python::
+
+      conda create --name myenv python=3.8
+
+#. This will create a new conda environment called `myenv`, using the specified version of Python.
+
+#. To activate the conda environment, use the following command::
+
+      conda activate myenv
+
+#. You should now see the name of your conda environment in the terminal prompt, indicating that it is active.
+
+#. To deactivate the conda environment, use the following command::
+
+      conda deactivate
+
+#. You can now use the conda environment as a sandbox for your projects, 
+   installing packages and running scripts without affecting the global Python environment. 
+   To install packages in the conda environment, activate the conda environment. Then 
+   use the conda install command, followed by the package name. For example::
+
+      conda install numpy
+
+   This will install the numpy package in the active conda environment.
+   Running the commands below for installing uwtools will install all
+   the necessary packages, so there is no need to install those manually
+   in this step.
+
 ^^^^^^^^^^
 virtualenv
 ^^^^^^^^^^
-A virtual environment is a tool used to isolate specific Python environments on a single machine, allowing you to work on multiple projects with different packages and package versions.
+A virtual environment is a tool used to isolate specific Python environments on a single machine, allowing you to work on multiple projects with different packages and package versions. 
 
 To create a virtual environment, follow these steps:
 
@@ -38,51 +80,15 @@ To create a virtual environment, follow these steps:
 #. You can now use the virtual environment as a sandbox for your Python projects, installing packages and running scripts without affecting the global Python environment.
 
 
-^^^^^
-conda
-^^^^^
-
-Conda is a package manager and environment management system for Python and other programming languages. You can use conda to create isolated environments for your projects, which can help you manage dependencies and package versions.
-
-To create a conda environment, follow these steps:
-
-#. Make sure you have conda installed on your system. If not, you can install it from the official website (https://docs.conda.io/en/latest/miniconda.html) or using your operating system's package manager.
-
-#. Open a terminal or command prompt and navigate to the directory where you want to create the conda environment.
-
-#. Use the `conda create` command to create a new conda environment. Replace `myenv` with the name you want to give to your environment, and `python=3.8` with the desired version of Python::
-
-      conda create --name myenv python=3.8
-
-#. This will create a new conda environment called `myenv`, using the specified version of Python.
-
-#. To activate the conda environment, use the following command::
-
-      conda activate myenv
-
-#. You should now see the name of your conda environment in the terminal prompt, indicating that it is active.
-
-#. To deactivate the conda environment, use the following command::
-
-      conda deactivate
-
-#. You can now use the conda environment as a sandbox for your projects, installing packages and running scripts without affecting the global Python environment. To install packages in the conda environment, use the conda install command, followed by the package name. For example::
-
-      conda install numpy
-
-#. This will install the numpy package in the active conda environment.
-   Running the commands below for installing uwtools will install all
-   the necessary packages, so there is no need to install those manually
-   in this step.
-
+.. _uwinstall:
 
 -------------------
 The uwtools package
 -------------------
 
-To install the workflow-tools repository from Github, follow these steps:
+To install the `workflow-tools` repository from Github, follow these steps:
 
-#. Make sure you have Git installed on your system. If not, you can install it from the official website (https://git-scm.com/) or using your operating system's package manager.
+#. Make sure you have Git installed on your system. If not, you can install it from the official website (https://git-scm.com/) or use your operating system's package manager.
 
 #. Open a terminal or command prompt and navigate to the directory where you want to install the repository.
 
@@ -92,11 +98,11 @@ To install the workflow-tools repository from Github, follow these steps:
 
 #. This will create a new directory called `workflow-tools` in the current directory, containing the files from the repository.
 
-#. Change into the `workflow-tools` directory by using the `cd` command::
+#. Switch to the `workflow-tools` directory by using the `cd` command::
 
       cd workflow-tools
 
-#. The repository is packaged as a pip Python package and managed via `setup.py`. Installing the package by typing ::
+#. The repository is packaged as a pip Python package and managed via `setup.py`. Install the package by typing: ::
 
       pip install .
 

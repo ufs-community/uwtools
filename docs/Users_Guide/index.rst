@@ -15,13 +15,12 @@ with one application will enable users and developers to gain some familiarity
 with other applications.
 
 It is important to note here that the Unified Workflow is an evolving software
-package. This documentation describes the |release|
-release dated |release_date|.
-
+package. This documentation describes the `develop` branch, which includes features from the most recent |release|
+release dated |release_date| and updates since that release.
 
 **Disclaimer**
 
-Copyright |copyright|
+Copyright |copyright|.
 
 The United States Department of Commerce (DOC) GitHub project code is provided
 on an "as is" basis and the user assumes responsibility for its use. DOC has
@@ -42,11 +41,15 @@ by DOC or the United States Government.
 The citation for this User's Guide should be:
 
 |author_list|, |release_year|: The Unified Workflow Version |version| User's Guide.
-Available at: https://github.com/ufs-community/workflow-tools
+Available at: https://unified-workflow.readthedocs.io/en/latest/Users_Guide/index.html
 
 **Acknowledgments**
 
-ACKNOWLEDGEMENTS HERE
+This documentation borrows heavily from METplus documentation where relevant. 
+The Unified Workflow Team would like to thank the METplus development team's contributions, which laid the foundation for this documentation. 
+
+Table of Contents
+==================
 
 .. toctree::
    :titlesonly:
@@ -54,7 +57,7 @@ ACKNOWLEDGEMENTS HERE
 
    installation
 
-Indices and tables
+Indices and Tables
 ==================
 
 * :ref:`genindex`
