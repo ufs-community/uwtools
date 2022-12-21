@@ -8,41 +8,13 @@ Installation [#f1]_
 Using a Python Environment
 --------------------------
 
-^^^^^^^^^^
-virtualenv
-^^^^^^^^^^
-A virtual environment is a tool used to isolate specific Python environments on a single machine, allowing you to work on multiple projects with different packages and package versions.
-
-To create a virtual environment, follow these steps:
-
-#. Make sure you have Python and the venv module installed on your system. If not, you can install them from the official website (https://www.python.org/) or using your operating system's package manager.
-
-#. Open a terminal or command prompt and navigate to the directory where you want to create the virtual environment.
-
-#. Use the python3 -m venv command to create a new virtual environment. Replace `myenv` with the name you want to give to your virtual environment::
-
-      python3 -m venv myenv
-
-#. This will create a new directory called `myenv`, which contains the files for the virtual environment.
-
-#. To activate the virtual environment, use the following command::
-
-      source myenv/bin/activate
-
-#. You should now see the name of your virtual environment in the terminal prompt, indicating that it is active.
-
-#. To deactivate the virtual environment, use the following command::
-
-      deactivate
-
-#. You can now use the virtual environment as a sandbox for your Python projects, installing packages and running scripts without affecting the global Python environment.
-
+Users may follow the instructions provided in this section to install conda and/or create virtual environments for their projects. These steps are not required to install or run the Unified Workflow Tools package (`uwtools`). However, use of conda virtual environments can make it easier to work on multiple projects with conflicting dependencies on the same machine. Go to :numref:`Section %s <uwinstall>` to skip directly to `uwtools` installation. 
 
 ^^^^^
 conda
 ^^^^^
 
-Conda is a package manager and environment management system for Python and other programming languages. You can use conda to create isolated environments for your projects, which can help you manage dependencies and package versions.
+Conda is a package manager and environment management system for Python and other programming languages. You can use conda to create isolated environments for your projects, which can help you manage dependencies and package versions. 
 
 To create a conda environment, follow these steps:
 
@@ -78,6 +50,37 @@ To create a conda environment, follow these steps:
    the necessary packages, so there is no need to install those manually
    in this step.
 
+^^^^^^^^^^
+virtualenv
+^^^^^^^^^^
+A virtual environment is a tool used to isolate specific Python environments on a single machine, allowing you to work on multiple projects with different packages and package versions. 
+
+To create a virtual environment, follow these steps:
+
+#. Make sure you have Python and the venv module installed on your system. If not, you can install them from the official website (https://www.python.org/) or using your operating system's package manager.
+
+#. Open a terminal or command prompt and navigate to the directory where you want to create the virtual environment.
+
+#. Use the python3 -m venv command to create a new virtual environment. Replace `myenv` with the name you want to give to your virtual environment::
+
+      python3 -m venv myenv
+
+#. This will create a new directory called `myenv`, which contains the files for the virtual environment.
+
+#. To activate the virtual environment, use the following command::
+
+      source myenv/bin/activate
+
+#. You should now see the name of your virtual environment in the terminal prompt, indicating that it is active.
+
+#. To deactivate the virtual environment, use the following command::
+
+      deactivate
+
+#. You can now use the virtual environment as a sandbox for your Python projects, installing packages and running scripts without affecting the global Python environment.
+
+
+.. _uwinstall:
 
 -------------------
 The uwtools package
