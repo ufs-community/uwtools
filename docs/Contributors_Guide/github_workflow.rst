@@ -52,7 +52,7 @@ A contributor to Unified Workflow will do the following:
 7.  Clean up after pull request has been merged by an authorized developer.
 
 
-Create a GitHub issue that reflects what needs to be done
+Create a GitHub Issue that reflects what needs to be done
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Go to the `workflow-tools repository <https://github.com/ufs-community/workflow-tools>`__  and
@@ -74,13 +74,13 @@ Generate a feature branch from the 'develop' branch for new development
   For example, for GitHub issue #777 that creates new wrapper, xyz, 
   the feature branch would be named: *feature_777_wrapper_xyz*
 
-* Create your feature branch based off the develop branch
+* Create your feature branch based off the 'develop' branch
 
   .. code-block:: ini
 
     git checkout develop
 
-* Verify that you are currently working in the develop branch by running
+* Verify that you are currently working in the 'develop' branch by running
 
   .. code-block:: ini
 
@@ -101,7 +101,7 @@ Generate a feature branch from the 'develop' branch for new development
 
     git checkout -b feature_777_wrapper_xyz
 
-  replacing `feature_777_wrapper_xyz` with your feature branch name.
+  replacing *feature_777_wrapper_xyz* with your feature branch name.
 
 * Verify that you are working in the correct branch by running:
 
@@ -143,7 +143,7 @@ local repository.
   `workflow-tools GitHub repository <https://github.com/ufs-community/workflow-tools>`__
   that you see when you run *git remote -v* and that you set to upstream in
   step 4 above). The second command pushes those changes to your forked
-  repository. The third command will merge the local develop branch into
+  repository. The third command will merge the local 'develop' branch into
   the feature branch.
 
    .. COMMENT: What does "step 4 above" reference? 
@@ -169,7 +169,7 @@ Please refer to the
 documentation on configuring your Git account.
 
 For the first line of your commit comment, enter a brief description, such
-as the GitHub Issue number and a brief description. On the second and
+as the GitHub issue number and a brief description. On the second and
 subsequent lines, provide a detailed description of the changes/additions
 you made.
 
@@ -245,7 +245,7 @@ different branch. Pull requests allow the reviewer to see the differences
 in the content from both branches.
 
 For issues with sub-tasks, it may be desirable to get some changes into the
-develop branch sooner, rather than later. If the changes seem to make sense
+'develop' branch sooner, rather than later. If the changes seem to make sense
 on their own and don't rely on other sub-tasks to be complete, creating a pull
 request for a sub-task may make sense. If a sub-task does rely on other
 sub-tasks to be complete, then it may be best to wait to create a pull request
@@ -270,7 +270,7 @@ Approving a pull request
     reviewer to perform.
 4.  Perform any testing that is requested of the reviewer.
 5.  Check to ensure the correct "base" branch is selected. In most cases, the
-    "base" branch will be the develop branch.
+    "base" branch will be the "develop" branch.
 6.  Click on the “Files Changed” tab to review the differences in code
     between the “base” branch and the “compare” branch.
 7.  Review each file and ensure that the changes seem reasonable.
@@ -346,29 +346,29 @@ Clean up after a successfully merged pull request
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 After an authorized developer has accepted your changes and merged
-them into the develop repository, update your local clone by pulling changes
-from the original repository (i.e., the `Unified Workflow develop branch <https://github.com/ufs-community/workflow-tools/tree/develop>`__):
+them into the 'develop' branch of the repository, update your local clone by pulling changes
+from the original repository (i.e., the `Unified Workflow 'develop' branch <https://github.com/ufs-community/workflow-tools/tree/develop>`__):
 
-* Checkout your 'develop' branch
+* Checkout your 'develop' branch.
 
   .. code-block:: ini
 
     git checkout develop
 
-* Verify that you are now working from the develop branch
+* Verify that you are now working from the 'develop' branch.
 
   .. code-block:: ini
 
     git branch
 
-* Merge changes from the upstream develop branch with your local develop branch
+* Merge changes from the upstream 'develop' branch with your local 'develop' branch.
 
   .. code-block:: ini
 
     git pull upstream develop
 
 * Your local cloned repository should now have all the latest changes from the
-  original repository's develop branch.
+  original repository's 'develop' branch.
 
   Now you can delete your feature branch:
 
