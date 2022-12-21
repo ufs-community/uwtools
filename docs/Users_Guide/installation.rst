@@ -66,11 +66,14 @@ To create a conda environment, follow these steps:
 
       conda deactivate
 
-#. You can now use the conda environment as a sandbox for your projects, installing packages and running scripts without affecting the global Python environment. To install packages in the conda environment, use the conda install command, followed by the package name. For example::
+#. You can now use the conda environment as a sandbox for your projects, 
+   installing packages and running scripts without affecting the global Python environment. 
+   To install packages in the conda environment, activate the conda environment. Then 
+   use the conda install command, followed by the package name. For example::
 
       conda install numpy
 
-#. This will install the numpy package in the active conda environment.
+   This will install the numpy package in the active conda environment.
    Running the commands below for installing uwtools will install all
    the necessary packages, so there is no need to install those manually
    in this step.
@@ -80,9 +83,9 @@ To create a conda environment, follow these steps:
 The uwtools package
 -------------------
 
-To install the workflow-tools repository from Github, follow these steps:
+To install the `workflow-tools` repository from Github, follow these steps:
 
-#. Make sure you have Git installed on your system. If not, you can install it from the official website (https://git-scm.com/) or using your operating system's package manager.
+#. Make sure you have Git installed on your system. If not, you can install it from the official website (https://git-scm.com/) or use your operating system's package manager.
 
 #. Open a terminal or command prompt and navigate to the directory where you want to install the repository.
 
@@ -92,11 +95,11 @@ To install the workflow-tools repository from Github, follow these steps:
 
 #. This will create a new directory called `workflow-tools` in the current directory, containing the files from the repository.
 
-#. Change into the `workflow-tools` directory by using the `cd` command::
+#. Switch to the `workflow-tools` directory by using the `cd` command::
 
       cd workflow-tools
 
-#. The repository is packaged as a pip Python package and managed via `setup.py`. Installing the package by typing ::
+#. The repository is packaged as a pip Python package and managed via `setup.py`. Install the package by typing: ::
 
       pip install .
 
