@@ -263,7 +263,7 @@ Approving a pull request
     were not successful or if there are conflicts with the base branch,
     ask the requestor to make changes.
 
-    .. COMMENT: There is no figure here despite what #2 says. 
+    .. figure:: ../figure/checks_pass_no_conflicts.png
     
 3.  Take a look at the description of the testing already performed for
     these changes, and then see what the recommended testing is for the
