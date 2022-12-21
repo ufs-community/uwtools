@@ -15,13 +15,8 @@ with one application will enable users and developers to gain some familiarity
 with other applications.
 
 It is important to note here that the Unified Workflow is an evolving software
-package. This documentation describes the |release|
-release dated |release_date|.
-
-.. COMMENT: Since this is for the develop branch, should it be tied to a release...? 
-   I updated the release to 0.1.0/2022-05-06, since I saw on the repo that that's the latest release.
-   Feel free to correct me if that's wrong. 
-
+package. This documentation describes the `develop` branch, which includes features from the most recent |release|
+release dated |release_date| and updates since that release.
 
 **Disclaimer**
 
@@ -47,6 +42,11 @@ The citation for this User's Guide should be:
 
 |author_list|, |release_year|: The Unified Workflow Version |version| User's Guide.
 Available at: https://unified-workflow.readthedocs.io/en/latest/Users_Guide/index.html
+
+**Acknowledgments**
+
+This documentation borrows heavily from METplus documentation where relevant. 
+The Unified Workflow Team would like to thank the METplus development team's contributions, which laid the foundation for this documentation. 
 
 Table of Contents
 ==================
