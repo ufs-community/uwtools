@@ -58,10 +58,7 @@ Sample Structure::
    └── __init__.py
         ├──logger.py
         └──exceptions.py
-
-.. COMMENT: Any reason this directory tree doesn't use the same structure 
-   as the one above with "├──" and "└──"?
-    
+   
 Examples of how to import this structure
 In **scheduler.py**::
 
