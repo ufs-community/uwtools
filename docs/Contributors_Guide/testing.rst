@@ -5,7 +5,7 @@
 Testing
 *******
 
-Test scripts are found in the GitHub repository in the src/tests directory
+Test scripts are found in the GitHub repository in the `src/tests` directory
 
 Unit Tests
 ==========
