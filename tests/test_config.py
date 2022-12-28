@@ -10,7 +10,6 @@ import pathlib
 import tempfile
 import json
 import itertools
-from difflib import Differ
 
 from uwtools import config
 
@@ -236,10 +235,12 @@ def test_transform_config():
             out_file = f'{tmp_dir}/test_{test1.lower()}to{test2.lower()}_dump.{test2file.lower()}'
             cfgout.dump_file(cfg, out_file)
 
-            #assert filecmp.cmp(ref, out_file)
             print(f"{test1} vs {test2}")
-            with open(ref, encoding="utf-8") as file_1, open(out_file, encoding="utf-8") as file_2:
-                differ = Differ()
-
-                for line in differ.compare(file_1.readlines(), file_2.readlines()):
-                    print(line)
+            with open(ref, 'r', encoding="utf-8") as file_1, open(out_file, 'r', encoding="utf-8") as file_2:
+                reflist = [line.rstrip('\n') for line in file_1]
+                outlist = [line.rstrip('\n') for line in file_2]
+                lines = zip(reflist, outlist)
+                for line1, line2 in lines:
+                    #assert line1 in line2
+                    if line1 != line2:
+                        return line1+line2
