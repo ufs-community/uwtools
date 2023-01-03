@@ -215,6 +215,9 @@ def test_ini_config_bash():
     assert cfg == expected
 
 def test_transform_config():
+
+    #pylint: disable=too-many-locals
+
     '''Test that transforms config objects to objects of other config subclasses.
 
     '''
@@ -227,20 +230,17 @@ def test_transform_config():
         test = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{test1file.lower()}"))
         ref = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{test2file.lower()}"))
 
-        cfgin = getattr(config, f"{test1}Config")
-        cfg = cfgin(test)
-        cfgout = getattr(config, f"{test2}Config")
+        cfgin = getattr(config, f"{test1}Config")(test)
+        cfgout = getattr(config, f"{test2}Config")()
+        cfgout.update(cfgin.data)
 
         with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
             out_file = f'{tmp_dir}/test_{test1.lower()}to{test2.lower()}_dump.{test2file.lower()}'
-            cfgout.dump_file(cfg, out_file)
+            cfgout.dump_file(out_file)
 
-            print(f"{test1} vs {test2}")
             with open(ref, 'r', encoding="utf-8") as file_1, open(out_file, 'r', encoding="utf-8") as file_2:
-                reflist = [line.rstrip('\n') for line in file_1]
-                outlist = [line.rstrip('\n') for line in file_2]
+                reflist = [line.rstrip('\n').strip().replace("'", "") for line in file_1]
+                outlist = [line.rstrip('\n').strip().replace("'", "") for line in file_2]
                 lines = zip(reflist, outlist)
                 for line1, line2 in lines:
-                    #assert line1 in line2
-                    if line1 != line2:
-                        return line1+line2
+                    assert line1 in line2

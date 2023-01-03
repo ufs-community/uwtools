@@ -165,7 +165,8 @@ class YAMLConfig(Config):
 
         super().__init__(config_path)
 
-        self.update(self._load())
+        if config_path is not None:
+            self.update(self._load())
 
     def _load(self, config_path=None):
         ''' Load the user-provided YAML config file path into a dict
@@ -206,21 +207,32 @@ class F90Config(Config):
         ''' Load the file and update the dictionary '''
         super().__init__(config_path)
 
-        self.update(self._load())
-        self.parse_include()
+        if config_path is not None:
+            self.update(self._load())
+            self.parse_include()
 
     def _load(self, config_path=None):
         ''' Load the user-provided Fortran namelist path into a dict
         object. '''
         config_path = config_path or self.config_path
         with open(config_path, 'r', encoding="utf-8") as file_name:
-            cfg = f90nml.read(file_name)
-        return cfg.todict(complex_tuple=False)
+            cfg = f90nml.read(file_name).todict(complex_tuple=False)
+
+        for sect, keys in cfg.items():
+            if isinstance(keys, collections.OrderedDict):
+                cfg[sect] = dict(keys)
+
+        return cfg
 
     def dump_file(self, output_path):
         ''' Write the dict to a namelist file. '''
+        nml = collections.OrderedDict(self.data)
+        for sect, keys in nml.items():
+            if isinstance(keys, dict):
+                nml[sect] = collections.OrderedDict(keys)
+
         with open(output_path, 'w', encoding="utf-8") as file_name:
-            f90nml.Namelist(self.data).write(file_name)
+            f90nml.Namelist(nml).write(file_name, sort=False)
 
 class INIConfig(Config):
 
@@ -238,8 +250,9 @@ class INIConfig(Config):
         super().__init__(config_path)
         self.space_around_delimiters = space_around_delimiters
 
-        self.update(self._load())
-        self.parse_include()
+        if config_path is not None:
+            self.update(self._load())
+            self.parse_include()
 
     def _load(self, config_path=None):
         ''' Load the user-provided INI config file path into a dict
@@ -284,7 +297,8 @@ class FieldTableConfig(YAMLConfig):
         ''' Load the file and update the dictionary '''
         super().__init__(config_path)
 
-        self.update(self._load())
+        if config_path is not None:
+            self.update(self._load())
 
     def _format_output(self):
         ''' Format the output of the dictionary into a string that
