@@ -34,7 +34,7 @@ class Config(collections.UserDict):
     dump_file(output_path)
         Abstract method used as an interface to write a file to disk
 
-    from_OrderedDict(in_dict)
+    from_ordereddict(in_dict)
         Given a dictionary, replaces instances of OrderedDict with a
         regular dictionary
 
@@ -80,7 +80,7 @@ class Config(collections.UserDict):
         ''' Interface to write a config object to a file at the
         output_path provided. '''
 
-    def from_OrderedDict(self, in_dict):
+    def from_ordereddict(self, in_dict):
         '''
         Given a dictionary, replace all instances of OrderedDict with a
         regular dictionary.
@@ -193,7 +193,7 @@ class YAMLConfig(Config):
         with open(config_path, 'r', encoding="utf-8") as file_name:
             cfg = yaml.load(file_name, Loader=loader)
 
-        self.from_OrderedDict(cfg)
+        self.from_ordereddict(cfg)
         return cfg
 
     def dump_file(self, output_path):
@@ -237,7 +237,7 @@ class F90Config(Config):
             cfg = f90nml.read(file_name).todict(complex_tuple=False)
 
         cfg = dict(cfg)
-        self.from_OrderedDict(cfg)
+        self.from_ordereddict(cfg)
         return cfg
 
     def dump_file(self, output_path):
@@ -286,11 +286,11 @@ class INIConfig(Config):
             with open(config_path, 'r', encoding="utf-8") as file_name:
                 cfg.read_string("[top]\n" + file_name.read())
                 ret_cfg = dict(cfg._sections.get('top'))
-                self.from_OrderedDict(ret_cfg)
+                self.from_ordereddict(ret_cfg)
                 return ret_cfg
 
         ret_cfg = dict(cfg._sections)
-        self.from_OrderedDict(ret_cfg)
+        self.from_ordereddict(ret_cfg)
         return ret_cfg
 
     def dump_file(self, output_path):
