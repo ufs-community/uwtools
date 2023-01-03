@@ -34,6 +34,10 @@ class Config(collections.UserDict):
     dump_file(output_path)
         Abstract method used as an interface to write a file to disk
 
+    from_ordereddict(in_dict)
+        Given a dictionary, replaces instances of OrderedDict with a
+        regular dictionary
+
     parse_include()
         Traverses the dictionary treating the !INCLUDE path the same as
         is done by pyyaml.
@@ -48,7 +52,7 @@ class Config(collections.UserDict):
         present in the second dictionary.
     '''
 
-    def __init__(self, config_path):
+    def __init__(self, config_path=None):
 
         '''
         Parameters
@@ -75,6 +79,18 @@ class Config(collections.UserDict):
     def dump_file(self, output_path):
         ''' Interface to write a config object to a file at the
         output_path provided. '''
+
+    def from_ordereddict(self, in_dict):
+        '''
+        Given a dictionary, replace all instances of OrderedDict with a
+        regular dictionary.
+        '''
+        if isinstance(in_dict, collections.OrderedDict):
+            in_dict = dict(in_dict)
+
+        for sect, keys in in_dict.items():
+            if isinstance(keys, collections.OrderedDict):
+                in_dict[sect] = dict(keys)
 
     def _load_paths(self, filepaths):
         '''
@@ -159,13 +175,14 @@ class YAMLConfig(Config):
 
     '''
 
-    def __init__(self, config_path):
+    def __init__(self, config_path=None):
 
         ''' Load the file and update the dictionary '''
 
         super().__init__(config_path)
 
-        self.update(self._load())
+        if config_path is not None:
+            self.update(self._load())
 
     def _load(self, config_path=None):
         ''' Load the user-provided YAML config file path into a dict
@@ -175,6 +192,8 @@ class YAMLConfig(Config):
         config_path = config_path or self.config_path
         with open(config_path, 'r', encoding="utf-8") as file_name:
             cfg = yaml.load(file_name, Loader=loader)
+
+        self.from_ordereddict(cfg)
         return cfg
 
     def dump_file(self, output_path):
@@ -201,32 +220,41 @@ class F90Config(Config):
 
     ''' Concrete class to handle Fortran namelist files. '''
 
-    def __init__(self, config_path):
+    def __init__(self, config_path=None):
 
         ''' Load the file and update the dictionary '''
         super().__init__(config_path)
 
-        self.update(self._load())
-        self.parse_include()
+        if config_path is not None:
+            self.update(self._load())
+            self.parse_include()
 
     def _load(self, config_path=None):
         ''' Load the user-provided Fortran namelist path into a dict
         object. '''
         config_path = config_path or self.config_path
         with open(config_path, 'r', encoding="utf-8") as file_name:
-            cfg = f90nml.read(file_name)
-        return cfg.todict(complex_tuple=False)
+            cfg = f90nml.read(file_name).todict(complex_tuple=False)
+
+        cfg = dict(cfg)
+        self.from_ordereddict(cfg)
+        return cfg
 
     def dump_file(self, output_path):
         ''' Write the dict to a namelist file. '''
+        nml = collections.OrderedDict(self.data)
+        for sect, keys in nml.items():
+            if isinstance(keys, dict):
+                nml[sect] = collections.OrderedDict(keys)
+
         with open(output_path, 'w', encoding="utf-8") as file_name:
-            f90nml.Namelist(self.data).write(file_name)
+            f90nml.Namelist(nml).write(file_name, sort=False)
 
 class INIConfig(Config):
 
     ''' Concrete class to handle INI config files. '''
 
-    def __init__(self, config_path, space_around_delimiters=True):
+    def __init__(self, config_path=None, space_around_delimiters=True):
 
         ''' Load the file and update the dictionary
 
@@ -238,8 +266,9 @@ class INIConfig(Config):
         super().__init__(config_path)
         self.space_around_delimiters = space_around_delimiters
 
-        self.update(self._load())
-        self.parse_include()
+        if config_path is not None:
+            self.update(self._load())
+            self.parse_include()
 
     def _load(self, config_path=None):
         ''' Load the user-provided INI config file path into a dict
@@ -256,9 +285,13 @@ class INIConfig(Config):
         except configparser.MissingSectionHeaderError:
             with open(config_path, 'r', encoding="utf-8") as file_name:
                 cfg.read_string("[top]\n" + file_name.read())
-                return cfg._sections.get('top')
+                ret_cfg = dict(cfg._sections.get('top'))
+                self.from_ordereddict(ret_cfg)
+                return ret_cfg
 
-        return cfg._sections
+        ret_cfg = dict(cfg._sections)
+        self.from_ordereddict(ret_cfg)
+        return ret_cfg
 
     def dump_file(self, output_path):
 
@@ -279,12 +312,13 @@ class FieldTableConfig(YAMLConfig):
     ''' This class will exist only to write out field_table format given
     that its configuration has been set by an input YAML file. '''
 
-    def __init__(self, config_path):
+    def __init__(self, config_path=None):
 
         ''' Load the file and update the dictionary '''
         super().__init__(config_path)
 
-        self.update(self._load())
+        if config_path is not None:
+            self.update(self._load())
 
     def _format_output(self):
         ''' Format the output of the dictionary into a string that

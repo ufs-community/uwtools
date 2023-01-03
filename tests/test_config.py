@@ -61,7 +61,7 @@ def test_parse_include_ini():
 def test_yaml_config_simple():
     '''Test that YAML load, update, and dump work with a basic YAML file. '''
 
-    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.yaml"))
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple2.yaml"))
     cfg = config.YAMLConfig(test_yaml)
 
     expected = {
@@ -214,36 +214,33 @@ def test_ini_config_bash():
     expected['dressing'] = ['ranch', 'italian']
     assert cfg == expected
 
-def test_compare_files():
-    '''Compare two config objects: base and user-provided
+def test_transform_config():
+
+    #pylint: disable=too-many-locals
+
+    '''Test that transforms config objects to objects of other config subclasses.
+
     '''
+    # Use itertools to iterate through unique pairs of config subcasses
+    # the transforms here ensure consistent file subscripts and config calls
+    for test1, test2 in itertools.permutations(["INI", "YAML", "F90"],2):
+        test1file = "NML" if test1 == "F90" else test1
+        test2file = "NML" if test2 == "F90" else test2
 
-    for base, user in itertools.product(["INI", "YAML", "F90"],repeat=2):
-        basefile = "NML" if base == "F90" else base
-        userfile = "NML" if user == "F90" else user
+        test = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{test1file.lower()}"))
+        ref = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{test2file.lower()}"))
 
-        print(f'Comparing config of {base} and {user}...')
+        cfgin = getattr(config, f"{test1}Config")(test)
+        cfgout = getattr(config, f"{test2}Config")()
+        cfgout.update(cfgin.data)
 
-        basepath = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{basefile.lower()}"))
-        userpath = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{userfile.lower()}"))
+        with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+            out_file = f'{tmp_dir}/test_{test1.lower()}to{test2.lower()}_dump.{test2file.lower()}'
+            cfgout.dump_file(out_file)
 
-        cfgbase = getattr(config, f"{base}Config")
-        cfgbaserun = dict(cfgbase(basepath))
-        cfguser = getattr(config, f"{user}Config")
-        cfguserrun = dict(cfguser(userpath))
-
-        #clean any resulting OrderedDicts
-        cleanbase = json.loads(json.dumps(cfgbaserun['salad']))
-        cleanuser = json.loads(json.dumps(cfguserrun['salad']))
-
-        # insure both files have the same depth of sections.
-        if len(cfgbaserun['salad']) == len(cfguserrun['salad']):
-            # If similar, compare keys and their values.
-            miskey = {key for key in cleanbase.keys() & cleanuser if cleanbase[key] != cleanuser[key]}
-            misval = {value for value in cleanbase.values() & cleanuser if cleanbase[value] != cleanuser[value]}
-            print('The following keys do not match: ', ', '.join(map(str,miskey)))
-            print('The following values do not match: ', ', '.join(map(str,misval)))
-            if miskey == '' & misval == '':
-                print('All config keys and values match!')
-        else:
-            print(f'{base} and {user} have different ranges of keys!')
+            with open(ref, 'r', encoding="utf-8") as file_1, open(out_file, 'r', encoding="utf-8") as file_2:
+                reflist = [line.rstrip('\n').strip().replace("'", "") for line in file_1]
+                outlist = [line.rstrip('\n').strip().replace("'", "") for line in file_2]
+                lines = zip(reflist, outlist)
+                for line1, line2 in lines:
+                    assert line1 in line2
