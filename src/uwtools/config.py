@@ -34,6 +34,10 @@ class Config(collections.UserDict):
     dump_file(output_path)
         Abstract method used as an interface to write a file to disk
 
+    from_OrderedDict(in_dict)
+        Given a dictionary, replaces instances of OrderedDict with a
+        regular dictionary
+
     parse_include()
         Traverses the dictionary treating the !INCLUDE path the same as
         is done by pyyaml.
@@ -75,6 +79,18 @@ class Config(collections.UserDict):
     def dump_file(self, output_path):
         ''' Interface to write a config object to a file at the
         output_path provided. '''
+
+    def from_OrderedDict(self, in_dict):
+        '''
+        Given a dictionary, replace all instances of OrderedDict with a
+        regular dictionary.
+        '''
+        if isinstance(in_dict, collections.OrderedDict):
+            in_dict = dict(in_dict)
+
+        for sect, keys in in_dict.items():
+            if isinstance(keys, collections.OrderedDict):
+                in_dict[sect] = dict(keys)
 
     def _load_paths(self, filepaths):
         '''
@@ -176,6 +192,8 @@ class YAMLConfig(Config):
         config_path = config_path or self.config_path
         with open(config_path, 'r', encoding="utf-8") as file_name:
             cfg = yaml.load(file_name, Loader=loader)
+
+        self.from_OrderedDict(cfg)
         return cfg
 
     def dump_file(self, output_path):
@@ -218,10 +236,8 @@ class F90Config(Config):
         with open(config_path, 'r', encoding="utf-8") as file_name:
             cfg = f90nml.read(file_name).todict(complex_tuple=False)
 
-        for sect, keys in cfg.items():
-            if isinstance(keys, collections.OrderedDict):
-                cfg[sect] = dict(keys)
-
+        cfg = dict(cfg)
+        self.from_OrderedDict(cfg)
         return cfg
 
     def dump_file(self, output_path):
@@ -269,9 +285,13 @@ class INIConfig(Config):
         except configparser.MissingSectionHeaderError:
             with open(config_path, 'r', encoding="utf-8") as file_name:
                 cfg.read_string("[top]\n" + file_name.read())
-                return cfg._sections.get('top')
+                ret_cfg = dict(cfg._sections.get('top'))
+                self.from_OrderedDict(ret_cfg)
+                return ret_cfg
 
-        return cfg._sections
+        ret_cfg = dict(cfg._sections)
+        self.from_OrderedDict(ret_cfg)
+        return ret_cfg
 
     def dump_file(self, output_path):
 
