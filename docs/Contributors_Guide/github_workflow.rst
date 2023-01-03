@@ -10,24 +10,26 @@ How Unified Workflow releases are created
 
 The branching model employed by the workflow-tools GitHub repository is similar to
 that described in
-`A successful Git branching model <https://nvie.com/posts/a-successful-git-branching-model/>`_,
+`A successful Git branching model <https://nvie.com/posts/a-successful-git-branching-model/>`__,
 where new or updated code is created on a 'feature' branch that is based on
-the `workflow-tools GitHub 'develop' branch <https://github.com/ufs-community/workflow-tools/tree/develop>`_.
+the `workflow-tools GitHub 'develop' branch <https://github.com/ufs-community/workflow-tools/tree/develop>`__.
+Developers should create an issue for each feature they plan to work on. 
 
-The feature branch is named after the corresponding Jira issue:
+The feature branch is named after the corresponding GitHub issue:
 
-*feature/<Github Issue number>_<some_descriptive_name>*
+   *feature/<Github Issue number>_<some_descriptive_name>*
 
 
 Sequence of Events - Contributing Code
 ======================================
 
-*Pre-requisite:*
+Prerequisites
+---------------
 
-The user must set up a GitHub repository account if one does not already have exist.
-Log into the account.  For more information about GitHub accounts, please refer
+The user must set up a GitHub repository account if one does not already exist.
+Log into the account. For more information about GitHub accounts, please refer
 to the GitHub Documentation on
-`GitHub accounts <https://help.github.com/en/github/getting-started-with-github/signing-up-for-a-new-github-account>`_.
+`GitHub accounts <https://help.github.com/en/github/getting-started-with-github/signing-up-for-a-new-github-account>`__.
 
 
 Workflow Overview
@@ -45,44 +47,40 @@ A contributor to Unified Workflow will do the following:
 
 5.  Push the feature branch to GitHub.
 
-6.  Open a pull request from feature branch to develop branch.
+6.  Open a pull request from the feature branch to the 'develop' branch.
 
 7.  Clean up after pull request has been merged by an authorized developer.
 
 
 Create a GitHub Issue that reflects what needs to be done
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* Go to the `workflow-tools repository <https://github.com/ufs-community/workflow-tools>`_  and
-  click on the `Issues link <https://github.com/ufs-community/workflow-tools/issues>`_.
+* Go to the `workflow-tools repository <https://github.com/ufs-community/workflow-tools>`__  and
+  click on the `Issues link <https://github.com/ufs-community/workflow-tools/issues>`__.
 
 * Click on the green **New issue** button.
 
-* Write a description of the task and attach appropriate values to Assignee,
-  Labels, and Milestone links located on the right hand side of the page.
+* Write a description of the task and attach appropriate values to **Assignee**,
+  **Labels**, and **Milestone** links located on the right-hand side of the page.
 
 
 
 Generate a feature branch from the 'develop' branch for new development
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* Create a feature branch in the ufs-community/workflow-tools GitHub repository following this naming convention
+* Create a feature branch in the ufs-community/workflow-tools GitHub repository 
+  following this naming convention: *feature/<Github Issue number>_<some_descriptive_name>*
 
-| *feature/<Github Issue number>_<some_descriptive_name>*
-|
+  For example, for GitHub issue #777 that creates new wrapper, xyz, 
+  the feature branch would be named: *feature_777_wrapper_xyz*
 
-  For example, for GitHub issue #777 that creates new wrapper xyz, the feature branch would be named:
-
-| *feature_777_wrapper_xyz*
-|
-
-* Create your feature branch based off the develop branch
+* Create your feature branch based off the 'develop' branch
 
   .. code-block:: ini
 
     git checkout develop
 
-* Verify that you are currently working in the develop branch by running
+* Verify that you are currently working in the 'develop' branch by running
 
   .. code-block:: ini
 
@@ -123,7 +121,7 @@ Generate a feature branch from the 'develop' branch for new development
 
 
 Make changes to code in the feature branch
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Users should make changes to their feature branch and commit changes to their
 local repository.
@@ -142,70 +140,72 @@ local repository.
     git merge origin develop
 
   The first command pulls changes from the original repository (the
-  `workflow-tools GitHub repository <https://github.com/ufs-community/workflow-tools>`_
+  `workflow-tools GitHub repository <https://github.com/ufs-community/workflow-tools>`__
   that you see when you run *git remote -v* and that you set to upstream in
-  step 4 above).  The second command pushes those changes to your forked
-  repository.  The third command will merge the local develop branch into
+  step 4 above). The second command pushes those changes to your forked
+  repository. The third command will merge the local 'develop' branch into
   the feature branch.
 
+   .. COMMENT: What does "step 4 above" reference? 
+      I don't see anything saying how to set an upstream remote. 
 
 Commit changes to feature branch
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* Commit any new files by running the following.  Run the *'git add'* command
-  only if this file is newly created and does not yet exist in your repository.
+Commit any new files by running the following. Run the *'git add'* command
+only if this file is newly created and does not yet exist in your repository.
 
-  .. code-block:: ini
+.. code-block:: ini
 
-    git add <filename>
-    git commit <filename>
+   git add <filename>
+   git commit <filename>
 
-  replacing <filename> with the filename.
+Replace `<filename>` with the filename.
 
-  A popup window will appear, where you will enter a description of this
-  commit, using the editor you selected when you set up your Git account.
-  Please refer to the
-  `Git Setup <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_
-  documentation on configuring your Git account.
+A popup window will appear, where you will enter a description of this
+commit, using the editor you selected when you set up your Git account.
+Please refer to the
+`Git Setup <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`__
+documentation on configuring your Git account.
 
-  For the first line of your commit comment, enter a brief description, such
-  as the GitHub Issue number and a brief description.  On the second and
-  subsequent lines, provide a detailed description of the changes/additions
-  you made.
+For the first line of your commit comment, enter a brief description, such
+as the GitHub issue number and a brief description. On the second and
+subsequent lines, provide a detailed description of the changes/additions
+you made.
 
-  **Note**: It is a best practice to commit one change per commit, rather than
-  wait until you have multiple changes to include in one commit.
+.. note::
+   It is best practice to commit one change per commit, rather than
+   wait until you have multiple changes to include in one commit.
 
 Push the feature branch to GitHub
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* Run the following:
+Run the following:
 
-  .. code-block:: ini
+.. code-block:: ini
 
-    git push origin <feature_777_wrapper_xyz>
+   git push origin <feature_777_wrapper_xyz>
 
-  replacing *feature_777_wrapper_xyz* with your feature branch name, to push
-  your changes to the origin (i.e. to your
-  *https://github.com/<your-github-user>/ufs-community/workflow-tools* repository)
+replacing *feature_777_wrapper_xyz* with your feature branch name, to push
+your changes to the origin (i.e., to your
+*https://github.com/<your-github-user>/ufs-community/workflow-tools* repository).
 
 Open a pull request using a browser
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* To request to have your changes be incorporated into the remote repository
-  (i.e. the `GitHub Unified Workflow repository <https://github.com/ufs-community/workflow-tools>`_).
-
-* An authorized Unified Workflow developer will need to approve the request and
-  then merge your files into the repository's develop branch.  The develop
-  branch will be used to create a future Unified Workflow release.
+To request to have your changes incorporated into the remote repository
+(i.e., the `GitHub Unified Workflow repository <https://github.com/ufs-community/workflow-tools>`__),
+you will need to open a pull request. 
+An authorized Unified Workflow developer will need to approve the request and
+then merge your files into the repository's 'develop' branch. The 'develop'
+branch will be used to create a future Unified Workflow release.
 
 * In your browser, navigate to
   *https://github.com/<your-github-user>/ufs-community/workflow-tools* replacing
   <your-github-user> with your GitHub username.
 
-* Click on the green 'Compare & pull request' button
-
-  * A web page with four grey buttons should appear:
+* Click on the green 'Compare & pull request' button. 
+  A web page with four grey buttons should appear:
 
     * On the left-most button (for setting the base repository), make sure
       you have selected 'base repository:ufs-community/workflow-tools'
@@ -219,12 +219,12 @@ Open a pull request using a browser
     * For the compare button, make sure you have selected
       'compare:<your_feature_branch>' where <your_feature_branch> corresponds
       to the feature branch where you have been making your changes
-      (e.g. feature_777_wrapper_xyz).
+      (e.g., *feature_777_wrapper_xyz*).
 
-    * In the 'write' window, follow the directions and fill in the template
-      add any additional comments/details.  When filling in the template,
+    * In the 'write' window, follow the directions and fill in the template. 
+      Add any additional comments/details. When filling in the template,
       users will need to "Define the PR metadata, as permissions allow.
-      Select: **Reviewer(s), Project(s)**, and **Milestone**" When selecting a
+      Select: **Reviewer(s), Project(s)**, and **Milestone**." When selecting a
       reviewer, internal contributors submitting pull requests should select
       the appropriate reviewer(s) and let the reviewer know that the pull
       request has been assigned to them.
@@ -234,37 +234,39 @@ Open a pull request using a browser
 
     * An authorized developer will accept the pull request (if
       everything meets acceptance criteria) and merge your code into the remote
-      repository's develop branch.
+      repository's 'develop' branch.
 
 Approve a pull request using a browser
 --------------------------------------
 
 Submitting a pull request allows a user to propose changes, request a
-review of the contributions and have the proposed changes merged into a
+review of the contributions, and have the proposed changes merged into a
 different branch. Pull requests allow the reviewer to see the differences
 in the content from both branches.
 
-For issues with sub-tasks, it may be desired to get some changes into the
-develop branch sooner, rather than later. If the changes seem to make sense
+For issues with sub-tasks, it may be desirable to get some changes into the
+'develop' branch sooner, rather than later. If the changes seem to make sense
 on their own and don't rely on other sub-tasks to be complete, creating a pull
 request for a sub-task may make sense. If a sub-task does rely on other
 sub-tasks to be complete, then it may be best to wait to create a pull request
 until the other sub-tasks are also complete.
 
 
-Creating a pull request
-^^^^^^^^^^^^^^^^^^^^^^^
+Approving a pull request
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 1.  Click on the “Pull requests” tab in the GitHub repository and
     click on the assigned pull request.
 2.  Ensure the continuous integration (CI) tests from
-    `GitHub Actions <https://github.com/ufs-community/workflow-tools/actions>`_ have
-    passed.  See "All checks have passed" in the figure below. If the tests
+    `GitHub Actions <https://github.com/ufs-community/workflow-tools/actions>`__ have
+    passed. See "All checks have passed" in the figure below. If the tests
     were not successful or if there are conflicts with the base branch,
-    ask the requestor make changes.
+    ask the requestor to make changes.
+
+    .. figure:: ../figure/checks_pass_no_conflicts.png
     
 3.  Take a look at the description of the testing already performed for
-    these changes and then see what the recommended testing is for the
+    these changes, and then see what the recommended testing is for the
     reviewer to perform.
 4.  Perform any testing that is requested of the reviewer.
 5.  Check to ensure the correct "base" branch is selected. In most cases, the
@@ -280,14 +282,13 @@ Creating a pull request
     
          A blue box with a plus will appear. Click on the blue box.
 
-    
          Click on the icon of a paper with +/- to “Insert a Suggestion”.  The line
          will be quoted and the reviewer can enter their suggestion below. Then, click on
          the “Add Single Comment” button, so that the requestor will get an
          email letting them know the reviewer has made a suggested change.
 
-    b. Or, a reviewer can edit the file directly on the web by clicking on the
-       “...” icon (three dots) in the right hand corner next to
+    b. Alternatively, a reviewer can edit the file directly on the web by clicking on the
+       “...” icon (three dots) in the right hand corner next to the
        “Viewed” icon and select “Edit file”. 	
 
 
@@ -296,10 +297,10 @@ Creating a pull request
 9.  Ensure the requestor has made all necessary testing updates.
 
 10.  If any changes were made, note that the CI tests will rerun.
-     Before moving on, make sure "All checks have passed." and make sure
-     “This branch has no conflicts with the base branch”.  Let the requestor
+     Before moving on, make sure "All checks have passed" and make sure
+     “This branch has no conflicts with the base branch”. Let the requestor
      know if the checks do not pass or if there is a conflict with the base
-     branch so that they can make the  necessary changes.
+     branch so that they can make the necessary changes.
 
 11.  A reviewer has three possible options:
 
@@ -313,8 +314,8 @@ Creating a pull request
        pull request can be merged.
 	    
 
-     A reviewer should click on: "Review changes", add comments to
-     the "Write box", and select either  "Comment", "Approve",
+     A reviewer should click on "Review changes", add comments to
+     the "Write box", select either  "Comment", "Approve",
      or "Request Changes", and then click on "Submit Review".
 
 12. Once the recommended testing is complete and any necessary changes have
@@ -344,39 +345,39 @@ button should be selected and the corresponding GitHub issue should be closed.
 Clean up after a successfully merged pull request
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* After an authorized developer has accepted your changes and merged
-  them into the develop repository, update your local clone by pulling changes
-  from the original repository's (i.e. the `Unified Workflow develop branch <https://github.com/ufs-community/workflow-tools/tree/develop>`_):
+After an authorized developer has accepted your changes and merged
+them into the 'develop' branch of the repository, update your local clone by pulling changes
+from the original repository (i.e., the `Unified Workflow 'develop' branch <https://github.com/ufs-community/workflow-tools/tree/develop>`__):
 
-* Checkout your develop branch
+* Checkout your 'develop' branch.
 
   .. code-block:: ini
 
     git checkout develop
 
-* Verify that you are now working from the develop branch
+* Verify that you are now working from the 'develop' branch.
 
   .. code-block:: ini
 
     git branch
 
-* Merge changes from the upstream develop branch with your local develop branch
+* Merge changes from the upstream 'develop' branch with your local 'develop' branch.
 
   .. code-block:: ini
 
     git pull upstream develop
 
 * Your local cloned repository should now have all the latest changes from the
-  original repository's develop branch.
+  original repository's 'develop' branch.
 
   Now you can delete your feature branch:
 
   .. code-block:: ini
 
-    *git branch -D <branch name>*
-    *git push --delete origin <branch name>*
+    git branch -D <branch name>
+    git push --delete origin <branch name>
 
-  where <branch name> is your feature branch name, e.g. feature_777_wrapper_xyz
+  where <branch name> is your feature branch name, e.g., *feature_777_wrapper_xyz*.
 
   You can verify that your feature branch has been successfully removed/deleted
   via your web browser. Navigate to *https://github.com/<your-github-user>/ufs-community/workflow-tools*,
