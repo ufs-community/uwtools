@@ -46,8 +46,8 @@ def atparse_replace(atline):
         before_atparse = atline.split("@[")[0]
         within_atparse = atline.split("@[")[1].split("]")[0]
 
-        #Set maxsplits to 1 so only first ] is captured, which
-        #should be the bracket closing @[
+#Set maxsplits to 1 so only first ] is captured, which
+#should be the bracket closing @[
         after_atparse = atline.split("@[")[1].split("]",maxsplit=1)[1]
         jinja2line = ''.join([before_atparse,"{{",within_atparse,"}}", after_atparse])
     else:
