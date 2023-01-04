@@ -244,3 +244,22 @@ def test_transform_config():
                 lines = zip(reflist, outlist)
                 for line1, line2 in lines:
                     assert line1 in line2
+
+def test_compare_config():
+    '''Compare two config objects using method
+    '''
+    for base, user in itertools.product(["INI", "YAML", "F90"],repeat=2):
+        basefile = "NML" if base == "F90" else base
+        userfile = "NML" if user == "F90" else user
+
+        print(f'Comparing config of {base} and {user}...')
+
+        basepath = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{basefile.lower()}"))
+        userpath = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{userfile.lower()}"))
+
+        cfgbase = getattr(config, f"{base}Config")
+        cfgbaserun = cfgbase(basepath)
+        cfguser = getattr(config, f"{user}Config")
+        cfguserrun = cfguser(userpath)
+
+        cfgbaserun.compare_config(cfguser, cfgbase)

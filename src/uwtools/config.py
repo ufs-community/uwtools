@@ -80,6 +80,27 @@ class Config(collections.UserDict):
         ''' Interface to write a config object to a file at the
         output_path provided. '''
 
+    @abc.abstractmethod
+    def compare_config(self, user_dict, base_dict=None):
+        '''
+        Assuming a section, key/value structure of configuration types,
+        compare the dictionary to the values stored in the external file.
+        '''
+        if base_dict is None:
+            base_dict = self.data
+
+        if len(user_dict.items()) != len(base_dict.items()):
+            raise KeyError('Given dictionaries have different ranges of keys!')
+        # Then, compare keys and values
+        _miskey = {key for key in base_dict.keys() & user_dict if base_dict[key] != user_dict[key]}
+        _misval = {value for value in base_dict.values() & user_dict if base_dict[value] != user_dict[value]}
+
+        if len(_miskey) == 0 & len(_misval) == 0:
+            print('All config values match!')
+        else:
+            if _miskey: print('The following keys are different: ', ', '.join(map(str,_miskey)))
+            if _misval: print('The following values are different: ', ', '.join(map(str,_misval)))
+
     def from_ordereddict(self, in_dict):
         '''
         Given a dictionary, replace all instances of OrderedDict with a
@@ -209,6 +230,15 @@ class YAMLConfig(Config):
         filepaths = loader.construct_sequence(node)
         return self._load_paths(filepaths)
 
+    def compare_config(self, user_dict, base_dict=None):
+        '''
+        Assuming a section, key/value structure of configuration types,
+        compare the dictionary to the values stored in the external file.
+        '''
+        base_dict = base_dict or self.data
+        
+        super().compare_config(user_dict, base_dict=None)
+
     @property
     def _yaml_loader(self):
         ''' Set up the loader with the appropriate constructors. '''
@@ -249,6 +279,15 @@ class F90Config(Config):
 
         with open(output_path, 'w', encoding="utf-8") as file_name:
             f90nml.Namelist(nml).write(file_name, sort=False)
+
+    def compare_config(self, user_dict, base_dict=None):
+        '''
+        Assuming a section, key/value structure of configuration types,
+        compare the dictionary to the values stored in the external file.
+        '''
+        base_dict = base_dict or self.data
+        
+        super().compare_config(user_dict, base_dict=None)
 
 class INIConfig(Config):
 
@@ -307,6 +346,14 @@ class INIConfig(Config):
                 for key, value in self.data.items():
                     file_name.write(f'{key}={value}\n')
 
+    def compare_config(self, user_dict, base_dict=None):
+        '''
+        Assuming a section, key/value structure of configuration types,
+        compare the dictionary to the values stored in the external file.
+        '''
+        base_dict = base_dict or self.data
+
+        super().compare_config(user_dict, base_dict=None)
 class FieldTableConfig(YAMLConfig):
 
     ''' This class will exist only to write out field_table format given
