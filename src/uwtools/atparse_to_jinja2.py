@@ -39,10 +39,7 @@ def parse_args(argv):
     return parser.parse_args(argv)
 
 def atparse_replace(atline):
-    ''' Function to replace @[] with {{}} in a line of text.
-    NOTE - This function assumes that the file does NOT have any entries of ] outside of
-    what is being used by the atparse template. I believe this is correct for UFS but that
-    is not something the code is checking for. '''
+    ''' Function to replace @[] with {{}} in a line of text. '''
 
     atvar = re.search(r'\@\[.*?\]',atline)
     if atvar:
@@ -51,7 +48,7 @@ def atparse_replace(atline):
 
         #Set maxsplits to 1 so only first ] is captured, which 
         #should be the bracket closing @[ 
-        after_atparse = atline.split("@[")[1].split("]",1)[1]  #Set maxsplits to 1 so only first 
+        after_atparse = atline.split("@[")[1].split("]",maxsplit=1)[1]  
         jinja2line = ''.join([before_atparse,"{{",within_atparse,"}}", after_atparse])
     else:
         jinja2line = atline
