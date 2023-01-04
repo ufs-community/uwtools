@@ -1,0 +1,11 @@
+&config
+  fruit = papaya
+  vegetable = peas
+  how_many = 17
+  dressing = ranch
+/
+&setting
+  topping = crouton
+  size = large
+  meat = chicken
+/

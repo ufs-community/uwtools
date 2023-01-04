@@ -48,8 +48,22 @@ def test_path_if_file_exists():
 def test_set_template_dryrun():
     """Unit test for checking dry-run output of ingest namelist tool"""
 
+    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
     outcome=\
-"""&salad
+    """Running script templater.py with args:
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+        outfile: None
+ input_template: """ + input_file  + """
+    config_file: None
+   config_items: []
+        dry_run: True
+  values_needed: False
+        verbose: False
+          quiet: False
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+&salad
   base = 'kale'
   fruit = 'banana'
   vegetable = 'tomato'
@@ -60,8 +74,6 @@ def test_set_template_dryrun():
     os.environ['fruit'] = 'banana'
     os.environ['vegetable'] = 'tomato'
     os.environ['how_many'] = '22'
-
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     args = [
          '-i', input_file,
@@ -79,13 +91,27 @@ def test_set_template_dryrun():
 def test_set_template_listvalues():
     """Unit test for checking values_needed output of ingest namelist tool"""
 
+    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+
     outcome=\
-'''Values needed for this template are:
+    """Running script templater.py with args:
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+        outfile: None
+ input_template: """ + input_file  + """
+    config_file: None
+   config_items: []
+        dry_run: False
+  values_needed: True
+        verbose: False
+          quiet: False
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+Values needed for this template are:
 fruit
 how_many
 vegetable
-'''
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+"""
 
     args = [
          '-i', input_file,
@@ -132,8 +158,23 @@ def test_set_template_command_line_config():
     '''Test that values provided on the command line produce the appropriate
     output.'''
 
+    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+
     outcome=\
-"""&salad
+    """Running script templater.py with args:
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+        outfile: None
+ input_template: """ + input_file  + """
+    config_file: None
+   config_items: ['fruit=pear', 'vegetable=squash', 'how_many=22']
+        dry_run: True
+  values_needed: False
+        verbose: False
+          quiet: False
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+&salad
   base = 'kale'
   fruit = 'pear'
   vegetable = 'squash'
@@ -141,7 +182,6 @@ def test_set_template_command_line_config():
   dressing = 'balsamic'
 /
 """
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     args = [
          '-i', input_file,
@@ -181,3 +221,73 @@ def test_set_template_yaml_config_model_configure():
 
         templater.set_template(args)
         assert compare_files(expected_file, out_file)
+
+def test_set_template_verbosity():
+    """Unit test for checking dry-run output of ingest namelist tool"""
+
+    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+    logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
+    trim_result = ''
+
+    outcome=\
+    """Finished setting up debug file logging in """ + logfile  + """
+Running script templater.py with args:
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+        outfile: None
+ input_template: """ + input_file  + """
+    config_file: None
+   config_items: []
+        dry_run: True
+  values_needed: False
+        verbose: True
+          quiet: False
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+&salad
+  base = 'kale'
+  fruit = 'banana'
+  vegetable = 'tomato'
+  how_many = 22
+  dressing = 'balsamic'
+/
+"""
+
+    os.environ['fruit'] = 'banana'
+    os.environ['vegetable'] = 'tomato'
+    os.environ['how_many'] = '22'
+
+    #test verbose level
+    args = [
+         '-i', input_file,
+         '--dry_run',
+         '-v'
+         ]
+
+    # Capture verbose stdout
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        templater.set_template(args)
+    result = outstring.getvalue()
+
+    lines = zip(outcome.split('\n'), result.split('\n'))
+    for outcome_line, result_line in lines:
+        # Check that only the correct messages were logged
+        assert outcome_line in result_line
+
+    #test quiet level
+    args = [
+         '-i', input_file,
+         '--dry_run',
+         '-q'
+         ]
+
+    # Capture quiet stdout
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        templater.set_template(args)
+    result = outstring.getvalue()
+
+    outcome = ''
+    # Check that only the correct messages were logged
+    assert result == outcome
