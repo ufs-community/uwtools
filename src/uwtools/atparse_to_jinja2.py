@@ -40,7 +40,7 @@ def parse_args(argv):
 
 def atparse_replace(atline):
     ''' Function to replace @[] with {{}} in a line of text. '''
-    
+
     while re.search(r'\@\[.*?\]',atline):
 
 #Set maxsplits to 1 so only first @[ is captured
