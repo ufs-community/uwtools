@@ -41,18 +41,17 @@ def parse_args(argv):
 def atparse_replace(atline):
     ''' Function to replace @[] with {{}} in a line of text. '''
 
-    atvar = re.search(r'\@\[.*?\]',atline)
-    if atvar:
-        before_atparse = atline.split("@[")[0]
+    while re.search(r'\@\[.*?\]',atline):
+
+#Set maxsplits to 1 so only first @[ is captured
+        before_atparse = atline.split("@[",1)[0]
         within_atparse = atline.split("@[")[1].split("]")[0]
 
 #Set maxsplits to 1 so only first ] is captured, which
 #should be the bracket closing @[
-        after_atparse = atline.split("@[")[1].split("]",maxsplit=1)[1]
-        jinja2line = ''.join([before_atparse,"{{",within_atparse,"}}", after_atparse])
-    else:
-        jinja2line = atline
-    return jinja2line
+        after_atparse = atline.split("@[",1)[1].split("]",1)[1]
+        atline = ''.join([before_atparse,"{{",within_atparse,"}}", after_atparse])
+    return atline
 
 def convert_template(argv):
     ''' Main section for converting the template file'''
