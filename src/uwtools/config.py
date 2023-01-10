@@ -89,17 +89,28 @@ class Config(collections.UserDict):
         if base_dict is None:
             base_dict = self.data
 
-        if len(user_dict.items()) != len(base_dict.items()):
-            raise KeyError('Given dictionaries have different ranges of keys!')
-        # Then, compare keys and values
-        _miskey = {key for key in base_dict.keys() & user_dict if base_dict[key] != user_dict[key]}
-        _misval = {value for value in base_dict.values() & user_dict if base_dict[value] != user_dict[value]}
+        mishdr = {}
+        miskey = {}
+        misval = {}
 
-        if len(_miskey) == 0 & len(_misval) == 0:
-            print('All config values match!')
-        else:
-            if _miskey: print('The following keys are different: ', ', '.join(map(str,_miskey)))
-            if _misval: print('The following values are different: ', ', '.join(map(str,_misval)))
+        if len(base_dict.items()) != len(user_dict.items()):
+            raise KeyError('Given dictionaries have different ranges of keys!')
+        # If similar, compare keys and their values
+        for key, value in base_dict.items():
+            if isinstance(value, dict):
+                if mishdr := set(
+                    set(base_dict.keys()).symmetric_difference(
+                        set(user_dict.keys())
+                    )
+                ):
+                    print('The following headers do not match: ', ', '.join(map(str,mishdr)))
+                self.compare_config(dict(user_dict[key]), dict(base_dict[key]))
+            else:
+                miskey = set(set(base_dict.keys()).symmetric_difference(set(user_dict.keys())))
+                misval = set(set(base_dict.values()).symmetric_difference(set(user_dict.values())))
+
+        if miskey: print('The following keys do not match: ', ', '.join(map(str,miskey)))
+        if misval: print('The following values do not match: ', ', '.join(map(str,misval)))
 
     def from_ordereddict(self, in_dict):
         '''
@@ -237,7 +248,7 @@ class YAMLConfig(Config):
         '''
         base_dict = base_dict or self.data
         
-        super().compare_config(user_dict, base_dict=None)
+        super().compare_config(user_dict, base_dict)
 
     @property
     def _yaml_loader(self):
@@ -287,7 +298,7 @@ class F90Config(Config):
         '''
         base_dict = base_dict or self.data
         
-        super().compare_config(user_dict, base_dict=None)
+        super().compare_config(user_dict, base_dict)
 
 class INIConfig(Config):
 
@@ -353,7 +364,7 @@ class INIConfig(Config):
         '''
         base_dict = base_dict or self.data
 
-        super().compare_config(user_dict, base_dict=None)
+        super().compare_config(user_dict, base_dict)
 class FieldTableConfig(YAMLConfig):
 
     ''' This class will exist only to write out field_table format given

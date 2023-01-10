@@ -257,9 +257,9 @@ def test_compare_config():
         basepath = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{basefile.lower()}"))
         userpath = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{userfile.lower()}"))
 
-        cfgbase = getattr(config, f"{base}Config")
-        cfgbaserun = cfgbase(basepath)
-        cfguser = getattr(config, f"{user}Config")
-        cfguserrun = cfguser(userpath)
+        cfgbaserun = getattr(config, f"{base}Config")(basepath)
+        cfguserrun = getattr(config, f"{user}Config")(userpath)
 
-        cfgbaserun.compare_config(cfguser, cfgbase)
+        cfguserrun['salad']['dressing'] = 'italian'
+
+        cfgbaserun.compare_config(cfguserrun, cfgbaserun)
