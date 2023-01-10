@@ -82,6 +82,7 @@ class Config(collections.UserDict):
 
     @abc.abstractmethod
     def compare_config(self, user_dict, base_dict=None):
+        #pylint: disable=multiple-statements
         '''
         Assuming a section, key/value structure of configuration types,
         compare the dictionary to the values stored in the external file.
@@ -243,7 +244,7 @@ class YAMLConfig(Config):
         compare the dictionary to the values stored in the external file.
         '''
         base_dict = base_dict or self.data
-        
+
         super().compare_config(user_dict, base_dict)
 
     @property
@@ -293,7 +294,7 @@ class F90Config(Config):
         compare the dictionary to the values stored in the external file.
         '''
         base_dict = base_dict or self.data
-        
+
         super().compare_config(user_dict, base_dict)
 
 class INIConfig(Config):
