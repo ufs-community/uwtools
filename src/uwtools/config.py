@@ -98,17 +98,13 @@ class Config(collections.UserDict):
         # If similar, compare keys and their values
         for key, value in base_dict.items():
             if isinstance(value, dict):
-                if mishdr := set(
-                    set(base_dict.keys()).symmetric_difference(
-                        set(user_dict.keys())
-                    )
-                ):
-                    print('The following headers do not match: ', ', '.join(map(str,mishdr)))
+                mishdr = set(set(base_dict.keys()).symmetric_difference(set(user_dict.keys())))
                 self.compare_config(dict(user_dict[key]), dict(base_dict[key]))
             else:
                 miskey = set(set(base_dict.keys()).symmetric_difference(set(user_dict.keys())))
                 misval = set(set(base_dict.values()).symmetric_difference(set(user_dict.values())))
 
+        if mishdr: print('The following headers do not match: ', ', '.join(map(str,mishdr)))
         if miskey: print('The following keys do not match: ', ', '.join(map(str,miskey)))
         if misval: print('The following values do not match: ', ', '.join(map(str,misval)))
 
