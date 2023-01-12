@@ -103,7 +103,8 @@ class Config(collections.UserDict):
                 self.compare_config(dict(user_dict[key]), dict(base_dict[key]))
             else:
                 miskey = set(set(base_dict.keys()).symmetric_difference(set(user_dict.keys())))
-                misvalue = set(set(base_dict.values()).symmetric_difference(set(user_dict.values())))
+                misvalue = set(\
+                    set(base_dict.values()).symmetric_difference(set(user_dict.values())))
 
         if misheader: print('The following headers do not match: ', ', '.join(map(str,misheader)))
         if miskey: print('The following keys do not match: ', ', '.join(map(str,miskey)))
