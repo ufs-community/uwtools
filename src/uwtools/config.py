@@ -80,7 +80,6 @@ class Config(collections.UserDict):
         ''' Interface to write a config object to a file at the
         output_path provided. '''
 
-    @abc.abstractmethod
     def compare_config(self, user_dict, base_dict=None):
         #pylint: disable=multiple-statements
         '''
@@ -90,24 +89,25 @@ class Config(collections.UserDict):
         if base_dict is None:
             base_dict = self.data
 
-        mishdr = {}
+        #Set up lists for missing headers, keys and values between dicts
+        misheader = {}
         miskey = {}
-        misval = {}
+        misvalue = {}
 
         if len(base_dict.items()) != len(user_dict.items()):
             raise KeyError('Given dictionaries have different ranges of keys!')
         # If similar, compare keys and their values
         for key, value in base_dict.items():
             if isinstance(value, dict):
-                mishdr = set(set(base_dict.keys()).symmetric_difference(set(user_dict.keys())))
+                misheader = set(set(base_dict.keys()).symmetric_difference(set(user_dict.keys())))
                 self.compare_config(dict(user_dict[key]), dict(base_dict[key]))
             else:
                 miskey = set(set(base_dict.keys()).symmetric_difference(set(user_dict.keys())))
-                misval = set(set(base_dict.values()).symmetric_difference(set(user_dict.values())))
+                misvalue = set(set(base_dict.values()).symmetric_difference(set(user_dict.values())))
 
-        if mishdr: print('The following headers do not match: ', ', '.join(map(str,mishdr)))
+        if misheader: print('The following headers do not match: ', ', '.join(map(str,misheader)))
         if miskey: print('The following keys do not match: ', ', '.join(map(str,miskey)))
-        if misval: print('The following values do not match: ', ', '.join(map(str,misval)))
+        if misvalue: print('The following values do not match: ', ', '.join(map(str,misvalue)))
 
     def from_ordereddict(self, in_dict):
         '''
@@ -238,15 +238,6 @@ class YAMLConfig(Config):
         filepaths = loader.construct_sequence(node)
         return self._load_paths(filepaths)
 
-    def compare_config(self, user_dict, base_dict=None):
-        '''
-        Assuming a section, key/value structure of configuration types,
-        compare the dictionary to the values stored in the external file.
-        '''
-        base_dict = base_dict or self.data
-
-        super().compare_config(user_dict, base_dict)
-
     @property
     def _yaml_loader(self):
         ''' Set up the loader with the appropriate constructors. '''
@@ -288,15 +279,6 @@ class F90Config(Config):
         with open(output_path, 'w', encoding="utf-8") as file_name:
             f90nml.Namelist(nml).write(file_name, sort=False)
 
-    def compare_config(self, user_dict, base_dict=None):
-        '''
-        Assuming a section, key/value structure of configuration types,
-        compare the dictionary to the values stored in the external file.
-        '''
-        base_dict = base_dict or self.data
-
-        super().compare_config(user_dict, base_dict)
-
 class INIConfig(Config):
 
     ''' Concrete class to handle INI config files. '''
@@ -323,10 +305,10 @@ class INIConfig(Config):
 
         config_path = config_path or self.config_path
 
-        # The protected _sections method is the most straightroward way to get
+        # The protected _sections method is the most straightforward way to get
         # at the dict representation of the parse config.
         # pylint: disable=protected-access
-        cfg = configparser.ConfigParser()
+        cfg = configparser.ConfigParser(dict_type=collections.OrderedDict)
         try:
             cfg.read(config_path)
         except configparser.MissingSectionHeaderError:
@@ -354,14 +336,6 @@ class INIConfig(Config):
                 for key, value in self.data.items():
                     file_name.write(f'{key}={value}\n')
 
-    def compare_config(self, user_dict, base_dict=None):
-        '''
-        Assuming a section, key/value structure of configuration types,
-        compare the dictionary to the values stored in the external file.
-        '''
-        base_dict = base_dict or self.data
-
-        super().compare_config(user_dict, base_dict)
 class FieldTableConfig(YAMLConfig):
 
     ''' This class will exist only to write out field_table format given

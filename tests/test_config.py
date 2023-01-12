@@ -3,9 +3,11 @@ Set of test for loading YAML files using the function call load_yaml
 '''
 #pylint: disable=unused-variable, consider-using-f-string
 from collections import OrderedDict
+from contextlib import redirect_stdout
 import datetime
 import filecmp
 import os
+import io
 import pathlib
 import tempfile
 import json
@@ -248,18 +250,54 @@ def test_transform_config():
 def test_compare_config():
     '''Compare two config objects using method
     '''
-    for base, user in itertools.product(["INI", "YAML", "F90"],repeat=2):
-        basefile = "NML" if base == "F90" else base
+    for user in ["INI", "YAML", "F90"]:
         userfile = "NML" if user == "F90" else user
 
-        print(f'Comparing config of {base} and {user}...')
+        basefile = {
+        "salad": {
+            "base": "kale",
+            "fruit": "banana",
+            "vegetable": "tomato",
+            "how_many": "12",
+            "dressing": "balsamic",
+            }
+    }
+        expected = \
+        """The following keys do not match:  size, how_many
+The following values do not match:  large, balsamic, italian, 12
+"""
+        noint = \
+        """The following values do not match:  12, 12
+"""
 
-        basepath = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{basefile.lower()}"))
+        print(f'Comparing config of base and {user}...')
+
         userpath = os.path.join(uwtools_file_base,pathlib.Path("fixtures",f"simple.{userfile.lower()}"))
-
-        cfgbaserun = getattr(config, f"{base}Config")(basepath)
         cfguserrun = getattr(config, f"{user}Config")(userpath)
 
-        cfguserrun['salad']['dressing'] = 'italian'
+        # Capture stdout to validate comparison
+        outstring = io.StringIO()
+        with redirect_stdout(outstring):
+            cfguserrun.compare_config(cfguserrun, basefile)
+        result = outstring.getvalue()
 
-        cfgbaserun.compare_config(cfguserrun, cfgbaserun)
+        assert result == '' or noint
+        outstring.close()
+
+        # update base dict to validate differences
+        outstring2 = io.StringIO()
+        basefile['salad']['dressing'] = 'italian'
+        del basefile['salad']['how_many']
+        basefile['salad']['size'] = 'large'
+        with redirect_stdout(outstring2):
+            cfguserrun.compare_config(cfguserrun, basefile)
+        result = outstring2.getvalue()
+
+        #due to potential sort differences, compare each line after removing lead text
+        lines = zip(expected.split('\n'), result.split('\n'))
+        for expected_line, result_line in lines:
+            expected_line = set(expected_line.replace(', ', ':  ').split(':  ')[1:])
+            result_line = set(result_line.replace(', ', ':  ').split(':  ')[1:])
+        # Check that only the correct messages were logged
+            assert expected_line == result_line
+        outstring2.close()
