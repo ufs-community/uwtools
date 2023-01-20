@@ -7,11 +7,11 @@ import abc
 import collections
 import configparser
 import copy
+import json
 import os
 import re
 
 import jinja2
-import json
 import f90nml
 import yaml
 
@@ -136,6 +136,9 @@ class Config(collections.UserDict):
                 del ref_dict[key]
 
     def dereference(self, ref_dict=None, full_dict=None):
+
+        # pylint: disable=too-many-branches
+
         ''' This method will be used as a method by which any Config
         object can cycle through its key/value pairs recursively,
         replacing Jinja2 templates as necessary.'''
@@ -149,15 +152,15 @@ class Config(collections.UserDict):
         if not isinstance(ref_dict, dict):
             return
 
-        for k, v in ref_dict.items():
+        for key, val in ref_dict.items():
 
-            if isinstance(v, dict):
-                self.dereference(v, full_dict)
+            if isinstance(val, dict):
+                self.dereference(val, full_dict)
             else:
 
                 # Save a bit of compute and only do this part for strings that
                 # contain the jinja double brackets.
-                v_str = str(v)
+                v_str = str(val)
                 is_a_template = any((ele for ele in ["{{", "{%"] if ele in v_str))
                 if is_a_template:
 
@@ -168,7 +171,7 @@ class Config(collections.UserDict):
                     # we can opt to leave some un-filled when they are not yet set.
                     # For example, we can save cycle-dependent templates to fill in
                     # at run time.
-                    if "{%" in v:
+                    if "{%" in val:
                         # Treat entire line as a single template
                         templates = [v_str]
                     else:
@@ -199,7 +202,7 @@ class Config(collections.UserDict):
                             # Fill in a template that has the appropriate variables
                             # set.
                             rendered = j2tmpl.render_template()
-                        except jinja2.exceptions.UndefinedError as e:
+                        except jinja2.exceptions.UndefinedError:
                             # Leave a templated field as-is in the resulting dict
                             pass
                         except TypeError:
@@ -209,14 +212,14 @@ class Config(collections.UserDict):
                         except:
                             # Fail on any other exception...something is
                             # probably wrong.
-                            print(f"{k}: {template}")
+                            print(f"{key}: {template}")
                             raise
 
                         data.append(rendered)
 
                     # Put the full template line back together as it was,
                     # filled or not, and make a guess on its intended type.
-                    ref_dict[k] = self.str_to_type("".join(data))
+                    ref_dict[key] = self.str_to_type("".join(data))
 
     @staticmethod
     def str_to_type(str_):
@@ -233,14 +236,14 @@ class Config(collections.UserDict):
             return False
         # int
         try:
-            v = int(str_)
-            return v
+            val = int(str_)
+            return val
         except ValueError:
             pass
         # float
         try:
-            v = float(str_)
-            return v
+            val = float(str_)
+            return val
         except ValueError:
             pass
         return str_

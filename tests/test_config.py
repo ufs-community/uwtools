@@ -254,9 +254,6 @@ def test_dereference():
     test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/gfs.yaml"))
     cfg = config.YAMLConfig(test_yaml)
 
-    for k, v in cfg.data.items():
-        print(f'CFG {k}: {v} ')
-
     # Check that existing dicts remain
     assert isinstance(cfg['fcst'], dict)
     assert isinstance(cfg['grid_stats'], dict)
@@ -286,6 +283,3 @@ def test_dereference():
 
     # Check that order isn't a problem
     assert cfg['grid_stats']['points_per_level'] == 10000
-
-
-
