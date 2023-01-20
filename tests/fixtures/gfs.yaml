@@ -4,16 +4,27 @@
 model: gfs
 target: ufs-weather-model
 
-horizontal_resolution: c768
-vertical_resolution: 64
+fcst:
+  horizontal_resolution: c768
+  vertical_resolution: 64
+  x_grid_points: 100
+  y_grid_points: 100
+  length: 12
+  freq: 3
+  output_hours: '{% for h in range(0, length, freq) %}{{ "%d " % h }}{% endfor %}'
 
-executable: ${UFSEXEC}
+#executable: '{{ env.UFSEXEC }}'
 
 filetype: gfs
-datapath: '$(experiment_dir)/{{current_cycle}}'
+#datapath: '{{ [experiment_dir, current_cycle] | path_join }}'
 filename_core: 'fv_core.res.nc'
 
-updated_datapath: '$(experiment_dir)/{{my_current_cycle}}'
 
 updatethis: 'testpassed'
-testupdate: $(updatethis)
+testupdate: '{{ updatethis }}'
+
+grid_stats:
+  num_ens_members: 30
+  ref_fcst: '{{ fcst.vertical_resolution }}'
+  total_points: '{{ fcst.x_grid_points * fcst.y_grid_points * fcst.vertical_resolution }}'
+  total_ens_points: '{{ num_ens_members * total_points|int }}'

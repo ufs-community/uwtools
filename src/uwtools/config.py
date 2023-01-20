@@ -8,10 +8,14 @@ import collections
 import configparser
 import copy
 import os
+import re
 
+import jinja2
 import json
 import f90nml
 import yaml
+
+from uwtools.j2template import J2Template
 
 class Config(collections.UserDict):
 
@@ -131,11 +135,121 @@ class Config(collections.UserDict):
                 self.update_values(self._load_paths(filepaths))
                 del ref_dict[key]
 
-    def replace_templates(self):
+    def dereference(self, ref_dict=None, full_dict=None):
         ''' This method will be used as a method by which any Config
         object can cycle through its key/value pairs recursively,
-        replacing Jinja2 templates as necessary. This is a placeholder
-        until more details are fleshed out in work scheduled for PI6.'''
+        replacing Jinja2 templates as necessary.'''
+
+        if ref_dict is None:
+            ref_dict = self.data
+
+        if full_dict is None:
+            full_dict = self.data
+
+        if not isinstance(ref_dict, dict):
+            return
+
+        for k, v in ref_dict.items():
+
+            if isinstance(v, dict):
+                self.dereference(v)
+            else:
+
+                # Save a bit of compute and only do this part for strings that
+                # contain the jinja double brackets.
+                v_str = str(v)
+                is_a_template = any((ele for ele in ["{{", "{%"] if ele in v_str))
+                if is_a_template:
+
+                    # Find expressions first, and process them as a single template
+                    # if they exist
+                    # Find individual double curly brace template in the string
+                    # otherwise. We need one substitution template at a time so that
+                    # we can opt to leave some un-filled when they are not yet set.
+                    # For example, we can save cycle-dependent templates to fill in
+                    # at run time.
+                    if "{%" in v:
+                        # Treat entire line as a single template
+                        templates = [v_str]
+                    else:
+                        # Separate out all the double curly bracket pairs
+                        templates = re.findall(r"{{[^}]*}}|\S", v_str)
+                    data = []
+                    for template in templates:
+                        # Creating the config object for the template
+                        # like this, gives us access to all the keys in
+                        # the current section without the need to
+                        # reference the current section name, and to the
+                        # other sections with dot values. Also make
+                        # environment variables available with env
+                        # prefix.
+                        if ref_dict == full_dict:
+                            config_obj = dict(env=os.environ,
+                                              **full_dict)
+                        else:
+                            config_obj = dict(env=os.environ,
+                                              **ref_dict,
+                                              **full_dict)
+                        j2tmpl = J2Template(configure_obj=config_obj,
+                                            template_str=template,
+                                            loader_args=dict(undefined=jinja2.StrictUndefined)
+                                            )
+                        try:
+                            # Fill in a template that has the appropriate variables
+                            # set.
+                            template = j2tmpl.render_template()
+                        except jinja2.exceptions.UndefinedError as e:
+                            # Leave a templated field as-is in the resulting dict
+                            print("UNDEFINED: ", template)
+                            for k, v in ref_dict.items():
+                                print(f'REF {k}: {v}')
+                            for k, v in full_dict.items():
+                                print(f'FULL {k}: {v}')
+                            pass
+                        except TypeError:
+                            #pass
+                            raise
+                        except ZeroDivisionError:
+                            #pass
+                            raise
+                        except:
+                            # Fail on any other exception...something is
+                            # probably wrong.
+                            print(f"{k}: {template}")
+                            raise
+
+                        data.append(template)
+
+                    # Put the full template line back together as it was,
+                    # filled or not, and make a guess on its intended type.
+                    ref_dict[k] = self.str_to_type("".join(data))
+
+    @staticmethod
+    def str_to_type(str_):
+        ''' Check if the string contains a float, int, boolean, or just
+        regular string. This will be used to automatically convert
+        environment variables to data types that are more convenient to
+        work with.'''
+
+
+        str_ = str_.strip("\"'")
+        if str_.lower() in ["true", "yes", "yeah"]:
+            return True
+        if str_.lower() in ["false", "no", "nope"]:
+            return False
+        # int
+        try:
+            v = int(str_)
+            return v
+        except ValueError:
+            pass
+        # float
+        try:
+            v = float(str_)
+            return v
+        except ValueError:
+            pass
+        return str_
 
     def update_values(self, new_dict, dict_to_update=None):
         '''
@@ -183,6 +297,8 @@ class YAMLConfig(Config):
 
         if config_path is not None:
             self.update(self._load())
+
+        self.dereference()
 
     def _load(self, config_path=None):
         ''' Load the user-provided YAML config file path into a dict

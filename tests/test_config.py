@@ -244,3 +244,15 @@ def test_transform_config():
                 lines = zip(reflist, outlist)
                 for line1, line2 in lines:
                     assert line1 in line2
+
+def test_dereference():
+
+    ''' Test that the Jinja2 fields are filled in as expected. '''
+
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/gfs.yaml"))
+    cfg = config.YAMLConfig(test_yaml)
+
+    for k, v in cfg.data.items():
+        print(f'{k}: {v}')
+
+
