@@ -152,7 +152,7 @@ class Config(collections.UserDict):
         for k, v in ref_dict.items():
 
             if isinstance(v, dict):
-                self.dereference(v)
+                self.dereference(v, full_dict)
             else:
 
                 # Save a bit of compute and only do this part for strings that
@@ -184,41 +184,35 @@ class Config(collections.UserDict):
                         # environment variables available with env
                         # prefix.
                         if ref_dict == full_dict:
-                            config_obj = dict(env=os.environ,
+                            config_obj = dict(**os.environ,
                                               **full_dict)
                         else:
-                            config_obj = dict(env=os.environ,
+                            config_obj = dict(**os.environ,
                                               **ref_dict,
                                               **full_dict)
                         j2tmpl = J2Template(configure_obj=config_obj,
                                             template_str=template,
                                             loader_args=dict(undefined=jinja2.StrictUndefined)
                                             )
+                        rendered = template
                         try:
                             # Fill in a template that has the appropriate variables
                             # set.
-                            template = j2tmpl.render_template()
+                            rendered = j2tmpl.render_template()
                         except jinja2.exceptions.UndefinedError as e:
                             # Leave a templated field as-is in the resulting dict
-                            print("UNDEFINED: ", template)
-                            for k, v in ref_dict.items():
-                                print(f'REF {k}: {v}')
-                            for k, v in full_dict.items():
-                                print(f'FULL {k}: {v}')
                             pass
                         except TypeError:
-                            #pass
-                            raise
+                            pass
                         except ZeroDivisionError:
-                            #pass
-                            raise
+                            pass
                         except:
                             # Fail on any other exception...something is
                             # probably wrong.
                             print(f"{k}: {template}")
                             raise
 
-                        data.append(template)
+                        data.append(rendered)
 
                     # Put the full template line back together as it was,
                     # filled or not, and make a guess on its intended type.
@@ -298,7 +292,11 @@ class YAMLConfig(Config):
         if config_path is not None:
             self.update(self._load())
 
+        prev = copy.deepcopy(self.data)
         self.dereference()
+        while prev != self.data:
+            self.dereference()
+            prev = copy.deepcopy(self.data)
 
     def _load(self, config_path=None):
         ''' Load the user-provided YAML config file path into a dict

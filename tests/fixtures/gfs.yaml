@@ -13,18 +13,20 @@ fcst:
   freq: 3
   output_hours: '{% for h in range(0, length, freq) %}{{ "%d " % h }}{% endfor %}'
 
-#executable: '{{ env.UFSEXEC }}'
+executable: '{{ UFSEXEC }}'
+undefined_env: '{{ NOPE }}'
 
 filetype: gfs
-#datapath: '{{ [experiment_dir, current_cycle] | path_join }}'
+datapath: '{{ [experiment_dir, current_cycle] | path_join }}'
 filename_core: 'fv_core.res.nc'
 
 
-updatethis: 'testpassed'
 testupdate: '{{ updatethis }}'
+updatethis: 'testpassed'
 
 grid_stats:
+  total_ens_points: '{{ (num_ens_members * total_points ) // 1 }}'
   num_ens_members: 30
+  points_per_level: '{{ total_ens_points // num_ens_members // fcst.vertical_resolution }}'
   ref_fcst: '{{ fcst.vertical_resolution }}'
   total_points: '{{ fcst.x_grid_points * fcst.y_grid_points * fcst.vertical_resolution }}'
-  total_ens_points: '{{ num_ens_members * total_points|int }}'
