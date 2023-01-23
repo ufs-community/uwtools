@@ -3,7 +3,22 @@ Template classes
 
 '''
 
+import os
+
 from jinja2 import Environment, BaseLoader, FileSystemLoader, meta
+
+def register_filters(j2env):
+
+    ''' Given a Jinja2 environment, register a set of filters recognized
+    by the UW Tools parser. '''
+
+    j2env.filters["path_join"] = path_join
+
+
+def path_join(arg):
+
+    ''' A Jinj2 filter definition for joining paths '''
+    return os.path.join(*arg)
 
 class J2Template():
 
@@ -42,7 +57,8 @@ class J2Template():
 
     '''
 
-    def __init__(self, configure_obj, template_path=None, template_str=None):
+    def __init__(self, configure_obj, template_path=None,
+                 template_str=None, loader_args=None):
 
         '''
         Parameters
@@ -57,6 +73,7 @@ class J2Template():
         self.configure_obj = configure_obj
         self.template_path = template_path
         self.template_str = template_str
+        self.loader_args = loader_args if loader_args is not None else {}
         if template_path is not None:
             self.template = self._load_file(template_path)
         elif template_str is not None:
@@ -64,6 +81,7 @@ class J2Template():
         else:
             # Error here. Must provide a template
             pass
+
 
     def dump_file(self,output_path):
 
@@ -89,6 +107,7 @@ class J2Template():
 
         self._j2env=Environment(loader=FileSystemLoader(searchpath='/'),
                                trim_blocks=True,lstrip_blocks=True)
+        register_filters(self._j2env)
         return self._j2env.get_template(template_path)
 
     def _load_string(self,template_str):
@@ -100,7 +119,8 @@ class J2Template():
         Jinja2 Template object
         '''
 
-        self._j2env=Environment(loader=BaseLoader())
+        self._j2env=Environment(loader=BaseLoader(), **self.loader_args)
+        register_filters(self._j2env)
         return self._j2env.from_string(template_str)
 
     def render_template(self):
