@@ -117,7 +117,7 @@ class Config(collections.UserDict):
 
         for sect, keys in diffs.items():
             for key in keys:
-                print(f"{sect}: {key:>15}: {diffs[sect][key]}")
+                print(f"{sect}: {key:>15}: {keys}")
 
     def from_ordereddict(self, in_dict):
         '''
