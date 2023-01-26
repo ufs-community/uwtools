@@ -85,7 +85,7 @@ class Config(collections.UserDict):
         output_path provided. '''
 
     def compare_config(self, user_dict, base_dict=None):
-        #pylint: disable=multiple-statements
+        #pylint: disable=unnecessary-dict-index-lookup
         '''
         Assuming a section, key/value structure of configuration types,
         compare the dictionary to the values stored in the external file.
@@ -117,7 +117,7 @@ class Config(collections.UserDict):
 
         for sect, keys in diffs.items():
             for key in keys:
-                print(f"{sect}: {key:>15}: {keys}")
+                print(f"{sect}: {key:>15}: {diffs[sect][key]}")
 
     def from_ordereddict(self, in_dict):
         '''
