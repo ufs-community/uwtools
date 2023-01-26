@@ -247,6 +247,45 @@ def test_transform_config():
                 for line1, line2 in lines:
                     assert line1 in line2
 
+def test_dereference():
+
+    ''' Test that the Jinja2 fields are filled in as expected. '''
+
+    os.environ['UFSEXEC'] = '/my/path/'
+
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/gfs.yaml"))
+    cfg = config.YAMLConfig(test_yaml)
+
+    # Check that existing dicts remain
+    assert isinstance(cfg['fcst'], dict)
+    assert isinstance(cfg['grid_stats'], dict)
+
+    # Check references to other items at same level, and order doesn't
+    # matter
+    assert cfg['testupdate'] == 'testpassed'
+
+    # Check references to other section items
+    assert cfg['grid_stats']['ref_fcst'] == 64
+
+    # Check environment values are included
+    assert cfg['executable'] == '/my/path/'
+
+    # Check that env variables that are not defined do not change
+    assert cfg['undefined_env'] == '{{ NOPE }}'
+
+    # Check undefined are left as-is
+    assert cfg['datapath'] == '{{ [experiment_dir, current_cycle] | path_join }}'
+
+    # Check math
+    assert cfg['grid_stats']['total_points'] == 640000
+    assert cfg['grid_stats']['total_ens_points'] == 19200000
+
+    # Check that statements expand
+    assert cfg['fcst']['output_hours'] == '0 3 6 9 '
+
+    # Check that order isn't a problem
+    assert cfg['grid_stats']['points_per_level'] == 10000
+
 def test_compare_config():
     '''Compare two config objects using method
     '''
@@ -263,11 +302,13 @@ def test_compare_config():
             }
     }
         expected = \
-        """The following keys do not match:  size, how_many
-The following values do not match:  large, balsamic, italian, 12
+        """salad:        dressing:  - italian + balsamic
+salad:            size:  - large + None
+salad:        how_many:  - None + 12
 """
+
         noint = \
-        """The following values do not match:  12, 12
+            """salad:        how_many:  - 12 + 12
 """
 
         print(f'Comparing config of base and {user}...')
@@ -292,6 +333,8 @@ The following values do not match:  large, balsamic, italian, 12
         with redirect_stdout(outstring2):
             cfguserrun.compare_config(cfguserrun, basefile)
         result = outstring2.getvalue()
+
+        print(result)
 
         #due to potential sort differences, compare each line after removing lead text
         lines = zip(expected.split('\n'), result.split('\n'))
