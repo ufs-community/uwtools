@@ -93,26 +93,31 @@ class Config(collections.UserDict):
         if base_dict is None:
             base_dict = self.data
 
-        #Set up lists for missing headers, keys and values between dicts
-        misheader = {}
-        miskey = {}
-        misvalue = {}
+        diffs = {}
+        for sect, items in base_dict.items():
+            for key, val in items.items():
+                if val != user_dict.get(sect, {}).get(key, ''):
+                    try:
+                        diffs[sect][key] = f" - {val} + {user_dict.get(sect, {}).get(key)}"
+                    except KeyError:
+                        diffs[sect] = {}
+                        diffs[sect][key] = f" - {val} + {user_dict.get(sect, {}).get(key)}"
 
-        if len(base_dict.items()) != len(user_dict.items()):
-            raise KeyError('Given dictionaries have different ranges of keys!')
-        # If similar, compare keys and their values
-        for key, value in base_dict.items():
-            if isinstance(value, dict):
-                misheader = set(set(base_dict.keys()).symmetric_difference(set(user_dict.keys())))
-                self.compare_config(dict(user_dict[key]), dict(base_dict[key]))
-            else:
-                miskey = set(set(base_dict.keys()).symmetric_difference(set(user_dict.keys())))
-                misvalue = set(\
-                    set(base_dict.values()).symmetric_difference(set(user_dict.values())))
+        for sect, items in user_dict.items():
+            for key, val in items.items():
+                if (
+                    val != base_dict.get(sect, {}).get(key, '')
+                    and diffs.get(sect, {}).get(key) is None
+                ):
+                    try:
+                        diffs[sect][key] = f" - {base_dict.get(sect, {}).get(key)} + {val}"
+                    except KeyError:
+                        diffs[sect] = {}
+                        diffs[sect][key] = f" - {base_dict.get(sect, {}).get(key)} + {val}"
 
-        if misheader: print('The following headers do not match: ', ', '.join(map(str,misheader)))
-        if miskey: print('The following keys do not match: ', ', '.join(map(str,miskey)))
-        if misvalue: print('The following values do not match: ', ', '.join(map(str,misvalue)))
+        for sect, keys in diffs.items():
+            for key in keys:
+                print(f"{sect}: {key:>15}: {diffs[sect][key]}")
 
     def from_ordereddict(self, in_dict):
         '''
