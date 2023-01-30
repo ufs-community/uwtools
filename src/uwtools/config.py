@@ -84,6 +84,41 @@ class Config(collections.UserDict):
         ''' Interface to write a config object to a file at the
         output_path provided. '''
 
+    def compare_config(self, user_dict, base_dict=None):
+        #pylint: disable=unnecessary-dict-index-lookup
+        '''
+        Assuming a section, key/value structure of configuration types,
+        compare the dictionary to the values stored in the external file.
+        '''
+        if base_dict is None:
+            base_dict = self.data
+
+        diffs = {}
+        for sect, items in base_dict.items():
+            for key, val in items.items():
+                if val != user_dict.get(sect, {}).get(key, ''):
+                    try:
+                        diffs[sect][key] = f" - {val} + {user_dict.get(sect, {}).get(key)}"
+                    except KeyError:
+                        diffs[sect] = {}
+                        diffs[sect][key] = f" - {val} + {user_dict.get(sect, {}).get(key)}"
+
+        for sect, items in user_dict.items():
+            for key, val in items.items():
+                if (
+                    val != base_dict.get(sect, {}).get(key, '')
+                    and diffs.get(sect, {}).get(key) is None
+                ):
+                    try:
+                        diffs[sect][key] = f" - {base_dict.get(sect, {}).get(key)} + {val}"
+                    except KeyError:
+                        diffs[sect] = {}
+                        diffs[sect][key] = f" - {base_dict.get(sect, {}).get(key)} + {val}"
+
+        for sect, keys in diffs.items():
+            for key in keys:
+                print(f"{sect}: {key:>15}: {diffs[sect][key]}")
+
     def from_ordereddict(self, in_dict):
         '''
         Given a dictionary, replace all instances of OrderedDict with a
@@ -393,10 +428,10 @@ class INIConfig(Config):
 
         config_path = config_path or self.config_path
 
-        # The protected _sections method is the most straightroward way to get
+        # The protected _sections method is the most straightforward way to get
         # at the dict representation of the parse config.
         # pylint: disable=protected-access
-        cfg = configparser.ConfigParser()
+        cfg = configparser.ConfigParser(dict_type=collections.OrderedDict)
         try:
             cfg.read(config_path)
         except configparser.MissingSectionHeaderError:
