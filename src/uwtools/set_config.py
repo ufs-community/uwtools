@@ -1,8 +1,14 @@
+#!/usr/bin/env python3
+
+'''
+This utility creates a command line interface for handling config files.
+'''
 import os
+import sys
 import argparse
 import pathlib
 from uwtools import config
-from uwtools import Logger
+# from uwtools import logger
 
 
 def path_if_file_exists(arg):
@@ -98,3 +104,6 @@ def create_config_obj (argv):
     #     else:
     #         config_obj.dump_file(user_args.outfile)
 
+if __name__ == '__main__':
+    create_config_obj(sys.argv[1:])
+    
