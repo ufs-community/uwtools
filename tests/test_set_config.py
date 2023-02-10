@@ -55,13 +55,21 @@ def test_set_config_yaml_simple ():
     ''' Test that providing a YAML base file with necessary settings 
     will create a YAML config file'''
 
+    # get input file
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.yaml"))
+    # create a temporary directory for outfile and expected file
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        # set outfile in temp directory
         out_file = f'{tmp_dir}/test_config_from_yaml.yaml'
-    
-
-    args = ['-i', input_file, '-o', out_file]
-    set_config.create_config_obj(args)
-    expected_file = config.YAMLConfig(input_file)
-    assert compare_files(expected_file, out_file)
+        # create args for create_config_obj input
+        args = ['-i', input_file, '-o', out_file]
+        # create config obj from commandline inputs
+        set_config.create_config_obj(args)
+        # create expected file using config.py
+        expected = config.YAMLConfig(input_file)
+        expected_file = f'{tmp_dir}/expected_yaml.yaml'
+        expected.dump_file(expected_file)
+        
+        # compare outfile and expected file
+        assert compare_files(expected_file, out_file)
     

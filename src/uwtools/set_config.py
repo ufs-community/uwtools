@@ -67,26 +67,29 @@ def create_config_obj (argv):
     # check input type
     file_type = get_file_type(user_args.input_base_file)
 
-    if file_type in ["yaml", "yml"]:
+    if file_type in [".yaml", ".yml"]:
         config_obj = config.YAMLConfig(user_args.input_base_file)
 
-    elif file_type in ["bash", "sh", "ini", "IN"]:
+    elif file_type in [".bash", ".sh", ".ini", ".IN"]:
         config_obj = config.INIConfig (user_args.input_base_file)
 
-    elif file_type == "nml":
+    elif file_type == ".nml":
         config_obj = config.F90Config (user_args.input_base_file)
+    
+    else:
+        config_obj = user_args.input_base_file
 
     # If user provided -c config, load it and update config_obj
     if user_args.config_file:
         config_file_type = get_file_type(user_args.config_file)
 
-        if config_file_type in ["yaml", "yml"]:
+        if config_file_type in [".yaml", ".yml"]:
             user_config_obj = config.YAMLConfig(user_args.config_file)
 
-        elif config_file_type in ["bash", "sh", "ini", "IN"]:
+        elif config_file_type in [".bash", ".sh", ".ini", ".IN"]:
             user_config_obj = config.INIConfig (user_args.config_file)
 
-        elif config_file_type == "nml":
+        elif config_file_type == ".nml":
             user_config_obj = config.F90Config (user_args.config_file)
 
         config_obj.update_values(user_config_obj)
