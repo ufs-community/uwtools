@@ -40,7 +40,7 @@ def parse_args(argv):
         required=True,
         type=path_if_file_exists,
         )
-        
+
     parser.add_argument(
         '-o', '--outfile',
         help='Full path to output file',
@@ -62,9 +62,8 @@ def parse_args(argv):
 
 def create_config_obj (argv):
     '''Main section for processing config file'''
-    user_args = parse_args(argv)
 
-    # check input type
+    user_args = parse_args(argv)
     file_type = get_file_type(user_args.input_base_file)
 
     if file_type in [".yaml", ".yml"]:
@@ -75,10 +74,8 @@ def create_config_obj (argv):
 
     elif file_type == ".nml":
         config_obj = config.F90Config (user_args.input_base_file)
-    
-    # else return error?
 
-    # If user provided -c config, load it and update config_obj
+
     if user_args.config_file:
         config_file_type = get_file_type(user_args.config_file)
 
