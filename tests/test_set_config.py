@@ -48,9 +48,6 @@ def test_path_if_file_exists():
         set_config.path_if_file_exists(not_a_filepath)
         
 
-# test command line with input file
-# seperate test for every file type
-
 def test_set_config_yaml_simple ():
     ''' Test that providing a YAML base file with necessary settings 
     will create a YAML config file'''
@@ -73,3 +70,132 @@ def test_set_config_yaml_simple ():
         # compare outfile and expected file
         assert compare_files(expected_file, out_file)
     
+def test_set_config_ini_simple ():
+    ''' Test that providing a basic INI file with necessary settings 
+    will create an INI config file'''
+
+    #get input file 
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.ini"))
+    # create a temp directory for outfile and expected file
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dr:
+        out_file = f'{tmp_dr}/test_config_from_ini.ini'
+        args = ['-i', input_file, '-o', out_file]
+
+        set_config.create_config_obj(args)
+
+        expected = config.INIConfig(input_file)
+        expected_file = f'{tmp_dr}/expected_ini.ini'
+        expected.dump_file(expected_file)
+
+        assert compare_files(expected_file, out_file)
+
+def test_set_config_f90nml_simple ():
+    '''Test that providing basic f90nml file with necessary settings
+    will create f90nml config file'''
+
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dr:
+
+        out_file = f'{tmp_dr}/test_config_from_nml.nml'
+        args = ['-i', input_file, '-o', out_file]
+
+        set_config.create_config_obj(args)
+
+        expected = config.F90Config(input_file)
+        expected_file = f'{tmp_dr}/expected_nml.nml'
+        expected.dump_file(expected_file)
+
+        assert compare_files(expected_file, out_file)
+
+def test_set_config_bash_simple ():
+    '''Test that providing bash file with necessary settings will 
+    create an INI config file'''
+
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.sh"))
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dr:
+
+        out_file = f'{tmp_dr}/test_config_from_bash.ini'
+
+        args = ['-i', input_file, '-o', out_file]
+
+        set_config.create_config_obj(args)
+
+        expected = config.INIConfig(input_file)
+        expected_file = f'{tmp_dr}/expected_ini.ini'
+        expected.dump_file(expected_file)
+
+        assert compare_files(expected_file, out_file)
+
+def test_set_config_yaml_config_file ():
+    '''Test that providing a yaml base input file and a config file will
+    create and update yaml config file'''
+
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.yaml"))
+    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.yaml"))
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        out_file = f'{tmp_dir}/test_config_from_yaml.yaml'
+        args = ['-i', input_file, '-o', out_file, '-c', config_file]
+   
+        set_config.create_config_obj(args)
+
+        expected = config.YAMLConfig(input_file)
+        config_file_obj = config.YAMLConfig(config_file)
+        expected.update_values(config_file_obj)
+        expected_file = f'{tmp_dir}/expected_yaml.yaml'
+        expected.dump_file(expected_file)
+
+        assert compare_files(expected_file, out_file)
+
+def test_set_config_f90nml_config_file ():
+    '''Test that providing a F90nml base input file and a config file will
+    create and update F90nml config file'''
+
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
+    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.nml"))
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        out_file = f'{tmp_dir}/test_config_from_nml.nml'
+        args = ['-i', input_file, '-o', out_file, '-c', config_file]
+   
+        set_config.create_config_obj(args)
+
+        expected = config.F90Config(input_file)
+        config_file_obj = config.F90Config(config_file)
+        expected.update_values(config_file_obj)
+        expected_file = f'{tmp_dir}/expected_nml.nml'
+        expected.dump_file(expected_file)
+
+        assert compare_files(expected_file, out_file)
+
+def test_set_config_ini_config_file ():
+    '''Test that aproviding INI base input file and a config file will 
+    create and update INI config file'''
+
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.ini"))
+    # config using bash file
+    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.sh"))
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        out_file = f'{tmp_dir}/test_config_from_ini.ini'
+        args = ['-i', input_file, '-o', out_file, '-c', config_file]
+   
+        set_config.create_config_obj(args)
+
+        expected = config.INIConfig(input_file)
+        config_file_obj = config.INIConfig(config_file)
+        expected.update_values(config_file_obj)
+        expected_file = f'{tmp_dir}/expected_ini.ini'
+        expected.dump_file(expected_file)
+
+        assert compare_files(expected_file, out_file)
+
+
+
+# questions
+# how does it handle when no outfile provided?  how do we test for that?

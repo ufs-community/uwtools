@@ -76,8 +76,7 @@ def create_config_obj (argv):
     elif file_type == ".nml":
         config_obj = config.F90Config (user_args.input_base_file)
     
-    else:
-        config_obj = user_args.input_base_file
+    # else return error?
 
     # If user provided -c config, load it and update config_obj
     if user_args.config_file:
