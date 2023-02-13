@@ -8,7 +8,7 @@ import sys
 import argparse
 import pathlib
 from uwtools import config
-# from uwtools import logger
+
 
 
 def path_if_file_exists(arg):
@@ -95,16 +95,6 @@ def create_config_obj (argv):
 
     if user_args.outfile:
         config_obj.dump_file(user_args.outfile)
-
-    # if user_args.dry_run:
-    #     if user_args.outfile:
-    #         log.info(r"warning file {outfile} ".format(outfile=user_args.outfile),
-    #              r"not written when using --dry_run")
-    #         # apply switch to allow user to view the results of rendered template
-    #         # instead of writing to disk
-    #         log.info(config_obj)
-    #     else:
-    #         config_obj.dump_file(user_args.outfile)
 
 if __name__ == '__main__':
     create_config_obj(sys.argv[1:])
