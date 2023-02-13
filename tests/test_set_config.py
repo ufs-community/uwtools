@@ -8,6 +8,8 @@ import argparse
 import pathlib
 import os
 import tempfile
+import io
+from contextlib import redirect_stdout
 import pytest
 from uwtools import config
 from uwtools import set_config
@@ -46,7 +48,7 @@ def test_path_if_file_exists():
         not_a_filepath = './no_way_this_file_exists.nope'
         set_config.path_if_file_exists(not_a_filepath)
 
-def test_set_config_yaml_simple ():
+def test_set_config_yaml_simple():
     ''' Test that providing a YAML base file with necessary settings 
     will create a YAML config file'''
 
@@ -65,7 +67,7 @@ def test_set_config_yaml_simple ():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_ini_simple ():
+def test_set_config_ini_simple():
     ''' Test that providing a basic INI file with necessary settings 
     will create an INI config file'''
 
@@ -83,7 +85,7 @@ def test_set_config_ini_simple ():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_f90nml_simple ():
+def test_set_config_f90nml_simple():
     '''Test that providing basic f90nml file with necessary settings
     will create f90nml config file'''
 
@@ -166,7 +168,7 @@ def test_set_config_f90nml_config_file ():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_ini_config_file ():
+def test_set_config_ini_config_file():
     '''Test that aproviding INI base input file and a config file will 
     create and update INI config file'''
 
@@ -188,7 +190,7 @@ def test_set_config_ini_config_file ():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_ini_bash_config_file ():
+def test_set_config_ini_bash_config_file():
     '''Test that aproviding INI base input file and a config file will 
     create and update INI config file'''
 
@@ -209,3 +211,20 @@ def test_set_config_ini_bash_config_file ():
         expected.dump_file(expected_file)
 
         assert compare_files(expected_file, out_file)
+
+def test_incompatible_file_type():
+    '''Test that providing an incompatible file type for input base file will 
+    return print statement'''
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/model_configure.sample"))
+        args = ['-i', input_file]
+
+        outstring = io.StringIO()
+        with redirect_stdout(outstring):
+            set_config.create_config_obj(args)
+        result = outstring.getvalue()
+        outcome = "Set config failure: bad file type\n"
+
+        assert result == outcome

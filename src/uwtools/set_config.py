@@ -70,10 +70,13 @@ def create_config_obj (argv):
         config_obj = config.YAMLConfig(user_args.input_base_file)
 
     elif file_type in [".bash", ".sh", ".ini", ".IN"]:
-        config_obj = config.INIConfig (user_args.input_base_file)
+        config_obj = config.INIConfig(user_args.input_base_file)
 
     elif file_type == ".nml":
-        config_obj = config.F90Config (user_args.input_base_file)
+        config_obj = config.F90Config(user_args.input_base_file)
+
+    else:
+        print ("Set config failure: bad file type")
 
 
     if user_args.config_file:
@@ -83,10 +86,10 @@ def create_config_obj (argv):
             user_config_obj = config.YAMLConfig(user_args.config_file)
 
         elif config_file_type in [".bash", ".sh", ".ini", ".IN"]:
-            user_config_obj = config.INIConfig (user_args.config_file)
+            user_config_obj = config.INIConfig(user_args.config_file)
 
         elif config_file_type == ".nml":
-            user_config_obj = config.F90Config (user_args.config_file)
+            user_config_obj = config.F90Config(user_args.config_file)
 
         config_obj.update_values(user_config_obj)
 
