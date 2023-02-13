@@ -1,11 +1,9 @@
-#pylint: disable=unused-variable
 
 '''
 Tests for set_config tool
 '''
 from contextlib import redirect_stdout
 import argparse
-import io
 import pathlib
 import os
 import tempfile
