@@ -10,6 +10,8 @@ import copy
 import json
 import os
 import re
+import argparse
+import pathlib
 
 import jinja2
 import f90nml
@@ -74,6 +76,83 @@ class Config(collections.UserDict):
         ''' This method will return configure contents'''
         return json.dumps(self.data)
 
+    @staticmethod
+    def path_if_file_exists(arg):
+        ''' Checks whether a file exists, and returns the path if it does. '''
+        if not os.path.exists(arg):
+            msg = f'{arg} does not exist!'
+            raise argparse.ArgumentTypeError(msg)
+        return arg
+    
+    @staticmethod
+    def get_file_type(arg):
+        '''Gets the file type from the path'''
+        return pathlib.Path(Config.path_if_file_exists(arg)).suffix
+
+    @staticmethod
+    def parse_args(argv):
+        '''
+        Function maintains the arguments accepted by this script. Please see
+        Python's argparse documentation for more information about settings of each
+        argument.
+        '''
+
+        parser = argparse.ArgumentParser(
+           description='Update a Jinja2 Template with user-defined settings.'
+        )
+        parser.add_argument(
+            '-i', '--input_base_file',
+            help='Path to a config base file.',
+            required=True,
+            type=Config.path_if_file_exists,
+            )
+        parser.add_argument(
+            '-o', '--outfile',
+            help='Full path to output file',
+            )
+        parser.add_argument(
+            '-c', '--config_file',
+            help='Optional path to a YAML configuration file.',
+            type=Config.path_if_file_exists,
+            )
+        parser.add_argument(
+            '-d', '--dry_run',
+            action='store_true',
+            help='If provided, print rendered template to stdout only',
+            )
+        return parser.parse_args(argv)
+
+    @staticmethod
+    def create_config_obj(self, argv):
+        '''Main section for processing config file'''
+
+        user_args = Config.parse_args(argv)
+        file_type = Config.get_file_type(user_args.input_base_file)
+
+        if file_type in [".yaml", ".yml"]:
+            config_obj = YAMLConfig(user_args.input_base_file)
+        elif file_type in [".bash", ".sh", ".ini", ".IN"]:
+            config_obj = INIConfig(user_args.input_base_file)
+        elif file_type == ".nml":
+            config_obj = F90Config(user_args.input_base_file)
+        else:
+            print ("Set config failure: bad file type")
+
+        if user_args.config_file:
+            config_file_type = Config.get_file_type(user_args.config_file)
+            if config_file_type in [".yaml", ".yml"]:
+               user_config_obj = YAMLConfig(user_args.config_file)
+            elif config_file_type in [".bash", ".sh", ".ini", ".IN"]:
+               user_config_obj = INIConfig(user_args.config_file)
+            elif config_file_type == ".nml":
+                user_config_obj = F90Config(user_args.config_file)
+            Config.update_values(user_config_obj)
+
+        if user_args.outfile:
+            Config.dump_file(user_args.outfile)
+
+        return config_obj
+
     @abc.abstractmethod
     def _load(self, config_path=None):
         ''' Interface to load a config file given the config_path
@@ -132,6 +211,27 @@ class Config(collections.UserDict):
             if isinstance(keys, collections.OrderedDict):
                 in_dict[sect] = dict(keys)
 
+    @staticmethod
+    def config_field_table(argv):
+        '''
+        Given a YAML config object, configure an appropriate field file table for the model.
+        '''
+        user_args = Config.parse_args(argv)
+
+        #First, ensure that the config file is present
+        if not user_args.config_file:
+            msg = 'Config file does not exist!'
+            raise argparse.KeyError(msg)
+        #Next, ensure that the base and config files are appropriate
+        user_config = Config.create_config_obj(user_args.input_base_file)
+        base_config = Config.create_config_obj(user_args.config_file)
+        Config.compare_config(user_config, base_config)
+        #Finally, convert available entries
+        config_file_type = Config.get_file_type(user_args.config_file)
+        cfgout = getattr(Config.config, f"{config_file_type}Config")()
+        cfgout.update(user_config.data)
+        cfgout.dump_file(user_args.outfile)
+        
     def _load_paths(self, filepaths):
         '''
         Given a list of filepaths, load each file in the list and return
