@@ -24,15 +24,15 @@ def compare_files(expected, actual):
 
     with open(expected, 'r', encoding='utf-8') as expected_file:
         expected_content = expected_file.read().rstrip('\n')
-    with open (actual, 'r', encoding='utf-8') as actual_file:
+    with open(actual, 'r', encoding='utf-8') as actual_file:
         actual_content = actual_file.read().rstrip('\n')
 
     if expected_content != actual_content:
-        print ('The expected file looks like:')
-        print (expected_content)
-        print ('*' * 80)
-        print ('The rendered file looks like:')
-        print (actual_content)
+        print('The expected file looks like:')
+        print(expected_content)
+        print('*' * 80)
+        print('The rendered file looks like:')
+        print(actual_content)
         return False
     return True
 
@@ -104,7 +104,7 @@ def test_set_config_f90nml_simple():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_bash_simple ():
+def test_set_config_bash_simple():
     '''Test that providing bash file with necessary settings will 
     create an INI config file'''
 
@@ -124,7 +124,7 @@ def test_set_config_bash_simple ():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_yaml_config_file ():
+def test_set_config_yaml_config_file():
     '''Test that providing a yaml base input file and a config file will
     create and update yaml config file'''
 
@@ -146,7 +146,7 @@ def test_set_config_yaml_config_file ():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_f90nml_config_file ():
+def test_set_config_f90nml_config_file():
     '''Test that providing a F90nml base input file and a config file will
     create and update F90nml config file'''
 

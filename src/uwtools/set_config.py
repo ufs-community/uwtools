@@ -18,7 +18,7 @@ def path_if_file_exists(arg):
         raise argparse.ArgumentTypeError(msg)
     return arg
 
-def get_file_type (arg):
+def get_file_type(arg):
     '''Gets the file type from the path'''
     return pathlib.Path(path_if_file_exists(arg)).suffix
 
@@ -60,7 +60,7 @@ def parse_args(argv):
     return parser.parse_args(argv)
 
 
-def create_config_obj (argv):
+def create_config_obj(argv):
     '''Main section for processing config file'''
 
     user_args = parse_args(argv)
