@@ -222,15 +222,15 @@ class Config(collections.UserDict):
                         # environment variables available with env
                         # prefix.
                         if ref_dict == full_dict:
-                            config_obj = dict(**os.environ,
-                                              **full_dict)
+                            config_obj = {**os.environ,
+                                          **full_dict}
                         else:
-                            config_obj = dict(**os.environ,
-                                              **ref_dict,
-                                              **full_dict)
+                            config_obj = {**os.environ,
+                                          **ref_dict,
+                                          **full_dict}
                         j2tmpl = J2Template(configure_obj=config_obj,
                                             template_str=template,
-                                            loader_args=dict(undefined=jinja2.StrictUndefined)
+                                            loader_args={'undefined': jinja2.StrictUndefined}
                                             )
                         rendered = template
                         try:
