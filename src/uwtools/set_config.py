@@ -76,7 +76,7 @@ def create_config_obj (argv):
         config_obj = config.F90Config(user_args.input_base_file)
 
     else:
-        print ("Set config failure: bad file type")
+        print("Set config failure: bad file type")
 
 
     if user_args.config_file:
