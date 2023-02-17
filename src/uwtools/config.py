@@ -10,7 +10,6 @@ import copy
 import json
 import os
 import re
-import pathlib
 
 import jinja2
 import f90nml
