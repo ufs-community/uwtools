@@ -1,4 +1,0 @@
- "TRACER", "atmos_mod", "{{atmos_mod}}"
-           "longname",     "{{longname}}"
-           "units",        "{{units}}"
-       "profile_type", "{{profile_type}}", "surface_value={{surface_value}}" /

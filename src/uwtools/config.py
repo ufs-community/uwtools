@@ -477,17 +477,20 @@ class FieldTableConfig(YAMLConfig):
     def _format_output(self):
         ''' Format the output of the dictionary into a string that
         matches that necessary for a field_table. Return the string'''
-        nml = collections.OrderedDict(self.data)
-        uwtools_file_base = os.path.join(os.path.dirname(__file__))
-        fieldtable = os.path.join(uwtools_file_base,pathlib.Path("templates", "field_table.IN"))
+
         outstring = ""
-
-        for key, value in copy.deepcopy(nml).items():
-            if isinstance(value, dict):
-                self._format_output()
-            elif isinstance(value, str):
-                outstring = J2Template(nml[key], fieldtable)
-
+        newline = '\n'
+        for field, settings in self.data.items():
+            outstring += f' "TRACER", "atmos_mod", "{field}" {newline}'
+            for key, value in settings.items():
+                if key == "longname":
+                    outstring += f'           "{key}",     "{value}" {newline}'
+                elif key == "units":
+                    outstring += f'           "{key}",        "{value}" {newline}'
+                elif key == "profile_type":
+                    outstring += f'       "{key}", "{value}", '
+                elif key == "surface_value":
+                    outstring += f'"{key}={value}" /{newline}'
         return outstring
 
         outstring = []
