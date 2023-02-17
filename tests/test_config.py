@@ -256,7 +256,7 @@ def test_config_field_table():
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
         out_file = f'{tmp_dir}/field_table_from_yaml.FV3_GFS'
 
-        outcfg = config.FieldTableConfig(cfg)
+        outcfg = config.FieldTableConfig(config_file)
         outcfg.dump_file(out_file)
 
         with open(expected_file, 'r', encoding="utf-8") as file_1, open(out_file, 'r', encoding="utf-8") as file_2:
