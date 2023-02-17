@@ -476,20 +476,22 @@ class FieldTableConfig(YAMLConfig):
         ''' Format the output of the dictionary into a string that
         matches that necessary for a field_table. Return the string'''
 
-        outstring = ""
-        newline = '\n'
+        outstring = []
         for field, settings in self.data.items():
-            outstring += f' "TRACER", "atmos_mod", "{field}" {newline}'
+            outstring.append(f' "TRACER", "atmos_mod", "{field}"')
             for key, value in settings.items():
-                if key == "longname":
-                    outstring += f'           "{key}",     "{value}" {newline}'
-                elif key == "units":
-                    outstring += f'           "{key}",        "{value}" {newline}'
-                elif key == "profile_type":
-                    outstring += f'       "{key}", "{value}", '
-                elif key == "surface_value":
-                    outstring += f'"{key}={value}" /{newline}'
-        return outstring
+                if isinstance(value, dict):
+                    method_string = f'{" ":7}"{key}", "{value.pop("name")}"'
+                    # all control vars go into one set of quotes
+                    control_vars = [f'{method}={val}' for method, val in value.items()]
+                    # whitespace after the comma matters
+                    outstring.append(f'{method_string}, "{", ".join(control_vars)}"')
+                else:
+                    #formatting of variable spacing dependent on key length
+                    padlength = 13-len(key)
+                    outstring.append(f'{" ":11}"{key}",{" ":{padlength}}"{value}"')
+            outstring[-1] += " /"
+        return "\n".join(outstring)
 
         outstring = []
         for field, settings in self.data.items():
