@@ -247,6 +247,25 @@ def test_transform_config():
                 for line1, line2 in lines:
                     assert line1 in line2
 
+def test_config_field_table():
+    '''Test reading a YAML config object and generating a field file table.
+    '''
+    config_file = os.path.join(uwtools_file_base,pathlib.Path("fixtures","FV3_GFS_v16.yaml"))
+    expected_file = os.path.join(uwtools_file_base,pathlib.Path("fixtures","field_table.FV3_GFS_v16"))
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/field_table_from_yaml.FV3_GFS'
+
+        outcfg = config.FieldTableConfig(config_file)
+        outcfg.dump_file(out_file)
+
+        with open(expected_file, 'r', encoding="utf-8") as file_1, open(out_file, 'r', encoding="utf-8") as file_2:
+            reflist = [line.rstrip('\n').strip().replace("'", "") for line in file_1]
+            outlist = [line.rstrip('\n').strip().replace("'", "") for line in file_2]
+            lines = zip(outlist, reflist)
+            for line1, line2 in lines:
+                assert line1 in line2
+
 def test_dereference():
 
     ''' Test that the Jinja2 fields are filled in as expected. '''
