@@ -489,8 +489,7 @@ class FieldTableConfig(YAMLConfig):
                     outstring.append(f'{method_string}, "{", ".join(control_vars)}"')
                 else:
                     #formatting of variable spacing dependent on key length
-                    padlength = 13-len(key)
-                    outstring.append(f'{" ":11}"{key}",{" ":{padlength}}"{value}"')
+                    outstring.append(f'{" ":11}"{key}",{" ":11}"{value}"')
             outstring[-1] += " /"
         return "\n".join(outstring)
 
