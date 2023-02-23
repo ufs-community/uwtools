@@ -228,3 +228,27 @@ def test_incompatible_file_type():
         outcome = "Set config failure: bad file type\n"
 
         assert result == outcome
+
+def test_set_config_field_table():
+    '''Test reading a YAML config object and generating a field file table.
+    '''
+    input_file = os.path.join(uwtools_file_base,pathlib.Path("fixtures","FV3_GFS_v16.yaml"))
+    expected_file = os.path.join(uwtools_file_base,pathlib.Path("fixtures","field_table.FV3_GFS_v16"))
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/field_table_from_yaml.FV3_GFS'
+        config_type = "field_table"
+        args = [
+         '-i', input_file,
+         '-o', out_file,
+         '--out_file_type', config_type
+        ]
+
+        set_config.create_config_obj(args)
+
+        with open(expected_file, 'r', encoding="utf-8") as file_1, open(out_file, 'r', encoding="utf-8") as file_2:
+            reflist = [line.rstrip('\n').strip().replace("'", "") for line in file_1]
+            outlist = [line.rstrip('\n').strip().replace("'", "") for line in file_2]
+            lines = zip(outlist, reflist)
+            for line1, line2 in lines:
+                assert line1 in line2
