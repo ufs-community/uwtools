@@ -17,6 +17,7 @@ import yaml
 
 from uwtools.j2template import J2Template
 
+
 class Config(collections.UserDict):
 
     '''
