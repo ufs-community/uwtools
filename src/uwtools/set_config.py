@@ -112,21 +112,17 @@ def create_config_obj(argv):
     if user_args.outfile:
         outfile_type = get_file_type(user_args.outfile)
         if outfile_type != infile_type:
-            if outfile_type in [".yaml", ".yml"] and infile_type != ".yaml":
+            if outfile_type in [".yaml", ".yml"]:
                 out_object = config.YAMLConfig()
-                out_object.update(config_obj.data)
-                outfile_type = ".yaml"
-            elif outfile_type in [".bash", ".sh", ".ini", ".IN"] and infile_type != ".ini":
+            elif outfile_type in [".bash", ".sh", ".ini", ".IN"]:
                 out_object = config.INIConfig()
-                out_object.update(config_obj.data)
-                outfile_type = ".ini"
             elif outfile_type == ".nml":
                 out_object = config.F90Config()
-                out_object.update(config_obj.data)
             else:
                 out_object = config.FieldTableConfig()
-                out_object.update(config_obj)
-        else:
+
+            out_object.update(config_obj)
+        else: # same type of file as input, no need to convert it
             out_object = config_obj
         out_object.dump_file(user_args.outfile)
 
