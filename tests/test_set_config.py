@@ -237,12 +237,7 @@ def test_set_config_field_table():
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
         out_file = f'{tmp_dir}/field_table_from_yaml.FV3_GFS'
-        config_type = "field_table"
-        args = [
-         '-i', input_file,
-         '-o', out_file,
-         '--out_file_type', config_type
-        ]
+        args = ['-i', input_file, '-o', out_file]
 
         set_config.create_config_obj(args)
 
