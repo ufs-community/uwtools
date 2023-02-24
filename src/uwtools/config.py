@@ -17,7 +17,6 @@ import yaml
 
 from uwtools.j2template import J2Template
 
-
 class Config(collections.UserDict):
 
     '''
@@ -476,38 +475,6 @@ class FieldTableConfig(YAMLConfig):
     def _format_output(self):
         ''' Format the output of the dictionary into a string that
         matches that necessary for a field_table. Return the string'''
-
-        outstring = []
-        for field, settings in self.data.items():
-            outstring.append(f' "TRACER", "atmos_mod", "{field}"')
-            for key, value in settings.items():
-                if isinstance(value, dict):
-                    method_string = f'{" ":7}"{key}", "{value.pop("name")}"'
-                    # all control vars go into one set of quotes
-                    control_vars = [f'{method}={val}' for method, val in value.items()]
-                    # whitespace after the comma matters
-                    outstring.append(f'{method_string}, "{", ".join(control_vars)}"')
-                else:
-                    #formatting of variable spacing dependent on key length
-                    outstring.append(f'{" ":11}"{key}", "{value}"')
-            outstring[-1] += " /"
-        return "\n".join(outstring)
-
-        outstring = []
-        for field, settings in self.data.items():
-            outstring.append(f' "TRACER", "atmos_mod", "{field}"')
-            for key, value in settings.items():
-                if isinstance(value, dict):
-                    method_string = f'{" ":7}"{key}", "{value.pop("name")}"'
-                    # all control vars go into one set of quotes
-                    control_vars = [f'{method}={val}' for method, val in value.items()]
-                    # whitespace after the comma matters
-                    outstring.append(f'{method_string}, "{", ".join(control_vars)}"')
-                else:
-                    #formatting of variable spacing dependent on key length
-                    outstring.append(f'{" ":11}"{key}", "{value}"')
-            outstring[-1] += " /"
-        return "\n".join(outstring)
 
         outstring = []
         for field, settings in self.data.items():
