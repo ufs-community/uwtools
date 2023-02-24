@@ -48,11 +48,6 @@ def parse_args(argv):
     )
 
     parser.add_argument(
-        '--out_file_type',
-        help='Optional output file type override',
-    )
-
-    parser.add_argument(
         '-c', '--config_file',
         help='Optional path to configuration file. Accepts YAML, bash/ini or namelist',
         type=path_if_file_exists,
