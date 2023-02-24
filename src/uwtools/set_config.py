@@ -42,11 +42,6 @@ def parse_args(argv):
     )
 
     parser.add_argument(
-        '--in_file_type',
-        help='Optional input file type',
-    )
-
-    parser.add_argument(
         '-o', '--outfile',
         help='Full path to output file. If different from input, will will perform conversion.\
             For field table output, specify model such as "field_table.FV3_GFS_v16"',
@@ -61,11 +56,6 @@ def parse_args(argv):
         '-c', '--config_file',
         help='Optional path to configuration file. Accepts YAML, bash/ini or namelist',
         type=path_if_file_exists,
-    )
-
-    parser.add_argument(
-        '--config_file_type',
-        help='Optional config file type override',
     )
 
     parser.add_argument(
@@ -99,16 +89,14 @@ def create_config_obj(argv):
     elif infile_type == ".nml":
         config_obj = config.F90Config(user_args.input_base_file)
 
-    elif infile_type == "field_table":
-        config_obj = config.FieldTableConfig()
-
     else:
         print("Set config failure: bad file type")
 
-    if user_args.config_file:
-        config_file_type = user_args.config_file_type or get_file_type(user_args.config_file)
 
-        if config_file_type in [".yaml", ".yml", "YML", "field_table"]:
+    if user_args.config_file:
+        config_file_type = get_file_type(user_args.config_file)
+
+        if config_file_type in [".yaml", ".yml"]:
             user_config_obj = config.YAMLConfig(user_args.config_file)
             config_file_type = ".yaml"
 
