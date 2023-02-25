@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#pylint: disable=too-many-branches
 
 '''
 This utility creates a command line interface for handling config files.
@@ -20,7 +21,7 @@ def path_if_file_exists(arg):
 
 def get_file_type(arg):
     '''Gets the file type from the path'''
-    return pathlib.Path(path_if_file_exists(arg)).suffix
+    return pathlib.Path(arg).suffix
 
 def parse_args(argv):
 
@@ -36,19 +37,20 @@ def parse_args(argv):
 
     parser.add_argument(
         '-i', '--input_base_file',
-        help='Path to a config base file.',
+        help='Path to a config base file. Accepts YAML, bash/ini or namelist',
         required=True,
         type=path_if_file_exists,
-        )
+    )
 
     parser.add_argument(
         '-o', '--outfile',
-        help='Full path to output file',
-        )
+        help='Full path to output file. If different from input, will will perform conversion.\
+            For field table output, specify model such as "field_table.FV3_GFS_v16"',
+    )
 
     parser.add_argument(
         '-c', '--config_file',
-        help='Optional path to configuration file',
+        help='Optional path to configuration file. Accepts YAML, bash/ini or namelist',
         type=path_if_file_exists,
     )
 
@@ -57,6 +59,12 @@ def parse_args(argv):
         action='store_true',
         help='If provided, print rendered config file to stdout only',
     )
+
+    parser.add_argument(
+        '--values_needed',
+        action='store_true',
+        help='If provided, print a list of required configuration settings to stdout',
+    )
     return parser.parse_args(argv)
 
 
@@ -64,15 +72,17 @@ def create_config_obj(argv):
     '''Main section for processing config file'''
 
     user_args = parse_args(argv)
-    file_type = get_file_type(user_args.input_base_file)
+    infile_type = get_file_type(user_args.input_base_file)
 
-    if file_type in [".yaml", ".yml"]:
+    if infile_type in [".yaml", ".yml"]:
         config_obj = config.YAMLConfig(user_args.input_base_file)
+        infile_type = ".yaml"
 
-    elif file_type in [".bash", ".sh", ".ini", ".IN"]:
+    elif infile_type in [".bash", ".sh", ".ini", ".IN"]:
         config_obj = config.INIConfig(user_args.input_base_file)
+        infile_type = ".ini"
 
-    elif file_type == ".nml":
+    elif infile_type == ".nml":
         config_obj = config.F90Config(user_args.input_base_file)
 
     else:
@@ -84,9 +94,11 @@ def create_config_obj(argv):
 
         if config_file_type in [".yaml", ".yml"]:
             user_config_obj = config.YAMLConfig(user_args.config_file)
+            config_file_type = ".yaml"
 
         elif config_file_type in [".bash", ".sh", ".ini", ".IN"]:
             user_config_obj = config.INIConfig(user_args.config_file)
+            config_file_type = ".ini"
 
         elif config_file_type == ".nml":
             user_config_obj = config.F90Config(user_args.config_file)
@@ -94,8 +106,21 @@ def create_config_obj(argv):
         config_obj.update_values(user_config_obj)
 
     if user_args.outfile:
-        config_obj.dump_file(user_args.outfile)
+        outfile_type = get_file_type(user_args.outfile)
+        if outfile_type != infile_type:
+            if outfile_type in [".yaml", ".yml"]:
+                out_object = config.YAMLConfig()
+            elif outfile_type in [".bash", ".sh", ".ini", ".IN"]:
+                out_object = config.INIConfig()
+            elif outfile_type == ".nml":
+                out_object = config.F90Config()
+            else:
+                out_object = config.FieldTableConfig()
+
+            out_object.update(config_obj)
+        else: # same type of file as input, no need to convert it
+            out_object = config_obj
+        out_object.dump_file(user_args.outfile)
 
 if __name__ == '__main__':
     create_config_obj(sys.argv[1:])
-    
