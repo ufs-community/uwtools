@@ -141,24 +141,20 @@ def create_config_obj(argv):
             out_object = config_obj
         out_object.dump_file(user_args.outfile)
 
-def show_values_needed(argv):
-    '''If --values_needed, print a list of required configuration settings to stdout'''
-    user_args = parse_args(argv)
+    ##begin values-needed
+    # if --values_needed, print a list of required configuration settings to stdout
 
-    # first ensure all required args are present
     if user_args.values_needed:
+        # first ensure all required args are present
         assert(
             user_args.values_needed and user_args.outfile
         ), "args: --values_needed also requires -outfile for reference"
 
-    outfile_type = get_file_type(user_args.outfile)
-    infile_type = get_file_type(user_args.input_base_file)
-
-    if outfile_type != infile_type:
-        #next, provide needed format if not performing a simple conversion
-        convert_list = [".yaml", ".yml", ".bash", ".sh", ".ini", ".IN", ".nml"]
-        if outfile_type not in convert_list:
-            print(f"""Required YAML format for field files:
+        if outfile_type != infile_type:
+            # next, provide needed format if not performing a simple conversion
+            convert_list = [".yaml", ".yml", ".bash", ".sh", ".ini", ".IN", ".nml"]
+            if outfile_type not in convert_list:
+                print(f"""Required YAML format for field files:
 {('-' * 70)}
 sphum:
   longname: specific humidity
@@ -166,13 +162,12 @@ sphum:
   profile_type: 
     name: fixed
     surface_value: 1.e30
-{('-' * 70)}
-""")
+{('-' * 70)}""")
+            else:
+                print(f"Performing direct conversion from {infile_type} to {outfile_type}, \
+                    no additional formatting is required!")
         else:
-            print(f"Performing direct conversion from {infile_type} to {outfile_type}, \
-                  no additional formatting is required!")
-    else:
-        print("If not converting, no additional formatting is required!")
+            print("If not converting, no additional formatting is required!")
 
 if __name__ == '__main__':
     create_config_obj(sys.argv[1:])
