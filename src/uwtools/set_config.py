@@ -133,13 +133,13 @@ def create_config_obj(argv):
         out_object.dump_file(user_args.outfile)
 
     if user_args.dry_run:
+        log.info(config_obj)
         if user_args.outfile:
             out_object = user_args.outfile
             log.info(f'warning file {out_object} ',
                  r"not written when using --dry_run")
         # apply switch to allow user to view the results of config
         # instead of writing to disk
-    log.info(config_obj)
 
 if __name__ == '__main__':
     create_config_obj(sys.argv[1:])
