@@ -9,6 +9,7 @@ import sys
 import argparse
 import pathlib
 from uwtools import config
+from uwtools.logger import Logger
 
 
 
@@ -71,8 +72,19 @@ def parse_args(argv):
 def create_config_obj(argv):
     '''Main section for processing config file'''
 
+    logfile = os.path.join(os.path.dirname(__file__), "set_config.log")
+    log = Logger(level='info',
+        _format='%(message)s',
+        colored_log= False,
+        logfile_path=logfile
+        )
+
     user_args = parse_args(argv)
     infile_type = get_file_type(user_args.input_base_file)
+
+    log.info(f"""Running script set_config.py:
+{('-' * 70)}
+{('-' * 70)}""")
 
     if infile_type in [".yaml", ".yml"]:
         config_obj = config.YAMLConfig(user_args.input_base_file)
@@ -87,6 +99,8 @@ def create_config_obj(argv):
 
     else:
         print("Set config failure: bad file type")
+        log.info(f'warning file {user_args.input_base_file} ',
+                 r"has incorrect file type")
 
 
     if user_args.config_file:
@@ -121,6 +135,17 @@ def create_config_obj(argv):
         else: # same type of file as input, no need to convert it
             out_object = config_obj
         out_object.dump_file(user_args.outfile)
+
+    if user_args.dry_run:
+        if user_args.outfile:
+            out_object = user_args.outfile
+            log.info(f'warning file {out_object} ',
+                 r"not written when using --dry_run")
+        # apply switch to allow user to view the results of config
+        # instead of writing to disk
+    elif user_args.outfile:
+        config_obj.dump_file(user_args.outfile)
+    log.info(config_obj)
 
 if __name__ == '__main__':
     create_config_obj(sys.argv[1:])
