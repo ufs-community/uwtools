@@ -82,10 +82,6 @@ def create_config_obj(argv):
     user_args = parse_args(argv)
     infile_type = get_file_type(user_args.input_base_file)
 
-    log.info(f"""Running script set_config.py:
-{('-' * 70)}
-{('-' * 70)}""")
-
     if infile_type in [".yaml", ".yml"]:
         config_obj = config.YAMLConfig(user_args.input_base_file)
         infile_type = ".yaml"
@@ -143,8 +139,6 @@ def create_config_obj(argv):
                  r"not written when using --dry_run")
         # apply switch to allow user to view the results of config
         # instead of writing to disk
-    elif user_args.outfile:
-        config_obj.dump_file(user_args.outfile)
     log.info(config_obj)
 
 if __name__ == '__main__':
