@@ -94,9 +94,8 @@ def create_config_obj(argv):
         config_obj = config.F90Config(user_args.input_base_file)
 
     else:
-        print("Set config failure: bad file type")
-        log.info(f'warning file {user_args.input_base_file} ',
-                 r"has incorrect file type")
+        config_obj = None
+        log.info("Set config failure: bad file type")
 
 
     if user_args.config_file:
@@ -115,6 +114,16 @@ def create_config_obj(argv):
 
         config_obj.update_values(user_config_obj)
 
+    if user_args.dry_run:
+        if user_args.outfile:
+            out_object = user_args.outfile
+            log.info(f'warning file {out_object} ',
+                 r"not written when using --dry_run")
+        # apply switch to allow user to view the results of config
+        # instead of writing to disk
+    if config_obj is not None:
+        log.info(config_obj)
+
     if user_args.outfile:
         outfile_type = get_file_type(user_args.outfile)
         if outfile_type != infile_type:
@@ -131,15 +140,6 @@ def create_config_obj(argv):
         else: # same type of file as input, no need to convert it
             out_object = config_obj
         out_object.dump_file(user_args.outfile)
-
-    if user_args.dry_run:
-        log.info(config_obj)
-        if user_args.outfile:
-            out_object = user_args.outfile
-            log.info(f'warning file {out_object} ',
-                 r"not written when using --dry_run")
-        # apply switch to allow user to view the results of config
-        # instead of writing to disk
 
 if __name__ == '__main__':
     create_config_obj(sys.argv[1:])
