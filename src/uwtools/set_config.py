@@ -9,6 +9,7 @@ import sys
 import argparse
 import pathlib
 from uwtools import config
+from uwtools.logger import Logger
 
 
 
@@ -71,6 +72,13 @@ def parse_args(argv):
 def create_config_obj(argv):
     '''Main section for processing config file'''
 
+    logfile = os.path.join(os.path.dirname(__file__), "set_config.log")
+    log = Logger(level='info',
+        _format='%(message)s',
+        colored_log= False,
+        logfile_path=logfile
+        )
+
     user_args = parse_args(argv)
     infile_type = get_file_type(user_args.input_base_file)
 
@@ -86,7 +94,8 @@ def create_config_obj(argv):
         config_obj = config.F90Config(user_args.input_base_file)
 
     else:
-        print("Set config failure: bad file type")
+        log.info("Set config failure: bad file type")
+        return
 
 
     if user_args.config_file:
@@ -104,6 +113,16 @@ def create_config_obj(argv):
             user_config_obj = config.F90Config(user_args.config_file)
 
         config_obj.update_values(user_config_obj)
+
+    if user_args.dry_run:
+        if user_args.outfile:
+            out_object = user_args.outfile
+            log.info(f'warning file {out_object} ',
+                 r"not written when using --dry_run")
+        # apply switch to allow user to view the results of config
+        # instead of writing to disk
+        log.info(config_obj)
+        return
 
     if user_args.outfile:
         outfile_type = get_file_type(user_args.outfile)

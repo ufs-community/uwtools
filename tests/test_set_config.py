@@ -247,3 +247,23 @@ def test_set_config_field_table():
             lines = zip(outlist, reflist)
             for line1, line2 in lines:
                 assert line1 in line2
+
+def test_set_config_dry_run():
+    ''' Test that providing a YAML base file with a dry run flag 
+    will print an YAML config file'''
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.yaml"))
+
+        args = ['-i', input_file, '-d']
+
+        expected = config.YAMLConfig(input_file)
+        expected_content = str(expected)
+
+        outstring = io.StringIO()
+        with redirect_stdout(outstring):
+            set_config.create_config_obj(args)
+        result = outstring.getvalue()
+
+        assert result.rstrip('\n') == expected_content
