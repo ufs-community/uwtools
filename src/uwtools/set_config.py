@@ -62,6 +62,12 @@ def parse_args(argv):
     )
 
     parser.add_argument(
+        '--show_format',
+        action='store_true',
+        help='If provided, print the required YAML formatting to generate the requested output file',
+    )
+
+    parser.add_argument(
         '--values_needed',
         action='store_true',
         help='If provided, print a list of required configuration settings to stdout',
@@ -141,28 +147,20 @@ def create_config_obj(argv):
             out_object = config_obj
         out_object.dump_file(user_args.outfile)
 
-    ##begin values-needed
-    # if --values_needed, print a list of required configuration settings to stdout
+    ##begin show_format
+    # if --show_format, print a list of required configuration settings to stdout
 
-    if user_args.values_needed:
+    if user_args.show_format:
         # first ensure all required args are present
         assert(
-            user_args.values_needed and user_args.outfile
-        ), "args: --values_needed also requires -outfile for reference"
+            user_args.show_format and user_args.outfile
+        ), "args: --show_format also requires -outfile for reference"
 
         if outfile_type != infile_type:
             # next, provide needed format if not performing a simple conversion
             convert_list = [".yaml", ".yml", ".bash", ".sh", ".ini", ".IN", ".nml"]
             if outfile_type not in convert_list:
-                print(f"""Required YAML format for field files:
-{('-' * 70)}
-sphum:
-  longname: specific humidity
-  units: kg/kg
-  profile_type: 
-    name: fixed
-    surface_value: 1.e30
-{('-' * 70)}""")
+                print(str(out_object.__doc__))
             else:
                 print(f"Performing direct conversion from {infile_type} to {outfile_type}, \
                     no additional formatting is required!")

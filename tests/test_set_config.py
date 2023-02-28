@@ -268,12 +268,15 @@ def test_set_config_dry_run():
 
         assert result.rstrip('\n') == expected_content
 
-def test_values_needed():
+def test_show_format():
     '''Test providing required configuration format for a given input and target.
     '''
     input_file = os.path.join(uwtools_file_base,pathlib.Path("fixtures","FV3_GFS_v16.yaml"))
     outcome=\
-    """Required YAML format for field files:
+    """ This class exists to write out a field_table format given
+    that its configuration has been set by an input YAML file. 
+----------------------------------------------------------------------
+    Required YAML format for field files:
 ----------------------------------------------------------------------
 sphum:
   longname: specific humidity
@@ -281,12 +284,12 @@ sphum:
   profile_type: 
     name: fixed
     surface_value: 1.e30
-----------------------------------------------------------------------
+
 """
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
         out_file = f'{tmp_dir}/field_table_from_yaml.FV3_GFS'
-        args = ['-i', input_file, '-o', out_file, '--values_needed']
+        args = ['-i', input_file, '-o', out_file, '--show_format']
 
         # Capture stdout for the required configuration settings
         outstring = io.StringIO()

@@ -460,9 +460,18 @@ class INIConfig(Config):
                     file_name.write(f'{key}={value}\n')
 
 class FieldTableConfig(YAMLConfig):
-
-    ''' This class will exist only to write out field_table format given
-    that its configuration has been set by an input YAML file. '''
+    ''' This class exists to write out a field_table format given
+    that its configuration has been set by an input YAML file. 
+----------------------------------------------------------------------
+    Required YAML format for field files:
+----------------------------------------------------------------------
+sphum:
+  longname: specific humidity
+  units: kg/kg
+  profile_type: 
+    name: fixed
+    surface_value: 1.e30
+'''
 
     def __init__(self, config_path=None):
 
