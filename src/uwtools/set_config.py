@@ -94,8 +94,8 @@ def create_config_obj(argv):
         config_obj = config.F90Config(user_args.input_base_file)
 
     else:
-        config_obj = None
         log.info("Set config failure: bad file type")
+        return
 
 
     if user_args.config_file:
@@ -121,8 +121,8 @@ def create_config_obj(argv):
                  r"not written when using --dry_run")
         # apply switch to allow user to view the results of config
         # instead of writing to disk
-    if config_obj is not None:
         log.info(config_obj)
+        return
 
     if user_args.outfile:
         outfile_type = get_file_type(user_args.outfile)
