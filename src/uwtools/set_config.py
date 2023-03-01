@@ -151,21 +151,16 @@ def create_config_obj(argv):
     # if --show_format, print a list of required configuration settings to stdout
 
     if user_args.show_format:
+        if user_args.outfile is None:
         # first ensure all required args are present
-        assert(
-            user_args.show_format and user_args.outfile
-        ), "args: --show_format also requires -outfile for reference"
+            raise argparse.ArgumentError(user_args.outfile, "args: --show_format also requires -outfile for reference")
 
-        if outfile_type != infile_type:
+        ref = out_object.__doc__
+        if outfile_type != infile_type and '\n' in ref:
             # next, provide needed format if not performing a simple conversion
-            convert_list = [".yaml", ".yml", ".bash", ".sh", ".ini", ".IN", ".nml"]
-            if outfile_type not in convert_list:
-                print(str(out_object.__doc__))
-            else:
-                print(f"Performing direct conversion from {infile_type} to {outfile_type}, \
-                    no additional formatting is required!")
+            log.info(help(out_object.dump_file))
         else:
-            print("If not converting, no additional formatting is required!")
+            log.info(r"No additional information is provided for this output file type")
 
 if __name__ == '__main__':
     create_config_obj(sys.argv[1:])

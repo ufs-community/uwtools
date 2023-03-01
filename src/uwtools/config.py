@@ -461,17 +461,7 @@ class INIConfig(Config):
 
 class FieldTableConfig(YAMLConfig):
     ''' This class exists to write out a field_table format given
-    that its configuration has been set by an input YAML file. 
-----------------------------------------------------------------------
-    Required YAML format for field files:
-----------------------------------------------------------------------
-sphum:
-  longname: specific humidity
-  units: kg/kg
-  profile_type: 
-    name: fixed
-    surface_value: 1.e30
-'''
+    that its configuration has been set by an input YAML file. '''
 
     def __init__(self, config_path=None):
 
@@ -502,7 +492,16 @@ sphum:
         return "\n".join(outstring)
 
     def dump_file(self, output_path):
-        ''' Write the formatted output to a text file. '''
+        ''' Write the formatted output to a text file. 
+
+The example format for generating a field file is::
+
+    sphum:
+      longname: specific humidity
+      units: kg/kg
+      profile_type: 
+        name: fixed
+        surface_value: 1.e30'''
 
         with open(output_path, 'w', encoding="utf-8") as file_name:
             file_name.write(self._format_output())

@@ -273,18 +273,21 @@ def test_show_format():
     '''
     input_file = os.path.join(uwtools_file_base,pathlib.Path("fixtures","FV3_GFS_v16.yaml"))
     outcome=\
-    """ This class exists to write out a field_table format given
-    that its configuration has been set by an input YAML file. 
-----------------------------------------------------------------------
-    Required YAML format for field files:
-----------------------------------------------------------------------
-sphum:
-  longname: specific humidity
-  units: kg/kg
-  profile_type: 
-    name: fixed
-    surface_value: 1.e30
+    """Help on method dump_file in module uwtools.config:
 
+dump_file(output_path) method of uwtools.config.FieldTableConfig instance
+    Write the formatted output to a text file. 
+    
+    The example format for generating a field file is::
+    
+        sphum:
+          longname: specific humidity
+          units: kg/kg
+          profile_type: 
+            name: fixed
+            surface_value: 1.e30
+
+None
 """
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
