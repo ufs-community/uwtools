@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=too-many-branches
+#pylint: disable=too-many-branches, too-many-statements
 
 '''
 This utility creates a command line interface for handling config files.
@@ -64,7 +64,7 @@ def parse_args(argv):
     parser.add_argument(
         '--show_format',
         action='store_true',
-        help='If provided, print the required YAML formatting to generate the requested output file',
+        help='If provided, print the required formatting to generate the requested output file',
     )
 
     parser.add_argument(
@@ -149,11 +149,11 @@ def create_config_obj(argv):
 
     ##begin show_format
     # if --show_format, print a list of required configuration settings to stdout
-
     if user_args.show_format:
         if user_args.outfile is None:
         # first ensure all required args are present
-            raise argparse.ArgumentError(user_args.outfile, "args: --show_format also requires -outfile for reference")
+            raise argparse.ArgumentError(user_args.outfile, \
+                "args: --show_format also requires -outfile for reference")
 
         ref = out_object.__doc__
         if outfile_type != infile_type and '\n' in ref:
