@@ -460,8 +460,7 @@ class INIConfig(Config):
                     file_name.write(f'{key}={value}\n')
 
 class FieldTableConfig(YAMLConfig):
-
-    ''' This class will exist only to write out field_table format given
+    ''' This class exists to write out a field_table format given
     that its configuration has been set by an input YAML file. '''
 
     def __init__(self, config_path=None):
@@ -493,7 +492,21 @@ class FieldTableConfig(YAMLConfig):
         return "\n".join(outstring)
 
     def dump_file(self, output_path):
-        ''' Write the formatted output to a text file. '''
+        '''         Write the formatted output to a text file. 
+        FMS field and tracer managers must be registered in an ASCII table called 'field_table'
+        This table lists field type, target model and methods the querying model will ask for.
+
+        See UFS documentation for more information:
+        https://ufs-weather-model.readthedocs.io/en/ufs-v1.0.0/InputsOutputs.html#field-table-file
+
+        The example format for generating a field file is::
+
+        sphum:
+          longname: specific humidity
+          units: kg/kg
+          profile_type: 
+            name: fixed
+            surface_value: 1.e30'''
 
         with open(output_path, 'w', encoding="utf-8") as file_name:
             file_name.write(self._format_output())
