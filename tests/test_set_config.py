@@ -277,15 +277,20 @@ def test_show_format():
 
 dump_file(output_path) method of uwtools.config.FieldTableConfig instance
     Write the formatted output to a text file. 
+    FMS field and tracer managers must be registered in an ASCII table called 'field_table'
+    This table lists field type, target model and methods the querying model will ask for.
+    
+    See UFS documentation for more information:
+    https://ufs-weather-model.readthedocs.io/en/ufs-v1.0.0/InputsOutputs.html#field-table-file
     
     The example format for generating a field file is::
     
-        sphum:
-          longname: specific humidity
-          units: kg/kg
-          profile_type: 
-            name: fixed
-            surface_value: 1.e30
+    sphum:
+      longname: specific humidity
+      units: kg/kg
+      profile_type: 
+        name: fixed
+        surface_value: 1.e30
 
 None
 """

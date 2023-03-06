@@ -147,7 +147,7 @@ def create_config_obj(argv):
             out_object = config_obj
         out_object.dump_file(user_args.outfile)
 
-    ##begin show_format
+
     # if --show_format, print a list of required configuration settings to stdout
     if user_args.show_format:
         if user_args.outfile is None:
@@ -155,12 +155,8 @@ def create_config_obj(argv):
             raise argparse.ArgumentError(user_args.outfile, \
                 "args: --show_format also requires -outfile for reference")
 
-        ref = out_object.__doc__
-        if outfile_type != infile_type and '\n' in ref:
-            # next, provide needed format if not performing a simple conversion
+        if outfile_type != infile_type:
             log.info(help(out_object.dump_file))
-        else:
-            log.info(r"No additional information is provided for this output file type")
 
 if __name__ == '__main__':
     create_config_obj(sys.argv[1:])
