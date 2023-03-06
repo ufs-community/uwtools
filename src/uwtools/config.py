@@ -492,14 +492,14 @@ class FieldTableConfig(YAMLConfig):
         return "\n".join(outstring)
 
     def dump_file(self, output_path):
-        ''' Write the formatted output to a text file. 
-FMS field and tracer managers must be registered in an ASCII table called 'field_table'
-This table lists field type, target model and methods the querying model will ask for.
+        '''         Write the formatted output to a text file. 
+        FMS field and tracer managers must be registered in an ASCII table called 'field_table'
+        This table lists field type, target model and methods the querying model will ask for.
 
-See UFS documentation for more information:
-https://ufs-weather-model.readthedocs.io/en/ufs-v1.0.0/InputsOutputs.html#field-table-file
+        See UFS documentation for more information:
+        https://ufs-weather-model.readthedocs.io/en/ufs-v1.0.0/InputsOutputs.html#field-table-file
 
-The example format for generating a field file is::
+        The example format for generating a field file is::
 
         sphum:
           longname: specific humidity

@@ -285,12 +285,12 @@ dump_file(output_path) method of uwtools.config.FieldTableConfig instance
     
     The example format for generating a field file is::
     
-            sphum:
-              longname: specific humidity
-              units: kg/kg
-              profile_type: 
-                name: fixed
-                surface_value: 1.e30
+    sphum:
+      longname: specific humidity
+      units: kg/kg
+      profile_type: 
+        name: fixed
+        surface_value: 1.e30
 
 None
 """
