@@ -501,12 +501,12 @@ https://ufs-weather-model.readthedocs.io/en/ufs-v1.0.0/InputsOutputs.html#field-
 
 The example format for generating a field file is::
 
-sphum:
-  longname: specific humidity
-  units: kg/kg
-  profile_type: 
-    name: fixed
-    surface_value: 1.e30'''
+        sphum:
+          longname: specific humidity
+          units: kg/kg
+          profile_type: 
+            name: fixed
+            surface_value: 1.e30'''
 
         with open(output_path, 'w', encoding="utf-8") as file_name:
             file_name.write(self._format_output())
