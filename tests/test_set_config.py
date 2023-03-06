@@ -306,3 +306,32 @@ None
         result = outstring.getvalue()
 
         assert result == outcome
+
+def test_values_needed():
+    '''Test that the values_needed flag logs variables provided, variables left as 
+    jinja2 templates, and values still needed'''
+
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/nml_2.ini"))
+    args = ['-i', input_file, '--values_needed']
+
+    # Capture stdout for values_needed output
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        set_config.create_config_obj(args)
+    result = outstring.getvalue()
+    
+    outcome=\
+    """
+Filled template variables:
+base
+dressing
+Variables left as jinja2 templates:
+fruit
+vegetable
+how_many
+Values still needed:
+toppings
+"""
+    assert result == outcome
+
+

@@ -120,6 +120,32 @@ def create_config_obj(argv):
 
         config_obj.update_values(user_config_obj)
 
+    if user_args.values_needed:
+        # Gather all input variables
+        config_dict = config_obj.data
+        set_variables = []
+        jinja2_variables = []
+        undeclared_variables = []
+        for key, val in config_dict:
+            # If variable left as jinja2 template:
+            if "{{" in val or "{%" in val:
+                jinja2_variables.append(key)
+            # If variable still undeclared
+            elif val == "":
+                undeclared_variables.append(key)
+            else:
+                set_variables.append(key)
+        log.info('Filled template variables:')
+        for var in set_variables:
+            log.info(var)
+        log.info('Variables left as jinja2 templates:')
+        for var in jinja2_variables:
+            log.info(var)
+        log.info('Values still needed:')
+        for var in undeclared_variables:
+            log.info(var)
+        return
+
     if user_args.dry_run:
         if user_args.outfile:
             out_object = user_args.outfile
