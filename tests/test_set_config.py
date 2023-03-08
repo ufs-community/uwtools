@@ -307,11 +307,11 @@ None
 
         assert result == outcome
 
-def test_values_needed():
+def test_values_needed_yaml():
     '''Test that the values_needed flag logs variables provided, variables left as 
     jinja2 templates, and values still needed'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/nml_2.ini"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/result3.yaml"))
     args = ['-i', input_file, '--values_needed']
 
     # Capture stdout for values_needed output
@@ -334,4 +334,63 @@ toppings
 """
     assert result == outcome
 
+def test_values_needed_ini():
+    '''Test that the values_needed flag logs variables provided, variables left as 
+    jinja2 templates, and values still needed'''
 
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple3.ini"))
+    args = ['-i', input_file, '--values_needed']
+
+    # Capture stdout for values_needed output
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        set_config.create_config_obj(args)
+    result = outstring.getvalue()
+
+    outcome=\
+    """
+Filled template variables:
+salad
+base
+fruit
+vegetable
+dressing
+dessert
+type
+Variables left as jinja2 templates:
+how_many
+flavor
+Values still needed:
+toppings
+"""
+    assert result == outcome
+
+def test_values_needed_f90nml():
+    '''Test that the values_needed flag logs variables provided, variables left as 
+    jinja2 templates, and values still needed'''
+
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/result_include_file_with_sect.nml"))
+    args = ['-i', input_file, '--values_needed']
+
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        set_config.create_config_obj(args)
+    result = outstring.getvalue()
+
+    outcome=\
+        """
+Filled template variables:
+config
+fruit
+vegetable
+how_many
+dressing
+meat
+setting
+topping
+size
+meat
+Variables left as jinja2 templates:
+Values still needed:
+"""
+    assert result == outcome

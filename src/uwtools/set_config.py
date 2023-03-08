@@ -8,6 +8,7 @@ import os
 import sys
 import argparse
 import pathlib
+import yaml
 from uwtools import config
 from uwtools.logger import Logger
 
@@ -74,6 +75,31 @@ def parse_args(argv):
     )
     return parser.parse_args(argv)
 
+def dereference(config_dict, set_variables, jinja2_variables, undeclared_variables):
+    '''
+    Given a config dictionary, parse which variables have been set, which are left as 
+    jinja2 templates, and which are undeclared
+    '''
+    for key, val in config_dict.items():
+        if isinstance(val, dict):
+            set_variables.append(key)
+            dereference(val, set_variables, jinja2_variables, undeclared_variables)
+        elif isinstance(val, list):
+            set_variables.append(key)
+            for item in val:
+                dereference(item, set_variables, jinja2_variables, undeclared_variables)
+        # If variable left as jinja2 template:
+        elif not isinstance(val, list) and "{{" in str(val) or "{%" in str(val):
+            jinja2_variables.append(key)
+        # If variable still undeclared
+        elif val == "":
+            undeclared_variables.append(key)
+        # If key is not empty, does not contain jinja2 template, and has not been added
+        else:
+            set_variables.append(key)
+
+    return config_dict, set_variables, jinja2_variables, undeclared_variables
+
 
 def create_config_obj(argv):
     '''Main section for processing config file'''
@@ -126,15 +152,9 @@ def create_config_obj(argv):
         set_variables = []
         jinja2_variables = []
         undeclared_variables = []
-        for key, val in config_dict:
-            # If variable left as jinja2 template:
-            if "{{" in val or "{%" in val:
-                jinja2_variables.append(key)
-            # If variable still undeclared
-            elif val == "":
-                undeclared_variables.append(key)
-            else:
-                set_variables.append(key)
+
+        dereference (config_dict, set_variables, jinja2_variables, undeclared_variables)
+        
         log.info('Filled template variables:')
         for var in set_variables:
             log.info(var)
