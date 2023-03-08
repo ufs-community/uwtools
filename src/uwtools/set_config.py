@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=too-many-branches
+#pylint: disable=too-many-branches, too-many-statements
 
 '''
 This utility creates a command line interface for handling config files.
@@ -59,6 +59,12 @@ def parse_args(argv):
         '-d', '--dry_run',
         action='store_true',
         help='If provided, print rendered config file to stdout only',
+    )
+
+    parser.add_argument(
+        '--show_format',
+        action='store_true',
+        help='If provided, print the required formatting to generate the requested output file',
     )
 
     parser.add_argument(
@@ -140,6 +146,17 @@ def create_config_obj(argv):
         else: # same type of file as input, no need to convert it
             out_object = config_obj
         out_object.dump_file(user_args.outfile)
+
+
+    # if --show_format, print a list of required configuration settings to stdout
+    if user_args.show_format:
+        if user_args.outfile is None:
+        # first ensure all required args are present
+            raise argparse.ArgumentError(user_args.outfile, \
+                "args: --show_format also requires -outfile for reference")
+
+        if outfile_type != infile_type:
+            log.info(help(out_object.dump_file))
 
 if __name__ == '__main__':
     create_config_obj(sys.argv[1:])

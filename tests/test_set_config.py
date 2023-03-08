@@ -267,3 +267,42 @@ def test_set_config_dry_run():
         result = outstring.getvalue()
 
         assert result.rstrip('\n') == expected_content
+
+def test_show_format():
+    '''Test providing required configuration format for a given input and target.
+    '''
+    input_file = os.path.join(uwtools_file_base,pathlib.Path("fixtures","FV3_GFS_v16.yaml"))
+    outcome=\
+    """Help on method dump_file in module uwtools.config:
+
+dump_file(output_path) method of uwtools.config.FieldTableConfig instance
+    Write the formatted output to a text file. 
+    FMS field and tracer managers must be registered in an ASCII table called 'field_table'
+    This table lists field type, target model and methods the querying model will ask for.
+    
+    See UFS documentation for more information:
+    https://ufs-weather-model.readthedocs.io/en/ufs-v1.0.0/InputsOutputs.html#field-table-file
+    
+    The example format for generating a field file is::
+    
+    sphum:
+      longname: specific humidity
+      units: kg/kg
+      profile_type: 
+        name: fixed
+        surface_value: 1.e30
+
+None
+"""
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/field_table_from_yaml.FV3_GFS'
+        args = ['-i', input_file, '-o', out_file, '--show_format']
+
+        # Capture stdout for the required configuration settings
+        outstring = io.StringIO()
+        with redirect_stdout(outstring):
+            set_config.create_config_obj(args)
+        result = outstring.getvalue()
+
+        assert result == outcome
