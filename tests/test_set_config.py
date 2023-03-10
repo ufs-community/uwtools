@@ -311,7 +311,7 @@ def test_values_needed_yaml():
     '''Test that the values_needed flag logs variables provided, variables left as 
     jinja2 templates, and values still needed'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/result3.yaml"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
     args = ['-i', input_file, '--values_needed']
 
     # Capture stdout for values_needed output
@@ -321,16 +321,19 @@ def test_values_needed_yaml():
     result = outstring.getvalue()
     
     outcome=\
-    """
-Filled template variables:
-base
-dressing
+    """Filled template variables:
+FV3GFS
+nomads
+protocol
+file_names
+grib2
 Variables left as jinja2 templates:
-fruit
-vegetable
-how_many
+url
+anl
+fcst
 Values still needed:
-toppings
+nemsio
+test
 """
     assert result == outcome
 
@@ -348,8 +351,7 @@ def test_values_needed_ini():
     result = outstring.getvalue()
 
     outcome=\
-    """
-Filled template variables:
+    """Filled template variables:
 salad
 base
 fruit
@@ -369,7 +371,7 @@ def test_values_needed_f90nml():
     '''Test that the values_needed flag logs variables provided, variables left as 
     jinja2 templates, and values still needed'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/result_include_file_with_sect.nml"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple3.nml"))
     args = ['-i', input_file, '--values_needed']
 
     outstring = io.StringIO()
@@ -378,19 +380,15 @@ def test_values_needed_f90nml():
     result = outstring.getvalue()
 
     outcome=\
-        """
-Filled template variables:
-config
+        """Filled template variables:
+salad
+base
 fruit
 vegetable
 how_many
-dressing
-meat
-setting
-topping
-size
-meat
 Variables left as jinja2 templates:
+dressing
 Values still needed:
+toppings
 """
     assert result == outcome
