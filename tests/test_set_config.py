@@ -319,7 +319,6 @@ def test_values_needed_yaml():
     with redirect_stdout(outstring):
         set_config.create_config_obj(args)
     result = outstring.getvalue()
-    
     outcome=\
     """Filled template variables:
 FV3GFS

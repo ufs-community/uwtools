@@ -301,6 +301,30 @@ class Config(collections.UserDict):
             else:
                 dict_to_update[key] = new_val
 
+    def iterate_values(self, config_dict, set_var, jinja2_var, undeclared_var):
+        '''
+        Given a config dictionary, parse which variables have been set, which are left as 
+        jinja2 templates, and which are undeclared
+        '''
+
+        for key, val in config_dict.items():
+            if isinstance(val, dict):
+                set_var.append(key)
+                self.iterate_values(val, set_var, jinja2_var, undeclared_var)
+            elif isinstance(val, list):
+                set_var.append(key)
+                for item in val:
+                    self.iterate_values(item, set_var, jinja2_var, undeclared_var)
+            elif "{{" in str(val) or "{%" in str(val):
+                jinja2_var.append(key)
+            elif val == "" or not val:
+                undeclared_var.append(key)
+
+            else:
+                set_var.append(key)
+
+        return config_dict, set_var, jinja2_var, undeclared_var
+
 
 class YAMLConfig(Config):
 
