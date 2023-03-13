@@ -8,7 +8,6 @@ import os
 import sys
 import argparse
 import pathlib
-import copy
 from uwtools import config
 from uwtools.logger import Logger
 

@@ -303,9 +303,9 @@ class Config(collections.UserDict):
 
     def iterate_values(self, config_dict, set_var, jinja2_var, empty_var):
         '''
-        Given a config dictionary, recursively parse which keys are complete, which keys have unfilled
-        jinja templates, and which keys are set to empty.  Takes in and returns a dict object 
-        and three seperate lists.
+        Given a config dictionary, recursively parse which keys are complete, which keys have 
+        unfilled jinja templates, and which keys are set to empty.  Takes in and returns a dict 
+        object and three seperate lists.
         '''
 
         for key, val in config_dict.items():
