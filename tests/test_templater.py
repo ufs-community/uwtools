@@ -291,3 +291,36 @@ Running script templater.py with args:
     outcome = ''
     # Check that only the correct messages were logged
     assert result == outcome
+
+def test_log_decorator():
+    """Unit test for checking application of the logger decorator"""
+
+    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+    config_file = os.path.join(uwtools_file_base, "fixtures/fruit_config.yaml")
+    logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
+
+    outcome=\
+    """Finished setting up debug file logging in """ + logfile  + """
+Running script templater.py with args:"""
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+        out_file = f'{tmp_dir}/test_render_from_yaml.nml'
+
+        args = [
+             '-i', input_file,
+             '-c', config_file,
+             '-o', out_file,
+             ]
+
+        print("Begin test of logger decorator")
+    # Capture quiet stdout
+#    outstring = io.StringIO()
+#    with redirect_stdout(outstring):
+#        templater.set_template(args).details()
+#    result = outstring.getvalue()
+        templater.set_template(argv).details()
+
+#    lines = zip(outcome.split('\n'), result.split('\n'))
+#    for outcome_line, result_line in lines:
+#        # Check that only the correct messages were logged
+#        assert outcome_line in result_line

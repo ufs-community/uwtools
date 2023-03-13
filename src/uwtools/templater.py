@@ -12,7 +12,7 @@ import argparse
 
 from uwtools.j2template import J2Template
 from uwtools import config
-from uwtools.logger import Logger
+from uwtools.logger import Logger, log_decorator
 
 def dict_from_config_args(args):
     '''Given a list of command line arguments in the form key=value, return a
@@ -148,6 +148,17 @@ def set_template(argv):
     else:
         # write out rendered template to file
         template.dump_file(user_args.outfile)
+
+    @log_decorator()
+    def details(self):
+        # writing custom logs specific to function, outside of log decorator, if needed
+        # provide caller, local variables and expected output to the log
+        #pylint: disable=try-except-raise
+        self.log.debug("Templater function custom log, outside decorator")
+        try:
+            return
+        except:
+            raise
 
 if __name__ == '__main__':
     set_template(sys.argv[1:])
