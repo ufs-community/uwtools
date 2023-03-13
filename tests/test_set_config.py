@@ -320,19 +320,21 @@ def test_values_needed_yaml():
         set_config.create_config_obj(args)
     result = outstring.getvalue()
     outcome=\
-    """Filled template variables:
-FV3GFS
-nomads
-protocol
-file_names
-grib2
-Variables left as jinja2 templates:
-url
-anl
-fcst
-Values still needed:
-nemsio
-test
+    """Keys that are complete:
+    FV3GFS
+    nomads
+    protocol
+    file_names
+    grib2
+
+Keys that have unfilled jinja2 templates:
+    url
+    anl
+    fcst
+
+Keys that are set to empty:
+    nemsio
+    test
 """
     assert result == outcome
 
@@ -350,19 +352,21 @@ def test_values_needed_ini():
     result = outstring.getvalue()
 
     outcome=\
-    """Filled template variables:
-salad
-base
-fruit
-vegetable
-dressing
-dessert
-type
-Variables left as jinja2 templates:
-how_many
-flavor
-Values still needed:
-toppings
+    """Keys that are complete:
+    salad
+    base
+    fruit
+    vegetable
+    dressing
+    dessert
+    type
+
+Keys that have unfilled jinja2 templates:
+    how_many
+    flavor
+
+Keys that are set to empty:
+    toppings
 """
     assert result == outcome
 
@@ -379,15 +383,17 @@ def test_values_needed_f90nml():
     result = outstring.getvalue()
 
     outcome=\
-        """Filled template variables:
-salad
-base
-fruit
-vegetable
-how_many
-Variables left as jinja2 templates:
-dressing
-Values still needed:
-toppings
+        """Keys that are complete:
+    salad
+    base
+    fruit
+    vegetable
+    how_many
+
+Keys that have unfilled jinja2 templates:
+    dressing
+
+Keys that are set to empty:
+    toppings
 """
     assert result == outcome
