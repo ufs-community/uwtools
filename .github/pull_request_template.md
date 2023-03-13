@@ -54,3 +54,8 @@ Please delete options that are not relevant.
 - [ ] New and existing tests pass with my changes
 - [ ] Any dependent changes have been merged and published
 
+<!-- 
+ If there is a co-author attribution:
+
+Update the final commit message (when squashing and merging) to include  `Co-authored-by: name <name@example.com>` (e.g. `Co-authored-by: Jane Doe <jane_doe@example.com>`).  Each co-author must have their own line, and the email address used must be the email address connected with their GitHub account.
+-->

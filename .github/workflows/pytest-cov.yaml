@@ -37,6 +37,7 @@ jobs:
 
   deploy_to_pages:
     needs: [run_pytest_coverage]
+    continue-on-error: true
     runs-on: ubuntu-latest
     permissions:
       contents: write
