@@ -8,6 +8,7 @@ import os
 import sys
 import argparse
 import pathlib
+import copy
 from uwtools import config
 from uwtools.logger import Logger
 
@@ -123,17 +124,19 @@ def create_config_obj(argv):
         config_dict = config_obj.data
         set_var = []
         jinja2_var = []
-        undeclared_var = []
-        config.Config.iterate_values(config_obj, config_dict, set_var, jinja2_var, undeclared_var)
+        empty_var = []
+        config.Config.iterate_values(config_obj, config_dict, set_var, jinja2_var, empty_var)
 
-        log.info('Filled template variables:')
+        log.info('Keys that are complete:')
         for var in set_var:
             log.info(var)
-        log.info('Variables left as jinja2 templates:')
+        log.info('')
+        log.info('Keys that have unfilled jinja2 templates:')
         for var in jinja2_var:
             log.info(var)
-        log.info('Values still needed:')
-        for var in undeclared_var:
+        log.info('')
+        log.info('Keys that are set to empty:')
+        for var in empty_var:
             log.info(var)
         return
 

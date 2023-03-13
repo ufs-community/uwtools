@@ -301,29 +301,31 @@ class Config(collections.UserDict):
             else:
                 dict_to_update[key] = new_val
 
-    def iterate_values(self, config_dict, set_var, jinja2_var, undeclared_var):
+    def iterate_values(self, config_dict, set_var, jinja2_var, empty_var):
         '''
-        Given a config dictionary, parse which variables have been set, which are left as 
-        jinja2 templates, and which are undeclared
+        Given a config dictionary, recursively parse which keys are complete, which keys have unfilled
+        jinja templates, and which keys are set to empty.  Takes in and returns a dict object 
+        and three seperate lists.
         '''
 
         for key, val in config_dict.items():
             if isinstance(val, dict):
-                set_var.append(key)
-                self.iterate_values(val, set_var, jinja2_var, undeclared_var)
+                set_var.append(f'    {key}')
+                self.iterate_values(val, set_var, jinja2_var, empty_var)
             elif isinstance(val, list):
-                set_var.append(key)
+                set_var.append(f'    {key}')
                 for item in val:
-                    self.iterate_values(item, set_var, jinja2_var, undeclared_var)
+                    self.iterate_values(item, set_var, jinja2_var, empty_var)
             elif "{{" in str(val) or "{%" in str(val):
-                jinja2_var.append(key)
-            elif val == "" or not val:
-                undeclared_var.append(key)
+                jinja2_var.append(f'    {key}')
+            # elif val == "" or not val:
+            elif not val:
+                empty_var.append(f'    {key}')
 
             else:
-                set_var.append(key)
+                set_var.append(f'    {key}')
 
-        return config_dict, set_var, jinja2_var, undeclared_var
+        return config_dict, set_var, jinja2_var, empty_var
 
 
 class YAMLConfig(Config):
