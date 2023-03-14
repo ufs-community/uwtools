@@ -88,6 +88,7 @@ def set_template(argv):
 
     logfile = os.path.join(os.path.dirname(__file__), "templater.log")
     log = Logger(level='info',
+        name='templater_log',
         _format='%(message)s',
         colored_log= False,
         logfile_path=logfile
@@ -95,6 +96,7 @@ def set_template(argv):
     if user_args.verbose:
         log.handlers.clear()
         log = Logger(level='debug',
+            name='templater_log',
             _format='%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s',
             colored_log= True,
             logfile_path=logfile
@@ -103,8 +105,6 @@ def set_template(argv):
     elif user_args.quiet:
         log.handlers.clear()
         log.propagate = False
-
-
 
     log.info(f"""Running script templater.py with args:
 {('-' * 70)}
@@ -154,7 +154,10 @@ def set_template(argv):
         # writing custom logs specific to function, outside of log decorator, if needed
         # provide caller, local variables and expected output to the log
         #pylint: disable=try-except-raise
-        self.log.debug("Templater function custom log, outside decorator")
+
+        # Initializing logger object to write custom logs
+        self.logger_obj = Logger.get_logger(self)
+        self.logger_obj.debug("Templater function custom log, outside decorator")
         try:
             return
         except:

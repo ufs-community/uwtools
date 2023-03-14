@@ -205,4 +205,6 @@ def log_decorator(_func=None):
         # Return the pointer to the function
         return log_decorator_wrapper
     # Decorator was called with arguments, so return a decorator function that can read and return a function
-    return log_decorator_info if _func is None else log_decorator_info(_func)
+    if _func is None:
+        return log_decorator_info
+    log_decorator_info(_func)

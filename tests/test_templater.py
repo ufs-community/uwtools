@@ -310,15 +310,16 @@ Running script templater.py with args:"""
              '-i', input_file,
              '-c', config_file,
              '-o', out_file,
+             '-v'
              ]
 
         print("Begin test of logger decorator")
-    # Capture quiet stdout
-#    outstring = io.StringIO()
-#    with redirect_stdout(outstring):
-#        templater.set_template(args).details()
-#    result = outstring.getvalue()
-        templater.set_template(argv).details()
+        # Capture verbose stdout
+        outstring = io.StringIO()
+        with redirect_stdout(outstring):
+            templater.set_template(args).details()
+        result = outstring.getvalue()
+        print(result)
 
 #    lines = zip(outcome.split('\n'), result.split('\n'))
 #    for outcome_line, result_line in lines:
