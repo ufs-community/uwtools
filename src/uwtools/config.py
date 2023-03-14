@@ -1,3 +1,4 @@
+#pylint: disable=too-many-arguments
 '''
 This file contains the Config file and its subclasses for a variety of
 dicatable file types.
