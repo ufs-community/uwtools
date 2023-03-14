@@ -301,32 +301,29 @@ class Config(collections.UserDict):
             else:
                 dict_to_update[key] = new_val
 
-    def iterate_values(self, config_dict, set_var, jinja2_var, empty_var):
+    def iterate_values(self, config_dict, set_var, jinja2_var, empty_var, parent):
         '''
-        Given a config dictionary, recursively parse which keys are complete, which keys have 
-        unfilled jinja templates, and which keys are set to empty.  Takes in and returns a dict 
-        object and three seperate lists.
+        Recursively parse which keys in the object are complete (set_var), which keys have 
+        unfilled jinja templates (jinja2_var), and which keys are set to empty (empty_var). 
         '''
 
         for key, val in config_dict.items():
             if isinstance(val, dict):
-                set_var.append(f'    {key}')
-                self.iterate_values(val, set_var, jinja2_var, empty_var)
+                set_var.append(f'    {parent}{key}')
+                new_parent = f'{parent}{key}.'
+                self.iterate_values(val, set_var, jinja2_var, empty_var, new_parent)
             elif isinstance(val, list):
-                set_var.append(f'    {key}')
+                set_var.append(f'    {parent}{key}')
                 for item in val:
-                    self.iterate_values(item, set_var, jinja2_var, empty_var)
+                    self.iterate_values(item, set_var, jinja2_var, empty_var, parent)
             elif "{{" in str(val) or "{%" in str(val):
-                jinja2_var.append(f'    {key}')
-            # elif val == "" or not val:
+                jinja2_var.append(f'    {parent}{key}')
             elif not val:
-                empty_var.append(f'    {key}')
+                empty_var.append(f'    {parent}{key}')
 
             else:
-                set_var.append(f'    {key}')
-
-        return config_dict, set_var, jinja2_var, empty_var
-
+                set_var.append(f'    {parent}{key}')
+        return config_dict, set_var, jinja2_var, empty_var, parent
 
 class YAMLConfig(Config):
 

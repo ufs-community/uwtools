@@ -5,8 +5,10 @@ FV3GFS:
     file_names: &gfs_file_names
       grib2:
         anl:
-          - gfs.t{{ hh }}z.pgrb2.0p25.f000
+          - gfs.t{{ hh }}z.atmanl.nemsio
+          - gfs.t{{ hh }}z.sfcanl.nemsio
         fcst:
           - gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}
+
       nemsio: Null
-      test:
+    test:
