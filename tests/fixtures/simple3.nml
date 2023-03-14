@@ -1,0 +1,11 @@
+&salad
+  base = 'kale'
+  fruit = 'papaya'
+  vegetable = 'eggplant'
+  how_many = 17
+  dressing = '{{ dressing }}'
+  toppings =
+  extras = 0
+  dessert = False
+  appetizer =
+/

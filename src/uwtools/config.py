@@ -1,3 +1,4 @@
+#pylint: disable=too-many-arguments
 '''
 This file contains the Config file and its subclasses for a variety of
 dicatable file types.
@@ -301,6 +302,29 @@ class Config(collections.UserDict):
             else:
                 dict_to_update[key] = new_val
 
+    def iterate_values(self, config_dict, set_var, jinja2_var, empty_var, parent):
+        '''
+        Recursively parse which keys in the object are complete (set_var), which keys have 
+        unfilled jinja templates (jinja2_var), and which keys are set to empty (empty_var). 
+        '''
+
+        for key, val in config_dict.items():
+            if isinstance(val, dict):
+                set_var.append(f'    {parent}{key}')
+                new_parent = f'{parent}{key}.'
+                self.iterate_values(val, set_var, jinja2_var, empty_var, new_parent)
+            elif isinstance(val, list):
+                set_var.append(f'    {parent}{key}')
+                for item in val:
+                    self.iterate_values(item, set_var, jinja2_var, empty_var, parent)
+            elif "{{" in str(val) or "{%" in str(val):
+                jinja2_var.append(f'    {parent}{key}')
+            elif val == "" or val is None:
+                empty_var.append(f'    {parent}{key}')
+
+            else:
+                set_var.append(f'    {parent}{key}')
+        return config_dict, set_var, jinja2_var, empty_var, parent
 
 class YAMLConfig(Config):
 
