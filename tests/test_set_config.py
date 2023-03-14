@@ -306,3 +306,102 @@ None
         result = outstring.getvalue()
 
         assert result == outcome
+
+def test_values_needed_yaml():
+    '''Test that the values_needed flag logs keys completed, keys containing  
+    unfilled jinja2 templates, and keys set to empty'''
+
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
+    args = ['-i', input_file, '--values_needed']
+
+    # Capture stdout for values_needed output
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        set_config.create_config_obj(args)
+    result = outstring.getvalue()
+    outcome=\
+    """Keys that are complete:
+    FV3GFS
+    FV3GFS.nomads
+    FV3GFS.nomads.protocol
+    FV3GFS.nomads.file_names
+    FV3GFS.nomads.file_names.grib2
+    FV3GFS.nomads.file_names.testfalse
+    FV3GFS.nomads.file_names.testzero
+
+Keys that have unfilled jinja2 templates:
+    FV3GFS.nomads.url
+    FV3GFS.nomads.file_names.grib2.anl
+    FV3GFS.nomads.file_names.grib2.fcst
+
+Keys that are set to empty:
+    FV3GFS.nomads.file_names.nemsio
+    FV3GFS.nomads.testempty
+"""
+    assert result == outcome
+
+def test_values_needed_ini():
+    '''Test that the values_needed flag logs keys completed, keys containing  
+    unfilled jinja2 templates, and keys set to empty'''
+
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple3.ini"))
+    args = ['-i', input_file, '--values_needed']
+
+    # Capture stdout for values_needed output
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        set_config.create_config_obj(args)
+    result = outstring.getvalue()
+
+    outcome=\
+    """Keys that are complete:
+    salad
+    salad.base
+    salad.fruit
+    salad.vegetable
+    salad.dressing
+    dessert
+    dessert.type
+    dessert.side
+    dessert.servings
+
+Keys that have unfilled jinja2 templates:
+    salad.how_many
+    dessert.flavor
+
+Keys that are set to empty:
+    salad.toppings
+    salad.meat
+"""
+    assert result == outcome
+
+def test_values_needed_f90nml():
+    '''Test that the values_needed flag logs keys completed, keys containing  
+    unfilled jinja2 templates, and keys set to empty'''
+
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple3.nml"))
+    args = ['-i', input_file, '--values_needed']
+
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        set_config.create_config_obj(args)
+    result = outstring.getvalue()
+
+    outcome=\
+        """Keys that are complete:
+    salad
+    salad.base
+    salad.fruit
+    salad.vegetable
+    salad.how_many
+    salad.extras
+    salad.dessert
+
+Keys that have unfilled jinja2 templates:
+    salad.dressing
+
+Keys that are set to empty:
+    salad.toppings
+    salad.appetizer
+"""
+    assert result == outcome
