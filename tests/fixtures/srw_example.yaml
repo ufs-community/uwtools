@@ -1,0 +1,16 @@
+FV3GFS:
+  nomads:
+    protocol: download
+    url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
+    file_names: &gfs_file_names
+      grib2:
+        anl:
+          - gfs.t{{ hh }}z.atmanl.nemsio
+          - gfs.t{{ hh }}z.sfcanl.nemsio
+        fcst:
+          - gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}
+
+      nemsio: Null
+      testfalse: False
+      testzero: 0
+    testempty:
