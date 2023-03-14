@@ -11,4 +11,6 @@ FV3GFS:
           - gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}
 
       nemsio: Null
-    test:
+      testfalse: False
+      testzero: 0
+    testempty:

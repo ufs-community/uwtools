@@ -326,6 +326,8 @@ def test_values_needed_yaml():
     FV3GFS.nomads.protocol
     FV3GFS.nomads.file_names
     FV3GFS.nomads.file_names.grib2
+    FV3GFS.nomads.file_names.testfalse
+    FV3GFS.nomads.file_names.testzero
 
 Keys that have unfilled jinja2 templates:
     FV3GFS.nomads.url
@@ -334,7 +336,7 @@ Keys that have unfilled jinja2 templates:
 
 Keys that are set to empty:
     FV3GFS.nomads.file_names.nemsio
-    FV3GFS.nomads.test
+    FV3GFS.nomads.testempty
 """
     assert result == outcome
 
@@ -360,6 +362,8 @@ def test_values_needed_ini():
     salad.dressing
     dessert
     dessert.type
+    dessert.side
+    dessert.servings
 
 Keys that have unfilled jinja2 templates:
     salad.how_many
@@ -367,6 +371,7 @@ Keys that have unfilled jinja2 templates:
 
 Keys that are set to empty:
     salad.toppings
+    salad.meat
 """
     assert result == outcome
 
@@ -389,11 +394,14 @@ def test_values_needed_f90nml():
     salad.fruit
     salad.vegetable
     salad.how_many
+    salad.extras
+    salad.dessert
 
 Keys that have unfilled jinja2 templates:
     salad.dressing
 
 Keys that are set to empty:
     salad.toppings
+    salad.appetizer
 """
     assert result == outcome

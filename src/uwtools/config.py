@@ -318,7 +318,7 @@ class Config(collections.UserDict):
                     self.iterate_values(item, set_var, jinja2_var, empty_var, parent)
             elif "{{" in str(val) or "{%" in str(val):
                 jinja2_var.append(f'    {parent}{key}')
-            elif not val:
+            elif val == "" or val is None:
                 empty_var.append(f'    {parent}{key}')
 
             else:

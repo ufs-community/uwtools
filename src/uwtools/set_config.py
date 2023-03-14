@@ -120,13 +120,10 @@ def create_config_obj(argv):
         config_obj.update_values(user_config_obj)
 
     if user_args.values_needed:
-        config_dict = config_obj.data
         set_var = []
         jinja2_var = []
         empty_var = []
-        config.Config.iterate_values(config_obj, config_dict,
-                                        set_var, jinja2_var, empty_var, parent="")
-
+        config_obj.iterate_values(config_obj.data, set_var, jinja2_var, empty_var, parent="")
         log.info('Keys that are complete:')
         for var in set_var:
             log.info(var)
