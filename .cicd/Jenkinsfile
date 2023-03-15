@@ -1,0 +1,211 @@
+pipeline {
+    agent none
+    stages {
+        stage('Run UFS Workflow Tools') {
+            
+            parallel {
+                stage('Run UFS Workflow tools on Cheyenne') {
+                    agent {
+                        label "cheyenne"
+                    }
+                    steps {
+                      cleanWs()    
+                      checkout changelog: false, poll: false, scm: scmGit(branches: [[name: 'develop']], extensions: [], gitTool: 'Default', userRemoteConfigs: [[url: 'https://github.com/ufs-community/workflow-tools']])
+                      sh '''
+                            module use /glade/work/epicufsrt/contrib/miniconda3/modulefiles
+                            module load miniconda3/4.12.0
+                            conda activate regional_workflow
+                            #Install uwtools and dependencies.
+                            pip install -e .
+                            #Check for presence of pytest and install if not.
+                            if hash pytest  2>/dev/null; then
+                               echo "pytest installed, moving on!" 
+                            else
+                               echo "pytest not installed"
+                               conda install -y pytest
+                            fi
+                            
+                            pytest tests/ | tee -a ${WORKSPACE}/results.txt
+                            status=${PIPESTATUS[0]}
+                            
+                            
+                            if hash pylint  2>/dev/null; then
+                               echo "pylint installed, moving on!" 
+                            else
+                               echo "pylint not installed"
+                               conda install -y pylint
+                            fi
+                            
+                            #Run against UW tools.
+                            cd ${WORKSPACE}/src/uwtools
+                            pylint .
+                            
+                            exit $status
+                      '''
+                    }
+                }
+                
+                stage('Run UFS Workflow tools on Jet') {
+                    agent {
+                        label "jet"
+                    }
+                    steps {
+                       cleanWs()    
+                       checkout changelog: false, poll: false, scm: scmGit(branches: [[name: 'develop']], extensions: [], gitTool: 'Default', userRemoteConfigs: [[url: 'https://github.com/ufs-community/workflow-tools']])    
+                       sh '''
+                          module use /mnt/lfs4/HFIP/hfv3gfs/role.epic/miniconda3/modulefiles
+                          module load miniconda3/4.12.0
+                          conda activate regional_workflow
+                          #Check for presence of pytest and install if not.
+                            if hash pytest  2>/dev/null; then
+                               echo "pytest installed, moving on!" 
+                            else
+                               echo "pytest not installed"
+                               conda install -y pytest
+                            fi
+                            
+                            pytest tests/ | tee -a ${WORKSPACE}/results.txt
+                            status=${PIPESTATUS[0]}
+                            
+                            if hash pylint  2>/dev/null; then
+                               echo "pylint installed, moving on!" 
+                            else
+                               echo "pylint not installed"
+                               conda install -y pylint
+                            fi
+                            
+                            
+                            #Run against UW tools.
+                            cd ${WORKSPACE}/src/uwtools
+                            pylint .
+                            
+                            exit $status
+                      '''
+                    }
+                }
+                
+               stage('Run UFS Workflow tools on Gaea') {
+                    agent {
+                        label "gaea"
+                    }
+                    steps {
+                        cleanWs()
+                        checkout changelog: false, poll: false, scm: scmGit(branches: [[name: 'develop']], extensions: [], gitTool: 'Default', userRemoteConfigs: [[url: 'https://github.com/ufs-community/workflow-tools']])  
+                        sh '''
+                        source /lustre/f2/dev/role.epic/contrib/Lmod_init.sh
+                        module use /lustre/f2/dev/role.epic/contrib/modulefiles
+                        module load miniconda3/4.12.0
+                        conda activate regional_workflow
+                          #Check for presence of pytest and install if not.
+                            if hash pytest  2>/dev/null; then
+                               echo "pytest installed, moving on!" 
+                            else
+                               echo "pytest not installed"
+                               conda install -y pytest
+                            fi
+                            
+                            pytest tests/ | tee -a ${WORKSPACE}/results.txt
+                            status=${PIPESTATUS[0]}
+                            
+                            
+                            if hash pylint  2>/dev/null; then
+                               echo "pylint installed, moving on!" 
+                            else
+                               echo "pylint not installed"
+                               conda install -y pylint
+                            fi
+                            
+                            
+                            #Run against UW tools.
+                            cd ${WORKSPACE}/src/uwtools
+                            pylint .
+                            
+                            exit $status
+                        '''
+                    }
+                }
+                
+                stage('Run UFS Workflow tools on Hera') {
+                    agent {
+                        label "hera"
+                    }
+                    steps {
+                        cleanWs()
+                        checkout changelog: false, poll: false, scm: scmGit(branches: [[name: 'develop']], extensions: [], gitTool: 'Default', userRemoteConfigs: [[url: 'https://github.com/ufs-community/workflow-tools']])
+                        sh '''
+                          module use /scratch1/NCEPDEV/nems/role.epic/miniconda3/modulefiles
+                          module load miniconda3/4.12.0
+                          conda activate regional_workflow
+                          #Check for presence of pytest and install if not.
+                            if hash pytest  2>/dev/null; then
+                               echo "pytest installed, moving on!" 
+                            else
+                               echo "pytest not installed"
+                               conda install -y pytest
+                            fi
+                            
+                            pytest tests/ | tee -a ${WORKSPACE}/results.txt
+                            status=${PIPESTATUS[0]}
+                            
+                            
+                            if hash pylint  2>/dev/null; then
+                               echo "pylint installed, moving on!" 
+                            else
+                               echo "pylint not installed"
+                               conda install -y pylint
+                            fi
+                            
+                            
+                            #Run against UW tools.
+                            cd ${WORKSPACE}/src/uwtools
+                            pylint .
+                            
+                            exit $status
+                        '''    
+                    }
+                }
+                
+                stage('Run UFS Workflow tools on Orion') {
+                    agent {
+                        label "Orion"
+                    }
+                    steps {
+                        cleanWs()
+                        checkout changelog: false, poll: false, scm: scmGit(branches: [[name: 'develop']], extensions: [], gitTool: 'Default', userRemoteConfigs: [[url: 'https://github.com/ufs-community/workflow-tools']])
+                        sh '''
+                          module use /work/noaa/epic-ps/role-epic-ps/miniconda3/modulefiles
+                          module load miniconda3/4.12.0
+                          conda activate regional_workflow
+                          #Check for presence of pytest and install if not.
+                            if hash pytest  2>/dev/null; then
+                               echo "pytest installed, moving on!" 
+                            else
+                               echo "pytest not installed"
+                               conda install -y pytest
+                            fi
+                            
+                            pytest tests/ | tee -a ${WORKSPACE}/results.txt
+                            status=${PIPESTATUS[0]}
+                            
+                            
+                            if hash pylint  2>/dev/null; then
+                               echo "pylint installed, moving on!" 
+                            else
+                               echo "pylint not installed"
+                               conda install -y pylint
+                            fi
+                            
+                            
+                            #Run against UW tools.
+                            cd ${WORKSPACE}/src/uwtools
+                            pylint .
+                            
+                            exit $status
+                        '''
+                        
+                    }
+                }
+            }
+        }
+    }
+}
