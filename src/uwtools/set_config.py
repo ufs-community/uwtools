@@ -74,7 +74,6 @@ def parse_args(argv):
     )
     return parser.parse_args(argv)
 
-
 def create_config_obj(argv):
     '''Main section for processing config file'''
 
@@ -119,6 +118,24 @@ def create_config_obj(argv):
             user_config_obj = config.F90Config(user_args.config_file)
 
         config_obj.update_values(user_config_obj)
+
+    if user_args.values_needed:
+        set_var = []
+        jinja2_var = []
+        empty_var = []
+        config_obj.iterate_values(config_obj.data, set_var, jinja2_var, empty_var, parent="")
+        log.info('Keys that are complete:')
+        for var in set_var:
+            log.info(var)
+        log.info('')
+        log.info('Keys that have unfilled jinja2 templates:')
+        for var in jinja2_var:
+            log.info(var)
+        log.info('')
+        log.info('Keys that are set to empty:')
+        for var in empty_var:
+            log.info(var)
+        return
 
     if user_args.dry_run:
         if user_args.outfile:
