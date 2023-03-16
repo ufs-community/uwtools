@@ -1,7 +1,14 @@
 name: uwtools
 channels:
+  - conda-forge
   - defaults
 dependencies:
+  - "boto3>=1.22.13"
+  - black
+  - "f90nml>=1.4.3"
+  - "jinja2>=3.0.0"
+  - "numpy>=1.21.6"
   - pylint
   - pytest
-  
+  - "pyyaml>=6.0"
+  - tox
