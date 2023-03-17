@@ -8,6 +8,7 @@ import io
 import os
 import tempfile
 
+import logging
 import pytest
 
 from uwtools import templater
@@ -313,11 +314,16 @@ Running script templater.py with args:"""
              '-v'
              ]
 
-        print("Begin test of logger decorator")
+        print("Test templater with logger decorator")
         # Capture verbose stdout
         outstring = io.StringIO()
         with redirect_stdout(outstring):
-            templater.set_template(args).details()
+            templater.set_template(args)
+            print("Test calling templater logging object")
+            #loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+            #print(f"Current loggers are: {loggers}")
+            log = logging.getLogger('uwtools.templater')
+            log.debug("Only the templater logger would see this")
         result = outstring.getvalue()
         print(result)
 
@@ -325,3 +331,4 @@ Running script templater.py with args:"""
 #    for outcome_line, result_line in lines:
 #        # Check that only the correct messages were logged
 #        assert outcome_line in result_line
+

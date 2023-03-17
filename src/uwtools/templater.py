@@ -12,7 +12,7 @@ import argparse
 
 from uwtools.j2template import J2Template
 from uwtools import config
-from uwtools.logger import Logger, log_decorator
+from uwtools.logger import Logger
 
 def dict_from_config_args(args):
     '''Given a list of command line arguments in the form key=value, return a
@@ -26,7 +26,13 @@ def path_if_file_exists(arg):
         raise argparse.ArgumentTypeError(msg)
     return arg
 
-def parse_args(argv):
+def details(self):
+    # writing custom logs specific to function, outside of log decorator, if needed
+    # provide caller, local variables and expected output to the log
+
+    print("hello world")
+
+def parse_args(argv=None):
 
     '''
     Function maintains the arguments accepted by this script. Please see
@@ -88,15 +94,16 @@ def set_template(argv):
 
     logfile = os.path.join(os.path.dirname(__file__), "templater.log")
     log = Logger(level='info',
-        name='templater_log',
+        name=__name__,
         _format='%(message)s',
         colored_log= False,
         logfile_path=logfile
         )
+
     if user_args.verbose:
         log.handlers.clear()
         log = Logger(level='debug',
-            name='templater_log',
+            name=__name__,
             _format='%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s',
             colored_log= True,
             logfile_path=logfile
@@ -148,20 +155,6 @@ def set_template(argv):
     else:
         # write out rendered template to file
         template.dump_file(user_args.outfile)
-
-    @log_decorator()
-    def details(self):
-        # writing custom logs specific to function, outside of log decorator, if needed
-        # provide caller, local variables and expected output to the log
-        #pylint: disable=try-except-raise
-
-        # Initializing logger object to write custom logs
-        self.logger_obj = Logger.get_logger(self)
-        self.logger_obj.debug("Templater function custom log, outside decorator")
-        try:
-            return
-        except:
-            raise
 
 if __name__ == '__main__':
     set_template(sys.argv[1:])
