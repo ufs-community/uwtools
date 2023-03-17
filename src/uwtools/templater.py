@@ -26,11 +26,12 @@ def path_if_file_exists(arg):
         raise argparse.ArgumentTypeError(msg)
     return arg
 
-def details(self):
+def details():
+    ''' Placeholder for a wrapper'''
     # writing custom logs specific to function, outside of log decorator, if needed
     # provide caller, local variables and expected output to the log
 
-    print("hello world")
+    print("Call Logger decorator to print 'hello world'")
 
 def parse_args(argv=None):
 

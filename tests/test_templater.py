@@ -12,7 +12,7 @@ import logging
 import pytest
 
 from uwtools import templater
-from uwtools.logger import Logger
+from uwtools.logger import Logger, log_decorator
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -329,11 +329,10 @@ Running script templater.py with args:"""
         print(result)
 
         #test simple decorator
-        print("Call Logger decorator to print 'hello world'")
-        Logger.log_decorator()
+        decor = log_decorator(templater.details)
+        decor()
 
 #    lines = zip(outcome.split('\n'), result.split('\n'))
 #    for outcome_line, result_line in lines:
 #        # Check that only the correct messages were logged
 #        assert outcome_line in result_line
-
