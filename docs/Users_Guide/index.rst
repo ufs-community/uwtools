@@ -55,7 +55,11 @@ Table of Contents
    :titlesonly:
    :numbered: 4
 
-   installation
+   Introduction <introduction>
+   Getting Started <getting_started>
+   Working with Templates <working_with_templates>
+   Working with Standard Configuration Files <working_with_config>
+
 
 Indices and Tables
 ==================
