@@ -152,11 +152,11 @@ class Logger:
 
         return handler
 
-def log_decorator(_func=None):
-    """
-    Add a logger decorator.
-    This decorator will allow setting custom logging details on a given function
-    Decorator based on work by Hima Mahajan https://github.com/hima03/log-decorator
-    Recommended wrapper use is to provide caller, local variables and expected output to log
-    """
-    print("hello world")
+    def log_decorator():
+        """
+        Add a logger decorator.
+        This decorator will allow setting custom logging details on a given function
+        Decorator based on work by Hima Mahajan https://github.com/hima03/log-decorator
+        Recommended wrapper use is to provide caller, local variables and expected output to log
+        """
+        print("hello world")

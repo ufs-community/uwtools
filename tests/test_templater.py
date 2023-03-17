@@ -12,6 +12,7 @@ import logging
 import pytest
 
 from uwtools import templater
+from uwtools.logger import Logger
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -326,6 +327,10 @@ Running script templater.py with args:"""
             log.debug("Only the templater logger would see this")
         result = outstring.getvalue()
         print(result)
+
+        #test simple decorator
+        print("Call Logger decorator to print 'hello world'")
+        Logger.log_decorator()
 
 #    lines = zip(outcome.split('\n'), result.split('\n'))
 #    for outcome_line, result_line in lines:
