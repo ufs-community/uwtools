@@ -326,6 +326,14 @@ class Config(collections.UserDict):
                 set_var.append(f'    {parent}{key}')
         return config_dict, set_var, jinja2_var, empty_var, parent
 
+    def dictionary_depth(self, config_dict):
+        '''
+        Recursively finds the depth of an objects data (a dictionary). 
+        '''
+        if isinstance(config_dict, dict):
+            return 1 + (max(map(self.dictionary_depth, config_dict.values())))
+        return 0
+
 class YAMLConfig(Config):
 
     '''
