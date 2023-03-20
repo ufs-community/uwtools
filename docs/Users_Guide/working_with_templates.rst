@@ -1,4 +1,4 @@
- .. _working with templates:
+.. _working_with_templates:
 
 **************************
 Working With Templates 
@@ -32,8 +32,6 @@ This tool turns any atparse enabled template into a Jinja2 enabled template. For
   $
      @[OUT_BEG]  @[DTPNT]  @[OUT_END] @[POFILETYPE]
   $
-
-
 
 atparse_to_jinja2 is called on the template from the command line::
 
@@ -101,7 +99,7 @@ Here is an example template file, jinjatemplate.nml::
   $
      {{OUT_BEG}}  {{DTPNT}}  {{OUT_END}} {{POFILETYPE}}
   $
-  
+
 And here is the example YAML config file we want to use to update the values in the template::
 
   NFGRIDS: 1
@@ -274,5 +272,3 @@ If provided, the --values_needed flag will print a list of required configuratio
   UNIPOINTS
   WINDLINE
   WW3GRIDLINE
-
-
