@@ -78,9 +78,9 @@ Package Dependencies
     
 .. _new_installation:
 
-----------------
+-------------------
 Installation [#f1]_
-----------------
+-------------------
 
 --------------------------
 Using a Python Environment
