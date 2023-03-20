@@ -82,9 +82,9 @@ Package Dependencies
 Installation [#f1]_
 -------------------
 
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 Using a Python Environment
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Users may follow the instructions provided in this section to install conda and/or create virtual environments for their projects. These steps are not required to install or run the Unified Workflow Tools package (`uwtools`). However, use of conda virtual environments can make it easier to work on multiple projects with conflicting dependencies on the same machine. Go to :numref:`Section %s <new_uwinstall>` to skip directly to `uwtools` installation. 
 
