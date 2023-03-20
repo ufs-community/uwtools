@@ -363,3 +363,22 @@ salad:        how_many:  - None + 12
         # Check that only the correct messages were logged
             assert expected_line == result_line
         outstring2.close()
+
+def test_dictionary_depth():
+
+    ''' Test that the proper dictionary depth is being returned for each file type. '''
+
+    input_yaml = os.path.join(uwtools_file_base, pathlib.Path("fixtures/FV3_GFS_v16.yaml"))
+    config_obj = config.YAMLConfig(input_yaml)
+    depth = config_obj.dictionary_depth(config_obj.data)
+    assert 3 == depth
+
+    input_nml = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
+    config_obj = config.F90Config(input_nml)
+    depth = config_obj.dictionary_depth(config_obj.data)
+    assert 2 == depth
+
+    input_ini = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.ini"))
+    config_obj = config.INIConfig(input_ini)
+    depth = config_obj.dictionary_depth(config_obj.data)
+    assert 2 == depth
