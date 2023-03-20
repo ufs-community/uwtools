@@ -5,6 +5,7 @@ Getting Started
 ***************
 
 .. _dependencies:
+
 ------------------------
 Package Dependencies
 ------------------------
@@ -75,7 +76,8 @@ Package Dependencies
     -
     -
     
-.. _installation:
+.. _new_installation:
+
 ----------------
 Installation [#f1]_
 ----------------
@@ -84,7 +86,7 @@ Installation [#f1]_
 Using a Python Environment
 --------------------------
 
-Users may follow the instructions provided in this section to install conda and/or create virtual environments for their projects. These steps are not required to install or run the Unified Workflow Tools package (`uwtools`). However, use of conda virtual environments can make it easier to work on multiple projects with conflicting dependencies on the same machine. Go to :numref:`Section %s <uwinstall>` to skip directly to `uwtools` installation. 
+Users may follow the instructions provided in this section to install conda and/or create virtual environments for their projects. These steps are not required to install or run the Unified Workflow Tools package (`uwtools`). However, use of conda virtual environments can make it easier to work on multiple projects with conflicting dependencies on the same machine. Go to :numref:`Section %s <new_uwinstall>` to skip directly to `uwtools` installation. 
 
 ^^^^^
 conda
@@ -157,7 +159,7 @@ To create a virtual environment, follow these steps:
 #. You can now use the virtual environment as a sandbox for your Python projects, installing packages and running scripts without affecting the global Python environment.
 
 
-.. _uwinstall:
+.. _new_uwinstall:
 
 -------------------
 The uwtools package
