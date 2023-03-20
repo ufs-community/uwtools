@@ -1,4 +1,4 @@
- .. _working_with_config:
+.. _working_with_config:
 
 ******************************************
 Working with Standard Configuration Files
@@ -10,8 +10,6 @@ set_config.py
 -------------
 
 This tool transforms a "base" config file into a fully formed, app-ready file that is fully configurable by the end user.
-
-
 
 .. _conf_inp_conf:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -48,9 +46,7 @@ The output is a fully formed config file::
   topping: crouton
   size: large
   meat: chicken
-  
-  
-  
+
 .. _conf_field:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Generating a field table from YAML
@@ -97,8 +93,7 @@ Generated field table::
              "longname", "rain mixing ratio"
              "units", "kg/kg"
          "profile_type", "fixed", "surface_value=1.e30" /
-         
-     
+   
 .. _conf_dry:
 ^^^^^^^^^^^^
 dry_run flag
@@ -113,7 +108,6 @@ will generate the following output::
   {"fruit": "papaya", "vegetable": "eggplant", "how_many": 17, "dressing": "ranch", "topping": "crouton", "size": "large", "meat": "chicken"}
 
 If the --dry_run flag is run with a user outfile included, it will generate a warning that the outfile will not be written.
-
 
 .. _conf_val_needed:
 ^^^^^^^^^^^^^^^^^^
