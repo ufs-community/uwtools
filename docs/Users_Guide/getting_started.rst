@@ -1,6 +1,5 @@
  .. _getting_started:
 
-
 ***************
 Getting Started
 ***************
@@ -75,9 +74,10 @@ Package Dependencies
     -
     -
     -
+    
 .. _installation:
 ----------------
-Installation
+Installation [#f1]_
 ----------------
 
 --------------------------
@@ -189,8 +189,5 @@ To install the `workflow-tools` repository from Github, follow these steps:
 
       python src/uwtools/templater.py -h
 
-
-
 .. [#f1] The contents of the Installation Guide have been compiled with
    the help of OpenAI.
-
