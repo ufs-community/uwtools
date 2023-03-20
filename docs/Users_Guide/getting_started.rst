@@ -1,14 +1,92 @@
-.. _installation:
+.. _getting_started:
 
-*******************
+***************
+Getting Started
+***************
+
+.. _dependencies:
+
+------------------------
+Package Dependencies
+------------------------
+.. Number of characters per line:
+   Name - no more that 13 characters
+   Version - no more than 6 characters
+   Source - no more than 8 characters
+   Description - no more than 22 (was 20) characters
+
+.. role:: raw-html(raw)
+   :format: html	  
+
+.. list-table:: UW Tools Requirements
+  :widths: auto
+  :header-rows: 1
+		
+  * - Name
+    - Version
+    - Source
+    - Description 
+
+  * - boto3
+    - >=1.22.13
+    - https://anaconda.org/conda-forge/boto3
+    - 
+        allows Python developers to write softare :raw-html:`<br />`
+        that makes use of services like Amazon :raw-html:`<br />`
+        S3 and Amazon EC2.
+  * - black
+    -
+    -
+    -
+
+  * - f90nml
+    - >=1.4.3
+    - https://pypi.org/project/f90nml/
+    -   provides a simple interface :for the :raw-html:`<br />`
+        reading, writing, and modifying Fortran :raw-html:`<br />`
+        namelist files.
+
+  * - Jinja2
+    - 3.0.0
+    - https://jinja.palletsprojects.com/en/3.1.x/
+    -
+
+  * - numpy
+    - >=1.21.6
+    - https://numpy.org/
+    -   library used for scientific computing
+
+  * - pylint
+    - 
+    - https://pypi.org/project/pylint/
+    -
+ 
+  * - pytest
+    - 
+    - https://docs.pytest.org/en/7.2.x/
+    -
+
+  * - pyyaml
+    - >=6.0
+    - https://pypi.org/project/PyYAML/
+    - 
+
+  * - tox
+    -
+    -
+    -
+    
+.. _new_installation:
+
+-------------------
 Installation [#f1]_
-*******************
+-------------------
 
 --------------------------
 Using a Python Environment
 --------------------------
 
-Users may follow the instructions provided in this section to install conda and/or create virtual environments for their projects. These steps are not required to install or run the Unified Workflow Tools package (`uwtools`). However, use of conda virtual environments can make it easier to work on multiple projects with conflicting dependencies on the same machine. Go to :numref:`Section %s <uwinstall>` to skip directly to `uwtools` installation. 
+Users may follow the instructions provided in this section to install conda and/or create virtual environments for their projects. These steps are not required to install or run the Unified Workflow Tools package (`uwtools`). However, use of conda virtual environments can make it easier to work on multiple projects with conflicting dependencies on the same machine. Go to :numref:`Section %s <new_uwinstall>` to skip directly to `uwtools` installation. 
 
 ^^^^^
 conda
@@ -53,6 +131,7 @@ To create a conda environment, follow these steps:
 ^^^^^^^^^^
 virtualenv
 ^^^^^^^^^^
+
 A virtual environment is a tool used to isolate specific Python environments on a single machine, allowing you to work on multiple projects with different packages and package versions. 
 
 To create a virtual environment, follow these steps:
@@ -80,7 +159,7 @@ To create a virtual environment, follow these steps:
 #. You can now use the virtual environment as a sandbox for your Python projects, installing packages and running scripts without affecting the global Python environment.
 
 
-.. _uwinstall:
+.. _new_uwinstall:
 
 -------------------
 The uwtools package
@@ -111,8 +190,6 @@ To install the `workflow-tools` repository from Github, follow these steps:
 #. You can now use the tools by running the appropriate scripts. For example, to use the templater tool, you can run the following command::
 
       python src/uwtools/templater.py -h
-
-
 
 .. [#f1] The contents of the Installation Guide have been compiled with
    the help of OpenAI.
