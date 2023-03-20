@@ -12,7 +12,7 @@ import logging
 import pytest
 
 from uwtools import templater
-from uwtools.logger import Logger, log_decorator
+from uwtools.logger import Logger, log_details
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -298,19 +298,40 @@ def test_log_decorator():
     """Unit test for checking application of the logger decorator"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
-    config_file = os.path.join(uwtools_file_base, "fixtures/fruit_config.yaml")
     logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
-
-    outcome=\
-    """Finished setting up debug file logging in """ + logfile  + """
-Running script templater.py with args:"""
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
         out_file = f'{tmp_dir}/test_render_from_yaml.nml'
 
+        outcome=\
+    """Finished setting up debug file logging in """ + logfile  + """
+Running script templater.py with args:
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+        outfile: """ + out_file  + """
+ input_template: """ + input_file  + """
+    config_file: None
+   config_items: []
+        dry_run: False
+  values_needed: False
+        verbose: True
+          quiet: False
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+Test calling templater logging object
+Only the templater logger would see this
+
+&salad
+  base = 'kale'
+  fruit = 'banana'
+  vegetable = 'tomato'
+  how_many = 22
+  dressing = 'balsamic'
+/
+"""
+
         args = [
              '-i', input_file,
-             '-c', config_file,
              '-o', out_file,
              '-v'
              ]
@@ -321,18 +342,13 @@ Running script templater.py with args:"""
         with redirect_stdout(outstring):
             templater.set_template(args)
             print("Test calling templater logging object")
-            #loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
-            #print(f"Current loggers are: {loggers}")
+            #Note: all instantiated loggers are stored in logging.root.manager.loggerDict
             log = logging.getLogger('uwtools.templater')
             log.debug("Only the templater logger would see this")
         result = outstring.getvalue()
         print(result)
 
-        #test simple decorator
-        decor = log_decorator(templater.details)
-        decor()
-
-#    lines = zip(outcome.split('\n'), result.split('\n'))
-#    for outcome_line, result_line in lines:
-#        # Check that only the correct messages were logged
-#        assert outcome_line in result_line
+    lines = zip(outcome.split('\n'), result.split('\n'))
+    for outcome_line, result_line in lines:
+        # Check that only the correct messages were logged
+        assert outcome_line in result_line

@@ -152,15 +152,20 @@ class Logger:
 
         return handler
 
-def log_decorator(func):
+def log_details(method_name: str = None, user_args = None):
     """
-    Add a logger decorator.
-
+    Add a method's name, arguments and output to its log
     """
-    def inner():
-        # calling the actual function now
-        # inside the wrapper function.
-        func()
-        print("Hello world!")
+    #pylint: disable=logging-fstring-interpolation, consider-using-f-string
+    # Initialize the root logger if no name is present
+    logger_obj = logging.getLogger(method_name) if method_name else logging.getLogger()
+    method_name = "script templater.py"
+    logger_obj.info("Running %s with args:", method_name)
+    logger_obj.info(f"""{('-' * 70)}
+{('-' * 70)}""")
+    for name, val in user_args.__dict__.items():
+        if name not in ["config"]:
+            logger_obj.info("{name:>15s}: {val}".format(name=name, val=val))
+    logger_obj.info(f"""{('-' * 70)}
+{('-' * 70)}""")
 
-    return inner

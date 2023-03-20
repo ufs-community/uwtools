@@ -12,7 +12,7 @@ import argparse
 
 from uwtools.j2template import J2Template
 from uwtools import config
-from uwtools.logger import Logger
+from uwtools.logger import Logger, log_details
 
 def dict_from_config_args(args):
     '''Given a list of command line arguments in the form key=value, return a
@@ -26,12 +26,6 @@ def path_if_file_exists(arg):
         raise argparse.ArgumentTypeError(msg)
     return arg
 
-def details():
-    ''' Placeholder for a wrapper'''
-    # writing custom logs specific to function, outside of log decorator, if needed
-    # provide caller, local variables and expected output to the log
-
-    print("Call Logger decorator to print 'hello world'")
 
 def parse_args(argv=None):
 
@@ -114,14 +108,15 @@ def set_template(argv):
         log.handlers.clear()
         log.propagate = False
 
-    log.info(f"""Running script templater.py with args:
-{('-' * 70)}
-{('-' * 70)}""")
-    for name, val in user_args.__dict__.items():
-        if name not in ["config"]:
-            log.info("{name:>15s}: {val}".format(name=name, val=val))
-    log.info(f"""{('-' * 70)}
-{('-' * 70)}""")
+    log_details(__name__, user_args)
+#    log.info(f"""Running script templater.py with args:
+#{('-' * 70)}
+#{('-' * 70)}""")
+#    for name, val in user_args.__dict__.items():
+#        if name not in ["config"]:
+#            log.info("{name:>15s}: {val}".format(name=name, val=val))
+#    log.info(f"""{('-' * 70)}
+#{('-' * 70)}""")
 
 
     if user_args.config_file:
