@@ -1,8 +1,9 @@
- .. _introduction:
+.. _introduction:
 
 *******************
 Introduction
 *******************
+
 .. _overview:
 --------
 Overview
@@ -39,5 +40,3 @@ configurations in three formats: YAML, INI, or Fortran namelist, and integrates 
 
 The user can supply values to overwrite any settings in the "base" configuration via YAML, INI, Fortran namelist, or environment variables. Input and output types need not be the same--for example, a Fortran namelist can be configured via a YAML config file.
 set_config.py supports the creation of a field_table for the UFS Weather Model given a YAML file.
-
-
