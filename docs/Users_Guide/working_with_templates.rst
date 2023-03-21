@@ -124,7 +124,7 @@ And here is the example YAML config file we want to use to update the values in 
 
 To run templater.py with an input template file and a config file::
 
-    python src/uwtools/atparse_to_jinja2.py -i /<path-totemplate>/jinja2template.nml -c /<path-to-config>/example_config.yaml -o <path-to-outfile>/rendered_template.nml
+    python src/uwtools/templater.py -i /<path-totemplate>/jinja2template.nml -c /<path-to-config>/example_config.yaml -o <path-to-outfile>/rendered_template.nml
 
 The rendered template will be updated with the values contained in the config file::
 
@@ -166,7 +166,7 @@ Input file and command line config items
 
 templater.py can be run with an input file and config items provided through the command line by using the config_items flag::
 
-    python src/uwtools/atparse_to_jinja2.py -i /<path-totemplate>/jinja2template.nml config_items NFGRIDS=0, NMGRID=5, FUNIPNT=' T', IOSRV='None', FPNTPROC='None', FGRDPROC=' None'
+    python src/uwtools/templater.py -i /<path-totemplate>/jinja2template.nml NFGRIDS=0, NMGRID=5, FUNIPNT=' T', IOSRV='None', FPNTPROC='None', FGRDPROC=' None'
 
 Rendered template::
 
