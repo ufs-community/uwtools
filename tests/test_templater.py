@@ -12,7 +12,7 @@ import logging
 import pytest
 
 from uwtools import templater
-from uwtools.logger import Logger, log_details
+from uwtools.logger import Logger
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -343,7 +343,7 @@ Only the templater logger would see this
             templater.set_template(args)
             print("Test calling templater logging object")
             #Note: all instantiated loggers are stored in logging.root.manager.loggerDict
-            log = logging.getLogger('uwtools.templater')
+            log = logging.getLogger('test_templater.uwtools.templater')
             log.debug("Only the templater logger would see this")
         result = outstring.getvalue()
         print(result)

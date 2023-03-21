@@ -9,10 +9,11 @@ via YAML or environment variables.
 import os
 import sys
 import argparse
+from inspect import getmodule, stack
 
 from uwtools.j2template import J2Template
 from uwtools import config
-from uwtools.logger import Logger, log_details
+from uwtools.logger import Logger
 
 def dict_from_config_args(args):
     '''Given a list of command line arguments in the form key=value, return a
@@ -87,9 +88,16 @@ def set_template(argv):
     '''Main section for rendering and writing a template file'''
     user_args = parse_args(argv)
 
+    #initialize logger with parent inheritance
+    py_caller = getmodule(stack()[1][0])
+    if py_caller.__name__ ==  __name__:
+        name = __name__
+    else:
+        name = f"{py_caller.__name__}.{__name__}"
+
     logfile = os.path.join(os.path.dirname(__file__), "templater.log")
     log = Logger(level='info',
-        name=__name__,
+        name=name,
         _format='%(message)s',
         colored_log= False,
         logfile_path=logfile
@@ -98,7 +106,7 @@ def set_template(argv):
     if user_args.verbose:
         log.handlers.clear()
         log = Logger(level='debug',
-            name=__name__,
+            name=name,
             _format='%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s',
             colored_log= True,
             logfile_path=logfile
@@ -108,15 +116,14 @@ def set_template(argv):
         log.handlers.clear()
         log.propagate = False
 
-    log_details(__name__, user_args)
-#    log.info(f"""Running script templater.py with args:
-#{('-' * 70)}
-#{('-' * 70)}""")
-#    for name, val in user_args.__dict__.items():
-#        if name not in ["config"]:
-#            log.info("{name:>15s}: {val}".format(name=name, val=val))
-#    log.info(f"""{('-' * 70)}
-#{('-' * 70)}""")
+    log.info(f"""Running script templater.py with args:
+{('-' * 70)}
+{('-' * 70)}""")
+    for name, val in user_args.__dict__.items():
+        if name not in ["config"]:
+            log.info("{name:>15s}: {val}".format(name=name, val=val))
+    log.info(f"""{('-' * 70)}
+{('-' * 70)}""")
 
 
     if user_args.config_file:

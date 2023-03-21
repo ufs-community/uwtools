@@ -11,6 +11,8 @@ import copy
 import json
 import os
 import re
+import logging
+from inspect import getmodule, stack
 
 import jinja2
 import f90nml
@@ -69,6 +71,15 @@ class Config(collections.UserDict):
         super().__init__()
 
         self.config_path = config_path
+
+        #initialize logger with parent inheritance
+        py_caller = getmodule(stack()[1][0])
+        if py_caller.__name__ ==  __name__:
+            name = __name__
+        else:
+            name = f"{py_caller.__name__}.{__name__}"
+        log = logging.getLogger(name)
+        log.debug("Beginning logging with %s",name)
 
     def __repr__(self):
         ''' This method will return configure contents'''
