@@ -6,9 +6,10 @@ This utility renders a Jinja2 template using user-supplied configuration options
 via YAML or environment variables.
 '''
 
-import os
-import sys
 import argparse
+import os
+import pathlib
+import sys
 
 from uwtools.j2template import J2Template
 from uwtools import config
@@ -82,6 +83,19 @@ def parse_args(argv):
         )
     return parser.parse_args(argv)
 
+def get_file_type(arg):
+    ''' Returns a standardized file type given the suffix of the input
+    arg. '''
+
+    suffix = pathlib.Path(arg).suffix
+    if suffix in [".yaml", ".yml"]:
+        return "YAML"
+    if suffix in [".bash", ".sh", ".ini"]:
+        return "INI"
+    if suffix in [".nml"]:
+        return "F90"
+
+
 def set_template(argv):
     '''Main section for rendering and writing a template file'''
     user_args = parse_args(argv)
@@ -117,13 +131,14 @@ def set_template(argv):
 
 
     if user_args.config_file:
-        cfg = config.YAMLConfig(user_args.config_file)
+        config_type = get_file_type(user_args.config_file)
+        cfg = getattr(config, f"config.{config_type}Config")(user_args.config_file)
     else:
         cfg = os.environ
 
     if user_args.config_items:
         user_settings = dict_from_config_args(user_args.config_items)
-        cfg.update(user_settings)
+        cfg.update_values(user_settings)
 
     # instantiate Jinja2 environment and template
     template = J2Template(cfg, user_args.input_template)
