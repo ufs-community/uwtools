@@ -19,7 +19,6 @@ import f90nml
 import yaml
 
 from uwtools.j2template import J2Template
-from uwtools.logger import Logger
 
 class Config(collections.UserDict):
 
