@@ -1,14 +1,15 @@
-name: uwtools
+name: workflow_tools
 channels:
   - conda-forge
   - defaults
 dependencies:
-  - "boto3>=1.22.13"
+  - python=3.9*
+  - boto3=1.22*
   - black
-  - "f90nml>=1.4.3"
-  - "jinja2>=3.0.0"
-  - "numpy>=1.21.6"
+  - f90nml=1.4*
+  - jinja2=3.0*
+  - numpy=1.21*
   - pylint
   - pytest
-  - "pyyaml>=6.0"
+  - pyyaml=6.0*
   - tox
