@@ -89,10 +89,10 @@ def set_template(argv):
     user_args = parse_args(argv)
 
     #initialize logger with parent inheritance
-    py_caller = getmodule(stack()[1][0])
-    if py_caller.__name__ ==  __name__:
+    if __name__ == '__main__':
         name = __name__
     else:
+        py_caller = getmodule(stack()[1][0])
         name = f"{py_caller.__name__}.{__name__}"
 
     logfile = os.path.join(os.path.dirname(__file__), "templater.log")

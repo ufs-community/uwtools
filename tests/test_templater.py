@@ -8,7 +8,6 @@ import io
 import os
 import tempfile
 
-import logging
 import pytest
 
 from uwtools import templater
@@ -294,61 +293,25 @@ Running script templater.py with args:
     # Check that only the correct messages were logged
     assert result == outcome
 
-def test_log_decorator():
-    """Unit test for checking application of the logger decorator"""
+def test_log_passing():
+    """Unit test for checking application of the logger object passing"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
     logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
+    ref = "Only the templater logger would see this"
 
-    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
-        out_file = f'{tmp_dir}/test_render_from_yaml.nml'
+    args = [
+        '-i', input_file,
+        '--dry_run',
+        '-v'
+        ]
 
-        outcome=\
-    """Finished setting up debug file logging in """ + logfile  + """
-Running script templater.py with args:
-----------------------------------------------------------------------
-----------------------------------------------------------------------
-        outfile: """ + out_file  + """
- input_template: """ + input_file  + """
-    config_file: None
-   config_items: []
-        dry_run: False
-  values_needed: False
-        verbose: True
-          quiet: False
-----------------------------------------------------------------------
-----------------------------------------------------------------------
-Test calling templater logging object
-Only the templater logger would see this
+    print("Test templater with logger decorator")
+    templater.set_template(args)
+    print("Test calling templater logging object")
+    log = Logger(name='test_templater.uwtools.templater').get_logger()
+    log.debug(ref)
 
-&salad
-  base = 'kale'
-  fruit = 'banana'
-  vegetable = 'tomato'
-  how_many = 22
-  dressing = 'balsamic'
-/
-"""
-
-        args = [
-             '-i', input_file,
-             '-o', out_file,
-             '-v'
-             ]
-
-        print("Test templater with logger decorator")
-        # Capture verbose stdout
-        outstring = io.StringIO()
-        with redirect_stdout(outstring):
-            templater.set_template(args)
-            print("Test calling templater logging object")
-            #Note: all instantiated loggers are stored in logging.root.manager.loggerDict
-            log = logging.getLogger('test_templater.uwtools.templater')
-            log.debug("Only the templater logger would see this")
-        result = outstring.getvalue()
-        print(result)
-
-    lines = zip(outcome.split('\n'), result.split('\n'))
-    for outcome_line, result_line in lines:
-        # Check that only the correct messages were logged
-        assert outcome_line in result_line
+    with open(logfile, 'r', encoding="utf-8") as file_2:
+        logfile_read = file_2.read()
+        assert ref in logfile_read

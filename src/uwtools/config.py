@@ -19,6 +19,7 @@ import f90nml
 import yaml
 
 from uwtools.j2template import J2Template
+from uwtools.logger import Logger
 
 class Config(collections.UserDict):
 
@@ -73,13 +74,14 @@ class Config(collections.UserDict):
         self.config_path = config_path
 
         #initialize logger with parent inheritance
-        py_caller = getmodule(stack()[1][0])
-        if py_caller.__name__ ==  __name__:
-            name = __name__
+        if __name__ == '__main__':
+            _name = __name__
         else:
-            name = f"{py_caller.__name__}.{__name__}"
-        log = logging.getLogger(name)
-        log.debug("Beginning logging with %s",name)
+            py_caller = getmodule(stack()[1][0])
+            _name = f"{py_caller.__name__}.{__name__}"
+        self.log = Logger(name=_name).get_logger()
+        message = "existing" if _name in logging.root.manager.loggerDict else "new"
+        self.log.debug("Beginning %s logging with %s" % (message,_name))
 
     def __repr__(self):
         ''' This method will return configure contents'''
