@@ -7,6 +7,7 @@ import argparse
 import io
 import os
 import tempfile
+import logging
 
 import pytest
 
@@ -309,7 +310,7 @@ def test_log_passing():
     print("Test templater with logger decorator")
     templater.set_template(args)
     print("Test calling templater logging object")
-    log = Logger(name='test_templater.uwtools.templater').get_logger()
+    log = logging.getLogger('test_templater.uwtools.templater')
     log.debug(ref)
 
     with open(logfile, 'r', encoding="utf-8") as file_2:

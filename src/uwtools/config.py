@@ -79,7 +79,7 @@ class Config(collections.UserDict):
         else:
             py_caller = getmodule(stack()[1][0])
             _name = f"{py_caller.__name__}.{__name__}"
-        self.log = Logger(name=_name).get_logger()
+        self.log = logging.getLogger(_name)
         #pylint: disable=no-member, consider-using-f-string
         message = "existing" if _name in logging.root.manager.loggerDict else "new"
         self.log.debug("Beginning {message} logging with {name}", message=message, name=_name)
