@@ -14,31 +14,32 @@ pipeline {
                       sh '''
                             module use /glade/work/epicufsrt/contrib/miniconda3/modulefiles
                             module load miniconda3/4.12.0
-                            conda activate regional_workflow
+                            conda activate workflow_tools
                             #Install uwtools and dependencies.
                             pip install -e .
                             #Check for presence of pytest and install if not.
                             if hash pytest  2>/dev/null; then
                                echo "pytest installed, moving on!" 
                             else
-                               echo "pytest not installed"
-                               conda install -y pytest
+                               echo "pytest is not installed"
+                               exit 1
                             fi
                             
-                            pytest tests/ | tee -a ${WORKSPACE}/results.txt
+                            pytest | tee -a ${WORKSPACE}/results.txt
                             status=${PIPESTATUS[0]}
                             
                             
                             if hash pylint  2>/dev/null; then
                                echo "pylint installed, moving on!" 
                             else
-                               echo "pylint not installed"
-                               conda install -y pylint
+                               echo "pylint is not installed"
+                               exit 1
                             fi
-                            
+
+                            pylint tests
                             #Run against UW tools.
-                            cd ${WORKSPACE}/src/uwtools
-                            pylint .
+                            cd ${WORKSPACE}/src
+                            pylint uwtools
                             
                             exit $status
                       '''
