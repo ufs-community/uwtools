@@ -3,8 +3,8 @@
 #Install uwtools
 pip install -e .
 
-# Check for tox and pylint
-for pkg in tox pylint ; do
+# Check for pytest and pylint
+for pkg in pytest pylint ; do
   if hash $pkg  2>/dev/null; then
     echo "$pkg installed, moving on!".
   else
@@ -14,9 +14,9 @@ for pkg in tox pylint ; do
 done
 
 # Run tests
-tox -v -e py | tee -a ${WORKSPACE}/results.txt
+pytest | tee -a ${WORKSPACE}/results.txt
 status=${PIPESTATUS[0]}
-test $status -eq 0 || ( echo "tox failed" && exit 1 )
+test $status -eq 0 || ( echo "pytest failed" && exit 1 )
 
 # Lint
 pylint tests
