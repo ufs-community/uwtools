@@ -72,6 +72,21 @@ def parse_args(argv):
         action='store_true',
         help='If provided, print a list of required configuration settings to stdout',
     )
+
+    parser.add_argument(
+        '--convert_input_file',
+        help='If provided, will convert provided input file to provided file type. Accepts YAML, bash/ini or namelist',
+    )
+
+    parser.add_argument(
+        '--convert_config_file',
+        help='If provided, will convert provided config file to provided file type. Accepts YAML, bash/ini or namelist',
+    )
+
+    parser.add_argument(
+        '--convert_output_file',
+        help='If provided, will convert provided output file to provided file type. Accepts YAML, bash/ini or namelist',
+    )
     return parser.parse_args(argv)
 
 def create_config_obj(argv):
@@ -86,6 +101,23 @@ def create_config_obj(argv):
 
     user_args = parse_args(argv)
     infile_type = get_file_type(user_args.input_base_file)
+
+    if user_args.convert_input_file:
+
+        inputDepth = user_args.input_base_file.dictionary_depth()
+
+        if user_args.convert_input_file == "yaml":
+            infile_type = ".yaml"
+
+        elif user_args.convert_input_file == 'nml' and inputDepth == 2:
+            infile_type = ".nml"
+
+        elif user_args.convert_input_file == 'ini' and inputDepth <= 2:
+            infile_type = ".ini"
+
+        else:
+            log.info("Conversion failure: input file not compatible with provided type")
+            return
 
     if infile_type in [".yaml", ".yml"]:
         config_obj = config.YAMLConfig(user_args.input_base_file)
