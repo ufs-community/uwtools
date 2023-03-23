@@ -175,10 +175,6 @@ def test_set_template_no_config_suffix_fails():
         with pytest.raises(ValueError):
             templater.set_template(args)
 
-
-
-
-
 def test_set_template_abs_path_ini_config():
 
     ''' Test that there are no errors when passing relative path and INI
@@ -194,7 +190,6 @@ def test_set_template_abs_path_ini_config():
          '-q',
          ]
     templater.set_template(args)
-
 
 def test_set_template_command_line_config():
     '''Test that values provided on the command line produce the appropriate
