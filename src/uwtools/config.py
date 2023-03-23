@@ -73,15 +73,15 @@ class Config(collections.UserDict):
         self.config_path = config_path
 
         #initialize logger with parent inheritance
-        if __name__ == '__main__':
+        #pylint: disable=no-member
+        if __name__ in logging.root.manager.loggerDict:
             _name = __name__
         else:
             py_caller = getmodule(stack()[1][0])
             _name = f"{py_caller.__name__}.{__name__}"
+
         self.log = logging.getLogger(_name)
-        #pylint: disable=no-member, consider-using-f-string
-        message = "existing" if _name in logging.root.manager.loggerDict else "new"
-        self.log.debug("Beginning {message} logging with {name}", message=message, name=_name)
+        self.log.debug("Beginning logging with {name}", name=_name)
 
     def __repr__(self):
         ''' This method will return configure contents'''

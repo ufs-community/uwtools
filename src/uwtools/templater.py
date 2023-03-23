@@ -9,6 +9,7 @@ via YAML or environment variables.
 import os
 import sys
 import argparse
+import logging
 from inspect import getmodule, stack
 
 from uwtools.j2template import J2Template
@@ -89,7 +90,8 @@ def set_template(argv):
     user_args = parse_args(argv)
 
     #initialize logger with parent inheritance
-    if __name__ == '__main__':
+    #pylint: disable=no-member
+    if __name__ in logging.root.manager.loggerDict:
         name = __name__
     else:
         py_caller = getmodule(stack()[1][0])
