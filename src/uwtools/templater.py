@@ -91,11 +91,11 @@ def set_template(argv):
 
     #initialize logger with parent inheritance
     #pylint: disable=no-member
-    if __name__ in logging.root.manager.loggerDict:
-        name = __name__
-    else:
-        py_caller = getmodule(stack()[1][0])
+    py_caller = getmodule(stack()[1][0])
+    if py_caller.__name__ in logging.root.manager.loggerDict:
         name = f"{py_caller.__name__}.{__name__}"
+    else:
+        name = __name__
 
     logfile = os.path.join(os.path.dirname(__file__), "templater.log")
     log = Logger(level='info',

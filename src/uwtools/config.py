@@ -74,11 +74,11 @@ class Config(collections.UserDict):
 
         #initialize logger with parent inheritance
         #pylint: disable=no-member
-        if __name__ in logging.root.manager.loggerDict:
-            _name = __name__
-        else:
-            py_caller = getmodule(stack()[1][0])
+        py_caller = getmodule(stack()[1][0])
+        if py_caller.__name__ in logging.root.manager.loggerDict:
             _name = f"{py_caller.__name__}.{__name__}"
+        else:
+            _name = __name__
 
         self.log = logging.getLogger(_name)
         self.log.debug("Beginning logging with {name}", name=_name)
