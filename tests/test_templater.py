@@ -6,6 +6,7 @@ from contextlib import redirect_stdout
 import argparse
 import io
 import os
+import shutil
 import tempfile
 
 import pytest
@@ -153,6 +154,47 @@ def test_set_template_yaml_config():
 
         templater.set_template(args)
         assert compare_files(expected_file, out_file)
+
+def test_set_template_no_config_suffix_fails():
+
+    ''' Test that there are no errors when passing relative path and INI
+    config.'''
+
+    input_file = "tests/fixtures/nml.IN"
+    config_file = "tests/fixtures/fruit_config.sh"
+
+    with tempfile.NamedTemporaryFile(dir='.', mode='w') as tmp_file:
+        shutil.copy2(config_file, tmp_file.name)
+
+        args = [
+            '-i', input_file,
+            '-c', tmp_file.name,
+            '-d',
+            '-q',
+            ]
+        with pytest.raises(ValueError):
+            templater.set_template(args)
+
+
+
+
+
+def test_set_template_abs_path_ini_config():
+
+    ''' Test that there are no errors when passing relative path and INI
+    config.'''
+
+    input_file = "tests/fixtures/nml.IN"
+    config_file = "tests/fixtures/fruit_config.sh"
+
+    args = [
+         '-i', input_file,
+         '-c', config_file,
+         '-d',
+         '-q',
+         ]
+    templater.set_template(args)
+
 
 def test_set_template_command_line_config():
     '''Test that values provided on the command line produce the appropriate

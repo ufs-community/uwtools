@@ -7,6 +7,7 @@ via YAML or environment variables.
 '''
 
 import argparse
+import logging
 import os
 import pathlib
 import sys
@@ -25,7 +26,8 @@ def path_if_file_exists(arg):
     if not os.path.exists(arg):
         msg = f'{arg} does not exist!'
         raise argparse.ArgumentTypeError(msg)
-    return arg
+
+    return os.path.abspath(arg)
 
 def parse_args(argv):
 
@@ -94,6 +96,9 @@ def get_file_type(arg):
         return "INI"
     if suffix in [".nml"]:
         return "F90"
+    msg = f"Bad file suffix -- {suffix}. Cannot determine file type!"
+    logging.critical(msg)
+    raise ValueError(msg)
 
 
 def set_template(argv):
@@ -132,13 +137,13 @@ def set_template(argv):
 
     if user_args.config_file:
         config_type = get_file_type(user_args.config_file)
-        cfg = getattr(config, f"config.{config_type}Config")(user_args.config_file)
+        cfg = getattr(config, f"{config_type}Config")(user_args.config_file)
     else:
         cfg = os.environ
 
     if user_args.config_items:
         user_settings = dict_from_config_args(user_args.config_items)
-        cfg.update_values(user_settings)
+        cfg.update(user_settings)
 
     # instantiate Jinja2 environment and template
     template = J2Template(cfg, user_args.input_template)
