@@ -309,7 +309,7 @@ def test_log_passing():
     print("Test templater with logger decorator")
     templater.set_template(args)
     print("Test calling templater logging object")
-    log = logging.getLogger('test_templater.uwtools.templater')
+    log = logging.getLogger('uwtools.templater')
     log.debug(ref)
 
     with open(logfile, 'r', encoding="utf-8") as file_2:
