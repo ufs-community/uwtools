@@ -405,3 +405,22 @@ Keys that are set to empty:
     salad.appetizer
 """
     assert result == outcome
+
+def test_cfg_to_yaml():
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.cfg"))
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        out_file = f'{tmp_dir}/test.yaml'
+        args = ['-i', input_file, '--dry_run', '--input_file_type', '.yaml']
+
+        outstring = io.StringIO()
+        with redirect_stdout(outstring):
+            set_config.create_config_obj(args)
+        result = outstring.getvalue()
+
+        expected = config.YAMLConfig(input_file)
+        expected_file = f'{tmp_dir}/test.yaml'
+        expected.dump_file(expected_file)
+
+        assert result.rstrip('\n') == str(expected)

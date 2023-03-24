@@ -74,17 +74,17 @@ def parse_args(argv):
     )
 
     parser.add_argument(
-        '--convert_input_file',
+        '--input_file_type',
         help='If provided, will convert provided input file to provided file type. Accepts YAML, bash/ini or namelist',
     )
 
     parser.add_argument(
-        '--convert_config_file',
+        '--config_file_type',
         help='If provided, will convert provided config file to provided file type. Accepts YAML, bash/ini or namelist',
     )
 
     parser.add_argument(
-        '--convert_output_file',
+        '--output_file_type',
         help='If provided, will convert provided output file to provided file type. Accepts YAML, bash/ini or namelist',
     )
     return parser.parse_args(argv)
@@ -100,24 +100,8 @@ def create_config_obj(argv):
         )
 
     user_args = parse_args(argv)
-    infile_type = get_file_type(user_args.input_base_file)
-
-    if user_args.convert_input_file:
-
-        inputDepth = user_args.input_base_file.dictionary_depth()
-
-        if user_args.convert_input_file == "yaml":
-            infile_type = ".yaml"
-
-        elif user_args.convert_input_file == 'nml' and inputDepth == 2:
-            infile_type = ".nml"
-
-        elif user_args.convert_input_file == 'ini' and inputDepth <= 2:
-            infile_type = ".ini"
-
-        else:
-            log.info("Conversion failure: input file not compatible with provided type")
-            return
+    
+    infile_type = user_args.input_file_type or get_file_type(user_args.input_base_file)
 
     if infile_type in [".yaml", ".yml"]:
         config_obj = config.YAMLConfig(user_args.input_base_file)
@@ -136,7 +120,7 @@ def create_config_obj(argv):
 
 
     if user_args.config_file:
-        config_file_type = get_file_type(user_args.config_file)
+        config_file_type = user_args.config_file_type or get_file_type(user_args.config_file)
 
         if config_file_type in [".yaml", ".yml"]:
             user_config_obj = config.YAMLConfig(user_args.config_file)
@@ -148,6 +132,14 @@ def create_config_obj(argv):
 
         elif config_file_type == ".nml":
             user_config_obj = config.F90Config(user_args.config_file)
+        
+        if config_file_type != infile_type:
+            config_depth = user_config_obj.dictionary_depth(user_config_obj.data)
+            input_depth = config_obj.dictionary_depth(config_obj.data)
+
+            if input_depth < config_depth:
+                log.info("Set config failure: config object not compatible with input object")
+                return
 
         config_obj.update_values(user_config_obj)
 
@@ -180,18 +172,31 @@ def create_config_obj(argv):
         return
 
     if user_args.outfile:
-        outfile_type = get_file_type(user_args.outfile)
+        outfile_type = user_args.output_file_type or get_file_type(user_args.outfile)
         if outfile_type != infile_type:
             if outfile_type in [".yaml", ".yml"]:
                 out_object = config.YAMLConfig()
             elif outfile_type in [".bash", ".sh", ".ini", ".IN"]:
+                if config_obj.dictionary_depth(config_obj.data) > 2:
+                    log.info("Set config failure: incompatible file types")
                 out_object = config.INIConfig()
             elif outfile_type == ".nml":
+                if config_obj.dictionary_depth(config_obj.data) != 2:
+                    log.info("Set config failure: incompatible file types")
+                    return 
                 out_object = config.F90Config()
             else:
                 out_object = config.FieldTableConfig()
 
             out_object.update(config_obj)
+
+            output_depth = out_object.dictionary_depth(out_object.data)
+            input_depth = config_obj.dictionary_depth(config_obj.data)
+
+            if input_depth > output_depth:
+                log.info("Set config failure: output object not compatible with input object")
+                return
+            
         else: # same type of file as input, no need to convert it
             out_object = config_obj
         out_object.dump_file(user_args.outfile)
