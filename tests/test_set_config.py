@@ -407,6 +407,7 @@ Keys that are set to empty:
     assert result == outcome
 
 def test_cfg_to_yaml():
+    ''' testing that .cfg file can be used to create a yaml object.'''
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.cfg"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
