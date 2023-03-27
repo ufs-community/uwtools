@@ -257,6 +257,15 @@ class Config(collections.UserDict):
                     # filled or not, and make a guess on its intended type.
                     ref_dict[key] = self.str_to_type("".join(data))
 
+    def dereference_all(self):
+        ''' Run dereference until all values have been filled in '''
+
+        prev = copy.deepcopy(self.data)
+        self.dereference()
+        while prev != self.data:
+            self.dereference()
+            prev = copy.deepcopy(self.data)
+
     @staticmethod
     def str_to_type(str_):
         ''' Check if the string contains a float, int, boolean, or just

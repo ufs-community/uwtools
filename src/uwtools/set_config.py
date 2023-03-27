@@ -120,12 +120,7 @@ def create_config_obj(argv):
 
         config_obj.update_values(user_config_obj)
 
-
-    prev = copy.deepcopy(config_obj)
-    config_obj.dereference()
-    while prev != config_obj:
-        config_obj.dereference()
-        prev = copy.deepcopy(config_obj)
+    config_obj.dereference_all()
 
     if user_args.values_needed:
         set_var = []

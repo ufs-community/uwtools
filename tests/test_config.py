@@ -274,6 +274,7 @@ def test_dereference():
 
     test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/gfs.yaml"))
     cfg = config.YAMLConfig(test_yaml)
+    cfg.dereference_all()
 
     # Check that existing dicts remain
     assert isinstance(cfg['fcst'], dict)
