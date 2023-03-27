@@ -4,7 +4,6 @@
 '''
 This utility creates a command line interface for handling config files.
 '''
-import copy
 import os
 import sys
 import argparse
