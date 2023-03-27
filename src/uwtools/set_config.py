@@ -147,6 +147,9 @@ def create_config_obj(argv):
                 return
 
         if user_args.compare:
+            log.info(f"- {user_args.input_base_file}")
+            log.info(f"+ {user_args.config_file}")
+            log.info("-"*80)
             config_obj.compare_config(user_config_obj)
             return
 
