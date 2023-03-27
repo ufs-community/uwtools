@@ -4,6 +4,7 @@
 '''
 This utility creates a command line interface for handling config files.
 '''
+import copy
 import os
 import sys
 import argparse
@@ -118,6 +119,13 @@ def create_config_obj(argv):
             user_config_obj = config.F90Config(user_args.config_file)
 
         config_obj.update_values(user_config_obj)
+
+
+    prev = copy.deepcopy(config_obj)
+    config_obj.dereference()
+    while prev != config_obj:
+        config_obj.dereference()
+        prev = copy.deepcopy(config_obj)
 
     if user_args.values_needed:
         set_var = []

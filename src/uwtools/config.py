@@ -308,6 +308,9 @@ class Config(collections.UserDict):
         unfilled jinja templates (jinja2_var), and which keys are set to empty (empty_var). 
         '''
 
+        if not isinstance(config_dict, dict):
+            return
+
         for key, val in config_dict.items():
             if isinstance(val, dict):
                 set_var.append(f'    {parent}{key}')
@@ -362,11 +365,10 @@ class YAMLConfig(Config):
         if config_path is not None:
             self.update(self._load())
 
-        prev = copy.deepcopy(self.data)
-        self.dereference()
-        while prev != self.data:
-            self.dereference()
-            prev = copy.deepcopy(self.data)
+    def __repr__(self):
+        ''' This method will return configure contents'''
+        return yaml.dump(self.data)
+
 
     def _load(self, config_path=None):
         ''' Load the user-provided YAML config file path into a dict
