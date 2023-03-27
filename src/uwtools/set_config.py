@@ -62,6 +62,11 @@ def parse_args(argv):
     )
 
     parser.add_argument(
+        '--compare',
+        action='store_true',
+        help='If provided, show diff between -i and -c files.', 
+    )
+    parser.add_argument(
         '--show_format',
         action='store_true',
         help='If provided, print the required formatting to generate the requested output file',
@@ -116,6 +121,10 @@ def create_config_obj(argv):
 
         elif config_file_type == ".nml":
             user_config_obj = config.F90Config(user_args.config_file)
+
+        if user_args.compare:
+            config_obj.compare_config(user_config_obj)
+            return
 
         config_obj.update_values(user_config_obj)
 
