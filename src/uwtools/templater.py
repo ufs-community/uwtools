@@ -92,7 +92,7 @@ def get_file_type(arg):
     suffix = pathlib.Path(arg).suffix
     if suffix in [".yaml", ".yml"]:
         return "YAML"
-    if suffix in [".bash", ".sh", ".ini"]:
+    if suffix in [".bash", ".sh", ".ini", ".cfg"]:
         return "INI"
     if suffix in [".nml"]:
         return "F90"
