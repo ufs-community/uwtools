@@ -1,15 +1,15 @@
+''' Tests for the atparse_to_jinja2 tool. '''
 
 from contextlib import redirect_stdout
 import io
 import os
 import pathlib
-import tempfile
 
 from uwtools import atparse_to_jinja2
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
-def test_all_templates_replaced():
+def test_all_templates_replaced(): #pylint: disable=unused-variable
 
     ''' Test that all atparse @[] items are replaced with Jinja2
     templates {{ }} '''
@@ -24,4 +24,3 @@ def test_all_templates_replaced():
 
     result = outstring.getvalue()
     assert '@[' not in result
-

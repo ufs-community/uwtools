@@ -123,8 +123,6 @@ def set_template(argv):
         log.handlers.clear()
         log.propagate = False
 
-
-
     log.info(f"""Running script templater.py with args:
 {('-' * 70)}
 {('-' * 70)}""")
@@ -148,13 +146,27 @@ def set_template(argv):
     # instantiate Jinja2 environment and template
     template = J2Template(cfg, user_args.input_template)
 
+    undeclared_variables = template.undeclared_variables
+
     if user_args.values_needed:
         # Gather the undefined template variables
-        undeclared_variables = template.undeclared_variables
         log.info('Values needed for this template are:')
         for var in sorted(undeclared_variables):
             log.info(var)
         return
+
+    missing = []
+    for var in undeclared_variables:
+        if var not in cfg.keys():
+            missing.append(var)
+
+    if missing:
+        log.critical("ERROR: Template requires variables that are not provided")
+        for key in missing:
+            log.critical(f"  {key}")
+        msg = "Missing values needed by template"
+        log.critical(msg)
+        raise ValueError(msg)
 
     if user_args.dry_run:
         if user_args.outfile:
