@@ -321,13 +321,13 @@ class Config(collections.UserDict):
                 for item in val:
                     self.iterate_values(item, set_var, jinja2_var, empty_var, parent)
             elif "{{" in str(val) or "{%" in str(val):
-                jinja2_var.append(f'    {parent}{key}')
+                jinja2_var.append(f'    {parent}{key}: {val}')
             elif val == "" or val is None:
                 empty_var.append(f'    {parent}{key}')
 
             else:
                 set_var.append(f'    {parent}{key}')
-        return config_dict, set_var, jinja2_var, empty_var, parent
+        return
 
     def dictionary_depth(self, config_dict):
         '''
