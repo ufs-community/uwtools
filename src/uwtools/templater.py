@@ -100,10 +100,26 @@ def get_file_type(arg):
     logging.critical(msg)
     raise ValueError(msg)
 
+def setup_config_obj(user_args):
 
-def set_template(argv):
-    '''Main section for rendering and writing a template file'''
-    user_args = parse_args(argv)
+    ''' Return a dictionary config object from a user-supplied config,
+    the os environment, and the command line arguments. '''
+
+    if user_args.config_file:
+        config_type = get_file_type(user_args.config_file)
+        cfg = getattr(config, f"{config_type}Config")(user_args.config_file)
+    else:
+        cfg = os.environ
+
+    if user_args.config_items:
+        user_settings = dict_from_config_args(user_args.config_items)
+        cfg.update(user_settings)
+
+    return cfg
+
+def setup_logging(user_args):
+
+    ''' Create the Logger object '''
 
     logfile = os.path.join(os.path.dirname(__file__), "templater.log")
     log = Logger(level='info',
@@ -123,6 +139,15 @@ def set_template(argv):
         log.handlers.clear()
         log.propagate = False
 
+    return log
+
+
+def set_template(argv):
+    '''Main section for rendering and writing a template file'''
+    user_args = parse_args(argv)
+
+    log = setup_logging(user_args)
+
     log.info(f"""Running script templater.py with args:
 {('-' * 70)}
 {('-' * 70)}""")
@@ -132,16 +157,7 @@ def set_template(argv):
     log.info(f"""{('-' * 70)}
 {('-' * 70)}""")
 
-
-    if user_args.config_file:
-        config_type = get_file_type(user_args.config_file)
-        cfg = getattr(config, f"{config_type}Config")(user_args.config_file)
-    else:
-        cfg = os.environ
-
-    if user_args.config_items:
-        user_settings = dict_from_config_args(user_args.config_items)
-        cfg.update(user_settings)
+    cfg = setup_config_obj(user_args)
 
     # instantiate Jinja2 environment and template
     template = J2Template(cfg, user_args.input_template)
@@ -155,6 +171,7 @@ def set_template(argv):
             log.info(var)
         return
 
+    # Check for missing values
     missing = []
     for var in undeclared_variables:
         if var not in cfg.keys():
