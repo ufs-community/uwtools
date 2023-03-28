@@ -297,7 +297,6 @@ def test_log_passing():
     """Unit test for checking application of the logger object passing"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
-    logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
     ref = "Only the templater logger would see this"
 
     args = [
@@ -306,12 +305,13 @@ def test_log_passing():
         '-v'
         ]
 
-    print("Test templater with logger decorator")
-    templater.set_template(args)
-    print("Test calling templater logging object")
-    log = logging.getLogger('uwtools.templater')
-    log.debug(ref)
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        print("Test templater with logger decorator")
+        templater.set_template(args)
+        print("Test calling templater logging object")
+        log = logging.getLogger('uwtools.templater')
+        log.debug(ref)
+    result = outstring.getvalue()
 
-    with open(logfile, 'r', encoding="utf-8") as file_2:
-        logfile_read = file_2.read()
-        assert ref in logfile_read
+    assert ref in result
