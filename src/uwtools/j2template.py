@@ -94,7 +94,8 @@ class J2Template():
 
         '''
         with open(output_path,'w+',encoding='utf-8') as file_:
-            file_.write(self.render_template())
+            file_.write(self.render_template() + "\n")
+
 
     def _load_file(self, template_path):
         '''

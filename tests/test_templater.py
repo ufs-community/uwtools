@@ -19,9 +19,9 @@ def compare_files(expected, actual):
     may not be able to handle end-of-file character differences with it.
     Prints the contents of two compared files to std out if they do not match.'''
     with open(expected, 'r', encoding='utf-8') as expected_file:
-        expected_content = expected_file.read().rstrip('\n')
+        expected_content = expected_file.read()
     with open(actual, 'r', encoding='utf-8') as actual_file:
-        actual_content = actual_file.read().rstrip('\n')
+        actual_content = actual_file.read()
 
     if expected_content != actual_content:
         print('The expected file looks like:')
