@@ -298,9 +298,7 @@ def test_log_passing():
     """Unit test for checking application of the logger object passing"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
-    # Create log file with PID in name to prevent simultaneous R/W
-    logfile = os.path.join(os.path.dirname(templater.__file__), f'{str(os.getpid())}_templater.log')
-    Path(logfile).touch() # Create file if does not exist
+    logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
     ref = "Only the templater logger would see this"
 
     args = [

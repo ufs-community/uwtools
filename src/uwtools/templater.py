@@ -6,10 +6,11 @@ This utility renders a Jinja2 template using user-supplied configuration options
 via YAML or environment variables.
 '''
 
-import os
-import sys
 import argparse
 import logging
+import os
+import pathlib
+import sys
 from inspect import getmodule, stack
 
 from uwtools.j2template import J2Template
@@ -26,10 +27,11 @@ def path_if_file_exists(arg):
     if not os.path.exists(arg):
         msg = f'{arg} does not exist!'
         raise argparse.ArgumentTypeError(msg)
-    return arg
+
+    return os.path.abspath(arg)
 
 
-def parse_args(argv=None):
+def parse_args(argv):
 
     '''
     Function maintains the arguments accepted by this script. Please see
@@ -85,15 +87,48 @@ def parse_args(argv=None):
         )
     return parser.parse_args(argv)
 
-def set_template(argv):
-    '''Main section for rendering and writing a template file'''
-    user_args = parse_args(argv)
+def get_file_type(arg):
+    ''' Returns a standardized file type given the suffix of the input
+    arg. '''
+
+    suffix = pathlib.Path(arg).suffix
+    if suffix in [".yaml", ".yml"]:
+        return "YAML"
+    if suffix in [".bash", ".sh", ".ini", ".cfg"]:
+        return "INI"
+    if suffix in [".nml"]:
+        return "F90"
+    msg = f"Bad file suffix -- {suffix}. Cannot determine file type!"
+    logging.critical(msg)
+    raise ValueError(msg)
+
+def setup_config_obj(user_args):
+
+    ''' Return a dictionary config object from a user-supplied config,
+    the os environment, and the command line arguments. '''
+
+    if user_args.config_file:
+        config_type = get_file_type(user_args.config_file)
+        cfg = getattr(config, f"{config_type}Config")(user_args.config_file)
+    else:
+        cfg = os.environ
+
+    if user_args.config_items:
+        user_settings = dict_from_config_args(user_args.config_items)
+        cfg.update(user_settings)
+
+    return cfg
+
+
+def setup_logging(user_args):
+
+    ''' Create the Logger object '''
 
     #initialize logger with parent inheritance
     #pylint: disable=no-member
     py_caller = getmodule(stack()[1][0])
     if py_caller.__name__ in logging.root.manager.loggerDict:
-        name = f"{py_caller.__name__}.{__name__}"
+        name = py_caller.__name__
     else:
         name = __name__
 
@@ -104,7 +139,6 @@ def set_template(argv):
         colored_log= False,
         logfile_path=logfile
         )
-
     if user_args.verbose:
         log.handlers.clear()
         log = Logger(level='debug',
@@ -118,6 +152,14 @@ def set_template(argv):
         log.handlers.clear()
         log.propagate = False
 
+    return log
+
+def set_template(argv):
+    '''Main section for rendering and writing a template file'''
+    user_args = parse_args(argv)
+
+    log = setup_logging(user_args)
+
     log.info(f"""Running script templater.py with args:
 {('-' * 70)}
 {('-' * 70)}""")
@@ -127,26 +169,33 @@ def set_template(argv):
     log.info(f"""{('-' * 70)}
 {('-' * 70)}""")
 
-
-    if user_args.config_file:
-        cfg = config.YAMLConfig(user_args.config_file)
-    else:
-        cfg = os.environ
-
-    if user_args.config_items:
-        user_settings = dict_from_config_args(user_args.config_items)
-        cfg.update(user_settings)
+    cfg = setup_config_obj(user_args)
 
     # instantiate Jinja2 environment and template
     template = J2Template(cfg, user_args.input_template)
 
+    undeclared_variables = template.undeclared_variables
+
     if user_args.values_needed:
         # Gather the undefined template variables
-        undeclared_variables = template.undeclared_variables
         log.info('Values needed for this template are:')
         for var in sorted(undeclared_variables):
             log.info(var)
         return
+
+    # Check for missing values
+    missing = []
+    for var in undeclared_variables:
+        if var not in cfg.keys():
+            missing.append(var)
+
+    if missing:
+        log.critical("ERROR: Template requires variables that are not provided")
+        for key in missing:
+            log.critical(f"  {key}")
+        msg = "Missing values needed by template"
+        log.critical(msg)
+        raise ValueError(msg)
 
     if user_args.dry_run:
         if user_args.outfile:
