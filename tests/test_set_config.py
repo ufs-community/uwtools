@@ -400,7 +400,7 @@ Keys that are set to empty:
 """
     assert result == outcome
 
-def test_cfg_to_yaml_conversion():
+def test_cfg_to_yaml_conversion(): #pylint: disable=unused-variable
     ''' Test that .a cfg file can be used to create a yaml object.'''
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2_yaml.cfg"))
 
@@ -419,7 +419,7 @@ def test_cfg_to_yaml_conversion():
 
         assert result.rstrip('\n') == str(expected)
 
-def test_output_file_conversion():
+def test_output_file_conversion(): #pylint: disable=unused-variable
     ''' Test that --output_input_type converts config object to desired object type'''
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
 
@@ -436,7 +436,7 @@ def test_output_file_conversion():
 
         assert compare_files(expected_file, out_file)
 
-def test_config_file_conversion():
+def test_config_file_conversion(): #pylint: disable=unused-variable
     ''' Test that --config_input_type converts config object to desired object type'''
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
     config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.ini"))
@@ -456,7 +456,7 @@ def test_config_file_conversion():
 
         assert compare_files(expected_file, out_file)
 
-def test_erroneous_conversion_flags():
+def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
     ''' Test that error is thrown when conversion file types are not compatible'''
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
