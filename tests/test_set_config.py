@@ -407,7 +407,7 @@ Keys that are set to empty:
     assert result == outcome
 
 def test_cfg_to_yaml_conversion():
-    ''' testing that .a cfg file can be used to create a yaml object.'''
+    ''' Test that .a cfg file can be used to create a yaml object.'''
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.cfg"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
@@ -426,17 +426,96 @@ def test_cfg_to_yaml_conversion():
         assert result.rstrip('\n') == str(expected)
 
 def test_output_file_conversion():
+    ''' Test that --output_input_type converts config object to desired object type'''
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
-        out_file = f'{tmp_dir}/test.yaml'
+        out_file = f'{tmp_dir}/test_ouput.nml'
         args = ['-i', input_file, '-o', out_file, '--output_file_type', '.ini']
 
-        pass
+        set_config.create_config_obj(args)
+
+        expected = config.INIConfig(input_file)
+        expected_file = f'{tmp_dir}/expected_ini.ini'
+        expected.dump_file(expected_file)
+
+        assert compare_files(expected_file, out_file)
 
 def test_config_file_conversion():
-    pass
+    ''' Test that --config_input_type converts config object to desired object type'''
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
 
-def test_multiple_conversion_flags():
-    pass
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        out_file = f'{tmp_dir}/test_config_conversion.nml'
+        config_file = f'{tmp_dir}/test_config.ini'
+        args = ['-i', input_file, '-c', config_file, '-o', out_file, '--config_file_type', '.nml']
+
+        set_config.create_config_obj(args)
+
+        expected = config.INIConfig(input_file)
+        config_file_obj = config.F90Config(config_file)
+        expected.update_values(config_file_obj)
+        expected_file = f'{tmp_dir}/expected_ini.ini'
+        expected.dump_file(expected_file)
+
+        assert compare_files(expected_file, config_file)
+
+def test_yaml_to_ini_config_conversion():
+    ''' Test that error is thrown and logged when a yaml file with a dictionary depth of 3
+    is flagged to be converted to an ini file when the --config_file_type flag is
+    provided'''
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
+        config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
+        args = ['-i', input_file, '-c', config_file, '-config_file_type', ".nml"]
+
+        outstring = io.StringIO()
+        with redirect_stdout(outstring):
+            set_config.create_config_obj(args)
+        result = outstring.getvalue()
+        outcome = "Set config failure: config object not compatible with input object\n"
+
+        '''SystemExit: 2'''
+
+        assert result == outcome
+
+def test_yaml_to_nml_ouput_conversion():
+    ''' Test that error is thrown and logged when a yaml file with a dictionary depth of 3
+    is flagged to be converted to a nml file when the --output_file_type flag is provided'''
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
+        out_file = f'{tmp_dir}/test_outfile_conversion.yaml'
+        args = ['-i', input_file, '-o', out_file, '-output_file_type', ".nml"]
+
+        outstring = io.StringIO()
+        with redirect_stdout(outstring):
+            set_config.create_config_obj(args)
+        result = outstring.getvalue()
+        outcome = "Set config failure: config object not compatible with input object\n"
+
+        '''SystemExit: 2'''
+
+        assert result == outcome
+
+def test_yaml_to_bash_input_conversion():
+    ''' Test that error is thrown and logged when a yaml file with a dictionary depth of 3
+    is flagged to be converted to a nml file when the --input_file_type flag is provided'''
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
+        args = ['-i', input_file, '--input_file_type', ".sh"]
+
+        outstring = io.StringIO()
+        with redirect_stdout(outstring):
+            set_config.create_config_obj(args)
+        result = outstring.getvalue()
+        outcome = "Set config failure: bad file type\n"
+
+        '''since we don't check the depth before the object is created, 
+        the input flag does not catch the issue'''
+
+        assert result == outcome
