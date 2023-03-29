@@ -465,6 +465,7 @@ class INIConfig(Config):
         # at the dict representation of the parse config.
         # pylint: disable=protected-access
         cfg = configparser.ConfigParser(dict_type=collections.OrderedDict)
+        cfg.optionxform = str
         try:
             cfg.read(config_path)
         except configparser.MissingSectionHeaderError:

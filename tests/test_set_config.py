@@ -1,5 +1,3 @@
-#pylint: disable=unused-variable
-
 '''
 Tests for set_config tool
 '''
@@ -36,7 +34,7 @@ def compare_files(expected, actual):
         return False
     return True
 
-def test_path_if_file_exists():
+def test_path_if_file_exists(): #pylint: disable=unused-variable
     '''Make sure the function works as expected.  It is used as a type in 
     argparse, so raises an argparse exception when the user provides a 
     non-existant path.'''
@@ -48,7 +46,7 @@ def test_path_if_file_exists():
         not_a_filepath = './no_way_this_file_exists.nope'
         set_config.path_if_file_exists(not_a_filepath)
 
-def test_set_config_yaml_simple():
+def test_set_config_yaml_simple(): #pylint: disable=unused-variable
     ''' Test that providing a YAML base file with necessary settings 
     will create a YAML config file'''
 
@@ -67,7 +65,7 @@ def test_set_config_yaml_simple():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_ini_simple():
+def test_set_config_ini_simple(): #pylint: disable=unused-variable
     ''' Test that providing a basic INI file with necessary settings 
     will create an INI config file'''
 
@@ -85,7 +83,7 @@ def test_set_config_ini_simple():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_f90nml_simple():
+def test_set_config_f90nml_simple(): #pylint: disable=unused-variable
     '''Test that providing basic f90nml file with necessary settings
     will create f90nml config file'''
 
@@ -104,7 +102,7 @@ def test_set_config_f90nml_simple():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_bash_simple():
+def test_set_config_bash_simple(): #pylint: disable=unused-variable
     '''Test that providing bash file with necessary settings will 
     create an INI config file'''
 
@@ -124,7 +122,7 @@ def test_set_config_bash_simple():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_yaml_config_file():
+def test_set_config_yaml_config_file(): #pylint: disable=unused-variable
     '''Test that providing a yaml base input file and a config file will
     create and update yaml config file'''
 
@@ -146,7 +144,7 @@ def test_set_config_yaml_config_file():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_f90nml_config_file():
+def test_set_config_f90nml_config_file(): #pylint: disable=unused-variable
     '''Test that providing a F90nml base input file and a config file will
     create and update F90nml config file'''
 
@@ -168,7 +166,7 @@ def test_set_config_f90nml_config_file():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_ini_config_file():
+def test_set_config_ini_config_file(): #pylint: disable=unused-variable
     '''Test that aproviding INI base input file and a config file will 
     create and update INI config file'''
 
@@ -190,7 +188,7 @@ def test_set_config_ini_config_file():
 
         assert compare_files(expected_file, out_file)
 
-def test_set_config_ini_bash_config_file():
+def test_set_config_ini_bash_config_file(): #pylint: disable=unused-variable
     '''Test that aproviding INI base input file and a config file will 
     create and update INI config file'''
 
@@ -212,24 +210,22 @@ def test_set_config_ini_bash_config_file():
 
         assert compare_files(expected_file, out_file)
 
-def test_incompatible_file_type():
+def test_incompatible_file_type(): #pylint: disable=unused-variable
     '''Test that providing an incompatible file type for input base file will 
     return print statement'''
 
-    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/model_configure.sample"))
+    args = ['-i', input_file]
 
-        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/model_configure.sample"))
-        args = ['-i', input_file]
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        set_config.create_config_obj(args)
+    result = outstring.getvalue()
+    outcome = "Set config failure: bad file type\n"
 
-        outstring = io.StringIO()
-        with redirect_stdout(outstring):
-            set_config.create_config_obj(args)
-        result = outstring.getvalue()
-        outcome = "Set config failure: bad file type\n"
+    assert result == outcome
 
-        assert result == outcome
-
-def test_set_config_field_table():
+def test_set_config_field_table(): #pylint: disable=unused-variable
     '''Test reading a YAML config object and generating a field file table.
     '''
     input_file = os.path.join(uwtools_file_base,pathlib.Path("fixtures","FV3_GFS_v16.yaml"))
@@ -248,27 +244,25 @@ def test_set_config_field_table():
             for line1, line2 in lines:
                 assert line1 in line2
 
-def test_set_config_dry_run():
+def test_set_config_dry_run(): #pylint: disable=unused-variable
     ''' Test that providing a YAML base file with a dry run flag 
     will print an YAML config file'''
 
-    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.yaml"))
 
-        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.yaml"))
+    args = ['-i', input_file, '-d']
 
-        args = ['-i', input_file, '-d']
+    expected = config.YAMLConfig(input_file)
+    expected_content = str(expected)
 
-        expected = config.YAMLConfig(input_file)
-        expected_content = str(expected)
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        set_config.create_config_obj(args)
+    result = outstring.getvalue()
 
-        outstring = io.StringIO()
-        with redirect_stdout(outstring):
-            set_config.create_config_obj(args)
-        result = outstring.getvalue()
+    assert result.rstrip('\n') == expected_content
 
-        assert result.rstrip('\n') == expected_content
-
-def test_show_format():
+def test_show_format(): #pylint: disable=unused-variable
     '''Test providing required configuration format for a given input and target.
     '''
     input_file = os.path.join(uwtools_file_base,pathlib.Path("fixtures","FV3_GFS_v16.yaml"))
@@ -307,7 +301,7 @@ None
 
         assert result == outcome
 
-def test_values_needed_yaml():
+def test_values_needed_yaml(): #pylint: disable=unused-variable
     '''Test that the values_needed flag logs keys completed, keys containing  
     unfilled jinja2 templates, and keys set to empty'''
 
@@ -340,7 +334,7 @@ Keys that are set to empty:
 """
     assert result == outcome
 
-def test_values_needed_ini():
+def test_values_needed_ini(): #pylint: disable=unused-variable
     '''Test that the values_needed flag logs keys completed, keys containing  
     unfilled jinja2 templates, and keys set to empty'''
 
@@ -375,7 +369,7 @@ Keys that are set to empty:
 """
     assert result == outcome
 
-def test_values_needed_f90nml():
+def test_values_needed_f90nml(): #pylint: disable=unused-variable
     '''Test that the values_needed flag logs keys completed, keys containing  
     unfilled jinja2 templates, and keys set to empty'''
 
