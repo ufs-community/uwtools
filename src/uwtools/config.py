@@ -331,8 +331,7 @@ class Config(collections.UserDict):
         Recursively finds the depth of an objects data (a dictionary). 
         '''
         if isinstance(config_dict, dict):
-            if config_dict:
-                return 1 + (max(map(self.dictionary_depth, config_dict.values())))
+            return 1 + (max(map(self.dictionary_depth, config_dict.values())))
         return 0
 
 class YAMLConfig(Config):
