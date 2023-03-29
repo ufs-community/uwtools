@@ -76,7 +76,7 @@ class Config(collections.UserDict):
         #pylint: disable=no-member
         py_caller = getmodule(stack()[1][0])
         if py_caller.__name__ in logging.root.manager.loggerDict:
-            _name = f"{py_caller.__name__}.{__name__}"
+            _name = py_caller.__name__
         else:
             _name = __name__
 

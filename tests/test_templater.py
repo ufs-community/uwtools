@@ -8,6 +8,7 @@ import io
 import os
 import tempfile
 import logging
+from pathlib import Path
 
 import pytest
 
@@ -297,6 +298,9 @@ def test_log_passing():
     """Unit test for checking application of the logger object passing"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+    # Create log file with PID in name to prevent simultaneous R/W
+    logfile = os.path.join(os.path.dirname(templater.__file__), f'{str(os.getpid())}_templater.log')
+    Path(logfile).touch() # Create file if does not exist
     ref = "Only the templater logger would see this"
 
     args = [
@@ -305,13 +309,14 @@ def test_log_passing():
         '-v'
         ]
 
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
-        print("Test templater with logger decorator")
-        templater.set_template(args)
-        print("Test calling templater logging object")
-        log = logging.getLogger('uwtools.templater')
-        log.debug(ref)
-    result = outstring.getvalue()
+    print("Test templater with logger decorator")
+    templater.set_template(args)
+    print("Test calling templater logging object")
+    log = logging.getLogger('uwtools.templater')
+    log.debug(ref)
 
-    assert ref in result
+    with open(logfile, 'r', encoding="utf-8") as file_2:
+        logfile_read = file_2.read()
+        assert ref in logfile_read
+
+    os.remove(logfile) # Remove file after test
