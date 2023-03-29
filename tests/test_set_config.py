@@ -408,7 +408,7 @@ Keys that are set to empty:
 
 def test_cfg_to_yaml_conversion():
     ''' Test that .a cfg file can be used to create a yaml object.'''
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.cfg"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2_yaml.cfg"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
@@ -427,20 +427,19 @@ def test_cfg_to_yaml_conversion():
 
 def test_output_file_conversion():
     ''' Test that --output_input_type converts config object to desired object type'''
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
-        out_file = f'{tmp_dir}/test_ouput.nml'
-        args = ['-i', input_file, '-o', out_file, '--output_file_type', '.ini']
+        out_file = f'{tmp_dir}/test_ouput.cfg'
+        args = ['-i', input_file, '-o', out_file, '--output_file_type', '.nml']
 
         set_config.create_config_obj(args)
 
-        expected = config.INIConfig(input_file)
-        expected_file = f'{tmp_dir}/expected_ini.ini'
+        expected = config.F90Config(input_file)
+        expected_file = f'{tmp_dir}/expected_nml.nml'
         expected.dump_file(expected_file)
 
-        # parsing error
         assert compare_files(expected_file, out_file)
 
 def test_config_file_conversion():
@@ -463,57 +462,14 @@ def test_config_file_conversion():
 
         assert compare_files(expected_file, out_file)
 
-def test_yaml_to_ini_config_conversion():
-    ''' Test that error is thrown and logged when a yaml file with a dictionary depth of 3
-    is flagged to be converted to an ini file when the --config_file_type flag is
-    provided'''
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
-    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
+def test_erroneous_conversion_flags():
+    ''' Test that error is thrown when conversion file types are not compatible'''
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
-        args = ['-i', input_file, '-c', config_file, '-config_file_type', ".nml"]
-
-        outstring = io.StringIO()
-        with redirect_stdout(outstring):
-            set_config.create_config_obj(args)
-        result = outstring.getvalue()
-        outcome = "Set config failure: config object not compatible with input object\n"
-
-        '''SystemExit: 2'''
-
-        assert result == outcome
-
-def test_yaml_to_nml_ouput_conversion():
-    ''' Test that error is thrown and logged when a yaml file with a dictionary depth of 3
-    is flagged to be converted to a nml file when the --output_file_type flag is provided'''
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
-
-    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
-
-        out_file = f'{tmp_dir}/test_outfile_conversion.yaml'
-        args = ['-i', input_file, '-o', out_file, '-output_file_type', ".nml"]
-
-        outstring = io.StringIO()
-        with redirect_stdout(outstring):
-            set_config.create_config_obj(args)
-        result = outstring.getvalue()
-        outcome = "Set config failure: config object not compatible with input object\n"
-
-        '''SystemExit: 2'''
-
-        assert result == outcome
-
-def test_yaml_to_bash_input_conversion():
-    ''' Test that error is thrown and logged when a yaml file with a dictionary depth of 3
-    is flagged to be converted to a nml file when the --input_file_type flag is provided'''
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
-
-    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
-        args = ['-i', input_file,'--input_file_type', ".sh"]
+        # test --input_file_type
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2_nml.cfg"))
+        args = ['-i', input_file, '--input_file_type', ".pdf"]
 
         outstring = io.StringIO()
         with redirect_stdout(outstring):
@@ -521,7 +477,30 @@ def test_yaml_to_bash_input_conversion():
         result = outstring.getvalue()
         outcome = "Set config failure: bad file type\n"
 
-        '''empty string: since we don't check the depth before the object is created, 
-        the input flag does not catch the incompatibility'''
+        assert result == outcome
+
+        # test --config_file_type
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
+        config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
+        args = ['-i', input_file, '-c', config_file, '--config_file_type', ".yaml"]
+
+        outstring = io.StringIO()
+        with redirect_stdout(outstring):
+            set_config.create_config_obj(args)
+        result = outstring.getvalue()
+        outcome = "Set config failure: config object not compatible with input object\n"
+
+        assert result == outcome
+
+        # test --ouput_file_type
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
+        out_file = f'{tmp_dir}/test_outfile_conversion.yaml'
+        args = ['-i', input_file, '-o', out_file, '--output_file_type', ".nml"]
+
+        outstring = io.StringIO()
+        with redirect_stdout(outstring):
+            set_config.create_config_obj(args)
+        result = outstring.getvalue()
+        outcome = "Set config failure: incompatible file types\n"
 
         assert result == outcome

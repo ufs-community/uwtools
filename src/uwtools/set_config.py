@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=too-many-branches, too-many-statements
+#pylint: disable=too-many-branches, too-many-statements, too-many-locals
 
 '''
 This utility creates a command line interface for handling config files.
@@ -70,7 +70,7 @@ def parse_args(argv):
     parser.add_argument(
         '--values_needed',
         action='store_true',
-        help='If provided, print a list of required configuration settings to stdout',
+        help='If provided, prints a list of required configuration settings to stdout',
     )
 
     parser.add_argument(
