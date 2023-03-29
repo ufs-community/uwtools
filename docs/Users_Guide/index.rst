@@ -18,6 +18,17 @@ It is important to note here that the Unified Workflow is an evolving software
 package. This documentation describes the `develop` branch, which includes features from the most recent |release|
 release dated |release_date| and updates since that release.
 
+**Table of Contents**
+
+.. toctree::
+   :titlesonly:
+   :numbered:
+
+   introduction
+   getting_started
+   working_with_templates
+   working_with_config
+
 **Disclaimer**
 
 Copyright |copyright|.
@@ -47,23 +58,3 @@ Available at: https://unified-workflow.readthedocs.io/en/latest/Users_Guide/inde
 
 This documentation borrows heavily from METplus documentation where relevant. 
 The Unified Workflow Team would like to thank the METplus development team's contributions, which laid the foundation for this documentation. 
-
-Table of Contents
-==================
-
-.. toctree::
-   :titlesonly:
-   :numbered: 4
-
-   Introduction <introduction>
-   Getting Started <getting_started>
-   Working with Templates <working_with_templates>
-   Working with Standard Configuration Files <working_with_config>
-
-
-Indices and Tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
-

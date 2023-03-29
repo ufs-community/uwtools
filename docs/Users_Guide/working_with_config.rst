@@ -119,7 +119,7 @@ If the ``--dry_run`` flag is run with a user outfile included, it will generate 
 values_needed flag
 ^^^^^^^^^^^^^^^^^^
 
-If provided, the values_needed flag will print which keys in the created config object are complete, which keys contain unfilled jinja templates, and which keys are set to empty to the stdout.  Config objects with nested keys will print a path to each key. Given the following YAML config object::
+If provided, the ``values_needed`` flag will print which keys in the created config object are complete, which keys contain unfilled jinja templates, and which keys are set to empty to the stdout.  Config objects with nested keys will print a path to each key. Given the following YAML config object::
 
   FV3GFS:
     nomads:
@@ -138,11 +138,11 @@ If provided, the values_needed flag will print which keys in the created config 
         testzero: 0
       testempty:
 
-The command:: 
+the command:: 
 
   python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --values_needed
   
-Will print the following to the stdout::
+will print the following to the stdout::
 
   Keys that are complete:
       FV3GFS
