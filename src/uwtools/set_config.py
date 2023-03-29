@@ -75,17 +75,20 @@ def parse_args(argv):
 
     parser.add_argument(
         '--input_file_type',
-        help='If provided, will convert provided input file to provided file type. Accepts YAML, bash/ini or namelist',
+        help='If provided, will convert provided input file to provided file type.\
+            Accepts YAML, bash/ini or namelist',
     )
 
     parser.add_argument(
         '--config_file_type',
-        help='If provided, will convert provided config file to provided file type. Accepts YAML, bash/ini or namelist',
+        help='If provided, will convert provided config file to provided file type.\
+            Accepts YAML, bash/ini or namelist',
     )
 
     parser.add_argument(
         '--output_file_type',
-        help='If provided, will convert provided output file to provided file type. Accepts YAML, bash/ini or namelist',
+        help='If provided, will convert provided output file to provided file type.\
+            Accepts YAML, bash/ini or namelist',
     )
     return parser.parse_args(argv)
 
@@ -100,7 +103,7 @@ def create_config_obj(argv):
         )
 
     user_args = parse_args(argv)
-    
+
     infile_type = user_args.input_file_type or get_file_type(user_args.input_base_file)
 
     if infile_type in [".yaml", ".yml"]:
@@ -132,7 +135,7 @@ def create_config_obj(argv):
 
         elif config_file_type == ".nml":
             user_config_obj = config.F90Config(user_args.config_file)
-        
+
         if config_file_type != infile_type:
             config_depth = user_config_obj.dictionary_depth(user_config_obj.data)
             input_depth = config_obj.dictionary_depth(config_obj.data)
@@ -183,7 +186,7 @@ def create_config_obj(argv):
             elif outfile_type == ".nml":
                 if config_obj.dictionary_depth(config_obj.data) != 2:
                     log.info("Set config failure: incompatible file types")
-                    return 
+                    return
                 out_object = config.F90Config()
             else:
                 out_object = config.FieldTableConfig()
@@ -196,7 +199,7 @@ def create_config_obj(argv):
             if input_depth > output_depth:
                 log.info("Set config failure: output object not compatible with input object")
                 return
-            
+
         else: # same type of file as input, no need to convert it
             out_object = config_obj
         out_object.dump_file(user_args.outfile)
