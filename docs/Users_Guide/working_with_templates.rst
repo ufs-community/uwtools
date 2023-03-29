@@ -10,7 +10,7 @@ Working With Templates
 atparse_to_jinja2
 ---------------------
 
-This tool turns any atparse enabled template into a Jinja2 enabled template. For example, the following is an atparse enabled template::
+This tool turns any ``atparse``-enabled template into a Jinja2-enabled template. For example, the following is an atparse enabled template::
 
   $ WAVEWATCH III multi-grid input file
   $ ------------------------------------
@@ -34,11 +34,11 @@ This tool turns any atparse enabled template into a Jinja2 enabled template. For
      @[OUT_BEG]  @[DTPNT]  @[OUT_END] @[POFILETYPE]
   $
 
-atparse_to_jinja2 is called on the template from the command line::
+``atparse_to_jinja2`` is called on the template from the command line::
 
   python src/uwtools/atparse_to_jinja2.py -i /<path-to-template>/enabled_template.inp.IN -o <path-to-outfile>/jinja_template.nml
 
-The resulting Jinja2 enabled template is written to the specified outfile, jinja_template.nml::
+The resulting Jinja2-enabled template is written to the specified outfile, ``jinja_template.nml``::
 
   $ WAVEWATCH III multi-grid input file
   $ ------------------------------------
@@ -62,7 +62,7 @@ The resulting Jinja2 enabled template is written to the specified outfile, jinja
      {{OUT_BEG}}  {{DTPNT}}  {{OUT_END}} {{POFILETYPE}}
   $
   
-The created jinja_template.nml file can also now be used with the templater.py tool.
+The created ``jinja_template.nml`` file can also now be used with the ``templater.py`` tool.
 
 .. _templater.py:
 
@@ -70,16 +70,16 @@ The created jinja_template.nml file can also now be used with the templater.py t
 templater.py
 ----------------
 
-templater.py takes in any Jinja2 template file and renders it with user-supplied values. templater.py takes several command line arguments including the path to the Jinja2 template file, an optional 
+``templater.py`` takes in any Jinja2 template file and renders it with user-supplied values. ``templater.py`` takes several command line arguments including the path to the Jinja2 template file, an optional 
 path to a YAML configuration file, and any additional configuration settings which will override values found in the YAML 
-configuration file or user environment variables.
+configuration (config) file or user environment variables.
 
 .. _temp_inp_conf:
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Input file and config file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-Here is an example template file, jinjatemplate.nml::
+Here is an example template file, ``jinjatemplate.nml``::
 
   $ WAVEWATCH III multi-grid input file
   $ ------------------------------------
@@ -122,9 +122,9 @@ And here is the example YAML config file we want to use to update the values in 
   FLAGMASKCOMP:  ' F'
   FLAGMASKOUT: ' F'
 
-To run templater.py with an input template file and a config file::
+To run ``templater.py`` with an input template file and a config file, modify the following command::
 
-    python src/uwtools/templater.py -i /<path-totemplate>/jinja2template.nml -c /<path-to-config>/example_config.yaml -o <path-to-outfile>/rendered_template.nml
+    python src/uwtools/templater.py -i /<path-to-template>/jinja2template.nml -c /<path-to-config>/example_config.yaml -o <path-to-outfile>/rendered_template.nml
 
 The rendered template will be updated with the values contained in the config file::
 
@@ -156,7 +156,7 @@ The rendered template will be updated with the values contained in the config fi
 Input file and environment file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If templater.py is called on an input file but no config file is provided, the template will be rendered using the user environment.
+If ``templater.py`` is called on an input file but no config file is provided, the template will be rendered using the user environment.
 
 .. _temp_inp_cli:
 
@@ -164,7 +164,7 @@ If templater.py is called on an input file but no config file is provided, the t
 Input file and command line config items
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-templater.py can be run with an input file and config items provided through the command line by using the config_items flag::
+``templater.py`` can be run with an input file and config items provided through the command line by using the ``config_items`` flag::
 
     python src/uwtools/templater.py -i /<path-totemplate>/jinja2template.nml NFGRIDS=0, NMGRID=5, FUNIPNT=' T', IOSRV='None', FPNTPROC='None', FGRDPROC=' None'
 
@@ -199,7 +199,7 @@ Any configuration settings supplied through the config_items flag will override 
 ^^^^^^^^^^^^
 dry_run flag
 ^^^^^^^^^^^^
-Running templater.py with -d or --dry_run flag will print the rendered template to stdout only, and provide no other output::
+Running ``templater.py`` with the ``-d`` or ``--dry_run`` flag will print the rendered template to stdout only and provide no other output::
 
     python src/uwtools/templater.py -i /<path-totemplate>/jinja2template.nml -c /<path-to-config>/example_config.yaml -d
 
@@ -239,7 +239,7 @@ Running templater.py with -d or --dry_run flag will print the rendered template 
 ^^^^^^^^^^^^^^^^^^
 Values Needed Flag
 ^^^^^^^^^^^^^^^^^^
-If provided, the --values_needed flag will print a list of required configuration settings for the input template to the stdout::
+If provided, the ``--values_needed`` flag will print a list of required configuration settings for the input template to the stdout::
     
   workflow-tools % python src/uwtools/templater.py -i /<path-totemplate>/jinja2template.nml --values_needed
   Running script templater.py with args:

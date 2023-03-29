@@ -18,7 +18,7 @@ This tool transforms a "base" config file into a fully formed, app-ready file th
 Input file and config file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-set_config.py determines the input file type, and creates a configuration object based on the input file type. If a user-defined configuration file is provided, it creates a configuration object for the user-defined configuration file and updates the values in the input configuration object.
+``set_config.py`` determines the input file type and creates a configuration object based on the input file type. If a user-defined configuration file is provided, it creates a configuration object for the user-defined configuration file and updates the values in the input configuration object.
 
 sample input base file::
 
@@ -35,7 +35,7 @@ sample config file::
   size: large
   meat: chicken
 
-to run set_config.py with an input and config file::
+To run ``set_config.py`` with an input and config file::
 
     python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml -o /<path-to-outfile>/sample_outfile.yaml
 
@@ -55,7 +55,7 @@ The output is a fully formed config file::
 Generating a field table from YAML
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To generate a field table from a YAML config base file using set_config.py, the outfile type must be specified as a field table in the command line.  
+To generate a field table from a YAML config base file using ``set_config.py``, the outfile type must be specified as a field table in the command line.  
 
 YAML base file::
 
@@ -103,7 +103,7 @@ Generated field table::
 dry_run flag
 ^^^^^^^^^^^^
 
-Running set_config.py with -d or --dry_run will print the config object to stdout only, and provide no other output::
+Running ``set_config.py`` with ``-d`` or ``--dry_run`` will print the config object to stdout only, and provide no other output::
 
         python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --dry_run
 
@@ -111,7 +111,7 @@ will generate the following output::
 
   {"fruit": "papaya", "vegetable": "eggplant", "how_many": 17, "dressing": "ranch", "topping": "crouton", "size": "large", "meat": "chicken"}
 
-If the --dry_run flag is run with a user outfile included, it will generate a warning that the outfile will not be written.
+If the ``--dry_run`` flag is run with a user outfile included, it will generate a warning that the outfile will not be written.
 
 .. _conf_val_needed:
 
