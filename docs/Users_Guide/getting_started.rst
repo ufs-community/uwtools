@@ -33,7 +33,7 @@ Package Dependencies
     - 
         allows Python developers to write software 
         that makes use of services like Amazon 
-        S3 and Amazon EC2.
+        S3 and Amazon EC2
   * - black
     -
     -
@@ -44,7 +44,7 @@ Package Dependencies
     - https://pypi.org/project/f90nml/
     -   provides a simple interface for 
         reading, writing, and modifying Fortran 
-        namelist files.
+        namelist files
 
   * - Jinja2
     - 3.0.0
@@ -101,7 +101,7 @@ To create a conda environment, follow these steps:
 
 #. Open a terminal or command prompt and navigate to the directory where you want to create the conda environment.
 
-#. Use the ``conda create`` command to create a new conda environment. Replace ``myenv`` with the name you want to give to your environment, and ``python=3.8`` with the desired version of Python::
+#. Use the ``conda create`` command to create a new conda environment. Replace ``myenv`` with the name you want to give to your environment, and replace ``python=3.8`` with the desired version of Python::
 
       conda create --name myenv python=3.8
 
@@ -111,7 +111,9 @@ To create a conda environment, follow these steps:
 
       conda activate myenv
 
-#. You should now see the name of your conda environment in the terminal prompt, indicating that it is active.
+#. You should now see the name of your conda environment in the terminal prompt, indicating that it is active. For example::
+
+      (myenv) $
 
 #. To deactivate the conda environment, use the following command::
 
@@ -125,7 +127,7 @@ To create a conda environment, follow these steps:
       conda install numpy
 
    This will install the numpy package in the active conda environment.
-   Running the commands below for installing uwtools will install all
+   Running the commands below for installing ``uwtools`` will install all
    the necessary packages, so there is no need to install those manually
    in this step.
 
@@ -186,7 +188,7 @@ To install the ``workflow-tools`` repository from GitHub, follow these steps:
 
       pip install .
 
-#. This will install all the necessary packages for the tools to run.
+   This will install all the necessary packages for the tools to run.
 
 #. You can now use the tools by running the appropriate scripts. For example, to use the templater tool, you can run the following command::
 

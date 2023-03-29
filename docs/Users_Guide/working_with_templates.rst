@@ -10,7 +10,7 @@ Working With Templates
 atparse_to_jinja2
 ---------------------
 
-This tool turns any ``atparse``-enabled template into a Jinja2-enabled template. For example, the following is an atparse enabled template::
+This tool turns any ``atparse``-enabled template into a Jinja2-enabled template. For example, the following is an ``atparse``-enabled template::
 
   $ WAVEWATCH III multi-grid input file
   $ ------------------------------------
@@ -192,7 +192,7 @@ Rendered template::
 
   $
 
-Any configuration settings supplied through the config_items flag will override values found in the config file or user environment.
+Any configuration settings supplied through the ``config_items`` flag will override values found in the config file or user environment.
 
 .. _temp_dryrun:
 
