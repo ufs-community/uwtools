@@ -469,33 +469,21 @@ def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
         input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2_nml.cfg"))
         args = ['-i', input_file, '--input_file_type', ".pdf"]
 
-        with pytest.raises(ValueError) as error:
+        with pytest.raises(ValueError):
             set_config.create_config_obj(args)
-
-            expected = "Set config failure: input base file not compatible\n"
-            actual = str(error.value)
-            assert actual == expected
 
         # test --config_file_type
         input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
         config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
         args = ['-i', input_file, '-c', config_file, '--config_file_type', ".yaml"]
 
-        with pytest.raises(ValueError) as error:
+        with pytest.raises(ValueError):
             set_config.create_config_obj(args)
-
-            expected = "Set config failure: output object not compatible with input object\n"
-            actual = str(error.value)
-            assert actual == expected
 
         # test --ouput_file_type
         input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
         out_file = f'{tmp_dir}/test_outfile_conversion.yaml'
         args = ['-i', input_file, '-o', out_file, '--output_file_type', ".nml"]
 
-        with pytest.raises(ValueError) as error:
+        with pytest.raises(ValueError):
             set_config.create_config_obj(args)
-
-            expected = "Set config failure: incompatible file types\n"
-            actual = str(error.value)
-            assert actual == expected
