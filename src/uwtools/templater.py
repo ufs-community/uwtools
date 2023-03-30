@@ -119,7 +119,6 @@ def setup_config_obj(user_args):
 
     return cfg
 
-
 def setup_logging(user_args):
 
     ''' Create the Logger object '''
@@ -153,6 +152,12 @@ def setup_logging(user_args):
         log.propagate = False
 
     return log
+
+def set_template(argv):
+    '''Main section for rendering and writing a template file'''
+    user_args = parse_args(argv)
+
+    log = setup_logging(user_args)
 
 def set_template(argv):
     '''Main section for rendering and writing a template file'''

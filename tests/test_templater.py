@@ -1,4 +1,3 @@
-#pylint: disable=unused-variable
 """
 Tests for templater tool.
 """
@@ -6,6 +5,7 @@ from contextlib import redirect_stdout
 import argparse
 import io
 import os
+import shutil
 import tempfile
 import logging
 from pathlib import Path
@@ -21,9 +21,9 @@ def compare_files(expected, actual):
     may not be able to handle end-of-file character differences with it.
     Prints the contents of two compared files to std out if they do not match.'''
     with open(expected, 'r', encoding='utf-8') as expected_file:
-        expected_content = expected_file.read().rstrip('\n')
+        expected_content = expected_file.read()
     with open(actual, 'r', encoding='utf-8') as actual_file:
-        actual_content = actual_file.read().rstrip('\n')
+        actual_content = actual_file.read()
 
     if expected_content != actual_content:
         print('The expected file looks like:')
@@ -35,7 +35,7 @@ def compare_files(expected, actual):
 
     return True
 
-def test_path_if_file_exists():
+def test_path_if_file_exists(): #pylint: disable=unused-variable
     """ Make sure the function works as expected. It is used as a type in
     argparse, so raises an argparse exception when the user provides a
     non-existent path"""
@@ -47,7 +47,7 @@ def test_path_if_file_exists():
         not_a_filepath = './no_way_this_file_exists.nope'
         templater.path_if_file_exists(not_a_filepath)
 
-def test_set_template_dryrun():
+def test_set_template_dryrun(): #pylint: disable=unused-variable
     """Unit test for checking dry-run output of ingest namelist tool"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
@@ -90,7 +90,7 @@ def test_set_template_dryrun():
 
     assert result == outcome
 
-def test_set_template_listvalues():
+def test_set_template_listvalues(): #pylint: disable=unused-variable
     """Unit test for checking values_needed output of ingest namelist tool"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
@@ -128,7 +128,7 @@ vegetable
 
     assert result == outcome
 
-def test_set_template_yaml_config():
+def test_set_template_yaml_config(): #pylint: disable=unused-variable
     ''' Test that providing a YAML file with necessary settings works to fill in
     the Jinja template. Test the writing mechanism, too '''
 
@@ -156,7 +156,43 @@ def test_set_template_yaml_config():
         templater.set_template(args)
         assert compare_files(expected_file, out_file)
 
-def test_set_template_command_line_config():
+def test_set_template_no_config_suffix_fails(): #pylint: disable=unused-variable
+
+    ''' Test that there are no errors when passing relative path and INI
+    config.'''
+
+    input_file = "tests/fixtures/nml.IN"
+    config_file = "tests/fixtures/fruit_config.sh"
+
+    with tempfile.NamedTemporaryFile(dir='.', mode='w') as tmp_file:
+        shutil.copy2(config_file, tmp_file.name)
+
+        args = [
+            '-i', input_file,
+            '-c', tmp_file.name,
+            '-d',
+            '-q',
+            ]
+        with pytest.raises(ValueError):
+            templater.set_template(args)
+
+def test_set_template_abs_path_ini_config(): #pylint: disable=unused-variable
+
+    ''' Test that there are no errors when passing relative path and INI
+    config.'''
+
+    input_file = "tests/fixtures/nml.IN"
+    config_file = "tests/fixtures/fruit_config.sh"
+
+    args = [
+         '-i', input_file,
+         '-c', config_file,
+         '-d',
+         '-q',
+         ]
+    templater.set_template(args)
+
+def test_set_template_command_line_config(): #pylint: disable=unused-variable
     '''Test that values provided on the command line produce the appropriate
     output.'''
 
@@ -200,7 +236,7 @@ def test_set_template_command_line_config():
     result = outstring.getvalue()
     assert result == outcome
 
-def test_set_template_yaml_config_model_configure():
+def test_set_template_yaml_config_model_configure(): #pylint: disable=unused-variable
     '''Tests that the templater will work as expected for a simple model_configure
     file. '''
 
@@ -224,12 +260,12 @@ def test_set_template_yaml_config_model_configure():
         templater.set_template(args)
         assert compare_files(expected_file, out_file)
 
-def test_set_template_verbosity():
+
+def test_set_template_verbosity(): #pylint: disable=unused-variable
     """Unit test for checking dry-run output of ingest namelist tool"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
     logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
-    trim_result = ''
 
     outcome=\
     """Finished setting up debug file logging in """ + logfile  + """
@@ -256,8 +292,8 @@ Running script templater.py with args:
 """
 
     os.environ['fruit'] = 'banana'
-    os.environ['vegetable'] = 'tomato'
     os.environ['how_many'] = '22'
+    del os.environ['vegetable']
 
     #test verbose level
     args = [
@@ -265,6 +301,15 @@ Running script templater.py with args:
          '--dry_run',
          '-v'
          ]
+
+    with pytest.raises(ValueError) as error:
+        templater.set_template(args)
+
+    expected = "Missing values needed by template"
+    actual = str(error.value)
+    assert expected == actual
+
+    os.environ['vegetable'] = 'tomato'
 
     # Capture verbose stdout
     outstring = io.StringIO()
