@@ -239,7 +239,7 @@ Running ``templater.py`` with the ``-d`` or ``--dry_run`` flag will print the re
 ^^^^^^^^^^^^^^^^^^
 Values Needed Flag
 ^^^^^^^^^^^^^^^^^^
-If provided, the ``--values_needed`` flag will print a list of required configuration settings for the input template to the stdout::
+If provided, the ``--values_needed`` flag will print a list of required configuration settings for the input template to stdout::
     
   workflow-tools % python src/uwtools/templater.py -i /<path-totemplate>/jinja2template.nml --values_needed
   Running script templater.py with args:

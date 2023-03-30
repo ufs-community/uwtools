@@ -20,14 +20,14 @@ Input file and config file
 
 ``set_config.py`` determines the input file type and creates a configuration object based on the input file type. If a user-defined configuration file is provided, it creates a configuration object for the user-defined configuration file and updates the values in the input configuration object.
 
-sample input base file::
+Sample input base file::
 
   fruit: papaya
   vegetable: eggplant
   how_many: 17
   dressing: ranch
 
-sample config file::
+Sample config file::
 
   fruit: papaya
   how_many: 17
@@ -55,7 +55,7 @@ The output is a fully formed config file::
 Generating a field table from YAML
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To generate a field table from a YAML config base file using ``set_config.py``, the outfile type must be specified as a field table in the command line.  
+To generate a field table from a YAML config base file using ``set_config.py``, the outfile must include ``field_table`` in the outfile name. 
 
 YAML base file::
 
@@ -78,7 +78,7 @@ YAML base file::
       name: fixed
       surface_value: 1.e30
       
-Command with specified outfile type::     
+Command with ``field_table`` outfile type specified::     
 
     python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base_field.yaml -o /<path-to-outfile>/sample_field_table.FV3_GFS_v16
     
@@ -103,11 +103,11 @@ Generated field table::
 dry_run flag
 ^^^^^^^^^^^^
 
-Running ``set_config.py`` with ``-d`` or ``--dry_run`` will print the config object to stdout only, and provide no other output::
+Running ``set_config.py`` with ``-d`` or ``--dry_run`` will print the config object to stdout only and provide no other output::
 
         python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --dry_run
 
-will generate the following output::
+The command above will generate the following output in the command line::
 
   {"fruit": "papaya", "vegetable": "eggplant", "how_many": 17, "dressing": "ranch", "topping": "crouton", "size": "large", "meat": "chicken"}
 
@@ -119,7 +119,7 @@ If the ``--dry_run`` flag is run with a user outfile included, it will generate 
 values_needed flag
 ^^^^^^^^^^^^^^^^^^
 
-If provided, the ``values_needed`` flag will print which keys in the created config object are complete, which keys contain unfilled jinja templates, and which keys are set to empty to the stdout.  Config objects with nested keys will print a path to each key. Given the following YAML config object::
+If provided, the ``values_needed`` flag will print to the stdout a list of which keys in the created config object are complete, which keys contain unfilled jinja templates, and which keys are set to empty. Config objects with nested keys will print a path to each key. Given the following YAML config object::
 
   FV3GFS:
     nomads:
@@ -138,7 +138,7 @@ If provided, the ``values_needed`` flag will print which keys in the created con
         testzero: 0
       testempty:
 
-the command:: 
+The command:: 
 
   python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --values_needed
   
