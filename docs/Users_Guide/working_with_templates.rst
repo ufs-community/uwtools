@@ -1,7 +1,7 @@
 .. _working_with_templates:
 
 **************************
-Working With Templates 
+Working with Templates 
 **************************
 
 .. _atp_j2:
@@ -10,7 +10,7 @@ Working With Templates
 atparse_to_jinja2
 ---------------------
 
-This tool turns any ``atparse``-enabled template into a Jinja2-enabled template. For example, the following is an ``atparse``-enabled template::
+This tool turns any *atparse*-enabled template into a Jinja2-enabled template. For example, the following is an *atparse*-enabled template::
 
   $ WAVEWATCH III multi-grid input file
   $ ------------------------------------
@@ -70,7 +70,7 @@ The created ``jinja_template.nml`` file can also now be used with the ``template
 templater.py
 ----------------
 
-``templater.py`` takes in any Jinja2 template file and renders it with user-supplied values. ``templater.py`` takes several command line arguments including the path to the Jinja2 template file, an optional 
+``templater.py`` takes in any Jinja2 template file and renders it with user-supplied values. ``templater.py`` takes several command line arguments, including the path to the Jinja2 template file, an optional 
 path to a YAML configuration file, and any additional configuration settings which will override values found in the YAML 
 configuration (config) file or user environment variables.
 
@@ -126,6 +126,12 @@ To run ``templater.py`` with an input template file and a config file, modify th
 
     python src/uwtools/templater.py -i /<path-to-template>/jinja2template.nml -c /<path-to-config>/example_config.yaml -o <path-to-outfile>/rendered_template.nml
 
+where:
+
+   * ``-i`` refers to the input template file
+   * ``-c`` refers to the config file
+   * ``-o`` refers to the output file (or outfile)
+
 The rendered template will be updated with the values contained in the config file::
 
   $ WAVEWATCH III multi-grid input file
@@ -156,7 +162,7 @@ The rendered template will be updated with the values contained in the config fi
 Input file and environment file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If ``templater.py`` is called on an input file but no config file is provided, the template will be rendered using the user environment.
+If ``templater.py`` is called on an input file, but no config file is provided, the template will be rendered using the user environment (``os.environ``).
 
 .. _temp_inp_cli:
 

@@ -138,7 +138,7 @@ If provided, the ``values_needed`` flag will print to the stdout a list of which
         testzero: 0
       testempty:
 
-The command:: 
+the command:: 
 
   python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --values_needed
   

@@ -126,7 +126,7 @@ To create a conda environment, follow these steps:
 
       conda install numpy
 
-   This will install the numpy package in the active conda environment.
+   This will install the ``numpy`` package in the active conda environment.
    Running the commands below for installing ``uwtools`` will install all
    the necessary packages, so there is no need to install those manually
    in this step.
