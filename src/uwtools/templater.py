@@ -66,6 +66,11 @@ def parse_args(argv):
         nargs='*',
         )
     parser.add_argument(
+        '-l', '--log_file',
+        help='Optional path to a specified log file',
+        default=os.path.join(os.path.dirname(__file__), "templater.log")
+        )
+    parser.add_argument(
         '-d', '--dry_run',
         action='store_true',
         help='If provided, print rendered template to stdout only',
@@ -131,7 +136,8 @@ def setup_logging(user_args):
     else:
         name = __name__
 
-    logfile = os.path.join(os.path.dirname(__file__), "templater.log")
+    logfile = user_args.log_file
+
     log = Logger(level='info',
         name=name,
         _format='%(message)s',
@@ -152,12 +158,6 @@ def setup_logging(user_args):
         log.propagate = False
 
     return log
-
-def set_template(argv):
-    '''Main section for rendering and writing a template file'''
-    user_args = parse_args(argv)
-
-    log = setup_logging(user_args)
 
 def set_template(argv):
     '''Main section for rendering and writing a template file'''

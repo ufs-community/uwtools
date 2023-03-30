@@ -51,6 +51,8 @@ def test_set_template_dryrun(): #pylint: disable=unused-variable
     """Unit test for checking dry-run output of ingest namelist tool"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+    logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
+    
     outcome=\
     """Running script templater.py with args:
 ----------------------------------------------------------------------
@@ -59,6 +61,7 @@ def test_set_template_dryrun(): #pylint: disable=unused-variable
  input_template: """ + input_file  + """
     config_file: None
    config_items: []
+       log_file: """ + logfile  + """
         dry_run: True
   values_needed: False
         verbose: False
@@ -94,6 +97,7 @@ def test_set_template_listvalues(): #pylint: disable=unused-variable
     """Unit test for checking values_needed output of ingest namelist tool"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+    logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
 
     outcome=\
     """Running script templater.py with args:
@@ -103,6 +107,7 @@ def test_set_template_listvalues(): #pylint: disable=unused-variable
  input_template: """ + input_file  + """
     config_file: None
    config_items: []
+       log_file: """ + logfile  + """
         dry_run: False
   values_needed: True
         verbose: False
@@ -197,6 +202,7 @@ def test_set_template_command_line_config(): #pylint: disable=unused-variable
     output.'''
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+    logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
 
     outcome=\
     """Running script templater.py with args:
@@ -206,6 +212,7 @@ def test_set_template_command_line_config(): #pylint: disable=unused-variable
  input_template: """ + input_file  + """
     config_file: None
    config_items: ['fruit=pear', 'vegetable=squash', 'how_many=22']
+       log_file: """ + logfile  + """
         dry_run: True
   values_needed: False
         verbose: False
@@ -276,6 +283,7 @@ Running script templater.py with args:
  input_template: """ + input_file  + """
     config_file: None
    config_items: []
+       log_file: """ + logfile  + """
         dry_run: True
   values_needed: False
         verbose: True
@@ -343,11 +351,12 @@ def test_log_passing():
     """Unit test for checking application of the logger object passing"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
-    logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
+    logfile = os.path.join(os.path.dirname(templater.__file__), f"{str(os.getpid())}_templater.log")
     ref = "Only the templater logger would see this"
 
     args = [
         '-i', input_file,
+        '-l', logfile,
         '--dry_run',
         '-v'
         ]
