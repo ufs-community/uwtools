@@ -118,8 +118,8 @@ def create_config_obj(argv):
         config_obj = config.F90Config(user_args.input_base_file)
 
     else:
-        log.info("Set config failure: bad file type")
-        return
+        log.critical("Set config failure: bad file type")
+        raise ValueError("Set config failure: input base file not compatible")
 
 
     if user_args.config_file:
@@ -141,8 +141,8 @@ def create_config_obj(argv):
             input_depth = config_obj.dictionary_depth(config_obj.data)
 
             if input_depth < config_depth:
-                log.info("Set config failure: config object not compatible with input object")
-                return
+                log.critical(f"  {user_args.config_file} not compatible with  {user_args.input_base_file}")
+                raise ValueError("Set config failure: config object not compatible with input object")
 
         config_obj.update_values(user_config_obj)
 
@@ -197,8 +197,8 @@ def create_config_obj(argv):
             input_depth = config_obj.dictionary_depth(config_obj.data)
 
             if input_depth > output_depth:
-                log.info("Set config failure: output object not compatible with input object")
-                return
+                log.critical(f"  {user_args.outfile} not compatible with {user_args.input_base_file}")
+                raise ValueError("Set config failure: output object not compatible with input object")
 
         else: # same type of file as input, no need to convert it
             out_object = config_obj
