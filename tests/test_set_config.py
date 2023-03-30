@@ -217,12 +217,8 @@ def test_incompatible_file_type(): #pylint: disable=unused-variable
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/model_configure.sample"))
     args = ['-i', input_file]
 
-    with pytest.raises(ValueError) as error:
+    with pytest.raises(ValueError):
         set_config.create_config_obj(args)
-
-        expected = "Set config failure: bad file type\n"
-        actual = str(error.value)
-        assert actual == expected
 
 def test_set_config_field_table(): #pylint: disable=unused-variable
     '''Test reading a YAML config object and generating a field file table.
@@ -401,22 +397,23 @@ Keys that are set to empty:
 
 def test_cfg_to_yaml_conversion(): #pylint: disable=unused-variable
     ''' Test that a .cfg file can be used to create a yaml object.'''
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2_yaml.cfg"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example_yaml.cfg"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
-        args = ['-i', input_file, '--dry_run', '--input_file_type', '.yaml']
+        out_file = f'{tmp_dir}/test_ouput.yaml'
+        args = ['-i', input_file, '-o', out_file, '--input_file_type', '.yaml']
 
-        outstring = io.StringIO()
-        with redirect_stdout(outstring):
-            set_config.create_config_obj(args)
-        result = outstring.getvalue()
+        set_config.create_config_obj(args)
 
         expected = config.YAMLConfig(input_file)
         expected_file = f'{tmp_dir}/test.yaml'
         expected.dump_file(expected_file)
 
-        assert result.rstrip('\n') == str(expected)
+        assert compare_files(out_file, expected_file)
+
+        with open(out_file, 'r', encoding='utf-8') as output:
+            assert output.read()[-1] == '\n'
 
 def test_output_file_conversion(): #pylint: disable=unused-variable
     ''' Test that --output_input_type converts config object to desired object type'''
@@ -434,6 +431,9 @@ def test_output_file_conversion(): #pylint: disable=unused-variable
         expected.dump_file(expected_file)
 
         assert compare_files(expected_file, out_file)
+
+        with open(out_file, 'r', encoding='utf-8') as output:
+            assert output.read()[-1] == '\n'
 
 def test_config_file_conversion(): #pylint: disable=unused-variable
     ''' Test that --config_input_type converts config object to desired object type'''
@@ -454,6 +454,9 @@ def test_config_file_conversion(): #pylint: disable=unused-variable
         expected.dump_file(expected_file)
 
         assert compare_files(expected_file, out_file)
+
+        with open(out_file, 'r', encoding='utf-8') as output:
+            assert output.read()[-1] == '\n'
 
 def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
     ''' Test that error is thrown when conversion file types are not compatible'''
@@ -491,6 +494,6 @@ def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
         with pytest.raises(ValueError) as error:
             set_config.create_config_obj(args)
 
-            expected = "Set config failure: output object not compatible with input object\n"
+            expected = "Set config failure: incompatible file types\n"
             actual = str(error.value)
             assert actual == expected
