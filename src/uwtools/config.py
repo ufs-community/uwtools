@@ -270,6 +270,15 @@ class Config(collections.UserDict):
                     # filled or not, and make a guess on its intended type.
                     ref_dict[key] = self.str_to_type("".join(data))
 
+    def dereference_all(self):
+        ''' Run dereference until all values have been filled in '''
+
+        prev = copy.deepcopy(self.data)
+        self.dereference()
+        while prev != self.data:
+            self.dereference()
+            prev = copy.deepcopy(self.data)
+
     @staticmethod
     def str_to_type(str_):
         ''' Check if the string contains a float, int, boolean, or just
@@ -321,6 +330,9 @@ class Config(collections.UserDict):
         unfilled jinja templates (jinja2_var), and which keys are set to empty (empty_var). 
         '''
 
+        if not isinstance(config_dict, dict):
+            return
+
         for key, val in config_dict.items():
             if isinstance(val, dict):
                 set_var.append(f'    {parent}{key}')
@@ -331,13 +343,13 @@ class Config(collections.UserDict):
                 for item in val:
                     self.iterate_values(item, set_var, jinja2_var, empty_var, parent)
             elif "{{" in str(val) or "{%" in str(val):
-                jinja2_var.append(f'    {parent}{key}')
+                jinja2_var.append(f'    {parent}{key}: {val}')
             elif val == "" or val is None:
                 empty_var.append(f'    {parent}{key}')
 
             else:
                 set_var.append(f'    {parent}{key}')
-        return config_dict, set_var, jinja2_var, empty_var, parent
+        return
 
     def dictionary_depth(self, config_dict):
         '''
@@ -375,11 +387,10 @@ class YAMLConfig(Config):
         if config_path is not None:
             self.update(self._load())
 
-        prev = copy.deepcopy(self.data)
-        self.dereference()
-        while prev != self.data:
-            self.dereference()
-            prev = copy.deepcopy(self.data)
+    def __repr__(self):
+        ''' This method will return configure contents'''
+        return yaml.dump(self.data)
+
 
     def _load(self, config_path=None):
         ''' Load the user-provided YAML config file path into a dict
