@@ -8,7 +8,6 @@ import os
 import shutil
 import tempfile
 import logging
-from pathlib import Path
 
 import pytest
 
@@ -52,7 +51,7 @@ def test_set_template_dryrun(): #pylint: disable=unused-variable
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
     logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
-    
+
     outcome=\
     """Running script templater.py with args:
 ----------------------------------------------------------------------
@@ -347,7 +346,7 @@ Running script templater.py with args:
     # Check that only the correct messages were logged
     assert result == outcome
 
-def test_log_passing():
+def test_log_passing(): #pylint: disable=unused-variable
     """Unit test for checking application of the logger object passing"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
