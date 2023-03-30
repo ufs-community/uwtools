@@ -186,7 +186,7 @@ def set_template(argv):
         log.info('Values needed for this template are:')
         for var in sorted(undeclared_variables):
             log.info(var)
-        return
+        return None
 
     # Check for missing values
     missing = []
