@@ -361,9 +361,9 @@ def test_log_passing(): #pylint: disable=unused-variable
         ]
 
     print("Test templater with logger decorator")
-    templater.set_template(args)
+    template_log = templater.set_template(args)
     print("Test calling templater logging object")
-    log = logging.getLogger('uwtools.templater')
+    log = logging.getLogger(template_log)
     log.debug(ref)
 
     with open(logfile, 'r', encoding="utf-8") as file_2:

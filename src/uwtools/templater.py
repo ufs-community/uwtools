@@ -215,5 +215,8 @@ def set_template(argv):
         # write out rendered template to file
         template.dump_file(user_args.outfile)
 
+    return log.name
+
+
 if __name__ == '__main__':
     set_template(sys.argv[1:])
