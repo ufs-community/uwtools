@@ -119,6 +119,8 @@ def create_config_obj(argv):
 
         config_obj.update_values(user_config_obj)
 
+    config_obj.dereference_all()
+
     if user_args.values_needed:
         set_var = []
         jinja2_var = []

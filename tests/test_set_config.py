@@ -253,6 +253,7 @@ def test_set_config_dry_run(): #pylint: disable=unused-variable
     args = ['-i', input_file, '-d']
 
     expected = config.YAMLConfig(input_file)
+    expected.dereference_all()
     expected_content = str(expected)
 
     outstring = io.StringIO()
@@ -260,7 +261,8 @@ def test_set_config_dry_run(): #pylint: disable=unused-variable
         set_config.create_config_obj(args)
     result = outstring.getvalue()
 
-    assert result.rstrip('\n') == expected_content
+    assert result.rstrip('\n') == expected_content.rstrip('\n')
+
 
 def test_show_format(): #pylint: disable=unused-variable
     '''Test providing required configuration format for a given input and target.
@@ -324,9 +326,9 @@ def test_values_needed_yaml(): #pylint: disable=unused-variable
     FV3GFS.nomads.file_names.testzero
 
 Keys that have unfilled jinja2 templates:
-    FV3GFS.nomads.url
-    FV3GFS.nomads.file_names.grib2.anl
-    FV3GFS.nomads.file_names.grib2.fcst
+    FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
+    FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio','gfs.t{{ hh }}z.sfcanl.nemsio']
+    FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
 
 Keys that are set to empty:
     FV3GFS.nomads.file_names.nemsio
@@ -360,8 +362,8 @@ def test_values_needed_ini(): #pylint: disable=unused-variable
     dessert.servings
 
 Keys that have unfilled jinja2 templates:
-    salad.how_many
-    dessert.flavor
+    salad.how_many: {{amount}}
+    dessert.flavor: {{flavor}}
 
 Keys that are set to empty:
     salad.toppings
@@ -392,7 +394,7 @@ def test_values_needed_f90nml(): #pylint: disable=unused-variable
     salad.dessert
 
 Keys that have unfilled jinja2 templates:
-    salad.dressing
+    salad.dressing: {{ dressing }}
 
 Keys that are set to empty:
     salad.toppings
