@@ -410,9 +410,10 @@ def test_cfg_to_yaml_conversion(): #pylint: disable=unused-variable
 
         expected = config.YAMLConfig(input_file)
         expected_file = f'{tmp_dir}/test.yaml'
+        expected.dereference_all()
         expected.dump_file(expected_file)
 
-        assert compare_files(out_file, expected_file)
+        assert compare_files(expected_file, out_file)
 
         with open(out_file, 'r', encoding='utf-8') as output:
             assert output.read()[-1] == '\n'
