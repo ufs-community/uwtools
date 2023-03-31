@@ -172,13 +172,13 @@ Input file and command line config items
 
 ``templater.py`` can be run with an input file and config items provided through the command line by using the ``config_items`` flag::
 
-    python src/uwtools/templater.py -i /<path-totemplate>/jinja2template.nml NFGRIDS=0, NMGRID=5, FUNIPNT=' T', IOSRV='None', FPNTPROC='None', FGRDPROC=' None'
+    python src/uwtools/templater.py -i /<path-totemplate>/jinja2template.nml NFGRIDS=0 NMGRIDS=5 FUNIPNT=' T' IOSRV='None' FPNTPROC='None' FGRDPROC=' None'
 
 Rendered template::
 
   $ WAVEWATCH III multi-grid input file
   $ ------------------------------------
-    0,  T, None, None,  None
+    0, 5, T, None, None,  None
   $
 
 
