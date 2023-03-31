@@ -217,13 +217,8 @@ def test_incompatible_file_type(): #pylint: disable=unused-variable
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/model_configure.sample"))
     args = ['-i', input_file]
 
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
+    with pytest.raises(ValueError):
         set_config.create_config_obj(args)
-    result = outstring.getvalue()
-    outcome = "Set config failure: bad file type\n"
-
-    assert result == outcome
 
 def test_set_config_field_table(): #pylint: disable=unused-variable
     '''Test reading a YAML config object and generating a field file table.
@@ -401,3 +396,95 @@ Keys that are set to empty:
     salad.appetizer
 """
     assert result == outcome
+
+def test_cfg_to_yaml_conversion(): #pylint: disable=unused-variable
+    ''' Test that a .cfg file can be used to create a yaml object.'''
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example_yaml.cfg"))
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        out_file = f'{tmp_dir}/test_ouput.yaml'
+        args = ['-i', input_file, '-o', out_file, '--input_file_type', '.yaml']
+
+        set_config.create_config_obj(args)
+
+        expected = config.YAMLConfig(input_file)
+        expected_file = f'{tmp_dir}/test.yaml'
+        expected.dereference_all()
+        expected.dump_file(expected_file)
+
+        assert compare_files(expected_file, out_file)
+
+        with open(out_file, 'r', encoding='utf-8') as output:
+            assert output.read()[-1] == '\n'
+
+def test_output_file_conversion(): #pylint: disable=unused-variable
+    ''' Test that --output_input_type converts config object to desired object type'''
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        out_file = f'{tmp_dir}/test_ouput.cfg'
+        args = ['-i', input_file, '-o', out_file, '--output_file_type', '.nml']
+
+        set_config.create_config_obj(args)
+
+        expected = config.F90Config(input_file)
+        expected_file = f'{tmp_dir}/expected_nml.nml'
+        expected.dump_file(expected_file)
+
+        assert compare_files(expected_file, out_file)
+
+        with open(out_file, 'r', encoding='utf-8') as output:
+            assert output.read()[-1] == '\n'
+
+def test_config_file_conversion(): #pylint: disable=unused-variable
+    ''' Test that --config_input_type converts config object to desired object type'''
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
+    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.ini"))
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        out_file = f'{tmp_dir}/test_config_conversion.nml'
+        args = ['-i', input_file, '-c', config_file, '-o', out_file, '--config_file_type', '.nml']
+
+        set_config.create_config_obj(args)
+
+        expected = config.F90Config(input_file)
+        config_file_obj = config.F90Config(config_file)
+        expected.update_values(config_file_obj)
+        expected_file = f'{tmp_dir}/expected_nml.nml'
+        expected.dump_file(expected_file)
+
+        assert compare_files(expected_file, out_file)
+
+        with open(out_file, 'r', encoding='utf-8') as output:
+            assert output.read()[-1] == '\n'
+
+def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
+    ''' Test that error is thrown when conversion file types are not compatible'''
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        # test --input_file_type
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2_nml.cfg"))
+        args = ['-i', input_file, '--input_file_type', ".pdf"]
+
+        with pytest.raises(ValueError):
+            set_config.create_config_obj(args)
+
+        # test --config_file_type
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
+        config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
+        args = ['-i', input_file, '-c', config_file, '--config_file_type', ".yaml"]
+
+        with pytest.raises(ValueError):
+            set_config.create_config_obj(args)
+
+        # test --ouput_file_type
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
+        out_file = f'{tmp_dir}/test_outfile_conversion.yaml'
+        args = ['-i', input_file, '-o', out_file, '--output_file_type', ".nml"]
+
+        with pytest.raises(ValueError):
+            set_config.create_config_obj(args)
