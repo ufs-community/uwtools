@@ -10,6 +10,7 @@ import argparse
 import pathlib
 from uwtools import config
 from uwtools.logger import Logger
+from uwtools.templater import get_file_type
 
 
 
@@ -20,9 +21,6 @@ def path_if_file_exists(arg):
         raise argparse.ArgumentTypeError(msg)
     return arg
 
-def get_file_type(arg):
-    '''Gets the file type from the path'''
-    return pathlib.Path(arg).suffix
 
 def parse_args(argv):
 
@@ -77,18 +75,21 @@ def parse_args(argv):
         '--input_file_type',
         help='If provided, will convert provided input file to provided file type.\
             Accepts YAML, bash/ini or namelist',
+        choices=["YAML", "INI", "F90"],
     )
 
     parser.add_argument(
         '--config_file_type',
         help='If provided, will convert provided config file to provided file type.\
             Accepts YAML, bash/ini or namelist',
+        choices=["YAML", "INI", "F90"],
     )
 
     parser.add_argument(
         '--output_file_type',
         help='If provided, will convert provided output file to provided file type.\
             Accepts YAML, bash/ini or namelist',
+        choices=["YAML", "INI", "F90", "FieldTable"],
     )
     return parser.parse_args(argv)
 
@@ -106,35 +107,14 @@ def create_config_obj(argv):
 
     infile_type = user_args.input_file_type or get_file_type(user_args.input_base_file)
 
-    if infile_type in [".yaml", ".yml"]:
-        config_obj = config.YAMLConfig(user_args.input_base_file)
-        infile_type = ".yaml"
-
-    elif infile_type in [".bash", ".sh", ".ini", ".IN"]:
-        config_obj = config.INIConfig(user_args.input_base_file)
-        infile_type = ".ini"
-
-    elif infile_type == ".nml":
-        config_obj = config.F90Config(user_args.input_base_file)
-
-    else:
-        log.critical("Set config failure: bad file type")
-        raise ValueError("Set config failure: input base file not compatible")
-
+    config_obj = getattr(config,
+                         f"{infile_type}Config")(user_args.input_base_file)
 
     if user_args.config_file:
         config_file_type = user_args.config_file_type or get_file_type(user_args.config_file)
 
-        if config_file_type in [".yaml", ".yml"]:
-            user_config_obj = config.YAMLConfig(user_args.config_file)
-            config_file_type = ".yaml"
-
-        elif config_file_type in [".bash", ".sh", ".ini", ".IN"]:
-            user_config_obj = config.INIConfig(user_args.config_file)
-            config_file_type = ".ini"
-
-        elif config_file_type == ".nml":
-            user_config_obj = config.F90Config(user_args.config_file)
+        user_config_obj = getattr(config, 
+                         f"{config_file_type}Config")(user_args.config_file)
 
         if config_file_type != infile_type:
             config_depth = user_config_obj.dictionary_depth(user_config_obj.data)
@@ -178,22 +158,10 @@ def create_config_obj(argv):
 
     if user_args.outfile:
         outfile_type = user_args.output_file_type or get_file_type(user_args.outfile)
-        if outfile_type != infile_type:
-            if outfile_type in [".yaml", ".yml"]:
-                out_object = config.YAMLConfig()
-            elif outfile_type in [".bash", ".sh", ".ini", ".IN"]:
-                if config_obj.dictionary_depth(config_obj.data) > 2:
-                    log.critical("Set config failure: incompatible file types")
-                    raise ValueError("Set config failure: output object not compatible with input")
-                out_object = config.INIConfig()
-            elif outfile_type == ".nml":
-                if config_obj.dictionary_depth(config_obj.data) != 2:
-                    log.critical("Set config failure: incompatible file types")
-                    raise ValueError("Set config failure: output object not compatible with input")
-                out_object = config.F90Config()
-            else:
-                out_object = config.FieldTableConfig()
+        out_object = getattr(config, 
+                         f"{outfile_type}Config")(user_args.outfile)
 
+        if outfile_type != infile_type:
             out_object.update(config_obj)
 
             output_depth = out_object.dictionary_depth(out_object.data)
