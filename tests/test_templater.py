@@ -269,12 +269,12 @@ def test_set_template_verbosity(): #pylint: disable=unused-variable
     logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
 
     outcome=\
-    """Finished setting up debug file logging in """ + logfile  + """
+    f"""Finished setting up debug file logging in {logfile}
 Running script templater.py with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
- input_template: """ + input_file  + """
+ input_template: {input_file}
     config_file: None
    config_items: []
         dry_run: True
@@ -290,6 +290,7 @@ Running script templater.py with args:
   how_many = 22
   dressing = 'balsamic'
 /
+J2Template._load_file INPUT Args: \n{input_file}
 """
 
     os.environ['fruit'] = 'banana'
