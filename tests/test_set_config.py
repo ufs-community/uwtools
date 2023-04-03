@@ -228,7 +228,7 @@ def test_set_config_field_table(): #pylint: disable=unused-variable
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
         out_file = f'{tmp_dir}/field_table_from_yaml.FV3_GFS'
-        args = ['-i', input_file, '-o', out_file]
+        args = ['-i', input_file, '-o', out_file, '--output_file_type', "FieldTable"]
 
         set_config.create_config_obj(args)
 
@@ -288,7 +288,8 @@ None
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
         out_file = f'{tmp_dir}/field_table_from_yaml.FV3_GFS'
-        args = ['-i', input_file, '-o', out_file, '--show_format']
+        args = ['-i', input_file, '-o', out_file, '--show_format',
+                '--output_file_type', "FieldTable"]
 
         # Capture stdout for the required configuration settings
         outstring = io.StringIO()
@@ -474,7 +475,6 @@ def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
         with pytest.raises(SystemExit):
             set_config.create_config_obj(args)
 
-        print("CRH HERE")
         # test --config_file_type
         input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
         config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))

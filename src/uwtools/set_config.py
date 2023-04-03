@@ -148,8 +148,7 @@ def create_config_obj(argv):
 
     if user_args.dry_run:
         if user_args.outfile:
-            out_object = user_args.outfile
-            log.info(f'warning file {out_object} ',
+            log.info(f'warning file {user_args.outfile} ',
                  r"not written when using --dry_run")
         # apply switch to allow user to view the results of config
         # instead of writing to disk
@@ -158,14 +157,22 @@ def create_config_obj(argv):
 
     if user_args.outfile:
         outfile_type = user_args.output_file_type or get_file_type(user_args.outfile)
-        out_object = getattr(config, 
-                         f"{outfile_type}Config")(user_args.outfile)
 
         if outfile_type != infile_type:
+
+            out_object = getattr(config, f"{outfile_type}Config")()
             out_object.update(config_obj)
 
             output_depth = out_object.dictionary_depth(out_object.data)
             input_depth = config_obj.dictionary_depth(config_obj.data)
+
+            # Check for incompatible conversion objects
+
+            err_msg = "Set config failure: incompatible file types"
+            if (outfile_type == "INI" and input_depth > 2) or \
+                    (outfile_type == "F90" and input_depth != 2):
+                log.critical(err_msg)
+                raise ValueError(err_msg)
 
             if input_depth > output_depth:
                 log.critical(f"{user_args.outfile} not compatible with {user_args.input_base_file}")
