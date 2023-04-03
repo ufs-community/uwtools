@@ -2,10 +2,11 @@
 Logger
 """
 
-import sys
-from pathlib import Path
-from typing import Union, List
+import functools
 import logging
+from pathlib import Path
+import sys
+from typing import Union, List
 
 
 class ColoredFormatter(logging.Formatter):
@@ -146,8 +147,42 @@ class Logger:
         if not logfile_path.parent.is_dir():
             logfile_path.mkdir(parents=True, exist_ok=True)
 
-        handler = logging.FileHandler(str(logfile_path))
+        handler = logging.FileHandler(str(logfile_path), mode="w")
         handler.setLevel(level)
         handler.setFormatter(logging.Formatter(_format))
 
         return handler
+
+def verbose(_func=None):
+    """ Logs the caller and args to a function. """
+    def log_decorator_info(func):
+        @functools.wraps(func)
+        def log_decorator_wrapper(self, *args, **kwargs):
+
+            log = logging.getLogger(self._log.name)
+
+            # Gather the args passed into the function
+            args_passed_in_function = [repr(a) for a in args]
+
+            # Gather the keyword args passed into the function
+            kwargs_passed_in_function = [f"{k}={v!r}" for k, v in kwargs.items()]
+
+            formatted_arguments = "\n".join(args_passed_in_function + kwargs_passed_in_function)
+
+
+            func_name = f"{self.__class__.__name__}.{func.__name__}"
+            log.debug("{} INPUT Args: \n\t{}".format(func_name, formatted_arguments))
+            try:
+                """ log return value from the function """
+                value = func(self, *args, **kwargs)
+                log.debug("{} RETURNED {}".format(func_name, value))
+            except:
+                """log exception if occurs in function"""
+                log.error("Exception: {}".format(str(sys.exc_info()[1])))
+                raise
+            return value
+        return log_decorator_wrapper
+    if _func is None:
+        return log_decorator_info
+    return log_decorator_info(_func)
+
