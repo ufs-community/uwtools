@@ -7,19 +7,9 @@ This utility creates a command line interface for handling config files.
 import os
 import sys
 import argparse
-import pathlib
 from uwtools import config
 from uwtools.logger import Logger
-from uwtools.templater import get_file_type
-
-
-
-def path_if_file_exists(arg):
-    '''Checks whether a file exists, and returns the path if it does.'''
-    if not os.path.exists(arg):
-        msg = f'{arg} does not exist!'
-        raise argparse.ArgumentTypeError(msg)
-    return arg
+from uwtools.utils import cli_helpers
 
 
 def parse_args(argv):
@@ -38,7 +28,7 @@ def parse_args(argv):
         '-i', '--input_base_file',
         help='Path to a config base file. Accepts YAML, bash/ini or namelist',
         required=True,
-        type=path_if_file_exists,
+        type=cli_helpers.path_if_file_exists,
     )
 
     parser.add_argument(
@@ -50,7 +40,7 @@ def parse_args(argv):
     parser.add_argument(
         '-c', '--config_file',
         help='Optional path to configuration file. Accepts YAML, bash/ini or namelist',
-        type=path_if_file_exists,
+        type=cli_helpers.path_if_file_exists,
     )
 
     parser.add_argument(
@@ -91,27 +81,33 @@ def parse_args(argv):
             Accepts YAML, bash/ini or namelist',
         choices=["YAML", "INI", "F90", "FieldTable"],
     )
+    parser.add_argument(
+        '-v', '--verbose',
+        action='store_true',
+        help='If provided, print all logging messages.',
+        )
+    parser.add_argument(
+        '-q', '--quiet',
+        action='store_true',
+        help='If provided, print no logging messages',
+        )
     return parser.parse_args(argv)
 
 def create_config_obj(argv):
     '''Main section for processing config file'''
 
-    logfile = os.path.join(os.path.dirname(__file__), "set_config.log")
-    log = Logger(level='info',
-        _format='%(message)s',
-        colored_log= False,
-        logfile_path=logfile
-        )
-
     user_args = parse_args(argv)
 
-    infile_type = user_args.input_file_type or get_file_type(user_args.input_base_file)
+    logfile = os.path.join(os.path.dirname(__file__), "set_config.log")
+    log = cli_helpers.setup_logging(user_args, logfile=logfile)
+
+    infile_type = user_args.input_file_type or cli_helpers.get_file_type(user_args.input_base_file)
 
     config_obj = getattr(config,
                          f"{infile_type}Config")(user_args.input_base_file)
 
     if user_args.config_file:
-        config_file_type = user_args.config_file_type or get_file_type(user_args.config_file)
+        config_file_type = user_args.config_file_type or cli_helpers.get_file_type(user_args.config_file)
 
         user_config_obj = getattr(config, 
                          f"{config_file_type}Config")(user_args.config_file)
@@ -156,7 +152,7 @@ def create_config_obj(argv):
         return
 
     if user_args.outfile:
-        outfile_type = user_args.output_file_type or get_file_type(user_args.outfile)
+        outfile_type = user_args.output_file_type or cli_helpers.get_file_type(user_args.outfile)
 
         if outfile_type != infile_type:
 

@@ -12,6 +12,8 @@ import pytest
 from uwtools import config
 from uwtools import set_config
 
+import uwtools.utils.cli_helpers as cli_helpers
+
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -40,11 +42,11 @@ def test_path_if_file_exists(): #pylint: disable=unused-variable
     non-existant path.'''
 
     with tempfile.NamedTemporaryFile(dir='.', mode='w') as tmp_file:
-        assert set_config.path_if_file_exists(tmp_file.name)
+        assert cli_helpers.path_if_file_exists(tmp_file.name)
 
     with pytest.raises(argparse.ArgumentTypeError):
         not_a_filepath = './no_way_this_file_exists.nope'
-        set_config.path_if_file_exists(not_a_filepath)
+        cli_helpers.path_if_file_exists(not_a_filepath)
 
 def test_set_config_yaml_simple(): #pylint: disable=unused-variable
     ''' Test that providing a YAML base file with necessary settings 

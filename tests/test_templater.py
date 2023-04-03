@@ -33,24 +33,12 @@ def compare_files(expected, actual):
 
     return True
 
-def test_path_if_file_exists(): #pylint: disable=unused-variable
-    """ Make sure the function works as expected. It is used as a type in
-    argparse, so raises an argparse exception when the user provides a
-    non-existent path"""
-
-    with tempfile.NamedTemporaryFile(dir='.', mode='w') as tmp_file:
-        assert templater.path_if_file_exists(tmp_file.name)
-
-    with pytest.raises(argparse.ArgumentTypeError):
-        not_a_filepath = './no_way_this_file_exists.nope'
-        templater.path_if_file_exists(not_a_filepath)
-
 def test_set_template_dryrun(): #pylint: disable=unused-variable
     """Unit test for checking dry-run output of ingest namelist tool"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
     outcome=\
-    """Running script templater.py with args:
+    """Running script with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
@@ -94,7 +82,7 @@ def test_set_template_listvalues(): #pylint: disable=unused-variable
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     outcome=\
-    """Running script templater.py with args:
+    """Running script with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
@@ -197,7 +185,7 @@ def test_set_template_command_line_config(): #pylint: disable=unused-variable
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     outcome=\
-    """Running script templater.py with args:
+    """Running script with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
@@ -267,7 +255,7 @@ def test_set_template_verbosity(): #pylint: disable=unused-variable
 
     outcome=\
     """Finished setting up debug file logging in """ + logfile  + """
-Running script templater.py with args:
+Running script with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None

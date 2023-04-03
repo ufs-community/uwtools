@@ -15,19 +15,8 @@ import sys
 from uwtools.j2template import J2Template
 from uwtools import config
 from uwtools.logger import Logger
+import uwtools.utils.cli_helpers as cli_helpers
 
-def dict_from_config_args(args):
-    '''Given a list of command line arguments in the form key=value, return a
-    dictionary of key/value pairs.'''
-    return dict([arg.split('=') for arg in args])
-
-def path_if_file_exists(arg):
-    ''' Checks whether a file exists, and returns the path if it does. '''
-    if not os.path.exists(arg):
-        msg = f'{arg} does not exist!'
-        raise argparse.ArgumentTypeError(msg)
-
-    return os.path.abspath(arg)
 
 def parse_args(argv):
 
@@ -48,13 +37,13 @@ def parse_args(argv):
         '-i', '--input_template',
         help='Path to a Jinja2 template file.',
         required=True,
-        type=path_if_file_exists,
+        type=cli_helpers.path_if_file_exists,
         )
     parser.add_argument(
         '-c', '--config_file',
         help='Optional path to a YAML configuration file. If not provided, '
         'os.environ is used to configure.',
-        type=path_if_file_exists,
+        type=cli_helpers.path_if_file_exists,
         )
     parser.add_argument(
         'config_items',
@@ -85,77 +74,40 @@ def parse_args(argv):
         )
     return parser.parse_args(argv)
 
-def get_file_type(arg):
-    ''' Returns a standardized file type given the suffix of the input
-    arg. '''
-
-    suffix = pathlib.Path(arg).suffix
-    if suffix in [".yaml", ".yml"]:
-        return "YAML"
-    if suffix in [".bash", ".sh", ".ini", ".cfg"]:
-        return "INI"
-    if suffix in [".nml"]:
-        return "F90"
-    msg = f"Bad file suffix -- {suffix}. Cannot determine file type!"
-    logging.critical(msg)
-    raise ValueError(msg)
-
 def setup_config_obj(user_args):
 
     ''' Return a dictionary config object from a user-supplied config,
     the os environment, and the command line arguments. '''
 
     if user_args.config_file:
-        config_type = get_file_type(user_args.config_file)
+        config_type = cli_helpers.get_file_type(user_args.config_file)
         cfg = getattr(config, f"{config_type}Config")(user_args.config_file)
     else:
         cfg = os.environ
 
     if user_args.config_items:
-        user_settings = dict_from_config_args(user_args.config_items)
+        user_settings = cli_helpers.dict_from_config_args(user_args.config_items)
         cfg.update(user_settings)
 
     return cfg
-
-def setup_logging(user_args):
-
-    ''' Create the Logger object '''
-
-    logfile = os.path.join(os.path.dirname(__file__), "templater.log")
-    log = Logger(level='info',
-        _format='%(message)s',
-        colored_log= False,
-        logfile_path=logfile
-        )
-    if user_args.verbose:
-        log.handlers.clear()
-        log = Logger(level='debug',
-            _format='%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s',
-            colored_log= True,
-            logfile_path=logfile
-            )
-        log.debug(r"Finished setting up debug file logging in {logfile}".format(logfile=logfile))
-    elif user_args.quiet:
-        log.handlers.clear()
-        log.propagate = False
-
-    return log
 
 
 def set_template(argv):
     '''Main section for rendering and writing a template file'''
     user_args = parse_args(argv)
 
-    log = setup_logging(user_args)
+    logfile = os.path.join(os.path.dirname(__file__), "templater.log")
+    log = cli_helpers.setup_logging(user_args, logfile=logfile)
 
-    log.info(f"""Running script templater.py with args:
-{('-' * 70)}
-{('-' * 70)}""")
+    log.info("""Running script with args:""")
+    log.info(f"{('-' * 70)}")
+    log.info(f"{('-' * 70)}")
     for name, val in user_args.__dict__.items():
         if name not in ["config"]:
             log.info("{name:>15s}: {val}".format(name=name, val=val))
-    log.info(f"""{('-' * 70)}
-{('-' * 70)}""")
+
+    log.info(f"{('-' * 70)}")
+    log.info(f"{('-' * 70)}")
 
     cfg = setup_config_obj(user_args)
 
