@@ -115,7 +115,7 @@ def setup_config_obj(user_args, log_name=None):
     if user_args.config_file:
         config_type = get_file_type(user_args.config_file)
         cfg_obj = getattr(config, f"{config_type}Config")
-        cfg = cfg_obj(user_args.config_file, log_name=log_name)
+        cfg = cfg_obj(user_args.config_file)
         log.debug("User config will be used to fill template.")
     else:
         cfg = os.environ
