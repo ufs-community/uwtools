@@ -145,7 +145,8 @@ def setup_logging(user_args, log_name=None):
             logfile_path=user_args.log_file,
             name=log_name,
             )
-        log.debug(r"Finished setting up debug file logging in {logfile}".format(logfile=user_args.log_file))
+        msg = f"Finished setting up debug file logging in {user_args.log_file}"
+        log.debug(msg)
     elif user_args.quiet:
         log.handlers.clear()
         log.propagate = False

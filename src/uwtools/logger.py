@@ -159,7 +159,7 @@ def verbose(_func=None):
         @functools.wraps(func)
         def log_decorator_wrapper(self, *args, **kwargs):
 
-            log = logging.getLogger(self._log.name)
+            log = logging.getLogger(self.log.name)
 
             # Gather the args passed into the function
             args_passed_in_function = [repr(a) for a in args]
@@ -167,22 +167,20 @@ def verbose(_func=None):
             # Gather the keyword args passed into the function
             kwargs_passed_in_function = [f"{k}={v!r}" for k, v in kwargs.items()]
 
+            # Format the output a little
             formatted_arguments = "\n".join(args_passed_in_function + kwargs_passed_in_function)
 
-
             func_name = f"{self.__class__.__name__}.{func.__name__}"
-            log.debug("{} INPUT Args: \n\t{}".format(func_name, formatted_arguments))
+            log.debug("%s INPUT Args: \n\t%s", func_name, formatted_arguments)
             try:
-                """ log return value from the function """
+                # Capture the return value from the decorated function
                 value = func(self, *args, **kwargs)
-                log.debug("{} RETURNED {}".format(func_name, value))
+                log.debug("%s RETURNED %s", func_name, value)
             except:
-                """log exception if occurs in function"""
-                log.error("Exception: {}".format(str(sys.exc_info()[1])))
+                log.error("Exception: %s", str(sys.exc_info()[1]))
                 raise
             return value
         return log_decorator_wrapper
     if _func is None:
         return log_decorator_info
     return log_decorator_info(_func)
-

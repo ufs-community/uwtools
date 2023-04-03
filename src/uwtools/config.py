@@ -18,7 +18,7 @@ import f90nml
 import yaml
 
 from uwtools.j2template import J2Template
-import uwtools.logger as logger
+from uwtools import logger
 
 class Config(collections.UserDict):
 
@@ -71,7 +71,7 @@ class Config(collections.UserDict):
         super().__init__()
 
         self.config_path = config_path
-        self._log = logging.getLogger(log_name)
+        self.log = logging.getLogger(log_name)
 
     def __repr__(self):
         ''' This method will return configure contents'''
