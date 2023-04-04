@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=consider-using-f-string
+#pylint: disable=consider-using-f-string, duplicate-code
 
 '''
 This utility renders a Jinja2 template using user-supplied configuration options
@@ -7,15 +7,12 @@ via YAML or environment variables.
 '''
 
 import argparse
-import logging
 import os
-import pathlib
 import sys
 
 from uwtools.j2template import J2Template
 from uwtools import config
-from uwtools.logger import Logger
-import uwtools.utils.cli_helpers as cli_helpers
+from uwtools.utils import cli_helpers
 
 
 def parse_args(argv):

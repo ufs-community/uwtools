@@ -8,7 +8,6 @@ import argparse
 import logging
 import os
 import pathlib
-import sys
 
 from uwtools.logger import Logger
 
@@ -57,10 +56,9 @@ def setup_logging(user_args, logfile=None):
             colored_log= True,
             logfile_path=logfile
             )
-        log.debug(r"Finished setting up debug file logging in {logfile}".format(logfile=logfile))
+        log.debug("Finished setting up debug file logging in %s", logfile)
     elif user_args.quiet:
         log.handlers.clear()
         log.propagate = False
 
     return log
-

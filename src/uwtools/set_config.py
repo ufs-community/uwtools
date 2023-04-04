@@ -8,7 +8,6 @@ import os
 import sys
 import argparse
 from uwtools import config
-from uwtools.logger import Logger
 from uwtools.utils import cli_helpers
 
 
@@ -107,9 +106,10 @@ def create_config_obj(argv):
                          f"{infile_type}Config")(user_args.input_base_file)
 
     if user_args.config_file:
-        config_file_type = user_args.config_file_type or cli_helpers.get_file_type(user_args.config_file)
+        config_file_type = user_args.config_file_type or \
+                cli_helpers.get_file_type(user_args.config_file)
 
-        user_config_obj = getattr(config, 
+        user_config_obj = getattr(config,
                          f"{config_file_type}Config")(user_args.config_file)
 
         if config_file_type != infile_type:
