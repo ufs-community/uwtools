@@ -2,7 +2,6 @@
 Tests for templater tool.
 """
 from contextlib import redirect_stdout
-import argparse
 import io
 import os
 import shutil

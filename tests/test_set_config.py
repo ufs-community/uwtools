@@ -12,7 +12,7 @@ import pytest
 from uwtools import config
 from uwtools import set_config
 
-import uwtools.utils.cli_helpers as cli_helpers
+from uwtools.utils import cli_helpers
 
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
