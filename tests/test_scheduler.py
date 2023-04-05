@@ -7,7 +7,7 @@ from uwtools import config
 
 
 def test_scheduler_dot_notation():
-    props = config.YAMLConfig(pathlib.Path("tests/fixtures/simple2.yaml"))
+    props = config.YAMLConfig(pathlib.Path("tests","fixtures","simple2.yaml"))
 
     js = JobScheduler.get_scheduler(props)
     expected = "user_account"

@@ -14,7 +14,7 @@ def test_all_templates_replaced(): #pylint: disable=unused-variable
     ''' Test that all atparse @[] items are replaced with Jinja2
     templates {{ }} '''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/ww3_multi.inp.IN"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","ww3_multi.inp.IN"))
 
     args = ["-i", input_file, "-d"]
 

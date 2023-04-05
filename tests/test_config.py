@@ -20,7 +20,7 @@ uwtools_file_base = os.path.join(os.path.dirname(__file__))
 def test_parse_include():
     '''Test that non-YAML handles !INCLUDE Tags properly'''
 
-    test_nml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/include_files.nml"))
+    test_nml = os.path.join(uwtools_file_base,pathlib.Path("fixtures","include_files.nml"))
     cfg = config.F90Config(test_nml)
 
     # salad key tests loading one file.
@@ -35,7 +35,7 @@ def test_parse_include_mult_sect():
     ''' Test that non-YAML handles !INCLUDE tags with files that have
     multiple sections in separate file. '''
 
-    test_nml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/include_files_with_sect.nml"))
+    test_nml = os.path.join(uwtools_file_base,pathlib.Path("fixtures","include_files_with_sect.nml"))
     cfg = config.F90Config(test_nml)
 
     # salad key tests loading one file.
@@ -51,7 +51,7 @@ def test_parse_include_ini():
     '''Test that non-YAML handles !INCLUDE Tags properly for INI with no
     sections'''
 
-    test_file = os.path.join(uwtools_file_base,pathlib.Path("fixtures/include_files.sh"))
+    test_file = os.path.join(uwtools_file_base,pathlib.Path("fixtures","include_files.sh"))
     cfg = config.INIConfig(test_file, space_around_delimiters=False)
 
     # salad key tests loading one file.
@@ -63,7 +63,7 @@ def test_parse_include_ini():
 def test_yaml_config_simple():
     '''Test that YAML load, update, and dump work with a basic YAML file. '''
 
-    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple2.yaml"))
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures","simple2.yaml"))
     cfg = config.YAMLConfig(test_yaml)
 
     expected = {
@@ -93,7 +93,7 @@ def test_yaml_config_composite_types():
     ''' Test that YAML load and dump work with a YAML file that has
     multiple data structures and levels. '''
 
-    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/result4.yaml"))
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures","result4.yaml"))
     cfg = config.YAMLConfig(test_yaml)
 
     assert cfg.get('step_cycle') == 'PT6H'
@@ -112,7 +112,7 @@ def test_yaml_config_include_files():
     ''' Test that including files via the !INCLUDE constructor works as
     expected. '''
 
-    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/include_files.yaml"))
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures","include_files.yaml"))
     cfg = config.YAMLConfig(test_yaml)
 
     # salad key tests loading one file. there should be 4 items under salad
@@ -134,7 +134,7 @@ def test_yaml_config_include_files():
 def test_f90nml_config_simple():
     '''Test that f90nml load, update, and dump work with a basic f90 namelist file. '''
 
-    test_nml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.nml"))
+    test_nml = os.path.join(uwtools_file_base,pathlib.Path("fixtures","simple.nml"))
     cfg = config.F90Config(test_nml)
 
     expected = {
@@ -165,7 +165,7 @@ def test_ini_config_simple():
     Everything in INI is treated as a string!
     '''
 
-    test_ini = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.ini"))
+    test_ini = os.path.join(uwtools_file_base,pathlib.Path("fixtures","simple.ini"))
     cfg = config.INIConfig(test_ini)
 
     expected = {
@@ -194,7 +194,7 @@ def test_ini_config_bash():
     '''Test that INI config load and dump work with a basic bash file.
     '''
 
-    test_bash = os.path.join(uwtools_file_base,pathlib.Path("fixtures/simple.sh"))
+    test_bash = os.path.join(uwtools_file_base,pathlib.Path("fixtures","simple.sh"))
     cfg = config.INIConfig(test_bash, space_around_delimiters=False)
 
     expected = {
@@ -272,7 +272,7 @@ def test_dereference():
 
     os.environ['UFSEXEC'] = '/my/path/'
 
-    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures/gfs.yaml"))
+    test_yaml = os.path.join(uwtools_file_base,pathlib.Path("fixtures","gfs.yaml"))
     cfg = config.YAMLConfig(test_yaml)
     cfg.dereference_all()
 
@@ -369,17 +369,17 @@ def test_dictionary_depth():
 
     ''' Test that the proper dictionary depth is being returned for each file type. '''
 
-    input_yaml = os.path.join(uwtools_file_base, pathlib.Path("fixtures/FV3_GFS_v16.yaml"))
+    input_yaml = os.path.join(uwtools_file_base, pathlib.Path("fixtures","FV3_GFS_v16.yaml"))
     config_obj = config.YAMLConfig(input_yaml)
     depth = config_obj.dictionary_depth(config_obj.data)
     assert 3 == depth
 
-    input_nml = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
+    input_nml = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple.nml"))
     config_obj = config.F90Config(input_nml)
     depth = config_obj.dictionary_depth(config_obj.data)
     assert 2 == depth
 
-    input_ini = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.ini"))
+    input_ini = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple2.ini"))
     config_obj = config.INIConfig(input_ini)
     depth = config_obj.dictionary_depth(config_obj.data)
     assert 2 == depth

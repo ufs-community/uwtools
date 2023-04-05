@@ -50,7 +50,7 @@ def test_set_config_yaml_simple(): #pylint: disable=unused-variable
     ''' Test that providing a YAML base file with necessary settings 
     will create a YAML config file'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.yaml"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple2.yaml"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
@@ -69,7 +69,7 @@ def test_set_config_ini_simple(): #pylint: disable=unused-variable
     ''' Test that providing a basic INI file with necessary settings 
     will create an INI config file'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.ini"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple.ini"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dr:
         out_file = f'{tmp_dr}/test_config_from_ini.ini'
@@ -87,7 +87,7 @@ def test_set_config_f90nml_simple(): #pylint: disable=unused-variable
     '''Test that providing basic f90nml file with necessary settings
     will create f90nml config file'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple.nml"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dr:
 
@@ -106,7 +106,7 @@ def test_set_config_bash_simple(): #pylint: disable=unused-variable
     '''Test that providing bash file with necessary settings will 
     create an INI config file'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.sh"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple.sh"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dr:
 
@@ -126,8 +126,8 @@ def test_set_config_yaml_config_file(): #pylint: disable=unused-variable
     '''Test that providing a yaml base input file and a config file will
     create and update yaml config file'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.yaml"))
-    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config_similar.yaml"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","fruit_config.yaml"))
+    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","fruit_config_similar.yaml"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
@@ -148,8 +148,8 @@ def test_set_config_f90nml_config_file(): #pylint: disable=unused-variable
     '''Test that providing a F90nml base input file and a config file will
     create and update F90nml config file'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
-    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple.nml"))
+    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple2.nml"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
@@ -170,8 +170,8 @@ def test_set_config_ini_config_file(): #pylint: disable=unused-variable
     '''Test that aproviding INI base input file and a config file will 
     create and update INI config file'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.ini"))
-    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.ini"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple.ini"))
+    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple2.ini"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
@@ -192,8 +192,8 @@ def test_set_config_ini_bash_config_file(): #pylint: disable=unused-variable
     '''Test that aproviding INI base input file and a config file will 
     create and update INI config file'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.ini"))
-    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.sh"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple.ini"))
+    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","fruit_config.sh"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
@@ -214,7 +214,7 @@ def test_incompatible_file_type(): #pylint: disable=unused-variable
     '''Test that providing an incompatible file type for input base file will 
     return print statement'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/model_configure.sample"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","model_configure.sample"))
     args = ['-i', input_file]
 
     with pytest.raises(ValueError):
@@ -243,7 +243,7 @@ def test_set_config_dry_run(): #pylint: disable=unused-variable
     ''' Test that providing a YAML base file with a dry run flag 
     will print an YAML config file'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.yaml"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","fruit_config.yaml"))
 
     args = ['-i', input_file, '-d']
 
@@ -302,7 +302,7 @@ def test_values_needed_yaml(): #pylint: disable=unused-variable
     '''Test that the values_needed flag logs keys completed, keys containing  
     unfilled jinja2 templates, and keys set to empty'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","srw_example.yaml"))
     args = ['-i', input_file, '--values_needed']
 
     # Capture stdout for values_needed output
@@ -335,7 +335,7 @@ def test_values_needed_ini(): #pylint: disable=unused-variable
     '''Test that the values_needed flag logs keys completed, keys containing  
     unfilled jinja2 templates, and keys set to empty'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple3.ini"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple3.ini"))
     args = ['-i', input_file, '--values_needed']
 
     # Capture stdout for values_needed output
@@ -370,7 +370,7 @@ def test_values_needed_f90nml(): #pylint: disable=unused-variable
     '''Test that the values_needed flag logs keys completed, keys containing  
     unfilled jinja2 templates, and keys set to empty'''
 
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple3.nml"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/","simple3.nml"))
     args = ['-i', input_file, '--values_needed']
 
     outstring = io.StringIO()
@@ -399,7 +399,7 @@ Keys that are set to empty:
 
 def test_cfg_to_yaml_conversion(): #pylint: disable=unused-variable
     ''' Test that a .cfg file can be used to create a yaml object.'''
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example_yaml.cfg"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","srw_example_yaml.cfg"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
@@ -420,7 +420,7 @@ def test_cfg_to_yaml_conversion(): #pylint: disable=unused-variable
 
 def test_output_file_conversion(): #pylint: disable=unused-variable
     ''' Test that --output_input_type converts config object to desired object type'''
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple.nml"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
@@ -440,8 +440,8 @@ def test_output_file_conversion(): #pylint: disable=unused-variable
 
 def test_config_file_conversion(): #pylint: disable=unused-variable
     ''' Test that --config_input_type converts config object to desired object type'''
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
-    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.ini"))
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple2.nml"))
+    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple2.ini"))
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
@@ -467,22 +467,22 @@ def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
         # test --input_file_type
-        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2_nml.cfg"))
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple2_nml.cfg"))
         args = ['-i', input_file, '--input_file_type', ".pdf"]
 
         with pytest.raises(ValueError):
             set_config.create_config_obj(args)
 
         # test --config_file_type
-        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
-        config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","simple2.nml"))
+        config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","srw_example.yaml"))
         args = ['-i', input_file, '-c', config_file, '--config_file_type', ".yaml"]
 
         with pytest.raises(ValueError):
             set_config.create_config_obj(args)
 
         # test --ouput_file_type
-        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
+        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures","srw_example.yaml"))
         out_file = f'{tmp_dir}/test_outfile_conversion.yaml'
         args = ['-i', input_file, '-o', out_file, '--output_file_type', ".nml"]
 

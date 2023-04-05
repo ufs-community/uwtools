@@ -41,7 +41,7 @@ def test_load_file():
     	'greeting': 'Hello',
     	'the_world': 'the world'
     }
-    test_path = os.path.join(uwtools_file_base,pathlib.Path("fixtures/J2Template.IN"))
+    test_path = os.path.join(uwtools_file_base,pathlib.Path("fixtures","J2Template.IN"))
     template = J2Template(test_config, template_path=test_path)
     assert template.render_template() == template_str
     assert template.undeclared_variables == output

@@ -48,7 +48,7 @@ def test_path_if_file_exists(): #pylint: disable=unused-variable
 def test_set_template_dryrun(): #pylint: disable=unused-variable
     """Unit test for checking dry-run output of ingest namelist tool"""
 
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+    input_file = os.path.join(uwtools_file_base, "fixtures","nml.IN")
     outcome=\
     """Running script templater.py with args:
 ----------------------------------------------------------------------
@@ -91,7 +91,7 @@ def test_set_template_dryrun(): #pylint: disable=unused-variable
 def test_set_template_listvalues(): #pylint: disable=unused-variable
     """Unit test for checking values_needed output of ingest namelist tool"""
 
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+    input_file = os.path.join(uwtools_file_base, "fixtures","nml.IN")
 
     outcome=\
     """Running script templater.py with args:
@@ -130,9 +130,9 @@ def test_set_template_yaml_config(): #pylint: disable=unused-variable
     ''' Test that providing a YAML file with necessary settings works to fill in
     the Jinja template. Test the writing mechanism, too '''
 
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
-    config_file = os.path.join(uwtools_file_base, "fixtures/fruit_config.yaml")
-    expected_file = os.path.join(uwtools_file_base, "fixtures/simple2.nml")
+    input_file = os.path.join(uwtools_file_base, "fixtures","nml.IN")
+    config_file = os.path.join(uwtools_file_base, "fixtures","fruit_config.yaml")
+    expected_file = os.path.join(uwtools_file_base, "fixtures","simple2.nml")
 
     # Also make sure that we're really pulling from the input file. Set
     # environment variables different from those in config_file
@@ -194,7 +194,7 @@ def test_set_template_command_line_config(): #pylint: disable=unused-variable
     '''Test that values provided on the command line produce the appropriate
     output.'''
 
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+    input_file = os.path.join(uwtools_file_base, "fixtures","nml.IN")
 
     outcome=\
     """Running script templater.py with args:
@@ -239,11 +239,11 @@ def test_set_template_yaml_config_model_configure(): #pylint: disable=unused-var
     file. '''
 
     input_file = os.path.join(uwtools_file_base,
-                              "fixtures/model_configure.sample.IN")
+                              "fixtures","model_configure.sample.IN")
     config_file = os.path.join(uwtools_file_base,
-                               "fixtures/model_configure.values.yaml")
+                               "fixtures","model_configure.values.yaml")
     expected_file = os.path.join(uwtools_file_base,
-                                 "fixtures/model_configure.sample")
+                                 "fixtures","model_configure.sample")
 
     # Make sure the output file matches the expected output
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
@@ -262,7 +262,7 @@ def test_set_template_yaml_config_model_configure(): #pylint: disable=unused-var
 def test_set_template_verbosity(): #pylint: disable=unused-variable
     """Unit test for checking dry-run output of ingest namelist tool"""
 
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
+    input_file = os.path.join(uwtools_file_base, "fixtures","nml.IN")
     logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
 
     outcome=\
