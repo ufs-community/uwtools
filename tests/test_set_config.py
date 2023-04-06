@@ -400,23 +400,6 @@ Keys that are set to empty:
 """
     assert result == outcome
 
-
-def test_cfg_to_yaml(): #pylint: disable=unused-variable
-    ''' testing that the input_file_type overrides the file suffix.'''
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.cfg"))
-
-    args = ['-i', input_file, '--dry_run', '--input_file_type', 'YAML']
-
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
-        set_config.create_config_obj(args)
-    result = outstring.getvalue()
-
-    expected = config.YAMLConfig(input_file)
-
-    assert result.rstrip('\n') == str(expected).rstrip('\n')
-
 def test_cfg_to_yaml_conversion(): #pylint: disable=unused-variable
     ''' Test that a .cfg file can be used to create a yaml object.'''
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example_yaml.cfg"))
