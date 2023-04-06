@@ -4,25 +4,14 @@
 '''
 This utility creates a command line interface for handling config files.
 '''
+import argparse
+import inspect
 import os
 import sys
-import argparse
-import pathlib
+
 from uwtools import config
-from uwtools.logger import Logger
+from uwtools.utils import cli_helpers
 
-
-
-def path_if_file_exists(arg):
-    '''Checks whether a file exists, and returns the path if it does.'''
-    if not os.path.exists(arg):
-        msg = f'{arg} does not exist!'
-        raise argparse.ArgumentTypeError(msg)
-    return arg
-
-def get_file_type(arg):
-    '''Gets the file type from the path'''
-    return pathlib.Path(arg).suffix
 
 def parse_args(argv):
 
@@ -40,7 +29,7 @@ def parse_args(argv):
         '-i', '--input_base_file',
         help='Path to a config base file. Accepts YAML, bash/ini or namelist',
         required=True,
-        type=path_if_file_exists,
+        type=cli_helpers.path_if_file_exists,
     )
 
     parser.add_argument(
@@ -52,7 +41,7 @@ def parse_args(argv):
     parser.add_argument(
         '-c', '--config_file',
         help='Optional path to configuration file. Accepts YAML, bash/ini or namelist',
-        type=path_if_file_exists,
+        type=cli_helpers.path_if_file_exists,
     )
 
     parser.add_argument(
@@ -77,64 +66,58 @@ def parse_args(argv):
         '--input_file_type',
         help='If provided, will convert provided input file to provided file type.\
             Accepts YAML, bash/ini or namelist',
+        choices=["YAML", "INI", "F90"],
     )
 
     parser.add_argument(
         '--config_file_type',
         help='If provided, will convert provided config file to provided file type.\
             Accepts YAML, bash/ini or namelist',
+        choices=["YAML", "INI", "F90"],
     )
 
     parser.add_argument(
         '--output_file_type',
         help='If provided, will convert provided output file to provided file type.\
             Accepts YAML, bash/ini or namelist',
+        choices=["YAML", "INI", "F90", "FieldTable"],
     )
+    parser.add_argument(
+        '-v', '--verbose',
+        action='store_true',
+        help='If provided, print all logging messages.',
+        )
+    parser.add_argument(
+        '-q', '--quiet',
+        action='store_true',
+        help='If provided, print no logging messages',
+        )
+    parser.add_argument(
+        '-l', '--log_file',
+        help='Optional path to a specified log file',
+        default=os.path.join(os.path.dirname(__file__), "set_config.log")
+        )
     return parser.parse_args(argv)
 
 def create_config_obj(argv):
     '''Main section for processing config file'''
 
-    logfile = os.path.join(os.path.dirname(__file__), "set_config.log")
-    log = Logger(level='info',
-        _format='%(message)s',
-        colored_log= False,
-        logfile_path=logfile
-        )
-
     user_args = parse_args(argv)
 
-    infile_type = user_args.input_file_type or get_file_type(user_args.input_base_file)
+    name = f"{inspect.stack()[0][3]}"
+    log = cli_helpers.setup_logging(user_args, log_name=name)
 
-    if infile_type in [".yaml", ".yml"]:
-        config_obj = config.YAMLConfig(user_args.input_base_file)
-        infile_type = ".yaml"
+    infile_type = user_args.input_file_type or cli_helpers.get_file_type(user_args.input_base_file)
 
-    elif infile_type in [".bash", ".sh", ".ini", ".IN"]:
-        config_obj = config.INIConfig(user_args.input_base_file)
-        infile_type = ".ini"
-
-    elif infile_type == ".nml":
-        config_obj = config.F90Config(user_args.input_base_file)
-
-    else:
-        log.critical("Set config failure: bad file type")
-        raise ValueError("Set config failure: input base file not compatible")
-
+    config_obj = getattr(config,
+                         f"{infile_type}Config")(user_args.input_base_file)
 
     if user_args.config_file:
-        config_file_type = user_args.config_file_type or get_file_type(user_args.config_file)
+        config_file_type = user_args.config_file_type or \
+                cli_helpers.get_file_type(user_args.config_file)
 
-        if config_file_type in [".yaml", ".yml"]:
-            user_config_obj = config.YAMLConfig(user_args.config_file)
-            config_file_type = ".yaml"
-
-        elif config_file_type in [".bash", ".sh", ".ini", ".IN"]:
-            user_config_obj = config.INIConfig(user_args.config_file)
-            config_file_type = ".ini"
-
-        elif config_file_type == ".nml":
-            user_config_obj = config.F90Config(user_args.config_file)
+        user_config_obj = getattr(config,
+                         f"{config_file_type}Config")(user_args.config_file)
 
         if config_file_type != infile_type:
             config_depth = user_config_obj.dictionary_depth(user_config_obj.data)
@@ -168,8 +151,7 @@ def create_config_obj(argv):
 
     if user_args.dry_run:
         if user_args.outfile:
-            out_object = user_args.outfile
-            log.info(f'warning file {out_object} ',
+            log.info(f'warning file {user_args.outfile} ',
                  r"not written when using --dry_run")
         # apply switch to allow user to view the results of config
         # instead of writing to disk
@@ -177,27 +159,23 @@ def create_config_obj(argv):
         return
 
     if user_args.outfile:
-        outfile_type = user_args.output_file_type or get_file_type(user_args.outfile)
-        if outfile_type != infile_type:
-            if outfile_type in [".yaml", ".yml"]:
-                out_object = config.YAMLConfig()
-            elif outfile_type in [".bash", ".sh", ".ini", ".IN"]:
-                if config_obj.dictionary_depth(config_obj.data) > 2:
-                    log.critical("Set config failure: incompatible file types")
-                    raise ValueError("Set config failure: output object not compatible with input")
-                out_object = config.INIConfig()
-            elif outfile_type == ".nml":
-                if config_obj.dictionary_depth(config_obj.data) != 2:
-                    log.critical("Set config failure: incompatible file types")
-                    raise ValueError("Set config failure: output object not compatible with input")
-                out_object = config.F90Config()
-            else:
-                out_object = config.FieldTableConfig()
+        outfile_type = user_args.output_file_type or cli_helpers.get_file_type(user_args.outfile)
 
+        if outfile_type != infile_type:
+
+            out_object = getattr(config, f"{outfile_type}Config")()
             out_object.update(config_obj)
 
             output_depth = out_object.dictionary_depth(out_object.data)
             input_depth = config_obj.dictionary_depth(config_obj.data)
+
+            # Check for incompatible conversion objects
+
+            err_msg = "Set config failure: incompatible file types"
+            if (outfile_type == "INI" and input_depth > 2) or \
+                    (outfile_type == "F90" and input_depth != 2):
+                log.critical(err_msg)
+                raise ValueError(err_msg)
 
             if input_depth > output_depth:
                 log.critical(f"{user_args.outfile} not compatible with {user_args.input_base_file}")

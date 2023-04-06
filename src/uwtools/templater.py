@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=consider-using-f-string
+#pylint: disable=consider-using-f-string, duplicate-code
 
 '''
 This utility renders a Jinja2 template using user-supplied configuration options
@@ -10,25 +10,12 @@ import argparse
 import inspect
 import logging
 import os
-import pathlib
 import sys
 
 from uwtools.j2template import J2Template
 from uwtools import config
-from uwtools.logger import Logger
+from uwtools.utils import cli_helpers
 
-def dict_from_config_args(args):
-    '''Given a list of command line arguments in the form key=value, return a
-    dictionary of key/value pairs.'''
-    return dict([arg.split('=') for arg in args])
-
-def path_if_file_exists(arg):
-    ''' Checks whether a file exists, and returns the path if it does. '''
-    if not os.path.exists(arg):
-        msg = f'{arg} does not exist!'
-        raise argparse.ArgumentTypeError(msg)
-
-    return os.path.abspath(arg)
 
 def parse_args(argv):
 
@@ -49,13 +36,13 @@ def parse_args(argv):
         '-i', '--input_template',
         help='Path to a Jinja2 template file.',
         required=True,
-        type=path_if_file_exists,
+        type=cli_helpers.path_if_file_exists,
         )
     parser.add_argument(
         '-c', '--config_file',
         help='Optional path to a YAML configuration file. If not provided, '
         'os.environ is used to configure.',
-        type=path_if_file_exists,
+        type=cli_helpers.path_if_file_exists,
         )
     parser.add_argument(
         'config_items',
@@ -91,21 +78,6 @@ def parse_args(argv):
         )
     return parser.parse_args(argv)
 
-def get_file_type(arg):
-    ''' Returns a standardized file type given the suffix of the input
-    arg. '''
-
-    suffix = pathlib.Path(arg).suffix
-    if suffix in [".yaml", ".yml"]:
-        return "YAML"
-    if suffix in [".bash", ".sh", ".ini", ".cfg"]:
-        return "INI"
-    if suffix in [".nml"]:
-        return "F90"
-    msg = f"Bad file suffix -- {suffix}. Cannot determine file type!"
-    logging.critical(msg)
-    raise ValueError(msg)
-
 def setup_config_obj(user_args, log_name=None):
 
     ''' Return a dictionary config object from a user-supplied config,
@@ -113,7 +85,7 @@ def setup_config_obj(user_args, log_name=None):
 
     log = logging.getLogger(log_name)
     if user_args.config_file:
-        config_type = get_file_type(user_args.config_file)
+        config_type = cli_helpers.get_file_type(user_args.config_file)
         cfg_obj = getattr(config, f"{config_type}Config")
         cfg = cfg_obj(user_args.config_file)
         log.debug("User config will be used to fill template.")
@@ -122,46 +94,20 @@ def setup_config_obj(user_args, log_name=None):
         log.debug("Environment variables will be used to fill template.")
 
     if user_args.config_items:
-        user_settings = dict_from_config_args(user_args.config_items)
+        user_settings = cli_helpers.dict_from_config_args(user_args.config_items)
         cfg.update(user_settings)
         log.debug("Overwriting config with settings on command line")
 
     return cfg
-
-def setup_logging(user_args, log_name=None):
-
-    ''' Create the Logger object '''
-
-    log = Logger(level='info',
-        _format='%(message)s',
-        colored_log= False,
-        logfile_path=user_args.log_file,
-        name=log_name,
-        )
-    if user_args.verbose:
-        log.handlers.clear()
-        log = Logger(level='debug',
-            colored_log= True,
-            logfile_path=user_args.log_file,
-            name=log_name,
-            )
-        msg = f"Finished setting up debug file logging in {user_args.log_file}"
-        log.debug(msg)
-    elif user_args.quiet:
-        log.handlers.clear()
-        log.propagate = False
-
-    return log
-
 
 def set_template(argv):
     '''Main section for rendering and writing a template file'''
     user_args = parse_args(argv)
 
     name = f"{inspect.stack()[0][3]}"
-    log = setup_logging(user_args, log_name=name)
+    log = cli_helpers.setup_logging(user_args, log_name=name)
 
-    log.info("""Running script templater.py with args: """)
+    log.info("""Running script with args: """)
     log.info(f"""{('-' * 70)}""")
     log.info(f"""{('-' * 70)}""")
     for name, val in user_args.__dict__.items():
