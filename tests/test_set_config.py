@@ -401,25 +401,21 @@ Keys that are set to empty:
     assert result == outcome
 
 
-def test_cfg_to_yaml():
-    ''' testing that .cfg file can be used to create a yaml object.'''
+def test_cfg_to_yaml(): #pylint: disable=unused-variable
+    ''' testing that the input_file_type overrides the file suffix.'''
+
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.cfg"))
 
-    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+    args = ['-i', input_file, '--dry_run', '--input_file_type', 'YAML']
 
-        out_file = f'{tmp_dir}/test.yaml'
-        args = ['-i', input_file, '--dry_run', '--input_file_type', '.yaml']
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        set_config.create_config_obj(args)
+    result = outstring.getvalue()
 
-        outstring = io.StringIO()
-        with redirect_stdout(outstring):
-            set_config.create_config_obj(args)
-        result = outstring.getvalue()
+    expected = config.YAMLConfig(input_file)
 
-        expected = config.YAMLConfig(input_file)
-        expected_file = f'{tmp_dir}/test.yaml'
-        expected.dump_file(expected_file)
-
-        assert result.rstrip('\n') == str(expected)
+    assert result.rstrip('\n') == str(expected).rstrip('\n')
 
 def test_cfg_to_yaml_conversion(): #pylint: disable=unused-variable
     ''' Test that a .cfg file can be used to create a yaml object.'''

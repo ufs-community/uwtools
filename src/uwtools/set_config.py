@@ -53,7 +53,7 @@ def parse_args(argv):
     parser.add_argument(
         '--compare',
         action='store_true',
-        help='If provided, show diff between -i and -c files.', 
+        help='If provided, show diff between -i and -c files.',
     )
     parser.add_argument(
         '--show_format',
