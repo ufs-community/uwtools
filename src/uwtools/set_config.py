@@ -4,9 +4,11 @@
 '''
 This utility creates a command line interface for handling config files.
 '''
+import argparse
+import inspect
 import os
 import sys
-import argparse
+
 from uwtools import config
 from uwtools.utils import cli_helpers
 
@@ -90,6 +92,11 @@ def parse_args(argv):
         action='store_true',
         help='If provided, print no logging messages',
         )
+    parser.add_argument(
+        '-l', '--log_file',
+        help='Optional path to a specified log file',
+        default=os.path.join(os.path.dirname(__file__), "set_config.log")
+        )
     return parser.parse_args(argv)
 
 def create_config_obj(argv):
@@ -97,8 +104,8 @@ def create_config_obj(argv):
 
     user_args = parse_args(argv)
 
-    logfile = os.path.join(os.path.dirname(__file__), "set_config.log")
-    log = cli_helpers.setup_logging(user_args, logfile=logfile)
+    name = f"{inspect.stack()[0][3]}"
+    log = cli_helpers.setup_logging(user_args, log_name=name)
 
     infile_type = user_args.input_file_type or cli_helpers.get_file_type(user_args.input_base_file)
 

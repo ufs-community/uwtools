@@ -40,24 +40,29 @@ def path_if_file_exists(arg):
 
     return os.path.abspath(arg)
 
-def setup_logging(user_args, logfile=None):
+def setup_logging(user_args, log_name=None):
 
     ''' Create the Logger object '''
 
-    log = Logger(level='info',
-        _format='%(message)s',
-        colored_log= False,
-        logfile_path=logfile
-        )
+    args = {
+        'level': 'info',
+        '_format': '%(message)s',
+        'colored_log': False,
+        'logfile_path': user_args.log_file,
+        'name': log_name,
+        }
+
     if user_args.verbose:
-        log.handlers.clear()
-        log = Logger(level='debug',
-            _format='%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s',
-            colored_log= True,
-            logfile_path=logfile
-            )
-        log.debug("Finished setting up debug file logging in %s", logfile)
-    elif user_args.quiet:
+        args['level'] = 'debug'
+        args['colored_log'] = True
+        del args['_format']
+
+    log = Logger(**args)
+
+    msg = f"Finished setting up debug file logging in {user_args.log_file}"
+    log.debug(msg)
+
+    if user_args.quiet:
         log.handlers.clear()
         log.propagate = False
 
