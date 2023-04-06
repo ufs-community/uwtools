@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=too-many-branches, too-many-statements
+#pylint: disable=too-many-branches, too-many-statements, too-many-locals
 
 '''
 This utility creates a command line interface for handling config files.
@@ -75,7 +75,25 @@ def parse_args(argv):
     parser.add_argument(
         '--values_needed',
         action='store_true',
-        help='If provided, print a list of required configuration settings to stdout',
+        help='If provided, prints a list of required configuration settings to stdout',
+    )
+
+    parser.add_argument(
+        '--input_file_type',
+        help='If provided, will convert provided input file to provided file type.\
+            Accepts YAML, bash/ini or namelist',
+    )
+
+    parser.add_argument(
+        '--config_file_type',
+        help='If provided, will convert provided config file to provided file type.\
+            Accepts YAML, bash/ini or namelist',
+    )
+
+    parser.add_argument(
+        '--output_file_type',
+        help='If provided, will convert provided output file to provided file type.\
+            Accepts YAML, bash/ini or namelist',
     )
 
     parser.add_argument(
@@ -105,7 +123,7 @@ def create_config_obj(argv):
         )
 
     user_args = parse_args(argv)
-    
+
     infile_type = user_args.input_file_type or get_file_type(user_args.input_base_file)
 
     if infile_type in [".yaml", ".yml"]:
@@ -120,8 +138,8 @@ def create_config_obj(argv):
         config_obj = config.F90Config(user_args.input_base_file)
 
     else:
-        log.info("Set config failure: bad file type")
-        return
+        log.critical("Set config failure: bad file type")
+        raise ValueError("Set config failure: input base file not compatible")
 
 
     if user_args.config_file:
@@ -153,7 +171,17 @@ def create_config_obj(argv):
             config_obj.compare_config(user_config_obj)
             return
 
+        if config_file_type != infile_type:
+            config_depth = user_config_obj.dictionary_depth(user_config_obj.data)
+            input_depth = config_obj.dictionary_depth(config_obj.data)
+
+            if input_depth < config_depth:
+                log.critical(f"{user_args.config_file} not compatible with input file")
+                raise ValueError("Set config failure: config object not compatible with input file")
+
         config_obj.update_values(user_config_obj)
+
+    config_obj.dereference_all()
 
     if user_args.values_needed:
         set_var = []
@@ -190,12 +218,13 @@ def create_config_obj(argv):
                 out_object = config.YAMLConfig()
             elif outfile_type in [".bash", ".sh", ".ini", ".IN"]:
                 if config_obj.dictionary_depth(config_obj.data) > 2:
-                    log.info("Set config failure: incompatible file types")
+                    log.critical("Set config failure: incompatible file types")
+                    raise ValueError("Set config failure: output object not compatible with input")
                 out_object = config.INIConfig()
             elif outfile_type == ".nml":
                 if config_obj.dictionary_depth(config_obj.data) != 2:
-                    log.info("Set config failure: incompatible file types")
-                    return 
+                    log.critical("Set config failure: incompatible file types")
+                    raise ValueError("Set config failure: output object not compatible with input")
                 out_object = config.F90Config()
             else:
                 out_object = config.FieldTableConfig()
@@ -209,6 +238,11 @@ def create_config_obj(argv):
                 log.info("Set config failure: output object not compatible with input object")
                 return
             
+=======
+                log.critical(f"{user_args.outfile} not compatible with {user_args.input_base_file}")
+                raise ValueError("Set config failure: output object not compatible with input file")
+
+>>>>>>> origin/develop
         else: # same type of file as input, no need to convert it
             out_object = config_obj
         out_object.dump_file(user_args.outfile)

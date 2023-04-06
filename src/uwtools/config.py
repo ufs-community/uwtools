@@ -9,6 +9,7 @@ import collections
 import configparser
 import copy
 import json
+import logging
 import os
 import re
 
@@ -17,6 +18,7 @@ import f90nml
 import yaml
 
 from uwtools.j2template import J2Template
+from uwtools import logger
 
 class Config(collections.UserDict):
 
@@ -57,7 +59,7 @@ class Config(collections.UserDict):
         present in the second dictionary.
     '''
 
-    def __init__(self, config_path=None):
+    def __init__(self, config_path=None, log_name=None):
 
         '''
         Parameters
@@ -69,6 +71,7 @@ class Config(collections.UserDict):
         super().__init__()
 
         self.config_path = config_path
+        self.log = logging.getLogger(log_name)
 
     def __repr__(self):
         ''' This method will return configure contents'''
@@ -171,6 +174,7 @@ class Config(collections.UserDict):
                 self.update_values(self._load_paths(filepaths))
                 del ref_dict[key]
 
+    @logger.verbose()
     def dereference(self, ref_dict=None, full_dict=None):
 
         # pylint: disable=too-many-branches
@@ -257,8 +261,17 @@ class Config(collections.UserDict):
                     # filled or not, and make a guess on its intended type.
                     ref_dict[key] = self.str_to_type("".join(data))
 
-    @staticmethod
-    def str_to_type(str_):
+    def dereference_all(self):
+        ''' Run dereference until all values have been filled in '''
+
+        prev = copy.deepcopy(self.data)
+        self.dereference()
+        while prev != self.data:
+            self.dereference()
+            prev = copy.deepcopy(self.data)
+
+    @logger.verbose()
+    def str_to_type(self, str_):
         ''' Check if the string contains a float, int, boolean, or just
         regular string. This will be used to automatically convert
         environment variables to data types that are more convenient to
@@ -308,6 +321,9 @@ class Config(collections.UserDict):
         unfilled jinja templates (jinja2_var), and which keys are set to empty (empty_var). 
         '''
 
+        if not isinstance(config_dict, dict):
+            return
+
         for key, val in config_dict.items():
             if isinstance(val, dict):
                 set_var.append(f'    {parent}{key}')
@@ -318,13 +334,13 @@ class Config(collections.UserDict):
                 for item in val:
                     self.iterate_values(item, set_var, jinja2_var, empty_var, parent)
             elif "{{" in str(val) or "{%" in str(val):
-                jinja2_var.append(f'    {parent}{key}')
+                jinja2_var.append(f'    {parent}{key}: {val}')
             elif val == "" or val is None:
                 empty_var.append(f'    {parent}{key}')
 
             else:
                 set_var.append(f'    {parent}{key}')
-        return config_dict, set_var, jinja2_var, empty_var, parent
+        return
 
     def dictionary_depth(self, config_dict):
         '''
@@ -362,11 +378,10 @@ class YAMLConfig(Config):
         if config_path is not None:
             self.update(self._load())
 
-        prev = copy.deepcopy(self.data)
-        self.dereference()
-        while prev != self.data:
-            self.dereference()
-            prev = copy.deepcopy(self.data)
+    def __repr__(self):
+        ''' This method will return configure contents'''
+        return yaml.dump(self.data)
+
 
     def _load(self, config_path=None):
         ''' Load the user-provided YAML config file path into a dict
@@ -464,6 +479,7 @@ class INIConfig(Config):
         # at the dict representation of the parse config.
         # pylint: disable=protected-access
         cfg = configparser.ConfigParser(dict_type=collections.OrderedDict)
+        cfg.optionxform = str
         try:
             cfg.read(config_path)
         except configparser.MissingSectionHeaderError:

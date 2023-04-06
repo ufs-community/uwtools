@@ -4,8 +4,10 @@ Template classes
 '''
 
 import os
+import logging
 
 from jinja2 import Environment, BaseLoader, FileSystemLoader, meta
+from uwtools import logger
 
 def register_filters(j2env):
 
@@ -58,7 +60,7 @@ class J2Template():
     '''
 
     def __init__(self, configure_obj, template_path=None,
-                 template_str=None, loader_args=None):
+                 template_str=None, **kwargs):
 
         '''
         Parameters
@@ -69,11 +71,22 @@ class J2Template():
         template_str : str
             A Jinja2 template string
 
+        Keyword Arguments
+        -----------------
+        loader_args : dict
+            A dictionary of arguments to pass to the J2 loader
+        log_name : str
+            The name of the logging object to be used.
+
         '''
+
+        self.log = logging.getLogger(kwargs.get('log_name'))
+
         self.configure_obj = configure_obj
         self.template_path = template_path
         self.template_str = template_str
-        self.loader_args = loader_args if loader_args is not None else {}
+        self.loader_args = kwargs.get('loader_args', {})
+
         if template_path is not None:
             self.template = self._load_file(template_path)
         elif template_str is not None:
@@ -81,6 +94,7 @@ class J2Template():
         else:
             # Error here. Must provide a template
             pass
+
 
 
     def dump_file(self,output_path):
@@ -93,9 +107,13 @@ class J2Template():
         output_path : Path
 
         '''
+        msg = f"Writing rendered template to output file: {output_path}"
+        self.log.debug(msg)
         with open(output_path,'w+',encoding='utf-8') as file_:
-            file_.write(self.render_template())
+            file_.write(self.render_template() + "\n")
 
+
+    @logger.verbose()
     def _load_file(self, template_path):
         '''
         Load the Jinja2 template from the file provided.
@@ -110,6 +128,7 @@ class J2Template():
         register_filters(self._j2env)
         return self._j2env.get_template(template_path)
 
+    @logger.verbose()
     def _load_string(self,template_str):
         '''
         Load the Jinja2 template from the string provided.
