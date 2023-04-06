@@ -7,6 +7,7 @@ via YAML or environment variables.
 '''
 
 import argparse
+import inspect
 import logging
 import os
 import pathlib
@@ -83,6 +84,11 @@ def parse_args(argv):
         action='store_true',
         help='If provided, print no logging messages',
         )
+    parser.add_argument(
+        '-l', '--log_file',
+        help='Optional path to a specified log file',
+        default=os.path.join(os.path.dirname(__file__), "templater.log")
+        )
     return parser.parse_args(argv)
 
 def get_file_type(arg):
@@ -100,41 +106,47 @@ def get_file_type(arg):
     logging.critical(msg)
     raise ValueError(msg)
 
-def setup_config_obj(user_args):
+def setup_config_obj(user_args, log_name=None):
 
     ''' Return a dictionary config object from a user-supplied config,
     the os environment, and the command line arguments. '''
 
+    log = logging.getLogger(log_name)
     if user_args.config_file:
         config_type = get_file_type(user_args.config_file)
-        cfg = getattr(config, f"{config_type}Config")(user_args.config_file)
+        cfg_obj = getattr(config, f"{config_type}Config")
+        cfg = cfg_obj(user_args.config_file)
+        log.debug("User config will be used to fill template.")
     else:
         cfg = os.environ
+        log.debug("Environment variables will be used to fill template.")
 
     if user_args.config_items:
         user_settings = dict_from_config_args(user_args.config_items)
         cfg.update(user_settings)
+        log.debug("Overwriting config with settings on command line")
 
     return cfg
 
-def setup_logging(user_args):
+def setup_logging(user_args, log_name=None):
 
     ''' Create the Logger object '''
 
-    logfile = os.path.join(os.path.dirname(__file__), "templater.log")
     log = Logger(level='info',
         _format='%(message)s',
         colored_log= False,
-        logfile_path=logfile
+        logfile_path=user_args.log_file,
+        name=log_name,
         )
     if user_args.verbose:
         log.handlers.clear()
         log = Logger(level='debug',
-            _format='%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s',
             colored_log= True,
-            logfile_path=logfile
+            logfile_path=user_args.log_file,
+            name=log_name,
             )
-        log.debug(r"Finished setting up debug file logging in {logfile}".format(logfile=logfile))
+        msg = f"Finished setting up debug file logging in {user_args.log_file}"
+        log.debug(msg)
     elif user_args.quiet:
         log.handlers.clear()
         log.propagate = False
@@ -146,21 +158,23 @@ def set_template(argv):
     '''Main section for rendering and writing a template file'''
     user_args = parse_args(argv)
 
-    log = setup_logging(user_args)
+    name = f"{inspect.stack()[0][3]}"
+    log = setup_logging(user_args, log_name=name)
 
-    log.info(f"""Running script templater.py with args:
-{('-' * 70)}
-{('-' * 70)}""")
+    log.info("""Running script templater.py with args: """)
+    log.info(f"""{('-' * 70)}""")
+    log.info(f"""{('-' * 70)}""")
     for name, val in user_args.__dict__.items():
         if name not in ["config"]:
             log.info("{name:>15s}: {val}".format(name=name, val=val))
-    log.info(f"""{('-' * 70)}
-{('-' * 70)}""")
+    log.info(f"""{('-' * 70)}""")
+    log.info(f"""{('-' * 70)}""")
 
-    cfg = setup_config_obj(user_args)
+    cfg = setup_config_obj(user_args, log_name=log.name)
 
     # instantiate Jinja2 environment and template
-    template = J2Template(cfg, user_args.input_template)
+    template = J2Template(cfg, user_args.input_template,
+                          log_name=log.name)
 
     undeclared_variables = template.undeclared_variables
 
