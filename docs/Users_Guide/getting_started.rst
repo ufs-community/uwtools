@@ -9,11 +9,6 @@ Getting Started
 ------------------------
 Package Dependencies
 ------------------------
-.. Number of characters per line:
-   Name - no more that 13 characters
-   Version - no more than 6 characters
-   Source - no more than 8 characters
-   Description - no more than 22 (was 20) characters
 
 .. role:: raw-html(raw)
    :format: html	  
