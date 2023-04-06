@@ -82,34 +82,23 @@ def parse_args(argv):
         '--input_file_type',
         help='If provided, will convert provided input file to provided file type.\
             Accepts YAML, bash/ini or namelist',
+        choices=['F90', 'INI', 'YAML'],
     )
 
     parser.add_argument(
         '--config_file_type',
         help='If provided, will convert provided config file to provided file type.\
             Accepts YAML, bash/ini or namelist',
+        choices=['F90', 'INI', 'YAML'],
     )
 
     parser.add_argument(
         '--output_file_type',
         help='If provided, will convert provided output file to provided file type.\
             Accepts YAML, bash/ini or namelist',
+        choices=['F90', 'INI', 'YAML', 'FieldTable'],
     )
 
-    parser.add_argument(
-        '--input_file_type',
-        help='If provided, will convert provided input file to provided file type. Accepts YAML, bash/ini or namelist',
-    )
-
-    parser.add_argument(
-        '--config_file_type',
-        help='If provided, will convert provided config file to provided file type. Accepts YAML, bash/ini or namelist',
-    )
-
-    parser.add_argument(
-        '--output_file_type',
-        help='If provided, will convert provided output file to provided file type. Accepts YAML, bash/ini or namelist',
-    )
     return parser.parse_args(argv)
 
 def create_config_obj(argv):
@@ -235,14 +224,9 @@ def create_config_obj(argv):
             input_depth = config_obj.dictionary_depth(config_obj.data)
 
             if input_depth > output_depth:
-                log.info("Set config failure: output object not compatible with input object")
-                return
-            
-=======
                 log.critical(f"{user_args.outfile} not compatible with {user_args.input_base_file}")
                 raise ValueError("Set config failure: output object not compatible with input file")
 
->>>>>>> origin/develop
         else: # same type of file as input, no need to convert it
             out_object = config_obj
         out_object.dump_file(user_args.outfile)
