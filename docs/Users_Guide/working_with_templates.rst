@@ -36,9 +36,9 @@ This tool turns any *atparse*-enabled template into a Jinja2-enabled template. F
 
 ``atparse_to_jinja2`` is called on the template from the command line::
 
-  python src/uwtools/atparse_to_jinja2.py -i /<path-to-template>/enabled_template.inp.IN -o <path-to-outfile>/jinja_template.nml
+  python src/uwtools/atparse_to_jinja2.py -i /<path-to-template>/enabled_template.inp.IN -o <path-to-outfile>/jinja2template.nml
 
-The resulting Jinja2-enabled template is written to the specified outfile, ``jinja_template.nml``::
+The resulting Jinja2-enabled template is written to the specified outfile, ``jinja2template.nml``::
 
   $ WAVEWATCH III multi-grid input file
   $ ------------------------------------
@@ -62,7 +62,7 @@ The resulting Jinja2-enabled template is written to the specified outfile, ``jin
      {{OUT_BEG}}  {{DTPNT}}  {{OUT_END}} {{POFILETYPE}}
   $
   
-The created ``jinja_template.nml`` file can also now be used with the ``templater.py`` tool.
+The created ``jinja2template.nml`` file can also now be used with the ``templater.py`` tool.
 
 .. _templater.py:
 
@@ -79,7 +79,7 @@ configuration (config) file or user environment variables.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Input file and config file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-Here is an example template file, ``jinjatemplate.nml``::
+Here is an example template file, ``jinja2template.nml``::
 
   $ WAVEWATCH III multi-grid input file
   $ ------------------------------------
