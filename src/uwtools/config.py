@@ -9,6 +9,7 @@ import collections
 import configparser
 import copy
 import json
+import logging
 import os
 import re
 
@@ -17,6 +18,7 @@ import f90nml
 import yaml
 
 from uwtools.j2template import J2Template
+from uwtools import logger
 
 class Config(collections.UserDict):
 
@@ -57,7 +59,7 @@ class Config(collections.UserDict):
         present in the second dictionary.
     '''
 
-    def __init__(self, config_path=None):
+    def __init__(self, config_path=None, log_name=None):
 
         '''
         Parameters
@@ -69,6 +71,7 @@ class Config(collections.UserDict):
         super().__init__()
 
         self.config_path = config_path
+        self.log = logging.getLogger(log_name)
 
     def __repr__(self):
         ''' This method will return configure contents'''
@@ -171,6 +174,7 @@ class Config(collections.UserDict):
                 self.update_values(self._load_paths(filepaths))
                 del ref_dict[key]
 
+    @logger.verbose()
     def dereference(self, ref_dict=None, full_dict=None):
 
         # pylint: disable=too-many-branches
@@ -266,8 +270,8 @@ class Config(collections.UserDict):
             self.dereference()
             prev = copy.deepcopy(self.data)
 
-    @staticmethod
-    def str_to_type(str_):
+    @logger.verbose()
+    def str_to_type(self, str_):
         ''' Check if the string contains a float, int, boolean, or just
         regular string. This will be used to automatically convert
         environment variables to data types that are more convenient to

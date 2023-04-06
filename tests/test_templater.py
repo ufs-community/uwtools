@@ -86,7 +86,8 @@ def test_set_template_dryrun(): #pylint: disable=unused-variable
         templater.set_template(args)
     result = outstring.getvalue()
 
-    assert result == outcome
+    for outcome_line in outcome.split('\n'):
+        assert outcome_line in result
 
 def test_set_template_listvalues(): #pylint: disable=unused-variable
     """Unit test for checking values_needed output of ingest namelist tool"""
@@ -124,7 +125,8 @@ vegetable
         templater.set_template(args)
     result = outstring.getvalue()
 
-    assert result == outcome
+    for outcome_line in outcome.split('\n'):
+        assert outcome_line in result
 
 def test_set_template_yaml_config(): #pylint: disable=unused-variable
     ''' Test that providing a YAML file with necessary settings works to fill in
@@ -232,7 +234,8 @@ def test_set_template_command_line_config(): #pylint: disable=unused-variable
     with redirect_stdout(outstring):
         templater.set_template(args)
     result = outstring.getvalue()
-    assert result == outcome
+    for outcome_line in outcome.split('\n'):
+        assert outcome_line in result
 
 def test_set_template_yaml_config_model_configure(): #pylint: disable=unused-variable
     '''Tests that the templater will work as expected for a simple model_configure
@@ -266,12 +269,12 @@ def test_set_template_verbosity(): #pylint: disable=unused-variable
     logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
 
     outcome=\
-    """Finished setting up debug file logging in """ + logfile  + """
+    f"""Finished setting up debug file logging in {logfile}
 Running script templater.py with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
- input_template: """ + input_file  + """
+ input_template: {input_file}
     config_file: None
    config_items: []
         dry_run: True
@@ -287,11 +290,13 @@ Running script templater.py with args:
   how_many = 22
   dressing = 'balsamic'
 /
+J2Template._load_file INPUT Args: \n{input_file}
 """
 
     os.environ['fruit'] = 'banana'
     os.environ['how_many'] = '22'
-    del os.environ['vegetable']
+    if os.environ.get("vegetable") is not None:
+        del os.environ['vegetable']
 
     #test verbose level
     args = [
@@ -315,10 +320,8 @@ Running script templater.py with args:
         templater.set_template(args)
     result = outstring.getvalue()
 
-    lines = zip(outcome.split('\n'), result.split('\n'))
-    for outcome_line, result_line in lines:
-        # Check that only the correct messages were logged
-        assert outcome_line in result_line
+    for outcome_line in outcome.split('\n'):
+        assert outcome_line in result
 
     #test quiet level
     args = [
