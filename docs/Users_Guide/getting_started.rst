@@ -194,7 +194,7 @@ To install the ``workflow-tools`` repository from GitHub, follow these steps:
 
       python src/uwtools/templater.py -h
 
-   The output from this command is::
+   As of April 6, 2023, the output from this command is::
 
       usage: templater.py [-h] [-o OUTFILE] -i INPUT_TEMPLATE [-c CONFIG_FILE] [-d] [--values_needed] [-v] [-q] [KEY=VALUE ...]
 
@@ -215,6 +215,10 @@ To install the ``workflow-tools`` repository from GitHub, follow these steps:
       --values_needed If provided, print a list of required configuration settings to stdout
       -v, --verbose If provided, print all logging messages.
       -q, --quiet If provided, print no logging messages
+
+   .. note:: 
+
+      Additional flags/option may be added at any time. The development team will rarely remove or change flag, but this may also happen from time to time. 
 
 .. [#f1] The contents of the Installation Guide have been compiled with
    the help of OpenAI.
