@@ -106,7 +106,7 @@ class J2Template():
         Jinja2 Template object
         '''
 
-        self._j2env=Environment(loader=FileSystemLoader(searchpath=''),
+        self._j2env=Environment(loader=FileSystemLoader(searchpath=['','/']),
                                trim_blocks=True,lstrip_blocks=True)
         register_filters(self._j2env)
         return self._j2env.get_template(template_path.replace('\\','/'))
