@@ -3,13 +3,10 @@ Set of test for loading YAML files using the function call load_yaml
 '''
 #pylint: disable=unused-variable, consider-using-f-string
 from collections import OrderedDict
-from contextlib import redirect_stdout
 import datetime
 import filecmp
-import io
 import itertools
 import json
-import logging
 import os
 import pathlib
 import tempfile

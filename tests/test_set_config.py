@@ -7,9 +7,10 @@ from contextlib import redirect_stdout
 import io
 import pathlib
 import os
-import pytest
 import re
 import tempfile
+
+import pytest
 
 from uwtools import config
 from uwtools import set_config
@@ -494,7 +495,7 @@ def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
         with pytest.raises(ValueError):
             set_config.create_config_obj(args)
 
-def test_compare_nml():
+def test_compare_nml(): #pylint: disable=unused-variable
 
     ''' Tests whether comparing two namelists works. '''
 
@@ -527,10 +528,7 @@ def test_compare_nml():
     # Make sure it doesn't include any additional significant diffs
     # A very rough estimate is that there is a word/colon set followed
     # by a -/+ set
-    pattern = re.compile('(\w):\s+(\w+):\s+-\s+(\w+)\s+\+\s+(\w+)')
+    pattern = re.compile(r'(\w):\s+(\w+):\s+-\s+(\w+)\s+\+\s+(\w+)')
     for result_line in result.split('\n'):
         if re.search(pattern, result_line):
             assert result_line in expected
-
-
-
