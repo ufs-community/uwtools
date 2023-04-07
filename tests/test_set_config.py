@@ -3,15 +3,16 @@ Tests for set_config tool
 '''
 
 import argparse
+from contextlib import redirect_stdout
+import io
 import pathlib
 import os
-import tempfile
-import io
-from contextlib import redirect_stdout
 import pytest
+import re
+import tempfile
+
 from uwtools import config
 from uwtools import set_config
-
 from uwtools.utils import cli_helpers
 
 
@@ -492,3 +493,44 @@ def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
 
         with pytest.raises(ValueError):
             set_config.create_config_obj(args)
+
+def test_compare_nml():
+
+    ''' Tests whether comparing two namelists works. '''
+
+    nml1 = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.nml"))
+    nml2 = os.path.join(uwtools_file_base,
+                        pathlib.Path("fixtures/fruit_config_mult_sect.nml"))
+
+    args = ['-i', nml1, '-c', nml2, '--compare']
+
+    expected = f"""
+    - {nml1}
+    + {nml2}
+    --------------------------------------------------------------------------------
+    config:       vegetable:  - eggplant + peas
+    setting:         topping:  - None + crouton
+    setting:            size:  - None + large
+    setting:            meat:  - None + chicken
+
+    """
+
+    outstring = io.StringIO()
+    with redirect_stdout(outstring):
+        set_config.create_config_obj(args)
+    result = outstring.getvalue()
+
+    # Make sure the tool output contains all the lines above
+    for expected_line in expected.split('\n'):
+        assert expected_line.strip() in result
+
+    # Make sure it doesn't include any additional significant diffs
+    # A very rough estimate is that there is a word/colon set followed
+    # by a -/+ set
+    pattern = re.compile('(\w):\s+(\w+):\s+-\s+(\w+)\s+\+\s+(\w+)')
+    for result_line in result.split('\n'):
+        if re.search(pattern, result_line):
+            assert result_line in expected
+
+
+

@@ -114,8 +114,8 @@ def create_config_obj(argv):
 
     infile_type = user_args.input_file_type or cli_helpers.get_file_type(user_args.input_base_file)
 
-    config_obj = getattr(config,
-                         f"{infile_type}Config")(user_args.input_base_file)
+    config_class = getattr(config, f"{infile_type}Config")
+    config_obj = config_class(user_args.input_base_file, log_name=name)
 
     if user_args.config_file:
         config_file_type = user_args.config_file_type or \
