@@ -9,11 +9,6 @@ Getting Started
 ------------------------
 Package Dependencies
 ------------------------
-.. Number of characters per line:
-   Name - no more that 13 characters
-   Version - no more than 6 characters
-   Source - no more than 8 characters
-   Description - no more than 22 (was 20) characters
 
 .. role:: raw-html(raw)
    :format: html	  
@@ -31,9 +26,9 @@ Package Dependencies
     - >=1.22.13
     - https://anaconda.org/conda-forge/boto3
     - 
-        allows Python developers to write softare :raw-html:`<br />`
-        that makes use of services like Amazon :raw-html:`<br />`
-        S3 and Amazon EC2.
+        allows Python developers to write software 
+        that makes use of services like Amazon 
+        S3 and Amazon EC2
   * - black
     -
     -
@@ -42,14 +37,14 @@ Package Dependencies
   * - f90nml
     - >=1.4.3
     - https://pypi.org/project/f90nml/
-    -   provides a simple interface :for the :raw-html:`<br />`
-        reading, writing, and modifying Fortran :raw-html:`<br />`
-        namelist files.
+    -   provides a simple interface for 
+        reading, writing, and modifying Fortran 
+        namelist files
 
   * - Jinja2
     - 3.0.0
     - https://jinja.palletsprojects.com/en/3.1.x/
-    -
+    -   templating tool
 
   * - numpy
     - >=1.21.6
@@ -59,17 +54,18 @@ Package Dependencies
   * - pylint
     - 
     - https://pypi.org/project/pylint/
-    -
+    -   static code analyzer that checks for  
+        errors and enforces coding standards
  
   * - pytest
     - 
     - https://docs.pytest.org/en/7.2.x/
-    -
+    -   testing framework
 
   * - pyyaml
     - >=6.0
     - https://pypi.org/project/PyYAML/
-    - 
+    -   YAML parser
 
   * - tox
     -
@@ -86,7 +82,7 @@ Installation [#f1]_
 Using a Python Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Users may follow the instructions provided in this section to install conda and/or create virtual environments for their projects. These steps are not required to install or run the Unified Workflow Tools package (`uwtools`). However, use of conda virtual environments can make it easier to work on multiple projects with conflicting dependencies on the same machine. Go to :numref:`Section %s <new_uwinstall>` to skip directly to `uwtools` installation. 
+Users may follow the instructions provided in this section to install conda and/or create virtual environments for their projects. These steps are not required to install or run the Unified Workflow Tools package (``uwtools``). However, use of conda virtual environments can make it easier to work on multiple projects with conflicting dependencies on the same machine. Go to :numref:`Section %s <new_uwinstall>` to skip directly to ``uwtools`` installation. 
 
 ^^^^^
 conda
@@ -100,17 +96,19 @@ To create a conda environment, follow these steps:
 
 #. Open a terminal or command prompt and navigate to the directory where you want to create the conda environment.
 
-#. Use the `conda create` command to create a new conda environment. Replace `myenv` with the name you want to give to your environment, and `python=3.8` with the desired version of Python::
+#. Use the ``conda create`` command to create a new conda environment. Replace ``myenv`` with the name you want to give to your environment, and replace ``python=3.8`` with the desired version of Python::
 
       conda create --name myenv python=3.8
 
-#. This will create a new conda environment called `myenv`, using the specified version of Python.
+#. This will create a new conda environment called ``myenv``, using the specified version of Python.
 
 #. To activate the conda environment, use the following command::
 
       conda activate myenv
 
-#. You should now see the name of your conda environment in the terminal prompt, indicating that it is active.
+#. You should now see the name of your conda environment in the terminal prompt, indicating that it is active. For example::
+
+      (myenv) $
 
 #. To deactivate the conda environment, use the following command::
 
@@ -123,8 +121,8 @@ To create a conda environment, follow these steps:
 
       conda install numpy
 
-   This will install the numpy package in the active conda environment.
-   Running the commands below for installing uwtools will install all
+   This will install the ``numpy`` package in the active conda environment.
+   Running the commands below for installing ``uwtools`` will install all
    the necessary packages, so there is no need to install those manually
    in this step.
 
@@ -136,15 +134,15 @@ A virtual environment is a tool used to isolate specific Python environments on 
 
 To create a virtual environment, follow these steps:
 
-#. Make sure you have Python and the venv module installed on your system. If not, you can install them from the official website (https://www.python.org/) or using your operating system's package manager.
+#. Make sure you have Python and the ``venv`` module installed on your system. If not, you can install them from the official website (https://www.python.org/) or using your operating system's package manager.
 
 #. Open a terminal or command prompt and navigate to the directory where you want to create the virtual environment.
 
-#. Use the python3 -m venv command to create a new virtual environment. Replace `myenv` with the name you want to give to your virtual environment::
+#. Use the ``python3 -m venv`` command to create a new virtual environment. Replace ``myenv`` with the name you want to give to your virtual environment::
 
       python3 -m venv myenv
 
-#. This will create a new directory called `myenv`, which contains the files for the virtual environment.
+#. This will create a new directory called ``myenv``, which contains the files for the virtual environment.
 
 #. To activate the virtual environment, use the following command::
 
@@ -165,7 +163,7 @@ To create a virtual environment, follow these steps:
 The uwtools package
 -------------------
 
-To install the `workflow-tools` repository from Github, follow these steps:
+To install the ``workflow-tools`` repository from GitHub, follow these steps:
 
 #. Make sure you have Git installed on your system. If not, you can install it from the official website (https://git-scm.com/) or use your operating system's package manager.
 
@@ -175,21 +173,47 @@ To install the `workflow-tools` repository from Github, follow these steps:
 
       git clone https://github.com/ufs-community/workflow-tools.git
 
-#. This will create a new directory called `workflow-tools` in the current directory, containing the files from the repository.
+#. This will create a new directory called ``workflow-tools`` in the current directory, containing the files from the repository.
 
-#. Switch to the `workflow-tools` directory by using the `cd` command::
+#. Switch to the ``workflow-tools`` directory by using the ``cd`` command::
 
       cd workflow-tools
 
-#. The repository is packaged as a pip Python package and managed via `setup.py`. Install the package by typing: ::
+#. The repository is packaged as a pip Python package and managed via ``setup.py``. Install the package by typing: ::
 
       pip install .
 
-#. This will install all the necessary packages for the tools to run.
+   This will install all the necessary packages for the tools to run.
 
 #. You can now use the tools by running the appropriate scripts. For example, to use the templater tool, you can run the following command::
 
       python src/uwtools/templater.py -h
+
+   As of April 6, 2023, the output from this command is::
+
+      usage: templater.py [-h] [-o OUTFILE] -i INPUT_TEMPLATE [-c CONFIG_FILE] [-d] [--values_needed] [-v] [-q] [KEY=VALUE ...]
+
+      Update a Jinja2 Template with user-defined settings.
+
+      positional arguments:
+      KEY=VALUE Any number of configuration settings that will override values found in YAML or user environment.
+
+      optional arguments:
+      -h, --help show this help message and exit
+      -o OUTFILE, --outfile OUTFILE
+      Full path to output file
+      -i INPUT_TEMPLATE, --input_template INPUT_TEMPLATE
+      Path to a Jinja2 template file.
+      -c CONFIG_FILE, --config_file CONFIG_FILE
+      Optional path to a YAML configuration file. If not provided, os.environ is used to configure.
+      -d, --dry_run If provided, print rendered template to stdout only
+      --values_needed If provided, print a list of required configuration settings to stdout
+      -v, --verbose If provided, print all logging messages.
+      -q, --quiet If provided, print no logging messages
+
+   .. note:: 
+
+      Additional flags/option may be added at any time. The development team will rarely remove or change flag, but this may also happen from time to time. 
 
 .. [#f1] The contents of the Installation Guide have been compiled with
    the help of OpenAI.
