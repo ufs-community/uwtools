@@ -8,7 +8,8 @@ import re
 import sys
 import argparse
 
-from uwtools import templater as tp
+from uwtools.utils import cli_helpers
+
 def parse_args(argv):
 
     '''
@@ -28,7 +29,7 @@ def parse_args(argv):
         '-i', '--input_template',
         help='Path to an atparse template file.',
         required=True,
-        type=tp.path_if_file_exists,
+        type=cli_helpers.path_if_file_exists,
         )
 
     parser.add_argument(

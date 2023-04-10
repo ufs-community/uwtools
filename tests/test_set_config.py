@@ -12,6 +12,8 @@ import pytest
 from uwtools import config
 from uwtools import set_config
 
+from uwtools.utils import cli_helpers
+
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -40,11 +42,11 @@ def test_path_if_file_exists(): #pylint: disable=unused-variable
     non-existant path.'''
 
     with tempfile.NamedTemporaryFile(dir='.', mode='w') as tmp_file:
-        assert set_config.path_if_file_exists(tmp_file.name)
+        assert cli_helpers.path_if_file_exists(tmp_file.name)
 
     with pytest.raises(argparse.ArgumentTypeError):
         not_a_filepath = './no_way_this_file_exists.nope'
-        set_config.path_if_file_exists(not_a_filepath)
+        cli_helpers.path_if_file_exists(not_a_filepath)
 
 def test_set_config_yaml_simple(): #pylint: disable=unused-variable
     ''' Test that providing a YAML base file with necessary settings 
@@ -228,7 +230,7 @@ def test_set_config_field_table(): #pylint: disable=unused-variable
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
         out_file = f'{tmp_dir}/field_table_from_yaml.FV3_GFS'
-        args = ['-i', input_file, '-o', out_file]
+        args = ['-i', input_file, '-o', out_file, '--output_file_type', "FieldTable"]
 
         set_config.create_config_obj(args)
 
@@ -288,7 +290,8 @@ None
 
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
         out_file = f'{tmp_dir}/field_table_from_yaml.FV3_GFS'
-        args = ['-i', input_file, '-o', out_file, '--show_format']
+        args = ['-i', input_file, '-o', out_file, '--show_format',
+                '--output_file_type', "FieldTable"]
 
         # Capture stdout for the required configuration settings
         outstring = io.StringIO()
@@ -404,7 +407,7 @@ def test_cfg_to_yaml_conversion(): #pylint: disable=unused-variable
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
         out_file = f'{tmp_dir}/test_ouput.yaml'
-        args = ['-i', input_file, '-o', out_file, '--input_file_type', '.yaml']
+        args = ['-i', input_file, '-o', out_file, '--input_file_type', 'YAML']
 
         set_config.create_config_obj(args)
 
@@ -425,7 +428,8 @@ def test_output_file_conversion(): #pylint: disable=unused-variable
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
         out_file = f'{tmp_dir}/test_ouput.cfg'
-        args = ['-i', input_file, '-o', out_file, '--output_file_type', '.nml']
+        args = ['-i', input_file, '-o', out_file, '--output_file_type',
+                'F90']
 
         set_config.create_config_obj(args)
 
@@ -446,7 +450,7 @@ def test_config_file_conversion(): #pylint: disable=unused-variable
     with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
 
         out_file = f'{tmp_dir}/test_config_conversion.nml'
-        args = ['-i', input_file, '-c', config_file, '-o', out_file, '--config_file_type', '.nml']
+        args = ['-i', input_file, '-c', config_file, '-o', out_file, '--config_file_type', 'F90']
 
         set_config.create_config_obj(args)
 
@@ -470,13 +474,13 @@ def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
         input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2_nml.cfg"))
         args = ['-i', input_file, '--input_file_type', ".pdf"]
 
-        with pytest.raises(ValueError):
+        with pytest.raises(SystemExit):
             set_config.create_config_obj(args)
 
         # test --config_file_type
         input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
         config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
-        args = ['-i', input_file, '-c', config_file, '--config_file_type', ".yaml"]
+        args = ['-i', input_file, '-c', config_file, '--config_file_type', "YAML"]
 
         with pytest.raises(ValueError):
             set_config.create_config_obj(args)
@@ -484,7 +488,7 @@ def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
         # test --ouput_file_type
         input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
         out_file = f'{tmp_dir}/test_outfile_conversion.yaml'
-        args = ['-i', input_file, '-o', out_file, '--output_file_type', ".nml"]
+        args = ['-i', input_file, '-o', out_file, '--output_file_type', "F90"]
 
         with pytest.raises(ValueError):
             set_config.create_config_obj(args)
