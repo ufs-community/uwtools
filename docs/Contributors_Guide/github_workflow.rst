@@ -5,7 +5,7 @@
 GitHub Workflow
 ***************
 
-How Unified Workflow releases are created
+How Unified Workflow Releases Are Created
 =========================================
 
 The branching model employed by the workflow-tools GitHub repository is similar to

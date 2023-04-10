@@ -16,9 +16,3 @@ Contributor's Guide
    directory_tree
    ci
    documentation
-   
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`

@@ -2,21 +2,32 @@
 User's Guide
 ############
 
-**Foreword: A note to Unified Workflow users**
+**Foreword: A Note to Unified Workflow Users**
 
 This User's Guide is provided as an aid to users of the Unified Workflow.
 The Unified Workflow is a set of tools intended to unify the workflow
 for various UFS applications under one framework. Introducing and
 implementing a unified set of workflow tools reduces the chances of
 everyone reinventing the wheel and facilitates collaboration and development
-across the UFS Community. If the same tools, framework, and standards are
-used across multiple applications, it is the hope that gaining familiarity
-with one application will enable users and developers to gain some familiarity
+across the UFS community. If the same tools, framework, and standards are
+used across multiple applications, gaining familiarity
+with one application will hopefully enable users and developers to gain some familiarity
 with other applications.
 
 It is important to note here that the Unified Workflow is an evolving software
 package. This documentation describes the `develop` branch, which includes features from the most recent |release|
 release dated |release_date| and updates since that release.
+
+**Table of Contents**
+
+.. toctree::
+   :titlesonly:
+   :numbered:
+
+   introduction
+   getting_started
+   working_with_templates
+   working_with_config
 
 **Disclaimer**
 
@@ -47,23 +58,3 @@ Available at: https://unified-workflow.readthedocs.io/en/latest/Users_Guide/inde
 
 This documentation borrows heavily from METplus documentation where relevant. 
 The Unified Workflow Team would like to thank the METplus development team's contributions, which laid the foundation for this documentation. 
-
-Table of Contents
-==================
-
-.. toctree::
-   :titlesonly:
-   :numbered: 4
-
-   Introduction <introduction>
-   Getting Started <getting_started>
-   Working with Templates <working_with_templates>
-   Working with Standard Configuration Files <working_with_config>
-
-
-Indices and Tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
-
