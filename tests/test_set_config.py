@@ -528,6 +528,9 @@ def test_compare_nml(): #pylint: disable=unused-variable
     # Make sure it doesn't include any additional significant diffs
     # A very rough estimate is that there is a word/colon set followed
     # by a -/+ set
+    # This regex is meant to match the lines in the expected string
+    # above that give us the setting, key value diffs like this:
+    #   config:       vegetable:  - eggplant + peas
     pattern = re.compile(r'(\w):\s+(\w+):\s+-\s+(\w+)\s+\+\s+(\w+)')
     for result_line in result.split('\n'):
         if re.search(pattern, result_line):
