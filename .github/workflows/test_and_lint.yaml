@@ -46,6 +46,7 @@ jobs:
         run: |
           eval "$(micromamba shell hook --shell=bash)"
           micromamba activate workflow_tools
+          export PYTHONPATH=$(pwd)/src
           pylint tests
 
       - name: Run pytest-cov
