@@ -1,0 +1,106 @@
+name: Testing, linting, and coverage
+on:
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+    branches:
+      - develop
+
+env:
+  PYTHONPATH: ${GITHUB_WORKSPACE}/src
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Install Micromamba with no environment
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          environment-file: false
+          channel-priority: flexible
+          cache-downloads: true
+          cache-env: true
+
+      - name: Install conda environment
+        run: micromamba create -y -f ${GITHUB_WORKSPACE}/environment.yml
+
+  lint:
+    name: Check Python code quality with Pylint
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Analyzing uwtools with pylint
+        run: |
+          micromamba activate workflow_tools
+          cd src
+          pylint uwtools
+
+      - name: Analyzing tests with pylint
+        run: |
+          micromamba activate workflow_tools
+          pylint tests
+
+  run_pytests:
+    name: Run pytest tests
+    runs-on: ubuntu-latest
+    needs: setup
+    strategy:
+      matrix:
+        python: ["3.7", "3.8", "3.9", "3.10"]
+
+    steps:
+      - name: Setup conda environment
+        run: |
+          micromamba create --name workflow_tools_${{ matrix.python }} --clone workflow_tools
+          micromamba activate workflow_tools_${{ matrix.python }}
+          micromamba install --no-pin --all -y python=${{ matrix.python }}
+
+      - name:
+        run: |
+          cd $GITHUB_WORKSPACE/uwtools
+          tox -v -e py
+
+  run_pytest_coverage:
+    name: Run pytest Coverage
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Run pytest-cov
+        run: |
+          pytest --cov-fail-under=90 --cov-report=html --cov=uwtools
+          rm ./htmlcov/.gitignore
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v3
+        with:
+          name: report
+          path: htmlcov
+
+  deploy_to_pages:
+    needs: [run_pytest_coverage]
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download Reports
+        uses: actions/download-artifact@v3
+        with:
+          name: report
+          path: report
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.3.3
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: "./report" # The folder the action should deploy.
+          target-folder: "./coverage"
