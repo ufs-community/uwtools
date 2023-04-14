@@ -29,9 +29,6 @@ jobs:
           cache-downloads: true
           cache-env: true
 
-      - name: Initialize micromamba
-        run: micromamba shell init --shell=bash --prefix=~/micromamba
-
       - name: Install conda environment
         run: |
           echo "Working in: ${GITHUB_WORKSPACE}"
@@ -48,6 +45,9 @@ jobs:
         uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: false
+
+      - name: Initialize micromamba
+        run: eval "$(micromamba shell hook --shell=bash)"
 
       - name: Analyzing uwtools with pylint
         run: |
@@ -74,6 +74,9 @@ jobs:
         with:
           environment-file: false
 
+      - name: Initialize micromamba
+        run: eval "$(micromamba shell hook --shell=bash)"
+
       - name: Setup conda environment
         run: |
           micromamba create --name workflow_tools_${{ matrix.python }} --clone workflow_tools
@@ -94,6 +97,9 @@ jobs:
         uses: mamba-org/provision-with-micromamba@main
         with:
           environment-file: false
+
+      - name: Initialize micromamba
+        run: eval "$(micromamba shell hook --shell=bash)"
 
       - name: Run pytest-cov
         run: |
