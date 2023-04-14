@@ -121,7 +121,8 @@ class Config(collections.UserDict):
 
         for sect, keys in diffs.items():
             for key in keys:
-                print(f"{sect}: {key:>15}: {diffs[sect][key]}")
+                msg = f"{sect}: {key:>15}: {diffs[sect][key]}"
+                self.log.info(msg)
 
     def from_ordereddict(self, in_dict):
         '''
@@ -369,11 +370,11 @@ class YAMLConfig(Config):
 
     '''
 
-    def __init__(self, config_path=None):
+    def __init__(self, config_path=None, log_name=None):
 
         ''' Load the file and update the dictionary '''
 
-        super().__init__(config_path)
+        super().__init__(config_path, log_name)
 
         if config_path is not None:
             self.update(self._load())
@@ -419,10 +420,10 @@ class F90Config(Config):
 
     ''' Concrete class to handle Fortran namelist files. '''
 
-    def __init__(self, config_path=None):
+    def __init__(self, config_path=None, log_name=None):
 
         ''' Load the file and update the dictionary '''
-        super().__init__(config_path)
+        super().__init__(config_path, log_name)
 
         if config_path is not None:
             self.update(self._load())
@@ -453,7 +454,7 @@ class INIConfig(Config):
 
     ''' Concrete class to handle INI config files. '''
 
-    def __init__(self, config_path=None, space_around_delimiters=True):
+    def __init__(self, config_path=None, log_name=None, space_around_delimiters=True):
 
         ''' Load the file and update the dictionary
 
@@ -462,7 +463,7 @@ class INIConfig(Config):
         space_around_delimiters : bool. True corresponds to INI format,
              while False is necessary for bash configuration files
         '''
-        super().__init__(config_path)
+        super().__init__(config_path, log_name)
         self.space_around_delimiters = space_around_delimiters
 
         if config_path is not None:
@@ -511,10 +512,10 @@ class FieldTableConfig(YAMLConfig):
     ''' This class exists to write out a field_table format given
     that its configuration has been set by an input YAML file. '''
 
-    def __init__(self, config_path=None):
+    def __init__(self, config_path=None, log_name=None):
 
         ''' Load the file and update the dictionary '''
-        super().__init__(config_path)
+        super().__init__(config_path, log_name)
 
         if config_path is not None:
             self.update(self._load())

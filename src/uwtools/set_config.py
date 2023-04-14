@@ -51,6 +51,11 @@ def parse_args(argv):
     )
 
     parser.add_argument(
+        '--compare',
+        action='store_true',
+        help='If provided, show diff between -i and -c files.',
+    )
+    parser.add_argument(
         '--show_format',
         action='store_true',
         help='If provided, print the required formatting to generate the requested output file',
@@ -109,8 +114,8 @@ def create_config_obj(argv):
 
     infile_type = user_args.input_file_type or cli_helpers.get_file_type(user_args.input_base_file)
 
-    config_obj = getattr(config,
-                         f"{infile_type}Config")(user_args.input_base_file)
+    config_class = getattr(config, f"{infile_type}Config")
+    config_obj = config_class(user_args.input_base_file, log_name=name)
 
     if user_args.config_file:
         config_file_type = user_args.config_file_type or \
@@ -126,6 +131,13 @@ def create_config_obj(argv):
             if input_depth < config_depth:
                 log.critical(f"{user_args.config_file} not compatible with input file")
                 raise ValueError("Set config failure: config object not compatible with input file")
+
+        if user_args.compare:
+            log.info(f"- {user_args.input_base_file}")
+            log.info(f"+ {user_args.config_file}")
+            log.info("-"*80)
+            config_obj.compare_config(user_config_obj)
+            return
 
         config_obj.update_values(user_config_obj)
 
