@@ -30,7 +30,6 @@ jobs:
           cache-env: true
 
       - name: Install conda environment
-        uses: mamba-org/provision-with-micromamba@main
         run: micromamba create -y -f ${GITHUB_WORKSPACE}/environment.yaml
 
   lint:
@@ -39,15 +38,16 @@ jobs:
     needs: setup
 
     steps:
-      - name: Analyzing uwtools with pylint
+      - name: Setup micromamba
         uses: mamba-org/provision-with-micromamba@main
+
+      - name: Analyzing uwtools with pylint
         run: |
           micromamba activate workflow_tools
           cd src
           pylint uwtools
 
       - name: Analyzing tests with pylint
-        uses: mamba-org/provision-with-micromamba@main
         run: |
           micromamba activate workflow_tools
           pylint tests
@@ -61,8 +61,10 @@ jobs:
         python: ["3.7", "3.8", "3.9", "3.10"]
 
     steps:
-      - name: Setup conda environment
+      - name: Setup micromamba
         uses: mamba-org/provision-with-micromamba@main
+
+      - name: Setup conda environment
         run: |
           micromamba create --name workflow_tools_${{ matrix.python }} --clone workflow_tools
           micromamba activate workflow_tools_${{ matrix.python }}
@@ -78,8 +80,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup
     steps:
+      - name: Setup micromamba
+        uses: mamba-org/provision-with-micromamba@main
+
       - name: Run pytest-cov
         run: |
+          micromamba activate workflow_tools
           pytest --cov-fail-under=90 --cov-report=html --cov=uwtools
           rm ./htmlcov/.gitignore
 
