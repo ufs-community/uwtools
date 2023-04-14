@@ -99,7 +99,7 @@ jobs:
           tox -v -e py
 
   deploy_to_pages:
-    needs: [run_pytest_coverage]
+    needs: [lint_and_coverage]
     continue-on-error: true
     runs-on: ubuntu-latest
     permissions:
