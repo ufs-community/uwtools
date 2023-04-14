@@ -99,6 +99,7 @@ jobs:
         run: |
           eval "$(micromamba shell hook --shell=bash)"
           micromamba activate workflow_tools_${{ matrix.python }}
+          export PYTHONPATH=$(pwd)/src
           cd $GITHUB_WORKSPACE/src/uwtools
           tox -v -e py
 
