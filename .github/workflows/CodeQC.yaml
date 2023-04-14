@@ -38,4 +38,4 @@ jobs:
 
     - name: Analyzing tests with pylint
       run: |
-        pylint tests
+        python -m pylint tests
