@@ -46,11 +46,9 @@ jobs:
         with:
           environment-file: false
 
-      - name: Initialize micromamba
-        run: eval "$(micromamba shell hook --shell=bash)"
-
       - name: Analyzing uwtools with pylint
         run: |
+          eval "$(micromamba shell hook --shell=bash)"
           micromamba activate workflow_tools
           cd src
           pylint uwtools
@@ -74,11 +72,9 @@ jobs:
         with:
           environment-file: false
 
-      - name: Initialize micromamba
-        run: eval "$(micromamba shell hook --shell=bash)"
-
       - name: Setup conda environment
         run: |
+          eval "$(micromamba shell hook --shell=bash)"
           micromamba create --name workflow_tools_${{ matrix.python }} --clone workflow_tools
           micromamba activate workflow_tools_${{ matrix.python }}
           micromamba install --no-pin --all -y python=${{ matrix.python }}
@@ -98,11 +94,9 @@ jobs:
         with:
           environment-file: false
 
-      - name: Initialize micromamba
-        run: eval "$(micromamba shell hook --shell=bash)"
-
       - name: Run pytest-cov
         run: |
+          eval "$(micromamba shell hook --shell=bash)"
           micromamba activate workflow_tools
           pytest --cov-fail-under=90 --cov-report=html --cov=uwtools
           rm ./htmlcov/.gitignore
