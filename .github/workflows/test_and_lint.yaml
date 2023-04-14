@@ -44,6 +44,7 @@ jobs:
 
       - name: Analyzing tests with pylint
         run: |
+          eval "$(micromamba shell hook --shell=bash)"
           micromamba activate workflow_tools
           pylint tests
 
