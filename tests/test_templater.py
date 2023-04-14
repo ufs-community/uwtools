@@ -9,7 +9,7 @@ import tempfile
 
 import pytest
 
-from uwtools import templater
+from scripts import templater
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
