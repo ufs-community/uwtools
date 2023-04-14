@@ -99,7 +99,7 @@ jobs:
         run: |
           eval "$(micromamba shell hook --shell=bash)"
           micromamba activate workflow_tools_${{ matrix.python }}
-          cd $GITHUB_WORKSPACE/uwtools
+          cd $GITHUB_WORKSPACE/src/uwtools
           tox -v -e py
 
   deploy_to_pages:
