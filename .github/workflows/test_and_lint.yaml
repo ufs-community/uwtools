@@ -30,6 +30,7 @@ jobs:
           cache-env: true
 
       - name: Install conda environment
+        uses: mamba-org/provision-with-micromamba@main
         run: micromamba create -y -f ${GITHUB_WORKSPACE}/environment.yaml
 
   lint:
@@ -39,12 +40,14 @@ jobs:
 
     steps:
       - name: Analyzing uwtools with pylint
+        uses: mamba-org/provision-with-micromamba@main
         run: |
           micromamba activate workflow_tools
           cd src
           pylint uwtools
 
       - name: Analyzing tests with pylint
+        uses: mamba-org/provision-with-micromamba@main
         run: |
           micromamba activate workflow_tools
           pylint tests
@@ -59,6 +62,7 @@ jobs:
 
     steps:
       - name: Setup conda environment
+        uses: mamba-org/provision-with-micromamba@main
         run: |
           micromamba create --name workflow_tools_${{ matrix.python }} --clone workflow_tools
           micromamba activate workflow_tools_${{ matrix.python }}
