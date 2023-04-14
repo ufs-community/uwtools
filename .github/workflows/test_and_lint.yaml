@@ -93,7 +93,7 @@ jobs:
         run: |
           eval "$(micromamba shell hook --shell=bash)"
           micromamba activate workflow_tools_${{ matrix.python }}
-          micromamba install --no-pin -y python=${{ matrix.python }}
+          micromamba install --no-pin -y -c anaconda python=${{ matrix.python }}
 
       - name:
         run: |
