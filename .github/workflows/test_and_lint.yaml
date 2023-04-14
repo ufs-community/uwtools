@@ -33,7 +33,7 @@ jobs:
         run: |
           echo "Working in: ${GITHUB_WORKSPACE}"
           ls ${GITHUB_WORKSPACE}
-          micromamba create -y -f ${GITHUB_WORKSPACE}/../environment.yaml
+          micromamba create -y -f ${GITHUB_WORKSPACE}/environment.yaml
 
   lint:
     name: Check Python code quality with Pylint
