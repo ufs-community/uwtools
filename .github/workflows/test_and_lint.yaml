@@ -30,7 +30,7 @@ jobs:
           cache-env: true
 
       - name: Install conda environment
-        run: micromamba create -y -f ${GITHUB_WORKSPACE}/environment.yaml
+        run: micromamba create -y -f ${GITHUB_WORKSPACE}/../environment.yaml
 
   lint:
     name: Check Python code quality with Pylint
