@@ -53,6 +53,7 @@ jobs:
         run: |
           eval "$(micromamba shell hook --shell=bash)"
           micromamba activate workflow_tools
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/src
           pytest --cov-fail-under=90 --cov-report=html --cov=uwtools
           rm ./htmlcov/.gitignore
 
@@ -86,17 +87,18 @@ jobs:
         run: |
           echo "Working in: ${GITHUB_WORKSPACE}"
           ls ${GITHUB_WORKSPACE}
-          micromamba create -y -f ${GITHUB_WORKSPACE}/environment.yaml
+          micromamba create -y -n workflow_tools_${{ matrix.python }} -f ${GITHUB_WORKSPACE}/environment.yaml
 
       - name: Setup conda environment
         run: |
           eval "$(micromamba shell hook --shell=bash)"
-          micromamba create --name workflow_tools_${{ matrix.python }} --clone workflow_tools
           micromamba activate workflow_tools_${{ matrix.python }}
           micromamba install --no-pin --all -y python=${{ matrix.python }}
 
       - name:
         run: |
+          eval "$(micromamba shell hook --shell=bash)"
+          micromamba activate workflow_tools_${{ matrix.python }}
           cd $GITHUB_WORKSPACE/uwtools
           tox -v -e py
 
