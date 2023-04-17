@@ -60,7 +60,7 @@ templater.py
 
 ``templater.py`` takes in any Jinja2 template file and renders it with user-supplied values. ``templater.py`` takes several command line arguments, including the path to the Jinja2 template file, an optional 
 path to a YAML configuration file, and any additional configuration settings which will override values found in the YAML 
-configuration (config) file or user environment variables.  If the config file/config items does not contain values for every field in the input file, ``templater.py`` will return an error.
+configuration (config) file or user environment variables.  If the provided config settings do not contain values for every field in the input Jinja2 template file, ``templater.py`` will return an error.
 
 .. _temp_inp_conf:
 
