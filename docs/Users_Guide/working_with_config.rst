@@ -37,7 +37,7 @@ Sample config file::
 
 To run ``set_config.py`` with an input and config file::
 
-    python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml -o /<path-to-outfile>/sample_outfile.yaml
+    python scripts/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml -o /<path-to-outfile>/sample_outfile.yaml
 
 The output is a fully formed config file:: 
 
@@ -80,7 +80,7 @@ YAML base file::
       
 Command with ``field_table`` outfile type specified::     
 
-    python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base_field.yaml -o /<path-to-outfile>/sample_field_table.FV3_GFS_v16
+    python scripts/set_config.py -i /<path-to-input-file>/sample_base_field.yaml -o /<path-to-outfile>/sample_field_table.FV3_GFS_v16
     
 Generated field table::
 
@@ -105,7 +105,7 @@ dry_run flag
 
 Running ``set_config.py`` with ``-d`` or ``--dry_run`` will print the config object to stdout only and provide no other output::
 
-        python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --dry_run
+        python scripts/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --dry_run
 
 The command above will generate the following output in the command line::
 
@@ -140,7 +140,7 @@ If provided, the ``values_needed`` flag will print to the stdout a list of which
 
 the command:: 
 
-  python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --values_needed
+  python scripts/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --values_needed
   
 will print the following to the stdout::
 

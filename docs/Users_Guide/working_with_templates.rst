@@ -27,16 +27,10 @@ This tool turns any *atparse*-enabled template into a Jinja2-enabled template. F
   $
      @[FLAGMASKCOMP]  @[FLAGMASKOUT]
   $
-     @[OUT_BEG]  @[DTFLD]  @[OUT_END] @[GOFILETYPE]
-     N
-     @[OUTPARS_WAV]
-  $
-     @[OUT_BEG]  @[DTPNT]  @[OUT_END] @[POFILETYPE]
-  $
 
 ``atparse_to_jinja2`` is called on the template from the command line::
 
-  python src/uwtools/atparse_to_jinja2.py -i /<path-to-template>/enabled_template.inp.IN -o <path-to-outfile>/jinja2template.nml
+  python scripts/atparse_to_jinja2.py -i /<path-to-template>/enabled_template.inp.IN -o <path-to-outfile>/jinja2template.nml
 
 The resulting Jinja2-enabled template is written to the specified outfile, ``jinja2template.nml``::
 
@@ -55,12 +49,6 @@ The resulting Jinja2-enabled template is written to the specified outfile, ``jin
   $
      {{FLAGMASKCOMP}}  {{FLAGMASKOUT}}
   $
-     {{OUT_BEG}}  {{DTFLD}}  {{OUT_END}} {{GOFILETYPE}}
-     N
-     {{OUTPARS_WAV}}
-  $
-     {{OUT_BEG}}  {{DTPNT}}  {{OUT_END}} {{POFILETYPE}}
-  $
   
 The created ``jinja2template.nml`` file can also now be used with the ``templater.py`` tool.
 
@@ -72,7 +60,7 @@ templater.py
 
 ``templater.py`` takes in any Jinja2 template file and renders it with user-supplied values. ``templater.py`` takes several command line arguments, including the path to the Jinja2 template file, an optional 
 path to a YAML configuration file, and any additional configuration settings which will override values found in the YAML 
-configuration (config) file or user environment variables.
+configuration (config) file or user environment variables.  If the config file/config items does not contain values for every field in the input file, ``templater.py`` will return an error.
 
 .. _temp_inp_conf:
 
@@ -96,17 +84,11 @@ Here is an example template file, ``jinja2template.nml``::
   $
      {{FLAGMASKCOMP}}  {{FLAGMASKOUT}}
   $
-     {{OUT_BEG}}  {{DTFLD}}  {{OUT_END}} {{GOFILETYPE}}
-     N
-     {{OUTPARS_WAV}}
-  $
-     {{OUT_BEG}}  {{DTPNT}}  {{OUT_END}} {{POFILETYPE}}
-  $
 
 And here is the example YAML config file we want to use to update the values in the template::
 
-  NFGRIDS: 1
   NMGRIDS: 3
+  NFGRIDS: 1
   FUNIPNT: ' T'
   IOSRV: 1
   FPNTPROC: 'T'
@@ -124,7 +106,7 @@ And here is the example YAML config file we want to use to update the values in 
 
 To run ``templater.py`` with an input template file and a config file, modify the following command::
 
-    python src/uwtools/templater.py -i /<path-to-template>/jinja2template.nml -c /<path-to-config>/example_config.yaml -o <path-to-outfile>/rendered_template.nml
+    python scripts/templater.py -i /<path-to-template>/jinja2template.nml -c /<path-to-config>/example_config.yaml -o <path-to-outfile>/rendered_template.nml
 
 where:
 
@@ -150,12 +132,6 @@ The rendered template will be updated with the values contained in the config fi
       F   F
   $
 
-     N
-
-  $
-
-  $
-
 .. _temp_inp_env:
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -172,7 +148,7 @@ Input file and command line config items
 
 ``templater.py`` can be run with an input file and config items provided through the command line by using the ``config_items`` flag::
 
-    python src/uwtools/templater.py -i /<path-totemplate>/jinja2template.nml NFGRIDS=0 NMGRIDS=5 FUNIPNT=' T' IOSRV='None' FPNTPROC='None' FGRDPROC=' None'
+    python scripts/templater.py -i /<path-totemplate>/jinja2template.nml NFGRIDS=0 NMGRIDS=5 FUNIPNT=' T' IOSRV='None' FPNTPROC='None' FGRDPROC=' None' CPLILINE='glo_15mxt' WINDLINE='$' ICELINE='$' CURRLINE='$' UNIPOINTS='ww3' WW3GRIDLINE="'ww3' 'no' 'no' 'CPL:native' 'no' 'no' 'no' 'no' 'no' 'no'  1  1  0.00 1.00  F" RUN_BEG=0000.00.00.00:00 RUN_END=0000.00.00.00:00 FLAGMASKCOMP=' F' FLAGMASKOUT=' F'
 
 Rendered template::
 
@@ -180,22 +156,16 @@ Rendered template::
   $ ------------------------------------
     0, 5, T, None, None,  None
   $
-
-
-
-
-
-
+  'glo_15mxt'
   $
-
   $
-
   $
-
-     N
-
+  ww3
+  'ww3' 'no' 'no' 'CPL:native' 'no' 'no' 'no' 'no' 'no' 'no'  1  1  0.00 1.00  F
   $
-
+     0000.00.00.00:00   0000.00.00.00:00
+  $
+      F   F
   $
 
 Any configuration settings supplied through the ``config_items`` flag will override values found in the config file or user environment.
@@ -207,7 +177,7 @@ dry_run flag
 ^^^^^^^^^^^^
 Running ``templater.py`` with the ``-d`` or ``--dry_run`` flag will print the rendered template to stdout only and provide no other output::
 
-    python src/uwtools/templater.py -i /<path-totemplate>/jinja2template.nml -c /<path-to-config>/example_config.yaml -d
+    python scripts/templater.py -i /<path-totemplate>/jinja2template.nml -c /<path-to-config>/example_config.yaml -d
 
   ----------------------------------------------------------------------
   ----------------------------------------------------------------------
@@ -247,7 +217,7 @@ Values Needed Flag
 ^^^^^^^^^^^^^^^^^^
 If provided, the ``--values_needed`` flag will print a list of required configuration settings for the input template to stdout::
     
-  workflow-tools % python src/uwtools/templater.py -i /<path-totemplate>/jinja2template.nml --values_needed
+  workflow-tools % python scripts/templater.py -i /<path-totemplate>/jinja2template.nml --values_needed
   Running script templater.py with args:
   ----------------------------------------------------------------------
   ----------------------------------------------------------------------
@@ -264,22 +234,15 @@ If provided, the ``--values_needed`` flag will print a list of required configur
   Values needed for this template are:
   CPLILINE
   CURRLINE
-  DTFLD
-  DTPNT
   FGRDPROC
   FLAGMASKCOMP
   FLAGMASKOUT
   FPNTPROC
   FUNIPNT
-  GOFILETYPE
   ICELINE
   IOSRV
   NFGRIDS
   NMGRIDS
-  OUTPARS_WAV
-  OUT_BEG
-  OUT_END
-  POFILETYPE
   RUN_BEG
   RUN_END
   UNIPOINTS
