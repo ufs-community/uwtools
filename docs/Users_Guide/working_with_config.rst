@@ -161,3 +161,16 @@ will print the following to the stdout::
   Keys that are set to empty:
       FV3GFS.nomads.file_names.nemsio
       FV3GFS.nomads.testempty
+
+.. _conf_conversion:
+
+^^^^^^^^^^^^^^^^
+Conversion flags
+^^^^^^^^^^^^^^^^
+
+``set_config.py`` has three flags that will convert given input, config, or outfile to the user-provided file type::
+    --input_file_type
+    --config_file_type
+    --outfile_file_type
+
+They accept YAML ('YAML'), bash/ini ('INI'), or namelist ('F90') file types.
