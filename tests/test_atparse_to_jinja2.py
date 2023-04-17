@@ -5,7 +5,7 @@ import io
 import os
 import pathlib
 
-from uwtools import atparse_to_jinja2
+from scripts import atparse_to_jinja2
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
