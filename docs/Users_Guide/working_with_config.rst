@@ -173,4 +173,12 @@ Conversion flags
     --config_file_type
     --outfile_file_type
 
-They accept YAML ('YAML'), bash/ini ('INI'), or namelist ('F90') file types.
+``--input_file_type`` and ``--config_file_type`` accept YAML ('YAML'), bash/ini ('INI'), or namelist ('F90') file types; ``outfile_file_type`` accepts these three as well as field table ('FieldTable').  This tool requires that the given file (input, config, or outfile) have a compatible structure with the provided file type.  A YAML file can have any depth, a bash/ini file can have a depth of 1 or 2, and a namelist file must have a depth of 2.
+
+.. _conf_compare:
+
+^^^^^^^^^^^^
+Compare flag
+^^^^^^^^^^^^
+
+When run with the ``--compare`` flag, ``set_config.py`` will print the difference between the input file (``-i``) and the config file (``-c``) to the stdout.
