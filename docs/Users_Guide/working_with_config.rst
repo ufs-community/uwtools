@@ -37,7 +37,7 @@ Sample config file::
 
 To run ``set_config.py`` with an input and config file::
 
-    python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml -o /<path-to-outfile>/sample_outfile.yaml
+    python scripts/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml -o /<path-to-outfile>/sample_outfile.yaml
 
 The output is a fully formed config file:: 
 
@@ -80,7 +80,7 @@ YAML base file::
       
 Command with ``field_table`` outfile type specified::     
 
-    python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base_field.yaml -o /<path-to-outfile>/sample_field_table.FV3_GFS_v16
+    python scripts/set_config.py -i /<path-to-input-file>/sample_base_field.yaml -o /<path-to-outfile>/sample_field_table.FV3_GFS_v16
     
 Generated field table::
 
@@ -105,7 +105,7 @@ dry_run flag
 
 Running ``set_config.py`` with ``-d`` or ``--dry_run`` will print the config object to stdout only and provide no other output::
 
-        python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --dry_run
+        python scripts/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --dry_run
 
 The command above will generate the following output in the command line::
 
@@ -140,7 +140,7 @@ If provided, the ``values_needed`` flag will print to the stdout a list of which
 
 the command:: 
 
-  python src/uwtools/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --values_needed
+  python scripts/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --values_needed
   
 will print the following to the stdout::
 
@@ -161,3 +161,24 @@ will print the following to the stdout::
   Keys that are set to empty:
       FV3GFS.nomads.file_names.nemsio
       FV3GFS.nomads.testempty
+
+.. _conf_conversion:
+
+^^^^^^^^^^^^^^^^
+Conversion flags
+^^^^^^^^^^^^^^^^
+
+``set_config.py`` has three flags that will convert given input, config, or outfile to the user-provided file type::
+    --input_file_type
+    --config_file_type
+    --outfile_file_type
+
+``--input_file_type`` and ``--config_file_type`` accept YAML ('YAML'), bash/ini ('INI'), or namelist ('F90') file types; ``outfile_file_type`` accepts these three as well as field table ('FieldTable').  This tool requires that the given file (input, config, or outfile) have a compatible structure with the provided file type.  A YAML file can have any depth, a bash/ini file can have a depth of 1 or 2, and a namelist file must have a depth of 2.
+
+.. _conf_compare:
+
+^^^^^^^^^^^^
+Compare flag
+^^^^^^^^^^^^
+
+When run with the ``--compare`` flag, ``set_config.py`` will print the difference between the input file (``-i``) and the config file (``-c``) to the stdout.
