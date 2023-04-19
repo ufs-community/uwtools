@@ -90,34 +90,36 @@ conda
 
 Conda is a package manager and environment management system for Python and other programming languages. You can use conda to create isolated environments for your projects, which can help you manage dependencies and package versions. 
 
-To create a conda environment, follow these steps:
+To create a conda environment from the workflow-tools provide
+environment.yaml file, follow these steps:
 
 #. Make sure you have conda installed on your system. If not, you can install it from the official website (https://docs.conda.io/en/latest/miniconda.html) or using your operating system's package manager.
 
 #. Open a terminal or command prompt and navigate to the directory where you want to create the conda environment.
 
-#. Use the ``conda create`` command to create a new conda environment. Replace ``myenv`` with the name you want to give to your environment, and replace ``python=3.8`` with the desired version of Python::
+#. Use the ``conda env create`` command to create a new conda environment. Specifically for workflow-tools type::
 
-      conda create --name myenv python=3.8
+      conda env create -f environment.yml
 
-#. This will create a new conda environment called ``myenv``, using the specified version of Python.
+#. This will create a new conda environment called ``workflow_tools``, using the specified version of Python.
 
 #. To activate the conda environment, use the following command::
 
-      conda activate myenv
+      conda activate workflow_tools
 
-#. You should now see the name of your conda environment in the terminal prompt, indicating that it is active. For example::
-
-      (myenv) $
+#. You should now see ``( workflow_tools )`` in the terminal prompt, indicating that the environment is active.
 
 #. To deactivate the conda environment, use the following command::
 
       conda deactivate
 
-#. You can now use the conda environment as a sandbox for your projects, 
-   installing packages and running scripts without affecting the global Python environment. 
-   To install packages in the conda environment, activate the conda environment. Then 
-   use the conda install command, followed by the package name. For example::
+#. You can now use the conda environment as a sandbox for your projects,
+   installing packages and running scripts without affecting the global
+   Python environment. The ``workflow_tools`` environment has all the
+   packages needed, but if you'd like to install others, you can.  To
+   install packages in the conda environment, activate the conda
+   environment. Then use the conda install command, followed by the
+   package name. For example::
 
       conda install numpy
 
@@ -179,15 +181,25 @@ To install the ``workflow-tools`` repository from GitHub, follow these steps:
 
       cd workflow-tools
 
-#. The repository is packaged as a pip Python package and managed via ``setup.py``. Install the package by typing: ::
+#. The repository supports users by providing conda and virtualenv recipes in its top level directory. The user should choose one of these methods for installing the necessary packages to support ``workflow-tools``.
 
-      pip install .
+   To install with pip and virtualenv, with your virtualenv activated::
+
+      pip install -r requirements.txt
+
+   To install a conda environment for use with the uwtools package,
+   follow the directions in the conda section above.
+
+
+#. The workflow-tools repository is not currently packaged (i.e., for a pip or conda installation). To point to your local installation, start by typing the following, substituting <workflow-tools location> with the location of your :
+
+      export PYTHONPATH=<workflow-tools location>/src:$PYTHONPATH
 
    This will install all the necessary packages for the tools to run.
 
 #. You can now use the tools by running the appropriate scripts. For example, to use the templater tool, you can run the following command::
 
-      python src/uwtools/templater.py -h
+      python scripts/templater.py -h
 
    As of April 6, 2023, the output from this command is::
 
