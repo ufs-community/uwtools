@@ -199,7 +199,7 @@ To install the ``workflow-tools`` repository from GitHub, follow these steps:
 
 #. You can now use the tools by running the appropriate scripts. For example, to use the templater tool, you can run the following command::
 
-      python src/uwtools/templater.py -h
+      python scripts/templater.py -h
 
    As of April 6, 2023, the output from this command is::
 

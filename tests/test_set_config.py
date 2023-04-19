@@ -12,8 +12,8 @@ import tempfile
 
 import pytest
 
+from scripts import set_config
 from uwtools import config
-from uwtools import set_config
 from uwtools.utils import cli_helpers
 
 

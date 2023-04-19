@@ -46,7 +46,7 @@ jobs:
         run: |
           eval "$(micromamba shell hook --shell=bash)"
           micromamba activate workflow_tools
-          export PYTHONPATH=$(pwd)/src
+          export PYTHONPATH=$(pwd):$(pwd)/src
           pylint tests
 
       - name: Run pytest-cov
@@ -54,7 +54,7 @@ jobs:
           eval "$(micromamba shell hook --shell=bash)"
           micromamba activate workflow_tools
           export PYTHONPATH=$PYTHONPATH:$(pwd)/src
-          pytest --cov-fail-under=90 --cov-report=html --cov=uwtools
+          python -m pytest --cov-fail-under=90 --cov-report=html --cov=uwtools
           rm ./htmlcov/.gitignore
 
       - name: Upload reports
@@ -100,7 +100,7 @@ jobs:
           eval "$(micromamba shell hook --shell=bash)"
           micromamba activate workflow_tools_${{ matrix.python }}
           export PYTHONPATH=$(pwd)/src
-          pytest
+          python -m pytest
 
   deploy_to_pages:
     needs: [lint_and_coverage]
