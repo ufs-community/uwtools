@@ -11,5 +11,6 @@ dependencies:
   - numpy=1.21*
   - pylint
   - pytest
+  - pytest-cov=3.*
   - pyyaml=6.0*
   - tox
