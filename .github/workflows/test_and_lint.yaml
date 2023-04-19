@@ -106,6 +106,7 @@ jobs:
     needs: [lint_and_coverage]
     continue-on-error: true
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
     permissions:
       contents: write
     steps:
