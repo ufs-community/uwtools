@@ -6,7 +6,7 @@ pip uninstall uwtools
 conda deactivate
 
 # Setup PYTHONPATH for uwtools
-export PYTHONPATH=${PWD}/src
+export PYTHONPATH=${PWD}:${PWD}/src
 
 # Check for pytest and pylint
 for pkg in pytest pylint ; do
