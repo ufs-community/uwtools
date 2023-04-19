@@ -1,7 +1,12 @@
 #!/bin/bash
 
-#Install uwtools
-pip install -e .
+# Cleanup old messes (should be removed after one run of the pipeline)
+conda activate regional_workflow
+pip uninstall uwtools
+conda deactivate
+
+# Setup PYTHONPATH for uwtools
+export PYTHONPATH=${PWD}:${PWD}/src
 
 # Check for pytest and pylint
 for pkg in pytest pylint ; do
