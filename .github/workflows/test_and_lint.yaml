@@ -49,6 +49,14 @@ jobs:
           export PYTHONPATH=$(pwd):$(pwd)/src
           pylint tests
 
+      - name: Check the Jenkins job script
+        run: |
+          eval "$(micromamba shell hook --shell=bash)"
+          micromamba activate workflow_tools
+          export PYTHONPATH=$(pwd):$(pwd)/src
+          export WORKSPACE=${GITHUB_WORKSPACE}
+          .cicd/jobs/lint_and_test.sh
+
       - name: Run pytest-cov
         run: |
           eval "$(micromamba shell hook --shell=bash)"
