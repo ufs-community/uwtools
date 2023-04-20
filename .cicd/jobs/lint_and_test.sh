@@ -16,23 +16,14 @@ done
 # Run tests
 pytest | tee -a ${WORKSPACE}/results.txt
 status=${PIPESTATUS[0]}
-if [ $status -ne 0 ] ; then
-  echo "pytest failed"
-  exit 1
-fi
+test $status == 0 || ( echo "pytest failed" && exit $status )
 
 # Lint
 pylint --ignore-imports=y tests scripts
 status=$?
-if [ $status -ne 0 ] ; then
-  echo "linting tests and scripts failed"
-  exit 1
-fi
+test $status == 0 || ( echo "linting tests and scripts failed" && exit $status )
 
 cd ${WORKSPACE}/src
 pylint uwtools
 status=$?
-if [ $status -ne 0 ] ; then
-  echo "linting uwtools failed"
-  exit 1
-fi
+test $status == 0 || ( echo "linting uwtools failed" && exit $status )
