@@ -122,12 +122,7 @@ class Forecast:
         Initialize the Forecast driver.
 
         '''
-        # Parse user arguments
-        user_args = parse_args(argv)
-
-        # Set up logging
-        name = f"{inspect.stack()[0][3]}"
-        log = cli_helpers.setup_logging(user_args, log_name=name)
+        self.args = parse_args(argv)
 
     def requirements(self):
 
@@ -194,8 +189,13 @@ def main(argv):
     '''
     Defines the user interface for the forecast driver. Parses arguments provided by the user
     and passes to the Forecast driver class to be run.'''
-    args = parse_args(argv)
-    forecast = Forecast(args)
+    user_args = parse_args(argv)
+
+    # Set up logging
+    name = f"{inspect.stack()[0][3]}"
+    log = cli_helpers.setup_logging(user_args, log_name=name)
+    
+    forecast = Forecast(user_args)
     forecast.run()
 
 class SRWForecast:
