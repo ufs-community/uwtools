@@ -89,6 +89,10 @@ class Forecast:
         config and platform files. If the --dry_run flag is provided, complete all
         stages through validation and print results without running the forecast.
 
+    main()
+        Main method for the driver. Calls the other methods in the driver           
+        to run the forecast.
+
     create_model_config()
         Collects all the user inputs required to create a model config
         file, calling the existing model config tools. 
@@ -140,6 +144,12 @@ class Forecast:
         config and platform files. If the --dry_run flag is provided, complete all
         stages through validation and print results without running the forecast.'''
 
+    def main(self, argv):
+        '''
+        Defines the user interface for the forecast driver. Parses arguments provided by the user
+        and passes to the Forecast driver class to be run.'''
+        self.args = parse_args(argv)
+
     @abc.abstractmethod
     def create_model_config(self):
 
@@ -185,19 +195,6 @@ class Forecast:
         ''' Runs the forecast executable with the namelist file and staged
         input files. This will both build the executable and run it. '''
 
-def main(argv):
-    '''
-    Defines the user interface for the forecast driver. Parses arguments provided by the user
-    and passes to the Forecast driver class to be run.'''
-    user_args = parse_args(argv)
-
-    # Set up logging
-    name = f"{inspect.stack()[0][3]}"
-    log = cli_helpers.setup_logging(user_args, log_name=name)
-    
-    forecast = Forecast(user_args)
-    forecast.run()
-
 class SRWForecast:
 
     '''
@@ -210,6 +207,19 @@ class SRWForecast:
 
         '''
         super().__init__(argv)
+
+    def main(self, argv):
+        '''
+        Defines the user interface for the forecast driver. Parses arguments provided by the user
+        and passes to the Forecast driver class to be run.'''
+        user_args = parse_args(argv)
+
+        # Set up logging
+        name = f"{inspect.stack()[0][3]}"
+        log = cli_helpers.setup_logging(user_args, log_name=name)
+
+        forecast = Forecast(user_args)
+        forecast.run()
 
     def create_model_config(self):
         ''' Create SRW model config file. '''
