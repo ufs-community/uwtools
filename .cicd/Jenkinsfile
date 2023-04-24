@@ -37,24 +37,6 @@ pipeline {
                     }
                 }
                 
-               stage('Run UFS Workflow tools on Gaea') {
-                    agent {
-                        label "gaea"
-                    }
-                    steps {
-                        cleanWs()
-                        checkout changelog: false, poll: false, scm: scmGit(branches: [[name: 'develop']], extensions: [], gitTool: 'Default', userRemoteConfigs: [[url: 'https://github.com/ufs-community/workflow-tools']])  
-                        sh '''
-                        source /lustre/f2/dev/role.epic/contrib/Lmod_init.sh
-                        module use /lustre/f2/dev/role.epic/contrib/modulefiles
-                        module load miniconda3/4.12.0
-                        conda activate workflow_tools
-
-                        ${WORKSPACE}/.cicd/jobs/lint_and_test.sh
-                        '''
-                    }
-                }
-                
                stage('Run UFS Workflow tools on Hera') {
                    agent {
                        label "hera"
