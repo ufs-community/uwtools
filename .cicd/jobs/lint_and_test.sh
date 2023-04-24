@@ -1,9 +1,4 @@
-#!/bin/bash
-
-# Cleanup old messes (should be removed after one run of the pipeline)
-conda activate regional_workflow
-pip uninstall uwtools
-conda deactivate
+#!/bin/bash -ux
 
 # Setup PYTHONPATH for uwtools
 export PYTHONPATH=${PWD}:${PWD}/src
@@ -21,14 +16,14 @@ done
 # Run tests
 pytest | tee -a ${WORKSPACE}/results.txt
 status=${PIPESTATUS[0]}
-test $status -eq 0 || ( echo "pytest failed" && exit 1 )
+test $status == 0 || ( echo "pytest failed" && exit $status )
 
 # Lint
-pylint tests
+pylint --ignore-imports=y tests scripts
 status=$?
-test $status -eq 0 || ( echo "linting tests failed" && exit 1 )
+test $status == 0 || ( echo "linting tests and scripts failed" && exit $status )
 
 cd ${WORKSPACE}/src
 pylint uwtools
 status=$?
-test $status -eq 0 || ( echo "linting tools failed" && exit 1 )
+test $status == 0 || ( echo "linting uwtools failed" && exit $status )

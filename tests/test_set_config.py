@@ -2,6 +2,8 @@
 Tests for set_config tool
 '''
 
+#pylint: disable=duplicate-code
+
 import argparse
 from contextlib import redirect_stdout
 import io
