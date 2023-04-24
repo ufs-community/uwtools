@@ -19,7 +19,8 @@ import os
 
 from uwtools.utils import cli_helpers
 
-def parse_args(argv):
+def parse_args(argv):# pragma: no cover
+    #remove pragma when completed
 
     '''
     Function maintains the arguments accepted by this script. Please see
@@ -61,7 +62,8 @@ def parse_args(argv):
         )
     return parser.parse_args(argv)
 
-class Forecast:
+class Forecast: # pragma: no cover
+    #remove pragma when completed
 
     ''' 
     This base class provides the interface to methods used to read in
@@ -195,7 +197,8 @@ class Forecast:
         ''' Runs the forecast executable with the namelist file and staged
         input files. This will both build the executable and run it. '''
 
-class SRWForecast:
+class SRWForecast: # pragma: no cover
+    #remove pragma when completed
 
     '''
         Concrete class to handle UFS Short Range Weather app forecasts.
