@@ -395,7 +395,7 @@ class YAMLConfig(Config):
         with open(config_path, 'r', encoding="utf-8") as file_name:
             try:
                 cfg = yaml.load(file_name, Loader=loader)
-            except yaml.constructor.ConstructorError as e:
+            except yaml.constructor.ConstructorError as e: #pylint: disable=invalid-name
                 constructor = e.problem.split()[-1]
                 msg = dedent(f"""\
 

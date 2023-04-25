@@ -8,8 +8,6 @@ import argparse
 import inspect
 import os
 import sys
-from textwrap import dedent
-import yaml
 
 from uwtools import config
 from uwtools import exceptions
@@ -214,10 +212,10 @@ def create_config_obj(argv, log=None):
 
 if __name__ == '__main__':
 
-    user_args = parse_args(sys.argv[1:])
-    name = "set_config"
-    log = cli_helpers.setup_logging(user_args, log_name=name)
+    cli_args = parse_args(sys.argv[1:])
+    LOG_NAME = "set_config"
+    cli_log = cli_helpers.setup_logging(cli_args, log_name=LOG_NAME)
     try:
-       create_config_obj(sys.argv[1:], log)
+        create_config_obj(sys.argv[1:], cli_log)
     except exceptions.UWConfigError as e:
         sys.exit(e)
