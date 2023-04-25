@@ -22,7 +22,7 @@ def path_join(arg):
     ''' A Jinj2 filter definition for joining paths '''
     return os.path.join(*arg)
 
-class J2Template():
+class J2Template(): #pylint: disable=unused-variable
 
     '''
     This class reads in Jinja templates from files or strings, and
