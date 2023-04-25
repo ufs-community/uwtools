@@ -1,15 +1,6 @@
-# pylint: disable=unused-variable,missing-class-docstring,missing-module-docstring
-class UWException(Exception):
-    pass
+""" Custom exceptions for the UWTools package """
 
-class SchedulerError(UWException):
-    pass
+# pylint: disable=unused-variable
 
-class FileManagerError(UWException):
-    pass
-
-class ConfigManagerError(UWException):
-    pass
-
-class DatabaseManagerError(UWException):
-    pass
+class UWConfigError(Exception):
+    """UWTools exception for Config Object error handling"""

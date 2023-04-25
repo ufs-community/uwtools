@@ -12,6 +12,7 @@ import json
 import logging
 import os
 import re
+from textwrap import dedent
 
 import jinja2
 import f90nml
@@ -19,6 +20,7 @@ import yaml
 
 from uwtools.j2template import J2Template
 from uwtools import logger
+from uwtools import exceptions
 
 class Config(collections.UserDict):
 
@@ -391,7 +393,22 @@ class YAMLConfig(Config):
         loader = self._yaml_loader
         config_path = config_path or self.config_path
         with open(config_path, 'r', encoding="utf-8") as file_name:
-            cfg = yaml.load(file_name, Loader=loader)
+            try:
+                cfg = yaml.load(file_name, Loader=loader)
+            except yaml.constructor.ConstructorError as e:
+                constructor = e.problem.split()[-1]
+                msg = dedent(f"""\
+
+                ERROR:
+                The input config file contains a constructor
+                that is not registered with the uwtools package.
+
+                constructor: {constructor}
+                config file: {config_path}
+
+                Please define the constructor before proceeding.""")
+                self.log.exception(msg)
+                raise exceptions.UWConfigError(msg)
 
         self.from_ordereddict(cfg)
         return cfg
@@ -416,7 +433,7 @@ class YAMLConfig(Config):
         loader.add_constructor('!INCLUDE', self._yaml_include)
         return loader
 
-class F90Config(Config):
+class F90Config(Config): #pylint: disable=unused-variable
 
     ''' Concrete class to handle Fortran namelist files. '''
 
@@ -450,7 +467,7 @@ class F90Config(Config):
         with open(output_path, 'w', encoding="utf-8") as file_name:
             f90nml.Namelist(nml).write(file_name, sort=False)
 
-class INIConfig(Config):
+class INIConfig(Config): #pylint: disable=unused-variable
 
     ''' Concrete class to handle INI config files. '''
 
@@ -508,7 +525,7 @@ class INIConfig(Config):
                 for key, value in self.data.items():
                     file_name.write(f'{key}={value}\n')
 
-class FieldTableConfig(YAMLConfig):
+class FieldTableConfig(YAMLConfig): #pylint: disable=unused-variable
     ''' This class exists to write out a field_table format given
     that its configuration has been set by an input YAML file. '''
 
