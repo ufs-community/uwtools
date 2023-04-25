@@ -19,11 +19,7 @@ status=${PIPESTATUS[0]}
 test $status == 0 || ( echo "pytest failed" && exit $status )
 
 # Lint
-pylint --ignore-imports=y tests scripts
+pylint --ignore-imports=y tests scripts src/uwtools
 status=$?
-test $status == 0 || ( echo "linting tests and scripts failed" && exit $status )
+test $status == 0 || ( echo "linting failed" && exit $status )
 
-cd ${WORKSPACE}/src
-pylint uwtools
-status=$?
-test $status == 0 || ( echo "linting uwtools failed" && exit $status )

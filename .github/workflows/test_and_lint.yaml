@@ -35,19 +35,12 @@ jobs:
           ls ${GITHUB_WORKSPACE}
           micromamba create -y -f ${GITHUB_WORKSPACE}/environment.yaml
 
-      - name: Analyzing uwtools with pylint
-        run: |
-          eval "$(micromamba shell hook --shell=bash)"
-          micromamba activate workflow_tools
-          cd src
-          pylint uwtools
-
-      - name: Analyzing tests with pylint
+      - name: Analyzing code with pylint
         run: |
           eval "$(micromamba shell hook --shell=bash)"
           micromamba activate workflow_tools
           export PYTHONPATH=$(pwd):$(pwd)/src
-          pylint tests
+          pylint tests scripts src/uwtools
 
       - name: Check the Jenkins job script
         run: |
