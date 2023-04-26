@@ -16,7 +16,7 @@ from uwtools.files.model import File
 logging.getLogger(__name__)
 
 
-def copy(source: List[File], destination: List[pathlib.Path]):
+def copy(source: List[File], destination: List[pathlib.Path]): #pylint: disable=unused-variable
     """copies each item from source to corresponding item in destination"""
     Copier(source, destination).run()
 

@@ -76,7 +76,7 @@ class File(ABC):
         raise NotImplementedError
 
 
-class S3(File):
+class S3(File): #pylint: disable=unused-variable
     """represents an Amazon S3 file"""
 
     @property
@@ -90,7 +90,7 @@ class S3(File):
         raise NotImplementedError
 
 
-class Unix(File):
+class Unix(File): #pylint: disable=unused-variable
     """represents a unix file"""
 
     @property
@@ -104,4 +104,3 @@ class Unix(File):
         if Path(self.path).is_file():
             return glob.glob(self.path)
         return glob.glob(os.path.join(self.path, '*'))
-    

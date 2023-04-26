@@ -416,7 +416,7 @@ class YAMLConfig(Config):
         loader.add_constructor('!INCLUDE', self._yaml_include)
         return loader
 
-class F90Config(Config):
+class F90Config(Config): #pylint: disable=unused-variable
 
     ''' Concrete class to handle Fortran namelist files. '''
 
@@ -450,7 +450,7 @@ class F90Config(Config):
         with open(output_path, 'w', encoding="utf-8") as file_name:
             f90nml.Namelist(nml).write(file_name, sort=False)
 
-class INIConfig(Config):
+class INIConfig(Config): #pylint: disable=unused-variable
 
     ''' Concrete class to handle INI config files. '''
 
@@ -508,7 +508,7 @@ class INIConfig(Config):
                 for key, value in self.data.items():
                     file_name.write(f'{key}={value}\n')
 
-class FieldTableConfig(YAMLConfig):
+class FieldTableConfig(YAMLConfig): #pylint: disable=unused-variable
     ''' This class exists to write out a field_table format given
     that its configuration has been set by an input YAML file. '''
 
