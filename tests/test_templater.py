@@ -277,7 +277,8 @@ Running script with args:
   how_many = 22
   dressing = 'balsamic'
 /
-J2Template._load_file INPUT Args: \n{input_file}
+J2Template._load_file INPUT Args:
+{input_file}
 """
 
     os.environ['fruit'] = 'banana'

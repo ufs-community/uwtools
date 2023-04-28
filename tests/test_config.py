@@ -10,9 +10,13 @@ import json
 import os
 import pathlib
 import tempfile
+from textwrap import dedent
+
+import pytest
 
 from uwtools import config
 from uwtools import logger
+from uwtools import exceptions
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -304,6 +308,71 @@ def test_dereference():
 
     # Check that order isn't a problem
     assert cfg['grid_stats']['points_per_level'] == 10000
+
+def test_dereference_exceptions(caplog):
+
+    ''' Test that dereference handles some standard mistakes. '''
+
+    log = logger.Logger(name='test_dereference', level='DEBUG')
+    cfg = config.YAMLConfig(log_name=log.name)
+    cfg.update({'undefined_filter': '{{ 34 | im_not_a_filter }}'})
+
+    with pytest.raises(exceptions.UWConfigError) as e_info:
+        cfg.dereference()
+
+    assert "filter: 'im_not_a_filter'" in repr(e_info)
+    cfg.pop('undefined_filter', None)
+
+    cfg.update({
+        'foo': 'bar',
+        'soap': '{{ foo }}',
+        'num': 2,
+        'nada': 0,
+        'divide': '{{ num // nada }}', # ZeroDivisionError
+        'list_a': [1, 2, 4],
+        'type_prob': '{{ list_a / "a" }}', # TypeError
+    })
+    caplog.clear()
+    cfg.dereference()
+
+    raised = [rec.msg for rec in caplog.records if "raised" in rec.msg]
+
+    assert "ZeroDivisionError" in raised[0]
+    assert "TypeError" in raised[1]
+
+def test_yaml_constructor_errors():
+
+    """ When loading YAML with Jinja2 templated values, we see a few
+    different renditions of constructor errors. Make sure those are
+    clear and helpful."""
+
+    # Test unregistered constructor raises UWConfigError
+    cfg = dedent("""\
+    foo: !not_a_constructor bar
+    """)
+
+    with tempfile.NamedTemporaryFile(dir="./", mode="w+t") as tmpfile:
+        tmpfile.writelines(cfg)
+        tmpfile.seek(0)
+
+        with pytest.raises(exceptions.UWConfigError) as e_info:
+            config_obj = config.YAMLConfig(tmpfile.name)
+            assert "constructor: !not_a_constructor" in repr(e_info)
+            assert "Define the constructor before proceeding" in repr(e_info)
+
+    # Test Jinja2 template without quotes raises UWConfigError
+    cfg = dedent("""\
+    foo: {{ bar }}
+    bar: 2
+    """)
+
+    with tempfile.NamedTemporaryFile(dir="./", mode="w+t") as tmpfile:
+        tmpfile.writelines(cfg)
+        tmpfile.seek(0)
+
+        with pytest.raises(exceptions.UWConfigError) as e_info:
+            config_obj = config.YAMLConfig(tmpfile.name)
+            assert "value is included in quotes" in repr(e_info)
 
 def test_compare_config(caplog):
     '''Compare two config objects using method
