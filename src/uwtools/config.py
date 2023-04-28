@@ -12,6 +12,7 @@ import json
 import logging
 import os
 import re
+import sys
 from textwrap import dedent
 
 import jinja2
@@ -177,7 +178,6 @@ class Config(collections.UserDict):
                 self.update_values(self._load_paths(filepaths))
                 del ref_dict[key]
 
-    @logger.verbose()
     def dereference(self, ref_dict=None, full_dict=None):
 
         # pylint: disable=too-many-branches
@@ -195,6 +195,10 @@ class Config(collections.UserDict):
         if not isinstance(ref_dict, dict):
             return
 
+        # Choosing sys._getframe() here because it's more efficient than
+        # other inspect methods.
+        func_name = f"{self.__class__.__name__}.{sys._getframe().f_code.co_name}"
+
         for key, val in ref_dict.items():
 
             if isinstance(val, dict):
@@ -206,7 +210,7 @@ class Config(collections.UserDict):
                 v_str = str(val)
                 is_a_template = any((ele for ele in ["{{", "{%"] if ele in v_str))
                 if is_a_template:
-
+                    error_catcher = {}
                     # Find expressions first, and process them as a single template
                     # if they exist
                     # Find individual double curly brace template in the string
@@ -236,10 +240,26 @@ class Config(collections.UserDict):
                             config_obj = {**os.environ,
                                           **ref_dict,
                                           **full_dict}
-                        j2tmpl = J2Template(configure_obj=config_obj,
-                                            template_str=template,
-                                            loader_args={'undefined': jinja2.StrictUndefined}
-                                            )
+                        try:
+                           j2tmpl = J2Template(configure_obj=config_obj,
+                                               template_str=template,
+                                               loader_args={'undefined': jinja2.StrictUndefined}
+                                               )
+                        except jinja2.exceptions.TemplateAssertionError as e:
+                            print(e)
+                            msg = dedent(f"""\
+
+                                ERROR:
+                                The input config file contains a Jinja2 filter
+                                that is not registered with the uwtools package.
+
+                                filter: {repr(e).split()[-1][:-3]}
+                                key: {key}
+
+                                Define the filter before proceeding.
+                                """)
+                            self.log.exception(msg)
+                            raise exceptions.UWConfigError(msg)
                         rendered = template
                         try:
                             # Fill in a template that has the appropriate variables
@@ -247,18 +267,21 @@ class Config(collections.UserDict):
                             rendered = j2tmpl.render_template()
                         except jinja2.exceptions.UndefinedError:
                             # Leave a templated field as-is in the resulting dict
-                            pass
+                            error_catcher[template] = "UndefinedError"
                         except TypeError:
-                            pass
+                            error_catcher[template] = "TypeError"
                         except ZeroDivisionError:
-                            pass
+                            error_catcher[template] = "ZeroDivisionError"
                         except:
                             # Fail on any other exception...something is
                             # probably wrong.
-                            print(f"{key}: {template}")
+                            self.log.exception(f"{key}: {template}")
                             raise
 
                         data.append(rendered)
+                        for tmpl, err in error_catcher.items():
+                            msg = f"{func_name}: {tmpl} raised {err}"
+                            self.log.debug(msg)
 
                     # Put the full template line back together as it was,
                     # filled or not, and make a guess on its intended type.
@@ -397,16 +420,26 @@ class YAMLConfig(Config):
                 cfg = yaml.load(file_name, Loader=loader)
             except yaml.constructor.ConstructorError as e: #pylint: disable=invalid-name
                 constructor = e.problem.split()[-1]
-                msg = dedent(f"""\
+                if 'unhashable' in e.problem:
+                    msg = dedent(f"""\
 
-                ERROR:
-                The input config file contains a constructor
-                that is not registered with the uwtools package.
+                        ERROR:
+                        The input config file may contain a Jinja2
+                        templated value at the location listed above.
+                        Ensure the value is included in quotes.
+                        """ )
+                else:
+                    msg = dedent(f"""\
 
-                constructor: {constructor}
-                config file: {config_path}
+                        ERROR:
+                        The input config file contains a constructor
+                        that is not registered with the uwtools package.
 
-                Please define the constructor before proceeding.""")
+                        constructor: {constructor}
+                        config file: {config_path}
+
+                        Define the constructor before proceeding.
+                        """)
                 self.log.exception(msg)
                 raise exceptions.UWConfigError(msg)
 

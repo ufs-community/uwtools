@@ -9,10 +9,12 @@ import itertools
 import json
 import os
 import pathlib
+import pytest
 import tempfile
 
 from uwtools import config
 from uwtools import logger
+from uwtools import exceptions
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -305,6 +307,37 @@ def test_dereference():
     # Check that order isn't a problem
     assert cfg['grid_stats']['points_per_level'] == 10000
 
+def test_dereference_exceptions(caplog):
+
+    ''' Test that dereference handles some standard mistakes. '''
+
+    log = logger.Logger(name='test_dereference', level='DEBUG')
+    cfg = config.YAMLConfig(log_name=log.name)
+    cfg.update({'undefined_filter': '{{ 34 | im_not_a_filter }}'})
+
+    with pytest.raises(exceptions.UWConfigError) as e_info:
+        cfg.dereference()
+
+    assert "filter: 'im_not_a_filter'" in repr(e_info)
+    cfg.pop('undefined_filter', None)
+
+    cfg.update({
+        'foo': 'bar',
+        'soap': '{{ foo }}',
+        'num': 2,
+        'nada': 0,
+        'divide': '{{ num // nada }}', # ZeroDivisionError
+        'list_a': [1, 2, 4],
+        'type_prob': '{{ list_a / "a" }}', # TypeError
+    })
+    caplog.clear()
+    cfg.dereference()
+
+    raised = [rec.msg for rec in caplog.records if "raised" in rec.msg]
+
+    assert "ZeroDivisionError" in raised[0]
+    assert "TypeError" in raised[1]
+
 def test_compare_config(caplog):
     '''Compare two config objects using method
     '''
@@ -374,3 +407,4 @@ def test_dictionary_depth():
     config_obj = config.INIConfig(input_ini)
     depth = config_obj.dictionary_depth(config_obj.data)
     assert 2 == depth
+

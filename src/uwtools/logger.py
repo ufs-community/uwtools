@@ -171,7 +171,8 @@ def verbose(_func=None): #pylint: disable=unused-variable
             formatted_arguments = "\n".join(args_passed_in_function + kwargs_passed_in_function)
 
             func_name = f"{self.__class__.__name__}.{func.__name__}"
-            log.debug("%s INPUT Args: \n\t%s", func_name, formatted_arguments)
+            log.debug("%s INPUT Args:", func_name)
+            log.debug("\t%s", formatted_arguments)
             try:
                 # Capture the return value from the decorated function
                 value = func(self, *args, **kwargs)
