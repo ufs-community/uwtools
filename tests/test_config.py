@@ -9,8 +9,10 @@ import itertools
 import json
 import os
 import pathlib
-import pytest
 import tempfile
+from textwrap import dedent
+
+import pytest
 
 from uwtools import config
 from uwtools import logger
@@ -338,6 +340,40 @@ def test_dereference_exceptions(caplog):
     assert "ZeroDivisionError" in raised[0]
     assert "TypeError" in raised[1]
 
+def test_yaml_constructor_errors():
+
+    """ When loading YAML with Jinja2 templated values, we see a few
+    different renditions of constructor errors. Make sure those are
+    clear and helpful."""
+
+    # Test unregistered constructor raises UWConfigError
+    cfg = dedent("""\
+    foo: !not_a_constructor bar
+    """)
+
+    with tempfile.NamedTemporaryFile(dir="./", mode="w+t") as tmpfile:
+        tmpfile.writelines(cfg)
+        tmpfile.seek(0)
+
+        with pytest.raises(exceptions.UWConfigError) as e_info:
+            config_obj = config.YAMLConfig(tmpfile.name)
+            assert "constructor: !not_a_constructor" in repr(e_info)
+            assert "Define the constructor before proceeding" in repr(e_info)
+
+    # Test Jinja2 template without quotes raises UWConfigError
+    cfg = dedent("""\
+    foo: {{ bar }}
+    bar: 2
+    """)
+
+    with tempfile.NamedTemporaryFile(dir="./", mode="w+t") as tmpfile:
+        tmpfile.writelines(cfg)
+        tmpfile.seek(0)
+
+        with pytest.raises(exceptions.UWConfigError) as e_info:
+            config_obj = config.YAMLConfig(tmpfile.name)
+            assert "value is included in quotes" in repr(e_info)
+
 def test_compare_config(caplog):
     '''Compare two config objects using method
     '''
@@ -407,4 +443,3 @@ def test_dictionary_depth():
     config_obj = config.INIConfig(input_ini)
     depth = config_obj.dictionary_depth(config_obj.data)
     assert 2 == depth
-

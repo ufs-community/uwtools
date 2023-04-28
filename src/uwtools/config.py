@@ -180,7 +180,7 @@ class Config(collections.UserDict):
 
     def dereference(self, ref_dict=None, full_dict=None):
 
-        # pylint: disable=too-many-branches
+        # pylint: disable=too-many-branches, too-many-locals
 
         ''' This method will be used as a method by which any Config
         object can cycle through its key/value pairs recursively,
@@ -197,7 +197,8 @@ class Config(collections.UserDict):
 
         # Choosing sys._getframe() here because it's more efficient than
         # other inspect methods.
-        func_name = f"{self.__class__.__name__}.{sys._getframe().f_code.co_name}"
+
+        func_name = f"{self.__class__.__name__}.{sys._getframe().f_code.co_name}" #pylint: disable=protected-access
 
         for key, val in ref_dict.items():
 
@@ -241,12 +242,11 @@ class Config(collections.UserDict):
                                           **ref_dict,
                                           **full_dict}
                         try:
-                           j2tmpl = J2Template(configure_obj=config_obj,
-                                               template_str=template,
-                                               loader_args={'undefined': jinja2.StrictUndefined}
-                                               )
+                            j2tmpl = J2Template(configure_obj=config_obj,
+                                                template_str=template,
+                                                loader_args={'undefined': jinja2.StrictUndefined}
+                                                )
                         except jinja2.exceptions.TemplateAssertionError as e:
-                            print(e)
                             msg = dedent(f"""\
 
                                 ERROR:
@@ -275,7 +275,8 @@ class Config(collections.UserDict):
                         except:
                             # Fail on any other exception...something is
                             # probably wrong.
-                            self.log.exception(f"{key}: {template}")
+                            msg = f"{key}: {template}"
+                            self.log.exception(msg)
                             raise
 
                         data.append(rendered)
@@ -421,7 +422,7 @@ class YAMLConfig(Config):
             except yaml.constructor.ConstructorError as e: #pylint: disable=invalid-name
                 constructor = e.problem.split()[-1]
                 if 'unhashable' in e.problem:
-                    msg = dedent(f"""\
+                    msg = dedent("""\
 
                         ERROR:
                         The input config file may contain a Jinja2
