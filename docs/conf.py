@@ -19,7 +19,7 @@ print(sys.path)
 
 project = 'Unified Workflow'
 author = ''
-author_list = 'Mahajan, R., C. Holt, B. Cash, F. Gabelmann, O. Adejumo, and J. Prestopnik'
+author_list = 'Holt, C., E. Carpenter, J. Derrico, V. Hagerty, F. Gabelmann, R. Mahajan, B. Cash, O. Adejumo, J. Prestopnik'
 version = '0.1.0'
 verinfo = version
 release = f'{version}'
