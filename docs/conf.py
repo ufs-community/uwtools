@@ -19,11 +19,11 @@ print(sys.path)
 
 project = 'Unified Workflow'
 author = ''
-author_list = 'Mahajan, R., C. Holt, B. Cash, F. Gabelmann, O. Adejumo, and J. Prestopnik'
-version = '0.1.0'
+author_list = 'Holt, C., E. Carpenter, J. Derrico, V. Hagerty, F. Gabelmann, R. Mahajan, B. Cash, O. Adejumo, J. Prestopnik'
+version = '1.0.0'
 verinfo = version
 release = f'{version}'
-release_date = '2022-05-06'
+release_date = '2023-05-01'
 release_year = release_date.split("-")[0]
 release_month = release_date.split("-")[1]
 release_day = release_date.split("-")[2]
