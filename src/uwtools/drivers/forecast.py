@@ -79,7 +79,7 @@ class FV3Forecast(Driver): # pragma: no cover
 
         Args:
            run_directory: path of desired run directory
-           exist_act: - could be any of [ 'delete', 'rename', 'quit' ]
+           exist_act: - could be any of 'delete', 'rename', 'quit'
                       - how program should act if run directory exists
                       - default is to delete old run directory
            Returns: None
@@ -112,8 +112,8 @@ class FV3Forecast(Driver): # pragma: no cover
 
         # Create new run directory with two required subdirectories
         try:
-            os.makedirs(run_directory + "/INPUT")
-            os.makedirs(run_directory + "/RESTART")
+            os.makedirs(run_directory + "/INPUT", exist_ok=True)
+            os.makedirs(run_directory + "/RESTART", exist_ok=True)
         except (RuntimeError):
             raise RuntimeError("Could not create new run directories")
 
