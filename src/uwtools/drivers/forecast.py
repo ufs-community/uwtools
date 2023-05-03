@@ -114,6 +114,11 @@ class FV3Forecast(Driver): # pragma: no cover
         try:
             os.makedirs(run_directory + "/INPUT")
             os.makedirs(run_directory + "/RESTART")
+            # Verify creation of new directory with subdirectories
+            if not os.path.isdir(run_directory + "/RESTART"):
+                logging.critical("New run directories not created")
+                sys.exit(1)                
+            logging.info("Directories created")
         except (RuntimeError, FileExistsError):
             raise RuntimeError("Could not create new run directories")
 
