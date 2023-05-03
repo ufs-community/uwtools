@@ -89,12 +89,12 @@ class FV3Forecast(Driver): # pragma: no cover
         if exist_act not in ["delete", "rename", "quit"]:
             raise ValueError("Bad argument to create_directory_structure")
 
-        # Exit program with error if caller chooses to Quit
+        # Exit program with error if caller chooses to quit
         if exist_act == "quit":
-            logging.critical("User chose Quit option")
+            logging.critical("User chose quit option")
             sys.exit(1)
 
-        # Try to delete existing run directory if option is Delete
+        # Try to delete existing run directory if option is delete
         try:
             if exist_act == "delete" and os.path.isdir(run_directory):
                 shutil.rmtree(run_directory)
@@ -102,11 +102,12 @@ class FV3Forecast(Driver): # pragma: no cover
             raise RuntimeError("Could not delete " +
                                "old run directory") from del_error
 
-        # Try to rename existing run directory if caller chooses Rename
+        # Try to rename existing run directory if caller chooses rename
         try:
             if exist_act == "rename" and os.path.isdir(run_directory):
                 now = datetime.now()
-                save_dir = run_directory + now.strftime("_%Y%m%d_%H%M%S")
+                save_dir = os.path.join(run_directory,
+                                        now.strftime("_%Y%m%d_%H%M%S"))
                 shutil.move(run_directory, save_dir)
         except (RuntimeError, FileExistsError) as rename_error:
             raise RuntimeError("Could not rename " +
@@ -114,13 +115,13 @@ class FV3Forecast(Driver): # pragma: no cover
 
         # Create new run directory with two required subdirectories
         try:
-            os.makedirs(run_directory + "/INPUT")
-            os.makedirs(run_directory + "/RESTART")
+            os.makedirs(os.path.join(run_directory, "/INPUT"))
+            os.makedirs(os.path.join(run_directory, "/RESTART"))
             # Verify creation of new directory with subdirectories
-            if not os.path.isdir(run_directory + "/RESTART"):
+            if not os.path.isdir(os.path.join(run_directory, "/RESTART")):
                 logging.critical("New run directories not created")
                 sys.exit(1)
-            logging.info("Directories created")
+            logging.info("New run directories created")
         except (RuntimeError, FileExistsError) as create_error:
             raise RuntimeError("Could not create " +
                                "new run directories") from create_error
