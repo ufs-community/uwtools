@@ -106,15 +106,15 @@ class FV3Forecast(Driver): # pragma: no cover
             if exist_act == "rename" and os.path.isdir(run_directory):
                 now = datetime.now()
                 save_dir = run_directory + now.strftime("_%Y%m%d_%H%M%S")
-                shutil.copytree(run_directory, save_dir)
+                shutil.move(run_directory, save_dir)
         except (RuntimeError):
             raise RuntimeError("Could not rename old run directory")
 
         # Create new run directory with two required subdirectories
         try:
-            os.makedirs(run_directory + "/INPUT", exist_ok=True)
-            os.makedirs(run_directory + "/RESTART", exist_ok=True)
-        except (RuntimeError):
+            os.makedirs(run_directory + "/INPUT")
+            os.makedirs(run_directory + "/RESTART")
+        except (RuntimeError, FileExistsError):
             raise RuntimeError("Could not create new run directories")
 
     def output(self):
