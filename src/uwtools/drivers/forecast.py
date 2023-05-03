@@ -98,8 +98,9 @@ class FV3Forecast(Driver): # pragma: no cover
         try:
             if exist_act == "delete" and os.path.isdir(run_directory):
                 shutil.rmtree(run_directory)
-        except (RuntimeError):
-            raise RuntimeError("Could not delete old run directory")
+        except (RuntimeError, FileExistsError) as del_error:
+            raise RuntimeError("Could not delete " +
+                               "old run directory") from del_error
 
         # Try to rename existing run directory if caller chooses Rename
         try:
@@ -107,8 +108,9 @@ class FV3Forecast(Driver): # pragma: no cover
                 now = datetime.now()
                 save_dir = run_directory + now.strftime("_%Y%m%d_%H%M%S")
                 shutil.move(run_directory, save_dir)
-        except (RuntimeError):
-            raise RuntimeError("Could not rename old run directory")
+        except (RuntimeError, FileExistsError) as rename_error:
+            raise RuntimeError("Could not rename " +
+                               "old run directory") from rename_error
 
         # Create new run directory with two required subdirectories
         try:
@@ -117,10 +119,11 @@ class FV3Forecast(Driver): # pragma: no cover
             # Verify creation of new directory with subdirectories
             if not os.path.isdir(run_directory + "/RESTART"):
                 logging.critical("New run directories not created")
-                sys.exit(1)                
+                sys.exit(1)
             logging.info("Directories created")
-        except (RuntimeError, FileExistsError):
-            raise RuntimeError("Could not create new run directories")
+        except (RuntimeError, FileExistsError) as create_error:
+            raise RuntimeError("Could not create " +
+                               "new run directories") from create_error
 
     def output(self):
         ''' Create list of SRW output files and stage them in the working
