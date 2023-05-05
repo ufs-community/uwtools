@@ -89,7 +89,7 @@ class FV3Forecast(Driver): # pragma: no cover
             raise ValueError("Bad argument to create_directory_structure")
 
         # Exit program with error if caller chooses to quit
-        if exist_act == "quit":
+        if exist_act == "quit" and os.path.isdir(run_directory):
             logging.critical("User chose quit option when creating directory")
             sys.exit(1)
 
@@ -98,17 +98,13 @@ class FV3Forecast(Driver): # pragma: no cover
 
         # Create new run directory with two required subdirectories
         try:
-            # Create and verify new directory with subdirectories
-            os.makedirs(os.path.join(run_directory, "INPUT"))
-            if not os.path.isdir(os.path.join(run_directory, "INPUT")):
-                msg = f"Directory {run_directory} with INPUT not created"
-                logging.critical(msg)
-                sys.exit(1)
-            os.makedirs(os.path.join(run_directory, "RESTART"))
-            if not os.path.isdir(os.path.join(run_directory, "RESTART")):
-                msg = f"Directory {run_directory} with RESTART not created"
-                logging.critical(msg)
-                sys.exit(1)
+            for subdir in ("INPUT", "RESTART"):
+                # Create and verify new directory with subdirectories
+                os.makedirs(os.path.join(run_directory, subdir))
+                if not os.path.isdir(os.path.join(run_directory, subdir)):
+                    msg = f"Directory {run_directory} with {subdir} not created"
+                    logging.critical(msg)
+                    raise RuntimeError(msg)
             msg = f"Directory {run_directory} created with subdirectories"
             logging.info(msg)
         except (RuntimeError, FileExistsError) as create_error:
