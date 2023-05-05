@@ -10,8 +10,8 @@ import logging
 import os
 import sys
 
-from .driver import Driver
 from uwtools.utils import file_helpers
+from .driver import Driver
 
 logging.getLogger(__name__)
 
