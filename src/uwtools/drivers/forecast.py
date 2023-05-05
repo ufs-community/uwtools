@@ -9,10 +9,9 @@ and physics suites.
 import logging
 import os
 import sys
-from datetime import datetime
-import shutil
 
 from .driver import Driver
+from uwtools.utils import file_helpers
 
 logging.getLogger(__name__)
 
@@ -85,45 +84,36 @@ class FV3Forecast(Driver): # pragma: no cover
            Returns: None
         '''
 
-        # Caller can only provide correct argument
+        # Caller should only provide correct argument
         if exist_act not in ["delete", "rename", "quit"]:
             raise ValueError("Bad argument to create_directory_structure")
 
         # Exit program with error if caller chooses to quit
         if exist_act == "quit":
-            logging.critical("User chose quit option")
+            logging.critical("User chose quit option when creating directory")
             sys.exit(1)
 
-        # Try to delete existing run directory if option is delete
-        try:
-            if exist_act == "delete" and os.path.isdir(run_directory):
-                shutil.rmtree(run_directory)
-        except (RuntimeError, FileExistsError) as del_error:
-            raise RuntimeError("Could not delete " +
-                               "old run directory") from del_error
-
-        # Try to rename existing run directory if caller chooses rename
-        try:
-            if exist_act == "rename" and os.path.isdir(run_directory):
-                now = datetime.now()
-                save_dir = run_directory + now.strftime("_%Y%m%d_%H%M%S")
-                shutil.move(run_directory, save_dir)
-        except (RuntimeError, FileExistsError) as rename_error:
-            raise RuntimeError("Could not rename " +
-                               "old run directory") from rename_error
+        # Delete or rename directory if it exists
+        file_helpers.handle_existing(run_directory, exist_act)
 
         # Create new run directory with two required subdirectories
         try:
+            # Create and verify new directory with subdirectories
             os.makedirs(os.path.join(run_directory, "INPUT"))
-            os.makedirs(os.path.join(run_directory, "RESTART"))
-            # Verify creation of new directory with subdirectories
-            if not os.path.isdir(os.path.join(run_directory, "RESTART")):
-                logging.critical("New run directories not created")
+            if not os.path.isdir(os.path.join(run_directory, "INPUT")):
+                msg = f"Directory {run_directory} with INPUT not created"
+                logging.critical(msg)
                 sys.exit(1)
-            logging.info("New run directories created")
+            os.makedirs(os.path.join(run_directory, "RESTART"))
+            if not os.path.isdir(os.path.join(run_directory, "RESTART")):
+                msg = f"Directory {run_directory} with RESTART not created"
+                logging.critical(msg)
+                sys.exit(1)
+            msg = f"Directory {run_directory} created with subdirectories"
+            logging.info(msg)
         except (RuntimeError, FileExistsError) as create_error:
-            raise RuntimeError("Could not create " +
-                               "new run directories") from create_error
+            msg = f"Could not create directory {run_directory} with subdirectories"
+            raise RuntimeError(msg) from create_error
 
     def output(self):
         ''' Create list of SRW output files and stage them in the working
