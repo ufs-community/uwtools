@@ -25,7 +25,7 @@ def test_create_directory_structure():
     forecast_obj.create_directory_structure(run_directory, "rename")
     copy_directory = glob.glob(run_directory + "_*")[0]
     assert os.path.isdir(os.path.join(copy_directory, "RESTART"))
-    
+
     if os.path.isdir(run_directory):
         shutil.rmtree(run_directory)
     if os.path.isdir(copy_directory):
