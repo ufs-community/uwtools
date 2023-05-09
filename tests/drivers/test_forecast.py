@@ -4,6 +4,7 @@
 import os
 import shutil
 import glob
+import pytest
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
@@ -21,10 +22,28 @@ def test_create_directory_structure():
     forecast_obj.create_directory_structure(run_directory, "delete")
     assert os.path.isdir(os.path.join(run_directory, "RESTART"))
 
+    # Put a test file into the run directory
+    test_file = os.path.join(run_directory, "test.txt")
+    file_open = open(test_file, "w")
+    file_open.write("test file")
+    file_open.close()
+
+    # Test create_directory_structure when run directory does exist
+    forecast_obj.create_directory_structure(run_directory, "delete")
+    assert os.path.isdir(os.path.join(run_directory, "RESTART"))
+    # Test file should be gone after delete
+    assert not os.path.isfile(test_file)
+
     # Test create_directory_structure when run directory does exist
     forecast_obj.create_directory_structure(run_directory, "rename")
     copy_directory = glob.glob(run_directory + "_*")[0]
     assert os.path.isdir(os.path.join(copy_directory, "RESTART"))
+
+    # Test create_directory_structure when run directory does exist
+    with pytest.raises(SystemExit) as pytest_wrapped_e:
+        forecast_obj.create_directory_structure(run_directory, "quit")
+    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.value.code == 1
 
     if os.path.isdir(run_directory):
         shutil.rmtree(run_directory)
