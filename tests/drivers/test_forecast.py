@@ -24,9 +24,9 @@ def test_create_directory_structure():
 
     # Put a test file into the run directory
     test_file = os.path.join(run_directory, "test.txt")
-    file_open = open(test_file, "w")
-    file_open.write("test file")
-    file_open.close()
+    with open(test_file, "w", encoding="utf-8") as file_open:
+        file_open.write("test file")
+        file_open.close()
 
     # Test create_directory_structure when run directory does exist
     forecast_obj.create_directory_structure(run_directory, "delete")
@@ -45,6 +45,7 @@ def test_create_directory_structure():
     assert pytest_wrapped_e.type == SystemExit
     assert pytest_wrapped_e.value.code == 1
 
+    # Clean up test directories
     if os.path.isdir(run_directory):
         shutil.rmtree(run_directory)
     if os.path.isdir(copy_directory):
