@@ -1,9 +1,12 @@
+'''
+Tests for forecast driver
+'''
 #pylint: disable=unused-variable
 
 import os
 import glob
-import pytest
 import tempfile
+import pytest
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
