@@ -1,10 +1,9 @@
-#pylint: disable=invalid-name, missing-module-docstring, missing-function-docstring
 #pylint: disable=unused-variable
 
 import os
-import shutil
 import glob
 import pytest
+import tempfile
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
@@ -13,10 +12,8 @@ from uwtools.drivers.forecast import FV3Forecast
 def test_create_directory_structure():
     """Tests create_directory_structure method given a directory."""
     forecast_obj = FV3Forecast(Driver)
-    uwtools_file_base = os.path.join(os.path.dirname(__file__))
-    run_directory = os.path.join(uwtools_file_base, "expt_dir")
-    if os.path.isdir(run_directory):
-        shutil.rmtree(run_directory)
+    temp_file_base = tempfile.gettempdir()
+    run_directory = os.path.join(temp_file_base, "expt_dir")
 
     # Test create_directory_structure when run directory does not exist
     forecast_obj.create_directory_structure(run_directory, "delete")
@@ -44,9 +41,3 @@ def test_create_directory_structure():
         forecast_obj.create_directory_structure(run_directory, "quit")
     assert pytest_wrapped_e.type == SystemExit
     assert pytest_wrapped_e.value.code == 1
-
-    # Clean up test directories
-    if os.path.isdir(run_directory):
-        shutil.rmtree(run_directory)
-    if os.path.isdir(copy_directory):
-        shutil.rmtree(copy_directory)
