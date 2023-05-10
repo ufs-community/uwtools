@@ -39,7 +39,7 @@ def test_create_directory_structure():
         copy_directory = glob.glob(run_directory + "_*")[0]
         assert os.path.isdir(os.path.join(copy_directory, "RESTART"))
 
-        # Clean up copied directory fronm rename     
+        # Clean up copied directory fronm rename
         if os.path.isdir(copy_directory):
             shutil.rmtree(copy_directory)
 
