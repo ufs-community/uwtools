@@ -4,6 +4,7 @@ Tests for forecast driver
 #pylint: disable=unused-variable
 
 import os
+import shutil
 import glob
 import tempfile
 import pytest
@@ -37,6 +38,10 @@ def test_create_directory_structure():
         forecast_obj.create_directory_structure(run_directory, "rename")
         copy_directory = glob.glob(run_directory + "_*")[0]
         assert os.path.isdir(os.path.join(copy_directory, "RESTART"))
+
+        # Clean up copied directory fronm rename     
+        if os.path.isdir(copy_directory):
+            shutil.rmtree(copy_directory)
 
         # Test create_directory_structure when run directory does exist
         with pytest.raises(SystemExit) as pytest_wrapped_e:
