@@ -1,13 +1,18 @@
 '''
 Tests for schema validation tool
 '''
+
+# pylint: disable=wrong-import-position,wrong-import-order
+
+import pytest
+jsonschema = pytest.importorskip("jsonschema")
+
 import io
 import json
 from contextlib import redirect_stdout
 import os
 import pathlib
-import jsonschema
-import pytest
+import jsonschema # pylint: disable=import-error
 import yaml
 
 

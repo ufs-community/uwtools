@@ -37,7 +37,7 @@ def test_set_template_dryrun(): #pylint: disable=unused-variable
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
     outcome=\
-    """Running script with args:
+    """Running set_template with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
@@ -82,7 +82,7 @@ def test_set_template_listvalues(): #pylint: disable=unused-variable
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     outcome=\
-    """Running script with args:
+    """Running set_template with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
@@ -186,7 +186,7 @@ def test_set_template_command_line_config(): #pylint: disable=unused-variable
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     outcome=\
-    """Running script with args:
+    """Running set_template with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
@@ -257,7 +257,7 @@ def test_set_template_verbosity(): #pylint: disable=unused-variable
 
     outcome=\
     f"""Finished setting up debug file logging in {logfile}
-Running script with args:
+Running set_template with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
