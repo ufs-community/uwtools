@@ -13,6 +13,7 @@ import sys
 from uwtools.drivers import forecast
 from uwtools.utils import cli_helpers
 
+
 def parse_args(argv):# pragma: no cover
     #remove pragma when completed
 
@@ -69,21 +70,24 @@ def parse_args(argv):# pragma: no cover
         )
     return parser.parse_args(argv)
 
+
 def run_forecast(argv): # pragma: no cover
     '''
-    Defines the user interface for the forecast driver. Parses arguments provided by the user
-    and passes to the Forecast driver class to be run.'''
+    Defines the user interface for the forecast driver. Parses arguments
+    provided by the user and passes to the Forecast driver class to be run.'''
     user_args = parse_args(argv)
 
     # Set up logging
     name = f"{inspect.stack()[0][3]}"
     log = cli_helpers.setup_logging(user_args, log_name=name)
 
-    forecast_type = user_args.forecast_app + user_args.forecast_model.join()
+    forecast_type = user_args.forecast_model.join()
     forecast_class = getattr(forecast, f"{forecast_type}Forecast")
-    experiment = forecast_class(user_args.config_file, user_args.machine, log_name=name)
+    experiment = forecast_class(user_args.config_file, user_args.machine,
+                                log_name=name)
 
     experiment.run()
+
 
 if __name__ == '__main__':
     run_forecast(sys.argv[1:])
