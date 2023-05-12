@@ -107,7 +107,7 @@ def set_template(argv):
     name = f"{inspect.stack()[0][3]}"
     log = cli_helpers.setup_logging(user_args, log_name=name)
 
-    log.info("""Running script with args: """)
+    log.info(f"""Running {name} with args: """)
     log.info(f"""{('-' * 70)}""")
     log.info(f"""{('-' * 70)}""")
     for name, val in user_args.__dict__.items():
