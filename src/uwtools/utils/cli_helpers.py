@@ -32,6 +32,29 @@ def get_file_type(arg): #pylint: disable=unused-variable
     logging.critical(msg)
     raise ValueError(msg)
 
+def log_input(log, script_name, user_args):
+
+    """ Write the script input user args out to the log.
+
+    Parameters
+    ----------
+    log : logger object
+    script_name : str
+                  name of the caller
+    user_args : parse_args.Namespace object
+                caller command-line arguments
+
+    """
+
+    log.info(f"""Running {script_name} with args: """)
+    log.info(f"""{('-' * 70)}""")
+    log.info(f"""{('-' * 70)}""")
+    for name, val in user_args.__dict__.items():
+        if name not in ["config"]:
+            log.info("{name:>15s}: {val}".format(name=name, val=val))
+    log.info(f"""{('-' * 70)}""")
+    log.info(f"""{('-' * 70)}""")
+
 def path_if_file_exists(arg): #pylint: disable=unused-variable
     ''' Checks whether a file exists, and returns the path if it does. '''
     if not os.path.exists(arg):

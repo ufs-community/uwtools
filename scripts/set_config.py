@@ -114,6 +114,12 @@ def create_config_file(argv, config_dict=None, log=None):
         name = f"{inspect.stack()[0][3]}"
         log = cli_helpers.setup_logging(user_args, log_name=name)
 
+    cli_helpers.log_input(
+        log=log,
+        script_name=name,
+        user_args=user_args,
+        )
+
     infile_type = user_args.input_file_type or cli_helpers.get_file_type(user_args.input_base_file)
 
     config_class = getattr(config, f"{infile_type}Config")
