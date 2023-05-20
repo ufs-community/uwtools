@@ -63,7 +63,7 @@ def test_set_config_yaml_simple(): #pylint: disable=unused-variable
         out_file = f'{tmp_dir}/test_config_from_yaml.yaml'
         args = ['-i', input_file, '-o', out_file]
 
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
         expected = config.YAMLConfig(input_file)
         expected_file = f'{tmp_dir}/expected_yaml.yaml'
@@ -81,7 +81,7 @@ def test_set_config_ini_simple(): #pylint: disable=unused-variable
         out_file = f'{tmp_dr}/test_config_from_ini.ini'
         args = ['-i', input_file, '-o', out_file]
 
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
         expected = config.INIConfig(input_file)
         expected_file = f'{tmp_dr}/expected_ini.ini'
@@ -100,7 +100,7 @@ def test_set_config_f90nml_simple(): #pylint: disable=unused-variable
         out_file = f'{tmp_dr}/test_config_from_nml.nml'
         args = ['-i', input_file, '-o', out_file]
 
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
         expected = config.F90Config(input_file)
         expected_file = f'{tmp_dr}/expected_nml.nml'
@@ -120,7 +120,7 @@ def test_set_config_bash_simple(): #pylint: disable=unused-variable
 
         args = ['-i', input_file, '-o', out_file]
 
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
         expected = config.INIConfig(input_file)
         expected_file = f'{tmp_dr}/expected_ini.ini'
@@ -140,7 +140,7 @@ def test_set_config_yaml_config_file(): #pylint: disable=unused-variable
         out_file = f'{tmp_dir}/test_config_from_yaml.yaml'
         args = ['-i', input_file, '-o', out_file, '-c', config_file]
 
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
         expected = config.YAMLConfig(input_file)
         config_file_obj = config.YAMLConfig(config_file)
@@ -162,7 +162,7 @@ def test_set_config_f90nml_config_file(): #pylint: disable=unused-variable
         out_file = f'{tmp_dir}/test_config_from_nml.nml'
         args = ['-i', input_file, '-o', out_file, '-c', config_file]
 
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
         expected = config.F90Config(input_file)
         config_file_obj = config.F90Config(config_file)
@@ -184,7 +184,7 @@ def test_set_config_ini_config_file(): #pylint: disable=unused-variable
         out_file = f'{tmp_dir}/test_config_from_ini.ini'
         args = ['-i', input_file, '-o', out_file, '-c', config_file]
 
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
         expected = config.INIConfig(input_file)
         config_file_obj = config.INIConfig(config_file)
@@ -206,7 +206,7 @@ def test_set_config_ini_bash_config_file(): #pylint: disable=unused-variable
         out_file = f'{tmp_dir}/test_config_from_ini.ini'
         args = ['-i', input_file, '-o', out_file, '-c', config_file]
 
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
         expected = config.INIConfig(input_file)
         config_file_obj = config.INIConfig(config_file)
@@ -224,7 +224,7 @@ def test_incompatible_file_type(): #pylint: disable=unused-variable
     args = ['-i', input_file]
 
     with pytest.raises(ValueError):
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
 def test_set_config_field_table(): #pylint: disable=unused-variable
     '''Test reading a YAML config object and generating a field file table.
@@ -236,7 +236,7 @@ def test_set_config_field_table(): #pylint: disable=unused-variable
         out_file = f'{tmp_dir}/field_table_from_yaml.FV3_GFS'
         args = ['-i', input_file, '-o', out_file, '--output_file_type', "FieldTable"]
 
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
         with open(expected_file, 'r', encoding="utf-8") as file_1, open(out_file, 'r', encoding="utf-8") as file_2:
             reflist = [line.rstrip('\n').strip().replace("'", "") for line in file_1]
@@ -259,7 +259,7 @@ def test_set_config_dry_run(): #pylint: disable=unused-variable
 
     outstring = io.StringIO()
     with redirect_stdout(outstring):
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
     result = outstring.getvalue()
 
     assert result.rstrip('\n') == expected_content.rstrip('\n')
@@ -300,7 +300,7 @@ None
         # Capture stdout for the required configuration settings
         outstring = io.StringIO()
         with redirect_stdout(outstring):
-            set_config.create_config_obj(args)
+            set_config.create_config_file(args)
         result = outstring.getvalue()
 
         assert result == outcome
@@ -315,7 +315,7 @@ def test_values_needed_yaml(): #pylint: disable=unused-variable
     # Capture stdout for values_needed output
     outstring = io.StringIO()
     with redirect_stdout(outstring):
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
     result = outstring.getvalue()
     outcome=\
     """Keys that are complete:
@@ -348,7 +348,7 @@ def test_values_needed_ini(): #pylint: disable=unused-variable
     # Capture stdout for values_needed output
     outstring = io.StringIO()
     with redirect_stdout(outstring):
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
     result = outstring.getvalue()
 
     outcome=\
@@ -382,7 +382,7 @@ def test_values_needed_f90nml(): #pylint: disable=unused-variable
 
     outstring = io.StringIO()
     with redirect_stdout(outstring):
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
     result = outstring.getvalue()
 
     outcome=\
@@ -413,7 +413,7 @@ def test_cfg_to_yaml_conversion(): #pylint: disable=unused-variable
         out_file = f'{tmp_dir}/test_ouput.yaml'
         args = ['-i', input_file, '-o', out_file, '--input_file_type', 'YAML']
 
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
         expected = config.YAMLConfig(input_file)
         expected_file = f'{tmp_dir}/test.yaml'
@@ -435,7 +435,7 @@ def test_output_file_conversion(): #pylint: disable=unused-variable
         args = ['-i', input_file, '-o', out_file, '--output_file_type',
                 'F90']
 
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
         expected = config.F90Config(input_file)
         expected_file = f'{tmp_dir}/expected_nml.nml'
@@ -456,7 +456,7 @@ def test_config_file_conversion(): #pylint: disable=unused-variable
         out_file = f'{tmp_dir}/test_config_conversion.nml'
         args = ['-i', input_file, '-c', config_file, '-o', out_file, '--config_file_type', 'F90']
 
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
         expected = config.F90Config(input_file)
         config_file_obj = config.F90Config(config_file)
@@ -479,7 +479,7 @@ def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
         args = ['-i', input_file, '--input_file_type', ".pdf"]
 
         with pytest.raises(SystemExit):
-            set_config.create_config_obj(args)
+            set_config.create_config_file(args)
 
         # test --config_file_type
         input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
@@ -487,7 +487,7 @@ def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
         args = ['-i', input_file, '-c', config_file, '--config_file_type', "YAML"]
 
         with pytest.raises(ValueError):
-            set_config.create_config_obj(args)
+            set_config.create_config_file(args)
 
         # test --ouput_file_type
         input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
@@ -495,7 +495,7 @@ def test_erroneous_conversion_flags(): #pylint: disable=unused-variable
         args = ['-i', input_file, '-o', out_file, '--output_file_type', "F90"]
 
         with pytest.raises(ValueError):
-            set_config.create_config_obj(args)
+            set_config.create_config_file(args)
 
 def test_compare_nml(): #pylint: disable=unused-variable
 
@@ -520,7 +520,7 @@ def test_compare_nml(): #pylint: disable=unused-variable
 
     outstring = io.StringIO()
     with redirect_stdout(outstring):
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
     result = outstring.getvalue()
 
     # Make sure the tool output contains all the lines above
