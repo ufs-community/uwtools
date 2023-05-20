@@ -105,7 +105,7 @@ def parse_args(argv):
         )
     return parser.parse_args(argv)
 
-def create_config_obj(argv, log=None):
+def create_config_obj(argv, config_dict=None, log=None):
     '''Main section for processing config file'''
 
     user_args = parse_args(argv)
@@ -142,6 +142,9 @@ def create_config_obj(argv, log=None):
             return
 
         config_obj.update_values(user_config_obj)
+
+    if config_dict is not None:
+        config_obj.update_values(config_dict)
 
     config_obj.dereference_all()
 
