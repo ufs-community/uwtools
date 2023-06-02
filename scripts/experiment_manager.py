@@ -10,7 +10,7 @@ import inspect
 import os
 import sys
 
-from uwtools.drivers import forecast
+from uwtools.drivers import experiment
 from uwtools.utils import cli_helpers
 
 
@@ -24,6 +24,12 @@ def parse_args(argv):# pragma: no cover
     '''
     parser = argparse.ArgumentParser(
        description='Set config with user-defined settings.'
+    )
+    parser.add_argument(
+        '--forecast_app',
+        help='If provided, will define the app to be run.\
+            Currently accepts SRW, MRW, or HAFS',
+        choices=["SRW", "MRW", "HAFS"],
     )
     parser.add_argument(
         '-d', '--dry_run',
@@ -58,7 +64,10 @@ def manager(argv): # pragma: no cover
     name = f"{inspect.stack()[0][3]}"
     log = cli_helpers.setup_logging(user_args, log_name=name)
 
-    manager.load_config()
+    experiment_class = getattr(experiment, f"{user_args.forecast_app}Experiment")
+    managed_experiment = experiment_class(user_args.config_file, log_name=name)
+
+    managed_experiment.load_config()
 
 
 if __name__ == '__main__':
