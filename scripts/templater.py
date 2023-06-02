@@ -28,6 +28,7 @@ def parse_args(argv):
     parser = argparse.ArgumentParser(
        description='Update a Jinja2 Template with user-defined settings.'
     )
+    group = parser.add_mutually_exclusive_group()
     parser.add_argument(
         '-o', '--outfile',
         help='Full path to output file',
@@ -61,12 +62,12 @@ def parse_args(argv):
         action='store_true',
         help='If provided, print a list of required configuration settings to stdout',
         )
-    parser.add_argument(
+    group.add_argument(
         '-v', '--verbose',
         action='store_true',
         help='If provided, print all logging messages.',
         )
-    parser.add_argument(
+    group.add_argument(
         '-q', '--quiet',
         action='store_true',
         help='If provided, print no logging messages',

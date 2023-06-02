@@ -157,8 +157,7 @@ def test_set_template_no_config_suffix_fails(): #pylint: disable=unused-variable
         args = [
             '-i', input_file,
             '-c', tmp_file.name,
-            '-d',
-            '-q',
+            '-d'
             ]
         with pytest.raises(ValueError):
             templater.set_template(args)
@@ -174,8 +173,7 @@ def test_set_template_abs_path_ini_config(): #pylint: disable=unused-variable
     args = [
          '-i', input_file,
          '-c', config_file,
-         '-d',
-         '-q',
+         '-d'
          ]
     templater.set_template(args)
 
@@ -327,3 +325,13 @@ J2Template._load_file INPUT Args:
     outcome = ''
     # Check that only the correct messages were logged
     assert result == outcome
+
+def test_mutually_exclusive_args(): #pylint: disable=unused-variable
+    ''' Test that -q, -v, -d args are mutually exclusive'''
+
+    input_file = os.path.join(uwtools_file_base, "fixtures/fruit_config.yaml")
+
+    args = ['-i', input_file, '-v', '-q']
+
+    with pytest.raises(SystemExit):
+        templater.set_template(args)
