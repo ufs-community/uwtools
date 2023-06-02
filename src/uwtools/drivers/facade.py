@@ -52,7 +52,6 @@ class Facade: # pragma: no cover
         Initialize the facade driver.
 
         '''
-        super().__init__(argv)
 
     @abc.abstractmethod
     def load_config(self):
@@ -67,25 +66,24 @@ class Facade: # pragma: no cover
         Validate the configuration file.
 
         '''
-    
+
     @abc.abstractmethod
     def create_experiment(self):
         '''
         Create the experiment directory and manager files.
 
         '''
-    
+
     @abc.abstractmethod
     def create_manager_files(self):
         '''
         Create the manager files.
 
         '''
-    
+
     @abc.abstractmethod
     def link_fix_files(self):
         '''
         Link the fix files.
 
         '''
-    
