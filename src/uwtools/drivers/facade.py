@@ -31,13 +31,13 @@ class Facade: # pragma: no cover
     Methods
     -------
     load_config()
-        Load the configuration file and validate it.
+        Load the configuration file.
     
     validate_config()
         Validate the configuration file.
     
     create_experiment()
-        Create the experiment directory and manager files.
+        Create the experiment directory.
     
     create_manager_files()
         Create the manager files.
@@ -56,7 +56,8 @@ class Facade: # pragma: no cover
     @abc.abstractmethod
     def load_config(self):
         '''
-        Load the configuration file and validate it.
+        Load the configuration file. This is the concrete implementation of the strangler pattern. This will 
+        at first call the old code, but will eventually call the new code. 
 
         '''
 
@@ -70,7 +71,7 @@ class Facade: # pragma: no cover
     @abc.abstractmethod
     def create_experiment(self):
         '''
-        Create the experiment directory and manager files.
+        Create the experiment directory.
 
         '''
 

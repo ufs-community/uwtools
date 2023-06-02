@@ -31,7 +31,7 @@ class SRWExperiment(Facade): # pragma: no cover
 
     def load_config(self):
         '''
-        Load the configuration file and validate it.
+        Load the configuration file.
 
         '''
 
@@ -43,50 +43,9 @@ class SRWExperiment(Facade): # pragma: no cover
 
     def create_experiment(self):
         '''
-        Create the experiment directory and manager files.
+        Create the experiment directory.
 
         '''
-
-    def create_directory_structure(self, run_directory, exist_act="delete"):
-        ''' Collects the name of the desired run directory, and has an
-        optional flag for what to do if the run directory specified already
-        exists. Creates the run directory and adds subdirectories
-        INPUT and RESTART. Verifies creation of all directories.
-
-        Args:
-           run_directory: path of desired run directory
-           exist_act: - could be any of 'delete', 'rename', 'quit'
-                      - how program should act if run directory exists
-                      - default is to delete old run directory
-           Returns: None
-        '''
-
-        # Caller should only provide correct argument
-        if exist_act not in ["delete", "rename", "quit"]:
-            raise ValueError("Bad argument to create_directory_structure")
-
-        # Exit program with error if caller chooses to quit
-        if exist_act == "quit" and os.path.isdir(run_directory):
-            logging.critical("User chose quit option when creating directory")
-            sys.exit(1)
-
-        # Delete or rename directory if it exists
-        file_helpers.handle_existing(run_directory, exist_act)
-
-        # Create new run directory with two required subdirectories
-        try:
-            for subdir in ("INPUT", "RESTART"):
-                # Create and verify new directory with subdirectories
-                os.makedirs(os.path.join(run_directory, subdir))
-                if not os.path.isdir(os.path.join(run_directory, subdir)):
-                    msg = f"Directory {run_directory} with {subdir} not created"
-                    logging.critical(msg)
-                    raise RuntimeError(msg)
-            msg = f"Directory {run_directory} created with subdirectories"
-            logging.info(msg)
-        except (RuntimeError, FileExistsError) as create_error:
-            msg = f"Could not create directory {run_directory} with subdirectories"
-            raise RuntimeError(msg) from create_error
 
     def create_manager_files(self):
         '''

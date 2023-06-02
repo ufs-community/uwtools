@@ -32,11 +32,6 @@ def parse_args(argv):# pragma: no cover
         choices=["SRW", "MRW", "HAFS"],
     )
     parser.add_argument(
-        '-d', '--dry_run',
-        action='store_true',
-        help='If provided, validate configuration but do not run the forecast',
-    )
-    parser.add_argument(
         '-v', '--verbose',
         action='store_true',
         help='If provided, print all logging messages.',
