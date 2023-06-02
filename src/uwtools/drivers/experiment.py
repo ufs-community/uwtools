@@ -40,13 +40,13 @@ class SRWExperiment(Facade): # pragma: no cover
         Validate the configuration file.
 
         '''
-    
+
     def create_experiment(self):
         '''
         Create the experiment directory and manager files.
 
         '''
-    
+
     def create_directory_structure(self, run_directory, exist_act="delete"):
         ''' Collects the name of the desired run directory, and has an
         optional flag for what to do if the run directory specified already
@@ -87,13 +87,13 @@ class SRWExperiment(Facade): # pragma: no cover
         except (RuntimeError, FileExistsError) as create_error:
             msg = f"Could not create directory {run_directory} with subdirectories"
             raise RuntimeError(msg) from create_error
-        
+
     def create_manager_files(self):
         '''
         Create the manager files.
 
         '''
-    
+
     def link_fix_files(self):
         '''
         Link the fix files.
