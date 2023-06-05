@@ -13,24 +13,26 @@ import pytest
 from uwtools import config
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
-from uwtools.utils import cli_helpers
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
+
 def test_create_namelist():
-    """Tests create_namelist method """
+    """Tests create_namelist method with and without optional base file"""
     forecast_obj = FV3Forecast(Driver)
-    
+
     with tempfile.TemporaryDirectory() as run_directory:
-        
-        update_file = os.path.join(uwtools_file_base, pathlib.Path("../fixtures/simple.nml"))
+
+        update_file = os.path.join(uwtools_file_base, 
+                                   pathlib.Path("../fixtures/simple.nml"))
         update_obj = config.F90Config(update_file)
-        
-        base_file = os.path.join(uwtools_file_base, pathlib.Path("../fixtures/simple3.nml"))
-        
+
+        base_file = os.path.join(uwtools_file_base, 
+                                 pathlib.Path("../fixtures/simple3.nml"))
+
         file_out = 'create_out.nml'
         outnml_file = os.path.join(run_directory, file_out)
-        
+
         outcome=\
         """&salad
     base = 'kale'
@@ -40,14 +42,14 @@ def test_create_namelist():
     dressing = 'balsamic'
 /
 """
-        
+
         forecast_obj.create_namelist(update_obj, outnml_file)
-        
+
         file = open(outnml_file, "r")
         outnml_string = file.read()
-        
+
         assert outnml_string == outcome
-        
+
         outcome2=\
         """&salad
     base = 'kale'
@@ -61,13 +63,14 @@ def test_create_namelist():
     appetizer = ,
 /
 """
-        
+
         forecast_obj.create_namelist(update_obj, outnml_file, base_file)
-        
+
         file = open(outnml_file, "r")
         outnml_string = file.read()
-        
+
         assert outnml_string == outcome2
+
 
 def test_create_directory_structure():
     """Tests create_directory_structure method given a directory."""
