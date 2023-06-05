@@ -23,11 +23,11 @@ def test_create_namelist():
 
     with tempfile.TemporaryDirectory() as run_directory:
 
-        update_file = os.path.join(uwtools_file_base, 
+        update_file = os.path.join(uwtools_file_base,
                                    pathlib.Path("../fixtures/simple.nml"))
         update_obj = config.F90Config(update_file)
 
-        base_file = os.path.join(uwtools_file_base, 
+        base_file = os.path.join(uwtools_file_base,
                                  pathlib.Path("../fixtures/simple3.nml"))
 
         file_out = 'create_out.nml'
@@ -45,8 +45,8 @@ def test_create_namelist():
 
         forecast_obj.create_namelist(update_obj, outnml_file)
 
-        file = open(outnml_file, "r")
-        outnml_string = file.read()
+        with open(outnml_file, "r", encoding="utf-8") as out_file:
+            outnml_string = out_file.read()
 
         assert outnml_string == outcome
 
@@ -66,8 +66,8 @@ def test_create_namelist():
 
         forecast_obj.create_namelist(update_obj, outnml_file, base_file)
 
-        file = open(outnml_file, "r")
-        outnml_string = file.read()
+        with open(outnml_file, "r", encoding="utf-8") as out_file:
+            outnml_string = out_file.read()
 
         assert outnml_string == outcome2
 
