@@ -11,7 +11,6 @@ import tempfile
 import pytest
 
 from uwtools import config
-from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
