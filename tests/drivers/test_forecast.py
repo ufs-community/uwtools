@@ -16,6 +16,48 @@ from uwtools.drivers.forecast import FV3Forecast
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 
+def compare_files(expected, actual):
+    '''Compare the content of two files.  Doing this over filecmp.cmp since 
+    we may not be able to handle end-of-file character differences with it.
+    Prints the contents of two compared files to std out if they do not match.'''
+
+    with open(expected, 'r', encoding='utf-8') as expected_file:
+        expected_content = expected_file.read().rstrip('\n')
+    with open(actual, 'r', encoding='utf-8') as actual_file:
+        actual_content = actual_file.read().rstrip('\n')
+
+    if expected_content != actual_content:
+        print('The expected file looks like:')
+        print(expected_content)
+        print('*' * 80)
+        print('The rendered file looks like:')
+        print(actual_content)
+        return False
+    return True
+
+
+def test_create_config():
+    '''Test that providing a yaml base input file and a config file will
+    create and update yaml config file'''
+    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.yaml"))
+    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config_similar.yaml"))
+
+    forecast_obj = FV3Forecast()
+
+    with tempfile.TemporaryDirectory(dir='.') as tmp_dir:
+
+        out_file = f'{tmp_dir}/test_config_from_yaml.yaml'
+
+        forecast_obj.create_model_config(config_file, out_file, input_file)
+
+        expected = config.YAMLConfig(input_file)
+        config_file_obj = config.YAMLConfig(config_file)
+        expected.update_values(config_file_obj)
+        expected_file = f'{tmp_dir}/expected_yaml.yaml'
+        expected.dump_file(expected_file)
+
+        assert compare_files(expected_file, out_file)
+
 def test_create_namelist():
     """Tests create_namelist method with and without optional base file"""
     forecast_obj = FV3Forecast()
