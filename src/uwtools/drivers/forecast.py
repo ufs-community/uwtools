@@ -10,6 +10,7 @@ import logging
 import os
 import sys
 
+from uwtools import config
 from uwtools.utils import file_helpers
 from .driver import Driver
 
@@ -24,12 +25,12 @@ class FV3Forecast(Driver): # pragma: no cover
         FV3 (ATM-only) mode.
     '''
 
-    def __init__(self, argv):
+    def __init__(self):
         '''
             Initialize the Forecast driver.
 
         '''
-        super().__init__(argv)
+        super().__init__()
 
     def requirements(self):
 
@@ -64,11 +65,28 @@ class FV3Forecast(Driver): # pragma: no cover
         config_obj. Calls data mover tool (could be python copy). Fix files
         usually are specific to a given named grid and resolution. '''
 
-    def create_namelist(self):
-        ''' Collects all the user inputs required to create a namelist
-        file, calling the existing namelist config tools. For SRW,
-        this will take the fix files and model_config previously created to
-        to generate config.yaml'''
+    def create_namelist(self, update_obj, outnml_file, base_file=None):
+        ''' Uses an object with user supplied values and an optional
+        namelist base file to create an output namelist file. Will
+        "dereference" the base file
+
+        Args:
+            update_obj: in-memory dictionary initialized by object.
+                        values override any settings in base file
+            outnml_file: location of output namelist
+            base_file: optional path to file to use as a base file
+        '''
+
+        if base_file:
+            config_obj = config.F90Config(base_file)
+            config_obj.update_values(update_obj)
+            config_obj.dereference_all()
+            config_obj.dump_file(outnml_file)
+        else:
+            update_obj.dump_file(outnml_file)
+
+        msg = f"Namelist file {outnml_file} created"
+        logging.info(msg)
 
     def create_directory_structure(self, run_directory, exist_act="delete"):
         ''' Collects the name of the desired run directory, and has an
