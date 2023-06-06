@@ -60,7 +60,7 @@ class Driver: # pragma: no cover
     run and will appropriately parse subsequent stages of the workflow.
     '''
 
-    def __init__(self, argv):
+    def __init__(self):
 
         '''
         Initialize the Forecast driver.

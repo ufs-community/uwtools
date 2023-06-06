@@ -19,7 +19,7 @@ uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 def test_create_namelist():
     """Tests create_namelist method with and without optional base file"""
-    forecast_obj = FV3Forecast(Driver)
+    forecast_obj = FV3Forecast()
 
     with tempfile.TemporaryDirectory() as run_directory:
 
@@ -74,7 +74,7 @@ def test_create_namelist():
 
 def test_create_directory_structure():
     """Tests create_directory_structure method given a directory."""
-    forecast_obj = FV3Forecast(Driver)
+    forecast_obj = FV3Forecast()
 
     with tempfile.TemporaryDirectory() as run_directory:
         # Test create_directory_structure when run directory does not exist

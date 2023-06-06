@@ -25,12 +25,12 @@ class FV3Forecast(Driver): # pragma: no cover
         FV3 (ATM-only) mode.
     '''
 
-    def __init__(self, argv):
+    def __init__(self):
         '''
             Initialize the Forecast driver.
 
         '''
-        super().__init__(argv)
+        super().__init__()
 
     def requirements(self):
 
