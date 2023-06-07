@@ -60,9 +60,9 @@ class FV3Forecast(Driver): # pragma: no cover
         will need to be made for the other apps. 
 
         Args:
-            update_obj: in-memory dictionary initialized by object.
+            config_obj: in-memory dictionary initialized by object.
                         values override any settings in base file
-            outnml_file: location of output namelist
+            outconfig_file: location of output configuration file
             base_file: optional path to file to use as a base file
         '''
 
