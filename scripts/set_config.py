@@ -105,13 +105,19 @@ def parse_args(argv):
         help='Optional path to a specified log file',
         default=os.path.join(os.path.dirname(__file__), "set_config.log")
         )
+    
+    args = parser.parse_args(argv)
+    if args.quiet and args.dry_run:
+        msg = "You added quiet and dry_run arguments. This will print nothing."
+        raise argparse.ArgumentError(None, msg)
+    
     return parser.parse_args(argv)
 
 def create_config_obj(argv, log=None):
     '''Main section for processing config file'''
 
     user_args = parse_args(argv)
-
+    
     if log is None:
         name = f"{inspect.stack()[0][3]}"
         log = cli_helpers.setup_logging(user_args, log_name=name)

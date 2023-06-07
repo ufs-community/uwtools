@@ -1,6 +1,7 @@
 """
 Tests for templater tool.
 """
+import argparse
 from contextlib import redirect_stdout
 import io
 import os
@@ -312,7 +313,6 @@ J2Template._load_file INPUT Args:
     #test quiet level
     args = [
          '-i', input_file,
-         '--dry_run',
          '-q',
          ]
 
@@ -339,3 +339,13 @@ def test_mutually_exclusive_args(): #pylint: disable=unused-variable
 
     with pytest.raises(SystemExit):
         templater.set_template(args)
+
+    args = ['-i', input_file, 
+            '-d', 
+            '-q',
+            ]
+
+    msg = "You added quiet and dry_run arguments. This will print nothing."
+    with pytest.raises(argparse.ArgumentError):
+        templater.set_template(args)
+
