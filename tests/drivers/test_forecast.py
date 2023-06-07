@@ -8,9 +8,13 @@ import shutil
 import glob
 import tempfile
 import pytest
+import pathlib
 
+from uwtools import config
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
+
+uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 
 def test_create_directory_structure():
@@ -48,3 +52,41 @@ def test_create_directory_structure():
             forecast_obj.create_directory_structure(run_directory, "quit")
         assert pytest_wrapped_e.type == SystemExit
         assert pytest_wrapped_e.value.code == 1
+
+def test_create_forecast_obj():
+    ''' Tests stage files given config object'''
+
+    with tempfile.TemporaryDirectory() as run_directory:
+        config_dict = {
+            "working_dir": f"./{run_directory}",
+            "static": {},
+            "cycledep": {},
+        }
+        forecast_obj = FV3Forecast(config_dict)
+
+        # convert to config_obj?
+        # perhaps wrong direction with uwtools_file_base? (taken from test_config)
+        test_yaml = os.path.join(uwtools_file_base,pathlib.Path("./expt_dir.yaml"))
+        test_cfg = config.YAMLConfig(test_yaml)
+        # how to connect expt_dir and config_dict?
+        forecast_obj.config_obj = test_cfg
+
+        forecast_obj.create_directory_structure(run_directory)
+        forecast_obj.stage_fix_files()
+
+        # assert files have been staged / are in tmpdir
+        # how to access files from aws?
+        # test_file = os.path.join(run_directory, "co2historicaldata_2010.txt")
+        # assert os.path.isfile(test_file)
+        assert "co2historicaldata_2010.txt" in forecast_obj.config_obj
+
+        # assert missing file is unavailable
+        # test_file = os.path.join(run_directory, "bad_file.txt")
+        # assert not os.path.isfile(test_file)
+        assert not "bad_file.txt" in forecast_obj.config_obj
+
+        forecast_obj.cycledep_files()
+
+        # test_file = os.path.join(run_directory, "INPUT/gfs_data.nc")
+        # assert os.path.isfile(test_file)
+        assert "gfs_data.nc" in forecast_obj.config_obj["INPUT"]
