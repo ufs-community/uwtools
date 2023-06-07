@@ -9,7 +9,7 @@ Unified Workflow tools for use with applications with UFS and beyond
 Simple installation instructions with a conda environment.
 ```sh
 $> git clone https://github.com/ufs-community/workflow-tools
-$> conda env create -f environment.yml
+$> conda env create -f environment.yaml
 $> conda activate workflow_tools
 $> cd workflow-tools
 $> export PYTHONPATH=<workflow-tools location>/src:$PYTHONPATH
