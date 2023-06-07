@@ -39,9 +39,9 @@ def compare_files(expected, actual):
 def test_create_config():
     '''Test that providing a yaml base input file and a config file will
     create and update yaml config file'''
-    input_file = os.path.join(uwtools_file_base, 
+    input_file = os.path.join(uwtools_file_base,
                               pathlib.Path("../fixtures/fruit_config.yaml"))
-    config_file = os.path.join(uwtools_file_base, 
+    config_file = os.path.join(uwtools_file_base,
                                pathlib.Path("../fixtures/fruit_config_similar.yaml"))
 
     forecast_obj = FV3Forecast()
