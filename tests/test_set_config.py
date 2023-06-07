@@ -539,11 +539,11 @@ def test_compare_nml(): #pylint: disable=unused-variable
             assert result_line in expected
 
 def test_mutually_exclusive_args(): #pylint: disable=unused-variable
-    ''' Test that -q and -v args are mutually exclusive'''
+    ''' Test that -q and -v args are mutually exclusive and testing -q and -d are mutually exclusive.'''
 
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.yaml"))
 
-    args = ['-i', input_file, 
+    args = ['-i', input_file,
             '-v', 
             '-q',
             ]
@@ -551,12 +551,10 @@ def test_mutually_exclusive_args(): #pylint: disable=unused-variable
     with pytest.raises(SystemExit):
         set_config.create_config_obj(args)
 
-    args = ['-i', input_file, 
+    args = ['-i', input_file,
             '-d', 
             '-q',
             ]
 
-    msg = "You added quiet and dry_run arguments. This will print nothing."
     with pytest.raises(argparse.ArgumentError):
         set_config.create_config_obj(args)
-
