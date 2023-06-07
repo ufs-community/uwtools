@@ -77,12 +77,12 @@ def parse_args(argv):
         help='Optional path to a specified log file',
         default=os.path.join(os.path.dirname(__file__), "templater.log")
         )
-    
+
     args = parser.parse_args(argv)
     if args.quiet and args.dry_run:
         msg = "You added quiet and dry_run arguments. This will print nothing."
         raise argparse.ArgumentError(None, msg)
-    
+
     return parser.parse_args(argv)
 
 def setup_config_obj(user_args, log_name=None):
