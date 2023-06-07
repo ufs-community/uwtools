@@ -6,8 +6,7 @@
 Unified Workflow tools for use with applications with UFS and beyond
 
 ## Installation
-Simple installation instructions with a conda environment
-Substitute <workflow-tools location> with your install directory
+Simple installation instructions with a conda environment.
 ```sh
 $> git clone https://github.com/ufs-community/workflow-tools
 $> conda env create -f environment.yml
@@ -16,6 +15,7 @@ $> cd workflow-tools
 $> export PYTHONPATH=<workflow-tools location>/src:$PYTHONPATH
 $> pip install -r requirements.txt
 ```
+Substitute <workflow-tools location> with your install directory
 
 ## Documentation
 The inline-documentation docstring standard (using the [NumPy](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard) convention) will be used to describe modules, funtions, classes and methods for inline code documentation.
