@@ -10,27 +10,10 @@ import tempfile
 import pytest
 
 from scripts import templater
+from uwtools.utils import file_helpers
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
-def compare_files(expected, actual):
-    '''Compares the content of two files. Doing this over filecmp.cmp since we
-    may not be able to handle end-of-file character differences with it.
-    Prints the contents of two compared files to std out if they do not match.'''
-    with open(expected, 'r', encoding='utf-8') as expected_file:
-        expected_content = expected_file.read()
-    with open(actual, 'r', encoding='utf-8') as actual_file:
-        actual_content = actual_file.read()
-
-    if expected_content != actual_content:
-        print('The expected file looks like:')
-        print(expected_content)
-        print('*' * 80)
-        print('The rendered file looks like:')
-        print(actual_content)
-        return False
-
-    return True
 
 def test_set_template_dryrun(): #pylint: disable=unused-variable
     """Unit test for checking dry-run output of ingest namelist tool"""
@@ -141,7 +124,7 @@ def test_set_template_yaml_config(): #pylint: disable=unused-variable
              ]
 
         templater.set_template(args)
-        assert compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
 def test_set_template_no_config_suffix_fails(): #pylint: disable=unused-variable
 
@@ -246,7 +229,7 @@ def test_set_template_yaml_config_model_configure(): #pylint: disable=unused-var
              ]
 
         templater.set_template(args)
-        assert compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
 
 def test_set_template_verbosity(): #pylint: disable=unused-variable

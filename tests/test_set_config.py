@@ -17,28 +17,10 @@ import pytest
 from scripts import set_config
 from uwtools import config
 from uwtools.utils import cli_helpers
+from uwtools.utils import file_helpers
 
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
-
-def compare_files(expected, actual):
-    '''Compare the content of two files.  Doing this over filecmp.cmp since 
-    we may not be able to handle end-of-file character differences with it.
-    Prints the contents of two compared files to std out if they do not match.'''
-
-    with open(expected, 'r', encoding='utf-8') as expected_file:
-        expected_content = expected_file.read().rstrip('\n')
-    with open(actual, 'r', encoding='utf-8') as actual_file:
-        actual_content = actual_file.read().rstrip('\n')
-
-    if expected_content != actual_content:
-        print('The expected file looks like:')
-        print(expected_content)
-        print('*' * 80)
-        print('The rendered file looks like:')
-        print(actual_content)
-        return False
-    return True
 
 def test_path_if_file_exists(): #pylint: disable=unused-variable
     '''Make sure the function works as expected.  It is used as a type in 
@@ -69,7 +51,7 @@ def test_set_config_yaml_simple(): #pylint: disable=unused-variable
         expected_file = f'{tmp_dir}/expected_yaml.yaml'
         expected.dump_file(expected_file)
 
-        assert compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
 def test_set_config_ini_simple(): #pylint: disable=unused-variable
     ''' Test that providing a basic INI file with necessary settings 
@@ -87,7 +69,7 @@ def test_set_config_ini_simple(): #pylint: disable=unused-variable
         expected_file = f'{tmp_dr}/expected_ini.ini'
         expected.dump_file(expected_file)
 
-        assert compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
 def test_set_config_f90nml_simple(): #pylint: disable=unused-variable
     '''Test that providing basic f90nml file with necessary settings
@@ -106,7 +88,7 @@ def test_set_config_f90nml_simple(): #pylint: disable=unused-variable
         expected_file = f'{tmp_dr}/expected_nml.nml'
         expected.dump_file(expected_file)
 
-        assert compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
 def test_set_config_bash_simple(): #pylint: disable=unused-variable
     '''Test that providing bash file with necessary settings will 
@@ -126,7 +108,7 @@ def test_set_config_bash_simple(): #pylint: disable=unused-variable
         expected_file = f'{tmp_dr}/expected_ini.ini'
         expected.dump_file(expected_file)
 
-        assert compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
 def test_set_config_yaml_config_file(): #pylint: disable=unused-variable
     '''Test that providing a yaml base input file and a config file will
@@ -148,7 +130,7 @@ def test_set_config_yaml_config_file(): #pylint: disable=unused-variable
         expected_file = f'{tmp_dir}/expected_yaml.yaml'
         expected.dump_file(expected_file)
 
-        assert compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
 def test_set_config_f90nml_config_file(): #pylint: disable=unused-variable
     '''Test that providing a F90nml base input file and a config file will
@@ -170,7 +152,7 @@ def test_set_config_f90nml_config_file(): #pylint: disable=unused-variable
         expected_file = f'{tmp_dir}/expected_nml.nml'
         expected.dump_file(expected_file)
 
-        assert compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
 def test_set_config_ini_config_file(): #pylint: disable=unused-variable
     '''Test that aproviding INI base input file and a config file will 
@@ -192,7 +174,7 @@ def test_set_config_ini_config_file(): #pylint: disable=unused-variable
         expected_file = f'{tmp_dir}/expected_ini.ini'
         expected.dump_file(expected_file)
 
-        assert compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
 def test_set_config_ini_bash_config_file(): #pylint: disable=unused-variable
     '''Test that aproviding INI base input file and a config file will 
@@ -214,7 +196,7 @@ def test_set_config_ini_bash_config_file(): #pylint: disable=unused-variable
         expected_file = f'{tmp_dir}/expected_ini.ini'
         expected.dump_file(expected_file)
 
-        assert compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
 def test_incompatible_file_type(): #pylint: disable=unused-variable
     '''Test that providing an incompatible file type for input base file will 
@@ -420,7 +402,7 @@ def test_cfg_to_yaml_conversion(): #pylint: disable=unused-variable
         expected.dereference_all()
         expected.dump_file(expected_file)
 
-        assert compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
         with open(out_file, 'r', encoding='utf-8') as output:
             assert output.read()[-1] == '\n'
@@ -441,7 +423,7 @@ def test_output_file_conversion(): #pylint: disable=unused-variable
         expected_file = f'{tmp_dir}/expected_nml.nml'
         expected.dump_file(expected_file)
 
-        assert compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
         with open(out_file, 'r', encoding='utf-8') as output:
             assert output.read()[-1] == '\n'
@@ -464,7 +446,7 @@ def test_config_file_conversion(): #pylint: disable=unused-variable
         expected_file = f'{tmp_dir}/expected_nml.nml'
         expected.dump_file(expected_file)
 
-        assert compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
         with open(out_file, 'r', encoding='utf-8') as output:
             assert output.read()[-1] == '\n'
