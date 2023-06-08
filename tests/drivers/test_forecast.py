@@ -12,28 +12,9 @@ import pytest
 
 from uwtools import config
 from uwtools.drivers.forecast import FV3Forecast
+from uwtools.utils import cli_helpers
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
-
-
-def compare_files(expected, actual):
-    '''Compare the content of two files.  Doing this over filecmp.cmp since 
-    we may not be able to handle end-of-file character differences with it.
-    Prints the contents of two compared files to std out if they do not match.'''
-
-    with open(expected, 'r', encoding='utf-8') as expected_file:
-        expected_content = expected_file.read().rstrip('\n')
-    with open(actual, 'r', encoding='utf-8') as actual_file:
-        actual_content = actual_file.read().rstrip('\n')
-
-    if expected_content != actual_content:
-        print('The expected file looks like:')
-        print(expected_content)
-        print('*' * 80)
-        print('The rendered file looks like:')
-        print(actual_content)
-        return False
-    return True
 
 
 def test_create_config():
@@ -58,7 +39,7 @@ def test_create_config():
         expected_file = f'{tmp_dir}/expected_yaml.yaml'
         expected.dump_file(expected_file)
 
-        assert compare_files(expected_file, out_file)
+        assert cli_helpers.compare_files(expected_file, out_file)
 
 def test_create_namelist():
     """Tests create_namelist method with and without optional base file"""
