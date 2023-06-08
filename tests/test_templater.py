@@ -10,7 +10,7 @@ import tempfile
 import pytest
 
 from scripts import templater
-from uwtools.utils import cli_helpers
+from uwtools.utils import file_helpers
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -124,7 +124,7 @@ def test_set_template_yaml_config(): #pylint: disable=unused-variable
              ]
 
         templater.set_template(args)
-        assert cli_helpers.compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
 def test_set_template_no_config_suffix_fails(): #pylint: disable=unused-variable
 
@@ -229,7 +229,7 @@ def test_set_template_yaml_config_model_configure(): #pylint: disable=unused-var
              ]
 
         templater.set_template(args)
-        assert cli_helpers.compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
 
 def test_set_template_verbosity(): #pylint: disable=unused-variable

@@ -1,4 +1,3 @@
-#pylint: disable=unused-variable
 """
 
 Helpers to be used when parsing arguments and gathering config files
@@ -13,12 +12,12 @@ import pathlib
 from uwtools.logger import Logger
 
 
-def dict_from_config_args(args):
+def dict_from_config_args(args): #pylint: disable=unused-variable
     '''Given a list of command line arguments in the form key=value, return a
     dictionary of key/value pairs.'''
     return dict([arg.split('=') for arg in args])
 
-def get_file_type(arg):
+def get_file_type(arg): #pylint: disable=unused-variable
     ''' Returns a standardized file type given the suffix of the input
     arg. '''
 
@@ -33,7 +32,7 @@ def get_file_type(arg):
     logging.critical(msg)
     raise ValueError(msg)
 
-def path_if_file_exists(arg):
+def path_if_file_exists(arg): #pylint: disable=unused-variable
     ''' Checks whether a file exists, and returns the path if it does. '''
     if not os.path.exists(arg):
         msg = f'{arg} does not exist!'
@@ -41,7 +40,7 @@ def path_if_file_exists(arg):
 
     return os.path.abspath(arg)
 
-def setup_logging(user_args, log_name=None):
+def setup_logging(user_args, log_name=None): #pylint: disable=unused-variable
 
     ''' Create the Logger object '''
 
@@ -69,21 +68,3 @@ def setup_logging(user_args, log_name=None):
 
     return log
 
-def compare_files(expected, actual):
-    '''Compare the content of two files.  Doing this over filecmp.cmp since 
-    we may not be able to handle end-of-file character differences with it.
-    Prints the contents of two compared files to std out if they do not match.'''
-
-    with open(expected, 'r', encoding='utf-8') as expected_file:
-        expected_content = expected_file.read().rstrip('\n')
-    with open(actual, 'r', encoding='utf-8') as actual_file:
-        actual_content = actual_file.read().rstrip('\n')
-
-    if expected_content != actual_content:
-        print('The expected file looks like:')
-        print(expected_content)
-        print('*' * 80)
-        print('The rendered file looks like:')
-        print(actual_content)
-        return False
-    return True

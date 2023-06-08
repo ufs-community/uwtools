@@ -12,7 +12,7 @@ import pytest
 
 from uwtools import config
 from uwtools.drivers.forecast import FV3Forecast
-from uwtools.utils import cli_helpers
+from uwtools.utils import file_helpers
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -39,7 +39,7 @@ def test_create_config():
         expected_file = f'{tmp_dir}/expected_yaml.yaml'
         expected.dump_file(expected_file)
 
-        assert cli_helpers.compare_files(expected_file, out_file)
+        assert file_helpers.compare_files(expected_file, out_file)
 
 def test_create_namelist():
     """Tests create_namelist method with and without optional base file"""
