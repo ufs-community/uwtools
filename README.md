@@ -13,7 +13,6 @@ $> conda env create -f environment.yaml
 $> conda activate workflow_tools
 $> cd workflow-tools
 $> export PYTHONPATH=<workflow-tools location>/src:$PYTHONPATH
-$> pip install -r requirements.txt
 ```
 Substitute 'workflow-tools location' with your install directory
 
