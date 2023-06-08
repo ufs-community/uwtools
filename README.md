@@ -14,7 +14,6 @@ $> conda activate workflow_tools
 $> cd workflow-tools
 $> export PYTHONPATH=$(pwd)/src:$PYTHONPATH
 ```
-Substitute 'workflow-tools location' with your install directory
 
 ## Documentation
 The inline-documentation docstring standard (using the [NumPy](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard) convention) will be used to describe modules, funtions, classes and methods for inline code documentation.
