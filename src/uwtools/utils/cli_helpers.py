@@ -67,4 +67,3 @@ def setup_logging(user_args, log_name=None): #pylint: disable=unused-variable
         log.propagate = False
 
     return log
-
