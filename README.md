@@ -12,7 +12,7 @@ $> git clone https://github.com/ufs-community/workflow-tools
 $> conda env create -f environment.yaml
 $> conda activate workflow_tools
 $> cd workflow-tools
-$> export PYTHONPATH=<workflow-tools location>/src:$PYTHONPATH
+$> export PYTHONPATH=$(pwd)/src:$PYTHONPATH
 ```
 Substitute 'workflow-tools location' with your install directory
 
