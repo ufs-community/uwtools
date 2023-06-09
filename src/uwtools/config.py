@@ -331,7 +331,7 @@ class Config(collections.UserDict):
         '''
 
         if dict_to_update is None:
-            dict_to_update = self.data
+            dict_to_update = self.data or {}
 
         for key, new_val in new_dict.items():
             if isinstance(new_val, dict):
