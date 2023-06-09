@@ -7,7 +7,7 @@ Goals
 * No conflicts between different packages in their external packages
 * No circular dependencies
 * If a user/developer introduces a new dependency, they need to add an entry in `environment.yaml` and `setup.cfg`. 
-* GitHub actions should test `setup.cfg` and `environment.yml` to ensure that our code runs correctly. 
+* GitHub actions should test `setup.cfg` and `environment.yaml` to ensure that our code runs correctly. 
 * Packages should adhere to the following generic structure as appropriate:
 
 Sample package structure::

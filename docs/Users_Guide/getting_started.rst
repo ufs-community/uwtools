@@ -99,7 +99,7 @@ environment.yaml file, follow these steps:
 
 #. Use the ``conda env create`` command to create a new conda environment. Specifically for workflow-tools type::
 
-      conda env create -f environment.yml
+      conda env create -f environment.yaml
 
 #. This will create a new conda environment called ``workflow_tools``, using the specified version of Python.
 
