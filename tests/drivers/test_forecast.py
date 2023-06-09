@@ -95,6 +95,38 @@ def test_create_namelist():
 
         assert outnml_string == outcome2
 
+def test_create_field_table():
+    """Tests create_field_table method with and without optional base file"""
+    forecast_obj = FV3Forecast()
+
+    with tempfile.TemporaryDirectory() as run_directory:
+
+        update_file = os.path.join(uwtools_file_base,
+                                   pathlib.Path("../fixtures/FV3_GFS_v16_update.yaml"))
+        update_obj = config.YAMLConfig(update_file)
+
+        base_file = os.path.join(uwtools_file_base,
+                                 pathlib.Path("../fixtures/FV3_GFS_v16.yaml"))
+
+        file_out = 'field_table_one.FV3_GFS'
+        outfldtbl_file = os.path.join(run_directory, file_out)
+        
+        expected_one = os.path.join(uwtools_file_base,
+                                    pathlib.Path("../fixtures/field_table_from_input.FV3_GFS"))
+        
+        forecast_obj.create_field_table(update_obj, outfldtbl_file)
+        
+        assert file_helpers.compare_files(expected_one, outfldtbl_file)
+        
+        file_out = 'field_table_two.FV3_GFS'
+        outfldtbl_file = os.path.join(run_directory, file_out)
+        
+        expected_two = os.path.join(uwtools_file_base,
+                                    pathlib.Path("../fixtures/field_table_from_base.FV3_GFS"))
+        
+        forecast_obj.create_field_table(update_obj, outfldtbl_file, base_file)
+        
+        assert file_helpers.compare_files(expected_two, outfldtbl_file)
 
 def test_create_directory_structure():
     """Tests create_directory_structure method given a directory."""

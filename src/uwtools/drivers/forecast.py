@@ -106,6 +106,31 @@ class FV3Forecast(Driver): # pragma: no cover
 
         msg = f"Namelist file {outnml_file} created"
         logging.info(msg)
+        
+    def create_field_table(self, update_obj, outfldtab_file, base_file=None):
+        ''' Uses an object with user supplied values and an optional
+        base file to create an output field table file. Will
+        "dereference" the base file
+
+        Args:
+            update_obj: in-memory dictionary initialized by object.
+                        values override any settings in base file
+            outfldtab_file: location of output field table
+            base_file: optional path to file to use as a base file
+        '''
+        if base_file:
+            config_obj = config.FieldTableConfig(base_file)
+            config_obj.update_values(update_obj)
+            config_obj.dereference_all()
+            config_obj.dump_file(outfldtab_file)
+        else:
+            # Convert update object to a field table object
+            out_object = getattr(config, "FieldTableConfig")()
+            out_object.update(update_obj)
+            out_object.dump_file(outfldtab_file)
+
+        msg = f"Namelist file {outfldtab_file} created"
+        logging.info(msg)
 
     def create_directory_structure(self, run_directory, exist_act="delete"):
         ''' Collects the name of the desired run directory, and has an
