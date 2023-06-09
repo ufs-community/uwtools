@@ -57,7 +57,7 @@ class FV3Forecast(Driver): # pragma: no cover
         of the workflow.
         Defaults will be filled in if not provided by the user. Equivalent
         references to config_default.yaml or config.community.yaml from SRW
-        will need to be made for the other apps. 
+        will need to be made for the other apps.
 
         Args:
             config_obj: in-memory dictionary initialized by object.
@@ -65,7 +65,6 @@ class FV3Forecast(Driver): # pragma: no cover
             outconfig_file: location of output configuration file
             base_file: optional path to file to use as a base file
         '''
-
 
         if base_file:
             args = ['-i', base_file, '-o', outconfig_file, '-c', config_obj]
@@ -75,7 +74,6 @@ class FV3Forecast(Driver): # pragma: no cover
 
         msg = f"Config file {outconfig_file} created"
         logging.info(msg)
-
 
     def stage_fix_files(self):
 
@@ -106,7 +104,7 @@ class FV3Forecast(Driver): # pragma: no cover
 
         msg = f"Namelist file {outnml_file} created"
         logging.info(msg)
-        
+
     def create_field_table(self, update_obj, outfldtab_file, base_file=None):
         ''' Uses an object with user supplied values and an optional
         base file to create an output field table file. Will
