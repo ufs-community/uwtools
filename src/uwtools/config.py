@@ -333,12 +333,17 @@ class Config(collections.UserDict):
         if dict_to_update is None:
             dict_to_update = self.data or {}
 
+        if not new_dict:
+            return
+
         for key, new_val in new_dict.items():
             if isinstance(new_val, dict):
                 if isinstance(dict_to_update.get(key), dict):
                     self.update_values(new_val, dict_to_update[key])
                 else:
                     dict_to_update[key] = new_val
+            elif new_val is None:
+                dict_to_update.pop(key, None)
             else:
                 dict_to_update[key] = new_val
 

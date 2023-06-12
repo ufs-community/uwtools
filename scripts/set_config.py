@@ -13,7 +13,6 @@ from uwtools import config
 from uwtools import exceptions
 from uwtools.utils import cli_helpers
 
-
 def parse_args(argv):
 
     '''
@@ -105,14 +104,13 @@ def parse_args(argv):
         )
     return parser.parse_args(argv)
 
-def create_config_file(argv, config_dict=None, log=None):
+def create_config_file(argv, config_dict=None, log_name=None):
     '''Main section for processing config file'''
 
     user_args = parse_args(argv)
 
-    if log is None:
-        name = f"{inspect.stack()[0][3]}"
-        log = cli_helpers.setup_logging(user_args, log_name=name)
+    name = log_name or f"{inspect.stack()[0][3]}"
+    log = cli_helpers.setup_logging(user_args, log_name=name)
 
     cli_helpers.log_input(
         log=log,
@@ -221,10 +219,7 @@ def create_config_file(argv, config_dict=None, log=None):
 
 if __name__ == '__main__':
 
-    cli_args = parse_args(sys.argv[1:])
-    LOG_NAME = "set_config"
-    cli_log = cli_helpers.setup_logging(cli_args, log_name=LOG_NAME)
     try:
-        create_config_file(sys.argv[1:], cli_log)
+        create_config_file(sys.argv[1:])
     except exceptions.UWConfigError as e:
         sys.exit(e)
