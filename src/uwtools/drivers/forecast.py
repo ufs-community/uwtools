@@ -57,7 +57,7 @@ class FV3Forecast(Driver): # pragma: no cover
         of the workflow.
         Defaults will be filled in if not provided by the user. Equivalent
         references to config_default.yaml or config.community.yaml from SRW
-        will need to be made for the other apps. 
+        will need to be made for the other apps.
 
         Args:
             config_obj: in-memory dictionary initialized by object.
@@ -65,7 +65,6 @@ class FV3Forecast(Driver): # pragma: no cover
             outconfig_file: location of output configuration file
             base_file: optional path to file to use as a base file
         '''
-
 
         if base_file:
             args = ['-i', base_file, '-o', outconfig_file, '-c', config_obj]
@@ -75,7 +74,6 @@ class FV3Forecast(Driver): # pragma: no cover
 
         msg = f"Config file {outconfig_file} created"
         logging.info(msg)
-
 
     def stage_fix_files(self):
 
@@ -105,6 +103,31 @@ class FV3Forecast(Driver): # pragma: no cover
             update_obj.dump_file(outnml_file)
 
         msg = f"Namelist file {outnml_file} created"
+        logging.info(msg)
+
+    def create_field_table(self, update_obj, outfldtab_file, base_file=None):
+        ''' Uses an object with user supplied values and an optional
+        base file to create an output field table file. Will
+        "dereference" the base file
+
+        Args:
+            update_obj: in-memory dictionary initialized by object.
+                        values override any settings in base file
+            outfldtab_file: location of output field table
+            base_file: optional path to file to use as a base file
+        '''
+        if base_file:
+            config_obj = config.FieldTableConfig(base_file)
+            config_obj.update_values(update_obj)
+            config_obj.dereference_all()
+            config_obj.dump_file(outfldtab_file)
+        else:
+            # Convert update object to a field table object
+            out_object = getattr(config, "FieldTableConfig")()
+            out_object.update(update_obj)
+            out_object.dump_file(outfldtab_file)
+
+        msg = f"Namelist file {outfldtab_file} created"
         logging.info(msg)
 
     def create_directory_structure(self, run_directory, exist_act="delete"):
