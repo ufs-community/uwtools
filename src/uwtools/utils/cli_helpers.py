@@ -32,7 +32,7 @@ def get_file_type(arg): #pylint: disable=unused-variable
     logging.critical(msg)
     raise ValueError(msg)
 
-def log_input(log, script_name, user_args):
+def log_input(log, script_name, user_args): #pylint: disable=unused-variable
 
     """ Write the script input user args out to the log.
 
