@@ -68,7 +68,7 @@ class FV3Forecast(Driver): # pragma: no cover
 
         if base_file:
             args = ['-i', base_file, '-o', outconfig_file, '-c', config_obj]
-            set_config.create_config_obj(args)
+            set_config.create_config_file(args)
         else:
             config_obj.dump_file(outconfig_file)
 

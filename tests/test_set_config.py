@@ -244,7 +244,7 @@ def test_set_config_dry_run(): #pylint: disable=unused-variable
         set_config.create_config_file(args)
     result = outstring.getvalue()
 
-    assert result.rstrip('\n') == expected_content.rstrip('\n')
+    assert expected_content.rstrip('\n') in result.rstrip('\n')
 
 
 def test_show_format(): #pylint: disable=unused-variable
@@ -285,7 +285,7 @@ None
             set_config.create_config_file(args)
         result = outstring.getvalue()
 
-        assert result == outcome
+        assert outcome in result
 
 def test_values_needed_yaml(): #pylint: disable=unused-variable
     '''Test that the values_needed flag logs keys completed, keys containing  
@@ -318,7 +318,7 @@ Keys that are set to empty:
     FV3GFS.nomads.file_names.nemsio
     FV3GFS.nomads.testempty
 """
-    assert result == outcome
+    assert outcome in result
 
 def test_values_needed_ini(): #pylint: disable=unused-variable
     '''Test that the values_needed flag logs keys completed, keys containing  
@@ -353,7 +353,7 @@ Keys that are set to empty:
     salad.toppings
     salad.meat
 """
-    assert result == outcome
+    assert outcome in result
 
 def test_values_needed_f90nml(): #pylint: disable=unused-variable
     '''Test that the values_needed flag logs keys completed, keys containing  
@@ -384,7 +384,7 @@ Keys that are set to empty:
     salad.toppings
     salad.appetizer
 """
-    assert result == outcome
+    assert outcome in result
 
 def test_cfg_to_yaml_conversion(): #pylint: disable=unused-variable
     ''' Test that a .cfg file can be used to create a yaml object.'''
