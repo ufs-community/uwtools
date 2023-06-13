@@ -54,7 +54,7 @@ class Facade: # pragma: no cover
         '''
 
     @abc.abstractmethod
-    def load_config(self):
+    def load_config(self, config_file):
         '''
         Load the configuration file. This is the concrete implementation of the strangler pattern. This will 
         at first call the old code, but will eventually call the new code. 
