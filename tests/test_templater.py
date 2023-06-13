@@ -316,15 +316,8 @@ J2Template._load_file INPUT Args:
          '-q',
          ]
 
-    # Capture quiet stdout
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
+    with pytest.raises(argparse.ArgumentError):
         templater.set_template(args)
-    result = outstring.getvalue()
-
-    outcome = ''
-    # Check that only the correct messages were logged
-    assert result == outcome
 
 def test_mutually_exclusive_args(): #pylint: disable=unused-variable
     ''' Test that -q and -v args are mutually exclusive and testing -q and -d are mutually exclusive.'''

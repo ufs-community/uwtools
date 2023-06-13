@@ -79,11 +79,15 @@ def parse_args(argv):
         )
 
     args = parser.parse_args(argv)
+    if not args.outfile and not args.dry_run and not args.values_needed:
+        msg = "You need outfile, dry_run, or values_needed to continue."
+        raise argparse.ArgumentError(None, msg)
+
     if args.quiet and args.dry_run:
         msg = "You added quiet and dry_run arguments. This will print nothing."
         raise argparse.ArgumentError(None, msg)
 
-    return parser.parse_args(argv)
+    return args
 
 def setup_config_obj(user_args, log_name=None):
 
