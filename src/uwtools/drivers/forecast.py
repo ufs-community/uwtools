@@ -9,6 +9,7 @@ and physics suites.
 import logging
 import os
 import sys
+import utils
 
 from uwtools import config
 from uwtools.utils import file_helpers
@@ -25,12 +26,13 @@ class FV3Forecast(Driver): # pragma: no cover
         FV3 (ATM-only) mode.
     '''
 
-    def __init__(self):
+    def __init__(self, config_obj):
         '''
             Initialize the Forecast driver.
 
         '''
         super().__init__()
+        self.config_obj = config_obj
 
     def requirements(self):
 
@@ -64,6 +66,35 @@ class FV3Forecast(Driver): # pragma: no cover
         stages them in the working directory. Likely gets all its info from
         config_obj. Calls data mover tool (could be python copy). Fix files
         usually are specific to a given named grid and resolution. '''
+
+        files_to_stage = self.config_obj.get('static', {})
+        
+        for target, file_path in files_to_stage.items():
+            if os.path.exists(file_path):
+                utils.safe_copy(file_path, target)
+                msg = f"File {file_path} staged in working directory at {target}"
+                logging.info(msg)
+            else:
+                msg = f"File path not found for file {target}"
+                # logging.critical(msg)
+                raise RuntimeError(msg)
+
+    def cycledep_files(self):
+        '''Holds the knowledge for how to modify a list of cycle-dependent files and
+        stages them in the working directory.
+        '''
+
+        files_to_stage = self.config_obj.get('cycyledep', {})
+        
+        for target, file_path in files_to_stage.items():
+            if os.path.exists(file_path):
+                utils.safe_copy(file_path, target)
+                msg = f"File {file_path} staged in working directory at {target}"
+                logging.info(msg)
+            else:
+                msg = f"File path not found for file {target}"
+                # logging.critical(msg)
+                raise RuntimeError(msg)
 
     def create_namelist(self, update_obj, outnml_file, base_file=None):
         ''' Uses an object with user supplied values and an optional
