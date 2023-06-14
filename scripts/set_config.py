@@ -26,6 +26,8 @@ def parse_args(argv):
        description='Set config with user-defined settings.'
     )
 
+    group = parser.add_mutually_exclusive_group()
+
     parser.add_argument(
         '-i', '--input_base_file',
         help='Path to a config base file. Accepts YAML, bash/ini or namelist',
@@ -88,12 +90,12 @@ def parse_args(argv):
             Accepts YAML, bash/ini or namelist',
         choices=["YAML", "INI", "F90", "FieldTable"],
     )
-    parser.add_argument(
+    group.add_argument(
         '-v', '--verbose',
         action='store_true',
         help='If provided, print all logging messages.',
         )
-    parser.add_argument(
+    group.add_argument(
         '-q', '--quiet',
         action='store_true',
         help='If provided, print no logging messages',
@@ -103,6 +105,12 @@ def parse_args(argv):
         help='Optional path to a specified log file',
         default=os.path.join(os.path.dirname(__file__), "set_config.log")
         )
+
+    args = parser.parse_args(argv)
+    if args.quiet and args.dry_run:
+        msg = "You added quiet and dry_run arguments. This will print nothing."
+        raise argparse.ArgumentError(None, msg)
+
     return parser.parse_args(argv)
 
 def create_config_obj(argv, log=None):

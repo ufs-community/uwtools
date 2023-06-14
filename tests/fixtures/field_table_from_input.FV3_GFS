@@ -1,0 +1,12 @@
+ "TRACER", "atmos_mod", "sphum"
+           "longname", "specific humidity"
+           "units", "kg/kg"
+       "profile_type", "fixed", "surface_value=2.0" /
+ "TRACER", "atmos_mod", "liq_wat"
+           "longname", "cloud water mixing ratio"
+           "units", "kg/kg"
+       "profile_type", "fixed", "surface_value=2.0" /
+ "TRACER", "atmos_mod", "rainwat"
+           "longname", "rain mixing ratio"
+           "units", "kg/kg"
+       "profile_type", "fixed", "surface_value=2.0" /
