@@ -1,0 +1,38 @@
+{
+"title": "workflow config",
+"description": "This document is to validate config files from SRW, HAFS, Global",
+"type": "object",
+"properties": {
+    "platform": {
+        "description": "attributes of the platform",
+        "type": "object",
+        "properties": {
+            "WORKFLOW_MANAGER": {
+                "type": "string",
+                "enum": ["rocoto", "none"]
+                },
+            "NCORES_PER_NODE": {
+                "type": "number"
+                },
+            "SCHED": {
+                "type": "string",
+                "enum": ["slurm", "pbspro", "lsf", "lsfcray", "none"]
+                },
+            "CCPA_OBS_DIR": {
+                "type": "string",
+                "format": "uri"
+                }
+            }
+        },
+    "cpl_aqm_parm": {
+        "description": "attributes of coupled air quality",
+        "type": "object",
+        "properties": {
+            "AQM_CONFIG_DIR": {
+                "type": "string",
+                "format": "uri"
+                }
+            }
+        }
+    }
+}

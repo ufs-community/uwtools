@@ -1,0 +1,108 @@
+#!/usr/bin/env python3
+#pylint: disable=too-many-branches, too-many-statements, too-many-locals
+
+'''
+This utility validates a config file using a validation schema.
+'''
+import argparse
+import inspect
+import os
+import sys
+import json
+import jsonschema
+import yaml
+
+from uwtools import config
+from uwtools import exceptions
+from uwtools.utils import cli_helpers
+
+
+def parse_args(argv):
+
+    '''
+    Function maintains the arguments accepted by this script. Please see
+    Python's argparse documentation for more information about settings of each
+    argument.
+    '''
+
+    parser = argparse.ArgumentParser(
+       description='Validate config with user-defined settings.'
+    )
+
+    group = parser.add_mutually_exclusive_group()
+
+    parser.add_argument(
+        '-s', '--validation_schema',
+        help='Path to a validation schema.',
+        required=True,
+        type=cli_helpers.path_if_file_exists,
+    )
+
+    parser.add_argument(
+        '-c', '--config_file',
+        help='Path to configuration file. Accepts YAML, bash/ini or namelist',
+        required=True,
+        type=cli_helpers.path_if_file_exists,
+    )
+
+    parser.add_argument(
+        '--config_file_type',
+        help='If used, will convert provided config file to given file type.\
+            Accepts YAML, bash/ini or namelist',
+        choices=["YAML", "INI", "F90"],
+    )
+
+    group.add_argument(
+        '-v', '--verbose',
+        action='store_true',
+        help='If provided, print all logging messages.',
+        )
+    group.add_argument(
+        '-q', '--quiet',
+        action='store_true',
+        help='If provided, print no logging messages',
+        )
+    parser.add_argument(
+        '-l', '--log_file',
+        help='Optional path to a specified log file',
+        default=os.path.join(os.path.dirname(__file__), "set_config.log")
+        )
+
+    return parser.parse_args(argv)
+
+
+def validate_config(argv, log=None):
+    '''Main section for validating config file'''
+
+    user_args = parse_args(argv)
+
+    if log is None:
+        name = f"{inspect.stack()[0][3]}"
+        log = cli_helpers.setup_logging(user_args, log_name=name)
+
+    with open(user_args.validation_schema, 'r',
+              encoding="utf-8") as schema_file:
+        schema = json.load(schema_file)
+
+    if user_args.config_file:
+        config_class = getattr(config, "YAMLConfig")
+        config_obj = config_class(user_args.config_file, log_name=log.name)
+
+    config_obj.dereference_all()
+
+    # For now, reads in the config file as a yaml file
+    with open(user_args.config_file, encoding="utf-8") as input_file:
+        infile = yaml.safe_load(input_file)
+
+    jsonschema.validate(infile, schema)
+
+
+if __name__ == '__main__':
+
+    cli_args = parse_args(sys.argv[1:])
+    LOG_NAME = "validate_config"
+    cli_log = cli_helpers.setup_logging(cli_args, log_name=LOG_NAME)
+    try:
+        validate_config(sys.argv[1:], cli_log)
+    except exceptions.UWConfigError as e:
+        sys.exit(e)
