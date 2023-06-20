@@ -28,6 +28,7 @@ def parse_args(argv):
     parser = argparse.ArgumentParser(
        description='Update a Jinja2 Template with user-defined settings.'
     )
+    group = parser.add_mutually_exclusive_group()
     parser.add_argument(
         '-o', '--outfile',
         help='Full path to output file',
@@ -61,12 +62,12 @@ def parse_args(argv):
         action='store_true',
         help='If provided, print a list of required configuration settings to stdout',
         )
-    parser.add_argument(
+    group.add_argument(
         '-v', '--verbose',
         action='store_true',
         help='If provided, print all logging messages.',
         )
-    parser.add_argument(
+    group.add_argument(
         '-q', '--quiet',
         action='store_true',
         help='If provided, print no logging messages',
@@ -76,7 +77,17 @@ def parse_args(argv):
         help='Optional path to a specified log file',
         default=os.path.join(os.path.dirname(__file__), "templater.log")
         )
-    return parser.parse_args(argv)
+
+    args = parser.parse_args(argv)
+    if not args.outfile and not args.dry_run and not args.values_needed:
+        msg = "You need outfile, dry_run, or values_needed to continue."
+        raise argparse.ArgumentError(None, msg)
+
+    if args.quiet and args.dry_run:
+        msg = "You added quiet and dry_run arguments. This will print nothing."
+        raise argparse.ArgumentError(None, msg)
+
+    return args
 
 def setup_config_obj(user_args, log_name=None):
 
