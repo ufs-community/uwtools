@@ -2,7 +2,7 @@
 #pylint: disable=unused-import, unused-variable, unused-argument, useless-parent-delegation
 # remove these disables once implemented
 '''
-This file contains the concrete facades for a variety of apps.
+This file contains the specific drivers for a particular app, using the facade pattern base class.
 '''
 
 import logging
@@ -13,14 +13,13 @@ import subprocess
 
 from uwtools.utils import file_helpers
 from uwtools.utils import cli_helpers
-from importlib import import_module
 from uwtools import config
-from .facade import Facade
+from drivers.facade import Facade
 
 logging.getLogger(__name__)
 
 
-class SRWExperiment(Facade): # pragma: no cover
+class SRW_v210(Facade): # pragma: no cover
     #remove pragma when completed
 
     '''
@@ -39,9 +38,18 @@ class SRWExperiment(Facade): # pragma: no cover
         Load the configuration file.
 
         '''
-        modname = ".apps/UW_v100" if len(sys.argv) > 1 else ".apps/SRW_v210"
-        load_config = getattr(import_module(modname), "load_config")
-        self.load_config(config_file)
+        file_type = cli_helpers.get_file_type(config_file)
+        if file_type == 'INI':
+            with open('config.yaml', 'w', encoding="utf-8") as file_name:
+                ## Note: this is a temporary path until parsing the SRW directory is implemented
+                subprocess.call(["python", "config_utils.py", "-c", config_file, "-t",
+                             "$PWD/config_defaults.yaml", "-o", "yaml"], stdout=file_name)
+        elif file_type == 'YAML':
+            shutil.copy2(config_file, 'config.yaml')
+        else:
+            msg = f"Bad file type -- {file_type}. Cannot load configuration!"
+            logging.critical(msg)
+            raise ValueError(msg)
 
     def validate_config(self):
         '''

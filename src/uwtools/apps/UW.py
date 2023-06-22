@@ -2,7 +2,7 @@
 #pylint: disable=unused-import, unused-variable, unused-argument, useless-parent-delegation
 # remove these disables once implemented
 '''
-This file contains the concrete facades for a variety of apps.
+This file contains the specific drivers for a particular app, using the facade pattern base class.
 '''
 
 import logging
@@ -13,14 +13,13 @@ import subprocess
 
 from uwtools.utils import file_helpers
 from uwtools.utils import cli_helpers
-from importlib import import_module
 from uwtools import config
-from .facade import Facade
+from drivers.facade import Facade
 
 logging.getLogger(__name__)
 
 
-class SRWExperiment(Facade): # pragma: no cover
+class UW_v100(Facade): # pragma: no cover
     #remove pragma when completed
 
     '''
@@ -39,9 +38,8 @@ class SRWExperiment(Facade): # pragma: no cover
         Load the configuration file.
 
         '''
-        modname = ".apps/UW_v100" if len(sys.argv) > 1 else ".apps/SRW_v210"
-        load_config = getattr(import_module(modname), "load_config")
-        self.load_config(config_file)
+        config_obj = config.YAMLConfig(config_file)
+        config_obj.dump_file('config.yaml')
 
     def validate_config(self):
         '''
