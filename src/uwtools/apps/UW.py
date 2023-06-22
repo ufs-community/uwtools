@@ -14,12 +14,12 @@ import subprocess
 from uwtools.utils import file_helpers
 from uwtools.utils import cli_helpers
 from uwtools import config
-from drivers.facade import Facade
+from ..drivers.facade import Facade
 
 logging.getLogger(__name__)
 
 
-class UW_v100(Facade): # pragma: no cover
+class UW(Facade): # pragma: no cover
     #remove pragma when completed
 
     '''

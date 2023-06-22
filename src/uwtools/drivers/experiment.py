@@ -10,11 +10,9 @@ import os
 import sys
 import shutil
 import subprocess
+from importlib import import_module
 
 from uwtools.utils import file_helpers
-from uwtools.utils import cli_helpers
-from importlib import import_module
-from uwtools import config
 from .facade import Facade
 
 logging.getLogger(__name__)
@@ -39,7 +37,7 @@ class SRWExperiment(Facade): # pragma: no cover
         Load the configuration file.
 
         '''
-        modname = ".apps/UW_v100" if len(sys.argv) > 1 else ".apps/SRW_v210"
+        modname = "uwtools.apps.UW" if len(sys.argv) > 1 else "uwtools.apps.SRW210"
         load_config = getattr(import_module(modname), "load_config")
         self.load_config(config_file)
 
