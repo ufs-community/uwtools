@@ -37,7 +37,7 @@ class SRWExperiment(Facade): # pragma: no cover
         Load the configuration file.
 
         '''
-        modname = "uwtools.apps.UW" if len(sys.argv) > 1 else "uwtools.apps.SRW210"
+        modname = "uwtools.apps.uw.UW" if len(sys.argv) > 1 else "uwtools.apps.srw.SRW210"
         load_config = getattr(import_module(modname), "load_config")
         self.load_config(config_file)
 
