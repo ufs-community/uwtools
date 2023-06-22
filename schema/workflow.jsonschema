@@ -21,7 +21,48 @@
             "CCPA_OBS_DIR": {
                 "type": "string",
                 "format": "uri"
-                }
+                },
+              "MRMS_OBS_DIR": {
+                  "type": "string",
+                  "format": "uri"
+                  },
+              "NDAS_OBS_DIR": {
+                  "type": "string",
+                  "format": "uri"
+                  },
+              "METPLUS_PATH": {
+                  "type": "string",
+                  "format": "uri"
+                  },
+              "MET_BIN_EXEC": {
+                  "type": "string"
+                  },
+              "MET_INSTALL_DIR": {
+                  "type": "string",
+                  "format": "uri"
+                  },
+              "DOMAIN_PREGEN_BASEDIR": {
+                  "type": "string",
+                  "format": "uri"
+                  },
+              "PARTITION_DEFAULT": {
+                  "type": "string"
+                  },
+              "QUEUE_DEFAULT": {
+                  "type": "string"
+                  },
+              "PARTITION_FCST": {
+                  "type": "string"
+                  },
+              "QUEUE_FCST": {
+                  "type": "string"
+                  },
+              "PARTITION_HPSS": {
+                  "type": "string"
+                  },
+              "QUEUE_HPSS": {
+                  "type": "string"
+                  }
             }
         },
     "cpl_aqm_parm": {
@@ -29,6 +70,10 @@
         "type": "object",
         "properties": {
             "AQM_CONFIG_DIR": {
+                "type": "string",
+                "format": "uri"
+                },
+            "AQM_BIO_DIR": {
                 "type": "string",
                 "format": "uri"
                 }

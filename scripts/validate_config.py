@@ -6,6 +6,7 @@ This utility validates a config file using a validation schema.
 '''
 import argparse
 import inspect
+import logging
 import os
 import sys
 import json
@@ -94,8 +95,30 @@ def validate_config(argv, log=None):
     with open(user_args.config_file, encoding="utf-8") as input_file:
         infile = yaml.safe_load(input_file)
 
-    jsonschema.validate(infile, schema)
+    # jsonschema.validate(infile, schema)
 
+    validator = jsonschema.Draft7Validator(schema)
+
+    # Print out each schema error
+    errors = validator.iter_errors(infile)
+
+    for error in errors:
+        logging.error(error)
+        print('------')
+
+    # Create a list of fields that could contain a file or path
+    path_list = []
+    for field in schema["properties"]:
+        for value in schema["properties"][field]["properties"]:
+            if "format" in schema["properties"][field]["properties"][value]:
+                path_list.append(value)
+                
+    # Check for existence of those files or paths
+    for field in infile:
+        for value in infile[field]:
+            if value in path_list:
+                if not os.path.exists(infile[field][value]):
+                    logging.error(f'{value} has Invalid Path {infile[field][value]}') 
 
 if __name__ == '__main__':
 
