@@ -9,7 +9,7 @@ build:
 requirements:
   host:
     - pip
-    - python >=3.9
+    - python {{ python }}
   run:
     - boto3 1.22.*
     - f90nml 1.4.*
