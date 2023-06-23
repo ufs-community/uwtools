@@ -101,7 +101,7 @@ class Config(collections.UserDict):
         if base_dict is None:
             base_dict = self.data
 
-        diffs = {}
+        diffs: dict = {}
         for sect, items in base_dict.items():
             for key, val in items.items():
                 if val != user_dict.get(sect, {}).get(key, ""):
@@ -309,14 +309,12 @@ class Config(collections.UserDict):
             return False
         # int
         try:
-            val = int(str_)
-            return val
+            return int(str_)
         except ValueError:
             pass
         # float
         try:
-            val = float(str_)
-            return val
+            return float(str_)
         except ValueError:
             pass
         return str_
@@ -416,31 +414,34 @@ class YAMLConfig(Config):
             try:
                 cfg = yaml.load(file_name, Loader=loader)
             except yaml.constructor.ConstructorError as e:  # pylint: disable=invalid-name
-                constructor = e.problem.split()[-1]
-                if "unhashable" in e.problem:
-                    msg = dedent(
-                        """\
+                if e.problem:
+                    constructor = e.problem.split()[-1]
+                    if "unhashable" in e.problem:
+                        msg = dedent(
+                            """\
 
-                        ERROR:
-                        The input config file may contain a Jinja2
-                        templated value at the location listed above.
-                        Ensure the value is included in quotes.
-                        """
-                    )
+                            ERROR:
+                            The input config file may contain a Jinja2
+                            templated value at the location listed above.
+                            Ensure the value is included in quotes.
+                            """
+                        )
+                    else:
+                        msg = dedent(
+                            f"""\
+
+                            ERROR:
+                            The input config file contains a constructor
+                            that is not registered with the uwtools package.
+
+                            constructor: {constructor}
+                            config file: {config_path}
+
+                            Define the constructor before proceeding.
+                            """
+                        )
                 else:
-                    msg = dedent(
-                        f"""\
-
-                        ERROR:
-                        The input config file contains a constructor
-                        that is not registered with the uwtools package.
-
-                        constructor: {constructor}
-                        config file: {config_path}
-
-                        Define the constructor before proceeding.
-                        """
-                    )
+                    msg = str(e)
                 self.log.exception(msg)
                 raise exceptions.UWConfigError(msg)
 
@@ -531,17 +532,17 @@ class INIConfig(Config):  # pylint: disable=unused-variable
         # at the dict representation of the parse config.
         # pylint: disable=protected-access
         cfg = configparser.ConfigParser(dict_type=collections.OrderedDict)
-        cfg.optionxform = str
+        cfg.optionxform = str  # type: ignore
         try:
             cfg.read(config_path)
         except configparser.MissingSectionHeaderError:
             with open(config_path, "r", encoding="utf-8") as file_name:
                 cfg.read_string("[top]\n" + file_name.read())
-                ret_cfg = dict(cfg._sections.get("top"))
+                ret_cfg = dict(cfg._sections.get("top"))  # type: ignore
                 self.from_ordereddict(ret_cfg)
                 return ret_cfg
 
-        ret_cfg = dict(cfg._sections)
+        ret_cfg = dict(cfg._sections)  # type: ignore
         self.from_ordereddict(ret_cfg)
         return ret_cfg
 
@@ -650,9 +651,9 @@ def create_config_obj(user_args, log=None):
     config_obj.dereference_all()
 
     if user_args.values_needed:
-        set_var = []
-        jinja2_var = []
-        empty_var = []
+        set_var: list = []
+        jinja2_var: list = []
+        empty_var: list = []
         config_obj.iterate_values(config_obj.data, set_var, jinja2_var, empty_var, parent="")
         log.info("Keys that are complete:")
         for var in set_var:
@@ -704,4 +705,4 @@ def create_config_obj(user_args, log=None):
 
     if user_args.show_format:
         if outfile_type != infile_type:
-            log.info(help(out_object.dump_file))
+            help(out_object.dump_file)

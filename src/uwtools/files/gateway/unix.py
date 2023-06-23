@@ -27,7 +27,7 @@ class Copier:
     def __init__(self, source: List[File], destination: List[pathlib.Path]):
         self.source = list(source)
         self.destination = list(destination)
-        self.queue = Queue()
+        self.queue: Queue = Queue()
         self.append(source, destination)
 
     def __iter__(self):

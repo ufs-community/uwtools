@@ -136,4 +136,4 @@ def main():
     try:
         config.create_config_obj(user_args=cli_args, log=cli_log)
     except exceptions.UWConfigError as e:
-        sys.exit(e)
+        sys.exit(str(e))

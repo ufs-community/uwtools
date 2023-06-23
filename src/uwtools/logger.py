@@ -6,7 +6,7 @@ import functools
 import logging
 import sys
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
 
 class ColoredFormatter(logging.Formatter):
@@ -44,17 +44,18 @@ class Logger:
     Improved logging
     """
 
-    LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-    DEFAULT_LEVEL = "INFO"
     DEFAULT_FORMAT = "%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s"
+    DEFAULT_LEVEL = "INFO"
+    LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
     def __init__(
         self,
-        name: str = None,
+        name: Optional[str] = None,
         level: str = DEFAULT_LEVEL,
-        _format: str = DEFAULT_FORMAT,
+        fmt: Optional[str] = DEFAULT_FORMAT,
         colored_log: bool = False,
-        logfile_path: Union[str, Path] = None,
+        log_file: Optional[Union[str, Path]] = None,
+        quiet: bool = False,
     ):
         """
         Constructor for Logger
@@ -62,7 +63,7 @@ class Logger:
 
         self.name = name
         self.level = level.upper()
-        self.format = _format
+        self.fmt = fmt or self.DEFAULT_FORMAT
         self.colored_log = colored_log
 
         if self.level not in Logger.LOG_LEVELS:
@@ -72,26 +73,24 @@ class Logger:
                 + f'{" | ".join(Logger.LOG_LEVELS)}'
             )
 
-        # Initialize the root logger if no name is present
+        # Get the named logger (or the root logger if no name is specified),
+        # set its log level, then attach console and file handlers if not in
+        # quiet mode.
+
         self._logger = logging.getLogger(name) if name else logging.getLogger()
-
         self._logger.setLevel(self.level)
-
-        _handlers = []
-        # Add console handler for logger
-        _handler = Logger.add_stream_handler(
-            level=self.level,
-            _format=self.format,
-            colored_log=self.colored_log,
-        )
-        _handlers.append(_handler)
-        self._logger.addHandler(_handler)
-
-        # Add file handler for logger
-        if logfile_path is not None:
-            _handler = Logger.add_file_handler(logfile_path, level=self.level, _format=self.format)
-            self._logger.addHandler(_handler)
-            _handlers.append(_handler)
+        if not quiet:
+            self._logger.addHandler(
+                Logger.add_stream_handler(
+                    level=self.level,
+                    fmt=self.fmt,
+                    colored_log=self.colored_log,
+                )
+            )
+            if log_file:
+                self._logger.addHandler(
+                    Logger.add_file_handler(log_file, level=self.level, fmt=self.fmt)
+                )
 
     def __getattr__(self, attribute):
         """
@@ -112,6 +111,7 @@ class Logger:
         Parameters
         ----------
         logger
+        logger
         handlers
 
         Returns
@@ -125,7 +125,10 @@ class Logger:
 
     @classmethod
     def add_stream_handler(
-        cls, level: str = DEFAULT_LEVEL, _format: str = DEFAULT_FORMAT, colored_log: bool = False
+        cls,
+        level: str = DEFAULT_LEVEL,
+        fmt: str = DEFAULT_FORMAT,
+        colored_log: bool = False,
     ):
         """
         Create stream handler
@@ -134,9 +137,7 @@ class Logger:
 
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(level)
-        _format = ColoredFormatter(_format) if colored_log else logging.Formatter(_format)
-        handler.setFormatter(_format)
-
+        handler.setFormatter(ColoredFormatter(fmt) if colored_log else logging.Formatter(fmt))
         return handler
 
     @classmethod
@@ -144,7 +145,7 @@ class Logger:
         cls,
         logfile_path: Union[str, Path],
         level: str = DEFAULT_LEVEL,
-        _format: str = DEFAULT_FORMAT,
+        fmt: str = DEFAULT_FORMAT,
     ):
         """
         Create file handler.
@@ -159,7 +160,7 @@ class Logger:
 
         handler = logging.FileHandler(str(logfile_path), mode="w")
         handler.setLevel(level)
-        handler.setFormatter(logging.Formatter(_format))
+        handler.setFormatter(logging.Formatter(fmt))
 
         return handler
 

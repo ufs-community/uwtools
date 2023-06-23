@@ -46,26 +46,13 @@ def path_if_file_exists(arg):  # pylint: disable=unused-variable
 def setup_logging(user_args, log_name=None):  # pylint: disable=unused-variable
     """Create the Logger object"""
 
-    args = {
-        "level": "info",
-        "_format": "%(message)s",
-        "colored_log": False,
-        "logfile_path": user_args.log_file,
-        "name": log_name,
-    }
-
-    if user_args.verbose:
-        args["level"] = "debug"
-        args["colored_log"] = True
-        del args["_format"]
-
-    log = Logger(**args)
-
-    msg = f"Finished setting up debug file logging in {user_args.log_file}"
-    log.debug(msg)
-
-    if user_args.quiet:
-        log.handlers.clear()
-        log.propagate = False
-
+    log = Logger(
+        colored_log=bool(user_args.verbose),
+        fmt=None if user_args.verbose else "%(message)s",
+        level="debug" if user_args.verbose else "info",
+        log_file=user_args.log_file,
+        quiet=user_args.quiet,
+        name=log_name,
+    )
+    log.debug(f"Finished setting up debug file logging in {user_args.log_file}")
     return log

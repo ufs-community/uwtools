@@ -18,6 +18,7 @@ import tempfile
 from collections import OrderedDict
 from contextlib import redirect_stdout
 from textwrap import dedent
+from typing import Any, Dict
 
 import pytest
 
@@ -116,7 +117,7 @@ def test_yaml_config_composite_types():
     assert isinstance(generic_repos[0], dict)
     assert generic_repos[0].get("branch") == "develop"
 
-    models = cfg.get("models")
+    models = cfg["models"]
     assert models[0].get("config").get("vertical_resolution") == 64
 
 
@@ -149,7 +150,7 @@ def test_f90nml_config_simple():
     test_nml = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
     cfg = config.F90Config(test_nml)
 
-    expected = {
+    expected: Dict[str, Any] = {
         "salad": OrderedDict(
             {
                 "base": "kale",
@@ -182,7 +183,7 @@ def test_ini_config_simple():
     test_ini = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.ini"))
     cfg = config.INIConfig(test_ini)
 
-    expected = {
+    expected: Dict[str, Any] = {
         "salad": {
             "base": "kale",
             "fruit": "banana",
@@ -210,7 +211,7 @@ def test_ini_config_bash():
     test_bash = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.sh"))
     cfg = config.INIConfig(test_bash, space_around_delimiters=False)
 
-    expected = {
+    expected: Dict[str, Any] = {
         "base": "kale",
         "fruit": "banana",
         "vegetable": "tomato",
@@ -423,7 +424,7 @@ salad:        how_many:  - None + 12
         print(f"Comparing config of base and {user}...")
 
         log_name = "compare_config"
-        log = logger.Logger(name=log_name, _format="%(message)s")
+        log = logger.Logger(name=log_name, fmt="%(message)s")
         userpath = os.path.join(
             uwtools_file_base, pathlib.Path("fixtures", f"simple.{userfile.lower()}")
         )
@@ -454,7 +455,7 @@ def test_dictionary_depth():
     """Test that the proper dictionary depth is being returned for each file type."""
 
     input_yaml = os.path.join(uwtools_file_base, pathlib.Path("fixtures/FV3_GFS_v16.yaml"))
-    config_obj = config.YAMLConfig(input_yaml)
+    config_obj: config.Config = config.YAMLConfig(input_yaml)
     depth = config_obj.dictionary_depth(config_obj.data)
     assert 3 == depth
 

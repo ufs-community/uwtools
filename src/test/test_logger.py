@@ -20,7 +20,7 @@ def test_logger(tmp_path):
     logfile = tmp_path / "logger.log"
 
     try:
-        log = Logger("test_logger", level=level, logfile_path=logfile, colored_log=True)
+        log = Logger("test_logger", level=level, log_file=logfile, colored_log=True)
         log.debug(reference["debug"])
         log.info(reference["info"])
         log.warning(reference["warning"])

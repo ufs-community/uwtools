@@ -9,11 +9,12 @@ show_missing = true
 line_length = 100
 
 [tool.mypy]
+check_untyped_defs = true
 follow_imports = "skip"
 ignore_missing_imports = true
 
 [tool.pylint.messages_control]
 disable = [
   "C0103", "C0209", "C0302",
-  "R0912", "R0914", "R0915",
+  "R0912", "R0913", "R0914", "R0915", "R1735",
 ]

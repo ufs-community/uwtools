@@ -4,6 +4,7 @@ Job Scheduling
 import collections
 import logging
 import re
+from collections.abc import Mapping
 from typing import Any, Dict, List
 
 from uwtools.utils import Memory
@@ -65,7 +66,7 @@ class JobCard(collections.UserList):
 class JobScheduler(collections.UserDict):
     """object that creates JobCard"""
 
-    _map = {}
+    _map: dict = {}
     prefix = ""
     key_value_separator = "="
 
@@ -140,7 +141,7 @@ class JobScheduler(collections.UserDict):
         return JobCard(processed)
 
     @classmethod
-    def get_scheduler(cls, props: Dict[str, Any]) -> "JobScheduler":
+    def get_scheduler(cls, props: Mapping):
         """returns the appropriate scheduler
 
         Parameters
