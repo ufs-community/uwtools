@@ -20,7 +20,7 @@ def test_all_templates_replaced(): #pylint: disable=unused-variable
 
     outstring = io.StringIO()
     with redirect_stdout(outstring):
-        atparse_to_jinja2.convert_template(args)
+        atparse_to_jinja2.main(args)
 
     result = outstring.getvalue()
     assert '@[' not in result

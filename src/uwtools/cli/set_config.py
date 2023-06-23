@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #pylint: disable=too-many-branches, too-many-statements, too-many-locals
 
 '''
@@ -218,8 +217,7 @@ def create_config_obj(argv, log=None):
         if outfile_type != infile_type:
             log.info(help(out_object.dump_file))
 
-if __name__ == '__main__':
-
+def main():
     cli_args = parse_args(sys.argv[1:])
     LOG_NAME = "set_config"
     cli_log = cli_helpers.setup_logging(cli_args, log_name=LOG_NAME)

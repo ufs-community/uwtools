@@ -54,7 +54,7 @@ def test_set_template_dryrun(): #pylint: disable=unused-variable
     # Capture stdout for the dry run
     outstring = io.StringIO()
     with redirect_stdout(outstring):
-        templater.set_template(args)
+        templater.main(args)
     result = outstring.getvalue()
 
     for outcome_line in outcome.split('\n'):
@@ -93,7 +93,7 @@ vegetable
     # Capture stdout for values_needed output
     outstring = io.StringIO()
     with redirect_stdout(outstring):
-        templater.set_template(args)
+        templater.main(args)
     result = outstring.getvalue()
 
     for outcome_line in outcome.split('\n'):
@@ -124,7 +124,7 @@ def test_set_template_yaml_config(): #pylint: disable=unused-variable
              '-o', out_file,
              ]
 
-        templater.set_template(args)
+        templater.main(args)
         assert file_helpers.compare_files(expected_file, out_file)
 
 def test_set_template_no_config_suffix_fails(): #pylint: disable=unused-variable
@@ -144,7 +144,7 @@ def test_set_template_no_config_suffix_fails(): #pylint: disable=unused-variable
             '-d',
             ]
         with pytest.raises(ValueError):
-            templater.set_template(args)
+            templater.main(args)
 
 def test_set_template_abs_path_ini_config(): #pylint: disable=unused-variable
 
@@ -159,7 +159,7 @@ def test_set_template_abs_path_ini_config(): #pylint: disable=unused-variable
          '-c', config_file,
          '-d',
          ]
-    templater.set_template(args)
+    templater.main(args)
 
 def test_set_template_command_line_config(): #pylint: disable=unused-variable
     '''Test that values provided on the command line produce the appropriate
@@ -201,7 +201,7 @@ def test_set_template_command_line_config(): #pylint: disable=unused-variable
     # Capture stdout for the dry run
     outstring = io.StringIO()
     with redirect_stdout(outstring):
-        templater.set_template(args)
+        templater.main(args)
     result = outstring.getvalue()
     for outcome_line in outcome.split('\n'):
         assert outcome_line in result
@@ -227,7 +227,7 @@ def test_set_template_yaml_config_model_configure(): #pylint: disable=unused-var
              '-o', out_file,
              ]
 
-        templater.set_template(args)
+        templater.main(args)
         assert file_helpers.compare_files(expected_file, out_file)
 
 
@@ -276,7 +276,7 @@ J2Template._load_file INPUT Args:
          ]
 
     with pytest.raises(ValueError) as error:
-        templater.set_template(args)
+        templater.main(args)
 
     expected = "Missing values needed by template"
     actual = str(error.value)
@@ -287,7 +287,7 @@ J2Template._load_file INPUT Args:
     # Capture verbose stdout
     outstring = io.StringIO()
     with redirect_stdout(outstring):
-        templater.set_template(args)
+        templater.main(args)
     result = outstring.getvalue()
 
     for outcome_line in outcome.split('\n'):
@@ -300,7 +300,7 @@ J2Template._load_file INPUT Args:
          ]
 
     with pytest.raises(argparse.ArgumentError):
-        templater.set_template(args)
+        templater.main(args)
 
 def test_mutually_exclusive_args(): #pylint: disable=unused-variable
     ''' Test that -q and -v args are mutually exclusive and testing -q and -d are mutually exclusive.'''
@@ -314,7 +314,7 @@ def test_mutually_exclusive_args(): #pylint: disable=unused-variable
         ]
 
     with pytest.raises(SystemExit):
-        templater.set_template(args)
+        templater.main(args)
 
     args = ['-i', input_file,
             '-d', 
@@ -322,4 +322,4 @@ def test_mutually_exclusive_args(): #pylint: disable=unused-variable
             ]
 
     with pytest.raises(argparse.ArgumentError):
-        templater.set_template(args)
+        templater.main(args)

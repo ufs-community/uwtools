@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #pylint: disable=unused-import, unused-variable, unused-argument
 # remove these disables once implemented
 '''

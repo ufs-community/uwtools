@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 '''
 This utility renders a Jinja2 template using user-supplied configuration options
 via YAML or environment variables.
@@ -54,7 +52,7 @@ def atparse_replace(atline):
         atline = ''.join([before_atparse,"{{",within_atparse,"}}", after_atparse])
     return atline
 
-def convert_template(argv):
+def main(argv):
     ''' Main section for converting the template file'''
 
     user_args = parse_args(argv)
@@ -69,6 +67,3 @@ def convert_template(argv):
             with open(user_args.outfile, "wt", encoding="utf-8") as jinja2template:
                 for line in atparsetemplate:
                     jinja2template.write(atparse_replace(line))
-
-if __name__ == '__main__':
-    convert_template(sys.argv[1:])

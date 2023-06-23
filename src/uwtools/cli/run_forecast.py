@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #pylint: disable=unused-import, unused-variable, unused-argument
 # remove these disables once implemented
 '''
@@ -71,7 +70,7 @@ def parse_args(argv):# pragma: no cover
     return parser.parse_args(argv)
 
 
-def run_forecast(argv): # pragma: no cover
+def main(argv): # pragma: no cover
     '''
     Defines the user interface for the forecast driver. Parses arguments
     provided by the user and passes to the Forecast driver class to be run.'''
@@ -87,7 +86,3 @@ def run_forecast(argv): # pragma: no cover
                                 log_name=name)
 
     experiment.run()
-
-
-if __name__ == '__main__':
-    run_forecast(sys.argv[1:])

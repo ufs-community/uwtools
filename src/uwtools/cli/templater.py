@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #pylint: disable=consider-using-f-string, duplicate-code
 
 '''
@@ -111,7 +110,7 @@ def setup_config_obj(user_args, log_name=None):
 
     return cfg
 
-def set_template(argv):
+def main(argv):
     '''Main section for rendering and writing a template file'''
     user_args = parse_args(argv)
 
@@ -168,6 +167,3 @@ def set_template(argv):
     else:
         # write out rendered template to file
         template.dump_file(user_args.outfile)
-
-if __name__ == '__main__':
-    set_template(sys.argv[1:])

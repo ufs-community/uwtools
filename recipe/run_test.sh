@@ -5,7 +5,10 @@ cli() {
   (
     set -eu
     clis=(
-      heythere
+      atparse-to-jinja2
+      run-forecast
+      set-config
+      template
     )
     for x in ${clis[*]}; do
       which $x
