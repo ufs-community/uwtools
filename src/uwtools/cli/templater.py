@@ -9,7 +9,6 @@ import argparse
 import inspect
 import logging
 import os
-import sys
 
 from uwtools import config
 from uwtools.j2template import J2Template

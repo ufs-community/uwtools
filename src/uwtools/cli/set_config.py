@@ -5,10 +5,9 @@
 """
 This utility creates a command line interface for handling config files.
 """
-import argparse
-import inspect
 import os
 import sys
+from argparse import ArgumentError, ArgumentParser
 
 from uwtools import config, exceptions
 from uwtools.utils import cli_helpers
@@ -21,7 +20,7 @@ def parse_args(argv):
     argument.
     """
 
-    parser = argparse.ArgumentParser(description="Set config with user-defined settings.")
+    parser = ArgumentParser(description="Set config with user-defined settings.")
 
     group = parser.add_mutually_exclusive_group()
 
@@ -110,19 +109,31 @@ def parse_args(argv):
         default=os.path.join(os.path.dirname(__file__), "set_config.log"),
     )
 
-    args = parser.parse_args(argv)
-    if args.quiet and args.dry_run:
-        msg = "You added quiet and dry_run arguments. This will print nothing."
-        raise argparse.ArgumentError(None, msg)
+    # Parse arguments.
 
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+
+    # Validate arguments.
+
+    if args.show_format and not args.outfile:
+        raise ArgumentError(None, "Option --show_format requires --outfile")
+
+    if args.quiet and args.dry_run:
+        raise ArgumentError(None, "Specifying --quiet will suppress --dry-run output")
+
+    # Return validated arguments.
+
+    return args
 
 
 def main():
+    """
+    Main entry-point function.
+    """
     cli_args = parse_args(sys.argv[1:])
     LOG_NAME = "set_config"
     cli_log = cli_helpers.setup_logging(cli_args, log_name=LOG_NAME)
     try:
-        config.create_config_obj(sys.argv[1:], cli_log)
+        config.create_config_obj(user_args=cli_args, log=cli_log)
     except exceptions.UWConfigError as e:
         sys.exit(e)

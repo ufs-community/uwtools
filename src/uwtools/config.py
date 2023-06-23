@@ -8,6 +8,7 @@ import abc
 import collections
 import configparser
 import copy
+import inspect
 import json
 import logging
 import os
@@ -21,6 +22,7 @@ import yaml
 
 from uwtools import exceptions, logger
 from uwtools.j2template import J2Template
+from uwtools.utils import cli_helpers
 
 
 class Config(collections.UserDict):
@@ -609,10 +611,8 @@ class FieldTableConfig(YAMLConfig):  # pylint: disable=unused-variable
             file_name.write(self._format_output())
 
 
-def create_config_obj(argv, log=None):
+def create_config_obj(user_args, log=None):
     """Main section for processing config file"""
-
-    user_args = parse_args(argv)
 
     if log is None:
         name = f"{inspect.stack()[0][3]}"
@@ -620,7 +620,7 @@ def create_config_obj(argv, log=None):
 
     infile_type = user_args.input_file_type or cli_helpers.get_file_type(user_args.input_base_file)
 
-    config_class = getattr(config, f"{infile_type}Config")
+    config_class = globals()[f"{infile_type}Config"]
     config_obj = config_class(user_args.input_base_file, log_name=log.name)
 
     if user_args.config_file:
@@ -628,7 +628,7 @@ def create_config_obj(argv, log=None):
             user_args.config_file
         )
 
-        user_config_obj = getattr(config, f"{config_file_type}Config")(user_args.config_file)
+        user_config_obj = globals()[f"{config_file_type}Config"](user_args.config_file)
 
         if config_file_type != infile_type:
             config_depth = user_config_obj.dictionary_depth(user_config_obj.data)
@@ -679,7 +679,7 @@ def create_config_obj(argv, log=None):
         outfile_type = user_args.output_file_type or cli_helpers.get_file_type(user_args.outfile)
 
         if outfile_type != infile_type:
-            out_object = getattr(config, f"{outfile_type}Config")()
+            out_object = globals()[f"{outfile_type}Config"]()
             out_object.update(config_obj)
 
             output_depth = out_object.dictionary_depth(out_object.data)
@@ -702,13 +702,6 @@ def create_config_obj(argv, log=None):
             out_object = config_obj
         out_object.dump_file(user_args.outfile)
 
-    # if --show_format, print a list of required configuration settings to stdout
     if user_args.show_format:
-        if user_args.outfile is None:
-            # first ensure all required args are present
-            raise argparse.ArgumentError(
-                user_args.outfile, "args: --show_format also requires -outfile for reference"
-            )
-
         if outfile_type != infile_type:
             log.info(help(out_object.dump_file))

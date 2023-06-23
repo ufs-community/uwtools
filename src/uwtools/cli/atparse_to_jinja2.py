@@ -4,7 +4,6 @@ via YAML or environment variables.
 """
 import argparse
 import re
-import sys
 
 from uwtools.utils import cli_helpers
 

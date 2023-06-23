@@ -9,8 +9,6 @@ import logging
 import os
 import sys
 
-from scripts import set_config
-
 from uwtools import config
 from uwtools.utils import file_helpers
 
@@ -65,7 +63,7 @@ class FV3Forecast(Driver):  # pragma: no cover
 
         if base_file:
             args = ["-i", base_file, "-o", outconfig_file, "-c", config_obj]
-            set_config.create_config_obj(args)
+            config.create_config_obj(args)
         else:
             config_obj.dump_file(outconfig_file)
 
