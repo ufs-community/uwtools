@@ -1,5 +1,5 @@
 package:
-  name: workflow-tools
+  name: uwtools
   version: 0.1.0
 source:
   path: ../src
@@ -9,7 +9,7 @@ build:
 requirements:
   host:
     - pip
-    - python {{ python }}
+    - python >=3.9
   run:
     - boto3 1.22.*
     - f90nml 1.4.*
