@@ -1,6 +1,5 @@
 CHANNELS    = $(addprefix -c ,$(shell tr '\n' ' ' <$(RECIPE_DIR)/channels)) -c local
 METAJSON    = $(RECIPE_DIR)/meta.json
-PYFILES     = $(shell find src -type f -name "*.py")
 RECIPEFILES = $(addprefix $(RECIPE_DIR)/,conda_build_config.yaml meta.yaml)
 TARGETS     = devshell env format lint meta package test typecheck unittest
 
@@ -22,7 +21,7 @@ env: package
 	conda create -y -n $(call spec,buildnum,-) $(CHANNELS) $(call spec,build,=)
 
 format:
-	black $(PYFILES) && isort --profile black $(PYFILES)
+	black $$(find src -type f -name "*.py") && isort --profile black $$(find src -type f -name "*.py")
 
 lint:
 	recipe/run_test.sh lint

@@ -9,8 +9,8 @@ import tempfile
 from contextlib import redirect_stdout
 
 import pytest
-from scripts import templater
 
+from uwtools.cli import templater
 from uwtools.utils import file_helpers
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
@@ -327,7 +327,9 @@ J2Template._load_file INPUT Args:
 
 
 def test_mutually_exclusive_args():  # pylint: disable=unused-variable
-    """Test that -q and -v args are mutually exclusive and testing -q and -d are mutually exclusive."""
+    """
+    Test that -q and -v args are mutually exclusive and testing -q and -d are mutually exclusive.
+    """
 
     input_file = os.path.join(uwtools_file_base, "fixtures/fruit_config.yaml")
 

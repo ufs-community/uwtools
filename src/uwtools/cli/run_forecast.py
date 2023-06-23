@@ -1,3 +1,5 @@
+# pylint: disable=duplicate-code
+
 # pylint: disable=unused-import, unused-variable, unused-argument
 # remove these disables once implemented
 """

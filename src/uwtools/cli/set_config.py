@@ -1,3 +1,5 @@
+# pylint: disable=duplicate-code
+
 # pylint: disable=too-many-branches, too-many-statements, too-many-locals
 
 """

@@ -20,7 +20,7 @@ cli() {
 lint() {
   echo Running linter:
   (
-    set -eux
+    set -eu
     pylint ${pyfiles[*]}
   )
   echo OK
@@ -29,7 +29,7 @@ lint() {
 typecheck() {
   echo Running typechecker:
   (
-    set -eux
+    set -eu
     mypy --install-types --non-interactive ${pyfiles[*]}
   )
   echo OK

@@ -5,7 +5,7 @@ import os
 import pathlib
 from contextlib import redirect_stdout
 
-from scripts import atparse_to_jinja2
+from uwtools.cli import atparse_to_jinja2
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
