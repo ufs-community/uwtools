@@ -9,7 +9,6 @@ import shutil
 
 
 def handle_existing(run_directory, exist_act): #pylint: disable=unused-variable
-    # pragma: no cover
     '''Given a run directory, and an action to do if
     directory exists, delete or rename directory.'''
 
@@ -36,7 +35,6 @@ def handle_existing(run_directory, exist_act): #pylint: disable=unused-variable
         raise RuntimeError(msg) from rename_error
 
 def compare_files(expected, actual): #pylint: disable=unused-variable
-    # pragma: no cover
     '''Compare the content of two files.  Doing this over filecmp.cmp since 
     we may not be able to handle end-of-file character differences with it.
     Prints the contents of two compared files to std out if they do not match.'''

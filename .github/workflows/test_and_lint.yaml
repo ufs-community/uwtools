@@ -55,7 +55,7 @@ jobs:
           eval "$(micromamba shell hook --shell=bash)"
           micromamba activate workflow_tools
           export PYTHONPATH=$PYTHONPATH:$(pwd)/src
-          python -m pytest --cov-fail-under=90 --cov-report=html --cov=uwtools
+          python -m pytest --cov-config=.coveragerc --cov-fail-under=90 --cov-report=html --cov=uwtools
           rm ./htmlcov/.gitignore
 
       - name: Upload reports
