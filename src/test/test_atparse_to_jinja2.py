@@ -1,18 +1,18 @@
-''' Tests for the atparse_to_jinja2 tool. '''
+""" Tests for the atparse_to_jinja2 tool. """
 
-from contextlib import redirect_stdout
 import io
 import os
 import pathlib
+from contextlib import redirect_stdout
 
 from scripts import atparse_to_jinja2
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
-def test_all_templates_replaced(): #pylint: disable=unused-variable
 
-    ''' Test that all atparse @[] items are replaced with Jinja2
-    templates {{ }} '''
+def test_all_templates_replaced():  # pylint: disable=unused-variable
+    """Test that all atparse @[] items are replaced with Jinja2
+    templates {{ }}"""
 
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/ww3_multi.inp.IN"))
 
@@ -23,4 +23,4 @@ def test_all_templates_replaced(): #pylint: disable=unused-variable
         atparse_to_jinja2.main(args)
 
     result = outstring.getvalue()
-    assert '@[' not in result
+    assert "@[" not in result

@@ -1,7 +1,9 @@
-#pylint: disable=invalid-name, missing-module-docstring, missing-function-docstring
-#pylint: disable=unused-variable
+# pylint: disable=invalid-name, missing-module-docstring, missing-function-docstring
+# pylint: disable=unused-variable
 import glob
+
 import pytest
+
 from uwtools.files import Unix
 from uwtools.files.model import file
 
@@ -14,7 +16,6 @@ def test_Unix():
 
 
 def test_Unix_validation():
-
     with pytest.raises(AttributeError) as error:
         Unix("ile://tests/fixtures/files/a.txt")
 
@@ -30,10 +31,12 @@ def test_Unix_validation():
 
     assert "File not found [file://ests/fixtures/files/a.txt]" in str(error)
 
+
 def test_dir_file():
     """Tests dir method given a file."""
     my_init = file.Unix("file://tests/fixtures/files/a.txt")
     assert my_init.dir == glob.glob("tests/fixtures/files/a.txt")
+
 
 def test_dir_path():
     """Tests dir method given a path, i.e. not a file."""

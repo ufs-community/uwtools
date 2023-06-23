@@ -16,7 +16,7 @@ from uwtools.files.model import File
 logging.getLogger(__name__)
 
 
-def copy(source: List[File], destination: List[pathlib.Path]): #pylint: disable=unused-variable
+def copy(source: List[File], destination: List[pathlib.Path]):  # pylint: disable=unused-variable
     """copies each item from source to corresponding item in destination"""
     Copier(source, destination).run()
 
@@ -38,15 +38,14 @@ class Copier:
 
     def append(self, source, destination):
         """append a task to the queue"""
-        for (src, dest) in zip(list(source), list(destination)):
+        for src, dest in zip(list(source), list(destination)):
             self.queue.put((src, dest))
 
     def run(self):
-        """ runs all tasks in queue threaded"""
+        """runs all tasks in queue threaded"""
 
         threads = [
-            Thread(target=_copy, args=(source.path, destination))
-            for (source, destination) in self
+            Thread(target=_copy, args=(source.path, destination)) for (source, destination) in self
         ]
 
         for thread in threads:

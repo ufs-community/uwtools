@@ -1,10 +1,10 @@
-#pylint: disable=missing-module-docstring
-from abc import ABC, abstractmethod
-from enum import Enum
+# pylint: disable=missing-module-docstring
 import glob
 import os
-from pathlib import Path
 import re
+from abc import ABC, abstractmethod
+from enum import Enum
+from pathlib import Path
 from typing import Any, List
 
 
@@ -76,7 +76,7 @@ class File(ABC):
         raise NotImplementedError
 
 
-class S3(File): #pylint: disable=unused-variable
+class S3(File):  # pylint: disable=unused-variable
     """represents an Amazon S3 file"""
 
     @property
@@ -90,7 +90,7 @@ class S3(File): #pylint: disable=unused-variable
         raise NotImplementedError
 
 
-class Unix(File): #pylint: disable=unused-variable
+class Unix(File):  # pylint: disable=unused-variable
     """represents a unix file"""
 
     @property
@@ -103,4 +103,4 @@ class Unix(File): #pylint: disable=unused-variable
         """returns the contents of the directory recursively"""
         if Path(self.path).is_file():
             return glob.glob(self.path)
-        return glob.glob(os.path.join(self.path, '*'))
+        return glob.glob(os.path.join(self.path, "*"))

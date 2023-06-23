@@ -10,7 +10,6 @@ import pathlib
 import boto3
 from botocore.exceptions import ClientError
 
-
 S3_CLIENT = boto3.client("s3")
 
 

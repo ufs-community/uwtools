@@ -1,109 +1,112 @@
-#pylint: disable=too-many-branches, too-many-statements, too-many-locals
+# pylint: disable=too-many-branches, too-many-statements, too-many-locals
 
-'''
+"""
 This utility creates a command line interface for handling config files.
-'''
+"""
 import argparse
 import inspect
 import os
 import sys
 
-from uwtools import config
-from uwtools import exceptions
+from uwtools import config, exceptions
 from uwtools.utils import cli_helpers
 
 
 def parse_args(argv):
-
-    '''
+    """
     Function maintains the arguments accepted by this script. Please see
     Python's argparse documentation for more information about settings of each
     argument.
-    '''
+    """
 
-    parser = argparse.ArgumentParser(
-       description='Set config with user-defined settings.'
-    )
+    parser = argparse.ArgumentParser(description="Set config with user-defined settings.")
 
     group = parser.add_mutually_exclusive_group()
 
     parser.add_argument(
-        '-i', '--input_base_file',
-        help='Path to a config base file. Accepts YAML, bash/ini or namelist',
+        "-i",
+        "--input_base_file",
+        help="Path to a config base file. Accepts YAML, bash/ini or namelist",
         required=True,
         type=cli_helpers.path_if_file_exists,
     )
 
     parser.add_argument(
-        '-o', '--outfile',
+        "-o",
+        "--outfile",
         help='Full path to output file. If different from input, will will perform conversion.\
             For field table output, specify model such as "field_table.FV3_GFS_v16"',
     )
 
     parser.add_argument(
-        '-c', '--config_file',
-        help='Optional path to configuration file. Accepts YAML, bash/ini or namelist',
+        "-c",
+        "--config_file",
+        help="Optional path to configuration file. Accepts YAML, bash/ini or namelist",
         type=cli_helpers.path_if_file_exists,
     )
 
     parser.add_argument(
-        '-d', '--dry_run',
-        action='store_true',
-        help='If provided, print rendered config file to stdout only',
+        "-d",
+        "--dry_run",
+        action="store_true",
+        help="If provided, print rendered config file to stdout only",
     )
 
     parser.add_argument(
-        '--compare',
-        action='store_true',
-        help='If provided, show diff between -i and -c files.',
+        "--compare",
+        action="store_true",
+        help="If provided, show diff between -i and -c files.",
     )
     parser.add_argument(
-        '--show_format',
-        action='store_true',
-        help='If provided, print the required formatting to generate the requested output file',
-    )
-
-    parser.add_argument(
-        '--values_needed',
-        action='store_true',
-        help='If provided, prints a list of required configuration settings to stdout',
+        "--show_format",
+        action="store_true",
+        help="If provided, print the required formatting to generate the requested output file",
     )
 
     parser.add_argument(
-        '--input_file_type',
-        help='If provided, will convert provided input file to provided file type.\
-            Accepts YAML, bash/ini or namelist',
+        "--values_needed",
+        action="store_true",
+        help="If provided, prints a list of required configuration settings to stdout",
+    )
+
+    parser.add_argument(
+        "--input_file_type",
+        help="If provided, will convert provided input file to provided file type.\
+            Accepts YAML, bash/ini or namelist",
         choices=["YAML", "INI", "F90"],
     )
 
     parser.add_argument(
-        '--config_file_type',
-        help='If provided, will convert provided config file to provided file type.\
-            Accepts YAML, bash/ini or namelist',
+        "--config_file_type",
+        help="If provided, will convert provided config file to provided file type.\
+            Accepts YAML, bash/ini or namelist",
         choices=["YAML", "INI", "F90"],
     )
 
     parser.add_argument(
-        '--output_file_type',
-        help='If provided, will convert provided output file to provided file type.\
-            Accepts YAML, bash/ini or namelist',
+        "--output_file_type",
+        help="If provided, will convert provided output file to provided file type.\
+            Accepts YAML, bash/ini or namelist",
         choices=["YAML", "INI", "F90", "FieldTable"],
     )
     group.add_argument(
-        '-v', '--verbose',
-        action='store_true',
-        help='If provided, print all logging messages.',
-        )
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="If provided, print all logging messages.",
+    )
     group.add_argument(
-        '-q', '--quiet',
-        action='store_true',
-        help='If provided, print no logging messages',
-        )
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="If provided, print no logging messages",
+    )
     parser.add_argument(
-        '-l', '--log_file',
-        help='Optional path to a specified log file',
-        default=os.path.join(os.path.dirname(__file__), "set_config.log")
-        )
+        "-l",
+        "--log_file",
+        help="Optional path to a specified log file",
+        default=os.path.join(os.path.dirname(__file__), "set_config.log"),
+    )
 
     args = parser.parse_args(argv)
     if args.quiet and args.dry_run:
@@ -111,6 +114,7 @@ def parse_args(argv):
         raise argparse.ArgumentError(None, msg)
 
     return parser.parse_args(argv)
+
 
 def main():
     cli_args = parse_args(sys.argv[1:])

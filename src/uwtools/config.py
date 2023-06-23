@@ -1,8 +1,8 @@
-#pylint: disable=too-many-arguments
-'''
+# pylint: disable=too-many-arguments
+"""
 This file contains the Config file and its subclasses for a variety of
 dicatable file types.
-'''
+"""
 
 import abc
 import collections
@@ -15,17 +15,17 @@ import re
 import sys
 from textwrap import dedent
 
-import jinja2
 import f90nml
+import jinja2
 import yaml
 
+from uwtools import exceptions, logger
 from uwtools.j2template import J2Template
-from uwtools import logger
-from uwtools import exceptions
+
 
 class Config(collections.UserDict):
 
-    '''
+    """
     This base class provides the interface to methods used to read in
     several configuration file types and manipulate them as such.
 
@@ -60,16 +60,15 @@ class Config(collections.UserDict):
         Update the values in an existing dictionary with values provided
         by a second dictionary. Keep any of the values that are not
         present in the second dictionary.
-    '''
+    """
 
     def __init__(self, config_path=None, log_name=None):
-
-        '''
+        """
         Parameters
         ----------
         config_path : Path (See Above)
 
-        '''
+        """
 
         super().__init__()
 
@@ -77,33 +76,33 @@ class Config(collections.UserDict):
         self.log = logging.getLogger(log_name)
 
     def __repr__(self):
-        ''' This method will return configure contents'''
+        """This method will return configure contents"""
         return json.dumps(self.data)
 
     @abc.abstractmethod
     def _load(self, config_path=None):
-        ''' Interface to load a config file given the config_path
+        """Interface to load a config file given the config_path
         attribute, or optional config_path argument. Returns a dict
-        object. '''
+        object."""
 
     @abc.abstractmethod
     def dump_file(self, output_path):
-        ''' Interface to write a config object to a file at the
-        output_path provided. '''
+        """Interface to write a config object to a file at the
+        output_path provided."""
 
     def compare_config(self, user_dict, base_dict=None):
-        #pylint: disable=unnecessary-dict-index-lookup
-        '''
+        # pylint: disable=unnecessary-dict-index-lookup
+        """
         Assuming a section, key/value structure of configuration types,
         compare the dictionary to the values stored in the external file.
-        '''
+        """
         if base_dict is None:
             base_dict = self.data
 
         diffs = {}
         for sect, items in base_dict.items():
             for key, val in items.items():
-                if val != user_dict.get(sect, {}).get(key, ''):
+                if val != user_dict.get(sect, {}).get(key, ""):
                     try:
                         diffs[sect][key] = f" - {val} + {user_dict.get(sect, {}).get(key)}"
                     except KeyError:
@@ -113,7 +112,7 @@ class Config(collections.UserDict):
         for sect, items in user_dict.items():
             for key, val in items.items():
                 if (
-                    val != base_dict.get(sect, {}).get(key, '')
+                    val != base_dict.get(sect, {}).get(key, "")
                     and diffs.get(sect, {}).get(key) is None
                 ):
                     try:
@@ -128,10 +127,10 @@ class Config(collections.UserDict):
                 self.log.info(msg)
 
     def from_ordereddict(self, in_dict):
-        '''
+        """
         Given a dictionary, replace all instances of OrderedDict with a
         regular dictionary.
-        '''
+        """
         if isinstance(in_dict, collections.OrderedDict):
             in_dict = dict(in_dict)
 
@@ -140,11 +139,11 @@ class Config(collections.UserDict):
                 in_dict[sect] = dict(keys)
 
     def _load_paths(self, filepaths):
-        '''
+        """
         Given a list of filepaths, load each file in the list and return
         a dictionary that includes the parsed contents of the collection
         of files.
-        '''
+        """
 
         cfg = {}
         for filepath in filepaths:
@@ -154,7 +153,7 @@ class Config(collections.UserDict):
         return cfg
 
     def parse_include(self, ref_dict=None):
-        '''
+        """
         Assuming a section, key/value structure of configuration types
         (other than YAML, which handles this in its own loader), update
         the dictionary with the values stored in the external file.
@@ -162,7 +161,7 @@ class Config(collections.UserDict):
         Recursively traverse the stored dictionary, finding any !INCLUDE
         tags. Update the dictionary with the contents of the files to be
         included.
-        '''
+        """
 
         if ref_dict is None:
             ref_dict = self.data
@@ -170,8 +169,8 @@ class Config(collections.UserDict):
         for key, value in copy.deepcopy(ref_dict).items():
             if isinstance(value, dict):
                 self.parse_include(ref_dict[key])
-            elif isinstance(value, str) and '!INCLUDE' in value:
-                filepaths = value.lstrip('!INCLUDE [').rstrip(']').split(',')
+            elif isinstance(value, str) and "!INCLUDE" in value:
+                filepaths = value.lstrip("!INCLUDE [").rstrip("]").split(",")
 
                 # Update the dictionary with the values in the
                 # included file
@@ -179,12 +178,11 @@ class Config(collections.UserDict):
                 del ref_dict[key]
 
     def dereference(self, ref_dict=None, full_dict=None):
-
         # pylint: disable=too-many-branches, too-many-locals
 
-        ''' This method will be used as a method by which any Config
+        """This method will be used as a method by which any Config
         object can cycle through its key/value pairs recursively,
-        replacing Jinja2 templates as necessary.'''
+        replacing Jinja2 templates as necessary."""
 
         if ref_dict is None:
             ref_dict = self.data
@@ -198,14 +196,12 @@ class Config(collections.UserDict):
         # Choosing sys._getframe() here because it's more efficient than
         # other inspect methods.
 
-        func_name = f"{self.__class__.__name__}.{sys._getframe().f_code.co_name}" #pylint: disable=protected-access
+        func_name = f"{self.__class__.__name__}.{sys._getframe().f_code.co_name}"  # pylint: disable=protected-access
 
         for key, val in ref_dict.items():
-
             if isinstance(val, dict):
                 self.dereference(val, full_dict)
             else:
-
                 # Save a bit of compute and only do this part for strings that
                 # contain the jinja double brackets.
                 v_str = str(val)
@@ -235,19 +231,18 @@ class Config(collections.UserDict):
                         # environment variables available with env
                         # prefix.
                         if ref_dict == full_dict:
-                            config_obj = {**os.environ,
-                                          **full_dict}
+                            config_obj = {**os.environ, **full_dict}
                         else:
-                            config_obj = {**os.environ,
-                                          **ref_dict,
-                                          **full_dict}
+                            config_obj = {**os.environ, **ref_dict, **full_dict}
                         try:
-                            j2tmpl = J2Template(configure_obj=config_obj,
-                                                template_str=template,
-                                                loader_args={'undefined': jinja2.StrictUndefined}
-                                                )
+                            j2tmpl = J2Template(
+                                configure_obj=config_obj,
+                                template_str=template,
+                                loader_args={"undefined": jinja2.StrictUndefined},
+                            )
                         except jinja2.exceptions.TemplateAssertionError as e:
-                            msg = dedent(f"""\
+                            msg = dedent(
+                                f"""\
 
                                 ERROR:
                                 The input config file contains a Jinja2 filter
@@ -257,7 +252,8 @@ class Config(collections.UserDict):
                                 key: {key}
 
                                 Define the filter before proceeding.
-                                """)
+                                """
+                            )
                             self.log.exception(msg)
                             raise exceptions.UWConfigError(msg)
                         rendered = template
@@ -289,7 +285,7 @@ class Config(collections.UserDict):
                     ref_dict[key] = self.str_to_type("".join(data))
 
     def dereference_all(self):
-        ''' Run dereference until all values have been filled in '''
+        """Run dereference until all values have been filled in"""
 
         prev = copy.deepcopy(self.data)
         self.dereference()
@@ -299,11 +295,10 @@ class Config(collections.UserDict):
 
     @logger.verbose()
     def str_to_type(self, str_):
-        ''' Check if the string contains a float, int, boolean, or just
+        """Check if the string contains a float, int, boolean, or just
         regular string. This will be used to automatically convert
         environment variables to data types that are more convenient to
-        work with.'''
-
+        work with."""
 
         str_ = str_.strip("\"'")
         if str_.lower() in ["true", "yes", "yeah"]:
@@ -325,10 +320,10 @@ class Config(collections.UserDict):
         return str_
 
     def update_values(self, new_dict, dict_to_update=None):
-        '''
+        """
         Update the values stored in the class's data (a dict) with
         the values provided by the new_dict.
-        '''
+        """
 
         if dict_to_update is None:
             dict_to_update = self.data
@@ -343,43 +338,44 @@ class Config(collections.UserDict):
                 dict_to_update[key] = new_val
 
     def iterate_values(self, config_dict, set_var, jinja2_var, empty_var, parent):
-        '''
-        Recursively parse which keys in the object are complete (set_var), which keys have 
-        unfilled jinja templates (jinja2_var), and which keys are set to empty (empty_var). 
-        '''
+        """
+        Recursively parse which keys in the object are complete (set_var), which keys have
+        unfilled jinja templates (jinja2_var), and which keys are set to empty (empty_var).
+        """
 
         if not isinstance(config_dict, dict):
             return
 
         for key, val in config_dict.items():
             if isinstance(val, dict):
-                set_var.append(f'    {parent}{key}')
-                new_parent = f'{parent}{key}.'
+                set_var.append(f"    {parent}{key}")
+                new_parent = f"{parent}{key}."
                 self.iterate_values(val, set_var, jinja2_var, empty_var, new_parent)
             elif isinstance(val, list):
-                set_var.append(f'    {parent}{key}')
+                set_var.append(f"    {parent}{key}")
                 for item in val:
                     self.iterate_values(item, set_var, jinja2_var, empty_var, parent)
             elif "{{" in str(val) or "{%" in str(val):
-                jinja2_var.append(f'    {parent}{key}: {val}')
+                jinja2_var.append(f"    {parent}{key}: {val}")
             elif val == "" or val is None:
-                empty_var.append(f'    {parent}{key}')
+                empty_var.append(f"    {parent}{key}")
 
             else:
-                set_var.append(f'    {parent}{key}')
+                set_var.append(f"    {parent}{key}")
         return
 
     def dictionary_depth(self, config_dict):
-        '''
-        Recursively finds the depth of an objects data (a dictionary). 
-        '''
+        """
+        Recursively finds the depth of an objects data (a dictionary).
+        """
         if isinstance(config_dict, dict):
             return 1 + (max(map(self.dictionary_depth, config_dict.values())))
         return 0
 
+
 class YAMLConfig(Config):
 
-    '''
+    """
     Concrete class to handle YAML configure files.
 
     Attributes
@@ -394,11 +390,10 @@ class YAMLConfig(Config):
     _yaml_include()
         Static method used to define a constructor function for PyYAML.
 
-    '''
+    """
 
     def __init__(self, config_path=None, log_name=None):
-
-        ''' Load the file and update the dictionary '''
+        """Load the file and update the dictionary"""
 
         super().__init__(config_path, log_name)
 
@@ -406,31 +401,33 @@ class YAMLConfig(Config):
             self.update(self._load())
 
     def __repr__(self):
-        ''' This method will return configure contents'''
+        """This method will return configure contents"""
         return yaml.dump(self.data)
 
-
     def _load(self, config_path=None):
-        ''' Load the user-provided YAML config file path into a dict
-        object. '''
+        """Load the user-provided YAML config file path into a dict
+        object."""
 
         loader = self._yaml_loader
         config_path = config_path or self.config_path
-        with open(config_path, 'r', encoding="utf-8") as file_name:
+        with open(config_path, "r", encoding="utf-8") as file_name:
             try:
                 cfg = yaml.load(file_name, Loader=loader)
-            except yaml.constructor.ConstructorError as e: #pylint: disable=invalid-name
+            except yaml.constructor.ConstructorError as e:  # pylint: disable=invalid-name
                 constructor = e.problem.split()[-1]
-                if 'unhashable' in e.problem:
-                    msg = dedent("""\
+                if "unhashable" in e.problem:
+                    msg = dedent(
+                        """\
 
                         ERROR:
                         The input config file may contain a Jinja2
                         templated value at the location listed above.
                         Ensure the value is included in quotes.
-                        """ )
+                        """
+                    )
                 else:
-                    msg = dedent(f"""\
+                    msg = dedent(
+                        f"""\
 
                         ERROR:
                         The input config file contains a constructor
@@ -440,7 +437,8 @@ class YAMLConfig(Config):
                         config file: {config_path}
 
                         Define the constructor before proceeding.
-                        """)
+                        """
+                    )
                 self.log.exception(msg)
                 raise exceptions.UWConfigError(msg)
 
@@ -448,32 +446,32 @@ class YAMLConfig(Config):
         return cfg
 
     def dump_file(self, output_path):
-        ''' Write the dictionary to a YAML file '''
+        """Write the dictionary to a YAML file"""
 
-        with open(output_path, 'w', encoding="utf-8") as file_name:
+        with open(output_path, "w", encoding="utf-8") as file_name:
             yaml.dump(self.data, file_name, sort_keys=False)
 
     def _yaml_include(self, loader, node):
-        ''' Returns a dictionary that includes the contents of the referenced
-        YAML files, and is used as a contructor method for PyYAML'''
+        """Returns a dictionary that includes the contents of the referenced
+        YAML files, and is used as a contructor method for PyYAML"""
 
         filepaths = loader.construct_sequence(node)
         return self._load_paths(filepaths)
 
     @property
     def _yaml_loader(self):
-        ''' Set up the loader with the appropriate constructors. '''
+        """Set up the loader with the appropriate constructors."""
         loader = yaml.SafeLoader
-        loader.add_constructor('!INCLUDE', self._yaml_include)
+        loader.add_constructor("!INCLUDE", self._yaml_include)
         return loader
 
-class F90Config(Config): #pylint: disable=unused-variable
 
-    ''' Concrete class to handle Fortran namelist files. '''
+class F90Config(Config):  # pylint: disable=unused-variable
+
+    """Concrete class to handle Fortran namelist files."""
 
     def __init__(self, config_path=None, log_name=None):
-
-        ''' Load the file and update the dictionary '''
+        """Load the file and update the dictionary"""
         super().__init__(config_path, log_name)
 
         if config_path is not None:
@@ -481,10 +479,10 @@ class F90Config(Config): #pylint: disable=unused-variable
             self.parse_include()
 
     def _load(self, config_path=None):
-        ''' Load the user-provided Fortran namelist path into a dict
-        object. '''
+        """Load the user-provided Fortran namelist path into a dict
+        object."""
         config_path = config_path or self.config_path
-        with open(config_path, 'r', encoding="utf-8") as file_name:
+        with open(config_path, "r", encoding="utf-8") as file_name:
             cfg = f90nml.read(file_name).todict(complex_tuple=False)
 
         cfg = dict(cfg)
@@ -492,28 +490,28 @@ class F90Config(Config): #pylint: disable=unused-variable
         return cfg
 
     def dump_file(self, output_path):
-        ''' Write the dict to a namelist file. '''
+        """Write the dict to a namelist file."""
         nml = collections.OrderedDict(self.data)
         for sect, keys in nml.items():
             if isinstance(keys, dict):
                 nml[sect] = collections.OrderedDict(keys)
 
-        with open(output_path, 'w', encoding="utf-8") as file_name:
+        with open(output_path, "w", encoding="utf-8") as file_name:
             f90nml.Namelist(nml).write(file_name, sort=False)
 
-class INIConfig(Config): #pylint: disable=unused-variable
 
-    ''' Concrete class to handle INI config files. '''
+class INIConfig(Config):  # pylint: disable=unused-variable
+
+    """Concrete class to handle INI config files."""
 
     def __init__(self, config_path=None, log_name=None, space_around_delimiters=True):
-
-        ''' Load the file and update the dictionary
+        """Load the file and update the dictionary
 
         Parameters
         ----------
         space_around_delimiters : bool. True corresponds to INI format,
              while False is necessary for bash configuration files
-        '''
+        """
         super().__init__(config_path, log_name)
         self.space_around_delimiters = space_around_delimiters
 
@@ -522,8 +520,8 @@ class INIConfig(Config): #pylint: disable=unused-variable
             self.parse_include()
 
     def _load(self, config_path=None):
-        ''' Load the user-provided INI config file path into a dict
-        object. '''
+        """Load the user-provided INI config file path into a dict
+        object."""
 
         config_path = config_path or self.config_path
 
@@ -535,9 +533,9 @@ class INIConfig(Config): #pylint: disable=unused-variable
         try:
             cfg.read(config_path)
         except configparser.MissingSectionHeaderError:
-            with open(config_path, 'r', encoding="utf-8") as file_name:
+            with open(config_path, "r", encoding="utf-8") as file_name:
                 cfg.read_string("[top]\n" + file_name.read())
-                ret_cfg = dict(cfg._sections.get('top'))
+                ret_cfg = dict(cfg._sections.get("top"))
                 self.from_ordereddict(ret_cfg)
                 return ret_cfg
 
@@ -546,34 +544,33 @@ class INIConfig(Config): #pylint: disable=unused-variable
         return ret_cfg
 
     def dump_file(self, output_path):
-
-        ''' Write the dict to an INI file '''
+        """Write the dict to an INI file"""
 
         parser = configparser.ConfigParser()
 
-        with open(output_path, 'w', encoding="utf-8") as file_name:
+        with open(output_path, "w", encoding="utf-8") as file_name:
             try:
                 parser.read_dict(self.data)
                 parser.write(file_name, space_around_delimiters=self.space_around_delimiters)
             except AttributeError:
                 for key, value in self.data.items():
-                    file_name.write(f'{key}={value}\n')
+                    file_name.write(f"{key}={value}\n")
 
-class FieldTableConfig(YAMLConfig): #pylint: disable=unused-variable
-    ''' This class exists to write out a field_table format given
-    that its configuration has been set by an input YAML file. '''
+
+class FieldTableConfig(YAMLConfig):  # pylint: disable=unused-variable
+    """This class exists to write out a field_table format given
+    that its configuration has been set by an input YAML file."""
 
     def __init__(self, config_path=None, log_name=None):
-
-        ''' Load the file and update the dictionary '''
+        """Load the file and update the dictionary"""
         super().__init__(config_path, log_name)
 
         if config_path is not None:
             self.update(self._load())
 
     def _format_output(self):
-        ''' Format the output of the dictionary into a string that
-        matches that necessary for a field_table. Return the string'''
+        """Format the output of the dictionary into a string that
+        matches that necessary for a field_table. Return the string"""
 
         outstring = []
         for field, settings in self.data.items():
@@ -582,17 +579,17 @@ class FieldTableConfig(YAMLConfig): #pylint: disable=unused-variable
                 if isinstance(value, dict):
                     method_string = f'{" ":7}"{key}", "{value.pop("name")}"'
                     # all control vars go into one set of quotes
-                    control_vars = [f'{method}={val}' for method, val in value.items()]
+                    control_vars = [f"{method}={val}" for method, val in value.items()]
                     # whitespace after the comma matters
                     outstring.append(f'{method_string}, "{", ".join(control_vars)}"')
                 else:
-                    #formatting of variable spacing dependent on key length
+                    # formatting of variable spacing dependent on key length
                     outstring.append(f'{" ":11}"{key}", "{value}"')
             outstring[-1] += " /"
         return "\n".join(outstring)
 
     def dump_file(self, output_path):
-        '''         Write the formatted output to a text file. 
+        """Write the formatted output to a text file.
         FMS field and tracer managers must be registered in an ASCII table called 'field_table'
         This table lists field type, target model and methods the querying model will ask for.
 
@@ -604,16 +601,16 @@ class FieldTableConfig(YAMLConfig): #pylint: disable=unused-variable
         sphum:
           longname: specific humidity
           units: kg/kg
-          profile_type: 
+          profile_type:
             name: fixed
-            surface_value: 1.e30'''
+            surface_value: 1.e30"""
 
-        with open(output_path, 'w', encoding="utf-8") as file_name:
+        with open(output_path, "w", encoding="utf-8") as file_name:
             file_name.write(self._format_output())
 
 
 def create_config_obj(argv, log=None):
-    '''Main section for processing config file'''
+    """Main section for processing config file"""
 
     user_args = parse_args(argv)
 
@@ -627,11 +624,11 @@ def create_config_obj(argv, log=None):
     config_obj = config_class(user_args.input_base_file, log_name=log.name)
 
     if user_args.config_file:
-        config_file_type = user_args.config_file_type or \
-                cli_helpers.get_file_type(user_args.config_file)
+        config_file_type = user_args.config_file_type or cli_helpers.get_file_type(
+            user_args.config_file
+        )
 
-        user_config_obj = getattr(config,
-                         f"{config_file_type}Config")(user_args.config_file)
+        user_config_obj = getattr(config, f"{config_file_type}Config")(user_args.config_file)
 
         if config_file_type != infile_type:
             config_depth = user_config_obj.dictionary_depth(user_config_obj.data)
@@ -644,7 +641,7 @@ def create_config_obj(argv, log=None):
         if user_args.compare:
             log.info(f"- {user_args.input_base_file}")
             log.info(f"+ {user_args.config_file}")
-            log.info("-"*80)
+            log.info("-" * 80)
             config_obj.compare_config(user_config_obj)
             return
 
@@ -657,23 +654,22 @@ def create_config_obj(argv, log=None):
         jinja2_var = []
         empty_var = []
         config_obj.iterate_values(config_obj.data, set_var, jinja2_var, empty_var, parent="")
-        log.info('Keys that are complete:')
+        log.info("Keys that are complete:")
         for var in set_var:
             log.info(var)
-        log.info('')
-        log.info('Keys that have unfilled jinja2 templates:')
+        log.info("")
+        log.info("Keys that have unfilled jinja2 templates:")
         for var in jinja2_var:
             log.info(var)
-        log.info('')
-        log.info('Keys that are set to empty:')
+        log.info("")
+        log.info("Keys that are set to empty:")
         for var in empty_var:
             log.info(var)
         return
 
     if user_args.dry_run:
         if user_args.outfile:
-            log.info(f'warning file {user_args.outfile} ',
-                 r"not written when using --dry_run")
+            log.info(f"warning file {user_args.outfile} ", r"not written when using --dry_run")
         # apply switch to allow user to view the results of config
         # instead of writing to disk
         log.info(config_obj)
@@ -683,7 +679,6 @@ def create_config_obj(argv, log=None):
         outfile_type = user_args.output_file_type or cli_helpers.get_file_type(user_args.outfile)
 
         if outfile_type != infile_type:
-
             out_object = getattr(config, f"{outfile_type}Config")()
             out_object.update(config_obj)
 
@@ -693,8 +688,9 @@ def create_config_obj(argv, log=None):
             # Check for incompatible conversion objects
 
             err_msg = "Set config failure: incompatible file types"
-            if (outfile_type == "INI" and input_depth > 2) or \
-                    (outfile_type == "F90" and input_depth != 2):
+            if (outfile_type == "INI" and input_depth > 2) or (
+                outfile_type == "F90" and input_depth != 2
+            ):
                 log.critical(err_msg)
                 raise ValueError(err_msg)
 
@@ -702,17 +698,17 @@ def create_config_obj(argv, log=None):
                 log.critical(f"{user_args.outfile} not compatible with {user_args.input_base_file}")
                 raise ValueError("Set config failure: output object not compatible with input file")
 
-        else: # same type of file as input, no need to convert it
+        else:  # same type of file as input, no need to convert it
             out_object = config_obj
         out_object.dump_file(user_args.outfile)
-
 
     # if --show_format, print a list of required configuration settings to stdout
     if user_args.show_format:
         if user_args.outfile is None:
-        # first ensure all required args are present
-            raise argparse.ArgumentError(user_args.outfile, \
-                "args: --show_format also requires -outfile for reference")
+            # first ensure all required args are present
+            raise argparse.ArgumentError(
+                user_args.outfile, "args: --show_format also requires -outfile for reference"
+            )
 
         if outfile_type != infile_type:
             log.info(help(out_object.dump_file))

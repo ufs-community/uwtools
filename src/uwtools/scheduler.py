@@ -4,7 +4,6 @@ Job Scheduling
 import collections
 import logging
 import re
-
 from typing import Any, Dict, List
 
 from uwtools.utils import Memory
@@ -86,8 +85,7 @@ class JobScheduler(collections.UserDict):
         members = [
             getattr(RequiredAttribs, attr)
             for attr in dir(RequiredAttribs)
-            if not callable(getattr(RequiredAttribs, attr))
-            and not attr.startswith("__")
+            if not callable(getattr(RequiredAttribs, attr)) and not attr.startswith("__")
         ]
 
         diff = [x for x in members if x not in props]
@@ -113,20 +111,22 @@ class JobScheduler(collections.UserDict):
         sanitized_attribs = self.pre_process()
 
         known = []
-        for (key, value) in sanitized_attribs.items():
+        for key, value in sanitized_attribs.items():
             if key in self._map and key not in IGNORED_ATTRIBS:
-                #pylint: disable=line-too-long
-                scheduler_flag = self._map[key](value) if callable(self._map[key]) else self._map[key]
-                scheduler_value = value if not callable(self._map[key]) else ''
-                directive = f"{self.prefix} {scheduler_flag}{self.key_value_separator}{scheduler_value}"
+                # pylint: disable=line-too-long
+                scheduler_flag = (
+                    self._map[key](value) if callable(self._map[key]) else self._map[key]
+                )
+                scheduler_value = value if not callable(self._map[key]) else ""
+                directive = (
+                    f"{self.prefix} {scheduler_flag}{self.key_value_separator}{scheduler_value}"
+                )
                 known.append(directive.strip())
 
         unknown = [
             f"{self.prefix} {key}{self.key_value_separator}{value}".strip()
             for (key, value) in sanitized_attribs.items()
-            if key not in self._map
-            and value not in NONEISH
-            and key not in IGNORED_ATTRIBS
+            if key not in self._map and value not in NONEISH and key not in IGNORED_ATTRIBS
         ]
 
         flags = [
@@ -151,9 +151,7 @@ class JobScheduler(collections.UserDict):
         TODO: map_schedulers should be hoisted up out of the method
         """
         if "scheduler" not in props:
-            raise KeyError(
-                f"no scheduler defined in props: [{', '.join(props.keys())}]"
-            )
+            raise KeyError(f"no scheduler defined in props: [{', '.join(props.keys())}]")
 
         map_schedulers = {
             "slurm": Slurm,

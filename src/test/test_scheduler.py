@@ -1,9 +1,10 @@
 # pylint: disable=all
 import pathlib
+
 import pytest
 
-from uwtools.scheduler import JobScheduler
 from uwtools import config
+from uwtools.scheduler import JobScheduler
 
 
 def test_scheduler_dot_notation():
@@ -28,9 +29,7 @@ def test_scheduler_prop_not_defined_raises_key_error():
         }
 
         JobScheduler.get_scheduler(props)
-    expected = (
-        "no scheduler defined in props: [account, queue, walltime, tasks_per_node"
-    )
+    expected = "no scheduler defined in props: [account, queue, walltime, tasks_per_node"
     actual = str(error.value)
     assert expected in actual
 

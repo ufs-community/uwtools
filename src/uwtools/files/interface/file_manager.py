@@ -1,12 +1,12 @@
 # pylint: disable=too-few-public-methods,missing-module-docstring
 
 import os
-from abc import ABC, abstractmethod
 import pathlib
+from abc import ABC, abstractmethod
 from typing import Any, List
 
 from uwtools.files.gateway import s3, unix
-from uwtools.files.model import File, Prefixes, S3
+from uwtools.files.model import S3, File, Prefixes
 
 
 class FileManager(ABC):
@@ -32,7 +32,7 @@ class S3FileManager(FileManager):
 
     def copy(self, source: List[Any], destination: List[S3]):
         """copies source to destination"""
-        for (src, dest) in zip(source, destination):
+        for src, dest in zip(source, destination):
             s3.upload_file(src.path, "bucket_name_here", os.path.basename(dest.path))
 
 

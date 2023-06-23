@@ -4,13 +4,13 @@ Helpers to be used when working with files and directories
 
 import logging
 import os
-from datetime import datetime
 import shutil
+from datetime import datetime
 
 
-def handle_existing(run_directory, exist_act): #pylint: disable=unused-variable
-    '''Given a run directory, and an action to do if
-    directory exists, delete or rename directory.'''
+def handle_existing(run_directory, exist_act):  # pylint: disable=unused-variable
+    """Given a run directory, and an action to do if
+    directory exists, delete or rename directory."""
 
     logging.getLogger(__name__)
 
@@ -34,21 +34,22 @@ def handle_existing(run_directory, exist_act): #pylint: disable=unused-variable
         logging.critical(msg)
         raise RuntimeError(msg) from rename_error
 
-def compare_files(expected, actual): #pylint: disable=unused-variable
-    '''Compare the content of two files.  Doing this over filecmp.cmp since 
-    we may not be able to handle end-of-file character differences with it.
-    Prints the contents of two compared files to std out if they do not match.'''
 
-    with open(expected, 'r', encoding='utf-8') as expected_file:
-        expected_content = expected_file.read().rstrip('\n')
-    with open(actual, 'r', encoding='utf-8') as actual_file:
-        actual_content = actual_file.read().rstrip('\n')
+def compare_files(expected, actual):  # pylint: disable=unused-variable
+    """Compare the content of two files.  Doing this over filecmp.cmp since
+    we may not be able to handle end-of-file character differences with it.
+    Prints the contents of two compared files to std out if they do not match."""
+
+    with open(expected, "r", encoding="utf-8") as expected_file:
+        expected_content = expected_file.read().rstrip("\n")
+    with open(actual, "r", encoding="utf-8") as actual_file:
+        actual_content = actual_file.read().rstrip("\n")
 
     if expected_content != actual_content:
-        print('The expected file looks like:')
+        print("The expected file looks like:")
         print(expected_content)
-        print('*' * 80)
-        print('The rendered file looks like:')
+        print("*" * 80)
+        print("The rendered file looks like:")
         print(actual_content)
         return False
     return True

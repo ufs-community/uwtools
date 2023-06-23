@@ -1,9 +1,9 @@
-#pylint: disable=consider-using-f-string, duplicate-code
+# pylint: disable=consider-using-f-string, duplicate-code
 
-'''
+"""
 This utility renders a Jinja2 template using user-supplied configuration options
 via YAML or environment variables.
-'''
+"""
 
 import argparse
 import inspect
@@ -11,71 +11,77 @@ import logging
 import os
 import sys
 
-from uwtools.j2template import J2Template
 from uwtools import config
+from uwtools.j2template import J2Template
 from uwtools.utils import cli_helpers
 
 
 def parse_args(argv):
-
-    '''
+    """
     Function maintains the arguments accepted by this script. Please see
     Python's argparse documentation for more information about settings of each
     argument.
-    '''
+    """
 
     parser = argparse.ArgumentParser(
-       description='Update a Jinja2 Template with user-defined settings.'
+        description="Update a Jinja2 Template with user-defined settings."
     )
     group = parser.add_mutually_exclusive_group()
     parser.add_argument(
-        '-o', '--outfile',
-        help='Full path to output file',
-        )
+        "-o",
+        "--outfile",
+        help="Full path to output file",
+    )
     parser.add_argument(
-        '-i', '--input_template',
-        help='Path to a Jinja2 template file.',
+        "-i",
+        "--input_template",
+        help="Path to a Jinja2 template file.",
         required=True,
         type=cli_helpers.path_if_file_exists,
-        )
+    )
     parser.add_argument(
-        '-c', '--config_file',
-        help='Optional path to a YAML configuration file. If not provided, '
-        'os.environ is used to configure.',
+        "-c",
+        "--config_file",
+        help="Optional path to a YAML configuration file. If not provided, "
+        "os.environ is used to configure.",
         type=cli_helpers.path_if_file_exists,
-        )
+    )
     parser.add_argument(
-        'config_items',
-        help='Any number of configuration settings that will override values '
-        'found in YAML or user environment.',
-        metavar='KEY=VALUE',
-        nargs='*',
-        )
+        "config_items",
+        help="Any number of configuration settings that will override values "
+        "found in YAML or user environment.",
+        metavar="KEY=VALUE",
+        nargs="*",
+    )
     parser.add_argument(
-        '-d', '--dry_run',
-        action='store_true',
-        help='If provided, print rendered template to stdout only',
-        )
+        "-d",
+        "--dry_run",
+        action="store_true",
+        help="If provided, print rendered template to stdout only",
+    )
     parser.add_argument(
-        '--values_needed',
-        action='store_true',
-        help='If provided, print a list of required configuration settings to stdout',
-        )
+        "--values_needed",
+        action="store_true",
+        help="If provided, print a list of required configuration settings to stdout",
+    )
     group.add_argument(
-        '-v', '--verbose',
-        action='store_true',
-        help='If provided, print all logging messages.',
-        )
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="If provided, print all logging messages.",
+    )
     group.add_argument(
-        '-q', '--quiet',
-        action='store_true',
-        help='If provided, print no logging messages',
-        )
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="If provided, print no logging messages",
+    )
     parser.add_argument(
-        '-l', '--log_file',
-        help='Optional path to a specified log file',
-        default=os.path.join(os.path.dirname(__file__), "templater.log")
-        )
+        "-l",
+        "--log_file",
+        help="Optional path to a specified log file",
+        default=os.path.join(os.path.dirname(__file__), "templater.log"),
+    )
 
     args = parser.parse_args(argv)
     if not args.outfile and not args.dry_run and not args.values_needed:
@@ -88,10 +94,10 @@ def parse_args(argv):
 
     return args
 
-def setup_config_obj(user_args, log_name=None):
 
-    ''' Return a dictionary config object from a user-supplied config,
-    the os environment, and the command line arguments. '''
+def setup_config_obj(user_args, log_name=None):
+    """Return a dictionary config object from a user-supplied config,
+    the os environment, and the command line arguments."""
 
     log = logging.getLogger(log_name)
     if user_args.config_file:
@@ -110,8 +116,9 @@ def setup_config_obj(user_args, log_name=None):
 
     return cfg
 
+
 def main(argv):
-    '''Main section for rendering and writing a template file'''
+    """Main section for rendering and writing a template file"""
     user_args = parse_args(argv)
 
     name = f"{inspect.stack()[0][3]}"
@@ -129,14 +136,13 @@ def main(argv):
     cfg = setup_config_obj(user_args, log_name=log.name)
 
     # instantiate Jinja2 environment and template
-    template = J2Template(cfg, user_args.input_template,
-                          log_name=log.name)
+    template = J2Template(cfg, user_args.input_template, log_name=log.name)
 
     undeclared_variables = template.undeclared_variables
 
     if user_args.values_needed:
         # Gather the undefined template variables
-        log.info('Values needed for this template are:')
+        log.info("Values needed for this template are:")
         for var in sorted(undeclared_variables):
             log.info(var)
         return
@@ -157,8 +163,10 @@ def main(argv):
 
     if user_args.dry_run:
         if user_args.outfile:
-            log.info(r"warning file {outfile} ".format(outfile=user_args.outfile),
-                 r"not written when using --dry_run")
+            log.info(
+                r"warning file {outfile} ".format(outfile=user_args.outfile),
+                r"not written when using --dry_run",
+            )
         # apply switch to allow user to view the results of rendered template
         # instead of writing to disk
         # Render the template with the specified config object

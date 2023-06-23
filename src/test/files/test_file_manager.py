@@ -1,9 +1,8 @@
-#pylint: disable=invalid-name, missing-module-docstring, missing-function-docstring
-#pylint: disable=unused-variable
+# pylint: disable=invalid-name, missing-module-docstring, missing-function-docstring
+# pylint: disable=unused-variable
 
 import os
 import shutil
-
 import tempfile
 from unittest.mock import patch
 
@@ -22,7 +21,6 @@ def test_FileManager():
 
 @patch.object(s3, "upload_file", return_value=None)
 def test_S3_FileManager(mock_file_manager):
-
     source = Unix("file://tests/fixtures/files/a.txt")
     destination = S3("s3://tests/fixtures/files/b.txt")
 
@@ -33,7 +31,6 @@ def test_S3_FileManager(mock_file_manager):
 
 @patch.object(shutil, "copy", return_value=None)
 def test_Unix_FileManager(mock_file_manager):
-
     source = Unix("file://tests/fixtures/files/a.txt")
     destination = Unix("file://tests/fixtures/files/b.txt")
 
@@ -43,7 +40,6 @@ def test_Unix_FileManager(mock_file_manager):
 
 
 def test_Unix_FileManager_Threaded():
-
     temp_dir = tempfile.mkdtemp()
 
     source = Unix("file://tests/fixtures/files")
