@@ -1,0 +1,33 @@
+package:
+  name: workflow-tools
+  version: 0.1.0
+source:
+  path: ../src
+build:
+  include_recipe: false
+  number: 0
+requirements:
+  host:
+    - pip
+    - python >=3.9
+  run:
+    - boto3 1.22.*
+    - f90nml 1.4.*
+    - jinja2 3.0.*
+    - jsonschema 4.17.*
+    - pyyaml 6.0.*
+test:
+  source_files:
+    - pyproject.toml
+    - setup.py
+    - test
+    - uwtools
+  requires:
+    - black
+    - coverage
+    - isort
+    - mypy
+    - pylint
+    - pytest
+about:
+  license: LGPL
