@@ -531,7 +531,7 @@ def test_mutually_exclusive_args(): #pylint: disable=unused-variable
             ]
 
     with pytest.raises(SystemExit):
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
 
     args = ['-i', input_file,
             '-d', 
@@ -539,4 +539,4 @@ def test_mutually_exclusive_args(): #pylint: disable=unused-variable
             ]
 
     with pytest.raises(argparse.ArgumentError):
-        set_config.create_config_obj(args)
+        set_config.create_config_file(args)
