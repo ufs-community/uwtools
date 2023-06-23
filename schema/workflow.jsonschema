@@ -78,6 +78,15 @@
                 "format": "uri"
                 }
             }
+        },
+        "task_get_da_obs": {
+            "description": "task for data assimilation",
+            "type": "object",
+            "properties": {
+                "OBS_SUFFIX": {
+                    "type": "string"
+                    }
+                }
+            }
         }
-    }
 }

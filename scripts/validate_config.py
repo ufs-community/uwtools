@@ -81,30 +81,28 @@ def validate_config(argv, log=None):
         name = f"{inspect.stack()[0][3]}"
         log = cli_helpers.setup_logging(user_args, log_name=name)
 
+    # Get the config file to be validated and dereference jinja templates
+    config_class = getattr(config, "YAMLConfig")
+    config_obj = config_class(user_args.config_file, log_name=log.name)
+    config_obj.dereference_all()
+
+    # Load the json validation schema
     with open(user_args.validation_schema, 'r',
               encoding="utf-8") as schema_file:
         schema = json.load(schema_file)
+        
+    schema_error = 0
 
-    if user_args.config_file:
-        config_class = getattr(config, "YAMLConfig")
-        config_obj = config_class(user_args.config_file, log_name=log.name)
-
-    config_obj.dereference_all()
-
-    # For now, reads in the config file as a yaml file
-    with open(user_args.config_file, encoding="utf-8") as input_file:
-        infile = yaml.safe_load(input_file)
-
-    # jsonschema.validate(infile, schema)
-
+    # Validate the config file against the schema file
     validator = jsonschema.Draft7Validator(schema)
 
     # Print out each schema error
-    errors = validator.iter_errors(infile)
+    errors = validator.iter_errors(config_obj.data)
 
     for error in errors:
+        schema_error += 1
         logging.error(error)
-        print('------')
+        logging.error('------')
 
     # Create a list of fields that could contain a file or path
     path_list = []
@@ -114,11 +112,15 @@ def validate_config(argv, log=None):
                 path_list.append(value)
                 
     # Check for existence of those files or paths
-    for field in infile:
-        for value in infile[field]:
+    for field in config_obj.data:
+        for value in config_obj.data[field]:
             if value in path_list:
-                if not os.path.exists(infile[field][value]):
-                    logging.error(f'{value} has Invalid Path {infile[field][value]}') 
+                if not os.path.exists(config_obj.data[field][value]):
+                    schema_error += 1
+                    logging.error(f'{value} has Invalid Path {config_obj.data[field][value]}')
+                    
+    if schema_error > 0:
+        sys.exit(f'This configuration file has {str(schema_error)} errors')
 
 if __name__ == '__main__':
 
