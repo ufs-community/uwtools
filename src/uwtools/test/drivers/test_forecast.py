@@ -4,12 +4,7 @@
 Tests for forecast driver
 """
 
-# import glob
-# import os
-# import pathlib
-# import shutil
-
-from pytest import fixture
+from pytest import fixture, raises
 
 from uwtools import config
 from uwtools.drivers.forecast import FV3Forecast
@@ -104,38 +99,35 @@ def test_create_field_table_with_base_file(create_field_table_assets, tmp_path):
     assert file_helpers.compare_files(expected, outfldtbl_file)
 
 
-# def test_create_directory_structure():
-#     """Tests create_directory_structure method given a directory."""
-#     forecast_obj = FV3Forecast()
+def test_create_directory_structure(tmp_path):
+    """Tests create_directory_structure method given a directory."""
 
-#     with tempfile.TemporaryDirectory() as run_directory:
-#         # Test create_directory_structure when run directory does not exist
-#         forecast_obj.create_directory_structure(run_directory, "delete")
-#         assert os.path.isdir(os.path.join(run_directory, "RESTART"))
+    rundir = tmp_path / "rundir"
+    forecast_obj = FV3Forecast()
 
-#         # Put a test file into the run directory
-#         test_file = os.path.join(run_directory, "test.txt")
-#         with open(test_file, "w", encoding="utf-8") as file_open:
-#             file_open.write("test file")
-#             file_open.close()
+    # Test delete behavior when run directory does not exist.
+    forecast_obj.create_directory_structure(rundir, "delete")
+    assert (rundir / "RESTART").is_dir()
 
-#         # Test create_directory_structure when run directory does exist
-#         forecast_obj.create_directory_structure(run_directory, "delete")
-#         assert os.path.isdir(os.path.join(run_directory, "RESTART"))
-#         # Test file should be gone after delete
-#         assert not os.path.isfile(test_file)
+    # Create a file in the run directory.
+    test_file = rundir / "test.txt"
+    with open(test_file, "w", encoding="utf-8"):
+        pass
+    assert test_file.is_file()
 
-#         # Test create_directory_structure when run directory does exist
-#         forecast_obj.create_directory_structure(run_directory, "rename")
-#         copy_directory = glob.glob(run_directory + "_*")[0]
-#         assert os.path.isdir(os.path.join(copy_directory, "RESTART"))
+    # Test delete behavior when run directory exists. Test file should be gone
+    # since old run directory was deleted.
+    forecast_obj.create_directory_structure(rundir, "delete")
+    assert (rundir / "RESTART").is_dir()
+    assert not test_file.is_file()
 
-#         # Clean up copied directory fronm rename
-#         if os.path.isdir(copy_directory):
-#             shutil.rmtree(copy_directory)
+    # Test rename behavior when run directory exists.
+    forecast_obj.create_directory_structure(rundir, "rename")
+    copy_directory = next(tmp_path.glob("%s_*" % rundir.name))
+    assert (copy_directory / "RESTART").is_dir()
 
-#         # Test create_directory_structure when run directory does exist
-#         with pytest.raises(SystemExit) as pytest_wrapped_e:
-#             forecast_obj.create_directory_structure(run_directory, "quit")
-#         assert pytest_wrapped_e.type == SystemExit
-#         assert pytest_wrapped_e.value.code == 1
+    # Test quit behavior when run directory exists.
+    with raises(SystemExit) as pytest_wrapped_e:
+        forecast_obj.create_directory_structure(rundir, "quit")
+    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.value.code == 1

@@ -27,7 +27,7 @@ def handle_existing(run_directory, exist_act):
     try:
         if exist_act == "rename" and os.path.isdir(run_directory):
             now = datetime.now()
-            save_dir = run_directory + now.strftime("_%Y%m%d_%H%M%S")
+            save_dir = "%s%s" % (run_directory, now.strftime("_%Y%m%d_%H%M%S"))
             shutil.move(run_directory, save_dir)
     except (RuntimeError, FileExistsError) as rename_error:
         msg = f"Could not rename directory {run_directory}"
