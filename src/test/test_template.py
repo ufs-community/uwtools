@@ -1,7 +1,7 @@
 """
 Unit tests for testing Template Class
 """
-# pylint: disable=unused-variable
+
 import os
 import pathlib
 

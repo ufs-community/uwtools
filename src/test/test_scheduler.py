@@ -1,4 +1,5 @@
-# pylint: disable=all
+# pylint: disable=missing-function-docstring
+
 import pathlib
 
 import pytest

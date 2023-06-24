@@ -1,5 +1,5 @@
-# pylint: disable=invalid-name, missing-module-docstring, missing-function-docstring
-# pylint: disable=unused-variable
+# pylint: disable=missing-function-docstring
+
 from uwtools.logger import Logger
 
 level = "debug"
@@ -14,7 +14,6 @@ reference = {
 
 
 def test_logger(tmp_path):
-    # pylint: disable=raise-missing-from
     """Test log file"""
 
     logfile = tmp_path / "logger.log"
@@ -27,15 +26,14 @@ def test_logger(tmp_path):
         log.error(reference["error"])
         log.critical(reference["critical"])
     except Exception as e:
-        raise AssertionError(f"logging failed as {e}")
+        raise AssertionError(f"logging failed as {e}") from e
 
     # Make sure log to file created messages
     try:
-        # pylint: disable=unspecified-encoding
-        with open(logfile, "r") as fh:
+        with open(logfile, "r", encoding="utf-8") as fh:
             log_msgs = fh.readlines()
     except Exception as e:
-        raise AssertionError(f"failed reading log file as {e}")
+        raise AssertionError(f"failed reading log file as {e}") from e
 
     # Ensure number of messages are same
     log_msgs_in_logfile = len(log_msgs)

@@ -15,7 +15,7 @@ import yaml
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 
-def test_validate_yaml_salad():  # pylint: disable=unused-variable
+def test_validate_yaml_salad():
     """
     Test that simple salad schema is accepted as valid json schema and that it
     validates both valid and bad input files

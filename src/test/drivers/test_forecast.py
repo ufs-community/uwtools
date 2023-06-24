@@ -1,7 +1,6 @@
 """
 Tests for forecast driver
 """
-# pylint: disable=unused-variable
 
 import glob
 import os

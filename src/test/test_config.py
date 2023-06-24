@@ -1,4 +1,5 @@
-# pylint: disable=duplicate-code,missing-function-docstring
+# pylint: disable=duplicate-code
+# pylint: disable=missing-function-docstring
 
 """
 Set of test for loading YAML files using the function call load_yaml

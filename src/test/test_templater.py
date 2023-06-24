@@ -16,7 +16,7 @@ from uwtools.utils import file_helpers
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 
-def test_set_template_dryrun():  # pylint: disable=unused-variable
+def test_set_template_dryrun():
     """Unit test for checking dry-run output of ingest namelist tool"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
@@ -65,7 +65,7 @@ def test_set_template_dryrun():  # pylint: disable=unused-variable
         assert outcome_line in result
 
 
-def test_set_template_listvalues():  # pylint: disable=unused-variable
+def test_set_template_listvalues():
     """Unit test for checking values_needed output of ingest namelist tool"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
@@ -109,7 +109,7 @@ vegetable
         assert outcome_line in result
 
 
-def test_set_template_yaml_config():  # pylint: disable=unused-variable
+def test_set_template_yaml_config():
     """Test that providing a YAML file with necessary settings works to fill in
     the Jinja template. Test the writing mechanism, too"""
 
@@ -140,7 +140,7 @@ def test_set_template_yaml_config():  # pylint: disable=unused-variable
         assert file_helpers.compare_files(expected_file, out_file)
 
 
-def test_set_template_no_config_suffix_fails():  # pylint: disable=unused-variable
+def test_set_template_no_config_suffix_fails():
     """Test that there are no errors when passing relative path and INI
     config."""
 
@@ -161,7 +161,7 @@ def test_set_template_no_config_suffix_fails():  # pylint: disable=unused-variab
             templater.main(args)
 
 
-def test_set_template_abs_path_ini_config():  # pylint: disable=unused-variable
+def test_set_template_abs_path_ini_config():
     """Test that there are no errors when passing relative path and INI
     config."""
 
@@ -178,7 +178,7 @@ def test_set_template_abs_path_ini_config():  # pylint: disable=unused-variable
     templater.main(args)
 
 
-def test_set_template_command_line_config():  # pylint: disable=unused-variable
+def test_set_template_command_line_config():
     """Test that values provided on the command line produce the appropriate
     output."""
 
@@ -228,7 +228,7 @@ def test_set_template_command_line_config():  # pylint: disable=unused-variable
         assert outcome_line in result
 
 
-def test_set_template_yaml_config_model_configure():  # pylint: disable=unused-variable
+def test_set_template_yaml_config_model_configure():
     """Tests that the templater will work as expected for a simple model_configure
     file."""
 
@@ -253,7 +253,7 @@ def test_set_template_yaml_config_model_configure():  # pylint: disable=unused-v
         assert file_helpers.compare_files(expected_file, out_file)
 
 
-def test_set_template_verbosity():  # pylint: disable=unused-variable
+def test_set_template_verbosity():
     """Unit test for checking dry-run output of ingest namelist tool"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
@@ -326,7 +326,7 @@ J2Template._load_file INPUT Args:
         templater.main(args)
 
 
-def test_mutually_exclusive_args():  # pylint: disable=unused-variable
+def test_mutually_exclusive_args():
     """
     Test that -q and -v args are mutually exclusive and testing -q and -d are mutually exclusive.
     """

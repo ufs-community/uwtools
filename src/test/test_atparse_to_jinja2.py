@@ -10,7 +10,7 @@ from uwtools.cli import atparse_to_jinja2
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 
-def test_all_templates_replaced():  # pylint: disable=unused-variable
+def test_all_templates_replaced():
     """Test that all atparse @[] items are replaced with Jinja2
     templates {{ }}"""
 
