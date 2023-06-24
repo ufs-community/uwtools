@@ -29,28 +29,24 @@ def parse_args(argv):
         required=True,
         type=cli_helpers.path_if_file_exists,
     )
-
     parser.add_argument(
         "-o",
         "--outfile",
         help='Full path to output file. If different from input, will will perform conversion.\
             For field table output, specify model such as "field_table.FV3_GFS_v16"',
     )
-
     parser.add_argument(
         "-c",
         "--config_file",
         help="Optional path to configuration file. Accepts YAML, bash/ini or namelist",
         type=cli_helpers.path_if_file_exists,
     )
-
     parser.add_argument(
         "-d",
         "--dry_run",
         action="store_true",
         help="If provided, print rendered config file to stdout only",
     )
-
     parser.add_argument(
         "--compare",
         action="store_true",
@@ -61,27 +57,23 @@ def parse_args(argv):
         action="store_true",
         help="If provided, print the required formatting to generate the requested output file",
     )
-
     parser.add_argument(
         "--values_needed",
         action="store_true",
         help="If provided, prints a list of required configuration settings to stdout",
     )
-
     parser.add_argument(
         "--input_file_type",
         help="If provided, will convert provided input file to provided file type.\
             Accepts YAML, bash/ini or namelist",
         choices=["YAML", "INI", "F90"],
     )
-
     parser.add_argument(
         "--config_file_type",
         help="If provided, will convert provided config file to provided file type.\
             Accepts YAML, bash/ini or namelist",
         choices=["YAML", "INI", "F90"],
     )
-
     parser.add_argument(
         "--output_file_type",
         help="If provided, will convert provided output file to provided file type.\
@@ -130,7 +122,12 @@ def main():
     """
     cli_args = parse_args(sys.argv[1:])
     LOG_NAME = "set_config"
-    cli_log = cli_helpers.setup_logging(cli_args, log_name=LOG_NAME)
+    cli_log = cli_helpers.setup_logging(
+        log_file=cli_args.log_file,
+        log_name=LOG_NAME,
+        quiet=cli_args.quiet,
+        verbose=cli_args.verbose,
+    )
     try:
         config.create_config_obj(user_args=cli_args, log=cli_log)
     except exceptions.UWConfigError as e:

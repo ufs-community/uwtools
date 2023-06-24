@@ -18,17 +18,20 @@ from uwtools.utils import file_helpers
 def test_create_config(tmp_path):
     """Test that providing a yaml base input file and a config file will
     create and update yaml config file"""
+
     input_file = fixpath_posix("fruit_config.yaml")
     config_file = fixpath_posix("fruit_config_similar.yaml")
+    output_file = tmp_path / "test_config_from_yaml.yaml"
+
     forecast_obj = FV3Forecast()
-    out_file = tmp_path / "test_config_from_yaml.yaml"
-    forecast_obj.create_model_config(config_file, out_file, input_file)
+    forecast_obj.create_model_config(config_file, output_file, input_file)
+
     expected = config.YAMLConfig(input_file)
-    config_file_obj = config.YAMLConfig(config_file)
-    expected.update_values(config_file_obj)
+    expected.update_values(config.YAMLConfig(config_file))
     expected_file = tmp_path / "expected_yaml.yaml"
     expected.dump_file(expected_file)
-    assert file_helpers.compare_files(expected_file, out_file)
+
+    assert file_helpers.compare_files(expected_file, output_file)
 
 
 # def test_create_namelist():

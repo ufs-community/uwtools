@@ -8,6 +8,7 @@ import argparse
 import logging
 import os
 import pathlib
+from typing import Optional
 
 from uwtools.logger import Logger
 
@@ -43,16 +44,18 @@ def path_if_file_exists(arg):
     return os.path.abspath(arg)
 
 
-def setup_logging(user_args, log_name=None):
+def setup_logging(
+    log_file: str, log_name: Optional[str] = None, quiet: bool = False, verbose: bool = False
+) -> Logger:
     """Create the Logger object"""
 
     log = Logger(
-        colored_log=bool(user_args.verbose),
-        fmt=None if user_args.verbose else "%(message)s",
-        level="debug" if user_args.verbose else "info",
-        log_file=user_args.log_file,
-        quiet=user_args.quiet,
+        colored_log=bool(verbose),
+        fmt=None if verbose else "%(message)s",
+        level="debug" if verbose else "info",
+        log_file=log_file,
+        quiet=quiet,
         name=log_name,
     )
-    log.debug(f"Finished setting up debug file logging in {user_args.log_file}")
+    log.debug(f"Finished setting up debug file logging in {log_file}")
     return log

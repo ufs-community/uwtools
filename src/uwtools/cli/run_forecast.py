@@ -16,7 +16,7 @@ def parse_args(argv):  # pragma: no cover
     """
     Function maintains the arguments accepted by this script. Please see
     Python's argparse documentation for more information about settings
-     of each argument.
+    of each argument.
     """
     parser = argparse.ArgumentParser(description="Set config with user-defined settings.")
     parser.add_argument(
@@ -79,7 +79,9 @@ def main(argv):  # pragma: no cover
 
     # Set up logging
     name = f"{inspect.stack()[0][3]}"
-    cli_helpers.setup_logging(user_args, log_name=name)
+    cli_helpers.setup_logging(
+        log_file=user_args.log_file, log_name=name, quiet=user_args.quiet, verbose=user_args.verbose
+    )
 
     forecast_type = user_args.forecast_model.join()
     forecast_class = getattr(forecast, f"{forecast_type}Forecast")

@@ -121,7 +121,9 @@ def main(argv):
     user_args = parse_args(argv)
 
     name = f"{inspect.stack()[0][3]}"
-    log = cli_helpers.setup_logging(user_args, log_name=name)
+    log = cli_helpers.setup_logging(
+        log_file=user_args.log_file, log_name=name, quiet=user_args.quiet, verbose=user_args.verbose
+    )
 
     log.info(f"""Running {name} with args: """)
     log.info(f"""{('-' * 70)}""")
