@@ -41,7 +41,7 @@ def test_create_namelist(tmp_path):
     update_obj = config.F90Config(fixture_posix("simple.nml"))
     outnml_file = tmp_path / "create_out.nml"
 
-    outcome1 = """&salad
+    expected_1 = """&salad
     base = 'kale'
     fruit = 'banana'
     vegetable = 'tomato'
@@ -52,9 +52,9 @@ def test_create_namelist(tmp_path):
     forecast_obj.create_namelist(update_obj, str(outnml_file))
     with open(outnml_file, "r", encoding="utf-8") as out_file:
         outnml_string = out_file.read()
-    assert outnml_string == outcome1
+    assert outnml_string == expected_1
 
-    outcome2 = """&salad
+    expected_2 = """&salad
     base = 'kale'
     fruit = 'banana'
     vegetable = 'tomato'
@@ -70,42 +70,25 @@ def test_create_namelist(tmp_path):
     forecast_obj.create_namelist(update_obj, outnml_file, base_file)
     with open(outnml_file, "r", encoding="utf-8") as out_file:
         outnml_string = out_file.read()
-    assert outnml_string == outcome2
+    assert outnml_string == expected_2
 
 
-# def test_create_field_table():
-#     """Tests create_field_table method with and without optional base file"""
-#     forecast_obj = FV3Forecast()
+def test_create_field_table(tmp_path):
+    """Tests create_field_table method with and without optional base file"""
 
-#     with tempfile.TemporaryDirectory() as run_directory:
-#         update_file = os.path.join(
-#             uwtools_file_base, pathlib.Path("../fixtures/FV3_GFS_v16_update.yaml")
-#         )
-#         update_obj = config.YAMLConfig(update_file)
+    forecast_obj = FV3Forecast()
+    update_obj = config.YAMLConfig(fixture_posix("FV3_GFS_v16_update.yaml"))
 
-#         base_file = os.path.join(uwtools_file_base, pathlib.Path("../fixtures/FV3_GFS_v16.yaml"))
+    outfldtbl_file_1 = tmp_path / "field_table_one.FV3_GFS"
+    expected_1 = fixture_posix("field_table_from_input.FV3_GFS")
+    forecast_obj.create_field_table(update_obj, outfldtbl_file_1)
+    assert file_helpers.compare_files(expected_1, outfldtbl_file_1)
 
-#         file_out = "field_table_one.FV3_GFS"
-#         outfldtbl_file = os.path.join(run_directory, file_out)
-
-#         expected_one = os.path.join(
-#             uwtools_file_base, pathlib.Path("../fixtures/field_table_from_input.FV3_GFS")
-#         )
-
-#         forecast_obj.create_field_table(update_obj, outfldtbl_file)
-
-#         assert file_helpers.compare_files(expected_one, outfldtbl_file)
-
-#         file_out = "field_table_two.FV3_GFS"
-#         outfldtbl_file = os.path.join(run_directory, file_out)
-
-#         expected_two = os.path.join(
-#             uwtools_file_base, pathlib.Path("../fixtures/field_table_from_base.FV3_GFS")
-#         )
-
-#         forecast_obj.create_field_table(update_obj, outfldtbl_file, base_file)
-
-#         assert file_helpers.compare_files(expected_two, outfldtbl_file)
+    base_file = fixture_posix("FV3_GFS_v16.yaml")
+    outfldtbl_file_2 = tmp_path / "field_table_two.FV3_GFS"
+    expected_2 = fixture_posix("field_table_from_base.FV3_GFS")
+    forecast_obj.create_field_table(update_obj, outfldtbl_file_2, base_file)
+    assert file_helpers.compare_files(expected_2, outfldtbl_file_2)
 
 
 # def test_create_directory_structure():
