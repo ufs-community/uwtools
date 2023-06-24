@@ -1,4 +1,3 @@
-# pylint: disable=too-few-public-methods
 """
 Unix based local file copying, threaded
 """
@@ -16,7 +15,7 @@ from uwtools.files.model import File
 logging.getLogger(__name__)
 
 
-def copy(source: List[File], destination: List[pathlib.Path]):  # pylint: disable=unused-variable
+def copy(source: List[File], destination: List[pathlib.Path]):
     """copies each item from source to corresponding item in destination"""
     Copier(source, destination).run()
 

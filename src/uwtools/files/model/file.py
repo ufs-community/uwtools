@@ -1,4 +1,3 @@
-# pylint: disable=missing-module-docstring
 import glob
 import os
 import re
@@ -76,7 +75,7 @@ class File(ABC):
         raise NotImplementedError
 
 
-class S3(File):  # pylint: disable=unused-variable
+class S3(File):
     """represents an Amazon S3 file"""
 
     @property
@@ -90,7 +89,7 @@ class S3(File):  # pylint: disable=unused-variable
         raise NotImplementedError
 
 
-class Unix(File):  # pylint: disable=unused-variable
+class Unix(File):
     """represents a unix file"""
 
     @property

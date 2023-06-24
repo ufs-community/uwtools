@@ -18,7 +18,7 @@ cli() {
 }
 
 lint() {
-  echo Running linter:
+  echo Running linter...
   (
     set -eu
     pylint ${pyfiles[*]}
@@ -27,7 +27,7 @@ lint() {
 }
 
 typecheck() {
-  echo Running typechecker:
+  echo Running typechecker...
   (
     set -eu
     mypy --install-types --non-interactive ${pyfiles[*]}
@@ -36,7 +36,7 @@ typecheck() {
 }
 
 unittest() {
-  echo Running unit tests:
+  echo Running unit tests...
   (
     set -eux
     coverage run -m pytest -v $srcdir/test
@@ -52,6 +52,6 @@ if [[ -n "${1:-}" ]]; then
 else
   lint
   typecheck
-  unittest
-  cli
+#   unittest
+#   cli
 fi

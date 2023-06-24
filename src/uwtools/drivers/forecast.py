@@ -1,5 +1,3 @@
-# pylint: disable=unused-import, unused-variable, unused-argument, useless-parent-delegation
-# remove these disables once implemented
 """
 This file contains the forecast drivers for a variety of apps
 and physics suites.
@@ -30,7 +28,6 @@ class FV3Forecast(Driver):  # pragma: no cover
         Initialize the Forecast driver.
 
         """
-        super().__init__()
 
     def requirements(self):
         """Recursively parse config and platform files to determine and

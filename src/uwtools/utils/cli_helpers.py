@@ -12,13 +12,13 @@ import pathlib
 from uwtools.logger import Logger
 
 
-def dict_from_config_args(args):  # pylint: disable=unused-variable
+def dict_from_config_args(args):
     """Given a list of command line arguments in the form key=value, return a
     dictionary of key/value pairs."""
     return dict([arg.split("=") for arg in args])
 
 
-def get_file_type(arg):  # pylint: disable=unused-variable
+def get_file_type(arg):
     """Returns a standardized file type given the suffix of the input
     arg."""
 
@@ -34,7 +34,7 @@ def get_file_type(arg):  # pylint: disable=unused-variable
     raise ValueError(msg)
 
 
-def path_if_file_exists(arg):  # pylint: disable=unused-variable
+def path_if_file_exists(arg):
     """Checks whether a file exists, and returns the path if it does."""
     if not os.path.exists(arg):
         msg = f"{arg} does not exist!"
@@ -43,7 +43,7 @@ def path_if_file_exists(arg):  # pylint: disable=unused-variable
     return os.path.abspath(arg)
 
 
-def setup_logging(user_args, log_name=None):  # pylint: disable=unused-variable
+def setup_logging(user_args, log_name=None):
     """Create the Logger object"""
 
     log = Logger(

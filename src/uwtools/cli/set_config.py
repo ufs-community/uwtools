@@ -1,7 +1,5 @@
 # pylint: disable=duplicate-code
 
-# pylint: disable=too-many-branches, too-many-statements, too-many-locals
-
 """
 This utility creates a command line interface for handling config files.
 """

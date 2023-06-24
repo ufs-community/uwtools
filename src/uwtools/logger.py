@@ -165,7 +165,7 @@ class Logger:
         return handler
 
 
-def verbose(_func=None):  # pylint: disable=unused-variable
+def verbose(_func=None):
     """Logs the caller and args to a function."""
 
     def log_decorator_info(func):

@@ -1,4 +1,4 @@
-# pylint: disable=consider-using-f-string, duplicate-code
+# pylint: disable=duplicate-code
 
 """
 This utility renders a Jinja2 template using user-supplied configuration options

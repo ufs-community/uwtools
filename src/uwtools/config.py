@@ -1,4 +1,3 @@
-# pylint: disable=too-many-arguments
 """
 This file contains the Config file and its subclasses for a variety of
 dicatable file types.
@@ -93,7 +92,6 @@ class Config(collections.UserDict):
         output_path provided."""
 
     def compare_config(self, user_dict, base_dict=None):
-        # pylint: disable=unnecessary-dict-index-lookup
         """
         Assuming a section, key/value structure of configuration types,
         compare the dictionary to the values stored in the external file.
@@ -125,7 +123,7 @@ class Config(collections.UserDict):
 
         for sect, keys in diffs.items():
             for key in keys:
-                msg = f"{sect}: {key:>15}: {diffs[sect][key]}"
+                msg = f"{sect}: {key:>15}: {keys[key]}"
                 self.log.info(msg)
 
     def from_ordereddict(self, in_dict):
@@ -180,8 +178,6 @@ class Config(collections.UserDict):
                 del ref_dict[key]
 
     def dereference(self, ref_dict=None, full_dict=None):
-        # pylint: disable=too-many-branches, too-many-locals
-
         """This method will be used as a method by which any Config
         object can cycle through its key/value pairs recursively,
         replacing Jinja2 templates as necessary."""
@@ -413,7 +409,7 @@ class YAMLConfig(Config):
         with open(config_path, "r", encoding="utf-8") as file_name:
             try:
                 cfg = yaml.load(file_name, Loader=loader)
-            except yaml.constructor.ConstructorError as e:  # pylint: disable=invalid-name
+            except yaml.constructor.ConstructorError as e:
                 if e.problem:
                     constructor = e.problem.split()[-1]
                     if "unhashable" in e.problem:
@@ -469,7 +465,7 @@ class YAMLConfig(Config):
         return loader
 
 
-class F90Config(Config):  # pylint: disable=unused-variable
+class F90Config(Config):
 
     """Concrete class to handle Fortran namelist files."""
 
@@ -503,7 +499,7 @@ class F90Config(Config):  # pylint: disable=unused-variable
             f90nml.Namelist(nml).write(file_name, sort=False)
 
 
-class INIConfig(Config):  # pylint: disable=unused-variable
+class INIConfig(Config):
 
     """Concrete class to handle INI config files."""
 
@@ -530,19 +526,20 @@ class INIConfig(Config):  # pylint: disable=unused-variable
 
         # The protected _sections method is the most straightforward way to get
         # at the dict representation of the parse config.
-        # pylint: disable=protected-access
+
         cfg = configparser.ConfigParser(dict_type=collections.OrderedDict)
         cfg.optionxform = str  # type: ignore
+        sections = cfg._sections  # type: ignore # pylint: disable=protected-access
         try:
             cfg.read(config_path)
         except configparser.MissingSectionHeaderError:
             with open(config_path, "r", encoding="utf-8") as file_name:
                 cfg.read_string("[top]\n" + file_name.read())
-                ret_cfg = dict(cfg._sections.get("top"))  # type: ignore
+                ret_cfg = dict(sections.get("top"))
                 self.from_ordereddict(ret_cfg)
                 return ret_cfg
 
-        ret_cfg = dict(cfg._sections)  # type: ignore
+        ret_cfg = dict(sections)
         self.from_ordereddict(ret_cfg)
         return ret_cfg
 
@@ -560,7 +557,7 @@ class INIConfig(Config):  # pylint: disable=unused-variable
                     file_name.write(f"{key}={value}\n")
 
 
-class FieldTableConfig(YAMLConfig):  # pylint: disable=unused-variable
+class FieldTableConfig(YAMLConfig):
     """This class exists to write out a field_table format given
     that its configuration has been set by an input YAML file."""
 

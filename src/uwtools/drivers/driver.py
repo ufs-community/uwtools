@@ -1,5 +1,3 @@
-# pylint: disable=unused-import, unused-variable, unused-argument
-# remove these disables once implemented
 """
 This file contains the scaffolding for the forecast driver.
 It is a python script that will be called by the user to run the

@@ -1,6 +1,4 @@
-# pylint: disable=duplicate-code
-
-# pylint: disable=unused-variable, consider-using-f-string, duplicate-code
+# pylint: disable=duplicate-code,missing-function-docstring
 
 """
 Set of test for loading YAML files using the function call load_yaml
@@ -232,8 +230,6 @@ def test_ini_config_bash():
 
 
 def test_transform_config():
-    # pylint: disable=too-many-locals
-
     """Test that transforms config objects to objects of other config subclasses."""
     # Use itertools to iterate through unique pairs of config subcasses
     # the transforms here ensure consistent file subscripts and config calls
@@ -379,7 +375,7 @@ def test_yaml_constructor_errors():
         tmpfile.seek(0)
 
         with pytest.raises(exceptions.UWConfigError) as e_info:
-            config_obj = config.YAMLConfig(tmpfile.name)
+            config.YAMLConfig(tmpfile.name)
             assert "constructor: !not_a_constructor" in repr(e_info)
             assert "Define the constructor before proceeding" in repr(e_info)
 
@@ -396,7 +392,7 @@ def test_yaml_constructor_errors():
         tmpfile.seek(0)
 
         with pytest.raises(exceptions.UWConfigError) as e_info:
-            config_obj = config.YAMLConfig(tmpfile.name)
+            config.YAMLConfig(tmpfile.name)
             assert "value is included in quotes" in repr(e_info)
 
 
@@ -424,7 +420,7 @@ salad:        how_many:  - None + 12
         print(f"Comparing config of base and {user}...")
 
         log_name = "compare_config"
-        log = logger.Logger(name=log_name, fmt="%(message)s")
+        logger.Logger(name=log_name, fmt="%(message)s")
         userpath = os.path.join(
             uwtools_file_base, pathlib.Path("fixtures", f"simple.{userfile.lower()}")
         )
@@ -473,7 +469,7 @@ def test_dictionary_depth():
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 
-def test_path_if_file_exists():  # pylint: disable=unused-variable
+def test_path_if_file_exists():
     """Make sure the function works as expected.  It is used as a type in
     argparse, so raises an argparse exception when the user provides a
     non-existant path."""
@@ -486,7 +482,7 @@ def test_path_if_file_exists():  # pylint: disable=unused-variable
         cli_helpers.path_if_file_exists(not_a_filepath)
 
 
-def test_set_config_yaml_simple():  # pylint: disable=unused-variable
+def test_set_config_yaml_simple():
     """Test that providing a YAML base file with necessary settings
     will create a YAML config file"""
 
@@ -505,7 +501,7 @@ def test_set_config_yaml_simple():  # pylint: disable=unused-variable
         assert file_helpers.compare_files(expected_file, out_file)
 
 
-def test_set_config_ini_simple():  # pylint: disable=unused-variable
+def test_set_config_ini_simple():
     """Test that providing a basic INI file with necessary settings
     will create an INI config file"""
 
@@ -524,7 +520,7 @@ def test_set_config_ini_simple():  # pylint: disable=unused-variable
         assert file_helpers.compare_files(expected_file, out_file)
 
 
-def test_set_config_f90nml_simple():  # pylint: disable=unused-variable
+def test_set_config_f90nml_simple():
     """Test that providing basic f90nml file with necessary settings
     will create f90nml config file"""
 
@@ -543,7 +539,7 @@ def test_set_config_f90nml_simple():  # pylint: disable=unused-variable
         assert file_helpers.compare_files(expected_file, out_file)
 
 
-def test_set_config_bash_simple():  # pylint: disable=unused-variable
+def test_set_config_bash_simple():
     """Test that providing bash file with necessary settings will
     create an INI config file"""
 
@@ -563,7 +559,7 @@ def test_set_config_bash_simple():  # pylint: disable=unused-variable
         assert file_helpers.compare_files(expected_file, out_file)
 
 
-def test_set_config_yaml_config_file():  # pylint: disable=unused-variable
+def test_set_config_yaml_config_file():
     """Test that providing a yaml base input file and a config file will
     create and update yaml config file"""
 
@@ -587,7 +583,7 @@ def test_set_config_yaml_config_file():  # pylint: disable=unused-variable
         assert file_helpers.compare_files(expected_file, out_file)
 
 
-def test_set_config_f90nml_config_file():  # pylint: disable=unused-variable
+def test_set_config_f90nml_config_file():
     """Test that providing a F90nml base input file and a config file will
     create and update F90nml config file"""
 
@@ -609,7 +605,7 @@ def test_set_config_f90nml_config_file():  # pylint: disable=unused-variable
         assert file_helpers.compare_files(expected_file, out_file)
 
 
-def test_set_config_ini_config_file():  # pylint: disable=unused-variable
+def test_set_config_ini_config_file():
     """Test that aproviding INI base input file and a config file will
     create and update INI config file"""
 
@@ -631,7 +627,7 @@ def test_set_config_ini_config_file():  # pylint: disable=unused-variable
         assert file_helpers.compare_files(expected_file, out_file)
 
 
-def test_set_config_ini_bash_config_file():  # pylint: disable=unused-variable
+def test_set_config_ini_bash_config_file():
     """Test that aproviding INI base input file and a config file will
     create and update INI config file"""
 
@@ -653,7 +649,7 @@ def test_set_config_ini_bash_config_file():  # pylint: disable=unused-variable
         assert file_helpers.compare_files(expected_file, out_file)
 
 
-def test_incompatible_file_type():  # pylint: disable=unused-variable
+def test_incompatible_file_type():
     """Test that providing an incompatible file type for input base file will
     return print statement"""
 
@@ -664,7 +660,7 @@ def test_incompatible_file_type():  # pylint: disable=unused-variable
         config.create_config_obj(args)
 
 
-def test_set_config_field_table():  # pylint: disable=unused-variable
+def test_set_config_field_table():
     """Test reading a YAML config object and generating a field file table."""
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures", "FV3_GFS_v16.yaml"))
     expected_file = os.path.join(
@@ -687,7 +683,7 @@ def test_set_config_field_table():  # pylint: disable=unused-variable
                 assert line1 in line2
 
 
-def test_set_config_dry_run():  # pylint: disable=unused-variable
+def test_set_config_dry_run():
     """Test that providing a YAML base file with a dry run flag
     will print an YAML config file"""
 
@@ -707,7 +703,7 @@ def test_set_config_dry_run():  # pylint: disable=unused-variable
     assert result.rstrip("\n") == expected_content.rstrip("\n")
 
 
-def test_show_format():  # pylint: disable=unused-variable
+def test_show_format():
     """Test providing required configuration format for a given input and target."""
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures", "FV3_GFS_v16.yaml"))
     outcome = """Help on method dump_file in module uwtools.config:
@@ -753,7 +749,7 @@ None
         assert result == outcome
 
 
-def test_values_needed_yaml():  # pylint: disable=unused-variable
+def test_values_needed_yaml():
     """Test that the values_needed flag logs keys completed, keys containing
     unfilled jinja2 templates, and keys set to empty"""
 
@@ -786,7 +782,7 @@ Keys that are set to empty:
     assert result == outcome
 
 
-def test_values_needed_ini():  # pylint: disable=unused-variable
+def test_values_needed_ini():
     """Test that the values_needed flag logs keys completed, keys containing
     unfilled jinja2 templates, and keys set to empty"""
 
@@ -821,7 +817,7 @@ Keys that are set to empty:
     assert result == outcome
 
 
-def test_values_needed_f90nml():  # pylint: disable=unused-variable
+def test_values_needed_f90nml():
     """Test that the values_needed flag logs keys completed, keys containing
     unfilled jinja2 templates, and keys set to empty"""
 
@@ -852,7 +848,7 @@ Keys that are set to empty:
     assert result == outcome
 
 
-def test_cfg_to_yaml_conversion():  # pylint: disable=unused-variable
+def test_cfg_to_yaml_conversion():
     """Test that a .cfg file can be used to create a yaml object."""
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example_yaml.cfg"))
 
@@ -873,7 +869,7 @@ def test_cfg_to_yaml_conversion():  # pylint: disable=unused-variable
             assert output.read()[-1] == "\n"
 
 
-def test_output_file_conversion():  # pylint: disable=unused-variable
+def test_output_file_conversion():
     """Test that --output_input_type converts config object to desired object type"""
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
 
@@ -893,7 +889,7 @@ def test_output_file_conversion():  # pylint: disable=unused-variable
             assert output.read()[-1] == "\n"
 
 
-def test_config_file_conversion():  # pylint: disable=unused-variable
+def test_config_file_conversion():
     """Test that --config_input_type converts config object to desired object type"""
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
     config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.ini"))
@@ -916,7 +912,7 @@ def test_config_file_conversion():  # pylint: disable=unused-variable
             assert output.read()[-1] == "\n"
 
 
-def test_erroneous_conversion_flags():  # pylint: disable=unused-variable
+def test_erroneous_conversion_flags():
     """Test that error is thrown when conversion file types are not compatible"""
 
     with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
@@ -944,7 +940,7 @@ def test_erroneous_conversion_flags():  # pylint: disable=unused-variable
             config.create_config_obj(args)
 
 
-def test_compare_nml():  # pylint: disable=unused-variable
+def test_compare_nml():
     """Tests whether comparing two namelists works."""
 
     nml1 = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.nml"))
@@ -984,7 +980,7 @@ def test_compare_nml():  # pylint: disable=unused-variable
             assert result_line in expected
 
 
-def test_mutually_exclusive_args():  # pylint: disable=unused-variable
+def test_mutually_exclusive_args():
     """
     Test that -q and -v args are mutually exclusive and testing -q and -d are mutually exclusive.
     """

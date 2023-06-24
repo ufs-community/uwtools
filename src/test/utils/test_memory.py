@@ -1,5 +1,5 @@
-# pylint: disable=invalid-name, missing-module-docstring, missing-function-docstring
-# pylint: disable=unused-variable
+# pylint: disable=missing-function-docstring
+
 from uwtools.utils import Memory
 
 

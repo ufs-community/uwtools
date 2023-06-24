@@ -1,5 +1,3 @@
-# pylint: disable=too-few-public-methods,missing-module-docstring
-
 import os
 import pathlib
 from abc import ABC, abstractmethod

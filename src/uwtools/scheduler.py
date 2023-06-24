@@ -19,7 +19,7 @@ NONEISH = [None, "", " ", "None", "none", False]
 IGNORED_ATTRIBS = ["scheduler"]
 
 
-class RequiredAttribs:  # pylint: disable=too-few-public-methods
+class RequiredAttribs:
     """key for required attributes"""
 
     ACCOUNT = "account"
@@ -29,7 +29,7 @@ class RequiredAttribs:  # pylint: disable=too-few-public-methods
     TASKS_PER_NODE = "tasks_per_node"
 
 
-class OptionalAttribs:  # pylint: disable=too-few-public-methods
+class OptionalAttribs:
     """key for optional attributes"""
 
     SHELL = "shell"
@@ -114,7 +114,6 @@ class JobScheduler(collections.UserDict):
         known = []
         for key, value in sanitized_attribs.items():
             if key in self._map and key not in IGNORED_ATTRIBS:
-                # pylint: disable=line-too-long
                 scheduler_flag = (
                     self._map[key](value) if callable(self._map[key]) else self._map[key]
                 )

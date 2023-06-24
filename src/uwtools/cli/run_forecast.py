@@ -1,7 +1,3 @@
-# pylint: disable=duplicate-code
-
-# pylint: disable=unused-import, unused-variable, unused-argument
-# remove these disables once implemented
 """
 This utility creates a command line interface for running a forecast.
 """
@@ -9,7 +5,6 @@ This utility creates a command line interface for running a forecast.
 import argparse
 import inspect
 import os
-import sys
 
 from uwtools.drivers import forecast
 from uwtools.utils import cli_helpers
@@ -84,7 +79,7 @@ def main(argv):  # pragma: no cover
 
     # Set up logging
     name = f"{inspect.stack()[0][3]}"
-    log = cli_helpers.setup_logging(user_args, log_name=name)
+    cli_helpers.setup_logging(user_args, log_name=name)
 
     forecast_type = user_args.forecast_model.join()
     forecast_class = getattr(forecast, f"{forecast_type}Forecast")

@@ -15,6 +15,6 @@ ignore_missing_imports = true
 
 [tool.pylint.messages_control]
 disable = [
-  "C0103", "C0209", "C0302",
-  "R0912", "R0913", "R0914", "R0915", "R1735",
+  "C0103", "C0209", "C0302", "C0114",
+  "R0903", "R0912", "R0913", "R0914", "R0915", "R1735",
 ]

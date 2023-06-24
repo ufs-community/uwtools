@@ -23,7 +23,7 @@ def path_join(arg):
     return os.path.join(*arg)
 
 
-class J2Template:  # pylint: disable=unused-variable
+class J2Template:
 
     """
     This class reads in Jinja templates from files or strings, and
