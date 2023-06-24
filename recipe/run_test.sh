@@ -52,6 +52,6 @@ if [[ -n "${1:-}" ]]; then
 else
   lint
   typecheck
-#   unittest
+  unittest
 #   cli
 fi

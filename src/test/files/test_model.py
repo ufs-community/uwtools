@@ -1,32 +1,35 @@
 # pylint: disable=missing-function-docstring
 
-import glob
+from glob import glob
+from test.support import fixpath_posix, fixpath_uri
 
-import pytest
+from pytest import raises
 
 from uwtools.files import Unix
 from uwtools.files.model import file
 
 
 def test_Unix():
-    _file = Unix("file://tests/fixtures/files/a.txt")
-
-    assert str(_file) == "file://tests/fixtures/files/a.txt"
-    assert repr(_file) == "<Unix file://tests/fixtures/files/a.txt/>"
+    path = Unix(fixpath_uri("files/a.txt"))
+    assert path.exists
+    assert str(path).startswith("file://")
+    assert str(path).endswith("files/a.txt")
+    assert repr(path).startswith("<Unix file://")
+    assert repr(path).endswith("files/a.txt/>")
 
 
 def test_Unix_validation():
-    with pytest.raises(AttributeError) as error:
+    with raises(AttributeError) as error:
         Unix("ile://tests/fixtures/files/a.txt")
 
     assert "attribute unknown: [ile://]" in str(error)
 
-    with pytest.raises(AttributeError) as error:
+    with raises(AttributeError) as error:
         Unix("//tests/fixtures/files/a.txt")
 
     assert "prefix not found in: [//tests/fixtures/files/a.txt]" in str(error)
 
-    with pytest.raises(FileNotFoundError) as error:
+    with raises(FileNotFoundError) as error:
         Unix("file://ests/fixtures/files/a.txt")
 
     assert "File not found [file://ests/fixtures/files/a.txt]" in str(error)
@@ -34,11 +37,12 @@ def test_Unix_validation():
 
 def test_dir_file():
     """Tests dir method given a file."""
-    my_init = file.Unix("file://tests/fixtures/files/a.txt")
-    assert my_init.dir == glob.glob("tests/fixtures/files/a.txt")
+    suffix = "files/a.txt"
+    my_init = file.Unix(fixpath_uri(suffix))
+    assert my_init.dir == glob(fixpath_posix(suffix))
 
 
 def test_dir_path():
     """Tests dir method given a path, i.e. not a file."""
-    my_init = file.Unix("file://tests/fixtures/files/")
-    assert my_init.dir == glob.glob("tests/fixtures/files/*")
+    my_init = file.Unix(fixpath_uri())
+    assert my_init.dir == glob(fixpath_posix("*"))
