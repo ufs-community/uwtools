@@ -11,7 +11,7 @@ Tests for forecast driver
 
 from uwtools import config
 from uwtools.drivers.forecast import FV3Forecast
-from uwtools.test.support import fixpath_posix
+from uwtools.test.support import fixture_posix
 from uwtools.utils import file_helpers
 
 
@@ -19,9 +19,9 @@ def test_create_config(tmp_path):
     """Test that providing a yaml base input file and a config file will
     create and update yaml config file"""
 
-    input_file = fixpath_posix("fruit_config.yaml")
-    config_file = fixpath_posix("fruit_config_similar.yaml")
-    output_file = tmp_path / "test_config_from_yaml.yaml"
+    input_file = fixture_posix("fruit_config.yaml")
+    config_file = fixture_posix("fruit_config_similar.yaml")
+    output_file = (tmp_path / "test_config_from_yaml.yaml").as_posix()
 
     forecast_obj = FV3Forecast()
     forecast_obj.create_model_config(config_file, output_file, input_file)
@@ -34,54 +34,43 @@ def test_create_config(tmp_path):
     assert file_helpers.compare_files(expected_file, output_file)
 
 
-# def test_create_namelist():
-#     """Tests create_namelist method with and without optional base file"""
-#     forecast_obj = FV3Forecast()
+def test_create_namelist(tmp_path):
+    """Tests create_namelist method with and without optional base file"""
 
-#     with tempfile.TemporaryDirectory() as run_directory:
-#         update_file = os.path.join(uwtools_file_base, pathlib.Path("../fixtures/simple.nml"))
-#         update_obj = config.F90Config(update_file)
+    forecast_obj = FV3Forecast()
+    update_obj = config.F90Config(fixture_posix("simple.nml"))
+    outnml_file = tmp_path / "create_out.nml"
 
-#         base_file = os.path.join(uwtools_file_base, pathlib.Path("../fixtures/simple3.nml"))
+    outcome1 = """&salad
+    base = 'kale'
+    fruit = 'banana'
+    vegetable = 'tomato'
+    how_many = 12
+    dressing = 'balsamic'
+/
+"""
+    forecast_obj.create_namelist(update_obj, str(outnml_file))
+    with open(outnml_file, "r", encoding="utf-8") as out_file:
+        outnml_string = out_file.read()
+    assert outnml_string == outcome1
 
-#         file_out = "create_out.nml"
-#         outnml_file = os.path.join(run_directory, file_out)
-
-#         outcome = """&salad
-#     base = 'kale'
-#     fruit = 'banana'
-#     vegetable = 'tomato'
-#     how_many = 12
-#     dressing = 'balsamic'
-# /
-# """
-
-#         forecast_obj.create_namelist(update_obj, outnml_file)
-
-#         with open(outnml_file, "r", encoding="utf-8") as out_file:
-#             outnml_string = out_file.read()
-
-#         assert outnml_string == outcome
-
-#         outcome2 = """&salad
-#     base = 'kale'
-#     fruit = 'banana'
-#     vegetable = 'tomato'
-#     how_many = 12
-#     dressing = 'balsamic'
-#     toppings = ,
-#     extras = 0
-#     dessert = .false.
-#     appetizer = ,
-# /
-# """
-
-#         forecast_obj.create_namelist(update_obj, outnml_file, base_file)
-
-#         with open(outnml_file, "r", encoding="utf-8") as out_file:
-#             outnml_string = out_file.read()
-
-#         assert outnml_string == outcome2
+    outcome2 = """&salad
+    base = 'kale'
+    fruit = 'banana'
+    vegetable = 'tomato'
+    how_many = 12
+    dressing = 'balsamic'
+    toppings = ,
+    extras = 0
+    dessert = .false.
+    appetizer = ,
+/
+"""
+    base_file = fixture_posix("simple3.nml")
+    forecast_obj.create_namelist(update_obj, outnml_file, base_file)
+    with open(outnml_file, "r", encoding="utf-8") as out_file:
+        outnml_string = out_file.read()
+    assert outnml_string == outcome2
 
 
 # def test_create_field_table():

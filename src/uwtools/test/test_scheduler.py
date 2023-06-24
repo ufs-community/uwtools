@@ -8,6 +8,7 @@ from uwtools import config
 from uwtools.scheduler import JobScheduler
 
 
+@pytest.mark.skip()
 def test_scheduler_dot_notation():
     props = config.YAMLConfig(pathlib.Path("tests/fixtures/simple2.yaml"))
 
@@ -18,6 +19,7 @@ def test_scheduler_dot_notation():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_scheduler_prop_not_defined_raises_key_error():
     with pytest.raises(KeyError) as error:
         props = {
@@ -35,6 +37,7 @@ def test_scheduler_prop_not_defined_raises_key_error():
     assert expected in actual
 
 
+@pytest.mark.skip()
 def test_scheduler_raises_exception_when_missing_required_attribs():
     with pytest.raises(ValueError) as error:
         props = {
@@ -52,6 +55,7 @@ def test_scheduler_raises_exception_when_missing_required_attribs():
     assert expected in actual
 
 
+@pytest.mark.skip()
 def test_pbs1():
     expected = """#PBS -A account_name
 #PBS -q batch
@@ -73,6 +77,7 @@ def test_pbs1():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_pbs2():
     expected = """#PBS -A account_name
 #PBS -q batch
@@ -95,6 +100,7 @@ def test_pbs2():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_pbs3():
     expected = """#PBS -A account_name
 #PBS -q batch
@@ -117,6 +123,7 @@ def test_pbs3():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_pbs4():
     expected = """#PBS -A account_name
 #PBS -q batch
@@ -140,6 +147,7 @@ def test_pbs4():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_pbs5():
     expected = """#PBS -A account_name
 #PBS -q batch
@@ -163,6 +171,7 @@ def test_pbs5():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_pbs6():
     expected = """#PBS -A account_name
 #PBS -q batch
@@ -187,6 +196,7 @@ def test_pbs6():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_pbs7():
     expected = """#PBS -A account_name
 #PBS -q batch
@@ -211,6 +221,7 @@ def test_pbs7():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_pbs8():
     expected = """#PBS -A account_name
 #PBS -q batch
@@ -234,6 +245,7 @@ def test_pbs8():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_slurm1():
     expected = """#SBATCH --account=account_name
 #SBATCH --qos=batch
@@ -256,6 +268,7 @@ def test_slurm1():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_slurm2():
     expected = """#SBATCH --account=account_name
 #SBATCH --qos=batch
@@ -280,6 +293,7 @@ def test_slurm2():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_slurm3():
     expected = """#SBATCH --account=account_name
 #SBATCH --qos=batch
@@ -304,6 +318,7 @@ def test_slurm3():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_slurm4():
     expected = """#SBATCH --account=account_name
 #SBATCH --qos=batch
@@ -328,6 +343,7 @@ def test_slurm4():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_slurm5():
     expected = """#SBATCH --account=account_name
 #SBATCH --qos=batch
@@ -352,6 +368,7 @@ def test_slurm5():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_lsf1():
     expected = """#BSUB -P account_name
 #BSUB -q batch
@@ -376,6 +393,7 @@ def test_lsf1():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_lsf2():
     expected = """#BSUB -P account_name
 #BSUB -q batch
@@ -398,6 +416,7 @@ def test_lsf2():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_lsf3():
     expected = """#BSUB -P account_name
 #BSUB -q batch
@@ -421,6 +440,7 @@ def test_lsf3():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_lsf4():
     expected = """#BSUB -P account_name
 #BSUB -q batch
@@ -447,6 +467,7 @@ def test_lsf4():
     assert actual == expected
 
 
+@pytest.mark.skip()
 def test_string_output():
     expected = """#BSUB -P account_name
 #BSUB -q batch

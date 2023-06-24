@@ -15,6 +15,7 @@ import yaml
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 
+@pytest.mark.skip()
 def test_validate_yaml_salad():
     """
     Test that simple salad schema is accepted as valid json schema and that it

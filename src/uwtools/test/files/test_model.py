@@ -6,11 +6,11 @@ from pytest import raises
 
 from uwtools.files import Unix
 from uwtools.files.model import file
-from uwtools.test.support import fixpath_posix, fixpath_uri
+from uwtools.test.support import fixture_posix, fixture_uri
 
 
 def test_Unix():
-    path = Unix(fixpath_uri("files/a.txt"))
+    path = Unix(fixture_uri("files/a.txt"))
     assert path.exists
     assert str(path).startswith("file://")
     assert str(path).endswith("files/a.txt")
@@ -38,11 +38,11 @@ def test_Unix_validation():
 def test_dir_file():
     """Tests dir method given a file."""
     suffix = "files/a.txt"
-    my_init = file.Unix(fixpath_uri(suffix))
-    assert my_init.dir == glob(fixpath_posix(suffix))
+    my_init = file.Unix(fixture_uri(suffix))
+    assert my_init.dir == glob(fixture_posix(suffix))
 
 
 def test_dir_path():
     """Tests dir method given a path, i.e. not a file."""
-    my_init = file.Unix(fixpath_uri())
-    assert my_init.dir == glob(fixpath_posix("*"))
+    my_init = file.Unix(fixture_uri())
+    assert my_init.dir == glob(fixture_posix("*"))

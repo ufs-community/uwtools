@@ -6,9 +6,9 @@ and physics suites.
 import logging
 import os
 import sys
-from types import SimpleNamespace as ns
 
 from uwtools import config
+from uwtools.cli.set_config import parse_args as parse_config_args
 from uwtools.utils import file_helpers
 
 from .driver import Driver
@@ -60,14 +60,7 @@ class FV3Forecast(Driver):  # pragma: no cover
         """
 
         if base_file:
-            user_args = ns(
-                config_file=config_obj,
-                input_base_file=base_file,
-                outfile=outconfig_file,
-                log_file=None,
-                quiet=False,
-                verbose=False,
-            )
+            user_args = parse_config_args(["-i", base_file, "-o", outconfig_file, "-c", config_obj])
             config.create_config_obj(user_args)
         else:
             config_obj.dump_file(outconfig_file)

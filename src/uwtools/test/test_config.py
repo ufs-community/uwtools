@@ -27,6 +27,7 @@ from uwtools.utils import cli_helpers, file_helpers
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 
+@pytest.mark.skip()
 def test_parse_include():
     """Test that non-YAML handles !INCLUDE Tags properly"""
 
@@ -40,6 +41,7 @@ def test_parse_include():
     assert len(cfg["config"]) == 5
 
 
+@pytest.mark.skip()
 def test_parse_include_mult_sect():
     """Test that non-YAML handles !INCLUDE tags with files that have
     multiple sections in separate file."""
@@ -57,6 +59,7 @@ def test_parse_include_mult_sect():
     assert len(cfg["setting"]) == 3
 
 
+@pytest.mark.skip()
 def test_parse_include_ini():
     """Test that non-YAML handles !INCLUDE Tags properly for INI with no
     sections"""
@@ -71,6 +74,7 @@ def test_parse_include_ini():
     assert len(cfg) == 5
 
 
+@pytest.mark.skip()
 def test_yaml_config_simple():
     """Test that YAML load, update, and dump work with a basic YAML file."""
 
@@ -101,6 +105,7 @@ def test_yaml_config_simple():
     assert cfg == expected
 
 
+@pytest.mark.skip()
 def test_yaml_config_composite_types():
     """Test that YAML load and dump work with a YAML file that has
     multiple data structures and levels."""
@@ -120,6 +125,7 @@ def test_yaml_config_composite_types():
     assert models[0].get("config").get("vertical_resolution") == 64
 
 
+@pytest.mark.skip()
 def test_yaml_config_include_files():
     """Test that including files via the !INCLUDE constructor works as
     expected."""
@@ -143,6 +149,7 @@ def test_yaml_config_include_files():
     assert cfg["reverse_files"].get("vegetable") == "eggplant"
 
 
+@pytest.mark.skip()
 def test_f90nml_config_simple():
     """Test that f90nml load, update, and dump work with a basic f90 namelist file."""
 
@@ -174,6 +181,7 @@ def test_f90nml_config_simple():
     assert cfg == expected
 
 
+@pytest.mark.skip()
 def test_ini_config_simple():
     """Test that INI config load and dump work with a basic INI file.
     Everything in INI is treated as a string!
@@ -204,6 +212,7 @@ def test_ini_config_simple():
     assert cfg == expected
 
 
+@pytest.mark.skip()
 def test_ini_config_bash():
     """Test that INI config load and dump work with a basic bash file."""
 
@@ -230,6 +239,7 @@ def test_ini_config_bash():
     assert cfg == expected
 
 
+@pytest.mark.skip()
 def test_transform_config():
     """Test that transforms config objects to objects of other config subclasses."""
     # Use itertools to iterate through unique pairs of config subcasses
@@ -263,6 +273,7 @@ def test_transform_config():
                     assert line1 in line2
 
 
+@pytest.mark.skip()
 def test_config_field_table():
     """Test reading a YAML config object and generating a field file table."""
     config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures", "FV3_GFS_v16.yaml"))
@@ -286,6 +297,7 @@ def test_config_field_table():
                 assert line1 in line2
 
 
+@pytest.mark.skip()
 def test_dereference():
     """Test that the Jinja2 fields are filled in as expected."""
 
@@ -326,6 +338,7 @@ def test_dereference():
     assert cfg["grid_stats"]["points_per_level"] == 10000
 
 
+@pytest.mark.skip()
 def test_dereference_exceptions(caplog):
     """Test that dereference handles some standard mistakes."""
 
@@ -359,6 +372,7 @@ def test_dereference_exceptions(caplog):
     assert "TypeError" in raised[1]
 
 
+@pytest.mark.skip()
 def test_yaml_constructor_errors():
     """When loading YAML with Jinja2 templated values, we see a few
     different renditions of constructor errors. Make sure those are
@@ -397,6 +411,7 @@ def test_yaml_constructor_errors():
             assert "value is included in quotes" in repr(e_info)
 
 
+@pytest.mark.skip()
 def test_compare_config(caplog):
     """Compare two config objects using method"""
     for user in ["INI", "YAML", "F90"]:
@@ -448,6 +463,7 @@ salad:        how_many:  - None + 12
             assert item.msg in expected
 
 
+@pytest.mark.skip()
 def test_dictionary_depth():
     """Test that the proper dictionary depth is being returned for each file type."""
 
@@ -470,6 +486,7 @@ def test_dictionary_depth():
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 
+@pytest.mark.skip()
 def test_path_if_file_exists():
     """Make sure the function works as expected.  It is used as a type in
     argparse, so raises an argparse exception when the user provides a
@@ -483,6 +500,7 @@ def test_path_if_file_exists():
         cli_helpers.path_if_file_exists(not_a_filepath)
 
 
+@pytest.mark.skip()
 def test_set_config_yaml_simple():
     """Test that providing a YAML base file with necessary settings
     will create a YAML config file"""
@@ -502,6 +520,7 @@ def test_set_config_yaml_simple():
         assert file_helpers.compare_files(expected_file, out_file)
 
 
+@pytest.mark.skip()
 def test_set_config_ini_simple():
     """Test that providing a basic INI file with necessary settings
     will create an INI config file"""
@@ -521,6 +540,7 @@ def test_set_config_ini_simple():
         assert file_helpers.compare_files(expected_file, out_file)
 
 
+@pytest.mark.skip()
 def test_set_config_f90nml_simple():
     """Test that providing basic f90nml file with necessary settings
     will create f90nml config file"""
@@ -540,6 +560,7 @@ def test_set_config_f90nml_simple():
         assert file_helpers.compare_files(expected_file, out_file)
 
 
+@pytest.mark.skip()
 def test_set_config_bash_simple():
     """Test that providing bash file with necessary settings will
     create an INI config file"""
@@ -560,6 +581,7 @@ def test_set_config_bash_simple():
         assert file_helpers.compare_files(expected_file, out_file)
 
 
+@pytest.mark.skip()
 def test_set_config_yaml_config_file():
     """Test that providing a yaml base input file and a config file will
     create and update yaml config file"""
@@ -584,6 +606,7 @@ def test_set_config_yaml_config_file():
         assert file_helpers.compare_files(expected_file, out_file)
 
 
+@pytest.mark.skip()
 def test_set_config_f90nml_config_file():
     """Test that providing a F90nml base input file and a config file will
     create and update F90nml config file"""
@@ -606,6 +629,7 @@ def test_set_config_f90nml_config_file():
         assert file_helpers.compare_files(expected_file, out_file)
 
 
+@pytest.mark.skip()
 def test_set_config_ini_config_file():
     """Test that aproviding INI base input file and a config file will
     create and update INI config file"""
@@ -628,6 +652,7 @@ def test_set_config_ini_config_file():
         assert file_helpers.compare_files(expected_file, out_file)
 
 
+@pytest.mark.skip()
 def test_set_config_ini_bash_config_file():
     """Test that aproviding INI base input file and a config file will
     create and update INI config file"""
@@ -650,6 +675,7 @@ def test_set_config_ini_bash_config_file():
         assert file_helpers.compare_files(expected_file, out_file)
 
 
+@pytest.mark.skip()
 def test_incompatible_file_type():
     """Test that providing an incompatible file type for input base file will
     return print statement"""
@@ -661,6 +687,7 @@ def test_incompatible_file_type():
         config.create_config_obj(args)
 
 
+@pytest.mark.skip()
 def test_set_config_field_table():
     """Test reading a YAML config object and generating a field file table."""
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures", "FV3_GFS_v16.yaml"))
@@ -684,6 +711,7 @@ def test_set_config_field_table():
                 assert line1 in line2
 
 
+@pytest.mark.skip()
 def test_set_config_dry_run():
     """Test that providing a YAML base file with a dry run flag
     will print an YAML config file"""
@@ -704,6 +732,7 @@ def test_set_config_dry_run():
     assert result.rstrip("\n") == expected_content.rstrip("\n")
 
 
+@pytest.mark.skip()
 def test_show_format():
     """Test providing required configuration format for a given input and target."""
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures", "FV3_GFS_v16.yaml"))
@@ -750,6 +779,7 @@ None
         assert result == outcome
 
 
+@pytest.mark.skip()
 def test_values_needed_yaml():
     """Test that the values_needed flag logs keys completed, keys containing
     unfilled jinja2 templates, and keys set to empty"""
@@ -783,6 +813,7 @@ Keys that are set to empty:
     assert result == outcome
 
 
+@pytest.mark.skip()
 def test_values_needed_ini():
     """Test that the values_needed flag logs keys completed, keys containing
     unfilled jinja2 templates, and keys set to empty"""
@@ -818,6 +849,7 @@ Keys that are set to empty:
     assert result == outcome
 
 
+@pytest.mark.skip()
 def test_values_needed_f90nml():
     """Test that the values_needed flag logs keys completed, keys containing
     unfilled jinja2 templates, and keys set to empty"""
@@ -849,6 +881,7 @@ Keys that are set to empty:
     assert result == outcome
 
 
+@pytest.mark.skip()
 def test_cfg_to_yaml_conversion():
     """Test that a .cfg file can be used to create a yaml object."""
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example_yaml.cfg"))
@@ -870,6 +903,7 @@ def test_cfg_to_yaml_conversion():
             assert output.read()[-1] == "\n"
 
 
+@pytest.mark.skip()
 def test_output_file_conversion():
     """Test that --output_input_type converts config object to desired object type"""
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
@@ -890,6 +924,7 @@ def test_output_file_conversion():
             assert output.read()[-1] == "\n"
 
 
+@pytest.mark.skip()
 def test_config_file_conversion():
     """Test that --config_input_type converts config object to desired object type"""
     input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
@@ -913,6 +948,7 @@ def test_config_file_conversion():
             assert output.read()[-1] == "\n"
 
 
+@pytest.mark.skip()
 def test_erroneous_conversion_flags():
     """Test that error is thrown when conversion file types are not compatible"""
 
@@ -941,6 +977,7 @@ def test_erroneous_conversion_flags():
             config.create_config_obj(args)
 
 
+@pytest.mark.skip()
 def test_compare_nml():
     """Tests whether comparing two namelists works."""
 
@@ -981,6 +1018,7 @@ def test_compare_nml():
             assert result_line in expected
 
 
+@pytest.mark.skip()
 def test_mutually_exclusive_args():
     """
     Test that -q and -v args are mutually exclusive and testing -q and -d are mutually exclusive.

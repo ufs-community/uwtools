@@ -4,15 +4,15 @@ from importlib import resources
 from pathlib import Path
 
 
-def fixpath(suffix: str = "") -> Path:
+def fixture_path(suffix: str = "") -> Path:
     with resources.as_file(resources.files("uwtools.test.fixtures")) as prefix:
         path = prefix / suffix
     return path
 
 
-def fixpath_posix(suffix: str = "") -> str:
-    return fixpath(suffix).as_posix()
+def fixture_posix(suffix: str = "") -> str:
+    return fixture_path(suffix).as_posix()
 
 
-def fixpath_uri(suffix: str = "") -> str:
-    return fixpath(suffix).as_uri()
+def fixture_uri(suffix: str = "") -> str:
+    return fixture_path(suffix).as_uri()
