@@ -4,7 +4,6 @@ This utility creates a command line interface for running a forecast.
 
 import argparse
 import inspect
-import os
 
 from uwtools.drivers import forecast
 from uwtools.utils import cli_helpers
@@ -66,7 +65,7 @@ def parse_args(argv):  # pragma: no cover
         "-l",
         "--log_file",
         help="Optional path to a specified log file",
-        default=os.path.join(os.path.dirname(__file__), "forecast.log"),
+        default="/dev/null",  # os.path.join(os.path.dirname(__file__), "forecast.log"),
     )
     return parser.parse_args(argv)
 

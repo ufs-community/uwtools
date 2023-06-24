@@ -3,7 +3,7 @@
 """
 This utility creates a command line interface for handling config files.
 """
-import os
+
 import sys
 from argparse import ArgumentError, ArgumentParser
 
@@ -96,7 +96,7 @@ def parse_args(argv):
         "-l",
         "--log_file",
         help="Optional path to a specified log file",
-        default=os.path.join(os.path.dirname(__file__), "set_config.log"),
+        default="/dev/null",  # os.path.join(os.path.dirname(__file__), "set_config.log"),
     )
 
     # Parse arguments.

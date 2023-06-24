@@ -265,7 +265,7 @@ def test_set_template_verbosity():
     """Unit test for checking dry-run output of ingest namelist tool"""
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
-    logfile = os.path.join(os.path.dirname(templater.__file__), "templater.log")
+    logfile = "/dev/null"  # os.path.join(os.path.dirname(templater.__file__), "templater.log")
 
     outcome = f"""Finished setting up debug file logging in {logfile}
 Running set_template with args:

@@ -79,7 +79,7 @@ def parse_args(argv):
         "-l",
         "--log_file",
         help="Optional path to a specified log file",
-        default=os.path.join(os.path.dirname(__file__), "templater.log"),
+        default="/dev/null",  # os.path.join(os.path.dirname(__file__), "templater.log"),
     )
 
     args = parser.parse_args(argv)
