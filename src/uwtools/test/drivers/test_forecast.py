@@ -1,3 +1,5 @@
+# pylint: disable=missing-function-docstring,redefined-outer-name
+
 """
 Tests for forecast driver
 """
@@ -7,7 +9,7 @@ Tests for forecast driver
 # import pathlib
 # import shutil
 
-# import pytest
+from pytest import fixture
 
 from uwtools import config
 from uwtools.drivers.forecast import FV3Forecast
@@ -34,27 +36,35 @@ def test_create_config(tmp_path):
     assert file_helpers.compare_files(expected_file, output_file)
 
 
-def test_create_namelist(tmp_path):
-    """Tests create_namelist method with and without optional base file"""
+@fixture
+def create_namelist_assets(tmp_path):
+    return FV3Forecast(), config.F90Config(fixture_posix("simple.nml")), tmp_path / "create_out.nml"
 
-    forecast_obj = FV3Forecast()
-    update_obj = config.F90Config(fixture_posix("simple.nml"))
-    outnml_file = tmp_path / "create_out.nml"
 
-    expected_1 = """&salad
+def test_create_namelist_without_base_file(create_namelist_assets):
+    """Tests create_namelist method without optional base file"""
+    forecast_obj, update_obj, outnml_file = create_namelist_assets
+    forecast_obj.create_namelist(update_obj, str(outnml_file))
+    expected = """
+&salad
     base = 'kale'
     fruit = 'banana'
     vegetable = 'tomato'
     how_many = 12
     dressing = 'balsamic'
 /
-"""
-    forecast_obj.create_namelist(update_obj, str(outnml_file))
+""".lstrip()
     with open(outnml_file, "r", encoding="utf-8") as out_file:
-        outnml_string = out_file.read()
-    assert outnml_string == expected_1
+        assert out_file.read() == expected
 
-    expected_2 = """&salad
+
+def test_create_namelist_with_base_file(create_namelist_assets):
+    """Tests create_namelist method with optional base file"""
+    forecast_obj, update_obj, outnml_file = create_namelist_assets
+    base_file = fixture_posix("simple3.nml")
+    forecast_obj.create_namelist(update_obj, outnml_file, base_file)
+    expected = """
+&salad
     base = 'kale'
     fruit = 'banana'
     vegetable = 'tomato'
@@ -65,30 +75,33 @@ def test_create_namelist(tmp_path):
     dessert = .false.
     appetizer = ,
 /
-"""
-    base_file = fixture_posix("simple3.nml")
-    forecast_obj.create_namelist(update_obj, outnml_file, base_file)
+""".lstrip()
     with open(outnml_file, "r", encoding="utf-8") as out_file:
-        outnml_string = out_file.read()
-    assert outnml_string == expected_2
+        assert out_file.read() == expected
 
 
-def test_create_field_table(tmp_path):
-    """Tests create_field_table method with and without optional base file"""
+@fixture
+def create_field_table_assets():
+    return FV3Forecast(), config.YAMLConfig(fixture_posix("FV3_GFS_v16_update.yaml"))
 
-    forecast_obj = FV3Forecast()
-    update_obj = config.YAMLConfig(fixture_posix("FV3_GFS_v16_update.yaml"))
 
-    outfldtbl_file_1 = tmp_path / "field_table_one.FV3_GFS"
-    expected_1 = fixture_posix("field_table_from_input.FV3_GFS")
-    forecast_obj.create_field_table(update_obj, outfldtbl_file_1)
-    assert file_helpers.compare_files(expected_1, outfldtbl_file_1)
+def test_create_field_table_without_base_file(create_field_table_assets, tmp_path):
+    """Tests create_field_table without optional base file"""
+    forecast_obj, update_obj = create_field_table_assets
+    outfldtbl_file = tmp_path / "field_table_one.FV3_GFS"
+    expected = fixture_posix("field_table_from_input.FV3_GFS")
+    forecast_obj.create_field_table(update_obj, outfldtbl_file)
+    assert file_helpers.compare_files(expected, outfldtbl_file)
 
+
+def test_create_field_table_with_base_file(create_field_table_assets, tmp_path):
+    """Tests create_field_table method with optional base file"""
+    forecast_obj, update_obj = create_field_table_assets
     base_file = fixture_posix("FV3_GFS_v16.yaml")
-    outfldtbl_file_2 = tmp_path / "field_table_two.FV3_GFS"
-    expected_2 = fixture_posix("field_table_from_base.FV3_GFS")
-    forecast_obj.create_field_table(update_obj, outfldtbl_file_2, base_file)
-    assert file_helpers.compare_files(expected_2, outfldtbl_file_2)
+    outfldtbl_file = tmp_path / "field_table_two.FV3_GFS"
+    expected = fixture_posix("field_table_from_base.FV3_GFS")
+    forecast_obj.create_field_table(update_obj, outfldtbl_file, base_file)
+    assert file_helpers.compare_files(expected, outfldtbl_file)
 
 
 # def test_create_directory_structure():
