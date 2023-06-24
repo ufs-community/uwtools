@@ -1,12 +1,12 @@
 # pylint: disable=missing-function-docstring
 
 from glob import glob
-from test.support import fixpath_posix, fixpath_uri
 
 from pytest import raises
 
 from uwtools.files import Unix
 from uwtools.files.model import file
+from uwtools.test.support import fixpath_posix, fixpath_uri
 
 
 def test_Unix():

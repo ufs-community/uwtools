@@ -2,12 +2,12 @@
 
 
 import shutil
-from test.support import fixpath_uri
 from unittest.mock import patch
 
 from uwtools.files import FileManager, S3FileManager, UnixFileManager
 from uwtools.files.gateway import s3
 from uwtools.files.model import S3, Prefixes, Unix
+from uwtools.test.support import fixpath_uri
 
 
 def test_FileManager():

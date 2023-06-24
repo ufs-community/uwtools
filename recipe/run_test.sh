@@ -39,7 +39,7 @@ unittest() {
   echo Running unit tests...
   (
     set -eux
-    coverage run -m pytest -v $srcdir/test
+    coverage run -m pytest -v $srcdir
     coverage report
   )
   echo OK

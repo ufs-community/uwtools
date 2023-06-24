@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 def fixpath(suffix: str = "") -> Path:
-    with resources.as_file(resources.files("fixtures")) as prefix:
+    with resources.as_file(resources.files("uwtools.test.fixtures")) as prefix:
         path = prefix / suffix
     return path
 
