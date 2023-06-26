@@ -54,6 +54,12 @@ class SRWExperiment(Facade): # pragma: no cover
         Create the experiment directory.
 
         '''
+        modname = "uwtools.apps.srw.SRW210"
+        # UW version coming soon!
+        # Note: for alternate versions, manually set the modname to the appropriate app version
+        # see the src/uwtools/apps/ directory for options
+        workflow_generator = getattr(import_module(modname), "create_experiment")
+        workflow_generator()
 
     def create_manager_files(self):
         '''

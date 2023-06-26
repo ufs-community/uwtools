@@ -44,7 +44,7 @@ class SRW210(Facade): # pragma: no cover
             with open('config.yaml', 'w', encoding="utf-8") as f:
                 ## Note: this is a temporary path until parsing the SRW directory is implemented
                 subprocess.run(f"python config_utils.py -c {config_file} -t $PWD/config_defaults.yaml -o yaml"
-                               , capture_output=True, shell=True, stdout=f)
+                               , capture_output=True, check=False, shell=True, stdout=f)
         elif file_type == 'YAML':
             shutil.copy2(config_file, 'config.yaml')
         else:
@@ -60,9 +60,12 @@ class SRW210(Facade): # pragma: no cover
 
     def create_experiment(self):
         '''
-        Create the experiment directory.
-
+        Generate the regional workflow.
+        This sets up the workflow based on config.yaml, links fix files, creates input.nml and FV3LAM_wflow.xml.
         '''
+        with open('config.yaml', 'w', encoding="utf-8") as f:
+            # Note: this is a temporary path until parsing the SRW directory is implemented
+            subprocess.run("python generate_FV3LAM_wflow.py", capture_output=True, check=False, shell=True, stdout=f)
 
     def create_manager_files(self):
         '''

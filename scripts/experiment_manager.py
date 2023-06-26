@@ -64,6 +64,7 @@ def manager(argv): # pragma: no cover
     managed_experiment = experiment_class(user_args.config_file, log_name=name)
 
     managed_experiment.load_config()
+    managed_experiment.create_experiment()
 
 
 if __name__ == '__main__':
