@@ -28,8 +28,9 @@ def parse_args(argv):# pragma: no cover
     parser.add_argument(
         '--forecast_app',
         help='If provided, will define the app to be run.\
-            Currently accepts SRW, MRW, or HAFS',
-        choices=["SRW", "MRW", "HAFS"],
+            Currently accepts SRW',
+            # will later include MRW, HAFS and more
+        choices=["SRW"],
     )
     parser.add_argument(
         '-v', '--verbose',

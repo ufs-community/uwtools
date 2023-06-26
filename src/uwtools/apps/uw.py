@@ -19,7 +19,7 @@ from ..drivers.facade import Facade
 logging.getLogger(__name__)
 
 
-class UW(Facade): # pragma: no cover
+class UWforSRW(Facade): # pragma: no cover
     #remove pragma when completed
 
     '''

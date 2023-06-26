@@ -23,6 +23,8 @@ class SRW210(Facade): # pragma: no cover
 
     '''
         Concrete class to handle UFS Short Range Weather app forecasts.
+        Methods call manual command line processes as described in the docs.
+        UFS Short Range Weather app, release v2.1.0
     '''
     def __init__(self, argv):
 
@@ -39,10 +41,10 @@ class SRW210(Facade): # pragma: no cover
         '''
         file_type = cli_helpers.get_file_type(config_file)
         if file_type == 'INI':
-            with open('config.yaml', 'w', encoding="utf-8") as file_name:
+            with open('config.yaml', 'w', encoding="utf-8") as f:
                 ## Note: this is a temporary path until parsing the SRW directory is implemented
-                subprocess.call(["python", "config_utils.py", "-c", config_file, "-t",
-                             "$PWD/config_defaults.yaml", "-o", "yaml"], stdout=file_name)
+                subprocess.run(f"python config_utils.py -c {config_file} -t $PWD/config_defaults.yaml -o yaml"
+                               , capture_output=True, shell=True, stdout=f)
         elif file_type == 'YAML':
             shutil.copy2(config_file, 'config.yaml')
         else:

@@ -12,9 +12,9 @@ See UW documentation for more information:
 https://github.com/ufs-community/workflow-tools/wiki/Implementation-of-a-Service-Oriented-Architecture-Fa%C3%A7ade
 '''
 
-import abc
+from abc import ABC, abstractmethod
 
-class Facade: # pragma: no cover
+class Facade(ABC): # pragma: no cover
     #remove pragma when completed
 
     ''' 
@@ -53,7 +53,7 @@ class Facade: # pragma: no cover
 
         '''
 
-    @abc.abstractmethod
+    @abstractmethod
     def load_config(self, config_file):
         '''
         Load the configuration file. This is the concrete implementation of the strangler pattern. This will 
@@ -61,28 +61,28 @@ class Facade: # pragma: no cover
 
         '''
 
-    @abc.abstractmethod
+    @abstractmethod
     def validate_config(self):
         '''
         Validate the configuration file.
 
         '''
 
-    @abc.abstractmethod
+    @abstractmethod
     def create_experiment(self):
         '''
         Create the experiment directory.
 
         '''
 
-    @abc.abstractmethod
+    @abstractmethod
     def create_manager_files(self):
         '''
         Create the manager files.
 
         '''
 
-    @abc.abstractmethod
+    @abstractmethod
     def link_fix_files(self):
         '''
         Link the fix files.
