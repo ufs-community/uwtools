@@ -1,0 +1,11 @@
+platform:
+  WORKFLOW_MANAGER: 20
+  NCORES_PER_NODE: forty
+  SCHED: slurm
+  CCPA_OBS_DIR: /scratchy/NCEPDEV/nems/role.epic/UFS_SRW_data/develop/obs_data/ccpa/proc
+  MRMS_OBS_DIR: /scratchy/NCEPDEV/nems/role.epic/UFS_SRW_data/develop/obs_data/mrms/proc
+  NDAS_OBS_DIR: tests/fixtures/good.yaml
+
+cpl_aqm_parm:
+  AQM_CONFIG_DIR: /scratchy/NCEPDEV/naqfc/RRFS_CMAQ/aqm/epa/data
+  AQM_BIO_DIR: /scratchy/NCEPDEV/naqfc/RRFS_CMAQ/aqm/bio
