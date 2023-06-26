@@ -81,11 +81,13 @@ def validate_config(argv, log=None):
         log = cli_helpers.setup_logging(user_args, log_name=name)
 
     # Get the config file to be validated and dereference jinja templates
+    # The config file will only be 2 levels deep
     config_class = getattr(config, "YAMLConfig")
     config_obj = config_class(user_args.config_file, log_name=log.name)
     config_obj.dereference_all()
 
     # Load the json validation schema
+    # This json file is created using the jsonschema syntax
     with open(user_args.validation_schema, 'r',
               encoding="utf-8") as schema_file:
         schema = json.load(schema_file)
@@ -107,6 +109,7 @@ def validate_config(argv, log=None):
     path_list = []
     for field in schema["properties"]:
         for value in schema["properties"][field]["properties"]:
+            # the json pair "format": "uri" labels a path or file
             if "format" in schema["properties"][field]["properties"][value]:
                 path_list.append(value)
 
@@ -120,7 +123,7 @@ def validate_config(argv, log=None):
                                   value, config_obj.data[field][value])
 
     if schema_error > 0:
-        sys.exit(f'This configuration file has {str(schema_error)} errors')
+        sys.exit(f'This configuration file has {schema_error} errors')
     else:
         sys.exit(0)
 
