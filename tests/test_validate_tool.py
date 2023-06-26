@@ -5,10 +5,7 @@
 This test checks the validate config tool command line script
 '''
 import os
-import sys
 import pathlib
-import json
-import jsonschema
 import pytest
 
 from scripts import validate_config
@@ -33,7 +30,7 @@ def test_config_no_errors(): #pylint: disable=unused-variable
 
             assert pytest_wrapped_e.type == SystemExit
             assert pytest_wrapped_e.value.code == 0
-    except BaseException:
+    except SystemExit:
         assert True
 
 
