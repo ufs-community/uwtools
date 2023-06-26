@@ -11,7 +11,6 @@ import os
 import sys
 import json
 import jsonschema
-import yaml
 
 from uwtools import config
 from uwtools import exceptions
@@ -90,7 +89,7 @@ def validate_config(argv, log=None):
     with open(user_args.validation_schema, 'r',
               encoding="utf-8") as schema_file:
         schema = json.load(schema_file)
-        
+
     schema_error = 0
 
     # Validate the config file against the schema file
@@ -110,17 +109,21 @@ def validate_config(argv, log=None):
         for value in schema["properties"][field]["properties"]:
             if "format" in schema["properties"][field]["properties"][value]:
                 path_list.append(value)
-                
+
     # Check for existence of those files or paths
     for field in config_obj.data:
         for value in config_obj.data[field]:
             if value in path_list:
                 if not os.path.exists(config_obj.data[field][value]):
                     schema_error += 1
-                    logging.error(f'{value} has Invalid Path {config_obj.data[field][value]}')
-                    
+                    logging.error(f'{value} has Invalid Path '
+                                  '{config_obj.data[field][value]}')
+
     if schema_error > 0:
         sys.exit(f'This configuration file has {str(schema_error)} errors')
+    else:
+        sys.exit(0)
+
 
 if __name__ == '__main__':
 
