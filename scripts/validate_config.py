@@ -116,8 +116,8 @@ def validate_config(argv, log=None):
             if value in path_list:
                 if not os.path.exists(config_obj.data[field][value]):
                     schema_error += 1
-                    logging.error(f'{value} has Invalid Path '
-                                  f'{config_obj.data[field][value]}')
+                    logging.error('%s has Invalid Path %s',
+                                  value, config_obj.data[field][value])
 
     if schema_error > 0:
         sys.exit(f'This configuration file has {str(schema_error)} errors')
