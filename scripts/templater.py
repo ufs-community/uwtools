@@ -117,6 +117,7 @@ def set_template(argv):
 
     name = f"{inspect.stack()[0][3]}"
     log = cli_helpers.setup_logging(user_args, log_name=name)
+    cli_arg = ""
 
     log.info(f"""Running {name} with args: """)
     log.info(f"""{('-' * 70)}""")
@@ -124,6 +125,10 @@ def set_template(argv):
     for name, val in user_args.__dict__.items():
         if name not in ["config"]:
             log.info("{name:>15s}: {val}".format(name=name, val=val))
+    log.info("To re-run with these settings: ")
+    for arg in argv:
+        cli_arg = cli_arg + arg
+    log.info(f"""{name}.py {cli_arg}""") 
     log.info(f"""{('-' * 70)}""")
     log.info(f"""{('-' * 70)}""")
 
