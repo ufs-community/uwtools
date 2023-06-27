@@ -63,9 +63,9 @@ class SRW210(Facade): # pragma: no cover
         Generate the regional workflow.
         This sets up the workflow based on config.yaml, links fix files, creates input.nml and FV3LAM_wflow.xml.
         '''
-        with open('config.yaml', 'w', encoding="utf-8") as f:
+        with open('config.yaml', 'w', encoding="utf-8") as file:
             # Note: this is a temporary path until parsing the SRW directory is implemented
-            subprocess.run("python generate_FV3LAM_wflow.py", capture_output=True, check=False, shell=True, stdout=f)
+            subprocess.run("python generate_FV3LAM_wflow.py", capture_output=True, check=False, shell=True, stdout=file)
 
     def create_manager_files(self):
         '''
