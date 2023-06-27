@@ -72,7 +72,7 @@ def parse_args(argv):# pragma: no cover
     return parser.parse_args(argv)
 
 
-def run_forecast(argv): # pragma: no cover
+def run_forecast(argv, log=None): # pragma: no cover
     '''
     Defines the user interface for the forecast driver. Parses arguments
     provided by the user and passes to the Forecast driver class to be run.'''

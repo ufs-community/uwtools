@@ -51,7 +51,7 @@ def parse_args(argv):# pragma: no cover
     return parser.parse_args(argv)
 
 
-def manager(argv): # pragma: no cover
+def manager(argv, log=None): # pragma: no cover
     '''
     Defines the user interface for the experiment manager. Parses arguments
     provided by the user and passes to the facade to be run.'''
