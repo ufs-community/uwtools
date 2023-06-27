@@ -61,7 +61,7 @@ def manager(argv): # pragma: no cover
     log = cli_helpers.setup_logging(user_args, log_name=name)
 
     experiment_class = getattr(experiment, f"{user_args.forecast_app}Experiment")
-    managed_experiment = experiment_class(user_args.config_file, log_name=name)
+    managed_experiment = experiment_class(user_args.config_file)
 
     managed_experiment.load_config()
     managed_experiment.create_experiment()

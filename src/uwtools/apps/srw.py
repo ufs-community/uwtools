@@ -41,10 +41,10 @@ class SRW210(Facade): # pragma: no cover
         '''
         file_type = cli_helpers.get_file_type(config_file)
         if file_type == 'INI':
-            with open('config.yaml', 'w', encoding="utf-8") as f:
+            with open('config.yaml', 'w', encoding="utf-8") as file:
                 ## Note: this is a temporary path until parsing the SRW directory is implemented
                 subprocess.run(f"python config_utils.py -c {config_file} -t $PWD/config_defaults.yaml -o yaml"
-                               , capture_output=True, check=False, shell=True, stdout=f)
+                               , capture_output=True, check=False, shell=True, stdout=file)
         elif file_type == 'YAML':
             shutil.copy2(config_file, 'config.yaml')
         else:
