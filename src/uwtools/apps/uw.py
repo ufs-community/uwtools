@@ -16,9 +16,6 @@ from uwtools.utils import cli_helpers
 from uwtools import config
 from ..drivers.facade import Facade
 
-logging.getLogger(__name__)
-
-
 class UWforSRW(Facade): # pragma: no cover
     #remove pragma when completed
 

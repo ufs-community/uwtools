@@ -10,6 +10,7 @@ import inspect
 import os
 import sys
 
+from uwtools import exceptions
 from uwtools.drivers import experiment
 from uwtools.utils import cli_helpers
 
@@ -68,4 +69,10 @@ def manager(argv): # pragma: no cover
 
 
 if __name__ == '__main__':
-    manager(sys.argv[1:])
+    cli_args = parse_args(sys.argv[1:])
+    LOG_NAME = "experiment_manager"
+    cli_log = cli_helpers.setup_logging(cli_args, log_name=LOG_NAME)
+    try:
+        manager(sys.argv[1:], cli_log)
+    except exceptions.UWConfigError as e:
+        sys.exit(e)

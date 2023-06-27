@@ -15,9 +15,6 @@ from uwtools.utils import file_helpers
 from uwtools.utils import cli_helpers
 from ..drivers.facade import Facade
 
-logging.getLogger(__name__)
-
-
 class SRW210(Facade): # pragma: no cover
     #remove pragma when completed
 
@@ -63,9 +60,8 @@ class SRW210(Facade): # pragma: no cover
         Generate the regional workflow.
         This sets up the workflow based on config.yaml, links fix files, creates input.nml and FV3LAM_wflow.xml.
         '''
-        with open('config.yaml', 'w', encoding="utf-8") as file:
-            # Note: this is a temporary path until parsing the SRW directory is implemented
-            subprocess.run("python generate_FV3LAM_wflow.py", capture_output=True, check=False, shell=True, stdout=file)
+        # Note: this is a temporary path until parsing the SRW directory is implemented
+        subprocess.run("python generate_FV3LAM_wflow.py", check=False, shell=True)
 
     def create_manager_files(self):
         '''

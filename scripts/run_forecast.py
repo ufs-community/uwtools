@@ -10,6 +10,7 @@ import inspect
 import os
 import sys
 
+from uwtools import exceptions
 from uwtools.drivers import forecast
 from uwtools.utils import cli_helpers
 
@@ -90,4 +91,10 @@ def run_forecast(argv): # pragma: no cover
 
 
 if __name__ == '__main__':
-    run_forecast(sys.argv[1:])
+    cli_args = parse_args(sys.argv[1:])
+    LOG_NAME = "run_forecast"
+    cli_log = cli_helpers.setup_logging(cli_args, log_name=LOG_NAME)
+    try:
+        run_forecast(sys.argv[1:], cli_log)
+    except exceptions.UWConfigError as e:
+        sys.exit(e)
