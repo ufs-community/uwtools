@@ -470,22 +470,22 @@ def test_lsf4():
 def test_string_output():
     props = {
         "account": "account_name",
+        "memory": "1MB",
         "nodes": 2,
         "queue": "batch",
-        "memory": "1MB",
         "scheduler": "lsf",
-        "threads": 2,
         "tasks_per_node": 3,
+        "threads": 2,
         "walltime": "00:01:00",
     }
     actual = str(JobScheduler.get_scheduler(props).job_card)
     expected = """
 #BSUB -P account_name
-#BSUB -n 6
-#BSUB -q batch
 #BSUB -R affinity[core(2)]
+#BSUB -R rusage[mem=1000KB]
 #BSUB -R span[ptile=3]
 #BSUB -W 00:01:00
-#BSUB -R rusage[mem=1000KB]
+#BSUB -n 6
+#BSUB -q batch
 """.strip()
     assert actual == expected

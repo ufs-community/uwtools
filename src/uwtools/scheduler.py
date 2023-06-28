@@ -1,9 +1,10 @@
 """
 Job Scheduling
 """
-import collections
+
 import logging
 import re
+from collections import UserDict, UserList
 from collections.abc import Mapping
 from typing import Any, Dict, List
 
@@ -45,7 +46,7 @@ class OptionalAttribs:
     PLACEMENT = "placement"
 
 
-class JobCard(collections.UserList):
+class JobCard(UserList):
     """represents a job card to submit to a scheduler"""
 
     def __str__(self):
@@ -63,7 +64,7 @@ class JobCard(collections.UserList):
         return line_separator.join(self)
 
 
-class JobScheduler(collections.UserDict):
+class JobScheduler(UserDict):
     """Creates JobCard"""
 
     _map: dict = {}
@@ -71,9 +72,8 @@ class JobScheduler(collections.UserDict):
     key_value_separator = "="
 
     def __init__(self, props):
-        super().__init__()
+        super().__init__(props)
         self.validate_props(props)
-        self.update(props)
 
     def __getattr__(self, name) -> Any:
         if name in self:
@@ -88,18 +88,12 @@ class JobScheduler(collections.UserDict):
             for attr in dir(RequiredAttribs)
             if not callable(getattr(RequiredAttribs, attr)) and not attr.startswith("__")
         ]
+        if diff := [x for x in members if x not in props]:
+            raise ValueError(f"Missing required attributes: [{', '.join(diff)}]")
 
-        diff = [x for x in members if x not in props]
-        if len(diff):
-            raise ValueError(f"missing required attributes: [{', '.join(diff)}]")
-
-    @property
-    def _data(self) -> Dict[Any, Any]:
-        return self.__dict__["data"]
-
-    def pre_process(self) -> Dict[Any, Any]:
-        """pre process attributes before converting to job card"""
-        return self._data
+    def pre_process(self) -> Dict[str, Any]:
+        """Pre-process attributes before converting to job card."""
+        return self.data
 
     @staticmethod
     def post_process(items: List[str]) -> List[str]:
@@ -108,7 +102,8 @@ class JobScheduler(collections.UserDict):
 
     @property
     def job_card(self) -> JobCard:
-        """returns the job card to be fed to external scheduler"""
+        """Returns the job card to be fed to external scheduler."""
+
         sanitized_attribs = self.pre_process()
 
         known = []
@@ -117,7 +112,7 @@ class JobScheduler(collections.UserDict):
                 scheduler_flag = (
                     self._map[key](value) if callable(self._map[key]) else self._map[key]
                 )
-                scheduler_value = value if not callable(self._map[key]) else ""
+                scheduler_value = "" if callable(self._map[key]) else value
                 directive = (
                     f"{self.prefix} {scheduler_flag}{self.key_value_separator}{scheduler_value}"
                 )
@@ -137,11 +132,15 @@ class JobScheduler(collections.UserDict):
 
         processed = self.post_process(known + unknown + flags)
 
-        return JobCard(processed)
+        # Sort batch directives to normalize output w.r.t. potential differences
+        # in ordering of input dicts.
+
+        return JobCard(sorted(processed))
 
     @classmethod
     def get_scheduler(cls, props: Mapping):
-        """returns the appropriate scheduler
+        """
+        Returns the appropriate scheduler.
 
         Parameters
         ----------
@@ -150,22 +149,20 @@ class JobScheduler(collections.UserDict):
 
         TODO: map_schedulers should be hoisted up out of the method
         """
-        if "scheduler" not in props:
-            raise KeyError(f"no scheduler defined in props: [{', '.join(props.keys())}]")
 
-        map_schedulers = {
-            "slurm": Slurm,
-            "pbs": PBS,
-            "lsf": LSF,
-        }
-        logging.debug("getting scheduler type %s", map_schedulers[props["scheduler"]])
+        if "scheduler" not in props:
+            raise KeyError(f"No scheduler defined in props: [{', '.join(props.keys())}]")
+        name = props["scheduler"]
+        schedulers = {"slurm": Slurm, "pbs": PBS, "lsf": LSF}
+        scheduler = schedulers[name]
+        logging.debug("Getting %s scheduler", scheduler)
         try:
-            return map_schedulers[props["scheduler"]](props)
+            return scheduler(props)
         except KeyError as error:
             raise KeyError(
-                f"{props['scheduler']} is not a supported scheduler"
+                f"{name} is not a supported scheduler"
                 + "Currently supported schedulers are:\n"
-                + f'{" | ".join(map_schedulers.keys())}"'
+                + f'{" | ".join(schedulers.keys())}"'
             ) from error
 
 
@@ -211,7 +208,7 @@ class PBS(JobScheduler):
     }
 
     def pre_process(self) -> Dict[str, Any]:
-        output = self._data
+        output = self.data
         output.update(self._select(output))
         output.update(self._placement(output))
 
@@ -289,7 +286,7 @@ class LSF(JobScheduler):
     }
 
     def pre_process(self) -> Dict[str, Any]:
-        items = self._data
+        items = self.data
         # LSF requires threads to be set (if None is provided, default to 1)
         items[OptionalAttribs.THREADS] = items.get(OptionalAttribs.THREADS, 1)
         nodes = items.get(RequiredAttribs.NODES, "")
