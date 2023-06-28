@@ -106,7 +106,7 @@ def setup_config_obj(user_args, log_name=None):
         cfg = cfg_obj(user_args.config_file)
         log.debug("User config will be used to fill template.")
     else:
-        cfg = os.environ
+        cfg = dict(os.environ)  # Do not modify os.environ: Make a copy.
         log.debug("Environment variables will be used to fill template.")
 
     if user_args.config_items:

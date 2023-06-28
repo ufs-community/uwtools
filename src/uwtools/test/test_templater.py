@@ -6,7 +6,6 @@ Tests for templater tool.
 import argparse
 import io
 import os
-import shutil
 import tempfile
 from contextlib import redirect_stdout
 from unittest.mock import patch
@@ -147,61 +146,38 @@ def test_set_template_yaml_config():
         assert compare_files(expected_file, out_file)
 
 
-@pytest.mark.skip()
-def test_set_template_no_config_suffix_fails():
-    """Test that there are no errors when passing relative path and INI
-    config."""
+def test_set_template_bad_config_suffix(tmp_path):
+    """
+    Test that a bad config filename suffix is rejected.
+    """
 
-    input_file = "tests/fixtures/nml.IN"
-    config_file = "tests/fixtures/fruit_config.sh"
-
-    with tempfile.NamedTemporaryFile(dir=".", mode="w") as tmp_file:
-        shutil.copy2(config_file, tmp_file.name)
-
-        args = [
-            "-i",
-            input_file,
-            "-c",
-            tmp_file.name,
-            "-d",
-        ]
-        with raises(ValueError):
-            templater.main(args)
+    badfile = str(tmp_path / "foo.shx")  # .shx is a bad suffix
+    with open(badfile, "w", encoding="utf-8"):
+        pass  # create empty file
+    with raises(ValueError):
+        templater.main(["-i", fixture_path("nml.IN"), "-c", badfile, "-d"])
 
 
-@pytest.mark.skip()
-def test_set_template_abs_path_ini_config():
-    """Test that there are no errors when passing relative path and INI
-    config."""
+def test_set_template_good_paths():
+    """
+    Confirm success using namelist input and shell config.
+    """
 
-    input_file = "tests/fixtures/nml.IN"
-    config_file = "tests/fixtures/fruit_config.sh"
-
-    args = [
-        "-i",
-        input_file,
-        "-c",
-        config_file,
-        "-d",
-    ]
-    templater.main(args)
+    templater.main(["-i", fixture_path("nml.IN"), "-c", fixture_path("fruit_config.sh"), "-d"])
 
 
-@pytest.mark.skip()
-def test_set_template_command_line_config():
-    """Test that values provided on the command line produce the appropriate
-    output."""
+def test_set_template_command_line_config(capsys):
+    """
+    Test behavior when values are provided on the command line.
+    """
 
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
-
-    outcome = (
-        """Running set_template with args:
+    infile = fixture_path("nml.IN")
+    expected = f"""
+Running with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
- input_template: """
-        + input_file
-        + """
+ input_template: {infile}
     config_file: None
    config_items: ['fruit=pear', 'vegetable=squash', 'how_many=22']
         dry_run: True
@@ -217,31 +193,17 @@ def test_set_template_command_line_config():
   how_many = 22
   dressing = 'balsamic'
 /
-"""
-    )
+""".lstrip()
 
-    args = [
-        "-i",
-        input_file,
-        "--dry_run",
-        "fruit=pear",
-        "vegetable=squash",
-        "how_many=22",
-    ]
-
-    # Capture stdout for the dry run
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
-        templater.main(args)
-    result = outstring.getvalue()
-    for outcome_line in outcome.split("\n"):
-        assert outcome_line in result
+    templater.main(["-i", infile, "--dry_run", "fruit=pear", "vegetable=squash", "how_many=22"])
+    actual = capsys.readouterr().out
+    for line in expected.split("\n"):
+        assert line in actual
 
 
 def test_set_template_yaml_config_model_configure(tmp_path):
     """
-    Tests that the templater will work as expected for a simple model_configure
-    file.
+    Test behavior when reading a simple model_configure file.
     """
 
     outfile = f"{tmp_path}/test_render_from_yaml.nml"
@@ -259,11 +221,9 @@ def test_set_template_yaml_config_model_configure(tmp_path):
 
 def test_set_template_verbosity(capsys):
     infile = fixture_path("nml.IN")
-    # #PM# WHAT TO DO ABOUT logfile BELOW?
-    logfile = "/dev/null"
-
+    # #PM# WHAT TO DO ABOUT /dev/null BELOW?
     expected = f"""
-Finished setting up debug file logging in {logfile}
+Finished setting up debug file logging in /dev/null
 Running with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
@@ -315,7 +275,7 @@ J2Template._load_file INPUT Args:
 
 def test_mutually_exclusive_args():
     """
-    Test that -q & -d args are mutually exclusive.
+    Test that mutually-exclusive -q/-d args are rejected.
     """
 
     infile = fixture_path("fruit_config.yaml")
