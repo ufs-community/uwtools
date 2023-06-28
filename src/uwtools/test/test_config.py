@@ -984,7 +984,7 @@ def test_compare_nml(capsys):
     nml1 = fixture_path("fruit_config.nml")
     nml2 = fixture_path("fruit_config_mult_sect.nml")
     config.create_config_obj(parse_config_args(["-i", nml1, "-c", nml2, "--compare"]))
-    actual = capsys.readouterr().out
+    actual = capsys.readouterr().out.split("\n")
 
     # Make sure the tool output contains all the expected lines:
 
@@ -997,6 +997,7 @@ setting:         topping:  - None + crouton
 setting:            size:  - None + large
 setting:            meat:  - None + chicken
 """.strip()
+
     for line in expected.split("\n"):
         assert line.strip() in actual
 
@@ -1007,7 +1008,7 @@ setting:            meat:  - None + chicken
     # above that give us the section, key value diffs like this:
     #   config:       vegetable:  - eggplant + peas
 
-    pattern = re.compile(r"(\w):\s+(\w+):\s+-\s+(\w+)\s+\+\s+(\w+)")
-    for line in actual.split("\n"):
+    pattern = re.compile(r"\w:\s+\w+:\s+-\s+\w+\s+\+\s+\w+")
+    for line in actual:
         if re.search(pattern, line):
             assert line in expected
