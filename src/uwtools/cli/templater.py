@@ -79,6 +79,7 @@ def parse_args(argv):
         "-l",
         "--log_file",
         help="Optional path to a specified log file",
+        # #PM# WHAT TO DO ABOUT THIS LOGDFILE PATH?
         default="/dev/null",  # os.path.join(os.path.dirname(__file__), "templater.log"),
     )
 
@@ -125,14 +126,14 @@ def main(argv):
         log_file=user_args.log_file, log_name=name, quiet=user_args.quiet, verbose=user_args.verbose
     )
 
-    log.info(f"""Running {name} with args: """)
-    log.info(f"""{('-' * 70)}""")
-    log.info(f"""{('-' * 70)}""")
+    log.info("Running with args:")
+    log.info(f"{('-' * 70)}")
+    log.info(f"{('-' * 70)}")
     for name, val in user_args.__dict__.items():
         if name not in ["config"]:
             log.info("{name:>15s}: {val}".format(name=name, val=val))
-    log.info(f"""{('-' * 70)}""")
-    log.info(f"""{('-' * 70)}""")
+    log.info(f"{('-' * 70)}")
+    log.info(f"{('-' * 70)}")
 
     cfg = setup_config_obj(user_args, log_name=log.name)
 

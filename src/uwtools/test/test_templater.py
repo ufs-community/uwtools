@@ -1,3 +1,5 @@
+# pylint: disable=missing-function-docstring
+
 """
 Tests for templater tool.
 """
@@ -7,10 +9,13 @@ import os
 import shutil
 import tempfile
 from contextlib import redirect_stdout
+from unittest.mock import patch
 
 import pytest
+from pytest import raises
 
 from uwtools.cli import templater
+from uwtools.test.support import fixture_posix
 from uwtools.utils import file_helpers
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
@@ -161,7 +166,7 @@ def test_set_template_no_config_suffix_fails():
             tmp_file.name,
             "-d",
         ]
-        with pytest.raises(ValueError):
+        with raises(ValueError):
             templater.main(args)
 
 
@@ -234,45 +239,37 @@ def test_set_template_command_line_config():
         assert outcome_line in result
 
 
-@pytest.mark.skip()
-def test_set_template_yaml_config_model_configure():
-    """Tests that the templater will work as expected for a simple model_configure
-    file."""
+def test_set_template_yaml_config_model_configure(tmp_path):
+    """
+    Tests that the templater will work as expected for a simple model_configure
+    file.
+    """
 
-    input_file = os.path.join(uwtools_file_base, "fixtures/model_configure.sample.IN")
-    config_file = os.path.join(uwtools_file_base, "fixtures/model_configure.values.yaml")
-    expected_file = os.path.join(uwtools_file_base, "fixtures/model_configure.sample")
-
-    # Make sure the output file matches the expected output
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/test_render_from_yaml.nml"
-
-        args = [
-            "-i",
-            input_file,
-            "-c",
-            config_file,
-            "-o",
-            out_file,
-        ]
-
-        templater.main(args)
-        assert file_helpers.compare_files(expected_file, out_file)
+    outfile = f"{tmp_path}/test_render_from_yaml.nml"
+    args = [
+        "-i",
+        fixture_posix("model_configure.sample.IN"),
+        "-c",
+        fixture_posix("model_configure.values.yaml"),
+        "-o",
+        outfile,
+    ]
+    templater.main(args)
+    assert file_helpers.compare_files(fixture_posix("model_configure.sample"), outfile)
 
 
-@pytest.mark.skip()
-def test_set_template_verbosity():
-    """Unit test for checking dry-run output of ingest namelist tool"""
+def test_set_template_verbosity(capsys):
+    infile = fixture_posix("nml.IN")
+    # #PM# WHAT TO DO ABOUT logfile BELOW?
+    logfile = "/dev/null"
 
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
-    logfile = "/dev/null"  # os.path.join(os.path.dirname(templater.__file__), "templater.log")
-
-    outcome = f"""Finished setting up debug file logging in {logfile}
-Running set_template with args:
+    expected = f"""
+Finished setting up debug file logging in {logfile}
+Running with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
- input_template: {input_file}
+ input_template: {infile}
     config_file: None
    config_items: []
         dry_run: True
@@ -289,75 +286,39 @@ Running set_template with args:
   dressing = 'balsamic'
 /
 J2Template._load_file INPUT Args:
-{input_file}
-"""
+{infile}
+""".lstrip()
 
-    os.environ["fruit"] = "banana"
-    os.environ["how_many"] = "22"
-    if os.environ.get("vegetable") is not None:
-        del os.environ["vegetable"]
+    # Test verbose output when missing a required template value.
 
-    # test verbose level
-    args = [
-        "-i",
-        input_file,
-        "--dry_run",
-        "-v",
-    ]
+    env = {"fruit": "banana", "how_many": "22"}  # missing "vegetable"
+    with patch.dict(os.environ, env):
+        with raises(ValueError) as error:
+            templater.main(["-i", infile, "--dry_run", "-v"])
+        assert str(error.value) == "Missing values needed by template"
 
-    with pytest.raises(ValueError) as error:
-        templater.main(args)
+    # Test verbose output when all template values are available.
 
-    expected = "Missing values needed by template"
-    actual = str(error.value)
-    assert expected == actual
+    env["vegetable"] = "tomato"
+    with patch.dict(os.environ, env):
+        templater.main(["-i", infile, "--dry_run", "-v"])
+    actual = capsys.readouterr().out
+    for line in expected.split("\n"):
+        assert line in actual
 
-    os.environ["vegetable"] = "tomato"
+    # Test quiet level.
 
-    # Capture verbose stdout
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
-        templater.main(args)
-    result = outstring.getvalue()
+    # PM# WHAT'S THE RATIONALE HERE?
 
-    for outcome_line in outcome.split("\n"):
-        assert outcome_line in result
-
-    # test quiet level
-    args = [
-        "-i",
-        input_file,
-        "-q",
-    ]
-
-    with pytest.raises(argparse.ArgumentError):
-        templater.main(args)
+    with raises(argparse.ArgumentError):
+        templater.main(["-i", infile, "-q"])
 
 
-@pytest.mark.skip()
 def test_mutually_exclusive_args():
     """
-    Test that -q and -v args are mutually exclusive and testing -q and -d are mutually exclusive.
+    Test that -q & -d args are mutually exclusive.
     """
 
-    input_file = os.path.join(uwtools_file_base, "fixtures/fruit_config.yaml")
-
-    args = [
-        "-i",
-        input_file,
-        "-v",
-        "-q",
-    ]
-
-    with pytest.raises(SystemExit):
-        templater.main(args)
-
-    args = [
-        "-i",
-        input_file,
-        "-d",
-        "-q",
-    ]
-
-    with pytest.raises(argparse.ArgumentError):
-        templater.main(args)
+    infile = fixture_posix("fruit_config.yaml")
+    with raises(argparse.ArgumentError):
+        templater.main(["-i", infile, "-q", "-d"])

@@ -65,6 +65,7 @@ def parse_args(argv):  # pragma: no cover
         "-l",
         "--log_file",
         help="Optional path to a specified log file",
+        # #PM# WHAT TO DO ABOUT THIS LOGDFILE PATH?
         default="/dev/null",  # os.path.join(os.path.dirname(__file__), "forecast.log"),
     )
     return parser.parse_args(argv)

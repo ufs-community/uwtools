@@ -96,6 +96,7 @@ def parse_args(argv):
         "-l",
         "--log_file",
         help="Optional path to a specified log file",
+        # #PM# WHAT TO DO ABOUT THIS LOGDFILE PATH?
         default="/dev/null",  # os.path.join(os.path.dirname(__file__), "set_config.log"),
     )
 
