@@ -15,8 +15,7 @@ import pytest
 from pytest import raises
 
 from uwtools.cli import templater
-from uwtools.test.support import fixture_path
-from uwtools.utils import file_helpers
+from uwtools.test.support import compare_files, fixture_path
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -145,7 +144,7 @@ def test_set_template_yaml_config():
         ]
 
         templater.main(args)
-        assert file_helpers.compare_files(expected_file, out_file)
+        assert compare_files(expected_file, out_file)
 
 
 @pytest.mark.skip()
@@ -255,7 +254,7 @@ def test_set_template_yaml_config_model_configure(tmp_path):
         outfile,
     ]
     templater.main(args)
-    assert file_helpers.compare_files(fixture_path("model_configure.sample"), outfile)
+    assert compare_files(fixture_path("model_configure.sample"), outfile)
 
 
 def test_set_template_verbosity(capsys):

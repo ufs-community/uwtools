@@ -8,8 +8,7 @@ from pytest import fixture, raises
 
 from uwtools import config
 from uwtools.drivers.forecast import FV3Forecast
-from uwtools.test.support import fixture_path
-from uwtools.utils import file_helpers
+from uwtools.test.support import compare_files, fixture_path
 
 
 def test_create_config(tmp_path):
@@ -28,7 +27,7 @@ def test_create_config(tmp_path):
     expected_file = tmp_path / "expected_yaml.yaml"
     expected.dump_file(expected_file)
 
-    assert file_helpers.compare_files(expected_file, output_file)
+    assert compare_files(expected_file, output_file)
 
 
 @fixture
@@ -86,7 +85,7 @@ def test_create_field_table_without_base_file(create_field_table_assets, tmp_pat
     outfldtbl_file = tmp_path / "field_table_one.FV3_GFS"
     expected = fixture_path("field_table_from_input.FV3_GFS")
     forecast_obj.create_field_table(update_obj, outfldtbl_file)
-    assert file_helpers.compare_files(expected, outfldtbl_file)
+    assert compare_files(expected, outfldtbl_file)
 
 
 def test_create_field_table_with_base_file(create_field_table_assets, tmp_path):
@@ -96,7 +95,7 @@ def test_create_field_table_with_base_file(create_field_table_assets, tmp_path):
     outfldtbl_file = tmp_path / "field_table_two.FV3_GFS"
     expected = fixture_path("field_table_from_base.FV3_GFS")
     forecast_obj.create_field_table(update_obj, outfldtbl_file, base_file)
-    assert file_helpers.compare_files(expected, outfldtbl_file)
+    assert compare_files(expected, outfldtbl_file)
 
 
 def test_create_directory_structure(tmp_path):

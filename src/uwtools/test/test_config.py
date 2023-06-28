@@ -22,7 +22,8 @@ from typing import Any, Dict
 import pytest
 
 from uwtools import config, exceptions, logger
-from uwtools.utils import cli_helpers, file_helpers
+from uwtools.test.support import compare_files
+from uwtools.utils import cli_helpers
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
@@ -517,7 +518,7 @@ def test_set_config_yaml_simple():
         expected_file = f"{tmp_dir}/expected_yaml.yaml"
         expected.dump_file(expected_file)
 
-        assert file_helpers.compare_files(expected_file, out_file)
+        assert compare_files(expected_file, out_file)
 
 
 @pytest.mark.skip()
@@ -537,7 +538,7 @@ def test_set_config_ini_simple():
         expected_file = f"{tmp_dr}/expected_ini.ini"
         expected.dump_file(expected_file)
 
-        assert file_helpers.compare_files(expected_file, out_file)
+        assert compare_files(expected_file, out_file)
 
 
 @pytest.mark.skip()
@@ -557,7 +558,7 @@ def test_set_config_f90nml_simple():
         expected_file = f"{tmp_dr}/expected_nml.nml"
         expected.dump_file(expected_file)
 
-        assert file_helpers.compare_files(expected_file, out_file)
+        assert compare_files(expected_file, out_file)
 
 
 @pytest.mark.skip()
@@ -578,7 +579,7 @@ def test_set_config_bash_simple():
         expected_file = f"{tmp_dr}/expected_ini.ini"
         expected.dump_file(expected_file)
 
-        assert file_helpers.compare_files(expected_file, out_file)
+        assert compare_files(expected_file, out_file)
 
 
 @pytest.mark.skip()
@@ -603,7 +604,7 @@ def test_set_config_yaml_config_file():
         expected_file = f"{tmp_dir}/expected_yaml.yaml"
         expected.dump_file(expected_file)
 
-        assert file_helpers.compare_files(expected_file, out_file)
+        assert compare_files(expected_file, out_file)
 
 
 @pytest.mark.skip()
@@ -626,7 +627,7 @@ def test_set_config_f90nml_config_file():
         expected_file = f"{tmp_dir}/expected_nml.nml"
         expected.dump_file(expected_file)
 
-        assert file_helpers.compare_files(expected_file, out_file)
+        assert compare_files(expected_file, out_file)
 
 
 @pytest.mark.skip()
@@ -649,7 +650,7 @@ def test_set_config_ini_config_file():
         expected_file = f"{tmp_dir}/expected_ini.ini"
         expected.dump_file(expected_file)
 
-        assert file_helpers.compare_files(expected_file, out_file)
+        assert compare_files(expected_file, out_file)
 
 
 @pytest.mark.skip()
@@ -672,7 +673,7 @@ def test_set_config_ini_bash_config_file():
         expected_file = f"{tmp_dir}/expected_ini.ini"
         expected.dump_file(expected_file)
 
-        assert file_helpers.compare_files(expected_file, out_file)
+        assert compare_files(expected_file, out_file)
 
 
 @pytest.mark.skip()
@@ -897,7 +898,7 @@ def test_cfg_to_yaml_conversion():
         expected.dereference_all()
         expected.dump_file(expected_file)
 
-        assert file_helpers.compare_files(expected_file, out_file)
+        assert compare_files(expected_file, out_file)
 
         with open(out_file, "r", encoding="utf-8") as output:
             assert output.read()[-1] == "\n"
@@ -918,7 +919,7 @@ def test_output_file_conversion():
         expected_file = f"{tmp_dir}/expected_nml.nml"
         expected.dump_file(expected_file)
 
-        assert file_helpers.compare_files(expected_file, out_file)
+        assert compare_files(expected_file, out_file)
 
         with open(out_file, "r", encoding="utf-8") as output:
             assert output.read()[-1] == "\n"
@@ -942,7 +943,7 @@ def test_config_file_conversion():
         expected_file = f"{tmp_dir}/expected_nml.nml"
         expected.dump_file(expected_file)
 
-        assert file_helpers.compare_files(expected_file, out_file)
+        assert compare_files(expected_file, out_file)
 
         with open(out_file, "r", encoding="utf-8") as output:
             assert output.read()[-1] == "\n"
