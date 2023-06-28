@@ -1,8 +1,9 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,redefined-outer-name
 
 import pathlib
 
 import pytest
+from pytest import fixture
 
 from uwtools import config
 from uwtools.scheduler import JobScheduler
@@ -368,90 +369,60 @@ def test_slurm5():
     assert actual == expected
 
 
-@pytest.mark.skip()
-def test_lsf1():
-    expected = """#BSUB -P account_name
-#BSUB -q batch
-#BSUB -W 00:01:00
-#BSUB -n 1
-#BSUB -R span[ptile=1]
-#BSUB -R affinity[core(1)]"""
-
-    props = {
-        "scheduler": "lsf",
+@fixture
+def lsf_props():
+    return {
         "account": "account_name",
-        "queue": "batch",
-        "walltime": "00:01:00",
         "nodes": 1,
+        "queue": "batch",
+        "scheduler": "lsf",
         "tasks_per_node": 1,
         "threads": 1,
+        "walltime": "00:01:00",
     }
 
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
 
-    assert actual == expected
-
-
-@pytest.mark.skip()
-def test_lsf2():
-    expected = """#BSUB -P account_name
-#BSUB -q batch
+def test_lsf1(lsf_props):
+    expected = """
+#BSUB -P account_name
+#BSUB -R affinity[core(1)]
+#BSUB -R span[ptile=1]
 #BSUB -W 00:01:00
-#BSUB -n 12
+#BSUB -n 1
+#BSUB -q batch
+""".strip()
+    assert JobScheduler.get_scheduler(lsf_props).job_card.content() == expected
+
+
+def test_lsf2(lsf_props):
+    lsf_props.update({"tasks_per_node": 12})
+    expected = """
+#BSUB -P account_name
+#BSUB -R affinity[core(1)]
 #BSUB -R span[ptile=12]
-#BSUB -R affinity[core(1)]"""
-
-    props = {
-        "scheduler": "lsf",
-        "account": "account_name",
-        "queue": "batch",
-        "walltime": "00:01:00",
-        "nodes": 1,
-        "tasks_per_node": 12,
-    }
-
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
-    assert actual == expected
-
-
-@pytest.mark.skip()
-def test_lsf3():
-    expected = """#BSUB -P account_name
-#BSUB -q batch
 #BSUB -W 00:01:00
 #BSUB -n 12
+#BSUB -q batch
+""".strip()
+    assert JobScheduler.get_scheduler(lsf_props).job_card.content() == expected
+
+
+def test_lsf3(lsf_props):
+    lsf_props.update({"nodes": 2, "tasks_per_node": 6})
+    expected = """
+#BSUB -P account_name
+#BSUB -R affinity[core(1)]
 #BSUB -R span[ptile=6]
-#BSUB -R affinity[core(1)]"""
-
-    props = {
-        "scheduler": "lsf",
-        "account": "account_name",
-        "queue": "batch",
-        "walltime": "00:01:00",
-        "nodes": 2,
-        "tasks_per_node": 6,
-    }
-
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
-
-    assert actual == expected
+#BSUB -W 00:01:00
+#BSUB -n 12
+#BSUB -q batch
+""".strip()
+    assert JobScheduler.get_scheduler(lsf_props).job_card.content() == expected
 
 
-def test_lsf4():
-    props = {
-        "account": "account_name",
-        "memory": "1MB",
-        "nodes": 2,
-        "queue": "batch",
-        "scheduler": "lsf",
-        "tasks_per_node": 3,
-        "threads": 2,
-        "walltime": "00:01:00",
-    }
-    actual = str(JobScheduler.get_scheduler(props).job_card)
+def test_lsf4(lsf_props):
+    lsf_props.update({"memory": "1MB", "nodes": 2, "tasks_per_node": 3, "threads": 2})
+    job_card = JobScheduler.get_scheduler(lsf_props).job_card
     expected = """
 #BSUB -P account_name
 #BSUB -R affinity[core(2)]
@@ -461,28 +432,5 @@ def test_lsf4():
 #BSUB -n 6
 #BSUB -q batch
 """.strip()
-    assert actual == expected
-
-
-def test_string_output():
-    props = {
-        "account": "account_name",
-        "memory": "1MB",
-        "nodes": 2,
-        "queue": "batch",
-        "scheduler": "lsf",
-        "tasks_per_node": 3,
-        "threads": 2,
-        "walltime": "00:01:00",
-    }
-    actual = str(JobScheduler.get_scheduler(props).job_card)
-    expected = """
-#BSUB -P account_name
-#BSUB -R affinity[core(2)]
-#BSUB -R rusage[mem=1000KB]
-#BSUB -R span[ptile=3]
-#BSUB -W 00:01:00
-#BSUB -n 6
-#BSUB -q batch
-""".strip()
-    assert actual == expected
+    assert job_card.content() == expected
+    assert str(job_card) == expected
