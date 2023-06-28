@@ -6,7 +6,6 @@ Tests for templater tool.
 import argparse
 import io
 import os
-import tempfile
 from contextlib import redirect_stdout
 from unittest.mock import patch
 
@@ -112,38 +111,6 @@ vegetable
 
     for outcome_line in outcome.split("\n"):
         assert outcome_line in result
-
-
-@pytest.mark.skip()
-def test_set_template_yaml_config():
-    """Test that providing a YAML file with necessary settings works to fill in
-    the Jinja template. Test the writing mechanism, too"""
-
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
-    config_file = os.path.join(uwtools_file_base, "fixtures/fruit_config.yaml")
-    expected_file = os.path.join(uwtools_file_base, "fixtures/simple2.nml")
-
-    # Also make sure that we're really pulling from the input file. Set
-    # environment variables different from those in config_file
-    os.environ["fruit"] = "candy"
-    os.environ["vegetable"] = "cookies"
-    os.environ["how_many"] = "all"
-
-    # Make sure the output file matches the expected output
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/test_render_from_yaml.nml"
-
-        args = [
-            "-i",
-            input_file,
-            "-c",
-            config_file,
-            "-o",
-            out_file,
-        ]
-
-        templater.main(args)
-        assert compare_files(expected_file, out_file)
 
 
 def test_mutually_exclusive_args():
@@ -263,6 +230,24 @@ J2Template._load_file INPUT Args:
 
     with raises(argparse.ArgumentError):
         templater.main(["-i", infile, "-q"])
+
+
+def test_set_template_yaml_config(tmp_path):
+    """
+    Test that providing a YAML file with necessary settings works to fill in
+    the Jinja template. Test the writing mechanism, too.
+    """
+
+    outfile = str(tmp_path / "test_render_from_yaml.nml")
+
+    # Patch environment to ensure that values are being taken from the config
+    # file, not the environment.
+
+    with patch.dict(os.environ, {"fruit": "candy", "vegetable": "cookies", "how_many": "all"}):
+        templater.main(
+            ["-i", fixture_path("nml.IN"), "-c", fixture_path("fruit_config.yaml"), "-o", outfile]
+        )
+    assert compare_files(fixture_path("simple2.nml"), outfile)
 
 
 def test_set_template_yaml_config_model_configure(tmp_path):
