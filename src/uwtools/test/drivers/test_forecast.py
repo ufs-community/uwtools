@@ -8,7 +8,7 @@ from pytest import fixture, raises
 
 from uwtools import config
 from uwtools.drivers.forecast import FV3Forecast
-from uwtools.test.support import fixture_posix
+from uwtools.test.support import fixture_path
 from uwtools.utils import file_helpers
 
 
@@ -16,8 +16,8 @@ def test_create_config(tmp_path):
     """Test that providing a yaml base input file and a config file will
     create and update yaml config file"""
 
-    input_file = fixture_posix("fruit_config.yaml")
-    config_file = fixture_posix("fruit_config_similar.yaml")
+    input_file = fixture_path("fruit_config.yaml")
+    config_file = fixture_path("fruit_config_similar.yaml")
     output_file = (tmp_path / "test_config_from_yaml.yaml").as_posix()
 
     forecast_obj = FV3Forecast()
@@ -33,7 +33,7 @@ def test_create_config(tmp_path):
 
 @fixture
 def create_namelist_assets(tmp_path):
-    return FV3Forecast(), config.F90Config(fixture_posix("simple.nml")), tmp_path / "create_out.nml"
+    return FV3Forecast(), config.F90Config(fixture_path("simple.nml")), tmp_path / "create_out.nml"
 
 
 def test_create_namelist_without_base_file(create_namelist_assets):
@@ -56,7 +56,7 @@ def test_create_namelist_without_base_file(create_namelist_assets):
 def test_create_namelist_with_base_file(create_namelist_assets):
     """Tests create_namelist method with optional base file"""
     forecast_obj, update_obj, outnml_file = create_namelist_assets
-    base_file = fixture_posix("simple3.nml")
+    base_file = fixture_path("simple3.nml")
     forecast_obj.create_namelist(update_obj, outnml_file, base_file)
     expected = """
 &salad
@@ -77,14 +77,14 @@ def test_create_namelist_with_base_file(create_namelist_assets):
 
 @fixture
 def create_field_table_assets():
-    return FV3Forecast(), config.YAMLConfig(fixture_posix("FV3_GFS_v16_update.yaml"))
+    return FV3Forecast(), config.YAMLConfig(fixture_path("FV3_GFS_v16_update.yaml"))
 
 
 def test_create_field_table_without_base_file(create_field_table_assets, tmp_path):
     """Tests create_field_table without optional base file"""
     forecast_obj, update_obj = create_field_table_assets
     outfldtbl_file = tmp_path / "field_table_one.FV3_GFS"
-    expected = fixture_posix("field_table_from_input.FV3_GFS")
+    expected = fixture_path("field_table_from_input.FV3_GFS")
     forecast_obj.create_field_table(update_obj, outfldtbl_file)
     assert file_helpers.compare_files(expected, outfldtbl_file)
 
@@ -92,9 +92,9 @@ def test_create_field_table_without_base_file(create_field_table_assets, tmp_pat
 def test_create_field_table_with_base_file(create_field_table_assets, tmp_path):
     """Tests create_field_table method with optional base file"""
     forecast_obj, update_obj = create_field_table_assets
-    base_file = fixture_posix("FV3_GFS_v16.yaml")
+    base_file = fixture_path("FV3_GFS_v16.yaml")
     outfldtbl_file = tmp_path / "field_table_two.FV3_GFS"
-    expected = fixture_posix("field_table_from_base.FV3_GFS")
+    expected = fixture_path("field_table_from_base.FV3_GFS")
     forecast_obj.create_field_table(update_obj, outfldtbl_file, base_file)
     assert file_helpers.compare_files(expected, outfldtbl_file)
 

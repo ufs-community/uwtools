@@ -10,17 +10,17 @@ import jsonschema
 import yaml
 from pytest import fixture, raises
 
-from uwtools.test.support import fixture_posix
+from uwtools.test.support import fixture_path
 
 
 def validate(subpath, schema):
-    with open(fixture_posix(subpath), "r", encoding="utf-8") as f:
+    with open(fixture_path(subpath), "r", encoding="utf-8") as f:
         jsonschema.validate(yaml.safe_load(f), schema)
 
 
 @fixture(scope="module")
 def schema():
-    with open(fixture_posix("schema/salad.jsonschema"), "r", encoding="utf-8") as f:
+    with open(fixture_path("schema/salad.jsonschema"), "r", encoding="utf-8") as f:
         return json.load(f)
 
 

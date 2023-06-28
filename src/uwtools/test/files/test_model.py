@@ -6,7 +6,7 @@ from pytest import raises
 
 from uwtools.files import Unix
 from uwtools.files.model import file
-from uwtools.test.support import fixture_posix, fixture_uri
+from uwtools.test.support import fixture_path, fixture_uri
 
 
 def test_Unix():
@@ -39,10 +39,10 @@ def test_dir_file():
     """Tests dir method given a file."""
     suffix = "files/a.txt"
     my_init = file.Unix(fixture_uri(suffix))
-    assert my_init.dir == glob(fixture_posix(suffix))
+    assert my_init.dir == glob(fixture_path(suffix))
 
 
 def test_dir_path():
     """Tests dir method given a path, i.e. not a file."""
     my_init = file.Unix(fixture_uri())
-    assert my_init.dir == glob(fixture_posix("*"))
+    assert my_init.dir == glob(fixture_path("*"))

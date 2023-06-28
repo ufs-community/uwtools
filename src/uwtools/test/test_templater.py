@@ -15,7 +15,7 @@ import pytest
 from pytest import raises
 
 from uwtools.cli import templater
-from uwtools.test.support import fixture_posix
+from uwtools.test.support import fixture_path
 from uwtools.utils import file_helpers
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
@@ -248,18 +248,18 @@ def test_set_template_yaml_config_model_configure(tmp_path):
     outfile = f"{tmp_path}/test_render_from_yaml.nml"
     args = [
         "-i",
-        fixture_posix("model_configure.sample.IN"),
+        fixture_path("model_configure.sample.IN"),
         "-c",
-        fixture_posix("model_configure.values.yaml"),
+        fixture_path("model_configure.values.yaml"),
         "-o",
         outfile,
     ]
     templater.main(args)
-    assert file_helpers.compare_files(fixture_posix("model_configure.sample"), outfile)
+    assert file_helpers.compare_files(fixture_path("model_configure.sample"), outfile)
 
 
 def test_set_template_verbosity(capsys):
-    infile = fixture_posix("nml.IN")
+    infile = fixture_path("nml.IN")
     # #PM# WHAT TO DO ABOUT logfile BELOW?
     logfile = "/dev/null"
 
@@ -319,6 +319,6 @@ def test_mutually_exclusive_args():
     Test that -q & -d args are mutually exclusive.
     """
 
-    infile = fixture_posix("fruit_config.yaml")
+    infile = fixture_path("fruit_config.yaml")
     with raises(argparse.ArgumentError):
         templater.main(["-i", infile, "-q", "-d"])
