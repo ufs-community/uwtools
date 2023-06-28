@@ -3,69 +3,15 @@
 """
 Tests for templater tool.
 """
+
 import argparse
-import io
 import os
-from contextlib import redirect_stdout
 from unittest.mock import patch
 
-import pytest
 from pytest import raises
 
 from uwtools.cli import templater
 from uwtools.test.support import compare_files, fixture_path
-
-uwtools_file_base = os.path.join(os.path.dirname(__file__))
-
-
-@pytest.mark.skip()
-def test_set_template_dryrun():
-    """Unit test for checking dry-run output of ingest namelist tool"""
-
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
-    outcome = (
-        """Running set_template with args:
-----------------------------------------------------------------------
-----------------------------------------------------------------------
-        outfile: None
- input_template: """
-        + input_file
-        + """
-    config_file: None
-   config_items: []
-        dry_run: True
-  values_needed: False
-        verbose: False
-          quiet: False
-----------------------------------------------------------------------
-----------------------------------------------------------------------
-&salad
-  base = 'kale'
-  fruit = 'banana'
-  vegetable = 'tomato'
-  how_many = 22
-  dressing = 'balsamic'
-/
-"""
-    )
-    os.environ["fruit"] = "banana"
-    os.environ["vegetable"] = "tomato"
-    os.environ["how_many"] = "22"
-
-    args = [
-        "-i",
-        input_file,
-        "--dry_run",
-    ]
-
-    # Capture stdout for the dry run
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
-        templater.main(args)
-    result = outstring.getvalue()
-
-    for outcome_line in outcome.split("\n"):
-        assert outcome_line in result
 
 
 def test_mutually_exclusive_args():
@@ -84,6 +30,18 @@ def test_set_template_all_good():
     """
 
     templater.main(["-i", fixture_path("nml.IN"), "-c", fixture_path("fruit_config.sh"), "-d"])
+
+
+def test_set_template_bad_config_suffix(tmp_path):
+    """
+    Test that a bad config filename suffix is rejected.
+    """
+
+    badfile = str(tmp_path / "foo.shx")  # .shx is a bad suffix
+    with open(badfile, "w", encoding="utf-8"):
+        pass  # create empty file
+    with raises(ValueError):
+        templater.main(["-i", fixture_path("nml.IN"), "-c", badfile, "-d"])
 
 
 def test_set_template_command_line_config(capsys):
@@ -121,16 +79,40 @@ Running with args:
         assert line in actual
 
 
-def test_set_template_bad_config_suffix(tmp_path):
+def test_set_template_dry_run(capsys):
     """
-    Test that a bad config filename suffix is rejected.
+    Test dry-run output of ingest namelist tool.
     """
 
-    badfile = str(tmp_path / "foo.shx")  # .shx is a bad suffix
-    with open(badfile, "w", encoding="utf-8"):
-        pass  # create empty file
-    with raises(ValueError):
-        templater.main(["-i", fixture_path("nml.IN"), "-c", badfile, "-d"])
+    infile = fixture_path("nml.IN")
+    expected = f"""
+Running with args:
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+        outfile: None
+ input_template: {infile}
+    config_file: None
+   config_items: []
+        dry_run: True
+  values_needed: False
+        verbose: False
+          quiet: False
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+&salad
+  base = 'kale'
+  fruit = 'banana'
+  vegetable = 'tomato'
+  how_many = 22
+  dressing = 'balsamic'
+/
+""".lstrip()
+
+    with patch.dict(os.environ, {"fruit": "banana", "vegetable": "tomato", "how_many": "22"}):
+        templater.main(["-i", infile, "--dry_run"])
+        actual = capsys.readouterr().out
+        for line in expected.split("\n"):
+            assert line in actual
 
 
 def test_set_template_listvalues(capsys):
