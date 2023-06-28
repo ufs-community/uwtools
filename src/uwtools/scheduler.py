@@ -64,7 +64,7 @@ class JobCard(collections.UserList):
 
 
 class JobScheduler(collections.UserDict):
-    """object that creates JobCard"""
+    """Creates JobCard"""
 
     _map: dict = {}
     prefix = ""
@@ -82,7 +82,7 @@ class JobScheduler(collections.UserDict):
 
     @staticmethod
     def validate_props(props) -> None:
-        """raises ValueError if invalid"""
+        """Raises ValueError if invalid."""
         members = [
             getattr(RequiredAttribs, attr)
             for attr in dir(RequiredAttribs)

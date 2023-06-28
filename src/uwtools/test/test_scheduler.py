@@ -467,28 +467,25 @@ def test_lsf4():
     assert actual == expected
 
 
-@pytest.mark.skip()
 def test_string_output():
-    expected = """#BSUB -P account_name
-#BSUB -q batch
-#BSUB -W 00:01:00
-#BSUB -n 6
-#BSUB -R span[ptile=3]
-#BSUB -R affinity[core(2)]
-#BSUB -R rusage[mem=1000KB]"""
-
     props = {
-        "scheduler": "lsf",
         "account": "account_name",
-        "queue": "batch",
-        "walltime": "00:01:00",
         "nodes": 2,
-        "tasks_per_node": 3,
-        "threads": 2,
+        "queue": "batch",
         "memory": "1MB",
+        "scheduler": "lsf",
+        "threads": 2,
+        "tasks_per_node": 3,
+        "walltime": "00:01:00",
     }
-
-    js = JobScheduler.get_scheduler(props)
-    jc = js.job_card
-    actual = str(jc)
+    actual = str(JobScheduler.get_scheduler(props).job_card)
+    expected = """
+#BSUB -P account_name
+#BSUB -n 6
+#BSUB -q batch
+#BSUB -R affinity[core(2)]
+#BSUB -R span[ptile=3]
+#BSUB -W 00:01:00
+#BSUB -R rusage[mem=1000KB]
+""".strip()
     assert actual == expected
