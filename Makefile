@@ -21,7 +21,7 @@ env: package
 	conda create -y -n $(call spec,buildnum,-) $(CHANNELS) $(call spec,build,=)
 
 format:
-	black $$(find src -type f -name "*.py") && isort --profile black $$(find src -type f -name "*.py")
+	@black $$(find src -type f -name "*.py") && isort --profile black $$(find src -type f -name "*.py")
 
 lint:
 	recipe/run_test.sh lint
