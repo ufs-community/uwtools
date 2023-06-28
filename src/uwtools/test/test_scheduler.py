@@ -57,6 +57,73 @@ def test_scheduler_raises_exception_when_missing_required_attribs():
 
 
 @fixture
+def lsf_props():
+    return {
+        "account": "account_name",
+        "nodes": 1,
+        "queue": "batch",
+        "scheduler": "lsf",
+        "tasks_per_node": 1,
+        "threads": 1,
+        "walltime": "00:01:00",
+    }
+
+
+def test_lsf_1(lsf_props):
+    expected = """
+#BSUB -P account_name
+#BSUB -R affinity[core(1)]
+#BSUB -R span[ptile=1]
+#BSUB -W 00:01:00
+#BSUB -n 1
+#BSUB -q batch
+""".strip()
+    assert JobScheduler.get_scheduler(lsf_props).job_card.content() == expected
+
+
+def test_lsf_2(lsf_props):
+    lsf_props.update({"tasks_per_node": 12})
+    expected = """
+#BSUB -P account_name
+#BSUB -R affinity[core(1)]
+#BSUB -R span[ptile=12]
+#BSUB -W 00:01:00
+#BSUB -n 12
+#BSUB -q batch
+""".strip()
+    assert JobScheduler.get_scheduler(lsf_props).job_card.content() == expected
+
+
+def test_lsf_3(lsf_props):
+    lsf_props.update({"nodes": 2, "tasks_per_node": 6})
+    expected = """
+#BSUB -P account_name
+#BSUB -R affinity[core(1)]
+#BSUB -R span[ptile=6]
+#BSUB -W 00:01:00
+#BSUB -n 12
+#BSUB -q batch
+""".strip()
+    assert JobScheduler.get_scheduler(lsf_props).job_card.content() == expected
+
+
+def test_lsf_4(lsf_props):
+    lsf_props.update({"memory": "1MB", "nodes": 2, "tasks_per_node": 3, "threads": 2})
+    job_card = JobScheduler.get_scheduler(lsf_props).job_card
+    expected = """
+#BSUB -P account_name
+#BSUB -R affinity[core(2)]
+#BSUB -R rusage[mem=1000KB]
+#BSUB -R span[ptile=3]
+#BSUB -W 00:01:00
+#BSUB -n 6
+#BSUB -q batch
+""".strip()
+    assert job_card.content() == expected
+    assert str(job_card) == expected
+
+
+@fixture
 def pbs_props():
     return {
         "account": "account_name",
@@ -232,70 +299,3 @@ def test_slurm_5(slurm_props):
 #SBATCH --time=00:01:00
 """.strip()
     assert JobScheduler.get_scheduler(slurm_props).job_card.content() == expected
-
-
-@fixture
-def lsf_props():
-    return {
-        "account": "account_name",
-        "nodes": 1,
-        "queue": "batch",
-        "scheduler": "lsf",
-        "tasks_per_node": 1,
-        "threads": 1,
-        "walltime": "00:01:00",
-    }
-
-
-def test_lsf_1(lsf_props):
-    expected = """
-#BSUB -P account_name
-#BSUB -R affinity[core(1)]
-#BSUB -R span[ptile=1]
-#BSUB -W 00:01:00
-#BSUB -n 1
-#BSUB -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(lsf_props).job_card.content() == expected
-
-
-def test_lsf_2(lsf_props):
-    lsf_props.update({"tasks_per_node": 12})
-    expected = """
-#BSUB -P account_name
-#BSUB -R affinity[core(1)]
-#BSUB -R span[ptile=12]
-#BSUB -W 00:01:00
-#BSUB -n 12
-#BSUB -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(lsf_props).job_card.content() == expected
-
-
-def test_lsf_3(lsf_props):
-    lsf_props.update({"nodes": 2, "tasks_per_node": 6})
-    expected = """
-#BSUB -P account_name
-#BSUB -R affinity[core(1)]
-#BSUB -R span[ptile=6]
-#BSUB -W 00:01:00
-#BSUB -n 12
-#BSUB -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(lsf_props).job_card.content() == expected
-
-
-def test_lsf_4(lsf_props):
-    lsf_props.update({"memory": "1MB", "nodes": 2, "tasks_per_node": 3, "threads": 2})
-    job_card = JobScheduler.get_scheduler(lsf_props).job_card
-    expected = """
-#BSUB -P account_name
-#BSUB -R affinity[core(2)]
-#BSUB -R rusage[mem=1000KB]
-#BSUB -R span[ptile=3]
-#BSUB -W 00:01:00
-#BSUB -n 6
-#BSUB -q batch
-""".strip()
-    assert job_card.content() == expected
-    assert str(job_card) == expected
