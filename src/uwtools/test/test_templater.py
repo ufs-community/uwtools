@@ -68,51 +68,6 @@ def test_set_template_dryrun():
         assert outcome_line in result
 
 
-@pytest.mark.skip()
-def test_set_template_listvalues():
-    """Unit test for checking values_needed output of ingest namelist tool"""
-
-    input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
-
-    outcome = (
-        """Running set_template with args:
-----------------------------------------------------------------------
-----------------------------------------------------------------------
-        outfile: None
- input_template: """
-        + input_file
-        + """
-    config_file: None
-   config_items: []
-        dry_run: False
-  values_needed: True
-        verbose: False
-          quiet: False
-----------------------------------------------------------------------
-----------------------------------------------------------------------
-Values needed for this template are:
-fruit
-how_many
-vegetable
-"""
-    )
-
-    args = [
-        "-i",
-        input_file,
-        "--values_needed",
-    ]
-
-    # Capture stdout for values_needed output
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
-        templater.main(args)
-    result = outstring.getvalue()
-
-    for outcome_line in outcome.split("\n"):
-        assert outcome_line in result
-
-
 def test_mutually_exclusive_args():
     """
     Test that mutually-exclusive -q/-d args are rejected.
@@ -176,6 +131,38 @@ def test_set_template_bad_config_suffix(tmp_path):
         pass  # create empty file
     with raises(ValueError):
         templater.main(["-i", fixture_path("nml.IN"), "-c", badfile, "-d"])
+
+
+def test_set_template_listvalues(capsys):
+    """
+    Test "values needed" output of ingest namelist tool.
+    """
+
+    infile = fixture_path("nml.IN")
+    expected = f"""
+Running with args:
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+        outfile: None
+ input_template: {infile}
+    config_file: None
+   config_items: []
+        dry_run: False
+  values_needed: True
+        verbose: False
+          quiet: False
+----------------------------------------------------------------------
+----------------------------------------------------------------------
+Values needed for this template are:
+fruit
+how_many
+vegetable
+""".lstrip()
+
+    templater.main(["-i", infile, "--values_needed"])
+    actual = capsys.readouterr().out
+    for line in expected.split("\n"):
+        assert line in actual
 
 
 def test_set_template_verbosity(capsys):
