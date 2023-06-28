@@ -246,127 +246,79 @@ def test_pbs8():
     assert actual == expected
 
 
-@pytest.mark.skip()
-def test_slurm1():
-    expected = """#SBATCH --account=account_name
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1"""
-
-    props = {
-        "scheduler": "slurm",
+@fixture
+def slurm_props():
+    return {
         "account": "account_name",
-        "queue": "batch",
-        "walltime": "00:01:00",
         "nodes": 1,
+        "queue": "batch",
+        "scheduler": "slurm",
         "tasks_per_node": 1,
-    }
-
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
-
-    assert actual == expected
-
-
-@pytest.mark.skip()
-def test_slurm2():
-    expected = """#SBATCH --account=account_name
-#SBATCH --qos=batch
-#SBATCH --partition=debug
-#SBATCH --time=00:01:00
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1"""
-
-    props = {
-        "scheduler": "slurm",
-        "account": "account_name",
-        "queue": "batch",
-        "partition": "debug",
         "walltime": "00:01:00",
-        "nodes": 1,
-        "tasks_per_node": 1,
     }
 
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
 
-    assert actual == expected
-
-
-@pytest.mark.skip()
-def test_slurm3():
-    expected = """#SBATCH --account=account_name
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=2
-#SBATCH --cpus-per-task=4"""
-
-    props = {
-        "scheduler": "slurm",
-        "account": "account_name",
-        "queue": "batch",
-        "walltime": "00:01:00",
-        "nodes": 1,
-        "tasks_per_node": 2,
-        "threads": 4,
-    }
-
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
-
-    assert actual == expected
-
-
-@pytest.mark.skip()
-def test_slurm4():
-    expected = """#SBATCH --account=account_name
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=2
-#SBATCH --mem=4MB"""
-
-    props = {
-        "scheduler": "slurm",
-        "account": "account_name",
-        "queue": "batch",
-        "walltime": "00:01:00",
-        "nodes": 1,
-        "tasks_per_node": 2,
-        "memory": "4MB",
-    }
-
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
-
-    assert actual == expected
-
-
-@pytest.mark.skip()
-def test_slurm5():
-    expected = """#SBATCH --account=account_name
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
+def test_slurm1(slurm_props):
+    expected = """
+#SBATCH --account=account_name
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --exclusive=True"""
+#SBATCH --qos=batch
+#SBATCH --time=00:01:00
+""".strip()
+    assert JobScheduler.get_scheduler(slurm_props).job_card.content() == expected
 
-    props = {
-        "scheduler": "slurm",
-        "account": "account_name",
-        "queue": "batch",
-        "walltime": "00:01:00",
-        "nodes": 1,
-        "tasks_per_node": 1,
-        "exclusive": True,
-    }
 
-    js = JobScheduler.get_scheduler(props)
-    actual = js.job_card.content()
+def test_slurm2(slurm_props):
+    slurm_props.update({"partition": "debug"})
+    expected = """
+#SBATCH --account=account_name
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --partition=debug
+#SBATCH --qos=batch
+#SBATCH --time=00:01:00
+""".strip()
+    assert JobScheduler.get_scheduler(slurm_props).job_card.content() == expected
 
-    assert actual == expected
+
+def test_slurm3(slurm_props):
+    slurm_props.update({"tasks_per_node": 2, "threads": 4})
+    expected = """
+#SBATCH --account=account_name
+#SBATCH --cpus-per-task=4
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=2
+#SBATCH --qos=batch
+#SBATCH --time=00:01:00
+""".strip()
+    assert JobScheduler.get_scheduler(slurm_props).job_card.content() == expected
+
+
+def test_slurm4(slurm_props):
+    slurm_props.update({"memory": "4MB", "tasks_per_node": 2})
+    expected = """
+#SBATCH --account=account_name
+#SBATCH --mem=4MB
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=2
+#SBATCH --qos=batch
+#SBATCH --time=00:01:00
+""".strip()
+    assert JobScheduler.get_scheduler(slurm_props).job_card.content() == expected
+
+
+def test_slurm5(slurm_props):
+    slurm_props.update({"exclusive": "True"})
+    expected = """
+#SBATCH --account=account_name
+#SBATCH --exclusive=True
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --qos=batch
+#SBATCH --time=00:01:00
+""".strip()
+    assert JobScheduler.get_scheduler(slurm_props).job_card.content() == expected
 
 
 @fixture
