@@ -146,19 +146,17 @@ def test_set_template_yaml_config():
         assert compare_files(expected_file, out_file)
 
 
-def test_set_template_bad_config_suffix(tmp_path):
+def test_mutually_exclusive_args():
     """
-    Test that a bad config filename suffix is rejected.
+    Test that mutually-exclusive -q/-d args are rejected.
     """
 
-    badfile = str(tmp_path / "foo.shx")  # .shx is a bad suffix
-    with open(badfile, "w", encoding="utf-8"):
-        pass  # create empty file
-    with raises(ValueError):
-        templater.main(["-i", fixture_path("nml.IN"), "-c", badfile, "-d"])
+    infile = fixture_path("fruit_config.yaml")
+    with raises(argparse.ArgumentError):
+        templater.main(["-i", infile, "-q", "-d"])
 
 
-def test_set_template_good_paths():
+def test_set_template_all_good():
     """
     Confirm success using namelist input and shell config.
     """
@@ -201,22 +199,16 @@ Running with args:
         assert line in actual
 
 
-def test_set_template_yaml_config_model_configure(tmp_path):
+def test_set_template_bad_config_suffix(tmp_path):
     """
-    Test behavior when reading a simple model_configure file.
+    Test that a bad config filename suffix is rejected.
     """
 
-    outfile = f"{tmp_path}/test_render_from_yaml.nml"
-    args = [
-        "-i",
-        fixture_path("model_configure.sample.IN"),
-        "-c",
-        fixture_path("model_configure.values.yaml"),
-        "-o",
-        outfile,
-    ]
-    templater.main(args)
-    assert compare_files(fixture_path("model_configure.sample"), outfile)
+    badfile = str(tmp_path / "foo.shx")  # .shx is a bad suffix
+    with open(badfile, "w", encoding="utf-8"):
+        pass  # create empty file
+    with raises(ValueError):
+        templater.main(["-i", fixture_path("nml.IN"), "-c", badfile, "-d"])
 
 
 def test_set_template_verbosity(capsys):
@@ -273,11 +265,19 @@ J2Template._load_file INPUT Args:
         templater.main(["-i", infile, "-q"])
 
 
-def test_mutually_exclusive_args():
+def test_set_template_yaml_config_model_configure(tmp_path):
     """
-    Test that mutually-exclusive -q/-d args are rejected.
+    Test behavior when reading a simple model_configure file.
     """
 
-    infile = fixture_path("fruit_config.yaml")
-    with raises(argparse.ArgumentError):
-        templater.main(["-i", infile, "-q", "-d"])
+    outfile = f"{tmp_path}/test_render_from_yaml.nml"
+    args = [
+        "-i",
+        fixture_path("model_configure.sample.IN"),
+        "-c",
+        fixture_path("model_configure.values.yaml"),
+        "-o",
+        outfile,
+    ]
+    templater.main(args)
+    assert compare_files(fixture_path("model_configure.sample"), outfile)
