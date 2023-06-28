@@ -1,59 +1,12 @@
 # pylint: disable=missing-function-docstring,redefined-outer-name
 
-import pathlib
-
-import pytest
-from pytest import fixture
+from pytest import fixture, raises
 
 from uwtools import config
 from uwtools.scheduler import JobScheduler
+from uwtools.test.support import fixture_path
 
-
-@pytest.mark.skip()
-def test_scheduler_dot_notation():
-    props = config.YAMLConfig(pathlib.Path("tests/fixtures/simple2.yaml"))
-
-    js = JobScheduler.get_scheduler(props)
-    expected = "user_account"
-    actual = js.account
-
-    assert actual == expected
-
-
-@pytest.mark.skip()
-def test_scheduler_prop_not_defined_raises_key_error():
-    with pytest.raises(KeyError) as error:
-        props = {
-            "account": "user_account",
-            "queue": "batch",
-            "walltime": "00:01:00",
-            "tasks_per_node": 1,
-            "extra_stuff": "12345",
-            "nodes": 1,
-        }
-
-        JobScheduler.get_scheduler(props)
-    expected = "no scheduler defined in props: [account, queue, walltime, tasks_per_node"
-    actual = str(error.value)
-    assert expected in actual
-
-
-@pytest.mark.skip()
-def test_scheduler_raises_exception_when_missing_required_attribs():
-    with pytest.raises(ValueError) as error:
-        props = {
-            "scheduler": "pbs",
-            "queue": "batch",
-            "walltime": "00:01:00",
-            "nodes": 1,
-            "tasks_per_node": 1,
-            "debug": True,
-        }
-
-        JobScheduler.get_scheduler(props)
-    expected = "missing required attributes: [account]"
-    actual = str(error.value)
-    assert expected in actual
+# LFS tests
 
 
 @fixture
@@ -121,6 +74,9 @@ def test_lsf_4(lsf_props):
 """.strip()
     assert job_card.content() == expected
     assert str(job_card) == expected
+
+
+# PBS tests
 
 
 @fixture
@@ -226,6 +182,9 @@ def test_pbs_8(pbs_props):
     assert JobScheduler.get_scheduler(pbs_props).job_card.content() == expected
 
 
+# Slurm tests
+
+
 @fixture
 def slurm_props():
     return {
@@ -299,3 +258,26 @@ def test_slurm_5(slurm_props):
 #SBATCH --time=00:01:00
 """.strip()
     assert JobScheduler.get_scheduler(slurm_props).job_card.content() == expected
+
+
+# Generic tests using PBS support.
+
+
+def test_scheduler_dot_notation():
+    props = config.YAMLConfig(fixture_path("simple2.yaml"))
+    js = JobScheduler.get_scheduler(props)
+    assert js.account == "user_account"
+
+
+def test_scheduler_prop_not_defined_raises_key_error(pbs_props):
+    del pbs_props["scheduler"]
+    with raises(KeyError) as error:
+        JobScheduler.get_scheduler(pbs_props)
+        assert "no scheduler defined in props" in error.value
+
+
+def test_scheduler_raises_exception_when_missing_required_attrs(pbs_props):
+    del pbs_props["account"]
+    with raises(ValueError) as error:
+        JobScheduler.get_scheduler(pbs_props)
+        assert "missing required attributes: [account]" in error.value
