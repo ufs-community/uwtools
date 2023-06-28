@@ -11,13 +11,11 @@ from uwtools.test.support import fixture_uri
 
 
 def test_FileManager_constructor_S3():
-    actual = FileManager.get_file_manager(Prefixes.S3)
-    assert isinstance(actual, S3FileManager)
+    assert isinstance(FileManager.get_file_manager(Prefixes.S3), S3FileManager)
 
 
 def test_FileManager_constructor_Unix():
-    actual = FileManager.get_file_manager(Prefixes.UNIX)
-    assert isinstance(actual, UnixFileManager)
+    assert isinstance(FileManager.get_file_manager(Prefixes.UNIX), UnixFileManager)
 
 
 @patch.object(s3, "upload_file", return_value=None)

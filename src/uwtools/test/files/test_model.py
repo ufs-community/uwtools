@@ -9,6 +9,19 @@ from uwtools.files.model import file
 from uwtools.test.support import fixture_path, fixture_uri
 
 
+def test_dir_file():
+    """Tests dir method given a file."""
+    suffix = "files/a.txt"
+    my_init = file.Unix(fixture_uri(suffix))
+    assert my_init.dir == glob(fixture_path(suffix))
+
+
+def test_dir_path():
+    """Tests dir method given a path, i.e. not a file."""
+    my_init = file.Unix(fixture_uri())
+    assert my_init.dir == glob(fixture_path("*"))
+
+
 def test_Unix():
     path = Unix(fixture_uri("files/a.txt"))
     assert path.exists
@@ -21,28 +34,10 @@ def test_Unix():
 def test_Unix_validation():
     with raises(AttributeError) as error:
         Unix("ile://tests/fixtures/files/a.txt")
-
     assert "attribute unknown: [ile://]" in str(error)
-
     with raises(AttributeError) as error:
         Unix("//tests/fixtures/files/a.txt")
-
     assert "prefix not found in: [//tests/fixtures/files/a.txt]" in str(error)
-
     with raises(FileNotFoundError) as error:
         Unix("file://ests/fixtures/files/a.txt")
-
     assert "File not found [file://ests/fixtures/files/a.txt]" in str(error)
-
-
-def test_dir_file():
-    """Tests dir method given a file."""
-    suffix = "files/a.txt"
-    my_init = file.Unix(fixture_uri(suffix))
-    assert my_init.dir == glob(fixture_path(suffix))
-
-
-def test_dir_path():
-    """Tests dir method given a path, i.e. not a file."""
-    my_init = file.Unix(fixture_uri())
-    assert my_init.dir == glob(fixture_path("*"))
