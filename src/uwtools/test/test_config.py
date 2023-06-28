@@ -1,5 +1,4 @@
-# pylint: disable=duplicate-code
-# pylint: disable=missing-function-docstring
+# pylint: disable=duplicate-code,missing-function-docstring
 
 """
 Set of test for loading YAML files using the function call load_yaml
@@ -22,7 +21,8 @@ from typing import Any, Dict
 import pytest
 
 from uwtools import config, exceptions, logger
-from uwtools.test.support import compare_files
+from uwtools.cli.set_config import parse_args as parse_config_args
+from uwtools.test.support import compare_files, fixture_path
 from uwtools.utils import cli_helpers
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
@@ -978,34 +978,27 @@ def test_erroneous_conversion_flags():
             config.create_config_obj(args)
 
 
-@pytest.mark.skip()
-def test_compare_nml():
+def test_compare_nml(capsys):
     """Tests whether comparing two namelists works."""
 
-    nml1 = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.nml"))
-    nml2 = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config_mult_sect.nml"))
+    nml1 = fixture_path("fruit_config.nml")
+    nml2 = fixture_path("fruit_config_mult_sect.nml")
+    config.create_config_obj(parse_config_args(["-i", nml1, "-c", nml2, "--compare"]))
+    actual = capsys.readouterr().out
 
-    args = ["-i", nml1, "-c", nml2, "--compare"]
+    # Make sure the tool output contains all the expected lines:
 
     expected = f"""
-    - {nml1}
-    + {nml2}
-    --------------------------------------------------------------------------------
-    config:       vegetable:  - eggplant + peas
-    setting:         topping:  - None + crouton
-    setting:            size:  - None + large
-    setting:            meat:  - None + chicken
-
-    """
-
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
-        config.create_config_obj(args)
-    result = outstring.getvalue()
-
-    # Make sure the tool output contains all the lines above
-    for expected_line in expected.split("\n"):
-        assert expected_line.strip() in result
+- {nml1}
++ {nml2}
+--------------------------------------------------------------------------------
+config:       vegetable:  - eggplant + peas
+setting:         topping:  - None + crouton
+setting:            size:  - None + large
+setting:            meat:  - None + chicken
+""".strip()
+    for line in expected.split("\n"):
+        assert line.strip() in actual
 
     # Make sure it doesn't include any additional significant diffs
     # A very rough estimate is that there is a word/colon set followed
@@ -1013,36 +1006,8 @@ def test_compare_nml():
     # This regex is meant to match the lines in the expected string
     # above that give us the section, key value diffs like this:
     #   config:       vegetable:  - eggplant + peas
+
     pattern = re.compile(r"(\w):\s+(\w+):\s+-\s+(\w+)\s+\+\s+(\w+)")
-    for result_line in result.split("\n"):
-        if re.search(pattern, result_line):
-            assert result_line in expected
-
-
-@pytest.mark.skip()
-def test_mutually_exclusive_args():
-    """
-    Test that -q and -v args are mutually exclusive and testing -q and -d are mutually exclusive.
-    """
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.yaml"))
-
-    args = [
-        "-i",
-        input_file,
-        "-v",
-        "-q",
-    ]
-
-    with pytest.raises(SystemExit):
-        config.create_config_obj(args)
-
-    args = [
-        "-i",
-        input_file,
-        "-d",
-        "-q",
-    ]
-
-    with pytest.raises(argparse.ArgumentError):
-        config.create_config_obj(args)
+    for line in actual.split("\n"):
+        if re.search(pattern, line):
+            assert line in expected
