@@ -18,3 +18,6 @@ disable = [
   "C0103", "C0209", "C0302", "C0114",
   "R0903", "R0912", "R0913", "R0914", "R0915", "R1735",
 ]
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::DeprecationWarning:botocore.*"]
