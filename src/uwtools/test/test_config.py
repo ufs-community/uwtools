@@ -949,33 +949,43 @@ def test_config_file_conversion():
             assert output.read()[-1] == "\n"
 
 
-@pytest.mark.skip()
-def test_erroneous_conversion_flags():
-    """Test that error is thrown when conversion file types are not compatible"""
+def test_bad_conversion_cfg_to_pdf():
+    with pytest.raises(SystemExit):
+        config.create_config_obj(
+            parse_config_args(["-i", fixture_path("simple2_nml.cfg"), "--input_file_type", ".pdf"])
+        )
 
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        # test --input_file_type
-        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2_nml.cfg"))
-        args = ["-i", input_file, "--input_file_type", ".pdf"]
 
-        with pytest.raises(SystemExit):
-            config.create_config_obj(args)
+def test_bad_conversion_nml_to_yaml():
+    with pytest.raises(ValueError):
+        config.create_config_obj(
+            parse_config_args(
+                [
+                    "-i",
+                    fixture_path("simple2.nml"),
+                    "-c",
+                    fixture_path("srw_example.yaml"),
+                    "--config_file_type",
+                    "YAML",
+                ]
+            )
+        )
 
-        # test --config_file_type
-        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
-        config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
-        args = ["-i", input_file, "-c", config_file, "--config_file_type", "YAML"]
 
-        with pytest.raises(ValueError):
-            config.create_config_obj(args)
-
-        # test --ouput_file_type
-        input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
-        out_file = f"{tmp_dir}/test_outfile_conversion.yaml"
-        args = ["-i", input_file, "-o", out_file, "--output_file_type", "F90"]
-
-        with pytest.raises(ValueError):
-            config.create_config_obj(args)
+def test_bad_conversion_yaml_to_nml(tmp_path):
+    with pytest.raises(ValueError):
+        config.create_config_obj(
+            parse_config_args(
+                [
+                    "-i",
+                    fixture_path("srw_example.yaml"),
+                    "-o",
+                    str(tmp_path / "test_outfile_conversion.yaml"),
+                    "--output_file_type",
+                    "F90",
+                ]
+            )
+        )
 
 
 def test_compare_nml(capsys):
