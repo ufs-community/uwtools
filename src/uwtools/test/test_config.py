@@ -3,7 +3,7 @@
 """
 Set of test for loading YAML files using the function call load_yaml
 """
-import argparse
+
 import builtins
 import datetime
 import filecmp
@@ -13,6 +13,7 @@ import os
 import pathlib
 import re
 import tempfile
+from argparse import ArgumentTypeError
 from collections import OrderedDict
 from pathlib import Path
 from textwrap import dedent
@@ -522,23 +523,6 @@ def test_dictionary_depth():
     assert 2 == depth
 
 
-uwtools_file_base = os.path.join(os.path.dirname(__file__))
-
-
-@pytest.mark.skip()
-def test_path_if_file_exists():
-    """Make sure the function works as expected.  It is used as a type in
-    argparse, so raises an argparse exception when the user provides a
-    non-existant path."""
-
-    with tempfile.NamedTemporaryFile(dir=".", mode="w") as tmp_file:
-        assert cli_helpers.path_if_file_exists(tmp_file.name)
-
-    with raises(argparse.ArgumentTypeError):
-        not_a_filepath = "./no_way_this_file_exists.nope"
-        cli_helpers.path_if_file_exists(not_a_filepath)
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -677,6 +661,22 @@ def test_output_file_conversion(tmp_path):
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read()[-1] == "\n"
+
+
+def test_path_if_file_exists(tmp_path):
+    """
+    Test that function raises an exception when the specified file does not
+    exist, and raises no exception when the file exists.
+    """
+
+    badfile = tmp_path / "no-such-file"
+    with raises(ArgumentTypeError):
+        cli_helpers.path_if_file_exists(badfile)
+
+    goodfile = tmp_path / "exists"
+    with open(goodfile, "w", encoding="utf-8"):
+        pass
+    assert cli_helpers.path_if_file_exists(goodfile)
 
 
 def test_set_config_dry_run(capsys):
