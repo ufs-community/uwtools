@@ -25,14 +25,14 @@ def parse_args(args):
     )
     parser.add_argument(
         "-i",
-        "--input_template",
+        "--input-template",
         help="Path to an atparse template file.",
         required=True,
         type=cli_helpers.path_if_file_exists,
     )
     parser.add_argument(
         "-d",
-        "--dry_run",
+        "--dry-run",
         action="store_true",
         help="If provided, print rendered template to stdout only",
     )

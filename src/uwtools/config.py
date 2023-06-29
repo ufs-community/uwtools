@@ -663,7 +663,7 @@ def create_config_obj(user_args, log=None):
 
     if user_args.dry_run:
         if user_args.outfile:
-            log.info(f"warning file {user_args.outfile} ", r"not written when using --dry_run")
+            log.info(f"warning file {user_args.outfile} ", r"not written when using --dry-run")
         # apply switch to allow user to view the results of config
         # instead of writing to disk
         log.info(config_obj)

@@ -77,7 +77,7 @@ def help_set_config_fmt2fmt(infn, cfgfn, tmpdir):
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
-            parse_config_args(["-i", fixture_path("simple2_nml.cfg"), "--input_file_type", ".pdf"])
+            parse_config_args(["-i", fixture_path("simple2_nml.cfg"), "--input-file-type", ".pdf"])
         )
 
 
@@ -90,7 +90,7 @@ def test_bad_conversion_nml_to_yaml():
                     fixture_path("simple2.nml"),
                     "-c",
                     fixture_path("srw_example.yaml"),
-                    "--config_file_type",
+                    "--config-file-type",
                     "YAML",
                 ]
             )
@@ -106,7 +106,7 @@ def test_bad_conversion_yaml_to_nml(tmp_path):
                     fixture_path("srw_example.yaml"),
                     "-o",
                     str(tmp_path / "test_outfile_conversion.yaml"),
-                    "--output_file_type",
+                    "--output-file-type",
                     "F90",
                 ]
             )
@@ -120,7 +120,7 @@ def test_cfg_to_yaml_conversion(tmp_path):
     infile = fixture_path("srw_example_yaml.cfg")
     outfile = str(tmp_path / "test_ouput.yaml")
     config.create_config_obj(
-        parse_config_args(["-i", infile, "-o", outfile, "--input_file_type", "YAML"])
+        parse_config_args(["-i", infile, "-o", outfile, "--input-file-type", "YAML"])
     )
     expected = config.YAMLConfig(infile)
     expected.dereference_all()
@@ -213,13 +213,13 @@ def test_config_field_table(tmp_path):
 
 def test_config_file_conversion(tmp_path):
     """
-    Test that --config_input_type converts config object to desired object type.
+    Test that --config-input-type converts config object to desired object type.
     """
     infile = fixture_path("simple2.nml")
     cfgfile = fixture_path("simple2.ini")
     outfile = str(tmp_path / "test_config_conversion.nml")
     config.create_config_obj(
-        parse_config_args(["-i", infile, "-c", cfgfile, "-o", outfile, "--config_file_type", "F90"])
+        parse_config_args(["-i", infile, "-c", cfgfile, "-o", outfile, "--config-file-type", "F90"])
     )
     expected = config.F90Config(infile)
     config_obj = config.F90Config(cfgfile)
@@ -373,12 +373,12 @@ def test_ini_config_simple(salad_base, tmp_path):
 
 def test_output_file_conversion(tmp_path):
     """
-    Test that --output_input_type converts config object to desired object type.
+    Test that --output-input-type converts config object to desired object type.
     """
     infile = fixture_path("simple.nml")
     outfile = str(tmp_path / "test_ouput.cfg")
     config.create_config_obj(
-        parse_config_args(["-i", infile, "-o", outfile, "--output_file_type", "F90"])
+        parse_config_args(["-i", infile, "-o", outfile, "--output-file-type", "F90"])
     )
     expected = config.F90Config(infile)
     expected_file = tmp_path / "expected.nml"
@@ -462,7 +462,7 @@ def test_set_config_field_table(tmp_path):
     infile = fixture_path("FV3_GFS_v16.yaml")
     outfile = str(tmp_path / "field_table_from_yaml.FV3_GFS")
     config.create_config_obj(
-        parse_config_args(["-i", infile, "-o", outfile, "--output_file_type", "FieldTable"])
+        parse_config_args(["-i", infile, "-o", outfile, "--output-file-type", "FieldTable"])
     )
     with open(fixture_path("field_table.FV3_GFS_v16"), "r", encoding="utf-8") as f1:
         with open(outfile, "r", encoding="utf-8") as f2:
@@ -548,8 +548,8 @@ def test_show_format():
             fixture_path("FV3_GFS_v16.yaml"),
             "-o",
             "/dev/null",
-            "--show_format",
-            "--output_file_type",
+            "--show-format",
+            "--output-file-type",
             "YAML",
         ]
     )
@@ -593,7 +593,7 @@ def test_values_needed_ini(capsys):
     unfilled jinja2 templates, and keys set to empty.
     """
     config.create_config_obj(
-        parse_config_args(["-i", fixture_path("simple3.ini"), "--values_needed"])
+        parse_config_args(["-i", fixture_path("simple3.ini"), "--values-needed"])
     )
     actual = capsys.readouterr().out
     expected = """
@@ -625,7 +625,7 @@ def test_values_needed_f90nml(capsys):
     unfilled jinja2 templates, and keys set to empty.
     """
     config.create_config_obj(
-        parse_config_args(["-i", fixture_path("simple3.nml"), "--values_needed"])
+        parse_config_args(["-i", fixture_path("simple3.nml"), "--values-needed"])
     )
     actual = capsys.readouterr().out
     expected = """
@@ -654,7 +654,7 @@ def test_values_needed_yaml(capsys):
     unfilled jinja2 templates, and keys set to empty.
     """
     config.create_config_obj(
-        parse_config_args(["-i", fixture_path("srw_example.yaml"), "--values_needed"])
+        parse_config_args(["-i", fixture_path("srw_example.yaml"), "--values-needed"])
     )
     actual = capsys.readouterr().out
     expected = """

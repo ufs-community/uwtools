@@ -24,7 +24,7 @@ def parse_args(args):
 
     parser.add_argument(
         "-i",
-        "--input_base_file",
+        "--input-base-file",
         help="Path to a config base file. Accepts YAML, bash/ini or namelist",
         required=True,
         type=cli_helpers.path_if_file_exists,
@@ -39,13 +39,13 @@ def parse_args(args):
     )
     parser.add_argument(
         "-c",
-        "--config_file",
+        "--config-file",
         help="Optional path to configuration file. Accepts YAML, bash/ini or namelist",
         type=cli_helpers.path_if_file_exists,
     )
     parser.add_argument(
         "-d",
-        "--dry_run",
+        "--dry-run",
         action="store_true",
         help="If provided, print rendered config file to stdout only",
     )
@@ -55,17 +55,17 @@ def parse_args(args):
         help="If provided, show diff between -i and -c files.",
     )
     parser.add_argument(
-        "--show_format",
+        "--show-format",
         action="store_true",
         help="If provided, print the required formatting to generate the requested output file",
     )
     parser.add_argument(
-        "--values_needed",
+        "--values-needed",
         action="store_true",
         help="If provided, prints a list of required configuration settings to stdout",
     )
     parser.add_argument(
-        "--input_file_type",
+        "--input-file-type",
         help=(
             "If provided, will convert provided input file to provided file type."
             "Accepts YAML, bash/ini or namelist"
@@ -73,7 +73,7 @@ def parse_args(args):
         choices=["YAML", "INI", "F90"],
     )
     parser.add_argument(
-        "--config_file_type",
+        "--config-file-type",
         help=(
             "If provided, will convert provided config file to provided file type."
             "Accepts YAML, bash/ini or namelist"
@@ -81,7 +81,7 @@ def parse_args(args):
         choices=["YAML", "INI", "F90"],
     )
     parser.add_argument(
-        "--output_file_type",
+        "--output-file-type",
         help=(
             "If provided, will convert provided output file to provided file type."
             "Accepts YAML, bash/ini or namelist"
@@ -102,7 +102,7 @@ def parse_args(args):
     )
     parser.add_argument(
         "-l",
-        "--log_file",
+        "--log-file",
         help="Optional path to a specified log file",
         # #PM# WHAT TO DO ABOUT THIS LOGDFILE PATH?
         default="/dev/null",  # os.path.join(os.path.dirname(__file__), "set_config.log"),

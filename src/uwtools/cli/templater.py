@@ -34,14 +34,14 @@ def parse_args(args):
     )
     parser.add_argument(
         "-i",
-        "--input_template",
+        "--input-template",
         help="Path to a Jinja2 template file.",
         required=True,
         type=cli_helpers.path_if_file_exists,
     )
     parser.add_argument(
         "-c",
-        "--config_file",
+        "--config-file",
         help="Optional path to a YAML configuration file. If not provided, "
         "os.environ is used to configure.",
         type=cli_helpers.path_if_file_exists,
@@ -55,12 +55,12 @@ def parse_args(args):
     )
     parser.add_argument(
         "-d",
-        "--dry_run",
+        "--dry-run",
         action="store_true",
         help="If provided, print rendered template to stdout only",
     )
     parser.add_argument(
-        "--values_needed",
+        "--values-needed",
         action="store_true",
         help="If provided, print a list of required configuration settings to stdout",
     )
@@ -78,7 +78,7 @@ def parse_args(args):
     )
     parser.add_argument(
         "-l",
-        "--log_file",
+        "--log-file",
         help="Optional path to a specified log file",
         # #PM# WHAT TO DO ABOUT THIS LOGDFILE PATH?
         default="/dev/null",  # os.path.join(os.path.dirname(__file__), "templater.log"),

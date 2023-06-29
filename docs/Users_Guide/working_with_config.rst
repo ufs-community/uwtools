@@ -103,15 +103,15 @@ Generated field table::
 dry_run flag
 ^^^^^^^^^^^^
 
-Running ``set_config.py`` with ``-d`` or ``--dry_run`` will print the config object to stdout only and provide no other output::
+Running ``set_config.py`` with ``-d`` or ``--dry-run`` will print the config object to stdout only and provide no other output::
 
-        python scripts/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --dry_run
+        python scripts/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --dry-run
 
 The command above will generate the following output in the command line::
 
   {"fruit": "papaya", "vegetable": "eggplant", "how_many": 17, "dressing": "ranch", "topping": "crouton", "size": "large", "meat": "chicken"}
 
-If the ``--dry_run`` flag is run with a user outfile included, it will generate a warning that the outfile will not be written.
+If the ``--dry-run`` flag is run with a user outfile included, it will generate a warning that the outfile will not be written.
 
 .. _conf_val_needed:
 
@@ -119,7 +119,7 @@ If the ``--dry_run`` flag is run with a user outfile included, it will generate 
 values_needed flag
 ^^^^^^^^^^^^^^^^^^
 
-If provided, the ``values_needed`` flag will print to the stdout a list of which keys in the created config object are complete, which keys contain unfilled jinja templates, and which keys are set to empty. Config objects with nested keys will print a path to each key. Given the following YAML config object::
+If provided, the ``values-needed`` flag will print to the stdout a list of which keys in the created config object are complete, which keys contain unfilled jinja templates, and which keys are set to empty. Config objects with nested keys will print a path to each key. Given the following YAML config object::
 
   FV3GFS:
     nomads:
@@ -140,7 +140,7 @@ If provided, the ``values_needed`` flag will print to the stdout a list of which
 
 the command:: 
 
-  python scripts/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --values_needed
+  python scripts/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --values-needed
   
 will print the following to the stdout::
 
@@ -169,11 +169,11 @@ Conversion flags
 ^^^^^^^^^^^^^^^^
 
 ``set_config.py`` has three flags that will convert given input, config, or outfile to the user-provided file type::
-    --input_file_type
-    --config_file_type
-    --outfile_file_type
+    --input-file-type
+    --config-file-type
+    --outfile-file-type
 
-``--input_file_type`` and ``--config_file_type`` accept YAML ('YAML'), bash/ini ('INI'), or namelist ('F90') file types; ``outfile_file_type`` accepts these three as well as field table ('FieldTable').  This tool requires that the given file (input, config, or outfile) have a compatible structure with the provided file type.  A YAML file can have any depth, a bash/ini file can have a depth of 1 or 2, and a namelist file must have a depth of 2.
+``--input-file-type`` and ``--config-file-type`` accept YAML ('YAML'), bash/ini ('INI'), or namelist ('F90') file types; ``--outfile-file-type`` accepts these three as well as field table ('FieldTable').  This tool requires that the given file (input, config, or outfile) have a compatible structure with the provided file type.  A YAML file can have any depth, a bash/ini file can have a depth of 1 or 2, and a namelist file must have a depth of 2.
 
 .. _conf_compare:
 

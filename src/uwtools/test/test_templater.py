@@ -73,7 +73,7 @@ Running with args:
   dressing = 'balsamic'
 /
 """.lstrip()
-    argv = ["test", "-i", infile, "--dry_run", "fruit=pear", "vegetable=squash", "how_many=22"]
+    argv = ["test", "-i", infile, "--dry-run", "fruit=pear", "vegetable=squash", "how_many=22"]
     with patch.object(templater.sys, "argv", argv):
         templater.main()
     actual = capsys.readouterr().out.split("\n")
@@ -110,7 +110,7 @@ Running with args:
 """.lstrip()
 
     with patch.dict(os.environ, {"fruit": "banana", "vegetable": "tomato", "how_many": "22"}):
-        argv = ["test", "-i", infile, "--dry_run"]
+        argv = ["test", "-i", infile, "--dry-run"]
         with patch.object(templater.sys, "argv", argv):
             templater.main()
         actual = capsys.readouterr().out.split("\n")
@@ -142,7 +142,7 @@ fruit
 how_many
 vegetable
 """.lstrip()
-    argv = ["test", "-i", infile, "--values_needed"]
+    argv = ["test", "-i", infile, "--values-needed"]
     with patch.object(templater.sys, "argv", argv):
         templater.main()
     actual = capsys.readouterr().out.split("\n")
@@ -184,7 +184,7 @@ J2Template._load_file INPUT Args:
     env = {"fruit": "banana", "how_many": "22"}  # missing "vegetable"
     with patch.dict(os.environ, env):
         with raises(ValueError) as error:
-            argv = ["test", "-i", infile, "--dry_run", "-v"]
+            argv = ["test", "-i", infile, "--dry-run", "-v"]
             with patch.object(templater.sys, "argv", argv):
                 templater.main()
         assert str(error.value) == "Missing values needed by template"
@@ -193,7 +193,7 @@ J2Template._load_file INPUT Args:
 
     env["vegetable"] = "tomato"
     with patch.dict(os.environ, env):
-        argv = ["test", "-i", infile, "--dry_run", "-v"]
+        argv = ["test", "-i", infile, "--dry-run", "-v"]
         with patch.object(templater.sys, "argv", argv):
             templater.main()
     actual = capsys.readouterr().out.split("\n")

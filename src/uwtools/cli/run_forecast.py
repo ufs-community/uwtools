@@ -19,7 +19,7 @@ def parse_args(args):
     parser = argparse.ArgumentParser(description="Set config with user-defined settings.")
     parser.add_argument(
         "-c",
-        "--config_file",
+        "--config-file",
         help="path to YAML configuration file",
         type=cli_helpers.path_if_file_exists,
     )
@@ -30,12 +30,12 @@ def parse_args(args):
         type=cli_helpers.path_if_file_exists,
     )
     parser.add_argument(
-        "--forecast_app",
+        "--forecast-app",
         help=("If provided, will define the app to be run. Currently accepts SRW, MRW, or HAFS"),
         choices=["SRW", "MRW", "HAFS"],
     )
     parser.add_argument(
-        "--forecast_model",
+        "--forecast-model",
         nargs="+",
         help=(
             "If provided, will define the experiment to be run."
@@ -45,7 +45,7 @@ def parse_args(args):
     )
     parser.add_argument(
         "-d",
-        "--dry_run",
+        "--dry-run",
         action="store_true",
         help="If provided, validate configuration but do not run the forecast",
     )
@@ -63,7 +63,7 @@ def parse_args(args):
     )
     parser.add_argument(
         "-l",
-        "--log_file",
+        "--log-file",
         help="Optional path to a specified log file",
         # #PM# WHAT TO DO ABOUT THIS LOGFILE PATH?
         default="/dev/null",  # os.path.join(os.path.dirname(__file__), "forecast.log"),
