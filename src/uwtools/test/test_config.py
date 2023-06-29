@@ -19,6 +19,7 @@ from typing import Any, Dict
 from unittest.mock import patch
 
 import pytest
+from pytest import raises
 
 from uwtools import config, exceptions, logger
 from uwtools.cli.set_config import parse_args as parse_config_args
@@ -347,7 +348,7 @@ def test_dereference_exceptions(caplog):
     cfg = config.YAMLConfig(log_name=log.name)
     cfg.update({"undefined_filter": "{{ 34 | im_not_a_filter }}"})
 
-    with pytest.raises(exceptions.UWConfigError) as e_info:
+    with raises(exceptions.UWConfigError) as e_info:
         cfg.dereference()
 
     assert "filter: 'im_not_a_filter'" in repr(e_info)
@@ -390,7 +391,7 @@ def test_yaml_constructor_errors():
         tmpfile.writelines(cfg)
         tmpfile.seek(0)
 
-        with pytest.raises(exceptions.UWConfigError) as e_info:
+        with raises(exceptions.UWConfigError) as e_info:
             config.YAMLConfig(tmpfile.name)
             assert "constructor: !not_a_constructor" in repr(e_info)
             assert "Define the constructor before proceeding" in repr(e_info)
@@ -407,7 +408,7 @@ def test_yaml_constructor_errors():
         tmpfile.writelines(cfg)
         tmpfile.seek(0)
 
-        with pytest.raises(exceptions.UWConfigError) as e_info:
+        with raises(exceptions.UWConfigError) as e_info:
             config.YAMLConfig(tmpfile.name)
             assert "value is included in quotes" in repr(e_info)
 
@@ -496,7 +497,7 @@ def test_path_if_file_exists():
     with tempfile.NamedTemporaryFile(dir=".", mode="w") as tmp_file:
         assert cli_helpers.path_if_file_exists(tmp_file.name)
 
-    with pytest.raises(argparse.ArgumentTypeError):
+    with raises(argparse.ArgumentTypeError):
         not_a_filepath = "./no_way_this_file_exists.nope"
         cli_helpers.path_if_file_exists(not_a_filepath)
 
@@ -676,27 +677,15 @@ def test_set_config_ini_bash_config_file():
         assert compare_files(expected_file, out_file)
 
 
-@pytest.mark.skip()
-def test_incompatible_file_type():
-    """Test that providing an incompatible file type for input base file will
-    return print statement"""
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/model_configure.sample"))
-    args = ["-i", input_file]
-
-    with pytest.raises(ValueError):
-        config.create_config_obj(args)
-
-
 def test_bad_conversion_cfg_to_pdf():
-    with pytest.raises(SystemExit):
+    with raises(SystemExit):
         config.create_config_obj(
             parse_config_args(["-i", fixture_path("simple2_nml.cfg"), "--input_file_type", ".pdf"])
         )
 
 
 def test_bad_conversion_nml_to_yaml():
-    with pytest.raises(ValueError):
+    with raises(ValueError):
         config.create_config_obj(
             parse_config_args(
                 [
@@ -712,7 +701,7 @@ def test_bad_conversion_nml_to_yaml():
 
 
 def test_bad_conversion_yaml_to_nml(tmp_path):
-    with pytest.raises(ValueError):
+    with raises(ValueError):
         config.create_config_obj(
             parse_config_args(
                 [
@@ -800,6 +789,15 @@ def test_config_file_conversion(tmp_path):
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read()[-1] == "\n"
+
+
+def test_incompatible_file_type():
+    """
+    Test that providing an incompatible file type for input base file will
+    return print statement.
+    """
+    with raises(ValueError):
+        config.create_config_obj(parse_config_args(["-i", fixture_path("model_configure.sample")]))
 
 
 def test_output_file_conversion(tmp_path):
