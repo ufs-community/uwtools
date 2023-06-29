@@ -850,20 +850,17 @@ Keys that are set to empty:
     assert result == outcome
 
 
-@pytest.mark.skip()
-def test_values_needed_f90nml():
-    """Test that the values_needed flag logs keys completed, keys containing
-    unfilled jinja2 templates, and keys set to empty"""
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple3.nml"))
-    args = ["-i", input_file, "--values_needed"]
-
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
-        config.create_config_obj(args)
-    result = outstring.getvalue()
-
-    outcome = """Keys that are complete:
+def test_values_needed_f90nml(capsys):
+    """
+    Test that the values_needed flag logs keys completed, keys containing
+    unfilled jinja2 templates, and keys set to empty.
+    """
+    config.create_config_obj(
+        parse_config_args(["-i", fixture_path("simple3.nml"), "--values_needed"])
+    )
+    actual = capsys.readouterr().out
+    expected = """
+Keys that are complete:
     salad
     salad.base
     salad.fruit
@@ -878,8 +875,8 @@ Keys that have unfilled jinja2 templates:
 Keys that are set to empty:
     salad.toppings
     salad.appetizer
-"""
-    assert result == outcome
+""".lstrip()
+    assert actual == expected
 
 
 def test_cfg_to_yaml_conversion(tmp_path):
