@@ -5,7 +5,7 @@ This utility creates a command line interface for handling config files.
 """
 
 import sys
-from argparse import ArgumentError, ArgumentParser
+from argparse import ArgumentError, ArgumentParser, HelpFormatter
 
 from uwtools import config, exceptions
 from uwtools.utils import cli_helpers
@@ -18,94 +18,90 @@ def parse_args(args):
     argument.
     """
 
-    parser = ArgumentParser(description="Set config with user-defined settings.")
-
-    group = parser.add_mutually_exclusive_group()
-
-    parser.add_argument(
+    parser = ArgumentParser(
+        description="Set config with user-defined settings.",
+        formatter_class=lambda prog: HelpFormatter(prog, max_help_position=8),
+    )
+    required = parser.add_argument_group("required arguments")
+    required.add_argument(
         "-i",
         "--input-base-file",
-        help="Path to a config base file. Accepts YAML, bash/ini or namelist",
+        help="Path to a YAML, bash/ini, or namelist config base file",
         required=True,
         type=cli_helpers.path_if_file_exists,
     )
-    parser.add_argument(
-        "-o",
-        "--outfile",
-        help=(
-            "Full path to output file. If different from input, will will perform conversion."
-            'For field table output, specify model such as "field_table.FV3_GFS_v16"'
-        ),
-    )
-    parser.add_argument(
+    optional = parser.add_argument_group("optional arguments")
+    optional.add_argument(
         "-c",
         "--config-file",
-        help="Optional path to configuration file. Accepts YAML, bash/ini or namelist",
+        help="Path to YAML, bash/ini, or namelist configuration file.",
+        metavar="FILE",
         type=cli_helpers.path_if_file_exists,
     )
-    parser.add_argument(
+    optional.add_argument(
         "-d",
         "--dry-run",
         action="store_true",
-        help="If provided, print rendered config file to stdout only",
+        help="Print rendered config file to stdout only.",
     )
-    parser.add_argument(
-        "--compare",
-        action="store_true",
-        help="If provided, show diff between -i and -c files.",
+    optional.add_argument(
+        "-l",
+        "--log-file",
+        # #PM# WHAT TO DO ABOUT THIS LOGDFILE PATH?
+        default="/dev/null",  # os.path.join(os.path.dirname(__file__), "set_config.log"),
+        help="Optional path to a file to log to",
+        metavar="FILE",
     )
-    parser.add_argument(
-        "--show-format",
-        action="store_true",
-        help="If provided, print the required formatting to generate the requested output file",
-    )
-    parser.add_argument(
-        "--values-needed",
-        action="store_true",
-        help="If provided, prints a list of required configuration settings to stdout",
-    )
-    parser.add_argument(
-        "--input-file-type",
+    optional.add_argument(
+        "-o",
+        "--outfile",
         help=(
-            "If provided, will convert provided input file to provided file type."
-            "Accepts YAML, bash/ini or namelist"
+            "Path to output file. If different from input, will will perform conversion. "
+            'For field table output, specify model such as "field_table.FV3_GFS_v16".'
         ),
-        choices=["YAML", "INI", "F90"],
+        metavar="FILE",
     )
-    parser.add_argument(
-        "--config-file-type",
-        help=(
-            "If provided, will convert provided config file to provided file type."
-            "Accepts YAML, bash/ini or namelist"
-        ),
-        choices=["YAML", "INI", "F90"],
-    )
-    parser.add_argument(
-        "--output-file-type",
-        help=(
-            "If provided, will convert provided output file to provided file type."
-            "Accepts YAML, bash/ini or namelist"
-        ),
-        choices=["YAML", "INI", "F90", "FieldTable"],
-    )
-    group.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="If provided, print all logging messages.",
-    )
-    group.add_argument(
+    optional.add_argument(
         "-q",
         "--quiet",
         action="store_true",
-        help="If provided, print no logging messages",
+        help="Print no logging messages.",
     )
-    parser.add_argument(
-        "-l",
-        "--log-file",
-        help="Optional path to a specified log file",
-        # #PM# WHAT TO DO ABOUT THIS LOGDFILE PATH?
-        default="/dev/null",  # os.path.join(os.path.dirname(__file__), "set_config.log"),
+    optional.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Print all logging messages.",
+    )
+    optional.add_argument(
+        "--compare",
+        action="store_true",
+        help="Show diff between input base and config files.",
+    )
+    optional.add_argument(
+        "--config-file-type",
+        help="Convert provided config file to provided file type.",
+        choices=["YAML", "INI", "F90"],
+    )
+    optional.add_argument(
+        "--input-file-type",
+        help="Convert provided input file to provided file type.",
+        choices=["YAML", "INI", "F90"],
+    )
+    optional.add_argument(
+        "--output-file-type",
+        help="Convert provided output file to provided file type.",
+        choices=["YAML", "INI", "F90", "FieldTable"],
+    )
+    optional.add_argument(
+        "--show-format",
+        action="store_true",
+        help="Print the required formatting to generate the requested output file.",
+    )
+    optional.add_argument(
+        "--values-needed",
+        action="store_true",
+        help="Print a list of required configuration settings.",
     )
 
     # Parse arguments.

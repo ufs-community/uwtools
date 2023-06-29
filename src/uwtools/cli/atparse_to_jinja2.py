@@ -3,9 +3,9 @@ This utility renders a Jinja2 template using user-supplied configuration options
 via YAML or environment variables.
 """
 
-import argparse
 import re
 import sys
+from argparse import ArgumentParser, HelpFormatter
 
 from uwtools.utils import cli_helpers
 
@@ -16,25 +16,31 @@ def parse_args(args):
     Python's argparse documentation for more information about settings of each
     argument.
     """
-
-    parser = argparse.ArgumentParser(description="Convert an atparse template to jinja2")
-    parser.add_argument(
-        "-o",
-        "--outfile",
-        help="Full path to new jinja2 template",
+    parser = ArgumentParser(
+        description="Convert an atparse template to Jinja2.",
+        formatter_class=lambda prog: HelpFormatter(prog, max_help_position=8),
     )
-    parser.add_argument(
+    required = parser.add_argument_group("required arguments")
+    required.add_argument(
         "-i",
         "--input-template",
-        help="Path to an atparse template file.",
+        help="Path to an atparse template file",
+        metavar="FILE",
         required=True,
         type=cli_helpers.path_if_file_exists,
     )
-    parser.add_argument(
+    optional = parser.add_argument_group("optional arguments")
+    optional.add_argument(
         "-d",
         "--dry-run",
         action="store_true",
-        help="If provided, print rendered template to stdout only",
+        help="Print rendered template to stdout only.",
+    )
+    optional.add_argument(
+        "-o",
+        "--outfile",
+        help="Path to new Jinja2 template",
+        metavar="FILE",
     )
     return parser.parse_args(args)
 

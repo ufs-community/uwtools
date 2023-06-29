@@ -5,11 +5,11 @@ This utility renders a Jinja2 template using user-supplied configuration options
 via YAML or environment variables.
 """
 
-import argparse
 import inspect
 import logging
 import os
 import sys
+from argparse import ArgumentError, ArgumentParser, HelpFormatter
 
 from uwtools import config
 from uwtools.j2template import J2Template
@@ -23,75 +23,84 @@ def parse_args(args):
     argument.
     """
 
-    parser = argparse.ArgumentParser(
-        description="Update a Jinja2 Template with user-defined settings."
+    parser = ArgumentParser(
+        description="Update a Jinja2 template with user-defined settings.",
+        formatter_class=lambda prog: HelpFormatter(prog, max_help_position=8),
     )
-    group = parser.add_mutually_exclusive_group()
-    parser.add_argument(
-        "-o",
-        "--outfile",
-        help="Full path to output file",
-    )
-    parser.add_argument(
+    required = parser.add_argument_group("required arguments")
+    required.add_argument(
         "-i",
         "--input-template",
-        help="Path to a Jinja2 template file.",
+        help="Path to a Jinja2 template file",
         required=True,
         type=cli_helpers.path_if_file_exists,
     )
-    parser.add_argument(
+    optional = parser.add_argument_group("optional arguments")
+    optional.add_argument(
         "-c",
         "--config-file",
-        help="Optional path to a YAML configuration file. If not provided, "
-        "os.environ is used to configure.",
+        help=(
+            "Path to a YAML configuration file. "
+            "If not provided, the environment is used to configure."
+        ),
+        metavar="FILE",
         type=cli_helpers.path_if_file_exists,
     )
-    parser.add_argument(
-        "config_items",
-        help="Any number of configuration settings that will override values "
-        "found in YAML or user environment.",
-        metavar="KEY=VALUE",
-        nargs="*",
-    )
-    parser.add_argument(
+    optional.add_argument(
         "-d",
         "--dry-run",
         action="store_true",
-        help="If provided, print rendered template to stdout only",
+        help="Only print rendered template.",
     )
-    parser.add_argument(
-        "--values-needed",
-        action="store_true",
-        help="If provided, print a list of required configuration settings to stdout",
+    optional.add_argument(
+        "-l",
+        "--log-file",
+        # #PM# WHAT TO DO ABOUT THIS LOGDFILE PATH?
+        default="/dev/null",  # os.path.join(os.path.dirname(__file__), "templater.log"),
+        help="Path to a specified log file",
+        metavar="FILE",
     )
-    group.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="If provided, print all logging messages.",
+    optional.add_argument(
+        "-o",
+        "--outfile",
+        help="Path to output file",
+        metavar="FILE",
     )
-    group.add_argument(
+    optional.add_argument(
         "-q",
         "--quiet",
         action="store_true",
-        help="If provided, print no logging messages",
+        help="Print no log messages.",
     )
-    parser.add_argument(
-        "-l",
-        "--log-file",
-        help="Optional path to a specified log file",
-        # #PM# WHAT TO DO ABOUT THIS LOGDFILE PATH?
-        default="/dev/null",  # os.path.join(os.path.dirname(__file__), "templater.log"),
+    optional.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Print more detailed log messages.",
+    )
+    optional.add_argument(
+        "--values-needed",
+        action="store_true",
+        help="Print a list of required configuration settings.",
+    )
+    optional.add_argument(
+        "config_items",
+        help=(
+            "Any number of configuration settings that will override values "
+            "from config files or the environments"
+        ),
+        metavar="KEY=VALUE",
+        nargs="*",
     )
 
     parsed = parser.parse_args(args)
     if not parsed.outfile and not parsed.dry_run and not parsed.values_needed:
         msg = "You need outfile, dry_run, or values_needed to continue."
-        raise argparse.ArgumentError(None, msg)
+        raise ArgumentError(None, msg)
 
     if parsed.quiet and parsed.dry_run:
         msg = "You added quiet and dry_run arguments. This will print nothing."
-        raise argparse.ArgumentError(None, msg)
+        raise ArgumentError(None, msg)
 
     return parsed
 
