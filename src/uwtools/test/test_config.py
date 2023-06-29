@@ -584,31 +584,6 @@ def test_set_config_bash_simple():
         assert compare_files(expected_file, out_file)
 
 
-@pytest.mark.skip()
-def test_set_config_yaml_config_file():
-    """Test that providing a yaml base input file and a config file will
-    create and update yaml config file"""
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.yaml"))
-    config_file = os.path.join(
-        uwtools_file_base, pathlib.Path("fixtures/fruit_config_similar.yaml")
-    )
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/test_config_from_yaml.yaml"
-        args = ["-i", input_file, "-o", out_file, "-c", config_file]
-
-        config.create_config_obj(args)
-
-        expected = config.YAMLConfig(input_file)
-        config_file_obj = config.YAMLConfig(config_file)
-        expected.update_values(config_file_obj)
-        expected_file = f"{tmp_dir}/expected_yaml.yaml"
-        expected.dump_file(expected_file)
-
-        assert compare_files(expected_file, out_file)
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -787,7 +762,7 @@ def set_config_helper(infn, cfgfn, tmpdir) -> None:
     ext = Path(infile).suffix
     outfile = str(tmpdir / f"outfile.{ext}")
     config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile, "-c", cfgfile]))
-    cfgclass = getattr(config, "%sConfig" % {".nml": "F90", ".ini": "INI"}[ext])
+    cfgclass = getattr(config, "%sConfig" % {".nml": "F90", ".ini": "INI", ".yaml": "YAML"}[ext])
     cfgobj = cfgclass(infile)
     cfgobj.update_values(cfgclass(cfgfile))
     reference = tmpdir / "expected"
@@ -817,6 +792,14 @@ def test_set_config_ini_config_file(tmp_path):
     create and update INI config file.
     """
     set_config_helper("simple.ini", "simple2.ini", tmp_path)
+
+
+def test_set_config_yaml_config_file(tmp_path):
+    """
+    Test that providing a YAML base input file and a YAML config file will
+    create and update YAML config file.
+    """
+    set_config_helper("fruit_config.yaml", "fruit_config_similar.yaml", tmp_path)
 
 
 def test_show_format():
