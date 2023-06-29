@@ -126,37 +126,6 @@ def test_parse_include_ini():
     assert len(cfg) == 5
 
 
-@pytest.mark.skip()
-def test_yaml_config_simple():
-    """Test that YAML load, update, and dump work with a basic YAML file."""
-
-    test_yaml = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.yaml"))
-    cfg = config.YAMLConfig(test_yaml)
-
-    expected = {
-        "scheduler": "slurm",
-        "jobname": "abcd",
-        "extra_stuff": 12345,
-        "account": "user_account",
-        "nodes": 1,
-        "queue": "bos",
-        "tasks_per_node": 4,
-        "walltime": "00:01:00",
-    }
-    assert cfg == expected
-    assert repr(cfg.data) == json.dumps(expected).replace('"', "'")
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/test_yaml_dump.yml"
-        cfg.dump_file(out_file)
-        assert filecmp.cmp(test_yaml, out_file)
-
-    cfg.update({"nodes": 12})
-    expected["nodes"] = 12
-
-    assert cfg == expected
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -766,6 +735,32 @@ def test_yaml_config_include_files():
     # 2-file test, but with included files reversed.
 
     assert cfgobj["reverse_files"]["vegetable"] == "eggplant"
+
+
+def test_yaml_config_simple(tmp_path):
+    """
+    Test that YAML load, update, and dump work with a basic YAML file.
+    """
+    infile = fixture_path("simple2.yaml")
+    outfile = tmp_path / "outfile.yml"
+    cfgobj = config.YAMLConfig(infile)
+    expected = {
+        "scheduler": "slurm",
+        "jobname": "abcd",
+        "extra_stuff": 12345,
+        "account": "user_account",
+        "nodes": 1,
+        "queue": "bos",
+        "tasks_per_node": 4,
+        "walltime": "00:01:00",
+    }
+    assert cfgobj == expected
+    assert repr(cfgobj.data) == json.dumps(expected).replace('"', "'")
+    cfgobj.dump_file(outfile)
+    assert filecmp.cmp(infile, outfile)
+    cfgobj.update({"nodes": 12})
+    expected["nodes"] = 12
+    assert cfgobj == expected
 
 
 def test_yaml_constructor_error_no_quotes(tmp_path):
