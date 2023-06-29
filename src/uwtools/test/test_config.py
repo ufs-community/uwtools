@@ -919,28 +919,24 @@ def test_output_file_conversion():
             assert output.read()[-1] == "\n"
 
 
-@pytest.mark.skip()
-def test_config_file_conversion():
-    """Test that --config_input_type converts config object to desired object type"""
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
-    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.ini"))
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/test_config_conversion.nml"
-        args = ["-i", input_file, "-c", config_file, "-o", out_file, "--config_file_type", "F90"]
-
-        config.create_config_obj(args)
-
-        expected = config.F90Config(input_file)
-        config_file_obj = config.F90Config(config_file)
-        expected.update_values(config_file_obj)
-        expected_file = f"{tmp_dir}/expected_nml.nml"
-        expected.dump_file(expected_file)
-
-        assert compare_files(expected_file, out_file)
-
-        with open(out_file, "r", encoding="utf-8") as output:
-            assert output.read()[-1] == "\n"
+def test_config_file_conversion(tmp_path):
+    """
+    Test that --config_input_type converts config object to desired object type.
+    """
+    infile = fixture_path("simple2.nml")
+    cfgfile = fixture_path("simple2.ini")
+    outfile = str(tmp_path / "test_config_conversion.nml")
+    config.create_config_obj(
+        parse_config_args(["-i", infile, "-c", cfgfile, "-o", outfile, "--config_file_type", "F90"])
+    )
+    expected = config.F90Config(infile)
+    config_obj = config.F90Config(cfgfile)
+    expected.update_values(config_obj)
+    expected_file = tmp_path / "expected_nml.nml"
+    expected.dump_file(expected_file)
+    assert compare_files(expected_file, outfile)
+    with open(outfile, "r", encoding="utf-8") as output:
+        assert output.read()[-1] == "\n"
 
 
 def test_bad_conversion_cfg_to_pdf():
