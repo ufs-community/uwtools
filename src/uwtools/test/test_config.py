@@ -379,40 +379,6 @@ def test_dereference():
     assert cfg["grid_stats"]["points_per_level"] == 10000
 
 
-@pytest.mark.skip()
-def test_dereference_exceptions(caplog):
-    """Test that dereference handles some standard mistakes."""
-
-    log = logger.Logger(name="test_dereference", level="DEBUG")
-    cfg = config.YAMLConfig(log_name=log.name)
-    cfg.update({"undefined_filter": "{{ 34 | im_not_a_filter }}"})
-
-    with raises(exceptions.UWConfigError) as e_info:
-        cfg.dereference()
-
-    assert "filter: 'im_not_a_filter'" in repr(e_info)
-    cfg.pop("undefined_filter", None)
-
-    cfg.update(
-        {
-            "foo": "bar",
-            "soap": "{{ foo }}",
-            "num": 2,
-            "nada": 0,
-            "divide": "{{ num // nada }}",  # ZeroDivisionError
-            "list_a": [1, 2, 4],
-            "type_prob": '{{ list_a / "a" }}',  # TypeError
-        }
-    )
-    caplog.clear()
-    cfg.dereference()
-
-    raised = [rec.msg for rec in caplog.records if "raised" in rec.msg]
-
-    assert "ZeroDivisionError" in raised[0]
-    assert "TypeError" in raised[1]
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -565,6 +531,35 @@ def test_config_file_conversion(tmp_path):
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read()[-1] == "\n"
+
+
+def test_dereference_exceptions(caplog):
+    """
+    Test that dereference handles some standard mistakes.
+    """
+    log = logger.Logger(name="test_dereference_exceptions", level="DEBUG")
+    cfg = config.YAMLConfig(log_name=log.name)
+    cfg.update({"undefined_filter": "{{ 34 | im_not_a_filter }}"})
+    with raises(exceptions.UWConfigError) as e:
+        cfg.dereference()
+    assert "filter: 'im_not_a_filter'" in str(e.value)
+    cfg.pop("undefined_filter", None)
+    cfg.update(
+        {
+            "divide": "{{ num // nada }}",  # ZeroDivisionError
+            "foo": "bar",
+            "list_a": [1, 2, 4],
+            "nada": 0,
+            "num": 2,
+            "soap": "{{ foo }}",
+            "type_prob": '{{ list_a / "a" }}',  # TypeError
+        }
+    )
+    caplog.clear()
+    cfg.dereference()
+    raised = [rec.msg for rec in caplog.records if "raised" in rec.msg]
+    assert "ZeroDivisionError" in raised[0]
+    assert "TypeError" in raised[1]
 
 
 @pytest.mark.parametrize(
