@@ -157,26 +157,6 @@ def test_yaml_config_simple():
     assert cfg == expected
 
 
-@pytest.mark.skip()
-def test_yaml_config_composite_types():
-    """Test that YAML load and dump work with a YAML file that has
-    multiple data structures and levels."""
-
-    test_yaml = os.path.join(uwtools_file_base, pathlib.Path("fixtures/result4.yaml"))
-    cfg = config.YAMLConfig(test_yaml)
-
-    assert cfg.get("step_cycle") == "PT6H"
-    assert isinstance(cfg.get("init_cycle"), datetime.datetime)
-
-    generic_repos = cfg.get("generic_repos")
-    assert isinstance(generic_repos, list)
-    assert isinstance(generic_repos[0], dict)
-    assert generic_repos[0].get("branch") == "develop"
-
-    models = cfg["models"]
-    assert models[0].get("config").get("vertical_resolution") == 64
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -745,12 +725,30 @@ Keys that are set to empty:
     assert actual == expected
 
 
+def test_yaml_config_composite_types():
+    """
+    Test that YAML load and dump work with a YAML file that has multiple data
+    structures and levels.
+    """
+    cfgobj = config.YAMLConfig(fixture_path("result4.yaml"))
+
+    assert cfgobj["step_cycle"] == "PT6H"
+    assert isinstance(cfgobj["init_cycle"], datetime.datetime)
+
+    generic_repos = cfgobj["generic_repos"]
+    assert isinstance(generic_repos, list)
+    assert isinstance(generic_repos[0], dict)
+    assert generic_repos[0]["branch"] == "develop"
+
+    models = cfgobj["models"]
+    assert models[0]["config"]["vertical_resolution"] == 64
+
+
 def test_yaml_config_include_files():
     """
     Test that including files via the !INCLUDE constructor works as expected.
     """
-    infile = fixture_path("include_files.yaml")
-    cfgobj = config.YAMLConfig(infile)
+    cfgobj = config.YAMLConfig(fixture_path("include_files.yaml"))
 
     # 1-file include tests.
 
