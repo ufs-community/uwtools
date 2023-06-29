@@ -18,7 +18,6 @@ import tempfile
 from argparse import ArgumentTypeError
 from collections import OrderedDict
 from pathlib import Path
-from textwrap import dedent
 from typing import Any, Dict
 from unittest.mock import patch
 
@@ -412,45 +411,6 @@ def test_dereference_exceptions(caplog):
 
     assert "ZeroDivisionError" in raised[0]
     assert "TypeError" in raised[1]
-
-
-@pytest.mark.skip()
-def test_yaml_constructor_errors():
-    """When loading YAML with Jinja2 templated values, we see a few
-    different renditions of constructor errors. Make sure those are
-    clear and helpful."""
-
-    # Test unregistered constructor raises UWConfigError
-    cfg = dedent(
-        """\
-    foo: !not_a_constructor bar
-    """
-    )
-
-    with tempfile.NamedTemporaryFile(dir="./", mode="w+t") as tmpfile:
-        tmpfile.writelines(cfg)
-        tmpfile.seek(0)
-
-        with raises(exceptions.UWConfigError) as e_info:
-            config.YAMLConfig(tmpfile.name)
-            assert "constructor: !not_a_constructor" in repr(e_info)
-            assert "Define the constructor before proceeding" in repr(e_info)
-
-    # Test Jinja2 template without quotes raises UWConfigError
-    cfg = dedent(
-        """\
-    foo: {{ bar }}
-    bar: 2
-    """
-    )
-
-    with tempfile.NamedTemporaryFile(dir="./", mode="w+t") as tmpfile:
-        tmpfile.writelines(cfg)
-        tmpfile.seek(0)
-
-        with raises(exceptions.UWConfigError) as e_info:
-            config.YAMLConfig(tmpfile.name)
-            assert "value is included in quotes" in repr(e_info)
 
 
 def test_bad_conversion_cfg_to_pdf():
@@ -874,3 +834,36 @@ Keys that are set to empty:
     FV3GFS.nomads.testempty
 """.lstrip()
     assert actual == expected
+
+
+def test_yaml_constructor_error_no_quotes(tmp_path):
+    # Test that Jinja2 template without quotes raises UWConfigError.
+
+    tmpfile = tmp_path / "test.yaml"
+    with tmpfile.open("w", encoding="utf-8") as f:
+        f.write(
+            """
+foo: {{ bar }}
+bar: 2
+"""
+        )
+    with raises(exceptions.UWConfigError) as e:
+        config.YAMLConfig(tmpfile)
+    # #PM# WHAT IS THE RATIONALE HERE?
+    assert "value is included in quotes" in str(e.value)
+
+
+def test_yaml_constructor_error_unregistered_constructor(tmp_path):
+    # Test that unregistered constructor raises UWConfigError.
+
+    tmpfile = tmp_path / "test.yaml"
+    with tmpfile.open("w", encoding="utf-8") as f:
+        f.write(
+            """
+foo: !not_a_constructor bar
+"""
+        )
+    with raises(exceptions.UWConfigError) as e:
+        config.YAMLConfig(tmpfile)
+    assert "constructor: '!not_a_constructor'" in str(e.value)
+    assert "Define the constructor before proceeding" in str(e.value)
