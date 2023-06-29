@@ -1,26 +1,18 @@
-""" Tests for the atparse_to_jinja2 tool. """
+"""
+Tests for the atparse_to_jinja2 tool.
+"""
 
-import io
-import os
-import pathlib
-from contextlib import redirect_stdout
+from unittest.mock import patch
 
 from uwtools.cli import atparse_to_jinja2
+from uwtools.test.support import fixture_path
 
-uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
-
-def test_all_templates_replaced():
-    """Test that all atparse @[] items are replaced with Jinja2
-    templates {{ }}"""
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/ww3_multi.inp.IN"))
-
-    args = ["-i", input_file, "-d"]
-
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
-        atparse_to_jinja2.main(args)
-
-    result = outstring.getvalue()
-    assert "@[" not in result
+def test_all_templates_replaced(capsys):
+    """
+    Test that all atparse @[] items are replaced with Jinja2 templates {{ }}.
+    """
+    argv = ["test", "-i", fixture_path("ww3_multi.inp.IN"), "-d"]
+    with patch.object(atparse_to_jinja2.sys, "argv", argv):
+        atparse_to_jinja2.main()
+    assert "@[" not in capsys.readouterr().out

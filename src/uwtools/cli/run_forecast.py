@@ -4,14 +4,13 @@ This utility creates a command line interface for running a forecast.
 
 import argparse
 import inspect
+import sys
 
 from uwtools.drivers import forecast
 from uwtools.utils import cli_helpers
 
 
-def parse_args(argv):  # pragma: no cover
-    # remove pragma when completed
-
+def parse_args(args):
     """
     Function maintains the arguments accepted by this script. Please see
     Python's argparse documentation for more information about settings
@@ -65,19 +64,20 @@ def parse_args(argv):  # pragma: no cover
         "-l",
         "--log_file",
         help="Optional path to a specified log file",
-        # #PM# WHAT TO DO ABOUT THIS LOGDFILE PATH?
+        # #PM# WHAT TO DO ABOUT THIS LOGFILE PATH?
         default="/dev/null",  # os.path.join(os.path.dirname(__file__), "forecast.log"),
     )
-    return parser.parse_args(argv)
+    return parser.parse_args(args)
 
 
-def main(argv):  # pragma: no cover
+def main():
     """
     Defines the user interface for the forecast driver. Parses arguments
     provided by the user and passes to the Forecast driver class to be run."""
-    user_args = parse_args(argv)
+    user_args = parse_args(sys.argv[1:])
 
-    # Set up logging
+    # Set up logging:
+
     name = f"{inspect.stack()[0][3]}"
     cli_helpers.setup_logging(
         log_file=user_args.log_file, log_name=name, quiet=user_args.quiet, verbose=user_args.verbose

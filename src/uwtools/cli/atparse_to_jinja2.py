@@ -2,13 +2,15 @@
 This utility renders a Jinja2 template using user-supplied configuration options
 via YAML or environment variables.
 """
+
 import argparse
 import re
+import sys
 
 from uwtools.utils import cli_helpers
 
 
-def parse_args(argv):
+def parse_args(args):
     """
     Function maintains the arguments accepted by this script. Please see
     Python's argparse documentation for more information about settings of each
@@ -28,14 +30,13 @@ def parse_args(argv):
         required=True,
         type=cli_helpers.path_if_file_exists,
     )
-
     parser.add_argument(
         "-d",
         "--dry_run",
         action="store_true",
         help="If provided, print rendered template to stdout only",
     )
-    return parser.parse_args(argv)
+    return parser.parse_args(args)
 
 
 def atparse_replace(atline):
@@ -53,10 +54,10 @@ def atparse_replace(atline):
     return atline
 
 
-def main(argv):
+def main():
     """Main section for converting the template file"""
 
-    user_args = parse_args(argv)
+    user_args = parse_args(sys.argv[1:])
     with open(user_args.input_template, "rt", encoding="utf-8") as atparsetemplate:
         if user_args.dry_run:
             if user_args.outfile:

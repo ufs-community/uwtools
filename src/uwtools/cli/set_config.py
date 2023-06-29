@@ -11,7 +11,7 @@ from uwtools import config, exceptions
 from uwtools.utils import cli_helpers
 
 
-def parse_args(argv):
+def parse_args(args):
     """
     Function maintains the arguments accepted by this script. Please see
     Python's argparse documentation for more information about settings of each
@@ -102,19 +102,19 @@ def parse_args(argv):
 
     # Parse arguments.
 
-    args = parser.parse_args(argv)
+    parsed = parser.parse_args(args)
 
     # Validate arguments.
 
-    if args.show_format and not args.outfile:
+    if parsed.show_format and not parsed.outfile:
         raise ArgumentError(None, "Option --show_format requires --outfile")
 
-    if args.quiet and args.dry_run:
+    if parsed.quiet and parsed.dry_run:
         raise ArgumentError(None, "Specifying --quiet will suppress --dry-run output")
 
     # Return validated arguments.
 
-    return args
+    return parsed
 
 
 def main():

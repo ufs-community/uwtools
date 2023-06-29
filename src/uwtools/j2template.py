@@ -106,7 +106,7 @@ class J2Template:
         msg = f"Writing rendered template to output file: {output_path}"
         self.log.debug(msg)
         with open(output_path, "w+", encoding="utf-8") as file_:
-            file_.write(self.render_template() + "\n")
+            print(self.render_template(), file=file_)
 
     @logger.verbose()
     def _load_file(self, template_path):

@@ -12,6 +12,7 @@ cli() {
     )
     for x in ${clis[*]}; do
       which $x
+      $x --help &>/dev/null
     done
   )
   echo OK
@@ -53,5 +54,5 @@ else
   lint
   typecheck
   unittest
-#   cli
+  cli
 fi

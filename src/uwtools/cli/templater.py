@@ -9,13 +9,14 @@ import argparse
 import inspect
 import logging
 import os
+import sys
 
 from uwtools import config
 from uwtools.j2template import J2Template
 from uwtools.utils import cli_helpers
 
 
-def parse_args(argv):
+def parse_args(args):
     """
     Function maintains the arguments accepted by this script. Please see
     Python's argparse documentation for more information about settings of each
@@ -83,16 +84,16 @@ def parse_args(argv):
         default="/dev/null",  # os.path.join(os.path.dirname(__file__), "templater.log"),
     )
 
-    args = parser.parse_args(argv)
-    if not args.outfile and not args.dry_run and not args.values_needed:
+    parsed = parser.parse_args(args)
+    if not parsed.outfile and not parsed.dry_run and not parsed.values_needed:
         msg = "You need outfile, dry_run, or values_needed to continue."
         raise argparse.ArgumentError(None, msg)
 
-    if args.quiet and args.dry_run:
+    if parsed.quiet and parsed.dry_run:
         msg = "You added quiet and dry_run arguments. This will print nothing."
         raise argparse.ArgumentError(None, msg)
 
-    return args
+    return parsed
 
 
 def setup_config_obj(user_args, log_name=None):
@@ -117,9 +118,9 @@ def setup_config_obj(user_args, log_name=None):
     return cfg
 
 
-def main(argv):
+def main():
     """Main section for rendering and writing a template file"""
-    user_args = parse_args(argv)
+    user_args = parse_args(sys.argv[1:])
 
     name = f"{inspect.stack()[0][3]}"
     log = cli_helpers.setup_logging(

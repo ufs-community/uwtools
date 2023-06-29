@@ -16,9 +16,7 @@ from .driver import Driver
 logging.getLogger(__name__)
 
 
-class FV3Forecast(Driver):  # pragma: no cover
-    # remove pragma when completed
-
+class FV3Forecast(Driver):
     """
     Concrete class to handle UFS Short Range Weather app forecasts.
     FV3 (ATM-only) mode.

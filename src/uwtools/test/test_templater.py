@@ -19,9 +19,10 @@ def test_mutually_exclusive_args():
     Test that mutually-exclusive -q/-d args are rejected.
     """
 
-    infile = fixture_path("fruit_config.yaml")
     with raises(argparse.ArgumentError):
-        templater.main(["-i", infile, "-q", "-d"])
+        argv = ["test", "-i", fixture_path("fruit_config.yaml"), "-q", "-d"]
+        with patch.object(templater.sys, "argv", argv):
+            templater.main()
 
 
 def test_set_template_all_good():
@@ -29,7 +30,9 @@ def test_set_template_all_good():
     Confirm success using namelist input and shell config.
     """
 
-    templater.main(["-i", fixture_path("nml.IN"), "-c", fixture_path("fruit_config.sh"), "-d"])
+    argv = ["test", "-i", fixture_path("nml.IN"), "-c", fixture_path("fruit_config.sh"), "-d"]
+    with patch.object(templater.sys, "argv", argv):
+        templater.main()
 
 
 def test_set_template_bad_config_suffix(tmp_path):
@@ -41,7 +44,9 @@ def test_set_template_bad_config_suffix(tmp_path):
     with open(badfile, "w", encoding="utf-8"):
         pass  # create empty file
     with raises(ValueError):
-        templater.main(["-i", fixture_path("nml.IN"), "-c", badfile, "-d"])
+        argv = ["test", "-i", fixture_path("nml.IN"), "-c", badfile, "-d"]
+        with patch.object(templater.sys, "argv", argv):
+            templater.main()
 
 
 def test_set_template_command_line_config(capsys):
@@ -72,8 +77,9 @@ Running with args:
   dressing = 'balsamic'
 /
 """.lstrip()
-
-    templater.main(["-i", infile, "--dry_run", "fruit=pear", "vegetable=squash", "how_many=22"])
+    argv = ["test", "-i", infile, "--dry_run", "fruit=pear", "vegetable=squash", "how_many=22"]
+    with patch.object(templater.sys, "argv", argv):
+        templater.main()
     actual = capsys.readouterr().out.split("\n")
     for line in expected.split("\n"):
         assert line_in_lines(line, actual)
@@ -109,7 +115,9 @@ Running with args:
 """.lstrip()
 
     with patch.dict(os.environ, {"fruit": "banana", "vegetable": "tomato", "how_many": "22"}):
-        templater.main(["-i", infile, "--dry_run"])
+        argv = ["test", "-i", infile, "--dry_run"]
+        with patch.object(templater.sys, "argv", argv):
+            templater.main()
         actual = capsys.readouterr().out.split("\n")
         for line in expected.split("\n"):
             assert line_in_lines(line, actual)
@@ -140,8 +148,9 @@ fruit
 how_many
 vegetable
 """.lstrip()
-
-    templater.main(["-i", infile, "--values_needed"])
+    argv = ["test", "-i", infile, "--values_needed"]
+    with patch.object(templater.sys, "argv", argv):
+        templater.main()
     actual = capsys.readouterr().out.split("\n")
     for line in expected.split("\n"):
         assert line_in_lines(line, actual)
@@ -181,14 +190,18 @@ J2Template._load_file INPUT Args:
     env = {"fruit": "banana", "how_many": "22"}  # missing "vegetable"
     with patch.dict(os.environ, env):
         with raises(ValueError) as error:
-            templater.main(["-i", infile, "--dry_run", "-v"])
+            argv = ["test", "-i", infile, "--dry_run", "-v"]
+            with patch.object(templater.sys, "argv", argv):
+                templater.main()
         assert str(error.value) == "Missing values needed by template"
 
     # Test verbose output when all template values are available.
 
     env["vegetable"] = "tomato"
     with patch.dict(os.environ, env):
-        templater.main(["-i", infile, "--dry_run", "-v"])
+        argv = ["test", "-i", infile, "--dry_run", "-v"]
+        with patch.object(templater.sys, "argv", argv):
+            templater.main()
     actual = capsys.readouterr().out.split("\n")
     for line in expected.split("\n"):
         assert line_in_lines(line, actual)
@@ -198,7 +211,9 @@ J2Template._load_file INPUT Args:
     # PM# WHAT'S THE RATIONALE HERE?
 
     with raises(argparse.ArgumentError):
-        templater.main(["-i", infile, "-q"])
+        argv = ["test", "-i", infile, "-q"]
+        with patch.object(templater.sys, "argv", argv):
+            templater.main()
 
 
 def test_set_template_yaml_config(tmp_path):
@@ -212,10 +227,18 @@ def test_set_template_yaml_config(tmp_path):
     # Patch environment to ensure that values are being taken from the config
     # file, not the environment.
 
+    argv = [
+        "test",
+        "-i",
+        fixture_path("nml.IN"),
+        "-c",
+        fixture_path("fruit_config.yaml"),
+        "-o",
+        outfile,
+    ]
     with patch.dict(os.environ, {"fruit": "candy", "vegetable": "cookies", "how_many": "all"}):
-        templater.main(
-            ["-i", fixture_path("nml.IN"), "-c", fixture_path("fruit_config.yaml"), "-o", outfile]
-        )
+        with patch.object(templater.sys, "argv", argv):
+            templater.main()
     assert compare_files(fixture_path("simple2.nml"), outfile)
 
 
@@ -225,7 +248,8 @@ def test_set_template_yaml_config_model_configure(tmp_path):
     """
 
     outfile = f"{tmp_path}/test_render_from_yaml.nml"
-    args = [
+    argv = [
+        "test",
         "-i",
         fixture_path("model_configure.sample.IN"),
         "-c",
@@ -233,5 +257,6 @@ def test_set_template_yaml_config_model_configure(tmp_path):
         "-o",
         outfile,
     ]
-    templater.main(args)
+    with patch.object(templater.sys, "argv", argv):
+        templater.main()
     assert compare_files(fixture_path("model_configure.sample"), outfile)

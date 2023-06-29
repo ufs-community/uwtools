@@ -12,9 +12,7 @@ https://github.com/ufs-community/workflow-tools/wiki/Migrating-Production-Workfl
 import abc
 
 
-class Driver:  # pragma: no cover
-    # remove pragma when completed
-
+class Driver:
     """
     This base class provides the interface to methods used to read in
     a user-provided YAML configuration file, convert it to the required
