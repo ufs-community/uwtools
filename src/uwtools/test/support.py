@@ -2,6 +2,7 @@
 
 import re
 from importlib import resources
+from logging import LogRecord
 from pathlib import Path
 from typing import List
 
@@ -44,3 +45,10 @@ def fixture_uri(suffix: str = "") -> str:
 
 def line_in_lines(line: str, lines: List[str]) -> bool:
     return any(x for x in lines if re.match(r"^.*%s$" % re.escape(line), x))
+
+
+def msg_in_caplog_records(msg: str, records: List[LogRecord]) -> bool:
+    for record in records:
+        if msg == record.msg:
+            return True
+    return False

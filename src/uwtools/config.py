@@ -72,7 +72,6 @@ class Config(collections.UserDict):
         """
 
         super().__init__()
-
         self.config_path = config_path
         self.log = logging.getLogger(log_name)
 

@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code,missing-function-docstring
+# pylint: disable=duplicate-code,missing-function-docstring,redefined-outer-name
 
 """
 Set of test for loading YAML files using the function call load_yaml
@@ -9,9 +9,11 @@ import datetime
 import filecmp
 import itertools
 import json
+import logging
 import os
 import pathlib
 import re
+import sys
 import tempfile
 from argparse import ArgumentTypeError
 from collections import OrderedDict
@@ -21,11 +23,11 @@ from typing import Any, Dict
 from unittest.mock import patch
 
 import pytest
-from pytest import raises
+from pytest import fixture, raises
 
 from uwtools import config, exceptions, logger
 from uwtools.cli.set_config import parse_args as parse_config_args
-from uwtools.test.support import compare_files, fixture_path, line_in_lines
+from uwtools.test.support import compare_files, fixture_path, line_in_lines, msg_in_caplog_records
 from uwtools.utils import cli_helpers
 
 # Helpers
@@ -508,53 +510,44 @@ def test_cfg_to_yaml_conversion(tmp_path):
         assert f.read()[-1] == "\n"
 
 
-def test_compare_config(caplog):
-    """Compare two config objects using method."""
-    for user in ["INI", "YAML", "F90"]:
-        userfile = "NML" if user == "F90" else user
-
-        basefile = {
-            "salad": {
-                "base": "kale",
-                "fruit": "banana",
-                "vegetable": "tomato",
-                "how_many": "12",
-                "dressing": "balsamic",
-            }
+@fixture
+def compare_config_base():
+    return {
+        "salad": {
+            "base": "kale",
+            "fruit": "banana",
+            "vegetable": "tomato",
+            "how_many": "12",
+            "dressing": "balsamic",
         }
-        expected = """salad:        dressing:  - italian + balsamic
-salad:            size:  - large + None
-salad:        how_many:  - None + 12
-"""
+    }
 
-        noint = "salad:        how_many:  - 12 + 12"
 
-        print(f"Comparing config of base and {user}...")
-
-        log_name = "compare_config"
-        logger.Logger(name=log_name, fmt="%(message)s")
-        userpath = fixture_path(f"simple.{userfile.lower()}")
-        cfguserrun = getattr(config, f"{user}Config")(userpath, log_name=log_name)
-
-        # Capture stdout to validate comparison
-        caplog.clear()
-        cfguserrun.compare_config(cfguserrun, basefile)
-
-        if caplog.records:
-            assert caplog.records[0].msg in noint
-        else:
-            assert caplog.records == []
-
-        # update base dict to validate differences
-        basefile["salad"]["dressing"] = "italian"
-        del basefile["salad"]["how_many"]
-        basefile["salad"]["size"] = "large"
-
-        caplog.clear()
-        cfguserrun.compare_config(cfguserrun, basefile)
-
-        for item in caplog.records:
-            assert item.msg in expected
+@pytest.mark.parametrize("fmt", ["F90", "INI", "YAML"])
+def test_compare_config(fmt, compare_config_base, caplog):
+    """Compare two config objects."""
+    ext = ".%s" % ("nml" if fmt == "F90" else fmt).lower()
+    cfgobj = help_cfgclass(ext)(fixture_path(f"simple{ext}"), log_name="test_compare_config")
+    cfgobj.log.addHandler(logging.StreamHandler(sys.stdout))
+    cfgobj.log.setLevel(logging.INFO)
+    cfgobj.compare_config(cfgobj, compare_config_base)
+    if fmt in ["F90", "YAML"]:
+        assert msg_in_caplog_records("salad:        how_many:  - 12 + 12", caplog.records)
+    else:
+        assert not caplog.records  # #PM# BUT WHY NOT IN INI?
+    caplog.clear()
+    # Create differences in base dict:
+    compare_config_base["salad"]["dressing"] = "italian"
+    compare_config_base["salad"]["size"] = "large"
+    del compare_config_base["salad"]["how_many"]
+    cfgobj.compare_config(cfgobj, compare_config_base)
+    # Expect to see the following differences logged:
+    for msg in [
+        "salad:        dressing:  - italian + balsamic",
+        "salad:            size:  - large + None",
+        "salad:        how_many:  - None + 12",
+    ]:
+        assert msg_in_caplog_records(msg, caplog.records)
 
 
 def test_compare_nml(capsys):
