@@ -803,16 +803,16 @@ def test_set_config_field_table(tmp_path):
                 assert line1 in line2
 
 
-# def set_config_helper(infn, cfgfn) -> None:
-#     infile = fixture_path("simple.ini")
-#     cfgfile = fixture_path("fruit_config.sh")
-#     outfile = str(tmp_path / "test_config_from_ini.ini")
-#     config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile, "-c", cfgfile]))
-#     inicfg = config.INIConfig(infile)
-#     inicfg.update_values(config.INIConfig(cfgfile))
-#     reference = tmp_path / "expected.ini"
-#     inicfg.dump_file(reference)
-#     assert compare_files(reference, outfile)
+def set_config_helper(infn, cfgfn, tmpdir) -> None:
+    infile = fixture_path(infn)
+    cfgfile = fixture_path(cfgfn)
+    outfile = str(tmpdir / "test_config_from_ini.ini")
+    config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile, "-c", cfgfile]))
+    cfgobj = config.INIConfig(infile)
+    cfgobj.update_values(config.INIConfig(cfgfile))
+    reference = tmpdir / "expected.ini"
+    cfgobj.dump_file(reference)
+    assert compare_files(reference, outfile)
 
 
 def test_set_config_ini_bash_config_file(tmp_path):
@@ -820,15 +820,7 @@ def test_set_config_ini_bash_config_file(tmp_path):
     Test that providing an INI base input file and a shell config file will
     create and update INI config file.
     """
-    infile = fixture_path("simple.ini")
-    cfgfile = fixture_path("fruit_config.sh")
-    outfile = str(tmp_path / "test_config_from_ini.ini")
-    config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile, "-c", cfgfile]))
-    inicfg = config.INIConfig(infile)
-    inicfg.update_values(config.INIConfig(cfgfile))
-    reference = tmp_path / "expected.ini"
-    inicfg.dump_file(reference)
-    assert compare_files(reference, outfile)
+    set_config_helper("simple.ini", "fruit_config.sh", tmp_path)
 
 
 def test_set_config_ini_config_file(tmp_path):
@@ -836,15 +828,7 @@ def test_set_config_ini_config_file(tmp_path):
     Test that providing an INI base input file and an INI config file will
     create and update INI config file.
     """
-    infile = fixture_path("simple.ini")
-    cfgfile = fixture_path("simple2.ini")
-    outfile = str(tmp_path / "test_config_from_ini.ini")
-    config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile, "-c", cfgfile]))
-    inicfg = config.INIConfig(infile)
-    inicfg.update_values(config.INIConfig(cfgfile))
-    reference = tmp_path / "expected.ini"
-    inicfg.dump_file(reference)
-    assert compare_files(reference, outfile)
+    set_config_helper("simple.ini", "simple2.ini", tmp_path)
 
 
 def test_show_format():
