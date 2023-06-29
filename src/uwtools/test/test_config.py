@@ -253,33 +253,6 @@ def test_ini_config_simple():
     assert cfg == expected
 
 
-@pytest.mark.skip()
-def test_ini_config_bash():
-    """Test that INI config load and dump work with a basic bash file."""
-
-    test_bash = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.sh"))
-    cfg = config.INIConfig(test_bash, space_around_delimiters=False)
-
-    expected: Dict[str, Any] = {
-        "base": "kale",
-        "fruit": "banana",
-        "vegetable": "tomato",
-        "how_many": "12",
-        "dressing": "balsamic",
-    }
-    assert cfg == expected
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/test_bash_dump.sh"
-        cfg.dump_file(out_file)
-
-        assert filecmp.cmp(test_bash, out_file)
-
-    cfg.update({"dressing": ["ranch", "italian"]})
-    expected["dressing"] = ["ranch", "italian"]
-    assert cfg == expected
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -538,6 +511,28 @@ def test_incompatible_file_type():
     """
     with raises(ValueError):
         config.create_config_obj(parse_config_args(["-i", fixture_path("model_configure.sample")]))
+
+
+def test_ini_config_bash(tmp_path):
+    """
+    Test that INI config load and dump work with a basic bash file.
+    """
+    bashfile = fixture_path("simple.sh")
+    outfile = tmp_path / "bashfile_dump.sh"
+    cfgobj = config.INIConfig(bashfile, space_around_delimiters=False)
+    expected: Dict[str, Any] = {
+        "base": "kale",
+        "fruit": "banana",
+        "vegetable": "tomato",
+        "how_many": "12",
+        "dressing": "balsamic",
+    }
+    assert cfgobj == expected
+    cfgobj.dump_file(outfile)
+    assert filecmp.cmp(bashfile, outfile)
+    cfgobj.update({"dressing": ["ranch", "italian"]})
+    expected["dressing"] = ["ranch", "italian"]
+    assert cfgobj == expected
 
 
 def test_output_file_conversion(tmp_path):
