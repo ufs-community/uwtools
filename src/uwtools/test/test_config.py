@@ -654,29 +654,6 @@ def test_set_config_ini_config_file():
         assert compare_files(expected_file, out_file)
 
 
-@pytest.mark.skip()
-def test_set_config_ini_bash_config_file():
-    """Test that aproviding INI base input file and a config file will
-    create and update INI config file"""
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.ini"))
-    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.sh"))
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/test_config_from_ini.ini"
-        args = ["-i", input_file, "-o", out_file, "-c", config_file]
-
-        config.create_config_obj(args)
-
-        expected = config.INIConfig(input_file)
-        config_file_obj = config.INIConfig(config_file)
-        expected.update_values(config_file_obj)
-        expected_file = f"{tmp_dir}/expected_ini.ini"
-        expected.dump_file(expected_file)
-
-        assert compare_files(expected_file, out_file)
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -847,6 +824,22 @@ def test_set_config_field_table(tmp_path):
             lines = zip(outlist, reflist)
             for line1, line2 in lines:
                 assert line1 in line2
+
+
+def test_set_config_ini_bash_config_file(tmp_path):
+    """
+    Test that aproviding INI base input file and a config file will create and
+    update INI config file.
+    """
+    infile = fixture_path("simple.ini")
+    cfgfile = fixture_path("fruit_config.sh")
+    outfile = str(tmp_path / "test_config_from_ini.ini")
+    config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile, "-c", cfgfile]))
+    inicfg = config.INIConfig(infile)
+    inicfg.update_values(config.INIConfig(cfgfile))
+    reference = tmp_path / "expected.ini"
+    inicfg.dump_file(reference)
+    assert compare_files(reference, outfile)
 
 
 def test_show_format():
