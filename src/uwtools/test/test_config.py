@@ -503,26 +503,6 @@ salad:        how_many:  - None + 12
             assert item.msg in expected
 
 
-@pytest.mark.skip()
-def test_dictionary_depth():
-    """Test that the proper dictionary depth is being returned for each file type."""
-
-    input_yaml = os.path.join(uwtools_file_base, pathlib.Path("fixtures/FV3_GFS_v16.yaml"))
-    config_obj: config.Config = config.YAMLConfig(input_yaml)
-    depth = config_obj.dictionary_depth(config_obj.data)
-    assert 3 == depth
-
-    input_nml = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
-    config_obj = config.F90Config(input_nml)
-    depth = config_obj.dictionary_depth(config_obj.data)
-    assert 2 == depth
-
-    input_ini = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.ini"))
-    config_obj = config.INIConfig(input_ini)
-    depth = config_obj.dictionary_depth(config_obj.data)
-    assert 2 == depth
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -635,6 +615,39 @@ def test_config_file_conversion(tmp_path):
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read()[-1] == "\n"
+
+
+# def test_dictionary_depth():
+#     """
+#     Test that the proper dictionary depth is returned for each file type.
+#     """
+#     input_yaml = fixture_path("FV3_GFS_v16.yaml")
+#     config_obj: config.Config = config.YAMLConfig(input_yaml)
+#     depth = config_obj.dictionary_depth(config_obj.data)
+#     assert 3 == depth
+#
+#     input_nml = fixture_path("simple.nml")
+#     config_obj = config.F90Config(input_nml)
+#     depth = config_obj.dictionary_depth(config_obj.data)
+#     assert 2 == depth
+#
+#     input_ini = fixture_path("simple2.ini")
+#     config_obj = config.INIConfig(input_ini)
+#     depth = config_obj.dictionary_depth(config_obj.data)
+#     assert 2 == depth
+
+
+@pytest.mark.parametrize(
+    "fn,depth", [("FV3_GFS_v16.yaml", 3), ("simple.nml", 2), ("simple2.ini", 2)]
+)
+def test_dictionary_depth(fn, depth):
+    """
+    Test that the proper dictionary depth is returned for each file type.
+    """
+    infile = fixture_path(fn)
+    ext = Path(infile).suffix
+    cfgobj = help_cfgclass(ext)(infile)
+    assert cfgobj.dictionary_depth(cfgobj.data) == depth
 
 
 def test_incompatible_file_type():
