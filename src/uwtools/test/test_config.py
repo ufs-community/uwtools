@@ -539,26 +539,6 @@ def test_path_if_file_exists():
         cli_helpers.path_if_file_exists(not_a_filepath)
 
 
-@pytest.mark.skip()
-def test_set_config_yaml_simple():
-    """Test that providing a YAML base file with necessary settings
-    will create a YAML config file"""
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.yaml"))
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/test_config_from_yaml.yaml"
-        args = ["-i", input_file, "-o", out_file]
-
-        config.create_config_obj(args)
-
-        expected = config.YAMLConfig(input_file)
-        expected_file = f"{tmp_dir}/expected_yaml.yaml"
-        expected.dump_file(expected_file)
-
-        assert compare_files(expected_file, out_file)
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -699,30 +679,6 @@ def test_output_file_conversion(tmp_path):
         assert f.read()[-1] == "\n"
 
 
-def test_set_config_bash_simple(tmp_path):
-    """
-    Test that providing a bash file with necessary settings will create an INI
-    config file.
-    """
-    help_set_config_simple("simple.sh", tmp_path)
-
-
-def test_set_config_f90nml_simple(tmp_path):
-    """
-    Test that providing a namelist file with necessary settings will create a
-    namelist config file.
-    """
-    help_set_config_simple("simple.nml", tmp_path)
-
-
-def test_set_config_ini_simple(tmp_path):
-    """
-    Test that providing an INI file with necessary settings will create an INI
-    config file.
-    """
-    help_set_config_simple("simple.ini", tmp_path)
-
-
 def test_set_config_dry_run(capsys):
     """
     Test that providing a YAML base file with a dry run flag will print an YAML
@@ -785,6 +741,38 @@ def test_set_config_fmt2fmt_yaml2yaml(tmp_path):
     create and update YAML config file.
     """
     help_set_config_fmt2fmt("fruit_config.yaml", "fruit_config_similar.yaml", tmp_path)
+
+
+def test_set_config_simple_bash(tmp_path):
+    """
+    Test that providing a bash file with necessary settings will create an INI
+    config file.
+    """
+    help_set_config_simple("simple.sh", tmp_path)
+
+
+def test_set_config_simple_namelist(tmp_path):
+    """
+    Test that providing a namelist file with necessary settings will create a
+    namelist config file.
+    """
+    help_set_config_simple("simple.nml", tmp_path)
+
+
+def test_set_config_simple_ini(tmp_path):
+    """
+    Test that providing an INI file with necessary settings will create an INI
+    config file.
+    """
+    help_set_config_simple("simple.ini", tmp_path)
+
+
+def test_set_config_simple_yaml(tmp_path):
+    """
+    Test that providing a YAML base file with necessary settings will create a
+    YAML config file.
+    """
+    help_set_config_simple("simple2.yaml", tmp_path)
 
 
 def test_show_format():
