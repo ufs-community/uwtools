@@ -7,7 +7,6 @@ import argparse
 import builtins
 import datetime
 import filecmp
-import io
 import itertools
 import json
 import os
@@ -15,7 +14,6 @@ import pathlib
 import re
 import tempfile
 from collections import OrderedDict
-from contextlib import redirect_stdout
 from textwrap import dedent
 from typing import Any, Dict
 from unittest.mock import patch
@@ -714,27 +712,6 @@ def test_set_config_field_table():
                 assert line1 in line2
 
 
-@pytest.mark.skip()
-def test_set_config_dry_run():
-    """Test that providing a YAML base file with a dry run flag
-    will print an YAML config file"""
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/fruit_config.yaml"))
-
-    args = ["-i", input_file, "-d"]
-
-    expected = config.YAMLConfig(input_file)
-    expected.dereference_all()
-    expected_content = str(expected)
-
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
-        config.create_config_obj(args)
-    result = outstring.getvalue()
-
-    assert result.rstrip("\n") == expected_content.rstrip("\n")
-
-
 def test_bad_conversion_cfg_to_pdf():
     with pytest.raises(SystemExit):
         config.create_config_obj(
@@ -864,6 +841,20 @@ def test_output_file_conversion(tmp_path):
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read()[-1] == "\n"
+
+
+def test_set_config_dry_run(capsys):
+    """
+    Test that providing a YAML base file with a dry run flag will print an YAML
+    config file.
+    """
+    infile = fixture_path("fruit_config.yaml")
+    yaml_config = config.YAMLConfig(infile)
+    yaml_config.dereference_all()
+    config.create_config_obj(parse_config_args(["-i", infile, "-d"]))
+    actual = capsys.readouterr().out.strip()
+    expected = str(yaml_config).strip()
+    assert actual == expected
 
 
 def test_show_format():
