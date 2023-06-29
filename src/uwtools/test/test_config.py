@@ -688,30 +688,6 @@ def test_incompatible_file_type():
         config.create_config_obj(args)
 
 
-@pytest.mark.skip()
-def test_set_config_field_table():
-    """Test reading a YAML config object and generating a field file table."""
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures", "FV3_GFS_v16.yaml"))
-    expected_file = os.path.join(
-        uwtools_file_base, pathlib.Path("fixtures", "field_table.FV3_GFS_v16")
-    )
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/field_table_from_yaml.FV3_GFS"
-        args = ["-i", input_file, "-o", out_file, "--output_file_type", "FieldTable"]
-
-        config.create_config_obj(args)
-
-        with open(expected_file, "r", encoding="utf-8") as f1, open(
-            out_file, "r", encoding="utf-8"
-        ) as f2:
-            reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1]
-            outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2]
-            lines = zip(outlist, reflist)
-            for line1, line2 in lines:
-                assert line1 in line2
-
-
 def test_bad_conversion_cfg_to_pdf():
     with pytest.raises(SystemExit):
         config.create_config_obj(
@@ -855,6 +831,24 @@ def test_set_config_dry_run(capsys):
     actual = capsys.readouterr().out.strip()
     expected = str(yaml_config).strip()
     assert actual == expected
+
+
+def test_set_config_field_table(tmp_path):
+    """
+    Test reading a YAML config object and generating a field file table.
+    """
+    infile = fixture_path("FV3_GFS_v16.yaml")
+    outfile = str(tmp_path / "field_table_from_yaml.FV3_GFS")
+    config.create_config_obj(
+        parse_config_args(["-i", infile, "-o", outfile, "--output_file_type", "FieldTable"])
+    )
+    with open(fixture_path("field_table.FV3_GFS_v16"), "r", encoding="utf-8") as f1:
+        with open(outfile, "r", encoding="utf-8") as f2:
+            reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1]
+            outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2]
+            lines = zip(outlist, reflist)
+            for line1, line2 in lines:
+                assert line1 in line2
 
 
 def test_show_format():
