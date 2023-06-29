@@ -559,26 +559,6 @@ def test_set_config_yaml_simple():
         assert compare_files(expected_file, out_file)
 
 
-@pytest.mark.skip()
-def test_set_config_ini_simple():
-    """Test that providing a basic INI file with necessary settings
-    will create an INI config file"""
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.ini"))
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dr:
-        out_file = f"{tmp_dr}/test_config_from_ini.ini"
-        args = ["-i", input_file, "-o", out_file]
-
-        config.create_config_obj(args)
-
-        expected = config.INIConfig(input_file)
-        expected_file = f"{tmp_dr}/expected_ini.ini"
-        expected.dump_file(expected_file)
-
-        assert compare_files(expected_file, out_file)
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -733,6 +713,14 @@ def test_set_config_f90nml_simple(tmp_path):
     namelist config file.
     """
     help_set_config_simple("simple.nml", tmp_path)
+
+
+def test_set_config_ini_simple(tmp_path):
+    """
+    Test that providing an INI file with necessary settings will create an INI
+    config file.
+    """
+    help_set_config_simple("simple.ini", tmp_path)
 
 
 def test_set_config_dry_run(capsys):
