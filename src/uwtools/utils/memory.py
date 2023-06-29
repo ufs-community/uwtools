@@ -41,7 +41,3 @@ class Memory:
         quantity = (MAP[self.measurement] / MAP[measurement.upper()]) * self.quantity
 
         return Memory(str(quantity) + measurement.upper())
-
-
-if __name__ == "__main__":
-    pass

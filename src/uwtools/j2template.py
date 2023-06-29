@@ -98,8 +98,7 @@ class J2Template:
         elif template_str is not None:
             self.template = self._load_string(template_str)
         else:
-            # Error here. Must provide a template
-            pass
+            raise RuntimeError("Must provide either a template path or a template string")
 
     def dump_file(self, output_path: str) -> None:
         """
