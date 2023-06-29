@@ -882,26 +882,20 @@ Keys that are set to empty:
     assert result == outcome
 
 
-@pytest.mark.skip()
-def test_cfg_to_yaml_conversion():
-    """Test that a .cfg file can be used to create a yaml object."""
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example_yaml.cfg"))
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/test_ouput.yaml"
-        args = ["-i", input_file, "-o", out_file, "--input_file_type", "YAML"]
-
-        config.create_config_obj(args)
-
-        expected = config.YAMLConfig(input_file)
-        expected_file = f"{tmp_dir}/test.yaml"
-        expected.dereference_all()
-        expected.dump_file(expected_file)
-
-        assert compare_files(expected_file, out_file)
-
-        with open(out_file, "r", encoding="utf-8") as output:
-            assert output.read()[-1] == "\n"
+def test_cfg_to_yaml_conversion(tmp_path):
+    """Test that a .cfg file can be used to create a YAML object."""
+    infile = fixture_path("srw_example_yaml.cfg")
+    outfile = str(tmp_path / "test_ouput.yaml")
+    config.create_config_obj(
+        parse_config_args(["-i", infile, "-o", outfile, "--input_file_type", "YAML"])
+    )
+    expected = config.YAMLConfig(infile)
+    expected.dereference_all()
+    expected_file = tmp_path / "test.yaml"
+    expected.dump_file(expected_file)
+    assert compare_files(expected_file, outfile)
+    with open(outfile, "r", encoding="utf-8") as output:
+        assert output.read()[-1] == "\n"
 
 
 @pytest.mark.skip()
