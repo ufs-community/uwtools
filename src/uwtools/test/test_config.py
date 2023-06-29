@@ -32,6 +32,19 @@ from uwtools.utils import cli_helpers
 # Helpers
 
 
+@fixture
+def salad_base():
+    return {
+        "salad": {
+            "base": "kale",
+            "fruit": "banana",
+            "vegetable": "tomato",
+            "how_many": "12",
+            "dressing": "balsamic",
+        }
+    }
+
+
 def help_cfgclass(ext):
     return getattr(
         config, "%sConfig" % {".nml": "F90", ".ini": "INI", ".sh": "INI", ".yaml": "YAML"}[ext]
@@ -310,37 +323,24 @@ def test_cfg_to_yaml_conversion(tmp_path):
         assert f.read()[-1] == "\n"
 
 
-@fixture
-def compare_config_base():
-    return {
-        "salad": {
-            "base": "kale",
-            "fruit": "banana",
-            "vegetable": "tomato",
-            "how_many": "12",
-            "dressing": "balsamic",
-        }
-    }
-
-
 @pytest.mark.parametrize("fmt", ["F90", "INI", "YAML"])
-def test_compare_config(fmt, compare_config_base, caplog):
+def test_compare_config(fmt, salad_base, caplog):
     """Compare two config objects."""
     ext = ".%s" % ("nml" if fmt == "F90" else fmt).lower()
     cfgobj = help_cfgclass(ext)(fixture_path(f"simple{ext}"), log_name="test_compare_config")
     cfgobj.log.addHandler(logging.StreamHandler(sys.stdout))
     cfgobj.log.setLevel(logging.INFO)
-    cfgobj.compare_config(cfgobj, compare_config_base)
+    cfgobj.compare_config(cfgobj, salad_base)
     if fmt in ["F90", "YAML"]:
         assert msg_in_caplog_records("salad:        how_many:  - 12 + 12", caplog.records)
     else:
         assert not caplog.records  # #PM# BUT WHY NOT IN INI?
     caplog.clear()
     # Create differences in base dict:
-    compare_config_base["salad"]["dressing"] = "italian"
-    compare_config_base["salad"]["size"] = "large"
-    del compare_config_base["salad"]["how_many"]
-    cfgobj.compare_config(cfgobj, compare_config_base)
+    salad_base["salad"]["dressing"] = "italian"
+    salad_base["salad"]["size"] = "large"
+    del salad_base["salad"]["how_many"]
+    cfgobj.compare_config(cfgobj, salad_base)
     # Expect to see the following differences logged:
     for msg in [
         "salad:        dressing:  - italian + balsamic",
@@ -513,20 +513,14 @@ def test_incompatible_file_type():
         config.create_config_obj(parse_config_args(["-i", fixture_path("model_configure.sample")]))
 
 
-def test_ini_config_bash(tmp_path):
+def test_ini_config_bash(salad_base, tmp_path):
     """
     Test that INI config load and dump work with a basic bash file.
     """
     bashfile = fixture_path("simple.sh")
     outfile = tmp_path / "bashfile_dump.sh"
     cfgobj = config.INIConfig(bashfile, space_around_delimiters=False)
-    expected: Dict[str, Any] = {
-        "base": "kale",
-        "fruit": "banana",
-        "vegetable": "tomato",
-        "how_many": "12",
-        "dressing": "balsamic",
-    }
+    expected = salad_base["salad"]
     assert cfgobj == expected
     cfgobj.dump_file(outfile)
     assert filecmp.cmp(bashfile, outfile)
