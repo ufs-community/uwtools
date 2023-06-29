@@ -16,9 +16,7 @@ import re
 import sys
 import tempfile
 from argparse import ArgumentTypeError
-from collections import OrderedDict
 from pathlib import Path
-from typing import Any, Dict
 from unittest.mock import patch
 
 import pytest
@@ -201,38 +199,6 @@ def test_yaml_config_include_files():
     # reverse_files tests loading a list of files in the reverse order as above,
     # and that the values are updated to the last read in.
     assert cfg["reverse_files"].get("vegetable") == "eggplant"
-
-
-@pytest.mark.skip()
-def test_f90nml_config_simple():
-    """Test that f90nml load, update, and dump work with a basic f90 namelist file."""
-
-    test_nml = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
-    cfg = config.F90Config(test_nml)
-
-    expected: Dict[str, Any] = {
-        "salad": OrderedDict(
-            {
-                "base": "kale",
-                "fruit": "banana",
-                "vegetable": "tomato",
-                "how_many": 12,
-                "dressing": "balsamic",
-            }
-        )
-    }
-    assert cfg == expected
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/test_nml_dump.nml"
-        cfg.dump_file(out_file)
-
-        assert filecmp.cmp(test_nml, out_file)
-
-    cfg.update({"dressing": ["ranch", "italian"]})
-    expected["dressing"] = ["ranch", "italian"]
-
-    assert cfg == expected
 
 
 def test_bad_conversion_cfg_to_pdf():
@@ -471,6 +437,23 @@ def test_dictionary_depth(fn, depth):
     ext = Path(infile).suffix
     cfgobj = help_cfgclass(ext)(infile)
     assert cfgobj.dictionary_depth(cfgobj.data) == depth
+
+
+def test_f90nml_config_simple(salad_base, tmp_path):
+    """
+    Test that namelist load, update, and dump work with a basic namelist file.
+    """
+    infile = fixture_path("simple.nml")
+    outfile = tmp_path / "outfile.nml"
+    cfgobj = config.F90Config(infile)
+    expected = salad_base
+    expected["salad"]["how_many"] = 12  # must be in for nml
+    assert cfgobj == expected
+    cfgobj.dump_file(outfile)
+    assert filecmp.cmp(infile, outfile)
+    cfgobj.update({"dressing": ["ranch", "italian"]})
+    expected["dressing"] = ["ranch", "italian"]
+    assert cfgobj == expected
 
 
 def test_incompatible_file_type():
