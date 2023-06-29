@@ -27,14 +27,31 @@ from uwtools.cli.set_config import parse_args as parse_config_args
 from uwtools.test.support import compare_files, fixture_path, line_in_lines
 from uwtools.utils import cli_helpers
 
-uwtools_file_base = os.path.join(os.path.dirname(__file__))
+# Helpers
 
 
-def set_config_helper(infn, cfgfn, tmpdir) -> None:
+def help_cfgclass(ext):
+    return getattr(
+        config, "%sConfig" % {".nml": "F90", ".ini": "INI", ".sh": "INI", ".yaml": "YAML"}[ext]
+    )
+
+
+def help_set_config_simple(infn, tmpdir):
+    infile = fixture_path(infn)
+    ext = Path(infile).suffix
+    outfile = str(tmpdir / f"outfile{ext}")
+    config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile]))
+    cfgobj = help_cfgclass(ext)(infile)
+    reference = tmpdir / f"reference{ext}"
+    cfgobj.dump_file(reference)
+    assert compare_files(reference, outfile)
+
+
+def help_set_config_fmt2fmt(infn, cfgfn, tmpdir):
     infile = fixture_path(infn)
     cfgfile = fixture_path(cfgfn)
     ext = Path(infile).suffix
-    outfile = str(tmpdir / f"outfile.{ext}")
+    outfile = str(tmpdir / f"outfile{ext}")
     config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile, "-c", cfgfile]))
     cfgclass = getattr(config, "%sConfig" % {".nml": "F90", ".ini": "INI", ".yaml": "YAML"}[ext])
     cfgobj = cfgclass(infile)
@@ -42,6 +59,11 @@ def set_config_helper(infn, cfgfn, tmpdir) -> None:
     reference = tmpdir / "expected"
     cfgobj.dump_file(reference)
     assert compare_files(reference, outfile)
+
+
+# Tests
+
+uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 
 @pytest.mark.skip()
@@ -557,26 +579,6 @@ def test_set_config_ini_simple():
         assert compare_files(expected_file, out_file)
 
 
-@pytest.mark.skip()
-def test_set_config_f90nml_simple():
-    """Test that providing basic f90nml file with necessary settings
-    will create f90nml config file"""
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dr:
-        out_file = f"{tmp_dr}/test_config_from_nml.nml"
-        args = ["-i", input_file, "-o", out_file]
-
-        config.create_config_obj(args)
-
-        expected = config.F90Config(input_file)
-        expected_file = f"{tmp_dr}/expected_nml.nml"
-        expected.dump_file(expected_file)
-
-        assert compare_files(expected_file, out_file)
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -684,7 +686,7 @@ def test_config_file_conversion(tmp_path):
     expected = config.F90Config(infile)
     config_obj = config.F90Config(cfgfile)
     expected.update_values(config_obj)
-    expected_file = tmp_path / "expected_nml.nml"
+    expected_file = tmp_path / "expected.nml"
     expected.dump_file(expected_file)
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
@@ -710,7 +712,7 @@ def test_output_file_conversion(tmp_path):
         parse_config_args(["-i", infile, "-o", outfile, "--output_file_type", "F90"])
     )
     expected = config.F90Config(infile)
-    expected_file = tmp_path / "expected_nml.nml"
+    expected_file = tmp_path / "expected.nml"
     expected.dump_file(expected_file)
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
@@ -719,16 +721,18 @@ def test_output_file_conversion(tmp_path):
 
 def test_set_config_bash_simple(tmp_path):
     """
-    Test that providing bash file with necessary settings will create an INI
+    Test that providing a bash file with necessary settings will create an INI
     config file.
     """
-    infile = fixture_path("simple.sh")
-    outfile = str(tmp_path / "test_config_from_bash.ini")
-    config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile]))
-    cfgobj = config.INIConfig(infile)
-    reference = tmp_path / "expected_ini.ini"
-    cfgobj.dump_file(reference)
-    assert compare_files(reference, outfile)
+    help_set_config_simple("simple.sh", tmp_path)
+
+
+def test_set_config_f90nml_simple(tmp_path):
+    """
+    Test that providing a namelist file with necessary settings will create a
+    namelist config file.
+    """
+    help_set_config_simple("simple.nml", tmp_path)
 
 
 def test_set_config_dry_run(capsys):
@@ -763,36 +767,36 @@ def test_set_config_field_table(tmp_path):
                 assert line1 in line2
 
 
-def test_set_config_f90nml_config_file(tmp_path):
+def test_set_config_fmt2fmt_nml2nml(tmp_path):
     """
     Test that providing a namelist base input file and a config file will create
     and update namelist config file.
     """
-    set_config_helper("simple.nml", "simple2.nml", tmp_path)
+    help_set_config_fmt2fmt("simple.nml", "simple2.nml", tmp_path)
 
 
-def test_set_config_ini_bash_config_file(tmp_path):
+def test_set_config_fmt2fmt_ini2bash(tmp_path):
     """
-    Test that providing an INI base input file and a shell config file will
+    Test that providing an INI base input file and a Bash config file will
     create and update INI config file.
     """
-    set_config_helper("simple.ini", "fruit_config.sh", tmp_path)
+    help_set_config_fmt2fmt("simple.ini", "fruit_config.sh", tmp_path)
 
 
-def test_set_config_ini_config_file(tmp_path):
+def test_set_config_fmt2fmt_ini2ini(tmp_path):
     """
     Test that providing an INI base input file and an INI config file will
     create and update INI config file.
     """
-    set_config_helper("simple.ini", "simple2.ini", tmp_path)
+    help_set_config_fmt2fmt("simple.ini", "simple2.ini", tmp_path)
 
 
-def test_set_config_yaml_config_file(tmp_path):
+def test_set_config_fmt2fmt_yaml2yaml(tmp_path):
     """
     Test that providing a YAML base input file and a YAML config file will
     create and update YAML config file.
     """
-    set_config_helper("fruit_config.yaml", "fruit_config_similar.yaml", tmp_path)
+    help_set_config_fmt2fmt("fruit_config.yaml", "fruit_config_similar.yaml", tmp_path)
 
 
 def test_show_format():
