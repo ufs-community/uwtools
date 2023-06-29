@@ -735,6 +735,137 @@ def test_set_config_dry_run():
     assert result.rstrip("\n") == expected_content.rstrip("\n")
 
 
+def test_bad_conversion_cfg_to_pdf():
+    with pytest.raises(SystemExit):
+        config.create_config_obj(
+            parse_config_args(["-i", fixture_path("simple2_nml.cfg"), "--input_file_type", ".pdf"])
+        )
+
+
+def test_bad_conversion_nml_to_yaml():
+    with pytest.raises(ValueError):
+        config.create_config_obj(
+            parse_config_args(
+                [
+                    "-i",
+                    fixture_path("simple2.nml"),
+                    "-c",
+                    fixture_path("srw_example.yaml"),
+                    "--config_file_type",
+                    "YAML",
+                ]
+            )
+        )
+
+
+def test_bad_conversion_yaml_to_nml(tmp_path):
+    with pytest.raises(ValueError):
+        config.create_config_obj(
+            parse_config_args(
+                [
+                    "-i",
+                    fixture_path("srw_example.yaml"),
+                    "-o",
+                    str(tmp_path / "test_outfile_conversion.yaml"),
+                    "--output_file_type",
+                    "F90",
+                ]
+            )
+        )
+
+
+def test_cfg_to_yaml_conversion(tmp_path):
+    """
+    Test that a .cfg file can be used to create a YAML object.
+    """
+    infile = fixture_path("srw_example_yaml.cfg")
+    outfile = str(tmp_path / "test_ouput.yaml")
+    config.create_config_obj(
+        parse_config_args(["-i", infile, "-o", outfile, "--input_file_type", "YAML"])
+    )
+    expected = config.YAMLConfig(infile)
+    expected.dereference_all()
+    expected_file = tmp_path / "test.yaml"
+    expected.dump_file(expected_file)
+    assert compare_files(expected_file, outfile)
+    with open(outfile, "r", encoding="utf-8") as f:
+        assert f.read()[-1] == "\n"
+
+
+def test_compare_nml(capsys):
+    """
+    Tests whether comparing two namelists works.
+    """
+    nml1 = fixture_path("fruit_config.nml")
+    nml2 = fixture_path("fruit_config_mult_sect.nml")
+    config.create_config_obj(parse_config_args(["-i", nml1, "-c", nml2, "--compare"]))
+    actual = capsys.readouterr().out.split("\n")
+
+    # Make sure the tool output contains all the expected lines:
+
+    expected = f"""
+- {nml1}
++ {nml2}
+--------------------------------------------------------------------------------
+config:       vegetable:  - eggplant + peas
+setting:         topping:  - None + crouton
+setting:            size:  - None + large
+setting:            meat:  - None + chicken
+""".strip()
+
+    for line in expected.split("\n"):
+        assert line_in_lines(line, actual)
+
+    # Make sure it doesn't include any additional significant diffs
+    # A very rough estimate is that there is a word/colon set followed
+    # by a -/+ set
+    # This regex is meant to match the lines in the expected string
+    # above that give us the section, key value diffs like this:
+    #   config:       vegetable:  - eggplant + peas
+
+    pattern = re.compile(r"\w:\s+\w+:\s+-\s+\w+\s+\+\s+\w+")
+    for line in actual:
+        if re.search(pattern, line):
+            assert line in expected
+
+
+def test_config_file_conversion(tmp_path):
+    """
+    Test that --config_input_type converts config object to desired object type.
+    """
+    infile = fixture_path("simple2.nml")
+    cfgfile = fixture_path("simple2.ini")
+    outfile = str(tmp_path / "test_config_conversion.nml")
+    config.create_config_obj(
+        parse_config_args(["-i", infile, "-c", cfgfile, "-o", outfile, "--config_file_type", "F90"])
+    )
+    expected = config.F90Config(infile)
+    config_obj = config.F90Config(cfgfile)
+    expected.update_values(config_obj)
+    expected_file = tmp_path / "expected_nml.nml"
+    expected.dump_file(expected_file)
+    assert compare_files(expected_file, outfile)
+    with open(outfile, "r", encoding="utf-8") as f:
+        assert f.read()[-1] == "\n"
+
+
+def test_output_file_conversion(tmp_path):
+    """
+    Test that --output_input_type converts config object to desired object type.
+    """
+    infile = fixture_path("simple.nml")
+    outfile = str(tmp_path / "test_ouput.cfg")
+    config.create_config_obj(
+        parse_config_args(["-i", infile, "-o", outfile, "--output_file_type", "F90"])
+    )
+    expected = config.F90Config(infile)
+    expected_file = tmp_path / "expected_nml.nml"
+    expected.dump_file(expected_file)
+    assert compare_files(expected_file, outfile)
+    with open(outfile, "r", encoding="utf-8") as f:
+        assert f.read()[-1] == "\n"
+
+
 def test_show_format():
     """
     Test providing required configuration format for a given input and target.
@@ -759,37 +890,6 @@ def test_show_format():
         args.output_file_type = "FieldTable"
         config.create_config_obj(args)
         mock_help.assert_called_once()
-
-
-def test_values_needed_yaml(capsys):
-    """
-    Test that the values_needed flag logs keys completed, keys containing
-    unfilled jinja2 templates, and keys set to empty.
-    """
-    config.create_config_obj(
-        parse_config_args(["-i", fixture_path("srw_example.yaml"), "--values_needed"])
-    )
-    actual = capsys.readouterr().out
-    expected = """
-Keys that are complete:
-    FV3GFS
-    FV3GFS.nomads
-    FV3GFS.nomads.protocol
-    FV3GFS.nomads.file_names
-    FV3GFS.nomads.file_names.grib2
-    FV3GFS.nomads.file_names.testfalse
-    FV3GFS.nomads.file_names.testzero
-
-Keys that have unfilled jinja2 templates:
-    FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
-    FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio','gfs.t{{ hh }}z.sfcanl.nemsio']
-    FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
-
-Keys that are set to empty:
-    FV3GFS.nomads.file_names.nemsio
-    FV3GFS.nomads.testempty
-""".lstrip()
-    assert actual == expected
 
 
 def test_values_needed_ini(capsys):
@@ -853,132 +953,32 @@ Keys that are set to empty:
     assert actual == expected
 
 
-def test_cfg_to_yaml_conversion(tmp_path):
+def test_values_needed_yaml(capsys):
     """
-    Test that a .cfg file can be used to create a YAML object.
+    Test that the values_needed flag logs keys completed, keys containing
+    unfilled jinja2 templates, and keys set to empty.
     """
-    infile = fixture_path("srw_example_yaml.cfg")
-    outfile = str(tmp_path / "test_ouput.yaml")
     config.create_config_obj(
-        parse_config_args(["-i", infile, "-o", outfile, "--input_file_type", "YAML"])
+        parse_config_args(["-i", fixture_path("srw_example.yaml"), "--values_needed"])
     )
-    expected = config.YAMLConfig(infile)
-    expected.dereference_all()
-    expected_file = tmp_path / "test.yaml"
-    expected.dump_file(expected_file)
-    assert compare_files(expected_file, outfile)
-    with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read()[-1] == "\n"
+    actual = capsys.readouterr().out
+    expected = """
+Keys that are complete:
+    FV3GFS
+    FV3GFS.nomads
+    FV3GFS.nomads.protocol
+    FV3GFS.nomads.file_names
+    FV3GFS.nomads.file_names.grib2
+    FV3GFS.nomads.file_names.testfalse
+    FV3GFS.nomads.file_names.testzero
 
+Keys that have unfilled jinja2 templates:
+    FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
+    FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio','gfs.t{{ hh }}z.sfcanl.nemsio']
+    FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
 
-def test_output_file_conversion(tmp_path):
-    """
-    Test that --output_input_type converts config object to desired object type.
-    """
-    infile = fixture_path("simple.nml")
-    outfile = str(tmp_path / "test_ouput.cfg")
-    config.create_config_obj(
-        parse_config_args(["-i", infile, "-o", outfile, "--output_file_type", "F90"])
-    )
-    expected = config.F90Config(infile)
-    expected_file = tmp_path / "expected_nml.nml"
-    expected.dump_file(expected_file)
-    assert compare_files(expected_file, outfile)
-    with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read()[-1] == "\n"
-
-
-def test_config_file_conversion(tmp_path):
-    """
-    Test that --config_input_type converts config object to desired object type.
-    """
-    infile = fixture_path("simple2.nml")
-    cfgfile = fixture_path("simple2.ini")
-    outfile = str(tmp_path / "test_config_conversion.nml")
-    config.create_config_obj(
-        parse_config_args(["-i", infile, "-c", cfgfile, "-o", outfile, "--config_file_type", "F90"])
-    )
-    expected = config.F90Config(infile)
-    config_obj = config.F90Config(cfgfile)
-    expected.update_values(config_obj)
-    expected_file = tmp_path / "expected_nml.nml"
-    expected.dump_file(expected_file)
-    assert compare_files(expected_file, outfile)
-    with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read()[-1] == "\n"
-
-
-def test_bad_conversion_cfg_to_pdf():
-    with pytest.raises(SystemExit):
-        config.create_config_obj(
-            parse_config_args(["-i", fixture_path("simple2_nml.cfg"), "--input_file_type", ".pdf"])
-        )
-
-
-def test_bad_conversion_nml_to_yaml():
-    with pytest.raises(ValueError):
-        config.create_config_obj(
-            parse_config_args(
-                [
-                    "-i",
-                    fixture_path("simple2.nml"),
-                    "-c",
-                    fixture_path("srw_example.yaml"),
-                    "--config_file_type",
-                    "YAML",
-                ]
-            )
-        )
-
-
-def test_bad_conversion_yaml_to_nml(tmp_path):
-    with pytest.raises(ValueError):
-        config.create_config_obj(
-            parse_config_args(
-                [
-                    "-i",
-                    fixture_path("srw_example.yaml"),
-                    "-o",
-                    str(tmp_path / "test_outfile_conversion.yaml"),
-                    "--output_file_type",
-                    "F90",
-                ]
-            )
-        )
-
-
-def test_compare_nml(capsys):
-    """
-    Tests whether comparing two namelists works.
-    """
-    nml1 = fixture_path("fruit_config.nml")
-    nml2 = fixture_path("fruit_config_mult_sect.nml")
-    config.create_config_obj(parse_config_args(["-i", nml1, "-c", nml2, "--compare"]))
-    actual = capsys.readouterr().out.split("\n")
-
-    # Make sure the tool output contains all the expected lines:
-
-    expected = f"""
-- {nml1}
-+ {nml2}
---------------------------------------------------------------------------------
-config:       vegetable:  - eggplant + peas
-setting:         topping:  - None + crouton
-setting:            size:  - None + large
-setting:            meat:  - None + chicken
-""".strip()
-
-    for line in expected.split("\n"):
-        assert line_in_lines(line, actual)
-
-    # Make sure it doesn't include any additional significant diffs
-    # A very rough estimate is that there is a word/colon set followed
-    # by a -/+ set
-    # This regex is meant to match the lines in the expected string
-    # above that give us the section, key value diffs like this:
-    #   config:       vegetable:  - eggplant + peas
-
-    pattern = re.compile(r"\w:\s+\w+:\s+-\s+\w+\s+\+\s+\w+")
-    for line in actual:
-        if re.search(pattern, line):
-            assert line in expected
+Keys that are set to empty:
+    FV3GFS.nomads.file_names.nemsio
+    FV3GFS.nomads.testempty
+""".lstrip()
+    assert actual == expected
