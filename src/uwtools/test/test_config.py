@@ -264,11 +264,11 @@ def test_transform_config():
             out_file = f"{tmp_dir}/test_{test1.lower()}to{test2.lower()}_dump.{test2file.lower()}"
             cfgout.dump_file(out_file)
 
-            with open(ref, "r", encoding="utf-8") as file_1, open(
+            with open(ref, "r", encoding="utf-8") as f1, open(
                 out_file, "r", encoding="utf-8"
-            ) as file_2:
-                reflist = [line.rstrip("\n").strip().replace("'", "") for line in file_1]
-                outlist = [line.rstrip("\n").strip().replace("'", "") for line in file_2]
+            ) as f2:
+                reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1]
+                outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2]
                 lines = zip(reflist, outlist)
                 for line1, line2 in lines:
                     assert line1 in line2
@@ -288,11 +288,11 @@ def test_config_field_table():
         outcfg = config.FieldTableConfig(config_file)
         outcfg.dump_file(out_file)
 
-        with open(expected_file, "r", encoding="utf-8") as file_1, open(
+        with open(expected_file, "r", encoding="utf-8") as f1, open(
             out_file, "r", encoding="utf-8"
-        ) as file_2:
-            reflist = [line.rstrip("\n").strip().replace("'", "") for line in file_1]
-            outlist = [line.rstrip("\n").strip().replace("'", "") for line in file_2]
+        ) as f2:
+            reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1]
+            outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2]
             lines = zip(outlist, reflist)
             for line1, line2 in lines:
                 assert line1 in line2
@@ -702,11 +702,11 @@ def test_set_config_field_table():
 
         config.create_config_obj(args)
 
-        with open(expected_file, "r", encoding="utf-8") as file_1, open(
+        with open(expected_file, "r", encoding="utf-8") as f1, open(
             out_file, "r", encoding="utf-8"
-        ) as file_2:
-            reflist = [line.rstrip("\n").strip().replace("'", "") for line in file_1]
-            outlist = [line.rstrip("\n").strip().replace("'", "") for line in file_2]
+        ) as f2:
+            reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1]
+            outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2]
             lines = zip(outlist, reflist)
             for line1, line2 in lines:
                 assert line1 in line2
@@ -894,29 +894,25 @@ def test_cfg_to_yaml_conversion(tmp_path):
     expected_file = tmp_path / "test.yaml"
     expected.dump_file(expected_file)
     assert compare_files(expected_file, outfile)
-    with open(outfile, "r", encoding="utf-8") as output:
-        assert output.read()[-1] == "\n"
+    with open(outfile, "r", encoding="utf-8") as f:
+        assert f.read()[-1] == "\n"
 
 
-@pytest.mark.skip()
-def test_output_file_conversion():
-    """Test that --output_input_type converts config object to desired object type"""
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/test_ouput.cfg"
-        args = ["-i", input_file, "-o", out_file, "--output_file_type", "F90"]
-
-        config.create_config_obj(args)
-
-        expected = config.F90Config(input_file)
-        expected_file = f"{tmp_dir}/expected_nml.nml"
-        expected.dump_file(expected_file)
-
-        assert compare_files(expected_file, out_file)
-
-        with open(out_file, "r", encoding="utf-8") as output:
-            assert output.read()[-1] == "\n"
+def test_output_file_conversion(tmp_path):
+    """
+    Test that --output_input_type converts config object to desired object type.
+    """
+    infile = fixture_path("simple.nml")
+    outfile = str(tmp_path / "test_ouput.cfg")
+    config.create_config_obj(
+        parse_config_args(["-i", infile, "-o", outfile, "--output_file_type", "F90"])
+    )
+    expected = config.F90Config(infile)
+    expected_file = tmp_path / "expected_nml.nml"
+    expected.dump_file(expected_file)
+    assert compare_files(expected_file, outfile)
+    with open(outfile, "r", encoding="utf-8") as f:
+        assert f.read()[-1] == "\n"
 
 
 def test_config_file_conversion(tmp_path):
@@ -935,8 +931,8 @@ def test_config_file_conversion(tmp_path):
     expected_file = tmp_path / "expected_nml.nml"
     expected.dump_file(expected_file)
     assert compare_files(expected_file, outfile)
-    with open(outfile, "r", encoding="utf-8") as output:
-        assert output.read()[-1] == "\n"
+    with open(outfile, "r", encoding="utf-8") as f:
+        assert f.read()[-1] == "\n"
 
 
 def test_bad_conversion_cfg_to_pdf():
