@@ -280,40 +280,6 @@ def test_ini_config_bash():
     assert cfg == expected
 
 
-@pytest.mark.skip()
-def test_transform_config():
-    """Test that transforms config objects to objects of other config subclasses."""
-    # Use itertools to iterate through unique pairs of config subcasses
-    # the transforms here ensure consistent file subscripts and config calls
-    for test1, test2 in itertools.permutations(["INI", "YAML", "F90"], 2):
-        test1file = "NML" if test1 == "F90" else test1
-        test2file = "NML" if test2 == "F90" else test2
-
-        test = os.path.join(
-            uwtools_file_base, pathlib.Path("fixtures", f"simple.{test1file.lower()}")
-        )
-        ref = os.path.join(
-            uwtools_file_base, pathlib.Path("fixtures", f"simple.{test2file.lower()}")
-        )
-
-        cfgin = getattr(config, f"{test1}Config")(test)
-        cfgout = getattr(config, f"{test2}Config")()
-        cfgout.update(cfgin.data)
-
-        with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-            out_file = f"{tmp_dir}/test_{test1.lower()}to{test2.lower()}_dump.{test2file.lower()}"
-            cfgout.dump_file(out_file)
-
-            with open(ref, "r", encoding="utf-8") as f1, open(
-                out_file, "r", encoding="utf-8"
-            ) as f2:
-                reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1]
-                outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2]
-                lines = zip(reflist, outlist)
-                for line1, line2 in lines:
-                    assert line1 in line2
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -728,6 +694,33 @@ def test_show_format():
         args.output_file_type = "FieldTable"
         config.create_config_obj(args)
         mock_help.assert_called_once()
+
+
+def test_transform_config(tmp_path):
+    """
+    Test that transforms config objects to objects of other config subclasses.
+    """
+    # Use itertools to construct all pairs of the config formats and iterate
+    # through their corresponding classes. The transforms here ensure consistent
+    # file subscripts and config calls.
+
+    for test1, test2 in itertools.permutations(["INI", "YAML", "F90"], 2):
+        test1file = "NML" if test1 == "F90" else test1
+        test2file = "NML" if test2 == "F90" else test2
+        test = fixture_path(f"simple.{test1file.lower()}")
+        ref = fixture_path(f"simple.{test2file.lower()}")
+        cfgin = getattr(config, f"{test1}Config")(test)
+        cfgout = getattr(config, f"{test2}Config")()
+        cfgout.update(cfgin.data)
+        out_file = tmp_path / f"test_{test1.lower()}to{test2.lower()}_dump.{test2file.lower()}"
+        cfgout.dump_file(out_file)
+        with open(ref, "r", encoding="utf-8") as f1:
+            with open(out_file, "r", encoding="utf-8") as f2:
+                reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1]
+                outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2]
+                lines = zip(reflist, outlist)
+                for line1, line2 in lines:
+                    assert line1 in line2
 
 
 def test_values_needed_ini(capsys):
