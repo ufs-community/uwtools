@@ -4,6 +4,7 @@
 Set of test for loading YAML files using the function call load_yaml
 """
 import argparse
+import builtins
 import datetime
 import filecmp
 import io
@@ -17,6 +18,7 @@ from collections import OrderedDict
 from contextlib import redirect_stdout
 from textwrap import dedent
 from typing import Any, Dict
+from unittest.mock import patch
 
 import pytest
 
@@ -733,67 +735,43 @@ def test_set_config_dry_run():
     assert result.rstrip("\n") == expected_content.rstrip("\n")
 
 
-@pytest.mark.skip()
 def test_show_format():
-    """Test providing required configuration format for a given input and target."""
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures", "FV3_GFS_v16.yaml"))
-    outcome = """Help on method dump_file in module uwtools.config:
-
-dump_file(output_path) method of uwtools.config.FieldTableConfig instance
-    Write the formatted output to a text file. 
-    FMS field and tracer managers must be registered in an ASCII table called 'field_table'
-    This table lists field type, target model and methods the querying model will ask for.
-    
-    See UFS documentation for more information:
-    https://ufs-weather-model.readthedocs.io/en/ufs-v1.0.0/InputsOutputs.html#field-table-file
-    
-    The example format for generating a field file is::
-    
-    sphum:
-      longname: specific humidity
-      units: kg/kg
-      profile_type: 
-        name: fixed
-        surface_value: 1.e30
-
-None
-"""
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/field_table_from_yaml.FV3_GFS"
-        args = [
+    """
+    Test providing required configuration format for a given input and target.
+    """
+    # Initially, input and output file types are both YAML:
+    args = parse_config_args(
+        [
             "-i",
-            input_file,
+            fixture_path("FV3_GFS_v16.yaml"),
             "-o",
-            out_file,
+            "/dev/null",
             "--show_format",
             "--output_file_type",
-            "FieldTable",
+            "YAML",
         ]
-
-        # Capture stdout for the required configuration settings
-        outstring = io.StringIO()
-        with redirect_stdout(outstring):
-            config.create_config_obj(args)
-        result = outstring.getvalue()
-
-        assert result == outcome
-
-
-@pytest.mark.skip()
-def test_values_needed_yaml():
-    """Test that the values_needed flag logs keys completed, keys containing
-    unfilled jinja2 templates, and keys set to empty"""
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/srw_example.yaml"))
-    args = ["-i", input_file, "--values_needed"]
-
-    # Capture stdout for values_needed output
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
+    )
+    with patch.object(builtins, "help") as mock_help:
+        # Since file types match, help() is not called:
         config.create_config_obj(args)
-    result = outstring.getvalue()
-    outcome = """Keys that are complete:
+        mock_help.assert_not_called()
+        # But help() is called when the input is YAML and the output FieldTable:
+        args.output_file_type = "FieldTable"
+        config.create_config_obj(args)
+        mock_help.assert_called_once()
+
+
+def test_values_needed_yaml(capsys):
+    """
+    Test that the values_needed flag logs keys completed, keys containing
+    unfilled jinja2 templates, and keys set to empty.
+    """
+    config.create_config_obj(
+        parse_config_args(["-i", fixture_path("srw_example.yaml"), "--values_needed"])
+    )
+    actual = capsys.readouterr().out
+    expected = """
+Keys that are complete:
     FV3GFS
     FV3GFS.nomads
     FV3GFS.nomads.protocol
@@ -810,25 +788,21 @@ Keys that have unfilled jinja2 templates:
 Keys that are set to empty:
     FV3GFS.nomads.file_names.nemsio
     FV3GFS.nomads.testempty
-"""
-    assert result == outcome
+""".lstrip()
+    assert actual == expected
 
 
-@pytest.mark.skip()
-def test_values_needed_ini():
-    """Test that the values_needed flag logs keys completed, keys containing
-    unfilled jinja2 templates, and keys set to empty"""
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple3.ini"))
-    args = ["-i", input_file, "--values_needed"]
-
-    # Capture stdout for values_needed output
-    outstring = io.StringIO()
-    with redirect_stdout(outstring):
-        config.create_config_obj(args)
-    result = outstring.getvalue()
-
-    outcome = """Keys that are complete:
+def test_values_needed_ini(capsys):
+    """
+    Test that the values_needed flag logs keys completed, keys containing
+    unfilled jinja2 templates, and keys set to empty.
+    """
+    config.create_config_obj(
+        parse_config_args(["-i", fixture_path("simple3.ini"), "--values_needed"])
+    )
+    actual = capsys.readouterr().out
+    expected = """
+Keys that are complete:
     salad
     salad.base
     salad.fruit
@@ -846,8 +820,8 @@ Keys that have unfilled jinja2 templates:
 Keys that are set to empty:
     salad.toppings
     salad.meat
-"""
-    assert result == outcome
+""".lstrip()
+    assert actual == expected
 
 
 def test_values_needed_f90nml(capsys):
@@ -880,7 +854,9 @@ Keys that are set to empty:
 
 
 def test_cfg_to_yaml_conversion(tmp_path):
-    """Test that a .cfg file can be used to create a YAML object."""
+    """
+    Test that a .cfg file can be used to create a YAML object.
+    """
     infile = fixture_path("srw_example_yaml.cfg")
     outfile = str(tmp_path / "test_ouput.yaml")
     config.create_config_obj(
@@ -972,8 +948,9 @@ def test_bad_conversion_yaml_to_nml(tmp_path):
 
 
 def test_compare_nml(capsys):
-    """Tests whether comparing two namelists works."""
-
+    """
+    Tests whether comparing two namelists works.
+    """
     nml1 = fixture_path("fruit_config.nml")
     nml2 = fixture_path("fruit_config_mult_sect.nml")
     config.create_config_obj(parse_config_args(["-i", nml1, "-c", nml2, "--compare"]))
