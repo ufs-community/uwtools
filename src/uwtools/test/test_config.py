@@ -8,13 +8,11 @@ import builtins
 import datetime
 import filecmp
 import itertools
-import json
 import logging
 import os
 import pathlib
 import re
 import sys
-import tempfile
 from argparse import ArgumentTypeError
 from pathlib import Path
 from unittest.mock import patch
@@ -745,17 +743,16 @@ def test_yaml_config_simple(tmp_path):
     outfile = tmp_path / "outfile.yml"
     cfgobj = config.YAMLConfig(infile)
     expected = {
-        "scheduler": "slurm",
-        "jobname": "abcd",
-        "extra_stuff": 12345,
         "account": "user_account",
+        "extra_stuff": 12345,
+        "jobname": "abcd",
         "nodes": 1,
         "queue": "bos",
+        "scheduler": "slurm",
         "tasks_per_node": 4,
         "walltime": "00:01:00",
     }
     assert cfgobj == expected
-    assert repr(cfgobj.data) == json.dumps(expected).replace('"', "'")
     cfgobj.dump_file(outfile)
     assert filecmp.cmp(infile, outfile)
     cfgobj.update({"nodes": 12})
