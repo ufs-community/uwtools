@@ -4,8 +4,8 @@ Tests for the atparse_to_jinja2 tool.
 
 from unittest.mock import patch
 
+from tests.support import fixture_path
 from uwtools.cli import atparse_to_jinja2
-from uwtools.test.support import fixture_path
 
 
 def test_all_templates_replaced(capsys):

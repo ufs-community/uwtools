@@ -39,9 +39,11 @@ typecheck() {
 unittest() {
   echo Running unit tests...
   (
-    set -eux
-    coverage run -m pytest -vv $srcdir
-    coverage report
+    set -eu
+    testdir=$srcdir/tests
+    export PYTHONPATH=$testdir
+    coverage run -m pytest -vv $testdir
+    coverage report --omit="$testdir/*"
   )
   echo OK
 }

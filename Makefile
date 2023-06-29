@@ -21,6 +21,7 @@ env: package
 	conda create -y -n $(call spec,buildnum,-) $(CHANNELS) $(call spec,build,=)
 
 format:
+	@echo Running formatters...
 	@black $$(find src -type f -name "*.py") && isort --profile black $$(find src -type f -name "*.py")
 
 lint:

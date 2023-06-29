@@ -19,9 +19,9 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture, raises
 
+from tests.support import compare_files, fixture_path, line_in_lines, msg_in_caplog_records
 from uwtools import config, exceptions, logger
 from uwtools.cli.set_config import parse_args as parse_config_args
-from uwtools.test.support import compare_files, fixture_path, line_in_lines, msg_in_caplog_records
 from uwtools.utils import cli_helpers
 
 # Helpers

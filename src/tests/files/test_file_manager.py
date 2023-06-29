@@ -4,10 +4,10 @@
 import shutil
 from unittest.mock import patch
 
+from tests.support import fixture_uri
 from uwtools.files import FileManager, S3FileManager, UnixFileManager
 from uwtools.files.gateway import s3
 from uwtools.files.model import S3, Prefixes, Unix
-from uwtools.test.support import fixture_uri
 
 
 def test_FileManager_constructor_S3():

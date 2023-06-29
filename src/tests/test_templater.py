@@ -10,8 +10,8 @@ from unittest.mock import patch
 
 from pytest import raises
 
+from tests.support import compare_files, fixture_path, line_in_lines
 from uwtools.cli import templater
-from uwtools.test.support import compare_files, fixture_path, line_in_lines
 
 
 def test_mutually_exclusive_args():
