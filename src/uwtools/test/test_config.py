@@ -10,7 +10,6 @@ import filecmp
 import itertools
 import logging
 import os
-import pathlib
 import re
 import sys
 from argparse import ArgumentTypeError
@@ -73,55 +72,6 @@ def help_set_config_fmt2fmt(infn, cfgfn, tmpdir):
 
 
 # Tests
-
-uwtools_file_base = os.path.join(os.path.dirname(__file__))
-
-
-@pytest.mark.skip()
-def test_parse_include():
-    """Test that non-YAML handles !INCLUDE Tags properly"""
-
-    test_nml = os.path.join(uwtools_file_base, pathlib.Path("fixtures/include_files.nml"))
-    cfg = config.F90Config(test_nml)
-
-    # salad key tests loading one file.
-    assert cfg["config"].get("fruit") == "papaya"
-    assert cfg["config"].get("how_many") == 17
-    assert cfg["config"].get("meat") == "beef"
-    assert len(cfg["config"]) == 5
-
-
-@pytest.mark.skip()
-def test_parse_include_mult_sect():
-    """Test that non-YAML handles !INCLUDE tags with files that have
-    multiple sections in separate file."""
-
-    test_nml = os.path.join(uwtools_file_base, pathlib.Path("fixtures/include_files_with_sect.nml"))
-    cfg = config.F90Config(test_nml)
-
-    # salad key tests loading one file.
-    assert cfg["config"].get("fruit") == "papaya"
-    assert cfg["config"].get("how_many") == 17
-    assert cfg["config"].get("meat") == "beef"
-    assert cfg["config"].get("dressing") == "ranch"
-    assert cfg["setting"].get("size") == "large"
-    assert len(cfg["config"]) == 5
-    assert len(cfg["setting"]) == 3
-
-
-@pytest.mark.skip()
-def test_parse_include_ini():
-    """Test that non-YAML handles !INCLUDE Tags properly for INI with no
-    sections"""
-
-    test_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/include_files.sh"))
-    cfg = config.INIConfig(test_file, space_around_delimiters=False)
-
-    # salad key tests loading one file.
-    assert cfg.get("fruit") == "papaya"
-    assert cfg.get("how_many") == "17"
-    assert cfg.get("meat") == "beef"
-    assert len(cfg) == 5
 
 
 def test_bad_conversion_cfg_to_pdf():
@@ -436,6 +386,43 @@ def test_output_file_conversion(tmp_path):
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read()[-1] == "\n"
+
+
+def test_parse_include():
+    """
+    Test that non-YAML handles !INCLUDE Tags properly.
+    """
+    cfgobj = config.F90Config(fixture_path("include_files.nml"))
+    assert cfgobj["config"]["fruit"] == "papaya"
+    assert cfgobj["config"]["how_many"] == 17
+    assert cfgobj["config"]["meat"] == "beef"
+    assert len(cfgobj["config"]) == 5
+
+
+def test_parse_include_ini():
+    """
+    Test that non-YAML handles !INCLUDE Tags properly for INI with no sections.
+    """
+    cfgobj = config.INIConfig(fixture_path("include_files.sh"), space_around_delimiters=False)
+    assert cfgobj.get("fruit") == "papaya"
+    assert cfgobj.get("how_many") == "17"
+    assert cfgobj.get("meat") == "beef"
+    assert len(cfgobj) == 5
+
+
+def test_parse_include_mult_sect():
+    """
+    Test that non-YAML handles !INCLUDE tags with files that have multiple
+    sections in separate file.
+    """
+    cfgobj = config.F90Config(fixture_path("include_files_with_sect.nml"))
+    assert cfgobj["config"]["fruit"] == "papaya"
+    assert cfgobj["config"]["how_many"] == 17
+    assert cfgobj["config"]["meat"] == "beef"
+    assert cfgobj["config"]["dressing"] == "ranch"
+    assert cfgobj["setting"]["size"] == "large"
+    assert len(cfgobj["config"]) == 5
+    assert len(cfgobj["setting"]) == 3
 
 
 def test_path_if_file_exists(tmp_path):
