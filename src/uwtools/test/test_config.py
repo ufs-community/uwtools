@@ -787,34 +787,20 @@ def set_config_helper(infn, cfgfn, tmpdir) -> None:
     ext = Path(infile).suffix
     outfile = str(tmpdir / f"outfile.{ext}")
     config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile, "-c", cfgfile]))
-    cfgobj = config.INIConfig(infile)
-    cfgobj.update_values(config.INIConfig(cfgfile))
+    cfgclass = getattr(config, "%sConfig" % {".nml": "F90", ".ini": "INI"}[ext])
+    cfgobj = cfgclass(infile)
+    cfgobj.update_values(cfgclass(cfgfile))
     reference = tmpdir / "expected"
     cfgobj.dump_file(reference)
     assert compare_files(reference, outfile)
 
 
-# def test_set_config_f90nml_config_file(tmp_path):
-#     """
-#     Test that providing a F90nml base input file and a config file will create
-#     and update F90nml config file.
-#     """
-#     infile = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.nml"))
-#     config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple2.nml"))
-
-#     with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-#         out_file = f"{tmp_dir}/test_config_from_nml.nml"
-#         args = ["-i", infile, "-o", out_file, "-c", config_file]
-
-#         config.create_config_obj(args)
-
-#         expected = config.F90Config(infile)
-#         config_file_obj = config.F90Config(config_file)
-#         expected.update_values(config_file_obj)
-#         expected_file = f"{tmp_dir}/expected_nml.nml"
-#         expected.dump_file(expected_file)
-
-#         assert compare_files(expected_file, out_file)
+def test_set_config_f90nml_config_file(tmp_path):
+    """
+    Test that providing a namelist base input file and a config file will create
+    and update namelist config file.
+    """
+    set_config_helper("simple.nml", "simple2.nml", tmp_path)
 
 
 def test_set_config_ini_bash_config_file(tmp_path):
