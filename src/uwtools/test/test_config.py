@@ -314,30 +314,6 @@ def test_transform_config():
                     assert line1 in line2
 
 
-@pytest.mark.skip()
-def test_config_field_table():
-    """Test reading a YAML config object and generating a field file table."""
-    config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures", "FV3_GFS_v16.yaml"))
-    expected_file = os.path.join(
-        uwtools_file_base, pathlib.Path("fixtures", "field_table.FV3_GFS_v16")
-    )
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/field_table_from_yaml.FV3_GFS"
-
-        outcfg = config.FieldTableConfig(config_file)
-        outcfg.dump_file(out_file)
-
-        with open(expected_file, "r", encoding="utf-8") as f1, open(
-            out_file, "r", encoding="utf-8"
-        ) as f2:
-            reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1]
-            outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2]
-            lines = zip(outlist, reflist)
-            for line1, line2 in lines:
-                assert line1 in line2
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -470,6 +446,23 @@ setting:            meat:  - None + chicken
     for line in actual:
         if re.search(pattern, line):
             assert line in expected
+
+
+def test_config_field_table(tmp_path):
+    """
+    Test reading a YAML config object and generating a field table file.
+    """
+    cfgfile = fixture_path("FV3_GFS_v16.yaml")
+    reference = fixture_path("field_table.FV3_GFS_v16")
+    outfile = tmp_path / "field_table_from_yaml.FV3_GFS"
+    config.FieldTableConfig(cfgfile).dump_file(outfile)
+    with open(reference, "r", encoding="utf-8") as f1:
+        reflines = [line.rstrip("\n").strip().replace("'", "") for line in f1]
+    with open(outfile, "r", encoding="utf-8") as f2:
+        outlines = [line.rstrip("\n").strip().replace("'", "") for line in f2]
+    lines = zip(outlines, reflines)
+    for line1, line2 in lines:
+        assert line1 == line2
 
 
 def test_config_file_conversion(tmp_path):
