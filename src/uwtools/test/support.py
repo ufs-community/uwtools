@@ -1,7 +1,9 @@
 # pylint: disable=missing-function-docstring
 
+import re
 from importlib import resources
 from pathlib import Path
+from typing import List
 
 
 def compare_files(expected: str, actual: str) -> bool:
@@ -38,3 +40,7 @@ def fixture_path(suffix: str = "") -> str:
 
 def fixture_uri(suffix: str = "") -> str:
     return fixture_pathobj(suffix).as_uri()
+
+
+def line_in_lines(line: str, lines: List[str]) -> bool:
+    return any(x for x in lines if re.match(r"^.*%s$" % re.escape(line), x))

@@ -22,7 +22,7 @@ import pytest
 
 from uwtools import config, exceptions, logger
 from uwtools.cli.set_config import parse_args as parse_config_args
-from uwtools.test.support import compare_files, fixture_path
+from uwtools.test.support import compare_files, fixture_path, line_in_lines
 from uwtools.utils import cli_helpers
 
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
@@ -999,7 +999,7 @@ setting:            meat:  - None + chicken
 """.strip()
 
     for line in expected.split("\n"):
-        assert line.strip() in actual
+        assert line_in_lines(line, actual)
 
     # Make sure it doesn't include any additional significant diffs
     # A very rough estimate is that there is a word/colon set followed

@@ -11,7 +11,7 @@ from unittest.mock import patch
 from pytest import raises
 
 from uwtools.cli import templater
-from uwtools.test.support import compare_files, fixture_path
+from uwtools.test.support import compare_files, fixture_path, line_in_lines
 
 
 def test_mutually_exclusive_args():
@@ -74,9 +74,9 @@ Running with args:
 """.lstrip()
 
     templater.main(["-i", infile, "--dry_run", "fruit=pear", "vegetable=squash", "how_many=22"])
-    actual = capsys.readouterr().out
+    actual = capsys.readouterr().out.split("\n")
     for line in expected.split("\n"):
-        assert line in actual
+        assert line_in_lines(line, actual)
 
 
 def test_set_template_dry_run(capsys):
@@ -110,9 +110,9 @@ Running with args:
 
     with patch.dict(os.environ, {"fruit": "banana", "vegetable": "tomato", "how_many": "22"}):
         templater.main(["-i", infile, "--dry_run"])
-        actual = capsys.readouterr().out
+        actual = capsys.readouterr().out.split("\n")
         for line in expected.split("\n"):
-            assert line in actual
+            assert line_in_lines(line, actual)
 
 
 def test_set_template_listvalues(capsys):
@@ -142,9 +142,9 @@ vegetable
 """.lstrip()
 
     templater.main(["-i", infile, "--values_needed"])
-    actual = capsys.readouterr().out
+    actual = capsys.readouterr().out.split("\n")
     for line in expected.split("\n"):
-        assert line in actual
+        assert line_in_lines(line, actual)
 
 
 def test_set_template_verbosity(capsys):
@@ -189,9 +189,9 @@ J2Template._load_file INPUT Args:
     env["vegetable"] = "tomato"
     with patch.dict(os.environ, env):
         templater.main(["-i", infile, "--dry_run", "-v"])
-    actual = capsys.readouterr().out
+    actual = capsys.readouterr().out.split("\n")
     for line in expected.split("\n"):
-        assert line in actual
+        assert line_in_lines(line, actual)
 
     # Test quiet level.
 

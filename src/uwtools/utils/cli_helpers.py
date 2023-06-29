@@ -45,12 +45,16 @@ def path_if_file_exists(arg):
 
 
 def setup_logging(
-    log_file: str, log_name: Optional[str] = None, quiet: bool = False, verbose: bool = False
+    log_file: str,
+    log_name: Optional[str] = None,
+    quiet: bool = False,
+    verbose: bool = False,
+    color: bool = False,
 ) -> Logger:
     """Create the Logger object"""
 
     log = Logger(
-        colored_log=bool(verbose),
+        colored_log=color,
         fmt=None if verbose else "%(message)s",
         level="debug" if verbose else "info",
         log_file=log_file,
