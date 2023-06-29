@@ -40,7 +40,7 @@ unittest() {
   (
     set -eux
     coverage run -m pytest -vv $srcdir
-#     coverage report
+    coverage report
   )
   echo OK
 }
