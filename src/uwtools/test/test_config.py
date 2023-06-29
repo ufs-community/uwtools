@@ -419,15 +419,14 @@ def test_config_field_table(tmp_path):
     Test reading a YAML config object and generating a field table file.
     """
     cfgfile = fixture_path("FV3_GFS_v16.yaml")
-    reference = fixture_path("field_table.FV3_GFS_v16")
     outfile = tmp_path / "field_table_from_yaml.FV3_GFS"
+    reference = fixture_path("field_table.FV3_GFS_v16")
     config.FieldTableConfig(cfgfile).dump_file(outfile)
     with open(reference, "r", encoding="utf-8") as f1:
-        reflines = [line.rstrip("\n").strip().replace("'", "") for line in f1]
+        reflines = [line.strip().replace("'", "") for line in f1]
     with open(outfile, "r", encoding="utf-8") as f2:
-        outlines = [line.rstrip("\n").strip().replace("'", "") for line in f2]
-    lines = zip(outlines, reflines)
-    for line1, line2 in lines:
+        outlines = [line.strip().replace("'", "") for line in f2]
+    for line1, line2 in zip(outlines, reflines):
         assert line1 == line2
 
 
@@ -704,23 +703,20 @@ def test_transform_config(tmp_path):
     # through their corresponding classes. The transforms here ensure consistent
     # file subscripts and config calls.
 
-    for test1, test2 in itertools.permutations(["INI", "YAML", "F90"], 2):
-        test1file = "NML" if test1 == "F90" else test1
-        test2file = "NML" if test2 == "F90" else test2
-        test = fixture_path(f"simple.{test1file.lower()}")
-        ref = fixture_path(f"simple.{test2file.lower()}")
-        cfgin = getattr(config, f"{test1}Config")(test)
-        cfgout = getattr(config, f"{test2}Config")()
+    for fmt1, fmt2 in itertools.permutations(["INI", "YAML", "F90"], 2):
+        ext1, ext2 = [".%s" % ("NML" if x == "F90" else x).lower() for x in (fmt1, fmt2)]
+        outfile = tmp_path / f"test_{fmt1.lower()}to{fmt2.lower()}_dump{ext2}"
+        reference = fixture_path(f"simple{ext2}")
+        cfgin = help_cfgclass(ext1)(fixture_path(f"simple{ext1}"))
+        cfgout = help_cfgclass(ext2)()
         cfgout.update(cfgin.data)
-        out_file = tmp_path / f"test_{test1.lower()}to{test2.lower()}_dump.{test2file.lower()}"
-        cfgout.dump_file(out_file)
-        with open(ref, "r", encoding="utf-8") as f1:
-            with open(out_file, "r", encoding="utf-8") as f2:
-                reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1]
-                outlist = [line.rstrip("\n").strip().replace("'", "") for line in f2]
-                lines = zip(reflist, outlist)
-                for line1, line2 in lines:
-                    assert line1 in line2
+        cfgout.dump_file(outfile)
+        with open(reference, "r", encoding="utf-8") as f1:
+            reflines = [line.strip().replace("'", "") for line in f1]
+        with open(outfile, "r", encoding="utf-8") as f2:
+            outlines = [line.strip().replace("'", "") for line in f2]
+        for line1, line2 in zip(reflines, outlines):
+            assert line1 == line2
 
 
 def test_values_needed_ini(capsys):
