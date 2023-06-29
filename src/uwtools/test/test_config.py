@@ -30,6 +30,20 @@ from uwtools.utils import cli_helpers
 uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 
+def set_config_helper(infn, cfgfn, tmpdir) -> None:
+    infile = fixture_path(infn)
+    cfgfile = fixture_path(cfgfn)
+    ext = Path(infile).suffix
+    outfile = str(tmpdir / f"outfile.{ext}")
+    config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile, "-c", cfgfile]))
+    cfgclass = getattr(config, "%sConfig" % {".nml": "F90", ".ini": "INI", ".yaml": "YAML"}[ext])
+    cfgobj = cfgclass(infile)
+    cfgobj.update_values(cfgclass(cfgfile))
+    reference = tmpdir / "expected"
+    cfgobj.dump_file(reference)
+    assert compare_files(reference, outfile)
+
+
 @pytest.mark.skip()
 def test_parse_include():
     """Test that non-YAML handles !INCLUDE Tags properly"""
@@ -563,27 +577,6 @@ def test_set_config_f90nml_simple():
         assert compare_files(expected_file, out_file)
 
 
-@pytest.mark.skip()
-def test_set_config_bash_simple():
-    """Test that providing bash file with necessary settings will
-    create an INI config file"""
-
-    input_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.sh"))
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dr:
-        out_file = f"{tmp_dr}/test_config_from_bash.ini"
-
-        args = ["-i", input_file, "-o", out_file]
-
-        config.create_config_obj(args)
-
-        expected = config.INIConfig(input_file)
-        expected_file = f"{tmp_dr}/expected_ini.ini"
-        expected.dump_file(expected_file)
-
-        assert compare_files(expected_file, out_file)
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -724,6 +717,20 @@ def test_output_file_conversion(tmp_path):
         assert f.read()[-1] == "\n"
 
 
+def test_set_config_bash_simple(tmp_path):
+    """
+    Test that providing bash file with necessary settings will create an INI
+    config file.
+    """
+    infile = fixture_path("simple.sh")
+    outfile = str(tmp_path / "test_config_from_bash.ini")
+    config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile]))
+    cfgobj = config.INIConfig(infile)
+    reference = tmp_path / "expected_ini.ini"
+    cfgobj.dump_file(reference)
+    assert compare_files(reference, outfile)
+
+
 def test_set_config_dry_run(capsys):
     """
     Test that providing a YAML base file with a dry run flag will print an YAML
@@ -754,20 +761,6 @@ def test_set_config_field_table(tmp_path):
             lines = zip(outlist, reflist)
             for line1, line2 in lines:
                 assert line1 in line2
-
-
-def set_config_helper(infn, cfgfn, tmpdir) -> None:
-    infile = fixture_path(infn)
-    cfgfile = fixture_path(cfgfn)
-    ext = Path(infile).suffix
-    outfile = str(tmpdir / f"outfile.{ext}")
-    config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile, "-c", cfgfile]))
-    cfgclass = getattr(config, "%sConfig" % {".nml": "F90", ".ini": "INI", ".yaml": "YAML"}[ext])
-    cfgobj = cfgclass(infile)
-    cfgobj.update_values(cfgclass(cfgfile))
-    reference = tmpdir / "expected"
-    cfgobj.dump_file(reference)
-    assert compare_files(reference, outfile)
 
 
 def test_set_config_f90nml_config_file(tmp_path):
