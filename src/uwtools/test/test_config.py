@@ -235,37 +235,6 @@ def test_f90nml_config_simple():
     assert cfg == expected
 
 
-@pytest.mark.skip()
-def test_ini_config_simple():
-    """Test that INI config load and dump work with a basic INI file.
-    Everything in INI is treated as a string!
-    """
-
-    test_ini = os.path.join(uwtools_file_base, pathlib.Path("fixtures/simple.ini"))
-    cfg = config.INIConfig(test_ini)
-
-    expected: Dict[str, Any] = {
-        "salad": {
-            "base": "kale",
-            "fruit": "banana",
-            "vegetable": "tomato",
-            "how_many": "12",
-            "dressing": "balsamic",
-        }
-    }
-    assert cfg == expected
-
-    with tempfile.TemporaryDirectory(dir=".") as tmp_dir:
-        out_file = f"{tmp_dir}/test_ini_dump.ini"
-        cfg.dump_file(out_file)
-
-        assert filecmp.cmp(test_ini, out_file)
-
-    cfg.update({"dressing": ["ranch", "italian"]})
-    expected["dressing"] = ["ranch", "italian"]
-    assert cfg == expected
-
-
 def test_bad_conversion_cfg_to_pdf():
     with raises(SystemExit):
         config.create_config_obj(
@@ -517,13 +486,30 @@ def test_ini_config_bash(salad_base, tmp_path):
     """
     Test that INI config load and dump work with a basic bash file.
     """
-    bashfile = fixture_path("simple.sh")
-    outfile = tmp_path / "bashfile_dump.sh"
-    cfgobj = config.INIConfig(bashfile, space_around_delimiters=False)
+    infile = fixture_path("simple.sh")
+    outfile = tmp_path / "outfile.sh"
+    cfgobj = config.INIConfig(infile, space_around_delimiters=False)
     expected = salad_base["salad"]
     assert cfgobj == expected
     cfgobj.dump_file(outfile)
-    assert filecmp.cmp(bashfile, outfile)
+    assert filecmp.cmp(infile, outfile)
+    cfgobj.update({"dressing": ["ranch", "italian"]})
+    expected["dressing"] = ["ranch", "italian"]
+    assert cfgobj == expected
+
+
+def test_ini_config_simple(salad_base, tmp_path):
+    """
+    Test that INI config load and dump work with a basic INI file. Everything in
+    INI is treated as a string!
+    """
+    infile = fixture_path("simple.ini")
+    outfile = tmp_path / "outfile.ini"
+    cfgobj = config.INIConfig(infile)
+    expected = salad_base
+    assert cfgobj == expected
+    cfgobj.dump_file(outfile)
+    assert filecmp.cmp(infile, outfile)
     cfgobj.update({"dressing": ["ranch", "italian"]})
     expected["dressing"] = ["ranch", "italian"]
     assert cfgobj == expected
