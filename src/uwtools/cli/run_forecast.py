@@ -31,15 +31,16 @@ def parse_args(args):
     )
     parser.add_argument(
         "--forecast_app",
-        help="If provided, will define the app to be run.\
-            Currently accepts SRW, MRW, or HAFS",
+        help=("If provided, will define the app to be run. Currently accepts SRW, MRW, or HAFS"),
         choices=["SRW", "MRW", "HAFS"],
     )
     parser.add_argument(
         "--forecast_model",
         nargs="+",
-        help="If provided, will define the experiment to be run.\
-            Currently accepts FV3, CCPP, MOM6, CICE, and/or CMEPS",
+        help=(
+            "If provided, will define the experiment to be run."
+            "Currently accepts FV3, CCPP, MOM6, CICE, and/or CMEPS"
+        ),
         choices=["FV3", "CCPP", "MOM6", "CICE", "CMEPS"],
     )
     parser.add_argument(

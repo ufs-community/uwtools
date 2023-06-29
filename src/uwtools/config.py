@@ -13,7 +13,6 @@ import logging
 import os
 import re
 import sys
-from textwrap import dedent
 
 import f90nml
 import jinja2
@@ -238,19 +237,16 @@ class Config(collections.UserDict):
                                 loader_args={"undefined": jinja2.StrictUndefined},
                             )
                         except jinja2.exceptions.TemplateAssertionError as e:
-                            msg = dedent(
-                                f"""\
+                            msg = f"""
+ERROR:
+The input config file contains a Jinja2 filter
+that is not registered with the uwtools package.
 
-                                ERROR:
-                                The input config file contains a Jinja2 filter
-                                that is not registered with the uwtools package.
+filter: {repr(e).split()[-1][:-3]}
+key: {key}
 
-                                filter: {repr(e).split()[-1][:-3]}
-                                key: {key}
-
-                                Define the filter before proceeding.
-                                """
-                            )
+Define the filter before proceeding.
+""".strip()
                             self.log.exception(msg)
                             raise exceptions.UWConfigError(msg)
                         rendered = template
@@ -410,31 +406,25 @@ class YAMLConfig(Config):
                 cfg = yaml.load(file_name, Loader=loader)
             except yaml.constructor.ConstructorError as e:
                 if e.problem:
-                    constructor = e.problem.split()[-1]
                     if "unhashable" in e.problem:
-                        msg = dedent(
-                            """\
-
-                            ERROR:
-                            The input config file may contain a Jinja2
-                            templated value at the location listed above.
-                            Ensure the value is included in quotes.
-                            """
-                        )
+                        msg = """
+ERROR:
+The input config file may contain a Jinja2
+templated value at the location listed above.
+Ensure the value is included in quotes.
+""".strip()
                     else:
-                        msg = dedent(
-                            f"""\
+                        constructor = e.problem.split()[-1]
+                        msg = f"""
+ERROR:
+The input config file contains a constructor
+that is not registered with the uwtools package.
 
-                            ERROR:
-                            The input config file contains a constructor
-                            that is not registered with the uwtools package.
+constructor: {constructor}
+config file: {config_path}
 
-                            constructor: {constructor}
-                            config file: {config_path}
-
-                            Define the constructor before proceeding.
-                            """
-                        )
+Define the constructor before proceeding.
+""".strip()
                 else:
                     msg = str(e)
                 self.log.exception(msg)

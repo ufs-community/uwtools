@@ -32,8 +32,10 @@ def parse_args(args):
     parser.add_argument(
         "-o",
         "--outfile",
-        help='Full path to output file. If different from input, will will perform conversion.\
-            For field table output, specify model such as "field_table.FV3_GFS_v16"',
+        help=(
+            "Full path to output file. If different from input, will will perform conversion."
+            'For field table output, specify model such as "field_table.FV3_GFS_v16"'
+        ),
     )
     parser.add_argument(
         "-c",
@@ -64,20 +66,26 @@ def parse_args(args):
     )
     parser.add_argument(
         "--input_file_type",
-        help="If provided, will convert provided input file to provided file type.\
-            Accepts YAML, bash/ini or namelist",
+        help=(
+            "If provided, will convert provided input file to provided file type."
+            "Accepts YAML, bash/ini or namelist"
+        ),
         choices=["YAML", "INI", "F90"],
     )
     parser.add_argument(
         "--config_file_type",
-        help="If provided, will convert provided config file to provided file type.\
-            Accepts YAML, bash/ini or namelist",
+        help=(
+            "If provided, will convert provided config file to provided file type."
+            "Accepts YAML, bash/ini or namelist"
+        ),
         choices=["YAML", "INI", "F90"],
     )
     parser.add_argument(
         "--output_file_type",
-        help="If provided, will convert provided output file to provided file type.\
-            Accepts YAML, bash/ini or namelist",
+        help=(
+            "If provided, will convert provided output file to provided file type."
+            "Accepts YAML, bash/ini or namelist"
+        ),
         choices=["YAML", "INI", "F90", "FieldTable"],
     )
     group.add_argument(

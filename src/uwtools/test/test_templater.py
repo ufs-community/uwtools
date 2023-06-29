@@ -18,7 +18,6 @@ def test_mutually_exclusive_args():
     """
     Test that mutually-exclusive -q/-d args are rejected.
     """
-
     with raises(argparse.ArgumentError):
         argv = ["test", "-i", fixture_path("fruit_config.yaml"), "-q", "-d"]
         with patch.object(templater.sys, "argv", argv):
@@ -29,7 +28,6 @@ def test_set_template_all_good():
     """
     Confirm success using namelist input and shell config.
     """
-
     argv = ["test", "-i", fixture_path("nml.IN"), "-c", fixture_path("fruit_config.sh"), "-d"]
     with patch.object(templater.sys, "argv", argv):
         templater.main()
@@ -39,7 +37,6 @@ def test_set_template_bad_config_suffix(tmp_path):
     """
     Test that a bad config filename suffix is rejected.
     """
-
     badfile = str(tmp_path / "foo.shx")  # .shx is a bad suffix
     with open(badfile, "w", encoding="utf-8"):
         pass  # create empty file
@@ -53,7 +50,6 @@ def test_set_template_command_line_config(capsys):
     """
     Test behavior when values are provided on the command line.
     """
-
     infile = fixture_path("nml.IN")
     expected = f"""
 Running with args:
@@ -89,7 +85,6 @@ def test_set_template_dry_run(capsys):
     """
     Test dry-run output of ingest namelist tool.
     """
-
     infile = fixture_path("nml.IN")
     expected = f"""
 Running with args:
@@ -127,7 +122,6 @@ def test_set_template_listvalues(capsys):
     """
     Test "values needed" output of ingest namelist tool.
     """
-
     infile = fixture_path("nml.IN")
     expected = f"""
 Running with args:
@@ -221,7 +215,6 @@ def test_set_template_yaml_config(tmp_path):
     Test that providing a YAML file with necessary settings works to fill in
     the Jinja template. Test the writing mechanism, too.
     """
-
     outfile = str(tmp_path / "test_render_from_yaml.nml")
 
     # Patch environment to ensure that values are being taken from the config
@@ -246,7 +239,6 @@ def test_set_template_yaml_config_model_configure(tmp_path):
     """
     Test behavior when reading a simple model_configure file.
     """
-
     outfile = f"{tmp_path}/test_render_from_yaml.nml"
     argv = [
         "test",
