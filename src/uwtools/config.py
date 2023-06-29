@@ -13,6 +13,7 @@ import logging
 import os
 import re
 import sys
+from typing import Optional
 
 import f90nml
 import jinja2
@@ -32,7 +33,7 @@ class Config(collections.UserDict):
     Attributes
     ----------
 
-    config_path : Path
+    config_path
         The file path to the configuration file to be parsed.
 
     Methods
@@ -62,14 +63,15 @@ class Config(collections.UserDict):
         present in the second dictionary.
     """
 
-    def __init__(self, config_path=None, log_name=None):
+    def __init__(self, config_path: Optional[str] = None, log_name: Optional[str] = None) -> None:
         """
         Parameters
         ----------
-        config_path : Path (See Above)
-
+        config_path
+            See class-level docstring
+        log_name
+            Name to be used in log messages
         """
-
         super().__init__()
         self.config_path = config_path
         self.log = logging.getLogger(log_name)
@@ -146,6 +148,7 @@ class Config(collections.UserDict):
         cfg = {}
         for filepath in filepaths:
             if not os.path.isabs(filepath):
+                assert self.config_path is not None
                 filepath = os.path.join(os.path.dirname(self.config_path), filepath)
             cfg.update(self._load(config_path=filepath))
         return cfg
@@ -383,7 +386,7 @@ class YAMLConfig(Config):
 
     """
 
-    def __init__(self, config_path=None, log_name=None):
+    def __init__(self, config_path: Optional[str] = None, log_name: Optional[str] = None) -> None:
         """Load the file and update the dictionary"""
 
         super().__init__(config_path, log_name)
@@ -458,7 +461,7 @@ class F90Config(Config):
 
     """Concrete class to handle Fortran namelist files."""
 
-    def __init__(self, config_path=None, log_name=None):
+    def __init__(self, config_path: Optional[str] = None, log_name: Optional[str] = None) -> None:
         """Load the file and update the dictionary"""
         super().__init__(config_path, log_name)
 
@@ -492,13 +495,19 @@ class INIConfig(Config):
 
     """Concrete class to handle INI config files."""
 
-    def __init__(self, config_path=None, log_name=None, space_around_delimiters=True):
-        """Load the file and update the dictionary
+    def __init__(
+        self,
+        config_path: Optional[str] = None,
+        log_name: Optional[str] = None,
+        space_around_delimiters: bool = True,
+    ):
+        """
+        Load the file and update the dictionary
 
         Parameters
         ----------
-        space_around_delimiters : bool. True corresponds to INI format,
-             while False is necessary for bash configuration files
+        space_around_delimiters
+            Should be True for INI format, False for bash
         """
         super().__init__(config_path, log_name)
         self.space_around_delimiters = space_around_delimiters
@@ -550,7 +559,7 @@ class FieldTableConfig(YAMLConfig):
     """This class exists to write out a field_table format given
     that its configuration has been set by an input YAML file."""
 
-    def __init__(self, config_path=None, log_name=None):
+    def __init__(self, config_path: Optional[str] = None, log_name: Optional[str] = None) -> None:
         """Load the file and update the dictionary"""
         super().__init__(config_path, log_name)
 

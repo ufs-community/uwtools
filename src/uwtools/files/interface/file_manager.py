@@ -15,8 +15,8 @@ class FileManager(ABC):
         """copies source to destination"""
         raise NotImplementedError
 
-    @classmethod
-    def get_file_manager(cls, _type: Prefixes):
+    @staticmethod
+    def get_file_manager(_type: Prefixes):
         """returns a file manager with source and destination"""
         _map = {
             Prefixes.UNIX: UnixFileManager,

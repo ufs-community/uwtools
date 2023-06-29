@@ -104,28 +104,24 @@ class Logger:
         """
         return self._logger
 
-    @classmethod
-    def add_handlers(cls, logger: logging.Logger, handlers: List[logging.Handler]):
+    @staticmethod
+    def add_handlers(logger: logging.Logger, handlers: List[logging.Handler]) -> logging.Logger:
         """
-        Add a list of handlers to a logger
+        Returns the given logger with the given handlers added.
+
         Parameters
         ----------
         logger
-        logger
+            The logger to add handlers to
         handlers
-
-        Returns
-        -------
-        logger
+            The handlers to add to the logger
         """
         for handler in handlers:
             logger.addHandler(handler)
-
         return logger
 
-    @classmethod
+    @staticmethod
     def add_stream_handler(
-        cls,
         level: str = DEFAULT_LEVEL,
         fmt: str = DEFAULT_FORMAT,
         colored_log: bool = False,
@@ -140,9 +136,8 @@ class Logger:
         handler.setFormatter(ColoredFormatter(fmt) if colored_log else logging.Formatter(fmt))
         return handler
 
-    @classmethod
+    @staticmethod
     def add_file_handler(
-        cls,
         logfile_path: Union[str, Path],
         level: str = DEFAULT_LEVEL,
         fmt: str = DEFAULT_FORMAT,

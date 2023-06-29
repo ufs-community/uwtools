@@ -1,6 +1,7 @@
 """
 Job Scheduling
 """
+from __future__ import annotations
 
 import logging
 import re
@@ -54,12 +55,13 @@ class JobCard(UserList):
         return str(self.content())
 
     def content(self, line_separator: str = "\n") -> str:
-        """returns the formatted content of the job cards
+        """
+        Returns the formatted content of the job cards.
 
         Parameters
         ----------
-        line_separator : str
-            the character or characters to join the content lines on.
+        line_separator
+            The character or characters to join the content lines with
         """
         return line_separator.join(self)
 
@@ -137,33 +139,30 @@ class JobScheduler(UserDict):
 
         return JobCard(sorted(processed))
 
-    @classmethod
-    def get_scheduler(cls, props: Mapping):
+    @staticmethod
+    def get_scheduler(props: Mapping) -> JobScheduler:
         """
         Returns the appropriate scheduler.
 
         Parameters
         ----------
-        props : dict
-            must contain a scheduler key or raise KeyError
-
-        TODO: map_schedulers should be hoisted up out of the method
+        props
+            Must contain a 'scheduler' key or a KeyError will be raised
         """
-
         if "scheduler" not in props:
             raise KeyError(f"No scheduler defined in props: [{', '.join(props.keys())}]")
         name = props["scheduler"]
+        logging.debug("Getting '%s' scheduler", name)
         schedulers = {"slurm": Slurm, "pbs": PBS, "lsf": LSF}
-        scheduler = schedulers[name]
-        logging.debug("Getting %s scheduler", scheduler)
         try:
-            return scheduler(props)
+            scheduler = schedulers[name]
         except KeyError as error:
             raise KeyError(
                 f"{name} is not a supported scheduler"
                 + "Currently supported schedulers are:\n"
                 + f'{" | ".join(schedulers.keys())}"'
             ) from error
+        return scheduler(props)
 
 
 class Slurm(JobScheduler):

@@ -5,6 +5,7 @@ Template classes
 
 import logging
 import os
+from typing import Optional
 
 from jinja2 import BaseLoader, Environment, FileSystemLoader, meta
 
@@ -60,15 +61,22 @@ class J2Template:
 
     """
 
-    def __init__(self, configure_obj, template_path=None, template_str=None, **kwargs):
+    def __init__(
+        self,
+        configure_obj: dict,
+        template_path: Optional[str] = None,
+        template_str: Optional[str] = None,
+        **kwargs,
+    ) -> None:
         """
         Parameters
         ----------
-        configure_obj : dict (See above)
-        template_path : Path
+        configure_obj
+            See class-level docstring
+        template_path
             Path to a Jinja2 template file
-        template_str : str
-            A Jinja2 template string
+        template_str
+            A Jinja2 template
 
         Keyword Arguments
         -----------------
@@ -76,7 +84,6 @@ class J2Template:
             A dictionary of arguments to pass to the J2 loader
         log_name : str
             The name of the logging object to be used.
-
         """
 
         self.log = logging.getLogger(kwargs.get("log_name"))
@@ -94,14 +101,14 @@ class J2Template:
             # Error here. Must provide a template
             pass
 
-    def dump_file(self, output_path):
+    def dump_file(self, output_path: str) -> None:
         """
-        Write rendered template to the output_path provided
+        Write rendered template to the path provided.
 
         Parameters
         ----------
-        output_path : Path
-
+        output_path
+            Path to file to write
         """
         msg = f"Writing rendered template to output file: {output_path}"
         self.log.debug(msg)
@@ -151,6 +158,7 @@ class J2Template:
         if self.template_str is not None:
             j2_parsed = self._j2env.parse(self.template_str)
         else:
+            assert self.template_path is not None
             with open(self.template_path, encoding="utf-8") as file_:
                 j2_parsed = self._j2env.parse(file_.read())
         return meta.find_undeclared_variables(j2_parsed)
