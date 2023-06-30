@@ -125,10 +125,9 @@ def set_template(argv):
     for name, val in user_args.__dict__.items():
         if name not in ["config"]:
             log.info("{name:>15s}: {val}".format(name=name, val=val))
-    log.info("To re-run with these settings: ")
     for arg in argv:
-        cli_arg = cli_arg + arg
-    log.info(f"""{name}.py {cli_arg}""") 
+        cli_arg = cli_arg + " " + arg
+    log.info(f"""re-run settings: templater.py {cli_arg}""")
     log.info(f"""{('-' * 70)}""")
     log.info(f"""{('-' * 70)}""")
 
