@@ -31,6 +31,11 @@ def test_Unix():
     assert repr(path).endswith("files/a.txt/>")
 
 
+def test_Unix_bad_path_type():
+    with raises(TypeError):
+        Unix(path=None)  # type: ignore
+
+
 def test_Unix_validation():
     with raises(AttributeError) as error:
         Unix("ile://tests/fixtures/files/a.txt")
@@ -40,4 +45,4 @@ def test_Unix_validation():
     assert "prefix not found in: [//tests/fixtures/files/a.txt]" in str(error)
     with raises(FileNotFoundError) as error:
         Unix("file://ests/fixtures/files/a.txt")
-    assert "File not found [file://ests/fixtures/files/a.txt]" in str(error)
+    assert "File not found: file://ests/fixtures/files/a.txt" in str(error)

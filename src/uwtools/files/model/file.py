@@ -18,7 +18,7 @@ PREFIX_PATTERN = r"\S.*:\/\/"
 
 
 class File(ABC):
-    """represents a file"""
+    """Represents a file."""
 
     def __init__(self, path: str):
         self._path = path
@@ -31,20 +31,17 @@ class File(ABC):
         return f"<{self.__class__.__name__} {self._path}/>"
 
     def validate(self) -> None:
-        """validates the File"""
-        path_is_string = isinstance(self.path, str)
-        prefix_is_set = self.prefix
-
-        if not path_is_string:
-            raise TypeError(f"Path expects a str, and is type {type(self.path)}.")
-        if not prefix_is_set:
-            raise TypeError("Prefix could not be set by File class")
+        """Validates the File."""
+        if not isinstance(self._path, str):
+            raise TypeError("Argument 'path' must be type str but is type %s" % type(self._path))
+        if not self.prefix:
+            raise TypeError("Prefix could not be set")
         if not self.exists:
-            raise FileNotFoundError(f"File not found [{self._path}]")
+            raise FileNotFoundError("File not found: %s" % self._path)
 
     @property
     def prefix(self) -> Prefixes:
-        """returns the prefix"""
+        """Returns the prefix."""
         result = re.match(PREFIX_PATTERN, self._path)
         prefix = None if result is None else result.group(0)
 
