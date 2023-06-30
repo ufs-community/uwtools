@@ -41,7 +41,7 @@ class SRWExperiment(Facade): # pragma: no cover
         Load the configuration file.
 
         '''
-    
+
         import_config_file = getattr(import_module(self.modname), "load_config")
         import_config_file(config_file)
 
