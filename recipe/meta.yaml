@@ -21,11 +21,10 @@ requirements:
     - pyyaml 6.0.*
     - {{ python }}
 test:
-  source_files:
-    - pyproject.toml
-    - setup.py
-    - tests
-    - uwtools
+#   source_files:
+#     - pyproject.toml
+#     - setup.py
+#     - uwtools
   requires:
     - black
     - coverage

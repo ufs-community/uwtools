@@ -10,7 +10,7 @@ import jsonschema
 import yaml
 from pytest import fixture, raises
 
-from tests.support import fixture_path
+from uwtools.tests.support import fixture_path
 
 
 def validate(subpath, schema):

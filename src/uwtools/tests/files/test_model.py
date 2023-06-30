@@ -4,9 +4,9 @@ from glob import glob
 
 from pytest import raises
 
-from tests.support import fixture_path, fixture_uri
 from uwtools.files import S3, Unix
 from uwtools.files.model import file
+from uwtools.tests.support import fixture_path, fixture_uri
 
 
 def test_dir_file():

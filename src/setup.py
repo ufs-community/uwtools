@@ -23,6 +23,9 @@ setup(
         ]
     },
     name=name_conda,
-    packages=find_packages(include=[name_py, "%s.*" % name_py]),
+    packages=find_packages(
+        exclude=["%s.tests" % name_py],
+        include=[name_py, "%s.*" % name_py],
+    ),
     version=meta["version"],
 )

@@ -49,7 +49,7 @@ def fixture_pathobj(suffix: str = "") -> Path:
         files. The prefix path to the resources files is known to Python and
         varies based on installation location.
     """
-    with resources.as_file(resources.files("tests.fixtures")) as prefix:
+    with resources.as_file(resources.files("uwtools.tests.fixtures")) as prefix:
         path = prefix / suffix
     return path
 

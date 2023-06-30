@@ -1,7 +1,7 @@
 #!/bin/bash -eu
 
 cli() {
-  echo Testing CLI programs:
+  echo Testing CLI programs...
   (
     set -eu
     clis=(
@@ -40,19 +40,19 @@ unittest() {
   echo Running unit tests...
   (
     set -eu
-    testdir=$srcdir/tests
-    export PYTHONPATH=$testdir
-    coverage run -m pytest -vv $testdir
-    coverage report --omit="$testdir/*"
+    coverage run -m pytest -vv .
+    coverage report --omit="*/tests/*"
   )
   echo OK
 }
 
-test "${CONDA_BUILD:-}" = 1 && srcdir=$PWD || srcdir=$(realpath $(dirname $0)/../src)
-pyfiles=( $(find $srcdir -type f -name "*.py") )
+test "${CONDA_BUILD:-}" = 1 && cd ../test_files || cd $(realpath $(dirname $0)/../src)
+pyfiles=( $(find . -type f -name "*.py") )
 if [[ -n "${1:-}" ]]; then
-  $1 # run single specified code-quality tool
+  # Run single specified code-quality tool.
+  $1
 else
+  # Run all code-quality tools.
   lint
   typecheck
   unittest

@@ -6,9 +6,9 @@ Tests for forecast driver
 
 from pytest import fixture, raises
 
-from tests.support import compare_files, fixture_path
 from uwtools import config
 from uwtools.drivers.forecast import FV3Forecast
+from uwtools.tests.support import compare_files, fixture_path
 
 
 def test_create_config(tmp_path):

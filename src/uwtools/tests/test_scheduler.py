@@ -2,9 +2,9 @@
 
 from pytest import fixture, raises
 
-from tests.support import fixture_path
 from uwtools import config
 from uwtools.scheduler import JobScheduler
+from uwtools.tests.support import fixture_path
 
 # LFS tests
 
