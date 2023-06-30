@@ -1,6 +1,5 @@
 # pylint: disable=missing-function-docstring
 
-
 import shutil
 from unittest.mock import patch
 

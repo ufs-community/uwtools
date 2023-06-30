@@ -153,13 +153,13 @@ def main():
     undeclared_variables = template.undeclared_variables
 
     if user_args.values_needed:
-        # Gather the undefined template variables
+        # Gather the undefined template variables.
         log.info("Values needed for this template are:")
         for var in sorted(undeclared_variables):
             log.info(var)
         return
 
-    # Check for missing values
+    # Check for missing values.
     missing = []
     for var in undeclared_variables:
         if var not in cfg.keys():
@@ -174,16 +174,11 @@ def main():
         raise ValueError(msg)
 
     if user_args.dry_run:
-        if user_args.outfile:
-            log.info(
-                r"warning file {outfile} ".format(outfile=user_args.outfile),
-                r"not written when using --dry_run",
-            )
-        # apply switch to allow user to view the results of rendered template
-        # instead of writing to disk
-        # Render the template with the specified config object
+        # Apply switch to allow user to view the results of rendered template
+        # instead of writing to disk. Render the template with the specified
+        # config object.
         rendered_template = template.render_template()
         log.info(rendered_template)
     else:
-        # write out rendered template to file
+        # Write out rendered template to file.
         template.dump_file(user_args.outfile)
