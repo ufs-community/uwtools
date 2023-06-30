@@ -62,7 +62,7 @@ class Facade(ABC): # pragma: no cover
         '''
 
     @abstractmethod
-    def validate_config(self):
+    def validate_config(self, config_file):
         '''
         Validate the configuration file.
 
