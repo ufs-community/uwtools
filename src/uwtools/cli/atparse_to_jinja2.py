@@ -5,12 +5,13 @@ via YAML or environment variables.
 
 import re
 import sys
-from argparse import ArgumentParser, HelpFormatter
+from argparse import ArgumentParser, HelpFormatter, Namespace
+from typing import List
 
 from uwtools.utils import cli_helpers
 
 
-def parse_args(args):
+def parse_args(args: List[str]) -> Namespace:
     """
     Function maintains the arguments accepted by this script. Please see
     Python's argparse documentation for more information about settings of each
@@ -45,7 +46,7 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def atparse_replace(atline):
+def atparse_replace(atline: str) -> str:
     """Function to replace @[] with {{}} in a line of text."""
 
     while re.search(r"\@\[.*?\]", atline):
@@ -60,17 +61,15 @@ def atparse_replace(atline):
     return atline
 
 
-def main():
+def main() -> None:
     """Main section for converting the template file"""
 
-    user_args = parse_args(sys.argv[1:])
-    with open(user_args.input_template, "rt", encoding="utf-8") as atparsetemplate:
-        if user_args.dry_run:
-            if user_args.outfile:
-                print(f"warning file {user_args.outfile} not written when using --dry_run")
+    args = parse_args(sys.argv[1:])
+    with open(args.input_template, "rt", encoding="utf-8") as atparsetemplate:
+        if args.dry_run:
             for line in atparsetemplate:
                 print(atparse_replace(line))
         else:
-            with open(user_args.outfile, "wt", encoding="utf-8") as jinja2template:
+            with open(args.outfile, "wt", encoding="utf-8") as jinja2template:
                 for line in atparsetemplate:
                     jinja2template.write(atparse_replace(line))
