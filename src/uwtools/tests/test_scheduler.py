@@ -2,9 +2,7 @@
 
 from pytest import fixture, raises
 
-from uwtools import config
 from uwtools.scheduler import JobScheduler
-from uwtools.tests.support import fixture_path
 
 # LFS tests
 
@@ -263,21 +261,32 @@ def test_slurm_5(slurm_props):
 # Generic tests using PBS support.
 
 
-def test_scheduler_dot_notation():
-    props = config.YAMLConfig(fixture_path("simple2.yaml"))
-    js = JobScheduler.get_scheduler(props)
-    assert js.account == "user_account"
+def test_scheduler_bad_attr(pbs_props):
+    js = JobScheduler.get_scheduler(pbs_props)
+    with raises(AttributeError):
+        assert js.bad_attr
+
+
+def test_scheduler_bad_scheduler():
+    with raises(KeyError) as e:
+        JobScheduler.get_scheduler({"scheduler": "FOO"})
+    assert "FOO is not a supported scheduler" in str(e.value)
+
+
+def test_scheduler_dot_notation(pbs_props):
+    js = JobScheduler.get_scheduler(pbs_props)
+    assert js.account == "account_name"
 
 
 def test_scheduler_prop_not_defined_raises_key_error(pbs_props):
     del pbs_props["scheduler"]
-    with raises(KeyError) as error:
+    with raises(KeyError) as e:
         JobScheduler.get_scheduler(pbs_props)
-        assert "no scheduler defined in props" in error.value
+    assert "No scheduler defined in props" in str(e.value)
 
 
 def test_scheduler_raises_exception_when_missing_required_attrs(pbs_props):
     del pbs_props["account"]
-    with raises(ValueError) as error:
+    with raises(ValueError) as e:
         JobScheduler.get_scheduler(pbs_props)
-        assert "missing required attributes: [account]" in error.value
+    assert "Missing required attributes: [account]" in str(e.value)
