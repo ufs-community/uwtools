@@ -64,8 +64,7 @@ def manager(argv, log=None): # pragma: no cover
     experiment_class = getattr(experiment, f"{user_args.forecast_app}Experiment")
     managed_experiment = experiment_class(user_args.config_file)
 
-    managed_experiment.load_config()
-    managed_experiment.create_experiment()
+    managed_experiment()
 
 
 if __name__ == '__main__':
