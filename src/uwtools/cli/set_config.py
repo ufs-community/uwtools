@@ -81,17 +81,17 @@ def parse_args(args):
     optional.add_argument(
         "--config-file-type",
         help="Convert provided config file to provided file type.",
-        choices=["YAML", "INI", "F90"],
+        choices=["F90", "INI", "YAML"],
     )
     optional.add_argument(
         "--input-file-type",
         help="Convert provided input file to provided file type.",
-        choices=["YAML", "INI", "F90"],
+        choices=["F90", "INI", "YAML"],
     )
     optional.add_argument(
         "--output-file-type",
         help="Convert provided output file to provided file type.",
-        choices=["YAML", "INI", "F90", "FieldTable"],
+        choices=["F90", "FieldTable", "INI", "YAML"],
     )
     optional.add_argument(
         "--show-format",
@@ -111,7 +111,7 @@ def parse_args(args):
     # Validate arguments.
 
     if parsed.show_format and not parsed.outfile:
-        raise ArgumentError(None, "Option --show_format requires --outfile")
+        raise ArgumentError(None, "Option --show-format requires --outfile")
 
     if parsed.quiet and parsed.dry_run:
         raise ArgumentError(None, "Specifying --quiet will suppress --dry-run output")
