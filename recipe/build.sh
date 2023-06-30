@@ -7,4 +7,4 @@ rm -rf build
 dst=../test_files
 mkdir -pv $dst
 mv -v $PKG_NAME $dst/
-cp -v $RECIPE_DIR/../pyproject.toml $dst/
+cp -v $SRC_DIR/pyproject.toml $dst/
