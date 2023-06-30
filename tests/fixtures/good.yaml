@@ -1,0 +1,7 @@
+platform:
+  WORKFLOW_MANAGER: rocoto
+  NCORES_PER_NODE: 40
+  SCHED: slurm
+
+task_get_da_obs:
+  OBS_SUFFIX: grib2
