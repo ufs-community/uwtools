@@ -5,7 +5,7 @@ Basic setuptools configuration
 import json
 import os
 
-from setuptools import setup  # type: ignore
+from setuptools import find_packages, setup  # type: ignore
 
 with open(os.path.join(os.environ["RECIPE_DIR"], "meta.json"), "r", encoding="utf-8") as f:
     meta = json.load(f)
@@ -23,6 +23,6 @@ setup(
         ]
     },
     name=name_conda,
-    packages=[name_py],
+    packages=find_packages(include=[name_py, "%s.*" % name_py]),
     version=meta["version"],
 )
