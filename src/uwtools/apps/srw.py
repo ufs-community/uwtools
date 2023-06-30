@@ -49,7 +49,7 @@ class SRW210(Facade): # pragma: no cover
             logging.critical(msg)
             raise ValueError(msg)
 
-    def validate_config(self):
+    def validate_config(self, config_file):
         '''
         Validate the configuration file.
 

@@ -38,7 +38,7 @@ class UWforSRW(Facade): # pragma: no cover
         config_obj = config.YAMLConfig(config_file)
         config_obj.dump_file('config.yaml')
 
-    def validate_config(self):
+    def validate_config(self, config_file):
         '''
         Validate the configuration file.
 
