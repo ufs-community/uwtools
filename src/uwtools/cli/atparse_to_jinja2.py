@@ -17,6 +17,7 @@ def parse_args(args: List[str]) -> Namespace:
     Python's argparse documentation for more information about settings of each
     argument.
     """
+    args = args or ["--help"]
     parser = ArgumentParser(
         description="Convert an atparse template to Jinja2.",
         formatter_class=lambda prog: HelpFormatter(prog, max_help_position=8),

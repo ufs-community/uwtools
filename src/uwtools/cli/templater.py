@@ -22,7 +22,7 @@ def parse_args(args):
     Python's argparse documentation for more information about settings of each
     argument.
     """
-
+    args = args or ["--help"]
     parser = ArgumentParser(
         description="Update a Jinja2 template with user-defined settings.",
         formatter_class=lambda prog: HelpFormatter(prog, max_help_position=8),
