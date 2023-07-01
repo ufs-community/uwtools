@@ -12,7 +12,7 @@ from uwtools.cli import set_config
 
 @fixture
 def args(tmp_path):
-    for fn in ("in.yaml", "cfg.yaml", "log", "out.yaml"):
+    for fn in ("in.yaml", "cfg.yaml", "out.yaml"):
         with (tmp_path / fn).open("w"):
             pass
     return {
@@ -23,17 +23,17 @@ def args(tmp_path):
     }
 
 
-@pytest.mark.skip()
 @patch.object(set_config.cli_helpers, "setup_logging")
 @patch.object(set_config.config, "create_config_obj")
 def test_main(create_config_obj, setup_logging, args):
-    with patch.object(set_config.sys, "argv", ["test", *args]):
+    arglist = list(chain(*args.items()))
+    with patch.object(set_config.sys, "argv", ["test", *arglist]):
         set_config.main()
         setup_logging.assert_called_once_with(
-            log_file="log", log_name="set_config", quiet=False, verbose=False
+            log_file=args["--log-file"], log_name="set_config", quiet=False, verbose=False
         )
         create_config_obj.assert_called_once_with(
-            user_args=set_config.parse_args(args), log=setup_logging()
+            user_args=set_config.parse_args(arglist), log=setup_logging()
         )
 
 
