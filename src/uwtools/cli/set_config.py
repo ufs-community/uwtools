@@ -126,10 +126,9 @@ def main():
     Main entry-point function.
     """
     cli_args = parse_args(sys.argv[1:])
-    LOG_NAME = "set_config"
     cli_log = cli_helpers.setup_logging(
         log_file=cli_args.log_file,
-        log_name=LOG_NAME,
+        log_name="set_config",
         quiet=cli_args.quiet,
         verbose=cli_args.verbose,
     )

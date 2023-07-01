@@ -553,14 +553,14 @@ def test_show_format():
             "YAML",
         ]
     )
-    with patch.object(builtins, "help") as mock_help:
+    with patch.object(builtins, "help") as help_:
         # Since file types match, help() is not called:
         config.create_config_obj(args)
-        mock_help.assert_not_called()
+        help_.assert_not_called()
         # But help() is called when the input is YAML and the output FieldTable:
         args.output_file_type = "FieldTable"
         config.create_config_obj(args)
-        mock_help.assert_called_once()
+        help_.assert_called_once()
 
 
 def test_transform_config(tmp_path):

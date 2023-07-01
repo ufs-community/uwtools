@@ -49,8 +49,8 @@ def test_handle_existing_rename_failure(exc, assets):
 
 def test_handle_existing_rename_success(assets):
     now, renamed, rundir = assets
-    with patch.object(file_helpers, "dt") as mock_dt:
-        mock_dt.now.return_value = now
+    with patch.object(file_helpers, "dt") as dt:
+        dt.now.return_value = now
         file_helpers.handle_existing(run_directory=rundir, exist_act="rename")
     assert renamed.is_dir()
     assert not rundir.is_dir()
