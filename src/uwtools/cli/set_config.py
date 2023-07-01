@@ -7,7 +7,8 @@ This utility creates a command line interface for handling config files.
 import sys
 from argparse import ArgumentError, ArgumentParser, HelpFormatter
 
-from uwtools import config, exceptions
+from uwtools import config
+from uwtools.exceptions import UWConfigError
 from uwtools.utils import cli_helpers
 
 
@@ -134,5 +135,5 @@ def main():
     )
     try:
         config.create_config_obj(user_args=cli_args, log=cli_log)
-    except exceptions.UWConfigError as e:
+    except UWConfigError as e:
         sys.exit(str(e))

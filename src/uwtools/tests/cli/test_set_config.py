@@ -28,6 +28,7 @@ def args(tmp_path):
 def test_main(create_config_obj, setup_logging, args):
     arglist = list(chain(*args.items()))
     with patch.object(set_config.sys, "argv", ["test", *arglist]):
+        # Test success:
         set_config.main()
         setup_logging.assert_called_once_with(
             log_file=args["--log-file"], log_name="set_config", quiet=False, verbose=False
@@ -35,6 +36,11 @@ def test_main(create_config_obj, setup_logging, args):
         create_config_obj.assert_called_once_with(
             user_args=set_config.parse_args(arglist), log=setup_logging()
         )
+        # Test failure:
+        create_config_obj.side_effect = set_config.UWConfigError()
+        with patch.object(set_config.sys, "exit") as exit_:
+            set_config.main()
+            assert exit_.called_once_with("")
 
 
 def test_parse_args_base(args):
