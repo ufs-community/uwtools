@@ -21,7 +21,7 @@ from pytest import fixture, raises
 
 from uwtools import config, exceptions, logger
 from uwtools.cli.set_config import parse_args as parse_config_args
-from uwtools.tests.support import compare_files, fixture_path, line_in_lines, msg_in_caplog_records
+from uwtools.tests.support import compare_files, fixture_path, line_in_lines, msg_in_caplog
 from uwtools.utils import cli_helpers
 
 # Helpers
@@ -140,7 +140,7 @@ def test_compare_config(fmt, salad_base, caplog):
     cfgobj.log.setLevel(logging.INFO)
     cfgobj.compare_config(cfgobj, salad_base)
     if fmt in ["F90", "YAML"]:
-        assert msg_in_caplog_records("salad:        how_many:  - 12 + 12", caplog.records)
+        assert msg_in_caplog("salad:        how_many:  - 12 + 12", caplog.records)
     else:
         assert not caplog.records  # #PM# BUT WHY NOT IN INI?
     caplog.clear()
@@ -155,7 +155,7 @@ def test_compare_config(fmt, salad_base, caplog):
         "salad:            size:  - large + None",
         "salad:        how_many:  - None + 12",
     ]:
-        assert msg_in_caplog_records(msg, caplog.records)
+        assert msg_in_caplog(msg, caplog.records)
 
 
 def test_compare_nml(capsys):

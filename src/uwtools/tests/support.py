@@ -103,7 +103,7 @@ def line_in_lines(line: str, lines: List[str]) -> bool:
     return any(x for x in lines if re.match(r"^.*%s$" % re.escape(line), x))
 
 
-def msg_in_caplog_records(msg: str, records: List[LogRecord]) -> bool:
+def msg_in_caplog(msg: str, records: List[LogRecord]) -> bool:
     """
     Determines whether the given message occurs in the given list of log
     records.
