@@ -3,8 +3,6 @@ This file contains the Config file and its subclasses for a variety of
 dicatable file types.
 """
 
-import abc
-import collections
 import configparser
 import copy
 import inspect
@@ -13,6 +11,8 @@ import logging
 import os
 import re
 import sys
+from abc import ABC, abstractmethod
+from collections import OrderedDict, UserDict
 from typing import Optional
 
 import f90nml
@@ -24,7 +24,7 @@ from uwtools.j2template import J2Template
 from uwtools.utils import cli_helpers
 
 
-class Config(collections.UserDict):
+class Config(ABC, UserDict):
 
     """
     This base class provides the interface to methods used to read in
@@ -80,13 +80,13 @@ class Config(collections.UserDict):
         """This method will return configure contents"""
         return json.dumps(self.data)
 
-    @abc.abstractmethod
+    @abstractmethod
     def _load(self, config_path=None):
         """Interface to load a config file given the config_path
         attribute, or optional config_path argument. Returns a dict
         object."""
 
-    @abc.abstractmethod
+    @abstractmethod
     def dump_file(self, output_path):
         """Interface to write a config object to a file at the
         output_path provided."""
@@ -131,11 +131,11 @@ class Config(collections.UserDict):
         Given a dictionary, replace all instances of OrderedDict with a
         regular dictionary.
         """
-        if isinstance(in_dict, collections.OrderedDict):
+        if isinstance(in_dict, OrderedDict):
             in_dict = dict(in_dict)
 
         for sect, keys in in_dict.items():
-            if isinstance(keys, collections.OrderedDict):
+            if isinstance(keys, OrderedDict):
                 in_dict[sect] = dict(keys)
 
     def _load_paths(self, filepaths):
@@ -482,10 +482,10 @@ class F90Config(Config):
 
     def dump_file(self, output_path):
         """Write the dict to a namelist file."""
-        nml = collections.OrderedDict(self.data)
+        nml = OrderedDict(self.data)
         for sect, keys in nml.items():
             if isinstance(keys, dict):
-                nml[sect] = collections.OrderedDict(keys)
+                nml[sect] = OrderedDict(keys)
 
         with open(output_path, "w", encoding="utf-8") as file_name:
             f90nml.Namelist(nml).write(file_name, sort=False)
@@ -525,7 +525,7 @@ class INIConfig(Config):
         # The protected _sections method is the most straightforward way to get
         # at the dict representation of the parse config.
 
-        cfg = configparser.ConfigParser(dict_type=collections.OrderedDict)
+        cfg = configparser.ConfigParser(dict_type=OrderedDict)
         cfg.optionxform = str  # type: ignore
         sections = cfg._sections  # type: ignore # pylint: disable=protected-access
         try:

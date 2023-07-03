@@ -778,3 +778,8 @@ foo: !not_a_constructor bar
         config.YAMLConfig(tmpfile)
     assert "constructor: '!not_a_constructor'" in str(e.value)
     assert "Define the constructor before proceeding" in str(e.value)
+
+
+# def test_Config___repr__():
+
+#         config.Config()
