@@ -367,96 +367,6 @@ Define the filter before proceeding.
         return 0
 
 
-class YAMLConfig(Config):
-
-    """
-    Concrete class to handle YAML configure files.
-
-    Attributes
-    ----------
-
-    _yaml_loader : Loader
-        The PyYAML Loader that's been extended with constructors
-
-    Methods
-    -------
-
-    _yaml_include()
-        Static method used to define a constructor function for PyYAML.
-
-    """
-
-    def __init__(self, config_path: Optional[str] = None, log_name: Optional[str] = None) -> None:
-        """Load the file and update the dictionary"""
-
-        super().__init__(config_path, log_name)
-
-        if config_path is not None:
-            self.update(self._load())
-
-    def __repr__(self):
-        """This method will return configure contents"""
-        return yaml.dump(self.data)
-
-    def _load(self, config_path=None):
-        """Load the user-provided YAML config file path into a dict
-        object."""
-
-        loader = self._yaml_loader
-        config_path = config_path or self.config_path
-        with open(config_path, "r", encoding="utf-8") as file_name:
-            try:
-                cfg = yaml.load(file_name, Loader=loader)
-            except yaml.constructor.ConstructorError as e:
-                if e.problem:
-                    if "unhashable" in e.problem:
-                        msg = """
-ERROR:
-The input config file may contain a Jinja2
-templated value at the location listed above.
-Ensure the value is included in quotes.
-""".strip()
-                    else:
-                        constructor = e.problem.split()[-1]
-                        msg = f"""
-ERROR:
-The input config file contains a constructor
-that is not registered with the uwtools package.
-
-constructor: {constructor}
-config file: {config_path}
-
-Define the constructor before proceeding.
-""".strip()
-                else:
-                    msg = str(e)
-                self.log.exception(msg)
-                raise exceptions.UWConfigError(msg)
-
-        self.from_ordereddict(cfg)
-        return cfg
-
-    def dump_file(self, output_path):
-        """Write the dictionary to a YAML file"""
-
-        with open(output_path, "w", encoding="utf-8") as file_name:
-            yaml.dump(self.data, file_name, sort_keys=False)
-
-    def _yaml_include(self, loader, node):
-        """Returns a dictionary that includes the contents of the referenced
-        YAML files, and is used as a contructor method for PyYAML"""
-
-        filepaths = loader.construct_sequence(node)
-        return self._load_paths(filepaths)
-
-    @property
-    def _yaml_loader(self):
-        """Set up the loader with the appropriate constructors."""
-        loader = yaml.SafeLoader
-        loader.add_constructor("!INCLUDE", self._yaml_include)
-        return loader
-
-
 class F90Config(Config):
 
     """Concrete class to handle Fortran namelist files."""
@@ -553,6 +463,96 @@ class INIConfig(Config):
             except AttributeError:
                 for key, value in self.data.items():
                     file_name.write(f"{key}={value}\n")
+
+
+class YAMLConfig(Config):
+
+    """
+    Concrete class to handle YAML configure files.
+
+    Attributes
+    ----------
+
+    _yaml_loader : Loader
+        The PyYAML Loader that's been extended with constructors
+
+    Methods
+    -------
+
+    _yaml_include()
+        Static method used to define a constructor function for PyYAML.
+
+    """
+
+    def __init__(self, config_path: Optional[str] = None, log_name: Optional[str] = None) -> None:
+        """Load the file and update the dictionary"""
+
+        super().__init__(config_path, log_name)
+
+        if config_path is not None:
+            self.update(self._load())
+
+    def __repr__(self):
+        """This method will return configure contents"""
+        return yaml.dump(self.data)
+
+    def _load(self, config_path=None):
+        """Load the user-provided YAML config file path into a dict
+        object."""
+
+        loader = self._yaml_loader
+        config_path = config_path or self.config_path
+        with open(config_path, "r", encoding="utf-8") as file_name:
+            try:
+                cfg = yaml.load(file_name, Loader=loader)
+            except yaml.constructor.ConstructorError as e:
+                if e.problem:
+                    if "unhashable" in e.problem:
+                        msg = """
+ERROR:
+The input config file may contain a Jinja2
+templated value at the location listed above.
+Ensure the value is included in quotes.
+""".strip()
+                    else:
+                        constructor = e.problem.split()[-1]
+                        msg = f"""
+ERROR:
+The input config file contains a constructor
+that is not registered with the uwtools package.
+
+constructor: {constructor}
+config file: {config_path}
+
+Define the constructor before proceeding.
+""".strip()
+                else:
+                    msg = str(e)
+                self.log.exception(msg)
+                raise exceptions.UWConfigError(msg)
+
+        self.from_ordereddict(cfg)
+        return cfg
+
+    def dump_file(self, output_path):
+        """Write the dictionary to a YAML file"""
+
+        with open(output_path, "w", encoding="utf-8") as file_name:
+            yaml.dump(self.data, file_name, sort_keys=False)
+
+    def _yaml_include(self, loader, node):
+        """Returns a dictionary that includes the contents of the referenced
+        YAML files, and is used as a contructor method for PyYAML"""
+
+        filepaths = loader.construct_sequence(node)
+        return self._load_paths(filepaths)
+
+    @property
+    def _yaml_loader(self):
+        """Set up the loader with the appropriate constructors."""
+        loader = yaml.SafeLoader
+        loader.add_constructor("!INCLUDE", self._yaml_include)
+        return loader
 
 
 class FieldTableConfig(YAMLConfig):
