@@ -13,10 +13,13 @@ import os
 import re
 import sys
 from argparse import ArgumentTypeError
+from collections import OrderedDict
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 import pytest
+import yaml
 from pytest import fixture, raises
 
 from uwtools import config, exceptions, logger
@@ -780,6 +783,24 @@ foo: !not_a_constructor bar
     assert "Define the constructor before proceeding" in str(e.value)
 
 
-# def test_Config___repr__():
+@fixture
+def f90_config(tmp_path):
+    path = tmp_path / "cfg.nml"
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("&nl n = 88 /")
+    return path
 
-#         config.Config()
+
+def test_Config___repr__(f90_config, capsys):
+    # Use F90Config subclass to exercise method in abstract base class.
+    print(config.F90Config(config_path=f90_config))
+    assert yaml.safe_load(capsys.readouterr().out)["nl"]["n"] == 88
+
+
+def test_Config_from_ordereddict(f90_config):
+    # Use F90Config subclass to exercise method in abstract base class.
+    d: dict[Any, Any] = OrderedDict([("z", 26), ("a", OrderedDict([("alpha", 1)]))])
+    d = config.F90Config(config_path=f90_config).from_ordereddict(d)
+    for x in d, d["a"]:
+        assert isinstance(x, dict)
+        assert not isinstance(x, OrderedDict)

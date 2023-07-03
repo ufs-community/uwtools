@@ -126,17 +126,17 @@ class Config(ABC, UserDict):
                 msg = f"{sect}: {key:>15}: {keys[key]}"
                 self.log.info(msg)
 
-    def from_ordereddict(self, in_dict):
+    def from_ordereddict(self, in_dict: dict) -> dict:
         """
         Given a dictionary, replace all instances of OrderedDict with a
         regular dictionary.
         """
         if isinstance(in_dict, OrderedDict):
             in_dict = dict(in_dict)
-
         for sect, keys in in_dict.items():
             if isinstance(keys, OrderedDict):
                 in_dict[sect] = dict(keys)
+        return in_dict
 
     def _load_paths(self, filepaths):
         """
@@ -379,16 +379,17 @@ class F90Config(Config):
             self.update(self._load())
             self.parse_include()
 
-    def _load(self, config_path=None):
+    def _load(self, config_path: Optional[str] = None) -> dict:
         """Load the user-provided Fortran namelist path into a dict
         object."""
+        # #PM# THIS SEEMS TO SILENTLY FAIL IF A NAMELIST IN THE FILE IS INVALID.
         config_path = config_path or self.config_path
-        with open(config_path, "r", encoding="utf-8") as file_name:
-            cfg = f90nml.read(file_name).todict(complex_tuple=False)
-
-        cfg = dict(cfg)
-        self.from_ordereddict(cfg)
-        return cfg
+        # #PM# SINCE config_path in ctor IS ALSO OPTIONAL, THIS ASSERTION IS REQUIRED (PROBABLY BAD)
+        assert config_path is not None
+        with open(config_path, "r", encoding="utf-8") as f:
+            cfg = f90nml.read(f).todict(complex_tuple=False)
+        # #PM# WHY NOT JUST KEEP OrderedDict OBJECT?
+        return self.from_ordereddict(cfg)
 
     def dump_file(self, output_path):
         """Write the dict to a namelist file."""
@@ -444,12 +445,9 @@ class INIConfig(Config):
             with open(config_path, "r", encoding="utf-8") as file_name:
                 cfg.read_string("[top]\n" + file_name.read())
                 ret_cfg = dict(sections.get("top"))
-                self.from_ordereddict(ret_cfg)
+                ret_cfg = self.from_ordereddict(ret_cfg)
                 return ret_cfg
-
-        ret_cfg = dict(sections)
-        self.from_ordereddict(ret_cfg)
-        return ret_cfg
+        return self.from_ordereddict(dict(sections))
 
     def dump_file(self, output_path):
         """Write the dict to an INI file"""
@@ -530,9 +528,7 @@ Define the constructor before proceeding.
                     msg = str(e)
                 self.log.exception(msg)
                 raise exceptions.UWConfigError(msg)
-
-        self.from_ordereddict(cfg)
-        return cfg
+        return self.from_ordereddict(cfg)
 
     def dump_file(self, output_path):
         """Write the dictionary to a YAML file"""
