@@ -4,6 +4,8 @@
 Tests for forecast driver
 """
 
+from unittest.mock import patch
+
 from pytest import fixture, raises
 
 from uwtools import config
@@ -86,6 +88,28 @@ def test_create_field_table_without_base_file(create_field_table_assets, tmp_pat
     expected = fixture_path("field_table_from_input.FV3_GFS")
     forecast_obj.create_field_table(update_obj, outfldtbl_file)
     assert compare_files(expected, outfldtbl_file)
+
+
+def test_create_directory_structure_bad_existing_act():
+    with raises(ValueError):
+        FV3Forecast().create_directory_structure(run_directory="/some/path", exist_act="foo")
+
+
+def test_create_model_config(tmp_path):
+    basefile = str(tmp_path / "base.yaml")
+    infile = str(tmp_path / "in.yaml")
+    outfile = str(tmp_path / "out.yaml")
+    for path in infile, basefile:
+        with open(path, "w", encoding="utf-8"):
+            pass
+    with patch.object(config, "create_config_obj") as create_config_obj:
+        FV3Forecast().create_model_config(
+            config_file=infile, outconfig_file=outfile, base_file=basefile
+        )
+    user_args = create_config_obj.call_args.args[0]
+    assert user_args.config_file == infile
+    assert user_args.input_base_file == basefile
+    assert user_args.outfile == outfile
 
 
 @fixture
