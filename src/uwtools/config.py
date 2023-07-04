@@ -13,7 +13,7 @@ import re
 import sys
 from abc import ABC, abstractmethod
 from collections import OrderedDict, UserDict
-from typing import Optional
+from typing import Optional, Union
 
 import f90nml
 import jinja2
@@ -289,11 +289,16 @@ Define the filter before proceeding.
             prev = copy.deepcopy(self.data)
 
     @logger.verbose()
-    def str_to_type(self, str_):
+    def str_to_type(self, str_: str) -> Union[bool, float, int, str]:
         """Check if the string contains a float, int, boolean, or just
         regular string. This will be used to automatically convert
         environment variables to data types that are more convenient to
         work with."""
+
+        # #PM# CONSIDER MANDATING YAML-COMPATIBLE VALUES (e.g. https://yaml.org/type/bool.html)
+        #      AND VALDATING THEM WITH THE YAML PARSER?
+        # #PM# str_to_type() IS AN INACCURATE NAME: THE VALUES RETURNED ARE OBJECTS, NOT TYPES.
+        #      reify_str() MIGHT BE A GOOD NAME.
 
         str_ = str_.strip("\"'")
         if str_.lower() in ["true", "yes", "yeah"]:
@@ -330,32 +335,29 @@ Define the filter before proceeding.
             else:
                 dict_to_update[key] = new_val
 
-    def iterate_values(self, config_dict, set_var, jinja2_var, empty_var, parent):
+    def iterate_values(self, config_dict, set_var, jinja2_var, empty_var, parent) -> None:
         """
-        Recursively parse which keys in the object are complete (set_var), which keys have
-        unfilled jinja templates (jinja2_var), and which keys are set to empty (empty_var).
+        Recursively parse which keys in the object are complete (set_var), which
+        keys have unfilled jinja templates (jinja2_var), and which keys are set
+        to empty (empty_var).
         """
 
-        if not isinstance(config_dict, dict):
-            return
-
-        for key, val in config_dict.items():
-            if isinstance(val, dict):
-                set_var.append(f"    {parent}{key}")
-                new_parent = f"{parent}{key}."
-                self.iterate_values(val, set_var, jinja2_var, empty_var, new_parent)
-            elif isinstance(val, list):
-                set_var.append(f"    {parent}{key}")
-                for item in val:
-                    self.iterate_values(item, set_var, jinja2_var, empty_var, parent)
-            elif "{{" in str(val) or "{%" in str(val):
-                jinja2_var.append(f"    {parent}{key}: {val}")
-            elif val == "" or val is None:
-                empty_var.append(f"    {parent}{key}")
-
-            else:
-                set_var.append(f"    {parent}{key}")
-        return
+        if isinstance(config_dict, dict):
+            for key, val in config_dict.items():
+                if isinstance(val, dict):
+                    set_var.append(f"    {parent}{key}")
+                    new_parent = f"{parent}{key}."
+                    self.iterate_values(val, set_var, jinja2_var, empty_var, new_parent)
+                elif isinstance(val, list):
+                    set_var.append(f"    {parent}{key}")
+                    for item in val:
+                        self.iterate_values(item, set_var, jinja2_var, empty_var, parent)
+                elif "{{" in str(val) or "{%" in str(val):
+                    jinja2_var.append(f"    {parent}{key}: {val}")
+                elif val == "" or val is None:
+                    empty_var.append(f"    {parent}{key}")
+                else:
+                    set_var.append(f"    {parent}{key}")
 
     def dictionary_depth(self, config_dict):
         """

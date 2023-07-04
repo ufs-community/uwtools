@@ -812,3 +812,13 @@ def test_Config_from_ordereddict(f90_cfgobj):
     for x in d, d["a"]:
         assert isinstance(x, dict)
         assert not isinstance(x, OrderedDict)
+
+
+def test_Config_str_to_type(f90_cfgobj):
+    for x in ["true", "yes", "yeah"]:
+        assert f90_cfgobj.str_to_type(x) is True
+    for x in ["false", "no", "nope"]:
+        assert f90_cfgobj.str_to_type(x) is False
+    assert f90_cfgobj.str_to_type("88") == 88
+    assert f90_cfgobj.str_to_type("3.14") == 3.14
+    assert f90_cfgobj.str_to_type("NA") == "NA"  # no conversion
