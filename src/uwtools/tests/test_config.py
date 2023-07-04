@@ -818,13 +818,13 @@ def test_Config_iterate_values(f90_cfgobj):
     empty_var: List[str] = []
     jinja2_var: List[str] = []
     set_var: List[str] = []
-    d = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: ["b", 99], 6: "string"}
+    d = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
     f90_cfgobj.iterate_values(
         config_dict=d, empty_var=empty_var, jinja2_var=jinja2_var, set_var=set_var, parent="p"
     )
     assert empty_var == ["    p1", "    p2"]
     assert jinja2_var == ["    p3: {{ n }}"]
-    assert set_var == ["    p4", "    p4.a", "    p5", "    p6"]
+    assert set_var == ["    p4", "    p4.a", "    p5", "    pb", "    p6"]
 
 
 def test_Config_str_to_type(f90_cfgobj):

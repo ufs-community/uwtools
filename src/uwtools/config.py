@@ -357,7 +357,7 @@ Define the filter before proceeding.
             elif isinstance(val, list):
                 set_var.append(f"    {parent}{key}")
                 for item in val:
-                    if isinstance(val, dict):
+                    if isinstance(item, dict):
                         self.iterate_values(item, set_var, jinja2_var, empty_var, parent)
             elif "{{" in str(val) or "{%" in str(val):
                 jinja2_var.append(f"    {parent}{key}: {val}")
