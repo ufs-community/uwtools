@@ -1,5 +1,5 @@
 """
-This test checks the validate config tool command line script
+Tests for uwtools.validate_config module
 """
 import os
 import pathlib

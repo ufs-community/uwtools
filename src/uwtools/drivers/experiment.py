@@ -5,7 +5,7 @@ This file contains the concrete facades for a variety of apps.
 import sys
 from importlib import import_module
 
-from .facade import Facade
+from uwtools.drivers.facade import Facade
 
 
 class SRWExperiment(Facade):

@@ -1,12 +1,8 @@
 """
-Set of tests for wrapping experiments with a facade
+Tests for uwtools.drivers.experiment module
 """
-# pylint: disable=undefined-variable, unused-variable, unused-argument, unused-import
-import os
 
 import pytest
-
-uwtools_file_base = os.path.join(os.path.dirname(__file__))
 
 
 @pytest.mark.skip(reason="no way of currently testing this")

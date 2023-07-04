@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# pylint: disable=unused-import, unused-variable, unused-argument
-# remove these disables once implemented
 """
 This file contains the scaffolding for the strangler pattern wrapper. 
 It is a python script that will be called by the user to run the 
@@ -16,9 +13,7 @@ https://github.com/ufs-community/workflow-tools/wiki/
 from abc import ABC, abstractmethod
 
 
-class Facade(ABC):  # pragma: no cover
-    # remove pragma when completed
-
+class Facade(ABC):
     """
     This base class provides the interface to methods used to read in
     a user-provided YAML configuration file, validate it, create the

@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# pylint: disable=unused-import, unused-variable, unused-argument
-# remove these disables once implemented
 """
 This utility creates a command line interface for managing an experiment.
 """
@@ -15,9 +12,7 @@ from uwtools.drivers import experiment
 from uwtools.utils import cli_helpers
 
 
-def parse_args(argv):  # pragma: no cover
-    # remove pragma when completed
-
+def parse_args(argv):
     """
     Function maintains the arguments accepted by this script. Please see
     Python's argparse documentation for more information about settings
@@ -54,7 +49,7 @@ def parse_args(argv):  # pragma: no cover
     return parser.parse_args(argv)
 
 
-def manager(argv, log=None):  # pragma: no cover
+def manager(argv, log=None):
     """
     Defines the user interface for the experiment manager. Parses arguments
     provided by the user and passes to the facade to be run."""

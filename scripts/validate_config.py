@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# pylint: disable=too-many-branches, too-many-statements, too-many-locals
-
 """
 This utility validates a config file using a validation schema.
 """
