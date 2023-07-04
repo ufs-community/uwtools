@@ -1,5 +1,5 @@
 """
-This utility creates a command line interface for running a forecast.
+CLI for running a forecast.
 """
 
 import inspect

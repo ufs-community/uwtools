@@ -1,7 +1,6 @@
 # pylint: disable=duplicate-code
-
 """
-This utility creates a command line interface for handling config files.
+CLI for handling config files.
 """
 
 import sys

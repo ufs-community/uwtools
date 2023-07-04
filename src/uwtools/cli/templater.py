@@ -1,5 +1,4 @@
 # pylint: disable=duplicate-code
-
 """
 This utility renders a Jinja2 template using user-supplied configuration options
 via YAML or environment variables.

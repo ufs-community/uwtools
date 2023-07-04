@@ -1,6 +1,6 @@
 # pylint: disable=duplicate-code
 """
-This utility creates a command line interface for managing an experiment.
+CLI for managing an experiment.
 """
 
 import argparse
