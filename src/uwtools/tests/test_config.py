@@ -784,23 +784,31 @@ foo: !not_a_constructor bar
 
 
 @fixture
-def f90_config(tmp_path):
+def f90_cfgobj(tmp_path):
+    # Use F90Config to exercise methods in Config abstract base class.
     path = tmp_path / "cfg.nml"
     with open(path, "w", encoding="utf-8") as f:
         f.write("&nl n = 88 /")
-    return path
+    return config.F90Config(config_path=path)
 
 
-def test_Config___repr__(f90_config, capsys):
-    # Use F90Config subclass to exercise method in abstract base class.
-    print(config.F90Config(config_path=f90_config))
+def test_Config___repr__(f90_cfgobj, capsys):
+    print(f90_cfgobj)
     assert yaml.safe_load(capsys.readouterr().out)["nl"]["n"] == 88
 
 
-def test_Config_from_ordereddict(f90_config):
-    # Use F90Config subclass to exercise method in abstract base class.
+def test_Config_dereference_unexpected_error(f90_cfgobj):
+    exctype = FloatingPointError
+    with patch.object(config.J2Template, "render_template", side_effect=exctype):
+        with raises(exctype):
+            f90_cfgobj.dereference(ref_dict={"n": "{{ n }}"})
+
+
+def test_Config_from_ordereddict(f90_cfgobj):
     d: dict[Any, Any] = OrderedDict([("z", 26), ("a", OrderedDict([("alpha", 1)]))])
-    d = config.F90Config(config_path=f90_config).from_ordereddict(d)
+    d = f90_cfgobj.from_ordereddict(d)
+    # Assert that every OrderedDict is now just a dict. The second assert is
+    # needed because isinstance(OrderedDict(), dict) is True.
     for x in d, d["a"]:
         assert isinstance(x, dict)
         assert not isinstance(x, OrderedDict)

@@ -178,7 +178,9 @@ class Config(ABC, UserDict):
                 self.update_values(self._load_paths(filepaths))
                 del ref_dict[key]
 
-    def dereference(self, ref_dict=None, full_dict=None):
+    def dereference(
+        self, ref_dict: Optional[dict] = None, full_dict: Optional[dict] = None
+    ) -> None:
         """This method will be used as a method by which any Config
         object can cycle through its key/value pairs recursively,
         replacing Jinja2 templates as necessary."""
@@ -188,9 +190,6 @@ class Config(ABC, UserDict):
 
         if full_dict is None:
             full_dict = self.data
-
-        if not isinstance(ref_dict, dict):
-            return
 
         # Choosing sys._getframe() here because it's more efficient than
         # other inspect methods.
@@ -264,12 +263,12 @@ Define the filter before proceeding.
                             error_catcher[template] = "TypeError"
                         except ZeroDivisionError:
                             error_catcher[template] = "ZeroDivisionError"
-                        except:
+                        except Exception as e:
                             # Fail on any other exception...something is
                             # probably wrong.
                             msg = f"{key}: {template}"
                             self.log.exception(msg)
-                            raise
+                            raise e
 
                         data.append(rendered)
                         for tmpl, err in error_catcher.items():
