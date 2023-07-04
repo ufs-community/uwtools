@@ -43,14 +43,14 @@ class Facade(ABC):
         Link the fix files.
     """
 
-    def __init__(self, argv):
+    def __init__(self):
         """
         Initialize the facade driver.
 
         """
 
     @abstractmethod
-    def load_config(self, config_file):
+    def load_config(self, config_file: str) -> None:
         """
         Load the configuration file. This is the concrete implementation of the
         strangler pattern. This will at first call the old code, but will
@@ -59,28 +59,28 @@ class Facade(ABC):
         """
 
     @abstractmethod
-    def validate_config(self, config_file):
+    def validate_config(self, config_file: str) -> None:
         """
         Validate the configuration file.
 
         """
 
     @abstractmethod
-    def create_experiment(self):
+    def create_experiment(self) -> None:
         """
         Create the experiment directory.
 
         """
 
     @abstractmethod
-    def create_manager_files(self):
+    def create_manager_files(self) -> None:
         """
         Create the manager files.
 
         """
 
     @abstractmethod
-    def link_fix_files(self):
+    def link_fix_files(self) -> None:
         """
         Link the fix files.
 

@@ -5,14 +5,32 @@ This utility creates a command line interface for handling config files.
 """
 
 import sys
-from argparse import ArgumentError, ArgumentParser, HelpFormatter
+from argparse import ArgumentError, ArgumentParser, HelpFormatter, Namespace
+from typing import List
 
 from uwtools import config
 from uwtools.exceptions import UWConfigError
 from uwtools.utils import cli_helpers
 
 
-def parse_args(args):
+def main() -> None:
+    """
+    Main entry-point function.
+    """
+    cli_args = parse_args(sys.argv[1:])
+    cli_log = cli_helpers.setup_logging(
+        log_file=cli_args.log_file,
+        log_name="set_config",
+        quiet=cli_args.quiet,
+        verbose=cli_args.verbose,
+    )
+    try:
+        config.create_config_obj(user_args=cli_args, log=cli_log)
+    except UWConfigError as e:
+        sys.exit(str(e))
+
+
+def parse_args(args: List[str]) -> Namespace:
     """
     Function maintains the arguments accepted by this script. Please see
     Python's argparse documentation for more information about settings of each
@@ -120,20 +138,3 @@ def parse_args(args):
     # Return validated arguments.
 
     return parsed
-
-
-def main():
-    """
-    Main entry-point function.
-    """
-    cli_args = parse_args(sys.argv[1:])
-    cli_log = cli_helpers.setup_logging(
-        log_file=cli_args.log_file,
-        log_name="set_config",
-        quiet=cli_args.quiet,
-        verbose=cli_args.verbose,
-    )
-    try:
-        config.create_config_obj(user_args=cli_args, log=cli_log)
-    except UWConfigError as e:
-        sys.exit(str(e))

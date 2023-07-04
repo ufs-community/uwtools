@@ -17,6 +17,7 @@ setup(
     entry_points={
         "console_scripts": [
             "atparse-to-jinja2 = %s.cli.atparse_to_jinja2:main" % name_py,
+            "experiment-manager = %s.cli.experiment_manager:main" % name_py,
             "run-forecast = %s.cli.run_forecast:main" % name_py,
             "set-config = %s.cli.set_config:main" % name_py,
             "template = %s.cli.templater:main" % name_py,
