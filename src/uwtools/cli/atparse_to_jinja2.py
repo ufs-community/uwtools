@@ -1,28 +1,19 @@
 """
-This utility renders a Jinja2 template using user-supplied configuration options
-via YAML or environment variables.
+CLI for rendering Jinja2 templates
 """
 
-import re
 import sys
 from argparse import ArgumentParser, HelpFormatter, Namespace
 from typing import List
 
-from uwtools.utils import cli_helpers
+from uwtools.utils import atparse_to_jinja2, cli_helpers
 
 
 def main() -> None:
-    """Main section for converting the template file"""
-
     args = parse_args(sys.argv[1:])
-    with open(args.input_template, "rt", encoding="utf-8") as atparsetemplate:
-        if args.dry_run:
-            for line in atparsetemplate:
-                print(atparse_replace(line))
-        else:
-            with open(args.outfile, "wt", encoding="utf-8") as jinja2template:
-                for line in atparsetemplate:
-                    jinja2template.write(atparse_replace(line))
+    atparse_to_jinja2.convert(
+        input_template=args.input_template, outfile=args.outfile, dry_run=args.dry_run
+    )
 
 
 def parse_args(args: List[str]) -> Namespace:
@@ -59,17 +50,3 @@ def parse_args(args: List[str]) -> Namespace:
         metavar="FILE",
     )
     return parser.parse_args(args)
-
-
-def atparse_replace(atline: str) -> str:
-    """Function to replace @[] with {{}} in a line of text."""
-
-    while re.search(r"\@\[.*?\]", atline):
-        # Set maxsplits to 1 so only first @[ is captured.
-        before_atparse = atline.split("@[", 1)[0]
-        within_atparse = atline.split("@[")[1].split("]")[0]
-        # Set maxsplits to 1 so only first ] is captured, which should be the
-        # bracket closing @[.
-        after_atparse = atline.split("@[", 1)[1].split("]", 1)[1]
-        atline = "".join([before_atparse, "{{", within_atparse, "}}", after_atparse])
-    return atline
