@@ -21,6 +21,7 @@ setup(
             "run-forecast = %s.cli.run_forecast:main" % name_py,
             "set-config = %s.cli.set_config:main" % name_py,
             "template = %s.cli.templater:main" % name_py,
+            "validate-config = %s.cli.validate_config:main" % name_py,
         ]
     },
     name=name_conda,
