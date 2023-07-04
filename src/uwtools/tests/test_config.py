@@ -78,11 +78,12 @@ def help_set_config_fmt2fmt(infn, cfgfn, tmpdir):
 # Tests
 
 
-def test_bad_conversion_cfg_to_pdf():
+def test_bad_conversion_cfg_to_pdf(capsys):
     with raises(SystemExit):
         config.create_config_obj(
             parse_config_args(["-i", fixture_path("simple2_nml.cfg"), "--input-file-type", ".pdf"])
         )
+    assert "invalid choice: '.pdf'" in capsys.readouterr().err
 
 
 def test_bad_conversion_nml_to_yaml():
