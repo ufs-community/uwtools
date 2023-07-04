@@ -1,25 +1,14 @@
-#!/usr/bin/env python3
-# pylint: disable=unused-import, unused-variable, unused-argument, useless-parent-delegation
-# remove these disables once implemented
 """
 This file contains the concrete facades for a variety of apps.
 """
 
-import logging
-import os
-import shutil
-import subprocess
 import sys
 from importlib import import_module
-
-from uwtools.utils import file_helpers
 
 from .facade import Facade
 
 
-class SRWExperiment(Facade):  # pragma: no cover
-    # remove pragma when completed
-
+class SRWExperiment(Facade):
     """
     Concrete class to handle UFS Short Range Weather app forecasts.
     """
@@ -29,8 +18,6 @@ class SRWExperiment(Facade):  # pragma: no cover
         Initialize the facade driver.
 
         """
-        super().__init__(argv)
-
         self.modname = (
             "uwtools.apps.uw.UWforSRW" if len(sys.argv) > 1 else "uwtools.apps.srw.SRW210"
         )

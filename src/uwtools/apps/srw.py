@@ -1,28 +1,21 @@
-#!/usr/bin/env python3
-# pylint: disable=unused-import, unused-variable, unused-argument, useless-parent-delegation
-# remove these disables once implemented
 """
-This file contains the specific drivers for a particular app, using the facade pattern base class.
+This file contains the specific drivers for a particular app, using the facade
+pattern base class.
 """
 
 import logging
-import os
 import shutil
 import subprocess
-import sys
 
-from uwtools.utils import cli_helpers, file_helpers
-
-from ..drivers.facade import Facade
+from uwtools.drivers.facade import Facade
+from uwtools.utils.cli_helpers import get_file_type
 
 
-class SRW210(Facade):  # pragma: no cover
-    # remove pragma when completed
-
+class SRW210(Facade):
     """
-    Concrete class to handle UFS Short Range Weather app forecasts.
-    Methods call manual command line processes as described in the docs.
-    UFS Short Range Weather app, release v2.1.0
+    Concrete class to handle UFS Short Range Weather app forecasts. Methods call
+    manual command line processes as described in the docs. UFS Short Range
+    Weather app, release v2.1.0
     """
 
     def __init__(self, argv):
@@ -30,14 +23,13 @@ class SRW210(Facade):  # pragma: no cover
         Initialize the facade driver.
 
         """
-        super().__init__(argv)
 
     def load_config(self, config_file):
         """
         Load the configuration file.
 
         """
-        file_type = cli_helpers.get_file_type(config_file)
+        file_type = get_file_type(config_file)
         if file_type == "INI":
             with open("config.yaml", "w", encoding="utf-8") as file:
                 ## Note: this is a temporary path until parsing the SRW directory is implemented
@@ -63,8 +55,8 @@ class SRW210(Facade):  # pragma: no cover
 
     def create_experiment(self):
         """
-        Generate the regional workflow.
-        This sets up the workflow based on config.yaml, links fix files, creates input.nml and FV3LAM_wflow.xml.
+        Generate the regional workflow. This sets up the workflow based on
+        config.yaml, links fix files, creates input.nml and FV3LAM_wflow.xml.
         """
         # Note: this is a temporary path until parsing the SRW directory is implemented
         subprocess.run("python generate_FV3LAM_wflow.py", check=False, shell=True)

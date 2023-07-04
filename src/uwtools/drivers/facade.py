@@ -9,7 +9,8 @@ to do the work. It will also be responsible for setting up the
 working directory and moving files around. 
 
 See UW documentation for more information:
-https://github.com/ufs-community/workflow-tools/wiki/Implementation-of-a-Service-Oriented-Architecture-Fa%C3%A7ade
+https://github.com/ufs-community/workflow-tools/wiki/
+  Implementation-of-a-Service-Oriented-Architecture-Fa%C3%A7ade
 """
 
 from abc import ABC, abstractmethod
@@ -56,8 +57,9 @@ class Facade(ABC):  # pragma: no cover
     @abstractmethod
     def load_config(self, config_file):
         """
-        Load the configuration file. This is the concrete implementation of the strangler pattern. This will
-        at first call the old code, but will eventually call the new code.
+        Load the configuration file. This is the concrete implementation of the
+        strangler pattern. This will at first call the old code, but will
+        eventually call the new code.
 
         """
 

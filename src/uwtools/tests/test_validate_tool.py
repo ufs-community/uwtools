@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# pylint: disable=too-many-branches, too-many-statements, too-many-locals
-
 """
 This test checks the validate config tool command line script
 """
