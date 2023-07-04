@@ -83,16 +83,11 @@ def main():
     Defines the user interface for the forecast driver. Parses arguments
     provided by the user and passes to the Forecast driver class to be run."""
     user_args = parse_args(sys.argv[1:])
-
-    # Set up logging:
-
     name = f"{inspect.stack()[0][3]}"
     cli_helpers.setup_logging(
         log_file=user_args.log_file, log_name=name, quiet=user_args.quiet, verbose=user_args.verbose
     )
-
     forecast_type = user_args.forecast_model.join()
     forecast_class = getattr(forecast, f"{forecast_type}Forecast")
     experiment = forecast_class(user_args.config_file, user_args.machine, log_name=name)
-
     experiment.run()
