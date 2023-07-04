@@ -24,6 +24,7 @@ from pytest import fixture, raises
 
 from uwtools import config, exceptions, logger
 from uwtools.cli.set_config import parse_args as parse_config_args
+from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import compare_files, fixture_path, line_in_lines, msg_in_caplog
 from uwtools.utils import cli_helpers
 
@@ -835,3 +836,15 @@ def test_Config_str_to_type(f90_cfgobj):
     assert f90_cfgobj.str_to_type("88") == 88
     assert f90_cfgobj.str_to_type("3.14") == 3.14
     assert f90_cfgobj.str_to_type("NA") == "NA"  # no conversion
+
+
+def test_YAMLConfig__load_unexpected_error(tmp_path):
+    cfgfile = tmp_path / "cfg.yaml"
+    with open(cfgfile, "w", encoding="utf-8") as f:
+        print("{n: 88}", file=f)
+    with patch.object(config.yaml, "load") as load:
+        msg = "Unexpected error"
+        load.side_effect = yaml.constructor.ConstructorError(note=msg)
+        with raises(UWConfigError) as e:
+            config.YAMLConfig(config_path=cfgfile)
+        assert msg in str(e.value)

@@ -516,16 +516,15 @@ class YAMLConfig(Config):
                     if "unhashable" in e.problem:
                         msg = """
 ERROR:
-The input config file may contain a Jinja2
-templated value at the location listed above.
-Ensure the value is included in quotes.
+The input config file may contain a Jinja2 templated value at the location
+listed above. Ensure the value is included in quotes.
 """.strip()
                     else:
                         constructor = e.problem.split()[-1]
                         msg = f"""
 ERROR:
-The input config file contains a constructor
-that is not registered with the uwtools package.
+The input config file contains a constructor that is not registered with the
+uwtools package.
 
 constructor: {constructor}
 config file: {config_path}
