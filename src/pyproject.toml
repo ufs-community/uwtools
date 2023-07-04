@@ -3,7 +3,7 @@ line-length = 100
 
 [tool.coverage.report]
 exclude_lines = ["@abstractmethod"]
-fail_under = 99
+fail_under = 100
 show_missing = true
 skip_covered = true
 

@@ -86,6 +86,16 @@ def test_bad_conversion_cfg_to_pdf(capsys):
     assert "invalid choice: '.pdf'" in capsys.readouterr().err
 
 
+# def test_bad_conversion_depth_mismatch(tmp_path):
+#     cfgfile = str(tmp_path / "cfg.yaml")
+#     outfile = str(tmp_path / "out.nml")
+#     with open(cfgfile, "w", encoding="utf-8") as f:
+#         print("{a: {b: {c: 88}}}", file=f)
+#     with raises(ValueError):  # as e:
+#         config.create_config_obj(parse_config_args(["-i", cfgfile, "-o", outfile]))
+#     # assert something
+
+
 def test_bad_conversion_nml_to_yaml():
     with raises(ValueError):
         config.create_config_obj(

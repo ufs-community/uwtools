@@ -686,7 +686,7 @@ def create_config_obj(user_args, log=None):
             out_object = globals()[f"{outfile_type}Config"]()
             out_object.update(config_obj)
 
-            output_depth = out_object.dictionary_depth(out_object.data)
+            # output_depth = out_object.dictionary_depth(out_object.data)
             input_depth = config_obj.dictionary_depth(config_obj.data)
 
             # Check for incompatible conversion objects
@@ -698,9 +698,10 @@ def create_config_obj(user_args, log=None):
                 log.critical(err_msg)
                 raise ValueError(err_msg)
 
-            if input_depth > output_depth:
-                log.critical(f"{user_args.outfile} not compatible with {user_args.input_base_file}")
-                raise ValueError("Set config failure: output object not compatible with input file")
+            # #PM# HOW IS THIS POSSIBLE?
+        # if input_depth > output_depth:
+        #     log.critical(f"{user_args.outfile} not compatible with {user_args.input_base_file}")
+        #     raise ValueError("Set config failure: output object not compatible with input file")
 
         else:  # same type of file as input, no need to convert it
             out_object = config_obj
