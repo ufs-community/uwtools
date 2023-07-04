@@ -689,7 +689,7 @@ def create_config_obj(user_args, log=None):
             # output_depth = out_object.dictionary_depth(out_object.data)
             input_depth = config_obj.dictionary_depth(config_obj.data)
 
-            # Check for incompatible conversion objects
+            # Check for incompatible conversion objects.
 
             err_msg = "Set config failure: incompatible file types"
             if (outfile_type == "INI" and input_depth > 2) or (
