@@ -16,8 +16,6 @@ from uwtools.utils import file_helpers
 
 from .facade import Facade
 
-logging.getLogger(__name__)
-
 
 class SRWExperiment(Facade):  # pragma: no cover
     # remove pragma when completed
