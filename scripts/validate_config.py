@@ -1,78 +1,82 @@
 #!/usr/bin/env python3
-#pylint: disable=too-many-branches, too-many-statements, too-many-locals
+# pylint: disable=too-many-branches, too-many-statements, too-many-locals
 
-'''
+"""
 This utility validates a config file using a validation schema.
-'''
+"""
 import argparse
 import inspect
+import json
 import logging
 import os
 import sys
-import json
+
 import jsonschema
 
-from uwtools import config
-from uwtools import exceptions
+from uwtools import config, exceptions
 from uwtools.utils import cli_helpers
 
 
 def parse_args(argv):
-
-    '''
+    """
     Function maintains the arguments accepted by this script. Please see
     Python's argparse documentation for more information about settings of each
     argument.
-    '''
+    """
 
     parser = argparse.ArgumentParser(
-       description='Validate config with user-defined settings.'
+        description="Validate config with user-defined settings."
     )
 
     group = parser.add_mutually_exclusive_group()
 
     parser.add_argument(
-        '-s', '--validation_schema',
-        help='Path to a validation schema.',
+        "-s",
+        "--validation_schema",
+        help="Path to a validation schema.",
         required=True,
         type=cli_helpers.path_if_file_exists,
     )
 
     parser.add_argument(
-        '-c', '--config_file',
-        help='Path to configuration file. Accepts YAML, bash/ini or namelist',
+        "-c",
+        "--config_file",
+        help="Path to configuration file. Accepts YAML, bash/ini or namelist",
         required=True,
         type=cli_helpers.path_if_file_exists,
     )
 
     parser.add_argument(
-        '--config_file_type',
-        help='If used, will convert provided config file to given file type.\
-            Accepts YAML, bash/ini or namelist',
+        "--config_file_type",
+        help="If used, will convert provided config file to given file type.\
+            Accepts YAML, bash/ini or namelist",
         choices=["YAML", "INI", "F90"],
     )
 
     group.add_argument(
-        '-v', '--verbose',
-        action='store_true',
-        help='If provided, print all logging messages.',
-        )
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="If provided, print all logging messages.",
+    )
     group.add_argument(
-        '-q', '--quiet',
-        action='store_true',
-        help='If provided, print no logging messages',
-        )
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="If provided, print no logging messages",
+    )
     parser.add_argument(
-        '-l', '--log_file',
-        help='Optional path to a specified log file',
-        default=os.path.join(os.path.dirname(__file__), "set_config.log")
-        )
+        "-l",
+        "--log_file",
+        help="Optional path to a specified log file",
+        default=os.path.join(os.path.dirname(__file__), "set_config.log"),
+    )
 
     return parser.parse_args(argv)
 
 
 def validate_config(argv, log=None):
-    '''Main section for validating config file'''
+    """Main section for validating config file"""
 
     user_args = parse_args(argv)
 
@@ -88,8 +92,7 @@ def validate_config(argv, log=None):
 
     # Load the json validation schema
     # This json file is created using the jsonschema syntax
-    with open(user_args.validation_schema, 'r',
-              encoding="utf-8") as schema_file:
+    with open(user_args.validation_schema, "r", encoding="utf-8") as schema_file:
         schema = json.load(schema_file)
 
     schema_error = 0
@@ -103,7 +106,7 @@ def validate_config(argv, log=None):
     for error in errors:
         schema_error += 1
         logging.error(error)
-        logging.error('------')
+        logging.error("------")
 
     # Create a list of fields that could contain a file or path
     path_list = []
@@ -119,17 +122,17 @@ def validate_config(argv, log=None):
             if value in path_list:
                 if not os.path.exists(config_obj.data[field][value]):
                     schema_error += 1
-                    logging.error('%s has Invalid Path %s',
-                                  value, config_obj.data[field][value])
+                    logging.error(
+                        "%s has Invalid Path %s", value, config_obj.data[field][value]
+                    )
 
     if schema_error > 0:
-        sys.exit(f'This configuration file has {schema_error} errors')
+        sys.exit(f"This configuration file has {schema_error} errors")
     else:
         sys.exit(0)
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     cli_args = parse_args(sys.argv[1:])
     LOG_NAME = "validate_config"
     cli_log = cli_helpers.setup_logging(cli_args, log_name=LOG_NAME)
