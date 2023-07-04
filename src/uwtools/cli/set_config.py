@@ -53,7 +53,7 @@ def parse_args(args: List[str]) -> Namespace:
     optional.add_argument(
         "-c",
         "--config-file",
-        help="Path to YAML, bash/ini, or namelist configuration file.",
+        help="Path to YAML, bash/ini, or namelist configuration file",
         metavar="FILE",
         type=cli_helpers.path_if_file_exists,
     )
@@ -68,7 +68,7 @@ def parse_args(args: List[str]) -> Namespace:
         "--log-file",
         # #PM# WHAT TO DO ABOUT THIS LOGFILE PATH?
         default="/dev/null",  # os.path.join(os.path.dirname(__file__), "set_config.log"),
-        help="Optional path to a file to log to",
+        help="Path to a file to log to",
         metavar="FILE",
     )
     optional.add_argument(

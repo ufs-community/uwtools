@@ -13,7 +13,7 @@ class SRWExperiment(Facade):
     Concrete class to handle UFS Short Range Weather app forecasts.
     """
 
-    def __init__(self, argv):
+    def __init__(self):
         """
         Initialize the facade driver.
 

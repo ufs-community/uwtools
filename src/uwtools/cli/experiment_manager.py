@@ -1,18 +1,14 @@
+# pylint: disable=duplicate-code
 """
 This utility creates a command line interface for managing an experiment.
 """
 
 import argparse
-
-# import inspect
-import os
 import sys
-from argparse import Namespace
+from argparse import HelpFormatter, Namespace
 from typing import List
 
 from uwtools.drivers import experiment
-
-# from uwtools.utils import cli_helpers
 
 
 def main() -> None:
@@ -31,31 +27,40 @@ def parse_args(args: List[str]) -> Namespace:
     """
     Function maintains the arguments accepted by this script. Please see
     Python's argparse documentation for more information about settings
-     of each argument.
+    of each argument.
     """
-    parser = argparse.ArgumentParser(description="Set config with user-defined settings.")
-    parser.add_argument(
-        "--forecast_app",
-        help="If provided, will define the app to be run.",
-        # Will later include MRW, HAFS and more.
-        choices=["SRW"],
+    args = args or ["--help"]
+    parser = argparse.ArgumentParser(
+        description="Set config with user-defined settings.",
+        formatter_class=lambda prog: HelpFormatter(prog, max_help_position=8),
     )
-    parser.add_argument(
+    # #PM# ARE ALL ARGUMENTS REALLY OPTIONAL?
+    # required = parser.add_argument_group("required arguments")
+    optional = parser.add_argument_group("optional arguments")
+    optional.add_argument(
+        "--forecast-app",
+        choices=["SRW"],  # Will later include MRW, HAFS and more.
+        help="Name of the app to run",
+        metavar="APPNAME",
+    )
+    optional.add_argument(
         "-v",
         "--verbose",
         action="store_true",
-        help="If provided, print all logging messages.",
+        help="Print all logging messages.",
     )
-    parser.add_argument(
+    optional.add_argument(
         "-q",
         "--quiet",
         action="store_true",
-        help="If provided, print no logging messages",
+        help="Print no logging messages",
     )
-    parser.add_argument(
+    optional.add_argument(
         "-l",
-        "--log_file",
-        help="Optional path to a specified log file",
-        default=os.path.join(os.path.dirname(__file__), "forecast.log"),
+        "--log-file",
+        # #PM# WHAT TO DO ABOUT THIS LOGFILE PATH?
+        default="/dev/null",  # os.path.join(os.path.dirname(__file__), "forecast.log"),
+        help="Path to a file to log to",
+        metavar="FILE",
     )
     return parser.parse_args(args)
