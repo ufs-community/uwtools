@@ -6,9 +6,11 @@ cli() {
     set -eu
     clis=(
       atparse-to-jinja2
+      experiment-manager
       run-forecast
       set-config
       template
+      validate-config
     )
     for x in ${clis[*]}; do
       which $x
