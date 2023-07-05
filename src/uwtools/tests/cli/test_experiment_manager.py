@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
+# pylint: disable=duplicate-code,missing-function-docstring,redefined-outer-name
 """
 Tests for the experiment-manager CLI
 """

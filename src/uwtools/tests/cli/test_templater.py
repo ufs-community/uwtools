@@ -1,5 +1,4 @@
-# pylint: disable=missing-function-docstring
-
+# pylint: disable=duplicate-code,missing-function-docstring
 """
 Tests for the templater CLI
 """

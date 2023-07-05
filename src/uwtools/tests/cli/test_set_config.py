@@ -1,7 +1,7 @@
+# pylint: disable=duplicate-code,missing-function-docstring,redefined-outer-name
 """
 Tests for the set-config CLI
 """
-# pylint: disable=missing-function-docstring,redefined-outer-name
 
 from argparse import ArgumentError
 from itertools import chain

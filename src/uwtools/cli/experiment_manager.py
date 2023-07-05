@@ -37,7 +37,7 @@ def parse_args(args: List[str]) -> Namespace:
     required.add_argument(
         "-a",
         "--forecast-app",
-        choices=["SRW"],  # Will later include MRW, HAFS and more.
+        choices={"SRW"},  # Will later include MRW, HAFS and more.
         help="Name of the app to run",
         metavar="APPNAME",
     )

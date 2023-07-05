@@ -57,7 +57,7 @@ def parse_args(args: List[str]) -> Namespace:
     optional.add_argument(
         "--config-file-type",
         help="Convert config file to this type.",
-        choices=["F90", "INI", "YAML"],
+        choices={"F90", "INI", "YAML"},
     )
     optional.add_argument(
         "-l",

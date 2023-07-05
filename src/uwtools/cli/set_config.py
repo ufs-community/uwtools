@@ -99,17 +99,17 @@ def parse_args(args: List[str]) -> Namespace:
     optional.add_argument(
         "--config-file-type",
         help="Convert provided config file to provided file type.",
-        choices=["F90", "INI", "YAML"],
+        choices={"F90", "INI", "YAML"},
     )
     optional.add_argument(
         "--input-file-type",
         help="Convert provided input file to provided file type.",
-        choices=["F90", "INI", "YAML"],
+        choices={"F90", "INI", "YAML"},
     )
     optional.add_argument(
         "--output-file-type",
         help="Convert provided output file to provided file type.",
-        choices=["F90", "FieldTable", "INI", "YAML"],
+        choices={"F90", "FieldTable", "INI", "YAML"},
     )
     optional.add_argument(
         "--show-format",

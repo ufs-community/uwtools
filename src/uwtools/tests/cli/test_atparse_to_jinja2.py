@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=duplicate-code,missing-function-docstring
 """
 Tests for the atparse-to-jinja2 CLI
 """
