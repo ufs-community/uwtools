@@ -3,7 +3,6 @@
 CLI for JSON Schema-based config validation
 """
 import argparse
-import inspect
 import sys
 from argparse import HelpFormatter, Namespace
 from typing import List
@@ -17,7 +16,7 @@ def main() -> None:
     Main entry point
     """
     args = parse_args(sys.argv[1:])
-    name = f"{inspect.stack()[0][3]}"
+    name = "validate-config"
     log = cli_helpers.setup_logging(
         log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
     )

@@ -12,6 +12,9 @@ from pytest import raises
 from uwtools.cli import atparse_to_jinja2
 from uwtools.tests.support import fixture_path
 
+# NB: Ensure that at least one test exercises both short and long forms of each
+#     CLI switch.
+
 
 @pytest.mark.parametrize("sw", [ns(i="-i"), ns(i="--input-template")])
 def test_main_bad_args(sw, capsys):

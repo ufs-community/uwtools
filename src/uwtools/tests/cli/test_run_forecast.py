@@ -11,6 +11,9 @@ from pytest import fixture, raises
 
 from uwtools.cli import run_forecast
 
+# NB: Ensure that at least one test exercises both short and long forms of each
+#     CLI switch.
+
 
 @fixture
 def files(tmp_path):
@@ -66,7 +69,7 @@ def test_parse_args_bad_machinefile(sw, tmp_path, capsys):
 def test_parse_args_good(sw, noise, files):
     """Test all valid CLI switch/value combinations."""
     cfgfile, machinefile, logfile = files
-    app, model = "SRW", "FV3"  # representative choices
+    app, model = "SRW", "FV3"  # representative (not exhaustive) choices
     parsed = run_forecast.parse_args(
         [
             sw.c,

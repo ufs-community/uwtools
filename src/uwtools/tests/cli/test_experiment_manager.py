@@ -11,6 +11,9 @@ from pytest import fixture, raises
 
 from uwtools.cli import experiment_manager
 
+# NB: Ensure that at least one test exercises both short and long forms of each
+#     CLI switch.
+
 
 def test_main():
     with patch.object(experiment_manager, "parse_args") as parse_args:

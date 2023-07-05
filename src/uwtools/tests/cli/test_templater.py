@@ -14,6 +14,9 @@ from pytest import raises
 from uwtools.cli import templater
 from uwtools.tests.support import compare_files, fixture_path, line_in_lines
 
+# NB: Ensure that at least one test exercises both short and long forms of each
+#     CLI switch.
+
 
 @pytest.mark.parametrize(
     "sw", [ns(d="-d", i="-i", q="-q"), ns(d="--dry-run", i="--input-template", q="--quiet")]
