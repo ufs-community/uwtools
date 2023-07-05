@@ -16,6 +16,7 @@ def convert(input_template: str, dry_run: bool = False, outfile: Optional[str] =
             for line in atparsetemplate:
                 print(_replace(line))
         else:
+            assert outfile is not None
             with open(outfile, "wt", encoding="utf-8") as jinja2template:
                 for line in atparsetemplate:
                     jinja2template.write(_replace(line))

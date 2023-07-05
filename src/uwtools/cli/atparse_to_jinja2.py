@@ -53,4 +53,7 @@ def parse_args(args: List[str]) -> Namespace:
         help="Path to new Jinja2 template",
         metavar="FILE",
     )
-    return parser.parse_args(args)
+    parsed = parser.parse_args(args)
+    if not parsed.dry_run and not parsed.outfile:
+        sys.exit("Specify either --dry-run or --outfile")
+    return parsed

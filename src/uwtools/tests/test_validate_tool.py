@@ -1,11 +1,10 @@
 """
 Tests for uwtools.validate_config module
 """
-import logging
-
 from pytest import raises
 
 from uwtools import config_validator
+from uwtools.logger import Logger
 from uwtools.tests.support import fixture_path
 
 
@@ -17,7 +16,7 @@ def test_validate_config_no_errors():
         config_validator.validate_config(
             config_file=fixture_path("schema_test_good.yaml"),
             validation_schema=fixture_path("schema/workflow.jsonschema"),
-            log=logging.getLogger(),
+            log=Logger(),
         )
     assert e.value.code == 0
 
