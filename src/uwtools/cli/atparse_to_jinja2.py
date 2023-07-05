@@ -55,5 +55,6 @@ def parse_args(args: List[str]) -> Namespace:
     )
     parsed = parser.parse_args(args)
     if not parsed.dry_run and not parsed.outfile:
-        sys.exit("Specify either --dry-run or --outfile")
+        print("Specify either --dry-run or --outfile", file=sys.stderr)
+        sys.exit(1)
     return parsed

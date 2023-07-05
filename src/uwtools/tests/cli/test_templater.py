@@ -6,34 +6,45 @@ Tests for templater tool.
 
 import argparse
 import os
+from types import SimpleNamespace as ns
 from unittest.mock import patch
 
+import pytest
 from pytest import raises
 
 from uwtools.cli import templater
 from uwtools.tests.support import compare_files, fixture_path, line_in_lines
 
 
-def test_mutually_exclusive_args():
+@pytest.mark.parametrize(
+    "sw", [ns(d="-d", i="-i", q="-q"), ns(d="--dry-run", i="--input-template", q="--quiet")]
+)
+def test_mutually_exclusive_args(sw):
     """
     Test that mutually-exclusive -q/-d args are rejected.
     """
     with raises(argparse.ArgumentError):
-        argv = ["test", "-i", fixture_path("fruit_config.yaml"), "-q", "-d"]
+        argv = ["test", sw.i, fixture_path("fruit_config.yaml"), sw.d, sw.q]
         with patch.object(templater.sys, "argv", argv):
             templater.main()
 
 
-def test_set_template_all_good():
+@pytest.mark.parametrize(
+    "sw", [ns(c="-c", d="-d", i="-i"), ns(c="--config-file", d="--dry-run", i="--input-template")]
+)
+def test_set_template_all_good(sw):
     """
     Confirm success using namelist input and shell config.
     """
-    argv = ["test", "-i", fixture_path("nml.IN"), "-c", fixture_path("fruit_config.sh"), "-d"]
+    argv = ["test", sw.i, fixture_path("nml.IN"), sw.c, fixture_path("fruit_config.sh"), sw.d]
     with patch.object(templater.sys, "argv", argv):
         templater.main()
 
 
-def test_set_template_bad_config_suffix(tmp_path):
+@pytest.mark.parametrize(
+    "sw", [ns(c="-c", d="-d", i="-i"), ns(c="--config-file", d="--dry-run", i="--input-template")]
+)
+def test_set_template_bad_config_suffix(sw, tmp_path):
     """
     Test that a bad config filename suffix is rejected.
     """
@@ -41,12 +52,13 @@ def test_set_template_bad_config_suffix(tmp_path):
     with open(badfile, "w", encoding="utf-8"):
         pass  # create empty file
     with raises(ValueError):
-        argv = ["test", "-i", fixture_path("nml.IN"), "-c", badfile, "-d"]
+        argv = ["test", sw.i, fixture_path("nml.IN"), sw.c, badfile, sw.d]
         with patch.object(templater.sys, "argv", argv):
             templater.main()
 
 
-def test_set_template_command_line_config(capsys):
+@pytest.mark.parametrize("sw", [ns(d="-d", i="-i"), ns(d="--dry-run", i="--input-template")])
+def test_set_template_command_line_config(sw, capsys):
     """
     Test behavior when values are provided on the command line.
     """
@@ -73,7 +85,7 @@ Running with args:
   dressing = 'balsamic'
 /
 """.lstrip()
-    argv = ["test", "-i", infile, "--dry-run", "fruit=pear", "vegetable=squash", "how_many=22"]
+    argv = ["test", sw.i, infile, sw.d, "fruit=pear", "vegetable=squash", "how_many=22"]
     with patch.object(templater.sys, "argv", argv):
         templater.main()
     actual = capsys.readouterr().out.split("\n")
@@ -81,7 +93,8 @@ Running with args:
         assert line_in_lines(line, actual)
 
 
-def test_set_template_dry_run(capsys):
+@pytest.mark.parametrize("sw", [ns(d="-d", i="-i"), ns(d="--dry-run", i="--input-template")])
+def test_set_template_dry_run(sw, capsys):
     """
     Test dry-run output of ingest namelist tool.
     """
@@ -110,7 +123,7 @@ Running with args:
 """.lstrip()
 
     with patch.dict(os.environ, {"fruit": "banana", "vegetable": "tomato", "how_many": "22"}):
-        argv = ["test", "-i", infile, "--dry-run"]
+        argv = ["test", sw.i, infile, sw.d]
         with patch.object(templater.sys, "argv", argv):
             templater.main()
         actual = capsys.readouterr().out.split("\n")
@@ -118,7 +131,8 @@ Running with args:
             assert line_in_lines(line, actual)
 
 
-def test_set_template_listvalues(capsys):
+@pytest.mark.parametrize("sw", [ns(i="-i"), ns(i="--input-template")])
+def test_set_template_listvalues(sw, capsys):
     """
     Test "values needed" output of ingest namelist tool.
     """
@@ -142,7 +156,7 @@ fruit
 how_many
 vegetable
 """.lstrip()
-    argv = ["test", "-i", infile, "--values-needed"]
+    argv = ["test", sw.i, infile, "--values-needed"]
     with patch.object(templater.sys, "argv", argv):
         templater.main()
     actual = capsys.readouterr().out.split("\n")
@@ -150,7 +164,10 @@ vegetable
         assert line_in_lines(line, actual)
 
 
-def test_set_template_verbosity(capsys):
+@pytest.mark.parametrize(
+    "sw", [ns(d="-d", i="-i", v="-v"), ns(d="--dry-run", i="--input-template", v="--verbose")]
+)
+def test_set_template_verbosity(sw, capsys):
     infile = fixture_path("nml.IN")
     # #PM# WHAT TO DO ABOUT /dev/null BELOW?
     expected = f"""
@@ -184,7 +201,7 @@ J2Template._load_file INPUT Args:
     env = {"fruit": "banana", "how_many": "22"}  # missing "vegetable"
     with patch.dict(os.environ, env):
         with raises(ValueError) as error:
-            argv = ["test", "-i", infile, "--dry-run", "-v"]
+            argv = ["test", sw.i, infile, sw.d, sw.v]
             with patch.object(templater.sys, "argv", argv):
                 templater.main()
         assert str(error.value) == "Missing values needed by template"
@@ -210,7 +227,10 @@ J2Template._load_file INPUT Args:
             templater.main()
 
 
-def test_set_template_yaml_config(tmp_path):
+@pytest.mark.parametrize(
+    "sw", [ns(c="-c", i="-i", o="-o"), ns(c="--config-file", i="--input-template", o="--outfile")]
+)
+def test_set_template_yaml_config(sw, tmp_path):
     """
     Test that providing a YAML file with necessary settings works to fill in
     the Jinja template. Test the writing mechanism, too.
@@ -222,11 +242,11 @@ def test_set_template_yaml_config(tmp_path):
 
     argv = [
         "test",
-        "-i",
+        sw.i,
         fixture_path("nml.IN"),
-        "-c",
+        sw.c,
         fixture_path("fruit_config.yaml"),
-        "-o",
+        sw.o,
         outfile,
     ]
     with patch.dict(os.environ, {"fruit": "candy", "vegetable": "cookies", "how_many": "all"}):
@@ -235,18 +255,21 @@ def test_set_template_yaml_config(tmp_path):
     assert compare_files(fixture_path("simple2.nml"), outfile)
 
 
-def test_set_template_yaml_config_model_configure(tmp_path):
+@pytest.mark.parametrize(
+    "sw", [ns(c="-c", i="-i", o="-o"), ns(c="--config-file", i="--input-template", o="--outfile")]
+)
+def test_set_template_yaml_config_model_configure(sw, tmp_path):
     """
     Test behavior when reading a simple model_configure file.
     """
     outfile = f"{tmp_path}/test_render_from_yaml.nml"
     argv = [
         "test",
-        "-i",
+        sw.i,
         fixture_path("model_configure.sample.IN"),
-        "-c",
+        sw.c,
         fixture_path("model_configure.values.yaml"),
-        "-o",
+        sw.o,
         outfile,
     ]
     with patch.object(templater.sys, "argv", argv):
