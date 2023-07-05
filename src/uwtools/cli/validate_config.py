@@ -8,7 +8,7 @@ import sys
 from argparse import HelpFormatter, Namespace
 from typing import List
 
-from uwtools.config_validator import validate_config
+from uwtools.config_validator import config_is_valid
 from uwtools.utils import cli_helpers
 
 
@@ -21,7 +21,10 @@ def main() -> None:
     log = cli_helpers.setup_logging(
         log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
     )
-    validate_config(config_file=args.config_file, validation_schema=args.validation_schema, log=log)
+    valid = config_is_valid(
+        config_file=args.config_file, validation_schema=args.validation_schema, log=log
+    )
+    sys.exit(0 if valid else 1)
 
 
 def parse_args(args: List[str]) -> Namespace:

@@ -3,7 +3,6 @@ Support for validating a config using JSON Schema.
 """
 import json
 import os
-import sys
 
 import jsonschema
 
@@ -11,7 +10,7 @@ from uwtools.config import YAMLConfig
 from uwtools.logger import Logger
 
 
-def validate_config(config_file: str, validation_schema: str, log: Logger) -> None:
+def config_is_valid(config_file: str, validation_schema: str, log: Logger) -> bool:
     """
     Validate a config using JSON Schema.
     """
@@ -39,7 +38,8 @@ def validate_config(config_file: str, validation_schema: str, log: Logger) -> No
         log.error(error)
         log.error("------")
 
-    # Create a list of fields that could contain a file or path
+    # Create a list of fields that could contain a file or path.
+
     path_list = []
     for field in schema["properties"]:
         for value in schema["properties"][field]["properties"]:
@@ -47,7 +47,8 @@ def validate_config(config_file: str, validation_schema: str, log: Logger) -> No
             if "format" in schema["properties"][field]["properties"][value]:
                 path_list.append(value)
 
-    # Check for existence of those files or paths
+    # Check for existence of those files or paths.
+
     for field in config_obj.data:
         for value in config_obj.data[field]:
             if value in path_list:
@@ -56,6 +57,6 @@ def validate_config(config_file: str, validation_schema: str, log: Logger) -> No
                     log.error("%s has Invalid Path %s", value, config_obj.data[field][value])
 
     if schema_error > 0:
-        sys.exit(f"This configuration file has {schema_error} errors")
-    else:
-        sys.exit(0)
+        log.error("This configuration file has %s error(s)", schema_error)
+        return False
+    return True

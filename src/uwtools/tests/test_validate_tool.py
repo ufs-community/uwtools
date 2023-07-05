@@ -1,39 +1,25 @@
 """
-Tests for uwtools.validate_config module
+Tests for uwtools.config_validator module
 """
-from pytest import raises
+
+import pytest
 
 from uwtools import config_validator
 from uwtools.logger import Logger
 from uwtools.tests.support import fixture_path
 
 
-def test_validate_config_no_errors():
+@pytest.mark.parametrize("vals", [("good", True), ("bad", False)])
+def test_confid_is_valid_good(vals):
     """
     Test that a valid config file succeeds validation.
     """
-    with raises(SystemExit) as e:
-        config_validator.validate_config(
-            config_file=fixture_path("schema_test_good.yaml"),
+    cfgtype, boolval = vals
+    assert (
+        config_validator.config_is_valid(
+            config_file=fixture_path(f"schema_test_{cfgtype}.yaml"),
             validation_schema=fixture_path("schema/workflow.jsonschema"),
             log=Logger(),
         )
-    assert e.value.code == 0
-
-
-# def test_validate_config_with_errors():  # pylint: disable=unused-variable
-#     """Make sure that errors cause system exit"""
-
-#     validation_schema = os.path.join(
-#         uwtools_file_base, pathlib.Path("../schema/workflow.jsonschema")
-#     )
-
-#     config_file = os.path.join(uwtools_file_base, pathlib.Path("fixtures/bad.yaml"))
-
-#     args = ["-s", validation_schema, "-c", config_file]
-
-#     with raises(SystemExit) as pytest_wrapped_e:
-#         config_validator.validate_config(args)
-
-#     assert pytest_wrapped_e.type == SystemExit
-#     assert pytest_wrapped_e.value.code == "This configuration file has 7 errors"
+        is boolval
+    )
