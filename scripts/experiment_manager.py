@@ -2,7 +2,7 @@
 #pylint: disable=unused-import, unused-variable, unused-argument
 # remove these disables once implemented
 '''
-This utility creates a command line interface for running a forecast.
+This utility creates a command line interface for managing an experiment.
 '''
 
 import argparse
@@ -11,7 +11,7 @@ import os
 import sys
 
 from uwtools import exceptions
-from uwtools.drivers import forecast
+from uwtools.drivers import experiment
 from uwtools.utils import cli_helpers
 
 
@@ -27,32 +27,11 @@ def parse_args(argv):# pragma: no cover
        description='Set config with user-defined settings.'
     )
     parser.add_argument(
-        '-c', '--config_file',
-        help='path to YAML configuration file',
-        type=cli_helpers.path_if_file_exists,
-    )
-    parser.add_argument(
-        '-m', '--machine',
-        help='path to YAML platform definition file',
-        type=cli_helpers.path_if_file_exists,
-    )
-    parser.add_argument(
         '--forecast_app',
         help='If provided, will define the app to be run.\
-            Currently accepts SRW, MRW, or HAFS',
-        choices=["SRW", "MRW", "HAFS"],
-    )
-    parser.add_argument(
-        '--forecast_model',
-        nargs='+',
-        help='If provided, will define the experiment to be run.\
-            Currently accepts FV3, CCPP, MOM6, CICE, and/or CMEPS',
-        choices=["FV3", "CCPP", "MOM6", "CICE", "CMEPS"],
-    )
-    parser.add_argument(
-        '-d', '--dry_run',
-        action='store_true',
-        help='If provided, validate configuration but do not run the forecast',
+            Currently accepts SRW',
+            # will later include MRW, HAFS and more
+        choices=["SRW"],
     )
     parser.add_argument(
         '-v', '--verbose',
@@ -72,29 +51,27 @@ def parse_args(argv):# pragma: no cover
     return parser.parse_args(argv)
 
 
-def run_forecast(argv, log=None): # pragma: no cover
+def manager(argv, log=None): # pragma: no cover
     '''
-    Defines the user interface for the forecast driver. Parses arguments
-    provided by the user and passes to the Forecast driver class to be run.'''
+    Defines the user interface for the experiment manager. Parses arguments
+    provided by the user and passes to the facade to be run.'''
     user_args = parse_args(argv)
 
     # Set up logging
     name = f"{inspect.stack()[0][3]}"
     log = cli_helpers.setup_logging(user_args, log_name=name)
 
-    forecast_type = user_args.forecast_model.join()
-    forecast_class = getattr(forecast, f"{forecast_type}Forecast")
-    experiment = forecast_class(user_args.config_file, user_args.machine,
-                                log_name=name)
+    experiment_class = getattr(experiment, f"{user_args.forecast_app}Experiment")
+    managed_experiment = experiment_class(user_args.config_file)
 
-    experiment.run()
+    managed_experiment()
 
 
 if __name__ == '__main__':
     cli_args = parse_args(sys.argv[1:])
-    LOG_NAME = "run_forecast"
+    LOG_NAME = "experiment_manager"
     cli_log = cli_helpers.setup_logging(cli_args, log_name=LOG_NAME)
     try:
-        run_forecast(sys.argv[1:], cli_log)
+        manager(sys.argv[1:], cli_log)
     except exceptions.UWConfigError as e:
         sys.exit(e)
