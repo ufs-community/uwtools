@@ -1,7 +1,7 @@
 # pylint: disable=missing-function-docstring
 
 """
-Tests for the templater CLI.
+Tests for the templater CLI
 """
 
 import argparse

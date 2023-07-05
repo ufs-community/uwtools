@@ -1,5 +1,5 @@
 """
-Tests for the set-config CLI.
+Tests for the set-config CLI
 """
 # pylint: disable=missing-function-docstring,redefined-outer-name
 
