@@ -1,76 +1,35 @@
 # pylint: disable=duplicate-code
-"""
-This utility renders a Jinja2 template using user-supplied configuration options
-via YAML or environment variables.
-"""
 
 import inspect
-import logging
-import os
 import sys
 from argparse import ArgumentError, ArgumentParser, HelpFormatter, Namespace
-from typing import List, Optional
+from typing import List
 
-from uwtools import config
-from uwtools.j2template import J2Template
-from uwtools.utils import cli_helpers
+from uwtools.utils import cli_helpers, templater
 
 
 def main() -> None:
-    """Main section for rendering and writing a template file"""
-    user_args = parse_args(sys.argv[1:])
-
+    args = parse_args(sys.argv[1:])
     name = f"{inspect.stack()[0][3]}"
     log = cli_helpers.setup_logging(
-        log_file=user_args.log_file, log_name=name, quiet=user_args.quiet, verbose=user_args.verbose
+        log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
     )
-
+    dashes = lambda: log.info("{x}\n{x}".format(x=f"{('-' * 70)}"))
     log.info("Running with args:")
-    log.info(f"{('-' * 70)}")
-    log.info(f"{('-' * 70)}")
-    for name, val in user_args.__dict__.items():
+    dashes()
+    for name, val in sorted(args.__dict__.items()):
         if name not in ["config"]:
             log.info("{name:>15s}: {val}".format(name=name, val=val))
-    log.info(f"{('-' * 70)}")
-    log.info(f"{('-' * 70)}")
-
-    cfg = setup_config_obj(user_args, log_name=log.name)
-
-    # instantiate Jinja2 environment and template
-    template = J2Template(cfg, user_args.input_template, log_name=log.name)
-
-    undeclared_variables = template.undeclared_variables
-
-    if user_args.values_needed:
-        # Gather the undefined template variables.
-        log.info("Values needed for this template are:")
-        for var in sorted(undeclared_variables):
-            log.info(var)
-        return
-
-    # Check for missing values.
-    missing = []
-    for var in undeclared_variables:
-        if var not in cfg.keys():
-            missing.append(var)
-
-    if missing:
-        log.critical("ERROR: Template requires variables that are not provided")
-        for key in missing:
-            log.critical(f"  {key}")
-        msg = "Missing values needed by template"
-        log.critical(msg)
-        raise ValueError(msg)
-
-    if user_args.dry_run:
-        # Apply switch to allow user to view the results of rendered template
-        # instead of writing to disk. Render the template with the specified
-        # config object.
-        rendered_template = template.render_template()
-        log.info(rendered_template)
-    else:
-        # Write out rendered template to file.
-        template.dump_file(user_args.outfile)
+    dashes()
+    templater.render(
+        config_file=args.config_file,
+        config_items=args.config_items,
+        input_template=args.input_template,
+        outfile=args.outfile,
+        log=log,
+        dry_run=args.dry_run,
+        values_needed=args.values_needed,
+    )
 
 
 def parse_args(args: List[str]) -> Namespace:
@@ -160,25 +119,3 @@ def parse_args(args: List[str]) -> Namespace:
         raise ArgumentError(None, msg)
 
     return parsed
-
-
-def setup_config_obj(user_args: Namespace, log_name: Optional[str] = None) -> dict:
-    """Return a dictionary config object from a user-supplied config,
-    the os environment, and the command line arguments."""
-
-    log = logging.getLogger(log_name)
-    if user_args.config_file:
-        config_type = cli_helpers.get_file_type(user_args.config_file)
-        cfg_obj = getattr(config, f"{config_type}Config")
-        cfg = cfg_obj(user_args.config_file)
-        log.debug("User config will be used to fill template.")
-    else:
-        cfg = dict(os.environ)  # Do not modify os.environ: Make a copy.
-        log.debug("Environment variables will be used to fill template.")
-
-    if user_args.config_items:
-        user_settings = cli_helpers.dict_from_config_args(user_args.config_items)
-        cfg.update(user_settings)
-        log.debug("Overwriting config with settings on command line")
-
-    return cfg

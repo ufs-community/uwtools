@@ -5,8 +5,10 @@ Utilities for rendering Jinja2 templates
 import re
 from typing import Optional
 
+from uwtools.utils import cli_helpers
 
-def convert(input_template: str, outfile: Optional[str] = None, dry_run: bool = False) -> None:
+
+def convert(input_template: str, dry_run: bool = False, outfile: Optional[str] = None) -> None:
     """
     Renders a Jinja2 template using user-supplied configuration options via YAML
     or environment variables.
