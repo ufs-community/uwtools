@@ -1,27 +1,35 @@
-import argparse
+"""
+CLI for JSON Schema-based config validation
+"""
 import inspect
-import json
-import logging
+import argparse
+# import inspect
+# import json
+# import logging
 import os
 import sys
+from typing import List
+from argparse import Namespace
+# import jsonschema
 
-import jsonschema
-
-from uwtools import config, exceptions
+# from uwtools import config, exceptions
 from uwtools.utils import cli_helpers
+from uwtools.config_validator import validate_config
+
+def main() -> None:
+    args = parse_args(sys.argv[1:])
+    name = f"{inspect.stack()[0][3]}"
+    log = cli_helpers.setup_logging(
+        log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
+    )
 
 
-def parse_args(argv):
+def parse_args(args: List[str]) -> Namespace:
     """
-    Function maintains the arguments accepted by this script. Please see
-    Python's argparse documentation for more information about settings of each
-    argument.
+    Parse CLI arguments.
     """
-
     parser = argparse.ArgumentParser(description="Validate config with user-defined settings.")
-
     group = parser.add_mutually_exclusive_group()
-
     parser.add_argument(
         "-s",
         "--validation_schema",
@@ -29,7 +37,6 @@ def parse_args(argv):
         required=True,
         type=cli_helpers.path_if_file_exists,
     )
-
     parser.add_argument(
         "-c",
         "--config_file",
@@ -37,14 +44,12 @@ def parse_args(argv):
         required=True,
         type=cli_helpers.path_if_file_exists,
     )
-
     parser.add_argument(
         "--config_file_type",
         help="If used, will convert provided config file to given file type.\
             Accepts YAML, bash/ini or namelist",
         choices=["YAML", "INI", "F90"],
     )
-
     group.add_argument(
         "-v",
         "--verbose",
@@ -63,5 +68,4 @@ def parse_args(argv):
         help="Optional path to a specified log file",
         default=os.path.join(os.path.dirname(__file__), "set_config.log"),
     )
-
-    return parser.parse_args(argv)
+    return parser.parse_args(args)

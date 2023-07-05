@@ -1,4 +1,8 @@
 # pylint: disable=duplicate-code
+"""
+CLI for rendering a Jinja2 template using user-supplied configuration options
+via YAML or environment variables.
+"""
 
 import inspect
 import sys

@@ -1,8 +1,6 @@
 """
-This utility validates a config file using a validation schema.
+Validate a config using JSON Schema.
 """
-import argparse
-import inspect
 import json
 import logging
 import os
@@ -12,36 +10,30 @@ import jsonschema
 
 from uwtools import config, exceptions
 from uwtools.utils import cli_helpers
+from uwtools.logger import Logger
+from uwtools.config import YAMLConfig
 
+def validate_config(config_file: str, validation_schema: str, log: Logger) -> None:
 
-def validate_config(argv, log=None):
-    """Main section for validating config file"""
+    # Get the config file to be validated and dereference Jinja2 templates.
+    # The config file will only be 2 levels deep.
 
-    user_args = parse_args(argv)
-
-    if log is None:
-        name = f"{inspect.stack()[0][3]}"
-        log = cli_helpers.setup_logging(user_args, log_name=name)
-
-    # Get the config file to be validated and dereference jinja templates
-    # The config file will only be 2 levels deep
-    config_class = getattr(config, "YAMLConfig")
-    config_obj = config_class(user_args.config_file, log_name=log.name)
+    config_obj = YAMLConfig(config_file, log_name=log.name)
     config_obj.dereference_all()
 
-    # Load the json validation schema
-    # This json file is created using the jsonschema syntax
-    with open(user_args.validation_schema, "r", encoding="utf-8") as schema_file:
+    # Load the JSON Schema validation schema.
+
+    with open(validation_schema, "r", encoding="utf-8") as schema_file:
         schema = json.load(schema_file)
 
-    schema_error = 0
+    # Validate the config file against the schema file.
 
-    # Validate the config file against the schema file
+    schema_error = 0
     validator = jsonschema.Draft7Validator(schema)
 
-    # Print out each schema error
-    errors = validator.iter_errors(config_obj.data)
+    # Print out each schema error.
 
+    errors = validator.iter_errors(config_obj.data)
     for error in errors:
         schema_error += 1
         logging.error(error)
