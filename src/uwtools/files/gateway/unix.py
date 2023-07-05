@@ -35,8 +35,9 @@ def _copy(src: Path, dst: Path) -> None:
     recursively.
     """
     logging.debug("Copying %s to %s", src, dst)
-    if dst.is_dir():
-        shutil.rmtree(dst)
-        shutil.copytree(src, dst)
-    else:
+    if src.is_file():
         shutil.copy(src, dst)
+    else:
+        if dst.is_dir():
+            shutil.rmtree(dst)
+        shutil.copytree(src, dst)
