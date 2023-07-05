@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring
 """
-Tests for the atparse-to-jinja2 tool.
+Tests for the atparse-to-jinja2 CLI.
 """
 
 from types import SimpleNamespace as ns

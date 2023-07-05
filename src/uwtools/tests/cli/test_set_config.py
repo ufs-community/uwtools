@@ -1,3 +1,6 @@
+"""
+Tests for the set-config CLI.
+"""
 # pylint: disable=missing-function-docstring,redefined-outer-name
 
 from argparse import ArgumentError
