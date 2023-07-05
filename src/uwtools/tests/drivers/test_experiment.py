@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 Tests for uwtools.drivers.experiment module
 """
@@ -12,5 +12,6 @@ from uwtools.drivers import experiment
 def SRWExperiment():
     return experiment.SRWExperiment()
 
+
 def test_SRWExperiment_load_config(SRWExperiment):
-    
+    assert SRWExperiment

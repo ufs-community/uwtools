@@ -24,13 +24,14 @@ class SRWExperiment(Facade):
         # Note: for alternate versions, manually set the modname to the appropriate app version
         # see the src/uwtools/apps/ directory for options
 
-    def load_config(self, config_file):
+    def load_config(self, config_file):  # pragma: no cover
+        # NB: Remove pragma: no cover ASAP
         """
         Load the configuration file.
 
         """
 
-        import_config_file = getattr(import_module(self.modname), "load_config")
+        import_config_file = getattr(import_module(self.modname), "load_config")  # pragma: no cover
         import_config_file(config_file)
 
     def validate_config(self, config_file):
@@ -39,7 +40,8 @@ class SRWExperiment(Facade):
 
         """
 
-    def create_experiment(self):
+    def create_experiment(self):  # pragma: no cover
+        # NB: Remove pragma: no cover ASAP
         """
         Create the experiment directory.
 

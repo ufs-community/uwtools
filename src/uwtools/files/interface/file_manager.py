@@ -10,7 +10,7 @@ from uwtools.files.model import S3, File, Prefixes
 class FileManager(ABC):
     """Represents file operations in an environment."""
 
-    @abstractmethod
+    @abstractmethod  # pragma: no cover
     def copy(self, source: List[File], destination: List):
         """Copies source to destination."""
         raise NotImplementedError

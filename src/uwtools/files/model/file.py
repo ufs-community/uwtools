@@ -38,19 +38,19 @@ class File(ABC):
         return self._uri.split("://", maxsplit=1)[1]
 
     @property
-    @abstractmethod
+    @abstractmethod  # pragma: no cover
     def dir(self) -> List[Any]:
         """Returns the contents of the directory recursively."""
         raise NotImplementedError()
 
     @property
-    @abstractmethod
+    @abstractmethod  # pragma: no cover
     def exists(self) -> bool:
         """Returns true if the file exists."""
         raise NotImplementedError()
 
     @property
-    @abstractmethod
+    @abstractmethod  # pragma: no cover
     def uri_prefix(self) -> str:
         """The URI prefix for this file type"""
         raise NotImplementedError()
