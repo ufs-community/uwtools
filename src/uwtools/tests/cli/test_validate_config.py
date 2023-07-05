@@ -61,37 +61,53 @@ def test_parse_args_bad_cfgfile(sw, files, capsys, tmp_path):
     assert "does not exist" in capsys.readouterr().err
 
 
-# @pytest.mark.parametrize("noise", ["-q", "--quiet", "-v", "--verbose"])
-# @pytest.mark.parametrize(
-#     "sw", [ns(a="-a", c="-c", l="-l"), ns(a="--forecast-app", c="--config-file", l="--log-file")]
-# )
-# def test_parse_args_good(sw, noise, assets):
-#     """Test all valid CLI switch/value combinations."""
-#     cfgfile, logfile = assets
-#     parsed = experiment_manager.parse_args([sw.a, "SRW", sw.c, cfgfile, sw.l, logfile, noise])
-#     assert parsed.forecast_app == "SRW"
-#     assert parsed.config_file == cfgfile
-#     assert parsed.log_file == logfile
-#     if noise in ["-q", "--quiet"]:
-#         sw_off = parsed.verbose
-#         sw_on = parsed.quiet
-#     else:
-#         sw_off = parsed.quiet
-#         sw_on = parsed.verbose
-#     assert sw_off is False
-#     assert sw_on is True
+@pytest.mark.parametrize("sw", [ns(c="-c", s="-s"), ns(c="--config-file", s="--validation-schema")])
+def test_parse_args_bad_schemafile(sw, files, capsys, tmp_path):
+    """Fails if non-existent schema file is specified."""
+    cfgfile, _, _ = files
+    schemafile = str(tmp_path / "no-such-file")
+    with raises(SystemExit) as e:
+        validate_config.parse_args([sw.c, cfgfile, sw.s, schemafile])
+    assert e.value.code == 2
+    assert "does not exist" in capsys.readouterr().err
 
 
-# @pytest.mark.parametrize(
-#     "sw",
-#     [
-#         ns(a="-a", c="-c", q="-q", v="-v"),
-#         ns(a="--forecast-app", c="--config-file", q="--quiet", v="--verbose"),
-#     ],
-# )
-# def test_parse_args_mutually_exclusive_args(sw, assets, capsys):
-#     cfgfile, _ = assets
-#     with raises(SystemExit) as e:
-#         experiment_manager.parse_args([sw.a, "SRW", sw.c, cfgfile, sw.q, sw.v])
-#     assert e.value.code == 1
-#     assert "Options --dry-run and --outfile may not be used together" in capsys.readouterr().err
+@pytest.mark.parametrize("noise", ["-q", "--quiet", "-v", "--verbose"])
+@pytest.mark.parametrize(
+    "sw",
+    [ns(c="-c", l="-l", s="-s"), ns(c="--config-file", l="--log-file", s="--validation-schema")],
+)
+def test_parse_args_good(sw, noise, files):
+    """Test all valid CLI switch/value combinations."""
+    cfgfile, logfile, schemafile = files
+    cfgtype = "F90"  # representative (not exhaustive) value
+    parsed = validate_config.parse_args(
+        [sw.c, cfgfile, sw.l, logfile, sw.s, schemafile, "--config-file-type", cfgtype, noise]
+    )
+    assert parsed.config_file == cfgfile
+    assert parsed.log_file == logfile
+    assert parsed.validation_schema == schemafile
+    if noise in ["-q", "--quiet"]:
+        sw_off = parsed.verbose
+        sw_on = parsed.quiet
+    else:
+        sw_off = parsed.quiet
+        sw_on = parsed.verbose
+    assert sw_off is False
+    assert sw_on is True
+    assert parsed.config_file_type == cfgtype
+
+
+@pytest.mark.parametrize(
+    "sw",
+    [
+        ns(c="-c", q="-q", s="-s", v="-v"),
+        ns(c="--config-file", q="--quiet", s="--validation-schema", v="--verbose"),
+    ],
+)
+def test_parse_args_mutually_exclusive_args(sw, files, capsys):
+    cfgfile, _, schemafile = files
+    with raises(SystemExit) as e:
+        validate_config.parse_args([sw.c, cfgfile, sw.s, schemafile, sw.q, sw.v])
+    assert e.value.code == 1
+    assert "Options --dry-run and --outfile may not be used together" in capsys.readouterr().err

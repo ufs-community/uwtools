@@ -80,5 +80,6 @@ def parse_args(args: List[str]) -> Namespace:
     )
     parsed = parser.parse_args(args)
     if parsed.quiet and parsed.verbose:
-        sys.exit("Options --quiet and --verbose are mutuall exclusive")
+        print("Options --dry-run and --outfile may not be used together", file=sys.stderr)
+        sys.exit(1)
     return parsed
