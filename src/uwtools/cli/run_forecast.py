@@ -1,3 +1,4 @@
+# pylint: disable=duplicate-code
 """
 CLI for running a forecast.
 """

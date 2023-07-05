@@ -1,3 +1,4 @@
+# pylint: disable=duplicate-code
 """
 CLI for rendering Jinja2 templates
 """
@@ -10,6 +11,9 @@ from uwtools.utils import atparse_to_jinja2, cli_helpers
 
 
 def main() -> None:
+    """
+    Main entry point
+    """
     args = parse_args(sys.argv[1:])
     atparse_to_jinja2.convert(
         input_template=args.input_template, outfile=args.outfile, dry_run=args.dry_run

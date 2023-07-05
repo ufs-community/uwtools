@@ -5,8 +5,6 @@ Utilities for rendering Jinja2 templates
 import re
 from typing import Optional
 
-from uwtools.utils import cli_helpers
-
 
 def convert(input_template: str, dry_run: bool = False, outfile: Optional[str] = None) -> None:
     """

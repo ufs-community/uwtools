@@ -1,71 +1,82 @@
+# pylint: disable=duplicate-code
 """
 CLI for JSON Schema-based config validation
 """
-import inspect
 import argparse
-# import inspect
-# import json
-# import logging
-import os
+import inspect
 import sys
+from argparse import HelpFormatter, Namespace
 from typing import List
-from argparse import Namespace
-# import jsonschema
 
-# from uwtools import config, exceptions
-from uwtools.utils import cli_helpers
 from uwtools.config_validator import validate_config
+from uwtools.utils import cli_helpers
+
 
 def main() -> None:
+    """
+    Main entry point
+    """
     args = parse_args(sys.argv[1:])
     name = f"{inspect.stack()[0][3]}"
     log = cli_helpers.setup_logging(
         log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
     )
+    validate_config(config_file=args.config_file, validation_schema=args.validation_schema, log=log)
 
 
 def parse_args(args: List[str]) -> Namespace:
     """
     Parse CLI arguments.
     """
-    parser = argparse.ArgumentParser(description="Validate config with user-defined settings.")
-    group = parser.add_mutually_exclusive_group()
-    parser.add_argument(
-        "-s",
-        "--validation_schema",
-        help="Path to a validation schema.",
-        required=True,
-        type=cli_helpers.path_if_file_exists,
+    args = args or ["--help"]
+    parser = argparse.ArgumentParser(
+        description="Validate a YAML config with JSON Schema.",
+        formatter_class=lambda prog: HelpFormatter(prog, max_help_position=8),
     )
-    parser.add_argument(
+    required = parser.add_argument_group("required arguments")
+    required.add_argument(
         "-c",
-        "--config_file",
-        help="Path to configuration file. Accepts YAML, bash/ini or namelist",
+        "--config-file",
+        help="Path to bash/ini, namelist, or YAML configuration file",
+        metavar="FILE",
         required=True,
         type=cli_helpers.path_if_file_exists,
     )
-    parser.add_argument(
-        "--config_file_type",
-        help="If used, will convert provided config file to given file type.\
-            Accepts YAML, bash/ini or namelist",
-        choices=["YAML", "INI", "F90"],
+    required.add_argument(
+        "-s",
+        "--validation-schema",
+        help="Path to JSON Schema file for validation",
+        metavar="FILE",
+        required=True,
+        type=cli_helpers.path_if_file_exists,
     )
-    group.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        help="If provided, print all logging messages.",
+    optional = parser.add_argument_group("optional arguments")
+    optional.add_argument(
+        "--config-file-type",
+        help="Convert config file to this type.",
+        choices=["F90", "INI", "YAML"],
     )
-    group.add_argument(
+    optional.add_argument(
+        "-l",
+        "--log-file",
+        # #PM# WHAT TO DO ABOUT THIS LOGFILE PATH?
+        default="/dev/null",  # os.path.join(os.path.dirname(__file__), "templater.log"),
+        help="Log to this file.",
+        metavar="FILE",
+    )
+    optional.add_argument(
         "-q",
         "--quiet",
         action="store_true",
-        help="If provided, print no logging messages",
+        help="Print no log messages.",
     )
-    parser.add_argument(
-        "-l",
-        "--log_file",
-        help="Optional path to a specified log file",
-        default=os.path.join(os.path.dirname(__file__), "set_config.log"),
+    optional.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Print all log messages.",
     )
-    return parser.parse_args(args)
+    parsed = parser.parse_args(args)
+    if parsed.quiet and parsed.verbose:
+        sys.exit("Options --quiet and --verbose are mutuall exclusive")
+    return parsed

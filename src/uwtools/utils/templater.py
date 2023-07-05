@@ -1,6 +1,6 @@
 """
-Renders a Jinja2 template using user-supplied configuration options via YAML or
-environment variables.
+Support for rendering a Jinja2 template using user-supplied configuration
+options via YAML or environment variables.
 """
 import os
 from typing import List
@@ -20,6 +20,10 @@ def render(
     dry_run: bool = False,
     values_needed: bool = False,
 ) -> None:
+    """
+    Render a Jinja2 template using user-supplied configuration options via YAML
+    or environment variables.
+    """
     cfg = _setup_config_obj(config_file=config_file, config_items=config_items, log=log)
 
     # Instantiate Jinja2 environment and template.

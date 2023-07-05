@@ -1,20 +1,20 @@
 """
-Validate a config using JSON Schema.
+Support for validating a config using JSON Schema.
 """
 import json
-import logging
 import os
 import sys
 
 import jsonschema
 
-from uwtools import config, exceptions
-from uwtools.utils import cli_helpers
-from uwtools.logger import Logger
 from uwtools.config import YAMLConfig
+from uwtools.logger import Logger
+
 
 def validate_config(config_file: str, validation_schema: str, log: Logger) -> None:
-
+    """
+    Validate a config using JSON Schema.
+    """
     # Get the config file to be validated and dereference Jinja2 templates.
     # The config file will only be 2 levels deep.
 
@@ -36,8 +36,8 @@ def validate_config(config_file: str, validation_schema: str, log: Logger) -> No
     errors = validator.iter_errors(config_obj.data)
     for error in errors:
         schema_error += 1
-        logging.error(error)
-        logging.error("------")
+        log.error(error)
+        log.error("------")
 
     # Create a list of fields that could contain a file or path
     path_list = []
@@ -53,19 +53,9 @@ def validate_config(config_file: str, validation_schema: str, log: Logger) -> No
             if value in path_list:
                 if not os.path.exists(config_obj.data[field][value]):
                     schema_error += 1
-                    logging.error("%s has Invalid Path %s", value, config_obj.data[field][value])
+                    log.error("%s has Invalid Path %s", value, config_obj.data[field][value])
 
     if schema_error > 0:
         sys.exit(f"This configuration file has {schema_error} errors")
     else:
         sys.exit(0)
-
-
-if __name__ == "__main__":
-    cli_args = parse_args(sys.argv[1:])
-    LOG_NAME = "validate_config"
-    cli_log = cli_helpers.setup_logging(cli_args, log_name=LOG_NAME)
-    try:
-        validate_config(sys.argv[1:], cli_log)
-    except exceptions.UWConfigError as e:
-        sys.exit(e)

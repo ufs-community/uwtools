@@ -13,6 +13,9 @@ from uwtools.utils import cli_helpers, templater
 
 
 def main() -> None:
+    """
+    Main entry point
+    """
     args = parse_args(sys.argv[1:])
     name = f"{inspect.stack()[0][3]}"
     log = cli_helpers.setup_logging(
@@ -75,7 +78,7 @@ def parse_args(args: List[str]) -> Namespace:
     optional.add_argument(
         "-l",
         "--log-file",
-        # #PM# WHAT TO DO ABOUT THIS LOGDFILE PATH?
+        # #PM# WHAT TO DO ABOUT THIS LOGFILE PATH?
         default="/dev/null",  # os.path.join(os.path.dirname(__file__), "templater.log"),
         help="Path to a specified log file",
         metavar="FILE",
