@@ -24,7 +24,7 @@ def render(
     Render a Jinja2 template using user-supplied configuration options via YAML
     or environment variables.
     """
-    cfg = _setup_config_obj(config_file=config_file, config_items=config_items, log=log)
+    cfg = _set_up_config_obj(config_file=config_file, config_items=config_items, log=log)
 
     # Instantiate Jinja2 environment and template.
     template = J2Template(cfg, input_template, log_name=log.name)
@@ -63,7 +63,7 @@ def render(
         template.dump_file(outfile)
 
 
-def _setup_config_obj(config_file: str, config_items: List[str], log: Logger) -> dict:
+def _set_up_config_obj(config_file: str, config_items: List[str], log: Logger) -> dict:
     """
     Return a dictionary config object from a user-supplied config, the shell
     environment, and the command line arguments.
