@@ -45,7 +45,7 @@ Note that the `uwtools` package's actual name will contain version and build inf
 
 ### Creating a development shell
 
-To create an interactive development shell:
+To create an interactive development `bash` shell:
 
 1. Download, install, and activate the latest [Miniforge3](https://github.com/conda-forge/miniforge#download) for your system. If an existing conda (Miniforge, Miniconda, Anaconda, etc.) installation is available and writable, you may activate that and skip the first 5 recipe steps below.
 2. Install the [condev](https://github.com/maddenp/condev) package into the base environment.
@@ -67,6 +67,14 @@ make devshell
 If the above is successful, you will be in a `workflow-tools` development shell. See below for usage information. You may exit the shell with `exit` or `ctrl-d`.
 
 Future `make devshell` invocations will be almost instantaneous, as the underlying virtual environment will already exist. In general, all source code changes will be immediately live in the development shell, subject to execution, test, etc. But some changes -- especially to the contents of the `recipe/` directory, or to the `src/setup.py` module -- may require recreation of the development shell. If you know this is needed, or when in doubt: Exit the development shell, run `conda env remove -n DEV-uwtools` to remove the old environment, then run `make devshell` to recreate it.
+
+If your development shell misses any functionality you're used to in your main shell, you can create a `~/.condevrc` file, which will be sourced by `make devshell`. When in doubt, you might
+
+``` sh
+cat <<EOF >~/.condevrc
+source ~/.bashrc
+EOF
+```
 
 ### Using a development shell
 
