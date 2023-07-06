@@ -90,7 +90,7 @@ In an active development shell, the following `make` targets are available and a
 
 Note that `make format` is never run automatically, to avoid reformatting under-development code in a way that might surprise the developer. A useful development idiom is to periodically run `make format && make test` to perform a full code-quality sweep through the code.
 
-The order of the targets above is intentionaly, and possibly useful: `make format` will complain about certain kinds of syntax errors that would cause all the remaining code-quality tools to fail (and may change line numbers reported by other tools, if it ran after them); `make lint` provides a good first check for obvious errors and antipatterns in the code; `make typecheck` offers a more nuanced look at interfaces between functions, methods, etc. and may spot issues that would cause `make unittest` to fail.
+The order of the targets above is intentionally, and possibly useful: `make format` will complain about certain kinds of syntax errors that would cause all the remaining code-quality tools to fail (and may change line numbers reported by other tools, if it ran after them); `make lint` provides a good first check for obvious errors and anti-patterns in the code; `make typecheck` offers a more nuanced look at interfaces between functions, methods, etc. and may spot issues that would cause `make unittest` to fail.
 
 The `make test` command is also automatically executed when `conda` builds a `uwtools` package, so it is important to periodically run these tests during development and, crucially, before merging changes, to ensure that the tests will pass when CI builds the `workflow-tools` code.
 
@@ -115,6 +115,7 @@ conda install -y -c local condev
 ```
 
 ## Documentation
+
 The inline-documentation docstring standard (using the [NumPy](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard) convention) will be used to describe modules, funtions, classes and methods for inline code documentation.
 
 Documentation is automatically generated through [Read the Docs](https://readthedocs.org/) when [develop](https://github.com/ufs-community/workflow-tools/tree/develop) is updated and available [here](https://unified-workflow.readthedocs.io/en/latest/).
