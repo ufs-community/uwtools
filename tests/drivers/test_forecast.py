@@ -168,7 +168,7 @@ def test_create_directory_structure():
         assert pytest_wrapped_e.value.code == 1
 
 def test_create_forecast_obj():
-    ''' Tests that stage_fixed_files is copying files from config_obj 
+    ''' Tests that stage_fixed_files() is copying files from config_obj 
     are being staged in run directory.'''
 
     with tempfile.TemporaryDirectory() as run_directory:

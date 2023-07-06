@@ -80,9 +80,9 @@ class FV3Forecast(Driver): # pragma: no cover
     def stage_fix_files(self, run_directory, config_obj):
 
         ''' Holds the knowledge for how to modify a list of fix files and
-        stages them in the working directory. Likely gets all its info from
-        config_obj. Calls data mover tool (could be python copy). Fix files
-        usually are specific to a given named grid and resolution. '''
+        stages them in the working directory. Calls data mover tool (could
+        be python copy). Fix files usually are specific to a given named
+        grid and resolution. '''
 
         files_to_stage = config_obj.get('static', {})
         for target, file_path in files_to_stage.items():
