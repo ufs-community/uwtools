@@ -9,8 +9,8 @@ and physics suites.
 import logging
 import os
 import sys
-import utils
 import shutil
+import utils
 
 from scripts import set_config
 from uwtools import config
