@@ -1,6 +1,7 @@
 [![Run tests](https://github.com/ufs-community/workflow-tools/actions/workflows/tests.yaml/badge.svg)](https://github.com/ufs-community/workflow-tools/actions/workflows/tests.yaml)
 [![Documentation](https://github.com/ufs-community/workflow-tools/actions/workflows/docs.yaml/badge.svg)](https://github.com/ufs-community/workflow-tools/actions/workflows/docs.yaml)
 [![CodeFactor](https://www.codefactor.io/repository/github/ufs-community/workflow-tools/badge)](https://www.codefactor.io/repository/github/ufs-community/workflow-tools)
+
 # workflow-tools
 
 Unified Workflow tools for use with applications with UFS and beyond
@@ -94,22 +95,13 @@ These targets work from the code in its current state in the clone. `make env` c
 
 ### Building condev locally
 
-The `condev` package can be built locally, then installed into the local conda installation:
+As an alternative to installing a prebuilt package from [anaconda.org](https://anaconda.org/), the `condev` package can be built locally, then installed into the local conda installation. Ensure that `conda-build` and `conda-verify` are installed in the base environment.
 
 ``` sh
 # Activate your conda
 git clone https://github.com/maddenp/condev.git
 make -C condev package
-conda install -y -c local -c conda-forge --override-channels condev
-```
-
-Simple installation instructions with a conda environment.
-```sh
-$> git clone https://github.com/ufs-community/workflow-tools
-$> cd workflow-tools
-$> conda env create -f environment.yaml
-$> conda activate workflow_tools
-$> export PYTHONPATH=$(pwd)/src:$PYTHONPATH
+conda install -y -c local condev
 ```
 
 ## Documentation
