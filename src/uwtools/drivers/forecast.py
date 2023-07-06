@@ -34,7 +34,6 @@ class FV3Forecast(Driver): # pragma: no cover
 
         '''
         super().__init__()
-        # self.config_obj = config_obj
 
     def requirements(self):
 
@@ -87,32 +86,13 @@ class FV3Forecast(Driver): # pragma: no cover
 
         files_to_stage = config_obj.get('static', {})
         for target, file_path in files_to_stage.items():
-            print("THIS IS PRINTING", target, file_path)
-            print(file_path, os.path.isfile(file_path))
             if os.path.isfile(file_path):
-                shutil.copyfile(target, file_path)
-                os.path.join(run_directory, target)
+                file = os.path.join(run_directory, target)
+                shutil.copyfile(file_path, file)
                 msg = f"File {file_path} staged in working directory at {target}"
                 logging.info(msg)
             else:
                 msg = f"File path {file_path} not found"
-                raise RuntimeError(msg)
-
-    def stage_cycledep_files(self, run_directory, config_obj):
-        '''Holds the knowledge for how to modify a list of cycle-dependent files and
-        stages them in the working directory.
-        '''
-
-        files_to_stage = config_obj.get('cycyledep', {})
-        
-        for target, file_path in files_to_stage.items():
-            if os.path.exists(file_path):
-                utils.safe_copy(file_path, target)
-                os.path.join(run_directory, target)
-                msg = f"File {file_path} staged in working directory at {target}"
-                logging.info(msg)
-            else:
-                msg = f"File path not found for file {target}"
                 raise RuntimeError(msg)
 
     def create_namelist(self, update_obj, outnml_file, base_file=None):
