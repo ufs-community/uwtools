@@ -69,9 +69,32 @@ Future `make devshell` invocations will be almost instantaneous, as the underlyi
 
 ### Using a development shell
 
-#### Building condev locally
+In an active development shell, the following `make` targets are available and act on all `.py` files under `src/`:
 
-You can also build the `condev` package locally and then install the locally-build package (Miniforge installations will not need the `-c conda-forge --override-channels` flags):
+| Command          | Description                                                                                   |
+| ---------------- | --------------------------------------------------------------------------------------------- |
+| `make format`    | Format with `black` and `isort`                                                               |
+| `make lint`      | Lint with `pylint`                                                                            |
+| `make typecheck` | Typecheck with `mypy`                                                                         |
+| `make unittest`  | Run unit tests and report coverage with `pytest` and `coverage`                               |
+| `make test`      | Equivalent to `make lint && make typecheck && make unittest`, plus checks defined CLI scripts |
+
+The `make test` command is also automatically executed when `conda` builds a `uwtools` package, so it is important to periodically run these tests during development and, crucially, before merging changes, to ensure that the tests will pass when CI builds the `workflow-tools` code.
+
+Note that `make format` is never run automatically, to avoid reformatting under-development code in a way that might surprise the developer. A useful development idiom is to periodically run `make format && make test` to perform a full code-quality sweep through the code.
+
+In addition to the `make devshell` command, two other `make` targets are available for use *outside* a development shell, i.e. from the base conda environment (requires presence of the `condev` package):
+
+| Command          | Description                                                |
+| ---------------- | ---------------------------------------------------------- |
+| `make package`   | Builds a `uwtools` conda package                           |
+| `make env`       | Creates a conda environment based on the `uwtools` code    |
+
+These targets work from the code in its current state in the clone. `make env` calls `make package` automatically to create a local package, then builds an environment based on the package.
+
+### Building condev locally
+
+The `condev` package can be built locally, then installed into the local conda installation:
 
 ``` sh
 # Activate your conda
