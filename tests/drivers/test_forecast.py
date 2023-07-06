@@ -3,6 +3,7 @@ Tests for forecast driver
 '''
 #pylint: disable=unused-variable
 
+import filecmp
 import os
 import pathlib
 import shutil
@@ -167,34 +168,25 @@ def test_create_directory_structure():
         assert pytest_wrapped_e.value.code == 1
 
 def test_create_forecast_obj():
-    ''' Tests stage files given config object'''
+    ''' Tests that files fron config_obj are being staged in run directory'''
 
     with tempfile.TemporaryDirectory() as run_directory:
 
-        #store here or in run directory? 
-        # do nothing base case 
-        config_dict = {
-            "working_dir": f"./{run_directory}",
-            "static": {},
-            "cycledep": {},
-        }
+        test_yaml = os.path.join(uwtools_file_base,pathlib.Path("../fixtures/expt_dir.yaml"))
+        test_cfg = config.YAMLConfig(test_yaml)
         forecast_obj = FV3Forecast()
 
-        # convert to config_obj?
-        test_yaml = os.path.join(uwtools_file_base,pathlib.Path("./expt_dir.yaml"))
-        test_cfg = config.YAMLConfig(test_yaml)
-        # how to connect expt_dir and config_dict?
-
         forecast_obj.create_directory_structure(run_directory)
-        forecast_obj.stage_fix_files()
 
-        # assert files have been staged / are in tmpdir
-        # how to access files from aws?
-        test_file = os.path.join(run_directory, "co2historicaldata_2010.txt")
-        assert os.path.isfile(test_file)
-        assert test_file in run_directory
+        files_to_stage = test_cfg.get('static', {})
 
+        for target, file_path in files_to_stage.items():
+            pathlib.Path(file_path).touch()
 
-        forecast_obj.cycledep_files()
-        test_file = os.path.join(run_directory, "INPUT/gfs_data.nc")
-        assert os.path.isfile(test_file)
+        forecast_obj.stage_fix_files(run_directory, test_cfg)
+
+        for target, file_path in files_to_stage.items():
+            assert os.path.isfile(file_path)
+            assert os.path.isfile(target)
+            assert filecmp.cmp(file_path, target)
+            os.remove(file_path)

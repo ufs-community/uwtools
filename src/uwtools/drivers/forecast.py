@@ -10,6 +10,7 @@ import logging
 import os
 import sys
 import utils
+import shutil
 
 from scripts import set_config
 from uwtools import config
@@ -27,13 +28,13 @@ class FV3Forecast(Driver): # pragma: no cover
         FV3 (ATM-only) mode.
     '''
 
-    def __init__(self, config_obj):
+    def __init__(self):
         '''
             Initialize the Forecast driver.
 
         '''
         super().__init__()
-        self.config_obj = config_obj
+        # self.config_obj = config_obj
 
     def requirements(self):
 
@@ -77,40 +78,41 @@ class FV3Forecast(Driver): # pragma: no cover
         msg = f"Config file {outconfig_file} created"
         logging.info(msg)
 
-    def stage_fix_files(self):
+    def stage_fix_files(self, run_directory, config_obj):
 
         ''' Holds the knowledge for how to modify a list of fix files and
         stages them in the working directory. Likely gets all its info from
         config_obj. Calls data mover tool (could be python copy). Fix files
         usually are specific to a given named grid and resolution. '''
 
-        files_to_stage = self.config_obj.get('static', {})
-        
+        files_to_stage = config_obj.get('static', {})
         for target, file_path in files_to_stage.items():
-            if os.path.exists(file_path):
-                utils.safe_copy(file_path, target)
+            print("THIS IS PRINTING", target, file_path)
+            print(file_path, os.path.isfile(file_path))
+            if os.path.isfile(file_path):
+                shutil.copyfile(target, file_path)
+                os.path.join(run_directory, target)
                 msg = f"File {file_path} staged in working directory at {target}"
                 logging.info(msg)
             else:
-                msg = f"File path not found for file {target}"
-                # logging.critical(msg)
+                msg = f"File path {file_path} not found"
                 raise RuntimeError(msg)
 
-    def cycledep_files(self):
+    def stage_cycledep_files(self, run_directory, config_obj):
         '''Holds the knowledge for how to modify a list of cycle-dependent files and
         stages them in the working directory.
         '''
 
-        files_to_stage = self.config_obj.get('cycyledep', {})
+        files_to_stage = config_obj.get('cycyledep', {})
         
         for target, file_path in files_to_stage.items():
             if os.path.exists(file_path):
                 utils.safe_copy(file_path, target)
+                os.path.join(run_directory, target)
                 msg = f"File {file_path} staged in working directory at {target}"
                 logging.info(msg)
             else:
                 msg = f"File path not found for file {target}"
-                # logging.critical(msg)
                 raise RuntimeError(msg)
 
     def create_namelist(self, update_obj, outnml_file, base_file=None):
