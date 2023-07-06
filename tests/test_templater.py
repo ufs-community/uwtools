@@ -21,17 +21,19 @@ def test_set_template_dryrun(): #pylint: disable=unused-variable
 
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
     outcome=\
-    """Running set_template with args:
+    f"""Running set_template with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
- input_template: """ + input_file  + """
+ input_template: {input_file}
     config_file: None
    config_items: []
         dry_run: True
   values_needed: False
         verbose: False
           quiet: False
+
+re-run settings: templater.py  -i {input_file} --dry_run
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 &salad
@@ -66,17 +68,19 @@ def test_set_template_listvalues(): #pylint: disable=unused-variable
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     outcome=\
-    """Running set_template with args:
+    f"""Running set_template with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
- input_template: """ + input_file  + """
+ input_template: {input_file}
     config_file: None
    config_items: []
         dry_run: False
   values_needed: True
         verbose: False
           quiet: False
+
+re-run settings: templater.py  -i {input_file} --values_needed
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 Values needed for this template are:
@@ -168,17 +172,19 @@ def test_set_template_command_line_config(): #pylint: disable=unused-variable
     input_file = os.path.join(uwtools_file_base, "fixtures/nml.IN")
 
     outcome=\
-    """Running set_template with args:
+    f"""Running set_template with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
         outfile: None
- input_template: """ + input_file  + """
+ input_template: {input_file}
     config_file: None
    config_items: ['fruit=pear', 'vegetable=squash', 'how_many=22']
         dry_run: True
   values_needed: False
         verbose: False
           quiet: False
+
+re-run settings: templater.py  -i {input_file} --dry_run fruit=pear vegetable=squash how_many=22
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 &salad
@@ -250,6 +256,7 @@ Running set_template with args:
   values_needed: False
         verbose: True
           quiet: False
+re-run settings: templater.py  -i {input_file} --dry_run -v
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 &salad
