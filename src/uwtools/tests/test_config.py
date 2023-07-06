@@ -775,7 +775,6 @@ bar: 2
         )
     with raises(exceptions.UWConfigError) as e:
         config.YAMLConfig(tmpfile)
-    # #PM# WHAT IS THE RATIONALE HERE?
     assert "value is included in quotes" in str(e.value)
 
 
