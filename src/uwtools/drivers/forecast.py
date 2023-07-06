@@ -17,9 +17,6 @@ from uwtools import config
 from uwtools.utils import file_helpers
 from .driver import Driver
 
-logging.getLogger(__name__)
-
-
 class FV3Forecast(Driver): # pragma: no cover
     #remove pragma when completed
 
