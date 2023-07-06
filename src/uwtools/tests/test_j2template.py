@@ -1,5 +1,4 @@
 # pylint: disable=missing-function-docstring,redefined-outer-name
-
 """
 Unit tests for testing J2Template class
 """
