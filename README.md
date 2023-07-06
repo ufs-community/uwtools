@@ -88,9 +88,11 @@ In an active development shell, the following `make` targets are available and a
 | `make unittest`  | Run unit tests and report coverage with `pytest` and `coverage`                               |
 | `make test`      | Equivalent to `make lint && make typecheck && make unittest`, plus checks defined CLI scripts |
 
-The `make test` command is also automatically executed when `conda` builds a `uwtools` package, so it is important to periodically run these tests during development and, crucially, before merging changes, to ensure that the tests will pass when CI builds the `workflow-tools` code.
-
 Note that `make format` is never run automatically, to avoid reformatting under-development code in a way that might surprise the developer. A useful development idiom is to periodically run `make format && make test` to perform a full code-quality sweep through the code.
+
+The order of the targets above is intentionaly, and possibly useful: `make format` will complain about certain kinds of syntax errors that would cause all the remaining code-quality tools to fail (and may change line numbers reported by other tools, if it ran after them); `make lint` provides a good first check for obvious errors and antipatterns in the code; `make typecheck` offers a more nuanced look at interfaces between functions, methods, etc. and may spot issues that would cause `make unittest` to fail.
+
+The `make test` command is also automatically executed when `conda` builds a `uwtools` package, so it is important to periodically run these tests during development and, crucially, before merging changes, to ensure that the tests will pass when CI builds the `workflow-tools` code.
 
 In addition to the `make devshell` command, two other `make` targets are available for use *outside* a development shell, i.e. from the base conda environment (requires presence of the `condev` package):
 

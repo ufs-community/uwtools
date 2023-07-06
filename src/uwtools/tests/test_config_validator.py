@@ -32,6 +32,7 @@ def test_confid_is_valid_good(vals):
 
 # #PM# EVERYTHING BELOW TESTS jsonschema, NOT OUR CODE. DO WE NEED IT?
 
+
 def validate(subpath, schema):
     with open(fixture_path(subpath), "r", encoding="utf-8") as f:
         jsonschema.validate(yaml.safe_load(f), schema)
