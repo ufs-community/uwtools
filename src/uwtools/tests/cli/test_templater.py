@@ -77,6 +77,7 @@ Running with args:
   values_needed: False
         verbose: False
           quiet: False
+Re-run settings: {sw.i} {infile} {sw.d} fruit=pear vegetable=squash how_many=22
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 &salad
@@ -113,6 +114,7 @@ Running with args:
   values_needed: False
         verbose: False
           quiet: False
+Re-run settings: {sw.i} {infile} {sw.d}
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 &salad
@@ -151,6 +153,7 @@ Running with args:
   values_needed: True
         verbose: False
           quiet: False
+Re-run settings: {sw.i} {infile} --values-needed
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 Values needed for this template are:
@@ -185,6 +188,7 @@ Running with args:
   values_needed: False
         verbose: True
           quiet: False
+Re-run settings: {sw.i} {infile} {sw.d} {sw.v}
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
 &salad

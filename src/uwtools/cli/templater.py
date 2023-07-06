@@ -27,6 +27,7 @@ def main() -> None:
     for name, val in sorted(args.__dict__.items()):
         if name not in ["config"]:
             log.info("{name:>15s}: {val}".format(name=name, val=val))
+    log.info("Re-run settings: %s", " ".join(sys.argv[1:]))
     dashes()
     templater.render(
         config_file=args.config_file,
