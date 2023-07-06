@@ -7,7 +7,8 @@ import os
 
 from setuptools import find_packages, setup  # type: ignore
 
-with open(os.path.join(os.environ["RECIPE_DIR"], "meta.json"), "r", encoding="utf-8") as f:
+recipe = os.environ.get("RECIPE_DIR", "../recipe")
+with open(os.path.join(recipe, "meta.json"), "r", encoding="utf-8") as f:
     meta = json.load(f)
 
 name_conda = meta["name"]
