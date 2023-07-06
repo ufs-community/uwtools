@@ -20,7 +20,7 @@ def register_filters(j2env):
 
 
 def path_join(arg):
-    """A Jinj2 filter definition for joining paths"""
+    """A Jinja2 filter definition for joining paths"""
     return os.path.join(*arg)
 
 
