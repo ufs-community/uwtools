@@ -74,22 +74,25 @@ class FV3Forecast(Driver): # pragma: no cover
         msg = f"Config file {outconfig_file} created"
         logging.info(msg)
 
-    def stage_fix_files(self, run_directory, config_obj):
+    def stage_static_files(self, run_directory, config_obj):
 
-        ''' Holds the knowledge for how to modify a list of fix files and
-        stages them in the working directory. Calls data mover tool (could
-        be python copy). Fix files usually are specific to a given named
-        grid and resolution. '''
+        ''' Takes in run directory and dictionary of file names
+        and paths that need to be staged in the run directory. Creates
+        dst file in run directory and copies contents from the src path
+        provided.'''
 
+        if not os.path.isdir(run_directory):
+            msg = f"Directory {run_directory} not found"
+            raise RuntimeError(msg)
         files_to_stage = config_obj.get('static', {})
-        for target, file_path in files_to_stage.items():
-            if os.path.isfile(file_path):
-                file = os.path.join(run_directory, target)
-                shutil.copyfile(file_path, file)
-                msg = f"File {file_path} staged in working directory at {target}"
+        for dst_fn, src_path in files_to_stage.items():
+            if os.path.isfile(src_path):
+                dst_path = os.path.join(run_directory, dst_fn)
+                shutil.copyfile(src_path, dst_path)
+                msg = f"File {src_path} staged in run directory at {dst_fn}"
                 logging.info(msg)
             else:
-                msg = f"File path {file_path} not found"
+                msg = f"File path {src_path} not found"
                 raise RuntimeError(msg)
 
     def create_namelist(self, update_obj, outnml_file, base_file=None):

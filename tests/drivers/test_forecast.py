@@ -184,7 +184,7 @@ def test_create_forecast_obj():
         for target, file_path in files_to_stage.items():
             pathlib.Path(file_path).touch()
 
-        forecast_obj.stage_fix_files(run_directory, test_cfg)
+        forecast_obj.stage_static_files(run_directory, test_cfg)
 
         for target, file_path in files_to_stage.items():
             assert os.path.isfile(file_path)
