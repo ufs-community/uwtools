@@ -168,8 +168,8 @@ def test_create_directory_structure():
         assert pytest_wrapped_e.value.code == 1
 
 def test_create_forecast_obj():
-    ''' Tests that stage_fixed_files() is copying files from config_obj 
-    are being staged in run directory.'''
+    ''' Tests that stage_static_files() is copying files from static
+    section of the config obj are being staged in run directory.'''
 
     with tempfile.TemporaryDirectory() as run_directory:
 
@@ -181,14 +181,14 @@ def test_create_forecast_obj():
 
         files_to_stage = test_cfg.get('static', {})
 
-        for target, file_path in files_to_stage.items():
-            pathlib.Path(file_path).touch()
+        for dst_fn, src_path in files_to_stage.items():
+            pathlib.Path(src_path).touch()
 
-        forecast_obj.stage_static_files(run_directory, test_cfg)
+        forecast_obj.stage_static_files(run_directory, files_to_stage)
 
-        for target, file_path in files_to_stage.items():
-            assert os.path.isfile(file_path)
-            file = os.path.join(run_directory, target)
-            assert os.path.isfile(file)
-            assert filecmp.cmp(file_path, file)
-            os.remove(file_path)
+        for dst_fn, src_path in files_to_stage.items():
+            assert os.path.isfile(src_path)
+            dst_path = os.path.join(run_directory, dst_fn)
+            assert os.path.isfile(dst_path)
+            assert filecmp.cmp(src_path, dst_path)
+            os.remove(src_path)

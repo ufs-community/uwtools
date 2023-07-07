@@ -74,7 +74,7 @@ class FV3Forecast(Driver): # pragma: no cover
         msg = f"Config file {outconfig_file} created"
         logging.info(msg)
 
-    def stage_static_files(self, run_directory, config_obj):
+    def stage_static_files(self, run_directory: str, static_files: dict[str, str]) -> None:
 
         ''' Takes in run directory and dictionary of file names
         and paths that need to be staged in the run directory. Creates
@@ -84,8 +84,7 @@ class FV3Forecast(Driver): # pragma: no cover
         if not os.path.isdir(run_directory):
             msg = f"Directory {run_directory} not found"
             raise RuntimeError(msg)
-        files_to_stage = config_obj.get('static', {})
-        for dst_fn, src_path in files_to_stage.items():
+        for dst_fn, src_path in static_files.items():
             if os.path.isfile(src_path):
                 dst_path = os.path.join(run_directory, dst_fn)
                 shutil.copyfile(src_path, dst_path)
