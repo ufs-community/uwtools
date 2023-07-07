@@ -7,6 +7,8 @@ import logging
 import os
 import sys
 from typing import Optional
+import shutil
+from typing import Dict
 
 from uwtools import config
 from uwtools.cli.set_config import parse_args as parse_config_args
@@ -69,11 +71,17 @@ class FV3Forecast(Driver):
         msg = f"Config file {outconfig_file} created"
         logging.info(msg)
 
-    def stage_fix_files(self):
-        """Holds the knowledge for how to modify a list of fix files and
-        stages them in the working directory. Likely gets all its info from
-        config_obj. Calls data mover tool (could be python copy). Fix files
-        usually are specific to a given named grid and resolution."""
+    def stage_static_files(self, run_directory: str, static_files: Dict[str, str]) -> None:
+        ''' Takes in run directory and dictionary of file names and
+        paths that need to be staged in the run directory. Creates
+        dst file in run directory and copies contents from the src
+        path provided.'''
+
+        for dst_fn, src_path in static_files.items():
+            dst_path = os.path.join(run_directory, dst_fn)
+            shutil.copyfile(src_path, dst_path)
+            msg = f"File {src_path} staged in run directory at {dst_fn}"
+            logging.info(msg)
 
     def create_namelist(self, update_obj, outnml_file, base_file=None):
         """Uses an object with user supplied values and an optional

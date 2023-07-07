@@ -1,0 +1,16 @@
+cycledep:
+  INPUT/gfs_data.nc: path/to/gfs_data.tile7.halo0.nc 
+  INPUT/sfc_data.nc: path/to/sfc_data.tile7.halo0.nc
+  INPUT/gfs_bndy.tile7.000.nc: path/to/gfs_bndy.tile7.000.nc
+  INPUT/gfs_bndy.tile7.006.nc: path/to/gfs_bndy.tile7.006.nc 
+  INPUT/gfs_ctrl.nc: path/to/gfs_ctrl.nc
+static: 
+  co2historicaldata_2010.txt: src/uwtools/drivers/global_co2historicaldata_2010.txt
+  co2historicaldata_2011.txt: src/uwtools/drivers/global_co2historicaldata_2011.txt
+  co2historicaldata_2012.txt: src/uwtools/drivers/global_co2historicaldata_2012.txt
+  co2historicaldata_2013.txt: src/uwtools/drivers/global_co2historicaldata_2013.txt
+  co2historicaldata_2014.txt: src/uwtools/drivers/global_co2historicaldata_2014.txt
+  co2historicaldata_2015.txt: src/uwtools/drivers/global_co2historicaldata_2015.txt
+  co2historicaldata_2016.txt: src/uwtools/drivers/global_co2historicaldata_2016.txt
+  co2historicaldata_2017.txt: src/uwtools/drivers/global_co2historicaldata_2017.txt
+  co2historicaldata_2018.txt: src/uwtools/drivers/global_co2historicaldata_2018.txt
