@@ -35,7 +35,7 @@ jobs:
 
     - name: Build documentation
       run: |
-        ./.github/jobs/build_documentation.sh
+        ./.github/scripts/build-documentation
     - uses: actions/upload-artifact@v3
       if: always()
       with:
