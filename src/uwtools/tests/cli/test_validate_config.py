@@ -22,9 +22,8 @@ def files(tmp_path):
     cfgfile = tmp_path / "cfg.yaml"
     logfile = tmp_path / "log"
     schemafile = fixture_path("schema_test_good.yaml")
-    for fn in cfgfile, logfile:
-        with open(fn, "w", encoding="utf-8"):
-            pass
+    for path in cfgfile, logfile:
+        path.touch()
     return str(cfgfile), str(logfile), str(schemafile)
 
 

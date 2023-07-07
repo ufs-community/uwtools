@@ -4,6 +4,7 @@
 Tests for forecast driver
 """
 
+from pathlib import Path
 from unittest.mock import patch
 
 from pytest import fixture, raises
@@ -44,8 +45,7 @@ def test_create_directory_structure(tmp_path):
 
     # Create a file in the run directory.
     test_file = rundir / "test.txt"
-    with open(test_file, "w", encoding="utf-8"):
-        pass
+    test_file.touch()
     assert test_file.is_file()
 
     # Test delete behavior when run directory exists. Test file should be gone
@@ -100,8 +100,7 @@ def test_create_model_config(tmp_path):
     infile = str(tmp_path / "in.yaml")
     outfile = str(tmp_path / "out.yaml")
     for path in infile, basefile:
-        with open(path, "w", encoding="utf-8"):
-            pass
+        Path(path).touch()
     with patch.object(config, "create_config_obj") as create_config_obj:
         FV3Forecast().create_model_config(
             config_file=infile, outconfig_file=outfile, base_file=basefile

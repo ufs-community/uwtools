@@ -451,8 +451,7 @@ def test_path_if_file_exists(tmp_path):
         cli_helpers.path_if_file_exists(badfile)
 
     goodfile = tmp_path / "exists"
-    with open(goodfile, "w", encoding="utf-8"):
-        pass
+    goodfile.touch()
     assert cli_helpers.path_if_file_exists(goodfile)
 
 

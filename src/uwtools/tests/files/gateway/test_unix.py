@@ -81,8 +81,7 @@ def test__copy_dir_create(dirs):
 def test__copy_dir_replace(dirs):
     src, dst = dirs
     dst.mkdir()
-    with open(dst / "junk", "w", encoding="utf-8"):
-        pass
+    (dst / "junk").touch()
     unix._copy(src=src, dst=dst)
     assert content(src) == content(dst)  # i.e. junk is gone
 

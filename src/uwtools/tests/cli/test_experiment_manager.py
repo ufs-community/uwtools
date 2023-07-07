@@ -27,8 +27,7 @@ def test_main():
 @fixture
 def assets(tmp_path):
     cfgfile = tmp_path / "cfg.yaml"
-    with open(cfgfile, "w", encoding="utf-8"):
-        pass
+    cfgfile.touch()
     logfile = tmp_path / "log"
     return str(cfgfile), str(logfile)
 

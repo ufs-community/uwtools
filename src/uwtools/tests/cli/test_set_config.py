@@ -16,8 +16,7 @@ from uwtools.cli import set_config
 @fixture
 def args(tmp_path):
     for fn in ("in.yaml", "cfg.yaml", "out.yaml"):
-        with (tmp_path / fn).open("w"):
-            pass
+        (tmp_path / fn).touch()
     return {
         "--input-base-file": str(tmp_path / "in.yaml"),
         "--config-file": str(tmp_path / "cfg.yaml"),

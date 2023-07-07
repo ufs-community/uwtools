@@ -5,6 +5,7 @@ Tests for the templater CLI
 
 import argparse
 import os
+from pathlib import Path
 from types import SimpleNamespace as ns
 from unittest.mock import patch
 
@@ -51,8 +52,7 @@ def test_set_template_bad_config_suffix(sw, tmp_path):
     Test that a bad config filename suffix is rejected.
     """
     badfile = str(tmp_path / "foo.shx")  # .shx is a bad suffix
-    with open(badfile, "w", encoding="utf-8"):
-        pass  # create empty file
+    Path(badfile).touch()
     with raises(ValueError):
         argv = ["test", sw.i, fixture_path("nml.IN"), sw.c, badfile, sw.d]
         with patch.object(templater.sys, "argv", argv):
