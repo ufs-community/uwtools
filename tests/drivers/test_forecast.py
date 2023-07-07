@@ -3,6 +3,7 @@ Tests for forecast driver
 '''
 #pylint: disable=unused-variable
 
+import filecmp
 import os
 import pathlib
 import shutil
@@ -165,3 +166,29 @@ def test_create_directory_structure():
             forecast_obj.create_directory_structure(run_directory, "quit")
         assert pytest_wrapped_e.type == SystemExit
         assert pytest_wrapped_e.value.code == 1
+
+def test_create_forecast_obj():
+    ''' Tests that stage_static_files() is copying files from static
+    section of the config obj are being staged in run directory.'''
+
+    with tempfile.TemporaryDirectory() as run_directory:
+
+        test_yaml = os.path.join(uwtools_file_base,pathlib.Path("../fixtures/expt_dir.yaml"))
+        test_cfg = config.YAMLConfig(test_yaml)
+        forecast_obj = FV3Forecast()
+
+        forecast_obj.create_directory_structure(run_directory)
+
+        files_to_stage = test_cfg.get('static', {})
+
+        for dst_fn, src_path in files_to_stage.items():
+            pathlib.Path(src_path).touch()
+
+        forecast_obj.stage_static_files(run_directory, files_to_stage)
+
+        for dst_fn, src_path in files_to_stage.items():
+            assert os.path.isfile(src_path)
+            dst_path = os.path.join(run_directory, dst_fn)
+            assert os.path.isfile(dst_path)
+            assert filecmp.cmp(src_path, dst_path)
+            os.remove(src_path)
