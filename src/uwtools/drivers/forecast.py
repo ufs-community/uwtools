@@ -74,7 +74,7 @@ class FV3Forecast(Driver): # pragma: no cover
         msg = f"Config file {outconfig_file} created"
         logging.info(msg)
 
-    def stage_static_files(self, run_directory: str, static_files: dict[str, str]) -> None:
+    def stage_static_files(self, run_directory, static_files):
 
         ''' Takes in run directory and dictionary of file names and
         paths that need to be staged in the run directory. Creates
