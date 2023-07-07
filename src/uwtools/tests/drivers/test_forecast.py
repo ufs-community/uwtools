@@ -4,6 +4,7 @@
 Tests for forecast driver
 """
 
+import filecmp
 from pathlib import Path
 from unittest.mock import patch
 
@@ -153,3 +154,29 @@ def test_create_namelist_without_base_file(create_namelist_assets):
 """.lstrip()
     with open(outnml_file, "r", encoding="utf-8") as out_file:
         assert out_file.read() == expected
+
+
+def test_FV3Forecast_stage_static_files(tmp_path):
+    """Tests that stage_static_files() is copying files from static
+    section of the config obj are being staged in run directory."""
+
+    run_directory = tmp_path / "run"
+    src_directory = tmp_path / "src"
+    files_to_stage = config.YAMLConfig(fixture_path("expt_dir.yaml"))["static"]
+    # Fix source paths so that they are relative to our test temp directory and
+    # create the test files.
+    src_directory.mkdir()
+    for dst_fn, src_path in files_to_stage.items():
+        fixed_src_path = src_directory / Path(src_path).name
+        files_to_stage[dst_fn] = str(fixed_src_path)
+        fixed_src_path.touch()
+    # Test that none of the destination files exist yet:
+    for dst_fn in files_to_stage.keys():
+        assert not (run_directory / dst_fn).is_file()
+    # Ask a forecast object to stage the files to the run directory:
+    forecast_obj = FV3Forecast()
+    forecast_obj.create_directory_structure(run_directory)
+    forecast_obj.stage_static_files(run_directory, files_to_stage)
+    # Test that all of the destination files now exist:
+    for dst_fn in files_to_stage.keys():
+        assert (run_directory / dst_fn).is_file()
