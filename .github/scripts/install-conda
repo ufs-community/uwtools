@@ -7,5 +7,5 @@ bash $f -bfp conda
   set -e +ux
   source conda/etc/profile.d/conda.sh
   conda activate
-  conda install -q -y conda-build conda-verify jq make
+  conda install -q -y -c maddenp condev=1.7
 )
