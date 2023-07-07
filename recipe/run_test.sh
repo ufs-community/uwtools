@@ -1,7 +1,7 @@
 #!/bin/bash -eu
 
 cli() {
-  echo Testing CLI programs...
+  msg Testing CLI programs
   (
     set -eu
     clis=(
@@ -17,39 +17,43 @@ cli() {
       $x --help &>/dev/null
     done
   )
-  echo OK
+  msg OK
 }
 
 lint() {
-  echo Running linter...
+  msg Running linter
   (
-    set -eu
-    pylint ${pyfiles[*]}
+    set -eux
+    pylint --recursive y .
   )
-  echo OK
+  msg OK
+}
+
+msg() {
+  echo "=> $@"
 }
 
 typecheck() {
-  echo Running typechecker...
+  msg Running typechecker
   (
-    set -eu
-    mypy --install-types --non-interactive ${pyfiles[*]}
+    set -eux
+    mypy --install-types --non-interactive --pretty .
   )
-  echo OK
+  msg OK
 }
 
 unittest() {
-  echo Running unit tests...
+  msg Running unit tests
   (
-    set -eu
+    set -eux
     coverage run -m pytest -vv .
     coverage report --omit="*/tests/*"
   )
-  echo OK
+  msg OK
 }
 
 test "${CONDA_BUILD:-}" = 1 && cd ../test_files || cd $(realpath $(dirname $0)/../src)
-pyfiles=( $(find . -type f -name "*.py") )
+msg Running in $PWD
 if [[ -n "${1:-}" ]]; then
   # Run single specified code-quality tool.
   $1

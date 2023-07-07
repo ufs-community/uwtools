@@ -4,4 +4,4 @@ set +ux
 source conda/etc/profile.d/conda.sh
 conda activate
 set -ux
-conda build -c conda-forge --error-overlinking --override-channels recipe
+make package
