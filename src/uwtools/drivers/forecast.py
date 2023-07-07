@@ -10,13 +10,13 @@ import logging
 import os
 import sys
 import shutil
+from typing import Dict
 import utils
 
 from scripts import set_config
 from uwtools import config
 from uwtools.utils import file_helpers
 from .driver import Driver
-from typing import Dict
 
 class FV3Forecast(Driver): # pragma: no cover
     #remove pragma when completed
