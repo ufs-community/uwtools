@@ -76,10 +76,10 @@ class FV3Forecast(Driver): # pragma: no cover
 
     def stage_static_files(self, run_directory: str, static_files: dict[str, str]) -> None:
 
-        ''' Takes in run directory and dictionary of file names
-        and paths that need to be staged in the run directory. Creates
-        dst file in run directory and copies contents from the src path
-        provided.'''
+        ''' Takes in run directory and dictionary of file names and
+        paths that need to be staged in the run directory. Creates
+        dst file in run directory and copies contents from the src
+        path provided.'''
 
         if not os.path.isdir(run_directory):
             msg = f"Directory {run_directory} not found"
