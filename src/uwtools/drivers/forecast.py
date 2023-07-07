@@ -16,6 +16,7 @@ from scripts import set_config
 from uwtools import config
 from uwtools.utils import file_helpers
 from .driver import Driver
+from typing import Dict
 
 class FV3Forecast(Driver): # pragma: no cover
     #remove pragma when completed
@@ -74,24 +75,18 @@ class FV3Forecast(Driver): # pragma: no cover
         msg = f"Config file {outconfig_file} created"
         logging.info(msg)
 
-    def stage_static_files(self, run_directory, static_files):
+    def stage_static_files(self, run_directory: str, static_files: Dict[str, str]) -> None:
         ''' Takes in run directory and dictionary of file names and
         paths that need to be staged in the run directory. Creates
         dst file in run directory and copies contents from the src
         path provided.'''
 
-        if not os.path.isdir(run_directory):
-            msg = f"Directory {run_directory} not found"
-            raise RuntimeError(msg)
         for dst_fn, src_path in static_files.items():
             if os.path.isfile(src_path):
                 dst_path = os.path.join(run_directory, dst_fn)
                 shutil.copyfile(src_path, dst_path)
                 msg = f"File {src_path} staged in run directory at {dst_fn}"
                 logging.info(msg)
-            else:
-                msg = f"File path {src_path} not found"
-                raise RuntimeError(msg)
 
     def create_namelist(self, update_obj, outnml_file, base_file=None):
         ''' Uses an object with user supplied values and an optional
