@@ -7,5 +7,5 @@ bash $f -bfp conda
   set -e +ux
   source conda/etc/profile.d/conda.sh
   conda activate
-  conda install -q -y -c maddenp --repodata-fn repodata.json condev=0.1.8
+  conda install -q -y -c maddenp --repodata-fn repodata.json condev=0.2.0
 )
