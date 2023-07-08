@@ -1,0 +1,25 @@
+name: Test and Lint
+on:
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+    branches:
+      - develop
+jobs:
+  make-package:
+    name: Run pytest tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install conda
+        run:  .github/scripts/install-conda
+      - name: Run Tests
+        run:  .github/scripts/make-test
+    strategy:
+      matrix:
+        # python: ["3.7", "3.8", "3.9", "3.10"]
+        python: ["3.9"]

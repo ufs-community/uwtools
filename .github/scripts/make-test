@@ -1,0 +1,10 @@
+#!/bin/bash -eux
+
+set +ux
+source conda/etc/profile.d/conda.sh
+conda activate
+set -ux
+cat <<EOF >~/.condevrc
+make test
+EOF
+make devshell
