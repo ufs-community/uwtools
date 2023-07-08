@@ -2,6 +2,7 @@
 """
 Tests for uwtools.logging module
 """
+
 import logging
 
 from pytest import raises
