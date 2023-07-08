@@ -1,10 +1,9 @@
-#!/bin/bash -eux
+#!/bin/bash -e
 
-set +ux
 source conda/etc/profile.d/conda.sh
 conda activate
+eval "$(grep -v '^condev_shell$' $(which condev-shell))"
 set -ux
-cat <<EOF >~/.condevrc
+export CONDA=$CONDA_EXE
+condev_rc
 make test
-EOF
-condev-shell
