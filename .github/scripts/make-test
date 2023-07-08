@@ -3,7 +3,8 @@
 source conda/etc/profile.d/conda.sh
 conda activate
 eval "$(grep -v '^condev_shell$' $(which condev-shell))"
-set -ux
+set -u
 export CONDA=$CONDA_EXE
 condev_rc
+set -x
 make test
