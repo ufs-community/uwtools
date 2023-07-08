@@ -80,16 +80,30 @@ class Config(ABC, UserDict):
         """This method will return configure contents"""
         return json.dumps(self.data)
 
+    # Private methods
+
     @abstractmethod
     def _load(self, config_path=None):
         """Interface to load a config file given the config_path
         attribute, or optional config_path argument. Returns a dict
         object."""
 
-    @abstractmethod
-    def dump_file(self, output_path):
-        """Interface to write a config object to a file at the
-        output_path provided."""
+    def _load_paths(self, filepaths):
+        """
+        Given a list of filepaths, load each file in the list and return
+        a dictionary that includes the parsed contents of the collection
+        of files.
+        """
+
+        cfg = {}
+        for filepath in filepaths:
+            if not os.path.isabs(filepath):
+                assert self.config_path is not None
+                filepath = os.path.join(os.path.dirname(self.config_path), filepath)
+            cfg.update(self._load(config_path=filepath))
+        return cfg
+
+    # Public methods
 
     def compare_config(self, user_dict, base_dict=None):
         """
@@ -125,58 +139,6 @@ class Config(ABC, UserDict):
             for key in keys:
                 msg = f"{sect}: {key:>15}: {keys[key]}"
                 self.log.info(msg)
-
-    def from_ordereddict(self, in_dict: dict) -> dict:
-        """
-        Given a dictionary, replace all instances of OrderedDict with a
-        regular dictionary.
-        """
-        if isinstance(in_dict, OrderedDict):
-            in_dict = dict(in_dict)
-        for sect, keys in in_dict.items():
-            if isinstance(keys, OrderedDict):
-                in_dict[sect] = dict(keys)
-        return in_dict
-
-    def _load_paths(self, filepaths):
-        """
-        Given a list of filepaths, load each file in the list and return
-        a dictionary that includes the parsed contents of the collection
-        of files.
-        """
-
-        cfg = {}
-        for filepath in filepaths:
-            if not os.path.isabs(filepath):
-                assert self.config_path is not None
-                filepath = os.path.join(os.path.dirname(self.config_path), filepath)
-            cfg.update(self._load(config_path=filepath))
-        return cfg
-
-    def parse_include(self, ref_dict=None):
-        """
-        Assuming a section, key/value structure of configuration types
-        (other than YAML, which handles this in its own loader), update
-        the dictionary with the values stored in the external file.
-
-        Recursively traverse the stored dictionary, finding any !INCLUDE
-        tags. Update the dictionary with the contents of the files to be
-        included.
-        """
-
-        if ref_dict is None:
-            ref_dict = self.data
-
-        for key, value in copy.deepcopy(ref_dict).items():
-            if isinstance(value, dict):
-                self.parse_include(ref_dict[key])
-            elif isinstance(value, str) and "!INCLUDE" in value:
-                filepaths = value.lstrip("!INCLUDE [").rstrip("]").split(",")
-
-                # Update the dictionary with the values in the
-                # included file
-                self.update_values(self._load_paths(filepaths))
-                del ref_dict[key]
 
     def dereference(
         self, ref_dict: Optional[dict] = None, full_dict: Optional[dict] = None
@@ -288,6 +250,87 @@ Define the filter before proceeding.
             self.dereference()
             prev = copy.deepcopy(self.data)
 
+    def dictionary_depth(self, config_dict):
+        """
+        Recursively finds the depth of an objects data (a dictionary).
+        """
+        if isinstance(config_dict, dict):
+            return 1 + (max(map(self.dictionary_depth, config_dict.values())))
+        return 0
+
+    def iterate_values(
+        self,
+        config_dict: dict,
+        set_var: List[str],
+        jinja2_var: List[str],
+        empty_var: List[str],
+        parent: str,
+    ) -> None:
+        """
+        Recursively parse which keys in the object are complete (set_var), which
+        keys have unfilled jinja templates (jinja2_var), and which keys are set
+        to empty (empty_var).
+        """
+
+        for key, val in config_dict.items():
+            if isinstance(val, dict):
+                set_var.append(f"    {parent}{key}")
+                new_parent = f"{parent}{key}."
+                self.iterate_values(val, set_var, jinja2_var, empty_var, new_parent)
+            elif isinstance(val, list):
+                set_var.append(f"    {parent}{key}")
+                for item in val:
+                    if isinstance(item, dict):
+                        self.iterate_values(item, set_var, jinja2_var, empty_var, parent)
+            elif "{{" in str(val) or "{%" in str(val):
+                jinja2_var.append(f"    {parent}{key}: {val}")
+            elif val == "" or val is None:
+                empty_var.append(f"    {parent}{key}")
+            else:
+                set_var.append(f"    {parent}{key}")
+
+    @abstractmethod
+    def dump_file(self, output_path):
+        """Interface to write a config object to a file at the
+        output_path provided."""
+
+    def from_ordereddict(self, in_dict: dict) -> dict:
+        """
+        Given a dictionary, replace all instances of OrderedDict with a
+        regular dictionary.
+        """
+        if isinstance(in_dict, OrderedDict):
+            in_dict = dict(in_dict)
+        for sect, keys in in_dict.items():
+            if isinstance(keys, OrderedDict):
+                in_dict[sect] = dict(keys)
+        return in_dict
+
+    def parse_include(self, ref_dict=None):
+        """
+        Assuming a section, key/value structure of configuration types
+        (other than YAML, which handles this in its own loader), update
+        the dictionary with the values stored in the external file.
+
+        Recursively traverse the stored dictionary, finding any !INCLUDE
+        tags. Update the dictionary with the contents of the files to be
+        included.
+        """
+
+        if ref_dict is None:
+            ref_dict = self.data
+
+        for key, value in copy.deepcopy(ref_dict).items():
+            if isinstance(value, dict):
+                self.parse_include(ref_dict[key])
+            elif isinstance(value, str) and "!INCLUDE" in value:
+                filepaths = value.lstrip("!INCLUDE [").rstrip("]").split(",")
+
+                # Update the dictionary with the values in the
+                # included file
+                self.update_values(self._load_paths(filepaths))
+                del ref_dict[key]
+
     @logger.verbose()
     def str_to_type(self, str_: str) -> Union[bool, float, int, str]:
         """Check if the string contains a float, int, boolean, or just
@@ -335,45 +378,6 @@ Define the filter before proceeding.
             else:
                 dict_to_update[key] = new_val
 
-    def iterate_values(
-        self,
-        config_dict: dict,
-        set_var: List[str],
-        jinja2_var: List[str],
-        empty_var: List[str],
-        parent: str,
-    ) -> None:
-        """
-        Recursively parse which keys in the object are complete (set_var), which
-        keys have unfilled jinja templates (jinja2_var), and which keys are set
-        to empty (empty_var).
-        """
-
-        for key, val in config_dict.items():
-            if isinstance(val, dict):
-                set_var.append(f"    {parent}{key}")
-                new_parent = f"{parent}{key}."
-                self.iterate_values(val, set_var, jinja2_var, empty_var, new_parent)
-            elif isinstance(val, list):
-                set_var.append(f"    {parent}{key}")
-                for item in val:
-                    if isinstance(item, dict):
-                        self.iterate_values(item, set_var, jinja2_var, empty_var, parent)
-            elif "{{" in str(val) or "{%" in str(val):
-                jinja2_var.append(f"    {parent}{key}: {val}")
-            elif val == "" or val is None:
-                empty_var.append(f"    {parent}{key}")
-            else:
-                set_var.append(f"    {parent}{key}")
-
-    def dictionary_depth(self, config_dict):
-        """
-        Recursively finds the depth of an objects data (a dictionary).
-        """
-        if isinstance(config_dict, dict):
-            return 1 + (max(map(self.dictionary_depth, config_dict.values())))
-        return 0
-
 
 class F90Config(Config):
 
@@ -387,6 +391,8 @@ class F90Config(Config):
             self.update(self._load())
             self.parse_include()
 
+    # Private methods
+
     def _load(self, config_path: Optional[str] = None) -> dict:
         """Load the user-provided Fortran namelist path into a dict
         object."""
@@ -398,6 +404,8 @@ class F90Config(Config):
             cfg = f90nml.read(f).todict(complex_tuple=False)
         # #PM# WHY NOT JUST KEEP OrderedDict OBJECT?
         return self.from_ordereddict(cfg)
+
+    # Public methods
 
     def dump_file(self, output_path):
         """Write the dict to a namelist file."""
@@ -435,6 +443,8 @@ class INIConfig(Config):
             self.update(self._load())
             self.parse_include()
 
+    # Private methods
+
     def _load(self, config_path=None):
         """Load the user-provided INI config file path into a dict
         object."""
@@ -456,6 +466,8 @@ class INIConfig(Config):
                 ret_cfg = self.from_ordereddict(ret_cfg)
                 return ret_cfg
         return self.from_ordereddict(dict(sections))
+
+    # Public methods
 
     def dump_file(self, output_path):
         """Write the dict to an INI file"""
@@ -502,6 +514,8 @@ class YAMLConfig(Config):
         """This method will return configure contents"""
         return yaml.dump(self.data)
 
+    # Private methods
+
     def _load(self, config_path=None):
         """Load the user-provided YAML config file path into a dict
         object."""
@@ -537,12 +551,6 @@ Define the constructor before proceeding.
                 raise exceptions.UWConfigError(msg)
         return self.from_ordereddict(cfg)
 
-    def dump_file(self, output_path):
-        """Write the dictionary to a YAML file"""
-
-        with open(output_path, "w", encoding="utf-8") as file_name:
-            yaml.dump(self.data, file_name, sort_keys=False)
-
     def _yaml_include(self, loader, node):
         """Returns a dictionary that includes the contents of the referenced
         YAML files, and is used as a contructor method for PyYAML"""
@@ -557,6 +565,14 @@ Define the constructor before proceeding.
         loader.add_constructor("!INCLUDE", self._yaml_include)
         return loader
 
+    # Public methods
+
+    def dump_file(self, output_path):
+        """Write the dictionary to a YAML file"""
+
+        with open(output_path, "w", encoding="utf-8") as file_name:
+            yaml.dump(self.data, file_name, sort_keys=False)
+
 
 class FieldTableConfig(YAMLConfig):
     """This class exists to write out a field_table format given
@@ -568,6 +584,8 @@ class FieldTableConfig(YAMLConfig):
 
         if config_path is not None:
             self.update(self._load())
+
+    # Private methods
 
     def _format_output(self):
         """Format the output of the dictionary into a string that
@@ -588,6 +606,8 @@ class FieldTableConfig(YAMLConfig):
                     outstring.append(f'{" ":11}"{key}", "{value}"')
             outstring[-1] += " /"
         return "\n".join(outstring)
+
+    # Public methods
 
     def dump_file(self, output_path):
         """

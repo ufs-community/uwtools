@@ -1,5 +1,7 @@
 # pylint: disable=missing-function-docstring,protected-access
-
+"""
+Tests for uwtools.logging module
+"""
 import logging
 
 from pytest import raises

@@ -1,4 +1,7 @@
 # pylint: disable=missing-function-docstring,redefined-outer-name
+"""
+Tests for uwtools.scheduler module
+"""
 
 from pytest import fixture, raises
 

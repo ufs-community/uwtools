@@ -2,6 +2,7 @@
 """
 Tests for uwtools.config_validator module
 """
+
 import json
 from importlib import resources
 

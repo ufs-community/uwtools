@@ -1,7 +1,6 @@
 # pylint: disable=duplicate-code,missing-function-docstring,redefined-outer-name
-
 """
-Set of test for loading YAML files using the function call load_yaml
+Tests for uwtools.config module
 """
 
 import builtins
@@ -28,37 +27,13 @@ from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import compare_files, fixture_path, line_in_lines, msg_in_caplog
 from uwtools.utils import cli_helpers
 
-# Helpers
-
-
-@fixture
-def salad_base():
-    return {
-        "salad": {
-            "base": "kale",
-            "fruit": "banana",
-            "vegetable": "tomato",
-            "how_many": "12",
-            "dressing": "balsamic",
-        }
-    }
+# Helper functions
 
 
 def help_cfgclass(ext):
     return getattr(
         config, "%sConfig" % {".nml": "F90", ".ini": "INI", ".sh": "INI", ".yaml": "YAML"}[ext]
     )
-
-
-def help_set_config_simple(infn, tmpdir):
-    infile = fixture_path(infn)
-    ext = Path(infile).suffix
-    outfile = str(tmpdir / f"outfile{ext}")
-    config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile]))
-    cfgobj = help_cfgclass(ext)(infile)
-    reference = tmpdir / f"reference{ext}"
-    cfgobj.dump_file(reference)
-    assert compare_files(reference, outfile)
 
 
 def help_set_config_fmt2fmt(infn, cfgfn, tmpdir):
@@ -75,7 +50,18 @@ def help_set_config_fmt2fmt(infn, cfgfn, tmpdir):
     assert compare_files(reference, outfile)
 
 
-# Tests
+def help_set_config_simple(infn, tmpdir):
+    infile = fixture_path(infn)
+    ext = Path(infile).suffix
+    outfile = str(tmpdir / f"outfile{ext}")
+    config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile]))
+    cfgobj = help_cfgclass(ext)(infile)
+    reference = tmpdir / f"reference{ext}"
+    cfgobj.dump_file(reference)
+    assert compare_files(reference, outfile)
+
+
+# Test functions
 
 
 def test_bad_conversion_cfg_to_pdf(capsys):
@@ -128,22 +114,17 @@ def test_bad_conversion_yaml_to_nml(tmp_path):
         )
 
 
-def test_cfg_to_yaml_conversion(tmp_path):
-    """
-    Test that a .cfg file can be used to create a YAML object.
-    """
-    infile = fixture_path("srw_example_yaml.cfg")
-    outfile = str(tmp_path / "test_ouput.yaml")
-    config.create_config_obj(
-        parse_config_args(["-i", infile, "-o", outfile, "--input-file-type", "YAML"])
-    )
-    expected = config.YAMLConfig(infile)
-    expected.dereference_all()
-    expected_file = tmp_path / "test.yaml"
-    expected.dump_file(expected_file)
-    assert compare_files(expected_file, outfile)
-    with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read()[-1] == "\n"
+@fixture
+def salad_base():
+    return {
+        "salad": {
+            "base": "kale",
+            "fruit": "banana",
+            "vegetable": "tomato",
+            "how_many": "12",
+            "dressing": "balsamic",
+        }
+    }
 
 
 @pytest.mark.parametrize("fmt", ["F90", "INI", "YAML"])
@@ -240,6 +221,24 @@ def test_config_file_conversion(tmp_path):
     config_obj = config.F90Config(cfgfile)
     expected.update_values(config_obj)
     expected_file = tmp_path / "expected.nml"
+    expected.dump_file(expected_file)
+    assert compare_files(expected_file, outfile)
+    with open(outfile, "r", encoding="utf-8") as f:
+        assert f.read()[-1] == "\n"
+
+
+def test_conversion_cfg_to_yaml(tmp_path):
+    """
+    Test that a .cfg file can be used to create a YAML object.
+    """
+    infile = fixture_path("srw_example_yaml.cfg")
+    outfile = str(tmp_path / "test_ouput.yaml")
+    config.create_config_obj(
+        parse_config_args(["-i", infile, "-o", outfile, "--input-file-type", "YAML"])
+    )
+    expected = config.YAMLConfig(infile)
+    expected.dereference_all()
+    expected_file = tmp_path / "test.yaml"
     expected.dump_file(expected_file)
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
