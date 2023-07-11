@@ -20,7 +20,7 @@ print(sys.path)
 project = 'Unified Workflow'
 author = ''
 author_list = 'Holt, C., E. Carpenter, J. Derrico, V. Hagerty, F. Gabelmann, R. Mahajan, B. Cash, O. Adejumo, J. Prestopnik'
-version = '1.0.0'
+version = os.environ["UWTOOLS_VERSION"]
 verinfo = version
 release = f'{version}'
 release_date = '2023-05-01'
