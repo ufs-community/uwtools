@@ -6,6 +6,13 @@ fail_under = 100
 show_missing = true
 skip_covered = true
 
+[tool.docformatter]
+black = true
+make-summary-multi-line = true
+pre-summary-newline = true
+wrap-descriptions = 100
+wrap-summaries = 100
+
 [tool.isort]
 line_length = 100
 
