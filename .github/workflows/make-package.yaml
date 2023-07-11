@@ -1,4 +1,4 @@
-name: Test and Lint
+name: Make Package
 on:
   pull_request:
     branches:
@@ -10,20 +10,12 @@ on:
     branches:
       - develop
 jobs:
-  lint_and_coverage:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Pass
-        run: /bin/true
-  make-test:
-    name: Run pytest tests
+  make-package:
+    name: Make Package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Install conda
         run:  .github/scripts/install-conda
-      - name: Run Tests
-        run:  .github/scripts/make-test
-    strategy:
-      matrix:
-        python: ["3.7", "3.8", "3.9", "3.10"]
+      - name: Make Package
+        run:  .github/scripts/make-package
