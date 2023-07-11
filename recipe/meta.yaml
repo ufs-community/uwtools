@@ -1,5 +1,3 @@
-{% set python = "python >=3.9" %}
-
 package:
   name: uwtools
   version: 0.1.0
@@ -12,14 +10,13 @@ build:
 requirements:
   host:
     - pip
-    - {{ python }}
   run:
     - boto3 1.22.*
     - f90nml 1.4.*
     - jinja2 3.0.*
     - jsonschema 4.17.*
+    - python >=3.8,<3.12
     - pyyaml 6.0.*
-    - {{ python }}
 test:
   requires:
     - black 23.3.*
