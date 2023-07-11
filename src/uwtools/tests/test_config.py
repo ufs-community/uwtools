@@ -774,7 +774,7 @@ bar: 2
         )
     with raises(exceptions.UWConfigError) as e:
         config.YAMLConfig(tmpfile)
-    assert "value is included in quotes" in str(e.value)
+    assert "value is enclosed in quotes" in str(e.value)
 
 
 def test_yaml_constructor_error_unregistered_constructor(tmp_path):
