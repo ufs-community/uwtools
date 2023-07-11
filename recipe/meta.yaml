@@ -22,11 +22,11 @@ requirements:
     - {{ python }}
 test:
   requires:
-    - black
-    - coverage
-    - isort
-    - mypy
-    - pylint
-    - pytest
+    - black 23.3.*
+    - coverage 7.2.*
+    - isort 5.12.*
+    - mypy 1.4.*
+    - pylint 2.17.*
+    - pytest 7.4.*
 about:
   license: LGPL
