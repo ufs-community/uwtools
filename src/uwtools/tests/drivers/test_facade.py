@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring
 """
-Tests for uwtools.drivers.facade module
+Tests for uwtools.drivers.facade module.
 """
 
 from uwtools.drivers import facade

@@ -1,5 +1,5 @@
 """
-Logger
+Logger.
 """
 
 import functools
@@ -41,7 +41,7 @@ class ColoredFormatter(logging.Formatter):
 
 class Logger:
     """
-    Improved logging
+    Improved logging.
     """
 
     DEFAULT_FORMAT = "%(asctime)s - %(levelname)-8s - %(name)-12s: %(message)s"
@@ -58,7 +58,7 @@ class Logger:
         quiet: bool = False,
     ):
         """
-        Constructor for Logger
+        Constructor for Logger.
         """
 
         self.name = name
@@ -96,7 +96,7 @@ Supported levels are: {levels}
 
     def __getattr__(self, attribute):
         """
-        Allows calling logging module methods directly
+        Allows calling logging module methods directly.
         """
         return getattr(self._logger, attribute)
 
@@ -148,13 +148,15 @@ Supported levels are: {levels}
 
     def get_logger(self):
         """
-        Return the logging object
+        Return the logging object.
         """
         return self._logger
 
 
 def verbose(_func=None):
-    """Logs the caller and args to a function."""
+    """
+    Logs the caller and args to a function.
+    """
 
     def log_decorator_info(func):
         @functools.wraps(func)

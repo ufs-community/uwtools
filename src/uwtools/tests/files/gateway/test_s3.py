@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,redefined-outer-name
 """
-Tests for uwtools.files.gateway.s3 module
+Tests for uwtools.files.gateway.s3 module.
 """
 
 from pathlib import Path

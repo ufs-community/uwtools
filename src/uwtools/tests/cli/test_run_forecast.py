@@ -1,6 +1,6 @@
 # pylint: disable=duplicate-code,missing-function-docstring,redefined-outer-name
 """
-Tests for the run-forecast CLI
+Tests for the run-forecast CLI.
 """
 
 from types import SimpleNamespace as ns
@@ -44,7 +44,9 @@ def test_main(files):
 
 @pytest.mark.parametrize("sw", [ns(c="-c"), ns(c="--config-file")])
 def test_parse_args_bad_cfgfile(sw, tmp_path, capsys):
-    """Fails if config file does not exist."""
+    """
+    Fails if config file does not exist.
+    """
     cfgfile = str(tmp_path / "no-such-file")
     with raises(SystemExit) as e:
         run_forecast.parse_args([sw.c, cfgfile])
@@ -54,7 +56,9 @@ def test_parse_args_bad_cfgfile(sw, tmp_path, capsys):
 
 @pytest.mark.parametrize("sw", [ns(m="-m"), ns(m="--machine")])
 def test_parse_args_bad_machinefile(sw, tmp_path, capsys):
-    """Fails if machine file does not exist."""
+    """
+    Fails if machine file does not exist.
+    """
     machinefile = str(tmp_path / "no-such-file")
     with raises(SystemExit) as e:
         run_forecast.parse_args([sw.m, machinefile])
@@ -67,7 +71,9 @@ def test_parse_args_bad_machinefile(sw, tmp_path, capsys):
     "sw", [ns(c="-c", l="-l", m="-m"), ns(c="--config-file", l="--log-file", m="--machine")]
 )
 def test_parse_args_good(sw, noise, files):
-    """Test all valid CLI switch/value combinations."""
+    """
+    Test all valid CLI switch/value combinations.
+    """
     cfgfile, machinefile, logfile = files
     app, model = "SRW", "FV3"  # representative (not exhaustive) choices
     parsed = run_forecast.parse_args(

@@ -31,9 +31,9 @@ def main() -> None:
 
 def parse_args(args: List[str]) -> Namespace:
     """
-    Function maintains the arguments accepted by this script. Please see
-    Python's argparse documentation for more information about settings of each
-    argument.
+    Function maintains the arguments accepted by this script.
+
+    Please see Python's argparse documentation for more information about settings of each argument.
     """
     args = args or ["--help"]
     parser = ArgumentParser(

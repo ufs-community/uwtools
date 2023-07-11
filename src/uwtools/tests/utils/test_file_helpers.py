@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,redefined-outer-name
 """
-Tests for uwtools.utils.file_helpers module
+Tests for uwtools.utils.file_helpers module.
 """
 from datetime import datetime as dt
 from unittest.mock import patch

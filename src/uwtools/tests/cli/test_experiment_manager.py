@@ -1,6 +1,6 @@
 # pylint: disable=duplicate-code,missing-function-docstring,redefined-outer-name
 """
-Tests for the experiment-manager CLI
+Tests for the experiment-manager CLI.
 """
 
 from types import SimpleNamespace as ns
@@ -34,7 +34,9 @@ def assets(tmp_path):
 
 @pytest.mark.parametrize("sw", [ns(a="-a", c="-c"), ns(a="--forecast-app", c="--config-file")])
 def test_parse_args_bad_app(sw, assets, capsys):
-    """Fails if a bad app name is specified."""
+    """
+    Fails if a bad app name is specified.
+    """
     cfgfile, _ = assets
     with raises(SystemExit) as e:
         experiment_manager.parse_args([sw.a, "FOO", sw.c, cfgfile])
@@ -44,7 +46,9 @@ def test_parse_args_bad_app(sw, assets, capsys):
 
 @pytest.mark.parametrize("sw", [ns(a="-a", c="-c"), ns(a="--forecast-app", c="--config-file")])
 def test_parse_args_bad_cfgfile(sw, capsys, tmp_path):
-    """Fails if non-existent config file is specified."""
+    """
+    Fails if non-existent config file is specified.
+    """
     cfgfile = str(tmp_path / "no-such-file")
     with raises(SystemExit) as e:
         experiment_manager.parse_args([sw.a, "SRW", sw.c, cfgfile])
@@ -57,7 +61,9 @@ def test_parse_args_bad_cfgfile(sw, capsys, tmp_path):
     "sw", [ns(a="-a", c="-c", l="-l"), ns(a="--forecast-app", c="--config-file", l="--log-file")]
 )
 def test_parse_args_good(sw, noise, assets):
-    """Test all valid CLI switch/value combinations."""
+    """
+    Test all valid CLI switch/value combinations.
+    """
     cfgfile, logfile = assets
     parsed = experiment_manager.parse_args([sw.a, "SRW", sw.c, cfgfile, sw.l, logfile, noise])
     assert parsed.forecast_app == "SRW"

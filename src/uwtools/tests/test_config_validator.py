@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,redefined-outer-name
 """
-Tests for uwtools.config_validator module
+Tests for uwtools.config_validator module.
 """
 
 from importlib import resources

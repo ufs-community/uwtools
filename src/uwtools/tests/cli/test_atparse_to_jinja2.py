@@ -1,6 +1,6 @@
 # pylint: disable=duplicate-code,missing-function-docstring
 """
-Tests for the atparse-to-jinja2 CLI
+Tests for the atparse-to-jinja2 CLI.
 """
 
 from types import SimpleNamespace as ns
@@ -29,8 +29,7 @@ def test_main_bad_args(sw, capsys):
 @pytest.mark.parametrize("sw", [ns(i="-i", o="-o"), ns(i="--input-template", o="--outfile")])
 def test_main_to_file(sw, tmp_path):
     """
-    Test that all atparse @[] items are replaced with Jinja2 templates {{ }}
-    when writing to file.
+    Test that all atparse @[] items are replaced with Jinja2 templates {{ }} when writing to file.
     """
     outfile = str(tmp_path / "out")
     argv = ["test", sw.i, fixture_path("ww3_multi.inp.IN"), sw.o, outfile]
@@ -44,8 +43,8 @@ def test_main_to_file(sw, tmp_path):
 @pytest.mark.parametrize("sw", [ns(d="-d", i="-i"), ns(d="--dry-run", i="--input-template")])
 def test_main_to_stdout(sw, capsys):
     """
-    Test that all atparse @[] items are replaced with Jinja2 templates {{ }}
-    when printing to stdout.
+    Test that all atparse @[] items are replaced with Jinja2 templates {{ }} when printing to
+    stdout.
     """
     argv = ["test", sw.i, fixture_path("ww3_multi.inp.IN"), sw.d]
     with patch.object(atparse_to_jinja2.sys, "argv", argv):

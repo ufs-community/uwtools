@@ -6,14 +6,18 @@ from typing import Any, List
 
 
 class Prefixes(Enum):
-    """Supported URI file prefixes"""
+    """
+    Supported URI file prefixes.
+    """
 
     S3 = "s3://"
     UNIX = "file://"
 
 
 class File(ABC):
-    """Represents a file."""
+    """
+    Represents a file.
+    """
 
     def __init__(self, uri: str):
         self._uri = uri
@@ -34,63 +38,87 @@ class File(ABC):
 
     @property
     def path(self) -> str:
-        """Returns the file path without a prefix."""
+        """
+        Returns the file path without a prefix.
+        """
         return self._uri.split("://", maxsplit=1)[1]
 
     @property
     @abstractmethod  # pragma: no cover
     def dir(self) -> List[Any]:
-        """Returns the contents of the directory recursively."""
+        """
+        Returns the contents of the directory recursively.
+        """
         raise NotImplementedError()
 
     @property
     @abstractmethod  # pragma: no cover
     def exists(self) -> bool:
-        """Returns true if the file exists."""
+        """
+        Returns true if the file exists.
+        """
         raise NotImplementedError()
 
     @property
     @abstractmethod  # pragma: no cover
     def uri_prefix(self) -> str:
-        """The URI prefix for this file type"""
+        """
+        The URI prefix for this file type.
+        """
         raise NotImplementedError()
 
 
 class S3(File):
-    """Represents an AWS S3 file."""
+    """
+    Represents an AWS S3 file.
+    """
 
     @property
     def dir(self) -> List[Any]:
-        """Returns the contents of the directory recursively."""
+        """
+        Returns the contents of the directory recursively.
+        """
         return []
 
     @property
     def exists(self) -> bool:
-        """Returns true if the file exists."""
+        """
+        Returns true if the file exists.
+        """
         return True
 
     @property
     def uri_prefix(self) -> str:
-        """The URI prefix for this file type"""
+        """
+        The URI prefix for this file type.
+        """
         return Prefixes.S3.value
 
 
 class Unix(File):
-    """Represents a Unix file."""
+    """
+    Represents a Unix file.
+    """
 
     @property
     def dir(self) -> List[Any]:
-        """Returns the contents of the directory recursively."""
+        """
+        Returns the contents of the directory recursively.
+        """
         if Path(self.path).is_file():
             return glob(self.path)
         return glob(str(Path(self.path) / "*"))
 
     @property
     def exists(self) -> bool:
-        """Returns true if the file exists."""
+        """
+        Returns true if the file exists.
+        """
         return Path(self.path).exists()
 
     @property
     def uri_prefix(self) -> str:
-        """The URI prefix for this file type"""
+        """
+        The URI prefix for this file type.
+        """
         return Prefixes.UNIX.value

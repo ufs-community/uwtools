@@ -1,7 +1,5 @@
 """
-
-Helpers to be used when parsing arguments and gathering config files
-
+Helpers to be used when parsing arguments and gathering config files.
 """
 
 import argparse
@@ -14,14 +12,17 @@ from uwtools.logger import Logger
 
 
 def dict_from_config_args(args):
-    """Given a list of command line arguments in the form key=value, return a
-    dictionary of key/value pairs."""
+    """
+    Given a list of command line arguments in the form key=value, return a dictionary of key/value
+    pairs.
+    """
     return dict([arg.split("=") for arg in args])
 
 
 def get_file_type(arg):
-    """Returns a standardized file type given the suffix of the input
-    arg."""
+    """
+    Returns a standardized file type given the suffix of the input arg.
+    """
 
     suffix = pathlib.Path(arg).suffix
     if suffix in [".yaml", ".yml"]:
@@ -36,7 +37,9 @@ def get_file_type(arg):
 
 
 def path_if_file_exists(arg):
-    """Checks whether a file exists, and returns the path if it does."""
+    """
+    Checks whether a file exists, and returns the path if it does.
+    """
     if not os.path.exists(arg):
         msg = f"{arg} does not exist!"
         raise argparse.ArgumentTypeError(msg)
@@ -51,7 +54,9 @@ def setup_logging(
     verbose: bool = False,
     color: bool = False,
 ) -> Logger:
-    """Create the Logger object"""
+    """
+    Create the Logger object.
+    """
 
     log = Logger(
         colored_log=color,

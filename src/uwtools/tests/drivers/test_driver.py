@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring
 """
-Tests for uwtools.drivers.driver module
+Tests for uwtools.drivers.driver module.
 """
 
 from uwtools.drivers import driver

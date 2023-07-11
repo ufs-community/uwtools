@@ -1,6 +1,6 @@
 # pylint: disable=duplicate-code,missing-function-docstring
 """
-Tests for the templater CLI
+Tests for the templater CLI.
 """
 
 import argparse
@@ -237,8 +237,9 @@ J2Template._load_file INPUT Args:
 )
 def test_set_template_yaml_config(sw, tmp_path):
     """
-    Test that providing a YAML file with necessary settings works to fill in
-    the Jinja template. Test the writing mechanism, too.
+    Test that providing a YAML file with necessary settings works to fill in the Jinja template.
+
+    Test the writing mechanism, too.
     """
     outfile = str(tmp_path / "test_render_from_yaml.nml")
 

@@ -13,8 +13,10 @@ from uwtools.utils import cli_helpers
 
 def main() -> None:
     """
-    Defines the user interface for the forecast driver. Parses arguments
-    provided by the user and passes to the Forecast driver class to be run."""
+    Defines the user interface for the forecast driver.
+
+    Parses arguments provided by the user and passes to the Forecast driver class to be run.
+    """
     args = parse_args(sys.argv[1:])
     name = "run-forecast"
     cli_helpers.setup_logging(
@@ -27,9 +29,9 @@ def main() -> None:
 
 def parse_args(args: List[str]) -> Namespace:
     """
-    Function maintains the arguments accepted by this script. Please see
-    Python's argparse documentation for more information about settings
-    of each argument.
+    Function maintains the arguments accepted by this script.
+
+    Please see Python's argparse documentation for more information about settings of each argument.
     """
     args = args or ["--help"]
     parser = ArgumentParser(

@@ -1,6 +1,6 @@
 # pylint: disable=duplicate-code,missing-function-docstring,redefined-outer-name
 """
-Tests for uwtools.config module
+Tests for uwtools.config module.
 """
 
 import builtins
@@ -119,7 +119,9 @@ def salad_base():
 
 @pytest.mark.parametrize("fmt", ["F90", "INI", "YAML"])
 def test_compare_config(fmt, salad_base, caplog):
-    """Compare two config objects."""
+    """
+    Compare two config objects.
+    """
     ext = ".%s" % ("nml" if fmt == "F90" else fmt).lower()
     cfgobj = help_cfgclass(ext)(fixture_path(f"simple{ext}"))
     cfgobj.log.addHandler(logging.StreamHandler(sys.stdout))
@@ -335,8 +337,7 @@ def test_f90nml_config_simple(salad_base, tmp_path):
 
 def test_incompatible_file_type():
     """
-    Test that providing an incompatible file type for input base file will
-    return print statement.
+    Test that providing an incompatible file type for input base file will return print statement.
     """
     with raises(ValueError):
         config.create_config_obj(parse_config_args(["-i", fixture_path("model_configure.sample")]))
@@ -360,8 +361,9 @@ def test_ini_config_bash(salad_base, tmp_path):
 
 def test_ini_config_simple(salad_base, tmp_path):
     """
-    Test that INI config load and dump work with a basic INI file. Everything in
-    INI is treated as a string!
+    Test that INI config load and dump work with a basic INI file.
+
+    Everything in INI is treated as a string!
     """
     infile = fixture_path("simple.ini")
     outfile = tmp_path / "outfile.ini"
@@ -417,8 +419,8 @@ def test_parse_include_ini():
 
 def test_parse_include_mult_sect():
     """
-    Test that non-YAML handles !INCLUDE tags with files that have multiple
-    sections in separate file.
+    Test that non-YAML handles !INCLUDE tags with files that have multiple sections in separate
+    file.
     """
     cfgobj = config.F90Config(fixture_path("include_files_with_sect.nml"))
     assert cfgobj["config"]["fruit"] == "papaya"
@@ -432,8 +434,8 @@ def test_parse_include_mult_sect():
 
 def test_path_if_file_exists(tmp_path):
     """
-    Test that function raises an exception when the specified file does not
-    exist, and raises no exception when the file exists.
+    Test that function raises an exception when the specified file does not exist, and raises no
+    exception when the file exists.
     """
 
     badfile = tmp_path / "no-such-file"
@@ -447,8 +449,7 @@ def test_path_if_file_exists(tmp_path):
 
 def test_set_config_dry_run(capsys):
     """
-    Test that providing a YAML base file with a dry run flag will print an YAML
-    config file.
+    Test that providing a YAML base file with a dry run flag will print an YAML config file.
     """
     infile = fixture_path("fruit_config.yaml")
     yaml_config = config.YAMLConfig(infile)
@@ -479,64 +480,60 @@ def test_set_config_field_table(tmp_path):
 
 def test_set_config_fmt2fmt_nml2nml(tmp_path):
     """
-    Test that providing a namelist base input file and a config file will create
-    and update namelist config file.
+    Test that providing a namelist base input file and a config file will create and update namelist
+    config file.
     """
     help_set_config_fmt2fmt("simple.nml", "simple2.nml", tmp_path)
 
 
 def test_set_config_fmt2fmt_ini2bash(tmp_path):
     """
-    Test that providing an INI base input file and a Bash config file will
-    create and update INI config file.
+    Test that providing an INI base input file and a Bash config file will create and update INI
+    config file.
     """
     help_set_config_fmt2fmt("simple.ini", "fruit_config.sh", tmp_path)
 
 
 def test_set_config_fmt2fmt_ini2ini(tmp_path):
     """
-    Test that providing an INI base input file and an INI config file will
-    create and update INI config file.
+    Test that providing an INI base input file and an INI config file will create and update INI
+    config file.
     """
     help_set_config_fmt2fmt("simple.ini", "simple2.ini", tmp_path)
 
 
 def test_set_config_fmt2fmt_yaml2yaml(tmp_path):
     """
-    Test that providing a YAML base input file and a YAML config file will
-    create and update YAML config file.
+    Test that providing a YAML base input file and a YAML config file will create and update YAML
+    config file.
     """
     help_set_config_fmt2fmt("fruit_config.yaml", "fruit_config_similar.yaml", tmp_path)
 
 
 def test_set_config_simple_bash(tmp_path):
     """
-    Test that providing a bash file with necessary settings will create an INI
-    config file.
+    Test that providing a bash file with necessary settings will create an INI config file.
     """
     help_set_config_simple("simple.sh", tmp_path)
 
 
 def test_set_config_simple_namelist(tmp_path):
     """
-    Test that providing a namelist file with necessary settings will create a
-    namelist config file.
+    Test that providing a namelist file with necessary settings will create a namelist config file.
     """
     help_set_config_simple("simple.nml", tmp_path)
 
 
 def test_set_config_simple_ini(tmp_path):
     """
-    Test that providing an INI file with necessary settings will create an INI
-    config file.
+    Test that providing an INI file with necessary settings will create an INI config file.
     """
     help_set_config_simple("simple.ini", tmp_path)
 
 
 def test_set_config_simple_yaml(tmp_path):
     """
-    Test that providing a YAML base file with necessary settings will create a
-    YAML config file.
+    Test that providing a YAML base file with necessary settings will create a YAML config file.
     """
     help_set_config_simple("simple2.yaml", tmp_path)
 
@@ -593,8 +590,8 @@ def test_transform_config(tmp_path):
 
 def test_values_needed_ini(capsys):
     """
-    Test that the values_needed flag logs keys completed, keys containing
-    unfilled jinja2 templates, and keys set to empty.
+    Test that the values_needed flag logs keys completed, keys containing unfilled jinja2 templates,
+    and keys set to empty.
     """
     config.create_config_obj(
         parse_config_args(["-i", fixture_path("simple3.ini"), "--values-needed"])
@@ -625,8 +622,8 @@ Keys that are set to empty:
 
 def test_values_needed_f90nml(capsys):
     """
-    Test that the values_needed flag logs keys completed, keys containing
-    unfilled jinja2 templates, and keys set to empty.
+    Test that the values_needed flag logs keys completed, keys containing unfilled jinja2 templates,
+    and keys set to empty.
     """
     config.create_config_obj(
         parse_config_args(["-i", fixture_path("simple3.nml"), "--values-needed"])
@@ -654,8 +651,8 @@ Keys that are set to empty:
 
 def test_values_needed_yaml(capsys):
     """
-    Test that the values_needed flag logs keys completed, keys containing
-    unfilled jinja2 templates, and keys set to empty.
+    Test that the values_needed flag logs keys completed, keys containing unfilled jinja2 templates,
+    and keys set to empty.
     """
     config.create_config_obj(
         parse_config_args(["-i", fixture_path("srw_example.yaml"), "--values-needed"])
@@ -685,8 +682,7 @@ Keys that are set to empty:
 
 def test_yaml_config_composite_types():
     """
-    Test that YAML load and dump work with a YAML file that has multiple data
-    structures and levels.
+    Test that YAML load and dump work with a YAML file that has multiple data structures and levels.
     """
     cfgobj = config.YAMLConfig(fixture_path("result4.yaml"))
 

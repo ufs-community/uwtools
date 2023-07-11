@@ -9,9 +9,8 @@ from typing import List
 
 def compare_files(path1: str, path2: str) -> bool:
     """
-    Determines whether the two given files are identical up to any number of
-    trailing newlines, which are ignored. Print the contents of both files when
-    they do not match.
+    Determines whether the two given files are identical up to any number of trailing newlines,
+    which are ignored. Print the contents of both files when they do not match.
 
     Parameters
     ----------
@@ -84,10 +83,9 @@ def fixture_uri(suffix: str = "") -> str:
 
 def line_in_lines(line: str, lines: List[str]) -> bool:
     """
-    Determines whether the given line occurs, as a line-ending suffix, in any of
-    the lines in the given list. For example, the line "bar" is a line-ending
-    suffix of the line "[2023-06-29T14:06:34] foo", but not of the line
-    "foo bar".
+    Determines whether the given line occurs, as a line-ending suffix, in any of the lines in the
+    given list. For example, the line "bar" is a line-ending suffix of the line
+    "[2023-06-29T14:06:34] foo", but not of the line "foo bar".
 
     Paramters
     ---------
@@ -105,8 +103,7 @@ def line_in_lines(line: str, lines: List[str]) -> bool:
 
 def msg_in_caplog(msg: str, records: List[LogRecord]) -> bool:
     """
-    Determines whether the given message occurs in the given list of log
-    records.
+    Determines whether the given message occurs in the given list of log records.
 
     Parameters
     ----------

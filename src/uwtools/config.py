@@ -50,7 +50,6 @@ Define the filter before proceeding.
 
 
 class Config(ABC, UserDict):
-
     """
     This base class provides the interface to methods used to read in several configuration file
     types and manipulate them as such.
@@ -100,7 +99,9 @@ class Config(ABC, UserDict):
         self.log = logging.getLogger(log_name)
 
     def __repr__(self):
-        """This method will return configure contents"""
+        """
+        This method will return configure contents.
+        """
         return json.dumps(self.data)
 
     # Private methods
@@ -109,7 +110,9 @@ class Config(ABC, UserDict):
     def _load(self, config_path=None):
         """
         Interface to load a config file given the config_path attribute, or optional config_path
-        argument. Returns a dict object.
+        argument.
+
+        Returns a dict object.
         """
 
     def _load_paths(self, filepaths):
@@ -251,7 +254,9 @@ class Config(ABC, UserDict):
                     ref_dict[key] = self.str_to_type("".join(data))
 
     def dereference_all(self):
-        """Run dereference until all values have been filled in"""
+        """
+        Run dereference until all values have been filled in.
+        """
 
         prev = copy.deepcopy(self.data)
         self.dereference()
@@ -339,9 +344,10 @@ class Config(ABC, UserDict):
     @logger.verbose()
     def str_to_type(self, str_: str) -> Union[bool, float, int, str]:
         """
-        Check if the string contains a float, int, boolean, or just regular string. This will be
-        used to automatically convert environment variables to data types that are more convenient
-        to work with.
+        Check if the string contains a float, int, boolean, or just regular string.
+
+        This will be used to automatically convert environment variables to data types that are more
+        convenient to work with.
         """
 
         str_ = str_.strip("\"'")
@@ -363,8 +369,8 @@ class Config(ABC, UserDict):
 
     def update_values(self, new_dict, dict_to_update=None):
         """
-        Update the values stored in the class's data (a dict) with the values provided by the
-        new dict.
+        Update the values stored in the class's data (a dict) with the values provided by the new
+        dict.
         """
 
         if dict_to_update is None:
@@ -381,11 +387,14 @@ class Config(ABC, UserDict):
 
 
 class F90Config(Config):
-
-    """Concrete class to handle Fortran namelist files"""
+    """
+    Concrete class to handle Fortran namelist files.
+    """
 
     def __init__(self, config_path: Optional[str] = None, log_name: Optional[str] = None) -> None:
-        """Load the file and update the dictionary."""
+        """
+        Load the file and update the dictionary.
+        """
         super().__init__(config_path, log_name)
 
         if config_path is not None:
@@ -408,7 +417,9 @@ class F90Config(Config):
     # Public methods
 
     def dump_file(self, output_path):
-        """Write the dict to a namelist file."""
+        """
+        Write the dict to a namelist file.
+        """
         nml = OrderedDict(self.data)
         for sect, keys in nml.items():
             if isinstance(keys, dict):
@@ -419,8 +430,9 @@ class F90Config(Config):
 
 
 class INIConfig(Config):
-
-    """Concrete class to handle INI config files."""
+    """
+    Concrete class to handle INI config files.
+    """
 
     def __init__(
         self,
@@ -429,7 +441,7 @@ class INIConfig(Config):
         space_around_delimiters: bool = True,
     ):
         """
-        Load the file and update the dictionary
+        Load the file and update the dictionary.
 
         Parameters
         ----------
@@ -446,7 +458,9 @@ class INIConfig(Config):
     # Private methods
 
     def _load(self, config_path=None):
-        """Load the user-provided INI config file path into a dict object."""
+        """
+        Load the user-provided INI config file path into a dict object.
+        """
 
         config_path = config_path or self.config_path
 
@@ -469,7 +483,9 @@ class INIConfig(Config):
     # Public methods
 
     def dump_file(self, output_path):
-        """Write the dict to an INI file"""
+        """
+        Write the dict to an INI file.
+        """
 
         parser = configparser.ConfigParser()
 
@@ -483,7 +499,6 @@ class INIConfig(Config):
 
 
 class YAMLConfig(Config):
-
     """
     Concrete class to handle YAML configure files.
 
@@ -498,11 +513,12 @@ class YAMLConfig(Config):
 
     _yaml_include()
         Static method used to define a constructor function for PyYAML.
-
     """
 
     def __init__(self, config_path: Optional[str] = None, log_name: Optional[str] = None) -> None:
-        """Load the file and update the dictionary."""
+        """
+        Load the file and update the dictionary.
+        """
 
         super().__init__(config_path, log_name)
 
@@ -510,7 +526,9 @@ class YAMLConfig(Config):
             self.update(self._load())
 
     def __repr__(self):
-        """This method will return configure contents."""
+        """
+        This method will return configure contents.
+        """
         return yaml.dump(self.data)
 
     # Private methods
@@ -542,8 +560,8 @@ class YAMLConfig(Config):
 
     def _yaml_include(self, loader, node):
         """
-        Returns a dictionary that includes the contents of the referenced YAML files, and is used
-        as a contructor method for PyYAML.
+        Returns a dictionary that includes the contents of the referenced YAML files, and is used as
+        a contructor method for PyYAML.
         """
 
         filepaths = loader.construct_sequence(node)
@@ -551,7 +569,9 @@ class YAMLConfig(Config):
 
     @property
     def _yaml_loader(self):
-        """Set up the loader with the appropriate constructors."""
+        """
+        Set up the loader with the appropriate constructors.
+        """
         loader = yaml.SafeLoader
         loader.add_constructor("!INCLUDE", self._yaml_include)
         return loader
@@ -559,7 +579,9 @@ class YAMLConfig(Config):
     # Public methods
 
     def dump_file(self, output_path):
-        """Write the dictionary to a YAML file."""
+        """
+        Write the dictionary to a YAML file.
+        """
 
         with open(output_path, "w", encoding="utf-8") as file_name:
             yaml.dump(self.data, file_name, sort_keys=False)
@@ -572,7 +594,9 @@ class FieldTableConfig(YAMLConfig):
     """
 
     def __init__(self, config_path: Optional[str] = None, log_name: Optional[str] = None) -> None:
-        """Load the file and update the dictionary."""
+        """
+        Load the file and update the dictionary.
+        """
         super().__init__(config_path, log_name)
 
         if config_path is not None:
@@ -583,7 +607,9 @@ class FieldTableConfig(YAMLConfig):
     def _format_output(self):
         """
         Format the output of the dictionary into a string that matches that necessary for a
-        field_table. Return the string.
+        field_table.
+
+        Return the string.
         """
 
         outstring = []
@@ -628,7 +654,9 @@ class FieldTableConfig(YAMLConfig):
 
 
 def create_config_obj(user_args, log=None):
-    """Main section for processing config file"""
+    """
+    Main section for processing config file.
+    """
 
     if log is None:
         name = f"{inspect.stack()[0][3]}"

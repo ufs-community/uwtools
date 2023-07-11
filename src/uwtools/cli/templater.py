@@ -1,7 +1,7 @@
 # pylint: disable=duplicate-code
 """
-CLI for rendering a Jinja2 template using user-supplied configuration options
-via YAML or environment variables.
+CLI for rendering a Jinja2 template using user-supplied configuration options via YAML or
+environment variables.
 """
 
 import inspect
@@ -14,7 +14,7 @@ from uwtools.utils import cli_helpers, templater
 
 def main() -> None:
     """
-    Main entry point
+    Main entry point.
     """
     args = parse_args(sys.argv[1:])
     name = f"{inspect.stack()[0][3]}"
@@ -42,9 +42,9 @@ def main() -> None:
 
 def parse_args(args: List[str]) -> Namespace:
     """
-    Function maintains the arguments accepted by this script. Please see
-    Python's argparse documentation for more information about settings of each
-    argument.
+    Function maintains the arguments accepted by this script.
+
+    Please see Python's argparse documentation for more information about settings of each argument.
     """
     args = args or ["--help"]
     parser = ArgumentParser(

@@ -1,5 +1,5 @@
 """
-Basic setuptools configuration
+Basic setuptools configuration.
 
 See https://setuptools.pypa.io/en/latest/userguide/quickstart.html#basic-use for
 information on this standard setuptools file.

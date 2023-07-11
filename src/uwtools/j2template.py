@@ -1,6 +1,5 @@
 """
-Template classes
-
+Template classes.
 """
 
 import logging
@@ -13,22 +12,24 @@ from uwtools import logger
 
 
 def register_filters(j2env):
-    """Given a Jinja2 environment, register a set of filters recognized
-    by the UW Tools parser."""
+    """
+    Given a Jinja2 environment, register a set of filters recognized by the UW Tools parser.
+    """
 
     j2env.filters["path_join"] = path_join
 
 
 def path_join(arg):
-    """A Jinja2 filter definition for joining paths"""
+    """
+    A Jinja2 filter definition for joining paths.
+    """
     return os.path.join(*arg)
 
 
 class J2Template:
-
     """
-    This class reads in Jinja templates from files or strings, and
-    renders the template given the user-provided configuration object.
+    This class reads in Jinja templates from files or strings, and renders the template given the
+    user-provided configuration object.
 
     Attributes
     ----------
@@ -58,7 +59,6 @@ class J2Template:
     validate_config()
         Checks to ensure that the provided configure_obj is sufficient
         to meet the needs of the undeclared_variables in the template
-
     """
 
     def __init__(
@@ -143,7 +143,8 @@ class J2Template:
         return self._j2env.from_string(template_str)
 
     def render_template(self):
-        """Render the Jinja2 template so that it's available in memory
+        """
+        Render the Jinja2 template so that it's available in memory.
 
         Returns
         -------
@@ -153,7 +154,9 @@ class J2Template:
 
     @property
     def undeclared_variables(self):
-        """Generates a list of variables needed for self.template"""
+        """
+        Generates a list of variables needed for self.template.
+        """
         if self.template_str is not None:
             j2_parsed = self._j2env.parse(self.template_str)
         else:

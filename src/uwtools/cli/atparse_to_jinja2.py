@@ -1,6 +1,6 @@
 # pylint: disable=duplicate-code
 """
-CLI for rendering Jinja2 templates
+CLI for rendering Jinja2 templates.
 """
 
 import sys
@@ -12,7 +12,7 @@ from uwtools.utils import atparse_to_jinja2, cli_helpers
 
 def main() -> None:
     """
-    Main entry point
+    Main entry point.
     """
     args = parse_args(sys.argv[1:])
     atparse_to_jinja2.convert(
@@ -22,9 +22,9 @@ def main() -> None:
 
 def parse_args(args: List[str]) -> Namespace:
     """
-    Function maintains the arguments accepted by this script. Please see
-    Python's argparse documentation for more information about settings of each
-    argument.
+    Function maintains the arguments accepted by this script.
+
+    Please see Python's argparse documentation for more information about settings of each argument.
     """
     args = args or ["--help"]
     parser = ArgumentParser(

@@ -1,6 +1,6 @@
 """
-Support for rendering a Jinja2 template using user-supplied configuration
-options via YAML or environment variables.
+Support for rendering a Jinja2 template using user-supplied configuration options via YAML or
+environment variables.
 """
 import os
 from typing import List
@@ -21,8 +21,8 @@ def render(
     values_needed: bool = False,
 ) -> None:
     """
-    Render a Jinja2 template using user-supplied configuration options via YAML
-    or environment variables.
+    Render a Jinja2 template using user-supplied configuration options via YAML or environment
+    variables.
     """
     cfg = _set_up_config_obj(config_file=config_file, config_items=config_items, log=log)
 
@@ -65,8 +65,8 @@ def render(
 
 def _set_up_config_obj(config_file: str, config_items: List[str], log: Logger) -> dict:
     """
-    Return a dictionary config object from a user-supplied config, the shell
-    environment, and the command line arguments.
+    Return a dictionary config object from a user-supplied config, the shell environment, and the
+    command line arguments.
     """
     if config_file:
         config_type = cli_helpers.get_file_type(config_file)

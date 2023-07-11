@@ -16,7 +16,6 @@ class SRWExperiment(Facade):
     def __init__(self):
         """
         Initialize the facade driver.
-
         """
         self.modname = (
             "uwtools.apps.uw.UWforSRW" if len(sys.argv) > 1 else "uwtools.apps.srw.SRW210"
@@ -28,7 +27,6 @@ class SRWExperiment(Facade):
         # NB: Remove pragma: no cover ASAP
         """
         Load the configuration file.
-
         """
 
         import_config_file = getattr(import_module(self.modname), "load_config")  # pragma: no cover
@@ -37,14 +35,12 @@ class SRWExperiment(Facade):
     def validate_config(self, config_file):
         """
         Validate the configuration file.
-
         """
 
     def create_experiment(self):  # pragma: no cover
         # NB: Remove pragma: no cover ASAP
         """
         Create the experiment directory.
-
         """
         # Note: UW version coming soon, replace module with self.modname when available
         workflow_generator = getattr(import_module("uwtools.apps.srw.SRW210"), "create_experiment")
@@ -53,11 +49,9 @@ class SRWExperiment(Facade):
     def create_manager_files(self):
         """
         Create the manager files.
-
         """
 
     def link_fix_files(self):
         """
         Link the fix files.
-
         """

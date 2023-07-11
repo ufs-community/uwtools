@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access
 """
-Tests for uwtools.logging module
+Tests for uwtools.logging module.
 """
 
 import logging
@@ -21,7 +21,9 @@ reference = {
 
 
 def test_logger(tmp_path):
-    """Test log file"""
+    """
+    Test log file.
+    """
 
     logfile = tmp_path / "logger.log"
 

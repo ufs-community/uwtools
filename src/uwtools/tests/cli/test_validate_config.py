@@ -1,6 +1,6 @@
 # pylint: disable=duplicate-code,missing-function-docstring,redefined-outer-name
 """
-Tests for the validate-config CLI
+Tests for the validate-config CLI.
 """
 
 from types import SimpleNamespace as ns
@@ -51,7 +51,9 @@ def test_main(files):
 
 @pytest.mark.parametrize("sw", [ns(c="-c", s="-s"), ns(c="--config-file", s="--validation-schema")])
 def test_parse_args_bad_cfgfile(sw, files, capsys, tmp_path):
-    """Fails if non-existent config file is specified."""
+    """
+    Fails if non-existent config file is specified.
+    """
     _, _, schemafile = files
     cfgfile = str(tmp_path / "no-such-file")
     with raises(SystemExit) as e:
@@ -62,7 +64,9 @@ def test_parse_args_bad_cfgfile(sw, files, capsys, tmp_path):
 
 @pytest.mark.parametrize("sw", [ns(c="-c", s="-s"), ns(c="--config-file", s="--validation-schema")])
 def test_parse_args_bad_schemafile(sw, files, capsys, tmp_path):
-    """Fails if non-existent schema file is specified."""
+    """
+    Fails if non-existent schema file is specified.
+    """
     cfgfile, _, _ = files
     schemafile = str(tmp_path / "no-such-file")
     with raises(SystemExit) as e:
@@ -77,7 +81,9 @@ def test_parse_args_bad_schemafile(sw, files, capsys, tmp_path):
     [ns(c="-c", l="-l", s="-s"), ns(c="--config-file", l="--log-file", s="--validation-schema")],
 )
 def test_parse_args_good(sw, noise, files):
-    """Test all valid CLI switch/value combinations."""
+    """
+    Test all valid CLI switch/value combinations.
+    """
     cfgfile, logfile, schemafile = files
     cfgtype = "F90"  # representative (not exhaustive) value
     parsed = validate_config.parse_args(

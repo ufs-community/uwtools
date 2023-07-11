@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,redefined-outer-name
 """
-Tests for uwtools.j2template module
+Tests for uwtools.j2template module.
 """
 
 from types import SimpleNamespace as ns

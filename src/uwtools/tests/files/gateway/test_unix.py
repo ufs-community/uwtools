@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
-Tests for uwtools.files.gateway.unix module
+Tests for uwtools.files.gateway.unix module.
 """
 
 from pytest import fixture

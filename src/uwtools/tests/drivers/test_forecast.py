@@ -1,7 +1,6 @@
 # pylint: disable=missing-function-docstring,redefined-outer-name
-
 """
-Tests for forecast driver
+Tests for forecast driver.
 """
 
 import filecmp
@@ -16,8 +15,10 @@ from uwtools.tests.support import compare_files, fixture_path
 
 
 def test_create_config(tmp_path):
-    """Test that providing a yaml base input file and a config file will
-    create and update yaml config file"""
+    """
+    Test that providing a yaml base input file and a config file will create and update yaml config
+    file.
+    """
 
     input_file = fixture_path("fruit_config.yaml")
     config_file = fixture_path("fruit_config_similar.yaml")
@@ -35,7 +36,9 @@ def test_create_config(tmp_path):
 
 
 def test_create_directory_structure(tmp_path):
-    """Tests create_directory_structure method given a directory."""
+    """
+    Tests create_directory_structure method given a directory.
+    """
 
     rundir = tmp_path / "rundir"
     forecast_obj = FV3Forecast()
@@ -73,7 +76,9 @@ def create_field_table_assets():
 
 
 def test_create_field_table_with_base_file(create_field_table_assets, tmp_path):
-    """Tests create_field_table method with optional base file"""
+    """
+    Tests create_field_table method with optional base file.
+    """
     forecast_obj, update_obj = create_field_table_assets
     base_file = fixture_path("FV3_GFS_v16.yaml")
     outfldtbl_file = tmp_path / "field_table_two.FV3_GFS"
@@ -83,7 +88,9 @@ def test_create_field_table_with_base_file(create_field_table_assets, tmp_path):
 
 
 def test_create_field_table_without_base_file(create_field_table_assets, tmp_path):
-    """Tests create_field_table without optional base file"""
+    """
+    Tests create_field_table without optional base file.
+    """
     forecast_obj, update_obj = create_field_table_assets
     outfldtbl_file = tmp_path / "field_table_one.FV3_GFS"
     expected = fixture_path("field_table_from_input.FV3_GFS")
@@ -118,7 +125,9 @@ def create_namelist_assets(tmp_path):
 
 
 def test_create_namelist_with_base_file(create_namelist_assets):
-    """Tests create_namelist method with optional base file"""
+    """
+    Tests create_namelist method with optional base file.
+    """
     forecast_obj, update_obj, outnml_file = create_namelist_assets
     base_file = fixture_path("simple3.nml")
     forecast_obj.create_namelist(update_obj, outnml_file, base_file)
@@ -140,7 +149,9 @@ def test_create_namelist_with_base_file(create_namelist_assets):
 
 
 def test_create_namelist_without_base_file(create_namelist_assets):
-    """Tests create_namelist method without optional base file"""
+    """
+    Tests create_namelist method without optional base file.
+    """
     forecast_obj, update_obj, outnml_file = create_namelist_assets
     forecast_obj.create_namelist(update_obj, str(outnml_file))
     expected = """
@@ -157,8 +168,10 @@ def test_create_namelist_without_base_file(create_namelist_assets):
 
 
 def test_FV3Forecast_stage_static_files(tmp_path):
-    """Tests that stage_static_files() is copying files from static
-    section of the config obj are being staged in run directory."""
+    """
+    Tests that stage_static_files() is copying files from static section of the config obj are being
+    staged in run directory.
+    """
 
     run_directory = tmp_path / "run"
     src_directory = tmp_path / "src"

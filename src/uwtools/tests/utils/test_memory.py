@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring
 """
-Tests for uwtools.utils.file_helpers module
+Tests for uwtools.utils.file_helpers module.
 """
 
 from uwtools.utils import Memory

@@ -9,14 +9,18 @@ from uwtools.tests.support import fixture_path, fixture_uri
 
 
 def test_dir_file():
-    """Tests dir method given a file."""
+    """
+    Tests dir method given a file.
+    """
     suffix = "files/a.txt"
     my_init = Unix(fixture_uri(suffix))
     assert my_init.dir == glob(fixture_path(suffix))
 
 
 def test_dir_path():
-    """Tests dir method given a path, i.e. not a file."""
+    """
+    Tests dir method given a path, i.e. not a file.
+    """
     my_init = Unix(fixture_uri())
     assert my_init.dir == glob(fixture_path("*"))
 

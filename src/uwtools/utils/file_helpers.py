@@ -1,5 +1,5 @@
 """
-Helpers for working with files and directories
+Helpers for working with files and directories.
 """
 
 import logging
@@ -10,8 +10,7 @@ from datetime import datetime as dt
 
 def handle_existing(run_directory: str, exist_act: str) -> None:
     """
-    Given a run directory, and an action to do if directory exists, delete or
-    rename directory.
+    Given a run directory, and an action to do if directory exists, delete or rename directory.
     """
 
     # Try to delete existing run directory if option is delete.

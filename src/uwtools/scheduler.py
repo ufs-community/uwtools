@@ -1,5 +1,5 @@
 """
-Job Scheduling
+Job Scheduling.
 """
 from __future__ import annotations
 
@@ -22,7 +22,9 @@ IGNORED_ATTRIBS = ["scheduler"]
 
 
 class RequiredAttribs:
-    """key for required attributes"""
+    """
+    Key for required attributes.
+    """
 
     ACCOUNT = "account"
     QUEUE = "queue"
@@ -32,7 +34,9 @@ class RequiredAttribs:
 
 
 class OptionalAttribs:
-    """key for optional attributes"""
+    """
+    Key for optional attributes.
+    """
 
     SHELL = "shell"
     JOB_NAME = "jobname"
@@ -48,10 +52,14 @@ class OptionalAttribs:
 
 
 class JobCard(UserList):
-    """represents a job card to submit to a scheduler"""
+    """
+    Represents a job card to submit to a scheduler.
+    """
 
     def __str__(self):
-        """returns string representation"""
+        """
+        Returns string representation.
+        """
         return str(self.content())
 
     def content(self, line_separator: str = "\n") -> str:
@@ -67,7 +75,9 @@ class JobCard(UserList):
 
 
 class JobScheduler(UserDict):
-    """Creates JobCard"""
+    """
+    Creates JobCard.
+    """
 
     _map: dict = {}
     prefix = ""
@@ -84,7 +94,9 @@ class JobScheduler(UserDict):
 
     @staticmethod
     def validate_props(props) -> None:
-        """Raises ValueError if invalid."""
+        """
+        Raises ValueError if invalid.
+        """
         members = [
             getattr(RequiredAttribs, attr)
             for attr in dir(RequiredAttribs)
@@ -94,17 +106,23 @@ class JobScheduler(UserDict):
             raise ValueError(f"Missing required attributes: [{', '.join(diff)}]")
 
     def pre_process(self) -> Dict[str, Any]:
-        """Pre-process attributes before converting to job card."""
+        """
+        Pre-process attributes before converting to job card.
+        """
         return self.data
 
     @staticmethod
     def post_process(items: List[str]) -> List[str]:
-        """post process attributes before converting to job card"""
+        """
+        Post process attributes before converting to job card.
+        """
         return [re.sub(r"\s{0,}\=\s{0,}", "=", x, count=0, flags=0) for x in items]
 
     @property
     def job_card(self) -> JobCard:
-        """Returns the job card to be fed to external scheduler."""
+        """
+        Returns the job card to be fed to external scheduler.
+        """
 
         sanitized_attribs = self.pre_process()
 
@@ -166,7 +184,9 @@ class JobScheduler(UserDict):
 
 
 class Slurm(JobScheduler):
-    """represents a Slurm based scheduler"""
+    """
+    Represents a Slurm based scheduler.
+    """
 
     prefix = "#SBATCH"
 
@@ -187,7 +207,9 @@ class Slurm(JobScheduler):
 
 
 class PBS(JobScheduler):
-    """represents a PBS based scheduler"""
+    """
+    Represents a PBS based scheduler.
+    """
 
     prefix = "#PBS"
     key_value_separator = " "
@@ -221,7 +243,9 @@ class PBS(JobScheduler):
         return dict(output)
 
     def _select(self, items) -> Dict[str, Any]:
-        """select logic"""
+        """
+        Select logic.
+        """
         total_nodes = items.get(RequiredAttribs.NODES, "")
         tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
         # Set default threads=1 to address job variability with PBS
@@ -242,7 +266,9 @@ class PBS(JobScheduler):
 
     @staticmethod
     def _placement(items) -> Dict[str, Any]:
-        """placement logic"""
+        """
+        Placement logic.
+        """
 
         exclusive = items.get(OptionalAttribs.EXCLUSIVE, "")
         placement = items.get(OptionalAttribs.PLACEMENT, "")
@@ -266,7 +292,9 @@ class PBS(JobScheduler):
 
 
 class LSF(JobScheduler):
-    """represents a LSF based scheduler"""
+    """
+    Represents a LSF based scheduler.
+    """
 
     prefix = "#BSUB"
     key_value_separator = " "

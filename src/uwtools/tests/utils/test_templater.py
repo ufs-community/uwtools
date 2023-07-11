@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring
 """
-Tests for uwtools.utils.templater module
+Tests for uwtools.utils.templater module.
 """
 
 from uwtools.utils import templater

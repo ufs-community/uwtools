@@ -14,8 +14,9 @@ from uwtools.utils import cli_helpers
 
 def main() -> None:
     """
-    Defines the user interface for the experiment manager. Parses arguments
-    provided by the user and passes to the facade to be run.
+    Defines the user interface for the experiment manager.
+
+    Parses arguments provided by the user and passes to the facade to be run.
     """
     user_args = parse_args(sys.argv[1:])
     experiment_class = getattr(experiment, f"{user_args.forecast_app}Experiment")
@@ -24,9 +25,9 @@ def main() -> None:
 
 def parse_args(args: List[str]) -> Namespace:
     """
-    Function maintains the arguments accepted by this script. Please see
-    Python's argparse documentation for more information about settings
-    of each argument.
+    Function maintains the arguments accepted by this script.
+
+    Please see Python's argparse documentation for more information about settings of each argument.
     """
     args = args or ["--help"]
     parser = argparse.ArgumentParser(

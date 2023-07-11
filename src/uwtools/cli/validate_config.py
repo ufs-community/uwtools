@@ -1,6 +1,6 @@
 # pylint: disable=duplicate-code
 """
-CLI for JSON Schema-based config validation
+CLI for JSON Schema-based config validation.
 """
 import argparse
 import sys
@@ -13,7 +13,7 @@ from uwtools.utils import cli_helpers
 
 def main() -> None:
     """
-    Main entry point
+    Main entry point.
     """
     args = parse_args(sys.argv[1:])
     name = "validate-config"
