@@ -8,12 +8,10 @@ build:
   jobs:
     pre_build:
       - make meta
-      - export UWTOOLS_VERSION=$(jq -r .version recipe/meta.json)
 conda:
   environment: docs/environment.yml
-# python:
-#    install:
-#      - requirements: docs/requirements.txt
 sphinx:
   builder: html
   configuration: docs/conf.py
+
+# TODO remove requirements.txt

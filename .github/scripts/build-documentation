@@ -8,7 +8,6 @@ set -e
 source conda/etc/profile.d/conda.sh
 conda activate
 make meta
-export UWTOOLS_VERSION=$(jq -r .version recipe/meta.json)
 pip install sphinx sphinx-gallery sphinx_rtd_theme
 set +e
 
