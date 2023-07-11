@@ -411,7 +411,6 @@ class F90Config(Config):
         assert config_path is not None
         with open(config_path, "r", encoding="utf-8") as f:
             cfg = f90nml.read(f).todict(complex_tuple=False)
-        # #PM# WHY NOT JUST KEEP OrderedDict OBJECT?
         return self.from_ordereddict(cfg)
 
     # Public methods
