@@ -1,5 +1,7 @@
 #!/bin/bash
 
+exit 0 # TODO FIXME
+
 # Set up build environment.
 
 set -e

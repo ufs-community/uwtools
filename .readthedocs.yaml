@@ -1,27 +1,18 @@
-# .readthedocs.yaml
-# Read the Docs configuration file
-# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+# Read the Docs configuration (see https://docs.readthedocs.io/en/stable/config-file/v2.html)
 
-# Required 
 version: 2
-
-# Build all formats (htmlzip, pdf, epub)
-#formats: all
-formats: []
-
 build:
   os: ubuntu-22.04
   tools:
-    python: "3.10"
-
-# Optionally set the version of Python and requirements required to build your
-# docs
-python:
-   install:
-   - requirements: docs/requirements.txt
-
-# Configuration for Sphinx documentation (this is the default documentation
-# type)
+    python: mambaforge-4.10
+  jobs:
+    pre_build:
+      - mamba install -q -y -c maddenp condev=0.3.0 sphinx-gallery sphinxcontrib-bibtex
+      - make meta
+      - export UWTOOLS_VERSION=$(jq -r .version recipe/meta.json)
+# python:
+#    install:
+#      - requirements: docs/requirements.txt
 sphinx:
   builder: html
   configuration: docs/conf.py
