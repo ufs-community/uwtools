@@ -72,16 +72,6 @@ def test_bad_conversion_cfg_to_pdf(capsys):
     assert "invalid choice: '.pdf'" in capsys.readouterr().err
 
 
-# def test_bad_conversion_depth_mismatch(tmp_path):
-#     cfgfile = str(tmp_path / "cfg.yaml")
-#     outfile = str(tmp_path / "out.nml")
-#     with open(cfgfile, "w", encoding="utf-8") as f:
-#         print("{a: {b: {c: 88}}}", file=f)
-#     with raises(ValueError):  # as e:
-#         config.create_config_obj(parse_config_args(["-i", cfgfile, "-o", outfile]))
-#     # assert something
-
-
 def test_bad_conversion_nml_to_yaml():
     with raises(ValueError):
         config.create_config_obj(
@@ -782,11 +772,7 @@ def test_yaml_constructor_error_unregistered_constructor(tmp_path):
 
     tmpfile = tmp_path / "test.yaml"
     with tmpfile.open("w", encoding="utf-8") as f:
-        f.write(
-            """
-foo: !not_a_constructor bar
-"""
-        )
+        f.write("foo: !not_a_constructor bar")
     with raises(exceptions.UWConfigError) as e:
         config.YAMLConfig(tmpfile)
     assert "constructor: '!not_a_constructor'" in str(e.value)
@@ -817,8 +803,8 @@ def test_Config_dereference_unexpected_error(f90_cfgobj):
 def test_Config_from_ordereddict(f90_cfgobj):
     d: dict[Any, Any] = OrderedDict([("z", 26), ("a", OrderedDict([("alpha", 1)]))])
     d = f90_cfgobj.from_ordereddict(d)
-    # Assert that every OrderedDict is now just a dict. The second assert is
-    # needed because isinstance(OrderedDict(), dict) is True.
+    # Assert that every OrderedDict is now just a dict. The second assert is needed because
+    # isinstance(OrderedDict(), dict) is True.
     for x in d, d["a"]:
         assert isinstance(x, dict)
         assert not isinstance(x, OrderedDict)
