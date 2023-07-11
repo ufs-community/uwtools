@@ -1,7 +1,6 @@
 """
 This file contains the Config file and its subclasses for a variety of dicatable file types.
 """
-
 import configparser
 import copy
 import inspect
