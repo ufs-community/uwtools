@@ -7,9 +7,10 @@ build:
     python: mambaforge-4.10
   jobs:
     pre_build:
-      - mamba install -q -y -c maddenp condev=0.3.0 sphinx-gallery sphinxcontrib-bibtex
       - make meta
       - export UWTOOLS_VERSION=$(jq -r .version recipe/meta.json)
+conda:
+  environment: docs/environment.yml
 # python:
 #    install:
 #      - requirements: docs/requirements.txt
