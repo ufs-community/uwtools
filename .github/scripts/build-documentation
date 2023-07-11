@@ -2,11 +2,13 @@
 
 # Set up build environment.
 
+set -ex
 source conda/etc/profile.d/conda.sh
 conda activate
 conda install -y sphinx sphinx-gallery sphinx_rtd_theme
 make meta
 export UWTOOLS_VERSION=$(jq -r .version recipe/meta.json)
+set +ex
 
 # Path to docs directory relative to top level of repository. $GITHUB_WORKSPACE
 # is set if the actions/checkout@v2 action is run first.

@@ -10,8 +10,6 @@ on:
       - docs/**
   pull_request:
     types: [opened, reopened, synchronize]
-env:
-  PYTHONPATH: ${GITHUB_WORKSPACE}/src
 jobs:
   create_documentation:
     runs-on: ubuntu-latest
