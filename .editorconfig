@@ -10,9 +10,6 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.bat]
-indent_style = tab
-
 [*.py]
 # Use 80 for Docstrings and comments.
 indent_size = 4
