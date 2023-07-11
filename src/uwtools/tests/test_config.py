@@ -121,7 +121,7 @@ def salad_base():
             "base": "kale",
             "fruit": "banana",
             "vegetable": "tomato",
-            "how_many": "12",
+            "how_many": 12,
             "dressing": "balsamic",
         }
     }
@@ -131,14 +131,14 @@ def salad_base():
 def test_compare_config(fmt, salad_base, caplog):
     """Compare two config objects."""
     ext = ".%s" % ("nml" if fmt == "F90" else fmt).lower()
-    cfgobj = help_cfgclass(ext)(fixture_path(f"simple{ext}"), log_name="test_compare_config")
+    cfgobj = help_cfgclass(ext)(fixture_path(f"simple{ext}"))
     cfgobj.log.addHandler(logging.StreamHandler(sys.stdout))
     cfgobj.log.setLevel(logging.INFO)
+    if fmt == "INI":
+        salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for INI
     cfgobj.compare_config(cfgobj, salad_base)
-    if fmt in ["F90", "YAML"]:
-        assert msg_in_caplog("salad:        how_many:  - 12 + 12", caplog.records)
-    else:
-        assert not caplog.records  # #PM# BUT WHY NOT IN INI?
+    # Expect no differences:
+    assert not caplog.records
     caplog.clear()
     # Create differences in base dict:
     salad_base["salad"]["dressing"] = "italian"
@@ -359,7 +359,7 @@ def test_ini_config_bash(salad_base, tmp_path):
     infile = fixture_path("simple.sh")
     outfile = tmp_path / "outfile.sh"
     cfgobj = config.INIConfig(infile, space_around_delimiters=False)
-    expected = salad_base["salad"]
+    expected = {**salad_base["salad"], "how_many": "12"}  # str "12" (not int 12) for INI
     assert cfgobj == expected
     cfgobj.dump_file(outfile)
     assert filecmp.cmp(infile, outfile)
@@ -377,6 +377,7 @@ def test_ini_config_simple(salad_base, tmp_path):
     outfile = tmp_path / "outfile.ini"
     cfgobj = config.INIConfig(infile)
     expected = salad_base
+    expected["salad"]["how_many"] = "12"  # str "12" (not int 12) for INI
     assert cfgobj == expected
     cfgobj.dump_file(outfile)
     assert filecmp.cmp(infile, outfile)
