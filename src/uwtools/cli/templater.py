@@ -79,8 +79,7 @@ def parse_args(args: List[str]) -> Namespace:
     optional.add_argument(
         "-l",
         "--log-file",
-        # #PM# WHAT TO DO ABOUT THIS LOGFILE PATH?
-        default="/dev/null",  # os.path.join(os.path.dirname(__file__), "templater.log"),
+        default="/dev/null",
         help="Path to a specified log file",
         metavar="FILE",
     )

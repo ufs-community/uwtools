@@ -28,7 +28,7 @@ def handle_existing(run_directory: str, exist_act: str) -> None:
 
     try:
         if exist_act == "rename" and os.path.isdir(run_directory):
-            now = dt.now()  # #PM# SHOULD WE UTCNOW?
+            now = dt.now()
             save_dir = "%s%s" % (run_directory, now.strftime("_%Y%m%d_%H%M%S"))
             shutil.move(run_directory, save_dir)
     except (FileExistsError, RuntimeError) as e:

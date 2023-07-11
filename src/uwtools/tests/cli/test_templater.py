@@ -174,7 +174,6 @@ vegetable
 )
 def test_set_template_verbosity(sw, capsys):
     infile = fixture_path("nml.IN")
-    # #PM# WHAT TO DO ABOUT /dev/null BELOW?
     expected = f"""
 Finished setting up debug file logging in /dev/null
 Running with args:

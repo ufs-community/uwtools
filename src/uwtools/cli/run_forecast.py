@@ -36,8 +36,6 @@ def parse_args(args: List[str]) -> Namespace:
         description="Set config with user-defined settings.",
         formatter_class=lambda prog: HelpFormatter(prog, max_help_position=8),
     )
-    # required = parser.add_argument_group("required arguments")
-    # #PM# ARE THERE REALLY NO REQUIRED ARGUMENTS?
     optional = parser.add_argument_group("optional arguments")
     optional.add_argument(
         "-c",
@@ -55,8 +53,7 @@ def parse_args(args: List[str]) -> Namespace:
     optional.add_argument(
         "-l",
         "--log-file",
-        # #PM# WHAT TO DO ABOUT THIS LOGFILE PATH?
-        default="/dev/null",  # os.path.join(os.path.dirname(__file__), "forecast.log"),
+        default="/dev/null",
         help="Path to a specified log file",
         metavar="FILE",
     )

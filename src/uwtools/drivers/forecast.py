@@ -57,15 +57,11 @@ class FV3Forecast(Driver):
             base_file: Path to optional file with base configuration
         """
 
-        # #PM# DEAL WITH ISSUE OF config_file / config_obj TYPE.
-
         if base_file:
             user_args = parse_config_args(
                 ["-i", base_file, "-o", outconfig_file, "-c", config_file]
             )
             config.create_config_obj(user_args)
-        # else:
-        #     config_obj.dump_file(outconfig_file)
 
         msg = f"Config file {outconfig_file} created"
         logging.info(msg)

@@ -325,9 +325,8 @@ Define the filter before proceeding.
                 self.parse_include(ref_dict[key])
             elif isinstance(value, str) and "!INCLUDE" in value:
                 filepaths = value.lstrip("!INCLUDE [").rstrip("]").split(",")
-
                 # Update the dictionary with the values in the
-                # included file
+                # included file.
                 self.update_values(self._load_paths(filepaths))
                 del ref_dict[key]
 
@@ -337,11 +336,6 @@ Define the filter before proceeding.
         regular string. This will be used to automatically convert
         environment variables to data types that are more convenient to
         work with."""
-
-        # #PM# CONSIDER MANDATING YAML-COMPATIBLE VALUES (e.g. https://yaml.org/type/bool.html)
-        #      AND VALDATING THEM WITH THE YAML PARSER?
-        # #PM# str_to_type() IS AN INACCURATE NAME: THE VALUES RETURNED ARE OBJECTS, NOT TYPES.
-        #      reify_str() MIGHT BE A GOOD NAME.
 
         str_ = str_.strip("\"'")
         if str_.lower() in ["true", "yes", "yeah"]:
@@ -396,9 +390,7 @@ class F90Config(Config):
     def _load(self, config_path: Optional[str] = None) -> dict:
         """Load the user-provided Fortran namelist path into a dict
         object."""
-        # #PM# THIS SEEMS TO SILENTLY FAIL IF A NAMELIST IN THE FILE IS INVALID.
         config_path = config_path or self.config_path
-        # #PM# SINCE config_path in ctor IS ALSO OPTIONAL, THIS ASSERTION IS REQUIRED (PROBABLY BAD)
         assert config_path is not None
         with open(config_path, "r", encoding="utf-8") as f:
             cfg = f90nml.read(f).todict(complex_tuple=False)
@@ -717,11 +709,6 @@ def create_config_obj(user_args, log=None):
             ):
                 log.critical(err_msg)
                 raise ValueError(err_msg)
-
-            # #PM# HOW IS THIS POSSIBLE?
-        # if input_depth > output_depth:
-        #     log.critical(f"{user_args.outfile} not compatible with {user_args.input_base_file}")
-        #     raise ValueError("Set config failure: output object not compatible with input file")
 
         else:  # same type of file as input, no need to convert it
             out_object = config_obj

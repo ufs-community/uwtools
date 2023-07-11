@@ -65,8 +65,7 @@ def parse_args(args: List[str]) -> Namespace:
     optional.add_argument(
         "-l",
         "--log-file",
-        # #PM# WHAT TO DO ABOUT THIS LOGFILE PATH?
-        default="/dev/null",  # os.path.join(os.path.dirname(__file__), "set_config.log"),
+        default="/dev/null",
         help="Path to a file to log to",
         metavar="FILE",
     )
