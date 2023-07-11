@@ -1,9 +1,0 @@
-{
-"type": "object",
-    "properties": {
-        "fruit": {"type": "string"},
-        "vegetable": {"type": "string"},
-        "how_many": {"type": "integer"},
-        "dressing": {"type": "string"}
-        }    
-}

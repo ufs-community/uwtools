@@ -3,13 +3,9 @@
 Tests for uwtools.config_validator module
 """
 
-import json
 from importlib import resources
 
-import jsonschema
 import pytest
-import yaml
-from pytest import fixture, raises
 
 from uwtools import config_validator
 from uwtools.logger import Logger
@@ -32,28 +28,3 @@ def test_confid_is_valid_good(vals):
         )
         is boolval
     )
-
-
-# #PM# EVERYTHING BELOW TESTS jsonschema, NOT OUR CODE. DO WE NEED IT?
-
-
-def validate(subpath, schema):
-    with open(fixture_path(subpath), "r", encoding="utf-8") as f:
-        jsonschema.validate(yaml.safe_load(f), schema)
-
-
-@fixture(scope="module")
-def schema():
-    with open(fixture_path("schema/salad.jsonschema"), "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def test_validate_bad_yaml(schema):
-    with raises(jsonschema.exceptions.ValidationError):
-        validate("bad_fruit_config.yaml", schema)
-
-
-def test_validate_good_yaml(schema, capsys):
-    validate("fruit_config_similar.yaml", schema)
-    assert capsys.readouterr().err == ""
-    assert capsys.readouterr().out == ""
