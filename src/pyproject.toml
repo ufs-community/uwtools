@@ -8,8 +8,10 @@ skip_covered = true
 
 [tool.docformatter]
 black = true
+in-place = true
 make-summary-multi-line = true
 pre-summary-newline = true
+recursive = true
 wrap-descriptions = 100
 wrap-summaries = 100
 
