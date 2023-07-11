@@ -114,6 +114,26 @@ make -C condev package
 conda install -y -c local condev
 ```
 
+### Files derived from condev
+
+The following files in this repo are derived from their counterparts in the [condev demo](https://github.com/maddenp/condev/tree/main/demo):
+
+``` sh
+├── Makefile
+├── recipe
+│   ├── build.sh
+│   ├── channels
+│   ├── conda_build_config.yaml
+│   ├── .gitignore
+│   ├── meta.yaml
+│   └── run_test.sh
+├── src
+│   ├── pyproject.toml
+│   ├── setup.py
+```
+
+Behaviors described in previous sections may rely on these files continuing to follow `condev` conventions.
+
 ## Documentation
 
 The inline-documentation docstring standard (using the [NumPy](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard) convention) will be used to describe modules, funtions, classes and methods for inline code documentation.
