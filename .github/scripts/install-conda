@@ -1,7 +1,5 @@
 #!/bin/bash -eux
 
-exit 0 # TODO FIXME
-
 f=Miniforge3-Linux-x86_64.sh
 wget --no-verbose https://github.com/conda-forge/miniforge/releases/latest/download/$f
 bash $f -bfp conda

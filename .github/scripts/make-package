@@ -1,7 +1,5 @@
 #!/bin/bash -e
 
-exit 0 # TODO FIXME
-
 source conda/etc/profile.d/conda.sh
 conda activate
 make package

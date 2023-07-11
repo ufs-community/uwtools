@@ -13,5 +13,3 @@ conda:
 sphinx:
   builder: html
   configuration: docs/conf.py
-
-# TODO remove requirements.txt
