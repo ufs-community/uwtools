@@ -25,7 +25,7 @@ format:
 	cd src
 	black .
 	isort --profile black .
-	docformatter --in-place --recursive . || true # exits 3 if changes were made :(
+	docformatter . || true # exits 3 if changes were made :(
 
 lint:
 	recipe/run_test.sh lint
