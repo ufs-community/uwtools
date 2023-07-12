@@ -8,7 +8,6 @@ export RECIPE_DIR := $(shell realpath ./recipe)
 spec = $(call val,name)$(2)$(call val,version)$(2)$(call val,$(1))
 val  = $(shell jq -r .$(1) $(METAJSON))
 
-.ONESHELL:
 .PHONY: $(TARGETS)
 
 all:
@@ -22,10 +21,7 @@ env: package
 
 format:
 	@echo "=> Running formatters"
-	cd src
-	black .
-	isort --profile black .
-	docformatter . || true # exits 3 if changes were made :(
+	(cd src && black . && isort --profile black . && docformatter .) || true
 
 lint:
 	recipe/run_test.sh lint
