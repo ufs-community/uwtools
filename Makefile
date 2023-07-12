@@ -21,7 +21,9 @@ env: package
 
 format:
 	@echo "=> Running formatters"
-	(cd src && black . && isort --profile black . && docformatter .) || true
+	cd src && black .
+	cd src && isort --profile black .
+	cd src && docformatter . || true
 
 lint:
 	recipe/run_test.sh lint
