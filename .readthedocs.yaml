@@ -1,5 +1,7 @@
 # Read the Docs configuration (see https://docs.readthedocs.io/en/stable/config-file/v2.html)
 
+# The 'make meta' command makes recipe/meta.json available to doc-build logic.
+
 version: 2
 build:
   os: ubuntu-22.04
