@@ -34,7 +34,7 @@ lint() {
   msg Running linter
   (
     set -eux
-    pylint --recursive y .
+    pylint .
   )
   msg OK
 }
@@ -47,7 +47,7 @@ typecheck() {
   msg Running typechecker
   (
     set -eux
-    mypy --install-types --non-interactive --pretty .
+    mypy --install-types --non-interactive .
   )
   msg OK
 }
@@ -57,7 +57,7 @@ unittest() {
   (
     set -eux
     coverage run -m pytest -vv .
-    coverage report --omit="*/tests/*"
+    coverage report
   )
   msg OK
 }

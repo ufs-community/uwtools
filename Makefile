@@ -21,8 +21,8 @@ env: package
 
 format:
 	@echo "=> Running formatters"
-	cd src && black .
-	cd src && isort --profile black .
+	black src
+	isort src
 	cd src && docformatter . || test $$? -eq 3
 
 lint:

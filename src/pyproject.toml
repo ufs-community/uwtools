@@ -3,6 +3,7 @@ line-length = 100
 
 [tool.coverage.report]
 fail_under = 100
+omit = ["*/tests/*"]
 show_missing = true
 skip_covered = true
 
@@ -17,11 +18,13 @@ wrap-summaries = 100
 
 [tool.isort]
 line_length = 100
+profile = "black"
 
 [tool.mypy]
 check_untyped_defs = true
 follow_imports = "skip"
 ignore_missing_imports = true
+pretty = true
 
 [tool.pylint.messages_control]
 disable = [
@@ -36,6 +39,7 @@ disable = [
   "unnecessary-lambda-assignment",
   "use-dict-literal",
 ]
+recursive = true
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::DeprecationWarning:botocore.*"]
