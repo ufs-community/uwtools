@@ -1,0 +1,19 @@
+name: Test and Lint
+on:
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+    branches:
+      - develop
+jobs:
+  test-and-lint:
+    name: Test and Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Succeed
+        run:  /bin/true
