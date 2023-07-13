@@ -23,7 +23,7 @@ format:
 	@echo "=> Running formatters"
 	cd src && black .
 	cd src && isort --profile black .
-	cd src && docformatter . || true
+	cd src && docformatter . || test $$? -eq 3
 
 lint:
 	recipe/run_test.sh lint
