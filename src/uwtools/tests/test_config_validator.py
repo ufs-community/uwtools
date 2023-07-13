@@ -13,7 +13,7 @@ from uwtools.tests.support import fixture_path
 
 
 @pytest.mark.parametrize("vals", [("good", True), ("bad", False)])
-def test_confid_is_valid_good(vals):
+def test_config_is_valid_good(vals):
     """
     Test that a valid config file succeeds validation.
     """
