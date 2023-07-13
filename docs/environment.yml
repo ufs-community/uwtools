@@ -1,0 +1,8 @@
+name: readthedocs
+channels:
+  - conda-forge
+  - maddenp
+dependencies:
+  - condev=0.3.0
+  - sphinx-gallery
+  - sphinxcontrib-bibtex

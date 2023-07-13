@@ -1,70 +1,50 @@
-# pylint: disable=too-few-public-methods
 """
-Unix based local file copying, threaded
+Unix-based, threaded, local file copying.
 """
 
 import logging
-import os
-import pathlib
 import shutil
-from queue import Empty, Queue
-from threading import Thread
-from typing import List
+from concurrent.futures import ThreadPoolExecutor, wait
+from pathlib import Path
+from typing import List, Tuple
 
 from uwtools.files.model import File
 
-logging.getLogger(__name__)
-
-
-def copy(source: List[File], destination: List[pathlib.Path]): #pylint: disable=unused-variable
-    """copies each item from source to corresponding item in destination"""
-    Copier(source, destination).run()
-
 
 class Copier:
-    """represents a threaded file copier"""
+    """
+    A threaded file copier.
+    """
 
-    def __init__(self, source: List[File], destination: List[pathlib.Path]):
-        self.source = list(source)
-        self.destination = list(destination)
-        self.queue = Queue()
-        self.append(source, destination)
+    def __init__(self, srcs: List[File], dsts: List[Path]) -> None:
+        self.pairs: List[Tuple[Path, Path]] = list(zip([Path(x.path) for x in srcs], dsts))
 
-    def __iter__(self):
-        try:
-            yield self.queue.get_nowait()
-        except Empty:
-            return
-
-    def append(self, source, destination):
-        """append a task to the queue"""
-        for (src, dest) in zip(list(source), list(destination)):
-            self.queue.put((src, dest))
-
-    def run(self):
-        """ runs all tasks in queue threaded"""
-
-        threads = [
-            Thread(target=_copy, args=(source.path, destination))
-            for (source, destination) in self
-        ]
-
-        for thread in threads:
-            thread.start()
-
-        # wait to complete
-        for thread in threads:
-            thread.join()
+    def run(self) -> None:
+        """
+        Copy each src->dst pair in a thread.
+        """
+        executor = ThreadPoolExecutor()
+        futures = [executor.submit(_copy, src, dst) for src, dst in self.pairs]
+        wait(futures)
 
 
-def _copy(source: pathlib.Path, destination: pathlib.Path):
-    """copies file or directory from src to destination.
+def copy(srcs: List[File], dsts: List[Path]) -> None:
+    """
+    Copies each source item to corresponding destination item.
+    """
+    Copier(srcs, dsts).run()
+
+
+def _copy(src: Path, dst: Path) -> None:
+    """
+    Copies file or directory from source to destination.
 
     Directories are copied recursively.
     """
-    logging.debug("copying %s to %s", source, destination)
-    if os.path.exists(destination) and os.path.isdir(destination):
-        shutil.rmtree(destination)
-        shutil.copytree(source, destination)
-        return
-    shutil.copy(source, destination)
+    logging.debug("Copying %s to %s", src, dst)
+    if src.is_file():
+        shutil.copy(src, dst)
+    else:
+        if dst.is_dir():
+            shutil.rmtree(dst)
+        shutil.copytree(src, dst)

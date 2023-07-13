@@ -1,0 +1,21 @@
+name: Make Package
+on:
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+    branches:
+      - develop
+jobs:
+  make-package:
+    name: Make Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install conda
+        run:  .github/scripts/install-conda
+      - name: Make Package
+        run:  .github/scripts/make-package

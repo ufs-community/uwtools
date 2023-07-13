@@ -203,7 +203,7 @@ To install the ``workflow-tools`` repository from GitHub, follow these steps:
 
    As of April 6, 2023, the output from this command is::
 
-      usage: templater.py [-h] [-o OUTFILE] -i INPUT_TEMPLATE [-c CONFIG_FILE] [-d] [--values_needed] [-v] [-q] [KEY=VALUE ...]
+      usage: templater.py [-h] [-o OUTFILE] -i INPUT_TEMPLATE [-c CONFIG_FILE] [-d] [--values-needed] [-v] [-q] [KEY=VALUE ...]
 
       Update a Jinja2 Template with user-defined settings.
 
@@ -214,12 +214,12 @@ To install the ``workflow-tools`` repository from GitHub, follow these steps:
       -h, --help show this help message and exit
       -o OUTFILE, --outfile OUTFILE
       Full path to output file
-      -i INPUT_TEMPLATE, --input_template INPUT_TEMPLATE
+      -i INPUT_TEMPLATE, --input-template INPUT_TEMPLATE
       Path to a Jinja2 template file.
-      -c CONFIG_FILE, --config_file CONFIG_FILE
+      -c CONFIG_FILE, --config-file CONFIG_FILE
       Optional path to a YAML configuration file. If not provided, os.environ is used to configure.
-      -d, --dry_run If provided, print rendered template to stdout only
-      --values_needed If provided, print a list of required configuration settings to stdout
+      -d, --dry-run If provided, print rendered template to stdout only
+      --values-needed If provided, print a list of required configuration settings to stdout
       -v, --verbose If provided, print all logging messages.
       -q, --quiet If provided, print no logging messages
 

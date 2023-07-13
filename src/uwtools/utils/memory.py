@@ -1,5 +1,5 @@
 """
-Encapsulates string based memory conversions
+Encapsulates string based memory conversions.
 """
 
 
@@ -7,7 +7,8 @@ MAP = {"KB": 1000, "MB": 1000 * 1000, "GB": 1000 * 1000 * 1000}
 
 
 class Memory:
-    """represents memory as quantity and measurement
+    """
+    Represents memory as quantity and measurement.
 
     100MB -> 100(quatity)MB(measurement)
     """
@@ -24,24 +25,26 @@ class Memory:
 
     @property
     def measurement(self):
-        """returns the measurement (MB, KB, etc.)"""
+        """
+        Returns the measurement (MB, KB, etc.)
+        """
         if self._measurement is None:
             self._measurement = self._value[-2:]
         return self._measurement
 
     @property
     def quantity(self):
-        """returns the quantity"""
+        """
+        Returns the quantity.
+        """
         if self._quantity is None:
             self._quantity = float(self._value[0:-2])
         return self._quantity
 
     def convert(self, measurement: str):
-        """converts the current representation to another measurement"""
+        """
+        Converts the current representation to another measurement.
+        """
         quantity = (MAP[self.measurement] / MAP[measurement.upper()]) * self.quantity
 
         return Memory(str(quantity) + measurement.upper())
-
-
-if __name__ == "__main__":
-    pass

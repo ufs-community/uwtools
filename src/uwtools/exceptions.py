@@ -1,6 +1,9 @@
-""" Custom exceptions for the UWTools package """
+"""
+Custom exceptions for the UWTools package.
+"""
 
-# pylint: disable=unused-variable
 
 class UWConfigError(Exception):
-    """UWTools exception for Config Object error handling"""
+    """
+    UWTools exception for Config Object error handling.
+    """

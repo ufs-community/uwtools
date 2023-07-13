@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Set up build environment.
+
+set -e
+source conda/etc/profile.d/conda.sh
+conda activate
+make meta # to make recipe/meta.json available to doc-build logic
+pip install sphinx sphinx-gallery sphinx_rtd_theme
+set +e
+
+# Path to docs directory relative to top level of repository. $GITHUB_WORKSPACE
+# is set if the actions/checkout@v2 action is run first.
+
+DOCS_DIR=$GITHUB_WORKSPACE/docs
+
+# Build the documentation.
+
+buildcmd="make -C $DOCS_DIR clean html"
+$buildcmd
+status=$?
+
+# Copy HTML output to create an artifact.
+
+dstdir=artifact/documentation
+mkdir -pv $dstdir
+cp -r $DOCS_DIR/_build/html/* $dstdir/
+
+# If the build failed and/or the warnings log has content, copy it to the
+# artifact and documentation directories, and print a report about issues that
+# were encountered during the build.
+
+warnings=$DOCS_DIR/_build/warnings.log
+
+if [[ $status != 0 || -s $warnings ]]; then
+  test $status -eq 0 && echo "ERROR: '$buildcmd' failed with status $status."
+  cp -v $warnings artifact/
+  cp -v $warnings $dstdir/
+  echo ERROR: Found warnings/errors!
+  echo Summary:
+  grep WARNING $warnings
+  grep ERROR $warnings
+  grep CRITICAL $warnings
+  echo Review this log file or download $(basename $warnings) artifact.
+  exit 1
+fi
+
+echo INFO: Documentation was built successfully.

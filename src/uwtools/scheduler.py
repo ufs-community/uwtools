@@ -1,10 +1,12 @@
 """
-Job Scheduling
+Job Scheduling.
 """
-import collections
+from __future__ import annotations
+
 import logging
 import re
-
+from collections import UserDict, UserList
+from collections.abc import Mapping
 from typing import Any, Dict, List
 
 from uwtools.utils import Memory
@@ -19,8 +21,10 @@ NONEISH = [None, "", " ", "None", "none", False]
 IGNORED_ATTRIBS = ["scheduler"]
 
 
-class RequiredAttribs:  # pylint: disable=too-few-public-methods
-    """key for required attributes"""
+class RequiredAttribs:
+    """
+    Key for required attributes.
+    """
 
     ACCOUNT = "account"
     QUEUE = "queue"
@@ -29,8 +33,10 @@ class RequiredAttribs:  # pylint: disable=too-few-public-methods
     TASKS_PER_NODE = "tasks_per_node"
 
 
-class OptionalAttribs:  # pylint: disable=too-few-public-methods
-    """key for optional attributes"""
+class OptionalAttribs:
+    """
+    Key for optional attributes.
+    """
 
     SHELL = "shell"
     JOB_NAME = "jobname"
@@ -45,35 +51,41 @@ class OptionalAttribs:  # pylint: disable=too-few-public-methods
     PLACEMENT = "placement"
 
 
-class JobCard(collections.UserList):
-    """represents a job card to submit to a scheduler"""
+class JobCard(UserList):
+    """
+    Represents a job card to submit to a scheduler.
+    """
 
     def __str__(self):
-        """returns string representation"""
+        """
+        Returns string representation.
+        """
         return str(self.content())
 
     def content(self, line_separator: str = "\n") -> str:
-        """returns the formatted content of the job cards
+        """
+        Returns the formatted content of the job cards.
 
         Parameters
         ----------
-        line_separator : str
-            the character or characters to join the content lines on.
+        line_separator
+            The character or characters to join the content lines with
         """
         return line_separator.join(self)
 
 
-class JobScheduler(collections.UserDict):
-    """object that creates JobCard"""
+class JobScheduler(UserDict):
+    """
+    Creates JobCard.
+    """
 
-    _map = {}
+    _map: dict = {}
     prefix = ""
     key_value_separator = "="
 
     def __init__(self, props):
-        super().__init__()
+        super().__init__(props)
         self.validate_props(props)
-        self.update(props)
 
     def __getattr__(self, name) -> Any:
         if name in self:
@@ -82,51 +94,54 @@ class JobScheduler(collections.UserDict):
 
     @staticmethod
     def validate_props(props) -> None:
-        """raises ValueError if invalid"""
+        """
+        Raises ValueError if invalid.
+        """
         members = [
             getattr(RequiredAttribs, attr)
             for attr in dir(RequiredAttribs)
-            if not callable(getattr(RequiredAttribs, attr))
-            and not attr.startswith("__")
+            if not callable(getattr(RequiredAttribs, attr)) and not attr.startswith("__")
         ]
+        if diff := [x for x in members if x not in props]:
+            raise ValueError(f"Missing required attributes: [{', '.join(diff)}]")
 
-        diff = [x for x in members if x not in props]
-        if len(diff):
-            raise ValueError(f"missing required attributes: [{', '.join(diff)}]")
-
-    @property
-    def _data(self) -> Dict[Any, Any]:
-        return self.__dict__["data"]
-
-    def pre_process(self) -> Dict[Any, Any]:
-        """pre process attributes before converting to job card"""
-        return self._data
+    def pre_process(self) -> Dict[str, Any]:
+        """
+        Pre-process attributes before converting to job card.
+        """
+        return self.data
 
     @staticmethod
     def post_process(items: List[str]) -> List[str]:
-        """post process attributes before converting to job card"""
+        """
+        Post process attributes before converting to job card.
+        """
         return [re.sub(r"\s{0,}\=\s{0,}", "=", x, count=0, flags=0) for x in items]
 
     @property
     def job_card(self) -> JobCard:
-        """returns the job card to be fed to external scheduler"""
+        """
+        Returns the job card to be fed to external scheduler.
+        """
+
         sanitized_attribs = self.pre_process()
 
         known = []
-        for (key, value) in sanitized_attribs.items():
+        for key, value in sanitized_attribs.items():
             if key in self._map and key not in IGNORED_ATTRIBS:
-                #pylint: disable=line-too-long
-                scheduler_flag = self._map[key](value) if callable(self._map[key]) else self._map[key]
-                scheduler_value = value if not callable(self._map[key]) else ''
-                directive = f"{self.prefix} {scheduler_flag}{self.key_value_separator}{scheduler_value}"
+                scheduler_flag = (
+                    self._map[key](value) if callable(self._map[key]) else self._map[key]
+                )
+                scheduler_value = "" if callable(self._map[key]) else value
+                directive = (
+                    f"{self.prefix} {scheduler_flag}{self.key_value_separator}{scheduler_value}"
+                )
                 known.append(directive.strip())
 
         unknown = [
             f"{self.prefix} {key}{self.key_value_separator}{value}".strip()
             for (key, value) in sanitized_attribs.items()
-            if key not in self._map
-            and value not in NONEISH
-            and key not in IGNORED_ATTRIBS
+            if key not in self._map and value not in NONEISH and key not in IGNORED_ATTRIBS
         ]
 
         flags = [
@@ -137,42 +152,41 @@ class JobScheduler(collections.UserDict):
 
         processed = self.post_process(known + unknown + flags)
 
-        return JobCard(processed)
+        # Sort batch directives to normalize output w.r.t. potential differences
+        # in ordering of input dicts.
 
-    @classmethod
-    def get_scheduler(cls, props: Dict[str, Any]) -> "JobScheduler":
-        """returns the appropriate scheduler
+        return JobCard(sorted(processed))
+
+    @staticmethod
+    def get_scheduler(props: Mapping) -> JobScheduler:
+        """
+        Returns the appropriate scheduler.
 
         Parameters
         ----------
-        props : dict
-            must contain a scheduler key or raise KeyError
-
-        TODO: map_schedulers should be hoisted up out of the method
+        props
+            Must contain a 'scheduler' key or a KeyError will be raised
         """
         if "scheduler" not in props:
-            raise KeyError(
-                f"no scheduler defined in props: [{', '.join(props.keys())}]"
-            )
-
-        map_schedulers = {
-            "slurm": Slurm,
-            "pbs": PBS,
-            "lsf": LSF,
-        }
-        logging.debug("getting scheduler type %s", map_schedulers[props["scheduler"]])
+            raise KeyError(f"No scheduler defined in props: [{', '.join(props.keys())}]")
+        name = props["scheduler"]
+        logging.debug("Getting '%s' scheduler", name)
+        schedulers = {"slurm": Slurm, "pbs": PBS, "lsf": LSF}
         try:
-            return map_schedulers[props["scheduler"]](props)
+            scheduler = schedulers[name]
         except KeyError as error:
             raise KeyError(
-                f"{props['scheduler']} is not a supported scheduler"
+                f"{name} is not a supported scheduler"
                 + "Currently supported schedulers are:\n"
-                + f'{" | ".join(map_schedulers.keys())}"'
+                + f'{" | ".join(schedulers.keys())}"'
             ) from error
+        return scheduler(props)
 
 
 class Slurm(JobScheduler):
-    """represents a Slurm based scheduler"""
+    """
+    Represents a Slurm based scheduler.
+    """
 
     prefix = "#SBATCH"
 
@@ -193,7 +207,9 @@ class Slurm(JobScheduler):
 
 
 class PBS(JobScheduler):
-    """represents a PBS based scheduler"""
+    """
+    Represents a PBS based scheduler.
+    """
 
     prefix = "#PBS"
     key_value_separator = " "
@@ -213,7 +229,7 @@ class PBS(JobScheduler):
     }
 
     def pre_process(self) -> Dict[str, Any]:
-        output = self._data
+        output = self.data
         output.update(self._select(output))
         output.update(self._placement(output))
 
@@ -227,7 +243,9 @@ class PBS(JobScheduler):
         return dict(output)
 
     def _select(self, items) -> Dict[str, Any]:
-        """select logic"""
+        """
+        Select logic.
+        """
         total_nodes = items.get(RequiredAttribs.NODES, "")
         tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
         # Set default threads=1 to address job variability with PBS
@@ -248,7 +266,9 @@ class PBS(JobScheduler):
 
     @staticmethod
     def _placement(items) -> Dict[str, Any]:
-        """placement logic"""
+        """
+        Placement logic.
+        """
 
         exclusive = items.get(OptionalAttribs.EXCLUSIVE, "")
         placement = items.get(OptionalAttribs.PLACEMENT, "")
@@ -272,7 +292,9 @@ class PBS(JobScheduler):
 
 
 class LSF(JobScheduler):
-    """represents a LSF based scheduler"""
+    """
+    Represents a LSF based scheduler.
+    """
 
     prefix = "#BSUB"
     key_value_separator = " "
@@ -291,7 +313,7 @@ class LSF(JobScheduler):
     }
 
     def pre_process(self) -> Dict[str, Any]:
-        items = self._data
+        items = self.data
         # LSF requires threads to be set (if None is provided, default to 1)
         items[OptionalAttribs.THREADS] = items.get(OptionalAttribs.THREADS, 1)
         nodes = items.get(RequiredAttribs.NODES, "")

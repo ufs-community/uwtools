@@ -175,7 +175,7 @@ Any configuration settings supplied through the ``config_items`` flag will overr
 ^^^^^^^^^^^^
 dry_run flag
 ^^^^^^^^^^^^
-Running ``templater.py`` with the ``-d`` or ``--dry_run`` flag will print the rendered template to stdout only and provide no other output::
+Running ``templater.py`` with the ``-d`` or ``--dry-run`` flag will print the rendered template to stdout only and provide no other output::
 
     python scripts/templater.py -i /<path-totemplate>/jinja2template.nml -c /<path-to-config>/example_config.yaml -d
 
@@ -215,9 +215,9 @@ Running ``templater.py`` with the ``-d`` or ``--dry_run`` flag will print the re
 ^^^^^^^^^^^^^^^^^^
 Values Needed Flag
 ^^^^^^^^^^^^^^^^^^
-If provided, the ``--values_needed`` flag will print a list of required configuration settings for the input template to stdout::
+If provided, the ``--values-needed`` flag will print a list of required configuration settings for the input template to stdout::
     
-  workflow-tools % python scripts/templater.py -i /<path-totemplate>/jinja2template.nml --values_needed
+  workflow-tools % python scripts/templater.py -i /<path-totemplate>/jinja2template.nml --values-needed
   Running script templater.py with args:
   ----------------------------------------------------------------------
   ----------------------------------------------------------------------
