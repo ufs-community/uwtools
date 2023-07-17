@@ -6,7 +6,6 @@ Tests for uwtools.config module.
 import builtins
 import datetime
 import filecmp
-import itertools
 import logging
 import os
 import re
@@ -583,27 +582,23 @@ def test_show_format():
         help_.assert_called_once()
 
 
-# #PM# PARAMETERIZE WITH PYTEST INSTEAD, SIMPLIFY FILENAMES
-def test_transform_config(tmp_path):
+@pytest.mark.parametrize("fmt1", ["F90", "INI", "YAML"])
+@pytest.mark.parametrize("fmt2", ["F90", "INI", "YAML"])
+def test_transform_config(fmt1, fmt2, tmp_path):
     """
     Test that transforms config objects to objects of other config subclasses.
     """
-    # Use itertools to construct all pairs of the config formats and iterate
-    # through their corresponding classes. The transforms here ensure consistent
-    # file subscripts and config calls.
-
-    for fmt1, fmt2 in itertools.permutations(["INI", "YAML", "F90"], 2):
-        ext1, ext2 = [".%s" % ("NML" if x == "F90" else x).lower() for x in (fmt1, fmt2)]
-        outfile = tmp_path / f"test_{fmt1.lower()}to{fmt2.lower()}_dump{ext2}"
-        reference = fixture_path(f"simple{ext2}")
-        cfgin = help_cfgclass(ext1)(fixture_path(f"simple{ext1}"))
-        help_cfgclass(ext2).dump_file_from_dict(path=outfile, cfg=cfgin.data)
-        with open(reference, "r", encoding="utf-8") as f1:
-            reflines = [line.strip().replace("'", "") for line in f1]
-        with open(outfile, "r", encoding="utf-8") as f2:
-            outlines = [line.strip().replace("'", "") for line in f2]
-        for line1, line2 in zip(reflines, outlines):
-            assert line1 == line2
+    ext1, ext2 = [".%s" % ("NML" if x == "F90" else x).lower() for x in (fmt1, fmt2)]
+    outfile = tmp_path / f"test_{fmt1.lower()}to{fmt2.lower()}_dump{ext2}"
+    reference = fixture_path(f"simple{ext2}")
+    cfgin = help_cfgclass(ext1)(fixture_path(f"simple{ext1}"))
+    help_cfgclass(ext2).dump_file_from_dict(path=outfile, cfg=cfgin.data)
+    with open(reference, "r", encoding="utf-8") as f1:
+        reflines = [line.strip().replace("'", "") for line in f1]
+    with open(outfile, "r", encoding="utf-8") as f2:
+        outlines = [line.strip().replace("'", "") for line in f2]
+    for line1, line2 in zip(reflines, outlines):
+        assert line1 == line2
 
 
 def test_values_needed_ini(capsys):
