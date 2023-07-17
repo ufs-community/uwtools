@@ -97,6 +97,8 @@ class Config(ABC, UserDict):
         super().__init__()
         self.config_path = config_path
         self.log = logging.getLogger(log_name)
+        if config_path is not None:
+            self.update(self._load())
 
     def __repr__(self):
         """
@@ -396,9 +398,7 @@ class F90Config(Config):
         Load the file and update the dictionary.
         """
         super().__init__(config_path, log_name)
-
         if config_path is not None:
-            self.update(self._load())
             self.parse_include()
 
     # Private methods
@@ -448,11 +448,9 @@ class INIConfig(Config):
             Should be True for INI format, False for bash
         """
         super().__init__(config_path, log_name)
-        self.space_around_delimiters = space_around_delimiters
-
         if config_path is not None:
-            self.update(self._load())
             self.parse_include()
+        self.space_around_delimiters = space_around_delimiters
 
     # Private methods
 
@@ -513,16 +511,6 @@ class YAMLConfig(Config):
     _yaml_include()
         Static method used to define a constructor function for PyYAML.
     """
-
-    def __init__(self, config_path: Optional[str] = None, log_name: Optional[str] = None) -> None:
-        """
-        Load the file and update the dictionary.
-        """
-
-        super().__init__(config_path, log_name)
-
-        if config_path is not None:
-            self.update(self._load())
 
     def __repr__(self):
         """
@@ -591,15 +579,6 @@ class FieldTableConfig(YAMLConfig):
     This class exists to write out a field_table format given that its configuration has been set by
     an input YAML file.
     """
-
-    def __init__(self, config_path: Optional[str] = None, log_name: Optional[str] = None) -> None:
-        """
-        Load the file and update the dictionary.
-        """
-        super().__init__(config_path, log_name)
-
-        if config_path is not None:
-            self.update(self._load())
 
     # Private methods
 
