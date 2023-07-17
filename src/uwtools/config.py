@@ -224,7 +224,7 @@ class Config(ABC, UserDict):
 
     def dereference_all(self):
         """
-        Run dereference until all values have been filled in.
+        Dereference iteratively until no Jinja2 templates remain.
         """
         prev = copy.deepcopy(self.data)
         self.dereference()
@@ -332,7 +332,7 @@ class Config(ABC, UserDict):
         Try to convert Boolean-ish values to bool objects, int-ish values to ints objects, and
         float-ish values to float objects. Return the original string if none of these apply.
 
-        :param s: The input string to reify.
+        :param s: The string to reify.
         """
         s = s.strip("\"'")
         if s.lower() in ["true", "yes", "yeah"]:
