@@ -21,7 +21,7 @@ import pytest
 import yaml
 from pytest import fixture, raises
 
-from uwtools import config, exceptions, logger
+from uwtools import config, exceptions
 from uwtools.cli.set_config import parse_args as parse_config_args
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import compare_files, fixture_path, line_in_lines, msg_in_caplog
@@ -276,30 +276,49 @@ def test_dereference():
         assert cfg["grid_stats"]["points_per_level"] == 10000
 
 
-def test_dereference_exceptions(caplog):
+def test_dereference_bad_filter(tmp_path):
+    """
+    Test that an unregistered filter is detected and treated as an error.
+    """
+    path = tmp_path / "cfg.yaml"
+    with open(path, "w", encoding="utf-8") as f:
+        print(
+            """
+undefined_filter: '{{ 34 | not_a_filter }}'
+""",
+            file=f,
+        )
+    cfg = config.YAMLConfig(config_path=path)
+    with raises(exceptions.UWConfigError) as e:
+        cfg.dereference()
+    assert "filter: 'not_a_filter'" in str(e.value)
+
+
+def test_dereference_exceptions(caplog, tmp_path):
     """
     Test that dereference handles some standard mistakes.
     """
-    log = logger.Logger(name="test_dereference_exceptions", level="DEBUG")
-    cfg = config.YAMLConfig(log_name=log.name)
-    cfg.update({"undefined_filter": "{{ 34 | im_not_a_filter }}"})
-    with raises(exceptions.UWConfigError) as e:
-        cfg.dereference()
-    assert "filter: 'im_not_a_filter'" in str(e.value)
-    cfg.pop("undefined_filter", None)
-    cfg.update(
-        {
-            "divide": "{{ num // nada }}",  # ZeroDivisionError
-            "foo": "bar",
-            "list_a": [1, 2, 4],
-            "nada": 0,
-            "num": 2,
-            "soap": "{{ foo }}",
-            "type_prob": '{{ list_a / "a" }}',  # TypeError
-        }
-    )
-    caplog.clear()
-    cfg.dereference()
+    path = tmp_path / "cfg.yaml"
+    with open(path, "w", encoding="utf-8") as f:
+        print(
+            """
+divide: '{{ num // nada }}'  # ZeroDivisionError
+foo: bar
+list_a: [1, 2, 4]
+nada: 0
+num: 2
+soap: '{{ foo }}'
+type_prob: '{{ list_a / \"a\" }}'  # TypeError
+""",
+            file=f,
+        )
+    log_name = "test"
+    log = logging.getLogger(log_name)
+    log.addHandler(logging.StreamHandler(sys.stdout))
+    log.setLevel(logging.DEBUG)
+    cfgobj = config.YAMLConfig(config_path=path, log_name=log_name)
+    cfgobj.dereference()
+    log.info("HELLO")
     raised = [rec.msg for rec in caplog.records if "raised" in rec.msg]
     assert "ZeroDivisionError" in raised[0]
     assert "TypeError" in raised[1]
@@ -564,6 +583,7 @@ def test_show_format():
         help_.assert_called_once()
 
 
+# #PM# PARAMETERIZE WITH PYTEST INSTEAD, SIMPLIFY FILENAMES
 def test_transform_config(tmp_path):
     """
     Test that transforms config objects to objects of other config subclasses.
@@ -577,9 +597,7 @@ def test_transform_config(tmp_path):
         outfile = tmp_path / f"test_{fmt1.lower()}to{fmt2.lower()}_dump{ext2}"
         reference = fixture_path(f"simple{ext2}")
         cfgin = help_cfgclass(ext1)(fixture_path(f"simple{ext1}"))
-        cfgout = help_cfgclass(ext2)()
-        cfgout.update(cfgin.data)
-        cfgout.dump_file(outfile)
+        help_cfgclass(ext2).dump_file_from_dict(path=outfile, cfg=cfgin.data)
         with open(reference, "r", encoding="utf-8") as f1:
             reflines = [line.strip().replace("'", "") for line in f1]
         with open(outfile, "r", encoding="utf-8") as f2:
