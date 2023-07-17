@@ -1,6 +1,8 @@
 """
 The abstract Config class and its format-specific subclasses.
 """
+from __future__ import annotations
+
 import configparser
 import copy
 import inspect
@@ -51,31 +53,8 @@ Define the filter before proceeding.
 
 class Config(ABC, UserDict):
     """
-    This base class provides the interface to methods used to read in several configuration file
-    types and manipulate them as such.
-
-    Attributes
-    ----------
-
-    config_path
-        The file path to the configuration file to be parsed.
-
-    Methods
-    -------
-    from_ordereddict(in_dict)
-        Given a dictionary, replaces instances of OrderedDict with a regular dictionary
-
-    parse_include()
-        Traverses the dictionary treating the !INCLUDE path the same as
-        is done by pyyaml.
-
-    replace_templates()
-        Traverses the dictionary and renders any Jinja2 templated
-        fields.
-
-    update_values()
-        Update the values in an existing dictionary with values providedv by a second dictionary.
-        Keep any of the values that are not present in the second dictionary.
+    A base class specifying (and partially implementing) methods to read, manimulate, and write
+    several configuration-file formats.
     """
 
     def __init__(self, config_path: str, log_name: Optional[str] = None) -> None:
@@ -92,7 +71,7 @@ class Config(ABC, UserDict):
 
     def __repr__(self):
         """
-        This method will return configure contents.
+        The string representation of a Config object.
         """
         return json.dumps(self.data)
 
@@ -110,8 +89,9 @@ class Config(ABC, UserDict):
 
     def _load_paths(self, filepaths: List[str]) -> dict:
         """
-        Given a list of filepaths, load each file in the list and return a dictionary that includes
-        the merged contents of the parsed files.
+        Merge and return the contents of a collection of config files.
+
+        :param filepaths: Paths to the config files to read and merge.
         """
         cfg = {}
         for filepath in filepaths:
@@ -122,35 +102,32 @@ class Config(ABC, UserDict):
 
     # Public methods
 
-    def compare_config(self, user_dict, base_dict=None):
+    def compare_config(self, dict1: dict, dict2: Optional[dict] = None) -> None:
         """
-        Assuming a section, key/value structure of configuration types, compare the dictionary to
-        the values stored in the external file.
-        """
-        if base_dict is None:
-            base_dict = self.data
+        Compare two config dictionaries.
 
+        Assumes a section/key/value structure.
+        """
+        dict2 = self.data if dict2 is None else dict2
         diffs: dict = {}
-        for sect, items in base_dict.items():
-            for key, val in items.items():
-                if val != user_dict.get(sect, {}).get(key, ""):
-                    try:
-                        diffs[sect][key] = f" - {val} + {user_dict.get(sect, {}).get(key)}"
-                    except KeyError:
-                        diffs[sect] = {}
-                        diffs[sect][key] = f" - {val} + {user_dict.get(sect, {}).get(key)}"
 
-        for sect, items in user_dict.items():
+        for sect, items in dict2.items():
             for key, val in items.items():
-                if (
-                    val != base_dict.get(sect, {}).get(key, "")
-                    and diffs.get(sect, {}).get(key) is None
-                ):
+                if val != dict1.get(sect, {}).get(key, ""):
                     try:
-                        diffs[sect][key] = f" - {base_dict.get(sect, {}).get(key)} + {val}"
+                        diffs[sect][key] = f" - {val} + {dict1.get(sect, {}).get(key)}"
                     except KeyError:
                         diffs[sect] = {}
-                        diffs[sect][key] = f" - {base_dict.get(sect, {}).get(key)} + {val}"
+                        diffs[sect][key] = f" - {val} + {dict1.get(sect, {}).get(key)}"
+
+        for sect, items in dict1.items():
+            for key, val in items.items():
+                if val != dict2.get(sect, {}).get(key, "") and diffs.get(sect, {}).get(key) is None:
+                    try:
+                        diffs[sect][key] = f" - {dict2.get(sect, {}).get(key)} + {val}"
+                    except KeyError:
+                        diffs[sect] = {}
+                        diffs[sect][key] = f" - {dict2.get(sect, {}).get(key)} + {val}"
 
         for sect, keys in diffs.items():
             for key in keys:
@@ -164,11 +141,8 @@ class Config(ABC, UserDict):
         This method will be used as a method by which any Config object can cycle through its
         key/value pairs recursively, replacing Jinja2 templates as necessary.
         """
-        if ref_dict is None:
-            ref_dict = self.data
-
-        if full_dict is None:
-            full_dict = self.data
+        ref_dict = self.data if ref_dict is None else ref_dict
+        full_dict = self.data if full_dict is None else full_dict
 
         # Choosing sys._getframe() here because it's more efficient than other inspect methods.
 
@@ -311,7 +285,9 @@ class Config(ABC, UserDict):
 
     def from_ordereddict(self, in_dict: dict) -> dict:
         """
-        Given a dictionary, replace all instances of OrderedDict with a regular dictionary.
+        Recursively replaces all OrderedDict objects with basic dict objects.
+
+        :param: in_dict: A dictionary potentially containing OrderedDict objects
         """
         if isinstance(in_dict, OrderedDict):
             in_dict = dict(in_dict)
@@ -320,18 +296,18 @@ class Config(ABC, UserDict):
                 in_dict[sect] = dict(keys)
         return in_dict
 
-    def parse_include(self, ref_dict=None):
+    def parse_include(self, ref_dict: Optional[dict] = None):
         """
-        Assuming a section, key/value structure of configuration types (other than YAML, which
-        handles this in its own loader), update the dictionary with the values stored in the
-        external file.
+        Recursively process !INCLUDE directives in a config object.
 
-        Recursively traverse the stored dictionary, finding any !INCLUDE tags. Update the dictionary
-        with the contents of the files to be included.
+        Recursively traverses the dictionary, replacing !INCLUDE tags with the contents of the files
+        they specify. Assumes a section/key/value structure. YAML provides this functionality in its
+        own loader.
+
+        :param ref_dict: A config object to process instead of the object's own data.
         """
         if ref_dict is None:
             ref_dict = self.data
-
         for key, value in copy.deepcopy(ref_dict).items():
             if isinstance(value, dict):
                 self.parse_include(ref_dict[key])
@@ -366,22 +342,26 @@ class Config(ABC, UserDict):
             pass
         return str_
 
-    def update_values(self, new_dict, dict_to_update=None):
+    def update_values(self, src: Union[dict, Config], dst: Optional[Config] = None):
         """
-        Update the values stored in the class's data (a dict) with the values provided by the new
-        dict.
-        """
-        if dict_to_update is None:
-            dict_to_update = self.data
+        Updates a Config object.
 
-        for key, new_val in new_dict.items():
+        Update the instance's own data (or, optionally, that of the specifed Config object) with the
+        values provided by another dictionary or Config object.
+
+        :param src: The dictionary with new data to use.
+        :param dst: The Config to update with the new data.
+        """
+        srcdict = src.data if isinstance(src, Config) else src
+        dstcfg = self if dst is None else dst
+        for key, new_val in srcdict.items():
             if isinstance(new_val, dict):
-                if isinstance(dict_to_update.get(key), dict):
-                    self.update_values(new_val, dict_to_update[key])
+                if isinstance(dstcfg.get(key), dict):
+                    self.update_values(new_val, dstcfg[key])
                 else:
-                    dict_to_update[key] = new_val
+                    dstcfg[key] = new_val
             else:
-                dict_to_update[key] = new_val
+                dstcfg[key] = new_val
 
 
 class F90Config(Config):
