@@ -660,7 +660,6 @@ class FieldTableConfig(YAMLConfig):
             lines[-1] += " /"
         with open(path, "w", encoding="utf-8") as file_name:
             file_name.write("\n".join(lines))
-        # #PM# JUST print() AS IT GOES
 
 
 def create_config_obj(user_args, log=None):
