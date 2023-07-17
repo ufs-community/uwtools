@@ -107,6 +107,9 @@ class Config(ABC, UserDict):
         Compare two config dictionaries.
 
         Assumes a section/key/value structure.
+
+        :param dict1: The first dictionary.
+        :param dict2: The second dictionary.
         """
         dict2 = self.data if dict2 is None else dict2
         diffs: dict = {}
@@ -138,8 +141,10 @@ class Config(ABC, UserDict):
         self, ref_dict: Optional[dict] = None, full_dict: Optional[dict] = None
     ) -> None:
         """
-        This method will be used as a method by which any Config object can cycle through its
-        key/value pairs recursively, replacing Jinja2 templates as necessary.
+        Recursively replace Jinja2 templates in a Config object.
+
+        :param ref_dict: ???
+        :param full_dict: ???
         """
         ref_dict = self.data if ref_dict is None else ref_dict
         full_dict = self.data if full_dict is None else full_dict
@@ -227,9 +232,11 @@ class Config(ABC, UserDict):
             self.dereference()
             prev = copy.deepcopy(self.data)
 
-    def dictionary_depth(self, config_dict):
+    def dictionary_depth(self, config_dict: dict) -> int:
         """
-        Recursively finds the depth of an objects data (a dictionary).
+        The depth of a dictionary.
+
+        :param config_dict: The dictionary whose depth to find.
         """
         if isinstance(config_dict, dict):
             return 1 + (max(map(self.dictionary_depth, config_dict.values())))
@@ -318,29 +325,31 @@ class Config(ABC, UserDict):
                 del ref_dict[key]
 
     @logger.verbose()
-    def str_to_type(self, str_: str) -> Union[bool, float, int, str]:
+    def str_to_type(self, s: str) -> Union[bool, float, int, str]:
         """
-        Check if the string contains a float, int, boolean, or just regular string.
+        Reify a string to a Python object, if possible.
 
-        This will be used to automatically convert environment variables to data types that are more
-        convenient to work with.
+        Try to convert Boolean-ish values to bool objects, int-ish values to ints objects, and
+        float-ish values to float objects. Return the original string if none of these apply.
+
+        :param s: The input string to reify.
         """
-        str_ = str_.strip("\"'")
-        if str_.lower() in ["true", "yes", "yeah"]:
+        s = s.strip("\"'")
+        if s.lower() in ["true", "yes", "yeah"]:
             return True
-        if str_.lower() in ["false", "no", "nope"]:
+        if s.lower() in ["false", "no", "nope"]:
             return False
         # int
         try:
-            return int(str_)
+            return int(s)
         except ValueError:
             pass
         # float
         try:
-            return float(str_)
+            return float(s)
         except ValueError:
             pass
-        return str_
+        return s
 
     def update_values(self, src: Union[dict, Config], dst: Optional[Config] = None):
         """
@@ -494,24 +503,12 @@ class INIConfig(Config):
 
 class YAMLConfig(Config):
     """
-    Concrete class to handle YAML configure files.
-
-    Attributes
-    ----------
-
-    _yaml_loader : Loader
-        The PyYAML Loader that's been extended with constructors
-
-    Methods
-    -------
-
-    _yaml_include()
-        Static method used to define a constructor function for PyYAML.
+    Concrete class to handle YAML config files.
     """
 
     def __repr__(self):
         """
-        This method will return configure contents.
+        The string representation of a YAMLConfig object.
         """
         return yaml.dump(self.data)
 
