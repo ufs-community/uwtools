@@ -108,10 +108,8 @@ class FV3Forecast(Driver):
             config_obj.dereference_all()
             config_obj.dump_file(outfldtab_file)
         else:
-            # Convert update object to a field table object
-            out_object = getattr(config, "FieldTableConfig")()
-            out_object.update(update_obj)
-            out_object.dump_file(outfldtab_file)
+            # Dump update object to a Field Table file:
+            config.FieldTableConfig.dump_file_from_dict(path=outfldtab_file, cfg=update_obj)
 
         msg = f"Namelist file {outfldtab_file} created"
         logging.info(msg)
