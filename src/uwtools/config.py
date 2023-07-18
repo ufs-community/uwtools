@@ -54,7 +54,7 @@ Define the filter before proceeding.
 
 class Config(ABC, UserDict):
     """
-    A base class specifying (and partially implementing) methods to read, manimulate, and write
+    A base class specifying (and partially implementing) methods to read, manipulate, and write
     several configuration-file formats.
     """
 
