@@ -251,8 +251,15 @@ class Config(ABC, UserDict):
         parent: str,
     ) -> None:
         """
-        Recursively parse which keys in the object are complete (set_var), which keys have unfilled
-        jinja templates (jinja2_var), and which keys are set to empty (empty_var).
+        Characterize values as complete, empty, or Jinja2 templates.
+
+        complete -> set_var, empty -> empty_var, templates -> jinja2_var
+
+        :param config_dict: The dictionary to examine.
+        :param set_var: Complete values.
+        :param jinja2_var: Jinja2 template values.
+        :param empty_var: Empty values.
+        :param parent: Parent key
         """
         for key, val in config_dict.items():
             if isinstance(val, dict):
@@ -435,12 +442,13 @@ class INIConfig(Config):
         space_around_delimiters: bool = True,
     ):
         """
-        Load the file and update the dictionary.
+        Construct an INIConfig object.
 
-        Parameters
-        ----------
-        space_around_delimiters
-            Should be True for INI format, False for bash
+        Spaces may be included for INI format, but should be excluded for bash.
+
+        :param config_path: Path to the config file to load.
+        :param log_name: Name of logger object to log to.
+        :param space_around_delimiters: Include spaces around delimiters?
         """
         super().__init__(config_path, log_name)
         self.space_around_delimiters = space_around_delimiters
@@ -541,16 +549,18 @@ class YAMLConfig(Config):
                 raise exceptions.UWConfigError(msg)
         return self.from_ordereddict(cfg)
 
-    def _yaml_include(self, loader, node):
+    def _yaml_include(self, loader: yaml.Loader, node: yaml.SequenceNode) -> dict:
         """
-        Returns a dictionary that includes the contents of the referenced YAML files, and is used as
-        a contructor method for PyYAML.
+        Returns a dictionary with YAML !INCLUDE tags processed.
+
+        :param loader: The YAML loader
+        :param node: A YAML node
         """
         filepaths = loader.construct_sequence(node)
         return self._load_paths(filepaths)
 
     @property
-    def _yaml_loader(self):
+    def _yaml_loader(self) -> type[yaml.SafeLoader]:
         """
         Set up the loader with the appropriate constructors.
         """
