@@ -259,7 +259,7 @@ class Config(ABC, UserDict):
         :param set_var: Complete values.
         :param jinja2_var: Jinja2 template values.
         :param empty_var: Empty values.
-        :param parent: Parent key
+        :param parent: Parent key.
         """
         for key, val in config_dict.items():
             if isinstance(val, dict):
@@ -294,7 +294,7 @@ class Config(ABC, UserDict):
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
-        :param opts: Other options required by a subclass
+        :param opts: Other options required by a subclass.
         """
 
     def from_ordereddict(self, in_dict: dict) -> dict:
@@ -420,7 +420,7 @@ class F90Config(Config):
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
-        :param opts: Other options required by a subclass
+        :param opts: Other options required by a subclass.
         """
         nml = OrderedDict(cfg)
         for sect, keys in nml.items():
@@ -553,8 +553,8 @@ class YAMLConfig(Config):
         """
         Returns a dictionary with YAML !INCLUDE tags processed.
 
-        :param loader: The YAML loader
-        :param node: A YAML node
+        :param loader: The YAML loader.
+        :param node: A YAML node.
         """
         filepaths = loader.construct_sequence(node)
         return self._load_paths(filepaths)
@@ -585,7 +585,7 @@ class YAMLConfig(Config):
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
-        :param opts: Other options required by a subclass
+        :param opts: Other options required by a subclass.
         """
         with open(path, "w", encoding="utf-8") as file_name:
             yaml.dump(cfg, file_name, sort_keys=False)
@@ -629,7 +629,7 @@ class FieldTableConfig(YAMLConfig):
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
-        :param opts: Other options required by a subclass
+        :param opts: Other options required by a subclass.
         """
         lines = []
         for field, settings in cfg.items():
