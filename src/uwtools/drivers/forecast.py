@@ -183,7 +183,7 @@ class FV3Forecast(Driver):
 
         This will build the executable.
         """
-        return (" ".join(str(i) if i is not None else "" for i in vars().values())).strip()
+        return " ".join(str(i) for i in vars().values() if i is not None)
 
     def stage_static_files(self, run_directory: str, static_files: Dict[str, str]) -> None:
         """
