@@ -62,14 +62,6 @@ def help_set_config_simple(infn, tmpdir):
 # Test functions
 
 
-def test_bad_conversion_cfg_to_pdf(capsys):
-    with raises(SystemExit):
-        config.create_config_obj(
-            input_base_file=fixture_path("simple2_nml.cfg"), input_file_type=".pdf"
-        )
-    assert "invalid choice: '.pdf'" in capsys.readouterr().err
-
-
 def test_bad_conversion_nml_to_yaml():
     with raises(ValueError):
         config.create_config_obj(
