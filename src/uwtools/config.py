@@ -70,7 +70,7 @@ class Config(ABC, UserDict):
         self.log = logging.getLogger(log_name)
         self.update(self._load(self.config_path))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         The string representation of a Config object.
         """
@@ -515,7 +515,7 @@ class YAMLConfig(Config):
     Concrete class to handle YAML config files.
     """
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         The string representation of a YAMLConfig object.
         """
