@@ -162,12 +162,28 @@ class FV3Forecast(Driver):
         Turns the resources config object into a batch card for the configured Task.
         """
 
-    def run(self):
+    def run(
+        self,
+        exec_name: str,
+        export: Optional[str] = None,
+        mpi: Optional[str] = None,
+        node_arg: Optional[str] = None,
+        pe_member01: Optional[int] = None,
+        num_of_procs: Optional[int] = None,
+        oversubscribe: Optional[str] = None,
+        procs_per_nodes: Optional[str] = None,
+        ppn: Optional[int] = None,
+        cpu_bind: Optional[str] = None,
+        core: Optional[str] = None,
+        depth: Optional[str] = None,
+        omp_num_threads: Optional[int] = None,
+    ) -> str:
         """
-        Runs the forecast executable with the namelist file and staged input files.
+        Builds the forecast executable with the user provided run commands.
 
-        This will both build the executable and run it.
+        This will build the executable.
         """
+        return (" ".join(str(i) if i is not None else "" for i in vars().values())).strip()
 
     def stage_static_files(self, run_directory: str, static_files: Dict[str, str]) -> None:
         """

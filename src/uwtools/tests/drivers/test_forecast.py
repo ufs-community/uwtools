@@ -167,6 +167,22 @@ def test_create_namelist_without_base_file(create_namelist_assets):
         assert out_file.read() == expected
 
 
+def test_forecast_run():
+    """
+    Tests that the forecast executable is built successfully with the user provided run commands.
+    """
+    hera_expected = "srun --export=ALL"
+    assert hera_expected == FV3Forecast.run("srun", "--export=ALL")
+
+    cheyenne_expected = "mpirun -np 4"
+    assert cheyenne_expected == FV3Forecast.run("mpirun", "-np", 4)
+
+    wcoss2_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2"
+    assert wcoss2_expected == FV3Forecast.run(
+        "mpiexec", "-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2
+    )
+
+
 def test_FV3Forecast_stage_static_files(tmp_path):
     """
     Tests that stage_static_files() is copying files from static section of the config obj are being
