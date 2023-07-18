@@ -16,15 +16,30 @@ def main() -> None:
     """
     Main entry-point function.
     """
-    cli_args = parse_args(sys.argv[1:])
-    cli_log = cli_helpers.setup_logging(
-        log_file=cli_args.log_file,
+    args = parse_args(sys.argv[1:])
+    log = cli_helpers.setup_logging(
+        log_file=args.log_file,
         log_name="set_config",
-        quiet=cli_args.quiet,
-        verbose=cli_args.verbose,
+        quiet=args.quiet,
+        verbose=args.verbose,
     )
     try:
-        config.create_config_obj(user_args=cli_args, log=cli_log)
+        config.create_config_obj(
+            input_base_file=args.input_base_file,
+            compare=args.compare,
+            config_file=args.config_file,
+            config_file_type=args.config_file_type,
+            dry_run=args.dry_run,
+            input_file_type=args.input_file_type,
+            log=log,
+            log_file=args.log_file,
+            outfile=args.outfile,
+            output_file_type=args.output_file_type,
+            quiet=args.quiet,
+            show_format=args.show_format,
+            values_needed=args.values_needed,
+            verbose=args.verbose,
+        )
     except UWConfigError as e:
         sys.exit(str(e))
 
@@ -52,7 +67,7 @@ def parse_args(args: List[str]) -> Namespace:
     optional.add_argument(
         "-c",
         "--config-file",
-        help="Path to YAML, bash/ini, or namelist configuration file",
+        help="Path to YAML, bash/INI, or namelist configuration file",
         metavar="FILE",
         type=cli_helpers.path_if_file_exists,
     )

@@ -22,6 +22,7 @@ import yaml
 
 from uwtools import exceptions, logger
 from uwtools.j2template import J2Template
+from uwtools.logger import Logger
 from uwtools.utils import cli_helpers
 
 msgs = ns(
@@ -222,7 +223,7 @@ class Config(ABC, UserDict):
                     # guess on its intended type.
                     ref_dict[key] = self.str_to_type("".join(data))
 
-    def dereference_all(self):
+    def dereference_all(self) -> None:
         """
         Dereference iteratively until no Jinja2 templates remain.
         """
@@ -649,42 +650,55 @@ class FieldTableConfig(YAMLConfig):
             file_name.write("\n".join(lines))
 
 
-def create_config_obj(user_args, log=None):
+def create_config_obj(
+    input_base_file: str,
+    compare: bool = False,
+    config_file: Optional[str] = None,
+    config_file_type: Optional[str] = None,
+    dry_run: bool = False,
+    input_file_type: Optional[str] = None,
+    log: Optional[Logger] = None,
+    log_file: Optional[str] = None,
+    outfile: Optional[str] = None,
+    output_file_type: Optional[str] = None,
+    quiet: bool = False,
+    show_format: bool = False,
+    values_needed: bool = False,
+    verbose: bool = False,
+):
     """
     Main section for processing config file.
     """
     if log is None:
         name = f"{inspect.stack()[0][3]}"
         log = cli_helpers.setup_logging(
-            log_file=user_args.log_file,
+            log_file=log_file or "/dev/stdout",
             log_name=name,
-            quiet=user_args.quiet,
-            verbose=user_args.verbose,
+            quiet=quiet,
+            verbose=verbose,
         )
 
-    infile_type = user_args.input_file_type or cli_helpers.get_file_type(user_args.input_base_file)
+    infile_type = input_file_type or cli_helpers.get_file_type(input_base_file)
 
     config_class = globals()[f"{infile_type}Config"]
-    config_obj = config_class(user_args.input_base_file, log_name=log.name)
+    config_obj = config_class(input_base_file, log_name=log.name)
 
-    if user_args.config_file:
-        config_file_type = user_args.config_file_type or cli_helpers.get_file_type(
-            user_args.config_file
-        )
+    if config_file:
+        config_file_type = config_file_type or cli_helpers.get_file_type(config_file)
 
-        user_config_obj = globals()[f"{config_file_type}Config"](user_args.config_file)
+        user_config_obj = globals()[f"{config_file_type}Config"](config_file)
 
         if config_file_type != infile_type:
             config_depth = user_config_obj.dictionary_depth(user_config_obj.data)
             input_depth = config_obj.dictionary_depth(config_obj.data)
 
             if input_depth < config_depth:
-                log.critical(f"{user_args.config_file} not compatible with input file")
+                log.critical(f"{config_file} not compatible with input file")
                 raise ValueError("Set config failure: config object not compatible with input file")
 
-        if user_args.compare:
-            log.info(f"- {user_args.input_base_file}")
-            log.info(f"+ {user_args.config_file}")
+        if compare:
+            log.info(f"- {input_base_file}")
+            log.info(f"+ {config_file}")
             log.info("-" * 80)
             config_obj.compare_config(user_config_obj)
             return
@@ -693,7 +707,7 @@ def create_config_obj(user_args, log=None):
 
     config_obj.dereference_all()
 
-    if user_args.values_needed:
+    if values_needed:
         set_var: List[str] = []
         jinja2_var: List[str] = []
         empty_var: List[str] = []
@@ -711,18 +725,18 @@ def create_config_obj(user_args, log=None):
             log.info(var)
         return
 
-    if user_args.dry_run:
+    if dry_run:
         # Apply switch to allow user to view the results of config instead of writing to disk.
         log.info(config_obj)
         return
 
-    if user_args.outfile:
-        outfile_type = user_args.output_file_type or cli_helpers.get_file_type(user_args.outfile)
+    if outfile:
+        outfile_type = output_file_type or cli_helpers.get_file_type(outfile)
         if outfile_type == infile_type:
-            config_obj.dump_file(user_args.outfile)
+            config_obj.dump_file(outfile)
         else:
             dump_method = globals()[f"{outfile_type}Config"].dump_file_from_dict
-            if user_args.show_format:
+            if show_format:
                 help(dump_method)
             else:
                 # Check for incompatible conversion objects:
@@ -734,4 +748,4 @@ def create_config_obj(user_args, log=None):
                     log.critical(err_msg)
                     raise ValueError(err_msg)
                 # Dump to file:
-                dump_method(path=user_args.outfile, cfg=config_obj)
+                dump_method(path=outfile, cfg=config_obj)
