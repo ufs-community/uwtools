@@ -256,12 +256,7 @@ def test_dereference_bad_filter(tmp_path):
     """
     path = tmp_path / "cfg.yaml"
     with open(path, "w", encoding="utf-8") as f:
-        print(
-            """
-undefined_filter: '{{ 34 | not_a_filter }}'
-""",
-            file=f,
-        )
+        print("undefined_filter: '{{ 34 | not_a_filter }}'", file=f)
     cfg = config.YAMLConfig(config_path=path)
     with raises(exceptions.UWConfigError) as e:
         cfg.dereference()
