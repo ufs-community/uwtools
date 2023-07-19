@@ -57,7 +57,7 @@ bash Miniforge3-Linux-aarch64.sh -bfp ~/conda
 rm Miniforge3-Linux-aarch64.sh
 source ~/conda/etc/profile.d/conda.sh
 conda activate
-conda install -y -c maddenp condev
+conda install -y -c maddenp condev=0.4.0
 cd /to/your/workflow-tools/clone
 make devshell
 ```
