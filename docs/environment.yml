@@ -3,6 +3,6 @@ channels:
   - conda-forge
   - maddenp
 dependencies:
-  - condev=0.3.0
+  - condev=0.4.0
   - sphinx-gallery
   - sphinxcontrib-bibtex
