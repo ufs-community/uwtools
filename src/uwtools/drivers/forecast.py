@@ -164,26 +164,17 @@ class FV3Forecast(Driver):
 
     def run(
         self,
+        run_cmd: str,
         exec_name: str,
-        export: Optional[str] = None,
-        mpi: Optional[str] = None,
-        node_arg: Optional[str] = None,
-        pe_member01: Optional[int] = None,
-        num_of_procs: Optional[int] = None,
-        oversubscribe: Optional[str] = None,
-        procs_per_nodes: Optional[str] = None,
-        ppn: Optional[int] = None,
-        cpu_bind: Optional[str] = None,
-        core: Optional[str] = None,
-        depth: Optional[str] = None,
-        omp_num_threads: Optional[int] = None,
+        *args,
+        **kwargs,
     ) -> str:
         """
-        Builds the forecast executable with the user provided run commands.
-
-        This will build the executable.
+        Constructs a command to be used to run the forecast executable.
         """
-        return " ".join(str(i) for i in vars().values() if i is not None)
+        args_str = " ".join(str(i) for i in args if i is not None)
+        kwargs_str = " ".join(str(i) for i in kwargs if i is not None)
+        return f"{run_cmd} {args_str} {kwargs_str}{exec_name}"
 
     def stage_static_files(self, run_directory: str, static_files: Dict[str, str]) -> None:
         """

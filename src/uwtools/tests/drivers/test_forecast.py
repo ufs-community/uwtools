@@ -4,6 +4,7 @@ Tests for forecast driver.
 """
 
 import filecmp
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -169,17 +170,17 @@ def test_create_namelist_without_base_file(create_namelist_assets):
 
 def test_forecast_run():
     """
-    Tests that the forecast executable is built successfully with the user provided run commands.
+    Tests that the command to be used to run the forecast executable was built successfully.
     """
-    hera_expected = "srun --export=ALL"
-    assert hera_expected == FV3Forecast.run("srun", "--export=ALL")
+    hera_expected = "srun --export=ALL test_exec.py"
+    assert hera_expected == FV3Forecast().run("srun", "test_exec.py", "--export=ALL")
 
-    cheyenne_expected = "mpirun -np 4"
-    assert cheyenne_expected == FV3Forecast.run("mpirun", "-np", 4)
+    cheyenne_expected = "mpirun -np 4 test_exec.py"
+    assert cheyenne_expected == FV3Forecast().run("mpirun", "test_exec.py", "-np", 4)
 
-    wcoss2_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2"
-    assert wcoss2_expected == FV3Forecast.run(
-        "mpiexec", "-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2
+    wcoss2_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
+    assert wcoss2_expected == FV3Forecast().run(
+        "mpiexec", "test_exec.py", "-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2
     )
 
 
