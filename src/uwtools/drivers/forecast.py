@@ -51,7 +51,7 @@ class FV3Forecast(Driver):
         be made for the other apps.
 
         Args:
-            base_file: Path to optional file with configuration
+            base_file: Path to base config file
             config_file: Path to user configuration file
             outconfig_file: Path to output configuration file
         """
