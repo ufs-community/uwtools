@@ -21,12 +21,14 @@ def test_create_config(tmp_path):
     file.
     """
 
-    input_file = fixture_path("fruit_config.yaml")
     config_file = fixture_path("fruit_config_similar.yaml")
+    input_file = fixture_path("fruit_config.yaml")
     output_file = (tmp_path / "test_config_from_yaml.yaml").as_posix()
 
     forecast_obj = FV3Forecast()
-    forecast_obj.create_model_config(config_file, output_file, input_file)
+    forecast_obj.create_model_config(
+        base_file=input_file, config_file=config_file, outconfig_file=output_file
+    )
 
     expected = config.YAMLConfig(input_file)
     expected.update_values(config.YAMLConfig(config_file))
@@ -114,10 +116,9 @@ def test_create_model_config(tmp_path):
         FV3Forecast().create_model_config(
             config_file=infile, outconfig_file=outfile, base_file=basefile
         )
-    user_args = create_config_obj.call_args.args[0]
-    assert user_args.config_file == infile
-    assert user_args.input_base_file == basefile
-    assert user_args.outfile == outfile
+    assert create_config_obj.call_args.kwargs["config_file"] == infile
+    assert create_config_obj.call_args.kwargs["input_base_file"] == basefile
+    assert create_config_obj.call_args.kwargs["outfile"] == outfile
 
 
 @fixture
