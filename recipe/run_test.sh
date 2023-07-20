@@ -62,7 +62,7 @@ unittest() {
   msg OK
 }
 
-test "${CONDA_BUILD:-}" = 1 && cd ../test_files || cd $(realpath $(dirname $0)/../src)
+test "${CONDA_BUILD:-}" = 1 && cd ../test_files || cd $(dirname $0)/../src
 msg Running in $PWD
 if [[ -n "${1:-}" ]]; then
   # Run single specified code-quality tool.
