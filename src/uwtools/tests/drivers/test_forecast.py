@@ -168,19 +168,27 @@ def test_create_namelist_without_base_file(create_namelist_assets):
         assert out_file.read() == expected
 
 
-def test_forecast_run():
+def test_forecast_run_cmd():
     """
     Tests that the command to be used to run the forecast executable was built successfully.
     """
     hera_expected = "srun --export=ALL test_exec.py"
-    assert hera_expected == FV3Forecast().run("srun", "test_exec.py", "--export=ALL")
+    assert hera_expected == FV3Forecast().run_cmd("srun", "--export=ALL", exec_name="test_exec.py")
+
+    hera_fail = "srun --export=ALL"
+    with raises(TypeError):
+        assert hera_fail == FV3Forecast().run_cmd("srun", "--export=ALL")
 
     cheyenne_expected = "mpirun -np 4 test_exec.py"
-    assert cheyenne_expected == FV3Forecast().run("mpirun", "test_exec.py", "-np", 4)
+    assert cheyenne_expected == FV3Forecast().run_cmd("mpirun", "-np", 4, exec_name="test_exec.py")
+
+    # failed due to exec_name not being given as a keyword argument
+    with raises(TypeError):
+        assert cheyenne_expected == FV3Forecast().run_cmd("mpirun", "-np", 4, "test_exec.py")
 
     wcoss2_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
-    assert wcoss2_expected == FV3Forecast().run(
-        "mpiexec", "test_exec.py", "-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2
+    assert wcoss2_expected == FV3Forecast().run_cmd(
+        "mpiexec", "-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2, exec_name="test_exec.py"
     )
 
 
