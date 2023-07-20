@@ -144,8 +144,11 @@ class Config(ABC, UserDict):
         """
         Recursively replace Jinja2 templates in a Config object.
 
-        :param ref_dict: ???
-        :param full_dict: ???
+        In general, this method should be called without arguments. Recursive calls made by the
+        method to itself will supply appropriate arguments.
+
+        :param ref_dict: Dictionary potentially containing to-be-rendered Jinja2 templates.
+        :param full_dict: Dictionary providing values to be used for rendering Jinja2 templates.
         """
         ref_dict = self.data if ref_dict is None else ref_dict
         full_dict = self.data if full_dict is None else full_dict
