@@ -153,13 +153,12 @@ class FV3Forecast(Driver):
         Turns the resources config object into a batch card for the configured Task.
         """
 
-    def run_cmd(self, run_cmd: str, *args, exec_name: str, **kwargs) -> str:
+    def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:
         """
         Constructs a command to be used to run the forecast executable.
         """
         args_str = " ".join(str(arg) for arg in args)
-        kwargs_str = " ".join(str(kwarg) for kwarg in kwargs)
-        return f"{run_cmd} {args_str} {kwargs_str}{exec_name}"
+        return f"{run_cmd} {args_str} {exec_name}"
 
     def run(self):
         """
