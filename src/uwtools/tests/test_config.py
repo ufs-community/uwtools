@@ -6,7 +6,6 @@ Tests for uwtools.config module.
 import builtins
 import datetime
 import filecmp
-import itertools
 import logging
 import os
 import re
@@ -21,8 +20,7 @@ import pytest
 import yaml
 from pytest import fixture, raises
 
-from uwtools import config, exceptions, logger
-from uwtools.cli.set_config import parse_args as parse_config_args
+from uwtools import config, exceptions
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import compare_files, fixture_path, line_in_lines, msg_in_caplog
 from uwtools.utils import cli_helpers
@@ -41,7 +39,7 @@ def help_set_config_fmt2fmt(infn, cfgfn, tmpdir):
     cfgfile = fixture_path(cfgfn)
     ext = Path(infile).suffix
     outfile = str(tmpdir / f"outfile{ext}")
-    config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile, "-c", cfgfile]))
+    config.create_config_obj(input_base_file=infile, config_file=cfgfile, outfile=outfile)
     cfgclass = getattr(config, "%sConfig" % {".nml": "F90", ".ini": "INI", ".yaml": "YAML"}[ext])
     cfgobj = cfgclass(infile)
     cfgobj.update_values(cfgclass(cfgfile))
@@ -54,7 +52,7 @@ def help_set_config_simple(infn, tmpdir):
     infile = fixture_path(infn)
     ext = Path(infile).suffix
     outfile = str(tmpdir / f"outfile{ext}")
-    config.create_config_obj(parse_config_args(["-i", infile, "-o", outfile]))
+    config.create_config_obj(input_base_file=infile, outfile=outfile)
     cfgobj = help_cfgclass(ext)(infile)
     reference = tmpdir / f"reference{ext}"
     cfgobj.dump_file(reference)
@@ -64,43 +62,21 @@ def help_set_config_simple(infn, tmpdir):
 # Test functions
 
 
-def test_bad_conversion_cfg_to_pdf(capsys):
-    with raises(SystemExit):
-        config.create_config_obj(
-            parse_config_args(["-i", fixture_path("simple2_nml.cfg"), "--input-file-type", ".pdf"])
-        )
-    assert "invalid choice: '.pdf'" in capsys.readouterr().err
-
-
 def test_bad_conversion_nml_to_yaml():
     with raises(ValueError):
         config.create_config_obj(
-            parse_config_args(
-                [
-                    "-i",
-                    fixture_path("simple2.nml"),
-                    "-c",
-                    fixture_path("srw_example.yaml"),
-                    "--config-file-type",
-                    "YAML",
-                ]
-            )
+            input_base_file=fixture_path("simple2.nml"),
+            config_file=fixture_path("srw_example.yaml"),
+            config_file_type="YAML",
         )
 
 
 def test_bad_conversion_yaml_to_nml(tmp_path):
     with raises(ValueError):
         config.create_config_obj(
-            parse_config_args(
-                [
-                    "-i",
-                    fixture_path("srw_example.yaml"),
-                    "-o",
-                    str(tmp_path / "test_outfile_conversion.yaml"),
-                    "--output-file-type",
-                    "F90",
-                ]
-            )
+            input_base_file=fixture_path("srw_example.yaml"),
+            outfile=str(tmp_path / "test_outfile_conversion.yaml"),
+            output_file_type="F90",
         )
 
 
@@ -152,7 +128,7 @@ def test_compare_nml(capsys):
     """
     nml1 = fixture_path("fruit_config.nml")
     nml2 = fixture_path("fruit_config_mult_sect.nml")
-    config.create_config_obj(parse_config_args(["-i", nml1, "-c", nml2, "--compare"]))
+    config.create_config_obj(input_base_file=nml1, config_file=nml2, compare=True)
     actual = capsys.readouterr().out.split("\n")
 
     # Make sure the tool output contains all the expected lines:
@@ -207,7 +183,7 @@ def test_config_file_conversion(tmp_path):
     cfgfile = fixture_path("simple2.ini")
     outfile = str(tmp_path / "test_config_conversion.nml")
     config.create_config_obj(
-        parse_config_args(["-i", infile, "-c", cfgfile, "-o", outfile, "--config-file-type", "F90"])
+        input_base_file=infile, config_file=cfgfile, outfile=outfile, config_file_type="F90"
     )
     expected = config.F90Config(infile)
     config_obj = config.F90Config(cfgfile)
@@ -225,9 +201,7 @@ def test_conversion_cfg_to_yaml(tmp_path):
     """
     infile = fixture_path("srw_example_yaml.cfg")
     outfile = str(tmp_path / "test_ouput.yaml")
-    config.create_config_obj(
-        parse_config_args(["-i", infile, "-o", outfile, "--input-file-type", "YAML"])
-    )
+    config.create_config_obj(input_base_file=infile, outfile=outfile, input_file_type="YAML")
     expected = config.YAMLConfig(infile)
     expected.dereference_all()
     expected_file = tmp_path / "test.yaml"
@@ -276,30 +250,44 @@ def test_dereference():
         assert cfg["grid_stats"]["points_per_level"] == 10000
 
 
-def test_dereference_exceptions(caplog):
+def test_dereference_bad_filter(tmp_path):
+    """
+    Test that an unregistered filter is detected and treated as an error.
+    """
+    path = tmp_path / "cfg.yaml"
+    with open(path, "w", encoding="utf-8") as f:
+        print("undefined_filter: '{{ 34 | not_a_filter }}'", file=f)
+    cfg = config.YAMLConfig(config_path=path)
+    with raises(exceptions.UWConfigError) as e:
+        cfg.dereference()
+    assert "filter: 'not_a_filter'" in str(e.value)
+
+
+def test_dereference_exceptions(caplog, tmp_path):
     """
     Test that dereference handles some standard mistakes.
     """
-    log = logger.Logger(name="test_dereference_exceptions", level="DEBUG")
-    cfg = config.YAMLConfig(log_name=log.name)
-    cfg.update({"undefined_filter": "{{ 34 | im_not_a_filter }}"})
-    with raises(exceptions.UWConfigError) as e:
-        cfg.dereference()
-    assert "filter: 'im_not_a_filter'" in str(e.value)
-    cfg.pop("undefined_filter", None)
-    cfg.update(
-        {
-            "divide": "{{ num // nada }}",  # ZeroDivisionError
-            "foo": "bar",
-            "list_a": [1, 2, 4],
-            "nada": 0,
-            "num": 2,
-            "soap": "{{ foo }}",
-            "type_prob": '{{ list_a / "a" }}',  # TypeError
-        }
-    )
-    caplog.clear()
-    cfg.dereference()
+    path = tmp_path / "cfg.yaml"
+    with open(path, "w", encoding="utf-8") as f:
+        print(
+            """
+divide: '{{ num // nada }}'  # ZeroDivisionError
+foo: bar
+list_a: [1, 2, 4]
+nada: 0
+num: 2
+soap: '{{ foo }}'
+type_prob: '{{ list_a / \"a\" }}'  # TypeError
+""",
+            file=f,
+        )
+    log_name = "test"
+    log = logging.getLogger(log_name)
+    log.addHandler(logging.StreamHandler(sys.stdout))
+    log.setLevel(logging.DEBUG)
+    cfgobj = config.YAMLConfig(config_path=path, log_name=log_name)
+    cfgobj.dereference()
+    log.info("HELLO")
     raised = [rec.msg for rec in caplog.records if "raised" in rec.msg]
     assert "ZeroDivisionError" in raised[0]
     assert "TypeError" in raised[1]
@@ -340,7 +328,7 @@ def test_incompatible_file_type():
     Test that providing an incompatible file type for input base file will return print statement.
     """
     with raises(ValueError):
-        config.create_config_obj(parse_config_args(["-i", fixture_path("model_configure.sample")]))
+        config.create_config_obj(input_base_file=fixture_path("model_configure.sample"))
 
 
 def test_ini_config_bash(salad_base, tmp_path):
@@ -384,9 +372,7 @@ def test_output_file_conversion(tmp_path):
     """
     infile = fixture_path("simple.nml")
     outfile = str(tmp_path / "test_ouput.cfg")
-    config.create_config_obj(
-        parse_config_args(["-i", infile, "-o", outfile, "--output-file-type", "F90"])
-    )
+    config.create_config_obj(input_base_file=infile, outfile=outfile, output_file_type="F90")
     expected = config.F90Config(infile)
     expected_file = tmp_path / "expected.nml"
     expected.dump_file(expected_file)
@@ -454,7 +440,7 @@ def test_set_config_dry_run(capsys):
     infile = fixture_path("fruit_config.yaml")
     yaml_config = config.YAMLConfig(infile)
     yaml_config.dereference_all()
-    config.create_config_obj(parse_config_args(["-i", infile, "-d"]))
+    config.create_config_obj(input_base_file=infile, dry_run=True)
     actual = capsys.readouterr().out.strip()
     expected = str(yaml_config).strip()
     assert actual == expected
@@ -466,9 +452,7 @@ def test_set_config_field_table(tmp_path):
     """
     infile = fixture_path("FV3_GFS_v16.yaml")
     outfile = str(tmp_path / "field_table_from_yaml.FV3_GFS")
-    config.create_config_obj(
-        parse_config_args(["-i", infile, "-o", outfile, "--output-file-type", "FieldTable"])
-    )
+    config.create_config_obj(input_base_file=infile, outfile=outfile, output_file_type="FieldTable")
     with open(fixture_path("field_table.FV3_GFS_v16"), "r", encoding="utf-8") as f1:
         with open(outfile, "r", encoding="utf-8") as f2:
             reflist = [line.rstrip("\n").strip().replace("'", "") for line in f1]
@@ -543,49 +527,42 @@ def test_show_format():
     Test providing required configuration format for a given input and target.
     """
     # Initially, input and output file types are both YAML:
-    args = parse_config_args(
-        [
-            "-i",
-            fixture_path("FV3_GFS_v16.yaml"),
-            "-o",
-            "/dev/null",
-            "--show-format",
-            "--output-file-type",
-            "YAML",
-        ]
-    )
     with patch.object(builtins, "help") as help_:
         # Since file types match, help() is not called:
-        config.create_config_obj(args)
+        config.create_config_obj(
+            input_base_file=fixture_path("FV3_GFS_v16.yaml"),
+            outfile="/dev/null",
+            show_format=True,
+            output_file_type="YAML",
+        )
         help_.assert_not_called()
         # But help() is called when the input is YAML and the output FieldTable:
-        args.output_file_type = "FieldTable"
-        config.create_config_obj(args)
+        config.create_config_obj(
+            input_base_file=fixture_path("FV3_GFS_v16.yaml"),
+            outfile="/dev/null",
+            show_format=True,
+            output_file_type="FieldTable",
+        )
         help_.assert_called_once()
 
 
-def test_transform_config(tmp_path):
+@pytest.mark.parametrize("fmt1", ["F90", "INI", "YAML"])
+@pytest.mark.parametrize("fmt2", ["F90", "INI", "YAML"])
+def test_transform_config(fmt1, fmt2, tmp_path):
     """
     Test that transforms config objects to objects of other config subclasses.
     """
-    # Use itertools to construct all pairs of the config formats and iterate
-    # through their corresponding classes. The transforms here ensure consistent
-    # file subscripts and config calls.
-
-    for fmt1, fmt2 in itertools.permutations(["INI", "YAML", "F90"], 2):
-        ext1, ext2 = [".%s" % ("NML" if x == "F90" else x).lower() for x in (fmt1, fmt2)]
-        outfile = tmp_path / f"test_{fmt1.lower()}to{fmt2.lower()}_dump{ext2}"
-        reference = fixture_path(f"simple{ext2}")
-        cfgin = help_cfgclass(ext1)(fixture_path(f"simple{ext1}"))
-        cfgout = help_cfgclass(ext2)()
-        cfgout.update(cfgin.data)
-        cfgout.dump_file(outfile)
-        with open(reference, "r", encoding="utf-8") as f1:
-            reflines = [line.strip().replace("'", "") for line in f1]
-        with open(outfile, "r", encoding="utf-8") as f2:
-            outlines = [line.strip().replace("'", "") for line in f2]
-        for line1, line2 in zip(reflines, outlines):
-            assert line1 == line2
+    ext1, ext2 = [".%s" % ("NML" if x == "F90" else x).lower() for x in (fmt1, fmt2)]
+    outfile = tmp_path / f"test_{fmt1.lower()}to{fmt2.lower()}_dump{ext2}"
+    reference = fixture_path(f"simple{ext2}")
+    cfgin = help_cfgclass(ext1)(fixture_path(f"simple{ext1}"))
+    help_cfgclass(ext2).dump_file_from_dict(path=outfile, cfg=cfgin.data)
+    with open(reference, "r", encoding="utf-8") as f1:
+        reflines = [line.strip().replace("'", "") for line in f1]
+    with open(outfile, "r", encoding="utf-8") as f2:
+        outlines = [line.strip().replace("'", "") for line in f2]
+    for line1, line2 in zip(reflines, outlines):
+        assert line1 == line2
 
 
 def test_values_needed_ini(capsys):
@@ -593,9 +570,7 @@ def test_values_needed_ini(capsys):
     Test that the values_needed flag logs keys completed, keys containing unfilled jinja2 templates,
     and keys set to empty.
     """
-    config.create_config_obj(
-        parse_config_args(["-i", fixture_path("simple3.ini"), "--values-needed"])
-    )
+    config.create_config_obj(input_base_file=fixture_path("simple3.ini"), values_needed=True)
     actual = capsys.readouterr().out
     expected = """
 Keys that are complete:
@@ -625,9 +600,7 @@ def test_values_needed_f90nml(capsys):
     Test that the values_needed flag logs keys completed, keys containing unfilled jinja2 templates,
     and keys set to empty.
     """
-    config.create_config_obj(
-        parse_config_args(["-i", fixture_path("simple3.nml"), "--values-needed"])
-    )
+    config.create_config_obj(input_base_file=fixture_path("simple3.nml"), values_needed=True)
     actual = capsys.readouterr().out
     expected = """
 Keys that are complete:
@@ -654,9 +627,7 @@ def test_values_needed_yaml(capsys):
     Test that the values_needed flag logs keys completed, keys containing unfilled jinja2 templates,
     and keys set to empty.
     """
-    config.create_config_obj(
-        parse_config_args(["-i", fixture_path("srw_example.yaml"), "--values-needed"])
-    )
+    config.create_config_obj(input_base_file=fixture_path("srw_example.yaml"), values_needed=True)
     actual = capsys.readouterr().out
     expected = """
 Keys that are complete:

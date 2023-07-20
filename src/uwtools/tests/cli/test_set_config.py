@@ -5,7 +5,7 @@ Tests for the set-config CLI.
 
 from argparse import ArgumentError
 from itertools import chain
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 import pytest
 from pytest import fixture, raises
@@ -36,7 +36,20 @@ def test_main(create_config_obj, setup_logging, args):
             log_file=args["--log-file"], log_name="set_config", quiet=False, verbose=False
         )
         create_config_obj.assert_called_once_with(
-            user_args=set_config.parse_args(arglist), log=setup_logging()
+            input_base_file=args["--input-base-file"],
+            compare=False,
+            config_file=args["--config-file"],
+            config_file_type=None,
+            dry_run=False,
+            input_file_type=None,
+            log=ANY,
+            log_file=args["--log-file"],
+            outfile=args["--outfile"],
+            output_file_type=None,
+            quiet=False,
+            show_format=False,
+            values_needed=False,
+            verbose=False,
         )
         # Test failure:
         create_config_obj.side_effect = set_config.UWConfigError()
