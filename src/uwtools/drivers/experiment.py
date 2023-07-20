@@ -36,6 +36,9 @@ class SRWExperiment(Facade):
         """
         Validate the configuration file.
         """
+        config_validation = getattr(import_module(self.modname), "validate_config")  # pragma: no cover
+        config_validation(config_file)
+
 
     def create_experiment(self):  # pragma: no cover
         # NB: Remove pragma: no cover ASAP

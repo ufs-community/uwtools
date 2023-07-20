@@ -3,7 +3,9 @@ This file contains the specific drivers for a particular app, using the facade p
 """
 
 from uwtools import config
+from uwtools import config_validator
 from uwtools.drivers.facade import Facade
+from uwtools.logger import Logger
 
 
 class UWforSRW(Facade):
@@ -15,6 +17,7 @@ class UWforSRW(Facade):
         """
         Initialize the facade driver.
         """
+        self.schema = "SRW.jsonschema"
 
     def load_config(self, config_file: str) -> None:
         """
@@ -26,7 +29,15 @@ class UWforSRW(Facade):
     def validate_config(self, config_file: str) -> None:
         """
         Validate the configuration file.
+        This will use the config_validator module to validate the config file.
+        The current version parses config.yaml, but later versions can individually check that each 
+        created j-job has a valid config.
         """
+        config_validator.config_is_valid(
+            config_file=config_file,
+            validation_schema=self.schema,
+            log=Logger(),
+            )
 
     def create_experiment(self) -> None:
         """
