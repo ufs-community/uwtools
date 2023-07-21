@@ -48,6 +48,7 @@ class SRW210(Facade):
     def validate_config(self, config_file: str) -> None:
         """
         Validate the configuration file.
+
         This will run build.sh with the set -eux flags to validate the config file.
         """
         subprocess.run("set -eux | $PWD/tests/build.sh", check=False, shell=True)
