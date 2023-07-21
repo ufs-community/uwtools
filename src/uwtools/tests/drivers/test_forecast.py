@@ -4,6 +4,7 @@ Tests for forecast driver.
 """
 
 import filecmp
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -166,6 +167,22 @@ def test_create_namelist_without_base_file(create_namelist_assets):
 """.lstrip()
     with open(outnml_file, "r", encoding="utf-8") as out_file:
         assert out_file.read() == expected
+
+
+def test_forecast_run_cmd():
+    """
+    Tests that the command to be used to run the forecast executable was built successfully.
+    """
+    hera_expected = "srun --export=ALL test_exec.py"
+    assert hera_expected == FV3Forecast().run_cmd("--export=ALL", run_cmd="srun", exec_name="test_exec.py")
+
+    cheyenne_expected = "mpirun -np 4 test_exec.py"
+    assert cheyenne_expected == FV3Forecast().run_cmd( "-np", 4, run_cmd="mpirun", exec_name="test_exec.py")
+
+    wcoss2_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
+    assert wcoss2_expected == FV3Forecast().run_cmd(
+        "-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2, run_cmd="mpiexec", exec_name="test_exec.py"
+    )
 
 
 def test_FV3Forecast_stage_static_files(tmp_path):
