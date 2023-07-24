@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 from unittest.mock import patch
 
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools import config
 from uwtools.drivers.forecast import FV3Forecast

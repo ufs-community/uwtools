@@ -4,12 +4,13 @@ Tests for uwtools.drivers.experiment module.
 """
 
 import pytest
-from pytest import fixture
 
 from uwtools.drivers import experiment
+from uwtools.logger import Logger
+from uwtools.tests.support import fixture_path
 
 
-@fixture
+@pytest.fixture
 def SRWExperiment():
     return experiment.SRWExperiment()
 
@@ -25,11 +26,17 @@ def test_load_config():
     """
 
 
-@pytest.mark.skip(reason="no way of currently testing this")
-def test_validate_config():
+@pytest.mark.parametrize("vals", [("good", True), ("bad", False)])
+def test_validate_config(vals):
     """
-    Test that the YAML file is validated correctly.
+    Test that a valid config file succeeds validation.
     """
+    cfgtype, boolval = vals
+    experiment_obj = experiment.SRWExperiment()
+    assert (
+        experiment_obj.validate_config(config_file=fixture_path(f"schema_test_{cfgtype}.yaml"))
+        is boolval
+    )
 
 
 @pytest.mark.skip(reason="no way of currently testing this")

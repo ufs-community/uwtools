@@ -56,7 +56,7 @@ class Facade(ABC):
         """
 
     @abstractmethod
-    def validate_config(self, config_file: str) -> None:
+    def validate_config(self, config_file: str) -> bool:
         """
         Validate the configuration file.
         """
