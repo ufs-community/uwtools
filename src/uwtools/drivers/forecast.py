@@ -167,17 +167,22 @@ class FV3Forecast(Driver):
         This will take in the executable built in run_cmd and then run it.
         """
 
-    def stage_static_files(self, run_directory: str, static_files: Dict[str, str]) -> None:
+    def stage_files(
+        self, run_directory: str, files_to_stage: Dict[str, str], link_files: bool = False
+    ) -> None:
         """
         Takes in run directory and dictionary of file names and paths that need to be staged in the
         run directory.
 
-        Creates dst file in run directory and copies contents from the src path provided.
+        Creates dst file in run directory and copies or links contents from the src path provided.
         """
 
         os.makedirs(run_directory, exist_ok=True)
-        for dst_fn, src_path in static_files.items():
+        for dst_fn, src_path in files_to_stage.items():
             dst_path = os.path.join(run_directory, dst_fn)
-            shutil.copyfile(src_path, dst_path)
+            if link_files:
+                os.symlink(src_path, dst_path)
+            else:
+                shutil.copyfile(src_path, dst_path)
             msg = f"File {src_path} staged in run directory at {dst_fn}"
             logging.info(msg)

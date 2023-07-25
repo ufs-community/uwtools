@@ -64,6 +64,7 @@ def test_create_directory_structure(tmp_path):
     # Test rename behavior when run directory exists.
     forecast_obj.create_directory_structure(rundir, "rename")
     copy_directory = next(tmp_path.glob("%s_*" % rundir.name))
+    # copy_directory = next(tmp_path.glob(f"{rundir.name}_*"))
     assert (copy_directory / "RESTART").is_dir()
 
     # Test quit behavior when run directory exists.
@@ -185,10 +186,26 @@ def test_forecast_run_cmd():
     )
 
 
-def test_FV3Forecast_stage_static_files(tmp_path):
+def test_forecast_run_cmd():
     """
-    Tests that stage_static_files() is copying files from static section of the config obj are being
-    staged in run directory.
+    Tests that the command to be used to run the forecast executable was built successfully.
+    """
+    hera_expected = "srun --export=ALL test_exec.py"
+    assert hera_expected == FV3Forecast().run_cmd("--export=ALL", run_cmd="srun", exec_name="test_exec.py")
+
+    cheyenne_expected = "mpirun -np 4 test_exec.py"
+    assert cheyenne_expected == FV3Forecast().run_cmd( "-np", 4, run_cmd="mpirun", exec_name="test_exec.py")
+
+    wcoss2_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
+    assert wcoss2_expected == FV3Forecast().run_cmd(
+        "-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2, run_cmd="mpiexec", exec_name="test_exec.py"
+    )
+
+
+def test_FV3Forecast_stage_files(tmp_path):
+    """
+    Tests that stage_files() is copying files from static section of the config obj are being staged
+    in run directory.
     """
 
     run_directory = tmp_path / "run"
@@ -207,7 +224,7 @@ def test_FV3Forecast_stage_static_files(tmp_path):
     # Ask a forecast object to stage the files to the run directory:
     forecast_obj = FV3Forecast()
     forecast_obj.create_directory_structure(run_directory)
-    forecast_obj.stage_static_files(run_directory, files_to_stage)
+    forecast_obj.stage_files(run_directory, files_to_stage)
     # Test that all of the destination files now exist:
     for dst_fn in files_to_stage.keys():
         assert (run_directory / dst_fn).is_file()
