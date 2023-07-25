@@ -61,6 +61,7 @@ def test_create_directory_structure(tmp_path):
     # Test rename behavior when run directory exists.
     forecast_obj.create_directory_structure(rundir, "rename")
     copy_directory = next(tmp_path.glob("%s_*" % rundir.name))
+    # copy_directory = next(tmp_path.glob(f"{rundir.name}_*"))
     assert (copy_directory / "RESTART").is_dir()
 
     # Test quit behavior when run directory exists.
@@ -167,10 +168,10 @@ def test_create_namelist_without_base_file(create_namelist_assets):
         assert out_file.read() == expected
 
 
-def test_FV3Forecast_stage_static_files(tmp_path):
+def test_stage_files(tmp_path):
     """
-    Tests that stage_static_files() is copying files from static section of the config obj are being
-    staged in run directory.
+    Tests that stage_files() is copying files from static section of the config obj are being staged
+    in run directory.
     """
 
     run_directory = tmp_path / "run"
@@ -189,7 +190,7 @@ def test_FV3Forecast_stage_static_files(tmp_path):
     # Ask a forecast object to stage the files to the run directory:
     forecast_obj = FV3Forecast()
     forecast_obj.create_directory_structure(run_directory)
-    forecast_obj.stage_static_files(run_directory, files_to_stage)
+    forecast_obj.stage_files(run_directory, files_to_stage)
     # Test that all of the destination files now exist:
     for dst_fn in files_to_stage.keys():
         assert (run_directory / dst_fn).is_file()
