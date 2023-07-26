@@ -64,7 +64,6 @@ def test_create_directory_structure(tmp_path):
     # Test rename behavior when run directory exists.
     forecast_obj.create_directory_structure(rundir, "rename")
     copy_directory = next(tmp_path.glob("%s_*" % rundir.name))
-    # copy_directory = next(tmp_path.glob(f"{rundir.name}_*"))
     assert (copy_directory / "RESTART").is_dir()
 
     # Test quit behavior when run directory exists.
@@ -228,3 +227,30 @@ def test_FV3Forecast_stage_files(tmp_path):
     # Test that all of the destination files now exist:
     for dst_fn in files_to_stage.keys():
         assert (run_directory / dst_fn).is_file()
+
+
+def test_stage_files_with_linking(tmp_path):
+    """
+    Tests that stage_files() correctly stages files in the run directory with dependent files using
+    symbolic links.
+    """
+    run_directory = tmp_path / "run"
+    src_directory = tmp_path / "src"
+    files_to_stage = config.YAMLConfig(fixture_path("expt_dir.yaml"))["cycledep"]
+    # Fix source paths so that they are relative to our test temp directory and
+    # create the test files.
+    src_directory.mkdir()
+    for dst_fn, src_path in files_to_stage.items():
+        fixed_src_path = src_directory / Path(src_path).name
+        files_to_stage[dst_fn] = str(fixed_src_path)
+        fixed_src_path.touch()
+    # Test that none of the destination files exist yet:
+    for dst_fn in files_to_stage.keys():
+        assert not (run_directory / dst_fn).is_file()
+    # Ask a forecast object to stage the files to the run directory:
+    forecast_obj = FV3Forecast()
+    forecast_obj.create_directory_structure(run_directory)
+    forecast_obj.stage_files(run_directory, files_to_stage, link_files=True)
+    # Test that all of the destination files now exist as symbolic links:
+    for dst_fn in files_to_stage.keys():
+        assert Path(run_directory / dst_fn).is_symlink()
