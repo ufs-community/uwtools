@@ -175,27 +175,14 @@ def test_forecast_run_cmd():
     Tests that the command to be used to run the forecast executable was built successfully.
     """
     hera_expected = "srun --export=ALL test_exec.py"
-    assert hera_expected == FV3Forecast().run_cmd(
-        "--export=ALL", run_cmd="srun", exec_name="test_exec.py"
-    )
+    assert hera_expected == FV3Forecast().run_cmd("--export=ALL", run_cmd="srun", exec_name="test_exec.py")
 
     cheyenne_expected = "mpirun -np 4 test_exec.py"
-    assert cheyenne_expected == FV3Forecast().run_cmd(
-        "-np", 4, run_cmd="mpirun", exec_name="test_exec.py"
-    )
+    assert cheyenne_expected == FV3Forecast().run_cmd( "-np", 4, run_cmd="mpirun", exec_name="test_exec.py")
 
     wcoss2_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
     assert wcoss2_expected == FV3Forecast().run_cmd(
-        "-n",
-        4,
-        "-ppn",
-        8,
-        "--cpu-bind",
-        "core",
-        "-depth",
-        2,
-        run_cmd="mpiexec",
-        exec_name="test_exec.py",
+        "-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2, run_cmd="mpiexec", exec_name="test_exec.py"
     )
 
 
