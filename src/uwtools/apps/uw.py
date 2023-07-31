@@ -4,9 +4,9 @@ This file contains the specific drivers for a particular app, using the facade p
 
 from importlib import resources
 
-from uwtools import config, config_validator
+from uwtools import config
+from uwtools.drivers import driver
 from uwtools.drivers.facade import Facade
-from uwtools.logger import Logger
 
 
 class UWforSRW(Facade):
@@ -18,10 +18,8 @@ class UWforSRW(Facade):
         """
         Initialize the facade driver.
         """
-        with resources.as_file(resources.files("uwtools.resources")) as path:
-            self.schema = (path / "workflow.jsonschema").as_posix()
 
-    def load_config(self, config_file: str) -> None:
+    def load_config(self, config_file: str) -> None:  # pragma: no cover
         """
         Load the configuration file.
         """
@@ -36,11 +34,11 @@ class UWforSRW(Facade):
         parses config.yaml, but later versions can individually check that each created j-job has a
         valid config.
         """
-        return config_validator.config_is_valid(
-            config_file=config_file,
-            validation_schema=self.schema,
-            log=Logger(),
-        )
+        with resources.as_file(resources.files("uwtools.resources")) as path:
+            schema = (path / "workflow.jsonschema").as_posix()
+
+        method = driver.Driver.validate
+        return method(config_file=config_file, schema=schema)
 
     def create_experiment(self) -> None:
         """

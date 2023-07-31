@@ -32,10 +32,9 @@ def test_validate_config(vals):
     Test that a valid config file succeeds validation.
     """
     cfgtype, boolval = vals
-    experiment_obj = experiment.SRWExperiment()
+    method = experiment.SRWExperiment()
     assert (
-        experiment_obj.validate_config(config_file=fixture_path(f"schema_test_{cfgtype}.yaml"))
-        is boolval
+        method.validate_config(config_file=fixture_path(f"schema_test_{cfgtype}.yaml")) is boolval
     )
 
 
