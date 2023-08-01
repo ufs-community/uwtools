@@ -5,14 +5,26 @@ Tests for forecast driver.
 
 import filecmp
 import sys
+from importlib import resources
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 from pytest import fixture, mark, raises
 
 from uwtools import config
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.tests.support import compare_files, fixture_path
+
+
+@pytest.mark.parametrize("vals", [("good", True), ("bad", False)])
+def test_validity(vals):
+    """
+    Tests validation on initialization when a config file is given.
+    """
+    cfgtype, boolval = vals
+
+    assert FV3Forecast(config_file=fixture_path(f"schema_test_{cfgtype}.yaml")) is boolval
 
 
 def test_create_config(tmp_path):

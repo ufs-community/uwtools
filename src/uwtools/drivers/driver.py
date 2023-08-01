@@ -57,12 +57,13 @@ class Driver(ABC):
     run and will appropriately parse subsequent stages of the workflow.
     """
 
-    def __init__(self, config_file: str):
+    def __init__(self, config_file: Optional[str] = None):
         """
         Initialize the Forecast driver.
         """
-        self.config = config_file
-        self.validate(self.config)
+        if config_file is not None:
+            self.config = config_file
+            self.validate()
 
     def validate(self, log: Optional[Logger] = None) -> bool:
         """
@@ -78,9 +79,9 @@ class Driver(ABC):
             validation_schema=self.schema,
             log=log,
         )
-    
-    @abstractmethod
+
     @property
+    @abstractmethod
     def schema(self):
         """
         The schema to validate the config file against.
