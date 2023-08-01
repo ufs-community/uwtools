@@ -211,15 +211,17 @@ def test_forecast_run_cmd():
     )
 
 
-def test_FV3Forecast_stage_static_files(tmp_path):
+@pytest.mark.parametrize("section", ["static", "cycledep"])
+@pytest.mark.parametrize("link_files", [True, False])
+def test_stage_files(tmp_path, section, link_files):
     """
-    Tests that stage_static_files() is copying files from static section of the config obj are being
-    staged in run directory.
+    Tests that stage_files() is copying or linking files from static or cycledep sections of the
+    config obj are being staged in run directory.
     """
 
     run_directory = tmp_path / "run"
     src_directory = tmp_path / "src"
-    files_to_stage = config.YAMLConfig(fixture_path("expt_dir.yaml"))["static"]
+    files_to_stage = config.YAMLConfig(fixture_path("expt_dir.yaml"))[section]
     # Fix source paths so that they are relative to our test temp directory and
     # create the test files.
     src_directory.mkdir()
@@ -233,7 +235,10 @@ def test_FV3Forecast_stage_static_files(tmp_path):
     # Ask a forecast object to stage the files to the run directory:
     forecast_obj = FV3Forecast()
     forecast_obj.create_directory_structure(run_directory)
-    forecast_obj.stage_static_files(run_directory, files_to_stage)
+    forecast_obj.stage_files(run_directory, files_to_stage, link_files=link_files)
     # Test that all of the destination files now exist:
     for dst_fn in files_to_stage.keys():
-        assert (run_directory / dst_fn).is_file()
+        if link_files:
+            assert (run_directory / dst_fn).is_symlink()
+        else:
+            assert (run_directory / dst_fn).is_file()
