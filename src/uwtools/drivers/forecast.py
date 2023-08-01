@@ -25,9 +25,16 @@ class FV3Forecast(Driver):
         """
         Initialize the Forecast driver.
         """
-        super().__init__()
         with resources.as_file(resources.files("uwtools.resources")) as path:
-            self.schema = (path / "workflow.jsonschema").as_posix()
+            self.schema = (path / "FV3Forecast.jsonschema").as_posix()
+        super().__init__()
+
+    @property
+    def schema(self):
+        """
+        The schema to validate the config file against.
+        """
+        return self.schema
 
     def requirements(self):
         """

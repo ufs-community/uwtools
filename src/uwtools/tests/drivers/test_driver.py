@@ -23,6 +23,6 @@ def test_FV3Forecast_config_is_valid_good(vals):
     """
     cfgtype, boolval = vals
     with resources.as_file(resources.files("uwtools.resources")) as path:
-        schema = (path / "workflow.jsonschema").as_posix()
+        schema = (path / "FV3Forecast.jsonschema").as_posix()
     method = driver.Driver.validate
     assert method(config_file=fixture_path(f"schema_test_{cfgtype}.yaml"), schema=schema) is boolval

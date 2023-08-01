@@ -23,7 +23,7 @@ class SRW210(Facade):
         Initialize the facade driver.
         """
 
-    def load_config(self, config_file: str) -> None:  # pragma: no cover
+    def load_config(self, config_file: str) -> None:
         """
         Load the configuration file.
         """
@@ -45,16 +45,12 @@ class SRW210(Facade):
             logging.critical(msg)
             raise ValueError(msg)
 
-    def validate_config(self, config_file: str) -> bool:  # pragma: no cover
+    def validate_config(self, config_file: str) -> None:
         """
         Validate the configuration file.
-
-        This will run build.sh with the set -eux flags to validate the config file.
         """
-        subprocess.run("set -eux | $PWD/tests/build.sh", check=False, shell=True)
-        return True
 
-    def create_experiment(self) -> None:  # pragma: no cover
+    def create_experiment(self) -> None:
         """
         Generate the regional workflow.
 
