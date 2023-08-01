@@ -23,8 +23,9 @@ def test_validity(vals):
     Tests validation on initialization when a config file is given.
     """
     cfgtype, boolval = vals
+    config = FV3Forecast(config_file=fixture_path(f"schema_test_{cfgtype}.yaml"))
 
-    assert FV3Forecast(config_file=fixture_path(f"schema_test_{cfgtype}.yaml")) is boolval
+    assert config.validate() is boolval
 
 
 def test_create_config(tmp_path):
