@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 Tests for uwtools.drivers.driver module.
 """
@@ -18,12 +18,33 @@ from uwtools.drivers.driver import Driver
 def create_schema(tmp_path):
     schema_file = tmp_path / "schema_file.jsonschema"
     with open(schema_file, "w", encoding="utf-8") as f:
-        print("undefined_filter: '{{ 34 | not_a_filter }}'", file=f)
+        print(
+            """
+{
+"title": "workflow config",
+"description": "This document is to validate config files from SRW, HAFS, Global",
+"type": "object",
+"properties": {
+    "platform": {
+        "description": "attributes of the platform",
+        "type": "object",
+        "properties": {
+            "WORKFLOW_MANAGER": {
+                "type": "string",
+                "enum": ["rocoto", "none"]
+                },
+            }
+        }
+    }        
+}
+""",
+            file=f,
+        )
     return schema_file
 
 
 @pytest.mark.usefixtures("create_schema")
-class Testinstance(Driver):
+class TestDriver(Driver):
     """
     Test concrete class instantiation.
     """
@@ -33,24 +54,16 @@ class Testinstance(Driver):
         return create_schema
 
     def requirements(self):
-        """
-        requirements.
-        """
+        pass
 
     def resources(self):
-        """
-        resources.
-        """
+        pass
 
     def output(self):
-        """
-        output.
-        """
+        pass
 
     def job_card(self):
-        """
-        job_card.
-        """
+        pass
 
 
 @fixture
@@ -59,19 +72,30 @@ def create_config(tmp_path):
     config_file_bad = tmp_path / "config_file_bad.yaml"
 
     with open(config_file_good, "w", encoding="utf-8") as f:
-        print("undefined_filter: '{{ 34 | not_a_filter }}'", file=f)
+        print(
+            """
+platform:
+  WORKFLOW_MANAGER: rocoto
+""",
+            file=f,
+        )
     with open(config_file_bad, "w", encoding="utf-8") as f:
-        print("undefined_filter: '{{ 34 | not_a_filter }}'", file=f)
+        print(
+            """
+platform:
+  WORKFLOW_MANAGER: 20
+""",
+            file=f,
+        )
 
     return str(config_file_good), str(config_file_bad)
 
 
-@pytest.mark.parametrize("vals", [("good", True), ("bad", False)])
-def test_validation(vals, create_config):
+@pytest.mark.parametrize("valid", [True, False])
+def test_validation(valid, create_config):
     # test concrete classes will validate correctly
-    config_file_good, config_file_bad = create_config  # pylint: disable=unused-variable
-    cfgtype, boolval = vals
+    config_file_good, config_file_bad = create_config  # pylint: disable=possibly-unused-variable
 
-    instance = Testinstance(config_file=f"config_file_{cfgtype}.yaml")
+    instance = TestDriver(config_file=config_file_good if valid else config_file_bad)
 
-    assert instance.validate() is boolval
+    assert instance.validate() is valid
