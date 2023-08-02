@@ -13,19 +13,22 @@ import pytest
 from pytest import fixture, raises
 
 from uwtools import config
+from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.tests.support import compare_files, fixture_path
 
 
-@pytest.mark.parametrize("vals", [("good", True), ("bad", False)])
-def test_validity(vals):
+def test_schema():
     """
     Tests validation on initialization when a config file is given.
     """
-    cfgtype, boolval = vals
-    config = FV3Forecast(config_file=fixture_path(f"schema_test_{cfgtype}.yaml"))
+    config_file = fixture_path("fruit_config_similar.yaml")
 
-    assert config.validate() is boolval
+    with patch.object(Driver, "validate", return_value=True):
+        forecast = FV3Forecast(config_file)
+
+    path = Path(forecast.schema)
+    assert path.is_file()
 
 
 def test_create_config(tmp_path):

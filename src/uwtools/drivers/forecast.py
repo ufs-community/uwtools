@@ -7,7 +7,7 @@ import os
 import shutil
 import sys
 from importlib import resources
-from typing import Dict, Optional
+from typing import Dict
 
 from uwtools import config
 from uwtools.drivers.driver import Driver
@@ -21,23 +21,13 @@ class FV3Forecast(Driver):
     FV3 (ATM-only) mode.
     """
 
-    def __init__(
-        self, config_file: Optional[str] = None
-    ):  # pylint: disable=useless-super-delegation
-        """
-        Initialize the Forecast driver.
-        """
-        super().__init__(config_file)
-        self._schema = ""
-
     @property
     def schema(self) -> str:
         """
         The schema to validate the config file against.
         """
         with resources.as_file(resources.files("uwtools.resources")) as path:
-            self._schema = (path / "workflow.jsonschema").as_posix()
-        return self._schema
+            return (path / "FV3Forecast.jsonschema").as_posix()
 
     def requirements(self):
         """
