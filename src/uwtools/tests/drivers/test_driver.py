@@ -3,55 +3,22 @@
 Tests for uwtools.drivers.driver module.
 """
 
-from importlib import resources
-from types import SimpleNamespace as ns
 from unittest.mock import patch
 
 import pytest
 from pytest import fixture
 
-from uwtools.drivers import driver
 from uwtools.drivers.driver import Driver
 
 
-@fixture
-def create_schema(tmp_path):
-    schema_file = tmp_path / "schema_file.jsonschema"
-    with open(schema_file, "w", encoding="utf-8") as f:
-        print(
-            """
-{
-"title": "workflow config",
-"description": "This document is to validate config files from SRW, HAFS, Global",
-"type": "object",
-"properties": {
-    "platform": {
-        "description": "attributes of the platform",
-        "type": "object",
-        "properties": {
-            "WORKFLOW_MANAGER": {
-                "type": "string",
-                "enum": ["rocoto", "none"]
-                },
-            }
-        }
-    }        
-}
-""",
-            file=f,
-        )
-    return schema_file
-
-
-@pytest.mark.usefixtures("create_schema")
-class TestDriver(Driver):
+class ConcreteDriver(Driver):
     """
-    Test concrete class instantiation.
+    Driver subclass for testing purposes.
     """
 
     @property
     def schema(self) -> str:
-        return create_schema
+        return ""
 
     def requirements(self):
         pass
@@ -67,35 +34,53 @@ class TestDriver(Driver):
 
 
 @fixture
-def create_config(tmp_path):
-    config_file_good = tmp_path / "config_file_good.yaml"
-    config_file_bad = tmp_path / "config_file_bad.yaml"
-
-    with open(config_file_good, "w", encoding="utf-8") as f:
-        print(
-            """
+def configs():
+    config_good = """
 platform:
   WORKFLOW_MANAGER: rocoto
-""",
-            file=f,
-        )
-    with open(config_file_bad, "w", encoding="utf-8") as f:
-        print(
-            """
+"""
+    config_bad = """
 platform:
   WORKFLOW_MANAGER: 20
-""",
-            file=f,
-        )
+"""
+    return config_good, config_bad
 
-    return str(config_file_good), str(config_file_bad)
+
+@fixture
+def schema():
+    return """
+{
+  "title": "workflow config",
+  "description": "This document is to validate config files from SRW, HAFS, Global",
+  "type": "object",
+  "properties": {
+    "platform": {
+      "description": "attributes of the platform",
+      "type": "object",
+      "properties": {
+        "WORKFLOW_MANAGER": {
+          "type": "string",
+          "enum": [
+            "rocoto",
+            "none"
+          ]
+        }
+      }
+    }
+  }
+}
+""".strip()
 
 
 @pytest.mark.parametrize("valid", [True, False])
-def test_validation(valid, create_config):
-    # test concrete classes will validate correctly
-    config_file_good, config_file_bad = create_config  # pylint: disable=possibly-unused-variable
-
-    instance = TestDriver(config_file=config_file_good if valid else config_file_bad)
-
-    assert instance.validate() is valid
+def test_validation(configs, schema, tmp_path, valid):
+    config_good, config_bad = configs
+    config_file = str(tmp_path / "config.yaml")
+    with open(config_file, "w", encoding="utf-8") as f:
+        print(config_good if valid else config_bad, file=f)
+    schema_file = str(tmp_path / "test.jsonschema")
+    with open(schema_file, "w", encoding="utf-8") as f:
+        print(schema, file=f)
+    with patch.object(ConcreteDriver, "schema", new=schema_file):
+        instance = ConcreteDriver(config_file=config_file)
+        assert instance.validate() is valid
