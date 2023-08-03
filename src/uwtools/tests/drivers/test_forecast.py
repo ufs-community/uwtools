@@ -18,12 +18,11 @@ from uwtools.tests.support import compare_files, fixture_path
 
 def test_schema():
     """
-    Tests validation on initialization when a config file is given.
+    Tests that the schema is properly defined with a file value.
     """
-    config_file = fixture_path("fruit_config_similar.yaml")
 
     with patch.object(Driver, "validate", return_value=True):
-        forecast = FV3Forecast(config_file)
+        forecast = FV3Forecast(config_file="/not/used")
 
     path = Path(forecast.schema)
     assert path.is_file()
