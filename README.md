@@ -4,7 +4,8 @@
 
 Unified Workflow tools for use with applications with UFS and beyond
 
-## Installation
+## User Installation
+- If you are a Developer, skip the User Installation and continue on to the Development section
 
 The recommended installation mechanism uses the Python package and virtual-environment manager [conda](https://docs.conda.io/en/latest/). Specifically, these instructions detail the use of the minimal [Miniforge](https://github.com/conda-forge/miniforge) variant of [Miniconda](https://docs.conda.io/en/latest/miniconda.html), built to use, by default, packages from the [conda-forge](https://conda-forge.org/) project. Users of the original Miniconda (or the [Anaconda](https://anaconda.org/) distribution) may need to add the flags `-c conda-forge --override-channels` to `conda build`, `conda create`, and `conda install` commands to specify the use of conda-forge packages.
 
