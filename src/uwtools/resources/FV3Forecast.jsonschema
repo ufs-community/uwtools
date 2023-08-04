@@ -1,6 +1,6 @@
 {
   "title": "FV3 Forecast config",
-  "description": "This document is to validate forecast config files from SRW, HAFS, Global",
+  "description": "This document is to validate user-defined FV3 forecast config files",
   "type": "object",
   "properties": {
     "platform": {
