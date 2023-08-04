@@ -21,7 +21,7 @@ def test_schema():
     Tests that the schema is properly defined with a file value.
     """
 
-    with patch.object(Driver, "validate", return_value=True):
+    with patch.object(Driver, "_validate", return_value=True):
         forecast = FV3Forecast(config_file="/not/used")
 
     path = Path(forecast.schema)

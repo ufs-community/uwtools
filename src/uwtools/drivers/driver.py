@@ -7,7 +7,6 @@ See UW documentation for more information:
 https://github.com/ufs-community/workflow-tools/wiki/Migrating-Production-Workflows-to-the-Unified-Workflow-using-the-Strangler-Fig-Pattern#component-drivers
 """
 
-import sys
 from abc import ABC, abstractmethod
 from typing import Optional
 
@@ -58,28 +57,25 @@ class Driver(ABC):
     run and will appropriately parse subsequent stages of the workflow.
     """
 
-    def __init__(self, config_file: Optional[str] = None):
+    def __init__(self, config_file: Optional[str] = None, log: Optional[Logger] = None):
         """
         Initialize the Forecast driver.
         """
+        self.log = log if log is not None else Logger()
         if config_file is not None:
             self.config_file = config_file
-            self.validate()
+            self._validate()
+        else:
+            self.log.info("No config file provided, available functions are limited.")
 
-    def validate(self, log: Optional[Logger] = None) -> bool:
+    def _validate(self) -> bool:
         """
         Validates the objects supplied to the driver from the provided config and platform files.
         """
-
-        log = Logger() if log is None else log
-        return (
-            config_validator.config_is_valid(
-                config_file=self.config_file,
-                validation_schema=self.schema,
-                log=log,
-            )
-            if self.config_file and self.schema
-            else sys.exit(1)
+        return config_validator.config_is_valid(
+            config_file=self.config_file,
+            validation_schema=self.schema,
+            log=self.log,
         )
 
     @property
