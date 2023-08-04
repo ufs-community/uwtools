@@ -51,7 +51,7 @@ def schema():
     return """
 {
   "title": "workflow config",
-  "description": "This document is to validate config files from SRW, HAFS, Global",
+  "description": "This document is to validate user-defined FV3 forecast config files",
   "type": "object",
   "properties": {
     "platform": {
@@ -84,3 +84,5 @@ def test_validation(configs, schema, tmp_path, valid):
     with patch.object(ConcreteDriver, "schema", new=schema_file):
         instance = ConcreteDriver(config_file=config_file)
         assert instance.validate() is valid
+        instancenone = ConcreteDriver(config_file=None)
+        assert instancenone.validate() is False

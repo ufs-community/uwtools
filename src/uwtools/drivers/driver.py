@@ -7,6 +7,7 @@ See UW documentation for more information:
 https://github.com/ufs-community/workflow-tools/wiki/Migrating-Production-Workflows-to-the-Unified-Workflow-using-the-Strangler-Fig-Pattern#component-drivers
 """
 
+import sys
 from abc import ABC, abstractmethod
 from typing import Optional
 
@@ -71,10 +72,14 @@ class Driver(ABC):
         """
 
         log = Logger() if log is None else log
-        return config_validator.config_is_valid(
-            config_file=self.config_file,
-            validation_schema=self.schema,
-            log=log,
+        return (
+            config_validator.config_is_valid(
+                config_file=self.config_file,
+                validation_schema=self.schema,
+                log=log,
+            )
+            if self.config_file and self.schema
+            else sys.exit(1)
         )
 
     @property

@@ -88,17 +88,78 @@
         }
       }
     },
+    "run_cmd": {
+      "description": "parameters for the run command",
+      "type": "object",
+      "properties": {
+        "RUN_CMD": {
+          "type": "string"
+        },
+        "EXEC_NAME": {
+          "type": "string"
+        },
+        "KWARGS": {
+          "type": "string"
+        }
+      }
+    },
     "locations": {
       "description": "locations of input files",
       "type": "object",
       "properties": {
-        "STATIC_FILES": {
+        "STATIC": {
           "type": "string",
           "format": "uri"
         },
-        "CYCLE_DEPENDENT_FILES": {
+        "CYCLEDEP": {
           "type": "string",
           "format": "uri"
+        }
+      }
+    },
+    "field_table": {
+      "description": "attributes of a field table",
+      "type": "object",
+      "properties": {
+        "LONGNAME": {
+          "type": "string",
+          "enum": [
+            "rocoto",
+            "none"
+          ]
+        },
+        "UNITS": {
+          "type": "string"
+        },
+        "PROFILE_TYPE": {
+          "type": "string",
+          "oneOf": [
+            {
+              "properties": {
+                "NAME": {
+                  "type": "string",
+                  "const": "fixed"
+                },
+                "SURFACE_VALUE": {
+                  "type": "number"
+                }
+              }
+            },
+            {
+              "properties": {
+                "NAME": {
+                  "type": "string",
+                  "const": "profile"
+                },
+                "SURFACE_VALUE": {
+                  "type": "number"
+                },
+                "TOP_VALUE": {
+                  "type": "number"
+                }
+              }
+            }
+          ]
         }
       }
     }
