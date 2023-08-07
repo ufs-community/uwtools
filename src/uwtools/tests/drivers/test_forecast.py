@@ -3,6 +3,7 @@
 Tests for forecast driver.
 """
 
+
 from pathlib import Path
 from unittest.mock import patch
 
@@ -10,8 +11,21 @@ import pytest
 from pytest import fixture, raises
 
 from uwtools import config
+from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.tests.support import compare_files, fixture_path
+
+
+def test_schema():
+    """
+    Tests that the schema is properly defined with a file value.
+    """
+
+    with patch.object(Driver, "_validate", return_value=True):
+        forecast = FV3Forecast(config_file="/not/used")
+
+    path = Path(forecast.schema)
+    assert path.is_file()
 
 
 def test_create_config(tmp_path):
