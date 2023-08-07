@@ -1,167 +1,118 @@
 {
-  "title": "FV3 Forecast config",
-  "description": "This document is to validate user-defined FV3 forecast config files",
-  "type": "object",
-  "properties": {
-    "platform": {
-      "description": "attributes of the platform",
-      "type": "object",
-      "properties": {
-        "WORKFLOW_MANAGER": {
-          "type": "string",
-          "enum": [
-            "rocoto",
-            "none"
-          ]
-        },
-        "NCORES_PER_NODE": {
-          "type": "number"
-        },
-        "SCHED": {
-          "type": "string",
-          "enum": [
-            "slurm",
-            "pbspro",
-            "lsf",
-            "lsfcray",
-            "none"
-          ]
-        },
-        "CCPA_OBS_DIR": {
-          "type": "string",
-          "format": "uri"
-        },
-        "MRMS_OBS_DIR": {
-          "type": "string",
-          "format": "uri"
-        },
-        "NDAS_OBS_DIR": {
-          "type": "string",
-          "format": "uri"
-        },
-        "METPLUS_PATH": {
-          "type": "string",
-          "format": "uri"
-        },
-        "MET_BIN_EXEC": {
-          "type": "string"
-        },
-        "MET_INSTALL_DIR": {
-          "type": "string",
-          "format": "uri"
-        },
-        "DOMAIN_PREGEN_BASEDIR": {
-          "type": "string",
-          "format": "uri"
-        },
-        "PARTITION_DEFAULT": {
-          "type": "string"
-        },
-        "QUEUE_DEFAULT": {
-          "type": "string"
-        },
-        "PARTITION_FCST": {
-          "type": "string"
-        },
-        "QUEUE_FCST": {
-          "type": "string"
-        },
-        "PARTITION_HPSS": {
-          "type": "string"
-        },
-        "QUEUE_HPSS": {
-          "type": "string"
-        }
-      }
-    },
-    "parameters": {
-      "description": "parameters of the forecast",
-      "type": "object",
-      "properties": {
-        "LENGTH": {
-          "type": "string",
-          "format": "uri"
-        },
-        "GRID": {
-          "type": "string",
-          "format": "uri"
-        }
-      }
-    },
-    "run_cmd": {
-      "description": "parameters for the run command",
-      "type": "object",
-      "properties": {
-        "RUN_CMD": {
-          "type": "string"
-        },
-        "EXEC_NAME": {
-          "type": "string"
-        },
-        "KWARGS": {
-          "type": "string"
-        }
-      }
-    },
-    "locations": {
-      "description": "locations of input files",
-      "type": "object",
-      "properties": {
-        "STATIC": {
-          "type": "string",
-          "format": "uri"
-        },
-        "CYCLEDEP": {
-          "type": "string",
-          "format": "uri"
-        }
-      }
-    },
-    "field_table": {
-      "description": "attributes of a field table",
-      "type": "object",
-      "properties": {
-        "LONGNAME": {
-          "type": "string",
-          "enum": [
-            "rocoto",
-            "none"
-          ]
-        },
-        "UNITS": {
-          "type": "string"
-        },
-        "PROFILE_TYPE": {
-          "type": "string",
-          "oneOf": [
-            {
-              "properties": {
-                "NAME": {
-                  "type": "string",
-                  "const": "fixed"
+    "title": "FV3 Forecast config",
+    "description": "This document is to validate user-defined FV3 forecast config files",
+    "type": "object",
+    "properties": {
+        "resources": {
+            "description": "Expected resources for the given platform",
+            "type": "object",
+            "properties": {
+                "WORKFLOW_MANAGER": {
+                    "type": "string",
+                    "enum": [
+                        "rocoto",
+                        "none"
+                    ]
                 },
-                "SURFACE_VALUE": {
-                  "type": "number"
+                "NCORES_PER_NODE": {
+                    "type": "number"
+                },
+                "SCHED": {
+                    "type": "string",
+                    "enum": [
+                        "slurm",
+                        "pbspro",
+                        "lsf",
+                        "lsfcray",
+                        "none"
+                    ]
                 }
-              }
-            },
-            {
-              "properties": {
-                "NAME": {
-                  "type": "string",
-                  "const": "profile"
-                },
-                "SURFACE_VALUE": {
-                  "type": "number"
-                },
-                "TOP_VALUE": {
-                  "type": "number"
-                }
-              }
             }
-          ]
+        },
+        "parameters": {
+            "description": "parameters of the forecast",
+            "type": "object",
+            "properties": {
+                "LENGTH": {
+                    "type": "string",
+                    "format": "number"
+                },
+                "GRID": {
+                    "type": "string",
+                    "format": "number"
+                }
+            }
+        },
+        "run_cmd": {
+            "description": "parameters for the run command",
+            "type": "object",
+            "properties": {
+                "RUN_CMD": {
+                    "type": "string"
+                },
+                "EXEC_NAME": {
+                    "type": "string"
+                },
+                "KWARGS": {
+                    "type": "array"
+                }
+            }
+        },
+        "locations": {
+            "description": "locations of input files",
+            "type": "object",
+            "properties": {
+                "STATIC": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "CYCLEDEP": {
+                    "type": "string",
+                    "format": "uri"
+                }
+            }
+        },
+        "field_table": {
+            "description": "attributes of a field table",
+            "type": "object",
+            "properties": {
+                "LONGNAME": {
+                    "type": "string"
+                },
+                "UNITS": {
+                    "type": "string"
+                },
+                "PROFILE_TYPE": {
+                    "type": "string",
+                    "oneOf": [
+                        {
+                            "properties": {
+                                "NAME": {
+                                    "type": "string",
+                                    "const": "fixed"
+                                },
+                                "SURFACE_VALUE": {
+                                    "type": "number"
+                                }
+                            }
+                        },
+                        {
+                            "properties": {
+                                "NAME": {
+                                    "type": "string",
+                                    "const": "profile"
+                                },
+                                "SURFACE_VALUE": {
+                                    "type": "number"
+                                },
+                                "TOP_VALUE": {
+                                    "type": "number"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
         }
-      }
     }
-  }
 }
