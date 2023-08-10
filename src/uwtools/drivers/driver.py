@@ -109,7 +109,7 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def job_card(self):
+    def job_card(self, job_resources):
         """
         Turns the resources config object into a batch card for the configured Task.
 

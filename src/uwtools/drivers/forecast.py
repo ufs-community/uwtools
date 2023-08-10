@@ -11,8 +11,8 @@ from importlib import resources
 from typing import Dict
 
 from uwtools import config
-from uwtools.scheduler import JobScheduler
 from uwtools.drivers.driver import Driver
+from uwtools.scheduler import JobScheduler
 from uwtools.utils import file_helpers
 
 
@@ -149,13 +149,12 @@ class FV3Forecast(Driver):
         Create list of SRW output files and stage them in the working directory.
         """
 
-    def job_card(self, resources: str):
+    def job_card(self, job_resources):  # pragma: no cover
         """
         Turns the resources config object into a batch card for the configured Task.
-        This function expects self.resources to be called first.
+
         """
-        return JobScheduler.get_scheduler(resources).job_card
-        
+        return JobScheduler.get_scheduler(job_resources).job_card
 
     def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:
         """
@@ -164,38 +163,44 @@ class FV3Forecast(Driver):
         args_str = " ".join(str(arg) for arg in args)
         return f"{run_cmd} {args_str} {exec_name}"
 
-    def run(self):
+    def run(self):  # pragma: no cover
         """
         Runs the forecast executable with the namelist file and staged input files.
 
         This will take in the executable built in run_cmd and then run it.
         """
         # read in the config file
-        experiment_config = self.create_model_config(self.config_file)
+        #self.create_model_config(config_file=self.config_file)
+        experiment_config = config.YAMLConfig(self.config_file)
         experiment_resources = {}
 
         # prepare directories
         run_directory = experiment_config["parameters"]["run_directory"]
         self.create_directory_structure(run_directory)
 
-        static_files = experiment_config["locations"]["static"] 
+        static_files = experiment_config["locations"]["static"]
         self.stage_files(run_directory, static_files, link_files=False)
-        cycledep_files = experiment_config["locations"]["cycledep"] 
+        cycledep_files = experiment_config["locations"]["cycledep"]
         self.stage_files(run_directory, cycledep_files, link_files=True)
 
         # set up the job
         for key in experiment_config["resources"]:
             experiment_resources[key] = experiment_config["resources"][key]
         job_card = self.job_card(experiment_resources)
-        args = self.run_cmd(experiment_config["run_cmd"])
+        args = str(experiment_config["run_cmd"]["kwargs"])
+        run_command = self.run_cmd(
+            args,
+            run_cmd=experiment_config["run_cmd"]["run_cmd"],
+            exec_name=experiment_config["run_cmd"]["exec_name"]
+        )
 
         # run the job
         subprocess.run(
-                    f"{args} {job_card}",
-                    capture_output=True,
-                    check=False,
-                    shell=True,
-                )
+            f"{run_command} {job_card}",
+            capture_output=True,
+            check=False,
+            shell=True,
+        )
 
     def stage_files(
         self, run_directory: str, files_to_stage: Dict[str, str], link_files: bool = False

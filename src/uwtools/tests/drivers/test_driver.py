@@ -29,7 +29,7 @@ class ConcreteDriver(Driver):
     def output(self):
         pass
 
-    def job_card(self):
+    def job_card(self, job_resources):
         pass
 
 
