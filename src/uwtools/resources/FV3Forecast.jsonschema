@@ -33,6 +33,10 @@
             "description": "parameters of the forecast",
             "type": "object",
             "properties": {
+                "RUN_DIRECTORY": {
+                    "type": "string",
+                    "format": "number"
+                },
                 "LENGTH": {
                     "type": "string",
                     "format": "number"
