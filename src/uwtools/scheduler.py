@@ -119,7 +119,7 @@ class JobScheduler(UserDict):
         return [re.sub(r"\s{0,}\=\s{0,}", "=", x, count=0, flags=0) for x in items]
 
     @property
-    def job_card(self) -> JobCard:
+    def batch_script(self) -> JobCard:
         """
         Returns the job card to be fed to external scheduler.
         """

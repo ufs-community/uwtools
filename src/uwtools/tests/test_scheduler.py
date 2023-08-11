@@ -32,7 +32,7 @@ def test_lsf_1(lsf_props):
 #BSUB -n 1
 #BSUB -q batch
 """.strip()
-    assert JobScheduler.get_scheduler(lsf_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(lsf_props).batch_script.content() == expected
 
 
 def test_lsf_2(lsf_props):
@@ -45,7 +45,7 @@ def test_lsf_2(lsf_props):
 #BSUB -n 12
 #BSUB -q batch
 """.strip()
-    assert JobScheduler.get_scheduler(lsf_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(lsf_props).batch_script.content() == expected
 
 
 def test_lsf_3(lsf_props):
@@ -58,12 +58,12 @@ def test_lsf_3(lsf_props):
 #BSUB -n 12
 #BSUB -q batch
 """.strip()
-    assert JobScheduler.get_scheduler(lsf_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(lsf_props).batch_script.content() == expected
 
 
 def test_lsf_4(lsf_props):
     lsf_props.update({"memory": "1MB", "nodes": 2, "tasks_per_node": 3, "threads": 2})
-    job_card = JobScheduler.get_scheduler(lsf_props).job_card
+    batch_script = JobScheduler.get_scheduler(lsf_props).batch_script
     expected = """
 #BSUB -P account_name
 #BSUB -R affinity[core(2)]
@@ -73,8 +73,8 @@ def test_lsf_4(lsf_props):
 #BSUB -n 6
 #BSUB -q batch
 """.strip()
-    assert job_card.content() == expected
-    assert str(job_card) == expected
+    assert batch_script.content() == expected
+    assert str(batch_script) == expected
 
 
 # PBS tests
@@ -99,7 +99,7 @@ def test_pbs_1(pbs_props):
 #PBS -l walltime=00:01:00
 #PBS -q batch
 """.strip()
-    assert JobScheduler.get_scheduler(pbs_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
 
 
 def test_pbs_2(pbs_props):
@@ -110,7 +110,7 @@ def test_pbs_2(pbs_props):
 #PBS -l walltime=00:01:00
 #PBS -q batch
 """.strip()
-    assert JobScheduler.get_scheduler(pbs_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
 
 
 def test_pbs_3(pbs_props):
@@ -121,7 +121,7 @@ def test_pbs_3(pbs_props):
 #PBS -l walltime=00:01:00
 #PBS -q batch
 """.strip()
-    assert JobScheduler.get_scheduler(pbs_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
 
 
 def test_pbs_4(pbs_props):
@@ -132,7 +132,7 @@ def test_pbs_4(pbs_props):
 #PBS -l walltime=00:01:00
 #PBS -q batch
 """.strip()
-    assert JobScheduler.get_scheduler(pbs_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
 
 
 def test_pbs_5(pbs_props):
@@ -144,7 +144,7 @@ def test_pbs_5(pbs_props):
 #PBS -l walltime=00:01:00
 #PBS -q batch
 """.strip()
-    assert JobScheduler.get_scheduler(pbs_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
 
 
 def test_pbs_6(pbs_props):
@@ -156,7 +156,7 @@ def test_pbs_6(pbs_props):
 #PBS -l walltime=00:01:00
 #PBS -q batch
 """.strip()
-    assert JobScheduler.get_scheduler(pbs_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
 
 
 def test_pbs_7(pbs_props):
@@ -168,7 +168,7 @@ def test_pbs_7(pbs_props):
 #PBS -l walltime=00:01:00
 #PBS -q batch
 """.strip()
-    assert JobScheduler.get_scheduler(pbs_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
 
 
 def test_pbs_8(pbs_props):
@@ -180,7 +180,7 @@ def test_pbs_8(pbs_props):
 #PBS -l walltime=00:01:00
 #PBS -q batch
 """.strip()
-    assert JobScheduler.get_scheduler(pbs_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
 
 
 # Slurm tests
@@ -206,7 +206,7 @@ def test_slurm_1(slurm_props):
 #SBATCH --qos=batch
 #SBATCH --time=00:01:00
 """.strip()
-    assert JobScheduler.get_scheduler(slurm_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(slurm_props).batch_script.content() == expected
 
 
 def test_slurm_2(slurm_props):
@@ -219,7 +219,7 @@ def test_slurm_2(slurm_props):
 #SBATCH --qos=batch
 #SBATCH --time=00:01:00
 """.strip()
-    assert JobScheduler.get_scheduler(slurm_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(slurm_props).batch_script.content() == expected
 
 
 def test_slurm_3(slurm_props):
@@ -232,7 +232,7 @@ def test_slurm_3(slurm_props):
 #SBATCH --qos=batch
 #SBATCH --time=00:01:00
 """.strip()
-    assert JobScheduler.get_scheduler(slurm_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(slurm_props).batch_script.content() == expected
 
 
 def test_slurm_4(slurm_props):
@@ -245,7 +245,7 @@ def test_slurm_4(slurm_props):
 #SBATCH --qos=batch
 #SBATCH --time=00:01:00
 """.strip()
-    assert JobScheduler.get_scheduler(slurm_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(slurm_props).batch_script.content() == expected
 
 
 def test_slurm_5(slurm_props):
@@ -258,7 +258,7 @@ def test_slurm_5(slurm_props):
 #SBATCH --qos=batch
 #SBATCH --time=00:01:00
 """.strip()
-    assert JobScheduler.get_scheduler(slurm_props).job_card.content() == expected
+    assert JobScheduler.get_scheduler(slurm_props).batch_script.content() == expected
 
 
 # Generic tests using PBS support.
