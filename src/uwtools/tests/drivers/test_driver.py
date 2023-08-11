@@ -32,6 +32,12 @@ class ConcreteDriver(Driver):
     def batch_script(self):
         pass
 
+    def run(self):
+        pass
+
+    def run_cmd(self, *args, run_cmd, exec_name):
+        pass
+
 
 @fixture
 def configs():

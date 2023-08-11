@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for forecast driver.
 """
@@ -39,7 +39,7 @@ def test_create_config(tmp_path):
     output_file = (tmp_path / "test_config_from_yaml.yaml").as_posix()
 
     forecast_obj = FV3Forecast()
-    forecast_obj.create_model_config(
+    forecast_obj._create_model_config(
         base_file=input_file, config_file=config_file, outconfig_file=output_file
     )
 

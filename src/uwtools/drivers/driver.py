@@ -58,7 +58,7 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def run_cmd(self) -> str:
+    def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:
         """
         The command-line command to run the NWP tool.
         """
