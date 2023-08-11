@@ -47,9 +47,9 @@ def test_create_config(tmp_path):
     assert compare_files(expected_file, output_file)
 
 
-def test__create_directory_structure(tmp_path):
+def test_create_directory_structure(tmp_path):
     """
-    Tests _create_directory_structure method given a directory.
+    Tests create_directory_structure method given a directory.
     """
 
     rundir = tmp_path / "rundir"
@@ -86,7 +86,7 @@ def create_field_table_update_obj():
     return config.YAMLConfig(fixture_path("FV3_GFS_v16_update.yaml"))
 
 
-def test__create_field_table_with_base_file(create_field_table_update_obj, tmp_path):
+def test_create_field_table_with_base_file(create_field_table_update_obj, tmp_path):
     """
     Tests create_field_table method with optional base file.
     """
@@ -97,9 +97,9 @@ def test__create_field_table_with_base_file(create_field_table_update_obj, tmp_p
     assert compare_files(expected, outfldtbl_file)
 
 
-def test__create_field_table_without_base_file(create_field_table_update_obj, tmp_path):
+def test_create_field_table_without_base_file(create_field_table_update_obj, tmp_path):
     """
-    Tests _create_field_table without optional base file.
+    Tests create_field_table without optional base file.
     """
     outfldtbl_file = tmp_path / "field_table_one.FV3_GFS"
     expected = fixture_path("field_table_from_input.FV3_GFS")
@@ -107,7 +107,7 @@ def test__create_field_table_without_base_file(create_field_table_update_obj, tm
     assert compare_files(expected, outfldtbl_file)
 
 
-def test__create_directory_structure_bad_existing_act():
+def test_create_directory_structure_bad_existing_act():
     with raises(ValueError):
         FV3Forecast.create_directory_structure(run_directory="/some/path", exist_act="foo")
 
@@ -133,9 +133,9 @@ def create_namelist_assets(tmp_path):
     return config.F90Config(fixture_path("simple.nml")), tmp_path / "create_out.nml"
 
 
-def test__create_namelist_with_base_file(create_namelist_assets):
+def test_create_namelist_with_base_file(create_namelist_assets):
     """
-    Tests _create_namelist method with optional base file.
+    Tests create_namelist method with optional base file.
     """
     update_obj, outnml_file = create_namelist_assets
     base_file = fixture_path("simple3.nml")
@@ -157,9 +157,9 @@ def test__create_namelist_with_base_file(create_namelist_assets):
         assert out_file.read() == expected
 
 
-def test__create_namelist_without_base_file(create_namelist_assets):
+def test_create_namelist_without_base_file(create_namelist_assets):
     """
-    Tests _create_namelist method without optional base file.
+    Tests create_namelist method without optional base file.
     """
     update_obj, outnml_file = create_namelist_assets
     FV3Forecast.create_namelist(update_obj, str(outnml_file))
