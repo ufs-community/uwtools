@@ -76,7 +76,7 @@ class BatchScript(UserList):
 
 class JobScheduler(UserDict):
     """
-    A class for interacting with HPC batch systems.
+    A class for interacting with HPC batch schedulers.
     """
 
     _map: dict = {}

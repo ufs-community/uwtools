@@ -27,7 +27,7 @@ class Driver(ABC):
     @abstractmethod
     def batch_script(self) -> None:
         """
-        Create a script for submission to the batch system.
+        Create a script for submission to the batch scheduler.
         """
 
     @abstractmethod

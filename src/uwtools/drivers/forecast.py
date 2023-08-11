@@ -23,7 +23,7 @@ class FV3Forecast(Driver):
 
     def batch_script(self) -> None:
         """
-        Write to disk, for submission to the batch system, a script to run FV3.
+        Write to disk, for submission to the batch scheduler, a script to run FV3.
         """
 
     @staticmethod
