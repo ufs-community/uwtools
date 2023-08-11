@@ -78,12 +78,6 @@ def schema():
 """.strip()
 
 
-def test_no_config(capsys):
-    ConcreteDriver(config_file=None)
-    msg = "No config file provided, available functions are limited."
-    assert msg in capsys.readouterr().out
-
-
 @pytest.mark.parametrize("valid", [True, False])
 def test_validation(capsys, configs, schema, tmp_path, valid):
     config_good, config_bad = configs

@@ -14,16 +14,13 @@ class Driver(ABC):
     An abstract class representing drivers for various NWP tools.
     """
 
-    def __init__(self, config_file: Optional[str] = None, log: Optional[Logger] = None):
+    def __init__(self, config_file: str, log: Optional[Logger] = None):
         """
         Initialize the driver.
         """
         self.log = log if log is not None else Logger()
-        if config_file is not None:
-            self.config_file = config_file
-            self._validate()
-        else:
-            self.log.info("No config file provided, available functions are limited.")
+        self._config_file = config_file
+        self._validate()
 
     # Public methods
 
@@ -77,7 +74,7 @@ class Driver(ABC):
         Validate the user-supplied config file.
         """
         return config_validator.config_is_valid(
-            config_file=self.config_file,
+            config_file=self._config_file,
             validation_schema=self.schema,
             log=self.log,
         )

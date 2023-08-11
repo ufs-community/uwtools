@@ -26,44 +26,8 @@ class FV3Forecast(Driver):
         Write to disk, for submission to the batch system, a script to run FV3.
         """
 
-    def output(self) -> None:
-        """
-        ???
-        """
-
-    def requirements(self) -> None:
-        """
-        ???
-        """
-
-    def resources(self) -> None:
-        """
-        ???
-        """
-
-    def run(self):
-        """
-        Runs FV3.
-        """
-
-    def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:
-        """
-        Constructs the command to run FV3.
-        """
-        args_str = " ".join(str(arg) for arg in args)
-        return f"{run_cmd} {args_str} {exec_name}"
-
-    @property
-    def schema(self) -> str:
-        """
-        The path to the file containing the schema to validate the config file against.
-        """
-        with resources.as_file(resources.files("uwtools.resources")) as path:
-            return (path / "FV3Forecast.jsonschema").as_posix()
-
-    # Private methods
-
-    def _create_directory_structure(self, run_directory, exist_act="delete"):
+    @staticmethod
+    def create_directory_structure(run_directory, exist_act="delete"):
         """
         Collects the name of the desired run directory, and has an optional flag for what to do if
         the run directory specified already exists. Creates the run directory and adds
@@ -99,7 +63,8 @@ class FV3Forecast(Driver):
             logging.info("Creating directory: %s", path)
             os.makedirs(path)
 
-    def _create_field_table(self, update_obj, outfldtab_file, base_file=None):
+    @staticmethod
+    def create_field_table(update_obj, outfldtab_file, base_file=None):
         """
         Uses an object with user supplied values and an optional base file to create an output field
         table file. Will "dereference" the base file.
@@ -122,26 +87,8 @@ class FV3Forecast(Driver):
         msg = f"Namelist file {outfldtab_file} created"
         logging.info(msg)
 
-    def _create_model_config(self, base_file: str, config_file: str, outconfig_file: str) -> None:
-        """
-        Collects all the user inputs required to create a model config file, calling the existing
-        model config tools. This will be unique to the app being run and will appropriately parse
-        subsequent stages of the workflow. Defaults will be filled in if not provided by the user.
-        Equivalent references to config_default.yaml or config.community.yaml from SRW will need to
-        be made for the other apps.
-
-        Args:
-            base_file: Path to base config file
-            config_file: Path to user configuration file
-            outconfig_file: Path to output configuration file
-        """
-        config.create_config_obj(
-            input_base_file=base_file, config_file=config_file, outfile=outconfig_file
-        )
-        msg = f"Config file {outconfig_file} created"
-        logging.info(msg)
-
-    def _create_namelist(self, update_obj, outnml_file, base_file=None):
+    @staticmethod
+    def create_namelist(update_obj, outnml_file, base_file=None):
         """
         Uses an object with user supplied values and an optional namelist base file to create an
         output namelist file. Will "dereference" the base file.
@@ -164,8 +111,44 @@ class FV3Forecast(Driver):
         msg = f"Namelist file {outnml_file} created"
         logging.info(msg)
 
-    def _stage_files(
-        self, run_directory: str, files_to_stage: Dict[str, str], link_files: bool = False
+    def output(self) -> None:
+        """
+        ???
+        """
+
+    def requirements(self) -> None:
+        """
+        ???
+        """
+
+    def resources(self) -> None:
+        """
+        ???
+        """
+
+    def run(self):
+        """
+        Runs FV3.
+        """
+
+    def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:
+        """
+        Constructs the command to run FV3.
+        """
+        args_str = " ".join(str(arg) for arg in args)
+        return f"{run_cmd} {args_str} {exec_name}"
+
+    @property
+    def schema(self) -> str:
+        """
+        The path to the file containing the schema to validate the config file against.
+        """
+        with resources.as_file(resources.files("uwtools.resources")) as path:
+            return (path / "FV3Forecast.jsonschema").as_posix()
+
+    @staticmethod
+    def stage_files(
+        run_directory: str, files_to_stage: Dict[str, str], link_files: bool = False
     ) -> None:
         """
         Takes in run directory and dictionary of file names and paths that need to be staged in the
@@ -183,3 +166,23 @@ class FV3Forecast(Driver):
                 shutil.copyfile(src_path, dst_path)
             msg = f"File {src_path} staged in run directory at {dst_fn}"
             logging.info(msg)
+
+    # Private methods
+
+    def _create_model_config(self, base_file: str, outconfig_file: str) -> None:
+        """
+        Collects all the user inputs required to create a model config file, calling the existing
+        model config tools. This will be unique to the app being run and will appropriately parse
+        subsequent stages of the workflow. Defaults will be filled in if not provided by the user.
+        Equivalent references to config_default.yaml or config.community.yaml from SRW will need to
+        be made for the other apps.
+
+        Args:
+            base_file: Path to base config file
+            outconfig_file: Path to output configuration file
+        """
+        config.create_config_obj(
+            input_base_file=base_file, config_file=self._config_file, outfile=outconfig_file
+        )
+        msg = f"Config file {outconfig_file} created"
+        logging.info(msg)

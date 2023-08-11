@@ -30,24 +30,20 @@ def test_schema():
 
 def test_create_config(tmp_path):
     """
-    Test that providing a yaml base input file and a config file will create and update yaml config
+    Test that providing a YAML base input file and a config file will create and update YAML config
     file.
     """
 
     config_file = fixture_path("fruit_config_similar.yaml")
     input_file = fixture_path("fruit_config.yaml")
     output_file = (tmp_path / "test_config_from_yaml.yaml").as_posix()
-
-    forecast_obj = FV3Forecast()
-    forecast_obj._create_model_config(
-        base_file=input_file, config_file=config_file, outconfig_file=output_file
-    )
-
+    with patch.object(FV3Forecast, "_validate", return_value=True):
+        forecast_obj = FV3Forecast(config_file=config_file)
+    forecast_obj._create_model_config(base_file=input_file, outconfig_file=output_file)
     expected = config.YAMLConfig(input_file)
     expected.update_values(config.YAMLConfig(config_file))
     expected_file = tmp_path / "expected_yaml.yaml"
     expected.dump_file(expected_file)
-
     assert compare_files(expected_file, output_file)
 
 
@@ -57,10 +53,9 @@ def test__create_directory_structure(tmp_path):
     """
 
     rundir = tmp_path / "rundir"
-    forecast_obj = FV3Forecast()
 
     # Test delete behavior when run directory does not exist.
-    forecast_obj._create_directory_structure(rundir, "delete")
+    FV3Forecast.create_directory_structure(rundir, "delete")
     assert (rundir / "RESTART").is_dir()
 
     # Create a file in the run directory.
@@ -70,53 +65,51 @@ def test__create_directory_structure(tmp_path):
 
     # Test delete behavior when run directory exists. Test file should be gone
     # since old run directory was deleted.
-    forecast_obj._create_directory_structure(rundir, "delete")
+    FV3Forecast.create_directory_structure(rundir, "delete")
     assert (rundir / "RESTART").is_dir()
     assert not test_file.is_file()
 
     # Test rename behavior when run directory exists.
-    forecast_obj._create_directory_structure(rundir, "rename")
+    FV3Forecast.create_directory_structure(rundir, "rename")
     copy_directory = next(tmp_path.glob("%s_*" % rundir.name))
     assert (copy_directory / "RESTART").is_dir()
 
     # Test quit behavior when run directory exists.
     with raises(SystemExit) as pytest_wrapped_e:
-        forecast_obj._create_directory_structure(rundir, "quit")
+        FV3Forecast.create_directory_structure(rundir, "quit")
     assert pytest_wrapped_e.type == SystemExit
     assert pytest_wrapped_e.value.code == 1
 
 
 @fixture
-def create_field_table_assets():
-    return FV3Forecast(), config.YAMLConfig(fixture_path("FV3_GFS_v16_update.yaml"))
+def create_field_table_update_obj():
+    return config.YAMLConfig(fixture_path("FV3_GFS_v16_update.yaml"))
 
 
-def test__create_field_table_with_base_file(create_field_table_assets, tmp_path):
+def test__create_field_table_with_base_file(create_field_table_update_obj, tmp_path):
     """
     Tests create_field_table method with optional base file.
     """
-    forecast_obj, update_obj = create_field_table_assets
     base_file = fixture_path("FV3_GFS_v16.yaml")
     outfldtbl_file = tmp_path / "field_table_two.FV3_GFS"
     expected = fixture_path("field_table_from_base.FV3_GFS")
-    forecast_obj._create_field_table(update_obj, outfldtbl_file, base_file)
+    FV3Forecast.create_field_table(create_field_table_update_obj, outfldtbl_file, base_file)
     assert compare_files(expected, outfldtbl_file)
 
 
-def test__create_field_table_without_base_file(create_field_table_assets, tmp_path):
+def test__create_field_table_without_base_file(create_field_table_update_obj, tmp_path):
     """
     Tests _create_field_table without optional base file.
     """
-    forecast_obj, update_obj = create_field_table_assets
     outfldtbl_file = tmp_path / "field_table_one.FV3_GFS"
     expected = fixture_path("field_table_from_input.FV3_GFS")
-    forecast_obj._create_field_table(update_obj, outfldtbl_file)
+    FV3Forecast.create_field_table(create_field_table_update_obj, outfldtbl_file)
     assert compare_files(expected, outfldtbl_file)
 
 
 def test__create_directory_structure_bad_existing_act():
     with raises(ValueError):
-        FV3Forecast()._create_directory_structure(run_directory="/some/path", exist_act="foo")
+        FV3Forecast.create_directory_structure(run_directory="/some/path", exist_act="foo")
 
 
 def test__create_model_config(tmp_path):
@@ -126,9 +119,10 @@ def test__create_model_config(tmp_path):
     for path in infile, basefile:
         Path(path).touch()
     with patch.object(config, "create_config_obj") as create_config_obj:
-        FV3Forecast()._create_model_config(
-            config_file=infile, outconfig_file=outfile, base_file=basefile
-        )
+        with patch.object(FV3Forecast, "_validate", return_value=True):
+            FV3Forecast(config_file=infile)._create_model_config(
+                outconfig_file=outfile, base_file=basefile
+            )
     assert create_config_obj.call_args.kwargs["config_file"] == infile
     assert create_config_obj.call_args.kwargs["input_base_file"] == basefile
     assert create_config_obj.call_args.kwargs["outfile"] == outfile
@@ -136,16 +130,16 @@ def test__create_model_config(tmp_path):
 
 @fixture
 def create_namelist_assets(tmp_path):
-    return FV3Forecast(), config.F90Config(fixture_path("simple.nml")), tmp_path / "create_out.nml"
+    return config.F90Config(fixture_path("simple.nml")), tmp_path / "create_out.nml"
 
 
 def test__create_namelist_with_base_file(create_namelist_assets):
     """
     Tests _create_namelist method with optional base file.
     """
-    forecast_obj, update_obj, outnml_file = create_namelist_assets
+    update_obj, outnml_file = create_namelist_assets
     base_file = fixture_path("simple3.nml")
-    forecast_obj._create_namelist(update_obj, outnml_file, base_file)
+    FV3Forecast.create_namelist(update_obj, outnml_file, base_file)
     expected = """
 &salad
     base = 'kale'
@@ -167,8 +161,8 @@ def test__create_namelist_without_base_file(create_namelist_assets):
     """
     Tests _create_namelist method without optional base file.
     """
-    forecast_obj, update_obj, outnml_file = create_namelist_assets
-    forecast_obj._create_namelist(update_obj, str(outnml_file))
+    update_obj, outnml_file = create_namelist_assets
+    FV3Forecast.create_namelist(update_obj, str(outnml_file))
     expected = """
 &salad
     base = 'kale'
@@ -186,29 +180,29 @@ def test_forecast_run_cmd():
     """
     Tests that the command to be used to run the forecast executable was built successfully.
     """
-    hera_expected = "srun --export=ALL test_exec.py"
-    assert hera_expected == FV3Forecast().run_cmd(
-        "--export=ALL", run_cmd="srun", exec_name="test_exec.py"
-    )
-
-    cheyenne_expected = "mpirun -np 4 test_exec.py"
-    assert cheyenne_expected == FV3Forecast().run_cmd(
-        "-np", 4, run_cmd="mpirun", exec_name="test_exec.py"
-    )
-
-    wcoss2_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
-    assert wcoss2_expected == FV3Forecast().run_cmd(
-        "-n",
-        4,
-        "-ppn",
-        8,
-        "--cpu-bind",
-        "core",
-        "-depth",
-        2,
-        run_cmd="mpiexec",
-        exec_name="test_exec.py",
-    )
+    with patch.object(FV3Forecast, "_validate", return_value=True):
+        fcstobj = FV3Forecast(config_file="/not/used")
+        hera_expected = "srun --export=ALL test_exec.py"
+        assert hera_expected == fcstobj.run_cmd(
+            "--export=ALL", run_cmd="srun", exec_name="test_exec.py"
+        )
+        cheyenne_expected = "mpirun -np 4 test_exec.py"
+        assert cheyenne_expected == fcstobj.run_cmd(
+            "-np", 4, run_cmd="mpirun", exec_name="test_exec.py"
+        )
+        wcoss2_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
+        assert wcoss2_expected == fcstobj.run_cmd(
+            "-n",
+            4,
+            "-ppn",
+            8,
+            "--cpu-bind",
+            "core",
+            "-depth",
+            2,
+            run_cmd="mpiexec",
+            exec_name="test_exec.py",
+        )
 
 
 @pytest.mark.parametrize("section", ["static", "cycledep"])
@@ -233,9 +227,8 @@ def test__stage_files(tmp_path, section, link_files):
     for dst_fn in files_to_stage.keys():
         assert not (run_directory / dst_fn).is_file()
     # Ask a forecast object to stage the files to the run directory:
-    forecast_obj = FV3Forecast()
-    forecast_obj._create_directory_structure(run_directory)
-    forecast_obj._stage_files(run_directory, files_to_stage, link_files=link_files)
+    FV3Forecast.create_directory_structure(run_directory)
+    FV3Forecast.stage_files(run_directory, files_to_stage, link_files=link_files)
     # Test that all of the destination files now exist:
     for dst_fn in files_to_stage.keys():
         if link_files:
