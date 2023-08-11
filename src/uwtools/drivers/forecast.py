@@ -1,5 +1,5 @@
 """
-Implements drivers for forecast models.
+Drivers for forecast models.
 """
 
 import logging
