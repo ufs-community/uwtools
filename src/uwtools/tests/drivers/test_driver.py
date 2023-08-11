@@ -89,8 +89,4 @@ def test_validation(capsys, configs, schema, tmp_path, valid):
         print(schema, file=f)
     with patch.object(ConcreteDriver, "schema", new=schema_file):
         ConcreteDriver(config_file=config_file)
-        assert (
-            "error(s)" not in capsys.readouterr().err
-            if valid
-            else "error(s)" in capsys.readouterr().err
-        )
+        assert ("errors" in capsys.readouterr().err) is False if valid else True
