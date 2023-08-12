@@ -3,6 +3,7 @@ Support for validating a config using JSON Schema.
 """
 import json
 from pathlib import Path
+from typing import List
 
 import jsonschema
 
@@ -23,12 +24,26 @@ def config_is_valid(config_file: str, schema_file: str, log: Logger) -> bool:
         schema = json.load(f)
     if not _config_conforms_to_schema(yaml_config.data, schema, log):
         return False
-    if not _config_paths_exist(yaml_config.data, schema, log):
+    if bad_paths := _bad_paths(yaml_config.data, schema, log):
+        for bad_path in bad_paths:
+            log.error("Path does not exist: %s", bad_path)
         return False
     return True
 
 
 # Private
+
+
+def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
+    paths = []
+    for key, val in config.items():
+        subschema = schema["properties"][key]
+        if isinstance(val, dict):
+            paths += _bad_paths(val, subschema, log)
+        else:
+            if subschema.get("format") == "uri" and not Path(val).exists():
+                paths.append(val)
+    return paths
 
 
 def _config_conforms_to_schema(config: dict, schema: dict, log: Logger) -> bool:
@@ -43,19 +58,3 @@ def _config_conforms_to_schema(config: dict, schema: dict, log: Logger) -> bool:
         log.error(error)
         log.error("------")
     return not errors
-
-
-def _config_paths_exist(config: dict, schema: dict, log: Logger) -> bool:
-    all_ok = True
-    for key, val in config.items():
-        ok = True
-        subschema = schema["properties"][key]
-        if isinstance(val, dict):
-            ok = _config_paths_exist(val, subschema, log)
-        else:
-            if subschema.get("format") == "uri":  # denotes a path
-                ok = Path(val).exists()
-                if not ok:
-                    log.error("Path does not exist: %s", val)
-        all_ok = all_ok and ok
-    return all_ok
