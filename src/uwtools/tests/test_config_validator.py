@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config_validator module.
 """
@@ -121,3 +121,33 @@ def test_config_is_valid_pass(config, config_file, schema, schema_file):
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
     assert config_validator.config_is_valid(config_file, schema_file, log=Logger())
+
+
+def test__bad_paths_top(config, schema, tmp_path):
+    d = str(tmp_path / "no-such-dir")
+    config["dir"] = d
+    assert config_validator._bad_paths(config, schema, log=Logger()) == [d]
+
+
+def test__bad_paths_nested(config, schema, tmp_path):
+    d = str(tmp_path / "no-such-dir")
+    config["sub"]["dir"] = d
+    assert config_validator._bad_paths(config, schema, log=Logger()) == [d]
+
+
+def test__bad_paths_none(config, schema):
+    assert not config_validator._bad_paths(config, schema, log=Logger())
+
+
+def test__config_conforms_to_schema_bad_enum_value(config, schema):
+    config["color"] = "yellow"
+    assert not config_validator._config_conforms_to_schema(config, schema, log=Logger())
+
+
+def test__config_conforms_to_schema_bad_number_value(config, schema):
+    config["number"] = "string"
+    assert not config_validator._config_conforms_to_schema(config, schema, log=Logger())
+
+
+def test__config_conforms_to_schema_pass(config, schema):
+    assert config_validator._config_conforms_to_schema(config, schema, log=Logger())
