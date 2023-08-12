@@ -42,19 +42,8 @@ def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
             paths += _bad_paths(val, subschema, log)
         else:
             if subschema.get("format") == "uri" and not Path(val).exists():
-                paths += [val]
+                paths.append(val)
     return paths
-
-
-# def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
-#     subschema = lambda k: schema["properties"][k]
-#     bad = lambda k, v: [v] if subschema(k).get("format") == "uri" and not Path(v).exists() else []
-#     return list(
-#         chain.from_iterable(
-#             _bad_paths(v, subschema(k), log) if isinstance(v, dict) else bad(k, v)
-#             for k, v in config.items()
-#         )
-#     )
 
 
 def _config_conforms_to_schema(config: dict, schema: dict, log: Logger) -> bool:
