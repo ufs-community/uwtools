@@ -45,7 +45,7 @@ def test_main(files):
                     validate_config.main()
                 assert e.value.code == 0
             config_is_valid.assert_called_once_with(
-                config_file=cfgfile, validation_schema=schemafile, log=log
+                config_file=cfgfile, schema_file=schemafile, log=log
             )
 
 

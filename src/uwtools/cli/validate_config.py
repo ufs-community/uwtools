@@ -21,7 +21,7 @@ def main() -> None:
         log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
     )
     valid = config_is_valid(
-        config_file=args.config_file, validation_schema=args.validation_schema, log=log
+        config_file=args.config_file, schema_file=args.validation_schema, log=log
     )
     sys.exit(0 if valid else 1)
 

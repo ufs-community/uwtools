@@ -12,15 +12,15 @@ from uwtools.logger import Logger
 # Public
 
 
-def config_is_valid(config_file: str, validation_schema: str, log: Logger) -> bool:
+def config_is_valid(config_file: str, schema_file: str, log: Logger) -> bool:
     """
     Check whether the given config file conforms to the given JSON Schema spec and whether any
     filesystem paths it identifies exist.
     """
     yaml_config = YAMLConfig(config_file, log_name=log.name)
     yaml_config.dereference_all()
-    with open(validation_schema, "r", encoding="utf-8") as schema_file:
-        schema = json.load(schema_file)
+    with open(schema_file, "r", encoding="utf-8") as f:
+        schema = json.load(f)
     if not _config_conforms_to_schema(yaml_config.data, schema, log):
         return False
     if not _config_paths_exist(yaml_config.data, schema, log):

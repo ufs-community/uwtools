@@ -16,7 +16,7 @@ from uwtools.drivers.forecast import FV3Forecast
 from uwtools.tests.support import compare_files, fixture_path
 
 
-def test_schema():
+def test_schema_file():
     """
     Tests that the schema is properly defined with a file value.
     """
@@ -24,7 +24,7 @@ def test_schema():
     with patch.object(Driver, "_validate", return_value=True):
         forecast = FV3Forecast(config_file="/not/used")
 
-    path = Path(forecast.schema)
+    path = Path(forecast.schema_file)
     assert path.is_file()
 
 
