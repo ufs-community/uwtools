@@ -15,7 +15,7 @@ from uwtools.tests.support import fixture_path
 @pytest.mark.parametrize("vals", [("good", True), ("bad", False)])
 def test_config_is_valid_good(vals):
     """
-    Test that a valid config file succeeds validation.
+    Test that good and bad configs pass and fail validation, respectively.
     """
     cfgtype, boolval = vals
     with resources.as_file(resources.files("uwtools.resources")) as path:

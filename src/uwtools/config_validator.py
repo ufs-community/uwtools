@@ -2,6 +2,7 @@
 Support for validating a config using JSON Schema.
 """
 import json
+from pathlib import Path
 
 import jsonschema
 
@@ -22,6 +23,8 @@ def config_is_valid(config_file: str, validation_schema: str, log: Logger) -> bo
         schema = json.load(schema_file)
     if not _config_conforms_to_schema(yaml_config.data, schema, log):
         return False
+    if not _config_paths_exist(yaml_config.data, schema, log):
+        return False
     return True
 
 
@@ -30,7 +33,7 @@ def config_is_valid(config_file: str, validation_schema: str, log: Logger) -> bo
 
 def _config_conforms_to_schema(config: dict, schema: dict, log: Logger) -> bool:
     """
-    Check whether the config object conforms to the JSON Schema spec.
+    Does the config object conform to the JSON Schema spec?
     """
     validator = jsonschema.Draft7Validator(schema)
     errors = list(validator.iter_errors(config))
@@ -42,24 +45,17 @@ def _config_conforms_to_schema(config: dict, schema: dict, log: Logger) -> bool:
     return not errors
 
 
-# def _config_paths_exist(config: dict, schema: dict) -> bool:
-#     for key, val in config.items():
-
-#     return True
-#     # Create a list of fields that could contain a file or path.
-
-#     path_list = []
-#     for field in schema["properties"]:
-#         for value in schema["properties"][field]["properties"]:
-#             # the json pair "format": "uri" labels a path or file
-#             if "format" in schema["properties"][field]["properties"][value]:
-#                 path_list.append(value)
-
-#     # Check for existence of those files or paths.
-
-#     for field in config_obj.data:
-#         for value in config_obj.data[field]:
-#             if value in path_list:
-#                 if not os.path.exists(config_obj.data[field][value]):
-#                     schema_error += 1
-#                     log.error("%s has Invalid Path %s", value, config_obj.data[field][value])
+def _config_paths_exist(config: dict, schema: dict, log: Logger) -> bool:
+    all_ok = True
+    for key, val in config.items():
+        ok = True
+        subschema = schema["properties"][key]
+        if isinstance(val, dict):
+            ok = _config_paths_exist(val, subschema, log)
+        else:
+            if subschema.get("format") == "uri":  # denotes a path
+                ok = Path(val).exists()
+                if not ok:
+                    log.error("Path does not exist: %s", val)
+        all_ok = all_ok and ok
+    return all_ok
