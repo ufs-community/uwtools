@@ -38,7 +38,7 @@ def _config_conforms_to_schema(config: dict, schema: dict, log: Logger) -> bool:
     validator = jsonschema.Draft7Validator(schema)
     errors = list(validator.iter_errors(config))
     log_method = log.error if errors else log.info
-    log_method("Found %s error%s", len(errors), "" if len(errors) == 1 else "s")
+    log_method("%s schema-validation error%s found", len(errors), "" if len(errors) == 1 else "s")
     for error in errors:
         log.error(error)
         log.error("------")

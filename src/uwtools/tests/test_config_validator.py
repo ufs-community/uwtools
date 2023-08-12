@@ -15,8 +15,8 @@ from uwtools.logger import Logger
 
 
 @fixture
-def config_file(tmp_path) -> Path:
-    data = {
+def config(tmp_path) -> Dict[str, Any]:
+    return {
         "color": "blue",
         "dir": str(tmp_path),
         "number": 88,
@@ -24,7 +24,11 @@ def config_file(tmp_path) -> Path:
             "dir": str(tmp_path),
         },
     }
-    return write_as_json(data, tmp_path / "config.yaml")
+
+
+@fixture
+def config_file(tmp_path) -> str:
+    return str(tmp_path / "config.yaml")
 
 
 @fixture
@@ -64,27 +68,43 @@ def write_as_json(data: Dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
-def test_config_is_valid_good(config_file, schema_file):
-    assert config_validator.config_is_valid(
-        config_file=config_file,
-        schema_file=schema_file,
-        log=Logger(),
-    )
+def test_config_is_valid_fail_bad_dir_top(caplog, config, config_file, schema_file, tmp_path):
+    # Specify a non-existent directory for the topmost directory value.
+    d = str(tmp_path / "no-such-dir")
+    config["dir"] = d
+    write_as_json(config, config_file)
+    assert not config_validator.config_is_valid(config_file, schema_file, log=Logger())
+    assert len([x for x in caplog.records if f"Path does not exist: {d}" in x.message]) == 1
 
 
-# @pytest.mark.parametrize("vals", [("good", True), ("bad", False)])
-# def test_config_is_valid_good(vals):
-#     """
-#     Test that good and bad configs pass and fail validation, respectively.
-#     """
-#     cfgtype, boolval = vals
-#     with resources.as_file(resources.files("uwtools.resources")) as path:
-#         schema = (path / "workflow.jsonschema").as_posix()
-#     assert (
-#         config_validator.config_is_valid(
-#             config_file=fixture_path(f"schema_test_{cfgtype}.yaml"),
-#             validation_schema=schema,
-#             log=Logger(),
-#         )
-#         is boolval
-#     )
+def test_config_is_valid_fail_bad_dir_nested(caplog, config, config_file, schema_file, tmp_path):
+    # Specify a non-existent directory for the nested directory value.
+    d = str(tmp_path / "no-such-dir")
+    config["sub"]["dir"] = d
+    write_as_json(config, config_file)
+    assert not config_validator.config_is_valid(config_file, schema_file, log=Logger())
+    assert len([x for x in caplog.records if f"Path does not exist: {d}" in x.message]) == 1
+
+
+def test_config_is_valid_fail_bad_enum_val(caplog, config, config_file, schema_file):
+    # Specify an invalid enum value.
+    config["color"] = "yellow"
+    write_as_json(config, config_file)
+    assert not config_validator.config_is_valid(config_file, schema_file, log=Logger())
+    assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
+    assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
+
+
+def test_config_is_valid_fail_bad_number_val(caplog, config, config_file, schema_file):
+    # Specify an invalid number value.
+    config["number"] = "string"
+    write_as_json(config, config_file)
+    assert not config_validator.config_is_valid(config_file, schema_file, log=Logger())
+    assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
+    assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
+
+
+def test_config_is_valid_pass(config, config_file, schema_file):
+    # Test a fully valid config file.
+    write_as_json(config, config_file)
+    assert config_validator.config_is_valid(config_file, schema_file, log=Logger())
