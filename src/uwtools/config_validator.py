@@ -2,7 +2,6 @@
 Support for validating a config using JSON Schema.
 """
 import json
-from itertools import chain
 from pathlib import Path
 from typing import List
 
@@ -35,118 +34,27 @@ def config_is_valid(config_file: str, schema_file: str, log: Logger) -> bool:
 # Private
 
 
-# def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
-#     paths = []
-#     for key, val in config.items():
-#         subschema = schema["properties"][key]
-#         if isinstance(val, dict):
-#             paths += _bad_paths(val, subschema, log)
-#         else:
-#             if subschema.get("format") == "uri" and not Path(val).exists():
-#                 paths.append(val)
-#     return paths
-
-# def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
-#     subschema = lambda key: schema["properties"][key]
-#     paths = []
-#     for key, val in config.items():
-#         if isinstance(val, dict):
-#             paths += _bad_paths(val, subschema(key), log)
-#         else:
-#             if subschema(key).get("format") == "uri" and not Path(val).exists():
-#                 paths.append(val)
-#     return paths
-
-
-# def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
-#     subschema = lambda key: schema["properties"][key]
-#     paths = []
-#     for key, val in config.items():
-#         if isinstance(val, dict):
-#             paths += _bad_paths(val, subschema(key), log)
-#         else:
-#             if subschema(key).get("format") == "uri" and not Path(val).exists():
-#                 paths += [val]
-#     return paths
-
-
-# def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
-#     subschema = lambda key: schema["properties"][key]
-#     paths = []
-#     for key, val in config.items():
-#         if isinstance(val, dict):
-#             x = _bad_paths(val, subschema(key), log)
-#         else:
-#             x = [val] if subschema(key).get("format") == "uri" and not Path(val).exists() else []
-#         paths += x
-#     return paths
-
-
-# def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
-#     subschema = lambda key: schema["properties"][key]
-#     paths = []
-#     for key, val in config.items():
-#         x = _bad_paths(val, subschema(key), log) if isinstance(val, dict) else ([val] if subschema(key).get("format") == "uri" and not Path(val).exists() else [])
-#         paths += x
-#     return paths
-
-
-# def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
-#     subschema = lambda k: schema["properties"][k]
-#     paths = []
-#     for k, v in config.items():
-#         paths += _bad_paths(v, subschema(k), log) if isinstance(v, dict) else ([v] if subschema(k).get("format") == "uri" and not Path(v).exists() else [])
-#     return paths
-
-
-# def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
-#     subschema = lambda k: schema["properties"][k]
-#     paths = list(chain.from_iterable(_bad_paths(v, subschema(k), log) if isinstance(v, dict) else ([v] if subschema(k).get("format") == "uri" and not Path(v).exists() else []) for k, v in config.items()))
-#     return paths
-
-
-# def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
-#     subschema = lambda k: schema["properties"][k]
-#     return list(chain.from_iterable(_bad_paths(v, subschema(k), log) if isinstance(v, dict) else ([v] if subschema(k).get("format") == "uri" and not Path(v).exists() else []) for k, v in config.items()))
-
-
-# def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
-#     subschema = lambda k: schema["properties"][k]
-#     return list(chain.from_iterable(_bad_paths(v, subschema(k), log) if isinstance(v, dict) else [v] if subschema(k).get("format") == "uri" and not Path(v).exists() else [] for k, v in config.items()))
-
-
-# def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
-#     subschema = lambda k: schema["properties"][k]
-#     foo = lambda k, v: [v] if subschema(k).get("format") == "uri" and not Path(v).exists() else []
-#     return list(chain.from_iterable(_bad_paths(v, subschema(k), log) if isinstance(v, dict) else foo(k, v) for k, v in config.items()))
-
-
-# def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
-#     subschema = lambda k: schema["properties"][k]
-#     badpath = lambda k, v: [v] if subschema(k).get("format") == "uri" and not Path(v).exists() else []
-#     paths = (_bad_paths(v, subschema(k), log) if isinstance(v, dict) else badpath(k, v) for k, v in config.items())
-#     return list(chain.from_iterable(paths))
+def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
+    paths = []
+    for key, val in config.items():
+        subschema = schema["properties"][key]
+        if isinstance(val, dict):
+            paths += _bad_paths(val, subschema, log)
+        else:
+            if subschema.get("format") == "uri" and not Path(val).exists():
+                paths += [val]
+    return paths
 
 
 # def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
 #     subschema = lambda k: schema["properties"][k]
 #     bad = lambda k, v: [v] if subschema(k).get("format") == "uri" and not Path(v).exists() else []
-#     paths = (
-#         _bad_paths(v, subschema(k), log) if isinstance(v, dict) else bad(k, v)
-#         for k, v in config.items()
+#     return list(
+#         chain.from_iterable(
+#             _bad_paths(v, subschema(k), log) if isinstance(v, dict) else bad(k, v)
+#             for k, v in config.items()
+#         )
 #     )
-#     return list(chain.from_iterable(paths))
-
-
-def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
-    subschema = lambda k: schema["properties"][k]
-    bad = lambda k, v: [v] if subschema(k).get("format") == "uri" and not Path(v).exists() else []
-    return list(
-        chain.from_iterable(
-            _bad_paths(v, subschema(k), log) if isinstance(v, dict) else bad(k, v)
-            for k, v in config.items()
-        )
-    )
 
 
 def _config_conforms_to_schema(config: dict, schema: dict, log: Logger) -> bool:
