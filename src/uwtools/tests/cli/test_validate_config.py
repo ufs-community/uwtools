@@ -21,7 +21,7 @@ from uwtools.tests.support import fixture_path
 def files(tmp_path):
     cfgfile = tmp_path / "cfg.yaml"
     logfile = tmp_path / "log"
-    schemafile = fixture_path("schema_test_good.yaml")
+    schemafile = fixture_path("/dev/zero")
     for path in cfgfile, logfile:
         path.touch()
     return str(cfgfile), str(logfile), str(schemafile)
