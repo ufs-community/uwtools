@@ -35,6 +35,12 @@ def config_is_valid(config_file: str, schema_file: str, log: Logger) -> bool:
 
 
 def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
+    """
+    Identify non-existent config paths.
+
+    The schema has the same shape as the config, so traverse them together, recursively, checking
+    values identified by the schema as having "uri" format, which denotes a path.
+    """
     paths = []
     for key, val in config.items():
         subschema = schema["properties"][key]
@@ -43,7 +49,7 @@ def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
         else:
             if subschema.get("format") == "uri" and not Path(val).exists():
                 paths.append(val)
-    return paths
+    return sorted(paths)
 
 
 def _config_conforms_to_schema(config: dict, schema: dict, log: Logger) -> bool:
