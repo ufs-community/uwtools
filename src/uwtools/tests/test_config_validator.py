@@ -126,28 +126,28 @@ def test_config_is_valid_pass(config, config_file, schema, schema_file):
 def test__bad_paths_top(config, schema, tmp_path):
     d = str(tmp_path / "no-such-dir")
     config["dir"] = d
-    assert config_validator._bad_paths(config, schema, log=Logger()) == [d]
+    assert config_validator._bad_paths(config, schema) == [d]
 
 
 def test__bad_paths_nested(config, schema, tmp_path):
     d = str(tmp_path / "no-such-dir")
     config["sub"]["dir"] = d
-    assert config_validator._bad_paths(config, schema, log=Logger()) == [d]
+    assert config_validator._bad_paths(config, schema) == [d]
 
 
 def test__bad_paths_none(config, schema):
-    assert not config_validator._bad_paths(config, schema, log=Logger())
+    assert not config_validator._bad_paths(config, schema)
 
 
-def test__config_conforms_to_schema_bad_enum_value(config, schema):
+def test__validation_errors_bad_enum_value(config, schema):
     config["color"] = "yellow"
-    assert not config_validator._config_conforms_to_schema(config, schema, log=Logger())
+    assert len(config_validator._validation_errors(config, schema)) == 1
 
 
-def test__config_conforms_to_schema_bad_number_value(config, schema):
+def test__validation_errors_bad_number_value(config, schema):
     config["number"] = "string"
-    assert not config_validator._config_conforms_to_schema(config, schema, log=Logger())
+    assert len(config_validator._validation_errors(config, schema)) == 1
 
 
-def test__config_conforms_to_schema_pass(config, schema):
-    assert config_validator._config_conforms_to_schema(config, schema, log=Logger())
+def test__validation_errors_pass(config, schema):
+    assert not config_validator._validation_errors(config, schema)

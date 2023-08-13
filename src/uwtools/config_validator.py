@@ -16,25 +16,35 @@ from uwtools.logger import Logger
 def config_is_valid(config_file: str, schema_file: str, log: Logger) -> bool:
     """
     Check whether the given config file conforms to the given JSON Schema spec and whether any
-    filesystem paths it identifies exist.
+    filesystem paths it identifies do not exist.
     """
+    # Load the config and schema.
     yaml_config = YAMLConfig(config_file, log_name=log.name)
     yaml_config.dereference_all()
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
-    if not _config_conforms_to_schema(yaml_config.data, schema, log):
+    # Collect and report on schema-validation errors.
+    errors = _validation_errors(yaml_config.data, schema)
+    log_method = log.error if errors else log.info
+    log_method("%s schema-validation error%s found", len(errors), "" if len(errors) == 1 else "s")
+    for error in errors:
+        log.error(error)
+        log.error("------")
+    if errors:
         return False
-    if bad_paths := _bad_paths(yaml_config.data, schema, log):
+    # Collect and report bad paths found in config.
+    if bad_paths := _bad_paths(yaml_config.data, schema):
         for bad_path in bad_paths:
             log.error("Path does not exist: %s", bad_path)
         return False
+    # If no issues were detected, report success.
     return True
 
 
 # Private
 
 
-def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
+def _bad_paths(config: dict, schema: dict) -> List[str]:
     """
     Identify non-existent config paths.
 
@@ -45,22 +55,16 @@ def _bad_paths(config: dict, schema: dict, log: Logger) -> List[str]:
     for key, val in config.items():
         subschema = schema["properties"][key]
         if isinstance(val, dict):
-            paths += _bad_paths(val, subschema, log)
+            paths += _bad_paths(val, subschema)
         else:
             if subschema.get("format") == "uri" and not Path(val).exists():
                 paths.append(val)
     return sorted(paths)
 
 
-def _config_conforms_to_schema(config: dict, schema: dict, log: Logger) -> bool:
+def _validation_errors(config: dict, schema: dict) -> List[str]:
     """
-    Does the config object conform to the JSON Schema spec?
+    Identify schema-validation errors.
     """
     validator = jsonschema.Draft7Validator(schema)
-    errors = list(validator.iter_errors(config))
-    log_method = log.error if errors else log.info
-    log_method("%s schema-validation error%s found", len(errors), "" if len(errors) == 1 else "s")
-    for error in errors:
-        log.error(error)
-        log.error("------")
-    return not errors
+    return list(validator.iter_errors(config))
