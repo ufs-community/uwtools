@@ -30,6 +30,7 @@ def config_is_valid(config_file: str, schema_file: str, log: Logger) -> bool:
     for error in errors:
         log.error(error)
         log.error("------")
+    # It's pointless to evaluate an invalid config, so return now if that's the case.
     if errors:
         return False
     # Collect and report bad paths found in config.
