@@ -763,8 +763,8 @@ def export_variables(config: dict, section_path: List[str], log: Logger) -> None
     for key in section_path:
         config = config[key]
     for key, value in config.items():
-        if type(value) not in (bool, str, int, float):
-            log.error(f"Non-scalar variable {key} was provided")
+        if type(value) not in (bool, float, int, str):
+            log.error(f"Non-scalar value {key} was provided")
             raise UWConfigError("Section values provided must be scalar values")
     for key, value in config.items():
         print(f"{key}={value}")
