@@ -21,6 +21,7 @@ import jinja2
 import yaml
 
 from uwtools import exceptions, logger
+from uwtools.exceptions import UWConfigError
 from uwtools.j2template import J2Template
 from uwtools.logger import Logger
 from uwtools.utils import cli_helpers
@@ -752,3 +753,17 @@ def create_config_obj(
                     raise ValueError(err_msg)
                 # Dump to file:
                 dump_method(path=outfile, cfg=config_obj)
+
+
+def export_variables(config_dict: dict, section_path: list, log: Logger) -> None:
+    """
+    Allows users to export sections of the config file as environment variables.
+    """
+    for key in section_path:
+        config_dict = config_dict[key]
+    for key, value in config_dict.items():
+        if type(value) not in (bool, str, int, float):
+            log.error(f"Non-scalar variable {key} was provided")
+            raise UWConfigError("Section values provided must be scalar values")
+    for key, value in config_dict.items():
+        print(f"{key}={value}")
