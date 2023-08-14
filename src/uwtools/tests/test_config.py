@@ -830,6 +830,13 @@ def test_print_config_section_yaml_for_nonscalar():
         config.print_config_section(config_obj.data, section, log=Logger())
 
 
+def test_print_config_section_yaml_not_dict():
+    config_obj = config.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
+    section = ["sgs_tke", "units"]
+    with raises(UWConfigError):
+        config.print_config_section(config_obj.data, section, log=Logger())
+
+
 def test_print_config_section_ini(capsys):
     config_obj = config.INIConfig(fixture_path("simple3.ini"))
     section = ["dessert"]

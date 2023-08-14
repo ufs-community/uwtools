@@ -761,7 +761,11 @@ def print_config_section(config: dict, section_path: List[str], log: Logger) -> 
     subtree as key=value pairs, one per line.
     """
     for key in section_path:
-        config = config[key]
+        if isinstance(config[key], dict):
+            config = config[key]
+        else:
+            log.error(f"{key} type must be a dictionary")
+            raise UWConfigError("Key type must be a dictionary")
     for key, value in config.items():
         if type(value) not in (bool, float, int, str):
             log.error(f"Non-scalar value {key} was provided")
