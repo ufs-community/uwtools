@@ -755,15 +755,15 @@ def create_config_obj(
                 dump_method(path=outfile, cfg=config_obj)
 
 
-def export_variables(config_dict: dict, section_path: List[str], log: Logger) -> None:
+def export_variables(config: dict, section_path: List[str], log: Logger) -> None:
     """
     Allows users to export sections of the config file as environment variables.
     """
     for key in section_path:
-        config_dict = config_dict[key]
-    for key, value in config_dict.items():
+        config = config[key]
+    for key, value in config.items():
         if type(value) not in (bool, str, int, float):
             log.error(f"Non-scalar variable {key} was provided")
             raise UWConfigError("Section values provided must be scalar values")
-    for key, value in config_dict.items():
+    for key, value in config.items():
         print(f"{key}={value}")
