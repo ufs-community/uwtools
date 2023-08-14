@@ -813,27 +813,27 @@ def test_YAMLConfig__load_unexpected_error(tmp_path):
         assert msg in str(e.value)
 
 
-def test_export_variables_yaml(capsys):
+def test_print_config_section_yaml(capsys):
     config_obj = config.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
     section = ["sgs_tke", "profile_type"]
-    config.export_variables(config_obj.data, section, log=Logger())
+    config.print_config_section(config_obj.data, section, log=Logger())
     actual = capsys.readouterr().out
     expected = """name=fixed
 surface_value=0.0\n"""
     assert actual == expected
 
 
-def test_export_variables_yaml_for_nonscalar():
+def test_print_config_section_yaml_for_nonscalar():
     config_obj = config.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
     section = ["o3mr"]
     with raises(UWConfigError):
-        config.export_variables(config_obj.data, section, log=Logger())
+        config.print_config_section(config_obj.data, section, log=Logger())
 
 
-def test_export_variables_ini(capsys):
+def test_print_config_section_ini(capsys):
     config_obj = config.INIConfig(fixture_path("simple3.ini"))
     section = ["dessert"]
-    config.export_variables(config_obj.data, section, log=Logger())
+    config.print_config_section(config_obj.data, section, log=Logger())
     actual = capsys.readouterr().out
     expected = """type=pie
 flavor={{flavor}}
@@ -842,8 +842,8 @@ servings=0\n"""
     assert actual == expected
 
 
-def test_export_variables_ini_missing_section():
+def test_print_config_section_ini_missing_section():
     config_obj = config.INIConfig(fixture_path("simple3.ini"))
     section = ["sandwich"]
     with raises(KeyError):
-        config.export_variables(config_obj.data, section, log=Logger())
+        config.print_config_section(config_obj.data, section, log=Logger())
