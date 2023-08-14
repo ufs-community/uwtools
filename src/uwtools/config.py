@@ -757,7 +757,8 @@ def create_config_obj(
 
 def export_variables(config: dict, section_path: List[str], log: Logger) -> None:
     """
-    Allows users to export sections of the config file as environment variables.
+    Descends into the config via the given section keys, then prints the contents of the located
+    subtree as key=value pairs, one per line.
     """
     for key in section_path:
         config = config[key]
