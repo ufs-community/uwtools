@@ -755,7 +755,7 @@ def create_config_obj(
                 dump_method(path=outfile, cfg=config_obj)
 
 
-def export_variables(config_dict: dict, section_path: list, log: Logger) -> None:
+def export_variables(config_dict: dict, section_path: List[str], log: Logger) -> None:
     """
     Allows users to export sections of the config file as environment variables.
     """
