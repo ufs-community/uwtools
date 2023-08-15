@@ -51,9 +51,9 @@ class OptionalAttribs:
     PLACEMENT = "placement"
 
 
-class JobCard(UserList):
+class BatchScript(UserList):
     """
-    Represents a job card to submit to a scheduler.
+    Represents a batch script to submit to a scheduler.
     """
 
     def __str__(self):
@@ -64,7 +64,7 @@ class JobCard(UserList):
 
     def content(self, line_separator: str = "\n") -> str:
         """
-        Returns the formatted content of the job cards.
+        Returns the formatted content of the batch script.
 
         Parameters
         ----------
@@ -76,7 +76,7 @@ class JobCard(UserList):
 
 class JobScheduler(UserDict):
     """
-    Creates JobCard.
+    A class for interacting with HPC batch schedulers.
     """
 
     _map: dict = {}
@@ -107,21 +107,21 @@ class JobScheduler(UserDict):
 
     def pre_process(self) -> Dict[str, Any]:
         """
-        Pre-process attributes before converting to job card.
+        Pre-process attributes before converting to batch script.
         """
         return self.data
 
     @staticmethod
     def post_process(items: List[str]) -> List[str]:
         """
-        Post process attributes before converting to job card.
+        Post process attributes before converting to batch script.
         """
         return [re.sub(r"\s{0,}\=\s{0,}", "=", x, count=0, flags=0) for x in items]
 
     @property
-    def job_card(self) -> JobCard:
+    def batch_script(self) -> BatchScript:
         """
-        Returns the job card to be fed to external scheduler.
+        Returns the batch script to be fed to external scheduler.
         """
 
         sanitized_attribs = self.pre_process()
@@ -155,7 +155,7 @@ class JobScheduler(UserDict):
         # Sort batch directives to normalize output w.r.t. potential differences
         # in ordering of input dicts.
 
-        return JobCard(sorted(processed))
+        return BatchScript(sorted(processed))
 
     @staticmethod
     def get_scheduler(props: Mapping) -> JobScheduler:

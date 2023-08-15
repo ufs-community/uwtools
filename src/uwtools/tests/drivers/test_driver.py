@@ -29,7 +29,13 @@ class ConcreteDriver(Driver):
     def output(self):
         pass
 
-    def job_card(self):
+    def batch_script(self):
+        pass
+
+    def run(self):
+        pass
+
+    def run_cmd(self, *args, run_cmd, exec_name):
         pass
 
 
@@ -72,13 +78,6 @@ def schema():
 """.strip()
 
 
-def test_no_config(capsys):
-    # pylint: disable=unused-variable
-    instancenone = ConcreteDriver(config_file=None)
-    msg = "No config file provided, available functions are limited."
-    assert msg in capsys.readouterr().out
-
-
 @pytest.mark.parametrize("valid", [True, False])
 def test_validation(capsys, configs, schema, tmp_path, valid):
     config_good, config_bad = configs
@@ -89,8 +88,7 @@ def test_validation(capsys, configs, schema, tmp_path, valid):
     with open(schema_file, "w", encoding="utf-8") as f:
         print(schema, file=f)
     with patch.object(ConcreteDriver, "schema", new=schema_file):
-        # pylint: disable=unused-variable
-        instance = ConcreteDriver(config_file=config_file)
+        ConcreteDriver(config_file=config_file)
         assert (
             "error(s)" not in capsys.readouterr().err
             if valid
