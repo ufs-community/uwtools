@@ -813,44 +813,71 @@ def test_YAMLConfig__load_unexpected_error(tmp_path):
         assert msg in str(e.value)
 
 
-def test_print_config_section_yaml(capsys):
-    config_obj = config.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
-    section = ["sgs_tke", "profile_type"]
-    config.print_config_section(config_obj.data, section, log=Logger())
-    actual = capsys.readouterr().out
-    expected = """name=fixed
-surface_value=0.0\n"""
-    assert actual == expected
-
-
-def test_print_config_section_yaml_for_nonscalar():
-    config_obj = config.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
-    section = ["o3mr"]
-    with raises(UWConfigError):
-        config.print_config_section(config_obj.data, section, log=Logger())
-
-
-def test_print_config_section_yaml_not_dict():
-    config_obj = config.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
-    section = ["sgs_tke", "units"]
-    with raises(UWConfigError):
-        config.print_config_section(config_obj.data, section, log=Logger())
-
-
 def test_print_config_section_ini(capsys):
     config_obj = config.INIConfig(fixture_path("simple3.ini"))
     section = ["dessert"]
     config.print_config_section(config_obj.data, section, log=Logger())
     actual = capsys.readouterr().out
-    expected = """type=pie
+    expected = """
+type=pie
 flavor={{flavor}}
 side=False
-servings=0\n"""
+servings=0
+""".lstrip()
     assert actual == expected
 
 
 def test_print_config_section_ini_missing_section():
     config_obj = config.INIConfig(fixture_path("simple3.ini"))
     section = ["sandwich"]
-    with raises(KeyError):
+    msg = "Bad config path: sandwich"
+    with raises(UWConfigError) as e:
         config.print_config_section(config_obj.data, section, log=Logger())
+    assert msg in str(e.value)
+
+
+def test_print_config_section_yaml(capsys):
+    config_obj = config.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
+    section = ["sgs_tke", "profile_type"]
+    config.print_config_section(config_obj.data, section, log=Logger())
+    actual = capsys.readouterr().out
+    expected = """
+    name=fixed
+surface_value=0.0
+""".lstrip()
+    assert actual == expected
+
+
+def test_print_config_section_yaml_for_nonscalar():
+    config_obj = config.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
+    section = ["o3mr"]
+    with raises(UWConfigError) as e:
+        config.print_config_section(config_obj.data, section, log=Logger())
+    assert "must be scalar" in str(e.value)
+
+
+def test_print_config_section_yaml_list(capsys):
+    config_obj = config.YAMLConfig(fixture_path("srw_example.yaml"))
+    section = ["FV3GFS", "nomads", "file_names", "grib2", "anl"]
+    config.print_config_section(config_obj.data, section, log=Logger())
+    actual = capsys.readouterr().out
+    expected = """
+anl=['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
+""".lstrip()
+    assert actual == expected
+
+
+def test_print_config_section_yaml_list_nonscalar():
+    config_obj = config.YAMLConfig(fixture_path("result4.yaml"))
+    section = ["models"]
+    with raises(UWConfigError) as e:
+        config.print_config_section(config_obj.data, section, log=Logger())
+    assert "must be scalar" in str(e.value)
+
+
+def test_print_config_section_yaml_not_dict():
+    config_obj = config.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
+    section = ["sgs_tke", "units"]
+    with raises(UWConfigError) as e:
+        config.print_config_section(config_obj.data, section, log=Logger())
+    assert "must be a dictionary" in str(e.value)

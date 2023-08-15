@@ -760,15 +760,32 @@ def print_config_section(config: dict, section_path: List[str], log: Logger) -> 
     Descends into the config via the given section keys, then prints the contents of the located
     subtree as key=value pairs, one per line.
     """
+    keys = []
     for key in section_path:
-        if isinstance(config[key], dict):
-            config = config[key]
+        keys.append(key)
+        current_path = " -> ".join(keys)
+        try:
+            subconfig = config[key]
+        except KeyError as exc:
+            msg = f"Bad config path: {current_path}"
+            log.error(msg)
+            raise UWConfigError(msg) from exc
+        if type(subconfig) in (dict, list):
+            config = subconfig
         else:
-            log.error(f"{key} type must be a dictionary")
-            raise UWConfigError("Key type must be a dictionary")
-    for key, value in config.items():
-        if type(value) not in (bool, float, int, str):
-            log.error(f"Non-scalar value {key} was provided")
-            raise UWConfigError("Section values provided must be scalar values")
-    for key, value in config.items():
-        print(f"{key}={value}")
+            msg = f"Value at {current_path} must be a dictionary or list"
+            log.error(msg)
+            raise UWConfigError(msg)
+    if isinstance(config, dict):
+        for key, value in config.items():
+            if type(value) not in (bool, float, int, str):
+                log.error(f"Non-scalar value {key} was provided")
+                raise UWConfigError("Section values provided must be scalar values")
+        for key, value in config.items():
+            print(f"{key}={value}")
+    else:
+        for value in config:
+            if type(value) not in (bool, float, int, str):
+                log.error(f"Non-scalar value {keys[-1]} was provided")
+                raise UWConfigError("Section values provided must be scalar values")
+        print(f"{keys[-1]}={config}")
