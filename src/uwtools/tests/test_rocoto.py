@@ -11,6 +11,7 @@ from uwtools import rocoto
 def test_write(tmp_path):
     r = rocoto.RocotoXML()
     r.write(output_dir=tmp_path)
-    expected = "<?xml version='1.0' encoding='utf-8'?>\n<workflow>\n</workflow>"
+    # pylint: disable=line-too-long
+    expected = "<?xml version='1.0' encoding='utf-8'?>\n<workflow>\n  <log>foo then bar</log>\n  <task>baz then qux</task>\n</workflow>"
     with open(tmp_path / "contents.xml", "r", encoding="utf-8") as f:
         assert expected == f.read()
