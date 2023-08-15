@@ -30,7 +30,9 @@ def test_main(files):
     cfgfile, logfile, machinefile = files
     args = ns(
         config_file=cfgfile,
+        forecast_app="SRW",
         forecast_model="FV3",
+        dry_run=True,
         log_file=logfile,
         machine=machinefile,
         quiet=False,
@@ -39,7 +41,21 @@ def test_main(files):
     with patch.object(run_forecast, "parse_args", return_value=args):
         with patch.object(run_forecast.forecast, "FV3Forecast") as fv3fcst:
             run_forecast.main()
-            fv3fcst.assert_called_once_with(cfgfile, machinefile, log_name="run-forecast")
+            fv3fcst.assert_called_once_with(
+                config_file=args.config_file,
+                forecast_app=args.forecast_app,
+                forecast_model=args.forecast_model,
+                dry_run=True,
+                log_file=args.log_file,
+                machine=args.machine,
+                quiet=False,
+                verbose=False,
+            )
+            # Test failure:
+            fv3fcst.side_effect = run_forecast.UWConfigError()
+            with patch.object(run_forecast.sys, "exit") as exit_:
+                run_forecast.main()
+                assert exit_.called_once_with("")
 
 
 @pytest.mark.parametrize("sw", [ns(c="-c"), ns(c="--config-file")])

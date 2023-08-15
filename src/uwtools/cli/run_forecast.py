@@ -8,6 +8,7 @@ from argparse import ArgumentParser, HelpFormatter, Namespace
 from typing import List
 
 from uwtools.drivers import forecast
+from uwtools.exceptions import UWConfigError
 from uwtools.utils import cli_helpers
 
 
@@ -22,9 +23,20 @@ def main() -> None:
     cli_helpers.setup_logging(
         log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
     )
-    forecast_class = getattr(forecast, "%sForecast" % args.forecast_model)
-    experiment = forecast_class(args.config_file, args.machine, log_name=name)
-    experiment.run()
+    forecast_class = getattr(forecast, f"{args.forecast_model}Forecast")
+    try:
+        forecast_class.run(
+            config_file=args.config_file,
+            dry_run=args.dry_run,
+            forecast_app=args.forecast_app,
+            forecast_model=args.forecast_model,
+            log_file=args.log_file,
+            machine=args.machine,
+            quiet=args.quiet,
+            verbose=args.verbose,
+        )
+    except UWConfigError as e:
+        sys.exit(str(e))
 
 
 def parse_args(args: List[str]) -> Namespace:

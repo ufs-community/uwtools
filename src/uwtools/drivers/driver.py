@@ -25,7 +25,7 @@ class Driver(ABC):
     # Public methods
 
     @abstractmethod
-    def batch_script(self) -> None:
+    def batch_script(self, job_resources):
         """
         Create a script for submission to the batch scheduler.
         """
@@ -49,7 +49,17 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def run(self) -> None:
+    def run(
+        self,
+        config_file: str,
+        forecast_app: str,
+        forecast_model: str,
+        dry_run: bool = False,
+        log_file: Optional[str] = None,
+        machine: Optional[str] = None,
+        quiet: bool = False,
+        verbose: bool = False,
+    ) -> None:
         """
         Run the NWP tool.
         """

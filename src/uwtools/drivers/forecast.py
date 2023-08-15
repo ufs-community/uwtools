@@ -2,18 +2,20 @@
 Drivers for forecast models.
 """
 
+
+import inspect
 import logging
 import os
 import shutil
 import subprocess
 import sys
 from importlib import resources
-from typing import Dict
+from typing import Dict, Optional
 
 from uwtools import config
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import JobScheduler
-from uwtools.utils import file_helpers
+from uwtools.utils import cli_helpers, file_helpers
 
 
 class FV3Forecast(Driver):
@@ -23,10 +25,11 @@ class FV3Forecast(Driver):
 
     # Public methods
 
-    def batch_script(self) -> None:
+    def batch_script(self, job_resources):  # pragma: no cover
         """
         Write to disk, for submission to the batch scheduler, a script to run FV3.
         """
+        return JobScheduler.get_scheduler(job_resources).batch_script
 
     @staticmethod
     def create_directory_structure(run_directory, exist_act="delete"):
@@ -128,16 +131,31 @@ class FV3Forecast(Driver):
         ???
         """
 
-
-    def run(self):
+    def run(
+        self,
+        config_file: str,
+        forecast_app: str,
+        forecast_model: str,
+        dry_run: bool = False,
+        log_file: Optional[str] = None,
+        machine: Optional[str] = None,
+        quiet: bool = False,
+        verbose: bool = False,
+    ) -> None:  # pragma: no cover
         """
         Runs FV3.
         """
+        # set up logging
+        name = f"{inspect.stack()[0][3]}"
+        log = cli_helpers.setup_logging(
+            log_file=log_file or "/dev/stdout",
+            log_name=name,
+            quiet=quiet,
+            verbose=verbose,
+        )
         # read in the config file
-        #self.create_model_config(config_file=self.config_file)
-        experiment_config = config.YAMLConfig(self.config_file)
-        experiment_resources = {}
-
+        # self.create_model_config(config_file=config_file)
+        experiment_config = config.YAMLConfig(config_file)
         # prepare directories
         run_directory = experiment_config["parameters"]["run_directory"]
         self.create_directory_structure(run_directory)
@@ -147,31 +165,30 @@ class FV3Forecast(Driver):
         cycledep_files = experiment_config["locations"]["cycledep"]
         self.stage_files(run_directory, cycledep_files, link_files=True)
 
-        # set up the job
-        for key in experiment_config["resources"]:
-            experiment_resources[key] = experiment_config["resources"][key]
-        job_card = self.job_card(experiment_resources)
+        experiment_resources = {
+            key: experiment_config["resources"][key] for key in experiment_config["resources"]
+        }
+        batch_script = self.batch_script(experiment_resources)
         args = str(experiment_config["run_cmd"]["kwargs"])
         run_command = self.run_cmd(
             args,
             run_cmd=experiment_config["run_cmd"]["run_cmd"],
-            exec_name=experiment_config["run_cmd"]["exec_name"]
+            exec_name=experiment_config["run_cmd"]["exec_name"],
         )
 
+        if dry_run:
+            # Apply switch to allow user to view the run command of config
+            # This will not run the job.
+            log.info(f"Configuration: {forecast_app} {forecast_model} {machine}")
+            log.info(f"Run command: {run_command} {batch_script}")
+            return
         # run the job
         subprocess.run(
-            f"{run_command} {job_card}",
+            f"{run_command} {batch_script}",
             capture_output=True,
             check=False,
             shell=True,
         )
-        
-    def batch_job(self, job_resources):  # pragma: no cover
-        """
-        Turns the resources config object into a batch job for the configured Task.
-
-        """
-        return JobScheduler.get_scheduler(job_resources).job_card
 
     def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:
         """
@@ -179,7 +196,6 @@ class FV3Forecast(Driver):
         """
         args_str = " ".join(str(arg) for arg in args)
         return f"{run_cmd} {args_str} {exec_name}"
-
 
     @property
     def schema(self) -> str:
