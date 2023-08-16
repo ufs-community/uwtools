@@ -755,6 +755,14 @@ def create_config_obj(
                 dump_method(path=outfile, cfg=config_obj)
 
 
+def log_and_error(msg: str, log: Logger) -> None:
+    """
+    Will log a user-provided error message and raise a UWConfigError with the same message.
+    """
+    log.error(msg)
+    raise UWConfigError(msg)
+
+
 def print_config_section(config: dict, section_path: List[str], log: Logger) -> None:
     """
     Descends into the config via the given section keys, then prints the contents of the located
@@ -784,11 +792,3 @@ def print_config_section(config: dict, section_path: List[str], log: Logger) -> 
         print("\n".join(output_lines))
     else:
         print(f"{keys[-1]}={config}")
-
-
-def log_and_error(msg: str, log: Logger) -> None:
-    """
-    Will log a user-provided error message and raise a UWConfigError with the same message.
-    """
-    log.error(msg)
-    raise UWConfigError(msg)
