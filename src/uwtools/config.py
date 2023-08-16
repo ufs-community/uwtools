@@ -761,31 +761,40 @@ def print_config_section(config: dict, section_path: List[str], log: Logger) -> 
     subtree as key=value pairs, one per line.
     """
     keys = []
-    for key in section_path:
-        keys.append(key)
+    for section in section_path:
+        keys.append(section)
         current_path = " -> ".join(keys)
         try:
-            subconfig = config[key]
-        except KeyError as exc:
-            msg = f"Bad config path: {current_path}"
-            log.error(msg)
-            raise UWConfigError(msg) from exc
+            subconfig = config[section]
+        except KeyError:
+            raise_uwconfigrerror(f"Bad config path: {current_path}", log)
         if type(subconfig) in (dict, list):
             config = subconfig
         else:
-            msg = f"Value at {current_path} must be a dictionary or list"
-            log.error(msg)
-            raise UWConfigError(msg)
+            raise_uwconfigrerror(f"Value at {current_path} must be a dictionary or list", log)
     if isinstance(config, dict):
         for key, value in config.items():
-            if type(value) not in (bool, float, int, str):
-                log.error(f"Non-scalar value {key} was provided")
-                raise UWConfigError("Section values provided must be scalar values")
+            if nonscalar_type_check(value):
+                raise_uwconfigrerror(f"Non-scalar value {key} was provided", log)
         for key, value in config.items():
             print(f"{key}={value}")
     else:
         for value in config:
-            if type(value) not in (bool, float, int, str):
-                log.error(f"Non-scalar value {keys[-1]} was provided")
-                raise UWConfigError("Section values provided must be scalar values")
+            if nonscalar_type_check(value):
+                raise_uwconfigrerror(f"Non-scalar value {keys[-1]} was provided", log)
         print(f"{keys[-1]}={config}")
+
+
+def raise_uwconfigrerror(msg: str, log: Logger) -> None:
+    """
+    Will log an error message and raise a UWConfigError with the provided message and string.
+    """
+    log.error(msg)
+    raise UWConfigError(msg)
+
+
+def nonscalar_type_check(value) -> bool:
+    """
+    Returns true if user-provided value is non-scalar and false otherwise.
+    """
+    return type(value) not in (bool, float, int, str)
