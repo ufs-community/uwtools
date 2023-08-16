@@ -767,34 +767,28 @@ def print_config_section(config: dict, section_path: List[str], log: Logger) -> 
         try:
             subconfig = config[section]
         except KeyError:
-            raise_uwconfigrerror(f"Bad config path: {current_path}", log)
+            log_and_error(f"Bad config path: {current_path}", log)
         if type(subconfig) in (dict, list):
             config = subconfig
         else:
-            raise_uwconfigrerror(f"Value at {current_path} must be a dictionary or list", log)
+            log_and_error(f"Value at {current_path} must be a dictionary or list", log)
+    output_lines = []
+    for item in config:
+        value = config[item] if isinstance(config, dict) else item
+        if type(value) not in (bool, float, int, str):
+            log_and_error(f"Non-scalar value {value} found at {current_path}", log)
+        else:
+            if isinstance(config, dict):
+                output_lines.append(f"{item}={value}")
     if isinstance(config, dict):
-        for key, value in config.items():
-            if nonscalar_type_check(value):
-                raise_uwconfigrerror(f"Non-scalar value {key} was provided", log)
-        for key, value in config.items():
-            print(f"{key}={value}")
+        print("\n".join(output_lines))
     else:
-        for value in config:
-            if nonscalar_type_check(value):
-                raise_uwconfigrerror(f"Non-scalar value {keys[-1]} was provided", log)
         print(f"{keys[-1]}={config}")
 
 
-def raise_uwconfigrerror(msg: str, log: Logger) -> None:
+def log_and_error(msg: str, log: Logger) -> None:
     """
-    Will log an error message and raise a UWConfigError with the provided message and string.
+    Will log a user-provided error message and raise a UWConfigError with the same message.
     """
     log.error(msg)
     raise UWConfigError(msg)
-
-
-def nonscalar_type_check(value) -> bool:
-    """
-    Returns true if user-provided value is non-scalar and false otherwise.
-    """
-    return type(value) not in (bool, float, int, str)

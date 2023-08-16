@@ -883,16 +883,7 @@ def test_print_config_section_yaml_not_dict():
     assert "must be a dictionary" in str(e.value)
 
 
-def test_raise_uwconfigrerror():
+def test_log_and_error():
     with raises(UWConfigError) as e:
-        config.raise_uwconfigrerror("Must be scalar value", log=Logger())
+        config.log_and_error("Must be scalar value", log=Logger())
     assert "Must be scalar value" in str(e.value)
-
-
-def test_nonscalar_type_check():
-    assert config.nonscalar_type_check(True) is False
-    assert config.nonscalar_type_check(3.14) is False
-    assert config.nonscalar_type_check(88) is False
-    assert config.nonscalar_type_check("string") is False
-    assert config.nonscalar_type_check({"key": "value"}) is True
-    assert config.nonscalar_type_check(["string", "sandwich", "test"]) is True
