@@ -819,10 +819,10 @@ def test_print_config_section_ini(capsys):
     config.print_config_section(config_obj.data, section, log=Logger())
     actual = capsys.readouterr().out
     expected = """
-type=pie
 flavor={{flavor}}
-side=False
 servings=0
+side=False
+type=pie
 """.lstrip()
     assert actual == expected
 
@@ -842,7 +842,7 @@ def test_print_config_section_yaml(capsys):
     config.print_config_section(config_obj.data, section, log=Logger())
     actual = capsys.readouterr().out
     expected = """
-    name=fixed
+name=fixed
 surface_value=0.0
 """.lstrip()
     assert actual == expected
