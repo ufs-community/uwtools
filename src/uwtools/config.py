@@ -779,11 +779,11 @@ def print_config_section(config: dict, section_path: List[str], log: Logger) -> 
         if not type(subconfig) in (dict, list):
             log_and_error(f"Value at {current_path} must be a dictionary or list", log)
         config = subconfig
-    output_lines = set()
+    output_lines = []
     for item in config:
         value = config[item] if isinstance(config, dict) else item
         if type(value) not in (bool, float, int, str):
             log_and_error(f"Non-scalar value {value} found at {current_path}", log)
         if isinstance(config, dict):
-            output_lines.add(f"{item}={value}")
+            output_lines.append(f"{item}={value}")
     print("\n".join(sorted(output_lines)) if isinstance(config, dict) else f"{keys[-1]}={config}")
