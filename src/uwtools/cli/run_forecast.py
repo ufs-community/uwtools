@@ -19,22 +19,15 @@ def main() -> None:
     Parses arguments provided by the user and passes to the Forecast driver class to be run.
     """
     args = parse_args(sys.argv[1:])
-    name = "run-forecast"
-    cli_helpers.setup_logging(
+    name = "validate-config"
+    log = cli_helpers.setup_logging(
         log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
     )
+
     forecast_class = getattr(forecast, f"{args.forecast_model}Forecast")
+    forecast_obj = forecast_class()
     try:
-        forecast_class.run(
-            config_file=args.config_file,
-            dry_run=args.dry_run,
-            forecast_app=args.forecast_app,
-            forecast_model=args.forecast_model,
-            log_file=args.log_file,
-            machine=args.machine,
-            quiet=args.quiet,
-            verbose=args.verbose,
-        )
+        forecast_obj.run(config_file=args.config_file, dry_run=args.dry_run, log=log)
     except UWConfigError as e:
         sys.exit(str(e))
 
@@ -72,11 +65,14 @@ def parse_args(args: List[str]) -> Namespace:
         metavar="FILE",
     )
     optional.add_argument(
-        "-m",
-        "--machine",
-        help="Path to YAML platform-definition file",
-        metavar="FILE",
-        type=cli_helpers.path_if_file_exists,
+        "--forecast-app",
+        choices={"HAFS", "MRW", "SRW"},
+        help="The app to be run",
+    )
+    optional.add_argument(
+        "--forecast-model",
+        choices={"CCPP", "CICE", "CMEPS", "FV3", "MOM6"},
+        help="The experiment to be run",
     )
     optional.add_argument(
         "-q",
@@ -89,16 +85,6 @@ def parse_args(args: List[str]) -> Namespace:
         "--verbose",
         action="store_true",
         help="Print all logging messages.",
-    )
-    optional.add_argument(
-        "--forecast-app",
-        choices={"HAFS", "MRW", "SRW"},
-        help="The app to be run",
-    )
-    optional.add_argument(
-        "--forecast-model",
-        choices={"CCPP", "CICE", "CMEPS", "FV3", "MOM6"},
-        help="The experiment to be run",
     )
     parsed = parser.parse_args(args)
     if parsed.quiet and parsed.verbose:

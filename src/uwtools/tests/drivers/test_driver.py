@@ -3,7 +3,6 @@
 Tests for uwtools.drivers.driver module.
 """
 
-from typing import Optional
 from unittest.mock import patch
 
 import pytest
@@ -33,17 +32,7 @@ class ConcreteDriver(Driver):
     def batch_script(self, job_resources):
         pass
 
-    def run(
-        self,
-        config_file: str,
-        forecast_app: str,
-        forecast_model: str,
-        dry_run: bool = False,
-        log_file: Optional[str] = None,
-        machine: Optional[str] = None,
-        quiet: bool = False,
-        verbose: bool = False,
-    ) -> None:
+    def run(self) -> None:
         pass
 
     def run_cmd(self, *args, run_cmd, exec_name):

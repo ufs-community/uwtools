@@ -7,6 +7,7 @@ from typing import Optional
 
 from uwtools import config_validator
 from uwtools.logger import Logger
+from uwtools.scheduler import BatchScript
 
 
 class Driver(ABC):
@@ -14,18 +15,22 @@ class Driver(ABC):
     An abstract class representing drivers for various NWP tools.
     """
 
-    def __init__(self, config_file: str, log: Optional[Logger] = None):
+    def __init__(
+        self, config_file: str, log: Optional[Logger] = None, dry_run: Optional[bool] = False
+    ):
         """
         Initialize the driver.
         """
+
         self.log = log if log is not None else Logger()
+        self._dry_run = dry_run if dry_run is not None else False
         self._config_file = config_file
         self._validate()
 
     # Public methods
 
     @abstractmethod
-    def batch_script(self, job_resources):
+    def batch_script(self, job_resources) -> BatchScript:
         """
         Create a script for submission to the batch scheduler.
         """
@@ -49,17 +54,7 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def run(
-        self,
-        config_file: str,
-        forecast_app: str,
-        forecast_model: str,
-        dry_run: bool = False,
-        log_file: Optional[str] = None,
-        machine: Optional[str] = None,
-        quiet: bool = False,
-        verbose: bool = False,
-    ) -> None:
+    def run(self) -> None:
         """
         Run the NWP tool.
         """

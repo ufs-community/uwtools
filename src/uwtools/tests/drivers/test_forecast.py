@@ -3,7 +3,6 @@
 Tests for forecast driver.
 """
 
-
 from pathlib import Path
 from unittest.mock import patch
 
@@ -14,6 +13,31 @@ from uwtools import config
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.tests.support import compare_files, fixture_path
+
+
+@fixture
+def slurm_props():
+    return {
+        "account": "account_name",
+        "nodes": 1,
+        "queue": "batch",
+        "scheduler": "slurm",
+        "tasks_per_node": 1,
+        "walltime": "00:01:00",
+    }
+
+
+def test_batch_script(slurm_props):
+    expected = """
+#SBATCH --account=account_name
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --qos=batch
+#SBATCH --time=00:01:00
+""".strip()
+    with patch.object(Driver, "_validate", return_value=True):
+        forecast = FV3Forecast(config_file="/not/used")
+    assert forecast.batch_script(job_resources=slurm_props).content() == expected
 
 
 def test_schema():

@@ -3,6 +3,7 @@
 Tests for the run-forecast CLI.
 """
 
+# from itertools import chain
 from types import SimpleNamespace as ns
 from unittest.mock import patch
 
@@ -19,22 +20,20 @@ from uwtools.cli import run_forecast
 def files(tmp_path):
     cfgfile = tmp_path / "cfg.yaml"
     logfile = tmp_path / "log"
-    machinefile = tmp_path / "machine.yaml"
-    for fn in cfgfile, logfile, machinefile:
+    for fn in cfgfile, logfile:
         with open(fn, "w", encoding="utf-8"):
             pass
-    return str(cfgfile), str(logfile), str(machinefile)
+    return str(cfgfile), str(logfile)
 
 
 def test_main(files):
-    cfgfile, logfile, machinefile = files
+    cfgfile, logfile = files
     args = ns(
         config_file=cfgfile,
-        forecast_app="SRW",
-        forecast_model="FV3",
         dry_run=True,
         log_file=logfile,
-        machine=machinefile,
+        forecast_app="SRW",
+        forecast_model="FV3",
         quiet=False,
         verbose=False,
     )
@@ -43,11 +42,10 @@ def test_main(files):
             run_forecast.main()
             fv3fcst.assert_called_once_with(
                 config_file=args.config_file,
-                forecast_app=args.forecast_app,
-                forecast_model=args.forecast_model,
                 dry_run=True,
                 log_file=args.log_file,
-                machine=args.machine,
+                forecast_app=args.forecast_app,
+                forecast_model=args.forecast_model,
                 quiet=False,
                 verbose=False,
             )
@@ -70,27 +68,13 @@ def test_parse_args_bad_cfgfile(sw, tmp_path, capsys):
     assert "does not exist!" in capsys.readouterr().err
 
 
-@pytest.mark.parametrize("sw", [ns(m="-m"), ns(m="--machine")])
-def test_parse_args_bad_machinefile(sw, tmp_path, capsys):
-    """
-    Fails if machine file does not exist.
-    """
-    machinefile = str(tmp_path / "no-such-file")
-    with raises(SystemExit) as e:
-        run_forecast.parse_args([sw.m, machinefile])
-    assert e.value.code == 2
-    assert "does not exist!" in capsys.readouterr().err
-
-
 @pytest.mark.parametrize("noise", ["-q", "--quiet", "-v", "--verbose"])
-@pytest.mark.parametrize(
-    "sw", [ns(c="-c", l="-l", m="-m"), ns(c="--config-file", l="--log-file", m="--machine")]
-)
+@pytest.mark.parametrize("sw", [ns(c="-c", l="-l"), ns(c="--config-file", l="--log-file")])
 def test_parse_args_good(sw, noise, files):
     """
     Test all valid CLI switch/value combinations.
     """
-    cfgfile, machinefile, logfile = files
+    cfgfile, logfile = files
     app, model = "SRW", "FV3"  # representative (not exhaustive) choices
     parsed = run_forecast.parse_args(
         [
@@ -98,8 +82,6 @@ def test_parse_args_good(sw, noise, files):
             cfgfile,
             sw.l,
             logfile,
-            sw.m,
-            machinefile,
             "--forecast-app",
             app,
             "--forecast-model",
@@ -109,7 +91,6 @@ def test_parse_args_good(sw, noise, files):
     )
     assert parsed.config_file == cfgfile
     assert parsed.log_file == logfile
-    assert parsed.machine == machinefile
     if noise in ["-q", "--quiet"]:
         sw_off = parsed.verbose
         sw_on = parsed.quiet

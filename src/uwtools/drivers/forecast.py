@@ -14,7 +14,8 @@ from typing import Dict, Optional
 
 from uwtools import config
 from uwtools.drivers.driver import Driver
-from uwtools.scheduler import JobScheduler
+from uwtools.logger import Logger
+from uwtools.scheduler import BatchScript, JobScheduler
 from uwtools.utils import cli_helpers, file_helpers
 
 
@@ -25,7 +26,7 @@ class FV3Forecast(Driver):
 
     # Public methods
 
-    def batch_script(self, job_resources):  # pragma: no cover
+    def batch_script(self, job_resources) -> BatchScript:  # pragma: no cover
         """
         Write to disk, for submission to the batch scheduler, a script to run FV3.
         """
@@ -131,38 +132,34 @@ class FV3Forecast(Driver):
         ???
         """
 
-    def run(
-        self,
-        config_file: str,
-        forecast_app: str,
-        forecast_model: str,
-        dry_run: bool = False,
-        log_file: Optional[str] = None,
-        machine: Optional[str] = None,
-        quiet: bool = False,
-        verbose: bool = False,
-    ) -> None:  # pragma: no cover
+    def run(self, log: Optional[Logger] = None) -> None:  # pragma: no cover
         """
         Runs FV3.
         """
-        # set up logging
-        name = f"{inspect.stack()[0][3]}"
-        log = cli_helpers.setup_logging(
-            log_file=log_file or "/dev/stdout",
-            log_name=name,
-            quiet=quiet,
-            verbose=verbose,
-        )
-        # read in the config file
-        # self.create_model_config(config_file=config_file)
-        experiment_config = config.YAMLConfig(config_file)
-        # prepare directories
-        run_directory = experiment_config["parameters"]["run_directory"]
+        # Set up logging.
+        if log is None:
+            name = f"{inspect.stack()[0][3]}"
+            log = cli_helpers.setup_logging(
+                log_file="/dev/stdout",
+                log_name=name,
+                quiet=False,
+                verbose=False,
+            )
+        # Read in the config file.
+        experiment_config = config.YAMLConfig(self._config_file)
+
+        # define forecast app and model
+        forecast_app = experiment_config["forecast"]["app"]
+        forecast_model = experiment_config["forecast"]["model"]
+        machine = experiment_config["platform"]["machine"]
+
+        # Prepare directories.
+        run_directory = experiment_config["forecast"]["FCSTDIR"]
         self.create_directory_structure(run_directory)
 
-        static_files = experiment_config["locations"]["static"]
+        static_files = experiment_config["forecast"]["STATIC"]
         self.stage_files(run_directory, static_files, link_files=False)
-        cycledep_files = experiment_config["locations"]["cycledep"]
+        cycledep_files = experiment_config["forecast"]["CYCLEDEP"]
         self.stage_files(run_directory, cycledep_files, link_files=True)
 
         experiment_resources = {
@@ -172,20 +169,20 @@ class FV3Forecast(Driver):
         args = str(experiment_config["run_cmd"]["kwargs"])
         run_command = self.run_cmd(
             args,
-            run_cmd=experiment_config["run_cmd"]["run_cmd"],
-            exec_name=experiment_config["run_cmd"]["exec_name"],
+            run_cmd=experiment_config["forecast"]["run_cmd"],
+            exec_name=experiment_config["forecast"]["exec_name"],
         )
 
-        if dry_run:
-            # Apply switch to allow user to view the run command of config
+        if self._dry_run:
+            # Apply switch to allow user to view the run command of config.
             # This will not run the job.
             log.info(f"Configuration: {forecast_app} {forecast_model} {machine}")
             log.info(f"Run command: {run_command} {batch_script}")
             return
-        # run the job
+        # Run the job.
         subprocess.run(
             f"{run_command} {batch_script}",
-            capture_output=True,
+            stderr=subprocess.STDOUT,
             check=False,
             shell=True,
         )
