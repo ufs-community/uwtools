@@ -25,7 +25,7 @@ name_conda = meta["name"]
 name_py = name_conda.replace("-", "_")
 
 setup(
-    entry_points={"console_scripts": ["uw = %s.cli_new:main" % name_py]},
+    entry_points={"console_scripts": ["uw = %s.cli:main" % name_py]},
     name=name_conda,
     packages=find_packages(
         exclude=["%s.tests" % name_py],
