@@ -776,14 +776,12 @@ def print_config_section(config: dict, section_path: List[str], log: Logger) -> 
             subconfig = config[section]
         except KeyError:
             log_and_error(f"Bad config path: {current_path}", log)
-        if not type(subconfig) in (dict, list):
-            log_and_error(f"Value at {current_path} must be a dictionary or list", log)
+        if not isinstance(subconfig, dict):
+            log_and_error(f"Value at {current_path} must be a dictionary", log)
         config = subconfig
     output_lines = []
-    for item in config:
-        value = config[item] if isinstance(config, dict) else item
-        if type(value) not in (bool, float, int, str):
-            log_and_error(f"Non-scalar value {value} found at {current_path}", log)
-        if isinstance(config, dict):
-            output_lines.append(f"{item}={value}")
-    print("\n".join(sorted(output_lines)) if isinstance(config, dict) else f"{keys[-1]}={config}")
+    for key, value in config.items():
+        if type(value) not in (bool, float, int, list, str):
+            log_and_error(f"Non-dictionary value {value} found at {current_path}", log)
+        output_lines.append(f"{key}={value}")
+    print("\n".join(sorted(output_lines)))

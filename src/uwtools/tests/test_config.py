@@ -853,18 +853,15 @@ def test_print_config_section_yaml_for_nonscalar():
     section = ["o3mr"]
     with raises(UWConfigError) as e:
         config.print_config_section(config_obj.data, section, log=Logger())
-    assert "Non-scalar value" in str(e.value)
+    assert "Non-dictionary value" in str(e.value)
 
 
-def test_print_config_section_yaml_list(capsys):
+def test_print_config_section_yaml_list():
     config_obj = config.YAMLConfig(fixture_path("srw_example.yaml"))
     section = ["FV3GFS", "nomads", "file_names", "grib2", "anl"]
-    config.print_config_section(config_obj.data, section, log=Logger())
-    actual = capsys.readouterr().out
-    expected = """
-anl=['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
-""".lstrip()
-    assert actual == expected
+    with raises(UWConfigError) as e:
+        config.print_config_section(config_obj.data, section, log=Logger())
+    assert "must be a dictionary" in str(e.value)
 
 
 def test_print_config_section_yaml_list_nonscalar():
@@ -872,7 +869,7 @@ def test_print_config_section_yaml_list_nonscalar():
     section = ["models"]
     with raises(UWConfigError) as e:
         config.print_config_section(config_obj.data, section, log=Logger())
-    assert "Non-scalar value" in str(e.value)
+    assert "must be a dictionary" in str(e.value)
 
 
 def test_print_config_section_yaml_not_dict():
