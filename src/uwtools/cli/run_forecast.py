@@ -20,22 +20,18 @@ def main() -> None:
     """
     args = parse_args(sys.argv[1:])
     name = "run-forecast"
-    cli_helpers.setup_logging(
+    log = cli_helpers.setup_logging(
         log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
     )
 
     forecast_class = getattr(forecast, f"{args.forecast_model}Forecast")
-    forecast_obj = forecast_class()
+    forecast_obj = forecast_class(
+        config_file=args.config_file,
+        dry_run=args.dry_run,
+        log=log,
+    )
     try:
-        forecast_obj.run(
-            config_file=args.config_file,
-            dry_run=args.dry_run,
-            forecast_app=args.forecast_app,
-            forecast_model=args.forecast_model,
-            log_file=args.log_file,
-            quiet=args.quiet,
-            verbose=args.verbose,
-        )
+        forecast_obj.run()
     except UWConfigError as e:
         sys.exit(str(e))
 

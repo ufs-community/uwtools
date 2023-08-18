@@ -38,21 +38,17 @@ def test_main(files):
     )
     with patch.object(run_forecast, "parse_args", return_value=args):
         with patch.object(run_forecast.forecast, "FV3Forecast") as fv3fcst:
-            run_forecast.main()
-            fv3fcst.assert_called_once_with(
-                config_file=args.config_file,
-                dry_run=True,
-                log_file=args.log_file,
-                forecast_app=args.forecast_app,
-                forecast_model=args.forecast_model,
-                quiet=False,
-                verbose=False,
-            )
-            # Test failure:
-            fv3fcst.side_effect = run_forecast.UWConfigError()
-            with patch.object(run_forecast.sys, "exit") as exit_:
+            with patch.object(run_forecast.cli_helpers, "setup_logging") as setuplogging:
                 run_forecast.main()
-                assert exit_.called_once_with("")
+                fv3fcst.assert_called_once_with(
+                    config_file=args.config_file,
+                    dry_run=True,
+                    log=setuplogging(),
+                )
+                # Test failure:
+                fv3fcst().run.side_effect = run_forecast.UWConfigError
+                with raises(SystemExit):
+                    run_forecast.main()
 
 
 @pytest.mark.parametrize("sw", [ns(c="-c"), ns(c="--config-file")])
