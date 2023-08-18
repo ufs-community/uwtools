@@ -654,6 +654,20 @@ class FieldTableConfig(YAMLConfig):
             file_name.write("\n".join(lines))
 
 
+# Private functions
+
+
+def _log_and_error(msg: str, log: Logger) -> None:
+    """
+    Will log a user-provided error message and raise a UWConfigError with the same message.
+    """
+    log.error(msg)
+    raise UWConfigError(msg)
+
+
+# Public functions
+
+
 def create_config_obj(
     input_base_file: str,
     compare: bool = False,
@@ -755,14 +769,6 @@ def create_config_obj(
                 dump_method(path=outfile, cfg=config_obj)
 
 
-def log_and_error(msg: str, log: Logger) -> None:
-    """
-    Will log a user-provided error message and raise a UWConfigError with the same message.
-    """
-    log.error(msg)
-    raise UWConfigError(msg)
-
-
 def print_config_section(config: dict, section_path: List[str], log: Logger) -> None:
     """
     Descends into the config via the given section keys, then prints the contents of the located
@@ -775,13 +781,13 @@ def print_config_section(config: dict, section_path: List[str], log: Logger) -> 
         try:
             subconfig = config[section]
         except KeyError:
-            log_and_error(f"Bad config path: {current_path}", log)
+            _log_and_error(f"Bad config path: {current_path}", log)
         if not isinstance(subconfig, dict):
-            log_and_error(f"Value at {current_path} must be a dictionary", log)
+            _log_and_error(f"Value at {current_path} must be a dictionary", log)
         config = subconfig
     output_lines = []
     for key, value in config.items():
         if type(value) not in (bool, float, int, str):
-            log_and_error(f"Non-scalar value {value} found at {current_path}", log)
+            _log_and_error(f"Non-scalar value {value} found at {current_path}", log)
         output_lines.append(f"{key}={value}")
     print("\n".join(sorted(output_lines)))

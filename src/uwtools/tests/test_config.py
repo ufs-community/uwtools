@@ -872,7 +872,7 @@ def test_print_config_section_yaml_not_dict():
     assert "must be a dictionary" in str(e.value)
 
 
-def test_log_and_error():
+def test__log_and_error():
     with raises(UWConfigError) as e:
-        config.log_and_error("Must be scalar value", log=Logger())
+        config._log_and_error("Must be scalar value", log=Logger())
     assert "Must be scalar value" in str(e.value)
