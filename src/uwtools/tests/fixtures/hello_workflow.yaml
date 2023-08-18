@@ -36,4 +36,3 @@ rocoto:
           taskdep:
             attrs:
               task: hello
-
