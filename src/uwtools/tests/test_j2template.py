@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.j2template module.
 """
@@ -19,8 +19,8 @@ def testdata():
 
 
 def validate(template):
-    assert template.configure_obj.get("greeting") == "Hello"
-    assert template.configure_obj.get("recipient") == "the world"
+    assert template._configure_obj.get("greeting") == "Hello"
+    assert template._configure_obj.get("recipient") == "the world"
     assert template.render_template() == "Hello to the world"
     assert template.undeclared_variables == {"greeting", "recipient"}
 
