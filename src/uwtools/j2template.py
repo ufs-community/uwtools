@@ -30,7 +30,7 @@ class J2Template:
         :param template_str: An in-memory Jinja2 template.
         :raises RuntimeError: If neither a template file or path is provided.
         """
-        self._log = logging.getLogger(kwargs.get("log_name"))
+        self.log = logging.getLogger(kwargs.get("log_name"))
         self._configure_obj = configure_obj
         self._template_path = template_path
         self._template_str = template_str
@@ -51,7 +51,7 @@ class J2Template:
         :param output_path: Path to file to write.
         """
         msg = f"Writing rendered template to output file: {output_path}"
-        self._log.debug(msg)
+        self.log.debug(msg)
         with open(output_path, "w+", encoding="utf-8") as file_:
             print(self.render_template(), file=file_)
 
