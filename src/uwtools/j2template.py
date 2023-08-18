@@ -51,7 +51,7 @@ class J2Template:
         :param output_path: Path to file to write.
         """
         msg = f"Writing rendered template to output file: {output_path}"
-        self._log.debug(msg)
+        self.log.debug(msg)
         with open(output_path, "w+", encoding="utf-8") as file_:
             print(self.render_template(), file=file_)
 
