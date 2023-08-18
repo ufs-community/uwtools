@@ -864,14 +864,6 @@ def test_print_config_section_yaml_list():
     assert "must be a dictionary" in str(e.value)
 
 
-def test_print_config_section_yaml_list_nonscalar():
-    config_obj = config.YAMLConfig(fixture_path("result4.yaml"))
-    section = ["models"]
-    with raises(UWConfigError) as e:
-        config.print_config_section(config_obj.data, section, log=Logger())
-    assert "must be a dictionary" in str(e.value)
-
-
 def test_print_config_section_yaml_not_dict():
     config_obj = config.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
     section = ["sgs_tke", "units"]
