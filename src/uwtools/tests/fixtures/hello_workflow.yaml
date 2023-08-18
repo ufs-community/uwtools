@@ -1,0 +1,39 @@
+rocoto:
+  attrs:
+    realtime: false
+    scheduler: slurm
+  cycledefs:
+    howdy: 
+      - 202209290000 202209300000 06:00:00
+  entities:
+    ACCOUNT: myaccount
+    FOO: test.log
+  log: /some/path/to/&FOO;
+  tasks:
+    task_hello:
+      attrs:
+        cycledefs: howdy
+        maxtries: "2"
+      account: "&ACCOUNT;"
+      command: "echo hello $person"
+      jobname: hello
+      nodes: 1:ppn=1
+      walltime: 00:01:00
+      envars:
+        person: siri
+    metatask_ensemble_hello:
+      var:
+        member: foo bar baz
+      task_hello_#member#:
+        attrs:
+          cycledefs: howdy
+          maxtries: "1"
+        account: "&ACCOUNT;"
+        command: "echo hello #member#"
+        nodes: 1:ppn=1
+        walltime: 00:01:00
+        dependency:
+          taskdep:
+            attrs:
+              task: hello
+
