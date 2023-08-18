@@ -10,7 +10,7 @@ import jsonschema
 from uwtools.config import YAMLConfig
 from uwtools.logger import Logger
 
-# Public
+# Public functions
 
 
 def config_is_valid(config_file: str, schema_file: str, log: Logger) -> bool:
@@ -42,7 +42,7 @@ def config_is_valid(config_file: str, schema_file: str, log: Logger) -> bool:
     return True
 
 
-# Private
+# Private functions
 
 
 def _bad_paths(config: dict, schema: dict) -> List[str]:
