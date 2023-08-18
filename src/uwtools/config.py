@@ -769,13 +769,13 @@ def create_config_obj(
                 dump_method(path=outfile, cfg=config_obj)
 
 
-def print_config_section(config: dict, section_path: List[str], log: Logger) -> None:
+def print_config_section(config: dict, key_path: List[str], log: Logger) -> None:
     """
-    Descends into the config via the given section keys, then prints the contents of the located
-    subtree as key=value pairs, one per line.
+    Descends into the config via the given keys, then prints the contents of the located subtree as
+    key=value pairs, one per line.
     """
     keys = []
-    for section in section_path:
+    for section in key_path:
         keys.append(section)
         current_path = " -> ".join(keys)
         try:
