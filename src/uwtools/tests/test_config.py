@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code,missing-function-docstring,redefined-outer-name
+# pylint: disable=duplicate-code,missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config module.
 """
