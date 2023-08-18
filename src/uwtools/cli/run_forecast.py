@@ -19,15 +19,23 @@ def main() -> None:
     Parses arguments provided by the user and passes to the Forecast driver class to be run.
     """
     args = parse_args(sys.argv[1:])
-    name = "validate-config"
-    log = cli_helpers.setup_logging(
+    name = "run-forecast"
+    cli_helpers.setup_logging(
         log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
     )
 
     forecast_class = getattr(forecast, f"{args.forecast_model}Forecast")
     forecast_obj = forecast_class()
     try:
-        forecast_obj.run(config_file=args.config_file, dry_run=args.dry_run, log=log)
+        forecast_obj.run(
+            config_file=args.config_file,
+            dry_run=args.dry_run,
+            forecast_app=args.forecast_app,
+            forecast_model=args.forecast_model,
+            log_file=args.log_file,
+            quiet=args.quiet,
+            verbose=args.verbose,
+        )
     except UWConfigError as e:
         sys.exit(str(e))
 

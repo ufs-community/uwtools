@@ -9,6 +9,7 @@ import os
 import shutil
 import subprocess
 import sys
+from collections.abc import Mapping
 from importlib import resources
 from typing import Dict, Optional
 
@@ -26,7 +27,7 @@ class FV3Forecast(Driver):
 
     # Public methods
 
-    def batch_script(self, job_resources) -> BatchScript:  # pragma: no cover
+    def batch_script(self, job_resources: Mapping) -> BatchScript:  # pragma: no cover
         """
         Write to disk, for submission to the batch scheduler, a script to run FV3.
         """
@@ -148,7 +149,7 @@ class FV3Forecast(Driver):
         # Read in the config file.
         experiment_config = config.YAMLConfig(self._config_file)
 
-        # define forecast app and model
+        # Define forecast app and model.
         forecast_app = experiment_config["forecast"]["app"]
         forecast_model = experiment_config["forecast"]["model"]
         machine = experiment_config["platform"]["machine"]

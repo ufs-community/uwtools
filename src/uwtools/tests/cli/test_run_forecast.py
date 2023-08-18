@@ -3,7 +3,6 @@
 Tests for the run-forecast CLI.
 """
 
-# from itertools import chain
 from types import SimpleNamespace as ns
 from unittest.mock import patch
 
