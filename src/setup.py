@@ -25,16 +25,7 @@ name_conda = meta["name"]
 name_py = name_conda.replace("-", "_")
 
 setup(
-    entry_points={
-        "console_scripts": [
-            "atparse-to-jinja2 = %s.cli.atparse_to_jinja2:main" % name_py,
-            "experiment-manager = %s.cli.experiment_manager:main" % name_py,
-            "run-forecast = %s.cli.run_forecast:main" % name_py,
-            "set-config = %s.cli.set_config:main" % name_py,
-            "template = %s.cli.templater:main" % name_py,
-            "validate-config = %s.cli.validate_config:main" % name_py,
-        ]
-    },
+    entry_points={"console_scripts": ["uw = %s.cli_new:main" % name_py]},
     name=name_conda,
     packages=find_packages(
         exclude=["%s.tests" % name_py],
