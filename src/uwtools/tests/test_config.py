@@ -853,7 +853,7 @@ def test_print_config_section_yaml_for_nonscalar():
     section = ["o3mr"]
     with raises(UWConfigError) as e:
         config.print_config_section(config_obj.data, section, log=Logger())
-    assert "Non-dictionary value" in str(e.value)
+    assert "Non-scalar value" in str(e.value)
 
 
 def test_print_config_section_yaml_list():

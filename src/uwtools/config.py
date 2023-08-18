@@ -781,7 +781,7 @@ def print_config_section(config: dict, section_path: List[str], log: Logger) -> 
         config = subconfig
     output_lines = []
     for key, value in config.items():
-        if type(value) not in (bool, float, int, list, str):
-            log_and_error(f"Non-dictionary value {value} found at {current_path}", log)
+        if type(value) not in (bool, float, int, str):
+            log_and_error(f"Non-scalar value {value} found at {current_path}", log)
         output_lines.append(f"{key}={value}")
     print("\n".join(sorted(output_lines)))
