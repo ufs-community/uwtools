@@ -2,65 +2,66 @@
 """
 Tests for uwtools.rocoto module.
 """
-
+import yaml
 from uwtools import rocoto
-
+from importlib import resources
+from uwtools.tests import support
 # Test functions
 
 
 def test_add_jobname(capsys):
-    expected = {
+    expected = yaml.safe_load("""
 task_hello:
+  command: echo hello 
   jobname: hello
-  ...
 metatask_howdy:
   var:
     mem: 1 2 3
   task_howdy_#mem#:
+    command: echo hello 
     jobname: howdy_#mem#
-    ...
   task_hola_#mem#:
+    command: echo hello 
     jobname: hola_#mem#
-    ...
   metatask_hey_#mem#:
     var:
       day: mon tues
     task_hey_#mem#_#day#:
+      command: echo hello 
       jobname: hey_#mem#_#day#
-      ...
-}
+""")
 
-    tasks = {
+    tasks = yaml.safe_load("""
 task_hello:
-  ...
+  command: echo hello
 metatask_howdy:
   var:
     mem: 1 2 3
   task_howdy_#mem#:
-    ...
+    command: echo hello 
   task_hola_#mem#:
-    ...
+    command: echo hello
   metatask_hey_#mem#:
     var:
       day: mon tues
     task_hey_#mem#_#day#:
-      ... 
-}
+      command: echo hello
+""")
 
-    config.rocoto._add_jobname(tasks)
-    actual = capsys.readoutter().out
-    assert expected == actual
+    rocoto._add_jobname(tasks)
+    assert expected == tasks
 
 
 def test_write_rocoto_xml(tmp_path):
-    pass
-    # r = rocoto_module.write_rocoto_xml(input_yaml, input_template, rendered_output)
-    """
-    r = rocoto.RocotoXML()
-    r.write(output_dir=tmp_path)
-    # pylint: disable=line-too-long
-    expected = "<?xml version='1.0' encoding='utf-8'?>\n<workflow>\n  <log>foo then bar</log>\n  <task>baz then qux</task>\n</workflow>"
-    with open(tmp_path / "contents.xml", "r", encoding="utf-8") as f:
-        assert expected == f.read()
-    """
+    input_yaml = support.fixture_path("hello_workflow.yaml")
+    with resources.as_file(resources.files("uwtools.resources")) as resc:
+        input_template=resc / "rocoto.jinja2"
+    output = tmp_path / "rendered.xml"
+    rocoto.write_rocoto_xml(input_yaml=input_yaml, input_template=str(input_template), rendered_output=str(output))
+
+    expected = support.fixture_path("hello_workflow.xml")
+    assert True == support.compare_files(expected, output)
+    #with open(expected, "r", encoding="utf-8") as f:
+    #    with open(tmp_path / output, "r", encoding="utf-8") as f2:
+    #        assert f.read() == f2.read()
 
