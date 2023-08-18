@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code,missing-function-docstring,redefined-outer-name
+# pylint: disable=duplicate-code,missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.config module.
 """
@@ -22,6 +22,7 @@ from pytest import fixture, raises
 
 from uwtools import config, exceptions
 from uwtools.exceptions import UWConfigError
+from uwtools.logger import Logger
 from uwtools.tests.support import compare_files, fixture_path, line_in_lines, msg_in_caplog
 from uwtools.utils import cli_helpers
 
@@ -810,3 +811,68 @@ def test_YAMLConfig__load_unexpected_error(tmp_path):
         with raises(UWConfigError) as e:
             config.YAMLConfig(config_path=cfgfile)
         assert msg in str(e.value)
+
+
+def test_print_config_section_ini(capsys):
+    config_obj = config.INIConfig(fixture_path("simple3.ini"))
+    section = ["dessert"]
+    config.print_config_section(config_obj.data, section, log=Logger())
+    actual = capsys.readouterr().out
+    expected = """
+flavor={{flavor}}
+servings=0
+side=False
+type=pie
+""".lstrip()
+    assert actual == expected
+
+
+def test_print_config_section_ini_missing_section():
+    config_obj = config.INIConfig(fixture_path("simple3.ini"))
+    section = ["sandwich"]
+    msg = "Bad config path: sandwich"
+    with raises(UWConfigError) as e:
+        config.print_config_section(config_obj.data, section, log=Logger())
+    assert msg in str(e.value)
+
+
+def test_print_config_section_yaml(capsys):
+    config_obj = config.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
+    section = ["sgs_tke", "profile_type"]
+    config.print_config_section(config_obj.data, section, log=Logger())
+    actual = capsys.readouterr().out
+    expected = """
+name=fixed
+surface_value=0.0
+""".lstrip()
+    assert actual == expected
+
+
+def test_print_config_section_yaml_for_nonscalar():
+    config_obj = config.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
+    section = ["o3mr"]
+    with raises(UWConfigError) as e:
+        config.print_config_section(config_obj.data, section, log=Logger())
+    assert "Non-scalar value" in str(e.value)
+
+
+def test_print_config_section_yaml_list():
+    config_obj = config.YAMLConfig(fixture_path("srw_example.yaml"))
+    section = ["FV3GFS", "nomads", "file_names", "grib2", "anl"]
+    with raises(UWConfigError) as e:
+        config.print_config_section(config_obj.data, section, log=Logger())
+    assert "must be a dictionary" in str(e.value)
+
+
+def test_print_config_section_yaml_not_dict():
+    config_obj = config.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
+    section = ["sgs_tke", "units"]
+    with raises(UWConfigError) as e:
+        config.print_config_section(config_obj.data, section, log=Logger())
+    assert "must be a dictionary" in str(e.value)
+
+
+def test__log_and_error():
+    with raises(UWConfigError) as e:
+        config._log_and_error("Must be scalar value", log=Logger())
+    assert "Must be scalar value" in str(e.value)
