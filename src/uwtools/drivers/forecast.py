@@ -180,13 +180,24 @@ class FV3Forecast(Driver):
             log.info(f"Configuration: {forecast_app} {forecast_model} {machine}")
             log.info(f"Run command: {run_command} {batch_script}")
             return
+
         # Run the job.
-        subprocess.run(
-            f"{run_command} {batch_script}",
-            stderr=subprocess.STDOUT,
-            check=False,
-            shell=True,
-        )
+        if self._outfile is not None:
+            with open(self._outfile, "w", encoding="utf-8") as f:
+                subprocess.run(
+                    f"{run_command} {batch_script}",
+                    stderr=subprocess.STDOUT,
+                    check=False,
+                    shell=True,
+                    stdout=f,
+                )
+        else:
+            subprocess.run(
+                f"{run_command}",
+                stderr=subprocess.STDOUT,
+                check=False,
+                shell=True,
+            )
 
     def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:
         """

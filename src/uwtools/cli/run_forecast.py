@@ -28,6 +28,7 @@ def main() -> None:
     forecast_obj = forecast_class(
         config_file=args.config_file,
         dry_run=args.dry_run,
+        outfile=args.outfile,
         log=log,
     )
     try:
@@ -77,6 +78,15 @@ def parse_args(args: List[str]) -> Namespace:
         "--forecast-model",
         choices={"CCPP", "CICE", "CMEPS", "FV3", "MOM6"},
         help="The experiment to be run",
+    )
+    optional.add_argument(
+        "-o",
+        "--outfile",
+        help=(
+            "Optional path to a batch script to be generated and run. "
+            "Default is to run the mpi command directly. "
+        ),
+        metavar="FILE",
     )
     optional.add_argument(
         "-q",

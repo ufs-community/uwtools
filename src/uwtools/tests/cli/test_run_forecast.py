@@ -33,6 +33,7 @@ def test_main(files):
         log_file=logfile,
         forecast_app="SRW",
         forecast_model="FV3",
+        outfile=None,
         quiet=False,
         verbose=False,
     )
@@ -44,6 +45,7 @@ def test_main(files):
                     config_file=args.config_file,
                     dry_run=True,
                     log=setuplogging(),
+                    outfile=None,
                 )
                 # Test failure:
                 fv3fcst().run.side_effect = run_forecast.UWConfigError

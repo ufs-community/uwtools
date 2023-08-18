@@ -15,7 +15,13 @@ class Driver(ABC):
     An abstract class representing drivers for various NWP tools.
     """
 
-    def __init__(self, config_file: str, log: Optional[Logger] = None, dry_run: bool = False):
+    def __init__(
+        self,
+        config_file: str,
+        log: Optional[Logger] = None,
+        dry_run: bool = False,
+        outfile: Optional[str] = None,
+    ):
         """
         Initialize the driver.
         """
@@ -23,6 +29,7 @@ class Driver(ABC):
         self.log = log if log is not None else Logger()
         self._dry_run = dry_run
         self._config_file = config_file
+        self._outfile = outfile
         self._validate()
 
     # Public methods
