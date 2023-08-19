@@ -88,7 +88,7 @@ def _set_up_config_obj(
         cfg = cfg_class(config_file)
         log.debug("Read initial config from %s", config_file)
     else:
-        cfg = dict(os.environ)
+        cfg = dict(os.environ)  # Do not modify os.environ: Make a copy.
         log.debug("Initial config set from environment")
     if key_eq_val_pairs:
         supplemental = cli_helpers.dict_from_key_eq_val_strings(key_eq_val_pairs)
