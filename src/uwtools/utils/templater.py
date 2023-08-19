@@ -1,5 +1,5 @@
 """
-Support for rendering a Jinja2 template using values from an input file.
+Support for rendering a Jinja2 template.
 """
 import os
 from typing import List, Optional
