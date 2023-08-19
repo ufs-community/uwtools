@@ -28,7 +28,7 @@ class J2Template:
         :param configure_obj: Key/value pairs needed to render the provided template.
         :param template_path: Path to a Jinja2 template file.
         :param template_str: An in-memory Jinja2 template.
-        :raises RuntimeError: If neither a template file or path is provided.
+        :raises: RuntimeError: If neither a template file or path is provided.
         """
         self.log = logging.getLogger(kwargs.get("log_name"))
         self._configure_obj = configure_obj
@@ -59,7 +59,7 @@ class J2Template:
         """
         Render the Jinja2 template so that it's available in memory.
 
-        :return A string containing a rendered Jinja2 template.
+        :return: A string containing a rendered Jinja2 template.
         """
         return self._template.render(self._configure_obj)
 
@@ -68,7 +68,7 @@ class J2Template:
         """
         Returns the names of variables needed to render the template.
 
-        :return Names of variables needed to render the template.
+        :return: Names of variables needed to render the template.
         """
         if self._template_str is not None:
             j2_parsed = self._j2env.parse(self._template_str)
@@ -85,8 +85,8 @@ class J2Template:
         """
         Load the Jinja2 template from the file provided.
 
-        :param template_path: Filesystem path to the Jinja2 template file. :return The Jinja2
-            template object.
+        :param template_path: Filesystem path to the Jinja2 template file.
+        :return: The Jinja2 template object.
         """
         self._j2env = Environment(loader=FileSystemLoader(searchpath="/"))
         _register_filters(self._j2env)
@@ -97,7 +97,8 @@ class J2Template:
         """
         Load the Jinja2 template from the string provided.
 
-        :param template: An in-memory Jinja2 template. :return The Jinja2 template object.
+        :param template: An in-memory Jinja2 template.
+        :return: The Jinja2 template object.
         """
         self._j2env = Environment(loader=BaseLoader(), **self._loader_args)
         _register_filters(self._j2env)
@@ -111,8 +112,8 @@ def path_join(path_components: List[str]) -> str:
     """
     A Jinja2 filter definition for joining paths.
 
-    :param path_components: The filesystem path components to join into a single path. :return The
-        joined path
+    :param path_components: The filesystem path components to join into a single path.
+    :return: The joined path.
     """
     return os.path.join(*path_components)
 
