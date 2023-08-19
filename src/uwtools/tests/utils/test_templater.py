@@ -32,28 +32,25 @@ def input_template(tmp_path):
     return str(path)
 
 
-def test_render(config_file, input_template, tmp_path):
-    outfile = str(tmp_path / "out.txt")
+def render(config_file, input_template, **kwargs):
     templater.render(
         config_file=config_file,
         key_eq_val_pairs=[],
         input_template=input_template,
-        outfile=outfile,
         log=Logger(),
+        **kwargs,
     )
+
+
+def test_render(config_file, input_template, tmp_path):
+    outfile = str(tmp_path / "out.txt")
+    render(config_file, input_template, outfile=outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read().strip() == "roses are red, violets are blue"
 
 
 def test_render_dry_run(caplog, config_file, input_template):
-    templater.render(
-        config_file=config_file,
-        key_eq_val_pairs=[],
-        input_template=input_template,
-        outfile="/dev/null",
-        log=Logger(),
-        dry_run=True,
-    )
+    render(config_file, input_template, outfile="/dev/null", dry_run=True)
     logmsgs = (record.msg for record in caplog.records)
     assert "roses are red, violets are blue" in logmsgs
 
@@ -66,27 +63,14 @@ def test_render_values_missing(caplog, config_file, input_template):
     with open(config_file, "w", encoding="utf-8") as f:
         f.write(yaml.dump(cfgobj))
     with raises(ValueError):
-        templater.render(
-            config_file=config_file,
-            key_eq_val_pairs=[],
-            input_template=input_template,
-            outfile="/dev/null",
-            log=Logger(),
-        )
+        render(config_file, input_template, outfile="/dev/null")
     logmsgs = (record.msg for record in caplog.records)
     assert "Template requires variables that are not provided" in logmsgs
     assert "roses" in logmsgs
 
 
 def test_render_values_needed(caplog, config_file, input_template):
-    templater.render(
-        config_file=config_file,
-        key_eq_val_pairs=[],
-        input_template=input_template,
-        outfile="/dev/null",
-        log=Logger(),
-        values_needed=True,
-    )
+    render(config_file, input_template, outfile="/dev/null", values_needed=True)
     logmsgs = (record.msg for record in caplog.records)
     for var in ("roses", "violets"):
         assert var in logmsgs
