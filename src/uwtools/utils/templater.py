@@ -63,7 +63,6 @@ def render(
         rendered_template = template.render_template()
         for line in rendered_template.split("\n"):
             log.info(line)
-        # log.info(rendered_template)
         return
 
     # Write rendered template to file.
