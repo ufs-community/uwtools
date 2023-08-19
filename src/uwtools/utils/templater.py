@@ -77,7 +77,7 @@ def _set_up_config_obj(config_file: str, config_items: List[str], log: Logger) -
         cfg = dict(os.environ)  # Do not modify os.environ: Make a copy.
         log.debug("Environment variables will be used to fill template.")
     if config_items:
-        user_settings = cli_helpers.dict_from_config_args(config_items)
+        user_settings = cli_helpers.dict_from_key_eq_val_strings(config_items)
         cfg.update(user_settings)
         log.debug("Overwriting config with settings on command line")
     return cfg

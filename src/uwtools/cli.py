@@ -34,7 +34,7 @@ def add_arg_input_template(parser: Group) -> None:
         help="Path to an atparse template file",
         metavar="FILE",
         required=True,
-        type=cli_helpers.path_if_file_exists,
+        type=cli_helpers.path_if_it_exists,
     )
 
 
