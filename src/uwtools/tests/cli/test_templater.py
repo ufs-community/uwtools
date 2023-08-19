@@ -223,7 +223,6 @@ J2Template._load_file INPUT Args:
     actual = capsys.readouterr().out.split("\n")
     for line in expected.split("\n"):
         assert any(re.match(r"^.*: %s$" % re.escape(line), x) for x in actual)
-        # assert line_in_lines(line, actual)
 
     # Test quiet level.
 
