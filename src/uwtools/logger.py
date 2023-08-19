@@ -174,7 +174,7 @@ def verbose(_func=None):
 
             func_name = f"{self.__class__.__name__}.{func.__name__}"
             log.debug("%s INPUT Args:", func_name)
-            log.debug("\t%s", formatted_arguments)
+            log.debug("%s", formatted_arguments)
             try:
                 # Capture the return value from the decorated function:
                 value = func(self, *args, **kwargs)
