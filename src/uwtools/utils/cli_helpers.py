@@ -57,7 +57,7 @@ def path_if_it_exists(path: str) -> str:
 
 
 def setup_logging(
-    log_file: str,
+    log_file: Optional[str],
     log_name: Optional[str] = None,
     quiet: bool = False,
     verbose: bool = False,

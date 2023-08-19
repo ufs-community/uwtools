@@ -1,7 +1,8 @@
 """
-Support for rendering a Jinja2 template using values from an input file.
+Support for rendering Jinja2 templates.
 """
-from typing import List
+import os
+from typing import List, Optional
 
 from uwtools import config
 from uwtools.j2template import J2Template
@@ -10,7 +11,7 @@ from uwtools.utils import cli_helpers
 
 
 def render(
-    config_file: str,
+    config_file: Optional[str],
     key_eq_val_pairs: List[str],
     input_template: str,
     outfile: str,
@@ -38,7 +39,7 @@ def render(
     # then return.
 
     if values_needed:
-        log.info("Values needed to render template %s are:" % input_template)
+        log.info("Values needed to render this template are:")
         for var in sorted(undeclared_variables):
             log.info(var)
         return
@@ -50,7 +51,7 @@ def render(
         if var not in cfg.keys():
             missing.append(var)
     if missing:
-        msg = "Template requires variables that are not provided"
+        msg = "Template requires values that were not provided:"
         log.critical(msg)
         for key in missing:
             log.critical(key)
@@ -60,7 +61,8 @@ def render(
 
     if dry_run:
         rendered_template = template.render_template()
-        log.info(rendered_template)
+        for line in rendered_template.split("\n"):
+            log.info(line)
         return
 
     # Write rendered template to file.
@@ -68,20 +70,26 @@ def render(
     template.dump_file(outfile)
 
 
-def _set_up_config_obj(config_file: str, key_eq_val_pairs: List[str], log: Logger) -> dict:
+def _set_up_config_obj(
+    config_file: Optional[str], key_eq_val_pairs: List[str], log: Logger
+) -> dict:
     """
-    Return a config object based on the given file and supplemented with values parsed from given
-    "key=value" strings.
+    Return a config object based on an input file, if given, or otherwise the shell environment; and
+    supplemented with override values from given "key=value" strings.
 
     :param config_file: The config file to base the config object on.
     :param keq_eq_val_pairs: "key=value" strings to supplement config-file values.
     :param log: A logger.
     :returns: A config object.
     """
-    config_type = cli_helpers.get_file_type(config_file)
-    cfg_class = getattr(config, f"{config_type}Config")
-    cfg = cfg_class(config_file)
-    log.debug("Read initial config from %s", config_file)
+    if config_file:
+        config_type = cli_helpers.get_file_type(config_file)
+        cfg_class = getattr(config, f"{config_type}Config")
+        cfg = cfg_class(config_file)
+        log.debug("Read initial config from %s", config_file)
+    else:
+        cfg = dict(os.environ)  # Do not modify os.environ: Make a copy.
+        log.debug("Initial config set from environment")
     if key_eq_val_pairs:
         supplemental = cli_helpers.dict_from_key_eq_val_strings(key_eq_val_pairs)
         cfg.update(supplemental)

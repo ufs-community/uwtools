@@ -64,8 +64,8 @@ def test_render_values_missing(caplog, config_file, input_template):
         f.write(yaml.dump(cfgobj))
     with raises(ValueError):
         render(config_file, input_template, outfile="/dev/null")
-    logmsgs = (record.msg for record in caplog.records)
-    assert "Template requires variables that are not provided" in logmsgs
+    logmsgs = list(record.msg for record in caplog.records)
+    assert "Template requires values that were not provided:" in logmsgs
     assert "roses" in logmsgs
 
 

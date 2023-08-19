@@ -3,7 +3,8 @@ Utilities for rendering Jinja2 templates.
 """
 
 import re
-from typing import Optional
+import sys
+from typing import IO, Optional
 
 
 def convert(input_template: str, outfile: Optional[str] = None, dry_run: bool = False) -> None:
@@ -16,16 +17,19 @@ def convert(input_template: str, outfile: Optional[str] = None, dry_run: bool = 
     :param dry_run: Run in dry-run mode?
     :raises: RuntimeError if neither an output file or dry-run are specified.
     """
-    with open(input_template, "r", encoding="utf-8") as atparsetemplate:
-        if dry_run:
-            for line in atparsetemplate:
-                print(_replace(line.strip()))
-        elif outfile:
-            with open(outfile, "w", encoding="utf-8") as jinja2template:
-                for line in atparsetemplate:
-                    jinja2template.write(_replace(line))
-        else:
-            raise RuntimeError("Provide an output path or run in dry-run mode.")
+
+    def write(f_out: IO) -> None:
+        with open(input_template, "r", encoding="utf-8") as f_in:
+            for line in f_in:
+                print(_replace(line.strip()), file=f_out)
+
+    if dry_run:
+        write(sys.stdout)
+    elif outfile:
+        with open(outfile, "w", encoding="utf-8") as out_f:
+            write(out_f)
+    else:
+        raise RuntimeError("Provide an output path or specify dry-run mode.")
 
 
 def _replace(atline: str) -> str:
