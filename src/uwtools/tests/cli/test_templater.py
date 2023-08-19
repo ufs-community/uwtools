@@ -227,12 +227,10 @@ J2Template._load_file INPUT Args:
 
     # Test quiet level.
 
-    # # #PM# WHAT'S THE RATIONALE HERE?
-
-    # with raises(argparse.ArgumentError):
-    #     argv = ["test", "-i", infile, "-q"]
-    #     with patch.object(templater.sys, "argv", argv):
-    #         templater.main()
+    with raises(argparse.ArgumentError):
+        argv = ["test", "-i", infile, "-q"]
+        with patch.object(templater.sys, "argv", argv):
+            templater.main()
 
 
 @pytest.mark.parametrize(
