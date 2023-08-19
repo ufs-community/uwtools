@@ -1,9 +1,7 @@
 """
-Support for rendering a Jinja2 template using user-supplied configuration options via YAML or
-environment variables.
+Support for rendering a Jinja2 template using values from an input file.
 """
-import os
-from typing import List
+from typing import List, Optional
 
 from uwtools import config
 from uwtools.j2template import J2Template
@@ -12,8 +10,8 @@ from uwtools.utils import cli_helpers
 
 
 def render(
-    config_file: str,
-    config_items: List[str],
+    config_file: Optional[str],
+    key_eq_val_pairs: List[str],
     input_template: str,
     outfile: str,
     log: Logger,
@@ -21,63 +19,75 @@ def render(
     values_needed: bool = False,
 ) -> None:
     """
-    Render a Jinja2 template using user-supplied configuration options via YAML or environment
-    variables.
+    Render a Jinja2 template using values fro an input file.
+
+    :param config_file: Path to the config file supplying values to render the template.
+    :param keq_eq_val_pairs: "key=value" strings to supplement config-file values.
+    :param input_template: Path to the Jinja2 template file to render.
+    :param outfile: Path to the file to write the rendered Jinja2 template to.
+    :param log: A logger.
+    :param dry_run: Run in dry-run mode?
+    :param values_needed: Just issue a report about variables needed to render the template? :raises
+        ValueError if values needed to render the template are missing.
     """
-    cfg = _set_up_config_obj(config_file=config_file, config_items=config_items, log=log)
-
-    # Instantiate Jinja2 environment and template.
+    cfg = _set_up_config_obj(config_file=config_file, key_eq_val_pairs=key_eq_val_pairs, log=log)
     template = J2Template(cfg, input_template, log_name=log.name)
-
     undeclared_variables = template.undeclared_variables
 
+    # If a report of variables required to render the template was requested, make that report and
+    # then return.
+
     if values_needed:
-        # Gather the undefined template variables.
-        log.info("Values needed for this template are:")
+        log.info("Values needed to render template %s are:" % input_template)
         for var in sorted(undeclared_variables):
             log.info(var)
         return
 
-    # Check for missing values.
+    # Check for missing values required to render the template. If found, report them and abort.
+
     missing = []
     for var in undeclared_variables:
         if var not in cfg.keys():
             missing.append(var)
-
     if missing:
-        log.critical("ERROR: Template requires variables that are not provided")
-        for key in missing:
-            log.critical(f"  {key}")
-        msg = "Missing values needed by template"
+        msg = "Template requires variables that are not provided"
         log.critical(msg)
+        for key in missing:
+            log.critical(key)
         raise ValueError(msg)
 
+    # In dry-run mode, display the rendered template and then return.
+
     if dry_run:
-        # Apply switch to allow user to view the results of rendered template
-        # instead of writing to disk. Render the template with the specified
-        # config object.
         rendered_template = template.render_template()
         log.info(rendered_template)
-    else:
-        # Write out rendered template to file.
-        template.dump_file(outfile)
+        return
+
+    # Write rendered template to file.
+
+    template.dump_file(outfile)
 
 
-def _set_up_config_obj(config_file: str, config_items: List[str], log: Logger) -> dict:
+def _set_up_config_obj(
+    config_file: Optional[str], key_eq_val_pairs: List[str], log: Logger
+) -> dict:
     """
-    Return a dictionary config object from a user-supplied config, the shell environment, and the
-    command line arguments.
+    Return a config object based on an input file, if given, and supplemented with values parsed
+    from given "key=value" strings.
+
+    :param config_file: The config file to base the config object on.
+    :param keq_eq_val_pairs: "key=value" strings to supplement config-file values.
+    :param log: A logger.
+    :returns: A config object.
     """
+    cfg = {}
     if config_file:
         config_type = cli_helpers.get_file_type(config_file)
-        cfg_obj = getattr(config, f"{config_type}Config")
-        cfg = cfg_obj(config_file)
-        log.debug("User config will be used to fill template.")
-    else:
-        cfg = dict(os.environ)  # Do not modify os.environ: Make a copy.
-        log.debug("Environment variables will be used to fill template.")
-    if config_items:
-        user_settings = cli_helpers.dict_from_config_args(config_items)
-        cfg.update(user_settings)
-        log.debug("Overwriting config with settings on command line")
+        cfg_class = getattr(config, f"{config_type}Config")
+        cfg = cfg_class(config_file)
+        log.debug("Read initial config from %s", config_file)
+    if key_eq_val_pairs:
+        supplemental = cli_helpers.dict_from_key_eq_val_strings(key_eq_val_pairs)
+        cfg.update(supplemental)
+        log.debug("Supplemented config with values: %s", " ".join(key_eq_val_pairs))
     return cfg

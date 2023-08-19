@@ -56,10 +56,9 @@ def test_parse_args_bad_cfgfile(sw, files, capsys, tmp_path):
     """
     _, _, schemafile = files
     cfgfile = str(tmp_path / "no-such-file")
-    with raises(SystemExit) as e:
+    with raises(FileNotFoundError):
         validate_config.parse_args([sw.c, cfgfile, sw.s, schemafile])
-    assert e.value.code == 2
-    assert "does not exist" in capsys.readouterr().err
+    assert f"{cfgfile} does not exist" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("sw", [ns(c="-c", s="-s"), ns(c="--config-file", s="--validation-schema")])
@@ -69,10 +68,9 @@ def test_parse_args_bad_schemafile(sw, files, capsys, tmp_path):
     """
     cfgfile, _, _ = files
     schemafile = str(tmp_path / "no-such-file")
-    with raises(SystemExit) as e:
+    with raises(FileNotFoundError):
         validate_config.parse_args([sw.c, cfgfile, sw.s, schemafile])
-    assert e.value.code == 2
-    assert "does not exist" in capsys.readouterr().err
+    assert f"{schemafile} does not exist" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("noise", ["-q", "--quiet", "-v", "--verbose"])

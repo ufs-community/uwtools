@@ -10,7 +10,6 @@ import logging
 import os
 import re
 import sys
-from argparse import ArgumentTypeError
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any, List
@@ -419,19 +418,18 @@ def test_parse_include_mult_sect():
     assert len(cfgobj["setting"]) == 3
 
 
-def test_path_if_file_exists(tmp_path):
+def test_path_if_it_exists(tmp_path):
     """
     Test that function raises an exception when the specified file does not exist, and raises no
     exception when the file exists.
     """
 
     badfile = tmp_path / "no-such-file"
-    with raises(ArgumentTypeError):
-        cli_helpers.path_if_file_exists(badfile)
-
+    with raises(FileNotFoundError):
+        cli_helpers.path_if_it_exists(badfile)
     goodfile = tmp_path / "exists"
     goodfile.touch()
-    assert cli_helpers.path_if_file_exists(goodfile)
+    assert cli_helpers.path_if_it_exists(goodfile)
 
 
 def test_set_config_dry_run(capsys):

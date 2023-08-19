@@ -44,7 +44,7 @@ def parse_args(args: List[str]) -> Namespace:
         "--config-file",
         help="Path to YAML configuration file",
         metavar="FILE",
-        type=cli_helpers.path_if_file_exists,
+        type=cli_helpers.path_if_it_exists,
     )
     optional.add_argument(
         "-d",
@@ -64,7 +64,7 @@ def parse_args(args: List[str]) -> Namespace:
         "--machine",
         help="Path to YAML platform-definition file",
         metavar="FILE",
-        type=cli_helpers.path_if_file_exists,
+        type=cli_helpers.path_if_it_exists,
     )
     optional.add_argument(
         "-q",

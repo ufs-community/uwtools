@@ -31,7 +31,7 @@ def main() -> None:
     dashes()
     templater.render(
         config_file=args.config_file,
-        config_items=args.config_items,
+        key_eq_val_pairs=args.config_items,
         input_template=args.input_template,
         outfile=args.outfile,
         log=log,
@@ -57,7 +57,7 @@ def parse_args(args: List[str]) -> Namespace:
         "--input-template",
         help="Path to a Jinja2 template file",
         required=True,
-        type=cli_helpers.path_if_file_exists,
+        type=cli_helpers.path_if_it_exists,
     )
     optional = parser.add_argument_group("optional arguments")
     optional.add_argument(
@@ -68,7 +68,7 @@ def parse_args(args: List[str]) -> Namespace:
             "If not provided, the environment is used to configure."
         ),
         metavar="FILE",
-        type=cli_helpers.path_if_file_exists,
+        type=cli_helpers.path_if_it_exists,
     )
     optional.add_argument(
         "-d",
