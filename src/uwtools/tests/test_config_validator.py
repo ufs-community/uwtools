@@ -8,7 +8,6 @@ from importlib import resources
 import pytest
 
 from uwtools import config_validator
-from uwtools.logger import Logger
 from uwtools.tests.support import fixture_path
 
 
@@ -24,7 +23,6 @@ def test_config_is_valid_good(vals):
         config_validator.config_is_valid(
             config_file=fixture_path(f"schema_test_{cfgtype}.yaml"),
             validation_schema=schema,
-            log=Logger(),
         )
         is boolval
     )

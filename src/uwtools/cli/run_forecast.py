@@ -19,7 +19,6 @@ def main() -> None:
     Parses arguments provided by the user and passes to the Forecast driver class to be run.
     """
     args = parse_args(sys.argv[1:])
-    name = "run-forecast"
     setup_logging(quiet=args.quiet, verbose=args.verbose)
     forecast_class = getattr(forecast, "%sForecast" % args.forecast_model)
     experiment = forecast_class(args.config_file, args.machine)

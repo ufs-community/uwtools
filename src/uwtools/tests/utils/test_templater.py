@@ -6,7 +6,6 @@ Tests for uwtools.utils.templater module.
 import yaml
 from pytest import fixture, raises
 
-from uwtools.logger import Logger
 from uwtools.utils import templater
 
 
@@ -37,7 +36,6 @@ def render(config_file, input_template, **kwargs):
         config_file=config_file,
         key_eq_val_pairs=[],
         input_template=input_template,
-        log=Logger(),
         **kwargs,
     )
 
@@ -78,7 +76,5 @@ def test_render_values_needed(caplog, config_file, input_template):
 
 def test__set_up_config_obj(config_file):
     expected = {"roses": "white", "violets": "blue", "cannot": {"override": "this"}}
-    actual = templater._set_up_config_obj(
-        config_file=config_file, key_eq_val_pairs=["roses=white"], log=Logger()
-    )
+    actual = templater._set_up_config_obj(config_file=config_file, key_eq_val_pairs=["roses=white"])
     assert actual == expected

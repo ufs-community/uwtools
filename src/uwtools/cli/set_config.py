@@ -29,10 +29,8 @@ def main() -> None:
             input_file_type=args.input_file_type,
             outfile=args.outfile,
             output_file_type=args.output_file_type,
-            quiet=args.quiet,
             show_format=args.show_format,
             values_needed=args.values_needed,
-            verbose=args.verbose,
         )
     except UWConfigError as e:
         sys.exit(str(e))

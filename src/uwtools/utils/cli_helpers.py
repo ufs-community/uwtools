@@ -4,7 +4,7 @@ Helpers to be used when parsing arguments and gathering config files.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 
 def dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:

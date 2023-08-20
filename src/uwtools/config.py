@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import configparser
 import copy
-import inspect
 import json
 import logging
 import os
@@ -20,10 +19,9 @@ import f90nml
 import jinja2
 import yaml
 
-from uwtools import exceptions, logger
+from uwtools import exceptions
 from uwtools.exceptions import UWConfigError
 from uwtools.j2template import J2Template
-from uwtools.logger import Logger
 from uwtools.utils import cli_helpers
 
 msgs = ns(
@@ -59,16 +57,14 @@ class Config(ABC, UserDict):
     several configuration-file formats.
     """
 
-    def __init__(self, config_path: str, log_name: Optional[str] = None) -> None:
+    def __init__(self, config_path: str) -> None:
         """
         Construct a Config object.
 
         :param config_path: Path to the config file to load.
-        :param log_name: Name of logger object to log to.
         """
         super().__init__()
         self.config_path = config_path
-        self.log = logging.getLogger(log_name)
         self.update(self._load(self.config_path))
 
     def __repr__(self) -> str:
@@ -137,7 +133,7 @@ class Config(ABC, UserDict):
         for sect, keys in diffs.items():
             for key in keys:
                 msg = f"{sect}: {key:>15}: {keys[key]}"
-                self.log.info(msg)
+                logging.info(msg)
 
     def dereference(
         self, ref_dict: Optional[dict] = None, full_dict: Optional[dict] = None
@@ -199,7 +195,7 @@ class Config(ABC, UserDict):
                             msg = msgs.unregistered_filter.format(
                                 filter=repr(e).split()[-1][:-3], key=key
                             )
-                            self.log.exception(msg)
+                            logging.exception(msg)
                             raise exceptions.UWConfigError(msg)
                         rendered = template
                         try:
@@ -215,13 +211,13 @@ class Config(ABC, UserDict):
                         except Exception as e:
                             # Fail on any other exception...something is probably wrong.
                             msg = f"{key}: {template}"
-                            self.log.exception(msg)
+                            logging.exception(msg)
                             raise e
 
                         data.append(rendered)
                         for tmpl, err in error_catcher.items():
                             msg = f"{func_name}: {tmpl} raised {err}"
-                            self.log.debug(msg)
+                            logging.debug(msg)
 
                     # Put the full template line back together as it was, filled or not, and make a
                     # guess on its intended type.
@@ -336,7 +332,6 @@ class Config(ABC, UserDict):
                 self.update_values(self._load_paths(filepaths))
                 del ref_dict[key]
 
-    @logger.verbose()
     def str_to_type(self, s: str) -> Union[bool, float, int, str]:
         """
         Reify a string to a Python object, if possible.
@@ -390,8 +385,8 @@ class F90Config(Config):
     Concrete class to handle Fortran namelist files.
     """
 
-    def __init__(self, config_path: str, log_name: Optional[str] = None) -> None:
-        super().__init__(config_path, log_name)
+    def __init__(self, config_path) -> None:
+        super().__init__(config_path)
         self.parse_include()
 
     # Private methods
@@ -443,7 +438,6 @@ class INIConfig(Config):
     def __init__(
         self,
         config_path: str,
-        log_name: Optional[str] = None,
         space_around_delimiters: bool = True,
     ):
         """
@@ -452,10 +446,9 @@ class INIConfig(Config):
         Spaces may be included for INI format, but should be excluded for bash.
 
         :param config_path: Path to the config file to load.
-        :param log_name: Name of logger object to log to.
         :param space_around_delimiters: Include spaces around delimiters?
         """
-        super().__init__(config_path, log_name)
+        super().__init__(config_path)
         self.space_around_delimiters = space_around_delimiters
         self.parse_include()
 
@@ -550,7 +543,7 @@ class YAMLConfig(Config):
                         )
                 else:
                     msg = str(e)
-                self.log.exception(msg)
+                logging.exception(msg)
                 raise exceptions.UWConfigError(msg)
         return self.from_ordereddict(cfg)
 
@@ -657,11 +650,11 @@ class FieldTableConfig(YAMLConfig):
 # Private functions
 
 
-def _log_and_error(msg: str, log: Logger) -> None:
+def _log_and_error(msg: str) -> None:
     """
-    Will log a user-provided error message and raise a UWConfigError with the same message.
+    Logs a user-provided error message and raise a UWConfigError with the same message.
     """
-    log.error(msg)
+    logging.error(msg)
     raise UWConfigError(msg)
 
 
@@ -675,31 +668,18 @@ def create_config_obj(
     config_file_type: Optional[str] = None,
     dry_run: bool = False,
     input_file_type: Optional[str] = None,
-    log: Optional[Logger] = None,
-    log_file: Optional[str] = None,
     outfile: Optional[str] = None,
     output_file_type: Optional[str] = None,
-    quiet: bool = False,
     show_format: bool = False,
     values_needed: bool = False,
-    verbose: bool = False,
 ):
     """
     Main section for processing config file.
     """
-    if log is None:
-        name = f"{inspect.stack()[0][3]}"
-        log = cli_helpers.setup_logging(
-            log_file=log_file or "/dev/stdout",
-            log_name=name,
-            quiet=quiet,
-            verbose=verbose,
-        )
-
     infile_type = input_file_type or cli_helpers.get_file_type(input_base_file)
 
     config_class = globals()[f"{infile_type}Config"]
-    config_obj = config_class(input_base_file, log_name=log.name)
+    config_obj = config_class(input_base_file)
 
     if config_file:
         config_file_type = config_file_type or cli_helpers.get_file_type(config_file)
@@ -711,13 +691,13 @@ def create_config_obj(
             input_depth = config_obj.dictionary_depth(config_obj.data)
 
             if input_depth < config_depth:
-                log.critical(f"{config_file} not compatible with input file")
+                logging.critical("%s not compatible with input file", config_file)
                 raise ValueError("Set config failure: config object not compatible with input file")
 
         if compare:
-            log.info(f"- {input_base_file}")
-            log.info(f"+ {config_file}")
-            log.info("-" * 80)
+            logging.info("- %s", input_base_file)
+            logging.info("+ %s", config_file)
+            logging.info("-" * 80)
             config_obj.compare_config(user_config_obj)
             return
 
@@ -730,22 +710,22 @@ def create_config_obj(
         jinja2_var: List[str] = []
         empty_var: List[str] = []
         config_obj.iterate_values(config_obj.data, set_var, jinja2_var, empty_var, parent="")
-        log.info("Keys that are complete:")
+        logging.info("Keys that are complete:")
         for var in set_var:
-            log.info(var)
-        log.info("")
-        log.info("Keys that have unfilled jinja2 templates:")
+            logging.info(var)
+        logging.info("")
+        logging.info("Keys that have unfilled jinja2 templates:")
         for var in jinja2_var:
-            log.info(var)
-        log.info("")
-        log.info("Keys that are set to empty:")
+            logging.info(var)
+        logging.info("")
+        logging.info("Keys that are set to empty:")
         for var in empty_var:
-            log.info(var)
+            logging.info(var)
         return
 
     if dry_run:
         # Apply switch to allow user to view the results of config instead of writing to disk.
-        log.info(config_obj)
+        logging.info(config_obj)
         return
 
     if outfile:
@@ -763,13 +743,13 @@ def create_config_obj(
                     outfile_type == "F90" and input_depth != 2
                 ):
                     err_msg = "Set config failure: incompatible file types"
-                    log.critical(err_msg)
+                    logging.critical(err_msg)
                     raise ValueError(err_msg)
                 # Dump to file:
                 dump_method(path=outfile, cfg=config_obj)
 
 
-def print_config_section(config: dict, key_path: List[str], log: Logger) -> None:
+def print_config_section(config: dict, key_path: List[str]) -> None:
     """
     Descends into the config via the given keys, then prints the contents of the located subtree as
     key=value pairs, one per line.
@@ -781,13 +761,13 @@ def print_config_section(config: dict, key_path: List[str], log: Logger) -> None
         try:
             subconfig = config[section]
         except KeyError:
-            _log_and_error(f"Bad config path: {current_path}", log)
+            _log_and_error(f"Bad config path: {current_path}")
         if not isinstance(subconfig, dict):
-            _log_and_error(f"Value at {current_path} must be a dictionary", log)
+            _log_and_error(f"Value at {current_path} must be a dictionary")
         config = subconfig
     output_lines = []
     for key, value in config.items():
         if type(value) not in (bool, float, int, str):
-            _log_and_error(f"Non-scalar value {value} found at {current_path}", log)
+            _log_and_error(f"Non-scalar value {value} found at {current_path}")
         output_lines.append(f"{key}={value}")
     print("\n".join(sorted(output_lines)))

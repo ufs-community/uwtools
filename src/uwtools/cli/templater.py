@@ -21,7 +21,7 @@ def main() -> None:
     args = parse_args(sys.argv[1:])
     name = f"{inspect.stack()[0][3]}"
     setup_logging(quiet=args.quiet, verbose=args.verbose)
-    dashes = lambda: logging.info("{x}\n{x}".format(x=f"{('-' * 70)}"))
+    dashes = lambda: logging.info("%s", "{x}\n{x}".format(x=f"{('-' * 70)}"))
     logging.info("Running with args:")
     dashes()
     for name, val in sorted(args.__dict__.items()):
