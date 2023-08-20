@@ -63,42 +63,56 @@ def add_arg_verbose(group: Group) -> None:
     )
 
 
-# pylint: enable=missing-function-docstring
-
-# Subcommands
+# Main modes
 
 
 def add_subparser_config(subparsers: Subparsers) -> None:
-    """
-    Add a 'config' mode subparser.
-    """
-    parser = subparsers.add_parser("config", help="manipulate configuration files")
-    # required = parser.add_argument_group("required arguments")
-    optional = parser.add_argument_group("optional arguments")
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
+    parser = subparsers.add_parser(
+        "config", help="work with config files", formatter_class=formatter
+    )
+    subparsers = parser.add_subparsers(metavar="mode")
+    add_subparser_config_render(subparsers)
+    add_subparser_config_translate(subparsers)
+    # add_subparser_config_validate(subparsers)
+    return parser
 
 
 def add_subparser_experiment(subparsers: Subparsers) -> None:
-    """
-    Add a 'experiment' mode subparser.
-    """
-    parser = subparsers.add_parser("experiment", help="configure and run experiments")
-    # required = parser.add_argument_group("required arguments")
-    optional = parser.add_argument_group("optional arguments")
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
+    subparsers.add_parser("experiment", help="configure and run experiments")
 
 
 def add_subparser_forecast(subparsers: Subparsers) -> None:
-    """
-    Add a 'forecast' mode subparser.
-    """
-    parser = subparsers.add_parser("forecast", help="configure and run forecasts")
-    # required = parser.add_argument_group("required arguments")
+    subparsers.add_parser("forecast", help="configure and run forecasts")
+
+
+# Submodes of config
+
+
+def add_subparser_config_render(subparsers: Subparsers) -> None:
+    parser = subparsers.add_parser("render", help="render config files")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
     add_arg_verbose(optional)
+
+
+def add_subparser_config_translate(subparsers: Subparsers) -> None:
+    parser = subparsers.add_parser("translate", help="translate config files")
+    optional = parser.add_argument_group("optional arguments")
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
+
+
+def add_subparser_config_validate(subparsers: Subparsers) -> None:
+    parser = subparsers.add_parser("config", help="validate config files")
+    optional = parser.add_argument_group("optional arguments")
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
+
+
+# Submodes of experiment
+# Submodes of forecast
+
+# pylint: enable=missing-function-docstring
 
 
 # General
@@ -107,6 +121,8 @@ def add_subparser_forecast(subparsers: Subparsers) -> None:
 def abort(msg: str) -> None:
     """
     Exit with an informative message and error status.
+
+    :param msg: The message to print.
     """
     print(msg, file=sys.stderr)
     sys.exit(1)
@@ -122,6 +138,13 @@ def check_args(parsed_args: Namespace) -> Namespace:
     except AttributeError:
         pass
     return parsed_args
+
+
+def formatter(prog: str) -> HelpFormatter:
+    """
+    A standard formatter for help messages.
+    """
+    return HelpFormatter(prog, max_help_position=8)
 
 
 def main() -> None:
@@ -141,11 +164,8 @@ def parse_args(cli_args: List[str]) -> Namespace:
     """
 
     cli_args = cli_args or ["--help"]
-    parser = Parser(
-        description="Unified Workflow Tools",
-        formatter_class=lambda prog: HelpFormatter(prog, max_help_position=8),
-    )
-    subparsers = parser.add_subparsers(metavar="mode")
+    parser = Parser(description="Unified Workflow Tools", formatter_class=formatter)
+    subparsers = parser.add_subparsers(metavar="<mode>", required=True)
     add_subparser_config(subparsers)
     add_subparser_experiment(subparsers)
     add_subparser_forecast(subparsers)
