@@ -120,8 +120,8 @@ def add_subparser_config_translate(subparsers: Subparsers) -> None:
     """
     parser = add_subparser(subparsers, "translate", "translate config files")
     required = parser.add_argument_group("required arguments")
-    add_arg_input_format(required)
-    add_arg_output_format(required)
+    add_arg_input_format(required, choices=["atparse"])
+    add_arg_output_format(required, choices=["jinja2"])
     optional = parser.add_argument_group("optional arguments")
     add_arg_input_file(optional)
     add_arg_output_file(optional)
@@ -269,10 +269,10 @@ def add_arg_input_file(group: Group, required: bool = False) -> None:
     )
 
 
-def add_arg_input_format(group: Group) -> None:
+def add_arg_input_format(group: Group, choices: List[str]) -> None:
     group.add_argument(
         "--input-format",
-        choices=["atparse"],
+        choices=choices,
         help="input-data format",
         required=True,
         type=str,
@@ -312,10 +312,10 @@ def add_arg_output_file(group: Group, required: bool = False) -> None:
     )
 
 
-def add_arg_output_format(group: Group) -> None:
+def add_arg_output_format(group: Group, choices: List[str]) -> None:
     group.add_argument(
         "--output-format",
-        choices=["ini", "nml", "yaml"],
+        choices=choices,
         help="output-data format",
         required=True,
         type=str,
