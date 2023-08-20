@@ -70,19 +70,32 @@ def add_subparser_config(subparsers: Subparsers) -> None:
     parser = subparsers.add_parser(
         "config", help="work with config files", formatter_class=formatter
     )
-    subparsers = parser.add_subparsers(metavar="mode")
+    subparsers = parser.add_subparsers(metavar="<mode>", required=True)
     add_subparser_config_render(subparsers)
     add_subparser_config_translate(subparsers)
-    # add_subparser_config_validate(subparsers)
+    add_subparser_config_validate(subparsers)
     return parser
 
 
 def add_subparser_experiment(subparsers: Subparsers) -> None:
-    subparsers.add_parser("experiment", help="configure and run experiments")
+    parser = subparsers.add_parser(
+        "experiment", help="configure and run experiments", formatter_class=formatter
+    )
+    subparsers = parser.add_subparsers(metavar="<mode>", required=True)
+    add_subparser_experiment_configure(subparsers)
+    add_subparser_experiment_run(subparsers)
+    add_subparser_experiment_validate(subparsers)
 
 
 def add_subparser_forecast(subparsers: Subparsers) -> None:
-    subparsers.add_parser("forecast", help="configure and run forecasts")
+    parser = subparsers.add_parser(
+        "forecast", help="configure and run forecasts", formatter_class=formatter
+    )
+    subparsers = parser.add_subparsers(metavar="<mode>", required=True)
+    add_subparser_forecast_configure(subparsers)
+    add_subparser_forecast_restart(subparsers)
+    add_subparser_forecast_run(subparsers)
+    add_subparser_forecast_validate(subparsers)
 
 
 # Submodes of config
@@ -110,7 +123,59 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
 
 
 # Submodes of experiment
+
+
+def add_subparser_experiment_configure(subparsers: Subparsers) -> None:
+    parser = subparsers.add_parser("configure", help="configure an experiment")
+    optional = parser.add_argument_group("optional arguments")
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
+
+
+def add_subparser_experiment_run(subparsers: Subparsers) -> None:
+    parser = subparsers.add_parser("run", help="run an experiment")
+    optional = parser.add_argument_group("optional arguments")
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
+
+
+def add_subparser_experiment_validate(subparsers: Subparsers) -> None:
+    parser = subparsers.add_parser("validate", help="validate an experiment")
+    optional = parser.add_argument_group("optional arguments")
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
+
+
 # Submodes of forecast
+
+
+def add_subparser_forecast_configure(subparsers: Subparsers) -> None:
+    parser = subparsers.add_parser("configure", help="configure an forecast")
+    optional = parser.add_argument_group("optional arguments")
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
+
+
+def add_subparser_forecast_restart(subparsers: Subparsers) -> None:
+    parser = subparsers.add_parser("restart", help="restart an forecast")
+    optional = parser.add_argument_group("optional arguments")
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
+
+
+def add_subparser_forecast_run(subparsers: Subparsers) -> None:
+    parser = subparsers.add_parser("run", help="run an forecast")
+    optional = parser.add_argument_group("optional arguments")
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
+
+
+def add_subparser_forecast_validate(subparsers: Subparsers) -> None:
+    parser = subparsers.add_parser("validate", help="validate an forecast")
+    optional = parser.add_argument_group("optional arguments")
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
+
 
 # pylint: enable=missing-function-docstring
 
@@ -163,7 +228,6 @@ def parse_args(cli_args: List[str]) -> Namespace:
     Please see Python's argparse documentation for more information about settings of each argument.
     """
 
-    cli_args = cli_args or ["--help"]
     parser = Parser(description="Unified Workflow Tools", formatter_class=formatter)
     subparsers = parser.add_subparsers(metavar="<mode>", required=True)
     add_subparser_config(subparsers)
