@@ -48,12 +48,15 @@ def parse_args(cli_args: List[str]) -> Namespace:
     return parser.parse_args(cli_args)
 
 
-# pylint: disable=missing-function-docstring
-
 # Mode: config
 
 
 def add_subparser_config(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: 'config'
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
     parser = subparsers.add_parser(
         "config", help="work with config files", formatter_class=formatter
     )
@@ -64,6 +67,11 @@ def add_subparser_config(subparsers: Subparsers) -> None:
 
 
 def add_subparser_config_render(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: 'config render'
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
     parser = subparsers.add_parser("render", help="render config files")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
@@ -71,6 +79,11 @@ def add_subparser_config_render(subparsers: Subparsers) -> None:
 
 
 def add_subparser_config_translate(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: 'config translate'
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
     parser = subparsers.add_parser("translate", help="translate config files")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
@@ -78,6 +91,11 @@ def add_subparser_config_translate(subparsers: Subparsers) -> None:
 
 
 def add_subparser_config_validate(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: 'config validate'
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
     parser = subparsers.add_parser("config", help="validate config files")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
@@ -88,6 +106,11 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
 
 
 def add_subparser_experiment(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: 'experiment'
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
     parser = subparsers.add_parser(
         "experiment", help="configure and run experiments", formatter_class=formatter
     )
@@ -98,6 +121,11 @@ def add_subparser_experiment(subparsers: Subparsers) -> None:
 
 
 def add_subparser_experiment_configure(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: 'experiment configure'
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
     parser = subparsers.add_parser("configure", help="configure an experiment")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
@@ -105,6 +133,11 @@ def add_subparser_experiment_configure(subparsers: Subparsers) -> None:
 
 
 def add_subparser_experiment_run(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: 'experiment run'
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
     parser = subparsers.add_parser("run", help="run an experiment")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
@@ -112,6 +145,11 @@ def add_subparser_experiment_run(subparsers: Subparsers) -> None:
 
 
 def add_subparser_experiment_validate(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: 'experiment validate'
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
     parser = subparsers.add_parser("validate", help="validate an experiment")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
@@ -122,31 +160,38 @@ def add_subparser_experiment_validate(subparsers: Subparsers) -> None:
 
 
 def add_subparser_forecast(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: 'forecast'
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
     parser = subparsers.add_parser(
         "forecast", help="configure and run forecasts", formatter_class=formatter
     )
     subparsers = parser.add_subparsers(metavar="<mode>", required=True)
     add_subparser_forecast_configure(subparsers)
-    add_subparser_forecast_restart(subparsers)
     add_subparser_forecast_run(subparsers)
     add_subparser_forecast_validate(subparsers)
 
 
 def add_subparser_forecast_configure(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: 'forecast configure'
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
     parser = subparsers.add_parser("configure", help="configure an forecast")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
     add_arg_verbose(optional)
 
 
-def add_subparser_forecast_restart(subparsers: Subparsers) -> None:
-    parser = subparsers.add_parser("restart", help="restart an forecast")
-    optional = parser.add_argument_group("optional arguments")
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
-
-
 def add_subparser_forecast_run(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: 'forecast run'
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
     parser = subparsers.add_parser("run", help="run an forecast")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
@@ -154,6 +199,11 @@ def add_subparser_forecast_run(subparsers: Subparsers) -> None:
 
 
 def add_subparser_forecast_validate(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: 'forecast validate'
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
     parser = subparsers.add_parser("validate", help="validate an forecast")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
@@ -161,6 +211,8 @@ def add_subparser_forecast_validate(subparsers: Subparsers) -> None:
 
 
 # Arguments
+
+# pylint: disable=missing-function-docstring
 
 
 def add_arg_dry_run(group: Group) -> None:
