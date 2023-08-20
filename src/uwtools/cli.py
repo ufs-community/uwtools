@@ -14,7 +14,11 @@ from typing import List
 
 def check_args(parsed_args: Namespace) -> Namespace:
     """
-    Validate basic correctness of CLI arguments.
+    Validate basic argument correctness.
+
+    :param parsed_args: The parsed command-line arguments to check.
+    :return: The checked command-line arguments.
+    :raises: SystemExit if any checks failed.
     """
     try:
         if not parsed_args.dry_run and not parsed_args.outfile:
@@ -35,9 +39,10 @@ def main() -> None:
 
 def parse_args(cli_args: List[str]) -> Namespace:
     """
-    Parse CLI arguments.
+    Parse command-line arguments.
 
-    Please see Python's argparse documentation for more information about settings of each argument.
+    :param cli_args: The raw command-line arguments to parse.
+    :return: Parsed command-line arguments.
     """
 
     parser = Parser(description="Unified Workflow Tools", formatter_class=formatter)
