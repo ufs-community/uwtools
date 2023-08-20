@@ -65,6 +65,18 @@ def abort(msg: str) -> None:
     sys.exit(1)
 
 
+def add_subparser(subparsers: Subparsers, name: str, msg: str) -> Parser:
+    """
+    Add a new subparser, with standard help formatting, to the given parser.
+
+    :param subparsers: The subparsers to add the new subparser to.
+    :param name: The name of the subparser.
+    :param msg: The help message for the subparser.
+    :return: The new subparser.
+    """
+    return subparsers.add_parser(name, help=msg, formatter_class=formatter)
+
+
 def formatter(prog: str) -> HelpFormatter:
     """
     A standard formatter for help messages.
@@ -81,9 +93,7 @@ def add_subparser_config(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = subparsers.add_parser(
-        "config", help="work with config files", formatter_class=formatter
-    )
+    parser = add_subparser(subparsers, "config", "work with config files")
     subparsers = parser.add_subparsers(metavar="MODE", required=True)
     add_subparser_config_render(subparsers)
     add_subparser_config_translate(subparsers)
@@ -96,7 +106,7 @@ def add_subparser_config_render(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = subparsers.add_parser("render", help="render config files", formatter_class=formatter)
+    parser = add_subparser(subparsers, "render", "render config files")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
     add_arg_verbose(optional)
@@ -108,9 +118,7 @@ def add_subparser_config_translate(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = subparsers.add_parser(
-        "translate", help="translate config files", formatter_class=formatter
-    )
+    parser = add_subparser(subparsers, "translate", "translate config files")
     required = parser.add_argument_group("required arguments")
     add_arg_input_format(required)
     add_arg_output_format(required)
@@ -127,9 +135,7 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = subparsers.add_parser(
-        "config", help="validate config files", formatter_class=formatter
-    )
+    parser = add_subparser(subparsers, "config", "validate config files")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
     add_arg_verbose(optional)
@@ -144,9 +150,7 @@ def add_subparser_experiment(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = subparsers.add_parser(
-        "experiment", help="configure and run experiments", formatter_class=formatter
-    )
+    parser = add_subparser(subparsers, "experiment", "configure and run experiments")
     subparsers = parser.add_subparsers(metavar="MODE", required=True)
     add_subparser_experiment_configure(subparsers)
     add_subparser_experiment_run(subparsers)
@@ -159,9 +163,7 @@ def add_subparser_experiment_configure(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = subparsers.add_parser(
-        "configure", help="configure an experiment", formatter_class=formatter
-    )
+    parser = add_subparser(subparsers, "configure", "configure an experiment")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
     add_arg_verbose(optional)
@@ -173,7 +175,7 @@ def add_subparser_experiment_run(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = subparsers.add_parser("run", help="run an experiment")
+    parser = add_subparser(subparsers, "run", "run an experiment")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
     add_arg_verbose(optional)
@@ -185,9 +187,7 @@ def add_subparser_experiment_validate(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = subparsers.add_parser(
-        "validate", help="validate an experiment", formatter_class=formatter
-    )
+    parser = add_subparser(subparsers, "validate", "validate an experiment")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
     add_arg_verbose(optional)
@@ -202,9 +202,7 @@ def add_subparser_forecast(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = subparsers.add_parser(
-        "forecast", help="configure and run forecasts", formatter_class=formatter
-    )
+    parser = add_subparser(subparsers, "forecast", "configure and run forecasts")
     subparsers = parser.add_subparsers(metavar="MODE", required=True)
     add_subparser_forecast_configure(subparsers)
     add_subparser_forecast_run(subparsers)
@@ -217,9 +215,7 @@ def add_subparser_forecast_configure(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = subparsers.add_parser(
-        "configure", help="configure an forecast", formatter_class=formatter
-    )
+    parser = add_subparser(subparsers, "configure", "configure an forecast")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
     add_arg_verbose(optional)
@@ -231,7 +227,7 @@ def add_subparser_forecast_run(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = subparsers.add_parser("run", help="run an forecast")
+    parser = add_subparser(subparsers, "run", "run an forecast")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
     add_arg_verbose(optional)
@@ -243,9 +239,7 @@ def add_subparser_forecast_validate(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = subparsers.add_parser(
-        "validate", help="validate an forecast", formatter_class=formatter
-    )
+    parser = add_subparser(subparsers, "validate", "validate an forecast")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
     add_arg_verbose(optional)
