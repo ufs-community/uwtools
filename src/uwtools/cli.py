@@ -274,7 +274,6 @@ def add_arg_input_format(group: Group) -> None:
         "--input-format",
         choices=["atparse"],
         help="input-data format",
-        metavar="FORMAT",
         required=True,
         type=str,
     )
@@ -318,7 +317,6 @@ def add_arg_output_format(group: Group) -> None:
         "--output-format",
         choices=["ini", "nml", "yaml"],
         help="output-data format",
-        metavar="FORMAT",
         required=True,
         type=str,
     )
