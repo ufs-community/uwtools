@@ -9,6 +9,7 @@ from typing import List
 
 from uwtools import config
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import setup_logging
 from uwtools.utils import cli_helpers
 
 
@@ -17,12 +18,7 @@ def main() -> None:
     Main entry-point function.
     """
     args = parse_args(sys.argv[1:])
-    log = cli_helpers.setup_logging(
-        log_file=args.log_file,
-        log_name="set_config",
-        quiet=args.quiet,
-        verbose=args.verbose,
-    )
+    setup_logging(quiet=args.quiet, verbose=args.verbose)
     try:
         config.create_config_obj(
             input_base_file=args.input_base_file,
@@ -31,8 +27,6 @@ def main() -> None:
             config_file_type=args.config_file_type,
             dry_run=args.dry_run,
             input_file_type=args.input_file_type,
-            log=log,
-            log_file=args.log_file,
             outfile=args.outfile,
             output_file_type=args.output_file_type,
             quiet=args.quiet,
@@ -76,13 +70,6 @@ def parse_args(args: List[str]) -> Namespace:
         "--dry-run",
         action="store_true",
         help="Print rendered config file to stdout only.",
-    )
-    optional.add_argument(
-        "-l",
-        "--log-file",
-        default="/dev/null",
-        help="Path to a file to log to",
-        metavar="FILE",
     )
     optional.add_argument(
         "-o",

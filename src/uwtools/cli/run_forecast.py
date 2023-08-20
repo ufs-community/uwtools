@@ -8,6 +8,7 @@ from argparse import ArgumentParser, HelpFormatter, Namespace
 from typing import List
 
 from uwtools.drivers import forecast
+from uwtools.logging import setup_logging
 from uwtools.utils import cli_helpers
 
 
@@ -19,11 +20,9 @@ def main() -> None:
     """
     args = parse_args(sys.argv[1:])
     name = "run-forecast"
-    cli_helpers.setup_logging(
-        log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
-    )
+    setup_logging(quiet=args.quiet, verbose=args.verbose)
     forecast_class = getattr(forecast, "%sForecast" % args.forecast_model)
-    experiment = forecast_class(args.config_file, args.machine, log_name=name)
+    experiment = forecast_class(args.config_file, args.machine)
     experiment.run()
 
 
@@ -51,13 +50,6 @@ def parse_args(args: List[str]) -> Namespace:
         "--dry-run",
         action="store_true",
         help="Validate configuration but do not run the forecast.",
-    )
-    optional.add_argument(
-        "-l",
-        "--log-file",
-        default="/dev/null",
-        help="Path to a specified log file",
-        metavar="FILE",
     )
     optional.add_argument(
         "-m",

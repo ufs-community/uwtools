@@ -9,6 +9,7 @@ from argparse import HelpFormatter, Namespace
 from typing import List
 
 from uwtools.drivers import experiment
+from uwtools.logging import setup_logging
 from uwtools.utils import cli_helpers
 
 
@@ -19,6 +20,7 @@ def main() -> None:
     Parses arguments provided by the user and passes to the facade to be run.
     """
     user_args = parse_args(sys.argv[1:])
+    setup_logging(quiet=user_args.quiet, verbose=user_args.verbose)
     experiment_class = getattr(experiment, f"{user_args.forecast_app}Experiment")
     experiment_class(user_args.config_file)
 
@@ -50,13 +52,6 @@ def parse_args(args: List[str]) -> Namespace:
         type=cli_helpers.path_if_it_exists,
     )
     optional = parser.add_argument_group("optional arguments")
-    optional.add_argument(
-        "-l",
-        "--log-file",
-        default="/dev/null",
-        help="Path to a file to log to",
-        metavar="FILE",
-    )
     optional.add_argument(
         "-q",
         "--quiet",

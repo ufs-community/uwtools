@@ -8,6 +8,7 @@ from argparse import HelpFormatter, Namespace
 from typing import List
 
 from uwtools.config_validator import config_is_valid
+from uwtools.logging import setup_logging
 from uwtools.utils import cli_helpers
 
 
@@ -16,13 +17,8 @@ def main() -> None:
     Main entry point.
     """
     args = parse_args(sys.argv[1:])
-    name = "validate-config"
-    log = cli_helpers.setup_logging(
-        log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
-    )
-    valid = config_is_valid(
-        config_file=args.config_file, validation_schema=args.validation_schema, log=log
-    )
+    setup_logging(quiet=args.quiet, verbose=args.verbose)
+    valid = config_is_valid(config_file=args.config_file, validation_schema=args.validation_schema)
     sys.exit(0 if valid else 1)
 
 
@@ -57,13 +53,6 @@ def parse_args(args: List[str]) -> Namespace:
         "--config-file-type",
         help="Convert config file to this type.",
         choices={"F90", "INI", "YAML"},
-    )
-    optional.add_argument(
-        "-l",
-        "--log-file",
-        default="/dev/null",
-        help="Log to this file.",
-        metavar="FILE",
     )
     optional.add_argument(
         "-q",

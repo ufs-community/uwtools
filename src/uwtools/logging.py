@@ -20,7 +20,7 @@ def setup_logging(quiet: bool = False, verbose: bool = False) -> None:
     logging.basicConfig(
         **{
             "datefmt": "%Y-%m-%dT%H:%M:%S",
-            "format": '[%(asctime)s] %(levelname)8s %(message)s',
+            "format": "[%(asctime)s] %(levelname)8s %(message)s",
             "level": logging.DEBUG if verbose else logging.INFO,
             **({"filename": os.devnull} if quiet else {"stream": sys.stderr}),
         }

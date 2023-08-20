@@ -7,6 +7,7 @@ import sys
 from argparse import ArgumentParser, HelpFormatter, Namespace
 from typing import List
 
+from uwtools.logging import setup_logging
 from uwtools.utils import atparse_to_jinja2, cli_helpers
 
 
@@ -15,6 +16,7 @@ def main() -> None:
     Main entry point.
     """
     args = parse_args(sys.argv[1:])
+    setup_logging()
     atparse_to_jinja2.convert(
         input_template=args.input_template, outfile=args.outfile, dry_run=args.dry_run
     )

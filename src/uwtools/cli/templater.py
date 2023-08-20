@@ -5,10 +5,12 @@ environment variables.
 """
 
 import inspect
+import logging
 import sys
 from argparse import ArgumentError, ArgumentParser, HelpFormatter, Namespace
 from typing import List
 
+from uwtools.logging import setup_logging
 from uwtools.utils import cli_helpers, templater
 
 
@@ -18,23 +20,20 @@ def main() -> None:
     """
     args = parse_args(sys.argv[1:])
     name = f"{inspect.stack()[0][3]}"
-    log = cli_helpers.setup_logging(
-        log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
-    )
-    dashes = lambda: log.info("{x}\n{x}".format(x=f"{('-' * 70)}"))
-    log.info("Running with args:")
+    setup_logging(quiet=args.quiet, verbose=args.verbose)
+    dashes = lambda: logging.info("{x}\n{x}".format(x=f"{('-' * 70)}"))
+    logging.info("Running with args:")
     dashes()
     for name, val in sorted(args.__dict__.items()):
         if name not in ["config"]:
-            log.info("{name:>15s}: {val}".format(name=name, val=val))
-    log.info("Re-run settings: %s", " ".join(sys.argv[1:]))
+            logging.info("{name:>15s}: {val}".format(name=name, val=val))
+    logging.info("Re-run settings: %s", " ".join(sys.argv[1:]))
     dashes()
     templater.render(
         config_file=args.config_file,
         key_eq_val_pairs=args.config_items,
         input_template=args.input_template,
         outfile=args.outfile,
-        log=log,
         dry_run=args.dry_run,
         values_needed=args.values_needed,
     )
@@ -75,13 +74,6 @@ def parse_args(args: List[str]) -> Namespace:
         "--dry-run",
         action="store_true",
         help="Only print rendered template.",
-    )
-    optional.add_argument(
-        "-l",
-        "--log-file",
-        default="/dev/null",
-        help="Path to a specified log file",
-        metavar="FILE",
     )
     optional.add_argument(
         "-o",
