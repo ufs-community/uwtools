@@ -1,5 +1,5 @@
 """
-Modal CLI support.
+Modal CLI.
 """
 
 import sys
@@ -48,13 +48,6 @@ def parse_args(cli_args: List[str]) -> Namespace:
     return parser.parse_args(cli_args)
 
 
-def formatter(prog: str) -> HelpFormatter:
-    """
-    A standard formatter for help messages.
-    """
-    return HelpFormatter(prog, max_help_position=8)
-
-
 # pylint: disable=missing-function-docstring
 
 # Mode: config
@@ -68,7 +61,6 @@ def add_subparser_config(subparsers: Subparsers) -> None:
     add_subparser_config_render(subparsers)
     add_subparser_config_translate(subparsers)
     add_subparser_config_validate(subparsers)
-    return parser
 
 
 def add_subparser_config_render(subparsers: Subparsers) -> None:
@@ -103,7 +95,6 @@ def add_subparser_experiment(subparsers: Subparsers) -> None:
     add_subparser_experiment_configure(subparsers)
     add_subparser_experiment_run(subparsers)
     add_subparser_experiment_validate(subparsers)
-    return parser
 
 
 def add_subparser_experiment_configure(subparsers: Subparsers) -> None:
@@ -139,7 +130,6 @@ def add_subparser_forecast(subparsers: Subparsers) -> None:
     add_subparser_forecast_restart(subparsers)
     add_subparser_forecast_run(subparsers)
     add_subparser_forecast_validate(subparsers)
-    return parser
 
 
 def add_subparser_forecast_configure(subparsers: Subparsers) -> None:
@@ -235,3 +225,10 @@ def abort(msg: str) -> None:
     """
     print(msg, file=sys.stderr)
     sys.exit(1)
+
+
+def formatter(prog: str) -> HelpFormatter:
+    """
+    A standard formatter for help messages.
+    """
+    return HelpFormatter(prog, max_help_position=8)
