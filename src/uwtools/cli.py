@@ -52,6 +52,25 @@ def parse_args(cli_args: List[str]) -> Namespace:
     add_subparser_forecast(subparsers)
     return parser.parse_args(cli_args)
 
+# Support
+
+
+def abort(msg: str) -> None:
+    """
+    Exit with an informative message and error status.
+
+    :param msg: The message to print.
+    """
+    print(msg, file=sys.stderr)
+    sys.exit(1)
+
+
+def formatter(prog: str) -> HelpFormatter:
+    """
+    A standard formatter for help messages.
+    """
+    return HelpFormatter(prog, max_help_position=8)
+
 
 # Mode: config
 
@@ -270,22 +289,3 @@ def add_arg_verbose(group: Group) -> None:
 
 
 # pylint: enable=missing-function-docstring
-
-# Support
-
-
-def abort(msg: str) -> None:
-    """
-    Exit with an informative message and error status.
-
-    :param msg: The message to print.
-    """
-    print(msg, file=sys.stderr)
-    sys.exit(1)
-
-
-def formatter(prog: str) -> HelpFormatter:
-    """
-    A standard formatter for help messages.
-    """
-    return HelpFormatter(prog, max_help_position=8)
