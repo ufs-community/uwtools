@@ -4,6 +4,7 @@ Tests for forecast driver.
 """
 
 from pathlib import Path
+from types import SimpleNamespace as ns
 from unittest.mock import patch
 
 import pytest
@@ -136,7 +137,7 @@ def test_create_directory_structure_bad_existing_act():
         FV3Forecast.create_directory_structure(run_directory="/some/path", exist_act="foo")
 
 
-def test__create_model_config(tmp_path):
+def test_create_model_config(tmp_path):
     basefile = str(tmp_path / "base.yaml")
     infile = str(tmp_path / "in.yaml")
     outfile = str(tmp_path / "out.yaml")
@@ -198,6 +199,21 @@ def test_create_namelist_without_base_file(create_namelist_assets):
 """.lstrip()
     with open(outnml_file, "r", encoding="utf-8") as out_file:
         assert out_file.read() == expected
+
+
+def test_run(tmp_path, capsys):
+    run_expected = """
+    Configuration: SRW FV3 hera
+    Run command: srun --export=ALL test_exec.py
+    """
+    config_file = fixture_path("forecast.yaml")
+    out_file = tmp_path / "test_exec.py"
+    out_file.touch()
+
+    with patch.object(FV3Forecast, "_validate", return_value=True):
+        fcstobj = FV3Forecast(config_file=config_file, dry_run=True, outfile=out_file)
+        fcstobj.run()
+    assert run_expected in capsys.readouterr().out
 
 
 def test_forecast_run_cmd():

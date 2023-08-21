@@ -3,6 +3,7 @@ Provides an abstract class representing drivers for various NWP tools.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from typing import Optional
 
 from uwtools import config_validator
@@ -35,7 +36,7 @@ class Driver(ABC):
     # Public methods
 
     @abstractmethod
-    def batch_script(self, job_resources) -> BatchScript:
+    def batch_script(self, job_resources: Mapping) -> BatchScript:
         """
         Create a script for submission to the batch scheduler.
         """

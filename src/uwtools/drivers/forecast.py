@@ -27,7 +27,7 @@ class FV3Forecast(Driver):
 
     # Public methods
 
-    def batch_script(self, job_resources: Mapping) -> BatchScript:  # pragma: no cover
+    def batch_script(self, job_resources: Mapping) -> BatchScript:
         """
         Write to disk, for submission to the batch scheduler, a script to run FV3.
         """
@@ -133,7 +133,7 @@ class FV3Forecast(Driver):
         ???
         """
 
-    def run(self, log: Optional[Logger] = None) -> None:  # pragma: no cover
+    def run(self, log: Optional[Logger] = None) -> None:
         """
         Runs FV3.
         """
@@ -147,37 +147,36 @@ class FV3Forecast(Driver):
                 verbose=False,
             )
         # Read in the config file.
-        experiment_config = config.YAMLConfig(self._config_file)
+        forecast_config = config.YAMLConfig(self._config_file)
 
-        # Define forecast app and model.
-        forecast_app = experiment_config["forecast"]["app"]
-        forecast_model = experiment_config["forecast"]["model"]
-        machine = experiment_config["platform"]["machine"]
+        # Define forecast model.
+        forecast_model = forecast_config["forecast"]["model"]
+        machine = forecast_config["platform"]["machine"]
 
         # Prepare directories.
-        run_directory = experiment_config["forecast"]["FCSTDIR"]
+        run_directory = forecast_config["forecast"]["FCSTDIR"]
         self.create_directory_structure(run_directory)
 
-        static_files = experiment_config["forecast"]["STATIC"]
+        static_files = forecast_config["forecast"]["STATIC"]
         self.stage_files(run_directory, static_files, link_files=False)
-        cycledep_files = experiment_config["forecast"]["CYCLEDEP"]
+        cycledep_files = forecast_config["forecast"]["CYCLEDEP"]
         self.stage_files(run_directory, cycledep_files, link_files=True)
 
         experiment_resources = {
-            key: experiment_config["resources"][key] for key in experiment_config["resources"]
+            key: forecast_config["resources"][key] for key in forecast_config["resources"]
         }
         batch_script = self.batch_script(experiment_resources)
-        args = str(experiment_config["run_cmd"]["kwargs"])
+        args = str(forecast_config["run_cmd"]["kwargs"])
         run_command = self.run_cmd(
             args,
-            run_cmd=experiment_config["forecast"]["run_cmd"],
-            exec_name=experiment_config["forecast"]["exec_name"],
+            run_cmd=forecast_config["forecast"]["run_cmd"],
+            exec_name=forecast_config["forecast"]["exec_name"],
         )
 
         if self._dry_run:
             # Apply switch to allow user to view the run command of config.
             # This will not run the job.
-            log.info(f"Configuration: {forecast_app} {forecast_model} {machine}")
+            log.info(f"Configuration: {forecast_model} {machine}")
             log.info(f"Run command: {run_command} {batch_script}")
             return
 

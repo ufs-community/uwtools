@@ -16,7 +16,7 @@ class ConcreteDriver(Driver):
     Driver subclass for testing purposes.
     """
 
-    def batch_script(self):
+    def batch_script(self, job_resources):
         pass
 
     def output(self):

@@ -52,11 +52,11 @@
                     "type": "string",
                     "format": "uri"
                 },
-                "STATIC": {
+                "CYCLEDEP": {
                     "type": "string",
                     "format": "uri"
                 },
-                "CYCLEDEP": {
+                "STATIC": {
                     "type": "string",
                     "format": "uri"
                 },

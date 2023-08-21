@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code, unused-import
 """
 CLI for running a forecast.
 """
@@ -8,7 +8,7 @@ from argparse import ArgumentParser, HelpFormatter, Namespace
 from typing import List
 
 from uwtools.drivers import forecast
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.utils import cli_helpers
 
 
@@ -33,7 +33,7 @@ def main() -> None:
     )
     try:
         forecast_obj.run()
-    except UWConfigError as e:
+    except UWError as e:
         sys.exit(str(e))
 
 
@@ -70,13 +70,8 @@ def parse_args(args: List[str]) -> Namespace:
         metavar="FILE",
     )
     optional.add_argument(
-        "--forecast-app",
-        choices={"HAFS", "MRW", "SRW"},
-        help="The app to be run",
-    )
-    optional.add_argument(
         "--forecast-model",
-        choices={"CCPP", "CICE", "CMEPS", "FV3", "MOM6"},
+        choices={"FV3"},
         help="The experiment to be run",
     )
     optional.add_argument(

@@ -31,7 +31,6 @@ def test_main(files):
         config_file=cfgfile,
         dry_run=True,
         log_file=logfile,
-        forecast_app="SRW",
         forecast_model="FV3",
         outfile=None,
         quiet=False,
@@ -71,15 +70,13 @@ def test_parse_args_good(sw, noise, files):
     Test all valid CLI switch/value combinations.
     """
     cfgfile, logfile = files
-    app, model = "SRW", "FV3"  # representative (not exhaustive) choices
+    model = "FV3"  # representative (not exhaustive) choices
     parsed = run_forecast.parse_args(
         [
             sw.c,
             cfgfile,
             sw.l,
             logfile,
-            "--forecast-app",
-            app,
             "--forecast-model",
             model,
             noise,
@@ -95,7 +92,6 @@ def test_parse_args_good(sw, noise, files):
         sw_on = parsed.verbose
     assert sw_off is False
     assert sw_on is True
-    assert parsed.forecast_app == app
     assert parsed.forecast_model == model
 
 
