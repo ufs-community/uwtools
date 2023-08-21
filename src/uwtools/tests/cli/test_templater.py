@@ -13,7 +13,7 @@ import pytest
 from pytest import raises
 
 from uwtools.cli import templater
-from uwtools.tests.support import compare_files, fixture_path, logged
+from uwtools.tests.support import compare_files, fixture_path
 
 # NB: Ensure that at least one test exercises both short and long forms of each
 #     CLI switch.
@@ -92,8 +92,8 @@ Re-run settings: {sw.i} {infile} {sw.d} fruit=pear vegetable=squash how_many=22
     argv = ["test", sw.i, infile, sw.d, "fruit=pear", "vegetable=squash", "how_many=22"]
     with patch.object(templater.sys, "argv", argv):
         templater.main()
-    for line in expected.split("\n"):
-        assert logged(caplog, line)
+    actual = "\n".join(record.message for record in caplog.records)
+    assert actual == expected
 
 
 @pytest.mark.parametrize("sw", [ns(d="-d", i="-i"), ns(d="--dry-run", i="--input-template")])
@@ -107,14 +107,14 @@ def test_set_template_dry_run(caplog, sw):
 Running with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
-        outfile: None
- input_template: {infile}
     config_file: None
    config_items: []
         dry_run: True
+ input_template: {infile}
+        outfile: None
+          quiet: False
   values_needed: False
         verbose: False
-          quiet: False
 Re-run settings: {sw.i} {infile} {sw.d}
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
@@ -130,8 +130,8 @@ Re-run settings: {sw.i} {infile} {sw.d}
         argv = ["test", sw.i, infile, sw.d]
         with patch.object(templater.sys, "argv", argv):
             templater.main()
-        for line in expected.split("\n"):
-            assert logged(caplog, line)
+        actual = "\n".join(record.message for record in caplog.records)
+        assert actual == expected
 
 
 @pytest.mark.parametrize("sw", [ns(i="-i"), ns(i="--input-template")])
@@ -164,8 +164,8 @@ vegetable
     argv = ["test", sw.i, infile, "--values-needed"]
     with patch.object(templater.sys, "argv", argv):
         templater.main()
-    for line in expected.split("\n"):
-        assert logged(caplog, line)
+    actual = "\n".join(record.message for record in caplog.records)
+    assert actual == expected
 
 
 @pytest.mark.parametrize(
@@ -218,8 +218,8 @@ Initial config set from environment
         argv = ["test", sw.i, infile, sw.d, sw.v]
         with patch.object(templater.sys, "argv", argv):
             templater.main()
-    for line in expected.split("\n"):
-        assert logged(caplog, line)
+    actual = "\n".join(record.message for record in caplog.records)
+    assert actual == expected
 
     # Test quiet level.
 

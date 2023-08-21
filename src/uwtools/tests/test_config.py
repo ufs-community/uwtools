@@ -619,7 +619,7 @@ Keys that are set to empty:
 
 def test_values_needed_yaml(caplog):
     """
-    Test that the values_needed flag logs keys completed, keys containing unfilled jinja2 templates,
+    Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
     and keys set to empty.
     """
     logging.getLogger().setLevel(logging.INFO)
