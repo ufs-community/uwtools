@@ -207,7 +207,7 @@ def test_forecast_run_cmd():
 
 @pytest.mark.parametrize("section", ["static", "cycledep"])
 @pytest.mark.parametrize("link_files", [True, False])
-def test__stage_files(tmp_path, section, link_files):
+def test_stage_files(tmp_path, section, link_files):
     """
     Tests that _stage_files() is copying or linking files from static or cycledep sections of the
     config obj are being staged in run directory.
