@@ -72,7 +72,7 @@ class Driver(ABC):
 
     @property
     @abstractmethod
-    def schema(self) -> str:
+    def schema_file(self) -> str:
         """
         The path to the file containing the schema to validate the config file against.
         """
@@ -85,6 +85,6 @@ class Driver(ABC):
         """
         return config_validator.config_is_valid(
             config_file=self._config_file,
-            validation_schema=self.schema,
+            schema_file=self.schema_file,
             log=self.log,
         )

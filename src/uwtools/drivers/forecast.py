@@ -207,7 +207,7 @@ class FV3Forecast(Driver):
         return f"{run_cmd} {args_str} {exec_name}"
 
     @property
-    def schema(self) -> str:
+    def schema_file(self) -> str:
         """
         The path to the file containing the schema to validate the config file against.
         """

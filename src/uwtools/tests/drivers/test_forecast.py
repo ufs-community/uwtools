@@ -40,7 +40,7 @@ def test_batch_script(slurm_props):
     assert forecast.batch_script(job_resources=slurm_props).content() == expected
 
 
-def test_schema():
+def test_schema_file():
     """
     Tests that the schema is properly defined with a file value.
     """
@@ -48,7 +48,7 @@ def test_schema():
     with patch.object(Driver, "_validate", return_value=True):
         forecast = FV3Forecast(config_file="/not/used")
 
-    path = Path(forecast.schema)
+    path = Path(forecast.schema_file)
     assert path.is_file()
 
 
@@ -233,8 +233,8 @@ def test_forecast_run_cmd():
 @pytest.mark.parametrize("link_files", [True, False])
 def test_stage_files(tmp_path, section, link_files):
     """
-    Tests that _stage_files() is copying or linking files from static or cycledep sections of the
-    config obj are being staged in run directory.
+    Tests that files from static or cycledep sections of the config obj are being staged (copied or
+    linked) to the run directory.
     """
 
     run_directory = tmp_path / "run"
