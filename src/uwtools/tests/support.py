@@ -1,9 +1,7 @@
 # pylint: disable=missing-function-docstring
 
-import re
 from importlib import resources
 from pathlib import Path
-from typing import List
 
 from _pytest.logging import LogCaptureFixture
 
@@ -80,26 +78,6 @@ def fixture_uri(suffix: str = "") -> str:
         varies based on installation location.
     """
     return fixture_pathobj(suffix).as_uri()
-
-
-def line_in_lines(line: str, lines: List[str]) -> bool:
-    """
-    Determines whether the given line occurs, as a line-ending suffix, in any of the lines in the
-    given list. For example, the line "bar" is a line-ending suffix of the line
-    "[2023-06-29T14:06:34] foo", but not of the line "foo bar".
-
-    Paramters
-    ---------
-    line:
-        The sought-for line
-    lines:
-        The lines to be checked for the line
-
-    Returns
-    -------
-    A bool indicating whether or not the line was found.
-    """
-    return any(x for x in lines if re.match(r"^.*%s$" % re.escape(line), x))
 
 
 def logged(caplog: LogCaptureFixture, msg: str) -> bool:

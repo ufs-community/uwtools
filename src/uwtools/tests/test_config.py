@@ -20,7 +20,7 @@ from pytest import fixture, raises
 
 from uwtools import config, exceptions
 from uwtools.exceptions import UWConfigError
-from uwtools.tests.support import compare_files, fixture_path, line_in_lines, logged
+from uwtools.tests.support import compare_files, fixture_path, logged
 from uwtools.utils import cli_helpers
 
 # Helper functions
@@ -137,9 +137,8 @@ setting:         topping:  - None + crouton
 setting:            size:  - None + large
 setting:            meat:  - None + chicken
 """.strip()
-    actual = [record.message for record in caplog.records]
     for line in expected.split("\n"):
-        assert line_in_lines(line, actual)
+        assert logged(caplog, line)
     # Make sure it doesn't include any additional significant diffs
     # A very rough estimate is that there is a word/colon set followed
     # by a -/+ set
@@ -147,7 +146,7 @@ setting:            meat:  - None + chicken
     # above that give us the section, key value diffs like this:
     #   config:       vegetable:  - eggplant + peas
     pattern = re.compile(r"\w:\s+\w+:\s+-\s+\w+\s+\+\s+\w+")
-    for line in actual:
+    for line in [record.message for record in caplog.records]:
         if re.search(pattern, line):
             assert line in expected
 
