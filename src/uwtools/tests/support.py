@@ -117,6 +117,6 @@ def msg_in_caplog(msg: str, records: List[LogRecord]) -> bool:
     A bool indicating whether or not the message was found.
     """
     for record in records:
-        if msg == record.msg:
+        if msg == record.message:
             return True
     return False

@@ -3,6 +3,7 @@
 Tests for uwtools.drivers.driver module.
 """
 
+import logging
 from unittest.mock import patch
 
 import pytest
@@ -79,7 +80,7 @@ def schema():
 
 
 @pytest.mark.parametrize("valid", [True, False])
-def test_validation(capsys, configs, schema, tmp_path, valid):
+def test_validation(caplog, configs, schema, tmp_path, valid):
     config_good, config_bad = configs
     config_file = str(tmp_path / "config.yaml")
     with open(config_file, "w", encoding="utf-8") as f:
@@ -88,9 +89,7 @@ def test_validation(capsys, configs, schema, tmp_path, valid):
     with open(schema_file, "w", encoding="utf-8") as f:
         print(schema, file=f)
     with patch.object(ConcreteDriver, "schema", new=schema_file):
+        logging.getLogger().setLevel(logging.DEBUG)
         ConcreteDriver(config_file=config_file)
-        assert (
-            "error(s)" not in capsys.readouterr().err
-            if valid
-            else "error(s)" in capsys.readouterr().err
-        )
+        error = any("error(s)" in record.message for record in caplog.records)
+        assert not error if valid else error

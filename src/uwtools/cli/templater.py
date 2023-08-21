@@ -4,7 +4,6 @@ CLI for rendering a Jinja2 template using user-supplied configuration options vi
 environment variables.
 """
 
-import inspect
 import logging
 import sys
 from argparse import ArgumentError, ArgumentParser, HelpFormatter, Namespace
@@ -19,16 +18,17 @@ def main() -> None:
     Main entry point.
     """
     args = parse_args(sys.argv[1:])
-    name = f"{inspect.stack()[0][3]}"
     setup_logging(quiet=args.quiet, verbose=args.verbose)
-    dashes = lambda: logging.info("%s", "{x}\n{x}".format(x=f"{('-' * 70)}"))
+    dashes = "-" * 70
     logging.info("Running with args:")
-    dashes()
+    logging.info(dashes)
+    logging.info(dashes)
     for name, val in sorted(args.__dict__.items()):
         if name not in ["config"]:
             logging.info("{name:>15s}: {val}".format(name=name, val=val))
     logging.info("Re-run settings: %s", " ".join(sys.argv[1:]))
-    dashes()
+    logging.info(dashes)
+    logging.info(dashes)
     templater.render(
         config_file=args.config_file,
         key_eq_val_pairs=args.config_items,

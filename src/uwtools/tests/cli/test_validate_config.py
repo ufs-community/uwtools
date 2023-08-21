@@ -3,6 +3,7 @@
 Tests for the validate-config CLI.
 """
 
+import logging
 from types import SimpleNamespace as ns
 from unittest.mock import patch
 
@@ -43,7 +44,7 @@ def test_main(files):
 
 
 @pytest.mark.parametrize("sw", [ns(c="-c", s="-s"), ns(c="--config-file", s="--validation-schema")])
-def test_parse_args_bad_cfgfile(sw, files, capsys, tmp_path):
+def test_parse_args_bad_cfgfile(sw, files, caplog, tmp_path):
     """
     Fails if non-existent config file is specified.
     """
@@ -51,19 +52,20 @@ def test_parse_args_bad_cfgfile(sw, files, capsys, tmp_path):
     cfgfile = str(tmp_path / "no-such-file")
     with raises(FileNotFoundError):
         validate_config.parse_args([sw.c, cfgfile, sw.s, schemafile])
-    assert f"{cfgfile} does not exist" in capsys.readouterr().err
+    assert f"{cfgfile} does not exist" in [record.message for record in caplog.records]
 
 
 @pytest.mark.parametrize("sw", [ns(c="-c", s="-s"), ns(c="--config-file", s="--validation-schema")])
-def test_parse_args_bad_schemafile(sw, files, capsys, tmp_path):
+def test_parse_args_bad_schemafile(sw, files, caplog, tmp_path):
     """
     Fails if non-existent schema file is specified.
     """
+    logging.getLogger().setLevel(logging.INFO)
     cfgfile, _ = files
     schemafile = str(tmp_path / "no-such-file")
     with raises(FileNotFoundError):
         validate_config.parse_args([sw.c, cfgfile, sw.s, schemafile])
-    assert f"{schemafile} does not exist" in capsys.readouterr().err
+    assert f"{schemafile} does not exist" in [record.message for record in caplog.records]
 
 
 @pytest.mark.parametrize("noise", ["-q", "--quiet", "-v", "--verbose"])

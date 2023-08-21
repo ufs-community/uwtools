@@ -3,6 +3,8 @@
 Tests for uwtools.utils.templater module.
 """
 
+import logging
+
 import yaml
 from pytest import fixture, raises
 
@@ -48,8 +50,9 @@ def test_render(config_file, input_template, tmp_path):
 
 
 def test_render_dry_run(caplog, config_file, input_template):
+    logging.getLogger().setLevel(logging.DEBUG)
     render(config_file, input_template, outfile="/dev/null", dry_run=True)
-    logmsgs = (record.msg for record in caplog.records)
+    logmsgs = (record.message for record in caplog.records)
     assert "roses are red, violets are blue" in logmsgs
 
 
@@ -62,14 +65,15 @@ def test_render_values_missing(caplog, config_file, input_template):
         f.write(yaml.dump(cfgobj))
     with raises(ValueError):
         render(config_file, input_template, outfile="/dev/null")
-    logmsgs = list(record.msg for record in caplog.records)
+    logmsgs = (record.message for record in caplog.records)
     assert "Template requires values that were not provided:" in logmsgs
     assert "roses" in logmsgs
 
 
 def test_render_values_needed(caplog, config_file, input_template):
+    logging.getLogger().setLevel(logging.DEBUG)
     render(config_file, input_template, outfile="/dev/null", values_needed=True)
-    logmsgs = (record.msg for record in caplog.records)
+    logmsgs = (record.message for record in caplog.records)
     for var in ("roses", "violets"):
         assert var in logmsgs
 
