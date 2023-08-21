@@ -105,7 +105,7 @@ def line_in_lines(line: str, lines: List[str]) -> bool:
 
 def logged(msg: str, caplog: LogCaptureFixture) -> bool:
     """
-    WRITEME
+    WRITEME.
     """
     return msg in [record.message for record in caplog.records]
 

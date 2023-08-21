@@ -3,6 +3,7 @@ Helpers to be used when parsing arguments and gathering config files.
 """
 
 import logging
+import sys
 from pathlib import Path
 from typing import Dict, List
 
@@ -49,6 +50,6 @@ def path_if_it_exists(path: str) -> str:
     p = Path(path)
     if not p.exists():
         msg = f"{path} does not exist"
-        logging.error(msg)
+        print(msg, file=sys.stderr)
         raise FileNotFoundError(msg)
     return str(p.absolute())

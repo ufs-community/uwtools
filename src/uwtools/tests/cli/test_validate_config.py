@@ -44,7 +44,7 @@ def test_main(files):
 
 
 @pytest.mark.parametrize("sw", [ns(c="-c", s="-s"), ns(c="--config-file", s="--validation-schema")])
-def test_parse_args_bad_cfgfile(sw, files, caplog, tmp_path):
+def test_parse_args_bad_cfgfile(capsys, files, sw, tmp_path):
     """
     Fails if non-existent config file is specified.
     """
@@ -52,11 +52,11 @@ def test_parse_args_bad_cfgfile(sw, files, caplog, tmp_path):
     cfgfile = str(tmp_path / "no-such-file")
     with raises(FileNotFoundError):
         validate_config.parse_args([sw.c, cfgfile, sw.s, schemafile])
-    assert f"{cfgfile} does not exist" in [record.message for record in caplog.records]
+    assert f"{cfgfile} does not exist" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("sw", [ns(c="-c", s="-s"), ns(c="--config-file", s="--validation-schema")])
-def test_parse_args_bad_schemafile(sw, files, caplog, tmp_path):
+def test_parse_args_bad_schemafile(capsys, files, sw, tmp_path):
     """
     Fails if non-existent schema file is specified.
     """
@@ -65,7 +65,7 @@ def test_parse_args_bad_schemafile(sw, files, caplog, tmp_path):
     schemafile = str(tmp_path / "no-such-file")
     with raises(FileNotFoundError):
         validate_config.parse_args([sw.c, cfgfile, sw.s, schemafile])
-    assert f"{schemafile} does not exist" in [record.message for record in caplog.records]
+    assert f"{schemafile} does not exist" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("noise", ["-q", "--quiet", "-v", "--verbose"])
@@ -73,7 +73,7 @@ def test_parse_args_bad_schemafile(sw, files, caplog, tmp_path):
     "sw",
     [ns(c="-c", l="-l", s="-s"), ns(c="--config-file", s="--validation-schema")],
 )
-def test_parse_args_good(sw, noise, files):
+def test_parse_args_good(files, noise, sw):
     """
     Test all valid CLI switch/value combinations.
     """
@@ -102,7 +102,7 @@ def test_parse_args_good(sw, noise, files):
         ns(c="--config-file", q="--quiet", s="--validation-schema", v="--verbose"),
     ],
 )
-def test_parse_args_mutually_exclusive_args(sw, files, capsys):
+def test_parse_args_mutually_exclusive_args(capsys, files, sw):
     cfgfile, schemafile = files
     with raises(SystemExit) as e:
         validate_config.parse_args([sw.c, cfgfile, sw.s, schemafile, sw.q, sw.v])
