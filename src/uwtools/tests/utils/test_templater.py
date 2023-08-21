@@ -51,7 +51,6 @@ def test_render(config_file, input_template, tmp_path):
 
 
 def test_render_dry_run(caplog, config_file, input_template):
-
     logging.getLogger().setLevel(logging.DEBUG)
     render(config_file, input_template, outfile="/dev/null", dry_run=True)
     assert logged(caplog, "roses are red, violets are blue")

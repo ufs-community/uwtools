@@ -12,6 +12,7 @@ from uwtools.config import YAMLConfig
 
 # Public functions
 
+
 def config_is_valid(config_file: str, schema_file: str) -> bool:
     """
     Check whether the given config file conforms to the given JSON Schema spec and whether any
