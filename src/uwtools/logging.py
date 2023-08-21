@@ -15,7 +15,7 @@ def setup_logging(quiet: bool = False, verbose: bool = False) -> None:
     :param verbose: Log all messages.
     """
     if quiet and verbose:
-        print("Speficy at most one of 'quiet' and 'verbose'", file=sys.stderr)
+        print("Specify at most one of 'quiet' and 'verbose'", file=sys.stderr)
         sys.exit(1)
     logging.basicConfig(
         datefmt="%Y-%m-%dT%H:%M:%S",
