@@ -48,10 +48,9 @@ def test_parse_args_bad_cfgfile(sw, tmp_path, capsys):
     Fails if config file does not exist.
     """
     cfgfile = str(tmp_path / "no-such-file")
-    with raises(SystemExit) as e:
+    with raises(FileNotFoundError):
         run_forecast.parse_args([sw.c, cfgfile])
-    assert e.value.code == 2
-    assert "does not exist!" in capsys.readouterr().err
+    assert f"{cfgfile} does not exist" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("sw", [ns(m="-m"), ns(m="--machine")])
@@ -60,10 +59,9 @@ def test_parse_args_bad_machinefile(sw, tmp_path, capsys):
     Fails if machine file does not exist.
     """
     machinefile = str(tmp_path / "no-such-file")
-    with raises(SystemExit) as e:
+    with raises(FileNotFoundError):
         run_forecast.parse_args([sw.m, machinefile])
-    assert e.value.code == 2
-    assert "does not exist!" in capsys.readouterr().err
+    assert f"{machinefile} does not exist" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("noise", ["-q", "--quiet", "-v", "--verbose"])
