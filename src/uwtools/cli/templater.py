@@ -6,7 +6,7 @@ environment variables.
 
 import logging
 import sys
-from argparse import ArgumentError, ArgumentParser, HelpFormatter, Namespace
+from argparse import ArgumentParser, HelpFormatter, Namespace
 from typing import List
 
 from uwtools.logging import setup_logging
@@ -109,12 +109,15 @@ def parse_args(args: List[str]) -> Namespace:
     )
 
     parsed = parser.parse_args(args)
+
     if not parsed.outfile and not parsed.dry_run and not parsed.values_needed:
         msg = "You need outfile, dry_run, or values_needed to continue."
-        raise ArgumentError(None, msg)
+        print(msg, file=sys.stderr)
+        sys.exit(1)
 
     if parsed.quiet and parsed.dry_run:
         msg = "You added quiet and dry_run arguments. This will print nothing."
-        raise ArgumentError(None, msg)
+        print(msg, file=sys.stderr)
+        sys.exit(1)
 
     return parsed

@@ -11,16 +11,16 @@ import pytest
 from pytest import fixture, raises
 
 from uwtools.cli import experiment_manager
-from uwtools.tests.support import logged
 
 # NB: Ensure that at least one test exercises both short and long forms of each
 #     CLI switch.
 
 
-def test_main():
-    with patch.object(experiment_manager, "parse_args") as parse_args:
-        cfgfile = "/some/file"
-        parse_args.return_value = ns(forecast_app="SRW", config_file=cfgfile)
+@pytest.mark.parametrize("sw", [ns(a="-a", c="-c"), ns(a="--forecast-app", c="--config-file")])
+def test_main(sw):
+    cfgfile = "/some/file"
+    argv = ["test", sw.a, "SRW", sw.c, cfgfile]
+    with patch.object(experiment_manager.sys, "argv", argv):
         with patch.object(experiment_manager.experiment, "SRWExperiment") as experiment:
             experiment_manager.main()
         experiment.assert_called_once_with(cfgfile)
@@ -34,14 +34,14 @@ def cfgfile(tmp_path):
 
 
 @pytest.mark.parametrize("sw", [ns(a="-a", c="-c"), ns(a="--forecast-app", c="--config-file")])
-def test_parse_args_bad_app(caplog, cfgfile, sw):
+def test_parse_args_bad_app(capsys, cfgfile, sw):
     """
     Fails if a bad app name is specified.
     """
     with raises(SystemExit) as e:
         experiment_manager.parse_args([sw.a, "FOO", sw.c, cfgfile])
     assert e.value.code == 2
-    assert logged(caplog, "invalid choice: 'FOO'")
+    assert "invalid choice: 'FOO'" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("sw", [ns(a="-a", c="-c"), ns(a="--forecast-app", c="--config-file")])
@@ -86,4 +86,4 @@ def test_parse_args_mutually_exclusive_args(capsys, cfgfile, sw):
     with raises(SystemExit) as e:
         experiment_manager.parse_args([sw.a, "SRW", sw.c, cfgfile, sw.q, sw.v])
     assert e.value.code == 1
-    assert "Options --dry-run and --outfile may not be used together" in capsys.readouterr().err
+    assert "Options --quiet and --verbose may not be used together" in capsys.readouterr().err

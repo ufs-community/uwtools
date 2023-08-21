@@ -27,7 +27,7 @@ def test_mutually_exclusive_args(sw):
     """
     Test that mutually-exclusive -q/-d args are rejected.
     """
-    with raises(argparse.ArgumentError):
+    with raises(SystemExit):
         argv = ["test", sw.i, fixture_path("fruit_config.yaml"), sw.d, sw.q]
         with patch.object(templater.sys, "argv", argv):
             templater.main()
@@ -225,7 +225,7 @@ Initial config set from environment
     # Test quiet level.
 
     caplog.clear()
-    with raises(argparse.ArgumentError):
+    with raises(SystemExit):
         argv = ["test", "-i", infile, "-q"]
         with patch.object(templater.sys, "argv", argv):
             templater.main()

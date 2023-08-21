@@ -19,10 +19,10 @@ def main() -> None:
 
     Parses arguments provided by the user and passes to the facade to be run.
     """
-    user_args = parse_args(sys.argv[1:])
-    setup_logging(quiet=user_args.quiet, verbose=user_args.verbose)
-    experiment_class = getattr(experiment, f"{user_args.forecast_app}Experiment")
-    experiment_class(user_args.config_file)
+    args = parse_args(sys.argv[1:])
+    setup_logging(quiet=args.quiet, verbose=args.verbose)
+    experiment_class = getattr(experiment, f"{args.forecast_app}Experiment")
+    experiment_class(args.config_file)
 
 
 def parse_args(args: List[str]) -> Namespace:
@@ -66,6 +66,6 @@ def parse_args(args: List[str]) -> Namespace:
     )
     parsed = parser.parse_args(args)
     if parsed.quiet and parsed.verbose:
-        print("Options --dry-run and --outfile may not be used together", file=sys.stderr)
+        print("Options --quiet and --verbose may not be used together", file=sys.stderr)
         sys.exit(1)
     return parsed
