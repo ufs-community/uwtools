@@ -5,7 +5,7 @@ Tests for the set-config CLI.
 
 from argparse import ArgumentError
 from itertools import chain
-from unittest.mock import ANY, patch
+from unittest.mock import patch
 
 import pytest
 from pytest import fixture, raises
@@ -20,21 +20,16 @@ def args(tmp_path):
     return {
         "--input-base-file": str(tmp_path / "in.yaml"),
         "--config-file": str(tmp_path / "cfg.yaml"),
-        "--log-file": str(tmp_path / "log"),
         "--outfile": str(tmp_path / "out.yaml"),
     }
 
 
-@patch.object(set_config.cli_helpers, "setup_logging")
 @patch.object(set_config.config, "create_config_obj")
-def test_main(create_config_obj, setup_logging, args):
+def test_main(create_config_obj, args):
     arglist = list(chain(*args.items()))
     with patch.object(set_config.sys, "argv", ["test", *arglist]):
         # Test success:
         set_config.main()
-        setup_logging.assert_called_once_with(
-            log_file=args["--log-file"], log_name="set_config", quiet=False, verbose=False
-        )
         create_config_obj.assert_called_once_with(
             input_base_file=args["--input-base-file"],
             compare=False,
@@ -42,14 +37,10 @@ def test_main(create_config_obj, setup_logging, args):
             config_file_type=None,
             dry_run=False,
             input_file_type=None,
-            log=ANY,
-            log_file=args["--log-file"],
             outfile=args["--outfile"],
             output_file_type=None,
-            quiet=False,
             show_format=False,
             values_needed=False,
-            verbose=False,
         )
         # Test failure:
         create_config_obj.side_effect = set_config.UWConfigError()
@@ -71,7 +62,6 @@ def test_parse_args_base(args):
     assert not parsed.verbose
     assert parsed.config_file.endswith("/cfg.yaml")
     assert parsed.input_base_file.endswith("/in.yaml")
-    assert parsed.log_file.endswith("/log")
     assert parsed.outfile.endswith("/out.yaml")
 
 
@@ -100,13 +90,13 @@ def test_parse_args_file_types_good(fmt, args):
     assert parsed.output_file_type == fmt
 
 
-def test_parse_args_mutually_exclusive_1(args):
+def test_parse_args_mutually_exclusive(args):
     arglist = list(chain(*args.items())) + ["--dry-run", "--quiet"]
     with raises(ArgumentError):
         set_config.parse_args(arglist)
 
 
-def test_parse_args_mutually_inclusive_1(args):
+def test_parse_args_mutually_inclusive(args):
     del args["--outfile"]
     arglist = list(chain(*args.items()))
     arglist += ["--show-format"]
