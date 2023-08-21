@@ -107,4 +107,4 @@ def test_parse_args_mutually_exclusive_args(capsys, files, sw):
     with raises(SystemExit) as e:
         validate_config.parse_args([sw.c, config_file, sw.s, schema_file, sw.q, sw.v])
     assert e.value.code == 1
-    assert "Options --dry-run and --outfile may not be used together" in capsys.readouterr().err
+    assert "Options --quiet and --verbose may not be used together" in capsys.readouterr().err
