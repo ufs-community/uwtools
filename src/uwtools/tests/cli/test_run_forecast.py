@@ -3,6 +3,7 @@
 Tests for the run-forecast CLI.
 """
 
+import logging
 from types import SimpleNamespace as ns
 from unittest.mock import patch
 
@@ -18,20 +19,17 @@ from uwtools.cli import run_forecast
 @fixture
 def files(tmp_path):
     cfgfile = tmp_path / "cfg.yaml"
-    logfile = tmp_path / "log"
     machinefile = tmp_path / "machine.yaml"
-    for fn in cfgfile, logfile, machinefile:
-        with open(fn, "w", encoding="utf-8"):
-            pass
-    return str(cfgfile), str(logfile), str(machinefile)
+    for path in cfgfile, machinefile:
+        path.touch()
+    return str(cfgfile), str(machinefile)
 
 
 def test_main(files):
-    cfgfile, logfile, machinefile = files
+    cfgfile, machinefile = files
     args = ns(
         config_file=cfgfile,
         forecast_model="FV3",
-        log_file=logfile,
         machine=machinefile,
         quiet=False,
         verbose=False,
@@ -39,47 +37,45 @@ def test_main(files):
     with patch.object(run_forecast, "parse_args", return_value=args):
         with patch.object(run_forecast.forecast, "FV3Forecast") as fv3fcst:
             run_forecast.main()
-            fv3fcst.assert_called_once_with(cfgfile, machinefile, log_name="run-forecast")
+            fv3fcst.assert_called_once_with(cfgfile, machinefile)
 
 
 @pytest.mark.parametrize("sw", [ns(c="-c"), ns(c="--config-file")])
-def test_parse_args_bad_cfgfile(sw, tmp_path, capsys):
+def test_parse_args_bad_cfgfile(caplog, sw, tmp_path):
     """
     Fails if config file does not exist.
     """
+    logging.getLogger().setLevel(logging.DEBUG)
     cfgfile = str(tmp_path / "no-such-file")
     with raises(FileNotFoundError):
         run_forecast.parse_args([sw.c, cfgfile])
-    assert f"{cfgfile} does not exist" in capsys.readouterr().err
+    assert f"{cfgfile} does not exist" in (record.message for record in caplog.records)
 
 
 @pytest.mark.parametrize("sw", [ns(m="-m"), ns(m="--machine")])
-def test_parse_args_bad_machinefile(sw, tmp_path, capsys):
+def test_parse_args_bad_machinefile(caplog, sw, tmp_path):
     """
     Fails if machine file does not exist.
     """
+    logging.getLogger().setLevel(logging.DEBUG)
     machinefile = str(tmp_path / "no-such-file")
     with raises(FileNotFoundError):
         run_forecast.parse_args([sw.m, machinefile])
-    assert f"{machinefile} does not exist" in capsys.readouterr().err
+    assert f"{machinefile} does not exist" in (record.message for record in caplog.records)
 
 
 @pytest.mark.parametrize("noise", ["-q", "--quiet", "-v", "--verbose"])
-@pytest.mark.parametrize(
-    "sw", [ns(c="-c", l="-l", m="-m"), ns(c="--config-file", l="--log-file", m="--machine")]
-)
+@pytest.mark.parametrize("sw", [ns(c="-c", m="-m"), ns(c="--config-file", m="--machine")])
 def test_parse_args_good(sw, noise, files):
     """
     Test all valid CLI switch/value combinations.
     """
-    cfgfile, machinefile, logfile = files
+    cfgfile, machinefile = files
     app, model = "SRW", "FV3"  # representative (not exhaustive) choices
     parsed = run_forecast.parse_args(
         [
             sw.c,
             cfgfile,
-            sw.l,
-            logfile,
             sw.m,
             machinefile,
             "--forecast-app",
@@ -90,7 +86,6 @@ def test_parse_args_good(sw, noise, files):
         ]
     )
     assert parsed.config_file == cfgfile
-    assert parsed.log_file == logfile
     assert parsed.machine == machinefile
     if noise in ["-q", "--quiet"]:
         sw_off = parsed.verbose
