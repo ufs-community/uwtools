@@ -21,17 +21,10 @@ task_hello:
   command: echo hello 
   jobname: hello
 metatask_howdy:
-  var:
-    mem: 1 2 3
   task_howdy_#mem#:
     command: echo hello 
     jobname: howdy_#mem#
-  task_hola_#mem#:
-    command: echo hello 
-    jobname: hola_#mem#
   metatask_hey_#mem#:
-    var:
-      day: mon tues
     task_hey_#mem#_#day#:
       command: echo hello 
       jobname: hey_#mem#_#day#
@@ -43,21 +36,14 @@ metatask_howdy:
 task_hello:
   command: echo hello
 metatask_howdy:
-  var:
-    mem: 1 2 3
   task_howdy_#mem#:
     command: echo hello 
-  task_hola_#mem#:
-    command: echo hello
   metatask_hey_#mem#:
-    var:
-      day: mon tues
     task_hey_#mem#_#day#:
       command: echo hello
 """
     )
 
-    # pylint: disable=protected-access
     rocoto._add_jobname(tasks)
     assert expected == tasks
 

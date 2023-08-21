@@ -1,4 +1,3 @@
-rocoto:
   attrs:
     realtime: false
     scheduler: slurm
