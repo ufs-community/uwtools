@@ -61,7 +61,7 @@ def parse_args(args: List[str]) -> Namespace:
         "--input-base-file",
         help="Path to a YAML, bash/ini, or namelist config base file",
         required=True,
-        type=cli_helpers.path_if_file_exists,
+        type=cli_helpers.path_if_it_exists,
     )
     optional = parser.add_argument_group("optional arguments")
     optional.add_argument(
@@ -69,7 +69,7 @@ def parse_args(args: List[str]) -> Namespace:
         "--config-file",
         help="Path to YAML, bash/INI, or namelist configuration file",
         metavar="FILE",
-        type=cli_helpers.path_if_file_exists,
+        type=cli_helpers.path_if_it_exists,
     )
     optional.add_argument(
         "-d",

@@ -42,7 +42,7 @@ def parse_args(args: List[str]) -> Namespace:
         help="Path to bash/ini, namelist, or YAML configuration file",
         metavar="FILE",
         required=True,
-        type=cli_helpers.path_if_file_exists,
+        type=cli_helpers.path_if_it_exists,
     )
     required.add_argument(
         "-s",
@@ -50,7 +50,7 @@ def parse_args(args: List[str]) -> Namespace:
         help="Path to JSON Schema file for validation",
         metavar="FILE",
         required=True,
-        type=cli_helpers.path_if_file_exists,
+        type=cli_helpers.path_if_it_exists,
     )
     optional = parser.add_argument_group("optional arguments")
     optional.add_argument(

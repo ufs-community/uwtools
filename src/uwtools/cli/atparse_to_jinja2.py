@@ -38,7 +38,7 @@ def parse_args(args: List[str]) -> Namespace:
         help="Path to an atparse template file",
         metavar="FILE",
         required=True,
-        type=cli_helpers.path_if_file_exists,
+        type=cli_helpers.path_if_it_exists,
     )
     optional = parser.add_argument_group("optional arguments")
     optional.add_argument(

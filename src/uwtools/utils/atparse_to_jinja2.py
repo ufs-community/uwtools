@@ -3,28 +3,41 @@ Utilities for rendering Jinja2 templates.
 """
 
 import re
-from typing import Optional
+import sys
+from typing import IO, Optional
 
 
-def convert(input_template: str, dry_run: bool = False, outfile: Optional[str] = None) -> None:
+def convert(input_template: str, outfile: Optional[str] = None, dry_run: bool = False) -> None:
     """
     Renders a Jinja2 template using user-supplied configuration options via YAML or environment
     variables.
+
+    :param input_template: Path to the template containing atparse syntax.
+    :param outfile: The file to write the converted template to.
+    :param dry_run: Run in dry-run mode?
+    :raises: RuntimeError if neither an output file or dry-run are specified.
     """
-    with open(input_template, "rt", encoding="utf-8") as atparsetemplate:
-        if dry_run:
-            for line in atparsetemplate:
-                print(_replace(line))
-        else:
-            assert outfile is not None
-            with open(outfile, "wt", encoding="utf-8") as jinja2template:
-                for line in atparsetemplate:
-                    jinja2template.write(_replace(line))
+
+    def write(f_out: IO) -> None:
+        with open(input_template, "r", encoding="utf-8") as f_in:
+            for line in f_in:
+                print(_replace(line.strip()), file=f_out)
+
+    if dry_run:
+        write(sys.stdout)
+    elif outfile:
+        with open(outfile, "w", encoding="utf-8") as out_f:
+            write(out_f)
+    else:
+        raise RuntimeError("Provide an output path or specify dry-run mode.")
 
 
 def _replace(atline: str) -> str:
     """
     Replace @[] with {{}} in a line of text.
+
+    :param atline: A line (potentially) containing atparse syntax.
+    :return: The given line with atparse syntax converted to Jinja2 syntax.
     """
     while re.search(r"\@\[.*?\]", atline):
         # Set maxsplits to 1 so only first @[ is captured.
