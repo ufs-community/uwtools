@@ -10,6 +10,7 @@ import pytest
 from pytest import fixture
 
 from uwtools.drivers.driver import Driver
+from uwtools.tests.support import logged
 
 
 class ConcreteDriver(Driver):
@@ -91,5 +92,7 @@ def test_validation(caplog, configs, schema, tmp_path, valid):
     with patch.object(ConcreteDriver, "schema_file", new=schema_file):
         logging.getLogger().setLevel(logging.DEBUG)
         ConcreteDriver(config_file=config_file)
-        error = any("error(s)" in record.message for record in caplog.records)
-        assert not error if valid else error
+        if valid:
+            assert logged(caplog, "0 schema-validation errors found")
+        else:
+            assert logged(caplog, "2 schema-validation errors found")
