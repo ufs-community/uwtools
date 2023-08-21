@@ -16,9 +16,11 @@ class ConcreteDriver(Driver):
     Driver subclass for testing purposes.
     """
 
-    @property
-    def schema(self) -> str:
-        return ""
+    def batch_script(self):
+        pass
+
+    def output(self):
+        pass
 
     def requirements(self):
         pass
@@ -26,17 +28,15 @@ class ConcreteDriver(Driver):
     def resources(self):
         pass
 
-    def output(self):
-        pass
-
-    def batch_script(self):
-        pass
-
     def run(self):
         pass
 
     def run_cmd(self, *args, run_cmd, exec_name):
         pass
+
+    @property
+    def schema_file(self) -> str:
+        return ""
 
 
 @fixture
@@ -87,10 +87,6 @@ def test_validation(capsys, configs, schema, tmp_path, valid):
     schema_file = str(tmp_path / "test.jsonschema")
     with open(schema_file, "w", encoding="utf-8") as f:
         print(schema, file=f)
-    with patch.object(ConcreteDriver, "schema", new=schema_file):
+    with patch.object(ConcreteDriver, "schema_file", new=schema_file):
         ConcreteDriver(config_file=config_file)
-        assert (
-            "error(s)" not in capsys.readouterr().err
-            if valid
-            else "error(s)" in capsys.readouterr().err
-        )
+        assert ("schema-validation errors" in capsys.readouterr().err) is False if valid else True
