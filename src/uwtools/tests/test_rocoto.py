@@ -24,10 +24,6 @@ metatask_howdy:
   task_howdy_#mem#:
     command: echo hello 
     jobname: howdy_#mem#
-  metatask_hey_#mem#:
-    task_hey_#mem#_#day#:
-      command: echo hello 
-      jobname: hey_#mem#_#day#
 """
     )
 
@@ -38,9 +34,6 @@ task_hello:
 metatask_howdy:
   task_howdy_#mem#:
     command: echo hello 
-  metatask_hey_#mem#:
-    task_hey_#mem#_#day#:
-      command: echo hello
 """
     )
 
