@@ -50,9 +50,9 @@ def render(
             missing.append(var)
     if missing:
         msg = "Template requires values that were not provided:"
-        logging.critical(msg)
+        logging.error(msg)
         for key in missing:
-            logging.critical(key)
+            logging.error(key)
         raise ValueError(msg)
 
     # In dry-run mode, display the rendered template and then return.

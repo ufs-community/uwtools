@@ -3,6 +3,7 @@
 Tests for the experiment-manager CLI.
 """
 
+import logging
 from types import SimpleNamespace as ns
 from unittest.mock import patch
 
@@ -10,6 +11,7 @@ import pytest
 from pytest import fixture, raises
 
 from uwtools.cli import experiment_manager
+from uwtools.tests.support import logged
 
 # NB: Ensure that at least one test exercises both short and long forms of each
 #     CLI switch.
@@ -25,27 +27,25 @@ def test_main():
 
 
 @fixture
-def assets(tmp_path):
-    cfgfile = tmp_path / "cfg.yaml"
-    cfgfile.touch()
-    logfile = tmp_path / "log"
-    return str(cfgfile), str(logfile)
+def cfgfile(tmp_path):
+    path = tmp_path / "cfg.yaml"
+    path.touch()
+    return str(path)
 
 
 @pytest.mark.parametrize("sw", [ns(a="-a", c="-c"), ns(a="--forecast-app", c="--config-file")])
-def test_parse_args_bad_app(sw, assets, capsys):
+def test_parse_args_bad_app(caplog, cfgfile, sw):
     """
     Fails if a bad app name is specified.
     """
-    cfgfile, _ = assets
     with raises(SystemExit) as e:
         experiment_manager.parse_args([sw.a, "FOO", sw.c, cfgfile])
     assert e.value.code == 2
-    assert "invalid choice: 'FOO'" in capsys.readouterr().err
+    assert "invalid choice: 'FOO'" in [record.message for record in caplog.records]
 
 
 @pytest.mark.parametrize("sw", [ns(a="-a", c="-c"), ns(a="--forecast-app", c="--config-file")])
-def test_parse_args_bad_cfgfile(sw, capsys, tmp_path):
+def test_parse_args_bad_cfgfile(capsys, sw, tmp_path):
     """
     Fails if non-existent config file is specified.
     """
@@ -56,18 +56,14 @@ def test_parse_args_bad_cfgfile(sw, capsys, tmp_path):
 
 
 @pytest.mark.parametrize("noise", ["-q", "--quiet", "-v", "--verbose"])
-@pytest.mark.parametrize(
-    "sw", [ns(a="-a", c="-c", l="-l"), ns(a="--forecast-app", c="--config-file", l="--log-file")]
-)
-def test_parse_args_good(sw, noise, assets):
+@pytest.mark.parametrize("sw", [ns(a="-a", c="-c"), ns(a="--forecast-app", c="--config-file")])
+def test_parse_args_good(cfgfile, noise, sw):
     """
     Test all valid CLI switch/value combinations.
     """
-    cfgfile, logfile = assets
-    parsed = experiment_manager.parse_args([sw.a, "SRW", sw.c, cfgfile, sw.l, logfile, noise])
+    parsed = experiment_manager.parse_args([sw.a, "SRW", sw.c, cfgfile, noise])
     assert parsed.forecast_app == "SRW"
     assert parsed.config_file == cfgfile
-    assert parsed.log_file == logfile
     if noise in ["-q", "--quiet"]:
         sw_off = parsed.verbose
         sw_on = parsed.quiet
@@ -85,8 +81,8 @@ def test_parse_args_good(sw, noise, assets):
         ns(a="--forecast-app", c="--config-file", q="--quiet", v="--verbose"),
     ],
 )
-def test_parse_args_mutually_exclusive_args(sw, assets, capsys):
-    cfgfile, _ = assets
+def test_parse_args_mutually_exclusive_args(capsys, cfgfile, sw):
+    logging.getLogger().setLevel(logging.DEBUG)
     with raises(SystemExit) as e:
         experiment_manager.parse_args([sw.a, "SRW", sw.c, cfgfile, sw.q, sw.v])
     assert e.value.code == 1

@@ -6,6 +6,8 @@ from logging import LogRecord
 from pathlib import Path
 from typing import List
 
+from _pytest.logging import LogCaptureFixture
+
 
 def compare_files(path1: str, path2: str) -> bool:
     """
@@ -99,6 +101,13 @@ def line_in_lines(line: str, lines: List[str]) -> bool:
     A bool indicating whether or not the line was found.
     """
     return any(x for x in lines if re.match(r"^.*%s$" % re.escape(line), x))
+
+
+def logged(msg: str, caplog: LogCaptureFixture) -> bool:
+    """
+    WRITEME
+    """
+    return msg in [record.message for record in caplog.records]
 
 
 def msg_in_caplog(msg: str, records: List[LogRecord]) -> bool:

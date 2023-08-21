@@ -691,7 +691,7 @@ def create_config_obj(
             input_depth = config_obj.dictionary_depth(config_obj.data)
 
             if input_depth < config_depth:
-                logging.critical("%s not compatible with input file", config_file)
+                logging.error("%s not compatible with input file", config_file)
                 raise ValueError("Set config failure: config object not compatible with input file")
 
         if compare:
@@ -743,7 +743,7 @@ def create_config_obj(
                     outfile_type == "F90" and input_depth != 2
                 ):
                     err_msg = "Set config failure: incompatible file types"
-                    logging.critical(err_msg)
+                    logging.error(err_msg)
                     raise ValueError(err_msg)
                 # Dump to file:
                 dump_method(path=outfile, cfg=config_obj)

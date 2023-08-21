@@ -49,7 +49,7 @@ class FV3Forecast(Driver):
         # Exit program with error if caller chooses to quit.
 
         if exist_act == "quit" and os.path.isdir(run_directory):
-            logging.critical("User chose quit option when creating directory")
+            logging.error("User chose quit option when creating directory")
             sys.exit(1)
 
         # Delete or rename directory if it exists.

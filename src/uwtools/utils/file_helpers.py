@@ -20,7 +20,7 @@ def handle_existing(run_directory: str, exist_act: str) -> None:
             shutil.rmtree(run_directory)
     except (FileExistsError, RuntimeError) as e:
         msg = f"Could not delete directory {run_directory}"
-        logging.critical(msg)
+        logging.error(msg)
         raise RuntimeError(msg) from e
 
     # Try to rename existing run directory if option is rename.
@@ -32,5 +32,5 @@ def handle_existing(run_directory: str, exist_act: str) -> None:
             shutil.move(run_directory, save_dir)
     except (FileExistsError, RuntimeError) as e:
         msg = f"Could not rename directory {run_directory}"
-        logging.critical(msg)
+        logging.error(msg)
         raise RuntimeError(msg) from e
