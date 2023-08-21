@@ -8,6 +8,7 @@ import logging
 import yaml
 from pytest import fixture, raises
 
+from uwtools.tests.support import logged
 from uwtools.utils import templater
 
 
@@ -52,8 +53,7 @@ def test_render(config_file, input_template, tmp_path):
 def test_render_dry_run(caplog, config_file, input_template):
     logging.getLogger().setLevel(logging.DEBUG)
     render(config_file, input_template, outfile="/dev/null", dry_run=True)
-    logmsgs = (record.message for record in caplog.records)
-    assert "roses are red, violets are blue" in logmsgs
+    assert logged(caplog, "roses are red, violets are blue")
 
 
 def test_render_values_missing(caplog, config_file, input_template):
@@ -65,17 +65,15 @@ def test_render_values_missing(caplog, config_file, input_template):
         f.write(yaml.dump(cfgobj))
     with raises(ValueError):
         render(config_file, input_template, outfile="/dev/null")
-    logmsgs = (record.message for record in caplog.records)
-    assert "Template requires values that were not provided:" in logmsgs
-    assert "roses" in logmsgs
+    assert logged(caplog, "Template requires values that were not provided:")
+    assert logged(caplog, "roses")
 
 
 def test_render_values_needed(caplog, config_file, input_template):
     logging.getLogger().setLevel(logging.DEBUG)
     render(config_file, input_template, outfile="/dev/null", values_needed=True)
-    logmsgs = (record.message for record in caplog.records)
     for var in ("roses", "violets"):
-        assert var in logmsgs
+        assert logged(caplog, var)
 
 
 def test__set_up_config_obj(config_file):

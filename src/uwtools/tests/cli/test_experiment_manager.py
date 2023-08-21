@@ -11,8 +11,7 @@ import pytest
 from pytest import fixture, raises
 
 from uwtools.cli import experiment_manager
-
-# from uwtools.tests.support import logged
+from uwtools.tests.support import logged
 
 # NB: Ensure that at least one test exercises both short and long forms of each
 #     CLI switch.
@@ -42,7 +41,7 @@ def test_parse_args_bad_app(caplog, cfgfile, sw):
     with raises(SystemExit) as e:
         experiment_manager.parse_args([sw.a, "FOO", sw.c, cfgfile])
     assert e.value.code == 2
-    assert "invalid choice: 'FOO'" in [record.message for record in caplog.records]
+    assert logged(caplog, "invalid choice: 'FOO'")
 
 
 @pytest.mark.parametrize("sw", [ns(a="-a", c="-c"), ns(a="--forecast-app", c="--config-file")])

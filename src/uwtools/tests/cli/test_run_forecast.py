@@ -11,6 +11,7 @@ import pytest
 from pytest import fixture, raises
 
 from uwtools.cli import run_forecast
+from uwtools.tests.support import logged
 
 # NB: Ensure that at least one test exercises both short and long forms of each
 #     CLI switch.
@@ -49,7 +50,7 @@ def test_parse_args_bad_cfgfile(caplog, sw, tmp_path):
     cfgfile = str(tmp_path / "no-such-file")
     with raises(FileNotFoundError):
         run_forecast.parse_args([sw.c, cfgfile])
-    assert f"{cfgfile} does not exist" in (record.message for record in caplog.records)
+    assert logged(caplog, f"{cfgfile} does not exist")
 
 
 @pytest.mark.parametrize("sw", [ns(m="-m"), ns(m="--machine")])
@@ -61,7 +62,7 @@ def test_parse_args_bad_machinefile(caplog, sw, tmp_path):
     machinefile = str(tmp_path / "no-such-file")
     with raises(FileNotFoundError):
         run_forecast.parse_args([sw.m, machinefile])
-    assert f"{machinefile} does not exist" in (record.message for record in caplog.records)
+    assert logged(caplog, f"{machinefile} does not exist")
 
 
 @pytest.mark.parametrize("noise", ["-q", "--quiet", "-v", "--verbose"])

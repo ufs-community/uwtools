@@ -21,7 +21,7 @@ from pytest import fixture, raises
 
 from uwtools import config, exceptions
 from uwtools.exceptions import UWConfigError
-from uwtools.tests.support import compare_files, fixture_path, line_in_lines, msg_in_caplog
+from uwtools.tests.support import compare_files, fixture_path, line_in_lines, logged
 from uwtools.utils import cli_helpers
 
 # Helper functions
@@ -118,7 +118,7 @@ def test_compare_config(fmt, salad_base, caplog):
         "salad:            size:  - large + None",
         "salad:        how_many:  - None + 12",
     ]:
-        assert msg_in_caplog(msg, caplog.records)
+        assert logged(caplog, msg)
 
 
 def test_compare_nml(capsys):

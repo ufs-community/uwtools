@@ -14,7 +14,7 @@ import pytest
 from pytest import raises
 
 from uwtools.cli import templater
-from uwtools.tests.support import compare_files, fixture_path, line_in_lines
+from uwtools.tests.support import compare_files, fixture_path, logged
 
 # NB: Ensure that at least one test exercises both short and long forms of each
 #     CLI switch.
@@ -89,13 +89,12 @@ Re-run settings: {sw.i} {infile} {sw.d} fruit=pear vegetable=squash how_many=22
   how_many = 22
   dressing = 'balsamic'
 /
-""".lstrip()
+""".strip()
     argv = ["test", sw.i, infile, sw.d, "fruit=pear", "vegetable=squash", "how_many=22"]
     with patch.object(templater.sys, "argv", argv):
         templater.main()
-    actual = [record.message for record in caplog.records]
     for line in expected.split("\n"):
-        assert line_in_lines(line, actual)
+        assert logged(caplog, line)
 
 
 @pytest.mark.parametrize("sw", [ns(d="-d", i="-i"), ns(d="--dry-run", i="--input-template")])
@@ -127,14 +126,13 @@ Re-run settings: {sw.i} {infile} {sw.d}
   how_many = 22
   dressing = 'balsamic'
 /
-""".lstrip()
+""".strip()
     with patch.dict(os.environ, {"fruit": "banana", "vegetable": "tomato", "how_many": "22"}):
         argv = ["test", sw.i, infile, sw.d]
         with patch.object(templater.sys, "argv", argv):
             templater.main()
-        actual = [record.message for record in caplog.records]
         for line in expected.split("\n"):
-            assert line_in_lines(line, actual)
+            assert logged(caplog, line)
 
 
 @pytest.mark.parametrize("sw", [ns(i="-i"), ns(i="--input-template")])
@@ -163,13 +161,12 @@ Values needed to render this template are:
 fruit
 how_many
 vegetable
-""".lstrip()
+""".strip()
     argv = ["test", sw.i, infile, "--values-needed"]
     with patch.object(templater.sys, "argv", argv):
         templater.main()
-    actual = [record.message for record in caplog.records]
     for line in expected.split("\n"):
-        assert line_in_lines(line, actual)
+        assert logged(caplog, line)
 
 
 @pytest.mark.parametrize(
@@ -222,9 +219,8 @@ Initial config set from environment
         argv = ["test", sw.i, infile, sw.d, sw.v]
         with patch.object(templater.sys, "argv", argv):
             templater.main()
-    actual = [record.message for record in caplog.records]
     for line in expected.split("\n"):
-        assert line_in_lines(line, actual)
+        assert logged(caplog, line)
 
     # Test quiet level.
 

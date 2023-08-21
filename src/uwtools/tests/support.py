@@ -2,7 +2,6 @@
 
 import re
 from importlib import resources
-from logging import LogRecord
 from pathlib import Path
 from typing import List
 
@@ -103,29 +102,11 @@ def line_in_lines(line: str, lines: List[str]) -> bool:
     return any(x for x in lines if re.match(r"^.*%s$" % re.escape(line), x))
 
 
-def logged(msg: str, caplog: LogCaptureFixture) -> bool:
+def logged(caplog: LogCaptureFixture, msg: str) -> bool:
     """
-    WRITEME.
+    Does the given message occur in the log capture?
+
+    :param caplog: The pytest log capture.
+    :param msg: The message sought.
     """
     return msg in [record.message for record in caplog.records]
-
-
-def msg_in_caplog(msg: str, records: List[LogRecord]) -> bool:
-    """
-    Determines whether the given message occurs in the given list of log records.
-
-    Parameters
-    ----------
-    msg
-        The sought-for message
-    records
-        The log records to be checked for the message
-
-    Returns
-    -------
-    A bool indicating whether or not the message was found.
-    """
-    for record in records:
-        if msg == record.message:
-            return True
-    return False
