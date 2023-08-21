@@ -11,7 +11,6 @@ import pytest
 from pytest import fixture, raises
 
 from uwtools.cli import run_forecast
-from uwtools.tests.support import logged
 
 # NB: Ensure that at least one test exercises both short and long forms of each
 #     CLI switch.
@@ -42,7 +41,7 @@ def test_main(files):
 
 
 @pytest.mark.parametrize("sw", [ns(c="-c"), ns(c="--config-file")])
-def test_parse_args_bad_cfgfile(caplog, sw, tmp_path):
+def test_parse_args_bad_cfgfile(capsys, sw, tmp_path):
     """
     Fails if config file does not exist.
     """
@@ -50,11 +49,11 @@ def test_parse_args_bad_cfgfile(caplog, sw, tmp_path):
     cfgfile = str(tmp_path / "no-such-file")
     with raises(FileNotFoundError):
         run_forecast.parse_args([sw.c, cfgfile])
-    assert logged(caplog, f"{cfgfile} does not exist")
+    assert f"{cfgfile} does not exist" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("sw", [ns(m="-m"), ns(m="--machine")])
-def test_parse_args_bad_machinefile(caplog, sw, tmp_path):
+def test_parse_args_bad_machinefile(capsys, sw, tmp_path):
     """
     Fails if machine file does not exist.
     """
@@ -62,12 +61,12 @@ def test_parse_args_bad_machinefile(caplog, sw, tmp_path):
     machinefile = str(tmp_path / "no-such-file")
     with raises(FileNotFoundError):
         run_forecast.parse_args([sw.m, machinefile])
-    assert logged(caplog, f"{machinefile} does not exist")
+    assert f"{machinefile} does not exist" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("noise", ["-q", "--quiet", "-v", "--verbose"])
 @pytest.mark.parametrize("sw", [ns(c="-c", m="-m"), ns(c="--config-file", m="--machine")])
-def test_parse_args_good(sw, noise, files):
+def test_parse_args_good(files, noise, sw):
     """
     Test all valid CLI switch/value combinations.
     """
@@ -101,7 +100,7 @@ def test_parse_args_good(sw, noise, files):
 
 
 @pytest.mark.parametrize("sw", [ns(q="-q", v="-v"), ns(q="--quiet", v="--verbose")])
-def test_parse_args_mutually_exclusive_args(sw, capsys):
+def test_parse_args_mutually_exclusive_args(capsys, sw):
     with raises(SystemExit) as e:
         run_forecast.parse_args([sw.q, sw.v])
     assert e.value.code == 1
