@@ -42,7 +42,7 @@ class SRW210(Facade):
             shutil.copy2(config_file, "config.yaml")
         else:
             msg = f"Bad file type -- {file_type}. Cannot load configuration!"
-            logging.error(msg)
+            logging.critical(msg)
             raise ValueError(msg)
 
     def validate_config(self, config_file: str) -> None:
