@@ -109,7 +109,6 @@ def parse_args(args: List[str]) -> Namespace:
     )
 
     parsed = parser.parse_args(args)
-
     if not parsed.outfile and not parsed.dry_run and not parsed.values_needed:
         msg = "You need outfile, dry_run, or values_needed to continue."
         print(msg, file=sys.stderr)

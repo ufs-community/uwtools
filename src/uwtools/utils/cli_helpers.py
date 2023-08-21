@@ -35,7 +35,7 @@ def get_file_type(path: str) -> str:
     if suffix in [".nml"]:
         return "F90"
     msg = f"Bad file suffix -- {suffix}. Cannot determine file type!"
-    logging.error(msg)
+    logging.critical(msg)
     raise ValueError(msg)
 
 
@@ -50,7 +50,6 @@ def path_if_it_exists(path: str) -> str:
     p = Path(path)
     if not p.exists():
         msg = f"{path} does not exist"
-
         print(msg, file=sys.stderr)
         raise FileNotFoundError(msg)
     return str(p.absolute())
