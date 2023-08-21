@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access
 """
 Tests for uwtools.rocoto module.
 """
@@ -8,8 +8,6 @@ import yaml
 
 from uwtools import rocoto
 from uwtools.tests import support
-
-# pylint: disable=protected-access
 
 # Test functions
 
@@ -21,24 +19,26 @@ task_hello:
   command: echo hello 
   jobname: hello
 metatask_howdy:
+  foo: bar
   task_howdy_#mem#:
     command: echo hello 
     jobname: howdy_#mem#
 """
     )
 
-    tasks = yaml.safe_load(
+    tree = yaml.safe_load(
         """
 task_hello:
   command: echo hello
 metatask_howdy:
+  foo: bar
   task_howdy_#mem#:
     command: echo hello 
 """
     )
 
-    rocoto._add_jobname(tasks)
-    assert expected == tasks
+    rocoto._add_jobname(tree)
+    assert expected == tree
 
 
 def test_write_rocoto_xml(tmp_path):

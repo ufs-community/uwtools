@@ -5,21 +5,24 @@ Support for creating Rocoto XML workflow documents.
 from uwtools.config import YAMLConfig
 from uwtools.j2template import J2Template
 
-
 # Private functions
-def _add_jobname(tasks: dict) -> None:
+
+
+def _add_jobname(tree: dict) -> None:
     """
     Add the jobname entry for all the tasks in the workflow.
 
-    :param tasks: Dict of tasks in workflow.
+    :param tree: Dict of tree  in workflow.
     """
-    for task, task_settings in tasks.items():
-        task_type, *rest = task.split("_", maxsplit=1)
-        if task_type == "task":
+    for element, subtree in tree.items():
+        element_parts = element.split("_", maxsplit=1)
+        element_type = element_parts[0]
+        if element_type == "task":
             # Use the provided attribute if it is present, otherwise use the name in the key.
-            tasks[task]["jobname"] = task_settings.get("attrs", {}).get("name") or rest[0]
-        elif task_type == "metatask":
-            _add_jobname(task_settings)
+            task_name = element_parts[1]
+            tree[element]["jobname"] = subtree.get("attrs", {}).get("name") or task_name
+        elif element_type == "metatask":
+            _add_jobname(subtree)
 
 
 # Public functions
