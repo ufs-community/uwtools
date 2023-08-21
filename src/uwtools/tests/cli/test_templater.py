@@ -3,7 +3,6 @@
 Tests for the templater CLI.
 """
 
-import argparse
 import logging
 import os
 from pathlib import Path

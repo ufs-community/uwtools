@@ -17,13 +17,14 @@ from uwtools.cli import experiment_manager
 
 
 @pytest.mark.parametrize("sw", [ns(a="-a", c="-c"), ns(a="--forecast-app", c="--config-file")])
-def test_main(sw):
-    cfgfile = "/some/file"
-    argv = ["test", sw.a, "SRW", sw.c, cfgfile]
+def test_main(sw, tmp_path):
+    cfgfile = tmp_path / "config.yaml"
+    cfgfile.touch()
+    argv = ["test", sw.a, "SRW", sw.c, str(cfgfile)]
     with patch.object(experiment_manager.sys, "argv", argv):
         with patch.object(experiment_manager.experiment, "SRWExperiment") as experiment:
             experiment_manager.main()
-        experiment.assert_called_once_with(cfgfile)
+        experiment.assert_called_once_with(str(cfgfile))
 
 
 @fixture
