@@ -51,7 +51,7 @@ def test_render(config_file, input_template, tmp_path):
 
 
 def test_render_dry_run(caplog, config_file, input_template):
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.INFO)
     render(config_file, input_template, outfile="/dev/null", dry_run=True)
     assert logged(caplog, "roses are red, violets are blue")
 
@@ -70,7 +70,7 @@ def test_render_values_missing(caplog, config_file, input_template):
 
 
 def test_render_values_needed(caplog, config_file, input_template):
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.INFO)
     render(config_file, input_template, outfile="/dev/null", values_needed=True)
     for var in ("roses", "violets"):
         assert logged(caplog, var)

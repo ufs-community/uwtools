@@ -266,6 +266,7 @@ def test_dereference_exceptions(caplog, tmp_path):
     """
     Test that dereference handles some standard mistakes.
     """
+    logging.getLogger().setLevel(logging.INFO)
     path = tmp_path / "cfg.yaml"
     with open(path, "w", encoding="utf-8") as f:
         print(
@@ -280,10 +281,6 @@ type_prob: '{{ list_a / \"a\" }}'  # TypeError
 """,
             file=f,
         )
-    log_name = "test"
-    log = logging.getLogger(log_name)
-    log.addHandler(logging.StreamHandler(sys.stdout))
-    log.setLevel(logging.DEBUG)
     cfgobj = config.YAMLConfig(config_path=path)
     cfgobj.dereference()
     logging.info("HELLO")
@@ -620,13 +617,14 @@ Keys that are set to empty:
     assert actual == expected
 
 
-def test_values_needed_yaml(capsys):
+def test_values_needed_yaml(caplog):
     """
     Test that the values_needed flag logs keys completed, keys containing unfilled jinja2 templates,
     and keys set to empty.
     """
+    logging.getLogger().setLevel(logging.INFO)
     config.create_config_obj(input_base_file=fixture_path("srw_example.yaml"), values_needed=True)
-    actual = capsys.readouterr().out
+    actual = "\n".join(record.message for record in caplog.records)
     expected = """
 Keys that are complete:
     FV3GFS
@@ -645,7 +643,7 @@ Keys that have unfilled jinja2 templates:
 Keys that are set to empty:
     FV3GFS.nomads.file_names.nemsio
     FV3GFS.nomads.testempty
-""".lstrip()
+""".strip()
     assert actual == expected
 
 

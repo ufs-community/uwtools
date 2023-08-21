@@ -64,7 +64,7 @@ def test_set_template_command_line_config(caplog, sw):
     """
     Test behavior when values are provided on the command line.
     """
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.INFO)
     infile = fixture_path("nml.IN")
     expected = f"""
 Running with args:
@@ -101,7 +101,7 @@ def test_set_template_dry_run(caplog, sw):
     """
     Test dry-run output of ingest namelist tool.
     """
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.INFO)
     infile = fixture_path("nml.IN")
     expected = f"""
 Running with args:
@@ -139,7 +139,7 @@ def test_set_template_listvalues(caplog, sw):
     """
     Test "values needed" output of ingest namelist tool.
     """
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.INFO)
     infile = fixture_path("nml.IN")
     expected = f"""
 Running with args:
@@ -172,7 +172,7 @@ vegetable
     "sw", [ns(d="-d", i="-i", v="-v"), ns(d="--dry-run", i="--input-template", v="--verbose")]
 )
 def test_set_template_verbosity(caplog, sw):
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger().setLevel(logging.DEBUG)  # <-- NB debug level
     infile = fixture_path("nml.IN")
     expected = f"""
 Running with args:
