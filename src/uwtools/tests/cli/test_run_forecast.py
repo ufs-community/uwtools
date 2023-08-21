@@ -59,10 +59,9 @@ def test_parse_args_bad_cfgfile(sw, tmp_path, capsys):
     Fails if config file does not exist.
     """
     cfgfile = str(tmp_path / "no-such-file")
-    with raises(SystemExit) as e:
+    with raises(FileNotFoundError):
         run_forecast.parse_args([sw.c, cfgfile])
-    assert e.value.code == 2
-    assert "does not exist!" in capsys.readouterr().err
+    assert f"{cfgfile} does not exist" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("noise", ["-q", "--quiet", "-v", "--verbose"])
