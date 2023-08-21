@@ -36,7 +36,7 @@ def write_rocoto_xml(input_yaml: str, input_template: str, rendered_output: str)
     # Make an instance of the YAMLConfig class.
     # Pass the input yaml to return a dict.
     config_obj = YAMLConfig(input_yaml)["rocoto"]
-    _add_jobname(config_obj)
+    _add_jobname(config_obj.get("tasks"))
 
     # Render the template.
     template = J2Template(configure_obj=config_obj, template_path=input_template)

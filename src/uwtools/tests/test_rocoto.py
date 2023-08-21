@@ -55,6 +55,7 @@ metatask_howdy:
 """
     )
 
+    # pylint: disable=protected-access
     rocoto._add_jobname(tasks)
     assert expected == tasks
 
@@ -69,4 +70,4 @@ def test_write_rocoto_xml(tmp_path):
     )
 
     expected = support.fixture_path("hello_workflow.xml")
-    assert True == support.compare_files(output, expected)
+    support.compare_files(expected, output)
