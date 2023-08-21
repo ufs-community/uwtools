@@ -14,11 +14,10 @@ def _add_jobname(tasks: dict) -> None:
     :param tasks: Dict of tasks in workflow.
     """
     for task, task_settings in tasks.items():
-        task_split = task.split("_", maxsplit=1)
-        task_type = task_split[0]
+        task_type, *rest = task.split("_", maxsplit=1)
         if task_type == "task":
             # Use the provided attribute if it is present, otherwise use the name in the key.
-            tasks[task]["jobname"] = task_settings.get("attrs", {}).get("name") or task_split[1]
+            tasks[task]["jobname"] = task_settings.get("attrs", {}).get("name") or rest[0]
         elif task_type == "metatask":
             _add_jobname(task_settings)
 
