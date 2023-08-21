@@ -9,6 +9,8 @@ import yaml
 from uwtools import rocoto
 from uwtools.tests import support
 
+# pylint: disable=protected-access
+
 # Test functions
 
 

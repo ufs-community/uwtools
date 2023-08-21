@@ -17,8 +17,7 @@ def _add_jobname(tasks: dict) -> None:
         task_split = task.split("_", maxsplit=1)
         task_type = task_split[0]
         if task_type == "task":
-            # Use the provided attribute if it is present, otherwise use.
-            # The name in the key.
+            # Use the provided attribute if it is present, otherwise use the name in the key.
             tasks[task]["jobname"] = task_settings.get("attrs", {}).get("name") or task_split[1]
         elif task_type == "metatask":
             _add_jobname(task_settings)
