@@ -18,7 +18,7 @@ def main() -> None:
     """
     args = parse_args(sys.argv[1:])
     setup_logging(quiet=args.quiet, verbose=args.verbose)
-    valid = config_is_valid(config_file=args.config_file, validation_schema=args.validation_schema)
+    valid = config_is_valid(config_file=args.config_file, schema_file=args.validation_schema)
     sys.exit(0 if valid else 1)
 
 

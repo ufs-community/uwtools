@@ -50,6 +50,7 @@ def path_if_it_exists(path: str) -> str:
     p = Path(path)
     if not p.exists():
         msg = f"{path} does not exist"
+
         print(msg, file=sys.stderr)
         raise FileNotFoundError(msg)
     return str(p.absolute())

@@ -17,9 +17,11 @@ class ConcreteDriver(Driver):
     Driver subclass for testing purposes.
     """
 
-    @property
-    def schema(self) -> str:
-        return ""
+    def batch_script(self):
+        pass
+
+    def output(self):
+        pass
 
     def requirements(self):
         pass
@@ -27,17 +29,15 @@ class ConcreteDriver(Driver):
     def resources(self):
         pass
 
-    def output(self):
-        pass
-
-    def batch_script(self):
-        pass
-
     def run(self):
         pass
 
     def run_cmd(self, *args, run_cmd, exec_name):
         pass
+
+    @property
+    def schema_file(self) -> str:
+        return ""
 
 
 @fixture
@@ -88,7 +88,7 @@ def test_validation(caplog, configs, schema, tmp_path, valid):
     schema_file = str(tmp_path / "test.jsonschema")
     with open(schema_file, "w", encoding="utf-8") as f:
         print(schema, file=f)
-    with patch.object(ConcreteDriver, "schema", new=schema_file):
+    with patch.object(ConcreteDriver, "schema_file", new=schema_file):
         logging.getLogger().setLevel(logging.DEBUG)
         ConcreteDriver(config_file=config_file)
         error = any("error(s)" in record.message for record in caplog.records)

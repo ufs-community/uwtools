@@ -3,60 +3,68 @@ Support for validating a config using JSON Schema.
 """
 import json
 import logging
-import os
+from pathlib import Path
+from typing import List
 
 import jsonschema
 
 from uwtools.config import YAMLConfig
 
+# Public functions
 
-def config_is_valid(config_file: str, validation_schema: str) -> bool:
+def config_is_valid(config_file: str, schema_file: str) -> bool:
     """
-    Validate a config using JSON Schema.
+    Check whether the given config file conforms to the given JSON Schema spec and whether any
+    filesystem paths it identifies do not exist.
     """
-    # Get the config file to be validated and dereference Jinja2 templates.
-    # The config file will only be 2 levels deep.
-
-    config_obj = YAMLConfig(config_file)
-    config_obj.dereference_all()
-
-    # Load the JSON Schema validation schema.
-
-    with open(validation_schema, "r", encoding="utf-8") as schema_file:
-        schema = json.load(schema_file)
-
-    # Validate the config file against the schema file.
-
-    schema_error = 0
-    validator = jsonschema.Draft7Validator(schema)
-
-    # Print out each schema error.
-
-    errors = validator.iter_errors(config_obj.data)
+    # Load the config and schema.
+    yaml_config = YAMLConfig(config_file)
+    yaml_config.dereference_all()
+    with open(schema_file, "r", encoding="utf-8") as f:
+        schema = json.load(f)
+    # Collect and report on schema-validation errors.
+    errors = _validation_errors(yaml_config.data, schema)
+    log_method = logging.error if errors else logging.info
+    log_method("%s schema-validation error%s found", len(errors), "" if len(errors) == 1 else "s")
     for error in errors:
-        schema_error += 1
         logging.error(error)
         logging.error("------")
-
-    # Create a list of fields that could contain a file or path.
-
-    path_list = []
-    for field in schema["properties"]:
-        for value in schema["properties"][field]["properties"]:
-            # the json pair "format": "uri" labels a path or file
-            if "format" in schema["properties"][field]["properties"][value]:
-                path_list.append(value)
-
-    # Check for existence of those files or paths.
-
-    for field in config_obj.data:
-        for value in config_obj.data[field]:
-            if value in path_list:
-                if not os.path.exists(config_obj.data[field][value]):
-                    schema_error += 1
-                    logging.error("%s has Invalid Path %s", value, config_obj.data[field][value])
-
-    if schema_error > 0:
-        logging.error("This configuration file has %s error(s)", schema_error)
+    # It's pointless to evaluate an invalid config, so return now if that's the case.
+    if errors:
         return False
+    # Collect and report bad paths found in config.
+    if bad_paths := _bad_paths(yaml_config.data, schema):
+        for bad_path in bad_paths:
+            logging.error("Path does not exist: %s", bad_path)
+        return False
+    # If no issues were detected, report success.
     return True
+
+
+# Private functions
+
+
+def _bad_paths(config: dict, schema: dict) -> List[str]:
+    """
+    Identify non-existent config paths.
+
+    The schema has the same shape as the config, so traverse them together, recursively, checking
+    values identified by the schema as having "uri" format, which denotes a path.
+    """
+    paths = []
+    for key, val in config.items():
+        subschema = schema["properties"][key]
+        if isinstance(val, dict):
+            paths += _bad_paths(val, subschema)
+        else:
+            if subschema.get("format") == "uri" and not Path(val).exists():
+                paths.append(val)
+    return sorted(paths)
+
+
+def _validation_errors(config: dict, schema: dict) -> List[str]:
+    """
+    Identify schema-validation errors.
+    """
+    validator = jsonschema.Draft7Validator(schema)
+    return list(validator.iter_errors(config))
