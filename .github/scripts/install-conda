@@ -1,7 +1,8 @@
 #!/bin/bash -eux
 
-wget --no-verbose https://github.com/conda-forge/miniforge/releases/download/23.1.0-4/Miniforge3-23.1.0-4-Linux-x86_64.sh
-bash $f -bfp conda
+url=https://github.com/conda-forge/miniforge/releases/download/23.1.0-4/Miniforge3-23.1.0-4-Linux-x86_64.sh
+wget --no-verbose $url
+bash $(basename $url) -bfp conda
 (
   set -e +ux
   source conda/etc/profile.d/conda.sh
