@@ -9,7 +9,6 @@ from typing import Any, Dict
 from pytest import fixture
 
 from uwtools import config_validator
-from uwtools.tests.support import fixture_path
 
 # Support functions
 

@@ -5,7 +5,6 @@ Tests for the templater CLI.
 
 import logging
 import os
-import re
 from pathlib import Path
 from types import SimpleNamespace as ns
 from unittest.mock import patch
