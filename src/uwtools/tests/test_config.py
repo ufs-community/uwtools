@@ -9,7 +9,6 @@ import filecmp
 import logging
 import os
 import re
-import sys
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any, List
@@ -93,14 +92,13 @@ def salad_base():
 
 
 @pytest.mark.parametrize("fmt", ["F90", "INI", "YAML"])
-def test_compare_config(fmt, salad_base, caplog):
+def test_compare_config(caplog, fmt, salad_base):
     """
     Compare two config objects.
     """
+    logging.getLogger().setLevel(logging.INFO)
     ext = ".%s" % ("nml" if fmt == "F90" else fmt).lower()
     cfgobj = help_cfgclass(ext)(fixture_path(f"simple{ext}"))
-    cfgobj.log.addHandler(logging.StreamHandler(sys.stdout))
-    cfgobj.log.setLevel(logging.INFO)
     if fmt == "INI":
         salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for INI
     cfgobj.compare_config(cfgobj, salad_base)
@@ -121,17 +119,15 @@ def test_compare_config(fmt, salad_base, caplog):
         assert logged(caplog, msg)
 
 
-def test_compare_nml(capsys):
+def test_compare_nml(caplog):
     """
     Tests whether comparing two namelists works.
     """
+    logging.getLogger().setLevel(logging.INFO)
     nml1 = fixture_path("fruit_config.nml")
     nml2 = fixture_path("fruit_config_mult_sect.nml")
     config.create_config_obj(input_base_file=nml1, config_file=nml2, compare=True)
-    actual = capsys.readouterr().out.split("\n")
-
     # Make sure the tool output contains all the expected lines:
-
     expected = f"""
 - {nml1}
 + {nml2}
@@ -141,17 +137,15 @@ setting:         topping:  - None + crouton
 setting:            size:  - None + large
 setting:            meat:  - None + chicken
 """.strip()
-
+    actual = [record.message for record in caplog.records]
     for line in expected.split("\n"):
         assert line_in_lines(line, actual)
-
     # Make sure it doesn't include any additional significant diffs
     # A very rough estimate is that there is a word/colon set followed
     # by a -/+ set
     # This regex is meant to match the lines in the expected string
     # above that give us the section, key value diffs like this:
     #   config:       vegetable:  - eggplant + peas
-
     pattern = re.compile(r"\w:\s+\w+:\s+-\s+\w+\s+\+\s+\w+")
     for line in actual:
         if re.search(pattern, line):
@@ -266,7 +260,7 @@ def test_dereference_exceptions(caplog, tmp_path):
     """
     Test that dereference handles some standard mistakes.
     """
-    logging.getLogger().setLevel(logging.INFO)
+    logging.getLogger().setLevel(logging.DEBUG)
     path = tmp_path / "cfg.yaml"
     with open(path, "w", encoding="utf-8") as f:
         print(
@@ -284,7 +278,7 @@ type_prob: '{{ list_a / \"a\" }}'  # TypeError
     cfgobj = config.YAMLConfig(config_path=path)
     cfgobj.dereference()
     logging.info("HELLO")
-    raised = [rec.msg for rec in caplog.records if "raised" in rec.msg]
+    raised = [record.message for record in caplog.records if "raised" in record.message]
     assert "ZeroDivisionError" in raised[0]
     assert "TypeError" in raised[1]
 
@@ -292,7 +286,7 @@ type_prob: '{{ list_a / \"a\" }}'  # TypeError
 @pytest.mark.parametrize(
     "fn,depth", [("FV3_GFS_v16.yaml", 3), ("simple.nml", 2), ("simple2.ini", 2)]
 )
-def test_dictionary_depth(fn, depth):
+def test_dictionary_depth(depth, fn):
     """
     Test that the proper dictionary depth is returned for each file type.
     """
@@ -428,16 +422,17 @@ def test_path_if_it_exists(tmp_path):
     assert cli_helpers.path_if_it_exists(goodfile)
 
 
-def test_set_config_dry_run(capsys):
+def test_set_config_dry_run(caplog):
     """
     Test that providing a YAML base file with a dry run flag will print an YAML config file.
     """
+    actual = "\n".join(record.message for record in caplog.records)
     infile = fixture_path("fruit_config.yaml")
     yaml_config = config.YAMLConfig(infile)
     yaml_config.dereference_all()
     config.create_config_obj(input_base_file=infile, dry_run=True)
-    actual = capsys.readouterr().out.strip()
-    expected = str(yaml_config).strip()
+    actual = "\n".join(record.message for record in caplog.records)
+    expected = str(yaml_config)
     assert actual == expected
 
 
@@ -560,13 +555,13 @@ def test_transform_config(fmt1, fmt2, tmp_path):
         assert line1 == line2
 
 
-def test_values_needed_ini(capsys):
+def test_values_needed_ini(caplog):
     """
-    Test that the values_needed flag logs keys completed, keys containing unfilled jinja2 templates,
+    Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
     and keys set to empty.
     """
+    logging.getLogger().setLevel(logging.INFO)
     config.create_config_obj(input_base_file=fixture_path("simple3.ini"), values_needed=True)
-    actual = capsys.readouterr().out
     expected = """
 Keys that are complete:
     salad
@@ -579,24 +574,25 @@ Keys that are complete:
     dessert.side
     dessert.servings
 
-Keys that have unfilled jinja2 templates:
+Keys that have unfilled Jinja2 templates:
     salad.how_many: {{amount}}
     dessert.flavor: {{flavor}}
 
 Keys that are set to empty:
     salad.toppings
     salad.meat
-""".lstrip()
+""".strip()
+    actual = "\n".join(record.message for record in caplog.records)
     assert actual == expected
 
 
-def test_values_needed_f90nml(capsys):
+def test_values_needed_f90nml(caplog):
     """
-    Test that the values_needed flag logs keys completed, keys containing unfilled jinja2 templates,
+    Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
     and keys set to empty.
     """
+    logging.getLogger().setLevel(logging.INFO)
     config.create_config_obj(input_base_file=fixture_path("simple3.nml"), values_needed=True)
-    actual = capsys.readouterr().out
     expected = """
 Keys that are complete:
     salad
@@ -607,13 +603,14 @@ Keys that are complete:
     salad.extras
     salad.dessert
 
-Keys that have unfilled jinja2 templates:
+Keys that have unfilled Jinja2 templates:
     salad.dressing: {{ dressing }}
 
 Keys that are set to empty:
     salad.toppings
     salad.appetizer
-""".lstrip()
+""".strip()
+    actual = "\n".join(record.message for record in caplog.records)
     assert actual == expected
 
 
@@ -635,7 +632,7 @@ Keys that are complete:
     FV3GFS.nomads.file_names.testfalse
     FV3GFS.nomads.file_names.testzero
 
-Keys that have unfilled jinja2 templates:
+Keys that have unfilled Jinja2 templates:
     FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
     FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio','gfs.t{{ hh }}z.sfcanl.nemsio']
     FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
@@ -751,7 +748,7 @@ def f90_cfgobj(tmp_path):
     return config.F90Config(config_path=path)
 
 
-def test_Config___repr__(f90_cfgobj, capsys):
+def test_Config___repr__(capsys, f90_cfgobj):
     print(f90_cfgobj)
     assert yaml.safe_load(capsys.readouterr().out)["nl"]["n"] == 88
 

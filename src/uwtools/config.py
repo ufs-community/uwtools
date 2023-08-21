@@ -714,7 +714,7 @@ def create_config_obj(
         for var in set_var:
             logging.info(var)
         logging.info("")
-        logging.info("Keys that have unfilled jinja2 templates:")
+        logging.info("Keys that have unfilled Jinja2 templates:")
         for var in jinja2_var:
             logging.info(var)
         logging.info("")
