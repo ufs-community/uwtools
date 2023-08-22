@@ -3,7 +3,6 @@
 Tests for the validate-config CLI.
 """
 
-import logging
 from types import SimpleNamespace as ns
 from unittest.mock import patch
 
@@ -60,7 +59,6 @@ def test_parse_args_bad_schema_file(capsys, files, sw, tmp_path):
     """
     Fails if non-existent schema file is specified.
     """
-    logging.getLogger().setLevel(logging.INFO)
     config_file, _ = files
     schema_file = str(tmp_path / "no-such-file")
     with raises(FileNotFoundError):

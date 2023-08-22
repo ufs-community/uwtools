@@ -12,8 +12,8 @@ from pytest import raises
 import uwtools.logging
 
 # NB: Since pytest takes control of logging, these tests make assertions about the way logging
-# setup calls were made instead of obtaining the root Logger object and making assertions about
-# it.
+# setup calls were made instead of obtaining the root logger object and making assertions about
+# it, since the roog logger will not be what one would expect.
 
 DATEFMT = "%Y-%m-%dT%H:%M:%S"
 FMT = "[%(asctime)s] %(levelname)8s %(message)s"
