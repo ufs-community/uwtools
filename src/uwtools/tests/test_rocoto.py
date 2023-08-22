@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access
+# pylint: disable=missing-function-docstring, protected-access
 """
 Tests for uwtools.rocoto module.
 """

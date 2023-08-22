@@ -10,9 +10,9 @@ from uwtools.j2template import J2Template
 
 def _add_jobname(tree: dict) -> None:
     """
-    Add the jobname entry for all the tasks in the workflow.
+    Add a "jobname" attribute to each "task" element in the given config tree.
 
-    :param tree: Dict of tree  in workflow.
+    :param tree: A config tree containing "task" elements.
     """
     for element, subtree in tree.items():
         element_parts = element.split("_", maxsplit=1)
@@ -37,8 +37,10 @@ def write_rocoto_xml(input_yaml: str, input_template: str, rendered_output: str)
     # Make an instance of the YAMLConfig class.
     # Pass the input yaml to return a dict.
     config_obj = YAMLConfig(input_yaml)
-    _add_jobname(config_obj.get("tasks"))
+    tasks = config_obj["tasks"]
+    if isinstance(tasks, dict):
+        _add_jobname(tasks)
 
     # Render the template.
-    template = J2Template(configure_obj=config_obj, template_path=input_template)
+    template = J2Template(configure_obj=config_obj.data, template_path=input_template)
     template.dump_file(output_path=rendered_output)
