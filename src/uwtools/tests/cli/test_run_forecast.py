@@ -8,7 +8,6 @@ from unittest.mock import patch
 
 import pytest
 from pytest import fixture, raises
-
 from uwtools.cli import run_forecast
 
 # NB: Ensure that at least one test exercises both short and long forms of each

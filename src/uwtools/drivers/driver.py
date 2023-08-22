@@ -6,9 +6,10 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from typing import Optional
 
-from uwtools import config_validator
 from uwtools.logger import Logger
 from uwtools.scheduler import BatchScript
+
+from uwtools import config_validator
 
 
 class Driver(ABC):
@@ -54,9 +55,9 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def resources(self) -> None:
+    def resources(self, platform: dict) -> Mapping:
         """
-        ???
+        Set up the formatting for the scheduler batch script.
         """
 
     @abstractmethod

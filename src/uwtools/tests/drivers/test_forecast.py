@@ -4,16 +4,15 @@ Tests for forecast driver.
 """
 
 from pathlib import Path
-from types import SimpleNamespace as ns
 from unittest.mock import patch
 
 import pytest
 from pytest import fixture, raises
-
-from uwtools import config
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.tests.support import compare_files, fixture_path
+
+from uwtools import config
 
 
 @fixture
@@ -209,9 +208,11 @@ def test_run(tmp_path, capsys):
     config_file = fixture_path("forecast.yaml")
     out_file = tmp_path / "test_exec.py"
     out_file.touch()
+    rundir = tmp_path / "rundir"
 
     with patch.object(FV3Forecast, "_validate", return_value=True):
         fcstobj = FV3Forecast(config_file=config_file, dry_run=True, outfile=out_file)
+        fcstobj.update_values(fcstdir=rundir)
         fcstobj.run()
     assert run_expected in capsys.readouterr().out
 

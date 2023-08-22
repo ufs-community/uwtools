@@ -3,11 +3,11 @@
 Tests for uwtools.drivers.driver module.
 """
 
+from collections.abc import Mapping
 from unittest.mock import patch
 
 import pytest
 from pytest import fixture
-
 from uwtools.drivers.driver import Driver
 
 
@@ -25,8 +25,8 @@ class ConcreteDriver(Driver):
     def requirements(self):
         pass
 
-    def resources(self):
-        pass
+    def resources(self, platform: dict) -> Mapping:
+        return {}
 
     def run(self) -> None:
         pass

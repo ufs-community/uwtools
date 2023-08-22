@@ -13,11 +13,12 @@ from collections.abc import Mapping
 from importlib import resources
 from typing import Dict, Optional
 
-from uwtools import config
 from uwtools.drivers.driver import Driver
 from uwtools.logger import Logger
 from uwtools.scheduler import BatchScript, JobScheduler
 from uwtools.utils import cli_helpers, file_helpers
+
+from uwtools import config
 
 
 class FV3Forecast(Driver):
@@ -128,10 +129,26 @@ class FV3Forecast(Driver):
         ???
         """
 
-    def resources(self) -> None:
+    def resources(self, platform: dict) -> Mapping:
         """
-        ???
+        Set up the formatting for the scheduler batch script.
         """
+        # Add required fields to platform.
+        # Currently supporting only slurm and none.
+        slurmqueues = ["hera", "jet", "orion", "stampede"]
+        if platform["queue"] is None and platform["machine"] in slurmqueues:
+            platform["queue"] = "slurm"
+        else:
+            platform["queue"] = "none"
+
+        return {
+            "account": platform["account"],
+            "nodes": 1,
+            "queue": platform["queue"],
+            "scheduler": platform["scheduler"],
+            "tasks_per_node": 1,
+            "walltime": "00:01:00",
+        }
 
     def run(self, log: Optional[Logger] = None) -> None:
         """
@@ -150,23 +167,23 @@ class FV3Forecast(Driver):
         forecast_config = config.YAMLConfig(self._config_file)
 
         # Define forecast model.
-        forecast_model = forecast_config["forecast"]["model"]
+        forecast_model = forecast_config["forecast"]["EXTRN_MDL_NAME"]
         machine = forecast_config["platform"]["machine"]
 
         # Prepare directories.
         run_directory = forecast_config["forecast"]["FCSTDIR"]
-        self.create_directory_structure(run_directory)
+        self.create_directory_structure(run_directory, "delete")
 
         static_files = forecast_config["forecast"]["STATIC"]
         self.stage_files(run_directory, static_files, link_files=False)
         cycledep_files = forecast_config["forecast"]["CYCLEDEP"]
         self.stage_files(run_directory, cycledep_files, link_files=True)
 
-        experiment_resources = {
-            key: forecast_config["resources"][key] for key in forecast_config["resources"]
-        }
-        batch_script = self.batch_script(experiment_resources)
-        args = str(forecast_config["run_cmd"]["kwargs"])
+        # Create the job script.
+        platform = {key: forecast_config["platform"][key] for key in forecast_config["platform"]}
+        platform_resources = self.resources(platform)
+        batch_script = self.batch_script(platform_resources)
+        args = "--export=ALL  -n"
         run_command = self.run_cmd(
             args,
             run_cmd=forecast_config["forecast"]["run_cmd"],
