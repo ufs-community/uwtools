@@ -12,7 +12,7 @@ def _add_jobname(tree: dict) -> None:
     """
     Add a "jobname" attribute to each "task" element in the given config tree.
 
-    :param tree: A config tree containing "task" elements.
+    :param tree: A config tree containing "task" elements..
     """
     for element, subtree in tree.items():
         element_parts = element.split("_", maxsplit=1)
@@ -32,10 +32,8 @@ def write_rocoto_xml(input_yaml: str, input_template: str, rendered_output: str)
 
     :param input_yaml: Path to YAML input file.
     :param input_template: Path to input template file.
-    :param rendered_output: Path to directory to write rendered XML file.
+    :param rendered_output: Path to write rendered XML file.
     """
-    # Make an instance of the YAMLConfig class.
-    # Pass the input yaml to return a dict.
     config_obj = YAMLConfig(input_yaml)
     tasks = config_obj["tasks"]
     if isinstance(tasks, dict):
