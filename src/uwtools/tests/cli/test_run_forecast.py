@@ -3,7 +3,6 @@
 Tests for the run-forecast CLI.
 """
 
-import logging
 from types import SimpleNamespace as ns
 from unittest.mock import patch
 
@@ -45,7 +44,6 @@ def test_parse_args_bad_cfgfile(capsys, sw, tmp_path):
     """
     Fails if config file does not exist.
     """
-    logging.getLogger().setLevel(logging.INFO)
     cfgfile = str(tmp_path / "no-such-file")
     with raises(FileNotFoundError):
         run_forecast.parse_args([sw.c, cfgfile])
@@ -57,7 +55,6 @@ def test_parse_args_bad_machinefile(capsys, sw, tmp_path):
     """
     Fails if machine file does not exist.
     """
-    logging.getLogger().setLevel(logging.INFO)
     machinefile = str(tmp_path / "no-such-file")
     with raises(FileNotFoundError):
         run_forecast.parse_args([sw.m, machinefile])
