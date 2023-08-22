@@ -200,23 +200,6 @@ def test_create_namelist_without_base_file(create_namelist_assets):
         assert out_file.read() == expected
 
 
-def test_run(tmp_path, capsys):
-    run_expected = """
-    Configuration: SRW FV3 hera
-    Run command: srun --export=ALL test_exec.py
-    """
-    config_file = fixture_path("forecast.yaml")
-    out_file = tmp_path / "test_exec.py"
-    out_file.touch()
-    rundir = tmp_path / "rundir"
-
-    with patch.object(FV3Forecast, "_validate", return_value=True):
-        fcstobj = FV3Forecast(config_file=config_file, dry_run=True, outfile=out_file)
-        fcstobj.update_values(fcstdir=rundir)
-        fcstobj.run()
-    assert run_expected in capsys.readouterr().out
-
-
 def test_forecast_run_cmd():
     """
     Tests that the command to be used to run the forecast executable was built successfully.
@@ -276,3 +259,28 @@ def test_stage_files(tmp_path, section, link_files):
             assert (run_directory / dst_fn).is_symlink()
         else:
             assert (run_directory / dst_fn).is_file()
+
+
+@pytest.mark.parametrize("section", ["static", "cycledep"])
+def test_run(tmp_path, section, capsys):
+    run_expected = """
+    Configuration: SRW FV3 hera
+    Run command: srun --export=ALL test_exec.py
+    """
+    config_file = fixture_path("forecast.yaml")
+    out_file = tmp_path / "test_exec.py"
+    out_file.touch()
+
+    src_directory = tmp_path / "src"
+    files_to_stage = config.YAMLConfig(fixture_path("expt_dir.yaml"))[section]
+    # Fix source paths so that they are relative to our test temp directory and
+    # create the test files.
+    for dst_fn, src_path in files_to_stage.items():
+        fixed_src_path = src_directory / Path(src_path).name
+        files_to_stage[dst_fn] = str(fixed_src_path)
+        fixed_src_path.touch()
+
+    with patch.object(FV3Forecast, "_validate", return_value=True):
+        fcstobj = FV3Forecast(config_file=config_file, dry_run=True, outfile=out_file)
+        fcstobj.run()
+    assert run_expected in capsys.readouterr().out

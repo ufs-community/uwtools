@@ -183,7 +183,7 @@ class FV3Forecast(Driver):
         platform = {key: forecast_config["platform"][key] for key in forecast_config["platform"]}
         platform_resources = self.resources(platform)
         batch_script = self.batch_script(platform_resources)
-        args = "--export=ALL  -n"
+        args = "--export=ALL -n"
         run_command = self.run_cmd(
             args,
             run_cmd=forecast_config["forecast"]["run_cmd"],
@@ -199,7 +199,8 @@ class FV3Forecast(Driver):
 
         # Run the job.
         if self._outfile is not None:
-            with open(self._outfile, "w", encoding="utf-8") as f:
+            outpath = run_directory.join(self._outfile)
+            with open(outpath, "w", encoding="utf-8") as f:
                 subprocess.run(
                     f"{run_command} {batch_script}",
                     stderr=subprocess.STDOUT,
