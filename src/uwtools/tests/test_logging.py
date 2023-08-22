@@ -25,7 +25,6 @@ def test_setup_logging():
         uwtools.logging.setup_logging()
         basicConfig.assert_called_once_with(
             datefmt=DATEFMT,
-            filename=None,
             format=FMT,
             level=logging.INFO,
             stream=sys.stderr,
@@ -40,7 +39,6 @@ def test_setup_logging_quiet():
             filename=os.devnull,
             format=FMT,
             level=logging.INFO,
-            stream=None,
         )
 
 
@@ -54,7 +52,6 @@ def test_setup_logging_verbose():
         uwtools.logging.setup_logging(verbose=True)
         basicConfig.assert_called_once_with(
             datefmt=DATEFMT,
-            filename=None,
             format=FMT,
             level=logging.DEBUG,
             stream=sys.stderr,
