@@ -5,7 +5,6 @@ Tests for uwtools.logging module.
 
 import logging
 import os
-import sys
 from unittest.mock import patch
 
 from pytest import raises
@@ -27,7 +26,6 @@ def test_setup_logging():
             datefmt=DATEFMT,
             format=FMT,
             level=logging.INFO,
-            stream=sys.stderr,
         )
 
 
@@ -54,5 +52,4 @@ def test_setup_logging_verbose():
             datefmt=DATEFMT,
             format=FMT,
             level=logging.DEBUG,
-            stream=sys.stderr,
         )
