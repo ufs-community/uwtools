@@ -3,7 +3,6 @@
 Tests for the experiment-manager CLI.
 """
 
-import logging
 from types import SimpleNamespace as ns
 from unittest.mock import patch
 
@@ -83,7 +82,6 @@ def test_parse_args_good(cfgfile, noise, sw):
     ],
 )
 def test_parse_args_mutually_exclusive_args(capsys, cfgfile, sw):
-    logging.getLogger().setLevel(logging.INFO)
     with raises(SystemExit) as e:
         experiment_manager.parse_args([sw.a, "SRW", sw.c, cfgfile, sw.q, sw.v])
     assert e.value.code == 1
