@@ -4,7 +4,6 @@ Tests for uwtools.files.gateway.unix module.
 """
 
 from pytest import fixture
-
 from uwtools.files.gateway import unix
 from uwtools.files.model.file import Unix
 

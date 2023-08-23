@@ -3,7 +3,6 @@ Drivers for forecast models.
 """
 
 
-import inspect
 import logging
 import os
 import shutil
@@ -11,12 +10,11 @@ import subprocess
 import sys
 from collections.abc import Mapping
 from importlib import resources
-from typing import Dict, Optional
+from typing import Dict
 
 from uwtools.drivers.driver import Driver
-from uwtools.logger import Logger
 from uwtools.scheduler import BatchScript, JobScheduler
-from uwtools.utils import cli_helpers, file_helpers
+from uwtools.utils import file_helpers
 
 from uwtools import config
 
@@ -28,11 +26,11 @@ class FV3Forecast(Driver):
 
     # Public methods
 
-    def batch_script(self, job_resources: Mapping) -> BatchScript:
+    def batch_script(self, platform_resources: Mapping) -> BatchScript:
         """
         Write to disk, for submission to the batch scheduler, a script to run FV3.
         """
-        return JobScheduler.get_scheduler(job_resources).batch_script
+        return JobScheduler.get_scheduler(platform_resources).batch_script
 
     @staticmethod
     def create_directory_structure(run_directory, exist_act="delete"):
@@ -131,75 +129,57 @@ class FV3Forecast(Driver):
 
     def resources(self, platform: dict) -> Mapping:
         """
-        Set up the formatting for the scheduler batch script.
+        ???
         """
         # Add required fields to platform.
-        # Currently supporting only slurm and none.
-        slurmqueues = ["hera", "jet", "orion", "stampede"]
-        if platform["queue"] is None and platform["machine"] in slurmqueues:
-            platform["queue"] = "slurm"
-        else:
-            platform["queue"] = "none"
-
+        # Currently supporting only slurm scheduler.
         return {
             "account": platform["account"],
             "nodes": 1,
-            "queue": platform["queue"],
-            "scheduler": platform["scheduler"],
+            "queue": "batch",
+            "scheduler": "slurm",
             "tasks_per_node": 1,
             "walltime": "00:01:00",
         }
 
-    def run(self, log: Optional[Logger] = None) -> None:
+    def run(self) -> None:
         """
-        Runs FV3.
+        Runs FV3 either as a subprocess or by submitting a batch script.
         """
-        # Set up logging.
-        if log is None:
-            name = f"{inspect.stack()[0][3]}"
-            log = cli_helpers.setup_logging(
-                log_file="/dev/stdout",
-                log_name=name,
-                quiet=False,
-                verbose=False,
-            )
         # Read in the config file.
-        forecast_config = config.YAMLConfig(self._config_file)
-
-        # Define forecast model.
-        forecast_model = forecast_config["forecast"]["EXTRN_MDL_NAME"]
-        machine = forecast_config["platform"]["machine"]
+        forecast_config = config.YAMLConfig(self._config_file)["forecast"]
 
         # Prepare directories.
-        run_directory = forecast_config["forecast"]["FCSTDIR"]
+        run_directory = forecast_config["RUN_DIRECTORY"]
         self.create_directory_structure(run_directory, "delete")
 
-        static_files = forecast_config["forecast"]["STATIC"]
+        static_files = forecast_config["STATIC"]
         self.stage_files(run_directory, static_files, link_files=False)
-        cycledep_files = forecast_config["forecast"]["CYCLEDEP"]
+        cycledep_files = forecast_config["CYCLEDEP"]
         self.stage_files(run_directory, cycledep_files, link_files=True)
 
         # Create the job script.
-        platform = {key: forecast_config["platform"][key] for key in forecast_config["platform"]}
+        platform = forecast_config["platform"]
         platform_resources = self.resources(platform)
         batch_script = self.batch_script(platform_resources)
-        args = "--export=ALL -n"
+        args = "--export=None -n"
         run_command = self.run_cmd(
             args,
-            run_cmd=forecast_config["forecast"]["run_cmd"],
-            exec_name=forecast_config["forecast"]["exec_name"],
+            run_cmd=forecast_config["run_cmd"],
+            exec_name=forecast_config["exec_name"],
         )
 
         if self._dry_run:
             # Apply switch to allow user to view the run command of config.
             # This will not run the job.
-            log.info(f"Configuration: {forecast_model} {machine}")
-            log.info(f"Run command: {run_command} {batch_script}")
+            logging.info("Configuration:")
+            for key in forecast_config["forecast"]:
+                logging.info(key)
             return
 
         # Run the job.
-        if self._outfile is not None:
-            outpath = run_directory.join(self._outfile)
+        if self._batch_script is not None:
+            outpath = run_directory.join(self._batch_script)
             with open(outpath, "w", encoding="utf-8") as f:
                 subprocess.run(
                     f"{run_command} {batch_script}",

@@ -1,4 +1,5 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=duplicate-code
 """
 Tests for forecast driver.
 """
@@ -26,7 +27,6 @@ def slurm_props():
         "walltime": "00:01:00",
     }
 
-
 def test_batch_script(slurm_props):
     expected = """
 #SBATCH --account=account_name
@@ -37,7 +37,7 @@ def test_batch_script(slurm_props):
 """.strip()
     with patch.object(Driver, "_validate", return_value=True):
         forecast = FV3Forecast(config_file="/not/used")
-    assert forecast.batch_script(job_resources=slurm_props).content() == expected
+    assert forecast.batch_script(platform_resources=slurm_props).content() == expected
 
 
 def test_schema_file():
@@ -261,8 +261,7 @@ def test_stage_files(tmp_path, section, link_files):
             assert (run_directory / dst_fn).is_file()
 
 
-@pytest.mark.parametrize("section", ["static", "cycledep"])
-def test_run(tmp_path, section, capsys):
+def test_run(tmp_path, capsys):
     run_expected = """
     Configuration: SRW FV3 hera
     Run command: srun --export=ALL test_exec.py
@@ -271,16 +270,16 @@ def test_run(tmp_path, section, capsys):
     out_file = tmp_path / "test_exec.py"
     out_file.touch()
 
-    src_directory = tmp_path / "src"
-    files_to_stage = config.YAMLConfig(fixture_path("expt_dir.yaml"))[section]
-    # Fix source paths so that they are relative to our test temp directory and
-    # create the test files.
-    for dst_fn, src_path in files_to_stage.items():
-        fixed_src_path = src_directory / Path(src_path).name
-        files_to_stage[dst_fn] = str(fixed_src_path)
-        fixed_src_path.touch()
-
-    with patch.object(FV3Forecast, "_validate", return_value=True):
-        fcstobj = FV3Forecast(config_file=config_file, dry_run=True, outfile=out_file)
-        fcstobj.run()
-    assert run_expected in capsys.readouterr().out
+    with patch.object(config, "YAMLConfig") as YAMLConfig:
+        YAMLConfig.return_value = {
+            "forecast": {
+                "CYCLEDEP": {"foo-file": "/tmp/foo"},
+                "MODEL": "FV3",
+                "RUN_DIRECTORY": "/tmp",
+            },
+            "platform": {"machine": "HAL9000"},
+        }
+        with patch.object(FV3Forecast, "_validate", return_value=True):
+            fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=out_file)
+            fcstobj.run()
+        assert run_expected in capsys.readouterr().out

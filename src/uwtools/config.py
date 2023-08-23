@@ -18,11 +18,11 @@ from typing import List, Optional, Union
 import f90nml
 import jinja2
 import yaml
-
-from uwtools import exceptions
 from uwtools.exceptions import UWConfigError
 from uwtools.j2template import J2Template
 from uwtools.utils import cli_helpers
+
+from uwtools import exceptions
 
 msgs = ns(
     unhashable="""

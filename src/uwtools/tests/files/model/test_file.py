@@ -3,7 +3,6 @@
 from glob import glob
 
 from pytest import raises
-
 from uwtools.files import S3, Unix
 from uwtools.tests.support import fixture_path, fixture_uri
 

@@ -7,10 +7,11 @@ import sys
 from argparse import ArgumentError, ArgumentParser, HelpFormatter, Namespace
 from typing import List
 
-from uwtools import config
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import setup_logging
 from uwtools.utils import cli_helpers
+
+from uwtools import config
 
 
 def main() -> None:

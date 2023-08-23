@@ -6,8 +6,8 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from typing import Optional
 
-from uwtools.logger import Logger
 from uwtools.scheduler import BatchScript
+
 from uwtools import config_validator
 
 
@@ -19,24 +19,22 @@ class Driver(ABC):
     def __init__(
         self,
         config_file: str,
-        log: Optional[Logger] = None,
         dry_run: bool = False,
-        outfile: Optional[str] = None,
+        batch_script: Optional[str] = None,
     ):
         """
         Initialize the driver.
         """
 
-        self.log = log if log is not None else Logger()
         self._dry_run = dry_run
         self._config_file = config_file
-        self._outfile = outfile
+        self._batch_script = batch_script
         self._validate()
 
     # Public methods
 
     @abstractmethod
-    def batch_script(self, job_resources: Mapping) -> BatchScript:
+    def batch_script(self, platform_resources: Mapping) -> BatchScript:
         """
         Create a script for submission to the batch scheduler.
         """
@@ -56,7 +54,7 @@ class Driver(ABC):
     @abstractmethod
     def resources(self, platform: dict) -> Mapping:
         """
-        Set up the formatting for the scheduler batch script.
+        ???
         """
 
     @abstractmethod

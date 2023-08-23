@@ -7,7 +7,6 @@ from unittest.mock import patch
 
 import pytest
 from pytest import fixture, raises
-
 from uwtools.utils import file_helpers
 
 

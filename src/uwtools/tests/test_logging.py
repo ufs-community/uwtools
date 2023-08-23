@@ -8,7 +8,6 @@ import os
 from unittest.mock import ANY, patch
 
 from pytest import raises
-
 import uwtools.logging
 
 # NB: Since pytest takes control of logging, these tests make assertions about the way logging

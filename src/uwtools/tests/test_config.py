@@ -17,11 +17,11 @@ from unittest.mock import patch
 import pytest
 import yaml
 from pytest import fixture, raises
-
-from uwtools import config, exceptions
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import compare_files, fixture_path, logged
 from uwtools.utils import cli_helpers
+
+from uwtools import config, exceptions
 
 # Helper functions
 

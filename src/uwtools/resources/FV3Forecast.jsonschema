@@ -7,9 +7,6 @@
             "description": "Expected resources for the given platform",
             "type": "object",
             "properties": {
-                "RUN_ENVIR": {
-                    "type": "string",
-                },
                 "MACHINE": {
                     "type": "string"
                     "enum": [
@@ -39,16 +36,13 @@
             "description": "parameters of the forecast",
             "type": "object",
             "properties": {
-                "APP": {
-                    "type": "string",
-                },
-                "EXTRN_MDL_NAME": {
+                "MODEL": {
                     "type": "string",
                 },
                 "EXEC_NAME": {
                     "type": "string",
                 },
-                "FCSTDIR": {
+                "RUN_DIRECTORY": {
                     "type": "string",
                     "format": "uri"
                 },

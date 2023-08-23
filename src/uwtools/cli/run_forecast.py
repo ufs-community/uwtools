@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code, unused-import
+# pylint: disable=duplicate-code,
 """
 CLI for running a forecast.
 """
@@ -8,7 +8,7 @@ from argparse import ArgumentParser, HelpFormatter, Namespace
 from typing import List
 
 from uwtools.drivers import forecast
-from uwtools.exceptions import UWConfigError, UWError
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import setup_logging
 from uwtools.utils import cli_helpers
 
@@ -20,19 +20,17 @@ def main() -> None:
     Parses arguments provided by the user and passes to the Forecast driver class to be run.
     """
     args = parse_args(sys.argv[1:])
-    name = "run-forecast"
     setup_logging(quiet=args.quiet, verbose=args.verbose)
 
     forecast_class = getattr(forecast, f"{args.forecast_model}Forecast")
     forecast_obj = forecast_class(
         config_file=args.config_file,
         dry_run=args.dry_run,
-        outfile=args.outfile,
-        log=log,
+        batch_script=args.batch_script,
     )
     try:
         forecast_obj.run()
-    except UWError as e:
+    except UWConfigError as e:
         sys.exit(str(e))
 
 
@@ -74,10 +72,9 @@ def parse_args(args: List[str]) -> Namespace:
         help="The experiment to be run",
     )
     optional.add_argument(
-        "-o",
-        "--outfile",
+        "--batch_script",
         help=(
-            "Optional path to a batch script to be generated and run. "
+            "Optional name for a batch script to be generated and run. "
             "Default is to run the mpi command directly. "
         ),
         metavar="FILE",

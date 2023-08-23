@@ -1,13 +1,11 @@
 platform:
-  run_envir: linux
   machine: gaea
   MPICMD: srun
   account: user_account
 forecast:
-  APP: SRW
-  EXTRN_MDL_NAME: FV3
-  EXEC_NAME: --export=ALL test_exec.py
-  FCSTDIR: src/uwtools/tests/drivers/
+  MODEL: FV3
+  EXEC_NAME: test_exec.py
+  RUN_DIRECTORY: src/uwtools/tests/drivers/
   CYCLEDEP:
     INPUT/gfs_data.nc: path/to/gfs_data.tile7.halo0.nc 
     INPUT/sfc_data.nc: path/to/sfc_data.tile7.halo0.nc

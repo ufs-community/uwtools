@@ -2,12 +2,10 @@
 Custom exceptions for the UWTools package.
 """
 
-from abc import ABC
 
-
-class UWError(ABC, Exception):
+class UWError(Exception):
     """
-    An abstract class representing all exceptions for UWTools.
+    An abstract class representing generic exceptions for UWTools.
     """
 
 

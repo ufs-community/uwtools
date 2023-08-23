@@ -6,7 +6,6 @@ Tests for uwtools.j2template module.
 from types import SimpleNamespace as ns
 
 from pytest import fixture, raises
-
 from uwtools.j2template import J2Template
 
 

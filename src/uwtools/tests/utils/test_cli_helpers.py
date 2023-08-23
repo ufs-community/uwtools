@@ -4,7 +4,6 @@ Tests for uwtools.utils.cli_helpers module.
 """
 
 from pytest import raises
-
 from uwtools.utils import cli_helpers
 
 

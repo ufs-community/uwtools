@@ -3,8 +3,8 @@
 Tests for uwtools.drivers.driver module.
 """
 
-from collections.abc import Mapping
 import logging
+from collections.abc import Mapping
 from unittest.mock import patch
 
 import pytest
@@ -18,7 +18,7 @@ class ConcreteDriver(Driver):
     Driver subclass for testing purposes.
     """
 
-    def batch_script(self, job_resources):
+    def batch_script(self, platform_resources):
         pass
 
     def output(self):
