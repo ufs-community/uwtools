@@ -33,7 +33,123 @@ def main() -> None:
     Main entry point.
     """
     args = check_args(parse_args(sys.argv[1:]))
-    print(args)
+    {"config": go_config, "experiment": go_experiment, "forecast": go_forecast}[args.mode](args)
+
+
+def go_config(args: Namespace) -> None:
+    """
+    Dispatch logic for config mode.
+
+    :param args: Parsed command-line args.
+    """
+    {"render": go_config_render, "translate": go_config_translate, "validate": go_config_validate}[
+        args.submode
+    ](args)
+
+
+def go_config_render(args: Namespace) -> None:
+    """
+    Dispatch logic for config render submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def go_config_translate(args: Namespace) -> None:
+    """
+    Dispatch logic for config translate submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def go_config_validate(args: Namespace) -> None:
+    """
+    Dispatch logic for config validate submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def go_experiment(args: Namespace) -> None:
+    """
+    Dispatch logic for experiment mode.
+
+    :param args: Parsed command-line args.
+    """
+    {
+        "configure": go_experiment_configure,
+        "run": go_experiment_run,
+        "validate": go_experiment_validate,
+    }[args.submode](args)
+
+
+def go_experiment_configure(args: Namespace) -> None:
+    """
+    Dispatch logic for experiment configure submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def go_experiment_run(args: Namespace) -> None:
+    """
+    Dispatch logic for experiment run submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def go_experiment_validate(args: Namespace) -> None:
+    """
+    Dispatch logic for experiment validate submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def go_forecast(args: Namespace) -> None:
+    """
+    Dispatch logic for forecast mode.
+
+    :param args: Parsed command-line args.
+    """
+    {"configure": go_forecast_configure, "run": go_forecast_run, "validate": go_forecast_validate}[
+        args.submode
+    ](args)
+
+
+def go_forecast_configure(args: Namespace) -> None:
+    """
+    Dispatch logic for forecast configure submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def go_forecast_run(args: Namespace) -> None:
+    """
+    Dispatch logic for forecast run submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def go_forecast_validate(args: Namespace) -> None:
+    """
+    Dispatch logic for forecast validate submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
 
 
 def parse_args(cli_args: List[str]) -> Namespace:
@@ -45,7 +161,7 @@ def parse_args(cli_args: List[str]) -> Namespace:
     """
 
     parser = Parser(description="Unified Workflow Tools", formatter_class=formatter)
-    subparsers = parser.add_subparsers(metavar="MODE", required=True)
+    subparsers = parser.add_subparsers(dest="mode", metavar="MODE", required=True)
     add_subparser_config(subparsers)
     add_subparser_experiment(subparsers)
     add_subparser_forecast(subparsers)
@@ -94,7 +210,7 @@ def add_subparser_config(subparsers: Subparsers) -> None:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = add_subparser(subparsers, "config", "work with config files")
-    subparsers = parser.add_subparsers(metavar="MODE", required=True)
+    subparsers = parser.add_subparsers(dest="submode", metavar="MODE", required=True)
     add_subparser_config_render(subparsers)
     add_subparser_config_translate(subparsers)
     add_subparser_config_validate(subparsers)
@@ -151,7 +267,7 @@ def add_subparser_experiment(subparsers: Subparsers) -> None:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = add_subparser(subparsers, "experiment", "configure and run experiments")
-    subparsers = parser.add_subparsers(metavar="MODE", required=True)
+    subparsers = parser.add_subparsers(dest="submode", metavar="MODE", required=True)
     add_subparser_experiment_configure(subparsers)
     add_subparser_experiment_run(subparsers)
     add_subparser_experiment_validate(subparsers)
