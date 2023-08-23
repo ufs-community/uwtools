@@ -8,7 +8,7 @@ from typing import List
 
 import jsonschema
 
-from uwtools.config import YAMLConfig
+from uwtools.config.core import YAMLConfig
 
 # Public functions
 

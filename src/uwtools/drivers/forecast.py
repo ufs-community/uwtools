@@ -9,7 +9,7 @@ import sys
 from importlib import resources
 from typing import Dict
 
-from uwtools import config
+from uwtools.config.core import F90Config, FieldTableConfig, create_config_obj
 from uwtools.drivers.driver import Driver
 from uwtools.utils import file_helpers
 
@@ -76,13 +76,13 @@ class FV3Forecast(Driver):
             base_file: optional path to file to use as a base file
         """
         if base_file:
-            config_obj = config.FieldTableConfig(base_file)
+            config_obj = FieldTableConfig(base_file)
             config_obj.update_values(update_obj)
             config_obj.dereference_all()
             config_obj.dump_file(outfldtab_file)
         else:
             # Dump update object to a Field Table file:
-            config.FieldTableConfig.dump_file_from_dict(path=outfldtab_file, cfg=update_obj)
+            FieldTableConfig.dump_file_from_dict(path=outfldtab_file, cfg=update_obj)
 
         msg = f"Namelist file {outfldtab_file} created"
         logging.info(msg)
@@ -101,7 +101,7 @@ class FV3Forecast(Driver):
         """
 
         if base_file:
-            config_obj = config.F90Config(base_file)
+            config_obj = F90Config(base_file)
             config_obj.update_values(update_obj)
             config_obj.dereference_all()
             config_obj.dump_file(outnml_file)
@@ -181,7 +181,7 @@ class FV3Forecast(Driver):
             base_file: Path to base config file
             outconfig_file: Path to output configuration file
         """
-        config.create_config_obj(
+        create_config_obj(
             input_base_file=base_file, config_file=self._config_file, outfile=outconfig_file
         )
         msg = f"Config file {outconfig_file} created"

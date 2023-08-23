@@ -10,8 +10,8 @@ from unittest.mock import patch
 import yaml
 from pytest import fixture, raises
 
+from uwtools.config import templater
 from uwtools.tests.support import logged
-from uwtools.utils import templater
 
 
 @fixture

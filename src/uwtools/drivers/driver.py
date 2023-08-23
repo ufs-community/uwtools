@@ -4,7 +4,7 @@ Provides an abstract class representing drivers for various NWP tools.
 
 from abc import ABC, abstractmethod
 
-from uwtools import config_validator
+from uwtools.config import validator
 
 
 class Driver(ABC):
@@ -70,7 +70,7 @@ class Driver(ABC):
         """
         Validate the user-supplied config file.
         """
-        return config_validator.config_is_valid(
+        return validator.config_is_valid(
             config_file=self._config_file,
             schema_file=self.schema_file,
         )

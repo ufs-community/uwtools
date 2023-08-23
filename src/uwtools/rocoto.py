@@ -2,8 +2,8 @@
 Support for creating Rocoto XML workflow documents.
 """
 
-from uwtools.config import YAMLConfig
-from uwtools.j2template import J2Template
+from uwtools.config.core import YAMLConfig
+from uwtools.config.j2template import J2Template
 
 # Private functions
 

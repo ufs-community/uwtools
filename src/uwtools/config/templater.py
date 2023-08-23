@@ -5,8 +5,8 @@ import logging
 import os
 from typing import List, Optional
 
-from uwtools import config
-from uwtools.j2template import J2Template
+import uwtools.config.core
+from uwtools.config.j2template import J2Template
 from uwtools.utils import cli_helpers
 
 
@@ -79,7 +79,7 @@ def _set_up_config_obj(config_file: Optional[str], key_eq_val_pairs: List[str]) 
     """
     if config_file:
         config_type = cli_helpers.get_file_type(config_file)
-        cfg_class = getattr(config, f"{config_type}Config")
+        cfg_class = getattr(uwtools.config.core, f"{config_type}Config")
         cfg = cfg_class(config_file)
         logging.debug("Read initial config from %s", config_file)
     else:

@@ -7,7 +7,7 @@ from types import SimpleNamespace as ns
 
 from pytest import fixture, raises
 
-from uwtools.j2template import J2Template
+from uwtools.config.j2template import J2Template
 
 
 @fixture

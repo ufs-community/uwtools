@@ -20,8 +20,8 @@ import jinja2
 import yaml
 
 from uwtools import exceptions
+from uwtools.config.j2template import J2Template
 from uwtools.exceptions import UWConfigError
-from uwtools.j2template import J2Template
 from uwtools.utils import cli_helpers
 
 msgs = ns(
@@ -529,9 +529,9 @@ class YAMLConfig(Config):
         :param config_path: Path to config file to load.
         """
         loader = self._yaml_loader
-        with open(config_path, "r", encoding="utf-8") as file_name:
+        with open(config_path, "r", encoding="utf-8") as f:
             try:
-                cfg = yaml.load(file_name, Loader=loader)
+                cfg = yaml.load(f, Loader=loader)
             except yaml.constructor.ConstructorError as e:
                 if e.problem:
                     if "unhashable" in e.problem:

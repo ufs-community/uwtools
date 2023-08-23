@@ -10,7 +10,8 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture, raises
 
-from uwtools import config
+from uwtools.config.core import F90Config, YAMLConfig
+from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.tests.support import compare_files, fixture_path
@@ -40,8 +41,8 @@ def test_create_config(tmp_path):
     with patch.object(FV3Forecast, "_validate", return_value=True):
         forecast_obj = FV3Forecast(config_file=config_file)
     forecast_obj._create_model_config(base_file=input_file, outconfig_file=output_file)
-    expected = config.YAMLConfig(input_file)
-    expected.update_values(config.YAMLConfig(config_file))
+    expected = YAMLConfig(input_file)
+    expected.update_values(YAMLConfig(config_file))
     expected_file = tmp_path / "expected_yaml.yaml"
     expected.dump_file(expected_file)
     assert compare_files(expected_file, output_file)
@@ -83,7 +84,7 @@ def test_create_directory_structure(tmp_path):
 
 @fixture
 def create_field_table_update_obj():
-    return config.YAMLConfig(fixture_path("FV3_GFS_v16_update.yaml"))
+    return YAMLConfig(fixture_path("FV3_GFS_v16_update.yaml"))
 
 
 def test_create_field_table_with_base_file(create_field_table_update_obj, tmp_path):
@@ -118,7 +119,7 @@ def test__create_model_config(tmp_path):
     outfile = str(tmp_path / "out.yaml")
     for path in infile, basefile:
         Path(path).touch()
-    with patch.object(config, "create_config_obj") as create_config_obj:
+    with patch.object(forecast, "create_config_obj") as create_config_obj:
         with patch.object(FV3Forecast, "_validate", return_value=True):
             FV3Forecast(config_file=infile)._create_model_config(
                 outconfig_file=outfile, base_file=basefile
@@ -130,7 +131,7 @@ def test__create_model_config(tmp_path):
 
 @fixture
 def create_namelist_assets(tmp_path):
-    return config.F90Config(fixture_path("simple.nml")), tmp_path / "create_out.nml"
+    return F90Config(fixture_path("simple.nml")), tmp_path / "create_out.nml"
 
 
 def test_create_namelist_with_base_file(create_namelist_assets):
@@ -215,7 +216,7 @@ def test_stage_files(tmp_path, section, link_files):
 
     run_directory = tmp_path / "run"
     src_directory = tmp_path / "src"
-    files_to_stage = config.YAMLConfig(fixture_path("expt_dir.yaml"))[section]
+    files_to_stage = YAMLConfig(fixture_path("expt_dir.yaml"))[section]
     # Fix source paths so that they are relative to our test temp directory and
     # create the test files.
     src_directory.mkdir()
