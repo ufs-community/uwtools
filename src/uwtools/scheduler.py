@@ -54,7 +54,8 @@ class BatchScript(UserList):
         """
         Returns string representation.
         """
-        return str(self.content())
+        shebang = "#!/bin/bash\n"
+        return str(shebang + self.content())
 
     def content(self, line_separator: str = "\n") -> str:
         """

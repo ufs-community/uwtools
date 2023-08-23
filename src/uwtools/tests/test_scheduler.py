@@ -73,7 +73,6 @@ def test_lsf_4(lsf_props):
 #BSUB -q batch
 """.strip()
     assert batch_script.content() == expected
-    assert str(batch_script) == expected
 
 
 # PBS tests

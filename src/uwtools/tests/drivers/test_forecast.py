@@ -27,6 +27,7 @@ def slurm_props():
         "walltime": "00:01:00",
     }
 
+
 def test_batch_script(slurm_props):
     expected = """
 #SBATCH --account=account_name
@@ -261,25 +262,36 @@ def test_stage_files(tmp_path, section, link_files):
             assert (run_directory / dst_fn).is_file()
 
 
-def test_run(tmp_path, capsys):
-    run_expected = """
-    Configuration: SRW FV3 hera
-    Run command: srun --export=ALL test_exec.py
-    """
+def test_run(tmp_path, caplog):
+    run_expected = """#!/bin/bash
+#SBATCH --account=user_account
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --qos=batch
+#SBATCH --time=00:01:00
+srun --export=None test_exec.py
+"""
     config_file = fixture_path("forecast.yaml")
     out_file = tmp_path / "test_exec.py"
     out_file.touch()
 
     with patch.object(config, "YAMLConfig") as YAMLConfig:
         YAMLConfig.return_value = {
-            "forecast": {
-                "CYCLEDEP": {"foo-file": "/tmp/foo"},
-                "MODEL": "FV3",
-                "RUN_DIRECTORY": "/tmp",
+            "platform": {
+                "machine": "HAL9000",
+                "MPICMD": "srun",
+                "account": "user_account",
             },
-            "platform": {"machine": "HAL9000"},
+            "forecast": {
+                "MODEL": "FV3",
+                "EXEC_NAME": "test_exec.py",
+                "RUN_DIRECTORY": tmp_path.as_posix(),
+                "CYCLEDEP": {"foo-file": str(tmp_path / "foo")},
+                "STATIC": {"static-foo-file": str(tmp_path / "foo")},
+                "VERBOSE": "False",
+            },
         }
         with patch.object(FV3Forecast, "_validate", return_value=True):
             fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=out_file)
             fcstobj.run()
-        assert run_expected in capsys.readouterr().out
+        assert run_expected in caplog.text

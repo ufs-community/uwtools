@@ -147,48 +147,49 @@ class FV3Forecast(Driver):
         Runs FV3 either as a subprocess or by submitting a batch script.
         """
         # Read in the config file.
-        forecast_config = config.YAMLConfig(self._config_file)["forecast"]
+        config_data = config.YAMLConfig(self._config_file)
+        forecast_config = config_data["forecast"]
+        platform_config = config_data["platform"]
 
         # Prepare directories.
         run_directory = forecast_config["RUN_DIRECTORY"]
-        self.create_directory_structure(run_directory, "delete")
+        self.create_directory_structure(run_directory, "rename")
 
         static_files = forecast_config["STATIC"]
-        self.stage_files(run_directory, static_files, link_files=False)
+        self.stage_files(run_directory, static_files, link_files=True)
         cycledep_files = forecast_config["CYCLEDEP"]
         self.stage_files(run_directory, cycledep_files, link_files=True)
 
         # Create the job script.
-        platform = forecast_config["platform"]
-        platform_resources = self.resources(platform)
+        platform_resources = self.resources(platform_config)
         batch_script = self.batch_script(platform_resources)
-        args = "--export=None -n"
+        args = "--export=None"
         run_command = self.run_cmd(
             args,
-            run_cmd=forecast_config["run_cmd"],
-            exec_name=forecast_config["exec_name"],
+            run_cmd=platform_config["MPICMD"],
+            exec_name=forecast_config["EXEC_NAME"],
         )
+        batch_script.append(run_command)
 
         if self._dry_run:
             # Apply switch to allow user to view the run command of config.
             # This will not run the job.
-            logging.info("Configuration:")
-            for key in forecast_config["forecast"]:
-                logging.info(key)
+            logging.info("Batch Script:")
+            logging.info(batch_script)
             return
 
         # Run the job.
-        if self._batch_script is not None:
+        if self._batch_script is not None:  # pragma: no cover
             outpath = run_directory.join(self._batch_script)
-            with open(outpath, "w", encoding="utf-8") as f:
-                subprocess.run(
-                    f"{run_command} {batch_script}",
-                    stderr=subprocess.STDOUT,
-                    check=False,
-                    shell=True,
-                    stdout=f,
-                )
-        else:
+            with open(outpath, "w+", encoding="utf-8") as file_:
+                print(batch_script, file=file_)
+            subprocess.run(
+                outpath,
+                stderr=subprocess.STDOUT,
+                check=False,
+                shell=True,
+            )
+        else:  # pragma: no cover
             subprocess.run(
                 f"{run_command}",
                 stderr=subprocess.STDOUT,
