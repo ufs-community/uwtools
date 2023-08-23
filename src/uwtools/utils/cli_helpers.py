@@ -3,10 +3,9 @@ Helpers to be used when parsing arguments and gathering config files.
 """
 
 import logging
+import sys
 from pathlib import Path
-from typing import Dict, List, Optional
-
-from uwtools.logger import Logger
+from typing import Dict, List
 
 
 def dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:
@@ -51,35 +50,6 @@ def path_if_it_exists(path: str) -> str:
     p = Path(path)
     if not p.exists():
         msg = f"{path} does not exist"
-        logging.critical(msg)
+        print(msg, file=sys.stderr)
         raise FileNotFoundError(msg)
     return str(p.absolute())
-
-
-def setup_logging(
-    log_file: Optional[str],
-    log_name: Optional[str] = None,
-    quiet: bool = False,
-    verbose: bool = False,
-    color: bool = False,
-) -> Logger:
-    """
-    Return a configured Logger object.
-
-    :param log_file: Path to the file to log to.
-    :param log_name: Name associated with log messages.
-    :param quiet: Suppress logging.
-    :param verbose: Log in verbose mode.
-    :param color: Log in color?
-    :return: A configured Logger object.
-    """
-    logger = Logger(
-        colored_log=color,
-        fmt=None if verbose else "%(message)s",
-        level="debug" if verbose else "info",
-        log_file=log_file,
-        quiet=quiet,
-        name=log_name,
-    )
-    logger.debug(f"Finished setting up debug file logging in {log_file}")
-    return logger

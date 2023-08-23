@@ -8,8 +8,6 @@ from typing import List, Optional, Set
 
 from jinja2 import BaseLoader, Environment, FileSystemLoader, Template, meta
 
-from uwtools import logger
-
 
 class J2Template:
     """
@@ -30,7 +28,6 @@ class J2Template:
         :param template_str: An in-memory Jinja2 template.
         :raises: RuntimeError: If neither a template file or path is provided.
         """
-        self.log = logging.getLogger(kwargs.get("log_name"))
         self._configure_obj = configure_obj
         self._template_path = template_path
         self._template_str = template_str
@@ -51,7 +48,7 @@ class J2Template:
         :param output_path: Path to file to write.
         """
         msg = f"Writing rendered template to output file: {output_path}"
-        self.log.debug(msg)
+        logging.debug(msg)
         with open(output_path, "w+", encoding="utf-8") as file_:
             print(self.render_template(), file=file_)
 
@@ -80,7 +77,6 @@ class J2Template:
 
     # Private methods
 
-    @logger.verbose()
     def _load_file(self, template_path: str) -> Template:
         """
         Load the Jinja2 template from the file provided.
@@ -92,7 +88,6 @@ class J2Template:
         _register_filters(self._j2env)
         return self._j2env.get_template(template_path)
 
-    @logger.verbose()
     def _load_string(self, template: str) -> Template:
         """
         Load the Jinja2 template from the string provided.

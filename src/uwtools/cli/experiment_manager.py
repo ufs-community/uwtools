@@ -9,6 +9,7 @@ from argparse import HelpFormatter, Namespace
 from typing import List
 
 from uwtools.drivers import experiment
+from uwtools.logging import setup_logging
 from uwtools.utils import cli_helpers
 
 
@@ -18,9 +19,10 @@ def main() -> None:
 
     Parses arguments provided by the user and passes to the facade to be run.
     """
-    user_args = parse_args(sys.argv[1:])
-    experiment_class = getattr(experiment, f"{user_args.forecast_app}Experiment")
-    experiment_class(user_args.config_file)
+    args = parse_args(sys.argv[1:])
+    setup_logging(quiet=args.quiet, verbose=args.verbose)
+    experiment_class = getattr(experiment, f"{args.forecast_app}Experiment")
+    experiment_class(args.config_file)
 
 
 def parse_args(args: List[str]) -> Namespace:
@@ -51,13 +53,6 @@ def parse_args(args: List[str]) -> Namespace:
     )
     optional = parser.add_argument_group("optional arguments")
     optional.add_argument(
-        "-l",
-        "--log-file",
-        default="/dev/null",
-        help="Path to a file to log to",
-        metavar="FILE",
-    )
-    optional.add_argument(
         "-q",
         "--quiet",
         action="store_true",
@@ -71,6 +66,6 @@ def parse_args(args: List[str]) -> Namespace:
     )
     parsed = parser.parse_args(args)
     if parsed.quiet and parsed.verbose:
-        print("Options --dry-run and --outfile may not be used together", file=sys.stderr)
+        print("Options --quiet and --verbose may not be used together", file=sys.stderr)
         sys.exit(1)
     return parsed

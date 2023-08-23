@@ -1,10 +1,9 @@
 # pylint: disable=missing-function-docstring
 
-import re
 from importlib import resources
-from logging import LogRecord
 from pathlib import Path
-from typing import List
+
+from _pytest.logging import LogCaptureFixture
 
 
 def compare_files(path1: str, path2: str) -> bool:
@@ -81,42 +80,11 @@ def fixture_uri(suffix: str = "") -> str:
     return fixture_pathobj(suffix).as_uri()
 
 
-def line_in_lines(line: str, lines: List[str]) -> bool:
+def logged(caplog: LogCaptureFixture, msg: str) -> bool:
     """
-    Determines whether the given line occurs, as a line-ending suffix, in any of the lines in the
-    given list. For example, the line "bar" is a line-ending suffix of the line
-    "[2023-06-29T14:06:34] foo", but not of the line "foo bar".
+    Does the given message occur in the log capture?
 
-    Paramters
-    ---------
-    line:
-        The sought-for line
-    lines:
-        The lines to be checked for the line
-
-    Returns
-    -------
-    A bool indicating whether or not the line was found.
+    :param caplog: The pytest log capture.
+    :param msg: The message sought.
     """
-    return any(x for x in lines if re.match(r"^.*%s$" % re.escape(line), x))
-
-
-def msg_in_caplog(msg: str, records: List[LogRecord]) -> bool:
-    """
-    Determines whether the given message occurs in the given list of log records.
-
-    Parameters
-    ----------
-    msg
-        The sought-for message
-    records
-        The log records to be checked for the message
-
-    Returns
-    -------
-    A bool indicating whether or not the message was found.
-    """
-    for record in records:
-        if msg == record.msg:
-            return True
-    return False
+    return msg in [record.message for record in caplog.records]

@@ -17,13 +17,29 @@ from uwtools.tests.support import fixture_path
 
 
 @pytest.mark.parametrize("sw", [ns(i="-i"), ns(i="--input-template")])
-def test_main_bad_args(sw, capsys):
+def test_main_bad_args_0(capsys, sw):
     argv = ["test", sw.i, fixture_path("ww3_multi.inp.IN")]
     with patch.object(atparse_to_jinja2.sys, "argv", argv):
         with raises(SystemExit) as e:
             atparse_to_jinja2.main()
         assert e.value.code == 1
         assert "Specify either --dry-run or --outfile" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "sw",
+    [
+        ns(d="-d", i="-i", q="-q", v="-v"),
+        ns(d="--dry-run", i="--input-template", q="--quiet", v="--verbose"),
+    ],
+)
+def test_main_bad_args_1(capsys, sw):
+    argv = ["test", sw.i, fixture_path("ww3_multi.inp.IN"), sw.d, sw.q, sw.v]
+    with patch.object(atparse_to_jinja2.sys, "argv", argv):
+        with raises(SystemExit) as e:
+            atparse_to_jinja2.main()
+        assert e.value.code == 1
+        assert "Options --quiet and --verbose may not be used together" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("sw", [ns(i="-i", o="-o"), ns(i="--input-template", o="--outfile")])
@@ -41,7 +57,7 @@ def test_main_to_file(sw, tmp_path):
 
 
 @pytest.mark.parametrize("sw", [ns(d="-d", i="-i"), ns(d="--dry-run", i="--input-template")])
-def test_main_to_stdout(sw, capsys):
+def test_main_to_stdout(capsys, sw):
     """
     Test that all atparse @[] items are replaced with Jinja2 templates {{ }} when printing to
     stdout.

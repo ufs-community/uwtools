@@ -3,10 +3,12 @@
 Tests for uwtools.utils.templater module.
 """
 
+import logging
+
 import yaml
 from pytest import fixture, raises
 
-from uwtools.logger import Logger
+from uwtools.tests.support import logged
 from uwtools.utils import templater
 
 
@@ -37,7 +39,6 @@ def render(config_file, input_template, **kwargs):
         config_file=config_file,
         key_eq_val_pairs=[],
         input_template=input_template,
-        log=Logger(),
         **kwargs,
     )
 
@@ -50,9 +51,9 @@ def test_render(config_file, input_template, tmp_path):
 
 
 def test_render_dry_run(caplog, config_file, input_template):
+    logging.getLogger().setLevel(logging.INFO)
     render(config_file, input_template, outfile="/dev/null", dry_run=True)
-    logmsgs = (record.msg for record in caplog.records)
-    assert "roses are red, violets are blue" in logmsgs
+    assert logged(caplog, "roses are red, violets are blue")
 
 
 def test_render_values_missing(caplog, config_file, input_template):
@@ -64,21 +65,18 @@ def test_render_values_missing(caplog, config_file, input_template):
         f.write(yaml.dump(cfgobj))
     with raises(ValueError):
         render(config_file, input_template, outfile="/dev/null")
-    logmsgs = list(record.msg for record in caplog.records)
-    assert "Template requires values that were not provided:" in logmsgs
-    assert "roses" in logmsgs
+    assert logged(caplog, "Template requires values that were not provided:")
+    assert logged(caplog, "roses")
 
 
 def test_render_values_needed(caplog, config_file, input_template):
+    logging.getLogger().setLevel(logging.INFO)
     render(config_file, input_template, outfile="/dev/null", values_needed=True)
-    logmsgs = (record.msg for record in caplog.records)
     for var in ("roses", "violets"):
-        assert var in logmsgs
+        assert logged(caplog, var)
 
 
 def test__set_up_config_obj(config_file):
     expected = {"roses": "white", "violets": "blue", "cannot": {"override": "this"}}
-    actual = templater._set_up_config_obj(
-        config_file=config_file, key_eq_val_pairs=["roses=white"], log=Logger()
-    )
+    actual = templater._set_up_config_obj(config_file=config_file, key_eq_val_pairs=["roses=white"])
     assert actual == expected
