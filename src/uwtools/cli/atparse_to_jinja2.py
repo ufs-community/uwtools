@@ -7,6 +7,7 @@ import sys
 from argparse import ArgumentParser, HelpFormatter, Namespace
 from typing import List
 
+from uwtools.logging import setup_logging
 from uwtools.utils import atparse_to_jinja2, cli_helpers
 
 
@@ -15,6 +16,7 @@ def main() -> None:
     Main entry point.
     """
     args = parse_args(sys.argv[1:])
+    setup_logging(quiet=args.quiet, verbose=args.verbose)
     atparse_to_jinja2.convert(
         input_template=args.input_template, outfile=args.outfile, dry_run=args.dry_run
     )
@@ -53,8 +55,23 @@ def parse_args(args: List[str]) -> Namespace:
         help="Path to new Jinja2 template",
         metavar="FILE",
     )
+    optional.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="Print no logging messages",
+    )
+    optional.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Print all logging messages.",
+    )
     parsed = parser.parse_args(args)
     if not parsed.dry_run and not parsed.outfile:
         print("Specify either --dry-run or --outfile", file=sys.stderr)
+        sys.exit(1)
+    if parsed.quiet and parsed.verbose:
+        print("Options --quiet and --verbose may not be used together", file=sys.stderr)
         sys.exit(1)
     return parsed

@@ -9,6 +9,7 @@ from typing import List
 
 from uwtools.drivers import forecast
 from uwtools.exceptions import UWConfigError, UWError
+from uwtools.logging import setup_logging
 from uwtools.utils import cli_helpers
 
 
@@ -20,9 +21,7 @@ def main() -> None:
     """
     args = parse_args(sys.argv[1:])
     name = "run-forecast"
-    log = cli_helpers.setup_logging(
-        log_file=args.log_file, log_name=name, quiet=args.quiet, verbose=args.verbose
-    )
+    setup_logging(quiet=args.quiet, verbose=args.verbose)
 
     forecast_class = getattr(forecast, f"{args.forecast_model}Forecast")
     forecast_obj = forecast_class(

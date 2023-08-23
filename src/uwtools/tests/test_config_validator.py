@@ -9,7 +9,6 @@ from typing import Any, Dict
 from pytest import fixture
 
 from uwtools import config_validator
-from uwtools.logger import Logger
 
 # Support functions
 
@@ -80,7 +79,7 @@ def test_config_is_valid_fail_bad_dir_top(
     config["dir"] = d
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert not config_validator.config_is_valid(config_file, schema_file, log=Logger())
+    assert not config_validator.config_is_valid(config_file, schema_file)
     assert len([x for x in caplog.records if f"Path does not exist: {d}" in x.message]) == 1
 
 
@@ -92,7 +91,7 @@ def test_config_is_valid_fail_bad_dir_nested(
     config["sub"]["dir"] = d
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert not config_validator.config_is_valid(config_file, schema_file, log=Logger())
+    assert not config_validator.config_is_valid(config_file, schema_file)
     assert len([x for x in caplog.records if f"Path does not exist: {d}" in x.message]) == 1
 
 
@@ -101,7 +100,7 @@ def test_config_is_valid_fail_bad_enum_val(caplog, config, config_file, schema, 
     config["color"] = "yellow"
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert not config_validator.config_is_valid(config_file, schema_file, log=Logger())
+    assert not config_validator.config_is_valid(config_file, schema_file)
     assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
 
@@ -111,7 +110,7 @@ def test_config_is_valid_fail_bad_number_val(caplog, config, config_file, schema
     config["number"] = "string"
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert not config_validator.config_is_valid(config_file, schema_file, log=Logger())
+    assert not config_validator.config_is_valid(config_file, schema_file)
     assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
 
@@ -120,7 +119,7 @@ def test_config_is_valid_pass(config, config_file, schema, schema_file):
     # Test a fully valid config file.
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert config_validator.config_is_valid(config_file, schema_file, log=Logger())
+    assert config_validator.config_is_valid(config_file, schema_file)
 
 
 def test__bad_paths_top(config, schema, tmp_path):

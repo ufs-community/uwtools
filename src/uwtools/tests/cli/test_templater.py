@@ -3,9 +3,8 @@
 Tests for the templater CLI.
 """
 
-import argparse
+import logging
 import os
-import re
 from pathlib import Path
 from types import SimpleNamespace as ns
 from unittest.mock import patch
@@ -14,7 +13,7 @@ import pytest
 from pytest import raises
 
 from uwtools.cli import templater
-from uwtools.tests.support import compare_files, fixture_path, line_in_lines
+from uwtools.tests.support import compare_files, fixture_path
 
 # NB: Ensure that at least one test exercises both short and long forms of each
 #     CLI switch.
@@ -27,7 +26,7 @@ def test_mutually_exclusive_args(sw):
     """
     Test that mutually-exclusive -q/-d args are rejected.
     """
-    with raises(argparse.ArgumentError):
+    with raises(SystemExit):
         argv = ["test", sw.i, fixture_path("fruit_config.yaml"), sw.d, sw.q]
         with patch.object(templater.sys, "argv", argv):
             templater.main()
@@ -61,10 +60,11 @@ def test_set_template_bad_config_suffix(sw, tmp_path):
 
 
 @pytest.mark.parametrize("sw", [ns(d="-d", i="-i"), ns(d="--dry-run", i="--input-template")])
-def test_set_template_command_line_config(sw, capsys):
+def test_set_template_command_line_config(caplog, sw):
     """
     Test behavior when values are provided on the command line.
     """
+    logging.getLogger().setLevel(logging.INFO)
     infile = fixture_path("nml.IN")
     expected = f"""
 Running with args:
@@ -88,33 +88,33 @@ Re-run settings: {sw.i} {infile} {sw.d} fruit=pear vegetable=squash how_many=22
   how_many = 22
   dressing = 'balsamic'
 /
-""".lstrip()
+""".strip()
     argv = ["test", sw.i, infile, sw.d, "fruit=pear", "vegetable=squash", "how_many=22"]
     with patch.object(templater.sys, "argv", argv):
         templater.main()
-    actual = capsys.readouterr().out.split("\n")
-    for line in expected.split("\n"):
-        assert line_in_lines(line, actual)
+    actual = "\n".join(record.message for record in caplog.records)
+    assert actual == expected
 
 
 @pytest.mark.parametrize("sw", [ns(d="-d", i="-i"), ns(d="--dry-run", i="--input-template")])
-def test_set_template_dry_run(sw, capsys):
+def test_set_template_dry_run(caplog, sw):
     """
     Test dry-run output of ingest namelist tool.
     """
+    logging.getLogger().setLevel(logging.INFO)
     infile = fixture_path("nml.IN")
     expected = f"""
 Running with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
-        outfile: None
- input_template: {infile}
     config_file: None
    config_items: []
         dry_run: True
+ input_template: {infile}
+        outfile: None
+          quiet: False
   values_needed: False
         verbose: False
-          quiet: False
 Re-run settings: {sw.i} {infile} {sw.d}
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
@@ -125,22 +125,21 @@ Re-run settings: {sw.i} {infile} {sw.d}
   how_many = 22
   dressing = 'balsamic'
 /
-""".lstrip()
-
+""".strip()
     with patch.dict(os.environ, {"fruit": "banana", "vegetable": "tomato", "how_many": "22"}):
         argv = ["test", sw.i, infile, sw.d]
         with patch.object(templater.sys, "argv", argv):
             templater.main()
-        actual = capsys.readouterr().out.split("\n")
-        for line in expected.split("\n"):
-            assert line_in_lines(line, actual)
+        actual = "\n".join(record.message for record in caplog.records)
+        assert actual == expected
 
 
 @pytest.mark.parametrize("sw", [ns(i="-i"), ns(i="--input-template")])
-def test_set_template_listvalues(sw, capsys):
+def test_set_template_listvalues(caplog, sw):
     """
     Test "values needed" output of ingest namelist tool.
     """
+    logging.getLogger().setLevel(logging.INFO)
     infile = fixture_path("nml.IN")
     expected = f"""
 Running with args:
@@ -150,7 +149,6 @@ Running with args:
    config_items: []
         dry_run: False
  input_template: {infile}
-       log_file: /dev/null
         outfile: None
           quiet: False
   values_needed: True
@@ -162,22 +160,21 @@ Values needed to render this template are:
 fruit
 how_many
 vegetable
-""".lstrip()
+""".strip()
     argv = ["test", sw.i, infile, "--values-needed"]
     with patch.object(templater.sys, "argv", argv):
         templater.main()
-    actual = capsys.readouterr().out.split("\n")
-    for line in expected.split("\n"):
-        assert line_in_lines(line, actual)
+    actual = "\n".join(record.message for record in caplog.records)
+    assert actual == expected
 
 
 @pytest.mark.parametrize(
     "sw", [ns(d="-d", i="-i", v="-v"), ns(d="--dry-run", i="--input-template", v="--verbose")]
 )
-def test_set_template_verbosity(sw, capsys):
+def test_set_template_verbosity(caplog, sw):
+    logging.getLogger().setLevel(logging.DEBUG)  # <-- NB debug level
     infile = fixture_path("nml.IN")
     expected = f"""
-Finished setting up debug file logging in /dev/null
 Running with args:
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
@@ -192,6 +189,7 @@ Running with args:
 Re-run settings: {sw.i} {infile} {sw.d} {sw.v}
 ----------------------------------------------------------------------
 ----------------------------------------------------------------------
+Initial config set from environment
 &salad
   base = 'kale'
   fruit = 'banana'
@@ -199,12 +197,11 @@ Re-run settings: {sw.i} {infile} {sw.d} {sw.v}
   how_many = 22
   dressing = 'balsamic'
 /
-J2Template._load_file INPUT Args:
-{infile}
 """.strip()
 
     # Test verbose output when missing a required template value.
 
+    caplog.clear()
     env = {"fruit": "banana", "how_many": "22"}  # missing "vegetable"
     with patch.dict(os.environ, env):
         with raises(ValueError) as error:
@@ -215,18 +212,19 @@ J2Template._load_file INPUT Args:
 
     # Test verbose output when all template values are available.
 
+    caplog.clear()
     env["vegetable"] = "tomato"
     with patch.dict(os.environ, env):
-        argv = ["test", "-i", infile, "--dry-run", "-v"]
+        argv = ["test", sw.i, infile, sw.d, sw.v]
         with patch.object(templater.sys, "argv", argv):
             templater.main()
-    actual = capsys.readouterr().out.split("\n")
-    for line in expected.split("\n"):
-        assert any(re.match(r"^.*: %s$" % re.escape(line), x) for x in actual)
+    actual = "\n".join(record.message for record in caplog.records)
+    assert actual == expected
 
     # Test quiet level.
 
-    with raises(argparse.ArgumentError):
+    caplog.clear()
+    with raises(SystemExit):
         argv = ["test", "-i", infile, "-q"]
         with patch.object(templater.sys, "argv", argv):
             templater.main()

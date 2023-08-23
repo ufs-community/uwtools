@@ -8,7 +8,6 @@ from typing import Optional
 
 from uwtools.logger import Logger
 from uwtools.scheduler import BatchScript
-
 from uwtools import config_validator
 
 
@@ -88,5 +87,4 @@ class Driver(ABC):
         return config_validator.config_is_valid(
             config_file=self._config_file,
             schema_file=self.schema_file,
-            log=self.log,
         )

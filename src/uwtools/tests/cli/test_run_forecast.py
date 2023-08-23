@@ -52,7 +52,7 @@ def test_main(files):
 
 
 @pytest.mark.parametrize("sw", [ns(c="-c"), ns(c="--config-file")])
-def test_parse_args_bad_cfgfile(sw, tmp_path, capsys):
+def test_parse_args_bad_cfgfile(capsys, sw, tmp_path):
     """
     Fails if config file does not exist.
     """
@@ -83,6 +83,7 @@ def test_parse_args_good(sw, noise, files):
     )
     assert parsed.config_file == cfgfile
     assert parsed.log_file == logfile
+
     if noise in ["-q", "--quiet"]:
         sw_off = parsed.verbose
         sw_on = parsed.quiet
@@ -95,7 +96,7 @@ def test_parse_args_good(sw, noise, files):
 
 
 @pytest.mark.parametrize("sw", [ns(q="-q", v="-v"), ns(q="--quiet", v="--verbose")])
-def test_parse_args_mutually_exclusive_args(sw, capsys):
+def test_parse_args_mutually_exclusive_args(capsys, sw):
     with raises(SystemExit) as e:
         run_forecast.parse_args([sw.q, sw.v])
     assert e.value.code == 1
