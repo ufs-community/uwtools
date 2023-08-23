@@ -11,12 +11,6 @@ from typing import Any, Dict, List
 
 from uwtools.utils import Memory
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
-    handlers=[logging.StreamHandler()],
-)
-
 NONEISH = [None, "", " ", "None", "none", False]
 IGNORED_ATTRIBS = ["scheduler"]
 

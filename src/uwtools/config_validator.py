@@ -2,41 +2,41 @@
 Support for validating a config using JSON Schema.
 """
 import json
+import logging
 from pathlib import Path
 from typing import List
 
 import jsonschema
 
 from uwtools.config import YAMLConfig
-from uwtools.logger import Logger
 
 # Public functions
 
 
-def config_is_valid(config_file: str, schema_file: str, log: Logger) -> bool:
+def config_is_valid(config_file: str, schema_file: str) -> bool:
     """
     Check whether the given config file conforms to the given JSON Schema spec and whether any
     filesystem paths it identifies do not exist.
     """
     # Load the config and schema.
-    yaml_config = YAMLConfig(config_file, log_name=log.name)
+    yaml_config = YAMLConfig(config_file)
     yaml_config.dereference_all()
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
     # Collect and report on schema-validation errors.
     errors = _validation_errors(yaml_config.data, schema)
-    log_method = log.error if errors else log.info
+    log_method = logging.error if errors else logging.info
     log_method("%s schema-validation error%s found", len(errors), "" if len(errors) == 1 else "s")
     for error in errors:
-        log.error(error)
-        log.error("------")
+        logging.error(error)
+        logging.error("------")
     # It's pointless to evaluate an invalid config, so return now if that's the case.
     if errors:
         return False
     # Collect and report bad paths found in config.
     if bad_paths := _bad_paths(yaml_config.data, schema):
         for bad_path in bad_paths:
-            log.error("Path does not exist: %s", bad_path)
+            logging.error("Path does not exist: %s", bad_path)
         return False
     # If no issues were detected, report success.
     return True

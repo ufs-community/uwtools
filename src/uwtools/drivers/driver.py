@@ -3,10 +3,8 @@ Provides an abstract class representing drivers for various NWP tools.
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from uwtools import config_validator
-from uwtools.logger import Logger
 
 
 class Driver(ABC):
@@ -14,11 +12,10 @@ class Driver(ABC):
     An abstract class representing drivers for various NWP tools.
     """
 
-    def __init__(self, config_file: str, log: Optional[Logger] = None):
+    def __init__(self, config_file: str):
         """
         Initialize the driver.
         """
-        self.log = log if log is not None else Logger()
         self._config_file = config_file
         self._validate()
 
@@ -76,5 +73,4 @@ class Driver(ABC):
         return config_validator.config_is_valid(
             config_file=self._config_file,
             schema_file=self.schema_file,
-            log=self.log,
         )

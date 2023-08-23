@@ -36,15 +36,3 @@ def test_path_if_it_exists(tmp_path):
     # Test file that exists:
     path.touch()
     assert cli_helpers.path_if_it_exists(str(path)) == str(path)
-
-
-def test_setup_logging():
-    logger = cli_helpers.setup_logging(
-        log_file="/dev/null",
-        log_name="testing",
-        quiet=False,
-        verbose=False,
-        color=False,
-    )
-    assert logger.name == "testing"
-    assert logger.colored_log is False
