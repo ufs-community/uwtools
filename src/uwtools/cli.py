@@ -135,7 +135,7 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "config", "validate config files")
+    parser = add_subparser(subparsers, "validate", "validate config files")
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
     add_arg_verbose(optional)
