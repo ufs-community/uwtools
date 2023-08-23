@@ -3,9 +3,9 @@
 Tests for uwtools.utils.templater module.
 """
 
+import logging
 import os
 from unittest.mock import patch
-import logging
 
 import yaml
 from pytest import fixture, raises
@@ -81,7 +81,7 @@ def test_render_values_needed(caplog, config_file, input_template):
 def test__set_up_config_obj_env():
     expected = {"roses": "white", "violets": "blue"}
     with patch.dict(os.environ, expected):
-        actual = templater._set_up_config_obj(config_file=None, key_eq_val_pairs=[], log=Logger())
+        actual = templater._set_up_config_obj(config_file=None, key_eq_val_pairs=[])
     assert actual["roses"] == "white"
     assert actual["violets"] == "blue"
 
