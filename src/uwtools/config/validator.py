@@ -5,7 +5,7 @@ Support for validating a config using JSON Schema.
 import json
 import logging
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 
 import jsonschema
 
@@ -14,7 +14,9 @@ from uwtools.config.core import YAMLConfig
 # Public functions
 
 
-def validate_yaml(schema_file: Union[Path, str], config_file: Union[Path, str]) -> bool:
+def validate_yaml(
+    schema_file: Union[Path, str], config_file: Optional[Union[Path, str]] = None
+) -> bool:
     """
     Check whether the given config file conforms to the given JSON Schema spec and whether any
     filesystem paths it identifies do not exist.
@@ -24,7 +26,7 @@ def validate_yaml(schema_file: Union[Path, str], config_file: Union[Path, str]) 
     :return: Did the YAML file conform to the schema?
     """
     # Load the config and schema.
-    yaml_config = YAMLConfig(str(config_file))
+    yaml_config = YAMLConfig(config_file)
     yaml_config.dereference_all()
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
@@ -33,8 +35,8 @@ def validate_yaml(schema_file: Union[Path, str], config_file: Union[Path, str]) 
     log_method = logging.error if errors else logging.info
     log_method("%s schema-validation error%s found", len(errors), "" if len(errors) == 1 else "s")
     for error in errors:
-        logging.error(error)
-        logging.error("------")
+        for line in str(error).split("\n"):
+            logging.error(line)
     # It's pointless to evaluate an invalid config, so return now if that's the case.
     if errors:
         return False

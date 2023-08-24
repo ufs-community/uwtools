@@ -13,6 +13,7 @@ import re
 import sys
 from abc import ABC, abstractmethod
 from collections import OrderedDict, UserDict
+from pathlib import Path
 from types import SimpleNamespace as ns
 from typing import List, Optional, Union
 
@@ -24,6 +25,9 @@ from uwtools import exceptions
 from uwtools.config.j2template import J2Template
 from uwtools.exceptions import UWConfigError
 from uwtools.utils.cli import get_file_type
+from uwtools.utils.file import readable
+
+ConfigPath = Optional[Union[Path, str]]
 
 msgs = ns(
     unhashable="""
@@ -58,14 +62,14 @@ class Config(ABC, UserDict):
     several configuration-file formats.
     """
 
-    def __init__(self, config_path: str) -> None:
+    def __init__(self, config_path: ConfigPath = None) -> None:
         """
         Construct a Config object.
 
         :param config_path: Path to the config file to load.
         """
         super().__init__()
-        self._config_path = config_path
+        self._config_path = str(config_path) if config_path else None
         self.update(self._load(self._config_path))
 
     def __repr__(self) -> str:
@@ -77,11 +81,12 @@ class Config(ABC, UserDict):
     # Private methods
 
     @abstractmethod
-    def _load(self, config_path: str) -> dict:
+    def _load(self, config_path: ConfigPath) -> dict:
         """
         Reads and parses a config file.
 
-        Returns the result of loading and parsing the specified config file.
+        Returns the result of loading and parsing the specified config file, or stdin if no file is
+        given.
 
         :param config_path: Path to config file to load.
         """
@@ -95,7 +100,12 @@ class Config(ABC, UserDict):
         cfg = {}
         for config_path in config_paths:
             if not os.path.isabs(config_path):
-                config_path = os.path.join(os.path.dirname(self._config_path), config_path)
+                if self._config_path:
+                    config_path = os.path.join(os.path.dirname(self._config_path), config_path)
+                else:
+                    msg = f"Relative path {config_path} when reading from stdin"
+                    logging.error(msg)
+                    raise UWConfigError(msg)
             cfg.update(self._load(config_path=config_path))
         return cfg
 
@@ -392,7 +402,7 @@ class NMLConfig(Config):
 
     # Private methods
 
-    def _load(self, config_path: str) -> dict:
+    def _load(self, config_path: ConfigPath) -> dict:
         """
         Reads and parses a Fortran namelist file.
 
@@ -400,7 +410,7 @@ class NMLConfig(Config):
 
         :param config_path: Path to config file to load.
         """
-        with open(config_path, "r", encoding="utf-8") as f:
+        with readable(config_path) as f:
             cfg = f90nml.read(f).todict(complex_tuple=False)
         return self.from_ordereddict(cfg)
 
@@ -455,7 +465,7 @@ class INIConfig(Config):
 
     # Private methods
 
-    def _load(self, config_path: str) -> dict:
+    def _load(self, config_path: ConfigPath) -> dict:
         """
         Reads and parses an INI file.
 
@@ -469,15 +479,15 @@ class INIConfig(Config):
         cfg = configparser.ConfigParser(dict_type=OrderedDict)
         cfg.optionxform = str  # type: ignore
         sections = cfg._sections  # type: ignore # pylint: disable=protected-access
+        with readable(config_path) as f:
+            raw = f.read()
         try:
-            cfg.read(config_path)
+            cfg.read_string(raw)
+            d = dict(sections)
         except configparser.MissingSectionHeaderError:
-            with open(config_path, "r", encoding="utf-8") as file_name:
-                cfg.read_string("[top]\n" + file_name.read())
-                ret_cfg = dict(sections.get("top"))
-                ret_cfg = self.from_ordereddict(ret_cfg)
-                return ret_cfg
-        return self.from_ordereddict(dict(sections))
+            cfg.read_string("[top]\n" + raw)
+            d = dict(sections.get("top"))
+        return self.from_ordereddict(d)
 
     # Public methods
 
@@ -521,7 +531,7 @@ class YAMLConfig(Config):
 
     # Private methods
 
-    def _load(self, config_path: str) -> dict:
+    def _load(self, config_path: ConfigPath) -> dict:
         """
         Reads and parses a YAML file.
 
@@ -530,7 +540,7 @@ class YAMLConfig(Config):
         :param config_path: Path to config file to load.
         """
         loader = self._yaml_loader
-        with open(config_path, "r", encoding="utf-8") as f:
+        with readable(config_path) as f:
             try:
                 cfg = yaml.load(f, Loader=loader)
             except yaml.constructor.ConstructorError as e:

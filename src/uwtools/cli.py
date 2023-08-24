@@ -11,6 +11,7 @@ from typing import List
 
 import uwtools.config.atparse_to_jinja2
 import uwtools.config.validator
+from uwtools.logging import setup_logging
 
 # Main logic
 
@@ -36,6 +37,7 @@ def main() -> None:
     Main entry point.
     """
     args = check_args(parse_args(sys.argv[1:]))
+    setup_logging(quiet=args.quiet, verbose=args.verbose)
     modes = {
         "config": dispatch_config,
         "experiment": dispatch_experiment,
