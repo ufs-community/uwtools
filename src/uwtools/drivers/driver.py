@@ -8,7 +8,7 @@ from typing import Optional
 
 from uwtools.scheduler import BatchScript
 
-from uwtools import config_validator
+from uwtools import config, config_validator
 
 
 class Driver(ABC):
@@ -26,10 +26,13 @@ class Driver(ABC):
         Initialize the driver.
         """
 
-        self._dry_run = dry_run
         self._config_file = config_file
+        self._dry_run = dry_run
         self._batch_script = batch_script
         self._validate()
+
+        self.config_data = config.YAMLConfig(self._config_file)
+
 
     # Public methods
 

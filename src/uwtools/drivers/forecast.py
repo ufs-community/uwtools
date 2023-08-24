@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 from collections.abc import Mapping
+from functools import cached_property
 from importlib import resources
 from typing import Dict
 
@@ -23,6 +24,16 @@ class FV3Forecast(Driver):
     """
     A driver for the FV3 forecast model.
     """
+
+    # Properties
+    @cached_property
+    def job_scheduler(self) -> str:
+        """
+        Get the name of the job scheduler.
+
+        Currently hard-coded pending additional methods
+        """
+        return "slurm"
 
     # Public methods
 
@@ -137,7 +148,7 @@ class FV3Forecast(Driver):
             "account": platform["account"],
             "nodes": 1,
             "queue": "batch",
-            "scheduler": "slurm",
+            "scheduler": self.job_scheduler,
             "tasks_per_node": 1,
             "walltime": "00:01:00",
         }
@@ -147,9 +158,8 @@ class FV3Forecast(Driver):
         Runs FV3 either as a subprocess or by submitting a batch script.
         """
         # Read in the config file.
-        config_data = config.YAMLConfig(self._config_file)
-        forecast_config = config_data["forecast"]
-        platform_config = config_data["platform"]
+        forecast_config = self.config_data["forecast"]
+        platform_config = self.config_data["platform"]
 
         # Prepare directories.
         run_directory = forecast_config["RUN_DIRECTORY"]
@@ -183,8 +193,9 @@ class FV3Forecast(Driver):
             outpath = run_directory.join(self._batch_script)
             with open(outpath, "w+", encoding="utf-8") as file_:
                 print(batch_script, file=file_)
+                batch_command = JobScheduler.get_scheduler(platform_resources).submit_command
             subprocess.run(
-                outpath,
+                f"{batch_command} {outpath}",
                 stderr=subprocess.STDOUT,
                 check=False,
                 shell=True,

@@ -36,8 +36,9 @@ def test_batch_script(slurm_props):
 #SBATCH --qos=batch
 #SBATCH --time=00:01:00
 """.strip()
+    config_file = fixture_path("forecast.yaml")
     with patch.object(Driver, "_validate", return_value=True):
-        forecast = FV3Forecast(config_file="/not/used")
+        forecast = FV3Forecast(config_file=config_file)
     assert forecast.batch_script(platform_resources=slurm_props).content() == expected
 
 
@@ -46,8 +47,9 @@ def test_schema_file():
     Tests that the schema is properly defined with a file value.
     """
 
+    config_file = fixture_path("forecast.yaml")
     with patch.object(Driver, "_validate", return_value=True):
-        forecast = FV3Forecast(config_file="/not/used")
+        forecast = FV3Forecast(config_file=config_file)
 
     path = Path(forecast.schema_file)
     assert path.is_file()
@@ -139,7 +141,7 @@ def test_create_directory_structure_bad_existing_act():
 
 def test_create_model_config(tmp_path):
     basefile = str(tmp_path / "base.yaml")
-    infile = str(tmp_path / "in.yaml")
+    infile = fixture_path("forecast.yaml")
     outfile = str(tmp_path / "out.yaml")
     for path in infile, basefile:
         Path(path).touch()
@@ -205,8 +207,9 @@ def test_forecast_run_cmd():
     """
     Tests that the command to be used to run the forecast executable was built successfully.
     """
+    config_file = fixture_path("forecast.yaml")
     with patch.object(FV3Forecast, "_validate", return_value=True):
-        fcstobj = FV3Forecast(config_file="/not/used")
+        fcstobj = FV3Forecast(config_file=config_file)
         hera_expected = "srun --export=ALL test_exec.py"
         assert hera_expected == fcstobj.run_cmd(
             "--export=ALL", run_cmd="srun", exec_name="test_exec.py"
@@ -278,7 +281,6 @@ srun --export=None test_exec.py
     with patch.object(config, "YAMLConfig") as YAMLConfig:
         YAMLConfig.return_value = {
             "platform": {
-                "machine": "HAL9000",
                 "MPICMD": "srun",
                 "account": "user_account",
             },

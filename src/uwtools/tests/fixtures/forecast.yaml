@@ -1,5 +1,4 @@
 platform:
-  machine: gaea
   MPICMD: srun
   account: user_account
 forecast:

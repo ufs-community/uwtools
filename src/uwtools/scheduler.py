@@ -152,6 +152,13 @@ class JobScheduler(UserDict):
 
         return BatchScript(sorted(processed))
 
+    @property
+    def submit_command(self) -> str:
+        """
+        Returns the command for running a batch script.
+        """
+        return self.command
+
     @staticmethod
     def get_scheduler(props: Mapping) -> JobScheduler:
         """
@@ -184,6 +191,7 @@ class Slurm(JobScheduler):
     """
 
     prefix = "#SBATCH"
+    command = "sbatch"
 
     _map = {
         RequiredAttribs.ACCOUNT: "--account",
@@ -208,6 +216,7 @@ class PBS(JobScheduler):
 
     prefix = "#PBS"
     key_value_separator = " "
+    command = "qsub"
 
     _map = {
         RequiredAttribs.ACCOUNT: "-A",
@@ -293,6 +302,7 @@ class LSF(JobScheduler):
 
     prefix = "#BSUB"
     key_value_separator = " "
+    command = "bsub"
 
     _map = {
         RequiredAttribs.QUEUE: "-q",

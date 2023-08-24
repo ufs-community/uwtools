@@ -259,6 +259,11 @@ def test_slurm_5(slurm_props):
     assert JobScheduler.get_scheduler(slurm_props).batch_script.content() == expected
 
 
+def test_slurm_6(slurm_props):
+    expected = "sbatch"
+    assert JobScheduler.get_scheduler(slurm_props).submit_command == expected
+
+
 # Generic tests using PBS support.
 
 

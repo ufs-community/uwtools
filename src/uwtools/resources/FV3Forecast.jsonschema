@@ -7,18 +7,6 @@
             "description": "Expected resources for the given platform",
             "type": "object",
             "properties": {
-                "MACHINE": {
-                    "type": "string"
-                    "enum": [
-                        "cheyenne",
-                        "gaea",
-                        "hera",
-                        "jet",
-                        "noaacloud",
-                        "orion",
-                        "wcoss2"
-                    ]
-                },
                 "MPICMD": {
                     "type": "string",
                     "enum": [
