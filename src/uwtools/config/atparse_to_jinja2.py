@@ -6,7 +6,7 @@ import re
 import sys
 from typing import IO, Optional
 
-from uwtools.utils.file_helpers import readable
+from uwtools.utils.file import readable
 
 
 def convert(

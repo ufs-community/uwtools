@@ -22,7 +22,7 @@ import yaml
 from uwtools import exceptions
 from uwtools.config.j2template import J2Template
 from uwtools.exceptions import UWConfigError
-from uwtools.utils import cli_helpers
+from uwtools.utils.cli import get_file_type
 
 msgs = ns(
     unhashable="""
@@ -676,13 +676,13 @@ def create_config_obj(
     """
     Main section for processing config file.
     """
-    infile_type = input_file_type or cli_helpers.get_file_type(input_base_file)
+    infile_type = input_file_type or get_file_type(input_base_file)
 
     config_class = globals()[f"{infile_type}Config"]
     config_obj = config_class(input_base_file)
 
     if config_file:
-        config_file_type = config_file_type or cli_helpers.get_file_type(config_file)
+        config_file_type = config_file_type or get_file_type(config_file)
 
         user_config_obj = globals()[f"{config_file_type}Config"](config_file)
 
@@ -729,7 +729,7 @@ def create_config_obj(
         return
 
     if outfile:
-        outfile_type = output_file_type or cli_helpers.get_file_type(outfile)
+        outfile_type = output_file_type or get_file_type(outfile)
         if outfile_type == infile_type:
             config_obj.dump_file(outfile)
         else:

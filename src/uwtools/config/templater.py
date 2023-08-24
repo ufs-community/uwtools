@@ -7,7 +7,7 @@ from typing import List, Optional
 
 import uwtools.config.core
 from uwtools.config.j2template import J2Template
-from uwtools.utils import cli_helpers
+from uwtools.utils.cli import dict_from_key_eq_val_strings, get_file_type
 
 
 def render(
@@ -78,7 +78,7 @@ def _set_up_config_obj(config_file: Optional[str], key_eq_val_pairs: List[str]) 
     :returns: A config object.
     """
     if config_file:
-        config_type = cli_helpers.get_file_type(config_file)
+        config_type = get_file_type(config_file)
         cfg_class = getattr(uwtools.config.core, f"{config_type}Config")
         cfg = cfg_class(config_file)
         logging.debug("Read initial config from %s", config_file)
@@ -86,7 +86,7 @@ def _set_up_config_obj(config_file: Optional[str], key_eq_val_pairs: List[str]) 
         cfg = dict(os.environ)  # Do not modify os.environ: Make a copy.
         logging.debug("Initial config set from environment")
     if key_eq_val_pairs:
-        supplemental = cli_helpers.dict_from_key_eq_val_strings(key_eq_val_pairs)
+        supplemental = dict_from_key_eq_val_strings(key_eq_val_pairs)
         cfg.update(supplemental)
         logging.debug("Supplemented config with values: %s", " ".join(key_eq_val_pairs))
     return cfg

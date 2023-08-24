@@ -11,7 +11,7 @@ from typing import Dict
 
 from uwtools.config.core import F90Config, FieldTableConfig, create_config_obj
 from uwtools.drivers.driver import Driver
-from uwtools.utils import file_helpers
+from uwtools.utils.file import handle_existing
 
 
 class FV3Forecast(Driver):
@@ -54,7 +54,7 @@ class FV3Forecast(Driver):
 
         # Delete or rename directory if it exists.
 
-        file_helpers.handle_existing(run_directory, exist_act)
+        handle_existing(run_directory, exist_act)
 
         # Create new run directory with two required subdirectories.
 

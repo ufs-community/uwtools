@@ -22,7 +22,7 @@ from uwtools import exceptions
 from uwtools.config import core
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import compare_files, fixture_path, logged
-from uwtools.utils import cli_helpers
+from uwtools.utils.cli import path_if_it_exists
 
 # Helper functions
 
@@ -416,10 +416,10 @@ def test_path_if_it_exists(tmp_path):
 
     badfile = tmp_path / "no-such-file"
     with raises(FileNotFoundError):
-        cli_helpers.path_if_it_exists(badfile)
+        path_if_it_exists(badfile)
     goodfile = tmp_path / "exists"
     goodfile.touch()
-    assert cli_helpers.path_if_it_exists(goodfile)
+    assert path_if_it_exists(goodfile)
 
 
 def test_set_config_dry_run(caplog):
