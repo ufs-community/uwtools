@@ -35,11 +35,12 @@ def main() -> None:
     Main entry point.
     """
     args = check_args(parse_args(sys.argv[1:]))
-    {
+    modes = {
         "config": dispatch_config,
         "experiment": dispatch_experiment,
-        "forecast": dispatch_forecast
-    }[args.mode](args)
+        "forecast": dispatch_forecast,
+    }
+    modes[args.mode](args)
 
 
 def parse_args(raw_args: List[str]) -> Namespace:
