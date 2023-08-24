@@ -10,6 +10,7 @@ import logging
 import os
 import re
 from collections import OrderedDict
+from io import StringIO
 from pathlib import Path
 from typing import Any, List
 from unittest.mock import patch
@@ -818,6 +819,21 @@ def test_YAMLConfig__load_unexpected_error(tmp_path):
         with raises(UWConfigError) as e:
             core.YAMLConfig(config_path=cfgfile)
         assert msg in str(e.value)
+
+
+def test_YAMLConfig__load_paths_failure_stdin_plus_relpath(caplog):
+    # Instantiate a YAMLConfig with no input file, triggering a read from stdin. Patch stdin to
+    # provide YAML with an !INCLUDE directive specifying a relative path. Since a relative path
+    # is meaningless relative to stdin, observe that an appropriate error is logged and exception
+    # raised.
+
+    relpath = "../bar/baz.yaml"
+    with patch.object(core.sys, "stdin", new=StringIO(f"foo: !INCLUDE [{relpath}]")):
+        with raises(UWConfigError) as e:
+            core.YAMLConfig()
+    msg = f"Reading from stdin, a relative path was encountered: {relpath}"
+    assert msg in str(e.value)
+    assert logged(caplog, msg)
 
 
 def test_print_config_section_ini(capsys):

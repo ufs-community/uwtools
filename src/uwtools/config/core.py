@@ -103,7 +103,7 @@ class Config(ABC, UserDict):
                 if self._config_path:
                     config_path = os.path.join(os.path.dirname(self._config_path), config_path)
                 else:
-                    msg = f"Relative path {config_path} when reading from stdin"
+                    msg = f"Reading from stdin, a relative path was encountered: {config_path}"
                     logging.error(msg)
                     raise UWConfigError(msg)
             cfg.update(self._load(config_path=config_path))
