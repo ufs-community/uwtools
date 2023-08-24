@@ -9,6 +9,8 @@ from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
 from typing import List
 
+import uwtools.config.atparse_to_jinja2
+
 # Main logic
 
 
@@ -62,7 +64,10 @@ def go_config_translate(args: Namespace) -> None:
 
     :param args: Parsed command-line args.
     """
-    raise NotImplementedError
+    if args.input_format == "atparse" and args.output_format == "jinja2":
+        uwtools.config.atparse_to_jinja2.convert(
+            input_file=args.input_file, output_file=args.output_file, dry_run=args.dry_run
+        )
 
 
 def go_config_validate(args: Namespace) -> None:

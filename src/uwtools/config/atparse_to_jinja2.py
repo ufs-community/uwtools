@@ -4,32 +4,49 @@ Utilities for rendering Jinja2 templates.
 
 import re
 import sys
-from typing import IO, Optional
+from contextlib import contextmanager
+from typing import IO, Generator, Optional, TextIO
 
 
-def convert(input_template: str, outfile: Optional[str] = None, dry_run: bool = False) -> None:
+@contextmanager
+def readable(filename: Optional[str] = None) -> Generator[TextIO, None, None]:
     """
-    Renders a Jinja2 template using user-supplied configuration options via YAML or environment
-    variables.
+    ???
+    """
+    if filename:
+        with open(filename, "r", encoding="utf-8") as f:
+            yield f
+    else:
+        yield sys.stdin
 
-    :param input_template: Path to the template containing atparse syntax.
-    :param outfile: The file to write the converted template to.
+
+def convert(
+    input_file: Optional[str] = None, output_file: Optional[str] = None, dry_run: bool = False
+) -> None:
+    """
+    Replaces atparse @[] tokens with Jinja2 {{}} equivalents.
+
+    If no input file is given, stdin is used. If no output file is given, stdout is used. In dry-run
+    mode, output is written to stderr.
+
+    :param input_file: Path to the template containing atparse syntax.
+    :param output_file: Path to the file to write the converted template to.
     :param dry_run: Run in dry-run mode?
     :raises: RuntimeError if neither an output file or dry-run are specified.
     """
 
     def write(f_out: IO) -> None:
-        with open(input_template, "r", encoding="utf-8") as f_in:
+        with readable(input_file) as f_in:
             for line in f_in:
                 print(_replace(line.strip()), file=f_out)
 
     if dry_run:
-        write(sys.stdout)
-    elif outfile:
-        with open(outfile, "w", encoding="utf-8") as out_f:
+        write(sys.stderr)
+    elif output_file:
+        with open(output_file, "w", encoding="utf-8") as out_f:
             write(out_f)
     else:
-        raise RuntimeError("Provide an output path or specify dry-run mode.")
+        write(sys.stdout)
 
 
 def _replace(atline: str) -> str:
