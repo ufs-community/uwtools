@@ -14,20 +14,20 @@ import uwtools.config.atparse_to_jinja2
 # Main logic
 
 
-def check_args(parsed_args: Namespace) -> Namespace:
+def check_args(args: Namespace) -> Namespace:
     """
     Validate basic argument correctness.
 
-    :param parsed_args: The parsed command-line arguments to check.
+    :param args: The parsed command-line arguments to check.
     :return: The checked command-line arguments.
     :raises: SystemExit if any checks failed.
     """
     try:
-        if not parsed_args.dry_run and not parsed_args.outfile:
-            abort("Specify either --dry-run or --outfile")
+        if args.quiet and args.verbose:
+            abort("Specify at most one of --quiet, --verbose")
     except AttributeError:
         pass
-    return parsed_args
+    return args
 
 
 def main() -> None:
@@ -35,16 +35,18 @@ def main() -> None:
     Main entry point.
     """
     args = check_args(parse_args(sys.argv[1:]))
-    {"config": dispatch_config, "experiment": dispatch_experiment, "forecast": dispatch_forecast}[
-        args.mode
-    ](args)
+    {
+        "config": dispatch_config,
+        "experiment": dispatch_experiment,
+        "forecast": dispatch_forecast
+    }[args.mode](args)
 
 
-def parse_args(cli_args: List[str]) -> Namespace:
+def parse_args(raw_args: List[str]) -> Namespace:
     """
     Parse command-line arguments.
 
-    :param cli_args: The raw command-line arguments to parse.
+    :param raw_args: The raw command-line arguments to parse.
     :return: Parsed command-line arguments.
     """
 
@@ -53,7 +55,7 @@ def parse_args(cli_args: List[str]) -> Namespace:
     add_subparser_config(subparsers)
     add_subparser_experiment(subparsers)
     add_subparser_forecast(subparsers)
-    return parser.parse_args(cli_args)
+    return parser.parse_args(raw_args)
 
 
 # Support
