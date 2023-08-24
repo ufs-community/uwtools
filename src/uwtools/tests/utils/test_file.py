@@ -2,6 +2,7 @@
 """
 Tests for uwtools.utils.file module.
 """
+
 from datetime import datetime as dt
 from unittest.mock import patch
 

@@ -2,6 +2,7 @@
 """
 Tests for uwtools.utils.atparse_to_jinja2 module.
 """
+
 from io import StringIO
 from unittest.mock import patch
 

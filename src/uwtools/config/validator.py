@@ -1,6 +1,7 @@
 """
 Support for validating a config using JSON Schema.
 """
+
 import json
 import logging
 from pathlib import Path

@@ -1,6 +1,7 @@
 """
 The abstract Config class and its format-specific subclasses.
 """
+
 from __future__ import annotations
 
 import configparser

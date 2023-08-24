@@ -2,6 +2,7 @@
 """
 Tests for uwtools.rocoto module.
 """
+
 from importlib import resources
 
 import yaml

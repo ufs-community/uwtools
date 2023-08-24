@@ -1,4 +1,7 @@
 # pylint: disable=missing-function-docstring
+"""
+Tests for uwtools.files FileManager and subclasses.
+"""
 
 import shutil
 from unittest.mock import patch

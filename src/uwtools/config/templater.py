@@ -1,6 +1,7 @@
 """
 Support for rendering Jinja2 templates.
 """
+
 import logging
 import os
 from typing import List, Optional
