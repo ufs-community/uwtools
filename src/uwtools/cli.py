@@ -35,126 +35,9 @@ def main() -> None:
     Main entry point.
     """
     args = check_args(parse_args(sys.argv[1:]))
-    {"config": go_config, "experiment": go_experiment, "forecast": go_forecast}[args.mode](args)
-
-
-def go_config(args: Namespace) -> None:
-    """
-    Dispatch logic for config mode.
-
-    :param args: Parsed command-line args.
-    """
-    {"render": go_config_render, "translate": go_config_translate, "validate": go_config_validate}[
-        args.submode
+    {"config": dispatch_config, "experiment": dispatch_experiment, "forecast": dispatch_forecast}[
+        args.mode
     ](args)
-
-
-def go_config_render(args: Namespace) -> None:
-    """
-    Dispatch logic for config render submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
-
-
-def go_config_translate(args: Namespace) -> None:
-    """
-    Dispatch logic for config translate submode.
-
-    :param args: Parsed command-line args.
-    """
-    if args.input_format == "atparse" and args.output_format == "jinja2":
-        uwtools.config.atparse_to_jinja2.convert(
-            input_file=args.input_file, output_file=args.output_file, dry_run=args.dry_run
-        )
-
-
-def go_config_validate(args: Namespace) -> None:
-    """
-    Dispatch logic for config validate submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
-
-
-def go_experiment(args: Namespace) -> None:
-    """
-    Dispatch logic for experiment mode.
-
-    :param args: Parsed command-line args.
-    """
-    {
-        "configure": go_experiment_configure,
-        "run": go_experiment_run,
-        "validate": go_experiment_validate,
-    }[args.submode](args)
-
-
-def go_experiment_configure(args: Namespace) -> None:
-    """
-    Dispatch logic for experiment configure submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
-
-
-def go_experiment_run(args: Namespace) -> None:
-    """
-    Dispatch logic for experiment run submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
-
-
-def go_experiment_validate(args: Namespace) -> None:
-    """
-    Dispatch logic for experiment validate submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
-
-
-def go_forecast(args: Namespace) -> None:
-    """
-    Dispatch logic for forecast mode.
-
-    :param args: Parsed command-line args.
-    """
-    {"configure": go_forecast_configure, "run": go_forecast_run, "validate": go_forecast_validate}[
-        args.submode
-    ](args)
-
-
-def go_forecast_configure(args: Namespace) -> None:
-    """
-    Dispatch logic for forecast configure submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
-
-
-def go_forecast_run(args: Namespace) -> None:
-    """
-    Dispatch logic for forecast run submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
-
-
-def go_forecast_validate(args: Namespace) -> None:
-    """
-    Dispatch logic for forecast validate submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
 
 
 def parse_args(cli_args: List[str]) -> Namespace:
@@ -365,6 +248,132 @@ def add_subparser_forecast_validate(subparsers: Subparsers) -> None:
     optional = parser.add_argument_group("optional arguments")
     add_arg_quiet(optional)
     add_arg_verbose(optional)
+
+
+# Dispatch functions.
+
+
+def dispatch_config(args: Namespace) -> None:
+    """
+    Dispatch logic for config mode.
+
+    :param args: Parsed command-line args.
+    """
+    {
+        "render": dispatch_config_render,
+        "translate": dispatch_config_translate,
+        "validate": dispatch_config_validate,
+    }[args.submode](args)
+
+
+def dispatch_config_render(args: Namespace) -> None:
+    """
+    Dispatch logic for config render submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def dispatch_config_translate(args: Namespace) -> None:
+    """
+    Dispatch logic for config translate submode.
+
+    :param args: Parsed command-line args.
+    """
+    if args.input_format == "atparse" and args.output_format == "jinja2":
+        uwtools.config.atparse_to_jinja2.convert(
+            input_file=args.input_file, output_file=args.output_file, dry_run=args.dry_run
+        )
+
+
+def dispatch_config_validate(args: Namespace) -> None:
+    """
+    Dispatch logic for config validate submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def dispatch_experiment(args: Namespace) -> None:
+    """
+    Dispatch logic for experiment mode.
+
+    :param args: Parsed command-line args.
+    """
+    {
+        "configure": dispatch_experiment_configure,
+        "run": dispatch_experiment_run,
+        "validate": dispatch_experiment_validate,
+    }[args.submode](args)
+
+
+def dispatch_experiment_configure(args: Namespace) -> None:
+    """
+    Dispatch logic for experiment configure submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def dispatch_experiment_run(args: Namespace) -> None:
+    """
+    Dispatch logic for experiment run submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def dispatch_experiment_validate(args: Namespace) -> None:
+    """
+    Dispatch logic for experiment validate submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def dispatch_forecast(args: Namespace) -> None:
+    """
+    Dispatch logic for forecast mode.
+
+    :param args: Parsed command-line args.
+    """
+    {
+        "configure": dispatch_forecast_configure,
+        "run": dispatch_forecast_run,
+        "validate": dispatch_forecast_validate,
+    }[args.submode](args)
+
+
+def dispatch_forecast_configure(args: Namespace) -> None:
+    """
+    Dispatch logic for forecast configure submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def dispatch_forecast_run(args: Namespace) -> None:
+    """
+    Dispatch logic for forecast run submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def dispatch_forecast_validate(args: Namespace) -> None:
+    """
+    Dispatch logic for forecast validate submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
 
 
 # Arguments
