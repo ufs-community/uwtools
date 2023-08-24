@@ -44,7 +44,7 @@ def handle_existing(directory: str, action: str) -> None:
 
 
 @contextmanager
-def readable(filepath: Optional[Union[str, Path]] = None) -> Generator[TextIO, None, None]:
+def readable(filepath: Optional[Union[Path, str]] = None) -> Generator[TextIO, None, None]:
     """
     If a path to a file is specified, open it and return a readable handle; if not, return readable
     stdin.

@@ -78,7 +78,7 @@ def test_validate_yaml_fail_bad_dir_top(caplog, config, config_file, schema, sch
     config["dir"] = d
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert not validator.validate_yaml(config_file, schema_file)
+    assert not validator.validate_yaml(schema_file=schema_file, config_file=config_file)
     assert len([x for x in caplog.records if f"Path does not exist: {d}" in x.message]) == 1
 
 
@@ -90,7 +90,7 @@ def test_validate_yaml_fail_bad_dir_nested(
     config["sub"]["dir"] = d
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert not validator.validate_yaml(config_file, schema_file)
+    assert not validator.validate_yaml(schema_file=schema_file, config_file=config_file)
     assert len([x for x in caplog.records if f"Path does not exist: {d}" in x.message]) == 1
 
 
@@ -99,7 +99,7 @@ def test_validate_yaml_fail_bad_enum_val(caplog, config, config_file, schema, sc
     config["color"] = "yellow"
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert not validator.validate_yaml(config_file, schema_file)
+    assert not validator.validate_yaml(schema_file=schema_file, config_file=config_file)
     assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
 
@@ -109,7 +109,7 @@ def test_validate_yaml_fail_bad_number_val(caplog, config, config_file, schema, 
     config["number"] = "string"
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert not validator.validate_yaml(config_file, schema_file)
+    assert not validator.validate_yaml(schema_file=schema_file, config_file=config_file)
     assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
 
@@ -118,7 +118,7 @@ def test_validate_yaml_pass(config, config_file, schema, schema_file):
     # Test a fully valid config file.
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert validator.validate_yaml(config_file, schema_file)
+    assert validator.validate_yaml(schema_file=schema_file, config_file=config_file)
 
 
 def test__bad_paths_top(config, schema, tmp_path):
