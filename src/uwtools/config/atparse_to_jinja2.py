@@ -9,12 +9,14 @@ from typing import IO, Generator, Optional, TextIO
 
 
 @contextmanager
-def readable(filename: Optional[str] = None) -> Generator[TextIO, None, None]:
+def readable(filepath: Optional[str] = None) -> Generator[TextIO, None, None]:
     """
-    ???
+    If a path to a file is specified, open it and return a readable handle; if not, return stdin.
+
+    :param filepath: The path to a file to read.
     """
-    if filename:
-        with open(filename, "r", encoding="utf-8") as f:
+    if filepath:
+        with open(filepath, "r", encoding="utf-8") as f:
             yield f
     else:
         yield sys.stdin
