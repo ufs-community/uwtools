@@ -21,7 +21,7 @@ def test_get_file_type():
         "sh": "INI",
         "ini": "INI",
         "cfg": "INI",
-        "nml": "F90",
+        "nml": "NML",
     }.items():
         assert cli.get_file_type(f"a.{ext}") == file_type
 

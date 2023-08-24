@@ -29,7 +29,7 @@ from uwtools.utils.cli import path_if_it_exists
 
 def help_cfgclass(ext):
     return getattr(
-        core, "%sConfig" % {".nml": "F90", ".ini": "INI", ".sh": "INI", ".yaml": "YAML"}[ext]
+        core, "%sConfig" % {".nml": "NML", ".ini": "INI", ".sh": "INI", ".yaml": "YAML"}[ext]
     )
 
 
@@ -39,7 +39,7 @@ def help_set_config_fmt2fmt(infn, cfgfn, tmpdir):
     ext = Path(infile).suffix
     outfile = str(tmpdir / f"outfile{ext}")
     core.create_config_obj(input_base_file=infile, config_file=cfgfile, outfile=outfile)
-    cfgclass = getattr(core, "%sConfig" % {".nml": "F90", ".ini": "INI", ".yaml": "YAML"}[ext])
+    cfgclass = getattr(core, "%sConfig" % {".nml": "NML", ".ini": "INI", ".yaml": "YAML"}[ext])
     cfgobj = cfgclass(infile)
     cfgobj.update_values(cfgclass(cfgfile))
     reference = tmpdir / "expected"
@@ -75,7 +75,7 @@ def test_bad_conversion_yaml_to_nml(tmp_path):
         core.create_config_obj(
             input_base_file=fixture_path("srw_example.yaml"),
             outfile=str(tmp_path / "test_outfile_conversion.yaml"),
-            output_file_type="F90",
+            output_file_type="NML",
         )
 
 
@@ -92,13 +92,13 @@ def salad_base():
     }
 
 
-@pytest.mark.parametrize("fmt", ["F90", "INI", "YAML"])
+@pytest.mark.parametrize("fmt", ["NML", "INI", "YAML"])
 def test_compare_config(caplog, fmt, salad_base):
     """
     Compare two config objects.
     """
     logging.getLogger().setLevel(logging.INFO)
-    ext = ".%s" % ("nml" if fmt == "F90" else fmt).lower()
+    ext = ".%s" % ("nml" if fmt == "NML" else fmt).lower()
     cfgobj = help_cfgclass(ext)(fixture_path(f"simple{ext}"))
     if fmt == "INI":
         salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for INI
@@ -176,10 +176,10 @@ def test_config_file_conversion(tmp_path):
     cfgfile = fixture_path("simple2.ini")
     outfile = str(tmp_path / "test_config_conversion.nml")
     core.create_config_obj(
-        input_base_file=infile, config_file=cfgfile, outfile=outfile, config_file_type="F90"
+        input_base_file=infile, config_file=cfgfile, outfile=outfile, config_file_type="NML"
     )
-    expected = core.F90Config(infile)
-    config_obj = core.F90Config(cfgfile)
+    expected = core.NMLConfig(infile)
+    config_obj = core.NMLConfig(cfgfile)
     expected.update_values(config_obj)
     expected_file = tmp_path / "expected.nml"
     expected.dump_file(expected_file)
@@ -296,13 +296,13 @@ def test_dictionary_depth(depth, fn):
     assert cfgobj.dictionary_depth(cfgobj.data) == depth
 
 
-def test_f90nml_config_simple(salad_base, tmp_path):
+def test_nml_config_simple(salad_base, tmp_path):
     """
     Test that namelist load, update, and dump work with a basic namelist file.
     """
     infile = fixture_path("simple.nml")
     outfile = tmp_path / "outfile.nml"
-    cfgobj = core.F90Config(infile)
+    cfgobj = core.NMLConfig(infile)
     expected = salad_base
     expected["salad"]["how_many"] = 12  # must be in for nml
     assert cfgobj == expected
@@ -362,8 +362,8 @@ def test_output_file_conversion(tmp_path):
     """
     infile = fixture_path("simple.nml")
     outfile = str(tmp_path / "test_ouput.cfg")
-    core.create_config_obj(input_base_file=infile, outfile=outfile, output_file_type="F90")
-    expected = core.F90Config(infile)
+    core.create_config_obj(input_base_file=infile, outfile=outfile, output_file_type="NML")
+    expected = core.NMLConfig(infile)
     expected_file = tmp_path / "expected.nml"
     expected.dump_file(expected_file)
     assert compare_files(expected_file, outfile)
@@ -375,7 +375,7 @@ def test_parse_include():
     """
     Test that non-YAML handles !INCLUDE Tags properly.
     """
-    cfgobj = core.F90Config(fixture_path("include_files.nml"))
+    cfgobj = core.NMLConfig(fixture_path("include_files.nml"))
     assert cfgobj["config"]["fruit"] == "papaya"
     assert cfgobj["config"]["how_many"] == 17
     assert cfgobj["config"]["meat"] == "beef"
@@ -398,7 +398,7 @@ def test_parse_include_mult_sect():
     Test that non-YAML handles !INCLUDE tags with files that have multiple sections in separate
     file.
     """
-    cfgobj = core.F90Config(fixture_path("include_files_with_sect.nml"))
+    cfgobj = core.NMLConfig(fixture_path("include_files_with_sect.nml"))
     assert cfgobj["config"]["fruit"] == "papaya"
     assert cfgobj["config"]["how_many"] == 17
     assert cfgobj["config"]["meat"] == "beef"
@@ -536,13 +536,13 @@ def test_show_format():
         help_.assert_called_once()
 
 
-@pytest.mark.parametrize("fmt1", ["F90", "INI", "YAML"])
-@pytest.mark.parametrize("fmt2", ["F90", "INI", "YAML"])
+@pytest.mark.parametrize("fmt1", ["NML", "INI", "YAML"])
+@pytest.mark.parametrize("fmt2", ["NML", "INI", "YAML"])
 def test_transform_config(fmt1, fmt2, tmp_path):
     """
     Test that transforms config objects to objects of other config subclasses.
     """
-    ext1, ext2 = [".%s" % ("NML" if x == "F90" else x).lower() for x in (fmt1, fmt2)]
+    ext1, ext2 = [".%s" % ("NML" if x == "NML" else x).lower() for x in (fmt1, fmt2)]
     outfile = tmp_path / f"test_{fmt1.lower()}to{fmt2.lower()}_dump{ext2}"
     reference = fixture_path(f"simple{ext2}")
     cfgin = help_cfgclass(ext1)(fixture_path(f"simple{ext1}"))
@@ -586,7 +586,7 @@ Keys that are set to empty:
     assert actual == expected
 
 
-def test_values_needed_f90nml(caplog):
+def test_values_needed_nml(caplog):
     """
     Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
     and keys set to empty.
@@ -740,29 +740,29 @@ def test_yaml_constructor_error_unregistered_constructor(tmp_path):
 
 
 @fixture
-def f90_cfgobj(tmp_path):
-    # Use F90Config to exercise methods in Config abstract base class.
+def nml_cfgobj(tmp_path):
+    # Use NMLConfig to exercise methods in Config abstract base class.
     path = tmp_path / "cfg.nml"
     with open(path, "w", encoding="utf-8") as f:
         f.write("&nl n = 88 /")
-    return core.F90Config(config_path=path)
+    return core.NMLConfig(config_path=path)
 
 
-def test_Config___repr__(capsys, f90_cfgobj):
-    print(f90_cfgobj)
+def test_Config___repr__(capsys, nml_cfgobj):
+    print(nml_cfgobj)
     assert yaml.safe_load(capsys.readouterr().out)["nl"]["n"] == 88
 
 
-def test_Config_dereference_unexpected_error(f90_cfgobj):
+def test_Config_dereference_unexpected_error(nml_cfgobj):
     exctype = FloatingPointError
     with patch.object(core.J2Template, "render_template", side_effect=exctype):
         with raises(exctype):
-            f90_cfgobj.dereference(ref_dict={"n": "{{ n }}"})
+            nml_cfgobj.dereference(ref_dict={"n": "{{ n }}"})
 
 
-def test_Config_from_ordereddict(f90_cfgobj):
+def test_Config_from_ordereddict(nml_cfgobj):
     d: dict[Any, Any] = OrderedDict([("z", 26), ("a", OrderedDict([("alpha", 1)]))])
-    d = f90_cfgobj.from_ordereddict(d)
+    d = nml_cfgobj.from_ordereddict(d)
     # Assert that every OrderedDict is now just a dict. The second assert is needed because
     # isinstance(OrderedDict(), dict) is True.
     for x in d, d["a"]:
@@ -770,12 +770,12 @@ def test_Config_from_ordereddict(f90_cfgobj):
         assert not isinstance(x, OrderedDict)
 
 
-def test_Config_iterate_values(f90_cfgobj):
+def test_Config_iterate_values(nml_cfgobj):
     empty_var: List[str] = []
     jinja2_var: List[str] = []
     set_var: List[str] = []
     d = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
-    f90_cfgobj.iterate_values(
+    nml_cfgobj.iterate_values(
         config_dict=d, empty_var=empty_var, jinja2_var=jinja2_var, set_var=set_var, parent="p"
     )
     assert empty_var == ["    p1", "    p2"]
@@ -783,14 +783,14 @@ def test_Config_iterate_values(f90_cfgobj):
     assert set_var == ["    p4", "    p4.a", "    p5", "    pb", "    p6"]
 
 
-def test_Config_str_to_type(f90_cfgobj):
+def test_Config_str_to_type(nml_cfgobj):
     for x in ["true", "yes", "yeah"]:
-        assert f90_cfgobj.str_to_type(x) is True
+        assert nml_cfgobj.str_to_type(x) is True
     for x in ["false", "no", "nope"]:
-        assert f90_cfgobj.str_to_type(x) is False
-    assert f90_cfgobj.str_to_type("88") == 88
-    assert f90_cfgobj.str_to_type("3.14") == 3.14
-    assert f90_cfgobj.str_to_type("NA") == "NA"  # no conversion
+        assert nml_cfgobj.str_to_type(x) is False
+    assert nml_cfgobj.str_to_type("88") == 88
+    assert nml_cfgobj.str_to_type("3.14") == 3.14
+    assert nml_cfgobj.str_to_type("NA") == "NA"  # no conversion
 
 
 def test_YAMLConfig__load_unexpected_error(tmp_path):

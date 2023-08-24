@@ -380,7 +380,7 @@ class Config(ABC, UserDict):
                 dstcfg[key] = new_val
 
 
-class F90Config(Config):
+class NMLConfig(Config):
     """
     Concrete class to handle Fortran namelist files.
     """
@@ -411,7 +411,7 @@ class F90Config(Config):
 
         :param path: Path to dump config to.
         """
-        F90Config.dump_file_from_dict(path, self.data)
+        NMLConfig.dump_file_from_dict(path, self.data)
 
     @staticmethod
     def dump_file_from_dict(path: str, cfg: dict, opts: Optional[ns] = None) -> None:
@@ -740,7 +740,7 @@ def create_config_obj(
                 # Check for incompatible conversion objects:
                 input_depth = config_obj.dictionary_depth(config_obj.data)
                 if (outfile_type == "INI" and input_depth > 2) or (
-                    outfile_type == "F90" and input_depth != 2
+                    outfile_type == "NML" and input_depth != 2
                 ):
                     err_msg = "Set config failure: incompatible file types"
                     logging.error(err_msg)

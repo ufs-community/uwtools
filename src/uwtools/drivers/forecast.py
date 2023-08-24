@@ -9,7 +9,7 @@ import sys
 from importlib import resources
 from typing import Dict
 
-from uwtools.config.core import F90Config, FieldTableConfig, create_config_obj
+from uwtools.config.core import FieldTableConfig, NMLConfig, create_config_obj
 from uwtools.drivers.driver import Driver
 from uwtools.utils.file import handle_existing
 
@@ -101,7 +101,7 @@ class FV3Forecast(Driver):
         """
 
         if base_file:
-            config_obj = F90Config(base_file)
+            config_obj = NMLConfig(base_file)
             config_obj.update_values(update_obj)
             config_obj.dereference_all()
             config_obj.dump_file(outnml_file)

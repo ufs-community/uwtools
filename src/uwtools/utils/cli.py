@@ -33,7 +33,7 @@ def get_file_type(path: str) -> str:
     if suffix in [".bash", ".sh", ".ini", ".cfg"]:
         return "INI"
     if suffix in [".nml"]:
-        return "F90"
+        return "NML"
     msg = f"Bad file suffix -- {suffix}. Cannot determine file type!"
     logging.critical(msg)
     raise ValueError(msg)

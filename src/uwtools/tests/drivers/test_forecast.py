@@ -10,7 +10,7 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture, raises
 
-from uwtools.config.core import F90Config, YAMLConfig
+from uwtools.config.core import NMLConfig, YAMLConfig
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
@@ -131,7 +131,7 @@ def test__create_model_config(tmp_path):
 
 @fixture
 def create_namelist_assets(tmp_path):
-    return F90Config(fixture_path("simple.nml")), tmp_path / "create_out.nml"
+    return NMLConfig(fixture_path("simple.nml")), tmp_path / "create_out.nml"
 
 
 def test_create_namelist_with_base_file(create_namelist_assets):
