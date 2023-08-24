@@ -10,6 +10,7 @@ from argparse import _SubParsersAction as Subparsers
 from typing import List
 
 import uwtools.config.atparse_to_jinja2
+import uwtools.config.validator
 
 # Main logic
 
@@ -40,7 +41,8 @@ def main() -> None:
         "experiment": dispatch_experiment,
         "forecast": dispatch_forecast,
     }
-    modes[args.mode](args)
+    success = modes[args.mode](args)
+    sys.exit(0 if success else 1)
 
 
 def parse_args(raw_args: List[str]) -> Namespace:
@@ -144,7 +146,11 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = add_subparser(subparsers, "validate", "validate config files")
+    required = parser.add_argument_group("required arguments")
+    add_arg_input_format(required, choices=["yaml"])
+    add_arg_schema_file(required)
     optional = parser.add_argument_group("optional arguments")
+    add_arg_input_file(optional)
     add_arg_quiet(optional)
     add_arg_verbose(optional)
 
@@ -256,20 +262,20 @@ def add_subparser_forecast_validate(subparsers: Subparsers) -> None:
 # Dispatch functions.
 
 
-def dispatch_config(args: Namespace) -> None:
+def dispatch_config(args: Namespace) -> bool:
     """
     Dispatch logic for config mode.
 
     :param args: Parsed command-line args.
     """
-    {
+    return {
         "render": dispatch_config_render,
         "translate": dispatch_config_translate,
         "validate": dispatch_config_validate,
     }[args.submode](args)
 
 
-def dispatch_config_render(args: Namespace) -> None:
+def dispatch_config_render(args: Namespace) -> bool:
     """
     Dispatch logic for config render submode.
 
@@ -278,41 +284,52 @@ def dispatch_config_render(args: Namespace) -> None:
     raise NotImplementedError
 
 
-def dispatch_config_translate(args: Namespace) -> None:
+def dispatch_config_translate(args: Namespace) -> bool:
     """
     Dispatch logic for config translate submode.
 
     :param args: Parsed command-line args.
     """
+    success = True
     if args.input_format == "atparse" and args.output_format == "jinja2":
         uwtools.config.atparse_to_jinja2.convert(
             input_file=args.input_file, output_file=args.output_file, dry_run=args.dry_run
         )
+    else:
+        success = False
+    return success
 
 
-def dispatch_config_validate(args: Namespace) -> None:
+def dispatch_config_validate(args: Namespace) -> bool:
     """
     Dispatch logic for config validate submode.
 
     :param args: Parsed command-line args.
     """
-    raise NotImplementedError
+    success = True
+    if args.input_format == "yaml":
+        success = uwtools.config.validator.validate_yaml(
+            config_file=args.input_file, schema_file=args.schema_file
+        )
+    else:
+        success = False
+    return success
 
 
-def dispatch_experiment(args: Namespace) -> None:
+def dispatch_experiment(args: Namespace) -> bool:
     """
     Dispatch logic for experiment mode.
 
     :param args: Parsed command-line args.
     """
-    {
+    return {
         "configure": dispatch_experiment_configure,
         "run": dispatch_experiment_run,
         "validate": dispatch_experiment_validate,
     }[args.submode](args)
 
 
-def dispatch_experiment_configure(args: Namespace) -> None:
+def dispatch_experiment_configure(args: Namespace) -> bool:
     """
     Dispatch logic for experiment configure submode.
 
@@ -321,7 +338,7 @@ def dispatch_experiment_configure(args: Namespace) -> None:
     raise NotImplementedError
 
 
-def dispatch_experiment_run(args: Namespace) -> None:
+def dispatch_experiment_run(args: Namespace) -> bool:
     """
     Dispatch logic for experiment run submode.
 
@@ -330,7 +347,7 @@ def dispatch_experiment_run(args: Namespace) -> None:
     raise NotImplementedError
 
 
-def dispatch_experiment_validate(args: Namespace) -> None:
+def dispatch_experiment_validate(args: Namespace) -> bool:
     """
     Dispatch logic for experiment validate submode.
 
@@ -339,20 +356,20 @@ def dispatch_experiment_validate(args: Namespace) -> None:
     raise NotImplementedError
 
 
-def dispatch_forecast(args: Namespace) -> None:
+def dispatch_forecast(args: Namespace) -> bool:
     """
     Dispatch logic for forecast mode.
 
     :param args: Parsed command-line args.
     """
-    {
+    return {
         "configure": dispatch_forecast_configure,
         "run": dispatch_forecast_run,
         "validate": dispatch_forecast_validate,
     }[args.submode](args)
 
 
-def dispatch_forecast_configure(args: Namespace) -> None:
+def dispatch_forecast_configure(args: Namespace) -> bool:
     """
     Dispatch logic for forecast configure submode.
 
@@ -361,7 +378,7 @@ def dispatch_forecast_configure(args: Namespace) -> None:
     raise NotImplementedError
 
 
-def dispatch_forecast_run(args: Namespace) -> None:
+def dispatch_forecast_run(args: Namespace) -> bool:
     """
     Dispatch logic for forecast run submode.
 
@@ -370,7 +387,7 @@ def dispatch_forecast_run(args: Namespace) -> None:
     raise NotImplementedError
 
 
-def dispatch_forecast_validate(args: Namespace) -> None:
+def dispatch_forecast_validate(args: Namespace) -> bool:
     """
     Dispatch logic for forecast validate submode.
 
@@ -440,6 +457,16 @@ def add_arg_quiet(group: Group) -> None:
         "-q",
         action="store_true",
         help="print no logging messages",
+    )
+
+
+def add_arg_schema_file(group: Group) -> None:
+    group.add_argument(
+        "--schema-file",
+        help="path to schema file to use for validation",
+        metavar="PATH",
+        required=True,
+        type=str,
     )
 
 

@@ -72,19 +72,17 @@ def write_as_json(data: Dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
-def test_config_is_valid_fail_bad_dir_top(
-    caplog, config, config_file, schema, schema_file, tmp_path
-):
+def test_validate_yaml_fail_bad_dir_top(caplog, config, config_file, schema, schema_file, tmp_path):
     # Specify a non-existent directory for the topmost directory value.
     d = str(tmp_path / "no-such-dir")
     config["dir"] = d
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert not validator.config_is_valid(config_file, schema_file)
+    assert not validator.validate_yaml(config_file, schema_file)
     assert len([x for x in caplog.records if f"Path does not exist: {d}" in x.message]) == 1
 
 
-def test_config_is_valid_fail_bad_dir_nested(
+def test_validate_yaml_fail_bad_dir_nested(
     caplog, config, config_file, schema, schema_file, tmp_path
 ):
     # Specify a non-existent directory for the nested directory value.
@@ -92,35 +90,35 @@ def test_config_is_valid_fail_bad_dir_nested(
     config["sub"]["dir"] = d
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert not validator.config_is_valid(config_file, schema_file)
+    assert not validator.validate_yaml(config_file, schema_file)
     assert len([x for x in caplog.records if f"Path does not exist: {d}" in x.message]) == 1
 
 
-def test_config_is_valid_fail_bad_enum_val(caplog, config, config_file, schema, schema_file):
+def test_validate_yaml_fail_bad_enum_val(caplog, config, config_file, schema, schema_file):
     # Specify an invalid enum value.
     config["color"] = "yellow"
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert not validator.config_is_valid(config_file, schema_file)
+    assert not validator.validate_yaml(config_file, schema_file)
     assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
 
 
-def test_config_is_valid_fail_bad_number_val(caplog, config, config_file, schema, schema_file):
+def test_validate_yaml_fail_bad_number_val(caplog, config, config_file, schema, schema_file):
     # Specify an invalid number value.
     config["number"] = "string"
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert not validator.config_is_valid(config_file, schema_file)
+    assert not validator.validate_yaml(config_file, schema_file)
     assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
 
 
-def test_config_is_valid_pass(config, config_file, schema, schema_file):
+def test_validate_yaml_pass(config, config_file, schema, schema_file):
     # Test a fully valid config file.
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
-    assert validator.config_is_valid(config_file, schema_file)
+    assert validator.validate_yaml(config_file, schema_file)
 
 
 def test__bad_paths_top(config, schema, tmp_path):

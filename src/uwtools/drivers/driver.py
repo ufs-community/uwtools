@@ -70,7 +70,7 @@ class Driver(ABC):
         """
         Validate the user-supplied config file.
         """
-        return validator.config_is_valid(
+        return validator.validate_yaml(
             config_file=self._config_file,
             schema_file=self.schema_file,
         )
