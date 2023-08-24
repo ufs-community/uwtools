@@ -824,7 +824,7 @@ def test_YAMLConfig__load_unexpected_error(tmp_path):
 def test_YAMLConfig__load_paths_failure_stdin_plus_relpath(caplog):
     # Instantiate a YAMLConfig with no input file, triggering a read from stdin. Patch stdin to
     # provide YAML with an !INCLUDE directive specifying a relative path. Since a relative path
-    # is meaningless relative to stdin, observe that an appropriate error is logged and exception
+    # is meaningless relative to stdin, assert that an appropriate error is logged and exception
     # raised.
 
     relpath = "../bar/baz.yaml"
