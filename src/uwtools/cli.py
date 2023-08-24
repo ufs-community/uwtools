@@ -246,6 +246,7 @@ def add_subparser_config_translate(subparsers: Subparsers) -> None:
     optional = parser.add_argument_group("optional arguments")
     add_arg_input_file(optional)
     add_arg_output_file(optional)
+    add_arg_dry_run(optional)
     add_arg_quiet(optional)
     add_arg_verbose(optional)
 
@@ -371,19 +372,19 @@ def add_subparser_forecast_validate(subparsers: Subparsers) -> None:
 # pylint: disable=missing-function-docstring
 
 
-# def add_arg_dry_run(group: Group) -> None:
-#     group.add_argument(
-#         "--dry-run",
-#         action="store_true",
-#         help="print rendered template only",
-#     )
+def add_arg_dry_run(group: Group) -> None:
+    group.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="print rendered template only",
+    )
 
 
 def add_arg_input_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         "--input-file",
         "-i",
-        help="path to input file",
+        help="path to input file (defaults to stdin)",
         metavar="PATH",
         required=required,
         type=str,
@@ -400,33 +401,11 @@ def add_arg_input_format(group: Group, choices: List[str]) -> None:
     )
 
 
-# def add_arg_input_template(group: Group, required: bool = False) -> None:
-#     group.add_argument(
-#         "--input-template",
-#         "-i",
-#         help="path to an atparse template file",
-#         metavar="FILE",
-#         required=required,
-#         type=str,
-#     )
-
-
-# def add_arg_outfile(group: Group, required: bool) -> None:
-#     group.add_argument(
-#         "--outfile",
-#         "-o",
-#         help="path to new Jinja2 template",
-#         metavar="FILE",
-#         required=required,
-#         type=str,
-#     )
-
-
 def add_arg_output_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         "--output-file",
         "-o",
-        help="path to output file",
+        help="path to output file (defaults to stdout)",
         metavar="PATH",
         required=required,
         type=str,
