@@ -65,8 +65,8 @@ class Config(ABC, UserDict):
         :param config_path: Path to the config file to load.
         """
         super().__init__()
-        self.config_path = config_path
-        self.update(self._load(self.config_path))
+        self._config_path = config_path
+        self.update(self._load(self._config_path))
 
     def __repr__(self) -> str:
         """
@@ -86,17 +86,17 @@ class Config(ABC, UserDict):
         :param config_path: Path to config file to load.
         """
 
-    def _load_paths(self, filepaths: List[str]) -> dict:
+    def _load_paths(self, config_paths: List[str]) -> dict:
         """
         Merge and return the contents of a collection of config files.
 
-        :param filepaths: Paths to the config files to read and merge.
+        :param config_paths: Paths to the config files to read and merge.
         """
         cfg = {}
-        for filepath in filepaths:
-            if not os.path.isabs(filepath):
-                filepath = os.path.join(os.path.dirname(self.config_path), filepath)
-            cfg.update(self._load(config_path=filepath))
+        for config_path in config_paths:
+            if not os.path.isabs(config_path):
+                config_path = os.path.join(os.path.dirname(self._config_path), config_path)
+            cfg.update(self._load(config_path=config_path))
         return cfg
 
     # Public methods
