@@ -28,12 +28,12 @@ def get_file_type(path: str) -> str:
     """
 
     suffix = Path(path).suffix
-    if suffix in [".yaml", ".yml"]:
-        return "YAML"
     if suffix in [".bash", ".sh", ".ini", ".cfg"]:
         return "INI"
     if suffix in [".nml"]:
         return "NML"
+    if suffix in [".yaml", ".yml"]:
+        return "YAML"
     msg = f"Bad file suffix -- {suffix}. Cannot determine file type!"
     logging.critical(msg)
     raise ValueError(msg)

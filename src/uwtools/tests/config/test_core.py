@@ -29,7 +29,14 @@ from uwtools.utils.cli import path_if_it_exists
 
 def help_cfgclass(ext):
     return getattr(
-        core, "%sConfig" % {".nml": "NML", ".ini": "INI", ".sh": "INI", ".yaml": "YAML"}[ext]
+        core,
+        "%sConfig"
+        % {
+            ".ini": "INI",
+            ".nml": "NML",
+            ".sh": "INI",
+            ".yaml": "YAML",
+        }[ext],
     )
 
 
@@ -39,7 +46,15 @@ def help_set_config_fmt2fmt(infn, cfgfn, tmpdir):
     ext = Path(infile).suffix
     outfile = str(tmpdir / f"outfile{ext}")
     core.create_config_obj(input_base_file=infile, config_file=cfgfile, outfile=outfile)
-    cfgclass = getattr(core, "%sConfig" % {".nml": "NML", ".ini": "INI", ".yaml": "YAML"}[ext])
+    cfgclass = getattr(
+        core,
+        "%sConfig"
+        % {
+            ".ini": "INI",
+            ".nml": "NML",
+            ".yaml": "YAML",
+        }[ext],
+    )
     cfgobj = cfgclass(infile)
     cfgobj.update_values(cfgclass(cfgfile))
     reference = tmpdir / "expected"
@@ -92,7 +107,7 @@ def salad_base():
     }
 
 
-@pytest.mark.parametrize("fmt", ["NML", "INI", "YAML"])
+@pytest.mark.parametrize("fmt", ["INI", "NML", "YAML"])
 def test_compare_config(caplog, fmt, salad_base):
     """
     Compare two config objects.
@@ -536,8 +551,8 @@ def test_show_format():
         help_.assert_called_once()
 
 
-@pytest.mark.parametrize("fmt1", ["NML", "INI", "YAML"])
-@pytest.mark.parametrize("fmt2", ["NML", "INI", "YAML"])
+@pytest.mark.parametrize("fmt1", ["INI", "NML", "YAML"])
+@pytest.mark.parametrize("fmt2", ["INI", "NML", "YAML"])
 def test_transform_config(fmt1, fmt2, tmp_path):
     """
     Test that transforms config objects to objects of other config subclasses.

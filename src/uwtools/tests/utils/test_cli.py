@@ -15,13 +15,13 @@ def test_dict_from_key_eq_val_strings():
 
 def test_get_file_type():
     for ext, file_type in {
+        "bash": "INI",
+        "cfg": "INI",
+        "ini": "INI",
+        "nml": "NML",
+        "sh": "INI",
         "yaml": "YAML",
         "yml": "YAML",
-        "bash": "INI",
-        "sh": "INI",
-        "ini": "INI",
-        "cfg": "INI",
-        "nml": "NML",
     }.items():
         assert cli.get_file_type(f"a.{ext}") == file_type
 
