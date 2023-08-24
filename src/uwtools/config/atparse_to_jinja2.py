@@ -4,22 +4,9 @@ Utilities for rendering Jinja2 templates.
 
 import re
 import sys
-from contextlib import contextmanager
-from typing import IO, Generator, Optional, TextIO
+from typing import IO, Optional
 
-
-@contextmanager
-def readable(filepath: Optional[str] = None) -> Generator[TextIO, None, None]:
-    """
-    If a path to a file is specified, open it and return a readable handle; if not, return stdin.
-
-    :param filepath: The path to a file to read.
-    """
-    if filepath:
-        with open(filepath, "r", encoding="utf-8") as f:
-            yield f
-    else:
-        yield sys.stdin
+from uwtools.utils.file_helpers import readable
 
 
 def convert(

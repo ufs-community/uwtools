@@ -5,7 +5,10 @@ Helpers for working with files and directories.
 import logging
 import os
 import shutil
+import sys
+from contextlib import contextmanager
 from datetime import datetime as dt
+from typing import Generator, Optional, TextIO
 
 
 def handle_existing(run_directory: str, exist_act: str) -> None:
@@ -34,3 +37,17 @@ def handle_existing(run_directory: str, exist_act: str) -> None:
         msg = f"Could not rename directory {run_directory}"
         logging.critical(msg)
         raise RuntimeError(msg) from e
+
+
+@contextmanager
+def readable(filepath: Optional[str] = None) -> Generator[TextIO, None, None]:
+    """
+    If a path to a file is specified, open it and return a readable handle; if not, return stdin.
+
+    :param filepath: The path to a file to read.
+    """
+    if filepath:
+        with open(filepath, "r", encoding="utf-8") as f:
+            yield f
+    else:
+        yield sys.stdin
