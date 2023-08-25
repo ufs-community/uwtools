@@ -5,7 +5,7 @@ Custom exceptions for the UWTools package.
 
 class UWError(Exception):
     """
-    An abstract class representing generic exceptions for UWTools.
+    A class representing generic exceptions for UWTools.
     """
 
 

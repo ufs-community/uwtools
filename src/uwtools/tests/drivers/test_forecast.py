@@ -3,12 +3,13 @@
 """
 Tests for forecast driver.
 """
-
+import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 from pytest import fixture, raises
+from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.tests.support import compare_files, fixture_path
@@ -293,7 +294,20 @@ srun --export=None test_exec.py
                 "VERBOSE": "False",
             },
         }
+        # Test dry run:
         with patch.object(FV3Forecast, "_validate", return_value=True):
             fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=out_file)
             fcstobj.run()
         assert run_expected in caplog.text
+
+        # Test real run:
+        with patch.object(FV3Forecast, "_validate", return_value=True):
+            with patch.object(forecast.subprocess, "run") as sprun:
+                fcstobj = FV3Forecast(config_file=config_file, batch_script=out_file)
+                fcstobj.run()
+                sprun.assert_called_once_with(
+                    f"sbatch {out_file}",
+                    stderr=subprocess.STDOUT,
+                    check=False,
+                    shell=True,
+                )

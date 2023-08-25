@@ -33,7 +33,6 @@ class Driver(ABC):
 
         self.config_data = config.YAMLConfig(self._config_file)
 
-
     # Public methods
 
     @abstractmethod

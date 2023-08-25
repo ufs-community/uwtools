@@ -11,6 +11,7 @@ import sys
 from collections.abc import Mapping
 from functools import cached_property
 from importlib import resources
+from pathlib import Path
 from typing import Dict
 
 from uwtools.drivers.driver import Driver
@@ -190,7 +191,7 @@ class FV3Forecast(Driver):
 
         # Run the job.
         if self._batch_script is not None:  # pragma: no cover
-            outpath = run_directory.join(self._batch_script)
+            outpath = Path(run_directory) / self._batch_script
             with open(outpath, "w+", encoding="utf-8") as file_:
                 print(batch_script, file=file_)
                 batch_command = JobScheduler.get_scheduler(platform_resources).submit_command

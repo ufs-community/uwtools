@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code,
+# pylint: disable=duplicate-code
 """
 CLI for running a forecast.
 """
@@ -58,13 +58,6 @@ def parse_args(args: List[str]) -> Namespace:
         "--dry-run",
         action="store_true",
         help="Validate configuration but do not run the forecast.",
-    )
-    optional.add_argument(
-        "-l",
-        "--log-file",
-        default="/dev/null",
-        help="Path to a specified log file",
-        metavar="FILE",
     )
     optional.add_argument(
         "--forecast-model",
