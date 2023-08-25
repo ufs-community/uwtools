@@ -44,21 +44,21 @@ def add_subparser_config(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "config", "Work with config files")
+    parser = add_subparser(subparsers, "config", "Handle configs")
     basic_setup(parser)
     subparsers = add_subparsers(parser, "submode")
-    add_subparser_config_render(subparsers)
+    add_subparser_config_realize(subparsers)
     add_subparser_config_translate(subparsers)
     add_subparser_config_validate(subparsers)
 
 
-def add_subparser_config_render(subparsers: Subparsers) -> None:
+def add_subparser_config_realize(subparsers: Subparsers) -> None:
     """
-    Subparser for mode: config render
+    Subparser for mode: config realize
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "render", "Render config files")
+    parser = add_subparser(subparsers, "realize", "Realize config")
     optional = basic_setup(parser)
     add_arg_input_file(optional)
     add_arg_output_file(optional)
@@ -76,7 +76,7 @@ def add_subparser_config_translate(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "translate", "Translate config files")
+    parser = add_subparser(subparsers, "translate", "Translate configs")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     add_arg_input_format(required, choices=["atparse"])
     add_arg_output_format(required, choices=["jinja2"])
@@ -94,7 +94,7 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "validate", "Validate config files")
+    parser = add_subparser(subparsers, "validate", "Validate config")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     add_arg_input_format(required, choices=["yaml"])
     add_arg_schema_file(required)
@@ -308,7 +308,7 @@ def add_subparser_template(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "template", "Manipulate Jinja2 templates")
+    parser = add_subparser(subparsers, "template", "Handle Jinja2 templates")
     basic_setup(parser)
     subparsers = add_subparsers(parser, "submode")
     add_subparser_template_render(subparsers)
@@ -485,17 +485,17 @@ def abort(msg: str) -> None:
     sys.exit(1)
 
 
-def add_subparser(subparsers: Subparsers, name: str, msg: str) -> Parser:
+def add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     """
     Add a new subparser, with standard help formatting, to the given parser.
 
     :param subparsers: The subparsers to add the new subparser to.
     :param name: The name of the subparser.
-    :param msg: The help message for the subparser.
+    :param helpmsg: The help message for the subparser.
     :return: The new subparser.
     """
     return subparsers.add_parser(
-        name, add_help=False, help=msg, formatter_class=formatter, description=msg
+        name, add_help=False, help=helpmsg, formatter_class=formatter, description=helpmsg
     )
 
 
