@@ -163,7 +163,7 @@ class FV3Forecast(Driver):
 
         # Prepare directories.
         run_directory = forecast_config["RUN_DIRECTORY"]
-        self.create_directory_structure(run_directory, "rename")
+        self.create_directory_structure(run_directory, "delete")
 
         static_files = forecast_config["STATIC"]
         self.stage_files(run_directory, static_files, link_files=True)
@@ -189,7 +189,7 @@ class FV3Forecast(Driver):
             return
 
         # Run the job.
-        if self._batch_script is not None:  # pragma: no cover
+        if self._batch_script is not None:
             outpath = Path(run_directory) / self._batch_script
             with open(outpath, "w+", encoding="utf-8") as file_:
                 print(batch_script, file=file_)
@@ -200,7 +200,7 @@ class FV3Forecast(Driver):
                 check=False,
                 shell=True,
             )
-        else:  # pragma: no cover
+        else:
             subprocess.run(
                 f"{run_command}",
                 stderr=subprocess.STDOUT,

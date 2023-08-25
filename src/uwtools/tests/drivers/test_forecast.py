@@ -300,13 +300,23 @@ srun --export=None test_exec.py
             fcstobj.run()
         assert run_expected in caplog.text
 
-        # Test real run:
+        # Test real batch run:
         with patch.object(FV3Forecast, "_validate", return_value=True):
             with patch.object(forecast.subprocess, "run") as sprun:
                 fcstobj = FV3Forecast(config_file=config_file, batch_script=out_file)
                 fcstobj.run()
                 sprun.assert_called_once_with(
                     f"sbatch {out_file}",
+                    stderr=subprocess.STDOUT,
+                    check=False,
+                    shell=True,
+                )
+                # Test real command run:
+                sprun.reset_mock()
+                fcstobj = FV3Forecast(config_file=config_file)
+                fcstobj.run()
+                sprun.assert_called_once_with(
+                    "srun --export=None test_exec.py",
                     stderr=subprocess.STDOUT,
                     check=False,
                     shell=True,
