@@ -686,19 +686,15 @@ def create_config_obj(
     Main section for processing config file.
     """
     infile_type = input_file_type or get_file_type(input_base_file)
-
     config_class = globals()[f"{infile_type}Config"]
     config_obj = config_class(input_base_file)
 
     if config_file:
         config_file_type = config_file_type or get_file_type(config_file)
-
         user_config_obj = globals()[f"{config_file_type}Config"](config_file)
-
         if config_file_type != infile_type:
             config_depth = user_config_obj.dictionary_depth(user_config_obj.data)
             input_depth = config_obj.dictionary_depth(config_obj.data)
-
             if input_depth < config_depth:
                 logging.error("%s not compatible with input file", config_file)
                 raise ValueError("Set config failure: config object not compatible with input file")
@@ -706,7 +702,7 @@ def create_config_obj(
         if compare:
             logging.info("- %s", input_base_file)
             logging.info("+ %s", config_file)
-            logging.info("-" * 80)
+            logging.info("-" * 69)
             config_obj.compare_config(user_config_obj)
             return
 

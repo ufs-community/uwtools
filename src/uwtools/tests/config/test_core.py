@@ -148,7 +148,7 @@ def test_compare_nml(caplog):
     expected = f"""
 - {nml1}
 + {nml2}
---------------------------------------------------------------------------------
+---------------------------------------------------------------------
 config:       vegetable:  - eggplant + peas
 setting:         topping:  - None + crouton
 setting:            size:  - None + large

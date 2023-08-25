@@ -58,16 +58,21 @@ def add_subparser_config_realize(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
+    choices = ["ini", "nml", "yaml"]
     parser = add_subparser(subparsers, "realize", "Realize config")
     optional = basic_setup(parser)
     add_arg_input_file(optional)
+    add_arg_input_format(optional, choices=choices)
     add_arg_output_file(optional)
+    add_arg_output_format(optional, choices=choices)
     add_arg_config_file(optional)
+    add_arg_config_format(optional, choices=choices)
+    add_arg_compare(optional)
+    add_arg_show_format(optional)
     add_arg_values_needed(optional)
     add_arg_dry_run(optional)
     add_arg_quiet(optional)
     add_arg_verbose(optional)
-    add_arg_key_eq_val_pairs(optional)
 
 
 def add_subparser_config_translate(subparsers: Subparsers) -> None:
@@ -363,6 +368,14 @@ def dispatch_template_render(args: Namespace) -> bool:
 # pylint: disable=missing-function-docstring
 
 
+def add_arg_compare(group: Group) -> None:
+    group.add_argument(
+        "--compare",
+        action="store_true",
+        help="Compare two configs",
+    )
+
+
 def add_arg_config_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         "--config-file",
@@ -370,6 +383,16 @@ def add_arg_config_file(group: Group, required: bool = False) -> None:
         help="Path to config file",
         metavar="PATH",
         required=required,
+        type=str,
+    )
+
+
+def add_arg_config_format(group: Group, choices: List[str]) -> None:
+    group.add_argument(
+        "--config-format",
+        choices=choices,
+        help="Config format",
+        required=True,
         type=str,
     )
 
@@ -397,7 +420,7 @@ def add_arg_input_format(group: Group, choices: List[str]) -> None:
     group.add_argument(
         "--input-format",
         choices=choices,
-        help="Input-data format",
+        help="Input format",
         required=True,
         type=str,
     )
@@ -427,7 +450,7 @@ def add_arg_output_format(group: Group, choices: List[str]) -> None:
     group.add_argument(
         "--output-format",
         choices=choices,
-        help="Output-data format",
+        help="Output format",
         required=True,
         type=str,
     )
@@ -449,6 +472,14 @@ def add_arg_schema_file(group: Group) -> None:
         metavar="PATH",
         required=True,
         type=str,
+    )
+
+
+def add_arg_show_format(group: Group) -> None:
+    group.add_argument(
+        "--show-format",
+        action="store_true",
+        help="???",
     )
 
 
