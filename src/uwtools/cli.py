@@ -37,97 +37,6 @@ def main() -> None:
     sys.exit(0 if success else 1)
 
 
-# Support
-
-
-def abort(msg: str) -> None:
-    """
-    Exit with an informative message and error status.
-
-    :param msg: The message to print.
-    """
-    print(msg, file=sys.stderr)
-    sys.exit(1)
-
-
-def add_subparser(subparsers: Subparsers, name: str, msg: str) -> Parser:
-    """
-    Add a new subparser, with standard help formatting, to the given parser.
-
-    :param subparsers: The subparsers to add the new subparser to.
-    :param name: The name of the subparser.
-    :param msg: The help message for the subparser.
-    :return: The new subparser.
-    """
-    return subparsers.add_parser(
-        name, add_help=False, help=msg, formatter_class=formatter, description=msg
-    )
-
-
-def add_subparsers(parser: Parser, dest: str) -> Subparsers:
-    """
-    Add subparsers to a parser.
-
-    :parm parser: The parser to add subparsers to.
-    :return: The new subparsers object.
-    """
-    return parser.add_subparsers(
-        dest=dest, metavar="MODE", required=True, title="Positional arguments"
-    )
-
-
-def basic_setup(parser: Parser) -> Group:
-    """
-    Create optional-arguments group and add help switch.
-
-    :param parser: The parser to add the optional group to.
-    """
-    optional = parser.add_argument_group("Optional arguments")
-    optional.add_argument("-h", "--help", action="help", help="Show help and exit")
-    return optional
-
-
-def check_args(args: Namespace) -> Namespace:
-    """
-    Validate basic argument correctness.
-
-    :param args: The parsed command-line arguments to check.
-    :return: The checked command-line arguments.
-    :raises: SystemExit if any checks failed.
-    """
-    try:
-        if args.quiet and args.verbose:
-            abort("Specify at most one of --quiet, --verbose")
-    except AttributeError:
-        pass
-    return args
-
-
-def formatter(prog: str) -> HelpFormatter:
-    """
-    A standard formatter for help messages.
-    """
-    return HelpFormatter(prog, max_help_position=8)
-
-
-def parse_args(raw_args: List[str]) -> Namespace:
-    """
-    Parse command-line arguments.
-
-    :param raw_args: The raw command-line arguments to parse.
-    :return: Parsed command-line arguments.
-    """
-
-    parser = Parser(description="Unified Workflow Tools", add_help=False, formatter_class=formatter)
-    basic_setup(parser)
-    subparsers = add_subparsers(parser, "mode")
-    add_subparser_config(subparsers)
-    # add_subparser_experiment(subparsers)
-    # add_subparser_forecast(subparsers)
-    add_subparser_template(subparsers)
-    return parser.parse_args(raw_args)
-
-
 # Mode config
 
 
@@ -563,3 +472,94 @@ def add_arg_verbose(group: Group) -> None:
 
 
 # pylint: enable=missing-function-docstring
+
+
+# Support
+
+
+def abort(msg: str) -> None:
+    """
+    Exit with an informative message and error status.
+
+    :param msg: The message to print.
+    """
+    print(msg, file=sys.stderr)
+    sys.exit(1)
+
+
+def add_subparser(subparsers: Subparsers, name: str, msg: str) -> Parser:
+    """
+    Add a new subparser, with standard help formatting, to the given parser.
+
+    :param subparsers: The subparsers to add the new subparser to.
+    :param name: The name of the subparser.
+    :param msg: The help message for the subparser.
+    :return: The new subparser.
+    """
+    return subparsers.add_parser(
+        name, add_help=False, help=msg, formatter_class=formatter, description=msg
+    )
+
+
+def add_subparsers(parser: Parser, dest: str) -> Subparsers:
+    """
+    Add subparsers to a parser.
+
+    :parm parser: The parser to add subparsers to.
+    :return: The new subparsers object.
+    """
+    return parser.add_subparsers(
+        dest=dest, metavar="MODE", required=True, title="Positional arguments"
+    )
+
+
+def basic_setup(parser: Parser) -> Group:
+    """
+    Create optional-arguments group and add help switch.
+
+    :param parser: The parser to add the optional group to.
+    """
+    optional = parser.add_argument_group("Optional arguments")
+    optional.add_argument("-h", "--help", action="help", help="Show help and exit")
+    return optional
+
+
+def check_args(args: Namespace) -> Namespace:
+    """
+    Validate basic argument correctness.
+
+    :param args: The parsed command-line arguments to check.
+    :return: The checked command-line arguments.
+    :raises: SystemExit if any checks failed.
+    """
+    try:
+        if args.quiet and args.verbose:
+            abort("Specify at most one of --quiet, --verbose")
+    except AttributeError:
+        pass
+    return args
+
+
+def formatter(prog: str) -> HelpFormatter:
+    """
+    A standard formatter for help messages.
+    """
+    return HelpFormatter(prog, max_help_position=8)
+
+
+def parse_args(raw_args: List[str]) -> Namespace:
+    """
+    Parse command-line arguments.
+
+    :param raw_args: The raw command-line arguments to parse.
+    :return: Parsed command-line arguments.
+    """
+
+    parser = Parser(description="Unified Workflow Tools", add_help=False, formatter_class=formatter)
+    basic_setup(parser)
+    subparsers = add_subparsers(parser, "mode")
+    add_subparser_config(subparsers)
+    # add_subparser_experiment(subparsers)
+    # add_subparser_forecast(subparsers)
+    add_subparser_template(subparsers)
+    return parser.parse_args(raw_args)
