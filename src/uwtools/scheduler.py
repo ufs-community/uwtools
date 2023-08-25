@@ -152,13 +152,6 @@ class JobScheduler(UserDict):
 
         return BatchScript(sorted(processed))
 
-    @property
-    def submit_command(self) -> str:
-        """
-        Returns the command for running a batch script.
-        """
-        return self.command
-
     @staticmethod
     def get_scheduler(props: Mapping) -> JobScheduler:
         """
@@ -191,7 +184,6 @@ class Slurm(JobScheduler):
     """
 
     prefix = "#SBATCH"
-    command = "sbatch"
 
     _map = {
         RequiredAttribs.ACCOUNT: "--account",
@@ -208,6 +200,13 @@ class Slurm(JobScheduler):
         OptionalAttribs.EXCLUSIVE: "--exclusive",
     }
 
+    @property
+    def submit_command(self) -> str:
+        """
+        Returns the command for running a batch script.
+        """
+        return "sbatch"
+
 
 class PBS(JobScheduler):
     """
@@ -216,7 +215,6 @@ class PBS(JobScheduler):
 
     prefix = "#PBS"
     key_value_separator = " "
-    command = "qsub"
 
     _map = {
         RequiredAttribs.ACCOUNT: "-A",
@@ -231,6 +229,13 @@ class PBS(JobScheduler):
         OptionalAttribs.THREADS: "ompthreads",
         OptionalAttribs.MEMORY: "mem",
     }
+
+    @property
+    def submit_command(self) -> str:
+        """
+        Returns the command for running a batch script.
+        """
+        return "qsub"
 
     def pre_process(self) -> Dict[str, Any]:
         output = self.data
@@ -302,7 +307,6 @@ class LSF(JobScheduler):
 
     prefix = "#BSUB"
     key_value_separator = " "
-    command = "bsub"
 
     _map = {
         RequiredAttribs.QUEUE: "-q",
@@ -316,6 +320,13 @@ class LSF(JobScheduler):
         OptionalAttribs.THREADS: lambda x: f"-R affinity[core({x})]",
         OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
     }
+
+    @property
+    def submit_command(self) -> str:
+        """
+        Returns the command for running a batch script.
+        """
+        return "bsub"
 
     def pre_process(self) -> Dict[str, Any]:
         items = self.data
