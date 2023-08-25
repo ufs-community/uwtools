@@ -235,7 +235,6 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
 #    """
 #    parser = add_subparser(subparsers, "run", "Run an experiment")
 #    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
-#    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
 #    optional = basic_setup(parser)
 #    add_arg_quiet(optional)
 #    add_arg_verbose(optional)
