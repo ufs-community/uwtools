@@ -18,8 +18,6 @@ from uwtools.logging import setup_logging
 
 TITLE_REQ_ARG = "Required arguments"
 
-# Main entry point
-
 
 def main() -> None:
     """
