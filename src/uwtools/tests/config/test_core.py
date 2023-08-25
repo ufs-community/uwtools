@@ -771,7 +771,7 @@ def test_Config___repr__(capsys, nml_cfgobj):
 
 def test_Config_dereference_unexpected_error(nml_cfgobj):
     exctype = FloatingPointError
-    with patch.object(core.J2Template, "render_template", side_effect=exctype):
+    with patch.object(core.J2Template, "render", side_effect=exctype):
         with raises(exctype):
             nml_cfgobj.dereference(ref_dict={"n": "{{ n }}"})
 

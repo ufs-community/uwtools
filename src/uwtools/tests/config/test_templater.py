@@ -8,7 +8,7 @@ import os
 from unittest.mock import patch
 
 import yaml
-from pytest import fixture, raises
+from pytest import fixture
 
 from uwtools.config import templater
 from uwtools.tests.support import logged
@@ -29,59 +29,74 @@ cannot:
 
 
 @fixture
-def input_template(tmp_path):
+def template(tmp_path):
     path = tmp_path / "template.jinja2"
     with open(path, "w", encoding="utf-8") as f:
         f.write("roses are {{roses}}, violets are {{violets}}")
     return str(path)
 
 
-def render(config_file, input_template, **kwargs):
+def render_helper(input_file, config_file, **kwargs):
     templater.render(
+        input_file=input_file,
         config_file=config_file,
-        key_eq_val_pairs=[],
-        input_template=input_template,
         **kwargs,
     )
 
 
-def test_render(config_file, input_template, tmp_path):
+def test_render(config_file, template, tmp_path):
     outfile = str(tmp_path / "out.txt")
-    render(config_file, input_template, outfile=outfile)
+    render_helper(input_file=template, config_file=config_file, output_file=outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read().strip() == "roses are red, violets are blue"
 
 
-def test_render_dry_run(caplog, config_file, input_template):
+def test_render_dry_run(caplog, config_file, template):
     logging.getLogger().setLevel(logging.INFO)
-    render(config_file, input_template, outfile="/dev/null", dry_run=True)
+    render_helper(
+        input_file=template, config_file=config_file, output_file="/dev/null", dry_run=True
+    )
     assert logged(caplog, "roses are red, violets are blue")
 
 
-def test_render_values_missing(caplog, config_file, input_template):
+def test_render_values_missing(caplog, config_file, template):
     # Read in the config, remove the "roses" key, then re-write it.
     with open(config_file, "r", encoding="utf-8") as f:
         cfgobj = yaml.safe_load(f.read())
     del cfgobj["roses"]
     with open(config_file, "w", encoding="utf-8") as f:
         f.write(yaml.dump(cfgobj))
-    with raises(ValueError):
-        render(config_file, input_template, outfile="/dev/null")
-    assert logged(caplog, "Template requires values that were not provided:")
+    render_helper(input_file=template, config_file=config_file, output_file="/dev/null")
+    assert logged(caplog, "Required value(s) not provided:")
     assert logged(caplog, "roses")
 
 
-def test_render_values_needed(caplog, config_file, input_template):
+def test_render_values_needed(caplog, config_file, template):
     logging.getLogger().setLevel(logging.INFO)
-    render(config_file, input_template, outfile="/dev/null", values_needed=True)
+    render_helper(
+        input_file=template, config_file=config_file, output_file="/dev/null", values_needed=True
+    )
     for var in ("roses", "violets"):
         assert logged(caplog, var)
+
+
+def test__report(caplog):
+    logging.getLogger().setLevel(logging.DEBUG)
+    expected = """
+Internal arguments:
+---------------------------------------------------------------------
+             foo: bar
+longish_variable: 88
+---------------------------------------------------------------------
+""".strip()
+    templater._report(dict(foo="bar", longish_variable=88))
+    assert "\n".join(record.message for record in caplog.records) == expected
 
 
 def test__set_up_config_obj_env():
     expected = {"roses": "white", "violets": "blue"}
     with patch.dict(os.environ, expected):
-        actual = templater._set_up_config_obj(config_file=None, key_eq_val_pairs=[])
+        actual = templater._set_up_config_obj()
     assert actual["roses"] == "white"
     assert actual["violets"] == "blue"
 

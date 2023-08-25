@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import Dict, List
 
+from uwtools.types import DefinitePath
+
 
 def dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:
     """
@@ -18,7 +20,7 @@ def dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:
     return dict([arg.split("=") for arg in config_items])
 
 
-def get_file_type(path: str) -> str:
+def get_file_type(path: DefinitePath) -> str:
     """
     Returns a standardized file type given a path/filename.
 

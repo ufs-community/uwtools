@@ -8,8 +8,9 @@ import shutil
 import sys
 from contextlib import contextmanager
 from datetime import datetime as dt
-from pathlib import Path
-from typing import Generator, Optional, TextIO, Union
+from typing import IO, Generator
+
+from uwtools.types import OptionalPath
 
 
 def handle_existing(directory: str, action: str) -> None:
@@ -44,7 +45,7 @@ def handle_existing(directory: str, action: str) -> None:
 
 
 @contextmanager
-def readable(filepath: Optional[Union[Path, str]] = None) -> Generator[TextIO, None, None]:
+def readable(filepath: OptionalPath = None, mode: str = "r") -> Generator[IO, None, None]:
     """
     If a path to a file is specified, open it and return a readable handle; if not, return readable
     stdin.
@@ -52,7 +53,22 @@ def readable(filepath: Optional[Union[Path, str]] = None) -> Generator[TextIO, N
     :param filepath: The path to a file to read.
     """
     if filepath:
-        with open(filepath, "r", encoding="utf-8") as f:
+        with open(filepath, mode, encoding="utf-8") as f:
             yield f
     else:
         yield sys.stdin
+
+
+@contextmanager
+def writable(filepath: OptionalPath = None, mode: str = "w") -> Generator[IO, None, None]:
+    """
+    If a path to a file is specified, open it and return a writable handle; if not, return writeable
+    stdout.
+
+    :param filepath: The path to a file to write to.
+    """
+    if filepath:
+        with open(filepath, mode, encoding="utf-8") as f:
+            yield f
+    else:
+        yield sys.stdout

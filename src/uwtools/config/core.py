@@ -13,7 +13,6 @@ import re
 import sys
 from abc import ABC, abstractmethod
 from collections import OrderedDict, UserDict
-from pathlib import Path
 from types import SimpleNamespace as ns
 from typing import List, Optional, Union
 
@@ -24,10 +23,9 @@ import yaml
 from uwtools import exceptions
 from uwtools.config.j2template import J2Template
 from uwtools.exceptions import UWConfigError
+from uwtools.types import OptionalPath
 from uwtools.utils.cli import get_file_type
 from uwtools.utils.file import readable
-
-ConfigPath = Optional[Union[Path, str]]
 
 msgs = ns(
     unhashable="""
@@ -62,7 +60,7 @@ class Config(ABC, UserDict):
     several configuration-file formats.
     """
 
-    def __init__(self, config_path: ConfigPath = None) -> None:
+    def __init__(self, config_path: OptionalPath = None) -> None:
         """
         Construct a Config object.
 
@@ -81,7 +79,7 @@ class Config(ABC, UserDict):
     # Private methods
 
     @abstractmethod
-    def _load(self, config_path: ConfigPath) -> dict:
+    def _load(self, config_path: OptionalPath) -> dict:
         """
         Reads and parses a config file.
 
@@ -211,7 +209,7 @@ class Config(ABC, UserDict):
                         rendered = template
                         try:
                             # Fill in a template that has the appropriate variables set.
-                            rendered = j2tmpl.render_template()
+                            rendered = j2tmpl.render()
                         except jinja2.exceptions.UndefinedError:
                             # Leave a templated field as-is in the resulting dict.
                             error_catcher[template] = "UndefinedError"
@@ -402,7 +400,7 @@ class NMLConfig(Config):
 
     # Private methods
 
-    def _load(self, config_path: ConfigPath) -> dict:
+    def _load(self, config_path: OptionalPath) -> dict:
         """
         Reads and parses a Fortran namelist file.
 
@@ -465,7 +463,7 @@ class INIConfig(Config):
 
     # Private methods
 
-    def _load(self, config_path: ConfigPath) -> dict:
+    def _load(self, config_path: OptionalPath) -> dict:
         """
         Reads and parses an INI file.
 
@@ -531,7 +529,7 @@ class YAMLConfig(Config):
 
     # Private methods
 
-    def _load(self, config_path: ConfigPath) -> dict:
+    def _load(self, config_path: OptionalPath) -> dict:
         """
         Reads and parses a YAML file.
 

@@ -2,16 +2,23 @@
 Modal CLI.
 """
 
+import logging
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import HelpFormatter, Namespace
 from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
+from pathlib import Path
 from typing import List
 
 import uwtools.config.atparse_to_jinja2
+import uwtools.config.templater
 import uwtools.config.validator
 from uwtools.logging import setup_logging
+
+TITLE_OPT_ARG = "Optional arguments"
+TITLE_POS_ARG = "Positional arguments"
+TITLE_REQ_ARG = "Required arguments"
 
 # Main logic
 
@@ -40,8 +47,9 @@ def main() -> None:
     setup_logging(quiet=args.quiet, verbose=args.verbose)
     modes = {
         "config": dispatch_config,
-        "experiment": dispatch_experiment,
+        # "experiment": dispatch_experiment,
         "forecast": dispatch_forecast,
+        "template": dispatch_template,
     }
     success = modes[args.mode](args)
     sys.exit(0 if success else 1)
@@ -55,11 +63,15 @@ def parse_args(raw_args: List[str]) -> Namespace:
     :return: Parsed command-line arguments.
     """
 
-    parser = Parser(description="Unified Workflow Tools", formatter_class=formatter)
-    subparsers = parser.add_subparsers(dest="mode", metavar="MODE", required=True)
+    parser = Parser(description="Unified Workflow Tools", add_help=False, formatter_class=formatter)
+    basic_setup(parser)
+    subparsers = parser.add_subparsers(
+        dest="mode", metavar="MODE", required=True, title=TITLE_POS_ARG
+    )
     add_subparser_config(subparsers)
-    add_subparser_experiment(subparsers)
+    # add_subparser_experiment(subparsers)
     add_subparser_forecast(subparsers)
+    add_subparser_template(subparsers)
     return parser.parse_args(raw_args)
 
 
@@ -76,6 +88,17 @@ def abort(msg: str) -> None:
     sys.exit(1)
 
 
+def basic_setup(parser: Parser) -> Group:
+    """
+    Create optional-arguments group and add help switch.
+
+    :param parser: The parser to add the optional group to.
+    """
+    optional = parser.add_argument_group(TITLE_OPT_ARG)
+    optional.add_argument("-h", "--help", action="help", help="Show help and exit")
+    return optional
+
+
 def add_subparser(subparsers: Subparsers, name: str, msg: str) -> Parser:
     """
     Add a new subparser, with standard help formatting, to the given parser.
@@ -85,7 +108,9 @@ def add_subparser(subparsers: Subparsers, name: str, msg: str) -> Parser:
     :param msg: The help message for the subparser.
     :return: The new subparser.
     """
-    return subparsers.add_parser(name, help=msg, formatter_class=formatter)
+    return subparsers.add_parser(
+        name, add_help=False, help=msg, formatter_class=formatter, description=msg
+    )
 
 
 def formatter(prog: str) -> HelpFormatter:
@@ -100,12 +125,15 @@ def formatter(prog: str) -> HelpFormatter:
 
 def add_subparser_config(subparsers: Subparsers) -> None:
     """
-    Subparser for mode: 'config'
+    Subparser for mode: config
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "config", "work with config files")
-    subparsers = parser.add_subparsers(dest="submode", metavar="MODE", required=True)
+    parser = add_subparser(subparsers, "config", "Work with config files")
+    basic_setup(parser)
+    subparsers = parser.add_subparsers(
+        dest="submode", metavar="MODE", required=True, title=TITLE_POS_ARG
+    )
     add_subparser_config_render(subparsers)
     add_subparser_config_translate(subparsers)
     add_subparser_config_validate(subparsers)
@@ -113,27 +141,33 @@ def add_subparser_config(subparsers: Subparsers) -> None:
 
 def add_subparser_config_render(subparsers: Subparsers) -> None:
     """
-    Subparser for mode: 'config render'
+    Subparser for mode: config render
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "render", "render config files")
-    optional = parser.add_argument_group("optional arguments")
+    parser = add_subparser(subparsers, "render", "Render config files")
+    optional = basic_setup(parser)
+    add_arg_input_file(optional)
+    add_arg_output_file(optional)
+    add_arg_config_file(optional)
+    add_arg_values_needed(optional)
+    add_arg_dry_run(optional)
     add_arg_quiet(optional)
     add_arg_verbose(optional)
+    add_arg_key_eq_val_pairs(optional)
 
 
 def add_subparser_config_translate(subparsers: Subparsers) -> None:
     """
-    Subparser for mode: 'config translate'
+    Subparser for mode: config translate
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "translate", "translate config files")
-    required = parser.add_argument_group("required arguments")
+    parser = add_subparser(subparsers, "translate", "Translate config files")
+    required = parser.add_argument_group(TITLE_REQ_ARG)
     add_arg_input_format(required, choices=["atparse"])
     add_arg_output_format(required, choices=["jinja2"])
-    optional = parser.add_argument_group("optional arguments")
+    optional = basic_setup(parser)
     add_arg_input_file(optional)
     add_arg_output_file(optional)
     add_arg_dry_run(optional)
@@ -143,15 +177,15 @@ def add_subparser_config_translate(subparsers: Subparsers) -> None:
 
 def add_subparser_config_validate(subparsers: Subparsers) -> None:
     """
-    Subparser for mode: 'config validate'
+    Subparser for mode: config validate
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "validate", "validate config files")
-    required = parser.add_argument_group("required arguments")
+    parser = add_subparser(subparsers, "validate", "Validate config files")
+    required = parser.add_argument_group(TITLE_REQ_ARG)
     add_arg_input_format(required, choices=["yaml"])
     add_arg_schema_file(required)
-    optional = parser.add_argument_group("optional arguments")
+    optional = basic_setup(parser)
     add_arg_input_file(optional)
     add_arg_quiet(optional)
     add_arg_verbose(optional)
@@ -160,53 +194,58 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
 # Mode: experiment
 
 
-def add_subparser_experiment(subparsers: Subparsers) -> None:
-    """
-    Subparser for mode: 'experiment'
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = add_subparser(subparsers, "experiment", "configure and run experiments")
-    subparsers = parser.add_subparsers(dest="submode", metavar="MODE", required=True)
-    add_subparser_experiment_configure(subparsers)
-    add_subparser_experiment_run(subparsers)
-    add_subparser_experiment_validate(subparsers)
-
-
-def add_subparser_experiment_configure(subparsers: Subparsers) -> None:
-    """
-    Subparser for mode: 'experiment configure'
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = add_subparser(subparsers, "configure", "configure an experiment")
-    optional = parser.add_argument_group("optional arguments")
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
+# def add_subparser_experiment(subparsers: Subparsers) -> None:
+#    """
+#    Subparser for mode: experiment
+#
+#    :param subparsers: Parent parser's subparsers, to add this subparser to.
+#    """
+#    parser = add_subparser(subparsers, "experiment", "Manage experiments")
+#    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
+#    subparsers = parser.add_subparsers(dest="submode", metavar="MODE", required=True, title=TITLE_POS_ARG) pylint: disable=line-too-long
+#    add_subparser_experiment_configure(subparsers)
+#    add_subparser_experiment_run(subparsers)
+#    add_subparser_experiment_validate(subparsers)
 
 
-def add_subparser_experiment_run(subparsers: Subparsers) -> None:
-    """
-    Subparser for mode: 'experiment run'
+# def add_subparser_experiment_configure(subparsers: Subparsers) -> None:
+#    """
+#    Subparser for mode: experiment configure
+#
+#    :param subparsers: Parent parser's subparsers, to add this subparser to.
+#    """
+#    parser = add_subparser(subparsers, "configure", "Configure an experiment")
+#    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
+#    optional = parser.add_argument_group(TITLE_OPT_ARG)
+#    add_arg_quiet(optional)
+#    add_arg_verbose(optional)
 
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = add_subparser(subparsers, "run", "run an experiment")
-    optional = parser.add_argument_group("optional arguments")
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
+
+# def add_subparser_experiment_run(subparsers: Subparsers) -> None:
+#    """
+#    Subparser for mode: experiment run
+#
+#    :param subparsers: Parent parser's subparsers, to add this subparser to.
+#    """
+#    parser = add_subparser(subparsers, "run", "Run an experiment")
+#    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
+#    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
+#    optional = parser.add_argument_group(TITLE_OPT_ARG)
+#    add_arg_quiet(optional)
+#    add_arg_verbose(optional)
 
 
-def add_subparser_experiment_validate(subparsers: Subparsers) -> None:
-    """
-    Subparser for mode: 'experiment validate'
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = add_subparser(subparsers, "validate", "validate an experiment")
-    optional = parser.add_argument_group("optional arguments")
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
+# def add_subparser_experiment_validate(subparsers: Subparsers) -> None:
+#    """
+#    Subparser for mode: experiment validate
+#
+#    :param subparsers: Parent parser's subparsers, to add this subparser to.
+#    """
+#    parser = add_subparser(subparsers, "validate", "Validate an experiment")
+#    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
+#    optional = parser.add_argument_group(TITLE_OPT_ARG)
+#    add_arg_quiet(optional)
+#    add_arg_verbose(optional)
 
 
 # Mode: forecast
@@ -214,51 +253,58 @@ def add_subparser_experiment_validate(subparsers: Subparsers) -> None:
 
 def add_subparser_forecast(subparsers: Subparsers) -> None:
     """
-    Subparser for mode: 'forecast'
+    Subparser for mode: forecast
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "forecast", "configure and run forecasts")
-    subparsers = parser.add_subparsers(metavar="MODE", required=True)
-    add_subparser_forecast_configure(subparsers)
+    parser = add_subparser(subparsers, "forecast", "Configure and run forecasts")
+    basic_setup(parser)
+    subparsers = parser.add_subparsers(metavar="MODE", required=True, title=TITLE_POS_ARG)
     add_subparser_forecast_run(subparsers)
-    add_subparser_forecast_validate(subparsers)
-
-
-def add_subparser_forecast_configure(subparsers: Subparsers) -> None:
-    """
-    Subparser for mode: 'forecast configure'
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = add_subparser(subparsers, "configure", "configure an forecast")
-    optional = parser.add_argument_group("optional arguments")
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
 
 
 def add_subparser_forecast_run(subparsers: Subparsers) -> None:
     """
-    Subparser for mode: 'forecast run'
+    Subparser for mode: forecast run
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "run", "run an forecast")
-    optional = parser.add_argument_group("optional arguments")
+    parser = add_subparser(subparsers, "run", "Run a forecast")
+    optional = basic_setup(parser)
     add_arg_quiet(optional)
     add_arg_verbose(optional)
 
 
-def add_subparser_forecast_validate(subparsers: Subparsers) -> None:
+def add_subparser_template(subparsers: Subparsers) -> None:
     """
-    Subparser for mode: 'forecast validate'
+    Subparser for mode: template
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "validate", "validate an forecast")
-    optional = parser.add_argument_group("optional arguments")
+    parser = add_subparser(subparsers, "template", "Manipulate Jinja2 templates")
+    basic_setup(parser)
+    subparsers = parser.add_subparsers(
+        dest="submode", metavar="MODE", required=True, title=TITLE_POS_ARG
+    )
+    add_subparser_template_render(subparsers)
+
+
+def add_subparser_template_render(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: template render
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = add_subparser(subparsers, "render", "Render a Jina2 template")
+    optional = basic_setup(parser)
+    add_arg_input_file(optional)
+    add_arg_output_file(optional)
+    add_arg_config_file(optional)
+    add_arg_values_needed(optional)
+    add_arg_dry_run(optional)
     add_arg_quiet(optional)
     add_arg_verbose(optional)
+    add_arg_key_eq_val_pairs(optional)
 
 
 # Dispatch functions.
@@ -318,44 +364,44 @@ def dispatch_config_validate(args: Namespace) -> bool:
     return success
 
 
-def dispatch_experiment(args: Namespace) -> bool:
-    """
-    Dispatch logic for experiment mode.
-
-    :param args: Parsed command-line args.
-    """
-    return {
-        "configure": dispatch_experiment_configure,
-        "run": dispatch_experiment_run,
-        "validate": dispatch_experiment_validate,
-    }[args.submode](args)
-
-
-def dispatch_experiment_configure(args: Namespace) -> bool:
-    """
-    Dispatch logic for experiment configure submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
+# def dispatch_experiment(args: Namespace) -> bool:
+#    """
+#    Dispatch logic for experiment mode.
+#
+#    :param args: Parsed command-line args.
+#    """
+#    return {
+#        "configure": dispatch_experiment_configure,
+#        "run": dispatch_experiment_run,
+#        "validate": dispatch_experiment_validate,
+#    }[args.submode](args)
 
 
-def dispatch_experiment_run(args: Namespace) -> bool:
-    """
-    Dispatch logic for experiment run submode.
+# def dispatch_experiment_configure(args: Namespace) -> bool:
+#    """
+#    Dispatch logic for experiment configure submode.
+#
+#    :param args: Parsed command-line args.
+#    """
+#    raise NotImplementedError
 
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
+
+# def dispatch_experiment_run(args: Namespace) -> bool:
+#    """
+#    Dispatch logic for experiment run submode.
+#
+#    :param args: Parsed command-line args.
+#    """
+#    raise NotImplementedError
 
 
-def dispatch_experiment_validate(args: Namespace) -> bool:
-    """
-    Dispatch logic for experiment validate submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
+# def dispatch_experiment_validate(args: Namespace) -> bool:
+#    """
+#    Dispatch logic for experiment validate submode.
+#
+#    :param args: Parsed command-line args.
+#    """
+#    raise NotImplementedError
 
 
 def dispatch_forecast(args: Namespace) -> bool:
@@ -364,20 +410,7 @@ def dispatch_forecast(args: Namespace) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {
-        "configure": dispatch_forecast_configure,
-        "run": dispatch_forecast_run,
-        "validate": dispatch_forecast_validate,
-    }[args.submode](args)
-
-
-def dispatch_forecast_configure(args: Namespace) -> bool:
-    """
-    Dispatch logic for forecast configure submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
+    return {"run": dispatch_forecast_run}[args.submode](args)
 
 
 def dispatch_forecast_run(args: Namespace) -> bool:
@@ -389,13 +422,30 @@ def dispatch_forecast_run(args: Namespace) -> bool:
     raise NotImplementedError
 
 
-def dispatch_forecast_validate(args: Namespace) -> bool:
+def dispatch_template(args: Namespace) -> bool:
     """
-    Dispatch logic for forecast validate submode.
+    Dispatch logic for template mode.
 
     :param args: Parsed command-line args.
     """
-    raise NotImplementedError
+    return {"render": dispatch_template_render}[args.submode](args)
+
+
+def dispatch_template_render(args: Namespace) -> bool:
+    """
+    Dispatch logic for template render submode.
+
+    :param args: Parsed command-line args.
+    """
+    logging.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
+    return uwtools.config.templater.render(
+        args.input_file,
+        args.output_file,
+        args.config_file,
+        args.key_eq_val_pairs,
+        args.values_needed,
+        args.dry_run,
+    )
 
 
 # Arguments
@@ -403,11 +453,22 @@ def dispatch_forecast_validate(args: Namespace) -> bool:
 # pylint: disable=missing-function-docstring
 
 
+def add_arg_config_file(group: Group, required: bool = False) -> None:
+    group.add_argument(
+        "--config-file",
+        "-c",
+        help="Path to config file",
+        metavar="PATH",
+        required=required,
+        type=str,
+    )
+
+
 def add_arg_dry_run(group: Group) -> None:
     group.add_argument(
         "--dry-run",
         action="store_true",
-        help="print rendered template only",
+        help="Print rendered template only",
     )
 
 
@@ -415,7 +476,7 @@ def add_arg_input_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         "--input-file",
         "-i",
-        help="path to input file (defaults to stdin)",
+        help="Path to input file (defaults to stdin)",
         metavar="PATH",
         required=required,
         type=str,
@@ -426,9 +487,18 @@ def add_arg_input_format(group: Group, choices: List[str]) -> None:
     group.add_argument(
         "--input-format",
         choices=choices,
-        help="input-data format",
+        help="Input-data format",
         required=True,
         type=str,
+    )
+
+
+def add_arg_key_eq_val_pairs(group: Group) -> None:
+    group.add_argument(
+        "key_eq_val_pairs",
+        help="A key=value pair to override/supplement config",
+        metavar="KEY=VALUE",
+        nargs="*",
     )
 
 
@@ -436,7 +506,7 @@ def add_arg_output_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         "--output-file",
         "-o",
-        help="path to output file (defaults to stdout)",
+        help="Path to output file (defaults to stdout)",
         metavar="PATH",
         required=required,
         type=str,
@@ -447,7 +517,7 @@ def add_arg_output_format(group: Group, choices: List[str]) -> None:
     group.add_argument(
         "--output-format",
         choices=choices,
-        help="output-data format",
+        help="Output-data format",
         required=True,
         type=str,
     )
@@ -458,17 +528,25 @@ def add_arg_quiet(group: Group) -> None:
         "--quiet",
         "-q",
         action="store_true",
-        help="print no logging messages",
+        help="Print no logging messages",
     )
 
 
 def add_arg_schema_file(group: Group) -> None:
     group.add_argument(
         "--schema-file",
-        help="path to schema file to use for validation",
+        help="Path to schema file to use for validation",
         metavar="PATH",
         required=True,
         type=str,
+    )
+
+
+def add_arg_values_needed(group: Group) -> None:
+    group.add_argument(
+        "--values-needed",
+        action="store_true",
+        help="Print report of values needed to render template",
     )
 
 
@@ -477,7 +555,7 @@ def add_arg_verbose(group: Group) -> None:
         "--verbose",
         "-v",
         action="store_true",
-        help="print all logging messages",
+        help="Print all logging messages",
     )
 
 

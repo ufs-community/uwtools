@@ -5,18 +5,17 @@ Support for validating a config using JSON Schema.
 import json
 import logging
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import List
 
 import jsonschema
 
 from uwtools.config.core import YAMLConfig
+from uwtools.types import DefinitePath, OptionalPath
 
 # Public functions
 
 
-def validate_yaml(
-    schema_file: Union[Path, str], config_file: Optional[Union[Path, str]] = None
-) -> bool:
+def validate_yaml(schema_file: DefinitePath, config_file: OptionalPath = None) -> bool:
     """
     Check whether the given config file conforms to the given JSON Schema spec and whether any
     filesystem paths it identifies do not exist.

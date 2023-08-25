@@ -49,10 +49,10 @@ class J2Template:
         """
         msg = f"Writing rendered template to output file: {output_path}"
         logging.debug(msg)
-        with open(output_path, "w+", encoding="utf-8") as file_:
-            print(self.render_template(), file=file_)
+        with open(output_path, "w+", encoding="utf-8") as f:
+            print(self.render(), file=f)
 
-    def render_template(self) -> str:
+    def render(self) -> str:
         """
         Render the Jinja2 template so that it's available in memory.
 

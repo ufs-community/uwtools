@@ -71,3 +71,16 @@ def test_readable_file(tmp_path):
 def test_readable_nofile():
     with file.readable() as f:
         assert f is sys.stdin
+
+
+def test_writable_file(tmp_path):
+    apath = tmp_path / "afile"
+    with file.writable(filepath=apath) as f:
+        assert f.write("hello")
+    with open(apath, "r", encoding="utf-8") as f:
+        assert f.read() == "hello"
+
+
+def test_writable_nofile():
+    with file.writable() as f:
+        assert f is sys.stdout
