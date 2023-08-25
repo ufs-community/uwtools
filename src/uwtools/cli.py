@@ -197,6 +197,60 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
     add_arg_verbose(optional)
 
 
+def dispatch_config(args: Namespace) -> bool:
+    """
+    Dispatch logic for config mode.
+
+    :param args: Parsed command-line args.
+    """
+    return {
+        "render": dispatch_config_render,
+        "translate": dispatch_config_translate,
+        "validate": dispatch_config_validate,
+    }[args.submode](args)
+
+
+def dispatch_config_render(args: Namespace) -> bool:
+    """
+    Dispatch logic for config render submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
+
+
+def dispatch_config_translate(args: Namespace) -> bool:
+    """
+    Dispatch logic for config translate submode.
+
+    :param args: Parsed command-line args.
+    """
+    success = True
+    if args.input_format == "atparse" and args.output_format == "jinja2":
+        uwtools.config.atparse_to_jinja2.convert(
+            input_file=args.input_file, output_file=args.output_file, dry_run=args.dry_run
+        )
+    else:
+        success = False
+    return success
+
+
+def dispatch_config_validate(args: Namespace) -> bool:
+    """
+    Dispatch logic for config validate submode.
+
+    :param args: Parsed command-line args.
+    """
+    success = True
+    if args.input_format == "yaml":
+        success = uwtools.config.validator.validate_yaml(
+            config_file=args.input_file, schema_file=args.schema_file
+        )
+    else:
+        success = False
+    return success
+
+
 # Mode: experiment
 
 
@@ -253,120 +307,6 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
 #    add_arg_verbose(optional)
 
 
-# Mode: forecast
-
-
-# def add_subparser_forecast(subparsers: Subparsers) -> None:
-#    """
-#    Subparser for mode: forecast
-#
-#    :param subparsers: Parent parser's subparsers, to add this subparser to.
-#    """
-#    parser = add_subparser(subparsers, "forecast", "Configure and run forecasts")
-#    basic_setup(parser)
-#    subparsers = add_subparsers(parser, "submode")
-#    add_subparser_forecast_run(subparsers)
-
-
-# def add_subparser_forecast_run(subparsers: Subparsers) -> None:
-#    """
-#    Subparser for mode: forecast run
-#
-#    :param subparsers: Parent parser's subparsers, to add this subparser to.
-#    """
-#    parser = add_subparser(subparsers, "run", "Run a forecast")
-#    optional = basic_setup(parser)
-#    add_arg_quiet(optional)
-#    add_arg_verbose(optional)
-
-
-def add_subparser_template(subparsers: Subparsers) -> None:
-    """
-    Subparser for mode: template
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = add_subparser(subparsers, "template", "Manipulate Jinja2 templates")
-    basic_setup(parser)
-    subparsers = add_subparsers(parser, "submode")
-    add_subparser_template_render(subparsers)
-
-
-def add_subparser_template_render(subparsers: Subparsers) -> None:
-    """
-    Subparser for mode: template render
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = add_subparser(subparsers, "render", "Render a Jina2 template")
-    optional = basic_setup(parser)
-    add_arg_input_file(optional)
-    add_arg_output_file(optional)
-    add_arg_config_file(optional)
-    add_arg_values_needed(optional)
-    add_arg_dry_run(optional)
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
-    add_arg_key_eq_val_pairs(optional)
-
-
-# Dispatch functions.
-
-
-def dispatch_config(args: Namespace) -> bool:
-    """
-    Dispatch logic for config mode.
-
-    :param args: Parsed command-line args.
-    """
-    return {
-        "render": dispatch_config_render,
-        "translate": dispatch_config_translate,
-        "validate": dispatch_config_validate,
-    }[args.submode](args)
-
-
-def dispatch_config_render(args: Namespace) -> bool:
-    """
-    Dispatch logic for config render submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
-
-
-def dispatch_config_translate(args: Namespace) -> bool:
-    """
-    Dispatch logic for config translate submode.
-
-    :param args: Parsed command-line args.
-    """
-    success = True
-    if args.input_format == "atparse" and args.output_format == "jinja2":
-        uwtools.config.atparse_to_jinja2.convert(
-            input_file=args.input_file, output_file=args.output_file, dry_run=args.dry_run
-        )
-    else:
-        success = False
-    return success
-
-
-def dispatch_config_validate(args: Namespace) -> bool:
-    """
-    Dispatch logic for config validate submode.
-
-    :param args: Parsed command-line args.
-    """
-    success = True
-    if args.input_format == "yaml":
-        success = uwtools.config.validator.validate_yaml(
-            config_file=args.input_file, schema_file=args.schema_file
-        )
-    else:
-        success = False
-    return success
-
-
 # def dispatch_experiment(args: Namespace) -> bool:
 #    """
 #    Dispatch logic for experiment mode.
@@ -407,6 +347,33 @@ def dispatch_config_validate(args: Namespace) -> bool:
 #    raise NotImplementedError
 
 
+# Mode: forecast
+
+
+# def add_subparser_forecast(subparsers: Subparsers) -> None:
+#    """
+#    Subparser for mode: forecast
+#
+#    :param subparsers: Parent parser's subparsers, to add this subparser to.
+#    """
+#    parser = add_subparser(subparsers, "forecast", "Configure and run forecasts")
+#    basic_setup(parser)
+#    subparsers = add_subparsers(parser, "submode")
+#    add_subparser_forecast_run(subparsers)
+
+
+# def add_subparser_forecast_run(subparsers: Subparsers) -> None:
+#    """
+#    Subparser for mode: forecast run
+#
+#    :param subparsers: Parent parser's subparsers, to add this subparser to.
+#    """
+#    parser = add_subparser(subparsers, "run", "Run a forecast")
+#    optional = basic_setup(parser)
+#    add_arg_quiet(optional)
+#    add_arg_verbose(optional)
+
+
 # def dispatch_forecast(args: Namespace) -> bool:
 #    """
 #    Dispatch logic for forecast mode.
@@ -423,6 +390,39 @@ def dispatch_config_validate(args: Namespace) -> bool:
 #    :param args: Parsed command-line args.
 #    """
 #    raise NotImplementedError
+
+
+# Mode: template
+
+
+def add_subparser_template(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: template
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = add_subparser(subparsers, "template", "Manipulate Jinja2 templates")
+    basic_setup(parser)
+    subparsers = add_subparsers(parser, "submode")
+    add_subparser_template_render(subparsers)
+
+
+def add_subparser_template_render(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: template render
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = add_subparser(subparsers, "render", "Render a Jina2 template")
+    optional = basic_setup(parser)
+    add_arg_input_file(optional)
+    add_arg_output_file(optional)
+    add_arg_config_file(optional)
+    add_arg_values_needed(optional)
+    add_arg_dry_run(optional)
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
+    add_arg_key_eq_val_pairs(optional)
 
 
 def dispatch_template(args: Namespace) -> bool:
