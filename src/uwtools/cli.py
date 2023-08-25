@@ -46,7 +46,7 @@ def main() -> None:
     modes = {
         "config": dispatch_config,
         # "experiment": dispatch_experiment,
-        "forecast": dispatch_forecast,
+        # "forecast": dispatch_forecast,
         "template": dispatch_template,
     }
     success = modes[args.mode](args)
@@ -66,7 +66,7 @@ def parse_args(raw_args: List[str]) -> Namespace:
     subparsers = add_subparsers(parser, "mode")
     add_subparser_config(subparsers)
     # add_subparser_experiment(subparsers)
-    add_subparser_forecast(subparsers)
+    # add_subparser_forecast(subparsers)
     add_subparser_template(subparsers)
     return parser.parse_args(raw_args)
 
@@ -256,28 +256,28 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
 # Mode: forecast
 
 
-def add_subparser_forecast(subparsers: Subparsers) -> None:
-    """
-    Subparser for mode: forecast
+# def add_subparser_forecast(subparsers: Subparsers) -> None:
+#    """
+#    Subparser for mode: forecast
+#
+#    :param subparsers: Parent parser's subparsers, to add this subparser to.
+#    """
+#    parser = add_subparser(subparsers, "forecast", "Configure and run forecasts")
+#    basic_setup(parser)
+#    subparsers = add_subparsers(parser, "submode")
+#    add_subparser_forecast_run(subparsers)
 
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = add_subparser(subparsers, "forecast", "Configure and run forecasts")
-    basic_setup(parser)
-    subparsers = add_subparsers(parser, "submode")
-    add_subparser_forecast_run(subparsers)
 
-
-def add_subparser_forecast_run(subparsers: Subparsers) -> None:
-    """
-    Subparser for mode: forecast run
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = add_subparser(subparsers, "run", "Run a forecast")
-    optional = basic_setup(parser)
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
+# def add_subparser_forecast_run(subparsers: Subparsers) -> None:
+#    """
+#    Subparser for mode: forecast run
+#
+#    :param subparsers: Parent parser's subparsers, to add this subparser to.
+#    """
+#    parser = add_subparser(subparsers, "run", "Run a forecast")
+#    optional = basic_setup(parser)
+#    add_arg_quiet(optional)
+#    add_arg_verbose(optional)
 
 
 def add_subparser_template(subparsers: Subparsers) -> None:
@@ -407,22 +407,22 @@ def dispatch_config_validate(args: Namespace) -> bool:
 #    raise NotImplementedError
 
 
-def dispatch_forecast(args: Namespace) -> bool:
-    """
-    Dispatch logic for forecast mode.
+# def dispatch_forecast(args: Namespace) -> bool:
+#    """
+#    Dispatch logic for forecast mode.
+#
+#    :param args: Parsed command-line args.
+#    """
+#    return {"run": dispatch_forecast_run}[args.submode](args)
 
-    :param args: Parsed command-line args.
-    """
-    return {"run": dispatch_forecast_run}[args.submode](args)
 
-
-def dispatch_forecast_run(args: Namespace) -> bool:
-    """
-    Dispatch logic for forecast run submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
+# def dispatch_forecast_run(args: Namespace) -> bool:
+#    """
+#    Dispatch logic for forecast run submode.
+#
+#    :param args: Parsed command-line args.
+#    """
+#    raise NotImplementedError
 
 
 def dispatch_template(args: Namespace) -> bool:
