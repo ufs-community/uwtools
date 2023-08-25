@@ -9,12 +9,12 @@ from unittest.mock import patch
 
 import pytest
 from pytest import fixture, raises
+
+from uwtools import config
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.tests.support import compare_files, fixture_path
-
-from uwtools import config
 
 
 @fixture

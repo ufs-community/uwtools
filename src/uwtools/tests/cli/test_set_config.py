@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 import pytest
 from pytest import fixture, raises
+
 from uwtools.cli import set_config
 
 

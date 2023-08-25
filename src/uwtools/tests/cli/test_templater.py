@@ -11,6 +11,7 @@ from unittest.mock import patch
 
 import pytest
 from pytest import raises
+
 from uwtools.cli import templater
 from uwtools.tests.support import compare_files, fixture_path
 

@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from pytest import fixture
+
 from uwtools.files.gateway import s3
 
 

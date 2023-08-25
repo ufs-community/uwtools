@@ -6,9 +6,8 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from typing import Optional
 
-from uwtools.scheduler import BatchScript
-
 from uwtools import config, config_validator
+from uwtools.scheduler import BatchScript
 
 
 class Driver(ABC):

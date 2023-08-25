@@ -5,10 +5,9 @@ import logging
 import os
 from typing import List, Optional
 
+from uwtools import config
 from uwtools.j2template import J2Template
 from uwtools.utils import cli_helpers
-
-from uwtools import config
 
 
 def render(

@@ -4,6 +4,7 @@ Tests for uwtools.scheduler module.
 """
 
 from pytest import fixture, raises
+
 from uwtools.scheduler import JobScheduler
 
 # LFS tests

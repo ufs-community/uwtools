@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 import pytest
 from pytest import fixture
+
 from uwtools.drivers.driver import Driver
 from uwtools.tests.support import logged
 

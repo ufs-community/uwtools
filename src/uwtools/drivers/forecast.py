@@ -14,11 +14,10 @@ from importlib import resources
 from pathlib import Path
 from typing import Dict
 
+from uwtools import config
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript, JobScheduler
 from uwtools.utils import file_helpers
-
-from uwtools import config
 
 
 class FV3Forecast(Driver):

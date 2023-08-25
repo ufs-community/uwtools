@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 import pytest
 from pytest import fixture, raises
+
 from uwtools.cli import validate_config
 from uwtools.tests.support import fixture_path
 

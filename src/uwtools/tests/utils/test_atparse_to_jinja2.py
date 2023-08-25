@@ -3,6 +3,7 @@
 Tests for uwtools.utils.atparse_to_jinja2 module.
 """
 from pytest import fixture, raises
+
 from uwtools.utils import atparse_to_jinja2
 
 # Helper functions

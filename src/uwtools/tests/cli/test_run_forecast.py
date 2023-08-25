@@ -8,11 +8,11 @@ from unittest.mock import patch
 
 import pytest
 from pytest import raises
+
 from uwtools.cli import run_forecast
 
 # NB: Ensure that at least one test exercises both short and long forms of each
 #     CLI switch.
-
 
 
 def test_main(tmp_path):

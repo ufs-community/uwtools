@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 import pytest
 from pytest import raises
+
 from uwtools.cli import atparse_to_jinja2
 from uwtools.tests.support import fixture_path
 

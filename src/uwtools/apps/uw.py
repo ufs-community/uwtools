@@ -2,9 +2,8 @@
 This file contains the specific drivers for a particular app, using the facade pattern base class.
 """
 
-from uwtools.drivers.facade import Facade
-
 from uwtools import config
+from uwtools.drivers.facade import Facade
 
 
 class UWforSRW(Facade):

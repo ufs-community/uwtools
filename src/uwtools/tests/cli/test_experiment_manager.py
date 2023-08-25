@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 import pytest
 from pytest import fixture, raises
+
 from uwtools.cli import experiment_manager
 
 # NB: Ensure that at least one test exercises both short and long forms of each
