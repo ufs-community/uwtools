@@ -16,8 +16,6 @@ import uwtools.config.templater
 import uwtools.config.validator
 from uwtools.logging import setup_logging
 
-TITLE_OPT_ARG = "Optional arguments"
-TITLE_POS_ARG = "Positional arguments"
 TITLE_REQ_ARG = "Required arguments"
 
 # Main logic
@@ -65,9 +63,7 @@ def parse_args(raw_args: List[str]) -> Namespace:
 
     parser = Parser(description="Unified Workflow Tools", add_help=False, formatter_class=formatter)
     basic_setup(parser)
-    subparsers = parser.add_subparsers(
-        dest="mode", metavar="MODE", required=True, title=TITLE_POS_ARG
-    )
+    subparsers = add_subparsers(parser, "mode")
     add_subparser_config(subparsers)
     # add_subparser_experiment(subparsers)
     add_subparser_forecast(subparsers)
@@ -94,7 +90,7 @@ def basic_setup(parser: Parser) -> Group:
 
     :param parser: The parser to add the optional group to.
     """
-    optional = parser.add_argument_group(TITLE_OPT_ARG)
+    optional = parser.add_argument_group("Optional arguments")
     optional.add_argument("-h", "--help", action="help", help="Show help and exit")
     return optional
 
@@ -110,6 +106,18 @@ def add_subparser(subparsers: Subparsers, name: str, msg: str) -> Parser:
     """
     return subparsers.add_parser(
         name, add_help=False, help=msg, formatter_class=formatter, description=msg
+    )
+
+
+def add_subparsers(parser: Parser, dest: str) -> Subparsers:
+    """
+    Add subparsers to a parser.
+
+    :parm parser: The parser to add subparsers to.
+    :return: The new subparsers object.
+    """
+    return parser.add_subparsers(
+        dest=dest, metavar="MODE", required=True, title="Positional arguments"
     )
 
 
@@ -131,9 +139,7 @@ def add_subparser_config(subparsers: Subparsers) -> None:
     """
     parser = add_subparser(subparsers, "config", "Work with config files")
     basic_setup(parser)
-    subparsers = parser.add_subparsers(
-        dest="submode", metavar="MODE", required=True, title=TITLE_POS_ARG
-    )
+    subparsers = add_subparsers(parser, "submode")
     add_subparser_config_render(subparsers)
     add_subparser_config_translate(subparsers)
     add_subparser_config_validate(subparsers)
@@ -202,7 +208,7 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
 #    """
 #    parser = add_subparser(subparsers, "experiment", "Manage experiments")
 #    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
-#    subparsers = parser.add_subparsers(dest="submode", metavar="MODE", required=True, title=TITLE_POS_ARG) pylint: disable=line-too-long
+#    subparsers = add_subparsers(parser, dest="submode")
 #    add_subparser_experiment_configure(subparsers)
 #    add_subparser_experiment_run(subparsers)
 #    add_subparser_experiment_validate(subparsers)
@@ -216,7 +222,7 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
 #    """
 #    parser = add_subparser(subparsers, "configure", "Configure an experiment")
 #    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
-#    optional = parser.add_argument_group(TITLE_OPT_ARG)
+#    optional = basic_setup(parser)
 #    add_arg_quiet(optional)
 #    add_arg_verbose(optional)
 
@@ -230,7 +236,7 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
 #    parser = add_subparser(subparsers, "run", "Run an experiment")
 #    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
 #    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
-#    optional = parser.add_argument_group(TITLE_OPT_ARG)
+#    optional = basic_setup(parser)
 #    add_arg_quiet(optional)
 #    add_arg_verbose(optional)
 
@@ -243,7 +249,7 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
 #    """
 #    parser = add_subparser(subparsers, "validate", "Validate an experiment")
 #    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
-#    optional = parser.add_argument_group(TITLE_OPT_ARG)
+#    optional = basic_setup(parser)
 #    add_arg_quiet(optional)
 #    add_arg_verbose(optional)
 
@@ -259,7 +265,7 @@ def add_subparser_forecast(subparsers: Subparsers) -> None:
     """
     parser = add_subparser(subparsers, "forecast", "Configure and run forecasts")
     basic_setup(parser)
-    subparsers = parser.add_subparsers(metavar="MODE", required=True, title=TITLE_POS_ARG)
+    subparsers = add_subparsers(parser, "submode")
     add_subparser_forecast_run(subparsers)
 
 
@@ -283,9 +289,7 @@ def add_subparser_template(subparsers: Subparsers) -> None:
     """
     parser = add_subparser(subparsers, "template", "Manipulate Jinja2 templates")
     basic_setup(parser)
-    subparsers = parser.add_subparsers(
-        dest="submode", metavar="MODE", required=True, title=TITLE_POS_ARG
-    )
+    subparsers = add_subparsers(parser, "submode")
     add_subparser_template_render(subparsers)
 
 
