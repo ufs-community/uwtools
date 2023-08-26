@@ -23,7 +23,7 @@ import yaml
 from uwtools import exceptions
 from uwtools.config.j2template import J2Template
 from uwtools.exceptions import UWConfigError
-from uwtools.types import OptionalPath
+from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.cli import get_file_type
 from uwtools.utils.file import readable
 
@@ -69,6 +69,7 @@ class Config(ABC, UserDict):
         super().__init__()
         self._config_path = str(config_path) if config_path else None
         self.update(self._load(self._config_path))
+        self.depth = self._depth(self.data)
 
     def __repr__(self) -> str:
         """
@@ -109,7 +110,7 @@ class Config(ABC, UserDict):
 
     # Public methods
 
-    def compare_config(self, dict1: dict, dict2: Optional[dict] = None) -> None:
+    def compare_config(self, dict1: dict, dict2: Optional[dict] = None) -> bool:
         """
         Compare two config dictionaries.
 
@@ -143,6 +144,8 @@ class Config(ABC, UserDict):
             for key in keys:
                 msg = f"{sect}: {key:>15}: {keys[key]}"
                 logging.info(msg)
+
+        return not diffs
 
     def dereference(
         self, ref_dict: Optional[dict] = None, full_dict: Optional[dict] = None
@@ -241,16 +244,6 @@ class Config(ABC, UserDict):
         while prev != self.data:
             self.dereference()
             prev = copy.deepcopy(self.data)
-
-    def dictionary_depth(self, config_dict: dict) -> int:
-        """
-        The depth of a dictionary.
-
-        :param config_dict: The dictionary whose depth to find.
-        """
-        if isinstance(config_dict, dict):
-            return 1 + (max(map(self.dictionary_depth, config_dict.values())))
-        return 0
 
     def iterate_values(
         self,
@@ -388,55 +381,16 @@ class Config(ABC, UserDict):
             else:
                 dstcfg[key] = new_val
 
-
-class NMLConfig(Config):
-    """
-    Concrete class to handle Fortran namelist files.
-    """
-
-    def __init__(self, config_path) -> None:
-        super().__init__(config_path)
-        self.parse_include()
-
     # Private methods
 
-    def _load(self, config_path: OptionalPath) -> dict:
+    def _depth(self, tree: dict) -> int:
         """
-        Reads and parses a Fortran namelist file.
+        The depth of this config's hierarchy.
 
-        See docs for Config._load().
-
-        :param config_path: Path to config file to load.
+        :param tree: A (sub)tree in the config.
+        :return: The length of the longest path to a value in the config.
         """
-        with readable(config_path) as f:
-            cfg = f90nml.read(f).todict(complex_tuple=False)
-        return self.from_ordereddict(cfg)
-
-    # Public methods
-
-    def dump_file(self, path: str) -> None:
-        """
-        Dumps the config as a Fortran namelist file.
-
-        :param path: Path to dump config to.
-        """
-        NMLConfig.dump_file_from_dict(path, self.data)
-
-    @staticmethod
-    def dump_file_from_dict(path: str, cfg: dict, opts: Optional[ns] = None) -> None:
-        """
-        Dumps a provided config dictionary as a Fortran namelist file.
-
-        :param path: Path to dump config to.
-        :param cfg: The in-memory config object to dump.
-        :param opts: Other options required by a subclass.
-        """
-        nml = OrderedDict(cfg)
-        for sect, keys in nml.items():
-            if isinstance(keys, dict):
-                nml[sect] = OrderedDict(keys)
-        with open(path, "w", encoding="utf-8") as file_name:
-            f90nml.Namelist(nml).write(file_name, sort=False)
+        return (max(map(self._depth, tree.values())) + 1) if isinstance(tree, dict) else 0
 
 
 class INIConfig(Config):
@@ -514,6 +468,56 @@ class INIConfig(Config):
             except AttributeError:
                 for key, value in cfg.items():
                     file_name.write(f"{key}={value}\n")
+
+
+class NMLConfig(Config):
+    """
+    Concrete class to handle Fortran namelist files.
+    """
+
+    def __init__(self, config_path) -> None:
+        super().__init__(config_path)
+        self.parse_include()
+
+    # Private methods
+
+    def _load(self, config_path: OptionalPath) -> dict:
+        """
+        Reads and parses a Fortran namelist file.
+
+        See docs for Config._load().
+
+        :param config_path: Path to config file to load.
+        """
+        with readable(config_path) as f:
+            cfg = f90nml.read(f).todict(complex_tuple=False)
+        return self.from_ordereddict(cfg)
+
+    # Public methods
+
+    def dump_file(self, path: str) -> None:
+        """
+        Dumps the config as a Fortran namelist file.
+
+        :param path: Path to dump config to.
+        """
+        NMLConfig.dump_file_from_dict(path, self.data)
+
+    @staticmethod
+    def dump_file_from_dict(path: str, cfg: dict, opts: Optional[ns] = None) -> None:
+        """
+        Dumps a provided config dictionary as a Fortran namelist file.
+
+        :param path: Path to dump config to.
+        :param cfg: The in-memory config object to dump.
+        :param opts: Other options required by a subclass.
+        """
+        nml = OrderedDict(cfg)
+        for sect, keys in nml.items():
+            if isinstance(keys, dict):
+                nml[sect] = OrderedDict(keys)
+        with open(path, "w", encoding="utf-8") as file_name:
+            f90nml.Namelist(nml).write(file_name, sort=False)
 
 
 class YAMLConfig(Config):
@@ -670,9 +674,42 @@ def _log_and_error(msg: str) -> None:
 # Public functions
 
 
+def compare_configs(
+    config_a_path: DefinitePath,
+    config_a_format: str,
+    config_b_path: DefinitePath,
+    config_b_format: str,
+) -> bool:
+    """
+    Compare two config files.
+
+    :param config_a_path: Path to first config file.
+    :param config_a_format: Format of first config file.
+    :param config_b_path: Path to second config file.
+    :param config_b_format: Format of second config file.
+    :return: False if config files had differences, otherwise True.
+    """
+
+    def getcfg(fmt: str, path: DefinitePath) -> Optional[Config]:
+        classes = {"ini": INIConfig, "nml": NMLConfig, "yaml": YAMLConfig}
+        try:
+            return classes[fmt](path)
+        except KeyError as e:
+            logging.error("Format '%s' should be one of: %s", e.args[0], ", ".join(classes.keys()))
+        return None
+
+    cfg_a = getcfg(config_a_format, config_a_path)
+    cfg_b = getcfg(config_b_format, config_b_path)
+    if not cfg_a or not cfg_b:
+        return False
+    logging.info("- %s", config_a_path)
+    logging.info("+ %s", config_b_path)
+    logging.info("-" * 69)
+    return cfg_a.compare_config(cfg_b.data)
+
+
 def create_config_obj(
     input_base_file: str,
-    compare: bool = False,
     config_file: Optional[str] = None,
     config_file_type: Optional[str] = None,
     dry_run: bool = False,
@@ -693,21 +730,12 @@ def create_config_obj(
         config_file_type = config_file_type or get_file_type(config_file)
         user_config_obj = globals()[f"{config_file_type}Config"](config_file)
         if config_file_type != infile_type:
-            config_depth = user_config_obj.dictionary_depth(user_config_obj.data)
-            input_depth = config_obj.dictionary_depth(config_obj.data)
+            config_depth = user_config_obj.depth
+            input_depth = config_obj.depth
             if input_depth < config_depth:
                 logging.error("%s not compatible with input file", config_file)
                 raise ValueError("Set config failure: config object not compatible with input file")
-
-        if compare:
-            logging.info("- %s", input_base_file)
-            logging.info("+ %s", config_file)
-            logging.info("-" * 69)
-            config_obj.compare_config(user_config_obj)
-            return
-
         config_obj.update_values(user_config_obj)
-
     config_obj.dereference_all()
 
     if values_needed:
@@ -743,7 +771,7 @@ def create_config_obj(
                 help(dump_method)
             else:
                 # Check for incompatible conversion objects:
-                input_depth = config_obj.dictionary_depth(config_obj.data)
+                input_depth = config_obj.depth
                 if (outfile_type == "INI" and input_depth > 2) or (
                     outfile_type == "NML" and input_depth != 2
                 ):

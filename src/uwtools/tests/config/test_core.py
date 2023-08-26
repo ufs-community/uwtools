@@ -8,7 +8,6 @@ import datetime
 import filecmp
 import logging
 import os
-import re
 from collections import OrderedDict
 from io import StringIO
 from pathlib import Path
@@ -24,6 +23,7 @@ from uwtools.config import core
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import compare_files, fixture_path, logged
 from uwtools.utils.cli import path_if_it_exists
+from uwtools.utils.file import writable
 
 # Helper functions
 
@@ -118,7 +118,7 @@ def test_compare_config(caplog, fmt, salad_base):
     cfgobj = help_cfgclass(ext)(fixture_path(f"simple{ext}"))
     if fmt == "INI":
         salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for INI
-    cfgobj.compare_config(cfgobj, salad_base)
+    assert cfgobj.compare_config(cfgobj, salad_base) is True
     # Expect no differences:
     assert not caplog.records
     caplog.clear()
@@ -126,7 +126,7 @@ def test_compare_config(caplog, fmt, salad_base):
     salad_base["salad"]["dressing"] = "italian"
     salad_base["salad"]["size"] = "large"
     del salad_base["salad"]["how_many"]
-    cfgobj.compare_config(cfgobj, salad_base)
+    assert not cfgobj.compare_config(cfgobj, salad_base)
     # Expect to see the following differences logged:
     for msg in [
         "salad:        dressing:  - italian + balsamic",
@@ -136,36 +136,59 @@ def test_compare_config(caplog, fmt, salad_base):
         assert logged(caplog, msg)
 
 
-def test_compare_nml(caplog):
-    """
-    Tests whether comparing two namelists works.
-    """
-    logging.getLogger().setLevel(logging.INFO)
-    nml1 = fixture_path("fruit_config.nml")
-    nml2 = fixture_path("fruit_config_mult_sect.nml")
-    core.create_config_obj(input_base_file=nml1, config_file=nml2, compare=True)
-    # Make sure the tool output contains all the expected lines:
-    expected = f"""
-- {nml1}
-+ {nml2}
----------------------------------------------------------------------
-config:       vegetable:  - eggplant + peas
-setting:         topping:  - None + crouton
-setting:            size:  - None + large
-setting:            meat:  - None + chicken
-""".strip()
-    for line in expected.split("\n"):
-        assert logged(caplog, line)
-    # Make sure it doesn't include any additional significant diffs
-    # A very rough estimate is that there is a word/colon set followed
-    # by a -/+ set
-    # This regex is meant to match the lines in the expected string
-    # above that give us the section, key value diffs like this:
-    #   config:       vegetable:  - eggplant + peas
-    pattern = re.compile(r"\w:\s+\w+:\s+-\s+\w+\s+\+\s+\w+")
-    for line in [record.message for record in caplog.records]:
-        if re.search(pattern, line):
-            assert line in expected
+@fixture
+def compare_configs_assets(tmp_path):
+    d = {"foo": {"bar": 88}, "baz": {"qux": 99}}
+    a = tmp_path / "a"
+    b = tmp_path / "b"
+    with writable(a) as f:
+        yaml.dump(d, f)
+    with writable(b) as f:
+        yaml.dump(d, f)
+    return d, a, b
+
+
+def test_compare_configs_good(caplog, compare_configs_assets):
+    _, a, b = compare_configs_assets
+    assert core.compare_configs(
+        config_a_path=a, config_a_format="yaml", config_b_path=b, config_b_format="yaml"
+    )
+    assert caplog.records
+
+
+def test_compare_configs_changed_value(caplog, compare_configs_assets):
+    d, a, b = compare_configs_assets
+    d["baz"]["qux"] = 11
+    with writable(b) as f:
+        yaml.dump(d, f)
+    assert not core.compare_configs(
+        config_a_path=a, config_a_format="yaml", config_b_path=b, config_b_format="yaml"
+    )
+    assert logged(caplog, "baz:             qux:  - 99 + 11")
+
+
+def test_compare_configs_missing_key(caplog, compare_configs_assets):
+    d, a, b = compare_configs_assets
+    del d["baz"]
+    with writable(b) as f:
+        yaml.dump(d, f)
+    # Note that a and b are swapped:
+    assert not core.compare_configs(
+        config_a_path=b, config_a_format="yaml", config_b_path=a, config_b_format="yaml"
+    )
+    assert logged(caplog, "baz:             qux:  - None + 99")
+
+
+def test_compare_configs_bad_format(caplog):
+    assert not core.compare_configs(
+        config_a_path="/not/used",
+        config_a_format="jpg",
+        config_b_path="/not/used",
+        config_b_format="netcdf",
+    )
+    msg = "Format '%s' should be one of: ini, nml, yaml"
+    assert logged(caplog, msg % "jpg")
+    assert logged(caplog, msg % "netcdf")
 
 
 def test_config_field_table(tmp_path):
@@ -192,10 +215,10 @@ def test_config_file_conversion(tmp_path):
     cfgfile = fixture_path("simple2.ini")
     outfile = str(tmp_path / "test_config_conversion.nml")
     core.create_config_obj(
-        input_base_file=infile, config_file=cfgfile, outfile=outfile, config_file_type="NML"
+        input_base_file=infile, config_file=cfgfile, outfile=outfile, config_file_type="INI"
     )
     expected = core.NMLConfig(infile)
-    config_obj = core.NMLConfig(cfgfile)
+    config_obj = core.INIConfig(cfgfile)
     expected.update_values(config_obj)
     expected_file = tmp_path / "expected.nml"
     expected.dump_file(expected_file)
@@ -218,6 +241,19 @@ def test_conversion_cfg_to_yaml(tmp_path):
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read()[-1] == "\n"
+
+
+@pytest.mark.parametrize(
+    "fn,depth", [("FV3_GFS_v16.yaml", 3), ("simple.nml", 2), ("simple2.ini", 2)]
+)
+def test_depth(depth, fn):
+    """
+    Test that the proper dictionary depth is returned for each file type.
+    """
+    infile = fixture_path(fn)
+    ext = Path(infile).suffix
+    cfgobj = help_cfgclass(ext)(infile)
+    assert cfgobj._depth(cfgobj.data) == depth
 
 
 def test_dereference():
@@ -297,19 +333,6 @@ type_prob: '{{ list_a / \"a\" }}'  # TypeError
     raised = [record.message for record in caplog.records if "raised" in record.message]
     assert "ZeroDivisionError" in raised[0]
     assert "TypeError" in raised[1]
-
-
-@pytest.mark.parametrize(
-    "fn,depth", [("FV3_GFS_v16.yaml", 3), ("simple.nml", 2), ("simple2.ini", 2)]
-)
-def test_dictionary_depth(depth, fn):
-    """
-    Test that the proper dictionary depth is returned for each file type.
-    """
-    infile = fixture_path(fn)
-    ext = Path(infile).suffix
-    cfgobj = help_cfgclass(ext)(infile)
-    assert cfgobj.dictionary_depth(cfgobj.data) == depth
 
 
 def test_nml_config_simple(salad_base, tmp_path):

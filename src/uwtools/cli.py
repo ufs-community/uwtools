@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import List
 
 import uwtools.config.atparse_to_jinja2
+import uwtools.config.core
 import uwtools.config.templater
 import uwtools.config.validator
 from uwtools.logging import setup_logging
@@ -47,9 +48,32 @@ def add_subparser_config(subparsers: Subparsers) -> None:
     parser = add_subparser(subparsers, "config", "Handle configs")
     basic_setup(parser)
     subparsers = add_subparsers(parser, "submode")
+    add_subparser_config_compare(subparsers)
     add_subparser_config_realize(subparsers)
     add_subparser_config_translate(subparsers)
     add_subparser_config_validate(subparsers)
+
+
+def add_subparser_config_compare(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: config compare
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    choices = ["ini", "nml", "yaml"]
+    parser = add_subparser(subparsers, "compare", "Compare configs")
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    add_arg_file_path(required, switch="--file-1-path", helpmsg="Path to config file 1")
+    add_arg_file_format(
+        required, switch="--file-1-format", helpmsg="Format of config file 1", choices=choices
+    )
+    add_arg_file_path(required, switch="--file-2-path", helpmsg="Path to config file 2")
+    add_arg_file_format(
+        required, switch="--file-2-format", helpmsg="Format of config file 2", choices=choices
+    )
+    optional = basic_setup(parser)
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
 
 
 def add_subparser_config_realize(subparsers: Subparsers) -> None:
@@ -116,10 +140,25 @@ def dispatch_config(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     return {
+        "compare": dispatch_config_compare,
         "render": dispatch_config_render,
         "translate": dispatch_config_translate,
         "validate": dispatch_config_validate,
     }[args.submode](args)
+
+
+def dispatch_config_compare(args: Namespace) -> bool:
+    """
+    Dispatch logic for config compare submode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.config.core.compare_configs(
+        config_a_path=args.file_1_path,
+        config_a_format=args.file_1_format,
+        config_b_path=args.file_2_path,
+        config_b_format=args.file_2_format,
+    )
 
 
 def dispatch_config_render(args: Namespace) -> bool:
@@ -402,6 +441,28 @@ def add_arg_dry_run(group: Group) -> None:
         "--dry-run",
         action="store_true",
         help="Print rendered template only",
+    )
+
+
+def add_arg_file_format(
+    group: Group, switch: str, helpmsg: str, choices: List[str], required: bool = True
+) -> None:
+    group.add_argument(
+        switch,
+        choices=choices,
+        help=helpmsg,
+        required=required,
+        type=str,
+    )
+
+
+def add_arg_file_path(group: Group, switch: str, helpmsg: str, required: bool = True) -> None:
+    group.add_argument(
+        switch,
+        help=helpmsg,
+        metavar="PATH",
+        required=required,
+        type=str,
     )
 
 
