@@ -1,5 +1,5 @@
 """
-The abstract Config class and its format-specific subclasses.
+Core classes and functions for working with configs.
 """
 
 from __future__ import annotations
@@ -649,6 +649,96 @@ class FieldTableConfig(YAMLConfig):
         FieldTableConfig.dump_dict(path, self.data)
 
 
+# Public functions
+
+
+def compare_configs(
+    config_a_path: DefinitePath,
+    config_a_format: str,
+    config_b_path: DefinitePath,
+    config_b_format: str,
+) -> bool:
+    """
+    Compare two config files.
+
+    :param config_a_path: Path to first config file.
+    :param config_a_format: Format of first config file.
+    :param config_b_path: Path to second config file.
+    :param config_b_format: Format of second config file.
+    :return: False if config files had differences, otherwise True.
+    """
+
+    cfg_a = _cli_name_to_config(config_a_format)(config_a_path)
+    cfg_b = _cli_name_to_config(config_b_format)(config_b_path)
+    logging.info("- %s", config_a_path)
+    logging.info("+ %s", config_b_path)
+    logging.info("-" * 69)
+    return cfg_a.compare_config(cfg_b.data)
+
+
+def print_config_section(config: dict, key_path: List[str]) -> None:
+    """
+    Descends into the config via the given keys, then prints the contents of the located subtree as
+    key=value pairs, one per line.
+    """
+    keys = []
+    current_path = "<unknown>"
+    for section in key_path:
+        keys.append(section)
+        current_path = " -> ".join(keys)
+        try:
+            subconfig = config[section]
+        except KeyError as e:
+            raise _log_and_error(f"Bad config path: {current_path}") from e
+        if not isinstance(subconfig, dict):
+            raise _log_and_error(f"Value at {current_path} must be a dictionary")
+        config = subconfig
+    output_lines = []
+    for key, value in config.items():
+        if type(value) not in (bool, float, int, str):
+            raise _log_and_error(f"Non-scalar value {value} found at {current_path}")
+        output_lines.append(f"{key}={value}")
+    print("\n".join(sorted(output_lines)))
+
+
+def realize_config(
+    input_file: OptionalPath,
+    input_format: str,
+    output_file: OptionalPath,
+    output_format: str,
+    values_file: OptionalPath,
+    values_format: Optional[str],
+    values_needed: bool = False,
+    dry_run: bool = False,
+) -> bool:
+    """
+    Realize an output config based on an input config and an optional values-providing config.
+
+    :param input_file: Input config file (stdin used when None).
+    :param input_format: Format of the input config.
+    :param output_file: Output config file (stdout used when None).
+    :param output_format: Format of the output config.
+    :param values_file: File providing values to modify input.
+    :param values_format: Format of the values config file.
+    :param values_needed: Provide a report about complete, missing, and template values.
+    :param dry_run: Log output instead of writing to output.
+    :return: True if no exception is raised.
+    :raises: UWConfigError if errors are encountered.
+    """
+
+    input_obj = _cli_name_to_config(input_format)(config_path=input_file)
+    input_obj.dereference_all()
+    input_obj = _realize_config_update(input_obj, values_file, values_format)
+    _realize_config_check_depths(input_obj, output_format)
+    if values_needed:
+        return _realize_config_values_needed(input_obj)
+    if dry_run:
+        logging.info(input_obj)
+    else:
+        _cli_name_to_config(output_format).dump_dict(path=output_file, cfg=input_obj.data)
+    return True
+
+
 # Private functions
 
 
@@ -683,55 +773,20 @@ def _log_and_error(msg: str) -> Exception:
     return UWConfigError(msg)
 
 
-# Public functions
-
-
-def compare_configs(
-    config_a_path: DefinitePath,
-    config_a_format: str,
-    config_b_path: DefinitePath,
-    config_b_format: str,
-) -> bool:
+def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
     """
-    Compare two config files.
+    Check that the depth of the input config does not exceed the output format's max.
 
-    :param config_a_path: Path to first config file.
-    :param config_a_format: Format of first config file.
-    :param config_b_path: Path to second config file.
-    :param config_b_format: Format of second config file.
-    :return: False if config files had differences, otherwise True.
+    :param input_obj: The input config.
+    :param output_format: The output format:
+    :raises: UWConfigError on excessive input-config depth.
     """
-
-    cfg_a = _cli_name_to_config(config_a_format)(config_a_path)
-    cfg_b = _cli_name_to_config(config_b_format)(config_b_path)
-    logging.info("- %s", config_a_path)
-    logging.info("+ %s", config_b_path)
-    logging.info("-" * 69)
-    return cfg_a.compare_config(cfg_b.data)
-
-
-def print_config_section(config: dict, key_path: List[str]) -> None:
-    """
-    Descends into the config via the given keys, then prints the contents of the located subtree as
-    key=value pairs, one per line.
-    """
-    keys = []
-    for section in key_path:
-        keys.append(section)
-        current_path = " -> ".join(keys)
-        try:
-            subconfig = config[section]
-        except KeyError as e:
-            raise _log_and_error(f"Bad config path: {current_path}") from e
-        if not isinstance(subconfig, dict):
-            raise _log_and_error(f"Value at {current_path} must be a dictionary")
-        config = subconfig
-    output_lines = []
-    for key, value in config.items():
-        if type(value) not in (bool, float, int, str):
-            raise _log_and_error(f"Non-scalar value {value} found at {current_path}")
-        output_lines.append(f"{key}={value}")
-    print("\n".join(sorted(output_lines)))
+    if (output_format == "ini" and input_obj.depth > 2) or (
+        output_format == "nml" and input_obj.depth != 2
+    ):
+        msg = "Cannot write depth-%s input to type-'%s' output" % (input_obj.depth, output_format)
+        logging.error(msg)
+        raise UWConfigError(msg)
 
 
 def _realize_config_update(
@@ -758,70 +813,22 @@ def _realize_config_update(
     return input_obj
 
 
-def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
+def _realize_config_values_needed(input_obj: Config) -> bool:
     """
-    Check that the depth of the input config does not exceed the output format's max.
+    Print a report characterizing input values as complete, empty, or template placeholders.
 
-    :param input_obj: The input config.
-    :param output_format: The output format:
-    :raises: UWConfigError on excessive input-config depth.
+    :param input_obj: The config to update.
     """
-    if (output_format == "ini" and input_obj.depth > 2) or (
-        output_format == "nml" and input_obj.depth != 2
-    ):
-        msg = "Cannot write depth-%s input to type-'%s' output" % (input_obj.depth, output_format)
-        logging.error(msg)
-        raise UWConfigError(msg)
-
-
-def realize_config(
-    input_file: OptionalPath,
-    input_format: str,
-    output_file: OptionalPath,
-    output_format: str,
-    values_file: OptionalPath,
-    values_format: Optional[str],
-    values_needed: bool = False,
-    dry_run: bool = False,
-) -> bool:
-    """
-    Realize an output config based on an input config and an optional values-providing config.
-
-    :param input_file: Input config file (stdin used when None).
-    :param input_format: Format of the input config.
-    :param output_file: Output config file (stdout used when None).
-    :param output_format: Format of the output config.
-    :param values_file: File providing values to modify input.
-    :param values_format: Format of the values config file.
-    :param values_needed: Provide a report about complete, missing, and template values.
-    :param dry_run: Log output instead of writing to output.
-    :return: True if no exception is raised.
-    :raises: UWConfigError if errors are encountered.
-    """
-
-    input_obj = _cli_name_to_config(input_format)(config_path=input_file)
-    input_obj.dereference_all()
-    input_obj = _realize_config_update(input_obj, values_file, values_format)
-    _realize_config_check_depths(input_obj, output_format)
-
-    if values_needed:
-        complete, empty, template = input_obj.characterize_values(input_obj.data, parent="")
-        logging.info("Keys that are complete:")
-        for var in complete:
-            logging.info(var)
-        logging.info("")
-        logging.info("Keys that have unfilled Jinja2 templates:")
-        for var in template:
-            logging.info(var)
-        logging.info("")
-        logging.info("Keys that are set to empty:")
-        for var in empty:
-            logging.info(var)
-        return True
-
-    if dry_run:
-        logging.info(input_obj)
-    else:
-        _cli_name_to_config(output_format).dump_dict(path=output_file, cfg=input_obj.data)
-
+    complete, empty, template = input_obj.characterize_values(input_obj.data, parent="")
+    logging.info("Keys that are complete:")
+    for var in complete:
+        logging.info(var)
+    logging.info("")
+    logging.info("Keys that have unfilled Jinja2 templates:")
+    for var in template:
+        logging.info(var)
+    logging.info("")
+    logging.info("Keys that are set to empty:")
+    for var in empty:
+        logging.info(var)
     return True
