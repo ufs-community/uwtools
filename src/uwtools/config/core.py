@@ -734,6 +734,30 @@ def print_config_section(config: dict, key_path: List[str]) -> None:
     print("\n".join(sorted(output_lines)))
 
 
+def _realize_config_update(
+    input_obj: Config, values_file: OptionalPath, values_format: Optional[str]
+) -> Config:
+    """
+    Update config with values from another config, if given.
+
+    :param input_obj: The config to update.
+    :param values_file: File providing values to modify input.
+    :param values_format: Format of the values config file.
+    :return: The input config, possibly updated.
+    """
+    if values_file:
+        logging.debug("Before update, config has depth %s", input_obj.depth)
+        values_format = values_format or get_file_type(values_file)
+        values_obj = _cli_name_to_config(values_format)(config_path=values_file)
+        logging.debug("Values config has depth %s", values_obj.depth)
+        input_obj.update_values(values_obj)
+        input_obj.dereference_all()
+        logging.debug("After update, input config has depth %s", input_obj.depth)
+    else:
+        logging.debug("Input config has depth %s", input_obj.depth)
+    return input_obj
+
+
 def realize_config(
     input_file: OptionalPath,
     input_format: str,
@@ -762,16 +786,17 @@ def realize_config(
     input_obj = _cli_name_to_config(input_format)(config_path=input_file)
     input_obj.dereference_all()
 
-    if values_file:
-        logging.debug("Before update, config has depth %s", input_obj.depth)
-        values_format = values_format or get_file_type(values_file)
-        values_obj = _cli_name_to_config(values_format)(config_path=values_file)
-        logging.debug("Values config has depth %s", values_obj.depth)
-        input_obj.update_values(values_obj)
-        input_obj.dereference_all()
-        logging.debug("After update, input config has depth %s", input_obj.depth)
-    else:
-        logging.debug("Input config has depth %s", input_obj.depth)
+    input_obj = _realize_config_update(input_obj, values_file, values_format)
+    # if values_file:
+    #     logging.debug("Before update, config has depth %s", input_obj.depth)
+    #     values_format = values_format or get_file_type(values_file)
+    #     values_obj = _cli_name_to_config(values_format)(config_path=values_file)
+    #     logging.debug("Values config has depth %s", values_obj.depth)
+    #     input_obj.update_values(values_obj)
+    #     input_obj.dereference_all()
+    #     logging.debug("After update, input config has depth %s", input_obj.depth)
+    # else:
+    #     logging.debug("Input config has depth %s", input_obj.depth)
 
     if (output_format == "ini" and input_obj.depth > 2) or (
         output_format == "nml" and input_obj.depth != 2
