@@ -146,7 +146,7 @@ def dispatch_config(args: Namespace) -> bool:
     """
     return {
         "compare": dispatch_config_compare,
-        "render": dispatch_config_render,
+        "realize": dispatch_config_realize,
         "translate": dispatch_config_translate,
         "validate": dispatch_config_validate,
     }[args.submode](args)
@@ -182,15 +182,6 @@ def dispatch_config_realize(args: Namespace) -> bool:
         values_needed=args.values_needed,
         dry_run=args.dry_run,
     )
-
-
-def dispatch_config_render(args: Namespace) -> bool:
-    """
-    Dispatch logic for config render submode.
-
-    :param args: Parsed command-line args.
-    """
-    raise NotImplementedError
 
 
 def dispatch_config_translate(args: Namespace) -> bool:
@@ -548,12 +539,12 @@ def add_arg_values_file(group: Group, required: bool = False) -> None:
     )
 
 
-def add_arg_values_format(group: Group, choices: List[str]) -> None:
+def add_arg_values_format(group: Group, choices: List[str], required: bool = False) -> None:
     group.add_argument(
         "--values-format",
         choices=choices,
         help="Values format",
-        required=True,
+        required=required,
         type=str,
     )
 
