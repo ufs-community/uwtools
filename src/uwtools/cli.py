@@ -29,7 +29,6 @@ def main() -> None:
     setup_logging(quiet=args.quiet, verbose=args.verbose)
     modes = {
         "config": dispatch_config,
-        # "experiment": dispatch_experiment,
         "forecast": dispatch_forecast,
         "template": dispatch_template,
     }
@@ -215,102 +214,6 @@ def dispatch_config_validate(args: Namespace) -> bool:
     else:
         success = False
     return success
-
-
-# Mode experiment
-
-
-# def add_subparser_experiment(subparsers: Subparsers) -> None:
-#    """
-#    Subparser for mode: experiment
-#
-#    :param subparsers: Parent parser's subparsers, to add this subparser to.
-#    """
-#    parser = add_subparser(subparsers, "experiment", "Manage experiments")
-#    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
-#    subparsers = add_subparsers(parser, dest="submode")
-#    add_subparser_experiment_configure(subparsers)
-#    add_subparser_experiment_run(subparsers)
-#    add_subparser_experiment_validate(subparsers)
-
-
-# def add_subparser_experiment_configure(subparsers: Subparsers) -> None:
-#    """
-#    Subparser for mode: experiment configure
-#
-#    :param subparsers: Parent parser's subparsers, to add this subparser to.
-#    """
-#    parser = add_subparser(subparsers, "configure", "Configure an experiment")
-#    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
-#    optional = basic_setup(parser)
-#    add_arg_quiet(optional)
-#    add_arg_verbose(optional)
-
-
-# def add_subparser_experiment_run(subparsers: Subparsers) -> None:
-#    """
-#    Subparser for mode: experiment run
-#
-#    :param subparsers: Parent parser's subparsers, to add this subparser to.
-#    """
-#    parser = add_subparser(subparsers, "run", "Run an experiment")
-#    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
-#    optional = basic_setup(parser)
-#    add_arg_quiet(optional)
-#    add_arg_verbose(optional)
-
-
-# def add_subparser_experiment_validate(subparsers: Subparsers) -> None:
-#    """
-#    Subparser for mode: experiment validate
-#
-#    :param subparsers: Parent parser's subparsers, to add this subparser to.
-#    """
-#    parser = add_subparser(subparsers, "validate", "Validate an experiment")
-#    parser.add_argument('-h', '--help', action='help', dest='help', help="Show help and exit")
-#    optional = basic_setup(parser)
-#    add_arg_quiet(optional)
-#    add_arg_verbose(optional)
-
-
-# def dispatch_experiment(args: Namespace) -> bool:
-#    """
-#    Dispatch logic for experiment mode.
-#
-#    :param args: Parsed command-line args.
-#    """
-#    return {
-#        "configure": dispatch_experiment_configure,
-#        "run": dispatch_experiment_run,
-#        "validate": dispatch_experiment_validate,
-#    }[args.submode](args)
-
-
-# def dispatch_experiment_configure(args: Namespace) -> bool:
-#    """
-#    Dispatch logic for experiment configure submode.
-#
-#    :param args: Parsed command-line args.
-#    """
-#    raise NotImplementedError
-
-
-# def dispatch_experiment_run(args: Namespace) -> bool:
-#    """
-#    Dispatch logic for experiment run submode.
-#
-#    :param args: Parsed command-line args.
-#    """
-#    raise NotImplementedError
-
-
-# def dispatch_experiment_validate(args: Namespace) -> bool:
-#    """
-#    Dispatch logic for experiment validate submode.
-#
-#    :param args: Parsed command-line args.
-#    """
-#    raise NotImplementedError
 
 
 # Mode forecast
@@ -697,7 +600,6 @@ def parse_args(raw_args: List[str]) -> Namespace:
     basic_setup(parser)
     subparsers = add_subparsers(parser, "mode")
     add_subparser_config(subparsers)
-    # add_subparser_experiment(subparsers)
     add_subparser_forecast(subparsers)
     add_subparser_template(subparsers)
     return parser.parse_args(raw_args)

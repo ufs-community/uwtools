@@ -55,3 +55,6 @@ class SRWExperiment(Facade):
         """
         Link the fix files.
         """
+
+
+CLASSES = {"SRW": SRWExperiment}
