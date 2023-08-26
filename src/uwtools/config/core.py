@@ -449,7 +449,7 @@ class INIConfig(Config):
                 parser.write(f, space_around_delimiters=opts.space if opts else True)
             except AttributeError:
                 for key, value in cfg.items():
-                    f.write(f"{key}={value}\n")
+                    print(f"{key}={value}", file=f)
 
     def dump_file(self, path: DefinitePath) -> None:
         """
@@ -638,7 +638,7 @@ class FieldTableConfig(YAMLConfig):
                     lines.append(f'{" ":11}"{key}", "{value}"')
             lines[-1] += " /"
         with writable(path) as f:
-            f.write("\n".join(lines))
+            print("\n".join(lines), file=f)
 
     def dump_file(self, path: DefinitePath) -> None:
         """
