@@ -15,6 +15,7 @@ import uwtools.config.atparse_to_jinja2
 import uwtools.config.core
 import uwtools.config.templater
 import uwtools.config.validator
+import uwtools.drivers.forecast
 from uwtools.logging import setup_logging
 
 TITLE_REQ_ARG = "Required arguments"
@@ -29,7 +30,7 @@ def main() -> None:
     modes = {
         "config": dispatch_config,
         # "experiment": dispatch_experiment,
-        # "forecast": dispatch_forecast,
+        "forecast": dispatch_forecast,
         "template": dispatch_template,
     }
     success = modes[args.mode](args)
@@ -315,46 +316,52 @@ def dispatch_config_validate(args: Namespace) -> bool:
 # Mode forecast
 
 
-# def add_subparser_forecast(subparsers: Subparsers) -> None:
-#    """
-#    Subparser for mode: forecast
-#
-#    :param subparsers: Parent parser's subparsers, to add this subparser to.
-#    """
-#    parser = add_subparser(subparsers, "forecast", "Configure and run forecasts")
-#    basic_setup(parser)
-#    subparsers = add_subparsers(parser, "submode")
-#    add_subparser_forecast_run(subparsers)
+def add_subparser_forecast(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: forecast
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = add_subparser(subparsers, "forecast", "Configure and run forecasts")
+    basic_setup(parser)
+    subparsers = add_subparsers(parser, "submode")
+    add_subparser_forecast_run(subparsers)
 
 
-# def add_subparser_forecast_run(subparsers: Subparsers) -> None:
-#    """
-#    Subparser for mode: forecast run
-#
-#    :param subparsers: Parent parser's subparsers, to add this subparser to.
-#    """
-#    parser = add_subparser(subparsers, "run", "Run a forecast")
-#    optional = basic_setup(parser)
-#    add_arg_quiet(optional)
-#    add_arg_verbose(optional)
+def add_subparser_forecast_run(subparsers: Subparsers) -> None:
+    """
+    Subparser for mode: forecast run
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = add_subparser(subparsers, "run", "Run a forecast")
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    add_arg_config_file(required)
+    add_arg_model(required, choices=["FV3"])
+    optional = basic_setup(parser)
+    add_arg_dry_run(optional)
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
 
 
-# def dispatch_forecast(args: Namespace) -> bool:
-#    """
-#    Dispatch logic for forecast mode.
-#
-#    :param args: Parsed command-line args.
-#    """
-#    return {"run": dispatch_forecast_run}[args.submode](args)
+def dispatch_forecast(args: Namespace) -> bool:
+    """
+    Dispatch logic for forecast mode.
+
+    :param args: Parsed command-line args.
+    """
+    forecast_class = uwtools.drivers.forecast.CLASSES[args.forecast_model]
+    forecast_class(config_file=args.config_file).run()
+    return True
 
 
-# def dispatch_forecast_run(args: Namespace) -> bool:
-#    """
-#    Dispatch logic for forecast run submode.
-#
-#    :param args: Parsed command-line args.
-#    """
-#    raise NotImplementedError
+def dispatch_forecast_run(args: Namespace) -> bool:
+    """
+    Dispatch logic for forecast run submode.
+
+    :param args: Parsed command-line args.
+    """
+    raise NotImplementedError
 
 
 # Mode template
@@ -429,6 +436,17 @@ def add_arg_compare(group: Group) -> None:
     )
 
 
+def add_arg_config_file(group: Group) -> None:
+    group.add_argument(
+        "--config-file",
+        "-c",
+        help="Path to YAML config file",
+        metavar="PATH",
+        required=True,
+        type=str,
+    )
+
+
 def add_arg_dry_run(group: Group) -> None:
     group.add_argument(
         "--dry-run",
@@ -438,7 +456,7 @@ def add_arg_dry_run(group: Group) -> None:
 
 
 def add_arg_file_format(
-    group: Group, switch: str, helpmsg: str, choices: List[str], required: bool = True
+    group: Group, switch: str, helpmsg: str, choices: List[str], required: bool = False
 ) -> None:
     group.add_argument(
         switch,
@@ -486,6 +504,16 @@ def add_arg_key_eq_val_pairs(group: Group) -> None:
         help="A key=value pair to override/supplement config",
         metavar="KEY=VALUE",
         nargs="*",
+    )
+
+
+def add_arg_model(group: Group, choices: List[str]) -> None:
+    group.add_argument(
+        "--model",
+        choices=choices,
+        help="Model name",
+        required=True,
+        type=str,
     )
 
 

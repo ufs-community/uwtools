@@ -191,3 +191,6 @@ class FV3Forecast(Driver):
         )
         msg = f"Config file {outconfig_file} created"
         logging.info(msg)
+
+
+CLASSES = {"FV3": FV3Forecast}
