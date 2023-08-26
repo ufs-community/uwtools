@@ -373,7 +373,7 @@ def add_subparser_template(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "template", "Handle Jinja2 templates")
+    parser = add_subparser(subparsers, "template", "Handle templates")
     basic_setup(parser)
     subparsers = add_subparsers(parser, "submode")
     add_subparser_template_render(subparsers)
@@ -385,7 +385,7 @@ def add_subparser_template_render(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "render", "Render a Jina2 template")
+    parser = add_subparser(subparsers, "render", "Render a template")
     optional = basic_setup(parser)
     add_arg_input_file(optional)
     add_arg_output_file(optional)
@@ -698,6 +698,6 @@ def parse_args(raw_args: List[str]) -> Namespace:
     subparsers = add_subparsers(parser, "mode")
     add_subparser_config(subparsers)
     # add_subparser_experiment(subparsers)
-    # add_subparser_forecast(subparsers)
+    add_subparser_forecast(subparsers)
     add_subparser_template(subparsers)
     return parser.parse_args(raw_args)
