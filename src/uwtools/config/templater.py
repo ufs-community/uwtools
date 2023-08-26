@@ -4,20 +4,19 @@ Support for rendering Jinja2 templates.
 
 import logging
 import os
-from typing import List, Optional
+from typing import Dict, Optional
 
 import uwtools.config.core
 from uwtools.config.j2template import J2Template
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.cli import dict_from_key_eq_val_strings, get_file_type
-from uwtools.utils.file import readable, writable
+from uwtools.utils.file import get_file_type, readable, writable
 
 
 def render(
     input_file: OptionalPath,
     output_file: OptionalPath,
     config_file: DefinitePath,
-    key_eq_val_pairs: Optional[List[str]] = None,
+    overrides: Optional[Dict[str, str]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> bool:
@@ -32,7 +31,7 @@ def render(
     :param dry_run: Run in dry-run mode?
     """
     _report(locals())
-    cfgobj = _set_up_config_obj(config_file=config_file, key_eq_val_pairs=key_eq_val_pairs)
+    cfgobj = _set_up_config_obj(config_file=config_file, overrides=overrides)
     with readable(input_file) as f:
         template_str = f.read()
     template = J2Template(configure_obj=cfgobj, template_str=template_str)
@@ -88,7 +87,7 @@ def _report(args: dict) -> None:
 
 
 def _set_up_config_obj(
-    config_file: OptionalPath = None, key_eq_val_pairs: Optional[List[str]] = None
+    config_file: OptionalPath = None, overrides: Optional[Dict[str, str]] = None
 ) -> dict:
     """
     Return a config object based on an input file, if given, or otherwise the shell environment; and
@@ -106,8 +105,7 @@ def _set_up_config_obj(
     else:
         cfg = dict(os.environ)  # Do not modify os.environ: Make a copy.
         logging.debug("Initial config set from environment")
-    if key_eq_val_pairs:
-        supplemental = dict_from_key_eq_val_strings(key_eq_val_pairs)
-        cfg.update(supplemental)
-        logging.debug("Supplemented config with values: %s", " ".join(key_eq_val_pairs))
+    if overrides:
+        cfg.update(overrides)
+        logging.debug("Update config with override values: %s", " ".join(overrides))
     return cfg

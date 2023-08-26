@@ -103,5 +103,5 @@ def test__set_up_config_obj_env():
 
 def test__set_up_config_obj_file(config_file):
     expected = {"roses": "white", "violets": "blue", "cannot": {"override": "this"}}
-    actual = templater._set_up_config_obj(config_file=config_file, key_eq_val_pairs=["roses=white"])
+    actual = templater._set_up_config_obj(config_file=config_file, overrides={"roses": "white"})
     assert actual == expected

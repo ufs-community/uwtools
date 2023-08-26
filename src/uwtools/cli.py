@@ -9,7 +9,7 @@ from argparse import HelpFormatter, Namespace
 from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
 from pathlib import Path
-from typing import List
+from typing import Dict, List
 
 import uwtools.config.atparse_to_jinja2
 import uwtools.config.core
@@ -65,11 +65,17 @@ def add_subparser_config_compare(subparsers: Subparsers) -> None:
     required = parser.add_argument_group(TITLE_REQ_ARG)
     add_arg_file_path(required, switch="--file-1-path", helpmsg="Path to config file 1")
     add_arg_file_format(
-        required, switch="--file-1-format", helpmsg="Format of config file 1", choices=choices
+        required,
+        switch="--file-1-format",
+        helpmsg="Format of config file 1",
+        choices=choices,
     )
     add_arg_file_path(required, switch="--file-2-path", helpmsg="Path to config file 2")
     add_arg_file_format(
-        required, switch="--file-2-format", helpmsg="Format of config file 2", choices=choices
+        required,
+        switch="--file-2-format",
+        helpmsg="Format of config file 2",
+        choices=choices,
     )
     optional = basic_setup(parser)
     add_arg_quiet(optional)
@@ -84,15 +90,14 @@ def add_subparser_config_realize(subparsers: Subparsers) -> None:
     """
     choices = ["ini", "nml", "yaml"]
     parser = add_subparser(subparsers, "realize", "Realize config")
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    add_arg_input_format(required, choices=choices)
+    add_arg_output_format(required, choices=choices)
     optional = basic_setup(parser)
     add_arg_input_file(optional)
-    add_arg_input_format(optional, choices=choices)
     add_arg_output_file(optional)
-    add_arg_output_format(optional, choices=choices)
-    add_arg_config_file(optional)
-    add_arg_config_format(optional, choices=choices)
-    add_arg_compare(optional)
-    add_arg_show_format(optional)
+    add_arg_values_file(optional)
+    add_arg_values_format(optional, choices=choices)
     add_arg_values_needed(optional)
     add_arg_dry_run(optional)
     add_arg_quiet(optional)
@@ -158,6 +163,24 @@ def dispatch_config_compare(args: Namespace) -> bool:
         config_a_format=args.file_1_format,
         config_b_path=args.file_2_path,
         config_b_format=args.file_2_format,
+    )
+
+
+def dispatch_config_realize(args: Namespace) -> bool:
+    """
+    Dispatch logic for config realize submode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.config.core.realize_config(
+        input_file=args.input_file,
+        input_format=args.input_format,
+        output_file=args.output_file,
+        output_format=args.output_format,
+        values_file=args.values_file,
+        values_format=args.values_format,
+        values_needed=args.values_needed,
+        dry_run=args.dry_run,
     )
 
 
@@ -368,7 +391,7 @@ def add_subparser_template_render(subparsers: Subparsers) -> None:
     optional = basic_setup(parser)
     add_arg_input_file(optional)
     add_arg_output_file(optional)
-    add_arg_config_file(optional)
+    add_arg_values_file(optional)
     add_arg_values_needed(optional)
     add_arg_dry_run(optional)
     add_arg_quiet(optional)
@@ -395,8 +418,8 @@ def dispatch_template_render(args: Namespace) -> bool:
     return uwtools.config.templater.render(
         args.input_file,
         args.output_file,
-        args.config_file,
-        args.key_eq_val_pairs,
+        args.values_file,
+        dict_from_key_eq_val_strings(args.key_eq_val_pairs),
         args.values_needed,
         args.dry_run,
     )
@@ -412,27 +435,6 @@ def add_arg_compare(group: Group) -> None:
         "--compare",
         action="store_true",
         help="Compare two configs",
-    )
-
-
-def add_arg_config_file(group: Group, required: bool = False) -> None:
-    group.add_argument(
-        "--config-file",
-        "-c",
-        help="Path to config file",
-        metavar="PATH",
-        required=required,
-        type=str,
-    )
-
-
-def add_arg_config_format(group: Group, choices: List[str]) -> None:
-    group.add_argument(
-        "--config-format",
-        choices=choices,
-        help="Config format",
-        required=True,
-        type=str,
     )
 
 
@@ -536,11 +538,23 @@ def add_arg_schema_file(group: Group) -> None:
     )
 
 
-def add_arg_show_format(group: Group) -> None:
+def add_arg_values_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        "--show-format",
-        action="store_true",
-        help="???",
+        "--values-file",
+        help="Path to file providing override or interpolation values",
+        metavar="PATH",
+        required=required,
+        type=str,
+    )
+
+
+def add_arg_values_format(group: Group, choices: List[str]) -> None:
+    group.add_argument(
+        "--values-format",
+        choices=choices,
+        help="Values format",
+        required=True,
+        type=str,
     )
 
 
@@ -627,7 +641,22 @@ def check_args(args: Namespace) -> Namespace:
             abort("Specify at most one of --quiet, --verbose")
     except AttributeError:
         pass
+    try:
+        if args.values_file and not args.values_format:
+            abort("Specify --values-format with --values-file")
+    except AttributeError:
+        pass
     return args
+
+
+def dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:
+    """
+    Given a list of key=value strings, return a dictionary of key/value pairs.
+
+    :param config_items: Strings in the form key=value.
+    :return: A dictionary based on the input key=value strings.
+    """
+    return dict([arg.split("=") for arg in config_items])
 
 
 def formatter(prog: str) -> HelpFormatter:

@@ -24,6 +24,24 @@ def assets(tmp_path):
     return now, renamed, rundir
 
 
+def test_get_file_type():
+    for ext, file_type in {
+        "bash": "INI",
+        "cfg": "INI",
+        "ini": "INI",
+        "nml": "NML",
+        "sh": "INI",
+        "yaml": "YAML",
+        "yml": "YAML",
+    }.items():
+        assert file.get_file_type(f"a.{ext}") == file_type
+
+
+def test_get_file_type_unrecignized():
+    with raises(ValueError):
+        file.get_file_type("a.jpg")
+
+
 @pytest.mark.parametrize("exc", [FileExistsError, RuntimeError])
 def test_handle_existing_delete_failure(exc, assets):
     _, _, rundir = assets
@@ -58,6 +76,18 @@ def test_handle_existing_rename_success(assets):
         file.handle_existing(directory=rundir, action="rename")
     assert renamed.is_dir()
     assert not rundir.is_dir()
+
+
+def test_path_if_it_exists(tmp_path):
+    # Test non-existent path:
+    path = tmp_path / "foo"
+    with raises(FileNotFoundError):
+        file.path_if_it_exists(str(path))
+    # Test directory that exists:
+    assert file.path_if_it_exists(str(tmp_path)) == str(tmp_path)
+    # Test file that exists:
+    path.touch()
+    assert file.path_if_it_exists(str(path)) == str(path)
 
 
 def test_readable_file(tmp_path):

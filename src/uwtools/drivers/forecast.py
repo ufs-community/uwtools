@@ -9,7 +9,7 @@ import sys
 from importlib import resources
 from typing import Dict
 
-from uwtools.config.core import FieldTableConfig, NMLConfig, create_config_obj
+from uwtools.config.core import FieldTableConfig, NMLConfig, realize_config
 from uwtools.drivers.driver import Driver
 from uwtools.utils.file import handle_existing
 
@@ -64,7 +64,7 @@ class FV3Forecast(Driver):
             os.makedirs(path)
 
     @staticmethod
-    def create_field_table(update_obj, outfldtab_file, base_file=None):
+    def create_field_table(update_obj: dict, outfldtab_file, base_file=None):
         """
         Uses an object with user supplied values and an optional base file to create an output field
         table file. Will "dereference" the base file.
@@ -82,7 +82,7 @@ class FV3Forecast(Driver):
             config_obj.dump_file(outfldtab_file)
         else:
             # Dump update object to a Field Table file:
-            FieldTableConfig.dump_file_from_dict(path=outfldtab_file, cfg=update_obj)
+            FieldTableConfig.dump_dict(path=outfldtab_file, cfg=update_obj)
 
         msg = f"Namelist file {outfldtab_file} created"
         logging.info(msg)
@@ -181,8 +181,13 @@ class FV3Forecast(Driver):
             base_file: Path to base config file
             outconfig_file: Path to output configuration file
         """
-        create_config_obj(
-            input_base_file=base_file, config_file=self._config_file, outfile=outconfig_file
+        realize_config(
+            input_file=base_file,
+            input_format="yaml",
+            output_file=outconfig_file,
+            output_format="yaml",
+            values_file=self._config_file,
+            values_format="yaml",
         )
         msg = f"Config file {outconfig_file} created"
         logging.info(msg)

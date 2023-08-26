@@ -118,14 +118,17 @@ def test__create_model_config(tmp_path):
     outfile = str(tmp_path / "out.yaml")
     for path in infile, basefile:
         Path(path).touch()
-    with patch.object(forecast, "create_config_obj") as create_config_obj:
+    with patch.object(forecast, "realize_config") as realize_config:
         with patch.object(FV3Forecast, "_validate", return_value=True):
             FV3Forecast(config_file=infile)._create_model_config(
                 outconfig_file=outfile, base_file=basefile
             )
-    assert create_config_obj.call_args.kwargs["config_file"] == infile
-    assert create_config_obj.call_args.kwargs["input_base_file"] == basefile
-    assert create_config_obj.call_args.kwargs["outfile"] == outfile
+    assert realize_config.call_args.kwargs["input_file"] == basefile
+    assert realize_config.call_args.kwargs["input_format"] == "yaml"
+    assert realize_config.call_args.kwargs["output_file"] == outfile
+    assert realize_config.call_args.kwargs["output_format"] == "yaml"
+    assert realize_config.call_args.kwargs["values_file"] == infile
+    assert realize_config.call_args.kwargs["values_format"] == "yaml"
 
 
 @fixture

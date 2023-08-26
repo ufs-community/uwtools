@@ -8,9 +8,10 @@ import shutil
 import sys
 from contextlib import contextmanager
 from datetime import datetime as dt
+from pathlib import Path
 from typing import IO, Generator
 
-from uwtools.types import OptionalPath
+from uwtools.types import DefinitePath, OptionalPath
 
 
 def handle_existing(directory: str, action: str) -> None:
@@ -42,6 +43,43 @@ def handle_existing(directory: str, action: str) -> None:
         msg = f"Could not rename directory {directory}"
         logging.critical(msg)
         raise RuntimeError(msg) from e
+
+
+def get_file_type(path: DefinitePath) -> str:
+    """
+    Returns a standardized file type given a path/filename.
+
+    :param path: A path or filename.
+    :return: One of a set of supported file types.
+    :raises: ValueError if the path/filename suffix is unrecognized.
+    """
+
+    suffix = Path(path).suffix
+    if suffix in [".bash", ".cfg", ".ini", ".sh"]:
+        return "INI"
+    if suffix in [".nml"]:
+        return "NML"
+    if suffix in [".yaml", ".yml"]:
+        return "YAML"
+    msg = f"Unrecognized file suffix '{suffix}'. Cannot determine file type!."
+    logging.critical(msg)
+    raise ValueError(msg)
+
+
+def path_if_it_exists(path: str) -> str:
+    """
+    Returns the given path as an absolute path if it exists, and raises an exception otherwise.
+
+    :param path: The filesystem path to test.
+    :return: The same filesystem path as an absolute path.
+    :raises: FileNotFoundError is path does not exst
+    """
+    p = Path(path)
+    if not p.exists():
+        msg = f"{path} does not exist"
+        print(msg, file=sys.stderr)
+        raise FileNotFoundError(msg)
+    return str(p.absolute())
 
 
 @contextmanager
