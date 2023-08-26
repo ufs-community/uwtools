@@ -758,6 +758,22 @@ def _realize_config_update(
     return input_obj
 
 
+def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
+    """
+    Check that the depth of the input config does not exceed the output format's max.
+
+    :param input_obj: The input config.
+    :param output_format: The output format:
+    :raises: UWConfigError on excessive input-config depth.
+    """
+    if (output_format == "ini" and input_obj.depth > 2) or (
+        output_format == "nml" and input_obj.depth != 2
+    ):
+        msg = "Cannot write depth-%s input to type-'%s' output" % (input_obj.depth, output_format)
+        logging.error(msg)
+        raise UWConfigError(msg)
+
+
 def realize_config(
     input_file: OptionalPath,
     input_format: str,
@@ -785,25 +801,8 @@ def realize_config(
 
     input_obj = _cli_name_to_config(input_format)(config_path=input_file)
     input_obj.dereference_all()
-
     input_obj = _realize_config_update(input_obj, values_file, values_format)
-    # if values_file:
-    #     logging.debug("Before update, config has depth %s", input_obj.depth)
-    #     values_format = values_format or get_file_type(values_file)
-    #     values_obj = _cli_name_to_config(values_format)(config_path=values_file)
-    #     logging.debug("Values config has depth %s", values_obj.depth)
-    #     input_obj.update_values(values_obj)
-    #     input_obj.dereference_all()
-    #     logging.debug("After update, input config has depth %s", input_obj.depth)
-    # else:
-    #     logging.debug("Input config has depth %s", input_obj.depth)
-
-    if (output_format == "ini" and input_obj.depth > 2) or (
-        output_format == "nml" and input_obj.depth != 2
-    ):
-        msg = "Cannot write depth-%s input to type-'%s' output" % (input_obj.depth, output_format)
-        logging.error(msg)
-        raise UWConfigError(msg)
+    _realize_config_check_depths(input_obj, output_format)
 
     if values_needed:
         complete, empty, template = input_obj.characterize_values(input_obj.data, parent="")
