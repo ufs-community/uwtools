@@ -1,18 +1,32 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
+from argparse import ArgumentParser as Parser
 from types import SimpleNamespace as ns
+from typing import List
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import pytest
-from pytest import raises
+from pytest import fixture, raises
 
 from uwtools import cli
 
+# Test functions
 
-def test_dict_from_key_eq_val_strings():
-    assert not cli.dict_from_key_eq_val_strings([])
-    assert cli.dict_from_key_eq_val_strings(["a=1", "b=2"]) == {"a": "1", "b": "2"}
+
+def test_add_subparser_config(subparsers):
+    cli.add_subparser_config(subparsers)
+    assert submodes(subparsers.choices["config"]) == ["compare", "realize", "translate", "validate"]
+
+
+def test_add_subparser_forecast(subparsers):
+    cli.add_subparser_forecast(subparsers)
+    assert submodes(subparsers.choices["forecast"]) == ["run"]
+
+
+def test_add_subparser_template(subparsers):
+    cli.add_subparser_template(subparsers)
+    assert submodes(subparsers.choices["template"]) == ["render"]
 
 
 @pytest.mark.parametrize("params", [(False, 1, False, True), (True, 0, True, False)])
@@ -31,3 +45,25 @@ def test_main_fail(params):
         mocks["dispatch_config"].assert_called_once_with(args)
         mocks["check_args"].assert_called_once_with(args)
         mocks["setup_logging"].assert_called_once_with(quiet=quiet, verbose=verbose)
+
+
+def test_dict_from_key_eq_val_strings():
+    assert not cli.dict_from_key_eq_val_strings([])
+    assert cli.dict_from_key_eq_val_strings(["a=1", "b=2"]) == {"a": "1", "b": "2"}
+
+
+# Helper functions
+
+
+@fixture
+def subparsers():
+    return Parser().add_subparsers()
+
+
+def submodes(subparser: Parser) -> List[str]:
+    if subparsers := subparser._subparsers:
+        if action := subparsers._actions[1]:
+            if choices := action.choices:
+                submodes = choices.keys()  # type: ignore
+                return list(submodes)
+    return []
