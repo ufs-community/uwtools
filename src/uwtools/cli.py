@@ -347,7 +347,7 @@ def add_arg_dry_run(group: Group) -> None:
     group.add_argument(
         "--dry-run",
         action="store_true",
-        help="Print rendered template only",
+        help="Only log info, making no changes",
     )
 
 
