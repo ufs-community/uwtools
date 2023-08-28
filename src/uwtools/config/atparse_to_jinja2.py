@@ -21,7 +21,6 @@ def convert(
     :param input_file: Path to the template containing atparse syntax.
     :param output_file: Path to the file to write the converted template to.
     :param dry_run: Run in dry-run mode?
-    :raises: RuntimeError if neither an output file or dry-run are specified.
     """
 
     def write(f_out: IO) -> None:
