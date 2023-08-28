@@ -253,9 +253,7 @@ def dispatch_forecast(args: Namespace) -> bool:
 
     :param args: Parsed command-line args.
     """
-    forecast_class = uwtools.drivers.forecast.CLASSES[args.forecast_model]
-    forecast_class(config_file=args.config_file).run()
-    return True
+    return {"run": dispatch_forecast_run}[args.submode](args)
 
 
 def dispatch_forecast_run(args: Namespace) -> bool:
@@ -264,7 +262,9 @@ def dispatch_forecast_run(args: Namespace) -> bool:
 
     :param args: Parsed command-line args.
     """
-    raise NotImplementedError
+    forecast_class = uwtools.drivers.forecast.CLASSES[args.forecast_model]
+    forecast_class(config_file=args.config_file).run()
+    return True
 
 
 # Mode template
@@ -317,12 +317,12 @@ def dispatch_template_render(args: Namespace) -> bool:
     """
     logging.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
     return uwtools.config.templater.render(
-        args.input_file,
-        args.output_file,
-        args.values_file,
-        dict_from_key_eq_val_strings(args.key_eq_val_pairs),
-        args.values_needed,
-        args.dry_run,
+        input_file=args.input_file,
+        output_file=args.output_file,
+        values_file=args.values_file,
+        overrides=dict_from_key_eq_val_strings(args.key_eq_val_pairs),
+        values_needed=args.values_needed,
+        dry_run=args.dry_run,
     )
 
 

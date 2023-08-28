@@ -15,8 +15,8 @@ from uwtools.tests.support import logged
 
 
 @fixture
-def config_file(tmp_path):
-    path = tmp_path / "config.yaml"
+def values_file(tmp_path):
+    path = tmp_path / "values.yaml"
     yaml = """
 roses: red
 violets: blue
@@ -36,45 +36,45 @@ def template(tmp_path):
     return str(path)
 
 
-def render_helper(input_file, config_file, **kwargs):
+def render_helper(input_file, values_file, **kwargs):
     templater.render(
         input_file=input_file,
-        config_file=config_file,
+        values_file=values_file,
         **kwargs,
     )
 
 
-def test_render(config_file, template, tmp_path):
+def test_render(values_file, template, tmp_path):
     outfile = str(tmp_path / "out.txt")
-    render_helper(input_file=template, config_file=config_file, output_file=outfile)
+    render_helper(input_file=template, values_file=values_file, output_file=outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read().strip() == "roses are red, violets are blue"
 
 
-def test_render_dry_run(caplog, config_file, template):
+def test_render_dry_run(caplog, values_file, template):
     logging.getLogger().setLevel(logging.INFO)
     render_helper(
-        input_file=template, config_file=config_file, output_file="/dev/null", dry_run=True
+        input_file=template, values_file=values_file, output_file="/dev/null", dry_run=True
     )
     assert logged(caplog, "roses are red, violets are blue")
 
 
-def test_render_values_missing(caplog, config_file, template):
+def test_render_values_missing(caplog, values_file, template):
     # Read in the config, remove the "roses" key, then re-write it.
-    with open(config_file, "r", encoding="utf-8") as f:
+    with open(values_file, "r", encoding="utf-8") as f:
         cfgobj = yaml.safe_load(f.read())
     del cfgobj["roses"]
-    with open(config_file, "w", encoding="utf-8") as f:
+    with open(values_file, "w", encoding="utf-8") as f:
         f.write(yaml.dump(cfgobj))
-    render_helper(input_file=template, config_file=config_file, output_file="/dev/null")
+    render_helper(input_file=template, values_file=values_file, output_file="/dev/null")
     assert logged(caplog, "Required value(s) not provided:")
     assert logged(caplog, "roses")
 
 
-def test_render_values_needed(caplog, config_file, template):
+def test_render_values_needed(caplog, values_file, template):
     logging.getLogger().setLevel(logging.INFO)
     render_helper(
-        input_file=template, config_file=config_file, output_file="/dev/null", values_needed=True
+        input_file=template, values_file=values_file, output_file="/dev/null", values_needed=True
     )
     for var in ("roses", "violets"):
         assert logged(caplog, var)
@@ -96,12 +96,12 @@ longish_variable: 88
 def test__set_up_config_obj_env():
     expected = {"roses": "white", "violets": "blue"}
     with patch.dict(os.environ, expected):
-        actual = templater._set_up_config_obj()
+        actual = templater._set_up_values_obj()
     assert actual["roses"] == "white"
     assert actual["violets"] == "blue"
 
 
-def test__set_up_config_obj_file(config_file):
+def test__set_up_config_obj_file(values_file):
     expected = {"roses": "white", "violets": "blue", "cannot": {"override": "this"}}
-    actual = templater._set_up_config_obj(config_file=config_file, overrides={"roses": "white"})
+    actual = templater._set_up_values_obj(values_file=values_file, overrides={"roses": "white"})
     assert actual == expected

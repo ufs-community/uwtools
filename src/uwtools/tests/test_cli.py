@@ -125,6 +125,46 @@ def test_dispath_config_validate_unsupported():
     assert cli.dispatch_config_validate(args) is False  # type: ignore
 
 
+@pytest.mark.parametrize("params", [("run", "dispatch_forecast_run")])
+def test_dispatch_forecast(params):
+    submode, funcname = params
+    args = ns(submode=submode)
+    with patch.object(cli, funcname) as m:
+        cli.dispatch_forecast(args)  # type: ignore
+    assert m.called_once_with(args)
+
+
+def test_dispatch_forecast_run():
+    args = ns(config_file=1, forecast_model="foo")
+    with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as m:
+        CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
+        with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):
+            cli.dispatch_forecast_run(args)  # type: ignore
+    assert m.called_once_with(args)
+    m().run.assert_called_once_with()
+
+
+@pytest.mark.parametrize("params", [("render", "dispatch_template_render")])
+def test_dispatch_template(params):
+    submode, funcname = params
+    args = ns(submode=submode)
+    with patch.object(cli, funcname) as m:
+        cli.dispatch_template(args)  # type: ignore
+    assert m.called_once_with(args)
+
+
+# def test_dispatch_template_render_yaml():
+#     args = ns(
+#         input_file=1,
+#         output_file=2,
+#         values_file=3,
+#         dict_from_key_eq_val_strings=4,
+#     )
+#     with patch.object(cli.uwtools.config.templater, "render") as m:
+#         cli.dispatch_template_render(args)  # type: ignore
+#     assert m.called_once_with(args)
+
+
 @pytest.mark.parametrize("params", [(False, 1, False, True), (True, 0, True, False)])
 def test_main_fail(params):
     fnretval, status, quiet, verbose = params

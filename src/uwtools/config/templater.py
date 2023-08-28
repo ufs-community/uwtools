@@ -15,7 +15,7 @@ from uwtools.utils.file import get_file_type, readable, writable
 def render(
     input_file: OptionalPath,
     output_file: OptionalPath,
-    config_file: DefinitePath,
+    values_file: DefinitePath,
     overrides: Optional[Dict[str, str]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
@@ -25,16 +25,16 @@ def render(
 
     :param input_file: Path to the Jinja2 template file to render.
     :param output_file: Path to the file to write the rendered Jinja2 template to.
-    :param config_file: Path to the config file supplying values to render the template.
-    :param keq_eq_val_pairs: "key=value" strings to supplement config-file values.
+    :param values_file: Path to the file supplying values to render the template.
+    :param keq_eq_val_pairs: "key=value" strings to supplement values-file values.
     :param values_needed: Just issue a report about variables needed to render the template?
     :param dry_run: Run in dry-run mode?
     """
     _report(locals())
-    cfgobj = _set_up_config_obj(config_file=config_file, overrides=overrides)
+    values = _set_up_values_obj(values_file=values_file, overrides=overrides)
     with readable(input_file) as f:
         template_str = f.read()
-    template = J2Template(configure_obj=cfgobj, template_str=template_str)
+    template = J2Template(configure_obj=values, template_str=template_str)
     undeclared_variables = template.undeclared_variables
 
     # If a report of variables required to render the template was requested, make that report and
@@ -49,7 +49,7 @@ def render(
     # Check for missing values required to render the template. If found, report them and raise an
     # exception.
 
-    missing = [var for var in undeclared_variables if var not in cfgobj.keys()]
+    missing = [var for var in undeclared_variables if var not in values.keys()]
     if missing:
         msg = "Required value(s) not provided:"
         logging.error(msg)
@@ -86,26 +86,26 @@ def _report(args: dict) -> None:
     dashes()
 
 
-def _set_up_config_obj(
-    config_file: OptionalPath = None, overrides: Optional[Dict[str, str]] = None
+def _set_up_values_obj(
+    values_file: OptionalPath = None, overrides: Optional[Dict[str, str]] = None
 ) -> dict:
     """
-    Return a config object based on an input file, if given, or otherwise the shell environment; and
-    supplemented with override values from given "key=value" strings.
+    Collect template-rendering values based on an input file, if given, or otherwise on the shell
+    environment; and supplemented with override values from given "key=value" strings.
 
-    :param config_file: The config file to base the config object on.
-    :param keq_eq_val_pairs: "key=value" strings to supplement config-file values.
-    :returns: A config object.
+    :param values_file: Path to the file supplying values to render the template.
+    :param keq_eq_val_pairs: "key=value" strings to supplement values-file values.
+    :returns: The collected values.
     """
-    if config_file:
-        config_type = get_file_type(config_file)
-        cfg_class = getattr(uwtools.config.core, f"{config_type}Config")
-        cfg = cfg_class(config_file)
-        logging.debug("Read initial config from %s", config_file)
+    if values_file:
+        values_type = get_file_type(values_file)
+        values_class = getattr(uwtools.config.core, f"{values_type}Config")
+        values = values_class(values_file)
+        logging.debug("Read initial values from %s", values_file)
     else:
-        cfg = dict(os.environ)  # Do not modify os.environ: Make a copy.
-        logging.debug("Initial config set from environment")
+        values = dict(os.environ)  # Do not modify os.environ: Make a copy.
+        logging.debug("Initial values taken from environment")
     if overrides:
-        cfg.update(overrides)
-        logging.debug("Update config with override values: %s", " ".join(overrides))
-    return cfg
+        values.update(overrides)
+        logging.debug("Updated values with overrides: %s", " ".join(overrides))
+    return values
