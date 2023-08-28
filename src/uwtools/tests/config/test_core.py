@@ -395,10 +395,10 @@ def test_realize_config_conversion_cfg_to_yaml(tmp_path):
         assert f.read()[-1] == "\n"
 
 
-def test_realize_config_depth_mismatch_to_ini(depth_mismatch_yaml_input):
+def test_realize_config_depth_mismatch_to_ini(realize_config_yaml_input):
     with raises(UWConfigError):
         core.realize_config(
-            input_file=depth_mismatch_yaml_input,
+            input_file=realize_config_yaml_input,
             input_format="yaml",
             output_file=None,
             output_format="ini",
@@ -407,10 +407,10 @@ def test_realize_config_depth_mismatch_to_ini(depth_mismatch_yaml_input):
         )
 
 
-def test_realize_config_depth_mismatch_to_nml(depth_mismatch_yaml_input):
+def test_realize_config_depth_mismatch_to_nml(realize_config_yaml_input):
     with raises(UWConfigError):
         core.realize_config(
-            input_file=depth_mismatch_yaml_input,
+            input_file=realize_config_yaml_input,
             input_format="yaml",
             output_file=None,
             output_format="nml",
@@ -586,6 +586,41 @@ def test_realize_config_simple_yaml(tmp_path):
     Test that providing a YAML base file with necessary settings will create a YAML config file.
     """
     help_realize_config_simple("simple2.yaml", "yaml", tmp_path)
+
+
+@pytest.mark.parametrize("fmt", ["ini", "nml"])
+def test__realize_config_check_depths_fail_nml(realize_config_testobj, fmt):
+    with raises(UWConfigError):
+        core._realize_config_check_depths(input_obj=realize_config_testobj, output_format=fmt)
+
+
+def test__realize_config_update_noop(realize_config_testobj):
+    assert realize_config_testobj == core._realize_config_update(
+        input_obj=realize_config_testobj, values_file=None, values_format=None
+    )
+
+
+def test__realize_config_update(realize_config_testobj, tmp_path):
+    o = realize_config_testobj
+    assert o.depth == 3
+    path = tmp_path / "values.yaml"
+    with writable(path) as f:
+        yaml.dump({1: {2: {3: {4: 99}}}}, f)  # depth 4
+    o = core._realize_config_update(input_obj=o, values_file=path, values_format="yaml")
+    assert o.depth == 4
+    assert o[1][2][3][4] == 99
+
+
+def test__realize_config_values_needed(caplog, tmp_path):
+    path = tmp_path / "a.yaml"
+    with writable(path) as f:
+        yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
+    c = core.YAMLConfig(config_path=path)
+    core._realize_config_values_needed(input_obj=c)
+    msgs = "\n".join(record.message for record in caplog.records)
+    assert "Keys that are complete:\n    1" in msgs
+    assert "Keys that have unfilled Jinja2 templates:\n    2" in msgs
+    assert "Keys that are set to empty:\n    3" in msgs
 
 
 @pytest.mark.parametrize("fmt1", ["ini", "nml", "yaml"])
@@ -902,15 +937,6 @@ def compare_configs_assets(tmp_path):
     return d, a, b
 
 
-@fixture
-def depth_mismatch_yaml_input(tmp_path):
-    path = tmp_path / "a.yaml"
-    d = {1: {2: {3: 88}}}  # depth 3
-    with writable(path) as f:
-        yaml.dump(d, f)
-    return path
-
-
 def help_realize_config_fmt2fmt(infn, infmt, cfgfn, cfgfmt, tmpdir):
     infile = fixture_path(infn)
     cfgfile = fixture_path(cfgfn)
@@ -957,6 +983,20 @@ def nml_cfgobj(tmp_path):
     with open(path, "w", encoding="utf-8") as f:
         f.write("&nl n = 88 /")
     return core.NMLConfig(config_path=path)
+
+
+@fixture
+def realize_config_testobj(realize_config_yaml_input):
+    return core.YAMLConfig(config_path=realize_config_yaml_input)
+
+
+@fixture
+def realize_config_yaml_input(tmp_path):
+    path = tmp_path / "a.yaml"
+    d = {1: {2: {3: 88}}}  # depth 3
+    with writable(path) as f:
+        yaml.dump(d, f)
+    return path
 
 
 @fixture
