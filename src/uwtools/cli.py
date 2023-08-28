@@ -18,6 +18,7 @@ import uwtools.config.validator
 import uwtools.drivers.forecast
 from uwtools.logging import setup_logging
 
+FORMATS = ["ini", "nml", "yaml"]
 TITLE_REQ_ARG = "Required arguments"
 
 
@@ -60,7 +61,7 @@ def add_subparser_config_compare(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    choices = ["ini", "nml", "yaml"]
+    choices = FORMATS
     parser = add_subparser(subparsers, "compare", "Compare configs")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     add_arg_file_path(required, switch="--file-1-path", helpmsg="Path to config file 1")
@@ -88,7 +89,7 @@ def add_subparser_config_realize(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    choices = ["ini", "nml", "yaml"]
+    choices = FORMATS
     parser = add_subparser(subparsers, "realize", "Realize config")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     add_arg_input_format(required, choices=choices)
