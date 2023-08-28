@@ -23,95 +23,7 @@ from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import compare_files, fixture_path, logged
 from uwtools.utils.file import path_if_it_exists, writable
 
-# Helper functions
-
-
-def help_realize_config_fmt2fmt(infn, infmt, cfgfn, cfgfmt, tmpdir):
-    infile = fixture_path(infn)
-    cfgfile = fixture_path(cfgfn)
-    ext = Path(infile).suffix
-    outfile = str(tmpdir / f"outfile{ext}")
-    core.realize_config(
-        input_file=infile,
-        input_format=infmt,
-        output_file=outfile,
-        output_format=infmt,
-        values_file=cfgfile,
-        values_format=cfgfmt,
-    )
-    cfgclass = core._cli_name_to_config(infmt)
-    cfgobj = cfgclass(infile)
-    cfgobj.update_values(cfgclass(cfgfile))
-    reference = tmpdir / "expected"
-    cfgobj.dump_file(reference)
-    assert compare_files(reference, outfile)
-
-
-def help_realize_config_simple(infn, infmt, tmpdir):
-    infile = fixture_path(infn)
-    ext = Path(infile).suffix
-    outfile = str(tmpdir / f"outfile{ext}")
-    core.realize_config(
-        input_file=infile,
-        input_format=infmt,
-        output_file=outfile,
-        output_format=infmt,
-        values_file=None,
-        values_format=None,
-    )
-    cfgobj = core._cli_name_to_config(infmt)(infile)
-    reference = tmpdir / f"reference{ext}"
-    cfgobj.dump_file(reference)
-    assert compare_files(reference, outfile)
-
-
 # Test functions
-
-
-@fixture
-def depth_mismatch_yaml_input(tmp_path):
-    path = tmp_path / "a.yaml"
-    d = {1: {2: {3: 88}}}  # depth 3
-    with writable(path) as f:
-        yaml.dump(d, f)
-    return path
-
-
-def test_depth_mismatch_to_ini(depth_mismatch_yaml_input):
-    with raises(UWConfigError):
-        core.realize_config(
-            input_file=depth_mismatch_yaml_input,
-            input_format="yaml",
-            output_file=None,
-            output_format="ini",
-            values_file=None,
-            values_format=None,
-        )
-
-
-def test_depth_mismatch_to_nml(depth_mismatch_yaml_input):
-    with raises(UWConfigError):
-        core.realize_config(
-            input_file=depth_mismatch_yaml_input,
-            input_format="yaml",
-            output_file=None,
-            output_format="nml",
-            values_file=None,
-            values_format=None,
-        )
-
-
-@fixture
-def salad_base():
-    return {
-        "salad": {
-            "base": "kale",
-            "fruit": "banana",
-            "vegetable": "tomato",
-            "how_many": 12,
-            "dressing": "balsamic",
-        }
-    }
 
 
 @pytest.mark.parametrize("fmt", ["ini", "nml", "yaml"])
@@ -140,18 +52,6 @@ def test_compare_config(caplog, fmt, salad_base):
         "salad:            size:  - None + large",
     ]:
         assert logged(caplog, msg)
-
-
-@fixture
-def compare_configs_assets(tmp_path):
-    d = {"foo": {"bar": 88}, "baz": {"qux": 99}}
-    a = tmp_path / "a"
-    b = tmp_path / "b"
-    with writable(a) as f:
-        yaml.dump(d, f)
-    with writable(b) as f:
-        yaml.dump(d, f)
-    return d, a, b
 
 
 def test_compare_configs_good(caplog, compare_configs_assets):
@@ -213,54 +113,6 @@ def test_config_field_table(tmp_path):
         outlines = [line.strip().replace("'", "") for line in f2]
     for line1, line2 in zip(outlines, reflines):
         assert line1 == line2
-
-
-def test_config_file_conversion(tmp_path):
-    """
-    Test using an ini object to configure nml input -> nml output.
-    """
-    infile = fixture_path("simple2.nml")
-    cfgfile = fixture_path("simple2.ini")
-    outfile = str(tmp_path / "test_config_conversion.nml")
-    core.realize_config(
-        input_file=infile,
-        input_format="nml",
-        output_file=outfile,
-        output_format="nml",
-        values_file=cfgfile,
-        values_format="ini",
-    )
-    expected = core.NMLConfig(infile)
-    config_obj = core.INIConfig(cfgfile)
-    expected.update_values(config_obj)
-    expected_file = tmp_path / "expected.nml"
-    expected.dump_file(expected_file)
-    assert compare_files(expected_file, outfile)
-    with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read()[-1] == "\n"
-
-
-def test_conversion_cfg_to_yaml(tmp_path):
-    """
-    Test that a .cfg file can be used to create a YAML object.
-    """
-    infile = fixture_path("srw_example_yaml.cfg")
-    outfile = str(tmp_path / "test_ouput.yaml")
-    core.realize_config(
-        input_file=infile,
-        input_format="yaml",
-        output_file=outfile,
-        output_format="yaml",
-        values_file=None,
-        values_format=None,
-    )
-    expected = core.YAMLConfig(infile)
-    expected.dereference_all()
-    expected_file = tmp_path / "test.yaml"
-    expected.dump_file(expected_file)
-    assert compare_files(expected_file, outfile)
-    with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read()[-1] == "\n"
 
 
 @pytest.mark.parametrize(
@@ -355,21 +207,6 @@ type_prob: '{{ list_a / \"a\" }}'  # TypeError
     assert "TypeError" in raised[1]
 
 
-def test_incompatible_file_type():
-    """
-    Test that providing an incompatible file type for input base file will return print statement.
-    """
-    with raises(UWConfigError):
-        core.realize_config(
-            input_file=fixture_path("model_configure.sample"),
-            input_format="sample",
-            output_file=None,
-            output_format="yaml",
-            values_file=None,
-            values_format=None,
-        )
-
-
 def test_ini_config_bash(salad_base, tmp_path):
     """
     Test that INI config load and dump work with a basic bash file.
@@ -423,28 +260,6 @@ def test_nml_config_simple(salad_base, tmp_path):
     cfgobj.update({"dressing": ["ranch", "italian"]})
     expected["dressing"] = ["ranch", "italian"]
     assert cfgobj == expected
-
-
-def test_output_file_conversion(tmp_path):
-    """
-    Test that --output-input-type converts config object to desired object type.
-    """
-    infile = fixture_path("simple.nml")
-    outfile = str(tmp_path / "test_ouput.cfg")
-    core.realize_config(
-        input_file=infile,
-        input_format="nml",
-        output_file=outfile,
-        output_format="nml",
-        values_file=None,
-        values_format=None,
-    )
-    expected = core.NMLConfig(infile)
-    expected_file = tmp_path / "expected.nml"
-    expected.dump_file(expected_file)
-    assert compare_files(expected_file, outfile)
-    with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read()[-1] == "\n"
 
 
 def test_parse_include():
@@ -557,6 +372,53 @@ def test_print_config_section_yaml_not_dict():
     assert "must be a dictionary" in str(e.value)
 
 
+def test_realize_config_conversion_cfg_to_yaml(tmp_path):
+    """
+    Test that a .cfg file can be used to create a YAML object.
+    """
+    infile = fixture_path("srw_example_yaml.cfg")
+    outfile = str(tmp_path / "test_ouput.yaml")
+    core.realize_config(
+        input_file=infile,
+        input_format="yaml",
+        output_file=outfile,
+        output_format="yaml",
+        values_file=None,
+        values_format=None,
+    )
+    expected = core.YAMLConfig(infile)
+    expected.dereference_all()
+    expected_file = tmp_path / "test.yaml"
+    expected.dump_file(expected_file)
+    assert compare_files(expected_file, outfile)
+    with open(outfile, "r", encoding="utf-8") as f:
+        assert f.read()[-1] == "\n"
+
+
+def test_realize_config_depth_mismatch_to_ini(depth_mismatch_yaml_input):
+    with raises(UWConfigError):
+        core.realize_config(
+            input_file=depth_mismatch_yaml_input,
+            input_format="yaml",
+            output_file=None,
+            output_format="ini",
+            values_file=None,
+            values_format=None,
+        )
+
+
+def test_realize_config_depth_mismatch_to_nml(depth_mismatch_yaml_input):
+    with raises(UWConfigError):
+        core.realize_config(
+            input_file=depth_mismatch_yaml_input,
+            input_format="yaml",
+            output_file=None,
+            output_format="nml",
+            values_file=None,
+            values_format=None,
+        )
+
+
 def test_realize_config_dry_run(caplog):
     """
     Test that providing a YAML base file with a dry-run flag will print an YAML config file.
@@ -602,6 +464,31 @@ def test_realize_config_field_table(tmp_path):
                 assert line1 in line2
 
 
+def test_realize_config_file_conversion(tmp_path):
+    """
+    Test using an ini object to configure nml input -> nml output.
+    """
+    infile = fixture_path("simple2.nml")
+    cfgfile = fixture_path("simple2.ini")
+    outfile = str(tmp_path / "test_config_conversion.nml")
+    core.realize_config(
+        input_file=infile,
+        input_format="nml",
+        output_file=outfile,
+        output_format="nml",
+        values_file=cfgfile,
+        values_format="ini",
+    )
+    expected = core.NMLConfig(infile)
+    config_obj = core.INIConfig(cfgfile)
+    expected.update_values(config_obj)
+    expected_file = tmp_path / "expected.nml"
+    expected.dump_file(expected_file)
+    assert compare_files(expected_file, outfile)
+    with open(outfile, "r", encoding="utf-8") as f:
+        assert f.read()[-1] == "\n"
+
+
 def test_realize_config_fmt2fmt_nml2nml(tmp_path):
     """
     Test that providing a namelist base input file and a config file will create and update namelist
@@ -634,6 +521,43 @@ def test_realize_config_fmt2fmt_yaml2yaml(tmp_path):
     help_realize_config_fmt2fmt(
         "fruit_config.yaml", "yaml", "fruit_config_similar.yaml", "yaml", tmp_path
     )
+
+
+def test_realize_config_incompatible_file_type():
+    """
+    Test that providing an incompatible file type for input base file will return print statement.
+    """
+    with raises(UWConfigError):
+        core.realize_config(
+            input_file=fixture_path("model_configure.sample"),
+            input_format="sample",
+            output_file=None,
+            output_format="yaml",
+            values_file=None,
+            values_format=None,
+        )
+
+
+def test_realize_config_output_file_conversion(tmp_path):
+    """
+    Test that --output-input-type converts config object to desired object type.
+    """
+    infile = fixture_path("simple.nml")
+    outfile = str(tmp_path / "test_ouput.cfg")
+    core.realize_config(
+        input_file=infile,
+        input_format="nml",
+        output_file=outfile,
+        output_format="nml",
+        values_file=None,
+        values_format=None,
+    )
+    expected = core.NMLConfig(infile)
+    expected_file = tmp_path / "expected.nml"
+    expected.dump_file(expected_file)
+    assert compare_files(expected_file, outfile)
+    with open(outfile, "r", encoding="utf-8") as f:
+        assert f.read()[-1] == "\n"
 
 
 def test_realize_config_simple_bash(tmp_path):
@@ -890,15 +814,6 @@ def test_yaml_constructor_error_unregistered_constructor(tmp_path):
     assert "Define the constructor before proceeding" in str(e.value)
 
 
-@fixture
-def nml_cfgobj(tmp_path):
-    # Use NMLConfig to exercise methods in Config abstract base class.
-    path = tmp_path / "cfg.nml"
-    with open(path, "w", encoding="utf-8") as f:
-        f.write("&nl n = 88 /")
-    return core.NMLConfig(config_path=path)
-
-
 def test_Config___repr__(capsys, nml_cfgobj):
     print(nml_cfgobj)
     assert yaml.safe_load(capsys.readouterr().out)["nl"]["n"] == 88
@@ -970,3 +885,88 @@ def test__log_and_error():
     with raises(UWConfigError) as e:
         raise core._log_and_error("Must be scalar value")
     assert "Must be scalar value" in str(e.value)
+
+
+# Helper functions
+
+
+@fixture
+def compare_configs_assets(tmp_path):
+    d = {"foo": {"bar": 88}, "baz": {"qux": 99}}
+    a = tmp_path / "a"
+    b = tmp_path / "b"
+    with writable(a) as f:
+        yaml.dump(d, f)
+    with writable(b) as f:
+        yaml.dump(d, f)
+    return d, a, b
+
+
+@fixture
+def depth_mismatch_yaml_input(tmp_path):
+    path = tmp_path / "a.yaml"
+    d = {1: {2: {3: 88}}}  # depth 3
+    with writable(path) as f:
+        yaml.dump(d, f)
+    return path
+
+
+def help_realize_config_fmt2fmt(infn, infmt, cfgfn, cfgfmt, tmpdir):
+    infile = fixture_path(infn)
+    cfgfile = fixture_path(cfgfn)
+    ext = Path(infile).suffix
+    outfile = str(tmpdir / f"outfile{ext}")
+    core.realize_config(
+        input_file=infile,
+        input_format=infmt,
+        output_file=outfile,
+        output_format=infmt,
+        values_file=cfgfile,
+        values_format=cfgfmt,
+    )
+    cfgclass = core._cli_name_to_config(infmt)
+    cfgobj = cfgclass(infile)
+    cfgobj.update_values(cfgclass(cfgfile))
+    reference = tmpdir / "expected"
+    cfgobj.dump_file(reference)
+    assert compare_files(reference, outfile)
+
+
+def help_realize_config_simple(infn, infmt, tmpdir):
+    infile = fixture_path(infn)
+    ext = Path(infile).suffix
+    outfile = str(tmpdir / f"outfile{ext}")
+    core.realize_config(
+        input_file=infile,
+        input_format=infmt,
+        output_file=outfile,
+        output_format=infmt,
+        values_file=None,
+        values_format=None,
+    )
+    cfgobj = core._cli_name_to_config(infmt)(infile)
+    reference = tmpdir / f"reference{ext}"
+    cfgobj.dump_file(reference)
+    assert compare_files(reference, outfile)
+
+
+@fixture
+def nml_cfgobj(tmp_path):
+    # Use NMLConfig to exercise methods in Config abstract base class.
+    path = tmp_path / "cfg.nml"
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("&nl n = 88 /")
+    return core.NMLConfig(config_path=path)
+
+
+@fixture
+def salad_base():
+    return {
+        "salad": {
+            "base": "kale",
+            "fruit": "banana",
+            "vegetable": "tomato",
+            "how_many": 12,
+            "dressing": "balsamic",
+        }
+    }
