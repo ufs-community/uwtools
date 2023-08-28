@@ -2,9 +2,10 @@
 Utilities for rendering Jinja2 templates.
 """
 
+import logging
 import re
 import sys
-from typing import IO, Optional
+from typing import IO, Any, Generator, Optional
 
 from uwtools.utils.file import readable
 
@@ -23,13 +24,18 @@ def convert(
     :param dry_run: Run in dry-run mode?
     """
 
-    def write(f_out: IO) -> None:
+    def lines() -> Generator[str, Any, Any]:
         with readable(input_file) as f_in:
             for line in f_in:
-                print(_replace(line.strip()), file=f_out)
+                yield _replace(line.strip())
+
+    def write(f_out: IO) -> None:
+        for line in lines():
+            print(_replace(line.strip()), file=f_out)
 
     if dry_run:
-        write(sys.stderr)
+        for line in lines():
+            logging.info(line)
     elif output_file:
         with open(output_file, "w", encoding="utf-8") as out_f:
             write(out_f)

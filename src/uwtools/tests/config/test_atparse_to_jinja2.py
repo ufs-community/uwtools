@@ -45,11 +45,11 @@ def test_convert_input_file_to_output_file(atparsefile, capsys, jinja2txt, tmp_p
     assert not streams.out
 
 
-def test_convert_input_file_to_stderr(atparsefile, capsys, jinja2txt, tmp_path):
+def test_convert_input_file_to_logging(atparsefile, caplog, capsys, jinja2txt, tmp_path):
     outfile = tmp_path / "outfile"
     atparse_to_jinja2.convert(input_file=atparsefile, dry_run=True)
     streams = capsys.readouterr()
-    assert streams.err == jinja2txt
+    assert "\n".join(record.message for record in caplog.records) == jinja2txt.strip()
     assert not streams.out
     assert not outfile.is_file()
 
@@ -72,11 +72,11 @@ def test_convert_stdin_to_file(atparselines, capsys, jinja2txt, tmp_path):
     assert not streams.out
 
 
-def test_convert_stdin_to_stderr(atparselines, capsys, jinja2txt, tmp_path):
+def test_convert_stdin_to_logging(atparselines, caplog, jinja2txt, tmp_path):
     outfile = tmp_path / "outfile"
     with patch.object(atparse_to_jinja2.sys, "stdin", new=StringIO("\n".join(atparselines))):
         atparse_to_jinja2.convert(output_file=outfile, dry_run=True)
-    assert capsys.readouterr().err == jinja2txt
+    assert "\n".join(record.message for record in caplog.records) == jinja2txt.strip()
     assert not outfile.is_file()
 
 
