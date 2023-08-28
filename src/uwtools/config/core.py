@@ -67,7 +67,6 @@ class Config(ABC, UserDict):
         super().__init__()
         self._config_path = str(config_path) if config_path else None
         self.update(self._load(self._config_path))
-        self.depth = self._depth(self.data)
 
     def __repr__(self) -> str:
         """
@@ -173,6 +172,13 @@ class Config(ABC, UserDict):
                 logging.info(msg)
 
         return not diffs
+
+    @property
+    def depth(self) -> int:
+        """
+        The depth of this config's hierarchy.
+        """
+        return self._depth(self.data)
 
     def dereference(
         self, ref_dict: Optional[dict] = None, full_dict: Optional[dict] = None
