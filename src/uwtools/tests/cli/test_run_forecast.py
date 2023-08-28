@@ -7,7 +7,7 @@ from types import SimpleNamespace as ns
 from unittest.mock import patch
 
 import pytest
-from pytest import fixture, raises
+from pytest import raises
 
 from uwtools.cli import run_forecast
 
@@ -15,28 +15,29 @@ from uwtools.cli import run_forecast
 #     CLI switch.
 
 
-@fixture
-def files(tmp_path):
+def test_main(tmp_path):
     cfgfile = tmp_path / "cfg.yaml"
-    machinefile = tmp_path / "machine.yaml"
-    for path in cfgfile, machinefile:
-        path.touch()
-    return str(cfgfile), str(machinefile)
-
-
-def test_main(files):
-    cfgfile, machinefile = files
+    cfgfile.touch()
     args = ns(
-        config_file=cfgfile,
+        config_file=str(cfgfile),
+        dry_run=True,
         forecast_model="FV3",
-        machine=machinefile,
+        batch_script=None,
         quiet=False,
         verbose=False,
     )
     with patch.object(run_forecast, "parse_args", return_value=args):
         with patch.object(run_forecast.forecast, "FV3Forecast") as fv3fcst:
             run_forecast.main()
-            fv3fcst.assert_called_once_with(cfgfile, machinefile)
+            fv3fcst.assert_called_once_with(
+                config_file=args.config_file,
+                dry_run=True,
+                batch_script=None,
+            )
+            # Test failure:
+            fv3fcst().run.side_effect = run_forecast.UWConfigError
+            with raises(SystemExit):
+                run_forecast.main()
 
 
 @pytest.mark.parametrize("sw", [ns(c="-c"), ns(c="--config-file")])
@@ -50,40 +51,26 @@ def test_parse_args_bad_cfgfile(capsys, sw, tmp_path):
     assert f"{cfgfile} does not exist" in capsys.readouterr().err
 
 
-@pytest.mark.parametrize("sw", [ns(m="-m"), ns(m="--machine")])
-def test_parse_args_bad_machinefile(capsys, sw, tmp_path):
-    """
-    Fails if machine file does not exist.
-    """
-    machinefile = str(tmp_path / "no-such-file")
-    with raises(FileNotFoundError):
-        run_forecast.parse_args([sw.m, machinefile])
-    assert f"{machinefile} does not exist" in capsys.readouterr().err
-
-
 @pytest.mark.parametrize("noise", ["-q", "--quiet", "-v", "--verbose"])
-@pytest.mark.parametrize("sw", [ns(c="-c", m="-m"), ns(c="--config-file", m="--machine")])
-def test_parse_args_good(files, noise, sw):
+@pytest.mark.parametrize("sw", [ns(c="-c"), ns(c="--config-file")])
+def test_parse_args_good(sw, noise, tmp_path):
     """
     Test all valid CLI switch/value combinations.
     """
-    cfgfile, machinefile = files
-    app, model = "SRW", "FV3"  # representative (not exhaustive) choices
+    cfgfile = tmp_path / "cfg.yaml"
+    cfgfile.touch()
+    model = "FV3"  # representative (not exhaustive) choices
     parsed = run_forecast.parse_args(
         [
             sw.c,
-            cfgfile,
-            sw.m,
-            machinefile,
-            "--forecast-app",
-            app,
+            str(cfgfile),
             "--forecast-model",
             model,
             noise,
         ]
     )
-    assert parsed.config_file == cfgfile
-    assert parsed.machine == machinefile
+    assert parsed.config_file == str(cfgfile)
+
     if noise in ["-q", "--quiet"]:
         sw_off = parsed.verbose
         sw_on = parsed.quiet
@@ -92,7 +79,6 @@ def test_parse_args_good(files, noise, sw):
         sw_on = parsed.verbose
     assert sw_off is False
     assert sw_on is True
-    assert parsed.forecast_app == app
     assert parsed.forecast_model == model
 
 

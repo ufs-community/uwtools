@@ -74,7 +74,11 @@ def test_lsf_4(lsf_props):
 #BSUB -q batch
 """.strip()
     assert batch_script.content() == expected
-    assert str(batch_script) == expected
+
+
+def test_lsf_5(lsf_props):
+    expected = "bsub"
+    assert JobScheduler.get_scheduler(lsf_props).submit_command == expected
 
 
 # PBS tests
@@ -183,6 +187,11 @@ def test_pbs_8(pbs_props):
     assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
 
 
+def test_pbs_9(pbs_props):
+    expected = "qsub"
+    assert JobScheduler.get_scheduler(pbs_props).submit_command == expected
+
+
 # Slurm tests
 
 
@@ -259,6 +268,11 @@ def test_slurm_5(slurm_props):
 #SBATCH --time=00:01:00
 """.strip()
     assert JobScheduler.get_scheduler(slurm_props).batch_script.content() == expected
+
+
+def test_slurm_6(slurm_props):
+    expected = "sbatch"
+    assert JobScheduler.get_scheduler(slurm_props).submit_command == expected
 
 
 # Generic tests using PBS support.
