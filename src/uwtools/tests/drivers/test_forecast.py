@@ -1,5 +1,4 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
-# pylint: disable=duplicate-code
 """
 Tests for forecast driver.
 """
@@ -10,7 +9,6 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture, raises
 
-import uwtools.config.core
 from uwtools.config.core import NMLConfig, YAMLConfig
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
@@ -270,58 +268,60 @@ def test_stage_files(tmp_path, section, link_files):
             assert (run_directory / dst_fn).is_file()
 
 
-def test_run(tmp_path, caplog):
-    run_expected = """#!/bin/bash
+def test_run(caplog, tmp_path):
+    run_expected = """
+#!/bin/bash
 #SBATCH --account=user_account
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --qos=batch
 #SBATCH --time=00:01:00
 srun --export=None test_exec.py
-"""
+""".strip()
     config_file = fixture_path("forecast.yaml")
     out_file = tmp_path / "test_exec.py"
     out_file.touch()
-
-    with patch.object(uwtools.config.core, "YAMLConfig") as YAMLConfig:
-        YAMLConfig.return_value = {
-            "platform": {
-                "MPICMD": "srun",
-                "account": "user_account",
-            },
-            "forecast": {
-                "MODEL": "FV3",
-                "EXEC_NAME": "test_exec.py",
-                "RUN_DIRECTORY": tmp_path.as_posix(),
-                "CYCLEDEP": {"foo-file": str(tmp_path / "foo")},
-                "STATIC": {"static-foo-file": str(tmp_path / "foo")},
-                "VERBOSE": "False",
-            },
-        }
-        # Test dry run:
-        with patch.object(FV3Forecast, "_validate", return_value=True):
-            fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=out_file)
+    config = {
+        "platform": {
+            "MPICMD": "srun",
+            "account": "user_account",
+        },
+        "forecast": {
+            "MODEL": "FV3",
+            "EXEC_NAME": "test_exec.py",
+            "RUN_DIRECTORY": tmp_path.as_posix(),
+            "CYCLEDEP": {"foo-file": str(tmp_path / "foo")},
+            "STATIC": {"static-foo-file": str(tmp_path / "foo")},
+            "VERBOSE": "False",
+        },
+    }
+    # Test dry run:
+    with patch.object(FV3Forecast, "_validate", return_value=True):
+        fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=out_file)
+        with patch.object(fcstobj, "_config", config):
             fcstobj.run()
-        assert run_expected in caplog.text
+    assert run_expected in caplog.text
 
-        # Test real batch run:
-        with patch.object(FV3Forecast, "_validate", return_value=True):
-            with patch.object(forecast.subprocess, "run") as sprun:
-                fcstobj = FV3Forecast(config_file=config_file, batch_script=out_file)
+    # Test real batch run:
+    with patch.object(FV3Forecast, "_validate", return_value=True):
+        with patch.object(forecast.subprocess, "run") as sprun:
+            fcstobj = FV3Forecast(config_file=config_file, batch_script=out_file)
+            with patch.object(fcstobj, "_config", config):
                 fcstobj.run()
-                sprun.assert_called_once_with(
-                    f"sbatch {out_file}",
-                    stderr=subprocess.STDOUT,
-                    check=False,
-                    shell=True,
-                )
-                # Test real command run:
-                sprun.reset_mock()
-                fcstobj = FV3Forecast(config_file=config_file)
+            sprun.assert_called_once_with(
+                f"sbatch {out_file}",
+                stderr=subprocess.STDOUT,
+                check=False,
+                shell=True,
+            )
+            # Test real command run:
+            sprun.reset_mock()
+            fcstobj = FV3Forecast(config_file=config_file)
+            with patch.object(fcstobj, "_config", config):
                 fcstobj.run()
-                sprun.assert_called_once_with(
-                    "srun --export=None test_exec.py",
-                    stderr=subprocess.STDOUT,
-                    check=False,
-                    shell=True,
-                )
+            sprun.assert_called_once_with(
+                "srun --export=None test_exec.py",
+                stderr=subprocess.STDOUT,
+                check=False,
+                shell=True,
+            )
