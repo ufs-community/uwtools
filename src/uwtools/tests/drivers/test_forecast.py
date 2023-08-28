@@ -289,11 +289,23 @@ def fv3_run_assets(tmp_path):
     return batch_script, config_file, config
 
 
-def test_FV3Forecast_run_dry_run():
-    pass
+def test_run_direct(fv3_run_assets):
+    _, config_file, config = fv3_run_assets
+    with patch.object(FV3Forecast, "_validate", return_value=True):
+        with patch.object(forecast.subprocess, "run") as sprun:
+            fcstobj = FV3Forecast(config_file=config_file)
+            with patch.object(fcstobj, "_config", config):
+                fcstobj.run()
+            sprun.assert_called_once_with(
+                "srun --export=None test_exec.py",
+                stderr=subprocess.STDOUT,
+                check=False,
+                shell=True,
+            )
 
 
-def test_run(caplog, tmp_path, fv3_run_assets):
+def test_FV3Forecast_run_dry_run(caplog, fv3_run_assets):
+    batch_script, config_file, config = fv3_run_assets
     run_expected = """
 #!/bin/bash
 #SBATCH --account=user_account
@@ -303,15 +315,15 @@ def test_run(caplog, tmp_path, fv3_run_assets):
 #SBATCH --time=00:01:00
 srun --export=None test_exec.py
 """.strip()
-    batch_script, config_file, config = fv3_run_assets
-    # Test dry run:
     with patch.object(FV3Forecast, "_validate", return_value=True):
         fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=batch_script)
         with patch.object(fcstobj, "_config", config):
             fcstobj.run()
     assert run_expected in caplog.text
 
-    # Test real batch run:
+
+def test_run_submit(fv3_run_assets):
+    batch_script, config_file, config = fv3_run_assets
     with patch.object(FV3Forecast, "_validate", return_value=True):
         with patch.object(forecast.subprocess, "run") as sprun:
             fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
@@ -319,17 +331,6 @@ srun --export=None test_exec.py
                 fcstobj.run()
             sprun.assert_called_once_with(
                 f"sbatch {batch_script}",
-                stderr=subprocess.STDOUT,
-                check=False,
-                shell=True,
-            )
-            # Test real command run:
-            sprun.reset_mock()
-            fcstobj = FV3Forecast(config_file=config_file)
-            with patch.object(fcstobj, "_config", config):
-                fcstobj.run()
-            sprun.assert_called_once_with(
-                "srun --export=None test_exec.py",
                 stderr=subprocess.STDOUT,
                 check=False,
                 shell=True,
