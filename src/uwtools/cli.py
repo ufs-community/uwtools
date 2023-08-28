@@ -331,14 +331,6 @@ def dispatch_template_render(args: Namespace) -> bool:
 # pylint: disable=missing-function-docstring
 
 
-def add_arg_compare(group: Group) -> None:
-    group.add_argument(
-        "--compare",
-        action="store_true",
-        help="Compare two configs",
-    )
-
-
 def add_arg_config_file(group: Group) -> None:
     group.add_argument(
         "--config-file",

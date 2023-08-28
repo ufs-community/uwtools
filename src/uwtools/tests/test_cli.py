@@ -2,7 +2,7 @@
 
 import logging
 from argparse import ArgumentParser as Parser
-from types import SimpleNamespace as ns
+from argparse import Namespace as ns
 from typing import List
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
@@ -14,6 +14,18 @@ from uwtools import cli
 from uwtools.tests.support import logged
 
 # Test functions
+
+
+def test_abort(capsys):
+    msg = "Aborting..."
+    with raises(SystemExit):
+        cli.abort(msg)
+    assert msg in capsys.readouterr().err
+
+
+def test_check_args_ok():
+    args = ns(foo=88)
+    assert cli.check_args(args) == args
 
 
 def test_add_subparser_config(subparsers):
@@ -74,14 +86,14 @@ def test_dispatch_config(params):
     submode, funcname = params
     args = ns(submode=submode)
     with patch.object(cli, funcname) as m:
-        cli.dispatch_config(args)  # type: ignore
+        cli.dispatch_config(args)
     assert m.called_once_with(args)
 
 
 def test_dispatch_config_compare():
     args = ns(file_1_path=1, file_1_format=2, file_2_path=3, file_2_format=4)
     with patch.object(cli.uwtools.config.core, "compare_configs") as m:
-        cli.dispatch_config_compare(args)  # type: ignore
+        cli.dispatch_config_compare(args)
     assert m.called_once_with(args)
 
 
@@ -97,7 +109,7 @@ def test_dispatch_config_realize():
         dry_run=8,
     )
     with patch.object(cli.uwtools.config.core, "realize_config") as m:
-        cli.dispatch_config_realize(args)  # type: ignore
+        cli.dispatch_config_realize(args)
     assert m.called_once_with(args)
 
 
@@ -106,25 +118,25 @@ def test_dispatch_config_translate_arparse_to_jinja2():
         input_file=1, input_format="atparse", output_file=3, output_format="jinja2", dry_run=5
     )
     with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as m:
-        cli.dispatch_config_translate(args)  # type: ignore
+        cli.dispatch_config_translate(args)
     assert m.called_once_with(args)
 
 
 def test_dispath_config_translate_unsupported():
     args = ns(input_file=1, input_format="jpg", output_file=3, output_format="png", dry_run=5)
-    assert cli.dispatch_config_translate(args) is False  # type: ignore
+    assert cli.dispatch_config_translate(args) is False
 
 
 def test_dispatch_config_validate_yaml():
     args = ns(input_file=1, input_format="yaml", schema_file=3)
     with patch.object(cli.uwtools.config.validator, "validate_yaml") as m:
-        cli.dispatch_config_validate(args)  # type: ignore
+        cli.dispatch_config_validate(args)
     assert m.called_once_with(args)
 
 
 def test_dispath_config_validate_unsupported():
     args = ns(input_file=1, input_format="jpg", schema_file=3)
-    assert cli.dispatch_config_validate(args) is False  # type: ignore
+    assert cli.dispatch_config_validate(args) is False
 
 
 @pytest.mark.parametrize("params", [("run", "dispatch_forecast_run")])
@@ -132,7 +144,7 @@ def test_dispatch_forecast(params):
     submode, funcname = params
     args = ns(submode=submode)
     with patch.object(cli, funcname) as m:
-        cli.dispatch_forecast(args)  # type: ignore
+        cli.dispatch_forecast(args)
     assert m.called_once_with(args)
 
 
@@ -141,7 +153,7 @@ def test_dispatch_forecast_run():
     with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as m:
         CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
         with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):
-            cli.dispatch_forecast_run(args)  # type: ignore
+            cli.dispatch_forecast_run(args)
     assert m.called_once_with(args)
     m().run.assert_called_once_with()
 
@@ -151,7 +163,7 @@ def test_dispatch_template(params):
     submode, funcname = params
     args = ns(submode=submode)
     with patch.object(cli, funcname) as m:
-        cli.dispatch_template(args)  # type: ignore
+        cli.dispatch_template(args)
     assert m.called_once_with(args)
 
 
@@ -167,7 +179,7 @@ def test_dispatch_template_render_yaml(caplog):
     )
     with patch.object(cli.uwtools.config.templater, "render") as m:
         with patch.object(cli.sys, "argv", ["foo", "--bar", "88"]):
-            cli.dispatch_template_render(args)  # type: ignore
+            cli.dispatch_template_render(args)
     assert m.called_once_with(args)
     assert logged(caplog, "Command: foo --bar 88")
 
