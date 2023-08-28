@@ -55,7 +55,7 @@ class Driver(ABC):
     @abstractmethod
     def resources(self, platform: dict) -> Mapping:
         """
-        ???
+        Parses the config and returns a formatted dictionary for the batch script.
         """
 
     @abstractmethod

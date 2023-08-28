@@ -140,7 +140,7 @@ class FV3Forecast(Driver):
 
     def resources(self, platform: dict) -> Mapping:
         """
-        ???
+        Parses the config and returns a formatted dictionary for the batch script.
         """
         # Add required fields to platform.
         # Currently supporting only slurm scheduler.
