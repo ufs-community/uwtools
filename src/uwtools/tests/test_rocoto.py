@@ -58,4 +58,3 @@ def test_rocoto_xml_is_valid():
     input_xml = support.fixture_path("hello_workflow.xml")
     tree = etree.parse(input_xml)
     root = etree.tostring(tree.getroot())
-    breakpoint()
