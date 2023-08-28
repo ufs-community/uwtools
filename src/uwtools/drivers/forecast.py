@@ -2,16 +2,22 @@
 Drivers for forecast models.
 """
 
+
 import logging
 import os
 import shutil
+import subprocess
 import sys
+from collections.abc import Mapping
+from functools import cached_property
 from importlib import resources
+from pathlib import Path
 from typing import Dict
 
 from uwtools.config.core import FieldTableConfig, NMLConfig, realize_config
 from uwtools.drivers.driver import Driver
 from uwtools.utils.file import handle_existing
+from uwtools.scheduler import BatchScript, JobScheduler
 
 
 class FV3Forecast(Driver):
@@ -19,12 +25,23 @@ class FV3Forecast(Driver):
     A driver for the FV3 forecast model.
     """
 
+    # Properties
+    @cached_property
+    def job_scheduler(self) -> str:
+        """
+        Get the name of the job scheduler.
+
+        Currently hard-coded pending additional methods
+        """
+        return "slurm"
+
     # Public methods
 
-    def batch_script(self) -> None:
+    def batch_script(self, platform_resources: Mapping) -> BatchScript:
         """
         Write to disk, for submission to the batch scheduler, a script to run FV3.
         """
+        return JobScheduler.get_scheduler(platform_resources).batch_script
 
     @staticmethod
     def create_directory_structure(run_directory, exist_act="delete"):
@@ -121,15 +138,75 @@ class FV3Forecast(Driver):
         ???
         """
 
-    def resources(self) -> None:
+    def resources(self, platform: dict) -> Mapping:
         """
-        ???
+        Parses the config and returns a formatted dictionary for the batch script.
         """
+        # Add required fields to platform.
+        # Currently supporting only slurm scheduler.
+        return {
+            "account": platform["account"],
+            "nodes": 1,
+            "queue": "batch",
+            "scheduler": self.job_scheduler,
+            "tasks_per_node": 1,
+            "walltime": "00:01:00",
+        }
 
-    def run(self):
+    def run(self) -> None:
         """
-        Runs FV3.
+        Runs FV3 either as a subprocess or by submitting a batch script.
         """
+        # Read in the config file.
+        forecast_config = self.config_data["forecast"]
+        platform_config = self.config_data["platform"]
+
+        # Prepare directories.
+        run_directory = forecast_config["RUN_DIRECTORY"]
+        self.create_directory_structure(run_directory, "delete")
+
+        static_files = forecast_config["STATIC"]
+        self.stage_files(run_directory, static_files, link_files=True)
+        cycledep_files = forecast_config["CYCLEDEP"]
+        self.stage_files(run_directory, cycledep_files, link_files=True)
+
+        # Create the job script.
+        platform_resources = self.resources(platform_config)
+        batch_script = self.batch_script(platform_resources)
+        args = "--export=None"
+        run_command = self.run_cmd(
+            args,
+            run_cmd=platform_config["MPICMD"],
+            exec_name=forecast_config["EXEC_NAME"],
+        )
+        batch_script.append(run_command)
+
+        if self._dry_run:
+            # Apply switch to allow user to view the run command of config.
+            # This will not run the job.
+            logging.info("Batch Script:")
+            logging.info(batch_script)
+            return
+
+        # Run the job.
+        if self._batch_script is not None:
+            outpath = Path(run_directory) / self._batch_script
+            with open(outpath, "w+", encoding="utf-8") as file_:
+                print(batch_script, file=file_)
+                batch_command = JobScheduler.get_scheduler(platform_resources).submit_command
+            subprocess.run(
+                f"{batch_command} {outpath}",
+                stderr=subprocess.STDOUT,
+                check=False,
+                shell=True,
+            )
+        else:
+            subprocess.run(
+                f"{run_command}",
+                stderr=subprocess.STDOUT,
+                check=False,
+                shell=True,
+            )
 
     def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:
         """

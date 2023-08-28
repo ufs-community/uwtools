@@ -3,116 +3,53 @@
     "description": "This document is to validate user-defined FV3 forecast config files",
     "type": "object",
     "properties": {
-        "resources": {
+        "platform": {
             "description": "Expected resources for the given platform",
             "type": "object",
             "properties": {
-                "WORKFLOW_MANAGER": {
+                "MPICMD": {
                     "type": "string",
                     "enum": [
-                        "rocoto",
-                        "none"
+                        "mpirun",
+                        "mpiexec",
+                        "srun"
                     ]
                 },
-                "NCORES_PER_NODE": {
-                    "type": "number"
-                },
-                "SCHED": {
-                    "type": "string",
-                    "enum": [
-                        "slurm",
-                        "pbspro",
-                        "lsf",
-                        "lsfcray",
-                        "none"
-                    ]
+                "ACCOUNT": {
+                    "type": "string"
                 }
             }
         },
-        "parameters": {
+    "forecast": {
             "description": "parameters of the forecast",
             "type": "object",
             "properties": {
-                "LENGTH": {
+                "MODEL": {
                     "type": "string",
-                    "format": "number"
-                },
-                "GRID": {
-                    "type": "string",
-                    "format": "number"
-                }
-            }
-        },
-        "run_cmd": {
-            "description": "parameters for the run command",
-            "type": "object",
-            "properties": {
-                "RUN_CMD": {
-                    "type": "string"
                 },
                 "EXEC_NAME": {
-                    "type": "string"
+                    "type": "string",
                 },
-                "KWARGS": {
-                    "type": "array"
-                }
-            }
-        },
-        "locations": {
-            "description": "locations of input files",
-            "type": "object",
-            "properties": {
-                "STATIC": {
+                "RUN_DIRECTORY": {
                     "type": "string",
                     "format": "uri"
                 },
                 "CYCLEDEP": {
                     "type": "string",
                     "format": "uri"
-                }
-            }
-        },
-        "field_table": {
-            "description": "attributes of a field table",
-            "type": "object",
-            "properties": {
-                "LONGNAME": {
-                    "type": "string"
                 },
-                "UNITS": {
-                    "type": "string"
-                },
-                "PROFILE_TYPE": {
+                "STATIC": {
                     "type": "string",
-                    "oneOf": [
-                        {
-                            "properties": {
-                                "NAME": {
-                                    "type": "string",
-                                    "const": "fixed"
-                                },
-                                "SURFACE_VALUE": {
-                                    "type": "number"
-                                }
-                            }
-                        },
-                        {
-                            "properties": {
-                                "NAME": {
-                                    "type": "string",
-                                    "const": "profile"
-                                },
-                                "SURFACE_VALUE": {
-                                    "type": "number"
-                                },
-                                "TOP_VALUE": {
-                                    "type": "number"
-                                }
-                            }
-                        }
+                    "format": "uri"
+                },
+                "VERBOSE": {
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "false"
                     ]
                 }
             }
-        }
+        }    
     }
 }
