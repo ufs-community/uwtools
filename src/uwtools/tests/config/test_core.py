@@ -174,7 +174,7 @@ def test_dereference_bad_filter(tmp_path):
     path = tmp_path / "cfg.yaml"
     with open(path, "w", encoding="utf-8") as f:
         print("undefined_filter: '{{ 34 | not_a_filter }}'", file=f)
-    cfg = core.YAMLConfig(config_path=path)
+    cfg = core.YAMLConfig(config_file=path)
     with raises(exceptions.UWConfigError) as e:
         cfg.dereference()
     assert "filter: 'not_a_filter'" in str(e.value)
@@ -199,7 +199,7 @@ type_prob: '{{ list_a / \"a\" }}'  # TypeError
 """,
             file=f,
         )
-    cfgobj = core.YAMLConfig(config_path=path)
+    cfgobj = core.YAMLConfig(config_file=path)
     cfgobj.dereference()
     logging.info("HELLO")
     raised = [record.message for record in caplog.records if "raised" in record.message]
@@ -615,7 +615,7 @@ def test__realize_config_values_needed(caplog, tmp_path):
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
-    c = core.YAMLConfig(config_path=path)
+    c = core.YAMLConfig(config_file=path)
     core._realize_config_values_needed(input_obj=c)
     msgs = "\n".join(record.message for record in caplog.records)
     assert "Keys that are complete:\n    1" in msgs
@@ -897,7 +897,7 @@ def test_YAMLConfig__load_unexpected_error(tmp_path):
         msg = "Unexpected error"
         load.side_effect = yaml.constructor.ConstructorError(note=msg)
         with raises(UWConfigError) as e:
-            core.YAMLConfig(config_path=cfgfile)
+            core.YAMLConfig(config_file=cfgfile)
         assert msg in str(e.value)
 
 
@@ -982,12 +982,12 @@ def nml_cfgobj(tmp_path):
     path = tmp_path / "cfg.nml"
     with open(path, "w", encoding="utf-8") as f:
         f.write("&nl n = 88 /")
-    return core.NMLConfig(config_path=path)
+    return core.NMLConfig(config_file=path)
 
 
 @fixture
 def realize_config_testobj(realize_config_yaml_input):
-    return core.YAMLConfig(config_path=realize_config_yaml_input)
+    return core.YAMLConfig(config_file=realize_config_yaml_input)
 
 
 @fixture

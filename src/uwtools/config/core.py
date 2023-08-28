@@ -37,7 +37,7 @@ ERROR:
 The input config file contains a constructor that is not registered with the uwtools package.
 
 constructor: {constructor}
-config file: {config_path}
+config file: {config_file}
 
 Define the constructor before proceeding.
 """.strip(),
@@ -59,15 +59,15 @@ class Config(ABC, UserDict):
     several configuration-file formats.
     """
 
-    def __init__(self, config_path: OptionalPath = None) -> None:
+    def __init__(self, config_file: OptionalPath = None) -> None:
         """
         Construct a Config object.
 
-        :param config_path: Path to the config file to load.
+        :param config_file: Path to the config file to load.
         """
         super().__init__()
-        self._config_path = str(config_path) if config_path else None
-        self.update(self._load(self._config_path))
+        self._config_file = str(config_file) if config_file else None
+        self.update(self._load(self._config_file))
 
     def __repr__(self) -> str:
         """
@@ -78,32 +78,32 @@ class Config(ABC, UserDict):
     # Private methods
 
     @abstractmethod
-    def _load(self, config_path: OptionalPath) -> dict:
+    def _load(self, config_file: OptionalPath) -> dict:
         """
         Reads and parses a config file.
 
         Returns the result of loading and parsing the specified config file, or stdin if no file is
         given.
 
-        :param config_path: Path to config file to load.
+        :param config_file: Path to config file to load.
         """
 
-    def _load_paths(self, config_paths: List[str]) -> dict:
+    def _load_paths(self, config_files: List[str]) -> dict:
         """
         Merge and return the contents of a collection of config files.
 
-        :param config_paths: Paths to the config files to read and merge.
+        :param config_files: Paths to the config files to read and merge.
         """
         cfg = {}
-        for config_path in config_paths:
-            if not os.path.isabs(config_path):
-                if self._config_path:
-                    config_path = os.path.join(os.path.dirname(self._config_path), config_path)
+        for config_file in config_files:
+            if not os.path.isabs(config_file):
+                if self._config_file:
+                    config_file = os.path.join(os.path.dirname(self._config_file), config_file)
                 else:
                     raise _log_and_error(
-                        "Reading from stdin, a relative path was encountered: %s" % config_path
+                        "Reading from stdin, a relative path was encountered: %s" % config_file
                     )
-            cfg.update(self._load(config_path=config_path))
+            cfg.update(self._load(config_file=config_file))
         return cfg
 
     # Public methods
@@ -397,7 +397,7 @@ class INIConfig(Config):
 
     def __init__(
         self,
-        config_path: str,
+        config_file: str,
         space_around_delimiters: bool = True,
     ):
         """
@@ -405,22 +405,22 @@ class INIConfig(Config):
 
         Spaces may be included for INI format, but should be excluded for bash.
 
-        :param config_path: Path to the config file to load.
+        :param config_file: Path to the config file to load.
         :param space_around_delimiters: Include spaces around delimiters?
         """
-        super().__init__(config_path)
+        super().__init__(config_file)
         self.space_around_delimiters = space_around_delimiters
         self.parse_include()
 
     # Private methods
 
-    def _load(self, config_path: OptionalPath) -> dict:
+    def _load(self, config_file: OptionalPath) -> dict:
         """
         Reads and parses an INI file.
 
         See docs for Config._load().
 
-        :param config_path: Path to config file to load.
+        :param config_file: Path to config file to load.
         """
         # The protected _sections method is the most straightforward way to get at the dict
         # representation of the parse config.
@@ -428,7 +428,7 @@ class INIConfig(Config):
         cfg = configparser.ConfigParser(dict_type=OrderedDict)
         cfg.optionxform = str  # type: ignore
         sections = cfg._sections  # type: ignore # pylint: disable=protected-access
-        with readable(config_path) as f:
+        with readable(config_file) as f:
             raw = f.read()
         try:
             cfg.read_string(raw)
@@ -472,21 +472,21 @@ class NMLConfig(Config):
     Concrete class to handle Fortran namelist files.
     """
 
-    def __init__(self, config_path) -> None:
-        super().__init__(config_path)
+    def __init__(self, config_file) -> None:
+        super().__init__(config_file)
         self.parse_include()
 
     # Private methods
 
-    def _load(self, config_path: OptionalPath) -> dict:
+    def _load(self, config_file: OptionalPath) -> dict:
         """
         Reads and parses a Fortran namelist file.
 
         See docs for Config._load().
 
-        :param config_path: Path to config file to load.
+        :param config_file: Path to config file to load.
         """
-        with readable(config_path) as f:
+        with readable(config_file) as f:
             cfg = f90nml.read(f).todict(complex_tuple=False)
         return self.from_ordereddict(cfg)
 
@@ -530,16 +530,16 @@ class YAMLConfig(Config):
 
     # Private methods
 
-    def _load(self, config_path: OptionalPath) -> dict:
+    def _load(self, config_file: OptionalPath) -> dict:
         """
         Reads and parses a YAML file.
 
         See docs for Config._load().
 
-        :param config_path: Path to config file to load.
+        :param config_file: Path to config file to load.
         """
         loader = self._yaml_loader
-        with readable(config_path) as f:
+        with readable(config_file) as f:
             try:
                 cfg = yaml.load(f, Loader=loader)
             except yaml.constructor.ConstructorError as e:
@@ -549,7 +549,7 @@ class YAMLConfig(Config):
                     else:
                         constructor = e.problem.split()[-1]
                         msg = MSGS.unregistered_constructor.format(
-                            config_path=config_path, constructor=constructor
+                            config_file=config_file, constructor=constructor
                         )
                 else:
                     msg = str(e)
@@ -733,7 +733,7 @@ def realize_config(
     :raises: UWConfigError if errors are encountered.
     """
 
-    input_obj = _cli_name_to_config(input_format)(config_path=input_file)
+    input_obj = _cli_name_to_config(input_format)(config_file=input_file)
     input_obj.dereference_all()
     input_obj = _realize_config_update(input_obj, values_file, values_format)
     _realize_config_check_depths(input_obj, output_format)
@@ -810,7 +810,7 @@ def _realize_config_update(
     if values_file:
         logging.debug("Before update, config has depth %s", input_obj.depth)
         values_format = values_format or get_file_type(values_file)
-        values_obj = _cli_name_to_config(values_format)(config_path=values_file)
+        values_obj = _cli_name_to_config(values_format)(config_file=values_file)
         logging.debug("Values config has depth %s", values_obj.depth)
         input_obj.update_values(values_obj)
         input_obj.dereference_all()
