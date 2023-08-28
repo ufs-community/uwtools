@@ -268,19 +268,10 @@ def test_stage_files(tmp_path, section, link_files):
             assert (run_directory / dst_fn).is_file()
 
 
-def test_run(caplog, tmp_path):
-    run_expected = """
-#!/bin/bash
-#SBATCH --account=user_account
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-srun --export=None test_exec.py
-""".strip()
+@fixture
+def fv3_run_assets(tmp_path):
+    batch_script = tmp_path / "batch.sh"
     config_file = fixture_path("forecast.yaml")
-    out_file = tmp_path / "test_exec.py"
-    out_file.touch()
     config = {
         "platform": {
             "MPICMD": "srun",
@@ -295,9 +286,27 @@ srun --export=None test_exec.py
             "VERBOSE": "False",
         },
     }
+    return batch_script, config_file, config
+
+
+def test_FV3Forecast_run_dry_run():
+    pass
+
+
+def test_run(caplog, tmp_path, fv3_run_assets):
+    run_expected = """
+#!/bin/bash
+#SBATCH --account=user_account
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --qos=batch
+#SBATCH --time=00:01:00
+srun --export=None test_exec.py
+""".strip()
+    batch_script, config_file, config = fv3_run_assets
     # Test dry run:
     with patch.object(FV3Forecast, "_validate", return_value=True):
-        fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=out_file)
+        fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=batch_script)
         with patch.object(fcstobj, "_config", config):
             fcstobj.run()
     assert run_expected in caplog.text
@@ -305,11 +314,11 @@ srun --export=None test_exec.py
     # Test real batch run:
     with patch.object(FV3Forecast, "_validate", return_value=True):
         with patch.object(forecast.subprocess, "run") as sprun:
-            fcstobj = FV3Forecast(config_file=config_file, batch_script=out_file)
+            fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
             with patch.object(fcstobj, "_config", config):
                 fcstobj.run()
             sprun.assert_called_once_with(
-                f"sbatch {out_file}",
+                f"sbatch {batch_script}",
                 stderr=subprocess.STDOUT,
                 check=False,
                 shell=True,
