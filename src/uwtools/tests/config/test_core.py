@@ -10,7 +10,7 @@ import os
 from collections import OrderedDict
 from io import StringIO
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict
 from unittest.mock import patch
 
 import pytest
@@ -377,7 +377,7 @@ def test_ini_config_bash(salad_base, tmp_path):
     infile = fixture_path("simple.sh")
     outfile = tmp_path / "outfile.sh"
     cfgobj = core.INIConfig(infile, space_around_delimiters=False)
-    expected: dict = {**salad_base["salad"], "how_many": "12"}  # str "12" (not int 12) for INI
+    expected: Dict[str, Any] = {**salad_base["salad"], "how_many": "12"}  # str "12" (not int 12) for INI
     assert cfgobj == expected
     cfgobj.dump_file(outfile)
     assert filecmp.cmp(infile, outfile)
