@@ -1,5 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
+import logging
 from argparse import ArgumentParser as Parser
 from types import SimpleNamespace as ns
 from typing import List
@@ -10,6 +11,7 @@ import pytest
 from pytest import fixture, raises
 
 from uwtools import cli
+from uwtools.tests.support import logged
 
 # Test functions
 
@@ -153,16 +155,21 @@ def test_dispatch_template(params):
     assert m.called_once_with(args)
 
 
-# def test_dispatch_template_render_yaml():
-#     args = ns(
-#         input_file=1,
-#         output_file=2,
-#         values_file=3,
-#         dict_from_key_eq_val_strings=4,
-#     )
-#     with patch.object(cli.uwtools.config.templater, "render") as m:
-#         cli.dispatch_template_render(args)  # type: ignore
-#     assert m.called_once_with(args)
+def test_dispatch_template_render_yaml(caplog):
+    logging.getLogger().setLevel(logging.DEBUG)
+    args = ns(
+        input_file=1,
+        output_file=2,
+        values_file=3,
+        key_eq_val_pairs=["foo=88", "bar=99"],
+        values_needed=5,
+        dry_run=6,
+    )
+    with patch.object(cli.uwtools.config.templater, "render") as m:
+        with patch.object(cli.sys, "argv", ["foo", "--bar", "88"]):
+            cli.dispatch_template_render(args)  # type: ignore
+    assert m.called_once_with(args)
+    assert logged(caplog, "Command: foo --bar 88")
 
 
 @pytest.mark.parametrize("params", [(False, 1, False, True), (True, 0, True, False)])
