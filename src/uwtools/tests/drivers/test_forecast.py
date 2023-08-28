@@ -10,6 +10,7 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture, raises
 
+import uwtools.config.core
 from uwtools.config.core import NMLConfig, YAMLConfig
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
@@ -282,7 +283,7 @@ srun --export=None test_exec.py
     out_file = tmp_path / "test_exec.py"
     out_file.touch()
 
-    with patch.object(config, "YAMLConfig") as YAMLConfig:
+    with patch.object(uwtools.config.core, "YAMLConfig") as YAMLConfig:
         YAMLConfig.return_value = {
             "platform": {
                 "MPICMD": "srun",

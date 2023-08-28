@@ -16,8 +16,8 @@ from typing import Dict
 
 from uwtools.config.core import FieldTableConfig, NMLConfig, realize_config
 from uwtools.drivers.driver import Driver
-from uwtools.utils.file import handle_existing
 from uwtools.scheduler import BatchScript, JobScheduler
+from uwtools.utils.file import handle_existing
 
 
 class FV3Forecast(Driver):
@@ -158,8 +158,8 @@ class FV3Forecast(Driver):
         Runs FV3 either as a subprocess or by submitting a batch script.
         """
         # Read in the config file.
-        forecast_config = self.config_data["forecast"]
-        platform_config = self.config_data["platform"]
+        forecast_config = self._config["forecast"]
+        platform_config = self._config["platform"]
 
         # Prepare directories.
         run_directory = forecast_config["RUN_DIRECTORY"]

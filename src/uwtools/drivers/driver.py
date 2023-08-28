@@ -7,6 +7,7 @@ from collections.abc import Mapping
 from typing import Optional
 
 from uwtools.config import validator
+from uwtools.config.core import YAMLConfig
 from uwtools.scheduler import BatchScript
 
 
@@ -29,6 +30,7 @@ class Driver(ABC):
         self._dry_run = dry_run
         self._batch_script = batch_script
         self._validate()
+        self._config = YAMLConfig(config_path=config_file)
 
     # Public methods
 
