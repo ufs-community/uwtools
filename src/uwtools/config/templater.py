@@ -34,7 +34,7 @@ def render(
     values = _set_up_values_obj(values_file=values_file, overrides=overrides)
     with readable(input_file) as f:
         template_str = f.read()
-    template = J2Template(configure_obj=values, template_str=template_str)
+    template = J2Template(values=values, template_str=template_str)
     undeclared_variables = template.undeclared_variables
 
     # If a report of variables required to render the template was requested, make that report and

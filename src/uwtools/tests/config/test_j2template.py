@@ -19,8 +19,8 @@ def testdata():
 
 
 def validate(template):
-    assert template._configure_obj.get("greeting") == "Hello"
-    assert template._configure_obj.get("recipient") == "the world"
+    assert template._values.get("greeting") == "Hello"
+    assert template._values.get("recipient") == "the world"
     assert template.render() == "Hello to the world"
     assert template.undeclared_variables == {"greeting", "recipient"}
 

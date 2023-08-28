@@ -221,12 +221,12 @@ class Config(ABC, UserDict):
                         # current section name, and to the other sections with dot values. Also make
                         # environment variables available with env prefix.
                         if ref_dict == full_dict:
-                            config_obj = {**os.environ, **full_dict}
+                            values = {**os.environ, **full_dict}
                         else:
-                            config_obj = {**os.environ, **ref_dict, **full_dict}
+                            values = {**os.environ, **ref_dict, **full_dict}
                         try:
                             j2tmpl = J2Template(
-                                configure_obj=config_obj,
+                                values=values,
                                 template_str=template,
                                 loader_args={"undefined": jinja2.StrictUndefined},
                             )

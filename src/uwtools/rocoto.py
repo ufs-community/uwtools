@@ -34,11 +34,11 @@ def write_rocoto_xml(input_yaml: str, input_template: str, rendered_output: str)
     :param input_template: Path to input template file.
     :param rendered_output: Path to write rendered XML file.
     """
-    config_obj = YAMLConfig(input_yaml)
-    tasks = config_obj["tasks"]
+    values = YAMLConfig(input_yaml)
+    tasks = values["tasks"]
     if isinstance(tasks, dict):
         _add_jobname(tasks)
 
     # Render the template.
-    template = J2Template(configure_obj=config_obj.data, template_path=input_template)
+    template = J2Template(values=values.data, template_path=input_template)
     template.dump_file(output_path=rendered_output)
