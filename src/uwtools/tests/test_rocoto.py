@@ -3,6 +3,7 @@
 Tests for uwtools.rocoto module.
 """
 from importlib import resources
+from lxml import etree
 
 import yaml
 
@@ -52,3 +53,9 @@ def test_write_rocoto_xml(tmp_path):
 
     expected = support.fixture_path("hello_workflow.xml")
     support.compare_files(expected, output)
+
+def test_rocoto_xml_is_valid():
+    input_xml = support.fixture_path("hello_workflow.xml")
+    tree = etree.parse(input_xml)
+    root = etree.tostring(tree.getroot())
+    breakpoint()
