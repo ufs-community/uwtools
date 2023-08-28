@@ -550,16 +550,11 @@ def check_args(args: Namespace) -> Namespace:
     :return: The checked command-line arguments.
     :raises: SystemExit if any checks failed.
     """
-    try:
-        if args.quiet and args.verbose:
-            abort("Specify at most one of --quiet, --verbose")
-    except AttributeError:
-        pass
-    try:
-        if args.values_file and not args.values_format:
-            abort("Specify --values-format with --values-file")
-    except AttributeError:
-        pass
+    a = vars(args)
+    if a.get("quiet") and a.get("verbose"):
+        abort("Specify at most one of --quiet, --verbose")
+    if a.get("values_file") and not a.get("values_format"):
+        abort("Specify --values-format with --values-file")
     return args
 
 

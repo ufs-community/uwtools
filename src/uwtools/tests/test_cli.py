@@ -23,6 +23,22 @@ def test_abort(capsys):
     assert msg in capsys.readouterr().err
 
 
+def test_check_args_fail_quiet_verbose(capsys):
+    logging.getLogger().setLevel(logging.INFO)
+    args = ns(quiet=True, verbose=True)
+    with raises(SystemExit):
+        cli.check_args(args)
+    assert "Specify at most one of --quiet, --verbose" in capsys.readouterr().err
+
+
+def test_check_args_fail_values_file_no_value_format(capsys):
+    logging.getLogger().setLevel(logging.INFO)
+    args = ns(values_file="foo")
+    with raises(SystemExit):
+        cli.check_args(args)
+    assert "Specify --values-format with --values-file" in capsys.readouterr().err
+
+
 def test_check_args_ok():
     args = ns(foo=88)
     assert cli.check_args(args) == args
