@@ -336,7 +336,7 @@ def add_arg_config_file(group: Group) -> None:
     group.add_argument(
         "--config-file",
         "-c",
-        help="Path to YAML config file",
+        help="Path to config file",
         metavar="PATH",
         required=True,
         type=str,
