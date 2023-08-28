@@ -23,27 +23,6 @@ def test_abort(capsys):
     assert msg in capsys.readouterr().err
 
 
-def test_check_args_fail_quiet_verbose(capsys):
-    logging.getLogger().setLevel(logging.INFO)
-    args = ns(quiet=True, verbose=True)
-    with raises(SystemExit):
-        cli.check_args(args)
-    assert "Specify at most one of --quiet, --verbose" in capsys.readouterr().err
-
-
-def test_check_args_fail_values_file_no_value_format(capsys):
-    logging.getLogger().setLevel(logging.INFO)
-    args = ns(values_file="foo")
-    with raises(SystemExit):
-        cli.check_args(args)
-    assert "Specify --values-format with --values-file" in capsys.readouterr().err
-
-
-def test_check_args_ok():
-    args = ns(foo=88)
-    assert cli.check_args(args) == args
-
-
 def test_add_subparser_config(subparsers):
     cli.add_subparser_config(subparsers)
     assert submodes(subparsers.choices["config"]) == ["compare", "realize", "translate", "validate"]
@@ -87,6 +66,32 @@ def test_add_subparser_template(subparsers):
 def test_add_subparser_template_render(subparsers):
     cli.add_subparser_template_render(subparsers)
     assert subparsers.choices["render"]
+
+
+def test_check_args_fail_quiet_verbose(capsys):
+    logging.getLogger().setLevel(logging.INFO)
+    args = ns(quiet=True, verbose=True)
+    with raises(SystemExit):
+        cli.check_args(args)
+    assert "Specify at most one of --quiet, --verbose" in capsys.readouterr().err
+
+
+def test_check_args_fail_values_file_no_value_format(capsys):
+    logging.getLogger().setLevel(logging.INFO)
+    args = ns(values_file="foo")
+    with raises(SystemExit):
+        cli.check_args(args)
+    assert "Specify --values-format with --values-file" in capsys.readouterr().err
+
+
+def test_check_args_ok():
+    args = ns(foo=88)
+    assert cli.check_args(args) == args
+
+
+def test_dict_from_key_eq_val_strings():
+    assert not cli.dict_from_key_eq_val_strings([])
+    assert cli.dict_from_key_eq_val_strings(["a=1", "b=2"]) == {"a": "1", "b": "2"}
 
 
 @pytest.mark.parametrize(
@@ -218,9 +223,13 @@ def test_main_fail(params):
         mocks["setup_logging"].assert_called_once_with(quiet=quiet, verbose=verbose)
 
 
-def test_dict_from_key_eq_val_strings():
-    assert not cli.dict_from_key_eq_val_strings([])
-    assert cli.dict_from_key_eq_val_strings(["a=1", "b=2"]) == {"a": "1", "b": "2"}
+def test_parse_args():
+    raw_args = ["foo", "--bar", "88"]
+    with patch.object(cli, "Parser") as Parser:
+        cli.parse_args(raw_args)
+        Parser.assert_called_once()
+        parser = Parser()
+        parser.parse_args.assert_called_with(raw_args)
 
 
 # Helper functions
