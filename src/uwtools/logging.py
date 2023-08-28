@@ -6,6 +6,15 @@ import logging
 import os
 import sys
 
+# The logging prefix
+#
+# [YYYY-MM-DDTHH:MM:HH]_CRITICAL_
+# 1234567890123456789012345678901
+#
+# is 31 characters, leaving 69 for messages (e.g. separators) on a 100-character line.
+
+MSGWIDTH = 69
+
 
 def setup_logging(quiet: bool = False, verbose: bool = False) -> None:
     """

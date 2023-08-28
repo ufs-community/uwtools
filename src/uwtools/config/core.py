@@ -22,6 +22,7 @@ import yaml
 
 from uwtools.config.j2template import J2Template
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import MSGWIDTH
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import get_file_type, readable, writable
 
@@ -678,7 +679,7 @@ def compare_configs(
     cfg_b = _cli_name_to_config(config_b_format)(config_b_path)
     logging.info("- %s", config_a_path)
     logging.info("+ %s", config_b_path)
-    logging.info("-" * 69)
+    logging.info("-" * MSGWIDTH)
     return cfg_a.compare_config(cfg_b.data)
 
 

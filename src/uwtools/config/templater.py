@@ -8,6 +8,7 @@ from typing import Dict, Optional
 
 import uwtools.config.core
 from uwtools.config.j2template import J2Template
+from uwtools.logging import MSGWIDTH
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import get_file_type, readable, writable
 
@@ -78,7 +79,7 @@ def _report(args: dict) -> None:
 
     :param args: The argument names and their values.
     """
-    dashes = lambda: logging.debug("-" * 69)
+    dashes = lambda: logging.debug("-" * MSGWIDTH)
     logging.debug("Internal arguments:")
     dashes()
     for varname, value in args.items():
