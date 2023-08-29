@@ -24,48 +24,48 @@ def test_abort(capsys):
     assert msg in capsys.readouterr().err
 
 
-def test_add_subparser_config(subparsers):
-    cli.add_subparser_config(subparsers)
+def test__add_subparser_config(subparsers):
+    cli._add_subparser_config(subparsers)
     assert submodes(subparsers.choices["config"]) == ["compare", "realize", "translate", "validate"]
 
 
-def test_add_subparser_config_compare(subparsers):
-    cli.add_subparser_config_compare(subparsers)
+def test__add_subparser_config_compare(subparsers):
+    cli._add_subparser_config_compare(subparsers)
     assert subparsers.choices["compare"]
 
 
-def test_add_subparser_config_realize(subparsers):
-    cli.add_subparser_config_realize(subparsers)
+def test__add_subparser_config_realize(subparsers):
+    cli._add_subparser_config_realize(subparsers)
     assert subparsers.choices["realize"]
 
 
-def test_add_subparser_config_translate(subparsers):
-    cli.add_subparser_config_translate(subparsers)
+def test__add_subparser_config_translate(subparsers):
+    cli._add_subparser_config_translate(subparsers)
     assert subparsers.choices["translate"]
 
 
-def test_add_subparser_config_validate(subparsers):
-    cli.add_subparser_config_validate(subparsers)
+def test__add_subparser_config_validate(subparsers):
+    cli._add_subparser_config_validate(subparsers)
     assert subparsers.choices["validate"]
 
 
-def test_add_subparser_forecast(subparsers):
-    cli.add_subparser_forecast(subparsers)
+def test__add_subparser_forecast(subparsers):
+    cli._add_subparser_forecast(subparsers)
     assert submodes(subparsers.choices["forecast"]) == ["run"]
 
 
-def test_add_subparser_forecast_run(subparsers):
-    cli.add_subparser_forecast_run(subparsers)
+def test__add_subparser_forecast_run(subparsers):
+    cli._add_subparser_forecast_run(subparsers)
     assert subparsers.choices["run"]
 
 
-def test_add_subparser_template(subparsers):
-    cli.add_subparser_template(subparsers)
+def test__add_subparser_template(subparsers):
+    cli._add_subparser_template(subparsers)
     assert submodes(subparsers.choices["template"]) == ["render"]
 
 
-def test_add_subparser_template_render(subparsers):
-    cli.add_subparser_template_render(subparsers)
+def test__add_subparser_template_render(subparsers):
+    cli._add_subparser_template_render(subparsers)
     assert subparsers.choices["render"]
 
 

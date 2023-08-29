@@ -44,100 +44,100 @@ def main() -> None:
 # Mode config
 
 
-def add_subparser_config(subparsers: Subparsers) -> None:
+def _add_subparser_config(subparsers: Subparsers) -> None:
     """
     Subparser for mode: config
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "config", "Handle configs")
+    parser = _add_subparser(subparsers, "config", "Handle configs")
     basic_setup(parser)
-    subparsers = add_subparsers(parser, "submode")
-    add_subparser_config_compare(subparsers)
-    add_subparser_config_realize(subparsers)
-    add_subparser_config_translate(subparsers)
-    add_subparser_config_validate(subparsers)
+    subparsers = _add_subparsers(parser, "submode")
+    _add_subparser_config_compare(subparsers)
+    _add_subparser_config_realize(subparsers)
+    _add_subparser_config_translate(subparsers)
+    _add_subparser_config_validate(subparsers)
 
 
-def add_subparser_config_compare(subparsers: Subparsers) -> None:
+def _add_subparser_config_compare(subparsers: Subparsers) -> None:
     """
     Subparser for mode: config compare
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "compare", "Compare configs")
+    parser = _add_subparser(subparsers, "compare", "Compare configs")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    add_arg_file_path(required, switch="--file-1-path", helpmsg="Path to file 1")
-    add_arg_file_path(required, switch="--file-2-path", helpmsg="Path to file 2")
+    _add_arg_file_path(required, switch="--file-1-path", helpmsg="Path to file 1")
+    _add_arg_file_path(required, switch="--file-2-path", helpmsg="Path to file 2")
     optional = basic_setup(parser)
-    add_arg_file_format(
+    _add_arg_file_format(
         optional,
         switch="--file-1-format",
         helpmsg="Format of file 1",
         choices=FORMATS,
     )
-    add_arg_file_format(
+    _add_arg_file_format(
         optional,
         switch="--file-2-format",
         helpmsg="Format of file 2",
         choices=FORMATS,
     )
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
+    _add_arg_quiet(optional)
+    _add_arg_verbose(optional)
 
 
-def add_subparser_config_realize(subparsers: Subparsers) -> None:
+def _add_subparser_config_realize(subparsers: Subparsers) -> None:
     """
     Subparser for mode: config realize
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "realize", "Realize config")
+    parser = _add_subparser(subparsers, "realize", "Realize config")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    add_arg_values_file(required, required=True)
+    _add_arg_values_file(required, required=True)
     optional = basic_setup(parser)
-    add_arg_input_file(optional)
-    add_arg_input_format(optional, choices=FORMATS)
-    add_arg_output_file(optional)
-    add_arg_output_format(optional, choices=FORMATS)
-    add_arg_values_format(optional, choices=FORMATS)
-    add_arg_values_needed(optional)
-    add_arg_dry_run(optional)
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
+    _add_arg_input_file(optional)
+    _add_arg_input_format(optional, choices=FORMATS)
+    _add_arg_output_file(optional)
+    _add_arg_output_format(optional, choices=FORMATS)
+    _add_arg_values_format(optional, choices=FORMATS)
+    _add_arg_values_needed(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_quiet(optional)
+    _add_arg_verbose(optional)
 
 
-def add_subparser_config_translate(subparsers: Subparsers) -> None:
+def _add_subparser_config_translate(subparsers: Subparsers) -> None:
     """
     Subparser for mode: config translate
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "translate", "Translate configs")
+    parser = _add_subparser(subparsers, "translate", "Translate configs")
     optional = basic_setup(parser)
-    add_arg_input_file(optional)
-    add_arg_input_format(optional, choices=[FORMAT.atparse])
-    add_arg_output_file(optional)
-    add_arg_output_format(optional, choices=[FORMAT.jinja2])
-    add_arg_dry_run(optional)
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
+    _add_arg_input_file(optional)
+    _add_arg_input_format(optional, choices=[FORMAT.atparse])
+    _add_arg_output_file(optional)
+    _add_arg_output_format(optional, choices=[FORMAT.jinja2])
+    _add_arg_dry_run(optional)
+    _add_arg_quiet(optional)
+    _add_arg_verbose(optional)
 
 
-def add_subparser_config_validate(subparsers: Subparsers) -> None:
+def _add_subparser_config_validate(subparsers: Subparsers) -> None:
     """
     Subparser for mode: config validate
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "validate", "Validate config")
+    parser = _add_subparser(subparsers, "validate", "Validate config")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    add_arg_schema_file(required)
+    _add_arg_schema_file(required)
     optional = basic_setup(parser)
-    add_arg_input_file(optional)
-    add_arg_input_format(optional, choices=[FORMAT.yaml])
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
+    _add_arg_input_file(optional)
+    _add_arg_input_format(optional, choices=[FORMAT.yaml])
+    _add_arg_quiet(optional)
+    _add_arg_verbose(optional)
 
 
 def dispatch_config(args: Namespace) -> bool:
@@ -221,32 +221,32 @@ def dispatch_config_validate(args: Namespace) -> bool:
 # Mode forecast
 
 
-def add_subparser_forecast(subparsers: Subparsers) -> None:
+def _add_subparser_forecast(subparsers: Subparsers) -> None:
     """
     Subparser for mode: forecast
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "forecast", "Configure and run forecasts")
+    parser = _add_subparser(subparsers, "forecast", "Configure and run forecasts")
     basic_setup(parser)
-    subparsers = add_subparsers(parser, "submode")
-    add_subparser_forecast_run(subparsers)
+    subparsers = _add_subparsers(parser, "submode")
+    _add_subparser_forecast_run(subparsers)
 
 
-def add_subparser_forecast_run(subparsers: Subparsers) -> None:
+def _add_subparser_forecast_run(subparsers: Subparsers) -> None:
     """
     Subparser for mode: forecast run
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "run", "Run a forecast")
+    parser = _add_subparser(subparsers, "run", "Run a forecast")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    add_arg_config_file(required)
-    add_arg_model(required, choices=["FV3"])
+    _add_arg_config_file(required)
+    _add_arg_model(required, choices=["FV3"])
     optional = basic_setup(parser)
-    add_arg_dry_run(optional)
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_quiet(optional)
+    _add_arg_verbose(optional)
 
 
 def dispatch_forecast(args: Namespace) -> bool:
@@ -272,35 +272,35 @@ def dispatch_forecast_run(args: Namespace) -> bool:
 # Mode template
 
 
-def add_subparser_template(subparsers: Subparsers) -> None:
+def _add_subparser_template(subparsers: Subparsers) -> None:
     """
     Subparser for mode: template
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "template", "Handle templates")
+    parser = _add_subparser(subparsers, "template", "Handle templates")
     basic_setup(parser)
-    subparsers = add_subparsers(parser, "submode")
-    add_subparser_template_render(subparsers)
+    subparsers = _add_subparsers(parser, "submode")
+    _add_subparser_template_render(subparsers)
 
 
-def add_subparser_template_render(subparsers: Subparsers) -> None:
+def _add_subparser_template_render(subparsers: Subparsers) -> None:
     """
     Subparser for mode: template render
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = add_subparser(subparsers, "render", "Render a template")
+    parser = _add_subparser(subparsers, "render", "Render a template")
     optional = basic_setup(parser)
-    add_arg_input_file(optional)
-    add_arg_output_file(optional)
-    add_arg_values_file(optional)
-    add_arg_values_format(optional, choices=FORMATS)
-    add_arg_values_needed(optional)
-    add_arg_dry_run(optional)
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
-    add_arg_key_eq_val_pairs(optional)
+    _add_arg_input_file(optional)
+    _add_arg_output_file(optional)
+    _add_arg_values_file(optional)
+    _add_arg_values_format(optional, choices=FORMATS)
+    _add_arg_values_needed(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_quiet(optional)
+    _add_arg_verbose(optional)
+    _add_arg_key_eq_val_pairs(optional)
 
 
 def dispatch_template(args: Namespace) -> bool:
@@ -335,7 +335,7 @@ def dispatch_template_render(args: Namespace) -> bool:
 # pylint: disable=missing-function-docstring
 
 
-def add_arg_config_file(group: Group) -> None:
+def _add_arg_config_file(group: Group) -> None:
     group.add_argument(
         "--config-file",
         "-c",
@@ -346,7 +346,7 @@ def add_arg_config_file(group: Group) -> None:
     )
 
 
-def add_arg_dry_run(group: Group) -> None:
+def _add_arg_dry_run(group: Group) -> None:
     group.add_argument(
         "--dry-run",
         action="store_true",
@@ -354,7 +354,7 @@ def add_arg_dry_run(group: Group) -> None:
     )
 
 
-def add_arg_file_format(
+def _add_arg_file_format(
     group: Group, switch: str, helpmsg: str, choices: List[str], required: bool = False
 ) -> None:
     group.add_argument(
@@ -366,7 +366,7 @@ def add_arg_file_format(
     )
 
 
-def add_arg_file_path(group: Group, switch: str, helpmsg: str, required: bool = True) -> None:
+def _add_arg_file_path(group: Group, switch: str, helpmsg: str, required: bool = True) -> None:
     group.add_argument(
         switch,
         help=helpmsg,
@@ -376,7 +376,7 @@ def add_arg_file_path(group: Group, switch: str, helpmsg: str, required: bool = 
     )
 
 
-def add_arg_input_file(group: Group, required: bool = False) -> None:
+def _add_arg_input_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         "--input-file",
         "-i",
@@ -387,7 +387,7 @@ def add_arg_input_file(group: Group, required: bool = False) -> None:
     )
 
 
-def add_arg_input_format(group: Group, choices: List[str], required: bool = False) -> None:
+def _add_arg_input_format(group: Group, choices: List[str], required: bool = False) -> None:
     group.add_argument(
         "--input-format",
         choices=choices,
@@ -397,7 +397,7 @@ def add_arg_input_format(group: Group, choices: List[str], required: bool = Fals
     )
 
 
-def add_arg_key_eq_val_pairs(group: Group) -> None:
+def _add_arg_key_eq_val_pairs(group: Group) -> None:
     group.add_argument(
         "key_eq_val_pairs",
         help="A key=value pair to override/supplement config",
@@ -406,7 +406,7 @@ def add_arg_key_eq_val_pairs(group: Group) -> None:
     )
 
 
-def add_arg_model(group: Group, choices: List[str]) -> None:
+def _add_arg_model(group: Group, choices: List[str]) -> None:
     group.add_argument(
         "--model",
         choices=choices,
@@ -416,7 +416,7 @@ def add_arg_model(group: Group, choices: List[str]) -> None:
     )
 
 
-def add_arg_output_file(group: Group, required: bool = False) -> None:
+def _add_arg_output_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         "--output-file",
         "-o",
@@ -427,7 +427,7 @@ def add_arg_output_file(group: Group, required: bool = False) -> None:
     )
 
 
-def add_arg_output_format(group: Group, choices: List[str], required: bool = False) -> None:
+def _add_arg_output_format(group: Group, choices: List[str], required: bool = False) -> None:
     group.add_argument(
         "--output-format",
         choices=choices,
@@ -437,7 +437,7 @@ def add_arg_output_format(group: Group, choices: List[str], required: bool = Fal
     )
 
 
-def add_arg_quiet(group: Group) -> None:
+def _add_arg_quiet(group: Group) -> None:
     group.add_argument(
         "--quiet",
         "-q",
@@ -446,7 +446,7 @@ def add_arg_quiet(group: Group) -> None:
     )
 
 
-def add_arg_schema_file(group: Group) -> None:
+def _add_arg_schema_file(group: Group) -> None:
     group.add_argument(
         "--schema-file",
         help="Path to schema file to use for validation",
@@ -456,7 +456,7 @@ def add_arg_schema_file(group: Group) -> None:
     )
 
 
-def add_arg_values_file(group: Group, required: bool = False) -> None:
+def _add_arg_values_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         "--values-file",
         help="Path to file providing override or interpolation values",
@@ -466,7 +466,7 @@ def add_arg_values_file(group: Group, required: bool = False) -> None:
     )
 
 
-def add_arg_values_format(group: Group, choices: List[str]) -> None:
+def _add_arg_values_format(group: Group, choices: List[str]) -> None:
     group.add_argument(
         "--values-format",
         choices=choices,
@@ -476,7 +476,7 @@ def add_arg_values_format(group: Group, choices: List[str]) -> None:
     )
 
 
-def add_arg_values_needed(group: Group) -> None:
+def _add_arg_values_needed(group: Group) -> None:
     group.add_argument(
         "--values-needed",
         action="store_true",
@@ -484,7 +484,7 @@ def add_arg_values_needed(group: Group) -> None:
     )
 
 
-def add_arg_verbose(group: Group) -> None:
+def _add_arg_verbose(group: Group) -> None:
     group.add_argument(
         "--verbose",
         "-v",
@@ -509,7 +509,7 @@ def abort(msg: str) -> None:
     sys.exit(1)
 
 
-def add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
+def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     """
     Add a new subparser, with standard help formatting, to the given parser.
 
@@ -523,7 +523,7 @@ def add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     )
 
 
-def add_subparsers(parser: Parser, dest: str) -> Subparsers:
+def _add_subparsers(parser: Parser, dest: str) -> Subparsers:
     """
     Add subparsers to a parser.
 
@@ -589,10 +589,10 @@ def parse_args(raw_args: List[str]) -> Namespace:
 
     parser = Parser(description="Unified Workflow Tools", add_help=False, formatter_class=formatter)
     basic_setup(parser)
-    subparsers = add_subparsers(parser, "mode")
-    add_subparser_config(subparsers)
-    add_subparser_forecast(subparsers)
-    add_subparser_template(subparsers)
+    subparsers = _add_subparsers(parser, "mode")
+    _add_subparser_config(subparsers)
+    _add_subparser_forecast(subparsers)
+    _add_subparser_template(subparsers)
     return parser.parse_args(raw_args)
 
 
@@ -613,12 +613,10 @@ def set_formats(args: Namespace) -> Namespace:
         "output_file": "output_format",
         "values_file": "values_format",
     }
-    # breakpoint()
     for path_arg, fmt_arg in path2fmt.items():
         if path_arg in argmap:
             if argmap[fmt_arg] is None:
                 if argmap[path_arg] is None:
                     abort("Specify %s when %s is not given" % (switch(fmt_arg), switch(path_arg)))
                 argmap[fmt_arg] = get_file_type(argmap[path_arg])
-    # breakpoint()
     return args
