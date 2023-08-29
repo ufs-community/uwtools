@@ -619,6 +619,8 @@ def _set_formats(args: Namespace) -> Namespace:
         if path_arg in argmap:
             if argmap[fmt_arg] is None:
                 if argmap[path_arg] is None:
-                    _abort("Specify %s when %s is not given" % (switch(fmt_arg), switch(path_arg)))
+                    _abort(
+                        "Specify %s when %s is not specified" % (switch(fmt_arg), switch(path_arg))
+                    )
                 argmap[fmt_arg] = get_file_type(argmap[path_arg])
     return args

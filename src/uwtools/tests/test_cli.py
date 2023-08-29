@@ -246,6 +246,28 @@ def test__parse_args():
         parser.parse_args.assert_called_with(raw_args)
 
 
+def test__set_formats_fail(capsys):
+    args = ns(input_file=None, input_format=None)
+    with raises(SystemExit):
+        cli._set_formats(args)
+    assert "Specify --input-format when --input-file is not specified" in capsys.readouterr().err
+
+
+def test__set_formats_pass_explicit():
+    # Accept explcitly-specified format, whatever it is.
+    args = ns(input_file="/path/to/input.txt", input_format="jpg")
+    args = cli._set_formats(args)
+    assert args.input_format == "jpg"
+
+
+@pytest.mark.parametrize("fmt", vars(FORMAT).keys())
+def test__set_formats_pass_implicit(fmt):
+    # The format is deduced for a file with a known extension.
+    args = ns(input_file=f"/path/to/input.{fmt}", input_format=None)
+    args = cli._set_formats(args)
+    assert args.input_format == vars(FORMAT)[fmt]
+
+
 # Helper functions
 
 
