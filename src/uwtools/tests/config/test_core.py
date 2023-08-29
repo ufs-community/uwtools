@@ -264,7 +264,7 @@ def test_nml_config_simple(salad_base, tmp_path):
 
 def test_parse_include():
     """
-    Test that non-YAML handles !INCLUDE Tags properly.
+    Test that non-YAML handles include tags properly.
     """
     cfgobj = core.NMLConfig(fixture_path("include_files.nml"))
     assert cfgobj["config"]["fruit"] == "papaya"
@@ -275,7 +275,7 @@ def test_parse_include():
 
 def test_parse_include_ini():
     """
-    Test that non-YAML handles !INCLUDE Tags properly for INI with no sections.
+    Test that non-YAML handles include tags properly for INI with no sections.
     """
     cfgobj = core.INIConfig(fixture_path("include_files.sh"), space_around_delimiters=False)
     assert cfgobj.get("fruit") == "papaya"
@@ -286,8 +286,7 @@ def test_parse_include_ini():
 
 def test_parse_include_mult_sect():
     """
-    Test that non-YAML handles !INCLUDE tags with files that have multiple sections in separate
-    file.
+    Test that non-YAML handles include tags with files that have multiple sections in separate file.
     """
     cfgobj = core.NMLConfig(fixture_path("include_files_with_sect.nml"))
     assert cfgobj["config"]["fruit"] == "papaya"
@@ -774,7 +773,7 @@ def test_yaml_config_composite_types():
 
 def test_yaml_config_include_files():
     """
-    Test that including files via the !INCLUDE constructor works as expected.
+    Test that including files via the include constructor works as expected.
     """
     cfgobj = core.YAMLConfig(fixture_path("include_files.yaml"))
 
@@ -903,12 +902,12 @@ def test_YAMLConfig__load_unexpected_error(tmp_path):
 
 def test_YAMLConfig__load_paths_failure_stdin_plus_relpath(caplog):
     # Instantiate a YAMLConfig with no input file, triggering a read from stdin. Patch stdin to
-    # provide YAML with an !INCLUDE directive specifying a relative path. Since a relative path
+    # provide YAML with an include directive specifying a relative path. Since a relative path
     # is meaningless relative to stdin, assert that an appropriate error is logged and exception
     # raised.
 
     relpath = "../bar/baz.yaml"
-    with patch.object(core.sys, "stdin", new=StringIO(f"foo: !INCLUDE [{relpath}]")):
+    with patch.object(core.sys, "stdin", new=StringIO(f"foo: {core.INCLUDE_TAG} [{relpath}]")):
         with raises(UWConfigError) as e:
             core.YAMLConfig()
     msg = f"Reading from stdin, a relative path was encountered: {relpath}"

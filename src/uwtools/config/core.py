@@ -26,6 +26,8 @@ from uwtools.logging import MSGWIDTH
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import FORMAT, get_file_type, readable, writable
 
+INCLUDE_TAG = "!INCLUDE"
+
 MSGS = ns(
     unhashable="""
 ERROR:
@@ -310,11 +312,11 @@ class Config(ABC, UserDict):
                 in_dict[sect] = dict(keys)
         return in_dict
 
-    def parse_include(self, ref_dict: Optional[dict] = None):
+    def parse_include(self, ref_dict: Optional[dict] = None) -> None:
         """
-        Recursively process !INCLUDE directives in a config object.
+        Recursively process include directives in a config object.
 
-        Recursively traverses the dictionary, replacing !INCLUDE tags with the contents of the files
+        Recursively traverse the dictionary, replacing include tags with the contents of the files
         they specify. Assumes a section/key/value structure. YAML provides this functionality in its
         own loader.
 
@@ -325,11 +327,12 @@ class Config(ABC, UserDict):
         for key, value in copy.deepcopy(ref_dict).items():
             if isinstance(value, dict):
                 self.parse_include(ref_dict[key])
-            elif isinstance(value, str) and "!INCLUDE" in value:
-                filepaths = value.lstrip("!INCLUDE [").rstrip("]").split(",")
-                # Update the dictionary with the values in the included file.
-                self.update_values(self._load_paths(filepaths))
-                del ref_dict[key]
+            elif isinstance(value, str):
+                if m := re.match(r"^\s*%s\s+(.*)" % INCLUDE_TAG, value):
+                    filepaths = yaml.safe_load(m[1])
+                    # Update the dict with values from the included file(s).
+                    self.update_values(self._load_paths(filepaths))
+                    del ref_dict[key]
 
     def str_to_type(self, s: str) -> Union[bool, float, int, str]:
         """
@@ -558,7 +561,7 @@ class YAMLConfig(Config):
 
     def _yaml_include(self, loader: yaml.Loader, node: yaml.SequenceNode) -> dict:
         """
-        Returns a dictionary with YAML !INCLUDE tags processed.
+        Returns a dictionary with include tags processed.
 
         :param loader: The YAML loader.
         :param node: A YAML node.
@@ -572,7 +575,7 @@ class YAMLConfig(Config):
         Set up the loader with the appropriate constructors.
         """
         loader = yaml.SafeLoader
-        loader.add_constructor("!INCLUDE", self._yaml_include)
+        loader.add_constructor(INCLUDE_TAG, self._yaml_include)
         return loader
 
     # Public methods
