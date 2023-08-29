@@ -32,7 +32,7 @@ def test_compare_config(caplog, fmt, salad_base):
     Compare two config objects.
     """
     logging.getLogger().setLevel(logging.INFO)
-    cfgobj = core._cli_name_to_config(fmt)(fixture_path(f"simple.{fmt}"))
+    cfgobj = core._format_to_config(fmt)(fixture_path(f"simple.{fmt}"))
     if fmt == "ini":
         salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini
     assert cfgobj.compare_config(salad_base) is True
@@ -124,7 +124,7 @@ def test_depth(depth, fn):
     """
     infile = fixture_path(fn)
     fmt = Path(infile).suffix.replace(".", "")
-    cfgobj = core._cli_name_to_config(fmt)(infile)
+    cfgobj = core._format_to_config(fmt)(infile)
     assert cfgobj._depth(cfgobj.data) == depth
 
 
@@ -631,8 +631,8 @@ def test_transform_config(fmt1, fmt2, tmp_path):
     """
     outfile = tmp_path / f"test_{fmt1.lower()}to{fmt2.lower()}_dump.{fmt2}"
     reference = fixture_path(f"simple.{fmt2}")
-    cfgin = core._cli_name_to_config(fmt1)(fixture_path(f"simple.{fmt1}"))
-    core._cli_name_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)
+    cfgin = core._format_to_config(fmt1)(fixture_path(f"simple.{fmt1}"))
+    core._format_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)
     with open(reference, "r", encoding="utf-8") as f1:
         reflines = [line.strip().replace("'", "") for line in f1]
     with open(outfile, "r", encoding="utf-8") as f2:
@@ -950,7 +950,7 @@ def help_realize_config_fmt2fmt(infn, infmt, cfgfn, cfgfmt, tmpdir):
         values_file=cfgfile,
         values_format=cfgfmt,
     )
-    cfgclass = core._cli_name_to_config(infmt)
+    cfgclass = core._format_to_config(infmt)
     cfgobj = cfgclass(infile)
     cfgobj.update_values(cfgclass(cfgfile))
     reference = tmpdir / "expected"
@@ -970,7 +970,7 @@ def help_realize_config_simple(infn, infmt, tmpdir):
         values_file=None,
         values_format=None,
     )
-    cfgobj = core._cli_name_to_config(infmt)(infile)
+    cfgobj = core._format_to_config(infmt)(infile)
     reference = tmpdir / f"reference{ext}"
     cfgobj.dump_file(reference)
     assert compare_files(reference, outfile)

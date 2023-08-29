@@ -24,7 +24,7 @@ from uwtools.config.j2template import J2Template
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import MSGWIDTH
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import get_file_type, readable, writable
+from uwtools.utils.file import FORMAT, get_file_type, readable, writable
 
 MSGS = ns(
     unhashable="""
@@ -675,8 +675,8 @@ def compare_configs(
     :return: False if config files had differences, otherwise True.
     """
 
-    cfg_a = _cli_name_to_config(config_a_format)(config_a_path)
-    cfg_b = _cli_name_to_config(config_b_format)(config_b_path)
+    cfg_a = _format_to_config(config_a_format)(config_a_path)
+    cfg_b = _format_to_config(config_b_format)(config_b_path)
     logging.info("- %s", config_a_path)
     logging.info("+ %s", config_b_path)
     logging.info("-" * MSGWIDTH)
@@ -733,7 +733,7 @@ def realize_config(
     :raises: UWConfigError if errors are encountered.
     """
 
-    input_obj = _cli_name_to_config(input_format)(config_file=input_file)
+    input_obj = _format_to_config(input_format)(config_file=input_file)
     input_obj.dereference_all()
     input_obj = _realize_config_update(input_obj, values_file, values_format)
     _realize_config_check_depths(input_obj, output_format)
@@ -742,14 +742,14 @@ def realize_config(
     if dry_run:
         logging.info(input_obj)
     else:
-        _cli_name_to_config(output_format).dump_dict(path=output_file, cfg=input_obj.data)
+        _format_to_config(output_format).dump_dict(path=output_file, cfg=input_obj.data)
     return True
 
 
 # Private functions
 
 
-def _cli_name_to_config(cli_name: str) -> Type[Config]:
+def _format_to_config(cli_name: str) -> Type[Config]:
     """
     Maps a CLI format name to its corresponding Config class.
 
@@ -757,10 +757,10 @@ def _cli_name_to_config(cli_name: str) -> Type[Config]:
     :return: The appropriate Config class.
     """
     classes: Dict[str, type[Config]] = {
-        "fieldtable": FieldTableConfig,
-        "ini": INIConfig,
-        "nml": NMLConfig,
-        "yaml": YAMLConfig,
+        FORMAT.fieldtable: FieldTableConfig,
+        FORMAT.ini: INIConfig,
+        FORMAT.nml: NMLConfig,
+        FORMAT.yaml: YAMLConfig,
     }
     try:
         return classes[cli_name]
@@ -810,7 +810,7 @@ def _realize_config_update(
     if values_file:
         logging.debug("Before update, config has depth %s", input_obj.depth)
         values_format = values_format or get_file_type(values_file)
-        values_obj = _cli_name_to_config(values_format)(config_file=values_file)
+        values_obj = _format_to_config(values_format)(config_file=values_file)
         logging.debug("Values config has depth %s", values_obj.depth)
         input_obj.update_values(values_obj)
         input_obj.dereference_all()

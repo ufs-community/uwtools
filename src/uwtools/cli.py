@@ -26,7 +26,7 @@ def main() -> None:
     """
     Main entry point.
     """
-    args = check_args(parse_args(sys.argv[1:]))
+    args = check_args(set_formats(parse_args(sys.argv[1:])))
     setup_logging(quiet=args.quiet, verbose=args.verbose)
     modes = {
         "config": dispatch_config,
@@ -589,3 +589,23 @@ def parse_args(raw_args: List[str]) -> Namespace:
     add_subparser_forecast(subparsers)
     add_subparser_template(subparsers)
     return parser.parse_args(raw_args)
+
+
+def set_formats(args: Namespace) -> Namespace:
+    """
+    Try to set missing format information.
+
+    :param args: The parsed command-line arguments.
+    :return: The parsed command-line arguments with missing formats set, when possible.
+    :raises: SystemExit if any missing format cannot be deduced.
+    """
+    # fmtmap = {}
+    # for format_sw, file_sw in {
+    #     "file_1_format": "file_1_path",
+    #     "file_2_format": "file_3_path",
+    #     "input_format": "input_file",
+    #     "output_format": "output_file",
+    #     "values_format": "values_file",
+    # }.items():
+    #     pass
+    return args

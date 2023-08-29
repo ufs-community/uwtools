@@ -9,9 +9,12 @@ import sys
 from contextlib import contextmanager
 from datetime import datetime as dt
 from pathlib import Path
+from types import SimpleNamespace as ns
 from typing import IO, Generator
 
 from uwtools.types import DefinitePath, OptionalPath
+
+FORMAT = ns(fieldtable="fieldtable", ini="ini", nml="nml", yaml="yaml")
 
 
 def handle_existing(directory: str, action: str) -> None:
@@ -54,14 +57,18 @@ def get_file_type(path: DefinitePath) -> str:
     :raises: ValueError if the path/filename suffix is unrecognized.
     """
 
-    suffix = Path(path).suffix
-    if suffix in [".bash", ".cfg", ".ini", ".sh"]:
-        return "INI"
-    if suffix in [".nml"]:
-        return "NML"
-    if suffix in [".yaml", ".yml"]:
-        return "YAML"
-    msg = f"Unrecognized file suffix '{suffix}'. Cannot determine file type!."
+    suffix = Path(path).suffix.replace(".", "")
+    if fmt := {
+        "bash": FORMAT.ini,
+        "cfg": FORMAT.ini,
+        "ini": FORMAT.ini,
+        "nml": FORMAT.nml,
+        "sh": FORMAT.ini,
+        "yaml": FORMAT.yaml,
+        "yml": FORMAT.yaml,
+    }.get(suffix):
+        return fmt
+    msg = f"Cannot determine file type from unrecognized extension '{suffix}'"
     logging.critical(msg)
     raise ValueError(msg)
 
