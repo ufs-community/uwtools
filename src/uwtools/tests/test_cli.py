@@ -229,6 +229,14 @@ def test_main_fail(params):
         mocks["setup_logging"].assert_called_with(quiet=quiet, verbose=verbose)
 
 
+def test_main_raises_exception(capsys):
+    msg = "Test failed intentionally"
+    with patch.object(cli, "parse_args", side_effect=Exception(msg)):
+        with raises(SystemExit):
+            cli.main()
+    assert msg in capsys.readouterr().err
+
+
 def test_parse_args():
     raw_args = ["foo", "--bar", "88"]
     with patch.object(cli, "Parser") as Parser:
