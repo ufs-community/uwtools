@@ -246,11 +246,23 @@ def test__parse_args():
         parser.parse_args.assert_called_with(raw_args)
 
 
-def test__set_formats_fail(capsys):
-    args = ns(input_file=None, input_format=None)
+@pytest.mark.parametrize(
+    "vals",
+    [
+        (ns(file_1_path=None, file_1_format=None), "--file-1-path", "--file-1-format"),
+        (ns(file_2_path=None, file_2_format=None), "--file-2-path", "--file-2-format"),
+        (ns(input_file=None, input_format=None), "--input-file", "--input-format"),
+        (ns(output_file=None, output_format=None), "--output-file", "--output-format"),
+        (ns(values_file=None, values_format=None), "--values-file", "--values-format"),
+    ],
+)
+def test__set_formats_fail(capsys, vals):
+    # When reading/writing from/to stdin/stdout, the data format must be specified, since there is
+    # no filename to deduce it from.
+    args, path_arg, fmt_arg = vals
     with raises(SystemExit):
         cli._set_formats(args)
-    assert "Specify --input-format when --input-file is not specified" in capsys.readouterr().err
+    assert f"Specify {fmt_arg} when {path_arg} is not specified" in capsys.readouterr().err
 
 
 def test__set_formats_pass_explicit():
@@ -262,7 +274,7 @@ def test__set_formats_pass_explicit():
 
 @pytest.mark.parametrize("fmt", vars(FORMAT).keys())
 def test__set_formats_pass_implicit(fmt):
-    # The format is deduced for a file with a known extension.
+    # The format is correctly deduced for a file with a known extension.
     args = ns(input_file=f"/path/to/input.{fmt}", input_format=None)
     args = cli._set_formats(args)
     assert args.input_format == vars(FORMAT)[fmt]
