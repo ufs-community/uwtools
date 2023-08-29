@@ -788,8 +788,8 @@ def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
     :param output_format: The output format:
     :raises: UWConfigError on excessive input-config depth.
     """
-    if (output_format == "ini" and input_obj.depth > 2) or (
-        output_format == "nml" and input_obj.depth != 2
+    if (output_format == FORMAT.ini and input_obj.depth > 2) or (
+        output_format == FORMAT.nml and input_obj.depth != 2
     ):
         msg = "Cannot write depth-%s input to type-'%s' output" % (input_obj.depth, output_format)
         logging.error(msg)

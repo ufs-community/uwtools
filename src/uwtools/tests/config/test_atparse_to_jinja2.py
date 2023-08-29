@@ -20,7 +20,7 @@ def atparselines():
 
 @fixture
 def atparsefile(atparselines, tmp_path):
-    path = tmp_path / "atparse"
+    path = tmp_path / "atparse.txt"
     with open(path, "w", encoding="utf-8") as f:
         for line in atparselines:
             print(line, file=f)

@@ -14,17 +14,30 @@ from typing import IO, Generator
 
 from uwtools.types import DefinitePath, OptionalPath
 
-FORMAT = ns(
+# A mapping from config types to literal strings:
+
+_FMT = ns(
     atparse="atparse",
-    bash="ini",
-    cfg="ini",
     fieldtable="fieldtable",
     ini="ini",
     jinja2="jinja2",
     nml="nml",
-    sh="ini",
     yaml="yaml",
-    yml="yaml",
+)
+
+# A mapping from variant config names to literal strings:
+
+FORMAT = ns(
+    atparse=_FMT.atparse,
+    bash=_FMT.ini,
+    cfg=_FMT.ini,
+    fieldtable=_FMT.fieldtable,
+    ini=_FMT.ini,
+    jinja2=_FMT.jinja2,
+    nml=_FMT.nml,
+    sh=_FMT.ini,
+    yaml=_FMT.yaml,
+    yml=_FMT.yaml,
 )
 
 

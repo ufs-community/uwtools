@@ -191,7 +191,7 @@ def dispatch_config_translate(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     success = True
-    if args.input_format == "atparse" and args.output_format == "jinja2":
+    if args.input_format == FORMAT.atparse and args.output_format == FORMAT.jinja2:
         uwtools.config.atparse_to_jinja2.convert(
             input_file=args.input_file, output_file=args.output_file, dry_run=args.dry_run
         )

@@ -451,7 +451,7 @@ def test_realize_config_field_table(tmp_path):
         input_file=infile,
         input_format=FORMAT.yaml,
         output_file=outfile,
-        output_format="fieldtable",
+        output_format=FORMAT.fieldtable,
         values_file=None,
         values_format=None,
     )

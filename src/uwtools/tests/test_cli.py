@@ -137,7 +137,11 @@ def test_dispatch_config_realize():
 
 def test_dispatch_config_translate_arparse_to_jinja2():
     args = ns(
-        input_file=1, input_format="atparse", output_file=3, output_format="jinja2", dry_run=5
+        input_file=1,
+        input_format=FORMAT.atparse,
+        output_file=3,
+        output_format=FORMAT.jinja2,
+        dry_run=5,
     )
     with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as m:
         cli.dispatch_config_translate(args)
