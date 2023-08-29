@@ -84,7 +84,7 @@ def get_file_type(path: DefinitePath) -> str:
     suffix = Path(path).suffix.replace(".", "")
     if fmt := vars(FORMAT).get(suffix):
         return fmt
-    msg = f"Cannot determine file type from unrecognized extension '{suffix}'"
+    msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
     logging.critical(msg)
     raise ValueError(msg)
 

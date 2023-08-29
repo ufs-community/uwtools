@@ -27,15 +27,18 @@ def main() -> None:
     """
     Main entry point.
     """
-    args = check_args(set_formats(parse_args(sys.argv[1:])))
-    setup_logging(quiet=args.quiet, verbose=args.verbose)
     modes = {
         "config": dispatch_config,
         "forecast": dispatch_forecast,
         "template": dispatch_template,
     }
-    success = modes[args.mode](args)
-    sys.exit(0 if success else 1)
+    setup_logging(quiet=True)
+    try:
+        args = check_args(set_formats(parse_args(sys.argv[1:])))
+        setup_logging(quiet=args.quiet, verbose=args.verbose)
+        sys.exit(0 if modes[args.mode](args) else 1)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        abort(str(e))
 
 
 # Mode config

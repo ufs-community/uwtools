@@ -226,7 +226,7 @@ def test_main_fail(params):
         assert e.value.code == status
         mocks["dispatch_config"].assert_called_once_with(args)
         mocks["check_args"].assert_called_once_with(args)
-        mocks["setup_logging"].assert_called_once_with(quiet=quiet, verbose=verbose)
+        mocks["setup_logging"].assert_called_with(quiet=quiet, verbose=verbose)
 
 
 def test_parse_args():
