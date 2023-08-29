@@ -14,7 +14,18 @@ from typing import IO, Generator
 
 from uwtools.types import DefinitePath, OptionalPath
 
-FORMAT = ns(fieldtable="fieldtable", ini="ini", nml="nml", yaml="yaml")
+FORMAT = ns(
+    atparse="atparse",
+    bash="ini",
+    cfg="ini",
+    fieldtable="fieldtable",
+    ini="ini",
+    jinja2="jinja2",
+    nml="nml",
+    sh="ini",
+    yaml="yaml",
+    yml="yaml",
+)
 
 
 def handle_existing(directory: str, action: str) -> None:
@@ -58,15 +69,7 @@ def get_file_type(path: DefinitePath) -> str:
     """
 
     suffix = Path(path).suffix.replace(".", "")
-    if fmt := {
-        "bash": FORMAT.ini,
-        "cfg": FORMAT.ini,
-        "ini": FORMAT.ini,
-        "nml": FORMAT.nml,
-        "sh": FORMAT.ini,
-        "yaml": FORMAT.yaml,
-        "yml": FORMAT.yaml,
-    }.get(suffix):
+    if fmt := vars(FORMAT).get(suffix):
         return fmt
     msg = f"Cannot determine file type from unrecognized extension '{suffix}'"
     logging.critical(msg)

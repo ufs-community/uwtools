@@ -17,8 +17,9 @@ import uwtools.config.templater
 import uwtools.config.validator
 import uwtools.drivers.forecast
 from uwtools.logging import setup_logging
+from uwtools.utils.file import FORMAT
 
-FORMATS = ["ini", "nml", "yaml"]
+FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.yaml]
 TITLE_REQ_ARG = "Required arguments"
 
 
@@ -113,9 +114,9 @@ def add_subparser_config_translate(subparsers: Subparsers) -> None:
     parser = add_subparser(subparsers, "translate", "Translate configs")
     optional = basic_setup(parser)
     add_arg_input_file(optional)
-    add_arg_input_format(optional, choices=["atparse"])
+    add_arg_input_format(optional, choices=[FORMAT.atparse])
     add_arg_output_file(optional)
-    add_arg_output_format(optional, choices=["jinja2"])
+    add_arg_output_format(optional, choices=[FORMAT.jinja2])
     add_arg_dry_run(optional)
     add_arg_quiet(optional)
     add_arg_verbose(optional)
@@ -132,7 +133,7 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
     add_arg_schema_file(required)
     optional = basic_setup(parser)
     add_arg_input_file(optional)
-    add_arg_input_format(optional, choices=["yaml"])
+    add_arg_input_format(optional, choices=[FORMAT.yaml])
     add_arg_quiet(optional)
     add_arg_verbose(optional)
 
@@ -206,7 +207,7 @@ def dispatch_config_validate(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     success = True
-    if args.input_format == "yaml":
+    if args.input_format == FORMAT.yaml:
         success = uwtools.config.validator.validate_yaml(
             config_file=args.input_file, schema_file=args.schema_file
         )

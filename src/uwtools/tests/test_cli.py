@@ -12,6 +12,7 @@ from pytest import fixture, raises
 
 from uwtools import cli
 from uwtools.tests.support import logged
+from uwtools.utils.file import FORMAT
 
 # Test functions
 
@@ -149,7 +150,7 @@ def test_dispath_config_translate_unsupported():
 
 
 def test_dispatch_config_validate_yaml():
-    args = ns(input_file=1, input_format="yaml", schema_file=3)
+    args = ns(input_file=1, input_format=FORMAT.yaml, schema_file=3)
     with patch.object(cli.uwtools.config.validator, "validate_yaml") as m:
         cli.dispatch_config_validate(args)
     assert m.called_once_with(args)

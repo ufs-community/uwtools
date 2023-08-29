@@ -21,19 +21,19 @@ from uwtools import exceptions
 from uwtools.config import core
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import compare_files, fixture_path, logged
-from uwtools.utils.file import path_if_it_exists, writable
+from uwtools.utils.file import FORMAT, path_if_it_exists, writable
 
 # Test functions
 
 
-@pytest.mark.parametrize("fmt", ["ini", "nml", "yaml"])
+@pytest.mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
 def test_compare_config(caplog, fmt, salad_base):
     """
     Compare two config objects.
     """
     logging.getLogger().setLevel(logging.INFO)
     cfgobj = core.format_to_config(fmt)(fixture_path(f"simple.{fmt}"))
-    if fmt == "ini":
+    if fmt == FORMAT.ini:
         salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini
     assert cfgobj.compare_config(salad_base) is True
     # Expect no differences:
@@ -57,7 +57,7 @@ def test_compare_config(caplog, fmt, salad_base):
 def test_compare_configs_good(caplog, compare_configs_assets):
     _, a, b = compare_configs_assets
     assert core.compare_configs(
-        config_a_path=a, config_a_format="yaml", config_b_path=b, config_b_format="yaml"
+        config_a_path=a, config_a_format=FORMAT.yaml, config_b_path=b, config_b_format=FORMAT.yaml
     )
     assert caplog.records
 
@@ -68,7 +68,7 @@ def test_compare_configs_changed_value(caplog, compare_configs_assets):
     with writable(b) as f:
         yaml.dump(d, f)
     assert not core.compare_configs(
-        config_a_path=a, config_a_format="yaml", config_b_path=b, config_b_format="yaml"
+        config_a_path=a, config_a_format=FORMAT.yaml, config_b_path=b, config_b_format=FORMAT.yaml
     )
     assert logged(caplog, "baz:             qux:  - 99 + 11")
 
@@ -80,7 +80,7 @@ def test_compare_configs_missing_key(caplog, compare_configs_assets):
         yaml.dump(d, f)
     # Note that a and b are swapped:
     assert not core.compare_configs(
-        config_a_path=b, config_a_format="yaml", config_b_path=a, config_b_format="yaml"
+        config_a_path=b, config_a_format=FORMAT.yaml, config_b_path=a, config_b_format=FORMAT.yaml
     )
     assert logged(caplog, "baz:             qux:  - None + 99")
 
@@ -92,7 +92,7 @@ def test_compare_configs_bad_format(caplog):
             config_a_path="/not/used",
             config_a_format="jpg",
             config_b_path="/not/used",
-            config_b_format="yaml",
+            config_b_format=FORMAT.yaml,
         )
     msg = "Format 'jpg' should be one of: fieldtable, ini, nml, yaml"
     assert logged(caplog, msg)
@@ -380,9 +380,9 @@ def test_realize_config_conversion_cfg_to_yaml(tmp_path):
     outfile = str(tmp_path / "test_ouput.yaml")
     core.realize_config(
         input_file=infile,
-        input_format="yaml",
+        input_format=FORMAT.yaml,
         output_file=outfile,
-        output_format="yaml",
+        output_format=FORMAT.yaml,
         values_file=None,
         values_format=None,
     )
@@ -399,9 +399,9 @@ def test_realize_config_depth_mismatch_to_ini(realize_config_yaml_input):
     with raises(UWConfigError):
         core.realize_config(
             input_file=realize_config_yaml_input,
-            input_format="yaml",
+            input_format=FORMAT.yaml,
             output_file=None,
-            output_format="ini",
+            output_format=FORMAT.ini,
             values_file=None,
             values_format=None,
         )
@@ -411,9 +411,9 @@ def test_realize_config_depth_mismatch_to_nml(realize_config_yaml_input):
     with raises(UWConfigError):
         core.realize_config(
             input_file=realize_config_yaml_input,
-            input_format="yaml",
+            input_format=FORMAT.yaml,
             output_file=None,
-            output_format="nml",
+            output_format=FORMAT.nml,
             values_file=None,
             values_format=None,
         )
@@ -429,9 +429,9 @@ def test_realize_config_dry_run(caplog):
     yaml_config.dereference_all()
     core.realize_config(
         input_file=infile,
-        input_format="yaml",
+        input_format=FORMAT.yaml,
         output_file=None,
-        output_format="yaml",
+        output_format=FORMAT.yaml,
         values_file=None,
         values_format=None,
         dry_run=True,
@@ -449,7 +449,7 @@ def test_realize_config_field_table(tmp_path):
     outfile = str(tmp_path / "field_table_from_yaml.FV3_GFS")
     core.realize_config(
         input_file=infile,
-        input_format="yaml",
+        input_format=FORMAT.yaml,
         output_file=outfile,
         output_format="fieldtable",
         values_file=None,
@@ -473,11 +473,11 @@ def test_realize_config_file_conversion(tmp_path):
     outfile = str(tmp_path / "test_config_conversion.nml")
     core.realize_config(
         input_file=infile,
-        input_format="nml",
+        input_format=FORMAT.nml,
         output_file=outfile,
-        output_format="nml",
+        output_format=FORMAT.nml,
         values_file=cfgfile,
-        values_format="ini",
+        values_format=FORMAT.ini,
     )
     expected = core.NMLConfig(infile)
     config_obj = core.INIConfig(cfgfile)
@@ -494,7 +494,7 @@ def test_realize_config_fmt2fmt_nml2nml(tmp_path):
     Test that providing a namelist base input file and a config file will create and update namelist
     config file.
     """
-    help_realize_config_fmt2fmt("simple.nml", "nml", "simple2.nml", "nml", tmp_path)
+    help_realize_config_fmt2fmt("simple.nml", FORMAT.nml, "simple2.nml", FORMAT.nml, tmp_path)
 
 
 def test_realize_config_fmt2fmt_ini2bash(tmp_path):
@@ -502,7 +502,7 @@ def test_realize_config_fmt2fmt_ini2bash(tmp_path):
     Test that providing an INI base input file and a Bash config file will create and update INI
     config file.
     """
-    help_realize_config_fmt2fmt("simple.ini", "ini", "fruit_config.sh", "ini", tmp_path)
+    help_realize_config_fmt2fmt("simple.ini", FORMAT.ini, "fruit_config.sh", FORMAT.ini, tmp_path)
 
 
 def test_realize_config_fmt2fmt_ini2ini(tmp_path):
@@ -510,7 +510,7 @@ def test_realize_config_fmt2fmt_ini2ini(tmp_path):
     Test that providing an INI base input file and an INI config file will create and update INI
     config file.
     """
-    help_realize_config_fmt2fmt("simple.ini", "ini", "simple2.ini", "ini", tmp_path)
+    help_realize_config_fmt2fmt("simple.ini", FORMAT.ini, "simple2.ini", FORMAT.ini, tmp_path)
 
 
 def test_realize_config_fmt2fmt_yaml2yaml(tmp_path):
@@ -519,7 +519,7 @@ def test_realize_config_fmt2fmt_yaml2yaml(tmp_path):
     config file.
     """
     help_realize_config_fmt2fmt(
-        "fruit_config.yaml", "yaml", "fruit_config_similar.yaml", "yaml", tmp_path
+        "fruit_config.yaml", FORMAT.yaml, "fruit_config_similar.yaml", FORMAT.yaml, tmp_path
     )
 
 
@@ -532,7 +532,7 @@ def test_realize_config_incompatible_file_type():
             input_file=fixture_path("model_configure.sample"),
             input_format="sample",
             output_file=None,
-            output_format="yaml",
+            output_format=FORMAT.yaml,
             values_file=None,
             values_format=None,
         )
@@ -546,9 +546,9 @@ def test_realize_config_output_file_conversion(tmp_path):
     outfile = str(tmp_path / "test_ouput.cfg")
     core.realize_config(
         input_file=infile,
-        input_format="nml",
+        input_format=FORMAT.nml,
         output_file=outfile,
-        output_format="nml",
+        output_format=FORMAT.nml,
         values_file=None,
         values_format=None,
     )
@@ -564,31 +564,31 @@ def test_realize_config_simple_bash(tmp_path):
     """
     Test that providing a bash file with necessary settings will create an INI config file.
     """
-    help_realize_config_simple("simple.sh", "ini", tmp_path)
+    help_realize_config_simple("simple.sh", FORMAT.ini, tmp_path)
 
 
 def test_realize_config_simple_namelist(tmp_path):
     """
     Test that providing a namelist file with necessary settings will create a namelist config file.
     """
-    help_realize_config_simple("simple.nml", "nml", tmp_path)
+    help_realize_config_simple("simple.nml", FORMAT.nml, tmp_path)
 
 
 def test_realize_config_simple_ini(tmp_path):
     """
     Test that providing an INI file with necessary settings will create an INI config file.
     """
-    help_realize_config_simple("simple.ini", "ini", tmp_path)
+    help_realize_config_simple("simple.ini", FORMAT.ini, tmp_path)
 
 
 def test_realize_config_simple_yaml(tmp_path):
     """
     Test that providing a YAML base file with necessary settings will create a YAML config file.
     """
-    help_realize_config_simple("simple2.yaml", "yaml", tmp_path)
+    help_realize_config_simple("simple2.yaml", FORMAT.yaml, tmp_path)
 
 
-@pytest.mark.parametrize("fmt", ["ini", "nml"])
+@pytest.mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml])
 def test__realize_config_check_depths_fail_nml(realize_config_testobj, fmt):
     with raises(UWConfigError):
         core._realize_config_check_depths(input_obj=realize_config_testobj, output_format=fmt)
@@ -606,7 +606,7 @@ def test__realize_config_update(realize_config_testobj, tmp_path):
     path = tmp_path / "values.yaml"
     with writable(path) as f:
         yaml.dump({1: {2: {3: {4: 99}}}}, f)  # depth 4
-    o = core._realize_config_update(input_obj=o, values_file=path, values_format="yaml")
+    o = core._realize_config_update(input_obj=o, values_file=path, values_format=FORMAT.yaml)
     assert o.depth == 4
     assert o[1][2][3][4] == 99
 
@@ -623,8 +623,8 @@ def test__realize_config_values_needed(caplog, tmp_path):
     assert "Keys that are set to empty:\n    3" in msgs
 
 
-@pytest.mark.parametrize("fmt1", ["ini", "nml", "yaml"])
-@pytest.mark.parametrize("fmt2", ["ini", "nml", "yaml"])
+@pytest.mark.parametrize("fmt1", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
+@pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
 def test_transform_config(fmt1, fmt2, tmp_path):
     """
     Test that transforms config objects to objects of other config subclasses.
@@ -649,9 +649,9 @@ def test_values_needed_ini(caplog):
     logging.getLogger().setLevel(logging.INFO)
     core.realize_config(
         input_file=fixture_path("simple3.ini"),
-        input_format="ini",
+        input_format=FORMAT.ini,
         output_file=None,
-        output_format="ini",
+        output_format=FORMAT.ini,
         values_file=None,
         values_format=None,
         values_needed=True,
@@ -688,9 +688,9 @@ def test_values_needed_nml(caplog):
     logging.getLogger().setLevel(logging.INFO)
     core.realize_config(
         input_file=fixture_path("simple3.nml"),
-        input_format="nml",
+        input_format=FORMAT.nml,
         output_file=None,
-        output_format="yaml",
+        output_format=FORMAT.yaml,
         values_file=None,
         values_format=None,
         values_needed=True,
@@ -724,9 +724,9 @@ def test_values_needed_yaml(caplog):
     logging.getLogger().setLevel(logging.INFO)
     core.realize_config(
         input_file=fixture_path("srw_example.yaml"),
-        input_format="yaml",
+        input_format=FORMAT.yaml,
         output_file=None,
-        output_format="yaml",
+        output_format=FORMAT.yaml,
         values_file=None,
         values_format=None,
         values_needed=True,

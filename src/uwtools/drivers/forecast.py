@@ -17,7 +17,7 @@ from typing import Dict
 from uwtools.config.core import FieldTableConfig, NMLConfig, realize_config
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript, JobScheduler
-from uwtools.utils.file import handle_existing
+from uwtools.utils.file import FORMAT, handle_existing
 
 
 class FV3Forecast(Driver):
@@ -260,11 +260,11 @@ class FV3Forecast(Driver):
         """
         realize_config(
             input_file=base_file,
-            input_format="yaml",
+            input_format=FORMAT.yaml,
             output_file=outconfig_file,
-            output_format="yaml",
+            output_format=FORMAT.yaml,
             values_file=self._config_file,
-            values_format="yaml",
+            values_format=FORMAT.yaml,
         )
         msg = f"Config file {outconfig_file} created"
         logging.info(msg)
