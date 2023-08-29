@@ -17,10 +17,10 @@ from uwtools.utils.file import FORMAT
 # Test functions
 
 
-def test_abort(capsys):
+def test__abort(capsys):
     msg = "Aborting..."
     with raises(SystemExit):
-        cli.abort(msg)
+        cli._abort(msg)
     assert msg in capsys.readouterr().err
 
 
@@ -69,25 +69,25 @@ def test__add_subparser_template_render(subparsers):
     assert subparsers.choices["render"]
 
 
-def test_check_args_fail_quiet_verbose(capsys):
+def test__check_args_fail_quiet_verbose(capsys):
     logging.getLogger().setLevel(logging.INFO)
     args = ns(quiet=True, verbose=True)
     with raises(SystemExit):
-        cli.check_args(args)
+        cli._check_args(args)
     assert "Specify at most one of --quiet, --verbose" in capsys.readouterr().err
 
 
-def test_check_args_fail_values_file_no_value_format(capsys):
+def test__check_args_fail_values_file_no_value_format(capsys):
     logging.getLogger().setLevel(logging.INFO)
     args = ns(values_file="foo")
     with raises(SystemExit):
-        cli.check_args(args)
+        cli._check_args(args)
     assert "Specify --values-format with --values-file" in capsys.readouterr().err
 
 
-def test_check_args_ok():
+def test__check_args_ok():
     args = ns(foo=88)
-    assert cli.check_args(args) == args
+    assert cli._check_args(args) == args
 
 
 def test_dict_from_key_eq_val_strings():
@@ -215,32 +215,32 @@ def test__dispatch_template_render_yaml(caplog):
 def test_main_fail(params):
     fnretval, status, quiet, verbose = params
     with patch.multiple(
-        cli, check_args=D, parse_args=D, _dispatch_config=D, setup_logging=D
+        cli, _check_args=D, _parse_args=D, _dispatch_config=D, setup_logging=D
     ) as mocks:
         args = ns(mode="config", quiet=quiet, verbose=verbose)
-        mocks["parse_args"].return_value = args
-        mocks["check_args"].return_value = mocks["parse_args"]()
+        mocks["_parse_args"].return_value = args
+        mocks["_check_args"].return_value = mocks["_parse_args"]()
         mocks["_dispatch_config"].return_value = fnretval
         with raises(SystemExit) as e:
             cli.main()
         assert e.value.code == status
         mocks["_dispatch_config"].assert_called_once_with(args)
-        mocks["check_args"].assert_called_once_with(args)
+        mocks["_check_args"].assert_called_once_with(args)
         mocks["setup_logging"].assert_called_with(quiet=quiet, verbose=verbose)
 
 
 def test_main_raises_exception(capsys):
     msg = "Test failed intentionally"
-    with patch.object(cli, "parse_args", side_effect=Exception(msg)):
+    with patch.object(cli, "_parse_args", side_effect=Exception(msg)):
         with raises(SystemExit):
             cli.main()
     assert msg in capsys.readouterr().err
 
 
-def test_parse_args():
+def test__parse_args():
     raw_args = ["foo", "--bar", "88"]
     with patch.object(cli, "Parser") as Parser:
-        cli.parse_args(raw_args)
+        cli._parse_args(raw_args)
         Parser.assert_called_once()
         parser = Parser()
         parser.parse_args.assert_called_with(raw_args)

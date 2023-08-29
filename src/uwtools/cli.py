@@ -34,11 +34,11 @@ def main() -> None:
     }
     setup_logging(quiet=True)
     try:
-        args = check_args(set_formats(parse_args(sys.argv[1:])))
+        args = _check_args(set_formats(_parse_args(sys.argv[1:])))
         setup_logging(quiet=args.quiet, verbose=args.verbose)
         sys.exit(0 if modes[args.mode](args) else 1)
     except Exception as e:  # pylint: disable=broad-exception-caught
-        abort(str(e))
+        _abort(str(e))
 
 
 # Mode config
@@ -51,7 +51,7 @@ def _add_subparser_config(subparsers: Subparsers) -> None:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, "config", "Handle configs")
-    basic_setup(parser)
+    _basic_setup(parser)
     subparsers = _add_subparsers(parser, "submode")
     _add_subparser_config_compare(subparsers)
     _add_subparser_config_realize(subparsers)
@@ -69,7 +69,7 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> None:
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_file_path(required, switch="--file-1-path", helpmsg="Path to file 1")
     _add_arg_file_path(required, switch="--file-2-path", helpmsg="Path to file 2")
-    optional = basic_setup(parser)
+    optional = _basic_setup(parser)
     _add_arg_file_format(
         optional,
         switch="--file-1-format",
@@ -95,7 +95,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> None:
     parser = _add_subparser(subparsers, "realize", "Realize config")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_values_file(required, required=True)
-    optional = basic_setup(parser)
+    optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_input_format(optional, choices=FORMATS)
     _add_arg_output_file(optional)
@@ -114,7 +114,7 @@ def _add_subparser_config_translate(subparsers: Subparsers) -> None:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, "translate", "Translate configs")
-    optional = basic_setup(parser)
+    optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_input_format(optional, choices=[FORMAT.atparse])
     _add_arg_output_file(optional)
@@ -133,7 +133,7 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> None:
     parser = _add_subparser(subparsers, "validate", "Validate config")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_schema_file(required)
-    optional = basic_setup(parser)
+    optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_input_format(optional, choices=[FORMAT.yaml])
     _add_arg_quiet(optional)
@@ -228,7 +228,7 @@ def _add_subparser_forecast(subparsers: Subparsers) -> None:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, "forecast", "Configure and run forecasts")
-    basic_setup(parser)
+    _basic_setup(parser)
     subparsers = _add_subparsers(parser, "submode")
     _add_subparser_forecast_run(subparsers)
 
@@ -243,7 +243,7 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> None:
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_config_file(required)
     _add_arg_model(required, choices=["FV3"])
-    optional = basic_setup(parser)
+    optional = _basic_setup(parser)
     _add_arg_dry_run(optional)
     _add_arg_quiet(optional)
     _add_arg_verbose(optional)
@@ -279,7 +279,7 @@ def _add_subparser_template(subparsers: Subparsers) -> None:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, "template", "Handle templates")
-    basic_setup(parser)
+    _basic_setup(parser)
     subparsers = _add_subparsers(parser, "submode")
     _add_subparser_template_render(subparsers)
 
@@ -291,7 +291,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> None:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, "render", "Render a template")
-    optional = basic_setup(parser)
+    optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_output_file(optional)
     _add_arg_values_file(optional)
@@ -499,7 +499,7 @@ def _add_arg_verbose(group: Group) -> None:
 # Support
 
 
-def abort(msg: str) -> None:
+def _abort(msg: str) -> None:
     """
     Exit with an informative message and error status.
 
@@ -535,7 +535,7 @@ def _add_subparsers(parser: Parser, dest: str) -> Subparsers:
     )
 
 
-def basic_setup(parser: Parser) -> Group:
+def _basic_setup(parser: Parser) -> Group:
     """
     Create optional-arguments group and add help switch.
 
@@ -546,7 +546,7 @@ def basic_setup(parser: Parser) -> Group:
     return optional
 
 
-def check_args(args: Namespace) -> Namespace:
+def _check_args(args: Namespace) -> Namespace:
     """
     Validate basic argument correctness.
 
@@ -556,9 +556,9 @@ def check_args(args: Namespace) -> Namespace:
     """
     a = vars(args)
     if a.get("quiet") and a.get("verbose"):
-        abort("Specify at most one of --quiet, --verbose")
+        _abort("Specify at most one of --quiet, --verbose")
     if a.get("values_file") and not a.get("values_format"):
-        abort("Specify --values-format with --values-file")
+        _abort("Specify --values-format with --values-file")
     return args
 
 
@@ -579,7 +579,7 @@ def formatter(prog: str) -> HelpFormatter:
     return HelpFormatter(prog, max_help_position=8)
 
 
-def parse_args(raw_args: List[str]) -> Namespace:
+def _parse_args(raw_args: List[str]) -> Namespace:
     """
     Parse command-line arguments.
 
@@ -588,7 +588,7 @@ def parse_args(raw_args: List[str]) -> Namespace:
     """
 
     parser = Parser(description="Unified Workflow Tools", add_help=False, formatter_class=formatter)
-    basic_setup(parser)
+    _basic_setup(parser)
     subparsers = _add_subparsers(parser, "mode")
     _add_subparser_config(subparsers)
     _add_subparser_forecast(subparsers)
@@ -617,6 +617,6 @@ def set_formats(args: Namespace) -> Namespace:
         if path_arg in argmap:
             if argmap[fmt_arg] is None:
                 if argmap[path_arg] is None:
-                    abort("Specify %s when %s is not given" % (switch(fmt_arg), switch(path_arg)))
+                    _abort("Specify %s when %s is not given" % (switch(fmt_arg), switch(path_arg)))
                 argmap[fmt_arg] = get_file_type(argmap[path_arg])
     return args
