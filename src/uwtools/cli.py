@@ -64,21 +64,21 @@ def add_subparser_config_compare(subparsers: Subparsers) -> None:
     choices = FORMATS
     parser = add_subparser(subparsers, "compare", "Compare configs")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    add_arg_file_path(required, switch="--file-1-path", helpmsg="Path to config file 1")
-    add_arg_file_format(
-        required,
-        switch="--file-1-format",
-        helpmsg="Format of config file 1",
-        choices=choices,
-    )
-    add_arg_file_path(required, switch="--file-2-path", helpmsg="Path to config file 2")
-    add_arg_file_format(
-        required,
-        switch="--file-2-format",
-        helpmsg="Format of config file 2",
-        choices=choices,
-    )
+    add_arg_file_path(required, switch="--file-1-path", helpmsg="Path to file 1")
+    add_arg_file_path(required, switch="--file-2-path", helpmsg="Path to file 2")
     optional = basic_setup(parser)
+    add_arg_file_format(
+        optional,
+        switch="--file-1-format",
+        helpmsg="Format of file 1",
+        choices=choices,
+    )
+    add_arg_file_format(
+        optional,
+        switch="--file-2-format",
+        helpmsg="Format of file 2",
+        choices=choices,
+    )
     add_arg_quiet(optional)
     add_arg_verbose(optional)
 
@@ -91,12 +91,11 @@ def add_subparser_config_realize(subparsers: Subparsers) -> None:
     """
     choices = FORMATS
     parser = add_subparser(subparsers, "realize", "Realize config")
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    add_arg_input_format(required, choices=choices)
-    add_arg_output_format(required, choices=choices)
     optional = basic_setup(parser)
     add_arg_input_file(optional)
+    add_arg_input_format(optional, choices=choices)
     add_arg_output_file(optional)
+    add_arg_output_format(optional, choices=choices)
     add_arg_values_file(optional)
     add_arg_values_format(optional, choices=choices)
     add_arg_values_needed(optional)
@@ -112,12 +111,11 @@ def add_subparser_config_translate(subparsers: Subparsers) -> None:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = add_subparser(subparsers, "translate", "Translate configs")
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    add_arg_input_format(required, choices=["atparse"])
-    add_arg_output_format(required, choices=["jinja2"])
     optional = basic_setup(parser)
     add_arg_input_file(optional)
+    add_arg_input_format(optional, choices=["atparse"])
     add_arg_output_file(optional)
+    add_arg_output_format(optional, choices=["jinja2"])
     add_arg_dry_run(optional)
     add_arg_quiet(optional)
     add_arg_verbose(optional)
@@ -131,10 +129,10 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
     """
     parser = add_subparser(subparsers, "validate", "Validate config")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    add_arg_input_format(required, choices=["yaml"])
     add_arg_schema_file(required)
     optional = basic_setup(parser)
     add_arg_input_file(optional)
+    add_arg_input_format(optional, choices=["yaml"])
     add_arg_quiet(optional)
     add_arg_verbose(optional)
 
@@ -384,12 +382,12 @@ def add_arg_input_file(group: Group, required: bool = False) -> None:
     )
 
 
-def add_arg_input_format(group: Group, choices: List[str]) -> None:
+def add_arg_input_format(group: Group, choices: List[str], required: bool = False) -> None:
     group.add_argument(
         "--input-format",
         choices=choices,
         help="Input format",
-        required=True,
+        required=required,
         type=str,
     )
 
@@ -424,12 +422,12 @@ def add_arg_output_file(group: Group, required: bool = False) -> None:
     )
 
 
-def add_arg_output_format(group: Group, choices: List[str]) -> None:
+def add_arg_output_format(group: Group, choices: List[str], required: bool = False) -> None:
     group.add_argument(
         "--output-format",
         choices=choices,
         help="Output format",
-        required=True,
+        required=required,
         type=str,
     )
 
