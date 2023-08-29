@@ -98,28 +98,28 @@ def test_dict_from_key_eq_val_strings():
 @pytest.mark.parametrize(
     "params",
     [
-        ("compare", "dispatch_config_compare"),
-        ("realize", "dispatch_config_realize"),
-        ("translate", "dispatch_config_translate"),
-        ("validate", "dispatch_config_validate"),
+        ("compare", "_dispatch_config_compare"),
+        ("realize", "_dispatch_config_realize"),
+        ("translate", "_dispatch_config_translate"),
+        ("validate", "_dispatch_config_validate"),
     ],
 )
-def test_dispatch_config(params):
+def test__dispatch_config(params):
     submode, funcname = params
     args = ns(submode=submode)
     with patch.object(cli, funcname) as m:
-        cli.dispatch_config(args)
+        cli._dispatch_config(args)
     assert m.called_once_with(args)
 
 
-def test_dispatch_config_compare():
+def test__dispatch_config_compare():
     args = ns(file_1_path=1, file_1_format=2, file_2_path=3, file_2_format=4)
     with patch.object(cli.uwtools.config.core, "compare_configs") as m:
-        cli.dispatch_config_compare(args)
+        cli._dispatch_config_compare(args)
     assert m.called_once_with(args)
 
 
-def test_dispatch_config_realize():
+def test__dispatch_config_realize():
     args = ns(
         input_file=1,
         input_format=2,
@@ -131,11 +131,11 @@ def test_dispatch_config_realize():
         dry_run=8,
     )
     with patch.object(cli.uwtools.config.core, "realize_config") as m:
-        cli.dispatch_config_realize(args)
+        cli._dispatch_config_realize(args)
     assert m.called_once_with(args)
 
 
-def test_dispatch_config_translate_arparse_to_jinja2():
+def test__dispatch_config_translate_arparse_to_jinja2():
     args = ns(
         input_file=1,
         input_format=FORMAT.atparse,
@@ -144,56 +144,56 @@ def test_dispatch_config_translate_arparse_to_jinja2():
         dry_run=5,
     )
     with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as m:
-        cli.dispatch_config_translate(args)
+        cli._dispatch_config_translate(args)
     assert m.called_once_with(args)
 
 
 def test_dispath_config_translate_unsupported():
     args = ns(input_file=1, input_format="jpg", output_file=3, output_format="png", dry_run=5)
-    assert cli.dispatch_config_translate(args) is False
+    assert cli._dispatch_config_translate(args) is False
 
 
-def test_dispatch_config_validate_yaml():
+def test__dispatch_config_validate_yaml():
     args = ns(input_file=1, input_format=FORMAT.yaml, schema_file=3)
     with patch.object(cli.uwtools.config.validator, "validate_yaml") as m:
-        cli.dispatch_config_validate(args)
+        cli._dispatch_config_validate(args)
     assert m.called_once_with(args)
 
 
 def test_dispath_config_validate_unsupported():
     args = ns(input_file=1, input_format="jpg", schema_file=3)
-    assert cli.dispatch_config_validate(args) is False
+    assert cli._dispatch_config_validate(args) is False
 
 
-@pytest.mark.parametrize("params", [("run", "dispatch_forecast_run")])
-def test_dispatch_forecast(params):
+@pytest.mark.parametrize("params", [("run", "_dispatch_forecast_run")])
+def test__dispatch_forecast(params):
     submode, funcname = params
     args = ns(submode=submode)
     with patch.object(cli, funcname) as m:
-        cli.dispatch_forecast(args)
+        cli._dispatch_forecast(args)
     assert m.called_once_with(args)
 
 
-def test_dispatch_forecast_run():
+def test__dispatch_forecast_run():
     args = ns(config_file=1, forecast_model="foo")
     with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as m:
         CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
         with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):
-            cli.dispatch_forecast_run(args)
+            cli._dispatch_forecast_run(args)
     assert m.called_once_with(args)
     m().run.assert_called_once_with()
 
 
-@pytest.mark.parametrize("params", [("render", "dispatch_template_render")])
-def test_dispatch_template(params):
+@pytest.mark.parametrize("params", [("render", "_dispatch_template_render")])
+def test__dispatch_template(params):
     submode, funcname = params
     args = ns(submode=submode)
     with patch.object(cli, funcname) as m:
-        cli.dispatch_template(args)
+        cli._dispatch_template(args)
     assert m.called_once_with(args)
 
 
-def test_dispatch_template_render_yaml(caplog):
+def test__dispatch_template_render_yaml(caplog):
     logging.getLogger().setLevel(logging.DEBUG)
     args = ns(
         input_file=1,
@@ -206,7 +206,7 @@ def test_dispatch_template_render_yaml(caplog):
     )
     with patch.object(cli.uwtools.config.templater, "render") as m:
         with patch.object(cli.sys, "argv", ["foo", "--bar", "88"]):
-            cli.dispatch_template_render(args)
+            cli._dispatch_template_render(args)
     assert m.called_once_with(args)
     assert logged(caplog, "Command: foo --bar 88")
 
@@ -215,16 +215,16 @@ def test_dispatch_template_render_yaml(caplog):
 def test_main_fail(params):
     fnretval, status, quiet, verbose = params
     with patch.multiple(
-        cli, check_args=D, parse_args=D, dispatch_config=D, setup_logging=D
+        cli, check_args=D, parse_args=D, _dispatch_config=D, setup_logging=D
     ) as mocks:
         args = ns(mode="config", quiet=quiet, verbose=verbose)
         mocks["parse_args"].return_value = args
         mocks["check_args"].return_value = mocks["parse_args"]()
-        mocks["dispatch_config"].return_value = fnretval
+        mocks["_dispatch_config"].return_value = fnretval
         with raises(SystemExit) as e:
             cli.main()
         assert e.value.code == status
-        mocks["dispatch_config"].assert_called_once_with(args)
+        mocks["_dispatch_config"].assert_called_once_with(args)
         mocks["check_args"].assert_called_once_with(args)
         mocks["setup_logging"].assert_called_with(quiet=quiet, verbose=verbose)
 

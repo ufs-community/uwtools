@@ -28,9 +28,9 @@ def main() -> None:
     Main entry point.
     """
     modes = {
-        "config": dispatch_config,
-        "forecast": dispatch_forecast,
-        "template": dispatch_template,
+        "config": _dispatch_config,
+        "forecast": _dispatch_forecast,
+        "template": _dispatch_template,
     }
     setup_logging(quiet=True)
     try:
@@ -140,21 +140,21 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> None:
     _add_arg_verbose(optional)
 
 
-def dispatch_config(args: Namespace) -> bool:
+def _dispatch_config(args: Namespace) -> bool:
     """
     Dispatch logic for config mode.
 
     :param args: Parsed command-line args.
     """
     return {
-        "compare": dispatch_config_compare,
-        "realize": dispatch_config_realize,
-        "translate": dispatch_config_translate,
-        "validate": dispatch_config_validate,
+        "compare": _dispatch_config_compare,
+        "realize": _dispatch_config_realize,
+        "translate": _dispatch_config_translate,
+        "validate": _dispatch_config_validate,
     }[args.submode](args)
 
 
-def dispatch_config_compare(args: Namespace) -> bool:
+def _dispatch_config_compare(args: Namespace) -> bool:
     """
     Dispatch logic for config compare submode.
 
@@ -168,7 +168,7 @@ def dispatch_config_compare(args: Namespace) -> bool:
     )
 
 
-def dispatch_config_realize(args: Namespace) -> bool:
+def _dispatch_config_realize(args: Namespace) -> bool:
     """
     Dispatch logic for config realize submode.
 
@@ -186,7 +186,7 @@ def dispatch_config_realize(args: Namespace) -> bool:
     )
 
 
-def dispatch_config_translate(args: Namespace) -> bool:
+def _dispatch_config_translate(args: Namespace) -> bool:
     """
     Dispatch logic for config translate submode.
 
@@ -202,7 +202,7 @@ def dispatch_config_translate(args: Namespace) -> bool:
     return success
 
 
-def dispatch_config_validate(args: Namespace) -> bool:
+def _dispatch_config_validate(args: Namespace) -> bool:
     """
     Dispatch logic for config validate submode.
 
@@ -249,16 +249,16 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> None:
     _add_arg_verbose(optional)
 
 
-def dispatch_forecast(args: Namespace) -> bool:
+def _dispatch_forecast(args: Namespace) -> bool:
     """
     Dispatch logic for forecast mode.
 
     :param args: Parsed command-line args.
     """
-    return {"run": dispatch_forecast_run}[args.submode](args)
+    return {"run": _dispatch_forecast_run}[args.submode](args)
 
 
-def dispatch_forecast_run(args: Namespace) -> bool:
+def _dispatch_forecast_run(args: Namespace) -> bool:
     """
     Dispatch logic for forecast run submode.
 
@@ -303,16 +303,16 @@ def _add_subparser_template_render(subparsers: Subparsers) -> None:
     _add_arg_key_eq_val_pairs(optional)
 
 
-def dispatch_template(args: Namespace) -> bool:
+def _dispatch_template(args: Namespace) -> bool:
     """
     Dispatch logic for template mode.
 
     :param args: Parsed command-line args.
     """
-    return {"render": dispatch_template_render}[args.submode](args)
+    return {"render": _dispatch_template_render}[args.submode](args)
 
 
-def dispatch_template_render(args: Namespace) -> bool:
+def _dispatch_template_render(args: Namespace) -> bool:
     """
     Dispatch logic for template render submode.
 
