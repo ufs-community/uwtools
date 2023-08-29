@@ -90,9 +90,9 @@ def test__check_args_ok():
     assert cli._check_args(args) == args
 
 
-def test_dict_from_key_eq_val_strings():
-    assert not cli.dict_from_key_eq_val_strings([])
-    assert cli.dict_from_key_eq_val_strings(["a=1", "b=2"]) == {"a": "1", "b": "2"}
+def test__dict_from_key_eq_val_strings():
+    assert not cli._dict_from_key_eq_val_strings([])
+    assert cli._dict_from_key_eq_val_strings(["a=1", "b=2"]) == {"a": "1", "b": "2"}
 
 
 @pytest.mark.parametrize(

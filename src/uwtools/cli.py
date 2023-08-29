@@ -324,7 +324,7 @@ def _dispatch_template_render(args: Namespace) -> bool:
         output_file=args.output_file,
         values_file=args.values_file,
         values_format=args.values_format,
-        overrides=dict_from_key_eq_val_strings(args.key_eq_val_pairs),
+        overrides=_dict_from_key_eq_val_strings(args.key_eq_val_pairs),
         values_needed=args.values_needed,
         dry_run=args.dry_run,
     )
@@ -519,7 +519,7 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     :return: The new subparser.
     """
     return subparsers.add_parser(
-        name, add_help=False, help=helpmsg, formatter_class=formatter, description=helpmsg
+        name, add_help=False, help=helpmsg, formatter_class=_formatter, description=helpmsg
     )
 
 
@@ -562,7 +562,7 @@ def _check_args(args: Namespace) -> Namespace:
     return args
 
 
-def dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:
+def _dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:
     """
     Given a list of key=value strings, return a dictionary of key/value pairs.
 
@@ -572,7 +572,7 @@ def dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:
     return dict([arg.split("=") for arg in config_items])
 
 
-def formatter(prog: str) -> HelpFormatter:
+def _formatter(prog: str) -> HelpFormatter:
     """
     A standard formatter for help messages.
     """
@@ -587,7 +587,9 @@ def _parse_args(raw_args: List[str]) -> Namespace:
     :return: Parsed command-line arguments.
     """
 
-    parser = Parser(description="Unified Workflow Tools", add_help=False, formatter_class=formatter)
+    parser = Parser(
+        description="Unified Workflow Tools", add_help=False, formatter_class=_formatter
+    )
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, "mode")
     _add_subparser_config(subparsers)
@@ -596,7 +598,7 @@ def _parse_args(raw_args: List[str]) -> Namespace:
     return parser.parse_args(raw_args)
 
 
-def set_formats(args: Namespace) -> Namespace:
+def _set_formats(args: Namespace) -> Namespace:
     """
     Try to set missing format information.
 
