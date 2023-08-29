@@ -17,7 +17,7 @@ import uwtools.config.templater
 import uwtools.config.validator
 import uwtools.drivers.forecast
 from uwtools.logging import setup_logging
-from uwtools.utils.file import FORMAT
+from uwtools.utils.file import FORMAT, get_file_type
 
 FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.yaml]
 TITLE_REQ_ARG = "Required arguments"
@@ -62,7 +62,6 @@ def add_subparser_config_compare(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    choices = FORMATS
     parser = add_subparser(subparsers, "compare", "Compare configs")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     add_arg_file_path(required, switch="--file-1-path", helpmsg="Path to file 1")
@@ -72,13 +71,13 @@ def add_subparser_config_compare(subparsers: Subparsers) -> None:
         optional,
         switch="--file-1-format",
         helpmsg="Format of file 1",
-        choices=choices,
+        choices=FORMATS,
     )
     add_arg_file_format(
         optional,
         switch="--file-2-format",
         helpmsg="Format of file 2",
-        choices=choices,
+        choices=FORMATS,
     )
     add_arg_quiet(optional)
     add_arg_verbose(optional)
@@ -90,15 +89,15 @@ def add_subparser_config_realize(subparsers: Subparsers) -> None:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    choices = FORMATS
     parser = add_subparser(subparsers, "realize", "Realize config")
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    add_arg_values_file(required, required=True)
     optional = basic_setup(parser)
     add_arg_input_file(optional)
-    add_arg_input_format(optional, choices=choices)
+    add_arg_input_format(optional, choices=FORMATS)
     add_arg_output_file(optional)
-    add_arg_output_format(optional, choices=choices)
-    add_arg_values_file(optional)
-    add_arg_values_format(optional, choices=choices)
+    add_arg_output_format(optional, choices=FORMATS)
+    add_arg_values_format(optional, choices=FORMATS)
     add_arg_values_needed(optional)
     add_arg_dry_run(optional)
     add_arg_quiet(optional)
@@ -293,6 +292,7 @@ def add_subparser_template_render(subparsers: Subparsers) -> None:
     add_arg_input_file(optional)
     add_arg_output_file(optional)
     add_arg_values_file(optional)
+    add_arg_values_format(optional, choices=FORMATS)
     add_arg_values_needed(optional)
     add_arg_dry_run(optional)
     add_arg_quiet(optional)
@@ -320,6 +320,7 @@ def dispatch_template_render(args: Namespace) -> bool:
         input_file=args.input_file,
         output_file=args.output_file,
         values_file=args.values_file,
+        values_format=args.values_format,
         overrides=dict_from_key_eq_val_strings(args.key_eq_val_pairs),
         values_needed=args.values_needed,
         dry_run=args.dry_run,
@@ -462,12 +463,12 @@ def add_arg_values_file(group: Group, required: bool = False) -> None:
     )
 
 
-def add_arg_values_format(group: Group, choices: List[str], required: bool = False) -> None:
+def add_arg_values_format(group: Group, choices: List[str]) -> None:
     group.add_argument(
         "--values-format",
         choices=choices,
         help="Values format",
-        required=required,
+        required=False,
         type=str,
     )
 
@@ -600,13 +601,21 @@ def set_formats(args: Namespace) -> Namespace:
     :return: The parsed command-line arguments with missing formats set, when possible.
     :raises: SystemExit if any missing format cannot be deduced.
     """
-    # fmtmap = {}
-    # for format_sw, file_sw in {
-    #     "file_1_format": "file_1_path",
-    #     "file_2_format": "file_3_path",
-    #     "input_format": "input_file",
-    #     "output_format": "output_file",
-    #     "values_format": "values_file",
-    # }.items():
-    #     pass
+    switch = lambda x: "--%s" % x.replace("_", "-")
+    argmap = vars(args)
+    path2fmt = {
+        "file_1_path": "file_1_format",
+        "file_2_path": "file_2_format",
+        "input_file": "input_format",
+        "output_file": "output_format",
+        "values_file": "values_format",
+    }
+    # breakpoint()
+    for path_arg, fmt_arg in path2fmt.items():
+        if path_arg in argmap:
+            if argmap[fmt_arg] is None:
+                if argmap[path_arg] is None:
+                    abort("Specify %s when %s is not given" % (switch(fmt_arg), switch(path_arg)))
+                argmap[fmt_arg] = get_file_type(argmap[path_arg])
+    # breakpoint()
     return args

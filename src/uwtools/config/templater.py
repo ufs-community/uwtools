@@ -17,6 +17,7 @@ def render(
     input_file: OptionalPath,
     output_file: OptionalPath,
     values_file: DefinitePath,
+    values_format: Optional[str] = None,
     overrides: Optional[Dict[str, str]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
@@ -32,7 +33,9 @@ def render(
     :param dry_run: Run in dry-run mode?
     """
     _report(locals())
-    values = _set_up_values_obj(values_file=values_file, overrides=overrides)
+    values = _set_up_values_obj(
+        values_file=values_file, values_format=values_format, overrides=overrides
+    )
     with readable(input_file) as f:
         template_str = f.read()
     template = J2Template(values=values, template_str=template_str)
@@ -88,7 +91,9 @@ def _report(args: dict) -> None:
 
 
 def _set_up_values_obj(
-    values_file: OptionalPath = None, overrides: Optional[Dict[str, str]] = None
+    values_file: OptionalPath = None,
+    values_format: Optional[str] = None,
+    overrides: Optional[Dict[str, str]] = None,
 ) -> dict:
     """
     Collect template-rendering values based on an input file, if given, or otherwise on the shell
@@ -99,8 +104,9 @@ def _set_up_values_obj(
     :returns: The collected values.
     """
     if values_file:
-        values_type = get_file_type(values_file)
-        values_class = format_to_config(values_type)
+        if values_format is None:
+            values_format = get_file_type(values_file)
+        values_class = format_to_config(values_format)
         values = values_class(values_file).data
         logging.debug("Read initial values from %s", values_file)
     else:

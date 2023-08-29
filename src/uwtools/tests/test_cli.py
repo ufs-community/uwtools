@@ -199,9 +199,10 @@ def test_dispatch_template_render_yaml(caplog):
         input_file=1,
         output_file=2,
         values_file=3,
+        values_format=4,
         key_eq_val_pairs=["foo=88", "bar=99"],
-        values_needed=5,
-        dry_run=6,
+        values_needed=6,
+        dry_run=7,
     )
     with patch.object(cli.uwtools.config.templater, "render") as m:
         with patch.object(cli.sys, "argv", ["foo", "--bar", "88"]):
