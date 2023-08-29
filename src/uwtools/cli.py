@@ -34,7 +34,7 @@ def main() -> None:
     }
     setup_logging(quiet=True)
     try:
-        args = _check_args(set_formats(_parse_args(sys.argv[1:])))
+        args = _check_args(_set_formats(_parse_args(sys.argv[1:])))
         setup_logging(quiet=args.quiet, verbose=args.verbose)
         sys.exit(0 if modes[args.mode](args) else 1)
     except Exception as e:  # pylint: disable=broad-exception-caught
