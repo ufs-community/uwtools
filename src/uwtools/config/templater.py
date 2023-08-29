@@ -6,7 +6,7 @@ import logging
 import os
 from typing import Dict, Optional
 
-import uwtools.config.core
+from uwtools.config.core import format_to_config
 from uwtools.config.j2template import J2Template
 from uwtools.logging import MSGWIDTH
 from uwtools.types import DefinitePath, OptionalPath
@@ -100,8 +100,8 @@ def _set_up_values_obj(
     """
     if values_file:
         values_type = get_file_type(values_file)
-        values_class = getattr(uwtools.config.core, f"{values_type}Config")
-        values = values_class(values_file)
+        values_class = format_to_config(values_type)
+        values = values_class(values_file).data
         logging.debug("Read initial values from %s", values_file)
     else:
         values = dict(os.environ)  # Do not modify os.environ: Make a copy.
