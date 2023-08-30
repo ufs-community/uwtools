@@ -56,11 +56,14 @@ def test_write_rocoto_xml(tmp_path):
 
 
 def test_rocoto_xml_is_valid():
-    input_xml = support.fixture_path("hello_workflow.xml")
-    tree = etree.parse(input_xml)
-    root = etree.tostring(tree.getroot())
-
-    breakpoint()
     with resources.as_file(resources.files("uwtools.resources")) as resc:
-        relaxng_doc = str(resc / "schema_with_metatasks")
-    relaxng = etree.RelaxNG(file=relaxng_doc)
+        with open(resc / "schema_with_metatasks.rng", "r", encoding="utf-8") as f:
+            schema = etree.RelaxNG(etree.parse(f))
+
+    valid_xml = support.fixture_path("hello_workflow.xml")
+    tree = etree.parse(valid_xml)
+    assert schema.validate(tree)
+
+    invalid_xml = support.fixture_path("rocoto_invalid.xml")
+    tree = etree.parse(invalid_xml)
+    assert not schema.validate(tree)
