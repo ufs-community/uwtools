@@ -16,9 +16,9 @@ from uwtools.types import DefinitePath, OptionalPath
 
 
 @dataclass(frozen=True)
-class _FORMAT_UNIQUE:
+class _FORMAT_CANONICAL:
     """
-    A mapping from config types to literal strings.
+    A mapping from canonical config format names to literal strings.
     """
 
     atparse: str = "atparse"
@@ -32,19 +32,19 @@ class _FORMAT_UNIQUE:
 @dataclass(frozen=True)
 class _FORMAT:
     """
-    A mapping from variant config names to literal strings:
+    A mapping from config format names to literal strings:
     """
 
-    atparse: str = _FORMAT_UNIQUE.atparse
-    bash: str = _FORMAT_UNIQUE.ini
-    cfg: str = _FORMAT_UNIQUE.ini
-    fieldtable: str = _FORMAT_UNIQUE.fieldtable
-    ini: str = _FORMAT_UNIQUE.ini
-    jinja2: str = _FORMAT_UNIQUE.jinja2
-    nml: str = _FORMAT_UNIQUE.nml
-    sh: str = _FORMAT_UNIQUE.ini
-    yaml: str = _FORMAT_UNIQUE.yaml
-    yml: str = _FORMAT_UNIQUE.yaml
+    atparse: str = _FORMAT_CANONICAL.atparse
+    bash: str = _FORMAT_CANONICAL.ini
+    cfg: str = _FORMAT_CANONICAL.ini
+    fieldtable: str = _FORMAT_CANONICAL.fieldtable
+    ini: str = _FORMAT_CANONICAL.ini
+    jinja2: str = _FORMAT_CANONICAL.jinja2
+    nml: str = _FORMAT_CANONICAL.nml
+    sh: str = _FORMAT_CANONICAL.ini
+    yaml: str = _FORMAT_CANONICAL.yaml
+    yml: str = _FORMAT_CANONICAL.yaml
 
 
 FORMAT = _FORMAT()

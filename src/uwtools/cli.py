@@ -27,12 +27,19 @@ def main() -> None:
     """
     Main entry point.
     """
+
+    # Silence logging initially, then process the command-line arguments by parsing them, filling
+    # in any unspecified data-format arguments, and checking semantic argument validity (i.e. that
+    # the arguments make sense together, not just on their own). If the arguments are sane, set up
+    # logging correctly, then dispatch to the mode handler, which will the dispatch to the submode
+    # handler. Shield command-line users from raised exceptions by aborting gracefully.
+
+    setup_logging(quiet=True)
     modes = {
         "config": _dispatch_config,
         "forecast": _dispatch_forecast,
         "template": _dispatch_template,
     }
-    setup_logging(quiet=True)
     try:
         args = _check_args(_set_formats(_parse_args(sys.argv[1:])))
         setup_logging(quiet=args.quiet, verbose=args.verbose)
@@ -606,8 +613,16 @@ def _set_formats(args: Namespace) -> Namespace:
     :return: The parsed command-line arguments with missing formats set, when possible.
     :raises: SystemExit if any missing format cannot be deduced.
     """
+
+    # Loop over pairs of path/format argument attributes and, for each, check if the path attribute
+    # is present (but possibly set to None), to decide if the pair is used in the current [sub]mode.
+    # If so, and if the format attribute was explicitly set on the command line, all's well; but if
+    # the format attribute is not set, try to set it now after deducing it from the path's extension
+    # and abort if this is not possible -- either because the path attribute is not set, or because
+    # the extension is unrecognized.
+
     switch = lambda x: "--%s" % x.replace("_", "-")
-    argmap = vars(args)
+    attrs = vars(args)
     path2fmt = {
         "file_1_path": "file_1_format",
         "file_2_path": "file_2_format",
@@ -615,12 +630,13 @@ def _set_formats(args: Namespace) -> Namespace:
         "output_file": "output_format",
         "values_file": "values_format",
     }
-    for path_arg, fmt_arg in path2fmt.items():
-        if path_arg in argmap:
-            if argmap[fmt_arg] is None:
-                if argmap[path_arg] is None:
+    for path_attr, fmt_attr in path2fmt.items():
+        if path_attr in attrs:
+            if attrs[fmt_attr] is None:
+                if attrs[path_attr] is None:
                     _abort(
-                        "Specify %s when %s is not specified" % (switch(fmt_arg), switch(path_arg))
+                        "Specify %s when %s is not specified"
+                        % (switch(fmt_attr), switch(path_attr))
                     )
-                argmap[fmt_arg] = get_file_type(argmap[path_arg])
+                attrs[fmt_attr] = get_file_type(attrs[path_attr])
     return args

@@ -330,7 +330,6 @@ class Config(ABC, UserDict):
             elif isinstance(value, str):
                 if m := re.match(r"^\s*%s\s+(.*)" % INCLUDE_TAG, value):
                     filepaths = yaml.safe_load(m[1])
-                    # Update the dict with values from the included file(s).
                     self.update_values(self._load_paths(filepaths))
                     del ref_dict[key]
 
