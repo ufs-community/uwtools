@@ -4,10 +4,9 @@ Utilities for rendering Jinja2 templates.
 
 import logging
 import re
-import sys
 from typing import IO, Any, Generator, Optional
 
-from uwtools.utils.file import readable
+from uwtools.utils.file import readable, writable
 
 
 def convert(
@@ -36,11 +35,9 @@ def convert(
     if dry_run:
         for line in lines():
             logging.info(line)
-    elif output_file:
-        with open(output_file, "w", encoding="utf-8") as out_f:
-            write(out_f)
     else:
-        write(sys.stdout)
+        with writable(output_file) as f:
+            write(f)
 
 
 def _replace(atline: str) -> str:

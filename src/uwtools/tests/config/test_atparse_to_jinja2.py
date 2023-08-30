@@ -3,6 +3,7 @@
 Tests for uwtools.utils.atparse_to_jinja2 module.
 """
 
+import sys
 from io import StringIO
 from unittest.mock import patch
 
@@ -63,7 +64,7 @@ def test_convert_input_file_to_stdout(atparsefile, capsys, jinja2txt):
 
 def test_convert_stdin_to_file(atparselines, capsys, jinja2txt, tmp_path):
     outfile = tmp_path / "outfile"
-    with patch.object(atparse_to_jinja2.sys, "stdin", new=StringIO("\n".join(atparselines))):
+    with patch.object(sys, "stdin", new=StringIO("\n".join(atparselines))):
         atparse_to_jinja2.convert(output_file=outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read() == jinja2txt
@@ -74,14 +75,14 @@ def test_convert_stdin_to_file(atparselines, capsys, jinja2txt, tmp_path):
 
 def test_convert_stdin_to_logging(atparselines, caplog, jinja2txt, tmp_path):
     outfile = tmp_path / "outfile"
-    with patch.object(atparse_to_jinja2.sys, "stdin", new=StringIO("\n".join(atparselines))):
+    with patch.object(sys, "stdin", new=StringIO("\n".join(atparselines))):
         atparse_to_jinja2.convert(output_file=outfile, dry_run=True)
     assert "\n".join(record.message for record in caplog.records) == jinja2txt.strip()
     assert not outfile.is_file()
 
 
 def test_convert_stdin_to_stdout(atparselines, capsys, jinja2txt):
-    with patch.object(atparse_to_jinja2.sys, "stdin", new=StringIO("\n".join(atparselines))):
+    with patch.object(sys, "stdin", new=StringIO("\n".join(atparselines))):
         atparse_to_jinja2.convert()
     streams = capsys.readouterr()
     assert not streams.err
