@@ -66,4 +66,4 @@ def test_rocoto_xml_is_valid():
 
     invalid_xml = support.fixture_path("rocoto_invalid.xml")
     tree = etree.parse(invalid_xml)
-    assert not schema.validate(tree)
+    assert schema.validate(tree) is False

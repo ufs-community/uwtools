@@ -5,7 +5,9 @@
 
 ]>
 <workflow realtime="False" scheduler="slurm" >
-
+  <!-- cycledef tag is required to pass validation for a Rocoto schema
+  cycledef defines the set of cycles to be run for the workflow
+  -->
   <log>/some/path/to/&FOO;</log>
   
   <task name="hello" cycledefs="howdy" maxtries="2" >
