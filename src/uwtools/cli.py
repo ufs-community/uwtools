@@ -78,9 +78,7 @@ def add_subparser_config_compare(subparsers: Subparsers) -> None:
         helpmsg="Format of config file 2",
         choices=choices,
     )
-    optional = basic_setup(parser)
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
+    basic_setup(parser)
 
 
 def add_subparser_config_realize(subparsers: Subparsers) -> None:
@@ -101,8 +99,6 @@ def add_subparser_config_realize(subparsers: Subparsers) -> None:
     add_arg_values_format(optional, choices=choices)
     add_arg_values_needed(optional)
     add_arg_dry_run(optional)
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
 
 
 def add_subparser_config_translate(subparsers: Subparsers) -> None:
@@ -119,8 +115,6 @@ def add_subparser_config_translate(subparsers: Subparsers) -> None:
     add_arg_input_file(optional)
     add_arg_output_file(optional)
     add_arg_dry_run(optional)
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
 
 
 def add_subparser_config_validate(subparsers: Subparsers) -> None:
@@ -135,8 +129,6 @@ def add_subparser_config_validate(subparsers: Subparsers) -> None:
     add_arg_schema_file(required)
     optional = basic_setup(parser)
     add_arg_input_file(optional)
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
 
 
 def dispatch_config(args: Namespace) -> bool:
@@ -244,8 +236,6 @@ def add_subparser_forecast_run(subparsers: Subparsers) -> None:
     add_arg_model(required, choices=["FV3"])
     optional = basic_setup(parser)
     add_arg_dry_run(optional)
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
 
 
 def dispatch_forecast(args: Namespace) -> bool:
@@ -296,8 +286,6 @@ def add_subparser_template_render(subparsers: Subparsers) -> None:
     add_arg_values_file(optional)
     add_arg_values_needed(optional)
     add_arg_dry_run(optional)
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
     add_arg_key_eq_val_pairs(optional)
 
 
@@ -540,6 +528,8 @@ def basic_setup(parser: Parser) -> Group:
     """
     optional = parser.add_argument_group("Optional arguments")
     optional.add_argument("-h", "--help", action="help", help="Show help and exit")
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
     return optional
 
 

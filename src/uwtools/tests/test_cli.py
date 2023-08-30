@@ -244,7 +244,7 @@ def subparsers():
 def submodes(parser: Parser) -> List[str]:
     # Return submodes (named subparsers) belonging to the given parser.
     if subparsers := parser._subparsers:
-        if action := subparsers._actions[1]:
+        if action := subparsers._actions[3]:
             if choices := action.choices:
                 submodes = choices.keys()  # type: ignore
                 return list(submodes)
