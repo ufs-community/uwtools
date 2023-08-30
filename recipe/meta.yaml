@@ -18,6 +18,7 @@ requirements:
     - python >=3.8,<3.12
     - python {{ release }}
     - pyyaml 6.0.*
+    - lxml 4.9.*
 test:
   requires:
     - black 23.3.*
