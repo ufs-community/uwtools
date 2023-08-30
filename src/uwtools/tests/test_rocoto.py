@@ -3,9 +3,9 @@
 Tests for uwtools.rocoto module.
 """
 from importlib import resources
-from lxml import etree
 
 import yaml
+from lxml import etree
 
 from uwtools import rocoto
 from uwtools.tests import support
@@ -54,7 +54,13 @@ def test_write_rocoto_xml(tmp_path):
     expected = support.fixture_path("hello_workflow.xml")
     support.compare_files(expected, output)
 
+
 def test_rocoto_xml_is_valid():
     input_xml = support.fixture_path("hello_workflow.xml")
     tree = etree.parse(input_xml)
     root = etree.tostring(tree.getroot())
+
+    breakpoint()
+    with resources.as_file(resources.files("uwtools.resources")) as resc:
+        relaxng_doc = str(resc / "schema_with_metatasks")
+    relaxng = etree.RelaxNG(file=relaxng_doc)
