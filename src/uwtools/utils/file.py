@@ -16,35 +16,32 @@ from uwtools.types import DefinitePath, OptionalPath
 
 
 @dataclass(frozen=True)
-class _FORMAT_CANONICAL:
-    """
-    A mapping from canonical config format names to literal strings.
-    """
-
-    atparse: str = "atparse"
-    fieldtable: str = "fieldtable"
-    ini: str = "ini"
-    jinja2: str = "jinja2"
-    nml: str = "nml"
-    yaml: str = "yaml"
-
-
-@dataclass(frozen=True)
 class _FORMAT:
     """
-    A mapping from config format names to literal strings:
+    A mapping from config format names to literal strings.
     """
 
-    atparse: str = _FORMAT_CANONICAL.atparse
-    bash: str = _FORMAT_CANONICAL.ini
-    cfg: str = _FORMAT_CANONICAL.ini
-    fieldtable: str = _FORMAT_CANONICAL.fieldtable
-    ini: str = _FORMAT_CANONICAL.ini
-    jinja2: str = _FORMAT_CANONICAL.jinja2
-    nml: str = _FORMAT_CANONICAL.nml
-    sh: str = _FORMAT_CANONICAL.ini
-    yaml: str = _FORMAT_CANONICAL.yaml
-    yml: str = _FORMAT_CANONICAL.yaml
+    # Canonical strings:
+
+    _atparse: str = "atparse"
+    _fieldtable: str = "fieldtable"
+    _ini: str = "ini"
+    _jinja2: str = "jinja2"
+    _nml: str = "nml"
+    _yaml: str = "yaml"
+
+    # Variants:
+
+    atparse: str = _atparse
+    bash: str = _ini
+    cfg: str = _ini
+    fieldtable: str = _fieldtable
+    ini: str = _ini
+    jinja2: str = _jinja2
+    nml: str = _nml
+    sh: str = _ini
+    yaml: str = _yaml
+    yml: str = _yaml
 
 
 FORMAT = _FORMAT()
