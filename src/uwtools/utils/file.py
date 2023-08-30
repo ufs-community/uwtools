@@ -7,38 +7,47 @@ import os
 import shutil
 import sys
 from contextlib import contextmanager
+from dataclasses import dataclass
 from datetime import datetime as dt
 from pathlib import Path
-from types import SimpleNamespace as ns
 from typing import IO, Generator
 
 from uwtools.types import DefinitePath, OptionalPath
 
-# A mapping from config types to literal strings:
 
-_FMT = ns(
-    atparse="atparse",
-    fieldtable="fieldtable",
-    ini="ini",
-    jinja2="jinja2",
-    nml="nml",
-    yaml="yaml",
-)
+@dataclass(frozen=True)
+class _FORMAT_UNIQUE:
+    """
+    A mapping from config types to literal strings.
+    """
 
-# A mapping from variant config names to literal strings:
+    atparse: str = "atparse"
+    fieldtable: str = "fieldtable"
+    ini: str = "ini"
+    jinja2: str = "jinja2"
+    nml: str = "nml"
+    yaml: str = "yaml"
 
-FORMAT = ns(
-    atparse=_FMT.atparse,
-    bash=_FMT.ini,
-    cfg=_FMT.ini,
-    fieldtable=_FMT.fieldtable,
-    ini=_FMT.ini,
-    jinja2=_FMT.jinja2,
-    nml=_FMT.nml,
-    sh=_FMT.ini,
-    yaml=_FMT.yaml,
-    yml=_FMT.yaml,
-)
+
+@dataclass(frozen=True)
+class _FORMAT:
+    """
+    A mapping from variant config names to literal strings:
+    """
+
+    atparse: str = _FORMAT_UNIQUE.atparse
+    bash: str = _FORMAT_UNIQUE.ini
+    cfg: str = _FORMAT_UNIQUE.ini
+    fieldtable: str = _FORMAT_UNIQUE.fieldtable
+    ini: str = _FORMAT_UNIQUE.ini
+    jinja2: str = _FORMAT_UNIQUE.jinja2
+    nml: str = _FORMAT_UNIQUE.nml
+    sh: str = _FORMAT_UNIQUE.ini
+    yaml: str = _FORMAT_UNIQUE.yaml
+    yml: str = _FORMAT_UNIQUE.yaml
+
+
+FORMAT = _FORMAT()
 
 
 def handle_existing(directory: str, action: str) -> None:
