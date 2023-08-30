@@ -5,8 +5,8 @@
 
 ]>
 <workflow realtime="False" scheduler="slurm" >
-  <!-- cycldef tag has been intentionally been removed to fail Rocoto schema validation
-  cycledef defines the set of cycles to be run for the workflow
+  <!-- cycldef tag has intentionally been removed to fail Rocoto schema validation
+  cycledef is required and defines the set of cycles to be run for the workflow
   -->
   <log>/some/path/to/&FOO;</log>
   
