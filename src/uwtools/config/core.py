@@ -279,6 +279,14 @@ class Config(ABC, UserDict):
             self.dereference()
             prev = copy.deepcopy(self.data)
 
+    @abstractmethod
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as a file.
+
+        :param path: Path to dump config to.
+        """
+
     @staticmethod
     @abstractmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
@@ -288,14 +296,6 @@ class Config(ABC, UserDict):
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
         :param opts: Other options required by a subclass.
-        """
-
-    @abstractmethod
-    def dump(self, path: DefinitePath) -> None:
-        """
-        Dumps the config as a file.
-
-        :param path: Path to dump config to.
         """
 
     def from_ordereddict(self, in_dict: dict) -> dict:
@@ -441,6 +441,14 @@ class INIConfig(Config):
 
     # Public methods
 
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as an INI file.
+
+        :param path: Path to dump config to.
+        """
+        INIConfig.dump_dict(path, self.data, ns(space=self.space_around_delimiters))
+
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
@@ -458,14 +466,6 @@ class INIConfig(Config):
             except AttributeError:
                 for key, value in cfg.items():
                     print(f"{key}={value}", file=f)
-
-    def dump(self, path: DefinitePath) -> None:
-        """
-        Dumps the config as an INI file.
-
-        :param path: Path to dump config to.
-        """
-        INIConfig.dump_dict(path, self.data, ns(space=self.space_around_delimiters))
 
 
 class NMLConfig(Config):
@@ -493,6 +493,14 @@ class NMLConfig(Config):
 
     # Public methods
 
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as a Fortran namelist file.
+
+        :param path: Path to dump config to.
+        """
+        NMLConfig.dump_dict(path, self.data)
+
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
@@ -508,14 +516,6 @@ class NMLConfig(Config):
                 nml[sect] = OrderedDict(keys)
         with writable(path) as f:
             f90nml.Namelist(nml).write(f, sort=False)
-
-    def dump(self, path: DefinitePath) -> None:
-        """
-        Dumps the config as a Fortran namelist file.
-
-        :param path: Path to dump config to.
-        """
-        NMLConfig.dump_dict(path, self.data)
 
 
 class YAMLConfig(Config):
@@ -578,6 +578,14 @@ class YAMLConfig(Config):
 
     # Public methods
 
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as a YAML file.
+
+        :param path: Path to dump config to.
+        """
+        YAMLConfig.dump_dict(path, self.data)
+
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
@@ -590,14 +598,6 @@ class YAMLConfig(Config):
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
 
-    def dump(self, path: DefinitePath) -> None:
-        """
-        Dumps the config as a YAML file.
-
-        :param path: Path to dump config to.
-        """
-        YAMLConfig.dump_dict(path, self.data)
-
 
 class FieldTableConfig(YAMLConfig):
     """
@@ -606,6 +606,14 @@ class FieldTableConfig(YAMLConfig):
     """
 
     # Public methods
+
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as a Field Table file.
+
+        :param path: Path to dump config to.
+        """
+        FieldTableConfig.dump_dict(path, self.data)
 
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
@@ -647,14 +655,6 @@ class FieldTableConfig(YAMLConfig):
             lines[-1] += " /"
         with writable(path) as f:
             print("\n".join(lines), file=f)
-
-    def dump(self, path: DefinitePath) -> None:
-        """
-        Dumps the config as a Field Table file.
-
-        :param path: Path to dump config to.
-        """
-        FieldTableConfig.dump_dict(path, self.data)
 
 
 # Public functions

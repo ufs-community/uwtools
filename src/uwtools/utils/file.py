@@ -47,6 +47,22 @@ class _FORMAT:
 FORMAT = _FORMAT()
 
 
+def get_file_type(path: DefinitePath) -> str:
+    """
+    Returns a standardized file type given a path/filename.
+
+    :param path: A path or filename.
+    :return: One of a set of supported file types.
+    :raises: ValueError if the path/filename suffix is unrecognized.
+    """
+    suffix = Path(path).suffix.replace(".", "")
+    if fmt := vars(FORMAT).get(suffix):
+        return fmt
+    msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
+    logging.critical(msg)
+    raise ValueError(msg)
+
+
 def handle_existing(directory: str, action: str) -> None:
     """
     Given a run directory, and an action to do if directory exists, delete or rename directory.
@@ -76,22 +92,6 @@ def handle_existing(directory: str, action: str) -> None:
         msg = f"Could not rename directory {directory}"
         logging.critical(msg)
         raise RuntimeError(msg) from e
-
-
-def get_file_type(path: DefinitePath) -> str:
-    """
-    Returns a standardized file type given a path/filename.
-
-    :param path: A path or filename.
-    :return: One of a set of supported file types.
-    :raises: ValueError if the path/filename suffix is unrecognized.
-    """
-    suffix = Path(path).suffix.replace(".", "")
-    if fmt := vars(FORMAT).get(suffix):
-        return fmt
-    msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
-    logging.critical(msg)
-    raise ValueError(msg)
 
 
 def path_if_it_exists(path: str) -> str:
