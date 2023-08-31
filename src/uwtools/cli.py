@@ -89,7 +89,6 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> None:
         helpmsg="Format of file 2",
         choices=FORMATS,
     )
-    basic_setup(parser)
 
 
 def _add_subparser_config_realize(subparsers: Subparsers) -> None:
@@ -539,8 +538,8 @@ def _basic_setup(parser: Parser) -> Group:
     """
     optional = parser.add_argument_group("Optional arguments")
     optional.add_argument("-h", "--help", action="help", help="Show help and exit")
-    add_arg_quiet(optional)
-    add_arg_verbose(optional)
+    _add_arg_quiet(optional)
+    _add_arg_verbose(optional)
     return optional
 
 
