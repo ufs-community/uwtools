@@ -5,6 +5,7 @@ Tests for uwtools.rocoto module.
 from importlib import resources
 
 import yaml
+import pytest
 from lxml import etree
 
 from uwtools import rocoto
@@ -55,15 +56,13 @@ def test_write_rocoto_xml(tmp_path):
     support.compare_files(expected, output)
 
 
-def test_rocoto_xml_is_valid():
+@pytest.mark.parametrize("vals", [("hello_workflow.xml", True), ("rocoto_invalid.xml", False)])
+def test_rocoto_xml_is_valid(vals):
+    fn, validity = vals
     with resources.as_file(resources.files("uwtools.resources")) as resc:
         with open(resc / "schema_with_metatasks.rng", "r", encoding="utf-8") as f:
             schema = etree.RelaxNG(etree.parse(f))
 
-    valid_xml = support.fixture_path("hello_workflow.xml")
-    tree = etree.parse(valid_xml)
-    assert schema.validate(tree)
-
-    invalid_xml = support.fixture_path("rocoto_invalid.xml")
-    tree = etree.parse(invalid_xml)
-    assert schema.validate(tree) is False
+    xml = support.fixture_path(fn)
+    tree = etree.parse(xml)
+    assert schema.validate(tree) is validity

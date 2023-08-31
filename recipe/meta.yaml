@@ -15,10 +15,10 @@ requirements:
     - f90nml 1.4.*
     - jinja2 3.0.*
     - jsonschema 4.17.*
+    - lxml 4.9.*
     - python >=3.8,<3.12
     - python {{ release }}
     - pyyaml 6.0.*
-    - lxml 4.9.*
 test:
   requires:
     - black 23.3.*
