@@ -290,7 +290,7 @@ class Config(ABC, UserDict):
         """
 
     @abstractmethod
-    def dump_file(self, path: DefinitePath) -> None:
+    def dump(self, path: DefinitePath) -> None:
         """
         Dumps the config as a file.
 
@@ -458,7 +458,7 @@ class INIConfig(Config):
                 for key, value in cfg.items():
                     print(f"{key}={value}", file=f)
 
-    def dump_file(self, path: DefinitePath) -> None:
+    def dump(self, path: DefinitePath) -> None:
         """
         Dumps the config as an INI file.
 
@@ -508,7 +508,7 @@ class NMLConfig(Config):
         with writable(path) as f:
             f90nml.Namelist(nml).write(f, sort=False)
 
-    def dump_file(self, path: DefinitePath) -> None:
+    def dump(self, path: DefinitePath) -> None:
         """
         Dumps the config as a Fortran namelist file.
 
@@ -589,7 +589,7 @@ class YAMLConfig(Config):
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
 
-    def dump_file(self, path: DefinitePath) -> None:
+    def dump(self, path: DefinitePath) -> None:
         """
         Dumps the config as a YAML file.
 
@@ -647,7 +647,7 @@ class FieldTableConfig(YAMLConfig):
         with writable(path) as f:
             print("\n".join(lines), file=f)
 
-    def dump_file(self, path: DefinitePath) -> None:
+    def dump(self, path: DefinitePath) -> None:
         """
         Dumps the config as a Field Table file.
 

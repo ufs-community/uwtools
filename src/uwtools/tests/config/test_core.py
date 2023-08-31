@@ -106,7 +106,7 @@ def test_config_field_table(tmp_path):
     cfgfile = fixture_path("FV3_GFS_v16.yaml")
     outfile = tmp_path / "field_table_from_yaml.FV3_GFS"
     reference = fixture_path("field_table.FV3_GFS_v16")
-    core.FieldTableConfig(cfgfile).dump_file(outfile)
+    core.FieldTableConfig(cfgfile).dump(outfile)
     with open(reference, "r", encoding="utf-8") as f1:
         reflines = [line.strip().replace("'", "") for line in f1]
     with open(outfile, "r", encoding="utf-8") as f2:
@@ -219,7 +219,7 @@ def test_ini_config_bash(salad_base, tmp_path):
         "how_many": "12",
     }  # str "12" (not int 12) for INI
     assert cfgobj == expected
-    cfgobj.dump_file(outfile)
+    cfgobj.dump(outfile)
     assert filecmp.cmp(infile, outfile)
     cfgobj.update({"dressing": ["ranch", "italian"]})
     expected["dressing"] = ["ranch", "italian"]
@@ -238,7 +238,7 @@ def test_ini_config_simple(salad_base, tmp_path):
     expected = salad_base
     expected["salad"]["how_many"] = "12"  # str "12" (not int 12) for INI
     assert cfgobj == expected
-    cfgobj.dump_file(outfile)
+    cfgobj.dump(outfile)
     assert filecmp.cmp(infile, outfile)
     cfgobj.update({"dressing": ["ranch", "italian"]})
     expected["dressing"] = ["ranch", "italian"]
@@ -255,7 +255,7 @@ def test_nml_config_simple(salad_base, tmp_path):
     expected = salad_base
     expected["salad"]["how_many"] = 12  # must be in for nml
     assert cfgobj == expected
-    cfgobj.dump_file(outfile)
+    cfgobj.dump(outfile)
     assert filecmp.cmp(infile, outfile)
     cfgobj.update({"dressing": ["ranch", "italian"]})
     expected["dressing"] = ["ranch", "italian"]
@@ -389,7 +389,7 @@ def test_realize_config_conversion_cfg_to_yaml(tmp_path):
     expected = core.YAMLConfig(infile)
     expected.dereference_all()
     expected_file = tmp_path / "test.yaml"
-    expected.dump_file(expected_file)
+    expected.dump(expected_file)
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read()[-1] == "\n"
@@ -483,7 +483,7 @@ def test_realize_config_file_conversion(tmp_path):
     config_obj = core.INIConfig(cfgfile)
     expected.update_values(config_obj)
     expected_file = tmp_path / "expected.nml"
-    expected.dump_file(expected_file)
+    expected.dump(expected_file)
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read()[-1] == "\n"
@@ -554,7 +554,7 @@ def test_realize_config_output_file_conversion(tmp_path):
     )
     expected = core.NMLConfig(infile)
     expected_file = tmp_path / "expected.nml"
-    expected.dump_file(expected_file)
+    expected.dump(expected_file)
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read()[-1] == "\n"
@@ -814,7 +814,7 @@ def test_yaml_config_simple(tmp_path):
         "walltime": "00:01:00",
     }
     assert cfgobj == expected
-    cfgobj.dump_file(outfile)
+    cfgobj.dump(outfile)
     assert filecmp.cmp(infile, outfile)
     cfgobj.update({"nodes": 12})
     expected["nodes"] = 12
@@ -954,7 +954,7 @@ def help_realize_config_fmt2fmt(infn, infmt, cfgfn, cfgfmt, tmpdir):
     cfgobj = cfgclass(infile)
     cfgobj.update_values(cfgclass(cfgfile))
     reference = tmpdir / "expected"
-    cfgobj.dump_file(reference)
+    cfgobj.dump(reference)
     assert compare_files(reference, outfile)
 
 
@@ -972,7 +972,7 @@ def help_realize_config_simple(infn, infmt, tmpdir):
     )
     cfgobj = core._cli_name_to_config(infmt)(infile)
     reference = tmpdir / f"reference{ext}"
-    cfgobj.dump_file(reference)
+    cfgobj.dump(reference)
     assert compare_files(reference, outfile)
 
 

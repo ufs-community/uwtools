@@ -70,7 +70,7 @@ def test_create_config(tmp_path):
     expected = YAMLConfig(input_file)
     expected.update_values(YAMLConfig(config_file))
     expected_file = tmp_path / "expected_yaml.yaml"
-    expected.dump_file(expected_file)
+    expected.dump(expected_file)
     assert compare_files(expected_file, output_file)
 
 

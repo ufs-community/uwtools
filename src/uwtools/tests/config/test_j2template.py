@@ -31,10 +31,10 @@ def test_bad_args(testdata):
         J2Template(testdata.config)
 
 
-def test_dump_file(testdata, tmp_path):
+def test_dump(testdata, tmp_path):
     path = str(tmp_path / "rendered.txt")
     j2template = J2Template(testdata.config, template_str=testdata.template)
-    j2template.dump_file(output_path=path)
+    j2template.dump(output_path=path)
     with open(path, "r", encoding="utf-8") as f:
         assert f.read().strip() == "Hello to the world"
 
