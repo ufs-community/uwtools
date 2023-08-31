@@ -89,8 +89,7 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> None:
         helpmsg="Format of file 2",
         choices=FORMATS,
     )
-    _add_arg_quiet(optional)
-    _add_arg_verbose(optional)
+    basic_setup(parser)
 
 
 def _add_subparser_config_realize(subparsers: Subparsers) -> None:
@@ -110,8 +109,6 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> None:
     _add_arg_values_format(optional, choices=FORMATS)
     _add_arg_values_needed(optional)
     _add_arg_dry_run(optional)
-    _add_arg_quiet(optional)
-    _add_arg_verbose(optional)
 
 
 def _add_subparser_config_translate(subparsers: Subparsers) -> None:
@@ -127,8 +124,6 @@ def _add_subparser_config_translate(subparsers: Subparsers) -> None:
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=[FORMAT.jinja2])
     _add_arg_dry_run(optional)
-    _add_arg_quiet(optional)
-    _add_arg_verbose(optional)
 
 
 def _add_subparser_config_validate(subparsers: Subparsers) -> None:
@@ -143,8 +138,6 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> None:
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_input_format(optional, choices=[FORMAT.yaml])
-    _add_arg_quiet(optional)
-    _add_arg_verbose(optional)
 
 
 def _dispatch_config(args: Namespace) -> bool:
@@ -252,8 +245,6 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> None:
     _add_arg_model(required, choices=["FV3"])
     optional = _basic_setup(parser)
     _add_arg_dry_run(optional)
-    _add_arg_quiet(optional)
-    _add_arg_verbose(optional)
 
 
 def _dispatch_forecast(args: Namespace) -> bool:
@@ -305,8 +296,6 @@ def _add_subparser_template_render(subparsers: Subparsers) -> None:
     _add_arg_values_format(optional, choices=FORMATS)
     _add_arg_values_needed(optional)
     _add_arg_dry_run(optional)
-    _add_arg_quiet(optional)
-    _add_arg_verbose(optional)
     _add_arg_key_eq_val_pairs(optional)
 
 
@@ -550,6 +539,8 @@ def _basic_setup(parser: Parser) -> Group:
     """
     optional = parser.add_argument_group("Optional arguments")
     optional.add_argument("-h", "--help", action="help", help="Show help and exit")
+    add_arg_quiet(optional)
+    add_arg_verbose(optional)
     return optional
 
 
