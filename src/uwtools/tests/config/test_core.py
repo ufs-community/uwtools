@@ -586,6 +586,8 @@ def test_realize_config_simple_yaml(tmp_path):
     Test that providing a YAML base file with necessary settings will create a YAML config file.
     """
     help_realize_config_simple("simple2.yaml", FORMAT.yaml, tmp_path)
+
+
 def test__realize_config_check_depths_fail_nml(realize_config_testobj, fmt):
     with raises(UWConfigError):
         core._realize_config_check_depths(input_obj=realize_config_testobj, output_format=fmt)
