@@ -54,7 +54,7 @@ def test_compare_config(caplog, fmt, salad_base):
         assert logged(caplog, msg)
 
 
-def test_compare_configs_good(caplog, compare_configs_assets):
+def test_compare_configs_good(compare_configs_assets, caplog):
     _, a, b = compare_configs_assets
     assert core.compare_configs(
         config_a_path=a, config_a_format=FORMAT.yaml, config_b_path=b, config_b_format=FORMAT.yaml
@@ -62,7 +62,7 @@ def test_compare_configs_good(caplog, compare_configs_assets):
     assert caplog.records
 
 
-def test_compare_configs_changed_value(caplog, compare_configs_assets):
+def test_compare_configs_changed_value(compare_configs_assets, caplog):
     d, a, b = compare_configs_assets
     d["baz"]["qux"] = 11
     with writable(b) as f:
@@ -73,7 +73,7 @@ def test_compare_configs_changed_value(caplog, compare_configs_assets):
     assert logged(caplog, "baz:             qux:  - 99 + 11")
 
 
-def test_compare_configs_missing_key(caplog, compare_configs_assets):
+def test_compare_configs_missing_key(compare_configs_assets, caplog):
     d, a, b = compare_configs_assets
     del d["baz"]
     with writable(b) as f:
@@ -588,7 +588,8 @@ def test_realize_config_simple_yaml(tmp_path):
     help_realize_config_simple("simple2.yaml", FORMAT.yaml, tmp_path)
 
 
-def test__realize_config_check_depths_fail_nml(realize_config_testobj, fmt):
+@pytest.mark.parametrize("fmt", ["ini", "nml"])
+def test__realize_config_check_depths_fail_nml(fmt, realize_config_testobj):
     with raises(UWConfigError):
         core._realize_config_check_depths(input_obj=realize_config_testobj, output_format=fmt)
 
