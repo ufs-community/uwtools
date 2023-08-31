@@ -3,8 +3,11 @@ Provides an abstract class representing drivers for various NWP tools.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
+from typing import Optional
 
-from uwtools import config_validator
+from uwtools import config, config_validator
+from uwtools.scheduler import BatchScript
 
 
 class Driver(ABC):
@@ -12,17 +15,27 @@ class Driver(ABC):
     An abstract class representing drivers for various NWP tools.
     """
 
-    def __init__(self, config_file: str):
+    def __init__(
+        self,
+        config_file: str,
+        dry_run: bool = False,
+        batch_script: Optional[str] = None,
+    ):
         """
         Initialize the driver.
         """
+
         self._config_file = config_file
+        self._dry_run = dry_run
+        self._batch_script = batch_script
         self._validate()
+
+        self.config_data = config.YAMLConfig(self._config_file)
 
     # Public methods
 
     @abstractmethod
-    def batch_script(self) -> None:
+    def batch_script(self, platform_resources: Mapping) -> BatchScript:
         """
         Create a script for submission to the batch scheduler.
         """
@@ -40,9 +53,9 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def resources(self) -> None:
+    def resources(self, platform: dict) -> Mapping:
         """
-        ???
+        Parses the config and returns a formatted dictionary for the batch script.
         """
 
     @abstractmethod

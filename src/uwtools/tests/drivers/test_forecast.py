@@ -1,9 +1,9 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=duplicate-code
 """
 Tests for forecast driver.
 """
-
-
+import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
@@ -11,9 +11,36 @@ import pytest
 from pytest import fixture, raises
 
 from uwtools import config
+from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.tests.support import compare_files, fixture_path
+
+
+@fixture
+def slurm_props():
+    return {
+        "account": "account_name",
+        "nodes": 1,
+        "queue": "batch",
+        "scheduler": "slurm",
+        "tasks_per_node": 1,
+        "walltime": "00:01:00",
+    }
+
+
+def test_batch_script(slurm_props):
+    expected = """
+#SBATCH --account=account_name
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --qos=batch
+#SBATCH --time=00:01:00
+""".strip()
+    config_file = fixture_path("forecast.yaml")
+    with patch.object(Driver, "_validate", return_value=True):
+        forecast = FV3Forecast(config_file=config_file)
+    assert forecast.batch_script(platform_resources=slurm_props).content() == expected
 
 
 def test_schema_file():
@@ -21,8 +48,9 @@ def test_schema_file():
     Tests that the schema is properly defined with a file value.
     """
 
+    config_file = fixture_path("forecast.yaml")
     with patch.object(Driver, "_validate", return_value=True):
-        forecast = FV3Forecast(config_file="/not/used")
+        forecast = FV3Forecast(config_file=config_file)
 
     path = Path(forecast.schema_file)
     assert path.is_file()
@@ -112,9 +140,9 @@ def test_create_directory_structure_bad_existing_act():
         FV3Forecast.create_directory_structure(run_directory="/some/path", exist_act="foo")
 
 
-def test__create_model_config(tmp_path):
+def test_create_model_config(tmp_path):
     basefile = str(tmp_path / "base.yaml")
-    infile = str(tmp_path / "in.yaml")
+    infile = fixture_path("forecast.yaml")
     outfile = str(tmp_path / "out.yaml")
     for path in infile, basefile:
         Path(path).touch()
@@ -180,8 +208,9 @@ def test_forecast_run_cmd():
     """
     Tests that the command to be used to run the forecast executable was built successfully.
     """
+    config_file = fixture_path("forecast.yaml")
     with patch.object(FV3Forecast, "_validate", return_value=True):
-        fcstobj = FV3Forecast(config_file="/not/used")
+        fcstobj = FV3Forecast(config_file=config_file)
         hera_expected = "srun --export=ALL test_exec.py"
         assert hera_expected == fcstobj.run_cmd(
             "--export=ALL", run_cmd="srun", exec_name="test_exec.py"
@@ -235,3 +264,60 @@ def test_stage_files(tmp_path, section, link_files):
             assert (run_directory / dst_fn).is_symlink()
         else:
             assert (run_directory / dst_fn).is_file()
+
+
+def test_run(tmp_path, caplog):
+    run_expected = """#!/bin/bash
+#SBATCH --account=user_account
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --qos=batch
+#SBATCH --time=00:01:00
+srun --export=None test_exec.py
+"""
+    config_file = fixture_path("forecast.yaml")
+    out_file = tmp_path / "test_exec.py"
+    out_file.touch()
+
+    with patch.object(config, "YAMLConfig") as YAMLConfig:
+        YAMLConfig.return_value = {
+            "platform": {
+                "MPICMD": "srun",
+                "account": "user_account",
+            },
+            "forecast": {
+                "MODEL": "FV3",
+                "EXEC_NAME": "test_exec.py",
+                "RUN_DIRECTORY": tmp_path.as_posix(),
+                "CYCLEDEP": {"foo-file": str(tmp_path / "foo")},
+                "STATIC": {"static-foo-file": str(tmp_path / "foo")},
+                "VERBOSE": "False",
+            },
+        }
+        # Test dry run:
+        with patch.object(FV3Forecast, "_validate", return_value=True):
+            fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=out_file)
+            fcstobj.run()
+        assert run_expected in caplog.text
+
+        # Test real batch run:
+        with patch.object(FV3Forecast, "_validate", return_value=True):
+            with patch.object(forecast.subprocess, "run") as sprun:
+                fcstobj = FV3Forecast(config_file=config_file, batch_script=out_file)
+                fcstobj.run()
+                sprun.assert_called_once_with(
+                    f"sbatch {out_file}",
+                    stderr=subprocess.STDOUT,
+                    check=False,
+                    shell=True,
+                )
+                # Test real command run:
+                sprun.reset_mock()
+                fcstobj = FV3Forecast(config_file=config_file)
+                fcstobj.run()
+                sprun.assert_called_once_with(
+                    "srun --export=None test_exec.py",
+                    stderr=subprocess.STDOUT,
+                    check=False,
+                    shell=True,
+                )

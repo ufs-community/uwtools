@@ -8,6 +8,7 @@ from argparse import ArgumentParser, HelpFormatter, Namespace
 from typing import List
 
 from uwtools.drivers import forecast
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import setup_logging
 from uwtools.utils import cli_helpers
 
@@ -20,9 +21,17 @@ def main() -> None:
     """
     args = parse_args(sys.argv[1:])
     setup_logging(quiet=args.quiet, verbose=args.verbose)
-    forecast_class = getattr(forecast, "%sForecast" % args.forecast_model)
-    experiment = forecast_class(args.config_file, args.machine)
-    experiment.run()
+
+    forecast_class = getattr(forecast, f"{args.forecast_model}Forecast")
+    forecast_obj = forecast_class(
+        config_file=args.config_file,
+        dry_run=args.dry_run,
+        batch_script=args.batch_script,
+    )
+    try:
+        forecast_obj.run()
+    except UWConfigError as e:
+        sys.exit(str(e))
 
 
 def parse_args(args: List[str]) -> Namespace:
@@ -51,11 +60,17 @@ def parse_args(args: List[str]) -> Namespace:
         help="Validate configuration but do not run the forecast.",
     )
     optional.add_argument(
-        "-m",
-        "--machine",
-        help="Path to YAML platform-definition file",
+        "--forecast-model",
+        choices={"FV3"},
+        help="The experiment to be run",
+    )
+    optional.add_argument(
+        "--batch_script",
+        help=(
+            "Optional name for a batch script to be generated and run. "
+            "Default is to run the mpi command directly. "
+        ),
         metavar="FILE",
-        type=cli_helpers.path_if_it_exists,
     )
     optional.add_argument(
         "-q",
@@ -68,16 +83,6 @@ def parse_args(args: List[str]) -> Namespace:
         "--verbose",
         action="store_true",
         help="Print all logging messages.",
-    )
-    optional.add_argument(
-        "--forecast-app",
-        choices={"HAFS", "MRW", "SRW"},
-        help="The app to be run",
-    )
-    optional.add_argument(
-        "--forecast-model",
-        choices={"CCPP", "CICE", "CMEPS", "FV3", "MOM6"},
-        help="The experiment to be run",
     )
     parsed = parser.parse_args(args)
     if parsed.quiet and parsed.verbose:
