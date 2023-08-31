@@ -96,7 +96,7 @@ class FV3Forecast(Driver):
             config_obj = FieldTableConfig(base_file)
             config_obj.update_values(update_obj)
             config_obj.dereference_all()
-            config_obj.dump_file(outfldtab_file)
+            config_obj.dump(outfldtab_file)
         else:
             # Dump update object to a Field Table file:
             FieldTableConfig.dump_dict(path=outfldtab_file, cfg=update_obj)
@@ -121,9 +121,9 @@ class FV3Forecast(Driver):
             config_obj = NMLConfig(base_file)
             config_obj.update_values(update_obj)
             config_obj.dereference_all()
-            config_obj.dump_file(outnml_file)
+            config_obj.dump(outnml_file)
         else:
-            update_obj.dump_file(outnml_file)
+            update_obj.dump(outnml_file)
 
         msg = f"Namelist file {outnml_file} created"
         logging.info(msg)

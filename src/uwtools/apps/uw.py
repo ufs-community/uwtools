@@ -21,7 +21,7 @@ class UWforSRW(Facade):
         Load the configuration file.
         """
         config_obj = YAMLConfig(config_file)
-        config_obj.dump_file("config.yaml")
+        config_obj.dump("config.yaml")
 
     def validate_config(self, config_file: str) -> None:
         """

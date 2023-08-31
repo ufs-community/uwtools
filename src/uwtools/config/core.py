@@ -27,7 +27,6 @@ from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import FORMAT, get_file_type, readable, writable
 
 INCLUDE_TAG = "!INCLUDE"
-
 MSGS = ns(
     unhashable="""
 ERROR:
@@ -292,7 +291,7 @@ class Config(ABC, UserDict):
         """
 
     @abstractmethod
-    def dump_file(self, path: DefinitePath) -> None:
+    def dump(self, path: DefinitePath) -> None:
         """
         Dumps the config as a file.
 
@@ -460,7 +459,7 @@ class INIConfig(Config):
                 for key, value in cfg.items():
                     print(f"{key}={value}", file=f)
 
-    def dump_file(self, path: DefinitePath) -> None:
+    def dump(self, path: DefinitePath) -> None:
         """
         Dumps the config as an INI file.
 
@@ -510,7 +509,7 @@ class NMLConfig(Config):
         with writable(path) as f:
             f90nml.Namelist(nml).write(f, sort=False)
 
-    def dump_file(self, path: DefinitePath) -> None:
+    def dump(self, path: DefinitePath) -> None:
         """
         Dumps the config as a Fortran namelist file.
 
@@ -591,7 +590,7 @@ class YAMLConfig(Config):
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
 
-    def dump_file(self, path: DefinitePath) -> None:
+    def dump(self, path: DefinitePath) -> None:
         """
         Dumps the config as a YAML file.
 
@@ -649,7 +648,7 @@ class FieldTableConfig(YAMLConfig):
         with writable(path) as f:
             print("\n".join(lines), file=f)
 
-    def dump_file(self, path: DefinitePath) -> None:
+    def dump(self, path: DefinitePath) -> None:
         """
         Dumps the config as a Field Table file.
 
@@ -677,8 +676,8 @@ def compare_configs(
     :return: False if config files had differences, otherwise True.
     """
 
-    cfg_a = format_to_config(config_a_format)(config_a_path)
-    cfg_b = format_to_config(config_b_format)(config_b_path)
+    cfg_a = _cli_name_to_config(config_a_format)(config_a_path)
+    cfg_b = _cli_name_to_config(config_b_format)(config_b_path)
     logging.info("- %s", config_a_path)
     logging.info("+ %s", config_b_path)
     logging.info("-" * MSGWIDTH)

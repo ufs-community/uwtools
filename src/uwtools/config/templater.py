@@ -93,7 +93,7 @@ def _report(args: dict) -> None:
 def _set_up_values_obj(
     values_file: OptionalPath = None,
     values_format: Optional[str] = None,
-    overrides: Optional[Dict[str, str]] = None,
+    overrides: Optional[Dict[str, str]] = None
 ) -> dict:
     """
     Collect template-rendering values based on an input file, if given, or otherwise on the shell

@@ -40,7 +40,7 @@ class J2Template:
 
     # Public methods
 
-    def dump_file(self, output_path: str) -> None:
+    def dump(self, output_path: str) -> None:
         """
         Write rendered template to the path provided.
 

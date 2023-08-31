@@ -279,7 +279,6 @@ def test__set_formats_pass_implicit(fmt):
     args = cli._set_formats(args)
     assert args.input_format == vars(FORMAT)[fmt]
 
-
 # Helper functions
 
 

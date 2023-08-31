@@ -219,7 +219,7 @@ def test_ini_config_bash(salad_base, tmp_path):
         "how_many": "12",
     }  # str "12" (not int 12) for INI
     assert cfgobj == expected
-    cfgobj.dump_file(outfile)
+    cfgobj.dump(outfile)
     assert filecmp.cmp(infile, outfile)
     cfgobj.update({"dressing": ["ranch", "italian"]})
     expected["dressing"] = ["ranch", "italian"]
@@ -238,7 +238,7 @@ def test_ini_config_simple(salad_base, tmp_path):
     expected = salad_base
     expected["salad"]["how_many"] = "12"  # str "12" (not int 12) for INI
     assert cfgobj == expected
-    cfgobj.dump_file(outfile)
+    cfgobj.dump(outfile)
     assert filecmp.cmp(infile, outfile)
     cfgobj.update({"dressing": ["ranch", "italian"]})
     expected["dressing"] = ["ranch", "italian"]
@@ -577,6 +577,7 @@ def test_realize_config_simple_ini(tmp_path):
     """
     Test that providing an INI file with necessary settings will create an INI config file.
     """
+
     help_realize_config_simple("simple.ini", FORMAT.ini, tmp_path)
 
 
@@ -585,9 +586,6 @@ def test_realize_config_simple_yaml(tmp_path):
     Test that providing a YAML base file with necessary settings will create a YAML config file.
     """
     help_realize_config_simple("simple2.yaml", FORMAT.yaml, tmp_path)
-
-
-@pytest.mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml])
 def test__realize_config_check_depths_fail_nml(realize_config_testobj, fmt):
     with raises(UWConfigError):
         core._realize_config_check_depths(input_obj=realize_config_testobj, output_format=fmt)
@@ -813,7 +811,7 @@ def test_yaml_config_simple(tmp_path):
         "walltime": "00:01:00",
     }
     assert cfgobj == expected
-    cfgobj.dump_file(outfile)
+    cfgobj.dump(outfile)
     assert filecmp.cmp(infile, outfile)
     cfgobj.update({"nodes": 12})
     expected["nodes"] = 12

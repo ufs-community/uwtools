@@ -5,8 +5,8 @@ Tests for uwtools.rocoto module.
 
 from importlib import resources
 
-import yaml
 import pytest
+import yaml
 from lxml import etree
 
 from uwtools import rocoto

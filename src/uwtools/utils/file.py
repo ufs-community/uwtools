@@ -86,7 +86,6 @@ def get_file_type(path: DefinitePath) -> str:
     :return: One of a set of supported file types.
     :raises: ValueError if the path/filename suffix is unrecognized.
     """
-
     suffix = Path(path).suffix.replace(".", "")
     if fmt := vars(FORMAT).get(suffix):
         return fmt
