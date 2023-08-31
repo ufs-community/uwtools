@@ -41,4 +41,4 @@ def write_rocoto_xml(input_yaml: str, input_template: str, rendered_output: str)
 
     # Render the template.
     template = J2Template(values=values.data, template_path=input_template)
-    template.dump_file(output_path=rendered_output)
+    template.dump(output_path=rendered_output)
