@@ -1,5 +1,4 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
-# pylint: disable=duplicate-code
 """
 Tests for forecast driver.
 """
@@ -10,7 +9,7 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture, raises
 
-from uwtools import config
+from uwtools.config.core import NMLConfig, YAMLConfig
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
@@ -68,10 +67,10 @@ def test_create_config(tmp_path):
     with patch.object(FV3Forecast, "_validate", return_value=True):
         forecast_obj = FV3Forecast(config_file=config_file)
     forecast_obj._create_model_config(base_file=input_file, outconfig_file=output_file)
-    expected = config.YAMLConfig(input_file)
-    expected.update_values(config.YAMLConfig(config_file))
+    expected = YAMLConfig(input_file)
+    expected.update_values(YAMLConfig(config_file))
     expected_file = tmp_path / "expected_yaml.yaml"
-    expected.dump_file(expected_file)
+    expected.dump(expected_file)
     assert compare_files(expected_file, output_file)
 
 
@@ -111,7 +110,7 @@ def test_create_directory_structure(tmp_path):
 
 @fixture
 def create_field_table_update_obj():
-    return config.YAMLConfig(fixture_path("FV3_GFS_v16_update.yaml"))
+    return YAMLConfig(fixture_path("FV3_GFS_v16_update.yaml"))
 
 
 def test_create_field_table_with_base_file(create_field_table_update_obj, tmp_path):
@@ -146,19 +145,22 @@ def test_create_model_config(tmp_path):
     outfile = str(tmp_path / "out.yaml")
     for path in infile, basefile:
         Path(path).touch()
-    with patch.object(config, "create_config_obj") as create_config_obj:
+    with patch.object(forecast, "realize_config") as realize_config:
         with patch.object(FV3Forecast, "_validate", return_value=True):
             FV3Forecast(config_file=infile)._create_model_config(
                 outconfig_file=outfile, base_file=basefile
             )
-    assert create_config_obj.call_args.kwargs["config_file"] == infile
-    assert create_config_obj.call_args.kwargs["input_base_file"] == basefile
-    assert create_config_obj.call_args.kwargs["outfile"] == outfile
+    assert realize_config.call_args.kwargs["input_file"] == basefile
+    assert realize_config.call_args.kwargs["input_format"] == "yaml"
+    assert realize_config.call_args.kwargs["output_file"] == outfile
+    assert realize_config.call_args.kwargs["output_format"] == "yaml"
+    assert realize_config.call_args.kwargs["values_file"] == infile
+    assert realize_config.call_args.kwargs["values_format"] == "yaml"
 
 
 @fixture
 def create_namelist_assets(tmp_path):
-    return config.F90Config(fixture_path("simple.nml")), tmp_path / "create_out.nml"
+    return NMLConfig(fixture_path("simple.nml")), tmp_path / "create_out.nml"
 
 
 def test_create_namelist_with_base_file(create_namelist_assets):
@@ -244,7 +246,7 @@ def test_stage_files(tmp_path, section, link_files):
 
     run_directory = tmp_path / "run"
     src_directory = tmp_path / "src"
-    files_to_stage = config.YAMLConfig(fixture_path("expt_dir.yaml"))[section]
+    files_to_stage = YAMLConfig(fixture_path("expt_dir.yaml"))[section]
     # Fix source paths so that they are relative to our test temp directory and
     # create the test files.
     src_directory.mkdir()
@@ -266,58 +268,70 @@ def test_stage_files(tmp_path, section, link_files):
             assert (run_directory / dst_fn).is_file()
 
 
-def test_run(tmp_path, caplog):
-    run_expected = """#!/bin/bash
+@fixture
+def fv3_run_assets(tmp_path):
+    batch_script = tmp_path / "batch.sh"
+    config_file = fixture_path("forecast.yaml")
+    config = {
+        "platform": {
+            "MPICMD": "srun",
+            "account": "user_account",
+        },
+        "forecast": {
+            "MODEL": "FV3",
+            "EXEC_NAME": "test_exec.py",
+            "RUN_DIRECTORY": tmp_path.as_posix(),
+            "CYCLEDEP": {"foo-file": str(tmp_path / "foo")},
+            "STATIC": {"static-foo-file": str(tmp_path / "foo")},
+            "VERBOSE": "False",
+        },
+    }
+    return batch_script, config_file, config
+
+
+def test_run_direct(fv3_run_assets):
+    _, config_file, config = fv3_run_assets
+    with patch.object(FV3Forecast, "_validate", return_value=True):
+        with patch.object(forecast.subprocess, "run") as sprun:
+            fcstobj = FV3Forecast(config_file=config_file)
+            with patch.object(fcstobj, "_config", config):
+                fcstobj.run()
+            sprun.assert_called_once_with(
+                "srun --export=None test_exec.py",
+                stderr=subprocess.STDOUT,
+                check=False,
+                shell=True,
+            )
+
+
+def test_FV3Forecast_run_dry_run(caplog, fv3_run_assets):
+    batch_script, config_file, config = fv3_run_assets
+    run_expected = """
+#!/bin/bash
 #SBATCH --account=user_account
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --qos=batch
 #SBATCH --time=00:01:00
 srun --export=None test_exec.py
-"""
-    config_file = fixture_path("forecast.yaml")
-    out_file = tmp_path / "test_exec.py"
-    out_file.touch()
-
-    with patch.object(config, "YAMLConfig") as YAMLConfig:
-        YAMLConfig.return_value = {
-            "platform": {
-                "MPICMD": "srun",
-                "account": "user_account",
-            },
-            "forecast": {
-                "MODEL": "FV3",
-                "EXEC_NAME": "test_exec.py",
-                "RUN_DIRECTORY": tmp_path.as_posix(),
-                "CYCLEDEP": {"foo-file": str(tmp_path / "foo")},
-                "STATIC": {"static-foo-file": str(tmp_path / "foo")},
-                "VERBOSE": "False",
-            },
-        }
-        # Test dry run:
-        with patch.object(FV3Forecast, "_validate", return_value=True):
-            fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=out_file)
+""".strip()
+    with patch.object(FV3Forecast, "_validate", return_value=True):
+        fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=batch_script)
+        with patch.object(fcstobj, "_config", config):
             fcstobj.run()
-        assert run_expected in caplog.text
+    assert run_expected in caplog.text
 
-        # Test real batch run:
-        with patch.object(FV3Forecast, "_validate", return_value=True):
-            with patch.object(forecast.subprocess, "run") as sprun:
-                fcstobj = FV3Forecast(config_file=config_file, batch_script=out_file)
+
+def test_run_submit(fv3_run_assets):
+    batch_script, config_file, config = fv3_run_assets
+    with patch.object(FV3Forecast, "_validate", return_value=True):
+        with patch.object(forecast.subprocess, "run") as sprun:
+            fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
+            with patch.object(fcstobj, "_config", config):
                 fcstobj.run()
-                sprun.assert_called_once_with(
-                    f"sbatch {out_file}",
-                    stderr=subprocess.STDOUT,
-                    check=False,
-                    shell=True,
-                )
-                # Test real command run:
-                sprun.reset_mock()
-                fcstobj = FV3Forecast(config_file=config_file)
-                fcstobj.run()
-                sprun.assert_called_once_with(
-                    "srun --export=None test_exec.py",
-                    stderr=subprocess.STDOUT,
-                    check=False,
-                    shell=True,
-                )
+            sprun.assert_called_once_with(
+                f"sbatch {batch_script}",
+                stderr=subprocess.STDOUT,
+                check=False,
+                shell=True,
+            )

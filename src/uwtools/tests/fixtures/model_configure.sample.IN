@@ -1,9 +1,0 @@
-total_member:            1
-PE_MEMBER01:             {{ PE_MEMBER01 }}
-print_esmf:              {{ print_esmf }}
-start_year:              {{ start_year }}
-start_month:             {{ start_month }}
-start_day:               {{ start_day }}
-start_hour:              {{ start_hour }}
-start_minute:            0
-start_second:            0

@@ -11,17 +11,10 @@
 # https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html#test-section
 
 cli() {
-  msg Testing CLI programs
+  msg Testing CLI program
   (
     set -eu
-    clis=(
-      atparse-to-jinja2
-      experiment-manager
-      run-forecast
-      set-config
-      template
-      validate-config
-    )
+    clis=( uw )
     for x in ${clis[*]}; do
       which $x
       $x --help &>/dev/null

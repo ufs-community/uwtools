@@ -7,7 +7,7 @@ from types import SimpleNamespace as ns
 
 from pytest import fixture, raises
 
-from uwtools.j2template import J2Template
+from uwtools.config.j2template import J2Template
 
 
 @fixture
@@ -19,9 +19,9 @@ def testdata():
 
 
 def validate(template):
-    assert template._configure_obj.get("greeting") == "Hello"
-    assert template._configure_obj.get("recipient") == "the world"
-    assert template.render_template() == "Hello to the world"
+    assert template._values.get("greeting") == "Hello"
+    assert template._values.get("recipient") == "the world"
+    assert template.render() == "Hello to the world"
     assert template.undeclared_variables == {"greeting", "recipient"}
 
 
@@ -31,10 +31,10 @@ def test_bad_args(testdata):
         J2Template(testdata.config)
 
 
-def test_dump_file(testdata, tmp_path):
+def test_dump(testdata, tmp_path):
     path = str(tmp_path / "rendered.txt")
     j2template = J2Template(testdata.config, template_str=testdata.template)
-    j2template.dump_file(output_path=path)
+    j2template.dump(output_path=path)
     with open(path, "r", encoding="utf-8") as f:
         assert f.read().strip() == "Hello to the world"
 

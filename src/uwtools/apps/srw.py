@@ -7,7 +7,7 @@ import shutil
 import subprocess
 
 from uwtools.drivers.facade import Facade
-from uwtools.utils.cli_helpers import get_file_type
+from uwtools.utils.file import get_file_type
 
 
 class SRW210(Facade):

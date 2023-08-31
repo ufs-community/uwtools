@@ -6,7 +6,8 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from typing import Optional
 
-from uwtools import config, config_validator
+from uwtools.config import validator
+from uwtools.config.core import YAMLConfig
 from uwtools.scheduler import BatchScript
 
 
@@ -29,8 +30,7 @@ class Driver(ABC):
         self._dry_run = dry_run
         self._batch_script = batch_script
         self._validate()
-
-        self.config_data = config.YAMLConfig(self._config_file)
+        self._config = YAMLConfig(config_file=config_file)
 
     # Public methods
 
@@ -83,7 +83,7 @@ class Driver(ABC):
         """
         Validate the user-supplied config file.
         """
-        return config_validator.config_is_valid(
+        return validator.validate_yaml(
             config_file=self._config_file,
             schema_file=self.schema_file,
         )

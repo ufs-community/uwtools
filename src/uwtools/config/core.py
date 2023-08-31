@@ -1,6 +1,7 @@
 """
-The abstract Config class and its format-specific subclasses.
+Core classes and functions for working with configs.
 """
+
 from __future__ import annotations
 
 import configparser
@@ -13,18 +14,19 @@ import sys
 from abc import ABC, abstractmethod
 from collections import OrderedDict, UserDict
 from types import SimpleNamespace as ns
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Tuple, Type, Union
 
 import f90nml
 import jinja2
 import yaml
 
-from uwtools import exceptions
+from uwtools.config.j2template import J2Template
 from uwtools.exceptions import UWConfigError
-from uwtools.j2template import J2Template
-from uwtools.utils import cli_helpers
+from uwtools.logging import MSGWIDTH
+from uwtools.types import DefinitePath, OptionalPath
+from uwtools.utils.file import get_file_type, readable, writable
 
-msgs = ns(
+MSGS = ns(
     unhashable="""
 ERROR:
 The input config file may contain a Jinja2 templated value at the location listed above. Ensure the
@@ -35,7 +37,7 @@ ERROR:
 The input config file contains a constructor that is not registered with the uwtools package.
 
 constructor: {constructor}
-config file: {config_path}
+config file: {config_file}
 
 Define the constructor before proceeding.
 """.strip(),
@@ -57,15 +59,15 @@ class Config(ABC, UserDict):
     several configuration-file formats.
     """
 
-    def __init__(self, config_path: str) -> None:
+    def __init__(self, config_file: OptionalPath = None) -> None:
         """
         Construct a Config object.
 
-        :param config_path: Path to the config file to load.
+        :param config_file: Path to the config file to load.
         """
         super().__init__()
-        self.config_path = config_path
-        self.update(self._load(self.config_path))
+        self._config_file = str(config_file) if config_file else None
+        self.update(self._load(self._config_file))
 
     def __repr__(self) -> str:
         """
@@ -76,31 +78,66 @@ class Config(ABC, UserDict):
     # Private methods
 
     @abstractmethod
-    def _load(self, config_path: str) -> dict:
+    def _load(self, config_file: OptionalPath) -> dict:
         """
         Reads and parses a config file.
 
-        Returns the result of loading and parsing the specified config file.
+        Returns the result of loading and parsing the specified config file, or stdin if no file is
+        given.
 
-        :param config_path: Path to config file to load.
+        :param config_file: Path to config file to load.
         """
 
-    def _load_paths(self, filepaths: List[str]) -> dict:
+    def _load_paths(self, config_files: List[str]) -> dict:
         """
         Merge and return the contents of a collection of config files.
 
-        :param filepaths: Paths to the config files to read and merge.
+        :param config_files: Paths to the config files to read and merge.
         """
         cfg = {}
-        for filepath in filepaths:
-            if not os.path.isabs(filepath):
-                filepath = os.path.join(os.path.dirname(self.config_path), filepath)
-            cfg.update(self._load(config_path=filepath))
+        for config_file in config_files:
+            if not os.path.isabs(config_file):
+                if self._config_file:
+                    config_file = os.path.join(os.path.dirname(self._config_file), config_file)
+                else:
+                    raise _log_and_error(
+                        "Reading from stdin, a relative path was encountered: %s" % config_file
+                    )
+            cfg.update(self._load(config_file=config_file))
         return cfg
 
     # Public methods
 
-    def compare_config(self, dict1: dict, dict2: Optional[dict] = None) -> None:
+    def characterize_values(self, values: dict, parent: str) -> Tuple[list, list, list]:
+        """
+        Characterize values as complete, empty, or template placeholders.
+
+        :param values: The dictionary to examine.
+        :param parent: Parent key.
+        """
+        complete: List[str] = []
+        empty: List[str] = []
+        template: List[str] = []
+        for key, val in values.items():
+            if isinstance(val, dict):
+                complete.append(f"    {parent}{key}")
+                c, e, t = self.characterize_values(val, f"{parent}{key}.")
+                complete, empty, template = complete + c, empty + e, template + t
+            elif isinstance(val, list):
+                complete.append(f"    {parent}{key}")
+                for item in val:
+                    if isinstance(item, dict):
+                        c, e, t = self.characterize_values(item, parent)
+                        complete, empty, template = complete + c, empty + e, template + t
+            elif "{{" in str(val) or "{%" in str(val):
+                template.append(f"    {parent}{key}: {val}")
+            elif val == "" or val is None:
+                empty.append(f"    {parent}{key}")
+            else:
+                complete.append(f"    {parent}{key}")
+        return complete, empty, template
+
+    def compare_config(self, dict1: dict, dict2: Optional[dict] = None) -> bool:
         """
         Compare two config dictionaries.
 
@@ -134,6 +171,15 @@ class Config(ABC, UserDict):
             for key in keys:
                 msg = f"{sect}: {key:>15}: {keys[key]}"
                 logging.info(msg)
+
+        return not diffs
+
+    @property
+    def depth(self) -> int:
+        """
+        The depth of this config's hierarchy.
+        """
+        return self._depth(self.data)
 
     def dereference(
         self, ref_dict: Optional[dict] = None, full_dict: Optional[dict] = None
@@ -182,25 +228,24 @@ class Config(ABC, UserDict):
                         # current section name, and to the other sections with dot values. Also make
                         # environment variables available with env prefix.
                         if ref_dict == full_dict:
-                            config_obj = {**os.environ, **full_dict}
+                            values = {**os.environ, **full_dict}
                         else:
-                            config_obj = {**os.environ, **ref_dict, **full_dict}
+                            values = {**os.environ, **ref_dict, **full_dict}
                         try:
                             j2tmpl = J2Template(
-                                configure_obj=config_obj,
+                                values=values,
                                 template_str=template,
                                 loader_args={"undefined": jinja2.StrictUndefined},
                             )
                         except jinja2.exceptions.TemplateAssertionError as e:
-                            msg = msgs.unregistered_filter.format(
+                            msg = MSGS.unregistered_filter.format(
                                 filter=repr(e).split()[-1][:-3], key=key
                             )
-                            logging.exception(msg)
-                            raise exceptions.UWConfigError(msg)
+                            raise _log_and_error(msg) from e
                         rendered = template
                         try:
                             # Fill in a template that has the appropriate variables set.
-                            rendered = j2tmpl.render_template()
+                            rendered = j2tmpl.render()
                         except jinja2.exceptions.UndefinedError:
                             # Leave a templated field as-is in the resulting dict.
                             error_catcher[template] = "UndefinedError"
@@ -233,69 +278,23 @@ class Config(ABC, UserDict):
             self.dereference()
             prev = copy.deepcopy(self.data)
 
-    def dictionary_depth(self, config_dict: dict) -> int:
-        """
-        The depth of a dictionary.
-
-        :param config_dict: The dictionary whose depth to find.
-        """
-        if isinstance(config_dict, dict):
-            return 1 + (max(map(self.dictionary_depth, config_dict.values())))
-        return 0
-
-    def iterate_values(
-        self,
-        config_dict: dict,
-        set_var: List[str],
-        jinja2_var: List[str],
-        empty_var: List[str],
-        parent: str,
-    ) -> None:
-        """
-        Characterize values as complete, empty, or Jinja2 templates.
-
-        complete -> set_var, empty -> empty_var, templates -> jinja2_var
-
-        :param config_dict: The dictionary to examine.
-        :param set_var: Complete values.
-        :param jinja2_var: Jinja2 template values.
-        :param empty_var: Empty values.
-        :param parent: Parent key.
-        """
-        for key, val in config_dict.items():
-            if isinstance(val, dict):
-                set_var.append(f"    {parent}{key}")
-                new_parent = f"{parent}{key}."
-                self.iterate_values(val, set_var, jinja2_var, empty_var, new_parent)
-            elif isinstance(val, list):
-                set_var.append(f"    {parent}{key}")
-                for item in val:
-                    if isinstance(item, dict):
-                        self.iterate_values(item, set_var, jinja2_var, empty_var, parent)
-            elif "{{" in str(val) or "{%" in str(val):
-                jinja2_var.append(f"    {parent}{key}: {val}")
-            elif val == "" or val is None:
-                empty_var.append(f"    {parent}{key}")
-            else:
-                set_var.append(f"    {parent}{key}")
-
-    @abstractmethod
-    def dump_file(self, path: str) -> None:
-        """
-        Dumps the config as a file.
-
-        :param path: Path to dump config to.
-        """
-
     @staticmethod
     @abstractmethod
-    def dump_file_from_dict(path: str, cfg: dict, opts: Optional[ns] = None) -> None:
+    def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
         Dumps a provided config dictionary as a file.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
         :param opts: Other options required by a subclass.
+        """
+
+    @abstractmethod
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as a file.
+
+        :param path: Path to dump config to.
         """
 
     def from_ordereddict(self, in_dict: dict) -> dict:
@@ -379,42 +378,122 @@ class Config(ABC, UserDict):
             else:
                 dstcfg[key] = new_val
 
+    # Private methods
 
-class F90Config(Config):
+    def _depth(self, tree: dict) -> int:
+        """
+        The depth of this config's hierarchy.
+
+        :param tree: A (sub)tree in the config.
+        :return: The length of the longest path to a value in the config.
+        """
+        return (max(map(self._depth, tree.values())) + 1) if isinstance(tree, dict) else 0
+
+
+class INIConfig(Config):
     """
-    Concrete class to handle Fortran namelist files.
+    Concrete class to handle INI config files.
     """
 
-    def __init__(self, config_path) -> None:
-        super().__init__(config_path)
+    def __init__(
+        self,
+        config_file: str,
+        space_around_delimiters: bool = True,
+    ):
+        """
+        Construct an INIConfig object.
+
+        Spaces may be included for INI format, but should be excluded for bash.
+
+        :param config_file: Path to the config file to load.
+        :param space_around_delimiters: Include spaces around delimiters?
+        """
+        super().__init__(config_file)
+        self.space_around_delimiters = space_around_delimiters
         self.parse_include()
 
     # Private methods
 
-    def _load(self, config_path: str) -> dict:
+    def _load(self, config_file: OptionalPath) -> dict:
+        """
+        Reads and parses an INI file.
+
+        See docs for Config._load().
+
+        :param config_file: Path to config file to load.
+        """
+        # The protected _sections method is the most straightforward way to get at the dict
+        # representation of the parse config.
+
+        cfg = configparser.ConfigParser(dict_type=OrderedDict)
+        cfg.optionxform = str  # type: ignore
+        sections = cfg._sections  # type: ignore # pylint: disable=protected-access
+        with readable(config_file) as f:
+            raw = f.read()
+        try:
+            cfg.read_string(raw)
+            d = dict(sections)
+        except configparser.MissingSectionHeaderError:
+            cfg.read_string("[top]\n" + raw)
+            d = dict(sections.get("top"))
+        return self.from_ordereddict(d)
+
+    # Public methods
+
+    @staticmethod
+    def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
+        """
+        Dumps a provided config dictionary as an INI file.
+
+        :param path: Path to dump config to.
+        :param cfg: The in-memory config object to dump.
+        :param space_around_delimiters: Place spaces around delimiters?
+        """
+        parser = configparser.ConfigParser()
+        with writable(path) as f:
+            try:
+                parser.read_dict(cfg)
+                parser.write(f, space_around_delimiters=opts.space if opts else True)
+            except AttributeError:
+                for key, value in cfg.items():
+                    print(f"{key}={value}", file=f)
+
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as an INI file.
+
+        :param path: Path to dump config to.
+        """
+        INIConfig.dump_dict(path, self.data, ns(space=self.space_around_delimiters))
+
+
+class NMLConfig(Config):
+    """
+    Concrete class to handle Fortran namelist files.
+    """
+
+    def __init__(self, config_file) -> None:
+        super().__init__(config_file)
+        self.parse_include()
+
+    # Private methods
+
+    def _load(self, config_file: OptionalPath) -> dict:
         """
         Reads and parses a Fortran namelist file.
 
         See docs for Config._load().
 
-        :param config_path: Path to config file to load.
+        :param config_file: Path to config file to load.
         """
-        with open(config_path, "r", encoding="utf-8") as f:
+        with readable(config_file) as f:
             cfg = f90nml.read(f).todict(complex_tuple=False)
         return self.from_ordereddict(cfg)
 
     # Public methods
 
-    def dump_file(self, path: str) -> None:
-        """
-        Dumps the config as a Fortran namelist file.
-
-        :param path: Path to dump config to.
-        """
-        F90Config.dump_file_from_dict(path, self.data)
-
     @staticmethod
-    def dump_file_from_dict(path: str, cfg: dict, opts: Optional[ns] = None) -> None:
+    def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
         Dumps a provided config dictionary as a Fortran namelist file.
 
@@ -426,85 +505,16 @@ class F90Config(Config):
         for sect, keys in nml.items():
             if isinstance(keys, dict):
                 nml[sect] = OrderedDict(keys)
-        with open(path, "w", encoding="utf-8") as file_name:
-            f90nml.Namelist(nml).write(file_name, sort=False)
+        with writable(path) as f:
+            f90nml.Namelist(nml).write(f, sort=False)
 
-
-class INIConfig(Config):
-    """
-    Concrete class to handle INI config files.
-    """
-
-    def __init__(
-        self,
-        config_path: str,
-        space_around_delimiters: bool = True,
-    ):
+    def dump(self, path: DefinitePath) -> None:
         """
-        Construct an INIConfig object.
-
-        Spaces may be included for INI format, but should be excluded for bash.
-
-        :param config_path: Path to the config file to load.
-        :param space_around_delimiters: Include spaces around delimiters?
-        """
-        super().__init__(config_path)
-        self.space_around_delimiters = space_around_delimiters
-        self.parse_include()
-
-    # Private methods
-
-    def _load(self, config_path: str) -> dict:
-        """
-        Reads and parses an INI file.
-
-        See docs for Config._load().
-
-        :param config_path: Path to config file to load.
-        """
-        # The protected _sections method is the most straightforward way to get at the dict
-        # representation of the parse config.
-
-        cfg = configparser.ConfigParser(dict_type=OrderedDict)
-        cfg.optionxform = str  # type: ignore
-        sections = cfg._sections  # type: ignore # pylint: disable=protected-access
-        try:
-            cfg.read(config_path)
-        except configparser.MissingSectionHeaderError:
-            with open(config_path, "r", encoding="utf-8") as file_name:
-                cfg.read_string("[top]\n" + file_name.read())
-                ret_cfg = dict(sections.get("top"))
-                ret_cfg = self.from_ordereddict(ret_cfg)
-                return ret_cfg
-        return self.from_ordereddict(dict(sections))
-
-    # Public methods
-
-    def dump_file(self, path: str) -> None:
-        """
-        Dumps the config as an INI file.
+        Dumps the config as a Fortran namelist file.
 
         :param path: Path to dump config to.
         """
-        INIConfig.dump_file_from_dict(path, self.data, ns(space=self.space_around_delimiters))
-
-    @staticmethod
-    def dump_file_from_dict(path: str, cfg: dict, opts: Optional[ns] = None) -> None:
-        """
-        Dumps a provided config dictionary as an INI file.
-
-        :param path: Path to dump config to.
-        :param cfg: The in-memory config object to dump.
-        :param space_around_delimiters: Place spaces around delimiters?
-        """
-        parser = configparser.ConfigParser()
-        with open(path, "w", encoding="utf-8") as file_name:
-            try:
-                parser.read_dict(cfg)
-                parser.write(file_name, space_around_delimiters=opts.space if opts else True)
-            except AttributeError:
-                for key, value in cfg.items():
-                    file_name.write(f"{key}={value}\n")
+        NMLConfig.dump_dict(path, self.data)
 
 
 class YAMLConfig(Config):
@@ -520,31 +530,30 @@ class YAMLConfig(Config):
 
     # Private methods
 
-    def _load(self, config_path: str) -> dict:
+    def _load(self, config_file: OptionalPath) -> dict:
         """
         Reads and parses a YAML file.
 
         See docs for Config._load().
 
-        :param config_path: Path to config file to load.
+        :param config_file: Path to config file to load.
         """
         loader = self._yaml_loader
-        with open(config_path, "r", encoding="utf-8") as file_name:
+        with readable(config_file) as f:
             try:
-                cfg = yaml.load(file_name, Loader=loader)
+                cfg = yaml.load(f, Loader=loader)
             except yaml.constructor.ConstructorError as e:
                 if e.problem:
                     if "unhashable" in e.problem:
-                        msg = msgs.unhashable
+                        msg = MSGS.unhashable
                     else:
                         constructor = e.problem.split()[-1]
-                        msg = msgs.unregistered_constructor.format(
-                            config_path=config_path, constructor=constructor
+                        msg = MSGS.unregistered_constructor.format(
+                            config_file=config_file, constructor=constructor
                         )
                 else:
                     msg = str(e)
-                logging.exception(msg)
-                raise exceptions.UWConfigError(msg)
+                raise _log_and_error(msg) from e
         return self.from_ordereddict(cfg)
 
     def _yaml_include(self, loader: yaml.Loader, node: yaml.SequenceNode) -> dict:
@@ -568,16 +577,8 @@ class YAMLConfig(Config):
 
     # Public methods
 
-    def dump_file(self, path: str) -> None:
-        """
-        Dumps the config as a YAML file.
-
-        :param path: Path to dump config to.
-        """
-        YAMLConfig.dump_file_from_dict(path, self.data)
-
     @staticmethod
-    def dump_file_from_dict(path: str, cfg: dict, opts: Optional[ns] = None) -> None:
+    def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
         Dumps a provided config dictionary as a YAML file.
 
@@ -585,8 +586,16 @@ class YAMLConfig(Config):
         :param cfg: The in-memory config object to dump.
         :param opts: Other options required by a subclass.
         """
-        with open(path, "w", encoding="utf-8") as file_name:
-            yaml.dump(cfg, file_name, sort_keys=False)
+        with writable(path) as f:
+            yaml.dump(cfg, f, sort_keys=False)
+
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as a YAML file.
+
+        :param path: Path to dump config to.
+        """
+        YAMLConfig.dump_dict(path, self.data)
 
 
 class FieldTableConfig(YAMLConfig):
@@ -597,16 +606,8 @@ class FieldTableConfig(YAMLConfig):
 
     # Public methods
 
-    def dump_file(self, path: str) -> None:
-        """
-        Dumps the config as a Field Table file.
-
-        :param path: Path to dump config to.
-        """
-        FieldTableConfig.dump_file_from_dict(path, self.data)
-
     @staticmethod
-    def dump_file_from_dict(path: str, cfg: dict, opts: Optional[ns] = None) -> None:
+    def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
         Dumps a provided config dictionary as a Field Table file.
 
@@ -643,110 +644,43 @@ class FieldTableConfig(YAMLConfig):
                     # Formatting of variable spacing dependent on key length.
                     lines.append(f'{" ":11}"{key}", "{value}"')
             lines[-1] += " /"
-        with open(path, "w", encoding="utf-8") as file_name:
-            file_name.write("\n".join(lines))
+        with writable(path) as f:
+            print("\n".join(lines), file=f)
 
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as a Field Table file.
 
-# Private functions
-
-
-def _log_and_error(msg: str) -> None:
-    """
-    Logs a user-provided error message and raise a UWConfigError with the same message.
-    """
-    logging.error(msg)
-    raise UWConfigError(msg)
+        :param path: Path to dump config to.
+        """
+        FieldTableConfig.dump_dict(path, self.data)
 
 
 # Public functions
 
 
-def create_config_obj(
-    input_base_file: str,
-    compare: bool = False,
-    config_file: Optional[str] = None,
-    config_file_type: Optional[str] = None,
-    dry_run: bool = False,
-    input_file_type: Optional[str] = None,
-    outfile: Optional[str] = None,
-    output_file_type: Optional[str] = None,
-    show_format: bool = False,
-    values_needed: bool = False,
-):
+def compare_configs(
+    config_a_path: DefinitePath,
+    config_a_format: str,
+    config_b_path: DefinitePath,
+    config_b_format: str,
+) -> bool:
     """
-    Main section for processing config file.
+    Compare two config files.
+
+    :param config_a_path: Path to first config file.
+    :param config_a_format: Format of first config file.
+    :param config_b_path: Path to second config file.
+    :param config_b_format: Format of second config file.
+    :return: False if config files had differences, otherwise True.
     """
-    infile_type = input_file_type or cli_helpers.get_file_type(input_base_file)
 
-    config_class = globals()[f"{infile_type}Config"]
-    config_obj = config_class(input_base_file)
-
-    if config_file:
-        config_file_type = config_file_type or cli_helpers.get_file_type(config_file)
-
-        user_config_obj = globals()[f"{config_file_type}Config"](config_file)
-
-        if config_file_type != infile_type:
-            config_depth = user_config_obj.dictionary_depth(user_config_obj.data)
-            input_depth = config_obj.dictionary_depth(config_obj.data)
-
-            if input_depth < config_depth:
-                logging.error("%s not compatible with input file", config_file)
-                raise ValueError("Set config failure: config object not compatible with input file")
-
-        if compare:
-            logging.info("- %s", input_base_file)
-            logging.info("+ %s", config_file)
-            logging.info("-" * 80)
-            config_obj.compare_config(user_config_obj)
-            return
-
-        config_obj.update_values(user_config_obj)
-
-    config_obj.dereference_all()
-
-    if values_needed:
-        set_var: List[str] = []
-        jinja2_var: List[str] = []
-        empty_var: List[str] = []
-        config_obj.iterate_values(config_obj.data, set_var, jinja2_var, empty_var, parent="")
-        logging.info("Keys that are complete:")
-        for var in set_var:
-            logging.info(var)
-        logging.info("")
-        logging.info("Keys that have unfilled Jinja2 templates:")
-        for var in jinja2_var:
-            logging.info(var)
-        logging.info("")
-        logging.info("Keys that are set to empty:")
-        for var in empty_var:
-            logging.info(var)
-        return
-
-    if dry_run:
-        # Apply switch to allow user to view the results of config instead of writing to disk.
-        logging.info(config_obj)
-        return
-
-    if outfile:
-        outfile_type = output_file_type or cli_helpers.get_file_type(outfile)
-        if outfile_type == infile_type:
-            config_obj.dump_file(outfile)
-        else:
-            dump_method = globals()[f"{outfile_type}Config"].dump_file_from_dict
-            if show_format:
-                help(dump_method)
-            else:
-                # Check for incompatible conversion objects:
-                input_depth = config_obj.dictionary_depth(config_obj.data)
-                if (outfile_type == "INI" and input_depth > 2) or (
-                    outfile_type == "F90" and input_depth != 2
-                ):
-                    err_msg = "Set config failure: incompatible file types"
-                    logging.error(err_msg)
-                    raise ValueError(err_msg)
-                # Dump to file:
-                dump_method(path=outfile, cfg=config_obj)
+    cfg_a = _cli_name_to_config(config_a_format)(config_a_path)
+    cfg_b = _cli_name_to_config(config_b_format)(config_b_path)
+    logging.info("- %s", config_a_path)
+    logging.info("+ %s", config_b_path)
+    logging.info("-" * MSGWIDTH)
+    return cfg_a.compare_config(cfg_b.data)
 
 
 def print_config_section(config: dict, key_path: List[str]) -> None:
@@ -755,19 +689,153 @@ def print_config_section(config: dict, key_path: List[str]) -> None:
     key=value pairs, one per line.
     """
     keys = []
+    current_path = "<unknown>"
     for section in key_path:
         keys.append(section)
         current_path = " -> ".join(keys)
         try:
             subconfig = config[section]
-        except KeyError:
-            _log_and_error(f"Bad config path: {current_path}")
+        except KeyError as e:
+            raise _log_and_error(f"Bad config path: {current_path}") from e
         if not isinstance(subconfig, dict):
-            _log_and_error(f"Value at {current_path} must be a dictionary")
+            raise _log_and_error(f"Value at {current_path} must be a dictionary")
         config = subconfig
     output_lines = []
     for key, value in config.items():
         if type(value) not in (bool, float, int, str):
-            _log_and_error(f"Non-scalar value {value} found at {current_path}")
+            raise _log_and_error(f"Non-scalar value {value} found at {current_path}")
         output_lines.append(f"{key}={value}")
     print("\n".join(sorted(output_lines)))
+
+
+def realize_config(
+    input_file: OptionalPath,
+    input_format: str,
+    output_file: OptionalPath,
+    output_format: str,
+    values_file: OptionalPath,
+    values_format: Optional[str],
+    values_needed: bool = False,
+    dry_run: bool = False,
+) -> bool:
+    """
+    Realize an output config based on an input config and an optional values-providing config.
+
+    :param input_file: Input config file (stdin used when None).
+    :param input_format: Format of the input config.
+    :param output_file: Output config file (stdout used when None).
+    :param output_format: Format of the output config.
+    :param values_file: File providing values to modify input.
+    :param values_format: Format of the values config file.
+    :param values_needed: Provide a report about complete, missing, and template values.
+    :param dry_run: Log output instead of writing to output.
+    :return: True if no exception is raised.
+    :raises: UWConfigError if errors are encountered.
+    """
+
+    input_obj = _cli_name_to_config(input_format)(config_file=input_file)
+    input_obj.dereference_all()
+    input_obj = _realize_config_update(input_obj, values_file, values_format)
+    _realize_config_check_depths(input_obj, output_format)
+    if values_needed:
+        return _realize_config_values_needed(input_obj)
+    if dry_run:
+        logging.info(input_obj)
+    else:
+        _cli_name_to_config(output_format).dump_dict(path=output_file, cfg=input_obj.data)
+    return True
+
+
+# Private functions
+
+
+def _cli_name_to_config(cli_name: str) -> Type[Config]:
+    """
+    Maps a CLI format name to its corresponding Config class.
+
+    :param cli_name: The format name as known to the CLI.
+    :return: The appropriate Config class.
+    """
+    classes: Dict[str, type[Config]] = {
+        "fieldtable": FieldTableConfig,
+        "ini": INIConfig,
+        "nml": NMLConfig,
+        "yaml": YAMLConfig,
+    }
+    try:
+        return classes[cli_name]
+    except KeyError as e:
+        raise _log_and_error(
+            "Format '%s' should be one of: %s" % (e.args[0], ", ".join(classes.keys()))
+        ) from e
+
+
+def _log_and_error(msg: str) -> Exception:
+    """
+    Log an error message and raise an exception.
+
+    :param msg: The error message to log and to associate with raised exception.
+    """
+    logging.error(msg)
+    return UWConfigError(msg)
+
+
+def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
+    """
+    Check that the depth of the input config does not exceed the output format's max.
+
+    :param input_obj: The input config.
+    :param output_format: The output format:
+    :raises: UWConfigError on excessive input-config depth.
+    """
+    if (output_format == "ini" and input_obj.depth > 2) or (
+        output_format == "nml" and input_obj.depth != 2
+    ):
+        msg = "Cannot write depth-%s input to type-'%s' output" % (input_obj.depth, output_format)
+        logging.error(msg)
+        raise UWConfigError(msg)
+
+
+def _realize_config_update(
+    input_obj: Config, values_file: OptionalPath, values_format: Optional[str]
+) -> Config:
+    """
+    Update config with values from another config, if given.
+
+    :param input_obj: The config to update.
+    :param values_file: File providing values to modify input.
+    :param values_format: Format of the values config file.
+    :return: The input config, possibly updated.
+    """
+    if values_file:
+        logging.debug("Before update, config has depth %s", input_obj.depth)
+        values_format = values_format or get_file_type(values_file)
+        values_obj = _cli_name_to_config(values_format)(config_file=values_file)
+        logging.debug("Values config has depth %s", values_obj.depth)
+        input_obj.update_values(values_obj)
+        input_obj.dereference_all()
+        logging.debug("After update, input config has depth %s", input_obj.depth)
+    else:
+        logging.debug("Input config has depth %s", input_obj.depth)
+    return input_obj
+
+
+def _realize_config_values_needed(input_obj: Config) -> bool:
+    """
+    Print a report characterizing input values as complete, empty, or template placeholders.
+
+    :param input_obj: The config to update.
+    """
+    complete, empty, template = input_obj.characterize_values(input_obj.data, parent="")
+    logging.info("Keys that are complete:")
+    for var in complete:
+        logging.info(var)
+    logging.info("")
+    logging.info("Keys that have unfilled Jinja2 templates:")
+    for var in template:
+        logging.info(var)
+    logging.info("")
+    logging.info("Keys that are set to empty:")
+    for var in empty:
+        logging.info(var)
+    return True

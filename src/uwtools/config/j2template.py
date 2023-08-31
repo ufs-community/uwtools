@@ -11,24 +11,23 @@ from jinja2 import BaseLoader, Environment, FileSystemLoader, Template, meta
 
 class J2Template:
     """
-    Reads Jinja templates from files or strings, and renders them using the user-provided
-    configuration object.
+    Reads Jinja templates from files or strings, and renders them using the user-provided values.
     """
 
     def __init__(
         self,
-        configure_obj: dict,
+        values: dict,
         template_path: Optional[str] = None,
         template_str: Optional[str] = None,
         **kwargs,
     ) -> None:
         """
-        :param configure_obj: Key/value pairs needed to render the provided template.
+        :param values: Values needed to render the provided template.
         :param template_path: Path to a Jinja2 template file.
         :param template_str: An in-memory Jinja2 template.
         :raises: RuntimeError: If neither a template file or path is provided.
         """
-        self._configure_obj = configure_obj
+        self._values = values
         self._template_path = template_path
         self._template_str = template_str
         self._loader_args = kwargs.get("loader_args", {})
@@ -41,7 +40,7 @@ class J2Template:
 
     # Public methods
 
-    def dump_file(self, output_path: str) -> None:
+    def dump(self, output_path: str) -> None:
         """
         Write rendered template to the path provided.
 
@@ -49,16 +48,16 @@ class J2Template:
         """
         msg = f"Writing rendered template to output file: {output_path}"
         logging.debug(msg)
-        with open(output_path, "w+", encoding="utf-8") as file_:
-            print(self.render_template(), file=file_)
+        with open(output_path, "w+", encoding="utf-8") as f:
+            print(self.render(), file=f)
 
-    def render_template(self) -> str:
+    def render(self) -> str:
         """
         Render the Jinja2 template so that it's available in memory.
 
         :return: A string containing a rendered Jinja2 template.
         """
-        return self._template.render(self._configure_obj)
+        return self._template.render(self._values)
 
     @property
     def undeclared_variables(self) -> Set[str]:
