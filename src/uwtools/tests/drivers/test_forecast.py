@@ -14,6 +14,7 @@ from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.tests.support import compare_files, fixture_path
+from uwtools.utils.file import FORMAT
 
 
 @fixture
@@ -151,11 +152,11 @@ def test_create_model_config(tmp_path):
                 outconfig_file=outfile, base_file=basefile
             )
     assert realize_config.call_args.kwargs["input_file"] == basefile
-    assert realize_config.call_args.kwargs["input_format"] == "yaml"
+    assert realize_config.call_args.kwargs["input_format"] == FORMAT.yaml
     assert realize_config.call_args.kwargs["output_file"] == outfile
-    assert realize_config.call_args.kwargs["output_format"] == "yaml"
+    assert realize_config.call_args.kwargs["output_format"] == FORMAT.yaml
     assert realize_config.call_args.kwargs["values_file"] == infile
-    assert realize_config.call_args.kwargs["values_format"] == "yaml"
+    assert realize_config.call_args.kwargs["values_format"] == FORMAT.yaml
 
 
 @fixture

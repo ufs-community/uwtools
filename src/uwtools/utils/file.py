@@ -7,11 +7,60 @@ import os
 import shutil
 import sys
 from contextlib import contextmanager
+from dataclasses import dataclass
 from datetime import datetime as dt
 from pathlib import Path
 from typing import IO, Generator
 
 from uwtools.types import DefinitePath, OptionalPath
+
+
+@dataclass(frozen=True)
+class _FORMAT:
+    """
+    A mapping from config format names to literal strings.
+    """
+
+    # Canonical strings:
+
+    _atparse: str = "atparse"
+    _fieldtable: str = "fieldtable"
+    _ini: str = "ini"
+    _jinja2: str = "jinja2"
+    _nml: str = "nml"
+    _yaml: str = "yaml"
+
+    # Variants:
+
+    atparse: str = _atparse
+    bash: str = _ini
+    cfg: str = _ini
+    fieldtable: str = _fieldtable
+    ini: str = _ini
+    jinja2: str = _jinja2
+    nml: str = _nml
+    sh: str = _ini
+    yaml: str = _yaml
+    yml: str = _yaml
+
+
+FORMAT = _FORMAT()
+
+
+def get_file_type(path: DefinitePath) -> str:
+    """
+    Returns a standardized file type given a path/filename.
+
+    :param path: A path or filename.
+    :return: One of a set of supported file types.
+    :raises: ValueError if the path/filename suffix is unrecognized.
+    """
+    suffix = Path(path).suffix.replace(".", "")
+    if fmt := vars(FORMAT).get(suffix):
+        return fmt
+    msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
+    logging.critical(msg)
+    raise ValueError(msg)
 
 
 def handle_existing(directory: str, action: str) -> None:
@@ -43,27 +92,6 @@ def handle_existing(directory: str, action: str) -> None:
         msg = f"Could not rename directory {directory}"
         logging.critical(msg)
         raise RuntimeError(msg) from e
-
-
-def get_file_type(path: DefinitePath) -> str:
-    """
-    Returns a standardized file type given a path/filename.
-
-    :param path: A path or filename.
-    :return: One of a set of supported file types.
-    :raises: ValueError if the path/filename suffix is unrecognized.
-    """
-
-    suffix = Path(path).suffix
-    if suffix in [".bash", ".cfg", ".ini", ".sh"]:
-        return "INI"
-    if suffix in [".nml"]:
-        return "NML"
-    if suffix in [".yaml", ".yml"]:
-        return "YAML"
-    msg = f"Unrecognized file suffix '{suffix}'. Cannot determine file type!."
-    logging.critical(msg)
-    raise ValueError(msg)
 
 
 def path_if_it_exists(path: str) -> str:

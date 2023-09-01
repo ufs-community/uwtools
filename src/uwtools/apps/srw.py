@@ -7,7 +7,7 @@ import shutil
 import subprocess
 
 from uwtools.drivers.facade import Facade
-from uwtools.utils.file import get_file_type
+from uwtools.utils.file import FORMAT, get_file_type
 
 
 class SRW210(Facade):
@@ -28,7 +28,7 @@ class SRW210(Facade):
         Load the configuration file.
         """
         file_type = get_file_type(config_file)
-        if file_type == "INI":
+        if file_type == FORMAT.ini:
             with open("config.yaml", "w", encoding="utf-8") as file:
                 # Note: This is a temporary path until parsing the SRW directory is implemented.
                 subprocess.run(
@@ -38,7 +38,7 @@ class SRW210(Facade):
                     shell=True,
                     stdout=file,
                 )
-        elif file_type == "YAML":
+        elif file_type == FORMAT.yaml:
             shutil.copy2(config_file, "config.yaml")
         else:
             msg = f"Bad file type -- {file_type}. Cannot load configuration!"

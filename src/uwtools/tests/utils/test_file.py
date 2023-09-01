@@ -26,13 +26,16 @@ def assets(tmp_path):
 
 def test_get_file_type():
     for ext, file_type in {
-        "bash": "INI",
-        "cfg": "INI",
-        "ini": "INI",
-        "nml": "NML",
-        "sh": "INI",
-        "yaml": "YAML",
-        "yml": "YAML",
+        "atparse": "atparse",
+        "bash": "ini",
+        "cfg": "ini",
+        "fieldtable": "fieldtable",
+        "ini": "ini",
+        "jinja2": "jinja2",
+        "nml": "nml",
+        "sh": "ini",
+        "yaml": "yaml",
+        "yml": "yaml",
     }.items():
         assert file.get_file_type(f"a.{ext}") == file_type
 

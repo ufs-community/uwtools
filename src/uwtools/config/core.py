@@ -24,8 +24,9 @@ from uwtools.config.j2template import J2Template
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import MSGWIDTH
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import get_file_type, readable, writable
+from uwtools.utils.file import FORMAT, get_file_type, readable, writable
 
+INCLUDE_TAG = "!INCLUDE"
 MSGS = ns(
     unhashable="""
 ERROR:
@@ -278,6 +279,14 @@ class Config(ABC, UserDict):
             self.dereference()
             prev = copy.deepcopy(self.data)
 
+    @abstractmethod
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as a file.
+
+        :param path: Path to dump config to.
+        """
+
     @staticmethod
     @abstractmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
@@ -287,14 +296,6 @@ class Config(ABC, UserDict):
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
         :param opts: Other options required by a subclass.
-        """
-
-    @abstractmethod
-    def dump(self, path: DefinitePath) -> None:
-        """
-        Dumps the config as a file.
-
-        :param path: Path to dump config to.
         """
 
     def from_ordereddict(self, in_dict: dict) -> dict:
@@ -310,11 +311,11 @@ class Config(ABC, UserDict):
                 in_dict[sect] = dict(keys)
         return in_dict
 
-    def parse_include(self, ref_dict: Optional[dict] = None):
+    def parse_include(self, ref_dict: Optional[dict] = None) -> None:
         """
-        Recursively process !INCLUDE directives in a config object.
+        Recursively process include directives in a config object.
 
-        Recursively traverses the dictionary, replacing !INCLUDE tags with the contents of the files
+        Recursively traverse the dictionary, replacing include tags with the contents of the files
         they specify. Assumes a section/key/value structure. YAML provides this functionality in its
         own loader.
 
@@ -325,11 +326,11 @@ class Config(ABC, UserDict):
         for key, value in copy.deepcopy(ref_dict).items():
             if isinstance(value, dict):
                 self.parse_include(ref_dict[key])
-            elif isinstance(value, str) and "!INCLUDE" in value:
-                filepaths = value.lstrip("!INCLUDE [").rstrip("]").split(",")
-                # Update the dictionary with the values in the included file.
-                self.update_values(self._load_paths(filepaths))
-                del ref_dict[key]
+            elif isinstance(value, str):
+                if m := re.match(r"^\s*%s\s+(.*)" % INCLUDE_TAG, value):
+                    filepaths = yaml.safe_load(m[1])
+                    self.update_values(self._load_paths(filepaths))
+                    del ref_dict[key]
 
     def str_to_type(self, s: str) -> Union[bool, float, int, str]:
         """
@@ -440,6 +441,14 @@ class INIConfig(Config):
 
     # Public methods
 
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as an INI file.
+
+        :param path: Path to dump config to.
+        """
+        INIConfig.dump_dict(path, self.data, ns(space=self.space_around_delimiters))
+
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
@@ -457,14 +466,6 @@ class INIConfig(Config):
             except AttributeError:
                 for key, value in cfg.items():
                     print(f"{key}={value}", file=f)
-
-    def dump(self, path: DefinitePath) -> None:
-        """
-        Dumps the config as an INI file.
-
-        :param path: Path to dump config to.
-        """
-        INIConfig.dump_dict(path, self.data, ns(space=self.space_around_delimiters))
 
 
 class NMLConfig(Config):
@@ -492,6 +493,14 @@ class NMLConfig(Config):
 
     # Public methods
 
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as a Fortran namelist file.
+
+        :param path: Path to dump config to.
+        """
+        NMLConfig.dump_dict(path, self.data)
+
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
@@ -507,14 +516,6 @@ class NMLConfig(Config):
                 nml[sect] = OrderedDict(keys)
         with writable(path) as f:
             f90nml.Namelist(nml).write(f, sort=False)
-
-    def dump(self, path: DefinitePath) -> None:
-        """
-        Dumps the config as a Fortran namelist file.
-
-        :param path: Path to dump config to.
-        """
-        NMLConfig.dump_dict(path, self.data)
 
 
 class YAMLConfig(Config):
@@ -558,7 +559,7 @@ class YAMLConfig(Config):
 
     def _yaml_include(self, loader: yaml.Loader, node: yaml.SequenceNode) -> dict:
         """
-        Returns a dictionary with YAML !INCLUDE tags processed.
+        Returns a dictionary with include tags processed.
 
         :param loader: The YAML loader.
         :param node: A YAML node.
@@ -572,10 +573,18 @@ class YAMLConfig(Config):
         Set up the loader with the appropriate constructors.
         """
         loader = yaml.SafeLoader
-        loader.add_constructor("!INCLUDE", self._yaml_include)
+        loader.add_constructor(INCLUDE_TAG, self._yaml_include)
         return loader
 
     # Public methods
+
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as a YAML file.
+
+        :param path: Path to dump config to.
+        """
+        YAMLConfig.dump_dict(path, self.data)
 
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
@@ -589,14 +598,6 @@ class YAMLConfig(Config):
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
 
-    def dump(self, path: DefinitePath) -> None:
-        """
-        Dumps the config as a YAML file.
-
-        :param path: Path to dump config to.
-        """
-        YAMLConfig.dump_dict(path, self.data)
-
 
 class FieldTableConfig(YAMLConfig):
     """
@@ -605,6 +606,14 @@ class FieldTableConfig(YAMLConfig):
     """
 
     # Public methods
+
+    def dump(self, path: DefinitePath) -> None:
+        """
+        Dumps the config as a Field Table file.
+
+        :param path: Path to dump config to.
+        """
+        FieldTableConfig.dump_dict(path, self.data)
 
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
@@ -647,14 +656,6 @@ class FieldTableConfig(YAMLConfig):
         with writable(path) as f:
             print("\n".join(lines), file=f)
 
-    def dump(self, path: DefinitePath) -> None:
-        """
-        Dumps the config as a Field Table file.
-
-        :param path: Path to dump config to.
-        """
-        FieldTableConfig.dump_dict(path, self.data)
-
 
 # Public functions
 
@@ -675,12 +676,33 @@ def compare_configs(
     :return: False if config files had differences, otherwise True.
     """
 
-    cfg_a = _cli_name_to_config(config_a_format)(config_a_path)
-    cfg_b = _cli_name_to_config(config_b_format)(config_b_path)
+    cfg_a = format_to_config(config_a_format)(config_a_path)
+    cfg_b = format_to_config(config_b_format)(config_b_path)
     logging.info("- %s", config_a_path)
     logging.info("+ %s", config_b_path)
     logging.info("-" * MSGWIDTH)
     return cfg_a.compare_config(cfg_b.data)
+
+
+def format_to_config(cli_name: str) -> Type[Config]:
+    """
+    Maps a CLI format name to its corresponding Config class.
+
+    :param cli_name: The format name as known to the CLI.
+    :return: The appropriate Config class.
+    """
+    classes: Dict[str, type[Config]] = {
+        FORMAT.fieldtable: FieldTableConfig,
+        FORMAT.ini: INIConfig,
+        FORMAT.nml: NMLConfig,
+        FORMAT.yaml: YAMLConfig,
+    }
+    try:
+        return classes[cli_name]
+    except KeyError as e:
+        raise _log_and_error(
+            "Format '%s' should be one of: %s" % (e.args[0], ", ".join(classes.keys()))
+        ) from e
 
 
 def print_config_section(config: dict, key_path: List[str]) -> None:
@@ -733,7 +755,7 @@ def realize_config(
     :raises: UWConfigError if errors are encountered.
     """
 
-    input_obj = _cli_name_to_config(input_format)(config_file=input_file)
+    input_obj = format_to_config(input_format)(config_file=input_file)
     input_obj.dereference_all()
     input_obj = _realize_config_update(input_obj, values_file, values_format)
     _realize_config_check_depths(input_obj, output_format)
@@ -742,32 +764,11 @@ def realize_config(
     if dry_run:
         logging.info(input_obj)
     else:
-        _cli_name_to_config(output_format).dump_dict(path=output_file, cfg=input_obj.data)
+        format_to_config(output_format).dump_dict(path=output_file, cfg=input_obj.data)
     return True
 
 
 # Private functions
-
-
-def _cli_name_to_config(cli_name: str) -> Type[Config]:
-    """
-    Maps a CLI format name to its corresponding Config class.
-
-    :param cli_name: The format name as known to the CLI.
-    :return: The appropriate Config class.
-    """
-    classes: Dict[str, type[Config]] = {
-        "fieldtable": FieldTableConfig,
-        "ini": INIConfig,
-        "nml": NMLConfig,
-        "yaml": YAMLConfig,
-    }
-    try:
-        return classes[cli_name]
-    except KeyError as e:
-        raise _log_and_error(
-            "Format '%s' should be one of: %s" % (e.args[0], ", ".join(classes.keys()))
-        ) from e
 
 
 def _log_and_error(msg: str) -> Exception:
@@ -788,8 +789,8 @@ def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
     :param output_format: The output format:
     :raises: UWConfigError on excessive input-config depth.
     """
-    if (output_format == "ini" and input_obj.depth > 2) or (
-        output_format == "nml" and input_obj.depth != 2
+    if (output_format == FORMAT.ini and input_obj.depth > 2) or (
+        output_format == FORMAT.nml and input_obj.depth != 2
     ):
         msg = "Cannot write depth-%s input to type-'%s' output" % (input_obj.depth, output_format)
         logging.error(msg)
@@ -810,7 +811,7 @@ def _realize_config_update(
     if values_file:
         logging.debug("Before update, config has depth %s", input_obj.depth)
         values_format = values_format or get_file_type(values_file)
-        values_obj = _cli_name_to_config(values_format)(config_file=values_file)
+        values_obj = format_to_config(values_format)(config_file=values_file)
         logging.debug("Values config has depth %s", values_obj.depth)
         input_obj.update_values(values_obj)
         input_obj.dereference_all()
