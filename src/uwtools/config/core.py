@@ -267,7 +267,7 @@ class Config(ABC, UserDict):
 
                     # Put the full template line back together as it was, filled or not, and make a
                     # guess on its intended type.
-                    ref_dict[key] = self.str_to_type("".join(data))
+                    ref_dict[key] = self.reify_str("".join(data))
 
     def dereference_all(self) -> None:
         """
@@ -332,31 +332,14 @@ class Config(ABC, UserDict):
                     self.update_values(self._load_paths(filepaths))
                     del ref_dict[key]
 
-    def str_to_type(self, s: str) -> Union[bool, float, int, str]:
+    def reify_str(self, s: str) -> Union[bool, float, int, str]:
         """
-        Reify a string to a Python object, if possible.
-
-        Try to convert Boolean-ish values to bool objects, int-ish values to ints objects, and
-        float-ish values to float objects. Return the original string if none of these apply.
+        Reify a string to a Python object, using YAML. Jinja2 templates will be passed as-is.
 
         :param s: The string to reify.
         """
         s = s.strip("\"'")
-        if s.lower() in ["true", "yes", "yeah"]:
-            return True
-        if s.lower() in ["false", "no", "nope"]:
-            return False
-        # int
-        try:
-            return int(s)
-        except ValueError:
-            pass
-        # float
-        try:
-            return float(s)
-        except ValueError:
-            pass
-        return s
+        return s if "{{" in s or "{%" in s else yaml.safe_load(s)
 
     def update_values(self, src: Union[dict, Config], dst: Optional[Config] = None):
         """
