@@ -161,7 +161,7 @@ def test_dereference():
         assert cfg["grid_stats"]["total_ens_points"] == 19200000
 
         # Check that statements expand:
-        assert cfg["fcst"]["output_hours"] == "0 3 6 9 "
+        assert cfg["fcst"]["output_hours"] == "0 3 6 9"
 
         # Check that order isn't a problem:
         assert cfg["grid_stats"]["points_per_level"] == 10000
