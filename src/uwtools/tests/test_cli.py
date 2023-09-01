@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
-import logging
+# import logging
 from argparse import ArgumentParser as Parser
 from argparse import Namespace as ns
 from typing import List
@@ -68,25 +68,25 @@ def test__add_subparser_template_render(subparsers):
     assert subparsers.choices["render"]
 
 
-def test__check_args_fail_quiet_verbose(capsys):
-    logging.getLogger().setLevel(logging.INFO)
-    args = ns(quiet=True, verbose=True)
-    with raises(SystemExit):
-        cli._check_args(args)
-    assert "Specify at most one of --quiet, --verbose" in capsys.readouterr().err
+# def test__check_args_fail_quiet_verbose(capsys):
+#     logging.getLogger().setLevel(logging.INFO)
+#     args = ns(quiet=True, verbose=True)
+#     with raises(SystemExit):
+#         cli._check_args(args)
+#     assert "Specify at most one of --quiet, --verbose" in capsys.readouterr().err
 
 
-def test__check_args_fail_values_file_no_value_format(capsys):
-    logging.getLogger().setLevel(logging.INFO)
-    args = ns(values_file="foo")
-    with raises(SystemExit):
-        cli._check_args(args)
-    assert "Specify --values-format with --values-file" in capsys.readouterr().err
+# def test__check_args_fail_values_file_no_value_format(capsys):
+#     logging.getLogger().setLevel(logging.INFO)
+#     args = ns(values_file="foo")
+#     with raises(SystemExit):
+#         cli._check_args(args)
+#     assert "Specify --values-format with --values-file" in capsys.readouterr().err
 
 
-def test__check_args_ok():
-    args = ns(foo=88)
-    assert cli._check_args(args) == args
+# def test__check_args_ok():
+#     args = ns(foo=88)
+#     assert cli._check_args(args) == args
 
 
 def test__dict_from_key_eq_val_strings():
@@ -242,38 +242,38 @@ def test__parse_args():
         parser.parse_args.assert_called_with(raw_args)
 
 
-@pytest.mark.parametrize(
-    "vals",
-    [
-        (ns(file_1_path=None, file_1_format=None), "--file-1-path", "--file-1-format"),
-        (ns(file_2_path=None, file_2_format=None), "--file-2-path", "--file-2-format"),
-        (ns(input_file=None, input_format=None), "--input-file", "--input-format"),
-        (ns(output_file=None, output_format=None), "--output-file", "--output-format"),
-        (ns(values_file=None, values_format=None), "--values-file", "--values-format"),
-    ],
-)
-def test__set_formats_fail(capsys, vals):
-    # When reading/writing from/to stdin/stdout, the data format must be specified, since there is
-    # no filename to deduce it from.
-    args, path_arg, fmt_arg = vals
-    with raises(SystemExit):
-        cli._set_formats(args)
-    assert f"Specify {fmt_arg} when {path_arg} is not specified" in capsys.readouterr().err
+# @pytest.mark.parametrize(
+#     "vals",
+#     [
+#         (ns(file_1_path=None, file_1_format=None), "--file-1-path", "--file-1-format"),
+#         (ns(file_2_path=None, file_2_format=None), "--file-2-path", "--file-2-format"),
+#         (ns(input_file=None, input_format=None), "--input-file", "--input-format"),
+#         (ns(output_file=None, output_format=None), "--output-file", "--output-format"),
+#         (ns(values_file=None, values_format=None), "--values-file", "--values-format"),
+#     ],
+# )
+# def test__set_formats_fail(capsys, vals):
+#     # When reading/writing from/to stdin/stdout, the data format must be specified, since there is
+#     # no filename to deduce it from.
+#     args, path_arg, fmt_arg = vals
+#     with raises(SystemExit):
+#         cli._set_formats(args)
+#     assert f"Specify {fmt_arg} when {path_arg} is not specified" in capsys.readouterr().err
 
 
-def test__set_formats_pass_explicit():
-    # Accept explcitly-specified format, whatever it is.
-    args = ns(input_file="/path/to/input.txt", input_format="jpg")
-    args = cli._set_formats(args)
-    assert args.input_format == "jpg"
+# def test__set_formats_pass_explicit():
+#     # Accept explcitly-specified format, whatever it is.
+#     args = ns(input_file="/path/to/input.txt", input_format="jpg")
+#     args = cli._set_formats(args)
+#     assert args.input_format == "jpg"
 
 
-@pytest.mark.parametrize("fmt", vars(FORMAT).keys())
-def test__set_formats_pass_implicit(fmt):
-    # The format is correctly deduced for a file with a known extension.
-    args = ns(input_file=f"/path/to/input.{fmt}", input_format=None)
-    args = cli._set_formats(args)
-    assert args.input_format == vars(FORMAT)[fmt]
+# @pytest.mark.parametrize("fmt", vars(FORMAT).keys())
+# def test__set_formats_pass_implicit(fmt):
+#     # The format is correctly deduced for a file with a known extension.
+#     args = ns(input_file=f"/path/to/input.{fmt}", input_format=None)
+#     args = cli._set_formats(args)
+#     assert args.input_format == vars(FORMAT)[fmt]
 
 
 # Helper functions

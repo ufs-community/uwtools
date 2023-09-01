@@ -55,6 +55,7 @@ def test_compare_config(caplog, fmt, salad_base):
 
 
 def test_compare_configs_good(compare_configs_assets, caplog):
+    logging.getLogger().setLevel(logging.INFO)
     _, a, b = compare_configs_assets
     assert core.compare_configs(
         config_a_path=a, config_a_format=FORMAT.yaml, config_b_path=b, config_b_format=FORMAT.yaml
@@ -63,6 +64,7 @@ def test_compare_configs_good(compare_configs_assets, caplog):
 
 
 def test_compare_configs_changed_value(compare_configs_assets, caplog):
+    logging.getLogger().setLevel(logging.INFO)
     d, a, b = compare_configs_assets
     d["baz"]["qux"] = 11
     with writable(b) as f:
@@ -74,6 +76,7 @@ def test_compare_configs_changed_value(compare_configs_assets, caplog):
 
 
 def test_compare_configs_missing_key(compare_configs_assets, caplog):
+    logging.getLogger().setLevel(logging.INFO)
     d, a, b = compare_configs_assets
     del d["baz"]
     with writable(b) as f:
@@ -612,6 +615,7 @@ def test__realize_config_update(realize_config_testobj, tmp_path):
 
 
 def test__realize_config_values_needed(caplog, tmp_path):
+    logging.getLogger().setLevel(logging.INFO)
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
@@ -906,7 +910,7 @@ def test_YAMLConfig__load_paths_failure_stdin_plus_relpath(caplog):
     # provide YAML with an include directive specifying a relative path. Since a relative path
     # is meaningless relative to stdin, assert that an appropriate error is logged and exception
     # raised.
-
+    logging.getLogger().setLevel(logging.INFO)
     relpath = "../bar/baz.yaml"
     with patch.object(core.sys, "stdin", new=StringIO(f"foo: {core.INCLUDE_TAG} [{relpath}]")):
         with raises(UWConfigError) as e:

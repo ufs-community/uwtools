@@ -2,6 +2,7 @@
 """
 Tests for forecast driver.
 """
+import logging
 import subprocess
 from pathlib import Path
 from unittest.mock import patch
@@ -306,6 +307,7 @@ def test_run_direct(fv3_run_assets):
 
 
 def test_FV3Forecast_run_dry_run(caplog, fv3_run_assets):
+    logging.getLogger().setLevel(logging.INFO)
     batch_script, config_file, config = fv3_run_assets
     run_expected = """
 #!/bin/bash
