@@ -43,6 +43,7 @@ def main() -> None:
     try:
         args = _check_args(_set_formats(_parse_args(sys.argv[1:])))
         setup_logging(quiet=args.quiet, verbose=args.verbose)
+        logging.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         sys.exit(0 if modes[args.mode](args) else 1)
     except Exception as e:  # pylint: disable=broad-exception-caught
         _abort(str(e))
@@ -313,7 +314,6 @@ def _dispatch_template_render(args: Namespace) -> bool:
 
     :param args: Parsed command-line args.
     """
-    logging.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
     return uwtools.config.templater.render(
         input_file=args.input_file,
         output_file=args.output_file,
@@ -583,7 +583,6 @@ def _parse_args(raw_args: List[str]) -> Namespace:
     :param raw_args: The raw command-line arguments to parse.
     :return: Parsed command-line arguments.
     """
-
     parser = Parser(
         description="Unified Workflow Tools", add_help=False, formatter_class=_formatter
     )

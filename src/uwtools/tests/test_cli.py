@@ -11,7 +11,6 @@ import pytest
 from pytest import fixture, raises
 
 from uwtools import cli
-from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
 
 # Test functions
@@ -193,8 +192,7 @@ def test__dispatch_template(params):
     assert m.called_once_with(args)
 
 
-def test__dispatch_template_render_yaml(caplog):
-    logging.getLogger().setLevel(logging.DEBUG)
+def test__dispatch_template_render_yaml():
     args = ns(
         input_file=1,
         output_file=2,
@@ -205,10 +203,8 @@ def test__dispatch_template_render_yaml(caplog):
         dry_run=7,
     )
     with patch.object(cli.uwtools.config.templater, "render") as m:
-        with patch.object(cli.sys, "argv", ["foo", "--bar", "88"]):
-            cli._dispatch_template_render(args)
+        cli._dispatch_template_render(args)
     assert m.called_once_with(args)
-    assert logged(caplog, "Command: foo --bar 88")
 
 
 @pytest.mark.parametrize("params", [(False, 1, False, True), (True, 0, True, False)])
