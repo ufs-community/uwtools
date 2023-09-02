@@ -254,21 +254,24 @@ def test__dispatch_config_validate_yaml():
 
 
 def test_dispath_config_validate_unsupported():
-    args = ns(input_file=1, input_format="jpg", schema_file=3)
+    args = ns()
+    vars(args).update({STR.infile: 1, STR.infmt: "jpg", STR.schemafile: 3})
     assert cli._dispatch_config_validate(args) is False
 
 
 @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
 def test__dispatch_forecast(params):
     submode, funcname = params
-    args = ns(submode=submode)
+    args = ns()
+    vars(args).update({STR.submode: submode})
     with patch.object(cli, funcname) as m:
         cli._dispatch_forecast(args)
     assert m.called_once_with(args)
 
 
 def test__dispatch_forecast_run():
-    args = ns(config_file=1, forecast_model="foo")
+    args = ns()
+    vars(args).update({STR.cfgfile: 1, "forecast_model": "foo"})
     with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as m:
         CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
         with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):
@@ -280,21 +283,25 @@ def test__dispatch_forecast_run():
 @pytest.mark.parametrize("params", [(STR.render, "_dispatch_template_render")])
 def test__dispatch_template(params):
     submode, funcname = params
-    args = ns(submode=submode)
+    args = ns()
+    vars(args).update({STR.submode: submode})
     with patch.object(cli, funcname) as m:
         cli._dispatch_template(args)
     assert m.called_once_with(args)
 
 
 def test__dispatch_template_render_yaml():
-    args = ns(
-        input_file=1,
-        output_file=2,
-        values_file=3,
-        values_format=4,
-        key_eq_val_pairs=["foo=88", "bar=99"],
-        values_needed=6,
-        dry_run=7,
+    args = ns()
+    vars(args).update(
+        {
+            STR.infile: 1,
+            STR.outfile: 2,
+            STR.valsfile: 3,
+            STR.valsfmt: 4,
+            STR.keyvalpairs: ["foo=88", "bar=99"],
+            STR.valsneeded: 6,
+            STR.dryrun: 7,
+        }
     )
     with patch.object(cli.uwtools.config.templater, STR.render) as m:
         cli._dispatch_template_render(args)

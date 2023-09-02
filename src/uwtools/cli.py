@@ -685,6 +685,7 @@ class _STR:
     help: str = "help"
     infile: str = "input_file"
     infmt: str = "input_format"
+    keyvalpairs: str = "key_eq_val_pairs"
     mode: str = "mode"
     model: str = "model"
     outfile: str = "output_file"
