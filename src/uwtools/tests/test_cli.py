@@ -99,28 +99,33 @@ def test__check_file_vs_format_fail(capsys, vals):
 def test__check_file_vs_format_pass_explicit():
     # Accept explcitly-specified format, whatever it is.
     fmt = "jpg"
+    args = ns()
+    vars(args).update({STR.infile: "/path/to/input.txt", STR.infmt: fmt})
     args = cli._check_file_vs_format(
         file_arg=STR.infile,
         format_arg=STR.infmt,
-        args=ns(input_file="/path/to/input.txt", input_format=fmt),
+        args=args,
     )
-    assert args.input_format == "jpg"
+    assert args.input_format == fmt
 
 
 @pytest.mark.parametrize("fmt", vars(FORMAT).keys())
 def test__check_file_vs_format_pass_implicit(fmt):
     # The format is correctly deduced for a file with a known extension.
+    args = ns()
+    vars(args).update({STR.infile: f"/path/to/input.{fmt}", STR.infmt: None})
     args = cli._check_file_vs_format(
         file_arg=STR.infile,
         format_arg=STR.infmt,
-        args=ns(input_file=f"/path/to/input.{fmt}", input_format=None),
+        args=args,
     )
     assert args.input_format == vars(FORMAT)[fmt]
 
 
-def test__check_quiet_vs_verbose_fail_quiet_verbose(capsys):
+def test__check_quiet_vs_verbose_fail(capsys):
     logging.getLogger().setLevel(logging.INFO)
-    args = ns(quiet=True, verbose=True)
+    args = ns()
+    vars(args).update({STR.quiet: True, STR.verbose: True})
     with raises(SystemExit):
         cli._check_quiet_vs_verbose(args)
     assert (
@@ -182,14 +187,16 @@ def test__dict_from_key_eq_val_strings():
 )
 def test__dispatch_config(params):
     submode, funcname = params
-    args = ns(submode=submode)
+    args = ns()
+    vars(args).update({STR.submode: submode})
     with patch.object(cli, funcname) as m:
         cli._dispatch_config(args)
     assert m.called_once_with(args)
 
 
 def test__dispatch_config_compare():
-    args = ns(file_1_path=1, file_1_format=2, file_2_path=3, file_2_format=4)
+    args = ns()
+    vars(args).update({STR.file1path: 1, STR.file1fmt: 2, STR.file2path: 3, STR.file2fmt: 4})
     with patch.object(cli.uwtools.config.core, "compare_configs") as m:
         cli._dispatch_config_compare(args)
     assert m.called_once_with(args)
