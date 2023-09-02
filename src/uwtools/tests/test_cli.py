@@ -212,7 +212,7 @@ def test_main_fail(params):
     dispatch_retval, status, quiet, verbose = params
     with patch.multiple(cli, _parse_args=D, _dispatch_config=D, setup_logging=D) as mocks:
         args = ns(mode="config", submode="realize", quiet=quiet, verbose=verbose)
-        mocks["_parse_args"].return_value = args, {"config": {"realize": []}}
+        mocks["_parse_args"].return_value = args, {"config": {"realize": [lambda _: True]}}
         mocks["_dispatch_config"].return_value = dispatch_retval
         with raises(SystemExit) as e:
             cli.main()
