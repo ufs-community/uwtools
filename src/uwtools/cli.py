@@ -437,7 +437,7 @@ def _add_arg_input_format(group: Group, choices: List[str], required: bool = Fal
 
 def _add_arg_key_eq_val_pairs(group: Group) -> None:
     group.add_argument(
-        "key_eq_val_pairs",
+        STR.keyvalpairs,
         help="A key=value pair to override/supplement config",
         metavar="KEY=VALUE",
         nargs="*",
