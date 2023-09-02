@@ -93,7 +93,7 @@ def test__check_file_vs_format_fail(capsys, vals):
     with raises(SystemExit):
         cli._check_file_vs_format(file_arg=file_arg, format_arg=format_arg, args=args)
     assert (
-        "Specify %s when %s is not specified" % (cli._arg2sw(format_arg), cli._arg2sw(file_arg))
+        "Specify %s when %s is not specified" % (cli._switch(format_arg), cli._switch(file_arg))
         in capsys.readouterr().err
     )
 
@@ -131,7 +131,7 @@ def test__check_quiet_vs_verbose_fail(capsys):
     with raises(SystemExit):
         cli._check_quiet_vs_verbose(args)
     assert (
-        "Specify at most one of %s, %s" % (cli._arg2sw(STR.quiet), cli._arg2sw(STR.verbose))
+        "Specify at most one of %s, %s" % (cli._switch(STR.quiet), cli._switch(STR.verbose))
         in capsys.readouterr().err
     )
 
@@ -316,9 +316,9 @@ def test_main_fail_checks(capsys, quiet, verbose):
     # Using mode 'template render' for testing.
     raw_args = ["testing", STR.template, STR.render]
     if quiet:
-        raw_args.append(cli._arg2sw(STR.quiet))
+        raw_args.append(cli._switch(STR.quiet))
     if verbose:
-        raw_args.append(cli._arg2sw(STR.verbose))
+        raw_args.append(cli._switch(STR.verbose))
     with patch.object(sys, "argv", raw_args):
         with patch.object(cli, "_dispatch_template", return_value=True):
             with raises(SystemExit) as e:

@@ -83,18 +83,18 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> SubmodeChecks:
     """
     parser = _add_subparser(subparsers, STR.compare, "Compare configs")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_file_path(required, switch=_arg2sw(STR.file1path), helpmsg="Path to file 1")
-    _add_arg_file_path(required, switch=_arg2sw(STR.file2path), helpmsg="Path to file 2")
+    _add_arg_file_path(required, switch=_switch(STR.file1path), helpmsg="Path to file 1")
+    _add_arg_file_path(required, switch=_switch(STR.file2path), helpmsg="Path to file 2")
     optional = _basic_setup(parser)
     _add_arg_file_format(
         optional,
-        switch=_arg2sw(STR.file1fmt),
+        switch=_switch(STR.file1fmt),
         helpmsg="Format of file 1",
         choices=FORMATS,
     )
     _add_arg_file_format(
         optional,
-        switch=_arg2sw(STR.file2fmt),
+        switch=_switch(STR.file2fmt),
         helpmsg="Format of file 2",
         choices=FORMATS,
     )
@@ -368,7 +368,7 @@ def _dispatch_template_render(args: Namespace) -> bool:
 
 def _add_arg_config_file(group: Group) -> None:
     group.add_argument(
-        _arg2sw(STR.cfgfile),
+        _switch(STR.cfgfile),
         "-c",
         help="Path to config file",
         metavar="PATH",
@@ -379,7 +379,7 @@ def _add_arg_config_file(group: Group) -> None:
 
 def _add_arg_dry_run(group: Group) -> None:
     group.add_argument(
-        _arg2sw(STR.dryrun),
+        _switch(STR.dryrun),
         action="store_true",
         help="Only log info, making no changes",
     )
@@ -409,7 +409,7 @@ def _add_arg_file_path(group: Group, switch: str, helpmsg: str, required: bool =
 
 def _add_arg_input_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        _arg2sw(STR.infile),
+        _switch(STR.infile),
         "-i",
         help="Path to input file (defaults to stdin)",
         metavar="PATH",
@@ -420,7 +420,7 @@ def _add_arg_input_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_input_format(group: Group, choices: List[str], required: bool = False) -> None:
     group.add_argument(
-        _arg2sw(STR.infmt),
+        _switch(STR.infmt),
         choices=choices,
         help="Input format",
         required=required,
@@ -439,7 +439,7 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
 
 def _add_arg_model(group: Group, choices: List[str]) -> None:
     group.add_argument(
-        _arg2sw(STR.model),
+        _switch(STR.model),
         choices=choices,
         help="Model name",
         required=True,
@@ -449,7 +449,7 @@ def _add_arg_model(group: Group, choices: List[str]) -> None:
 
 def _add_arg_output_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        _arg2sw(STR.outfile),
+        _switch(STR.outfile),
         "-o",
         help="Path to output file (defaults to stdout)",
         metavar="PATH",
@@ -460,7 +460,7 @@ def _add_arg_output_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_output_format(group: Group, choices: List[str], required: bool = False) -> None:
     group.add_argument(
-        _arg2sw(STR.outfmt),
+        _switch(STR.outfmt),
         choices=choices,
         help="Output format",
         required=required,
@@ -470,7 +470,7 @@ def _add_arg_output_format(group: Group, choices: List[str], required: bool = Fa
 
 def _add_arg_quiet(group: Group) -> None:
     group.add_argument(
-        _arg2sw(STR.quiet),
+        _switch(STR.quiet),
         "-q",
         action="store_true",
         help="Print no logging messages",
@@ -479,7 +479,7 @@ def _add_arg_quiet(group: Group) -> None:
 
 def _add_arg_schema_file(group: Group) -> None:
     group.add_argument(
-        _arg2sw(STR.schemafile),
+        _switch(STR.schemafile),
         help="Path to schema file to use for validation",
         metavar="PATH",
         required=True,
@@ -489,7 +489,7 @@ def _add_arg_schema_file(group: Group) -> None:
 
 def _add_arg_values_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        _arg2sw(STR.valsfile),
+        _switch(STR.valsfile),
         help="Path to file providing override or interpolation values",
         metavar="PATH",
         required=required,
@@ -499,7 +499,7 @@ def _add_arg_values_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_values_format(group: Group, choices: List[str]) -> None:
     group.add_argument(
-        _arg2sw(STR.valsfmt),
+        _switch(STR.valsfmt),
         choices=choices,
         help="Values format",
         required=False,
@@ -509,7 +509,7 @@ def _add_arg_values_format(group: Group, choices: List[str]) -> None:
 
 def _add_arg_values_needed(group: Group) -> None:
     group.add_argument(
-        _arg2sw(STR.valsneeded),
+        _switch(STR.valsneeded),
         action="store_true",
         help="Print report of values needed to render template",
     )
@@ -517,7 +517,7 @@ def _add_arg_values_needed(group: Group) -> None:
 
 def _add_arg_verbose(group: Group) -> None:
     group.add_argument(
-        _arg2sw(STR.verbose),
+        _switch(STR.verbose),
         "-v",
         action="store_true",
         help="Print all logging messages",
@@ -578,16 +578,6 @@ def _add_subparsers(parser: Parser, dest: str) -> Subparsers:
     )
 
 
-def _arg2sw(arg: str) -> str:
-    """
-    Convert argument name to long-form switch.
-
-    :param arg: Internal name of parsed argument.
-    :return: The long-form switch.
-    """
-    return "--%s" % arg.replace("_", "-")
-
-
 def _basic_setup(parser: Parser) -> Group:
     """
     Create optional-arguments group and add help switch.
@@ -595,7 +585,7 @@ def _basic_setup(parser: Parser) -> Group:
     :param parser: The parser to add the optional group to.
     """
     optional = parser.add_argument_group("Optional arguments")
-    optional.add_argument("-h", _arg2sw(STR.help), action=STR.help, help="Show help and exit")
+    optional.add_argument("-h", _switch(STR.help), action=STR.help, help="Show help and exit")
     return optional
 
 
@@ -603,7 +593,7 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Namespace) -> Na
     a = vars(args)
     if a[format_arg] is None:
         if a[file_arg] is None:
-            _abort("Specify %s when %s is not specified" % (_arg2sw(format_arg), _arg2sw(file_arg)))
+            _abort("Specify %s when %s is not specified" % (_switch(format_arg), _switch(file_arg)))
         a[format_arg] = get_file_type(a[file_arg])
     return args
 
@@ -611,7 +601,7 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Namespace) -> Na
 def _check_quiet_vs_verbose(args) -> Namespace:
     a = vars(args)
     if a.get(STR.quiet) and a.get(STR.verbose):
-        _abort("Specify at most one of %s, %s" % (_arg2sw(STR.quiet), _arg2sw(STR.verbose)))
+        _abort("Specify at most one of %s, %s" % (_switch(STR.quiet), _switch(STR.verbose)))
     return args
 
 
@@ -662,6 +652,16 @@ def _parse_args(raw_args: List[str]) -> Tuple[Namespace, Checks]:
         STR.template: _add_subparser_template(subparsers),
     }
     return parser.parse_args(raw_args), checks
+
+
+def _switch(arg: str) -> str:
+    """
+    Convert argument name to long-form switch.
+
+    :param arg: Internal name of parsed argument.
+    :return: The long-form switch.
+    """
+    return "--%s" % arg.replace("_", "-")
 
 
 @dataclass(frozen=True)
