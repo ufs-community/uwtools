@@ -238,23 +238,26 @@ def test__parse_args():
         parser.parse_args.assert_called_with(raw_args)
 
 
-# @pytest.mark.parametrize(
-#     "vals",
-#     [
-#         (ns(file_1_path=None, file_1_format=None), "--file-1-path", "--file-1-format"),
-#         (ns(file_2_path=None, file_2_format=None), "--file-2-path", "--file-2-format"),
-#         (ns(input_file=None, input_format=None), "--input-file", "--input-format"),
-#         (ns(output_file=None, output_format=None), "--output-file", "--output-format"),
-#         (ns(values_file=None, values_format=None), "--values-file", "--values-format"),
-#     ],
-# )
-# def test__set_formats_fail(capsys, vals):
-#     # When reading/writing from/to stdin/stdout, the data format must be specified, since there is
-#     # no filename to deduce it from.
-#     args, path_arg, fmt_arg = vals
-#     with raises(SystemExit):
-#         cli._set_formats(args)
-#     assert f"Specify {fmt_arg} when {path_arg} is not specified" in capsys.readouterr().err
+@pytest.mark.parametrize(
+    "vals",
+    [
+        (ns(file_1_path=None, file_1_format=None), "file_1_path", "file_1_format"),
+        (ns(file_2_path=None, file_2_format=None), "file_2_path", "file_2_format"),
+        (ns(input_file=None, input_format=None), "input_file", "input_format"),
+        (ns(output_file=None, output_format=None), "output_file", "output_format"),
+        (ns(values_file=None, values_format=None), "values_file", "values_format"),
+    ],
+)
+def test__set_formats_fail(capsys, vals):
+    # When reading/writing from/to stdin/stdout, the data format must be specified, since there is
+    # no filename to deduce it from.
+    args, file_arg, format_arg = vals
+    with raises(SystemExit):
+        cli._check_file_vs_format(file_arg=file_arg, format_arg=format_arg, args=args)
+    assert (
+        "Specify %s when %s is not specified" % (cli._arg2sw(format_arg), cli._arg2sw(file_arg))
+        in capsys.readouterr().err
+    )
 
 
 # def test__set_formats_pass_explicit():
