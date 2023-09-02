@@ -209,19 +209,15 @@ def test__dispatch_template_render_yaml():
 
 @pytest.mark.parametrize("params", [(False, 1, False, True), (True, 0, True, False)])
 def test_main_fail(params):
-    fnretval, status, quiet, verbose = params
-    with patch.multiple(
-        cli, _check_args=D, _parse_args=D, _dispatch_config=D, setup_logging=D
-    ) as mocks:
-        args = ns(mode="config", quiet=quiet, verbose=verbose)
-        mocks["_parse_args"].return_value = args
-        mocks["_check_args"].return_value = mocks["_parse_args"]()
-        mocks["_dispatch_config"].return_value = fnretval
+    dispatch_retval, status, quiet, verbose = params
+    with patch.multiple(cli, _parse_args=D, _dispatch_config=D, setup_logging=D) as mocks:
+        args = ns(mode="config", submode="realize", quiet=quiet, verbose=verbose)
+        mocks["_parse_args"].return_value = args, {"config": {"realize": []}}
+        mocks["_dispatch_config"].return_value = dispatch_retval
         with raises(SystemExit) as e:
             cli.main()
         assert e.value.code == status
         mocks["_dispatch_config"].assert_called_once_with(args)
-        mocks["_check_args"].assert_called_once_with(args)
         mocks["setup_logging"].assert_called_with(quiet=quiet, verbose=verbose)
 
 
@@ -279,17 +275,17 @@ def test__parse_args():
 # Helper functions
 
 
-@fixture
-def subparsers():
-    # Create and return a subparsers test object.
-    return Parser().add_subparsers()
-
-
 def submodes(parser: Parser) -> List[str]:
     # Return submodes (named subparsers) belonging to the given parser.
     if subparsers := parser._subparsers:
-        if action := subparsers._actions[3]:
+        if action := subparsers._actions[1]:
             if choices := action.choices:
                 submodes = choices.keys()  # type: ignore
                 return list(submodes)
     return []
+
+
+@fixture
+def subparsers():
+    # Create and return a subparsers test object.
+    return Parser().add_subparsers()

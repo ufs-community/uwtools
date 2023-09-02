@@ -40,17 +40,17 @@ def main() -> None:
     # handler. Shield command-line users from raised exceptions by aborting gracefully.
 
     setup_logging(quiet=True)
-    modes = {
-        "config": _dispatch_config,
-        "forecast": _dispatch_forecast,
-        "template": _dispatch_template,
-    }
     try:
         args, checks = _parse_args(sys.argv[1:])
         for check in checks[args.mode][args.submode]:
             check()
         setup_logging(quiet=args.quiet, verbose=args.verbose)
         logging.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
+        modes = {
+            "config": _dispatch_config,
+            "forecast": _dispatch_forecast,
+            "template": _dispatch_template,
+        }
         sys.exit(0 if modes[args.mode](args) else 1)
     except Exception as e:  # pylint: disable=broad-exception-caught
         _abort(str(e))
