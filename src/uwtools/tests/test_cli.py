@@ -260,19 +260,26 @@ def test__set_formats_fail(capsys, vals):
     )
 
 
-# def test__set_formats_pass_explicit():
-#     # Accept explcitly-specified format, whatever it is.
-#     args = ns(input_file="/path/to/input.txt", input_format="jpg")
-#     args = cli._set_formats(args)
-#     assert args.input_format == "jpg"
+def test__set_formats_pass_explicit():
+    # Accept explcitly-specified format, whatever it is.
+    fmt = "jpg"
+    args = cli._check_file_vs_format(
+        file_arg="input_file",
+        format_arg="input_format",
+        args=ns(input_file="/path/to/input.txt", input_format=fmt),
+    )
+    assert args.input_format == "jpg"
 
 
-# @pytest.mark.parametrize("fmt", vars(FORMAT).keys())
-# def test__set_formats_pass_implicit(fmt):
-#     # The format is correctly deduced for a file with a known extension.
-#     args = ns(input_file=f"/path/to/input.{fmt}", input_format=None)
-#     args = cli._set_formats(args)
-#     assert args.input_format == vars(FORMAT)[fmt]
+@pytest.mark.parametrize("fmt", vars(FORMAT).keys())
+def test__set_formats_pass_implicit(fmt):
+    # The format is correctly deduced for a file with a known extension.
+    args = cli._check_file_vs_format(
+        file_arg="input_file",
+        format_arg="input_format",
+        args=ns(input_file=f"/path/to/input.{fmt}", input_format=None),
+    )
+    assert args.input_format == vars(FORMAT)[fmt]
 
 
 # Helper functions
