@@ -34,24 +34,22 @@ def main() -> None:
     Main entry point.
     """
 
-    # Silence logging initially, then process the command-line arguments by parsing them, filling
-    # in any unspecified data-format arguments, and checking semantic argument validity (i.e. that
-    # the arguments make sense together, not just on their own). If the arguments are sane, set up
-    # logging correctly, then dispatch to the mode handler, which will the dispatch to the submode
-    # handler. Shield command-line users from raised exceptions by aborting gracefully.
+    # Silence logging initially, then process the command-line arguments by parsing them. Run all
+    # defined checks for the appropriate [sub]mode. Reconfigure logging after quiet/verbose choices
+    # are known, then dispatch to the [sub]mode handler.
 
     setup_logging(quiet=True)
-    modes = {
-        STR.config: _dispatch_config,
-        STR.forecast: _dispatch_forecast,
-        STR.template: _dispatch_template,
-    }
     try:
         args, checks = _parse_args(sys.argv[1:])
         for check in checks[args.mode][args.submode]:
             check(args)
         setup_logging(quiet=args.quiet, verbose=args.verbose)
         logging.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
+        modes = {
+            STR.config: _dispatch_config,
+            STR.forecast: _dispatch_forecast,
+            STR.template: _dispatch_template,
+        }
         sys.exit(0 if modes[args.mode](args) else 1)
     except Exception as e:  # pylint: disable=broad-exception-caught
         _abort(str(e))
@@ -324,6 +322,13 @@ def _add_subparser_template_render(subparsers: Subparsers) -> SubmodeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
+    # In this submode, input/output files are optional (stdin and stdout are used by default),
+    # and their formats are irrelevant because they're treated as generic text. A values file
+    # is also optional, as values used to render the template will be taken from the environment
+    # or from key=value command-line pairs by default. However, if a values file IS specified,
+    # its format must either be explicitly specified, or deduced from its extension, so a check
+    # is provided for this case.
+
     parser = _add_subparser(subparsers, STR.render, "Render a template")
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
@@ -334,7 +339,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_dry_run(optional)
     _add_arg_key_eq_val_pairs(optional)
     checks = _add_args_quiet_and_verbose(optional)
-    return checks
+    return checks + [_check_template_render_vals_args]
 
 
 def _dispatch_template(args: Namespace) -> bool:
@@ -614,6 +619,14 @@ def _check_quiet_vs_verbose(args) -> Namespace:
     a = vars(args)
     if a.get(STR.quiet) and a.get(STR.verbose):
         _abort("Specify at most one of %s, %s" % (_arg2sw(STR.quiet), _arg2sw(STR.verbose)))
+    return args
+
+
+def _check_template_render_vals_args(args: Namespace) -> Namespace:
+    a = vars(args)
+    if a.get(STR.valsfile) is not None:
+        if a.get(STR.valsfmt) is None:
+            a[STR.valsfmt] = get_file_type(a[STR.valsfile])
     return args
 
 
