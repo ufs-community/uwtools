@@ -100,7 +100,8 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> SubmodeChecks:
         helpmsg="Format of file 2",
         choices=FORMATS,
     )
-    return _add_args_quiet_and_verbose(optional) + [
+    checks = _add_args_quiet_and_verbose(optional)
+    return checks + [
         partial(_check_file_vs_format, STR.file1path, STR.file1fmt),
         partial(_check_file_vs_format, STR.file2path, STR.file2fmt),
     ]
@@ -123,7 +124,8 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_values_format(optional, choices=FORMATS)
     _add_arg_values_needed(optional)
     _add_arg_dry_run(optional)
-    return _add_args_quiet_and_verbose(optional) + [
+    checks = _add_args_quiet_and_verbose(optional)
+    return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
         partial(_check_file_vs_format, STR.outfile, STR.outfmt),
         partial(_check_file_vs_format, STR.valsfile, STR.valsfmt),
@@ -143,7 +145,8 @@ def _add_subparser_config_translate(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=[FORMAT.jinja2])
     _add_arg_dry_run(optional)
-    return _add_args_quiet_and_verbose(optional) + [
+    checks = _add_args_quiet_and_verbose(optional)
+    return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
         partial(_check_file_vs_format, STR.outfile, STR.outfmt),
     ]
@@ -161,7 +164,8 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> SubmodeChecks:
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_input_format(optional, choices=[FORMAT.yaml])
-    return _add_args_quiet_and_verbose(optional) + [
+    checks = _add_args_quiet_and_verbose(optional)
+    return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
     ]
 
@@ -273,7 +277,8 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_model(required, choices=["FV3"])
     optional = _basic_setup(parser)
     _add_arg_dry_run(optional)
-    return _add_args_quiet_and_verbose(optional)
+    checks = _add_args_quiet_and_verbose(optional)
+    return checks
 
 
 def _dispatch_forecast(args: Namespace) -> bool:
@@ -328,7 +333,8 @@ def _add_subparser_template_render(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_values_needed(optional)
     _add_arg_dry_run(optional)
     _add_arg_key_eq_val_pairs(optional)
-    return _add_args_quiet_and_verbose(optional)
+    checks = _add_args_quiet_and_verbose(optional)
+    return checks
 
 
 def _dispatch_template(args: Namespace) -> bool:
