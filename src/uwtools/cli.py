@@ -8,6 +8,7 @@ from argparse import ArgumentParser as Parser
 from argparse import HelpFormatter, Namespace
 from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
+from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 from typing import Callable, Dict, List, Tuple
@@ -47,9 +48,9 @@ def main() -> None:
         setup_logging(quiet=args.quiet, verbose=args.verbose)
         logging.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
-            "config": _dispatch_config,
-            "forecast": _dispatch_forecast,
-            "template": _dispatch_template,
+            STR.config: _dispatch_config,
+            STR.forecast: _dispatch_forecast,
+            STR.template: _dispatch_template,
         }
         sys.exit(0 if modes[args.mode](args) else 1)
     except Exception as e:  # pylint: disable=broad-exception-caught
@@ -65,14 +66,14 @@ def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, "config", "Handle configs")
+    parser = _add_subparser(subparsers, STR.config, "Handle configs")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, "submode")
+    subparsers = _add_subparsers(parser, STR.submode)
     return {
-        "compare": _add_subparser_config_compare(subparsers),
-        "realize": _add_subparser_config_realize(subparsers),
-        "translate": _add_subparser_config_translate(subparsers),
-        "validate": _add_subparser_config_validate(subparsers),
+        STR.compare: _add_subparser_config_compare(subparsers),
+        STR.realize: _add_subparser_config_realize(subparsers),
+        STR.translate: _add_subparser_config_translate(subparsers),
+        STR.validate: _add_subparser_config_validate(subparsers),
     }
 
 
@@ -82,26 +83,26 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> SubmodeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, "compare", "Compare configs")
+    parser = _add_subparser(subparsers, STR.compare, "Compare configs")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_file_path(required, switch="--file-1-path", helpmsg="Path to file 1")
-    _add_arg_file_path(required, switch="--file-2-path", helpmsg="Path to file 2")
+    _add_arg_file_path(required, switch=_arg2sw(STR.file1path), helpmsg="Path to file 1")
+    _add_arg_file_path(required, switch=_arg2sw(STR.file2path), helpmsg="Path to file 2")
     optional = _basic_setup(parser)
     _add_arg_file_format(
         optional,
-        switch="--file-1-format",
+        switch=_arg2sw(STR.file1fmt),
         helpmsg="Format of file 1",
         choices=FORMATS,
     )
     _add_arg_file_format(
         optional,
-        switch="--file-2-format",
+        switch=_arg2sw(STR.file2fmt),
         helpmsg="Format of file 2",
         choices=FORMATS,
     )
     return _add_args_quiet_and_verbose(optional) + [
-        partial(_check_file_vs_format, "file_1_path", "file_1_format"),
-        partial(_check_file_vs_format, "file_2_path", "file_2_format"),
+        partial(_check_file_vs_format, STR.file1path, STR.file1fmt),
+        partial(_check_file_vs_format, STR.file2path, STR.file2fmt),
     ]
 
 
@@ -111,7 +112,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> SubmodeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, "realize", "Realize config")
+    parser = _add_subparser(subparsers, STR.realize, "Realize config")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_values_file(required, required=True)
     optional = _basic_setup(parser)
@@ -123,9 +124,9 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_values_needed(optional)
     _add_arg_dry_run(optional)
     return _add_args_quiet_and_verbose(optional) + [
-        partial(_check_file_vs_format, "input_file", "input_format"),
-        partial(_check_file_vs_format, "output_file", "output_format"),
-        partial(_check_file_vs_format, "values_file", "values_format"),
+        partial(_check_file_vs_format, STR.infile, STR.infmt),
+        partial(_check_file_vs_format, STR.outfile, STR.outfmt),
+        partial(_check_file_vs_format, STR.valsfile, STR.valsfmt),
     ]
 
 
@@ -135,7 +136,7 @@ def _add_subparser_config_translate(subparsers: Subparsers) -> SubmodeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, "translate", "Translate configs")
+    parser = _add_subparser(subparsers, STR.translate, "Translate configs")
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_input_format(optional, choices=[FORMAT.atparse])
@@ -143,8 +144,8 @@ def _add_subparser_config_translate(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_output_format(optional, choices=[FORMAT.jinja2])
     _add_arg_dry_run(optional)
     return _add_args_quiet_and_verbose(optional) + [
-        partial(_check_file_vs_format, "input_file", "input_format"),
-        partial(_check_file_vs_format, "output_file", "output_format"),
+        partial(_check_file_vs_format, STR.infile, STR.infmt),
+        partial(_check_file_vs_format, STR.outfile, STR.outfmt),
     ]
 
 
@@ -154,14 +155,14 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> SubmodeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, "validate", "Validate config")
+    parser = _add_subparser(subparsers, STR.validate, "Validate config")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_schema_file(required)
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_input_format(optional, choices=[FORMAT.yaml])
     return _add_args_quiet_and_verbose(optional) + [
-        partial(_check_file_vs_format, "input_file", "input_format"),
+        partial(_check_file_vs_format, STR.infile, STR.infmt),
     ]
 
 
@@ -172,10 +173,10 @@ def _dispatch_config(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     return {
-        "compare": _dispatch_config_compare,
-        "realize": _dispatch_config_realize,
-        "translate": _dispatch_config_translate,
-        "validate": _dispatch_config_validate,
+        STR.compare: _dispatch_config_compare,
+        STR.realize: _dispatch_config_realize,
+        STR.translate: _dispatch_config_translate,
+        STR.validate: _dispatch_config_validate,
     }[args.submode](args)
 
 
@@ -252,9 +253,9 @@ def _add_subparser_forecast(subparsers: Subparsers) -> ModeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, "forecast", "Configure and run forecasts")
+    parser = _add_subparser(subparsers, STR.forecast, "Configure and run forecasts")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, "submode")
+    subparsers = _add_subparsers(parser, STR.submode)
     return {
         "run": _add_subparser_forecast_run(subparsers),
     }
@@ -304,9 +305,9 @@ def _add_subparser_template(subparsers: Subparsers) -> ModeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, "template", "Handle templates")
+    parser = _add_subparser(subparsers, STR.template, "Handle templates")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, "submode")
+    subparsers = _add_subparsers(parser, STR.submode)
     return {
         "render": _add_subparser_template_render(subparsers),
     }
@@ -363,7 +364,7 @@ def _dispatch_template_render(args: Namespace) -> bool:
 
 def _add_arg_config_file(group: Group) -> None:
     group.add_argument(
-        "--config-file",
+        _arg2sw(STR.cfgfile),
         "-c",
         help="Path to config file",
         metavar="PATH",
@@ -374,7 +375,7 @@ def _add_arg_config_file(group: Group) -> None:
 
 def _add_arg_dry_run(group: Group) -> None:
     group.add_argument(
-        "--dry-run",
+        _arg2sw(STR.dryrun),
         action="store_true",
         help="Only log info, making no changes",
     )
@@ -404,7 +405,7 @@ def _add_arg_file_path(group: Group, switch: str, helpmsg: str, required: bool =
 
 def _add_arg_input_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        "--input-file",
+        _arg2sw(STR.infile),
         "-i",
         help="Path to input file (defaults to stdin)",
         metavar="PATH",
@@ -415,7 +416,7 @@ def _add_arg_input_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_input_format(group: Group, choices: List[str], required: bool = False) -> None:
     group.add_argument(
-        "--input-format",
+        _arg2sw(STR.infmt),
         choices=choices,
         help="Input format",
         required=required,
@@ -434,7 +435,7 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
 
 def _add_arg_model(group: Group, choices: List[str]) -> None:
     group.add_argument(
-        "--model",
+        _arg2sw(STR.model),
         choices=choices,
         help="Model name",
         required=True,
@@ -444,7 +445,7 @@ def _add_arg_model(group: Group, choices: List[str]) -> None:
 
 def _add_arg_output_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        "--output-file",
+        _arg2sw(STR.outfile),
         "-o",
         help="Path to output file (defaults to stdout)",
         metavar="PATH",
@@ -455,7 +456,7 @@ def _add_arg_output_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_output_format(group: Group, choices: List[str], required: bool = False) -> None:
     group.add_argument(
-        "--output-format",
+        _arg2sw(STR.outfmt),
         choices=choices,
         help="Output format",
         required=required,
@@ -465,7 +466,7 @@ def _add_arg_output_format(group: Group, choices: List[str], required: bool = Fa
 
 def _add_arg_quiet(group: Group) -> None:
     group.add_argument(
-        "--quiet",
+        _arg2sw(STR.quiet),
         "-q",
         action="store_true",
         help="Print no logging messages",
@@ -474,7 +475,7 @@ def _add_arg_quiet(group: Group) -> None:
 
 def _add_arg_schema_file(group: Group) -> None:
     group.add_argument(
-        "--schema-file",
+        _arg2sw(STR.schemafile),
         help="Path to schema file to use for validation",
         metavar="PATH",
         required=True,
@@ -484,7 +485,7 @@ def _add_arg_schema_file(group: Group) -> None:
 
 def _add_arg_values_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        "--values-file",
+        _arg2sw(STR.valsfile),
         help="Path to file providing override or interpolation values",
         metavar="PATH",
         required=required,
@@ -494,7 +495,7 @@ def _add_arg_values_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_values_format(group: Group, choices: List[str]) -> None:
     group.add_argument(
-        "--values-format",
+        _arg2sw(STR.valsfmt),
         choices=choices,
         help="Values format",
         required=False,
@@ -504,7 +505,7 @@ def _add_arg_values_format(group: Group, choices: List[str]) -> None:
 
 def _add_arg_values_needed(group: Group) -> None:
     group.add_argument(
-        "--values-needed",
+        _arg2sw(STR.valsneeded),
         action="store_true",
         help="Print report of values needed to render template",
     )
@@ -512,7 +513,7 @@ def _add_arg_values_needed(group: Group) -> None:
 
 def _add_arg_verbose(group: Group) -> None:
     group.add_argument(
-        "--verbose",
+        _arg2sw(STR.verbose),
         "-v",
         action="store_true",
         help="Print all logging messages",
@@ -612,11 +613,11 @@ def _parse_args(raw_args: List[str]) -> Tuple[Namespace, Checks]:
         description="Unified Workflow Tools", add_help=False, formatter_class=_formatter
     )
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, "mode")
+    subparsers = _add_subparsers(parser, STR.mode)
     checks = {
-        "config": _add_subparser_config(subparsers),
-        "forecast": _add_subparser_forecast(subparsers),
-        "template": _add_subparser_template(subparsers),
+        STR.config: _add_subparser_config(subparsers),
+        STR.forecast: _add_subparser_forecast(subparsers),
+        STR.template: _add_subparser_template(subparsers),
     }
     return parser.parse_args(raw_args), checks
 
@@ -642,7 +643,46 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Namespace) -> Na
 
 def _check_quiet_vs_verbose(args) -> Namespace:
     a = vars(args)
-    quiet, verbose = "quiet", "verbose"
-    if a.get(quiet) and a.get(verbose):
-        _abort("Specify at most one of %s, %s" % (_arg2sw(quiet), _arg2sw(verbose)))
+    if a.get(STR.quiet) and a.get(STR.verbose):
+        _abort("Specify at most one of %s, %s" % (_arg2sw(STR.quiet), _arg2sw(STR.verbose)))
     return args
+
+
+@dataclass(frozen=True)
+class _STR:
+    """
+    A lookup map for CLI-related strings.
+    """
+
+    cfgfile: str = "config_file"
+    compare: str = "compare"
+    config: str = "config"
+    dryrun: str = "dry_run"
+    file1fmt: str = "file_1_format"
+    file1path: str = "file_1_path"
+    file2fmt: str = "file_2_format"
+    file2path: str = "file_2_path"
+    forecast: str = "forecast"
+    help: str = "help"
+    infile: str = "input_file"
+    infmt: str = "input_format"
+    mode: str = "mode"
+    model: str = "model"
+    outfile: str = "output_file"
+    outfmt: str = "output_format"
+    quiet: str = "quiet"
+    realize: str = "realize"
+    render: str = "render"
+    run: str = "run"
+    schemafile: str = "schema_file"
+    submode: str = "submode"
+    template: str = "template"
+    translate: str = "translate"
+    validate: str = "validate"
+    valsfile: str = "values_file"
+    valsfmt: str = "values_format"
+    valsneeded: str = "values_needed"
+    verbose: str = "verbose"
+
+
+STR = _STR()
