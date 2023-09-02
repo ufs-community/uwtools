@@ -322,13 +322,6 @@ def _add_subparser_template_render(subparsers: Subparsers) -> SubmodeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    # In this submode, input/output files are optional (stdin and stdout are used by default),
-    # and their formats are irrelevant because they're treated as generic text. A values file
-    # is also optional, as values used to render the template will be taken from the environment
-    # or from key=value command-line pairs by default. However, if a values file IS specified,
-    # its format must either be explicitly specified, or deduced from its extension, so a check
-    # is provided for this case.
-
     parser = _add_subparser(subparsers, STR.render, "Render a template")
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
@@ -623,6 +616,10 @@ def _check_quiet_vs_verbose(args) -> Namespace:
 
 
 def _check_template_render_vals_args(args: Namespace) -> Namespace:
+    # In "template render" mode, a values file is optional, as values used to render the template
+    # will be taken from the environment or from key=value command-line pairs by default. But if a
+    # values file IS specified, its format must either be explicitly specified, or deduced from its
+    # extension.
     a = vars(args)
     if a.get(STR.valsfile) is not None:
         if a.get(STR.valsfmt) is None:
