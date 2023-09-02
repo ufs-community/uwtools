@@ -74,26 +74,6 @@ def test__add_subparser_template_render(subparsers):
     assert subparsers.choices[STR.render]
 
 
-# @pytest.mark.parametrize(
-#     "vals",
-#     [
-#         (ns(file_1_path=None, file_1_format=None), STR.file1path, STR.file1fmt),
-#         (ns(file_2_path=None, file_2_format=None), STR.file2path, STR.file2fmt),
-#         (ns(input_file=None, input_format=None), STR.infile, STR.infmt),
-#         (ns(output_file=None, output_format=None), STR.outfile, STR.outfmt),
-#         (ns(values_file=None, values_format=None), STR.valsfile, STR.valsfmt),
-#     ],
-# )
-# def test__check_file_vs_format_fail(capsys, vals):
-#     # When reading/writing from/to stdin/stdout, the data format must be specified, since there is
-#     # no filename to deduce it from.
-#     args, file_arg, format_arg = vals
-#     with raises(SystemExit):
-#         cli._check_file_vs_format(file_arg=file_arg, format_arg=format_arg, args=args)
-#     assert (
-#         "Specify %s when %s is not specified" % (cli._arg2sw(format_arg), cli._arg2sw(file_arg))
-#         in capsys.readouterr().err
-#     )
 @pytest.mark.parametrize(
     "vals",
     [
