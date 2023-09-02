@@ -203,15 +203,18 @@ def test__dispatch_config_compare():
 
 
 def test__dispatch_config_realize():
-    args = ns(
-        input_file=1,
-        input_format=2,
-        output_file=3,
-        output_format=4,
-        values_file=5,
-        values_format=6,
-        values_needed=7,
-        dry_run=8,
+    args = ns()
+    vars(args).update(
+        {
+            STR.infile: 1,
+            STR.infmt: 2,
+            STR.outfile: 3,
+            STR.outfmt: 4,
+            STR.valsfile: 5,
+            STR.valsfmt: 6,
+            STR.valsneeded: 7,
+            STR.dryrun: 8,
+        }
     )
     with patch.object(cli.uwtools.config.core, "realize_config") as m:
         cli._dispatch_config_realize(args)
@@ -219,12 +222,15 @@ def test__dispatch_config_realize():
 
 
 def test__dispatch_config_translate_arparse_to_jinja2():
-    args = ns(
-        input_file=1,
-        input_format=FORMAT.atparse,
-        output_file=3,
-        output_format=FORMAT.jinja2,
-        dry_run=5,
+    args = ns()
+    vars(args).update(
+        {
+            STR.infile: 1,
+            STR.infmt: FORMAT.atparse,
+            STR.outfile: 3,
+            STR.outfmt: FORMAT.jinja2,
+            STR.dryrun: 5,
+        }
     )
     with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as m:
         cli._dispatch_config_translate(args)
@@ -232,12 +238,16 @@ def test__dispatch_config_translate_arparse_to_jinja2():
 
 
 def test_dispath_config_translate_unsupported():
-    args = ns(input_file=1, input_format="jpg", output_file=3, output_format="png", dry_run=5)
+    args = ns()
+    vars(args).update(
+        {STR.infile: 1, STR.infmt: "jpg", STR.outfile: 3, STR.outfmt: "png", STR.dryrun: 5}
+    )
     assert cli._dispatch_config_translate(args) is False
 
 
 def test__dispatch_config_validate_yaml():
-    args = ns(input_file=1, input_format=FORMAT.yaml, schema_file=3)
+    args = ns()
+    vars(args).update({STR.infile: 1, STR.infmt: FORMAT.yaml, STR.schemafile: 3})
     with patch.object(cli.uwtools.config.validator, "validate_yaml") as m:
         cli._dispatch_config_validate(args)
     assert m.called_once_with(args)
