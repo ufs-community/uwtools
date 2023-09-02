@@ -581,7 +581,7 @@ def _basic_setup(parser: Parser) -> Group:
     :param parser: The parser to add the optional group to.
     """
     optional = parser.add_argument_group("Optional arguments")
-    optional.add_argument("-h", "--help", action="help", help="Show help and exit")
+    optional.add_argument("-h", _arg2sw(STR.help), action="help", help="Show help and exit")
     return optional
 
 
