@@ -675,7 +675,6 @@ def compare_configs(
     :param config_b_format: Format of second config file.
     :return: False if config files had differences, otherwise True.
     """
-
     cfg_a = format_to_config(config_a_format)(config_a_path)
     cfg_b = format_to_config(config_b_format)(config_b_path)
     logging.info("- %s", config_a_path)
