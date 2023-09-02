@@ -24,7 +24,7 @@ from uwtools.utils.file import FORMAT, get_file_type
 FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.yaml]
 TITLE_REQ_ARG = "Required arguments"
 
-SubmodeChecks = List[Callable]
+SubmodeChecks = List[Callable[[Namespace], Namespace]]
 ModeChecks = Dict[str, SubmodeChecks]
 Checks = Dict[str, ModeChecks]
 
