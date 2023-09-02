@@ -44,7 +44,7 @@ def main() -> None:
     try:
         args, checks = _parse_args(sys.argv[1:])
         for check in checks[args.mode][args.submode]:
-            check()
+            check(args)
         setup_logging(quiet=args.quiet, verbose=args.verbose)
         logging.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
