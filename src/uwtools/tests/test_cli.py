@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
-# import logging
+import logging
 from argparse import ArgumentParser as Parser
 from argparse import Namespace as ns
 from typing import List
@@ -68,25 +68,17 @@ def test__add_subparser_template_render(subparsers):
     assert subparsers.choices["render"]
 
 
-# def test__check_args_fail_quiet_verbose(capsys):
-#     logging.getLogger().setLevel(logging.INFO)
-#     args = ns(quiet=True, verbose=True)
-#     with raises(SystemExit):
-#         cli._check_args(args)
-#     assert "Specify at most one of --quiet, --verbose" in capsys.readouterr().err
+def test__check_quiet_vs_verbose_fail_quiet_verbose(capsys):
+    logging.getLogger().setLevel(logging.INFO)
+    args = ns(quiet=True, verbose=True)
+    with raises(SystemExit):
+        cli._check_quiet_vs_verbose(args)
+    assert "Specify at most one of --quiet, --verbose" in capsys.readouterr().err
 
 
-# def test__check_args_fail_values_file_no_value_format(capsys):
-#     logging.getLogger().setLevel(logging.INFO)
-#     args = ns(values_file="foo")
-#     with raises(SystemExit):
-#         cli._check_args(args)
-#     assert "Specify --values-format with --values-file" in capsys.readouterr().err
-
-
-# def test__check_args_ok():
-#     args = ns(foo=88)
-#     assert cli._check_args(args) == args
+def test__quiet_vs_verbose_ok():
+    args = ns(foo=88)
+    assert cli._check_quiet_vs_verbose(args) == args
 
 
 def test__dict_from_key_eq_val_strings():
