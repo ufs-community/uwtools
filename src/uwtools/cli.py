@@ -257,7 +257,7 @@ def _add_subparser_forecast(subparsers: Subparsers) -> ModeChecks:
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.submode)
     return {
-        "run": _add_subparser_forecast_run(subparsers),
+        STR.run: _add_subparser_forecast_run(subparsers),
     }
 
 
@@ -267,7 +267,7 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> SubmodeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, "run", "Run a forecast")
+    parser = _add_subparser(subparsers, STR.run, "Run a forecast")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_config_file(required)
     _add_arg_model(required, choices=["FV3"])
@@ -282,7 +282,7 @@ def _dispatch_forecast(args: Namespace) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {"run": _dispatch_forecast_run}[args.submode](args)
+    return {STR.run: _dispatch_forecast_run}[args.submode](args)
 
 
 def _dispatch_forecast_run(args: Namespace) -> bool:
@@ -309,7 +309,7 @@ def _add_subparser_template(subparsers: Subparsers) -> ModeChecks:
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.submode)
     return {
-        "render": _add_subparser_template_render(subparsers),
+        STR.render: _add_subparser_template_render(subparsers),
     }
 
 
@@ -319,7 +319,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> SubmodeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, "render", "Render a template")
+    parser = _add_subparser(subparsers, STR.render, "Render a template")
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_output_file(optional)
@@ -337,7 +337,7 @@ def _dispatch_template(args: Namespace) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {"render": _dispatch_template_render}[args.submode](args)
+    return {STR.render: _dispatch_template_render}[args.submode](args)
 
 
 def _dispatch_template_render(args: Namespace) -> bool:
@@ -574,6 +574,16 @@ def _add_subparsers(parser: Parser, dest: str) -> Subparsers:
     )
 
 
+def _arg2sw(arg: str) -> str:
+    """
+    Convert argument name to long-form switch.
+
+    :param arg: Internal name of parsed argument.
+    :return: The long-form switch.
+    """
+    return "--%s" % arg.replace("_", "-")
+
+
 def _basic_setup(parser: Parser) -> Group:
     """
     Create optional-arguments group and add help switch.
@@ -581,8 +591,24 @@ def _basic_setup(parser: Parser) -> Group:
     :param parser: The parser to add the optional group to.
     """
     optional = parser.add_argument_group("Optional arguments")
-    optional.add_argument("-h", _arg2sw(STR.help), action="help", help="Show help and exit")
+    optional.add_argument("-h", _arg2sw(STR.help), action=STR.help, help="Show help and exit")
     return optional
+
+
+def _check_file_vs_format(file_arg: str, format_arg: str, args: Namespace) -> Namespace:
+    a = vars(args)
+    if a[format_arg] is None:
+        if a[file_arg] is None:
+            _abort("Specify %s when %s is not specified" % (_arg2sw(format_arg), _arg2sw(file_arg)))
+        a[format_arg] = get_file_type(a[file_arg])
+    return args
+
+
+def _check_quiet_vs_verbose(args) -> Namespace:
+    a = vars(args)
+    if a.get(STR.quiet) and a.get(STR.verbose):
+        _abort("Specify at most one of %s, %s" % (_arg2sw(STR.quiet), _arg2sw(STR.verbose)))
+    return args
 
 
 def _dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:
@@ -620,32 +646,6 @@ def _parse_args(raw_args: List[str]) -> Tuple[Namespace, Checks]:
         STR.template: _add_subparser_template(subparsers),
     }
     return parser.parse_args(raw_args), checks
-
-
-def _arg2sw(arg: str) -> str:
-    """
-    Convert argument name to long-form switch.
-
-    :param arg: Internal name of parsed argument.
-    :return: The long-form switch.
-    """
-    return "--%s" % arg.replace("_", "-")
-
-
-def _check_file_vs_format(file_arg: str, format_arg: str, args: Namespace) -> Namespace:
-    a = vars(args)
-    if a[format_arg] is None:
-        if a[file_arg] is None:
-            _abort("Specify %s when %s is not specified" % (_arg2sw(format_arg), _arg2sw(file_arg)))
-        a[format_arg] = get_file_type(a[file_arg])
-    return args
-
-
-def _check_quiet_vs_verbose(args) -> Namespace:
-    a = vars(args)
-    if a.get(STR.quiet) and a.get(STR.verbose):
-        _abort("Specify at most one of %s, %s" % (_arg2sw(STR.quiet), _arg2sw(STR.verbose)))
-    return args
 
 
 @dataclass(frozen=True)
