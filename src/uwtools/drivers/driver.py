@@ -31,6 +31,7 @@ class Driver(ABC):
         self._batch_script = batch_script
         self._validate()
         self._config = YAMLConfig(config_file=config_file)
+        self._platform_config = self._config["platform"]
 
     # Public methods
 
@@ -79,6 +80,7 @@ class Driver(ABC):
 
     # Private methods
 
+    def _run_batch_job(self, 
     def _validate(self) -> bool:
         """
         Validate the user-supplied config file.

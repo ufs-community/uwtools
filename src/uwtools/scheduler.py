@@ -11,6 +11,7 @@ from collections.abc import Mapping
 from typing import Any, Dict, List
 
 from uwtools.utils import Memory
+from uwtools.utils.file import writable
 
 NONEISH = [None, "", " ", "None", "none", False]
 IGNORED_ATTRIBS = ["scheduler"]
@@ -68,6 +69,17 @@ class BatchScript(UserList):
             The character or characters to join the content lines with
         """
         return line_separator.join(self)
+
+    def dump(self, output_file: OptionalPath) -> bool:
+        """
+        Write a batch script to an output location
+
+        :param output_file: Path to the file to write the batch script to
+        """
+
+        with writable(output_file) as f:
+            print(self, file=f)
+        return True
 
 
 class JobScheduler(UserDict):
@@ -178,6 +190,19 @@ class JobScheduler(UserDict):
             ) from error
         return scheduler(props)
 
+    def run_job(self, script_path: OptionalPath): -> bool
+        """
+        Submits a job to the scheduler.
+        """
+
+        subprocess.run(
+            f"{self.submit_command} {outpath}",
+            stderr=subprocess.STDOUT,
+            check=False,
+            shell=True,
+            )
+
+
 
 class Slurm(JobScheduler):
     """
@@ -185,13 +210,15 @@ class Slurm(JobScheduler):
     """
 
     prefix = "#SBATCH"
+    submit_command = "sbatch"
 
     _map = {
         RequiredAttribs.ACCOUNT: "--account",
-        RequiredAttribs.NODES: "--nodes",
         RequiredAttribs.QUEUE: "--qos",
-        RequiredAttribs.TASKS_PER_NODE: "--ntasks-per-node",
         RequiredAttribs.WALLTIME: "--time",
+        OptionalAttribs.TASKS_PER_NODE: "--ntasks-per-node",
+        OptionalAttribs.NODES: "--nodes",
+        OptionalAttribs.CORES: "--ntasks",
         OptionalAttribs.JOB_NAME: "--job-name",
         OptionalAttribs.STDOUT: "--output",
         OptionalAttribs.STDERR: "--error",
@@ -201,13 +228,6 @@ class Slurm(JobScheduler):
         OptionalAttribs.EXCLUSIVE: "--exclusive",
     }
 
-    @property
-    def submit_command(self) -> str:
-        """
-        Returns the command for running a batch script.
-        """
-        return "sbatch"
-
 
 class PBS(JobScheduler):
     """
@@ -216,6 +236,7 @@ class PBS(JobScheduler):
 
     prefix = "#PBS"
     key_value_separator = " "
+    submit_command = "qsub"
 
     _map = {
         RequiredAttribs.ACCOUNT: "-A",
@@ -231,12 +252,6 @@ class PBS(JobScheduler):
         OptionalAttribs.MEMORY: "mem",
     }
 
-    @property
-    def submit_command(self) -> str:
-        """
-        Returns the command for running a batch script.
-        """
-        return "qsub"
 
     def pre_process(self) -> Dict[str, Any]:
         output = self.data
@@ -308,6 +323,7 @@ class LSF(JobScheduler):
 
     prefix = "#BSUB"
     key_value_separator = " "
+    subit_command = "bsub"
 
     _map = {
         RequiredAttribs.QUEUE: "-q",
@@ -322,12 +338,6 @@ class LSF(JobScheduler):
         OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
     }
 
-    @property
-    def submit_command(self) -> str:
-        """
-        Returns the command for running a batch script.
-        """
-        return "bsub"
 
     def pre_process(self) -> Dict[str, Any]:
         items = self.data

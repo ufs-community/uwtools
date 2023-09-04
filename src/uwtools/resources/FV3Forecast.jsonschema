@@ -24,32 +24,25 @@
             "description": "parameters of the forecast",
             "type": "object",
             "properties": {
-                "MODEL": {
+                "model": {
                     "type": "string",
                 },
-                "EXEC_NAME": {
+                "exec_name": {
                     "type": "string",
                 },
-                "RUN_DIRECTORY": {
+                "run_dir": {
                     "type": "string",
                     "format": "uri"
                 },
-                "CYCLEDEP": {
+                "cycledep": {
                     "type": "string",
                     "format": "uri"
                 },
-                "STATIC": {
+                "static": {
                     "type": "string",
                     "format": "uri"
                 },
-                "VERBOSE": {
-                    "type": "string",
-                    "enum": [
-                        "true",
-                        "false"
-                    ]
-                }
             }
-        }    
+        }
     }
 }

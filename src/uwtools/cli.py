@@ -241,6 +241,8 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> None:
     """
     parser = _add_subparser(subparsers, "run", "Run a forecast")
     required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_cdate(required)
+    _add_arg_cyc(required)
     _add_arg_config_file(required)
     _add_arg_model(required, choices=["FV3"])
     optional = _basic_setup(parser)
@@ -263,7 +265,10 @@ def _dispatch_forecast_run(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     forecast_class = uwtools.drivers.forecast.CLASSES[args.forecast_model]
-    forecast_class(config_file=args.config_file).run()
+    forecast_class(config_file=args.config_file, dry_run=args.dry_run).run(
+            cdate=args.cdate,
+            cyc=args.cyc,
+       )
     return True
 
 
@@ -330,12 +335,32 @@ def _dispatch_template_render(args: Namespace) -> bool:
 # pylint: disable=missing-function-docstring
 
 
+def _add_arg_cdate(group: Group) -> None:
+
+    group.add_argument(
+        "--cdate",
+        help="The cycle date in YYYYMMDD format",
+        required=True,
+        type=str,
+    )
+
+
 def _add_arg_config_file(group: Group) -> None:
     group.add_argument(
         "--config-file",
         "-c",
         help="Path to config file",
         metavar="PATH",
+        required=True,
+        type=str,
+    )
+
+
+def _add_arg_cyc(group: Group) -> None:
+
+    group.add_argument(
+        "--cyc",
+        help="The cycle hour in HH format",
         required=True,
         type=str,
     )

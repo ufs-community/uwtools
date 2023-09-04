@@ -25,15 +25,18 @@ class FV3Forecast(Driver):
     A driver for the FV3 forecast model.
     """
 
-    # Properties
-    @cached_property
-    def job_scheduler(self) -> str:
+    def __init__(
+        self,
+        config_file: str,
+        dry_run: bool = False,
+        batch_script: Optional[str] = None,
+    ):
         """
-        Get the name of the job scheduler.
+        Initialize the Forecast Driver
+        """
 
-        Currently hard-coded pending additional methods
-        """
-        return "slurm"
+        super().__init__()
+        self._fcst_config = self._config["forecast"]
 
     # Public methods
 
@@ -142,71 +145,59 @@ class FV3Forecast(Driver):
         """
         Parses the config and returns a formatted dictionary for the batch script.
         """
-        # Add required fields to platform.
-        # Currently supporting only slurm scheduler.
-        return {
-            "account": platform["account"],
-            "nodes": 1,
-            "queue": "batch",
-            "scheduler": self.job_scheduler,
-            "tasks_per_node": 1,
-            "walltime": "00:01:00",
-        }
 
-    def run(self) -> None:
+        return self._fcst_config["jobinfo"].update({
+            "account": self._config["user"]["account"],
+            "scheduler": self._config["platform"]["scheduler"],
+        })
+
+    def run(self, cdate, cyc) -> None:
         """
         Runs FV3 either as a subprocess or by submitting a batch script.
         """
-        # Read in the config file.
-        forecast_config = self._config["forecast"]
-        platform_config = self._config["platform"]
-
         # Prepare directories.
-        run_directory = forecast_config["RUN_DIRECTORY"]
+        run_directory = self._fcst_config["run_dir"]
         self.create_directory_structure(run_directory, "delete")
 
-        static_files = forecast_config["STATIC"]
+        self._fcst_config["cycledep"].update(self._define_boundary_files())
+
+        static_files = self._fcst_config["STATIC"]
         self.stage_files(run_directory, static_files, link_files=True)
-        cycledep_files = forecast_config["CYCLEDEP"]
+        cycledep_files = self._fcst_config["CYCLEDEP"]
         self.stage_files(run_directory, cycledep_files, link_files=True)
 
-        # Create the job script.
-        platform_resources = self.resources(platform_config)
-        batch_script = self.batch_script(platform_resources)
-        args = "--export=None"
+        args = "--export=NONE"
         run_command = self.run_cmd(
             args,
-            run_cmd=platform_config["MPICMD"],
-            exec_name=forecast_config["EXEC_NAME"],
+            run_cmd=self._platform_config["mpicmd"],
+            exec_name=self._fcst_config["exec_name"],
         )
-        batch_script.append(run_command)
 
-        if self._dry_run:
-            # Apply switch to allow user to view the run command of config.
-            # This will not run the job.
-            logging.info("Batch Script:")
-            logging.info(batch_script)
+        if self._batch_script is not None:
+
+            scheduler = JobScheduler.get_scheduler(platform_resources)
+            batch_script = self._create_batch_script(scheduler)
+            batch_script.append(run_command)
+
+            if self._dry_run:
+
+                # Apply switch to allow user to view the run command of config.
+                # This will not run the job.
+                logging.info("Batch Script:")
+                logging.info(batch_script)
+                return
+
+            outpath = Path(run_directory) / self._batch_script
+            scheduler.dump(outpath)
+            scheduler.run_job(outputh)
             return
 
-        # Run the job.
-        if self._batch_script is not None:
-            outpath = Path(run_directory) / self._batch_script
-            with open(outpath, "w+", encoding="utf-8") as file_:
-                print(batch_script, file=file_)
-                batch_command = JobScheduler.get_scheduler(platform_resources).submit_command
-            subprocess.run(
-                f"{batch_command} {outpath}",
-                stderr=subprocess.STDOUT,
-                check=False,
-                shell=True,
-            )
-        else:
-            subprocess.run(
-                f"{run_command}",
-                stderr=subprocess.STDOUT,
-                check=False,
-                shell=True,
-            )
+        subprocess.run(
+            f"{run_command}",
+            stderr=subprocess.STDOUT,
+            check=False,
+            shell=True,
+        )
 
     def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:
         """
@@ -246,6 +237,14 @@ class FV3Forecast(Driver):
 
     # Private methods
 
+    def _create_batch_script(self, scheduler: JobScheduler) -> BatchScript:
+
+        """
+        Setup a batch script with a run command.
+        """
+        return scheduler.batch_script.append(run_command)
+
+
     def _create_model_config(self, base_file: str, outconfig_file: str) -> None:
         """
         Collects all the user inputs required to create a model config file, calling the existing
@@ -268,6 +267,37 @@ class FV3Forecast(Driver):
         )
         msg = f"Config file {outconfig_file} created"
         logging.info(msg)
+
+    def _define_boundary_files(self, length_category) -> Dict:
+
+        """
+        Maps the prepared boundary conditions to the appropriate
+        hours for the forecast.
+        """
+
+        cycledep_boundary_files = {}
+        boudary_file_template = lbcs_config["output_file_template"]
+        lbcs_config = self._config["preprocessing"]["lateral_boundary_conditions"]
+        offset = abs(lbcs_config["offset"])
+        end_hour = self._fcst_config["length"][length_category] + offset + 1
+        boundary_hours = range(
+            offset,
+            lbcs_config["interval_hours"],
+            end_hour,
+            )
+        for tile in self._fcst_config["tiles"]:
+            for boundary_hour in boundary_hours:
+                fhr = boundary_hour - offset
+                link_name = f"gfs_bndy.tile{tile}.{fhr}.nc"
+                boundary_file_path = boudary_file_template.format(tile=tile, fhr=boundary_hour)
+
+                cycledep_boundary_files.update(
+                    {link_name: boundary_file_path}
+                    )
+
+        return cycledep_boundary_files
+
+
 
 
 CLASSES = {"FV3": FV3Forecast}
