@@ -161,12 +161,9 @@ class FV3Forecast(Driver):
 
         self._fcst_config["cycledep"].update(self._define_boundary_files())
 
-        static_files = self._fcst_config["STATIC"]
-        self.stage_files(run_directory, static_files, link_files=True)
-        cycledep_files = self._fcst_config["CYCLEDEP"]
-        self.stage_files(run_directory, cycledep_files, link_files=True)
+        for file_category in ["static", "cycledep"]:
+            self.stage_files(run_directory, file_category, link_files=True)
 
-        args = "--export=NONE"
         run_command = self.run_cmd(
             args,
             run_cmd=self._platform_config["mpicmd"],
@@ -225,13 +222,19 @@ class FV3Forecast(Driver):
         Creates dst file in run directory and copies or links contents from the src path provided.
         """
 
-        os.makedirs(run_directory, exist_ok=True)
+        link_or_copy = os.symlink if link_files else shutil.copyfile
+
         for dst_fn, src_path in files_to_stage.items():
             dst_path = os.path.join(run_directory, dst_fn)
-            if link_files:
-                os.symlink(src_path, dst_path)
-            else:
-                shutil.copyfile(src_path, dst_path)
+            if isinstance(src_path, list):
+                self.stage_files(
+                    run_directory,
+                    {os.path.join(dst_path, os.path.basename(src)): src
+                        for src in src_path},
+                    link_files,
+                    )
+                continue
+            link_or_copy(src_path, dst_path)
             msg = f"File {src_path} staged in run directory at {dst_fn}"
             logging.info(msg)
 
