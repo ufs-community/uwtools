@@ -164,7 +164,7 @@ def test_dereference():
         assert cfg["grid_stats"]["total_ens_points"] == 19200000
 
         # Check that statements expand:
-        assert cfg["fcst"]["output_hours"] == "0 3 6 9 "
+        assert cfg["fcst"]["output_hours"] == "0 3 6 9"
 
         # Check that order isn't a problem:
         assert cfg["grid_stats"]["points_per_level"] == 10000
@@ -866,14 +866,19 @@ def test_Config_characterize_values(nml_cfgobj):
     assert template == ["    p3: {{ n }}"]
 
 
-def test_Config_str_to_type(nml_cfgobj):
-    for x in ["true", "yes", "yeah"]:
-        assert nml_cfgobj.str_to_type(x) is True
-    for x in ["false", "no", "nope"]:
-        assert nml_cfgobj.str_to_type(x) is False
-    assert nml_cfgobj.str_to_type("88") == 88
-    assert nml_cfgobj.str_to_type("3.14") == 3.14
-    assert nml_cfgobj.str_to_type("NA") == "NA"  # no conversion
+def test_Config_reify_scalar_str(nml_cfgobj):
+    for x in ["true", "yes", "TRUE"]:
+        assert nml_cfgobj.reify_scalar_str(x) is True
+    for x in ["false", "no", "FALSE"]:
+        assert nml_cfgobj.reify_scalar_str(x) is False
+    assert nml_cfgobj.reify_scalar_str("88") == 88
+    assert nml_cfgobj.reify_scalar_str("'88'") == "88"  # quoted int not converted
+    assert nml_cfgobj.reify_scalar_str("3.14") == 3.14
+    assert nml_cfgobj.reify_scalar_str("NA") == "NA"  # no conversion
+    assert nml_cfgobj.reify_scalar_str("@[foo]") == "@[foo]"  # no conversion for YAML exceptions
+    with raises(AttributeError) as e:
+        nml_cfgobj.reify_scalar_str([1, 2, 3])
+    assert "'list' object has no attribute 'read'" in str(e.value)  # Exception on unintended list
 
 
 def test_Config_dereference_unexpected_error(nml_cfgobj):
