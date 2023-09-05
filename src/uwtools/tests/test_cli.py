@@ -4,6 +4,7 @@ import logging
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import Namespace as ns
+from argparse import _SubParsersAction
 from typing import List
 from unittest.mock import patch
 
@@ -363,12 +364,10 @@ def test__parse_args():
 
 
 def submodes(parser: Parser) -> List[str]:
-    # Return submodes (named subparsers) belonging to the given parser.
-    if subparsers := parser._subparsers:
-        if action := subparsers._actions[1]:
-            if choices := action.choices:
-                submodes = choices.keys()  # type: ignore
-                return list(submodes)
+    # Return submodes (named subparsers) belonging to the given parser. For some background, see
+    # https://stackoverflow.com/questions/43688450.
+    if actions := [x for x in parser._actions if isinstance(x, _SubParsersAction)]:
+        return list(actions[0].choices.keys())
     return []
 
 
