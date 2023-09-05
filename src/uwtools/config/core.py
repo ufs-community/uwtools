@@ -340,7 +340,7 @@ class Config(ABC, UserDict):
         """
         try:
             r = yaml.safe_load(s)
-        except (yaml.YAMLError, AttributeError):
+        except yaml.YAMLError:
             return s
         return s if type(r) in [dict, list] else r
 

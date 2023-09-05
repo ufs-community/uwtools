@@ -868,10 +868,13 @@ def test_Config_reify_scalar_str(nml_cfgobj):
     for x in ["false", "no", "FALSE"]:
         assert nml_cfgobj.reify_scalar_str(x) is False
     assert nml_cfgobj.reify_scalar_str("88") == 88
+    assert nml_cfgobj.reify_scalar_str("'88'") == "88"  # quoted int not converted
     assert nml_cfgobj.reify_scalar_str("3.14") == 3.14
     assert nml_cfgobj.reify_scalar_str("NA") == "NA"  # no conversion
-    assert nml_cfgobj.reify_scalar_str("cycle: '06'") == "cycle: '06'"
-    assert nml_cfgobj.reify_scalar_str([1, 2, 3]) == [1, 2, 3]
+    assert nml_cfgobj.reify_scalar_str("@[foo]") == "@[foo]"  # no conversion for YAML exceptions
+    with raises(AttributeError) as e:
+        nml_cfgobj.reify_scalar_str([1, 2, 3])
+    assert "'list' object has no attribute 'read'" in str(e.value)  # Exception on unintended list
 
 
 def test_Config_dereference_unexpected_error(nml_cfgobj):
