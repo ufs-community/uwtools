@@ -267,7 +267,7 @@ class Config(ABC, UserDict):
 
                     # Put the full template line back together as it was, filled or not, and make a
                     # guess on its intended type.
-                    ref_dict[key] = self.reify_str("".join(data))
+                    ref_dict[key] = self.reify_scalar_str("".join(data))
 
     def dereference_all(self) -> None:
         """
@@ -332,14 +332,17 @@ class Config(ABC, UserDict):
                     self.update_values(self._load_paths(filepaths))
                     del ref_dict[key]
 
-    def reify_str(self, s: str) -> Union[bool, float, int, str]:
+    def reify_scalar_str(self, s: str) -> Union[bool, float, int, str]:
         """
         Reify a string to a Python object, using YAML. Jinja2 templates will be passed as-is.
 
         :param s: The string to reify.
         """
-        s = s.strip("\"'")
-        return s if "{{" in s or "{%" in s else yaml.safe_load(s)
+        try:
+            r = yaml.safe_load(s)
+        except (yaml.YAMLError, AttributeError):
+            return s
+        return s if type(r) in [dict, list] else r
 
     def update_values(self, src: Union[dict, Config], dst: Optional[Config] = None):
         """
