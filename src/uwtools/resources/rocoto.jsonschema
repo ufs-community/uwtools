@@ -1,0 +1,39 @@
+{
+    "attrs": {
+        "realtime": {
+            "enum": [
+                "true",
+                "false",
+                "T",
+                "F",
+                "t",
+                "f",
+                "True",
+                "False",
+                "FALSE",
+                "TRUE"
+            ]
+        }
+        "scheduler": {
+            "enum": [
+                "sge",
+                "lsf",
+                "lsfcray",
+                "ll",
+                "torque",
+                "moabtorque",
+                "moab",
+                "pbspro",
+                "slurm",
+                "cobalt"
+            ]
+        }
+    }
+    "cycledefs": {
+        "type": "string",
+        "format": "date" " " "date" " " "time"
+    }
+    "log": {
+        "type": "string"
+    }
+}
