@@ -1,6 +1,7 @@
 {
     "attrs": {
         "realtime": {
+            "type": "string",
             "enum": [
                 "true",
                 "false",
@@ -15,6 +16,7 @@
             ]
         }
         "scheduler": {
+            "type": "string",
             "enum": [
                 "sge",
                 "lsf",
@@ -34,6 +36,9 @@
         "format": "date" " " "date" " " "time"
     }
     "log": {
+        "type": "string"
+    }
+    "entities": {
         "type": "string"
     }
 }
