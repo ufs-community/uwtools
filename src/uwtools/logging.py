@@ -23,6 +23,9 @@ def setup_logging(quiet: bool = False, verbose: bool = False) -> None:
     :param quiet: Supress all logging output.
     :param verbose: Log all messages.
     """
+    logger = logging.getLogger()
+    for handler in logger.handlers:
+        logger.removeHandler(handler)
     if quiet and verbose:
         print("Specify at most one of 'quiet' and 'verbose'", file=sys.stderr)
         sys.exit(1)
