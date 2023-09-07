@@ -44,6 +44,9 @@
                         }
                     }
                 },
+                "mpicmd": {
+                    "type": "string"
+                },
                 "namelist": {
                     "type": "object",
                     "properties": {
@@ -74,9 +77,6 @@
         "platform": {
             "type": "object",
             "properties": {
-                "mpicmd": {
-                    "type": "string"
-                },
                 "scheduler": {
                     "type": "string",
                     "enum": [

@@ -14,7 +14,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Dict
 
-from uwtools.config.core import Config, FieldTableConfig, NMLConfig, realize_config
+from uwtools.config.core import Config, FieldTableConfig, NMLConfig, realize_config, YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript, JobScheduler
 from uwtools.types import OptionalPath

@@ -31,7 +31,7 @@ class Driver(ABC):
         self._batch_script = batch_script
         self._validate()
         self._expt_config = YAMLConfig(config_file=config_file)
-        self._platform_config = self._config["platform"]
+        self._platform_config = self._expt_config["platform"]
 
     # Public methods
 
@@ -69,7 +69,7 @@ class Driver(ABC):
         """
         The command-line command to run the NWP tool.
         """
-        run_cmd = self._platform_config["mpicmd"]
+        run_cmd = self._config["mpicmd"]
         exec_name = self._config["exec_name"]
         args_str = " ".join(str(arg) for arg in args)
         return f"{run_cmd} {args_str} {exec_name}"

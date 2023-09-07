@@ -323,7 +323,7 @@ class LSF(JobScheduler):
 
     prefix = "#BSUB"
     key_value_separator = " "
-    subit_command = "bsub"
+    submit_command = "bsub"
 
     _map = {
         RequiredAttribs.QUEUE: "-q",
