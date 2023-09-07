@@ -120,7 +120,36 @@ class Driver(ABC):
 
     # Private methods
 
-    def _run_batch_job(self, 
+    @staticmethod
+    def _create_dictable_configure_file(config_class: Config, config_values: dict, output_path:
+            OptionalPath) -> None:
+        """
+        The standard procedure for updating a file of a configuration class type with user-provided
+        values.
+
+        :param config_class: the Config subclass matching the configure file type
+        :param config_values: the in-memory configuration object to update base values with
+        :param output_path: optional path to dump file to
+        """
+
+        # Optional path to use as a base path.
+        base_file = config_values.get("base_file")
+
+        # User-supplied values that override any settings in the base
+        # file.
+        update_values = config_values.get("update_values", {})
+
+        if base_file:
+            config_obj = config_class(base_file)
+            config_obj.update_values(update_obj)
+            config_obj.dereference_all()
+            config_obj.dump(output_path)
+        else:
+            config_class.dump_dict(path=output_path, cfg=update_values)
+
+        msg = f"Configure file {putput_file} created"
+        logging.info(msg)
+
     def _validate(self) -> bool:
         """
         Validate the user-supplied config file.

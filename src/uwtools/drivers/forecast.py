@@ -14,7 +14,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Dict
 
-from uwtools.config.core import FieldTableConfig, NMLConfig, realize_config
+from uwtools.config.core import Config, FieldTableConfig, NMLConfig, realize_config
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript, JobScheduler
 from uwtools.types import OptionalPath
@@ -55,12 +55,10 @@ class FV3Forecast(Driver):
         the run directory specified already exists. Creates the run directory and adds
         subdirectories INPUT and RESTART. Verifies creation of all directories.
 
-        Args:
-           run_directory: path of desired run directory
-           exist_act: - could be any of 'delete', 'rename', 'quit'
+        :param run_directory: path of desired run directory
+        :param exist_act: - could be any of 'delete', 'rename', 'quit'
                       - how program should act if run directory exists
                       - default is to delete old run directory
-           Returns: None
         """
 
         # Caller should only provide correct argument.
@@ -85,56 +83,44 @@ class FV3Forecast(Driver):
             logging.info("Creating directory: %s", path)
             os.makedirs(path)
 
-    @staticmethod
-    def create_field_table(update_obj: dict, outfldtab_file, base_file=None):
+    def create_field_table(self, output_path: OptionalPath) -> None:
         """
-        Uses an object with user supplied values and an optional base file to create an output field
-        table file. Will "dereference" the base file.
+        Uses the forecast config object to create a Field Table
 
-        Args:
-            update_obj: in-memory dictionary initialized by object.
-                        values override any settings in base file
-            outfldtab_file: location of output field table
-            base_file: optional path to file to use as a base file
+        :param output_path: optional location of output field table
         """
-        if base_file:
-            config_obj = FieldTableConfig(base_file)
-            config_obj.update_values(update_obj)
-            config_obj.dereference_all()
-            config_obj.dump(outfldtab_file)
-        else:
-            # Dump update object to a Field Table file:
-            FieldTableConfig.dump_dict(path=outfldtab_file, cfg=update_obj)
+        self._create_dictable_configure_file(
+                config_class=FieldTableConfig,
+                config_values=self._config["field_table"],
+                output_path=output_path,
+                )
 
-        msg = f"Namelist file {outfldtab_file} created"
-        logging.info(msg)
 
-    def create_namelist(self, config_section: str, output_file: OptionalPath) -> None:
+    def create_model_configure(self, output_path: OptionalPath) -> None:
+        """
+        Uses the forecast config object to create a model_configure
+
+        :param output_path: optional location of the output model_configure file
+        """
+        self._create_dictable_configure_file(
+                config_class=YAMLConfig,
+                config_values=self._config["model_configure"],
+                output_path=output_path,
+                )
+
+    def create_namelist(self, output_path: OptionalPath) -> None:
         """
         Uses an object with user supplied values and an optional namelist base file to create an
         output namelist file. Will "dereference" the base file.
 
-        Args:
-            outnml_file: optionl location of output namelist
+        :param output_path: optional location of output namelist
         """
+        self._create_dictable_configure_file(
+                config_class=NMLConfig,
+                config_values=self._config["namelist"],
+                output_path=output_path,
+                )
 
-        # Optional path to use as a base path.
-        base_file = self._config[config_section].get("base_file")
-
-        # User-supplied values that override any settings in the base
-        # file.
-        update_values = self._config[config_section].get("update_values", {})
-
-        if base_file:
-            config_obj = NMLConfig(base_file)
-            config_obj.update_values(update_obj)
-            config_obj.dereference_all()
-            config_obj.dump(outnml_file)
-        else:
-            NMLConfig.dump_dict(update_values)
-
-        msg = f"Namelist file {outnml_file} created"
-        logging.info(msg)
 
     def output(self) -> None:
         """
@@ -207,29 +193,6 @@ class FV3Forecast(Driver):
             return (path / "FV3Forecast.jsonschema").as_posix()
 
     # Private methods
-
-    def _create_model_config(self, base_file: str, outconfig_file: str) -> None:
-        """
-        Collects all the user inputs required to create a model config file, calling the existing
-        model config tools. This will be unique to the app being run and will appropriately parse
-        subsequent stages of the workflow. Defaults will be filled in if not provided by the user.
-        Equivalent references to config_default.yaml or config.community.yaml from SRW will need to
-        be made for the other apps.
-
-        Args:
-            base_file: Path to base config file
-            outconfig_file: Path to output configuration file
-        """
-        realize_config(
-            input_file=base_file,
-            input_format=FORMAT.yaml,
-            output_file=outconfig_file,
-            output_format=FORMAT.yaml,
-            values_file=self._expt_config_file,
-            values_format=FORMAT.yaml,
-        )
-        msg = f"Config file {outconfig_file} created"
-        logging.info(msg)
 
     def _define_boundary_files(self, length_category) -> Dict:
 
