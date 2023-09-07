@@ -24,12 +24,14 @@ with open(os.path.join(recipe, "meta.json"), "r", encoding="utf-8") as f:
 name_conda = meta["name"]
 name_py = name_conda.replace("-", "_")
 
-setup(
-    entry_points={"console_scripts": ["uw = %s.cli:main" % name_py]},
-    name=name_conda,
-    packages=find_packages(
-        exclude=["%s.tests" % name_py],
-        include=[name_py, "%s.*" % name_py],
-    ),
-    version=meta["version"],
-)
+kwargs = {
+    "entry_points": {"console_scripts": ["uw = %s.cli:main" % name_py]},
+    "name": name_conda,
+    "packages": find_packages(exclude=["%s.tests" % name_py], include=[name_py, "%s.*" % name_py]),
+    "version": meta["version"],
+}
+
+if not os.environ.get("CONDA_PREFIX"):
+    kwargs["install_requires"] = [x.replace(" =", "==") for x in meta["packages"]["run"]]
+
+setup(**kwargs)
