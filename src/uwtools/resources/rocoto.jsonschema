@@ -1,44 +1,48 @@
 {
     "workflow": {
         "attrs": {
-            "realtime": {
-                "type": "string",
-                "enum": [
-                    "true",
-                    "false",
-                    "T",
-                    "F",
-                    "t",
-                    "f",
-                    "True",
-                    "False",
-                    "FALSE",
-                    "TRUE"
-                ]
-            }
-            "scheduler": {
-                "type": "string",
-                "enum": [
-                    "sge",
-                    "lsf",
-                    "lsfcray",
-                    "ll",
-                    "torque",
-                    "moabtorque",
-                    "moab",
-                    "pbspro",
-                    "slurm",
-                    "cobalt"
-                ]
-            }
-            "cycylethrottle": {
-                "type": "integer",
-                "minimum": 0
-            }
-            "taskthrottle": {
-                "type": "integer",
-                "minimum": 0
-            }
+            "type": "object",
+            "properties": {
+                "realtime": {
+                    "type": "string",
+                    "enum": [
+                        "true",
+                        "false",
+                        "T",
+                        "F",
+                        "t",
+                        "f",
+                        "True",
+                        "False",
+                        "FALSE",
+                        "TRUE"
+                    ]
+                }
+                "scheduler": {
+                    "type": "string",
+                    "enum": [
+                        "sge",
+                        "lsf",
+                        "lsfcray",
+                        "ll",
+                        "torque",
+                        "moabtorque",
+                        "moab",
+                        "pbspro",
+                        "slurm",
+                        "cobalt"
+                    ]
+                }
+                "cycylethrottle": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+                "taskthrottle": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            },
+            "required": [ "realtime", "scheduler"]
         }
         "cycledefs": {
             "type": "string",
@@ -49,7 +53,7 @@
             "format", "uri"
         }
         "entities": {
-            "type": "string"
+            "type": "object"
         }
     }
 }
