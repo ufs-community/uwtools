@@ -1,0 +1,3 @@
+Do not manually edit meta.json.
+
+If meta.yaml changes, regenerate meta.json by running "make meta" in the clone root, from a shell with conda activated and the "condev" package installed (i.e. not a development shell). Commit the updated meta.json file.
