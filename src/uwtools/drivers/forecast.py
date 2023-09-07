@@ -17,6 +17,7 @@ from typing import Dict
 from uwtools.config.core import FieldTableConfig, NMLConfig, realize_config
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript, JobScheduler
+from uwtools.types import OptionalPath
 from uwtools.utils.file import FORMAT, handle_existing
 
 
@@ -36,15 +37,16 @@ class FV3Forecast(Driver):
         """
 
         super().__init__()
-        self._fcst_config = self._config["forecast"]
+        self._config = self._config["forecast"]
 
     # Public methods
 
-    def batch_script(self, platform_resources: Mapping) -> BatchScript:
+    def batch_script(self) -> BatchScript:
         """
         Write to disk, for submission to the batch scheduler, a script to run FV3.
         """
-        return JobScheduler.get_scheduler(platform_resources).batch_script
+        pre_run = self._mpi_env_variables("\n")
+        return self.scheduler.batch_script.append(pre_run).append(self.run_cmd())
 
     @staticmethod
     def create_directory_structure(run_directory, exist_act="delete"):
@@ -107,18 +109,21 @@ class FV3Forecast(Driver):
         msg = f"Namelist file {outfldtab_file} created"
         logging.info(msg)
 
-    @staticmethod
-    def create_namelist(update_obj, outnml_file, base_file=None):
+    def create_namelist(self, config_section: str, output_file: OptionalPath) -> None:
         """
         Uses an object with user supplied values and an optional namelist base file to create an
         output namelist file. Will "dereference" the base file.
 
         Args:
-            update_obj: in-memory dictionary initialized by object.
-                        values override any settings in base file
-            outnml_file: location of output namelist
-            base_file: optional path to file to use as a base file
+            outnml_file: optionl location of output namelist
         """
+
+        # Optional path to use as a base path.
+        base_file = self._config[config_section].get("base_file")
+
+        # User-supplied values that override any settings in the base
+        # file.
+        update_values = self._config[config_section].get("update_values", {})
 
         if base_file:
             config_obj = NMLConfig(base_file)
@@ -126,7 +131,7 @@ class FV3Forecast(Driver):
             config_obj.dereference_all()
             config_obj.dump(outnml_file)
         else:
-            update_obj.dump(outnml_file)
+            NMLConfig.dump_dict(update_values)
 
         msg = f"Namelist file {outnml_file} created"
         logging.info(msg)
@@ -146,9 +151,9 @@ class FV3Forecast(Driver):
         Parses the config and returns a formatted dictionary for the batch script.
         """
 
-        return self._fcst_config["jobinfo"].update({
-            "account": self._config["user"]["account"],
-            "scheduler": self._config["platform"]["scheduler"],
+        return self._config["jobinfo"].update({
+            "account": self._expt_config["user"]["account"],
+            "scheduler": self._expt_config["platform"]["scheduler"],
         })
 
     def run(self, cdate, cyc) -> None:
@@ -156,25 +161,17 @@ class FV3Forecast(Driver):
         Runs FV3 either as a subprocess or by submitting a batch script.
         """
         # Prepare directories.
-        run_directory = self._fcst_config["run_dir"]
+        run_directory = self._config["run_dir"]
         self.create_directory_structure(run_directory, "delete")
 
-        self._fcst_config["cycledep"].update(self._define_boundary_files())
+        self._config["cycledep"].update(self._define_boundary_files())
 
         for file_category in ["static", "cycledep"]:
             self.stage_files(run_directory, file_category, link_files=True)
 
-        run_command = self.run_cmd(
-            args,
-            run_cmd=self._platform_config["mpicmd"],
-            exec_name=self._fcst_config["exec_name"],
-        )
-
         if self._batch_script is not None:
 
-            scheduler = JobScheduler.get_scheduler(platform_resources)
-            batch_script = self._create_batch_script(scheduler)
-            batch_script.append(run_command)
+            batch_script = self.batch_script
 
             if self._dry_run:
 
@@ -185,23 +182,21 @@ class FV3Forecast(Driver):
                 return
 
             outpath = Path(run_directory) / self._batch_script
-            scheduler.dump(outpath)
-            scheduler.run_job(outputh)
+            batch_script.dump(outpath)
+            self.scheduler.run_job(outpath)
+            return
+
+        if self._dry_run:
+            logging.info("Would run: ")
+            logging.info(self.run_cmd())
             return
 
         subprocess.run(
-            f"{run_command}",
+            f"{self.run_cmd()}",
             stderr=subprocess.STDOUT,
             check=False,
             shell=True,
         )
-
-    def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:
-        """
-        Constructs the command to run FV3.
-        """
-        args_str = " ".join(str(arg) for arg in args)
-        return f"{run_cmd} {args_str} {exec_name}"
 
     @property
     def schema_file(self) -> str:
@@ -211,42 +206,7 @@ class FV3Forecast(Driver):
         with resources.as_file(resources.files("uwtools.resources")) as path:
             return (path / "FV3Forecast.jsonschema").as_posix()
 
-    @staticmethod
-    def stage_files(
-        run_directory: str, files_to_stage: Dict[str, str], link_files: bool = False
-    ) -> None:
-        """
-        Takes in run directory and dictionary of file names and paths that need to be staged in the
-        run directory.
-
-        Creates dst file in run directory and copies or links contents from the src path provided.
-        """
-
-        link_or_copy = os.symlink if link_files else shutil.copyfile
-
-        for dst_fn, src_path in files_to_stage.items():
-            dst_path = os.path.join(run_directory, dst_fn)
-            if isinstance(src_path, list):
-                self.stage_files(
-                    run_directory,
-                    {os.path.join(dst_path, os.path.basename(src)): src
-                        for src in src_path},
-                    link_files,
-                    )
-                continue
-            link_or_copy(src_path, dst_path)
-            msg = f"File {src_path} staged in run directory at {dst_fn}"
-            logging.info(msg)
-
     # Private methods
-
-    def _create_batch_script(self, scheduler: JobScheduler) -> BatchScript:
-
-        """
-        Setup a batch script with a run command.
-        """
-        return scheduler.batch_script.append(run_command)
-
 
     def _create_model_config(self, base_file: str, outconfig_file: str) -> None:
         """
@@ -265,7 +225,7 @@ class FV3Forecast(Driver):
             input_format=FORMAT.yaml,
             output_file=outconfig_file,
             output_format=FORMAT.yaml,
-            values_file=self._config_file,
+            values_file=self._expt_config_file,
             values_format=FORMAT.yaml,
         )
         msg = f"Config file {outconfig_file} created"
@@ -280,15 +240,15 @@ class FV3Forecast(Driver):
 
         cycledep_boundary_files = {}
         boudary_file_template = lbcs_config["output_file_template"]
-        lbcs_config = self._config["preprocessing"]["lateral_boundary_conditions"]
+        lbcs_config = self._expt_config["preprocessing"]["lateral_boundary_conditions"]
         offset = abs(lbcs_config["offset"])
-        end_hour = self._fcst_config["length"][length_category] + offset + 1
+        end_hour = self._config["length"][length_category] + offset + 1
         boundary_hours = range(
             offset,
             lbcs_config["interval_hours"],
             end_hour,
             )
-        for tile in self._fcst_config["tiles"]:
+        for tile in self._config["tiles"]:
             for boundary_hour in boundary_hours:
                 fhr = boundary_hour - offset
                 link_name = f"gfs_bndy.tile{tile}.{fhr}.nc"
@@ -300,6 +260,20 @@ class FV3Forecast(Driver):
 
         return cycledep_boundary_files
 
+
+    def _mpi_env_variables(self, delimiter=" "):
+        """
+        Returns a bash string of environment variables needed to run the
+        MPI job.
+        """
+        envvars = {
+            "KMP_AFFINITY": "scatter",
+            "OMP_NUM_THREADS": self._config["jobinfo"].get("threads", 1),
+            "OMP_STACKSIZE": self._config["jobinfo"].get("threads", "512m"),
+            "MPI_TYPE_DEPTH": 20,
+            "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
+        }
+        return delimiter.join([f"{k=v}" for k, v in envvars.items()])
 
 
 

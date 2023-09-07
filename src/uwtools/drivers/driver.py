@@ -8,7 +8,7 @@ from typing import Optional
 
 from uwtools.config import validator
 from uwtools.config.core import YAMLConfig
-from uwtools.scheduler import BatchScript
+from uwtools.scheduler import BatchScript, JobScheduler
 
 
 class Driver(ABC):
@@ -30,7 +30,7 @@ class Driver(ABC):
         self._dry_run = dry_run
         self._batch_script = batch_script
         self._validate()
-        self._config = YAMLConfig(config_file=config_file)
+        self._expt_config = YAMLConfig(config_file=config_file)
         self._platform_config = self._config["platform"]
 
     # Public methods
@@ -65,11 +65,23 @@ class Driver(ABC):
         Run the NWP tool.
         """
 
-    @abstractmethod
-    def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:
+    def run_cmd(self, *args) -> str:
         """
         The command-line command to run the NWP tool.
         """
+        run_cmd = self._platform_config["mpicmd"]
+        exec_name = self._config["exec_name"]
+        args_str = " ".join(str(arg) for arg in args)
+        return f"{run_cmd} {args_str} {exec_name}"
+
+
+    @property
+    def scheduler(self) -> JobScheduler:
+        """
+        The job scheduler speficied by the platform information
+        """
+        return JobScheduler.get_scheduler(self.resources)
+
 
     @property
     @abstractmethod
@@ -77,6 +89,34 @@ class Driver(ABC):
         """
         The path to the file containing the schema to validate the config file against.
         """
+
+    @staticmethod
+    def stage_files(
+        run_directory: str, files_to_stage: Dict[str, str], link_files: bool = False
+    ) -> None:
+        """
+        Takes in run directory and dictionary of file names and paths that need to be staged in the
+        run directory.
+
+        Creates dst file in run directory and copies or links contents from the src path provided.
+        """
+
+        link_or_copy = os.symlink if link_files else shutil.copyfile
+
+        for dst_fn, src_path in files_to_stage.items():
+            dst_path = os.path.join(run_directory, dst_fn)
+            if isinstance(src_path, list):
+                self.stage_files(
+                    run_directory,
+                    {os.path.join(dst_path, os.path.basename(src)): src
+                        for src in src_path},
+                    link_files,
+                    )
+                continue
+            link_or_copy(src_path, dst_path)
+            msg = f"File {src_path} staged in run directory at {dst_fn}"
+            logging.info(msg)
+
 
     # Private methods
 
