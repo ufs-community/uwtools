@@ -37,7 +37,7 @@ class FV3Forecast(Driver):
         """
 
         super().__init__()
-        self._config = self._config["forecast"]
+        self._config = self._expt_config["forecast"]
 
     # Public methods
 
@@ -194,18 +194,17 @@ class FV3Forecast(Driver):
 
     # Private methods
 
-    def _define_boundary_files(self, length_category) -> Dict:
-
+    def _define_boundary_files(self) -> Dict:
         """
         Maps the prepared boundary conditions to the appropriate
         hours for the forecast.
         """
 
         cycledep_boundary_files = {}
-        boudary_file_template = lbcs_config["output_file_template"]
         lbcs_config = self._expt_config["preprocessing"]["lateral_boundary_conditions"]
+        boudary_file_template = lbcs_config["output_file_template"]
         offset = abs(lbcs_config["offset"])
-        end_hour = self._config["length"][length_category] + offset + 1
+        end_hour = self._config["length"] + offset + 1
         boundary_hours = range(
             offset,
             lbcs_config["interval_hours"],

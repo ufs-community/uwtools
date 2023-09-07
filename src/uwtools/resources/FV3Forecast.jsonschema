@@ -3,45 +3,121 @@
     "description": "This document is to validate user-defined FV3 forecast config files",
     "type": "object",
     "properties": {
-        "platform": {
-            "description": "Expected resources for the given platform",
-            "type": "object",
-            "properties": {
-                "MPICMD": {
-                    "type": "string",
-                    "enum": [
-                        "mpirun",
-                        "mpiexec",
-                        "srun"
-                    ]
-                },
-                "ACCOUNT": {
-                    "type": "string"
-                }
-            }
-        },
-    "forecast": {
+        "forecast": {
             "description": "parameters of the forecast",
             "type": "object",
             "properties": {
-                "model": {
-                    "type": "string",
+                "cycledep": {
+                    "type": "object",
                 },
                 "exec_name": {
                     "type": "string",
+                },
+                "field_table": {
+                    "type": "object",
+                    "properties": {
+                        "base_file": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "update_values": {
+                            "type": "object",
+                        }
+                    }
+                },
+                "length": {
+                    "type": "integer",
+                    "minimum": 1"
+                }
+                "model": {
+                    "type": "string",
+                },
+                "model_configure": {
+                    "type": "object",
+                    "properties": {
+                        "base_file": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "update_values": {
+                            "type": "object",
+                        }
+                    }
+                },
+                "namelist": {
+                    "type": "object",
+                    "properties": {
+                        "base_file": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "update_values": {
+                            "type": "object",
+                        }
+                    }
                 },
                 "run_dir": {
                     "type": "string",
                     "format": "uri"
                 },
-                "cycledep": {
-                    "type": "string",
-                    "format": "uri"
-                },
                 "static": {
-                    "type": "string",
-                    "format": "uri"
+                    "type": "object",
                 },
+                "tiles: {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "platform": {
+            "type": "object",
+            "properties": {
+                "mpicmd": {
+                    "type": "string"
+                },
+                "scheduler": {
+                    "type": "string",
+                    "enum": [
+                      "lsf",
+                      "pbs",
+                      "slurm"
+                    ]
+                }
+                "required": ["mpicmd"]
+            }
+        },
+        "preprocessing": {
+            "type": "object",
+            "properties": {
+                "lateral_boundary_conditions": {
+                    "type": "object",
+                    "properties": {
+                        "interval_hours": {
+                            "type": "number",
+                            "minimum": 1,
+                            "default": 3
+                        },
+                        "offset": {
+                            "type": "number",
+                            "minimum": 0,
+                            "default": 0
+                        },
+                        "output_file_template": {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    }
+                }
+            }
+        },
+        "user": {
+            "type": "object",
+            "properties": {
+                "account": {
+                  "type": "string"
+                }
             }
         }
     }
