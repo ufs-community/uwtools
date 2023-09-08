@@ -13,7 +13,7 @@ from datetime import datetime
 from functools import cached_property
 from importlib import resources
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Iterable
 
 from uwtools.config.core import Config, FieldTableConfig, NMLConfig, realize_config, YAMLConfig
 from uwtools.drivers.driver import Driver
@@ -195,6 +195,18 @@ class FV3Forecast(Driver):
 
     # Private methods
 
+    @property
+    def _boundary_hours(self) -> Iterable:
+
+        lbcs_config = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
+        offset = abs(lbcs_config["offset"])
+        end_hour = self._config["length"] + offset + 1
+        return range(
+            start=offset,
+            stop=end_hour,
+            step=lbcs_config["interval_hours"],
+            )
+
     def _define_boundary_files(self) -> Dict:
         """
         Maps the prepared boundary conditions to the appropriate
@@ -202,20 +214,12 @@ class FV3Forecast(Driver):
         """
 
         boundary_files = {}
-        lbcs_config = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
         boudary_file_template = lbcs_config["output_file_template"]
-        offset = abs(lbcs_config["offset"])
-        end_hour = self._config["length"] + offset + 1
-        boundary_hours = range(
-            start=offset,
-            stop=end_hour,
-            step=lbcs_config["interval_hours"],
-            )
         for tile in self._config["tiles"]:
-            for boundary_hour in boundary_hours:
-                fhr = boundary_hour - offset
-                link_name = f"gfs_bndy.tile{tile}.{fhr}.nc"
-                boundary_file_path = boudary_file_template.format(tile=tile, fhr=boundary_hour)
+            for boundary_hour in self._boundary_hours:
+                forecast_hour = boundary_hour - offset
+                link_name = f"gfs_bndy.tile{tile}.{forecast_hour}.nc"
+                boundary_file_path = boudary_file_template.format(tile=tile, forecast_hour=boundary_hour)
 
                 boundary_files.update(
                     {link_name: boundary_file_path}

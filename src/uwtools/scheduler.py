@@ -70,16 +70,14 @@ class BatchScript(UserList):
         """
         return line_separator.join(self)
 
-    def dump(self, output_file: OptionalPath) -> bool:
+    def dump(self, output_file: OptionalPath) -> None:
         """
         Write a batch script to an output location
 
         :param output_file: Path to the file to write the batch script to
         """
-
         with writable(output_file) as f:
-            print(self, file=f)
-        return True
+            print(str(self).strip(), file=f)
 
 
 class JobScheduler(UserDict):
@@ -190,7 +188,7 @@ class JobScheduler(UserDict):
             ) from error
         return scheduler(props)
 
-    def run_job(self, script_path: OptionalPath): -> bool
+    def run_job(self, script_path: OptionalPath) -> None:
         """
         Submits a job to the scheduler.
         """
@@ -201,7 +199,6 @@ class JobScheduler(UserDict):
             check=False,
             shell=True,
             )
-
 
 
 class Slurm(JobScheduler):
