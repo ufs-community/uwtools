@@ -89,7 +89,7 @@ class FV3Forecast(Driver):
 
         :param output_path: optional location of output field table
         """
-        self._create_dictable_configure_file(
+        self._create_user_updated_config(
                 config_class=FieldTableConfig,
                 config_values=self._config["field_table"],
                 output_path=output_path,
@@ -102,7 +102,7 @@ class FV3Forecast(Driver):
 
         :param output_path: optional location of the output model_configure file
         """
-        self._create_dictable_configure_file(
+        self._create_user_updated_config(
                 config_class=YAMLConfig,
                 config_values=self._config["model_configure"],
                 output_path=output_path,
@@ -115,7 +115,7 @@ class FV3Forecast(Driver):
 
         :param output_path: optional location of output namelist
         """
-        self._create_dictable_configure_file(
+        self._create_user_updated_config(
                 config_class=NMLConfig,
                 config_values=self._config["namelist"],
                 output_path=output_path,

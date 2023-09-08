@@ -121,7 +121,7 @@ class Driver(ABC):
     # Private methods
 
     @staticmethod
-    def _create_dictable_configure_file(config_class: Config, config_values: dict, output_path:
+    def _create_user_updated_config(config_class: Config, config_values: dict, output_path:
             OptionalPath) -> None:
         """
         The standard procedure for updating a file of a configuration class type with user-provided
