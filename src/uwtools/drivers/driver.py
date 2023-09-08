@@ -30,8 +30,8 @@ class Driver(ABC):
         self._dry_run = dry_run
         self._batch_script = batch_script
         self._validate()
-        self._expt_config = YAMLConfig(config_file=config_file)
-        self._platform_config = self._expt_config["platform"]
+        self._experiment_config = YAMLConfig(config_file=config_file)
+        self._platform_config = self._experiment_config["platform"]
 
     # Public methods
 

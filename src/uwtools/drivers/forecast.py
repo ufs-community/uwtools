@@ -37,7 +37,7 @@ class FV3Forecast(Driver):
         """
 
         super().__init__()
-        self._config = self._expt_config["forecast"]
+        self._config = self._experiment_config["forecast"]
 
     # Public methods
 
@@ -138,8 +138,8 @@ class FV3Forecast(Driver):
         """
 
         return self._config["jobinfo"].update({
-            "account": self._expt_config["user"]["account"],
-            "scheduler": self._expt_config["platform"]["scheduler"],
+            "account": self._experiment_config["user"]["account"],
+            "scheduler": self._experiment_config["platform"]["scheduler"],
         })
 
     def run(self, cdate, cyc) -> None:
@@ -201,7 +201,7 @@ class FV3Forecast(Driver):
         """
 
         cycledep_boundary_files = {}
-        lbcs_config = self._expt_config["preprocessing"]["lateral_boundary_conditions"]
+        lbcs_config = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
         boudary_file_template = lbcs_config["output_file_template"]
         offset = abs(lbcs_config["offset"])
         end_hour = self._config["length"] + offset + 1

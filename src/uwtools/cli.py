@@ -2,6 +2,7 @@
 Modal CLI.
 """
 
+import datetime
 import logging
 import sys
 from argparse import ArgumentParser as Parser
@@ -241,8 +242,7 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> None:
     """
     parser = _add_subparser(subparsers, "run", "Run a forecast")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_cdate(required)
-    _add_arg_cyc(required)
+    _add_arg_cycle(required)
     _add_arg_config_file(required)
     _add_arg_model(required, choices=["FV3"])
     optional = _basic_setup(parser)
@@ -335,13 +335,13 @@ def _dispatch_template_render(args: Namespace) -> bool:
 # pylint: disable=missing-function-docstring
 
 
-def _add_arg_cdate(group: Group) -> None:
+def _add_arg_cycle(group: Group) -> None:
 
     group.add_argument(
-        "--cdate",
-        help="The cycle date in YYYYMMDD format",
+        "--cycle",
+        help="The cycle in ISO8601 format",
         required=True,
-        type=str,
+        type=datetime.date.fromisoformat,
     )
 
 
@@ -351,16 +351,6 @@ def _add_arg_config_file(group: Group) -> None:
         "-c",
         help="Path to config file",
         metavar="PATH",
-        required=True,
-        type=str,
-    )
-
-
-def _add_arg_cyc(group: Group) -> None:
-
-    group.add_argument(
-        "--cyc",
-        help="The cycle hour in HH format",
         required=True,
         type=str,
     )
