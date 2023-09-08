@@ -137,10 +137,11 @@ class FV3Forecast(Driver):
         Parses the config and returns a formatted dictionary for the batch script.
         """
 
-        return self._config["jobinfo"].update({
+        return {
             "account": self._experiment_config["user"]["account"],
             "scheduler": self._experiment_config["platform"]["scheduler"],
-        })
+            **self._config["jobinfo"],
+        }
 
     def run(self, cycle: datetime) -> None:
         """
@@ -150,9 +151,9 @@ class FV3Forecast(Driver):
         run_directory = self._config["run_dir"]
         self.create_directory_structure(run_directory, "delete")
 
-        self._config["cycledep"].update(self._define_boundary_files())
+        self._config["cycle-dependent"].update(self._define_boundary_files())
 
-        for file_category in ["static", "cycledep"]:
+        for file_category in ["static", "cycle-dependent"]:
             self.stage_files(run_directory, file_category, link_files=True)
 
         if self._batch_script is not None:
@@ -200,15 +201,15 @@ class FV3Forecast(Driver):
         hours for the forecast.
         """
 
-        cycledep_boundary_files = {}
+        boundary_files = {}
         lbcs_config = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
         boudary_file_template = lbcs_config["output_file_template"]
         offset = abs(lbcs_config["offset"])
         end_hour = self._config["length"] + offset + 1
         boundary_hours = range(
-            offset,
-            lbcs_config["interval_hours"],
-            end_hour,
+            start=offset,
+            stop=end_hour,
+            step=lbcs_config["interval_hours"],
             )
         for tile in self._config["tiles"]:
             for boundary_hour in boundary_hours:
@@ -216,11 +217,11 @@ class FV3Forecast(Driver):
                 link_name = f"gfs_bndy.tile{tile}.{fhr}.nc"
                 boundary_file_path = boudary_file_template.format(tile=tile, fhr=boundary_hour)
 
-                cycledep_boundary_files.update(
+                boundary_files.update(
                     {link_name: boundary_file_path}
                     )
 
-        return cycledep_boundary_files
+        return boundary_files
 
 
     def _mpi_env_variables(self, delimiter=" "):

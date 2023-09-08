@@ -7,7 +7,7 @@
             "description": "parameters of the forecast",
             "type": "object",
             "properties": {
-                "cycledep": {
+                "cycle-dependent": {
                     "type": "object",
                 },
                 "exec_name": {
