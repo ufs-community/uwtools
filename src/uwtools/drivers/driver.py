@@ -4,6 +4,7 @@ Provides an abstract class representing drivers for various NWP tools.
 
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
+from datetime import datetime
 from typing import Optional
 
 from uwtools.config import validator
@@ -36,7 +37,7 @@ class Driver(ABC):
     # Public methods
 
     @abstractmethod
-    def batch_script(self, platform_resources: Mapping) -> BatchScript:
+    def batch_script(self) -> BatchScript:
         """
         Create a script for submission to the batch scheduler.
         """
@@ -54,20 +55,24 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def resources(self, platform: dict) -> Mapping:
+    def resources(self) -> Mapping:
         """
         Parses the config and returns a formatted dictionary for the batch script.
         """
 
     @abstractmethod
-    def run(self) -> None:
+    def run(self, cycle: datetime) -> None:
         """
         Run the NWP tool.
+
+        :param cycle: The time stamp of the current cycle to run.
         """
 
     def run_cmd(self, *args) -> str:
         """
         The command-line command to run the NWP tool.
+
+        :param args: Any number of native flags for the run command
         """
         run_cmd = self._config["mpicmd"]
         exec_name = self._config["exec_name"]
@@ -95,10 +100,13 @@ class Driver(ABC):
         run_directory: str, files_to_stage: Dict[str, str], link_files: bool = False
     ) -> None:
         """
-        Takes in run directory and dictionary of file names and paths that need to be staged in the
-        run directory.
+        Creates destination files in run directory and copies or links contents from the source path
+        provided.
 
-        Creates dst file in run directory and copies or links contents from the src path provided.
+        :param run_directory: Path of desired run directory.
+        :param files_to_stage: File names in the run directory (keys) and their source paths
+            (values).
+        :param link_files: Whether to link or copy the files.
         """
 
         link_or_copy = os.symlink if link_files else shutil.copyfile

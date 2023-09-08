@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 from collections.abc import Mapping
+from datetime import datetime
 from functools import cached_property
 from importlib import resources
 from pathlib import Path
@@ -55,10 +56,9 @@ class FV3Forecast(Driver):
         the run directory specified already exists. Creates the run directory and adds
         subdirectories INPUT and RESTART. Verifies creation of all directories.
 
-        :param run_directory: path of desired run directory
-        :param exist_act: - could be any of 'delete', 'rename', 'quit'
-                      - how program should act if run directory exists
-                      - default is to delete old run directory
+        :param run_directory: Path of desired run directory.
+        :param exist_act: Could be any of 'delete', 'rename', 'quit'. Sets how the program responds
+            to a preexisting run directory. The default is to delete the old run directory.
         """
 
         # Caller should only provide correct argument.
@@ -87,7 +87,7 @@ class FV3Forecast(Driver):
         """
         Uses the forecast config object to create a Field Table
 
-        :param output_path: optional location of output field table
+        :param output_path: Optional location of output field table.
         """
         self._create_user_updated_config(
                 config_class=FieldTableConfig,
@@ -100,7 +100,7 @@ class FV3Forecast(Driver):
         """
         Uses the forecast config object to create a model_configure
 
-        :param output_path: optional location of the output model_configure file
+        :param output_path: Optional location of the output model_configure file.
         """
         self._create_user_updated_config(
                 config_class=YAMLConfig,
@@ -113,7 +113,7 @@ class FV3Forecast(Driver):
         Uses an object with user supplied values and an optional namelist base file to create an
         output namelist file. Will "dereference" the base file.
 
-        :param output_path: optional location of output namelist
+        :param output_path: Optional location of output namelist.
         """
         self._create_user_updated_config(
                 config_class=NMLConfig,
@@ -132,7 +132,7 @@ class FV3Forecast(Driver):
         ???
         """
 
-    def resources(self, platform: dict) -> Mapping:
+    def resources(self) -> Mapping:
         """
         Parses the config and returns a formatted dictionary for the batch script.
         """
@@ -142,7 +142,7 @@ class FV3Forecast(Driver):
             "scheduler": self._experiment_config["platform"]["scheduler"],
         })
 
-    def run(self, cdate, cyc) -> None:
+    def run(self, cycle: datetime) -> None:
         """
         Runs FV3 either as a subprocess or by submitting a batch script.
         """
