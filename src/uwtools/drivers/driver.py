@@ -140,16 +140,13 @@ class Driver(ABC):
         :param output_path: optional path to dump file to
         """
 
-        # Optional path to use as a base path.
-        base_file = config_values.get("base_file")
-
         # User-supplied values that override any settings in the base
         # file.
         update_values = config_values.get("update_values", {})
 
-        if base_file:
+        if base_file := config_values.get("base_file"):
             config_obj = config_class(base_file)
-            config_obj.update_values(update_obj)
+            config_obj.update_values(update_values)
             config_obj.dereference_all()
             config_obj.dump(output_path)
         else:
