@@ -5,21 +5,19 @@ Drivers for forecast models.
 
 import logging
 import os
-import shutil
 import subprocess
 import sys
 from collections.abc import Mapping
 from datetime import datetime
-from functools import cached_property
 from importlib import resources
 from pathlib import Path
-from typing import Dict, Iterable
+from typing import Dict
 
-from uwtools.config.core import Config, FieldTableConfig, NMLConfig, realize_config, YAMLConfig
+from uwtools.config.core import FieldTableConfig, NMLConfig, YAMLConfig
 from uwtools.drivers.driver import Driver
-from uwtools.scheduler import BatchScript, JobScheduler
-from uwtools.types import OptionalPath
-from uwtools.utils.file import FORMAT, handle_existing
+from uwtools.scheduler import BatchScript
+from uwtools.types import Optional, OptionalPath
+from uwtools.utils.file import handle_existing
 
 
 class FV3Forecast(Driver):
@@ -37,17 +35,19 @@ class FV3Forecast(Driver):
         Initialize the Forecast Driver
         """
 
-        super().__init__()
+        super(Driver).__init__()
         self._config = self._experiment_config["forecast"]
 
     # Public methods
 
     def batch_script(self) -> BatchScript:
         """
-        Write to disk, for submission to the batch scheduler, a script to run FV3.
+        Prepare batch script contents for interaction with system scheduler.
         """
         pre_run = self._mpi_env_variables("\n")
-        return self.scheduler.batch_script.append(pre_run).append(self.run_cmd())
+        bs = self.scheduler.batch_script
+        bs.append(pre_run).append(self.run_cmd())
+        return bs
 
     @staticmethod
     def create_directory_structure(run_directory, exist_act="delete"):
@@ -169,7 +169,7 @@ class FV3Forecast(Driver):
                 return
 
             outpath = Path(run_directory) / self._batch_script
-            batch_script.dump(outpath)
+            BatchScript.dump(batch_script, outpath)
             self.scheduler.run_job(outpath)
             return
 
@@ -195,32 +195,29 @@ class FV3Forecast(Driver):
 
     # Private methods
 
-    @property
-    def _boundary_hours(self) -> Iterable:
+    def _boundary_hours(self, lbcs_config: Dict) -> tuple[int, int, int]:
 
-        lbcs_config = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
         offset = abs(lbcs_config["offset"])
         end_hour = self._config["length"] + offset + 1
-        return range(
-            start=offset,
-            stop=end_hour,
-            step=lbcs_config["interval_hours"],
-            )
+        return offset, lbcs_config["interval_hours"], end_hour
 
     def _define_boundary_files(self) -> Dict:
         """
         Maps the prepared boundary conditions to the appropriate
         hours for the forecast.
         """
-
         boundary_files = {}
+        lbcs_config = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
         boudary_file_template = lbcs_config["output_file_template"]
+        offset, interval, endhour = self._boundary_hours(lbcs_config)
         for tile in self._config["tiles"]:
-            for boundary_hour in self._boundary_hours:
+            for boundary_hour in range(offset, endhour, interval):
                 forecast_hour = boundary_hour - offset
                 link_name = f"gfs_bndy.tile{tile}.{forecast_hour}.nc"
-                boundary_file_path = boudary_file_template.format(tile=tile, forecast_hour=boundary_hour)
-
+                boundary_file_path = boudary_file_template.format(
+                    tile=tile,
+                    forecast_hour=boundary_hour,
+                    )
                 boundary_files.update(
                     {link_name: boundary_file_path}
                     )
@@ -240,7 +237,7 @@ class FV3Forecast(Driver):
             "MPI_TYPE_DEPTH": 20,
             "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
         }
-        return delimiter.join([f"{k=v}" for k, v in envvars.items()])
+        return delimiter.join([f"{k}={v}" for k, v in envvars.items()])
 
 
 

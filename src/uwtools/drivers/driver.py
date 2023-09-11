@@ -2,14 +2,18 @@
 Provides an abstract class representing drivers for various NWP tools.
 """
 
+import logging
+import os
+import shutil
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from datetime import datetime
-from typing import Optional
+from typing import Dict, Optional
 
 from uwtools.config import validator
-from uwtools.config.core import YAMLConfig
+from uwtools.config.core import Config, YAMLConfig
 from uwtools.scheduler import BatchScript, JobScheduler
+from uwtools.types import OptionalPath
 
 
 class Driver(ABC):
@@ -114,7 +118,7 @@ class Driver(ABC):
         for dst_fn, src_path in files_to_stage.items():
             dst_path = os.path.join(run_directory, dst_fn)
             if isinstance(src_path, list):
-                self.stage_files(
+                Driver.stage_files(
                     run_directory,
                     {os.path.join(dst_path, os.path.basename(src)): src
                         for src in src_path},
@@ -127,6 +131,14 @@ class Driver(ABC):
 
 
     # Private methods
+
+    @property
+    @abstractmethod
+    def _config(self):
+        """
+        The config object that describes the subset of an experiment config related to a subclass of
+        Driver.
+        """
 
     @staticmethod
     def _create_user_updated_config(config_class: Config, config_values: dict, output_path:
@@ -152,7 +164,7 @@ class Driver(ABC):
         else:
             config_class.dump_dict(path=output_path, cfg=update_values)
 
-        msg = f"Configure file {putput_file} created"
+        msg = f"Configure file {output_path} created"
         logging.info(msg)
 
     def _validate(self) -> bool:
