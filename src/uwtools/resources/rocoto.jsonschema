@@ -1,59 +1,72 @@
 {
-    "workflow": {
-        "attrs": {
+    "definitions": {
+        "dateTimePattern": {
+            "type": "string",
+            "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2}):(\\d{2})$"
+        }
+    },
+    "type": "object",
+    "properties": {
+        "workflow": {
             "type": "object",
             "properties": {
-                "realtime": {
+                "attrs": {
+                    "type": "object",
+                    "properties": {
+                        "realtime": {
+                            "type": "string",
+                            "enum": [
+                                "true",
+                                "false",
+                                "T",
+                                "F",
+                                "t",
+                                "f",
+                                "True",
+                                "False",
+                                "FALSE",
+                                "TRUE"
+                            ]
+                        },
+                        "scheduler": {
+                            "type": "string",
+                            "enum": [
+                                "sge",
+                                "lsf",
+                                "lsfcray",
+                                "ll",
+                                "torque",
+                                "moabtorque",
+                                "moab",
+                                "pbspro",
+                                "slurm",
+                                "cobalt"
+                            ]
+                        },
+                        "cycylethrottle": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "taskthrottle": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    },
+                    "required": ["realtime", "scheduler"]
+                },
+                "cycledefs": {
+                    "$ref": "#/definitions/dateTimePattern"
+                },
+                "log": {
                     "type": "string",
-                    "enum": [
-                        "true",
-                        "false",
-                        "T",
-                        "F",
-                        "t",
-                        "f",
-                        "True",
-                        "False",
-                        "FALSE",
-                        "TRUE"
-                    ]
-                }
-                "scheduler": {
-                    "type": "string",
-                    "enum": [
-                        "sge",
-                        "lsf",
-                        "lsfcray",
-                        "ll",
-                        "torque",
-                        "moabtorque",
-                        "moab",
-                        "pbspro",
-                        "slurm",
-                        "cobalt"
-                    ]
-                }
-                "cycylethrottle": {
-                    "type": "integer",
-                    "minimum": 0
-                }
-                "taskthrottle": {
-                    "type": "integer",
-                    "minimum": 0
+                    "format": "uri"
+                },
+                "entities": {
+                    "type": "object"
                 }
             },
-            "required": [ "realtime", "scheduler"]
-        }
-        "cycledefs": {
-            "type": "string",
-            "pattern": "^\[\d{10},\d{10},(0[0-9]|1[0-9]|2[0-4]):([0-5][0-9]):([0-5][0-9])\]$"
-        }
-        "log": {
-            "type": "string",
-            "format", "uri"
-        }
-        "entities": {
-            "type": "object"
+            "required": ["attrs", "cycledefs", "log"]
         }
     }
 }
+
