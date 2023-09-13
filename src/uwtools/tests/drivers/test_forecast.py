@@ -29,18 +29,24 @@ def slurm_props():
     }
 
 
-def test_batch_script(slurm_props):
+def test_batch_script():
     expected = """
 #SBATCH --account=account_name
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --qos=batch
 #SBATCH --time=00:01:00
+KMP_AFFINITY=scatter
+OMP_NUM_THREADS=1
+OMP_STACKSIZE=1
+MPI_TYPE_DEPTH=20
+ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4
+srun  test_exec.py
 """.strip()
     config_file = fixture_path("forecast.yaml")
     with patch.object(Driver, "_validate", return_value=True):
         forecast = FV3Forecast(config_file=config_file)
-    assert forecast.batch_script(platform_resources=slurm_props).content() == expected
+    assert forecast.batch_script().content() == expected
 
 
 def test_schema_file():

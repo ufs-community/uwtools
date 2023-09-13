@@ -89,7 +89,7 @@ class Driver(ABC):
         """
         The job scheduler speficied by the platform information
         """
-        return JobScheduler.get_scheduler(self.resources)
+        return JobScheduler.get_scheduler(self.resources())
 
 
     @property

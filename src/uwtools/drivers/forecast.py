@@ -45,7 +45,8 @@ class FV3Forecast(Driver):
         """
         pre_run = self._mpi_env_variables("\n")
         bs = self.scheduler.batch_script
-        bs.append(pre_run).append(self.run_cmd())
+        bs.append(pre_run)
+        bs.append(self.run_cmd())
         return bs
 
     @staticmethod
@@ -238,8 +239,8 @@ class FV3Forecast(Driver):
         """
         envvars = {
             "KMP_AFFINITY": "scatter",
-            "OMP_NUM_THREADS": self._config["jobinfo"].get("threads", 1),
-            "OMP_STACKSIZE": self._config["jobinfo"].get("threads", "512m"),
+            "OMP_NUM_THREADS": self._config["runtime_info"].get("threads", 1),
+            "OMP_STACKSIZE": self._config["runtime_info"].get("threads", "512m"),
             "MPI_TYPE_DEPTH": 20,
             "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
         }

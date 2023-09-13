@@ -1,6 +1,8 @@
+user:
+  account: account_name
 platform:
   mpicmd: srun
-  account: user_account
+  scheduler: slurm
 preprocessing:
   lateral_boundary_conditions:
     interval_hours: 3
@@ -10,6 +12,14 @@ forecast:
   model: FV3
   exec_name: test_exec.py
   run_dir: src/uwtools/tests/drivers/
+  jobinfo:
+    nodes: 1
+    tasks_per_node: 1
+    walltime: 00:01:00
+    queue: batch
+  runtime_info:
+    threads: 1
+    stacksize: 512m
   cycle-dependent:
     INPUT/gfs_data.nc: path/to/gfs_data.tile7.halo0.nc
     INPUT/sfc_data.nc: path/to/sfc_data.tile7.halo0.nc
