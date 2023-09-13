@@ -1,5 +1,5 @@
 {
-    "definitions": {
+    "$defs": {
         "dateTimePattern": {
             "type": "string",
             "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2}):(\\d{2})$"
@@ -55,7 +55,7 @@
                     "required": ["realtime", "scheduler"]
                 },
                 "cycledefs": {
-                    "$ref": "#/definitions/dateTimePattern"
+                    "$ref": "#/$defs/dateTimePattern"
                 },
                 "log": {
                     "type": "string",
