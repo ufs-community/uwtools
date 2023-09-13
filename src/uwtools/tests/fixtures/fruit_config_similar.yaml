@@ -1,7 +1,10 @@
-fruit: papaya
-vegetable: peas
-how_many: 17
-dressing: ranch
-topping: crouton
-size: large
-meat: chicken
+forecast:
+  model_configure:
+    update_values:
+      fruit: papaya
+      vegetable: peas
+      how_many: 17
+      dressing: ranch
+      topping: crouton
+      size: large
+      meat: chicken

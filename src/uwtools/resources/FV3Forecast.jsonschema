@@ -9,9 +9,12 @@
             "properties": {
                 "cycle-dependent": {
                     "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    }
                 },
                 "exec_name": {
-                    "type": "string",
+                    "type": "string"
                 },
                 "field_table": {
                     "type": "object",
@@ -21,16 +24,16 @@
                             "format": "uri"
                         },
                         "update_values": {
-                            "type": "object",
+                            "type": "object"
                         }
                     }
                 },
                 "length": {
                     "type": "integer",
-                    "minimum": 1"
-                }
+                    "minimum": 1
+                },
                 "model": {
-                    "type": "string",
+                    "type": "string"
                 },
                 "model_configure": {
                     "type": "object",
@@ -40,7 +43,7 @@
                             "format": "uri"
                         },
                         "update_values": {
-                            "type": "object",
+                            "type": "object"
                         }
                     }
                 },
@@ -55,7 +58,7 @@
                             "format": "uri"
                         },
                         "update_values": {
-                            "type": "object",
+                            "type": "object"
                         }
                     }
                 },
@@ -65,8 +68,11 @@
                 },
                 "static": {
                     "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    }
                 },
-                "tiles: {
+                "tiles": {
                     "type": "array",
                     "items": {
                         "type": "integer"
@@ -84,7 +90,7 @@
                       "pbs",
                       "slurm"
                     ]
-                }
+                },
                 "required": ["mpicmd"]
             }
         },

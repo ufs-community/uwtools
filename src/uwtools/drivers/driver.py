@@ -36,7 +36,7 @@ class Driver(ABC):
         self._batch_script = batch_script
         self._validate()
         self._experiment_config = YAMLConfig(config_file=config_file)
-        self._platform_config = self._experiment_config["platform"]
+        self._platform_config = self._experiment_config.get("platform", {})
 
     # Public methods
 
@@ -78,7 +78,7 @@ class Driver(ABC):
 
         :param args: Any number of native flags for the run command
         """
-        run_cmd = self._config["mpicmd"]
+        run_cmd = self._platform_config["mpicmd"]
         exec_name = self._config["exec_name"]
         args_str = " ".join(str(arg) for arg in args)
         return f"{run_cmd} {args_str} {exec_name}"
@@ -134,7 +134,7 @@ class Driver(ABC):
 
     @property
     @abstractmethod
-    def _config(self):
+    def _config(self) -> Mapping:
         """
         The config object that describes the subset of an experiment config related to a subclass of
         Driver.

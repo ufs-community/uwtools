@@ -60,7 +60,7 @@ def _bad_paths(config: dict, schema: dict) -> List[str]:
     """
     paths = []
     for key, val in config.items():
-        subschema = schema["properties"][key]
+        subschema = schema.get("properties", {}).get(key, {})
         if isinstance(val, dict):
             paths += _bad_paths(val, subschema)
         else:

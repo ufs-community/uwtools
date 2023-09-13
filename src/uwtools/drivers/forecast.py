@@ -35,8 +35,7 @@ class FV3Forecast(Driver):
         Initialize the Forecast Driver
         """
 
-        super(Driver).__init__()
-        self._config = self._experiment_config["forecast"]
+        super().__init__(config_file=config_file, dry_run=dry_run, batch_script=batch_script)
 
     # Public methods
 
@@ -200,6 +199,13 @@ class FV3Forecast(Driver):
         offset = abs(lbcs_config["offset"])
         end_hour = self._config["length"] + offset + 1
         return offset, lbcs_config["interval_hours"], end_hour
+
+    @property
+    def _config(self) -> Mapping:
+        """
+        The config object that describes the subset of an experiment config related to the FV3Forecast.
+        """
+        return self._experiment_config["forecast"]
 
     def _define_boundary_files(self) -> Dict:
         """
