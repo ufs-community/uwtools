@@ -1,0 +1,102 @@
+{
+    "$defs": {
+        "task": {
+            "type": "object",
+            "properties": {
+                "attrs": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "object"
+                        },
+                        "maxtrices": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "throttle": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "cycledefs": {
+                            "type": "string"
+                        },
+                        "final": {
+                            "type": "string",
+                            "enum": [
+                                "true",
+                                "false",
+                                "T",
+                                "F",
+                                "t",
+                                "f",
+                                "True",
+                                "False",
+                                "FALSE",
+                                "TRUE"
+                            ]
+                        }
+                    },
+                    "required": ["name"]
+                }
+            }
+        },
+        "metatask": {
+            "type": "object",
+            "properties": {
+                "attrs": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "mode": {
+                                    "type": "string"
+                                },
+                                "throttle": {
+                                    "type": "integer",
+                                    "minimum": 0
+                                }
+                            }
+                        }
+                    }
+                },
+                "var": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "$ref": "#/$defs/metatask",
+                "$ref": "#/$defs/task"
+            },
+            "required": ["var"]
+        }
+    },
+    "type": "object",
+    "properties": {
+        "workflow": {
+            "type": "object",
+            "properties": {
+                "metatask": {
+                    "$ref": "#/$defs/metatask"
+                },
+                "task": {
+                    "$ref": "#/$defs/task"
+                }
+            },
+            "oneOf": [
+                {
+                    "required": ["task"]
+                },
+                {
+                    "required": ["metatask"]
+                }
+            ]
+        }
+    }
+}
