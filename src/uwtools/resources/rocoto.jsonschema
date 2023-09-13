@@ -1,55 +1,68 @@
 {
+    "$defs": {
+        "RocotoTags": {
+            "type": "object",
+            "propertyNames": {
+                "pattern": {
+                    "^taskdep(_.*)?$",
+                    "^datadep(_.*)?$",
+                    "^timedep(_.*)?$",
+                    "^streq(_.*)?$",
+                    "^strneq(_.*)?$",
+                    "^/true(_.*)?$",
+                    "^/false(_.*)?$",
+                    "^sh(_.*)?$",
+                    "^ruby(_.*)?$",
+                    "^cycleexistdep(_.*)?$",
+                    "^and(_.*)?$",
+                    "^or(_.*)?$",
+                    "^not(_.*)?$",
+                    "^nand(_.*)?$",
+                    "^nor(_.*)?$",
+                    "^xor(_.*)?$",
+                    "^some(_.*)?$"
+                }
+            }
+        }
+    }
+},
+{
     "type": "object",
     "properties": {
         "dependency": {
             "type": "object",
-            "properties": {
-                "anyOf": [
-                    {
-                    "type": "object",
-                    "propertyNames": {
-                        "pattern": {
-                            "^taskdep(_.*)?$",
-                            "^datadep(_.*)?$",
-                            "^timedep(_.*)?$",
-                            "^streq(_.*)?$",
-                            "^strneq(_.*)?$",
-                            "^/true(_.*)?$",
-                            "^/false(_.*)?$",
-                            "^sh(_.*)?$",
-                            "^ruby(_.*)?$",
-                            "^cycleexistdep(_.*)?$",
-                            "^and(_.*)?$",
-                            "^or(_.*)?$",
-                            "^not(_.*)?$",
-                            "^nand(_.*)?$",
-                            "^nor(_.*)?$",
-                            "^xor(_.*)?$",
-                            "^some(_.*)?$"
-                        }
-                    }
-                    }
-                ],
-                    "properties": {
-                        "anyOf": [
-                            "attrs": {
-                                "task": {
-                                    "type": "string"
-                                }
-                                "metatask": {
-                                    "type": "string"
-                                }
-                                "age": {
-                                    "type": "string",
-                                    "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2}):(\\d{2})$"
-                                }
-                            },
-                            "text": {
-                                "type": "string",
+            "if": {
+                "properties": {$ref": "#/$defs/RocotoTags"}
+            },
+            "then": {
+                "properties": {
+                    "anyOf": [
+                        "$ref": "#/$defs/RocotoTags"
+                    ],
+                }
+            },
+            "else": {
+                "properties": {
+                    "anyOf": [
+                        "attrs": {
+                            "task": {
+                                "type": "string"
                             }
-                        ]
-                    }
-            }
+                            "metatask": {
+                                "type": "string"
+                            }
+                            "age": {
+                                "type": "string",
+                                "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2}):(\\d{2})$"
+                            }
+                        },
+                        "text": {
+                            "type": "string",
+                        }
+                    ]
+                }
+            },
+            "items": { "$ref": "#" }
         }
     }
 }
