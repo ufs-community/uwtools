@@ -68,7 +68,7 @@ def test_create_model_configure(tmp_path):
     file.
     """
 
-    config_file = fixture_path("fruit_config_similar.yaml")
+    config_file = fixture_path("fruit_config_similar_for_fcst.yaml")
     base_file = fixture_path("fruit_config.yaml")
     fcst_config_file = tmp_path / "fcst.yml"
 
