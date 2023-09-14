@@ -29,7 +29,7 @@
                   "type": "string"
                 },
                 "cycle_offset": {
-                  "pattern": "#/$defs/dateTimePattern"
+                  "$ref": "#/$defs/dateTimePattern"
                 },
                 "state": {
                   "type": "string",
@@ -63,10 +63,10 @@
               "type": "object",
               "properties": {
                 "left": {
-                  "pattern": "#/$defs/dateTimePattern"
+                  "$ref": "#/$defs/dateTimePattern"
                 },
                 "right": {
-                  "pattern": "#/$defs/dateTimePattern"
+                  "$ref": "#/$defs/dateTimePattern"
                 }
               },
               "required": [
@@ -87,10 +87,10 @@
               "type": "object",
               "properties": {
                 "left": {
-                  "pattern": "#/$defs/dateTimePattern"
+                  "$ref": "#/$defs/dateTimePattern"
                 },
                 "right": {
-                  "pattern": "#/$defs/dateTimePattern"
+                  "$ref": "#/$defs/dateTimePattern"
                 }
               },
               "required": [
@@ -111,15 +111,15 @@
               "type": "object",
               "properties": {
                 "cycle_offset": {
-                  "pattern": "#/$defs/dateTimePattern"
+                  "$ref": "#/$defs/dateTimePattern"
                 }
               },
+              "required": [
+                "cycleexistdep"
+              ],
               "additionalProperties": false
             }
-          },
-          "required": [
-            "cycleexistdep"
-          ]
+          }
         },
         {
           "type": "object",
@@ -132,14 +132,11 @@
                 }
               },
               "required": [
-                "task"
+                "taskvalid"
               ],
               "additionalProperties": false
             }
-          },
-          "required": [
-            "taskvalid"
-          ]
+          }
         },
         {
           "type": "object",
@@ -154,7 +151,7 @@
                       "type": "string"
                     },
                     "cycle_offset": {
-                      "pattern": "#/$defs/dateTimePattern"
+                      "$ref": "#/$defs/dateTimePattern"
                     },
                     "state": {
                       "type": "string",
@@ -171,18 +168,15 @@
                       "type": "number",
                       "minimum": 0,
                       "maximum": 1
-                    },
-                    "required": [
-                      "metatask"
-                    ],
-                    "additionalProperties": false
-                  }
+                    }
+                  },
+                  "required": [
+                    "metatask"
+                  ],
+                  "additionalProperties": false
                 }
               }
-            },
-            "required": [
-              "metataskdep"
-            ]
+            }
           }
         },
         {
@@ -195,7 +189,7 @@
                   "type": "object",
                   "properties": {
                     "age": {
-                      "pattern": "#/$defs/dateTimePattern"
+                      "$ref": "#/$defs/dateTimePattern"
                     },
                     "minsize": {
                       "type": "string"
@@ -206,18 +200,18 @@
                   "type": "string"
                 }
               },
+              "required": [
+                "datadep"
+              ],
               "additionalProperties": false
             }
-          },
-          "required": [
-            "datadep"
-          ]
+          }
         },
         {
           "type": "object",
           "properties": {
             "timedep": {
-              "pattern": "#/$defs/dateTimePattern"
+              "$ref": "#/$defs/dateTimePattern"
             }
           },
           "required": [
@@ -232,17 +226,12 @@
               "items": {
                 "$ref": "#/definitions/dependency"
               },
-              "minItems": 1,
-              "properties": {
-                "threshold": {
-                  "type": "number",
-                  "minimum": 0,
-                  "maximum": 1
-                }
-              },
-              "required": [
-                "threshold"
-              ]
+              "minItems": 1
+            },
+            "threshold": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
             }
           },
           "required": [
