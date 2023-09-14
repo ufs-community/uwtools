@@ -133,7 +133,11 @@ def test_create_field_table_with_base_file(create_field_table_update_obj, tmp_pa
     base_file = fixture_path("FV3_GFS_v16.yaml")
     outfldtbl_file = tmp_path / "field_table_two.FV3_GFS"
     expected = fixture_path("field_table_from_base.FV3_GFS")
-    FV3Forecast.create_field_table(create_field_table_update_obj, outfldtbl_file, base_file)
+    config_file = tmp_path / "fcst.yaml"
+    forecast_config = create_field_table_update_obj
+    forecast_config["forecast"]["field_table"]["base_file"] = base_file
+    forecast_config.dump(config_file)
+    FV3Forecast(config_file).create_field_table(outfldtbl_file)
     assert compare_files(expected, outfldtbl_file)
 
 
