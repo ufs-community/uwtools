@@ -62,20 +62,26 @@ def test_schema_file():
     assert path.is_file()
 
 
-def test_create_config(tmp_path):
+def test_create_model_configure(tmp_path):
     """
     Test that providing a YAML base input file and a config file will create and update YAML config
     file.
     """
 
     config_file = fixture_path("fruit_config_similar.yaml")
-    input_file = fixture_path("fruit_config.yaml")
+    base_file = fixture_path("fruit_config.yaml")
+    fcst_config_file = tmp_path / "fcst.yml"
+
+    fcst_config = YAMLConfig(config_file)
+    fcst_config["forecast"]["model_configure"]["base_file"] = base_file
+    fcst_config.dump(fcst_config_file)
+
     output_file = (tmp_path / "test_config_from_yaml.yaml").as_posix()
     with patch.object(FV3Forecast, "_validate", return_value=True):
-        forecast_obj = FV3Forecast(config_file=config_file)
-    forecast_obj._create_model_config(base_file=input_file, outconfig_file=output_file)
-    expected = YAMLConfig(input_file)
-    expected.update_values(YAMLConfig(config_file))
+        forecast_obj = FV3Forecast(config_file=fcst_config_file)
+    forecast_obj.create_model_configure(output_file)
+    expected = YAMLConfig(base_file)
+    expected.update_values(YAMLConfig(config_file)["forecast"]["model_configure"]["update_values"])
     expected_file = tmp_path / "expected_yaml.yaml"
     expected.dump(expected_file)
     assert compare_files(expected_file, output_file)
