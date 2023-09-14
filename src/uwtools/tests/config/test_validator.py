@@ -4,12 +4,15 @@ Tests for uwtools.config.validator module.
 """
 
 import json
+from importlib import resources
 from pathlib import Path
 from typing import Any, Dict
 
+from lxml import etree
 from pytest import fixture
 
 from uwtools.config import validator
+from uwtools.tests import support
 
 # Support functions
 
@@ -118,6 +121,14 @@ def test_validate_yaml_pass(config, config_file, schema, schema_file):
     # Test a fully valid config file.
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
+    assert validator.validate_yaml(schema_file=schema_file, config_file=config_file)
+
+
+def test_validate_workflow_tags_pass():
+    # Test a fully valid config file passes schema
+    with resources.as_file(resources.files("uwtools.resources")) as resc:
+        schema_file = resc / "rocoto.jsonschema"
+    config_file = support.fixture_path("hello_workflow_tags.yaml")
     assert validator.validate_yaml(schema_file=schema_file, config_file=config_file)
 
 
