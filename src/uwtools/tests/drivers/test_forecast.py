@@ -246,13 +246,13 @@ def test_forecast_run_cmd():
     with patch.object(FV3Forecast, "_validate", return_value=True):
         fcstobj = FV3Forecast(config_file=config_file)
         hera_expected = "srun --export=ALL test_exec.py"
-        assert hera_expected == fcstobj.run_cmd(
-            "--export=ALL", run_cmd="srun", exec_name="test_exec.py"
-        )
+        assert hera_expected == fcstobj.run_cmd("--export=ALL")
         cheyenne_expected = "mpirun -np 4 test_exec.py"
-        assert cheyenne_expected == fcstobj.run_cmd(
-            "-np", 4, run_cmd="mpirun", exec_name="test_exec.py"
-        )
+
+        fcstobj._experiment_config["platform"]["mpicmd"] = "mpirun"
+        assert cheyenne_expected == fcstobj.run_cmd("-np", 4)
+
+        fcstobj._experiment_config["platform"]["mpicmd"] = "mpiexec"
         wcoss2_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
         assert wcoss2_expected == fcstobj.run_cmd(
             "-n",
@@ -263,8 +263,6 @@ def test_forecast_run_cmd():
             "core",
             "-depth",
             2,
-            run_cmd="mpiexec",
-            exec_name="test_exec.py",
         )
 
 
