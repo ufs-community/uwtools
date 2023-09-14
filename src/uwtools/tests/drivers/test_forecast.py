@@ -157,23 +157,18 @@ def test_create_directory_structure_bad_existing_act():
         FV3Forecast.create_directory_structure(run_directory="/some/path", exist_act="foo")
 
 
-def test_create_model_config(tmp_path):
+def test_create_model_configure_call_private(tmp_path):
     basefile = str(tmp_path / "base.yaml")
     infile = fixture_path("forecast.yaml")
     outfile = str(tmp_path / "out.yaml")
     for path in infile, basefile:
         Path(path).touch()
-    with patch.object(forecast, "realize_config") as realize_config:
+    with patch.object(Driver, "_create_user_updated_config") as _create_user_updated_config:
         with patch.object(FV3Forecast, "_validate", return_value=True):
-            FV3Forecast(config_file=infile)._create_model_config(
-                outconfig_file=outfile, base_file=basefile
-            )
-    assert realize_config.call_args.kwargs["input_file"] == basefile
-    assert realize_config.call_args.kwargs["input_format"] == FORMAT.yaml
-    assert realize_config.call_args.kwargs["output_file"] == outfile
-    assert realize_config.call_args.kwargs["output_format"] == FORMAT.yaml
-    assert realize_config.call_args.kwargs["values_file"] == infile
-    assert realize_config.call_args.kwargs["values_format"] == FORMAT.yaml
+            FV3Forecast(config_file=infile).create_model_configure(outfile)
+    assert _create_user_updated_config.call_args.kwargs["config_class"] == YAMLConfig
+    assert _create_user_updated_config.call_args.kwargs["config_values"] == None
+    assert _create_user_updated_config.call_args.kwargs["output_path"] == outfile
 
 
 @fixture
