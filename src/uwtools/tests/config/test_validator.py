@@ -7,7 +7,6 @@ import json
 from importlib import resources
 from pathlib import Path
 from typing import Any, Dict
-
 from pytest import fixture
 
 from uwtools.config import validator
