@@ -147,7 +147,8 @@ def test_create_field_table_without_base_file(create_field_table_update_obj, tmp
     """
     outfldtbl_file = tmp_path / "field_table_one.FV3_GFS"
     expected = fixture_path("field_table_from_input.FV3_GFS")
-    FV3Forecast.create_field_table(create_field_table_update_obj, outfldtbl_file)
+    config_file = fixture_path("FV3_GFS_v16_update.yaml")
+    FV3Forecast(config_file).create_field_table(outfldtbl_file)
     assert compare_files(expected, outfldtbl_file)
 
 
