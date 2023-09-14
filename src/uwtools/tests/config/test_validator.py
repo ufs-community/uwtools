@@ -130,6 +130,7 @@ def test_validate_yaml_pass(config, config_file, schema, schema_file):
 
 def test_validate_workflow_tags_pass():
     # Test a fully valid config file passes schema
+    # Current test config only includes dependencies
     with resources.as_file(resources.files("uwtools.resources")) as resc:
         schema_file = resc / "rocoto.jsonschema"
     config_file = support.fixture_path("hello_workflow_tags.yaml")
