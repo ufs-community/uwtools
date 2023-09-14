@@ -210,12 +210,21 @@ def test_create_namelist_with_base_file(create_namelist_assets, tmp_path):
         assert out_file.read() == expected
 
 
-def test_create_namelist_without_base_file(create_namelist_assets):
+def test_create_namelist_without_base_file(create_namelist_assets, tmp_path):
     """
     Tests create_namelist method without optional base file.
     """
     update_obj, outnml_file = create_namelist_assets
-    FV3Forecast.create_namelist(update_obj, str(outnml_file))
+    fcst_config = {
+        "forecast": {
+            "namelist": {
+                "update_values": update_obj.data,
+                },
+            },
+        }
+    fcst_config_file = tmp_path / "fcst.yml"
+    YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
+    FV3Forecast(fcst_config_file).create_namelist(outnml_file)
     expected = """
 &salad
     base = 'kale'
