@@ -14,19 +14,7 @@
                     "type": "object",
                     "properties": {
                         "realtime": {
-                            "type": "string",
-                            "enum": [
-                                "true",
-                                "false",
-                                "T",
-                                "F",
-                                "t",
-                                "f",
-                                "True",
-                                "False",
-                                "FALSE",
-                                "TRUE"
-                            ]
+                            "type": "boolean"
                         },
                         "scheduler": {
                             "type": "string",

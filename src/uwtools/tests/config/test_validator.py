@@ -8,7 +8,6 @@ from importlib import resources
 from pathlib import Path
 from typing import Any, Dict
 
-from lxml import etree
 from pytest import fixture
 
 from uwtools.config import validator
