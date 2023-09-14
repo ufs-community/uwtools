@@ -41,6 +41,9 @@ class ConcreteDriver(Driver):
     def schema_file(self) -> str:
         return ""
 
+    def _config(self) -> Mapping:
+        return {}
+
 
 @fixture
 def configs():
