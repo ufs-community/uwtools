@@ -3,6 +3,7 @@
 Tests for uwtools.utils.atparse_to_jinja2 module.
 """
 
+import logging
 import sys
 from io import StringIO
 from unittest.mock import patch
@@ -47,6 +48,7 @@ def test_convert_input_file_to_output_file(atparsefile, capsys, jinja2txt, tmp_p
 
 
 def test_convert_input_file_to_logging(atparsefile, caplog, capsys, jinja2txt, tmp_path):
+    logging.getLogger().setLevel(logging.INFO)
     outfile = tmp_path / "outfile"
     atparse_to_jinja2.convert(input_file=atparsefile, dry_run=True)
     streams = capsys.readouterr()
@@ -74,6 +76,7 @@ def test_convert_stdin_to_file(atparselines, capsys, jinja2txt, tmp_path):
 
 
 def test_convert_stdin_to_logging(atparselines, caplog, jinja2txt, tmp_path):
+    logging.getLogger().setLevel(logging.INFO)
     outfile = tmp_path / "outfile"
     with patch.object(sys, "stdin", new=StringIO("\n".join(atparselines))):
         atparse_to_jinja2.convert(output_file=outfile, dry_run=True)
