@@ -1,16 +1,18 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
 import logging
+import sys
 from argparse import ArgumentParser as Parser
 from argparse import Namespace as ns
+from argparse import _SubParsersAction
 from typing import List
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import pytest
 from pytest import fixture, raises
 
 from uwtools import cli
+from uwtools.cli import STR
 from uwtools.utils.file import FORMAT
 
 # Test functions
@@ -25,68 +27,151 @@ def test__abort(capsys):
 
 def test__add_subparser_config(subparsers):
     cli._add_subparser_config(subparsers)
-    assert submodes(subparsers.choices["config"]) == ["compare", "realize", "translate", "validate"]
+    assert submodes(subparsers.choices[STR.config]) == [
+        STR.compare,
+        STR.realize,
+        STR.translate,
+        STR.validate,
+    ]
 
 
 def test__add_subparser_config_compare(subparsers):
     cli._add_subparser_config_compare(subparsers)
-    assert subparsers.choices["compare"]
+    assert subparsers.choices[STR.compare]
 
 
 def test__add_subparser_config_realize(subparsers):
     cli._add_subparser_config_realize(subparsers)
-    assert subparsers.choices["realize"]
+    assert subparsers.choices[STR.realize]
 
 
 def test__add_subparser_config_translate(subparsers):
     cli._add_subparser_config_translate(subparsers)
-    assert subparsers.choices["translate"]
+    assert subparsers.choices[STR.translate]
 
 
 def test__add_subparser_config_validate(subparsers):
     cli._add_subparser_config_validate(subparsers)
-    assert subparsers.choices["validate"]
+    assert subparsers.choices[STR.validate]
 
 
 def test__add_subparser_forecast(subparsers):
     cli._add_subparser_forecast(subparsers)
-    assert submodes(subparsers.choices["forecast"]) == ["run"]
+    assert submodes(subparsers.choices[STR.forecast]) == [STR.run]
 
 
 def test__add_subparser_forecast_run(subparsers):
     cli._add_subparser_forecast_run(subparsers)
-    assert subparsers.choices["run"]
+    assert subparsers.choices[STR.run]
 
 
 def test__add_subparser_template(subparsers):
     cli._add_subparser_template(subparsers)
-    assert submodes(subparsers.choices["template"]) == ["render"]
+    assert submodes(subparsers.choices[STR.template]) == [STR.render]
 
 
 def test__add_subparser_template_render(subparsers):
     cli._add_subparser_template_render(subparsers)
-    assert subparsers.choices["render"]
+    assert subparsers.choices[STR.render]
 
 
-def test__check_args_fail_quiet_verbose(capsys):
-    logging.getLogger().setLevel(logging.INFO)
-    args = ns(quiet=True, verbose=True)
+@pytest.mark.parametrize(
+    "vals",
+    [
+        (STR.file1path, STR.file1fmt),
+        (STR.file2path, STR.file2fmt),
+        (STR.infile, STR.infmt),
+        (STR.outfile, STR.outfmt),
+        (STR.valsfile, STR.valsfmt),
+    ],
+)
+def test__check_file_vs_format_fail(capsys, vals):
+    # When reading/writing from/to stdin/stdout, the data format must be specified, since there is
+    # no filename to deduce it from.
+    file_arg, format_arg = vals
+    args = ns()
+    vars(args).update({file_arg: None, format_arg: None})
     with raises(SystemExit):
-        cli._check_args(args)
-    assert "Specify at most one of --quiet, --verbose" in capsys.readouterr().err
+        cli._check_file_vs_format(file_arg=file_arg, format_arg=format_arg, args=args)
+    assert (
+        "Specify %s when %s is not specified" % (cli._switch(format_arg), cli._switch(file_arg))
+        in capsys.readouterr().err
+    )
 
 
-def test__check_args_fail_values_file_no_value_format(capsys):
+def test__check_file_vs_format_pass_explicit():
+    # Accept explcitly-specified format, whatever it is.
+    fmt = "jpg"
+    args = ns()
+    vars(args).update({STR.infile: "/path/to/input.txt", STR.infmt: fmt})
+    args = cli._check_file_vs_format(
+        file_arg=STR.infile,
+        format_arg=STR.infmt,
+        args=args,
+    )
+    assert args.input_format == fmt
+
+
+@pytest.mark.parametrize("fmt", vars(FORMAT).keys())
+def test__check_file_vs_format_pass_implicit(fmt):
+    # The format is correctly deduced for a file with a known extension.
+    args = ns()
+    vars(args).update({STR.infile: f"/path/to/input.{fmt}", STR.infmt: None})
+    args = cli._check_file_vs_format(
+        file_arg=STR.infile,
+        format_arg=STR.infmt,
+        args=args,
+    )
+    assert args.input_format == vars(FORMAT)[fmt]
+
+
+def test__check_quiet_vs_verbose_fail(capsys):
     logging.getLogger().setLevel(logging.INFO)
-    args = ns(values_file="foo")
+    args = ns()
+    vars(args).update({STR.quiet: True, STR.verbose: True})
     with raises(SystemExit):
-        cli._check_args(args)
-    assert "Specify --values-format with --values-file" in capsys.readouterr().err
+        cli._check_quiet_vs_verbose(args)
+    assert (
+        "Specify at most one of %s, %s" % (cli._switch(STR.quiet), cli._switch(STR.verbose))
+        in capsys.readouterr().err
+    )
 
 
-def test__check_args_ok():
+def test__check_quiet_vs_verbose_ok():
     args = ns(foo=88)
-    assert cli._check_args(args) == args
+    assert cli._check_quiet_vs_verbose(args) == args
+
+
+def test__check_template_render_vals_args_implicit_fail():
+    # The values-file format cannot be deduced from the filename.
+    args = ns()
+    vars(args)[STR.valsfile] = "a.jpg"
+    with raises(ValueError) as e:
+        cli._check_template_render_vals_args(args)
+    assert "Cannot deduce format" in str(e.value)
+
+
+def test__check_template_render_vals_args_implicit_pass():
+    # The values-file format is deduced from the filename.
+    args = ns()
+    vars(args)[STR.valsfile] = "a.yaml"
+    checked = cli._check_template_render_vals_args(args)
+    assert vars(checked)[STR.valsfmt] == FORMAT.yaml
+
+
+def test__check_template_render_vals_args_noop_no_valsfile():
+    # No values file is provided, so format is irrelevant.
+    args = ns()
+    vars(args)[STR.valsfile] = None
+    assert cli._check_template_render_vals_args(args) == args
+
+
+def test__check_template_render_vals_args_noop_explicit_valsfmt():
+    # An explicit values format is honored, valid or not.
+    args = ns()
+    vars(args)[STR.valsfile] = "a.txt"
+    vars(args)[STR.valsfmt] = "jpg"
+    assert cli._check_template_render_vals_args(args) == args
 
 
 def test__dict_from_key_eq_val_strings():
@@ -97,37 +182,42 @@ def test__dict_from_key_eq_val_strings():
 @pytest.mark.parametrize(
     "params",
     [
-        ("compare", "_dispatch_config_compare"),
-        ("realize", "_dispatch_config_realize"),
-        ("translate", "_dispatch_config_translate"),
-        ("validate", "_dispatch_config_validate"),
+        (STR.compare, "_dispatch_config_compare"),
+        (STR.realize, "_dispatch_config_realize"),
+        (STR.translate, "_dispatch_config_translate"),
+        (STR.validate, "_dispatch_config_validate"),
     ],
 )
 def test__dispatch_config(params):
     submode, funcname = params
-    args = ns(submode=submode)
+    args = ns()
+    vars(args).update({STR.submode: submode})
     with patch.object(cli, funcname) as m:
         cli._dispatch_config(args)
     assert m.called_once_with(args)
 
 
 def test__dispatch_config_compare():
-    args = ns(file_1_path=1, file_1_format=2, file_2_path=3, file_2_format=4)
+    args = ns()
+    vars(args).update({STR.file1path: 1, STR.file1fmt: 2, STR.file2path: 3, STR.file2fmt: 4})
     with patch.object(cli.uwtools.config.core, "compare_configs") as m:
         cli._dispatch_config_compare(args)
     assert m.called_once_with(args)
 
 
 def test__dispatch_config_realize():
-    args = ns(
-        input_file=1,
-        input_format=2,
-        output_file=3,
-        output_format=4,
-        values_file=5,
-        values_format=6,
-        values_needed=7,
-        dry_run=8,
+    args = ns()
+    vars(args).update(
+        {
+            STR.infile: 1,
+            STR.infmt: 2,
+            STR.outfile: 3,
+            STR.outfmt: 4,
+            STR.valsfile: 5,
+            STR.valsfmt: 6,
+            STR.valsneeded: 7,
+            STR.dryrun: 8,
+        }
     )
     with patch.object(cli.uwtools.config.core, "realize_config") as m:
         cli._dispatch_config_realize(args)
@@ -135,12 +225,15 @@ def test__dispatch_config_realize():
 
 
 def test__dispatch_config_translate_arparse_to_jinja2():
-    args = ns(
-        input_file=1,
-        input_format=FORMAT.atparse,
-        output_file=3,
-        output_format=FORMAT.jinja2,
-        dry_run=5,
+    args = ns()
+    vars(args).update(
+        {
+            STR.infile: 1,
+            STR.infmt: FORMAT.atparse,
+            STR.outfile: 3,
+            STR.outfmt: FORMAT.jinja2,
+            STR.dryrun: 5,
+        }
     )
     with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as m:
         cli._dispatch_config_translate(args)
@@ -148,26 +241,32 @@ def test__dispatch_config_translate_arparse_to_jinja2():
 
 
 def test_dispath_config_translate_unsupported():
-    args = ns(input_file=1, input_format="jpg", output_file=3, output_format="png", dry_run=5)
+    args = ns()
+    vars(args).update(
+        {STR.infile: 1, STR.infmt: "jpg", STR.outfile: 3, STR.outfmt: "png", STR.dryrun: 5}
+    )
     assert cli._dispatch_config_translate(args) is False
 
 
 def test__dispatch_config_validate_yaml():
-    args = ns(input_file=1, input_format=FORMAT.yaml, schema_file=3)
+    args = ns()
+    vars(args).update({STR.infile: 1, STR.infmt: FORMAT.yaml, STR.schemafile: 3})
     with patch.object(cli.uwtools.config.validator, "validate_yaml") as m:
         cli._dispatch_config_validate(args)
     assert m.called_once_with(args)
 
 
 def test_dispath_config_validate_unsupported():
-    args = ns(input_file=1, input_format="jpg", schema_file=3)
+    args = ns()
+    vars(args).update({STR.infile: 1, STR.infmt: "jpg", STR.schemafile: 3})
     assert cli._dispatch_config_validate(args) is False
 
 
-@pytest.mark.parametrize("params", [("run", "_dispatch_forecast_run")])
+@pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
 def test__dispatch_forecast(params):
     submode, funcname = params
-    args = ns(submode=submode)
+    args = ns()
+    vars(args).update({STR.submode: submode})
     with patch.object(cli, funcname) as m:
         cli._dispatch_forecast(args)
     assert m.called_once_with(args)
@@ -175,6 +274,7 @@ def test__dispatch_forecast(params):
 
 def test__dispatch_forecast_run():
     args = ns(cycle="2023-01-01T00:00:00", config_file=1, dry_run=True, forecast_model="foo")
+    vars(args).update({STR.cfgfile: 1, "forecast_model": "foo"})
     with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as m:
         CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
         with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):
@@ -183,46 +283,64 @@ def test__dispatch_forecast_run():
     m().run.assert_called_once_with(cycle="2023-01-01T00:00:00")
 
 
-@pytest.mark.parametrize("params", [("render", "_dispatch_template_render")])
+@pytest.mark.parametrize("params", [(STR.render, "_dispatch_template_render")])
 def test__dispatch_template(params):
     submode, funcname = params
-    args = ns(submode=submode)
+    args = ns()
+    vars(args).update({STR.submode: submode})
     with patch.object(cli, funcname) as m:
         cli._dispatch_template(args)
     assert m.called_once_with(args)
 
 
 def test__dispatch_template_render_yaml():
-    args = ns(
-        input_file=1,
-        output_file=2,
-        values_file=3,
-        values_format=4,
-        key_eq_val_pairs=["foo=88", "bar=99"],
-        values_needed=6,
-        dry_run=7,
+    args = ns()
+    vars(args).update(
+        {
+            STR.infile: 1,
+            STR.outfile: 2,
+            STR.valsfile: 3,
+            STR.valsfmt: 4,
+            STR.keyvalpairs: ["foo=88", "bar=99"],
+            STR.valsneeded: 6,
+            STR.dryrun: 7,
+        }
     )
-    with patch.object(cli.uwtools.config.templater, "render") as m:
+    with patch.object(cli.uwtools.config.templater, STR.render) as m:
         cli._dispatch_template_render(args)
     assert m.called_once_with(args)
 
 
-@pytest.mark.parametrize("params", [(False, 1, False, True), (True, 0, True, False)])
-def test_main_fail(params):
-    fnretval, status, quiet, verbose = params
-    with patch.multiple(
-        cli, _check_args=D, _parse_args=D, _dispatch_config=D, setup_logging=D
-    ) as mocks:
-        args = ns(mode="config", quiet=quiet, verbose=verbose)
-        mocks["_parse_args"].return_value = args
-        mocks["_check_args"].return_value = mocks["_parse_args"]()
-        mocks["_dispatch_config"].return_value = fnretval
-        with raises(SystemExit) as e:
-            cli.main()
-        assert e.value.code == status
-        mocks["_dispatch_config"].assert_called_once_with(args)
-        mocks["_check_args"].assert_called_once_with(args)
-        mocks["setup_logging"].assert_called_with(quiet=quiet, verbose=verbose)
+@pytest.mark.parametrize("quiet", [True])
+@pytest.mark.parametrize("verbose", [False])
+def test_main_fail_checks(capsys, quiet, verbose):
+    # Using mode 'template render' for testing.
+    raw_args = ["testing", STR.template, STR.render]
+    if quiet:
+        raw_args.append(cli._switch(STR.quiet))
+    if verbose:
+        raw_args.append(cli._switch(STR.verbose))
+    with patch.object(sys, "argv", raw_args):
+        with patch.object(cli, "_dispatch_template", return_value=True):
+            with raises(SystemExit) as e:
+                cli.main()
+            if quiet and verbose:
+                assert e.value.code == 1
+                assert "Specify at most one of" in capsys.readouterr().err
+            else:
+                assert e.value.code == 0
+
+
+@pytest.mark.parametrize("vals", [(True, 0), (False, 1)])
+def test_main_fail_dispatch(vals):
+    # Using mode 'template render' for testing.
+    dispatch_retval, exit_status = vals
+    raw_args = ["testing", STR.template, STR.render]
+    with patch.object(sys, "argv", raw_args):
+        with patch.object(cli, "_dispatch_template", return_value=dispatch_retval):
+            with raises(SystemExit) as e:
+                cli.main()
+            assert e.value.code == exit_status
 
 
 def test_main_raises_exception(capsys):
@@ -234,7 +352,7 @@ def test_main_raises_exception(capsys):
 
 
 def test__parse_args():
-    raw_args = ["foo", "--bar", "88"]
+    raw_args = ["testing", "--bar", "88"]
     with patch.object(cli, "Parser") as Parser:
         cli._parse_args(raw_args)
         Parser.assert_called_once()
@@ -242,54 +360,18 @@ def test__parse_args():
         parser.parse_args.assert_called_with(raw_args)
 
 
-@pytest.mark.parametrize(
-    "vals",
-    [
-        (ns(file_1_path=None, file_1_format=None), "--file-1-path", "--file-1-format"),
-        (ns(file_2_path=None, file_2_format=None), "--file-2-path", "--file-2-format"),
-        (ns(input_file=None, input_format=None), "--input-file", "--input-format"),
-        (ns(output_file=None, output_format=None), "--output-file", "--output-format"),
-        (ns(values_file=None, values_format=None), "--values-file", "--values-format"),
-    ],
-)
-def test__set_formats_fail(capsys, vals):
-    # When reading/writing from/to stdin/stdout, the data format must be specified, since there is
-    # no filename to deduce it from.
-    args, path_arg, fmt_arg = vals
-    with raises(SystemExit):
-        cli._set_formats(args)
-    assert f"Specify {fmt_arg} when {path_arg} is not specified" in capsys.readouterr().err
-
-
-def test__set_formats_pass_explicit():
-    # Accept explcitly-specified format, whatever it is.
-    args = ns(input_file="/path/to/input.txt", input_format="jpg")
-    args = cli._set_formats(args)
-    assert args.input_format == "jpg"
-
-
-@pytest.mark.parametrize("fmt", vars(FORMAT).keys())
-def test__set_formats_pass_implicit(fmt):
-    # The format is correctly deduced for a file with a known extension.
-    args = ns(input_file=f"/path/to/input.{fmt}", input_format=None)
-    args = cli._set_formats(args)
-    assert args.input_format == vars(FORMAT)[fmt]
-
-
 # Helper functions
+
+
+def submodes(parser: Parser) -> List[str]:
+    # Return submodes (named subparsers) belonging to the given parser. For some background, see
+    # https://stackoverflow.com/questions/43688450.
+    if actions := [x for x in parser._actions if isinstance(x, _SubParsersAction)]:
+        return list(actions[0].choices.keys())
+    return []
 
 
 @fixture
 def subparsers():
     # Create and return a subparsers test object.
     return Parser().add_subparsers()
-
-
-def submodes(parser: Parser) -> List[str]:
-    # Return submodes (named subparsers) belonging to the given parser.
-    if subparsers := parser._subparsers:
-        if action := subparsers._actions[3]:
-            if choices := action.choices:
-                submodes = choices.keys()  # type: ignore
-                return list(submodes)
-    return []

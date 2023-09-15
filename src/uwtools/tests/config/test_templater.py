@@ -61,6 +61,7 @@ def test_render_dry_run(caplog, values_file, template):
 
 def test_render_values_missing(caplog, values_file, template):
     # Read in the config, remove the "roses" key, then re-write it.
+    logging.getLogger().setLevel(logging.INFO)
     with open(values_file, "r", encoding="utf-8") as f:
         cfgobj = yaml.safe_load(f.read())
     del cfgobj["roses"]

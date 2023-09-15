@@ -55,6 +55,7 @@ def test_compare_config(caplog, fmt, salad_base):
 
 
 def test_compare_configs_good(compare_configs_assets, caplog):
+    logging.getLogger().setLevel(logging.INFO)
     _, a, b = compare_configs_assets
     assert core.compare_configs(
         config_a_path=a, config_a_format=FORMAT.yaml, config_b_path=b, config_b_format=FORMAT.yaml
@@ -63,6 +64,7 @@ def test_compare_configs_good(compare_configs_assets, caplog):
 
 
 def test_compare_configs_changed_value(compare_configs_assets, caplog):
+    logging.getLogger().setLevel(logging.INFO)
     d, a, b = compare_configs_assets
     d["baz"]["qux"] = 11
     with writable(b) as f:
@@ -74,6 +76,7 @@ def test_compare_configs_changed_value(compare_configs_assets, caplog):
 
 
 def test_compare_configs_missing_key(compare_configs_assets, caplog):
+    logging.getLogger().setLevel(logging.INFO)
     d, a, b = compare_configs_assets
     del d["baz"]
     with writable(b) as f:
@@ -161,7 +164,7 @@ def test_dereference():
         assert cfg["grid_stats"]["total_ens_points"] == 19200000
 
         # Check that statements expand:
-        assert cfg["fcst"]["output_hours"] == "0 3 6 9 "
+        assert cfg["fcst"]["output_hours"] == "0 3 6 9"
 
         # Check that order isn't a problem:
         assert cfg["grid_stats"]["points_per_level"] == 10000
@@ -612,6 +615,7 @@ def test__realize_config_update(realize_config_testobj, tmp_path):
 
 
 def test__realize_config_values_needed(caplog, tmp_path):
+    logging.getLogger().setLevel(logging.INFO)
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
@@ -862,14 +866,19 @@ def test_Config_characterize_values(nml_cfgobj):
     assert template == ["    p3: {{ n }}"]
 
 
-def test_Config_str_to_type(nml_cfgobj):
-    for x in ["true", "yes", "yeah"]:
-        assert nml_cfgobj.str_to_type(x) is True
-    for x in ["false", "no", "nope"]:
-        assert nml_cfgobj.str_to_type(x) is False
-    assert nml_cfgobj.str_to_type("88") == 88
-    assert nml_cfgobj.str_to_type("3.14") == 3.14
-    assert nml_cfgobj.str_to_type("NA") == "NA"  # no conversion
+def test_Config_reify_scalar_str(nml_cfgobj):
+    for x in ["true", "yes", "TRUE"]:
+        assert nml_cfgobj.reify_scalar_str(x) is True
+    for x in ["false", "no", "FALSE"]:
+        assert nml_cfgobj.reify_scalar_str(x) is False
+    assert nml_cfgobj.reify_scalar_str("88") == 88
+    assert nml_cfgobj.reify_scalar_str("'88'") == "88"  # quoted int not converted
+    assert nml_cfgobj.reify_scalar_str("3.14") == 3.14
+    assert nml_cfgobj.reify_scalar_str("NA") == "NA"  # no conversion
+    assert nml_cfgobj.reify_scalar_str("@[foo]") == "@[foo]"  # no conversion for YAML exceptions
+    with raises(AttributeError) as e:
+        nml_cfgobj.reify_scalar_str([1, 2, 3])
+    assert "'list' object has no attribute 'read'" in str(e.value)  # Exception on unintended list
 
 
 def test_Config_dereference_unexpected_error(nml_cfgobj):
@@ -906,7 +915,7 @@ def test_YAMLConfig__load_paths_failure_stdin_plus_relpath(caplog):
     # provide YAML with an include directive specifying a relative path. Since a relative path
     # is meaningless relative to stdin, assert that an appropriate error is logged and exception
     # raised.
-
+    logging.getLogger().setLevel(logging.INFO)
     relpath = "../bar/baz.yaml"
     with patch.object(core.sys, "stdin", new=StringIO(f"foo: {core.INCLUDE_TAG} [{relpath}]")):
         with raises(UWConfigError) as e:
