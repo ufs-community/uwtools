@@ -31,7 +31,7 @@
                                 "cobalt"
                             ]
                         },
-                        "cycylethrottle": {
+                        "cyclethrottle": {
                             "type": "integer",
                             "minimum": 0
                         },
@@ -43,7 +43,16 @@
                     "required": ["realtime", "scheduler"]
                 },
                 "cycledefs": {
-                    "$ref": "#/$defs/dateTimePattern"
+                    "type": "object",
+                    "properties": {
+                        "howdy": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "$ref": "#/$defs/dateTimePattern"
+                            }
+                        }
+                    }
                 },
                 "log": {
                     "type": "string",
