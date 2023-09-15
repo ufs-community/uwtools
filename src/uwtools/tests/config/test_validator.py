@@ -142,6 +142,7 @@ def test_validate_workflow_tags_pass():
         schema_file=schema_file, config_file=config_file, check_path=False
     )
 
+
 def test__bad_paths_top(config, schema, tmp_path):
     d = str(tmp_path / "no-such-dir")
     config["dir"] = d

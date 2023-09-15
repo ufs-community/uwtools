@@ -49,7 +49,8 @@
                             "type": "array",
                             "items": {
                                 "$ref": "#/$defs/dateTimePattern"
-                            }
+                            }, 
+                            "required": ["ref"]
                         }
                     }
                 },
