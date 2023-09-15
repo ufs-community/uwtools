@@ -266,8 +266,7 @@ def _dispatch_forecast_run(args: Namespace) -> bool:
     """
     forecast_class = uwtools.drivers.forecast.CLASSES[args.forecast_model]
     forecast_class(config_file=args.config_file, dry_run=args.dry_run).run(
-            cdate=args.cdate,
-            cyc=args.cyc,
+            cycle=args.cycle,
        )
     return True
 
