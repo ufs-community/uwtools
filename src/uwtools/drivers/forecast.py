@@ -152,7 +152,7 @@ class FV3Forecast(Driver):
         self._config["cycle-dependent"].update(self._define_boundary_files())
 
         for file_category in ["static", "cycle-dependent"]:
-            self.stage_files(run_directory, file_category, link_files=True)
+            self.stage_files(run_directory, self._config[file_category], link_files=True)
 
         if self._batch_script is not None:
             batch_script = self.batch_script
@@ -165,7 +165,7 @@ class FV3Forecast(Driver):
                 return
 
             outpath = Path(run_directory) / self._batch_script
-            BatchScript.dump(batch_script, outpath)
+            BatchScript.dump(str(batch_script), outpath)
             self.scheduler.run_job(outpath)
             return
 

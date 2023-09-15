@@ -32,7 +32,7 @@ class ConcreteDriver(Driver):
     def resources(self) -> Mapping:
         return {}
 
-    def run(self, cycle: datetime) -> None:
+    def run(self, cycle: datetime.date) -> None:
         pass
 
     def run_cmd(self, *args):

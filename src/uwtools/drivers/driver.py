@@ -8,7 +8,7 @@ import shutil
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Callable, Dict, Optional, Type, Union
 
 from uwtools.config import validator
 from uwtools.config.core import Config, YAMLConfig
@@ -110,7 +110,6 @@ class Driver(ABC):
             (values).
         :param link_files: Whether to link or copy the files.
         """
-
         link_or_copy = os.symlink if link_files else shutil.copyfile
 
         for dst_fn, src_path in files_to_stage.items():
@@ -138,7 +137,7 @@ class Driver(ABC):
 
     @staticmethod
     def _create_user_updated_config(
-        config_class: Config, config_values: dict, output_path: OptionalPath
+        config_class: Type[Config], config_values: dict, output_path: OptionalPath
     ) -> None:
         """
         The standard procedure for updating a file of a configuration class type with user-provided
