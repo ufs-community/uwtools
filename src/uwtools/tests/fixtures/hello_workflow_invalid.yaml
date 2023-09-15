@@ -3,8 +3,6 @@
       realtime: false
       scheduler: slurm
       cyclethrottle: 5
-    cycledefs:
-      - This is invalid
     entities:
       ACCOUNT: myaccount
       FOO: test.log
