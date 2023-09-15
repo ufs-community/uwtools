@@ -45,10 +45,9 @@
                 "cycledefs": {
                     "type": "object",
                     "properties": {
-                        "howdy": {
+                        "groupname": {
                             "type": "array",
                             "items": {
-                                "type": "string",
                                 "$ref": "#/$defs/dateTimePattern"
                             }
                         }

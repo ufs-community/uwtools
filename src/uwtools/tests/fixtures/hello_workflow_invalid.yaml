@@ -1,0 +1,13 @@
+  workflow:
+    attrs:
+      realtime: false
+      scheduler: slurm
+      cyclethrottle: 5
+    cycledefs:
+      howdy:
+        - Invalid input 
+        - XYZ 202209290000 202209300000 06:00:00
+    entities:
+      ACCOUNT: myaccount
+      FOO: test.log
+    log: /some/path/to/&FOO;
