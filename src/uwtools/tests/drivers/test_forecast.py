@@ -2,6 +2,7 @@
 """
 Tests for forecast driver.
 """
+import datetime as dt
 import subprocess
 from pathlib import Path
 from unittest.mock import patch
@@ -14,7 +15,6 @@ from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.tests.support import compare_files, fixture_path
-from uwtools.utils.file import FORMAT
 
 
 @fixture
@@ -141,7 +141,7 @@ def test_create_field_table_with_base_file(create_field_table_update_obj, tmp_pa
     assert compare_files(expected, outfldtbl_file)
 
 
-def test_create_field_table_without_base_file(create_field_table_update_obj, tmp_path):
+def test_create_field_table_without_base_file(tmp_path):
     """
     Tests create_field_table without optional base file.
     """
@@ -167,7 +167,7 @@ def test_create_model_configure_call_private(tmp_path):
         with patch.object(FV3Forecast, "_validate", return_value=True):
             FV3Forecast(config_file=infile).create_model_configure(outfile)
     assert _create_user_updated_config.call_args.kwargs["config_class"] == YAMLConfig
-    assert _create_user_updated_config.call_args.kwargs["config_values"] == None
+    assert _create_user_updated_config.call_args.kwargs["config_values"] is None
     assert _create_user_updated_config.call_args.kwargs["output_path"] == outfile
 
 
@@ -325,7 +325,7 @@ def test_run_direct(fv3_run_assets):
         with patch.object(forecast.subprocess, "run") as sprun:
             fcstobj = FV3Forecast(config_file=config_file)
             with patch.object(fcstobj, "_config", config):
-                fcstobj.run()
+                fcstobj.run(cycle=dt.datetime.now())
             sprun.assert_called_once_with(
                 "srun --export=None test_exec.py",
                 stderr=subprocess.STDOUT,
@@ -348,7 +348,7 @@ srun --export=None test_exec.py
     with patch.object(FV3Forecast, "_validate", return_value=True):
         fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=batch_script)
         with patch.object(fcstobj, "_config", config):
-            fcstobj.run()
+            fcstobj.run(cycle=dt.datetime.now())
     assert run_expected in caplog.text
 
 
@@ -358,7 +358,7 @@ def test_run_submit(fv3_run_assets):
         with patch.object(forecast.subprocess, "run") as sprun:
             fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
             with patch.object(fcstobj, "_config", config):
-                fcstobj.run()
+                fcstobj.run(cycle=dt.datetime.now())
             sprun.assert_called_once_with(
                 f"sbatch {batch_script}",
                 stderr=subprocess.STDOUT,

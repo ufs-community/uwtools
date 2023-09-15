@@ -204,7 +204,8 @@ class FV3Forecast(Driver):
     @property
     def _config(self) -> Mapping:
         """
-        The config object that describes the subset of an experiment config related to the FV3Forecast.
+        The config object that describes the subset of an experiment config related to the
+        FV3Forecast.
         """
         return self._experiment_config["forecast"]
 
