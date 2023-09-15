@@ -8,7 +8,7 @@ import shutil
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from datetime import datetime
-from typing import Callable, Dict, Optional, Type, Union
+from typing import Dict, Optional, Type
 
 from uwtools.config import validator
 from uwtools.config.core import Config, YAMLConfig
@@ -121,7 +121,7 @@ class Driver(ABC):
                     link_files,
                 )
                 continue
-            link_or_copy(src_path, dst_path)
+            link_or_copy(src_path, dst_path) # type: ignore
             msg = f"File {src_path} staged in run directory at {dst_fn}"
             logging.info(msg)
 
