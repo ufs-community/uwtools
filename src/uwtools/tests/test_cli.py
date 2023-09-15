@@ -180,7 +180,7 @@ def test__dispatch_forecast_run():
         with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):
             cli._dispatch_forecast_run(args)
     assert m.called_once_with(args)
-    m().run.assert_called_once_with(cycle='2023-01-01T00:00:00')
+    m().run.assert_called_once_with(cycle="2023-01-01T00:00:00")
 
 
 @pytest.mark.parametrize("params", [("render", "_dispatch_template_render")])

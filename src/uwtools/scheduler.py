@@ -15,7 +15,6 @@ from uwtools.types import OptionalPath
 from uwtools.utils import Memory
 from uwtools.utils.file import writable
 
-
 NONEISH = [None, "", " ", "None", "none", False]
 IGNORED_ATTRIBS = ["scheduler"]
 
@@ -79,7 +78,7 @@ class BatchScript(UserList):
     @staticmethod
     def dump(contents: str, output_file: OptionalPath) -> None:
         """
-        Write a batch script to an output location
+        Write a batch script to an output location.
 
         :param output_file: Path to the file to write the batch script to
         """
@@ -204,7 +203,7 @@ class JobScheduler(UserDict):
             stderr=subprocess.STDOUT,
             check=False,
             shell=True,
-            )
+        )
 
 
 class Slurm(JobScheduler):
@@ -254,7 +253,6 @@ class PBS(JobScheduler):
         OptionalAttribs.STDOUT: "-o",
         OptionalAttribs.THREADS: "ompthreads",
     }
-
 
     def pre_process(self) -> Dict[str, Any]:
         output = self.data
@@ -340,7 +338,6 @@ class LSF(JobScheduler):
         OptionalAttribs.STDOUT: "-o",
         OptionalAttribs.THREADS: lambda x: f"-R affinity[core({x})]",
     }
-
 
     def pre_process(self) -> Dict[str, Any]:
         items = self.data

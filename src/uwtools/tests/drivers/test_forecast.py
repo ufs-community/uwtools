@@ -187,9 +187,9 @@ def test_create_namelist_with_base_file(create_namelist_assets, tmp_path):
             "namelist": {
                 "base_file": base_file,
                 "update_values": update_obj.data,
-                },
             },
-        }
+        },
+    }
     fcst_config_file = tmp_path / "fcst.yml"
     YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
     FV3Forecast(fcst_config_file).create_namelist(outnml_file)
@@ -219,9 +219,9 @@ def test_create_namelist_without_base_file(create_namelist_assets, tmp_path):
         "forecast": {
             "namelist": {
                 "update_values": update_obj.data,
-                },
             },
-        }
+        },
+    }
     fcst_config_file = tmp_path / "fcst.yml"
     YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
     FV3Forecast(fcst_config_file).create_namelist(outnml_file)

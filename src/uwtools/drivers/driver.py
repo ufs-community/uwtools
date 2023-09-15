@@ -83,14 +83,12 @@ class Driver(ABC):
         args_str = " ".join(str(arg) for arg in args)
         return f"{run_cmd} {args_str} {exec_name}"
 
-
     @property
     def scheduler(self) -> JobScheduler:
         """
-        The job scheduler speficied by the platform information
+        The job scheduler speficied by the platform information.
         """
         return JobScheduler.get_scheduler(self.resources())
-
 
     @property
     @abstractmethod
@@ -120,15 +118,13 @@ class Driver(ABC):
             if isinstance(src_path, list):
                 Driver.stage_files(
                     run_directory,
-                    {os.path.join(dst_path, os.path.basename(src)): src
-                        for src in src_path},
+                    {os.path.join(dst_path, os.path.basename(src)): src for src in src_path},
                     link_files,
-                    )
+                )
                 continue
             link_or_copy(src_path, dst_path)
             msg = f"File {src_path} staged in run directory at {dst_fn}"
             logging.info(msg)
-
 
     # Private methods
 
@@ -141,8 +137,9 @@ class Driver(ABC):
         """
 
     @staticmethod
-    def _create_user_updated_config(config_class: Config, config_values: dict, output_path:
-            OptionalPath) -> None:
+    def _create_user_updated_config(
+        config_class: Config, config_values: dict, output_path: OptionalPath
+    ) -> None:
         """
         The standard procedure for updating a file of a configuration class type with user-provided
         values.

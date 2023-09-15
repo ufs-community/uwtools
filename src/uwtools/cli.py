@@ -266,8 +266,8 @@ def _dispatch_forecast_run(args: Namespace) -> bool:
     """
     forecast_class = uwtools.drivers.forecast.CLASSES[args.forecast_model]
     forecast_class(config_file=args.config_file, dry_run=args.dry_run).run(
-            cycle=args.cycle,
-       )
+        cycle=args.cycle,
+    )
     return True
 
 
@@ -335,7 +335,6 @@ def _dispatch_template_render(args: Namespace) -> bool:
 
 
 def _add_arg_cycle(group: Group) -> None:
-
     group.add_argument(
         "--cycle",
         help="The cycle in ISO8601 format",
