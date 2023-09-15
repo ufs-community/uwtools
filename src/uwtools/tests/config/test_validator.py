@@ -133,7 +133,9 @@ def test_validate_workflow_tags_pass():
     with resources.as_file(resources.files("uwtools.resources")) as resc:
         schema_file = resc / "rocoto.jsonschema"
     config_file = support.fixture_path("hello_workflow_tags.yaml")
-    assert validator.validate_yaml(schema_file=schema_file, config_file=config_file, check_path=False)
+    assert validator.validate_yaml(
+        schema_file=schema_file, config_file=config_file, check_path=False
+    )
 
 
 def test__bad_paths_top(config, schema, tmp_path):
