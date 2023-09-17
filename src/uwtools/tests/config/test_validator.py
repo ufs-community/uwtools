@@ -2,13 +2,13 @@
 """
 Tests for uwtools.config.validator module.
 """
-
 import json
 import logging
 from importlib import resources
 from pathlib import Path
 from typing import Any, Dict
 
+import pytest
 from pytest import fixture
 
 from uwtools.config import validator
@@ -128,18 +128,17 @@ def test_validate_yaml_pass(config, config_file, schema, schema_file):
     assert validator.validate_yaml(schema_file=schema_file, config_file=config_file)
 
 
-def test_validate_workflow_tags_pass():
-    # Test a fully valid config file passes schema
+@pytest.mark.parametrize(
+    "vals", [("hello_workflow_tags.yaml", True), ("hello_workflow_invalid.yaml", False)]
+)
+def test_validate_workflow_tags_pass(vals):
+    fn, validity = vals
     with resources.as_file(resources.files("uwtools.resources")) as resc:
         schema_file = resc / "rocoto.jsonschema"
-    config_file = support.fixture_path("hello_workflow_tags.yaml")
-    assert validator.validate_yaml(
-        schema_file=schema_file, config_file=config_file, check_path=False
-    )
-
-    config_file = support.fixture_path("hello_workflow_invalid.yaml")
-    assert not validator.validate_yaml(
-        schema_file=schema_file, config_file=config_file, check_path=False
+    config_file = support.fixture_path(fn)
+    assert (
+        validator.validate_yaml(schema_file=schema_file, config_file=config_file, check_path=False)
+        is validity
     )
 
 
