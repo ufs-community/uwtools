@@ -13,7 +13,7 @@
                         "name": {
                             "type": "object"
                         },
-                        "maxtrices": {
+                        "maxtries": {
                             "type": "integer",
                             "minimum": 0
                         },
