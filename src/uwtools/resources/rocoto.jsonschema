@@ -2,22 +2,29 @@
   "$defs": {
     "dateTimePattern": {
       "type": "string",
-      "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2}):(\\d{2})$"
+      "pattern": "^(\\d{2}:){3}\\d{2}$"
+    },
+    "BoolLoop": {
+      "type": "object",
+      "patternProperties": {
+        "^(and|or|not|nand|nor|xor)(_.*)?$": {
+          "$ref": "#/$defs/BoolLoop"
+        }
+      }
     }
   },
-  "definitions": {
+  "type": "object",
+  "properties": {
     "dependency": {
-      "oneOf": [
+      "anyOf": [
         {
           "type": "object",
           "patternProperties": {
             "^(and|or|not|nand|nor|xor)(_.*)?$": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/dependency"
-              }
+              "$ref": "#/$defs/BoolLoop"
             }
-          }
+          },
+          "additionalProperties": false
         },
         {
           "type": "object",
@@ -29,7 +36,7 @@
                   "type": "string"
                 },
                 "cycle_offset": {
-                  "$ref": "#/$defs/dateTimePattern"
+                  "$ref": "#/$defs/TimePattern"
                 },
                 "state": {
                   "type": "string",
@@ -63,10 +70,10 @@
               "type": "object",
               "properties": {
                 "left": {
-                  "$ref": "#/$defs/dateTimePattern"
+                  "type": "string"
                 },
                 "right": {
-                  "$ref": "#/$defs/dateTimePattern"
+                  "type": "string"
                 }
               },
               "required": [
@@ -87,10 +94,10 @@
               "type": "object",
               "properties": {
                 "left": {
-                  "$ref": "#/$defs/dateTimePattern"
+                  "type": "string"
                 },
                 "right": {
-                  "$ref": "#/$defs/dateTimePattern"
+                  "type": "string"
                 }
               },
               "required": [
@@ -111,7 +118,7 @@
               "type": "object",
               "properties": {
                 "cycle_offset": {
-                  "$ref": "#/$defs/dateTimePattern"
+                  "$ref": "#/$defs/TimePattern"
                 }
               },
               "required": [
@@ -151,7 +158,7 @@
                       "type": "string"
                     },
                     "cycle_offset": {
-                      "$ref": "#/$defs/dateTimePattern"
+                      "$ref": "#/$defs/TimePattern"
                     },
                     "state": {
                       "type": "string",
@@ -189,7 +196,7 @@
                   "type": "object",
                   "properties": {
                     "age": {
-                      "$ref": "#/$defs/dateTimePattern"
+                      "$ref": "#/$defs/TimePattern"
                     },
                     "minsize": {
                       "type": "string"
@@ -211,7 +218,7 @@
           "type": "object",
           "properties": {
             "timedep": {
-              "$ref": "#/$defs/dateTimePattern"
+              "$ref": "#/$defs/TimePattern"
             }
           },
           "required": [
@@ -224,7 +231,7 @@
             "some": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/dependency"
+                "type": "string"
               },
               "minItems": 1
             },
@@ -240,5 +247,8 @@
         }
       ]
     }
-  }
+  },
+  "required": [
+    "dependency"
+  ]
 }

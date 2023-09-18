@@ -2,7 +2,6 @@
 """
 Tests for uwtools.config.validator module.
 """
-
 import json
 import logging
 from importlib import resources
