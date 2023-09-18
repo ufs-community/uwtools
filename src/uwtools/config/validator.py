@@ -5,7 +5,7 @@ Support for validating a config using JSON Schema.
 import json
 import logging
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import jsonschema
 
@@ -15,7 +15,9 @@ from uwtools.types import DefinitePath, OptionalPath
 # Public functions
 
 
-def validate_yaml(schema_file: DefinitePath, config_file: OptionalPath = None) -> bool:
+def validate_yaml(
+    schema_file: DefinitePath, config_file: OptionalPath = None, check_path: Optional[bool] = True
+) -> bool:
     """
     Check whether the given config file conforms to the given JSON Schema spec and whether any
     filesystem paths it identifies do not exist.
@@ -40,10 +42,11 @@ def validate_yaml(schema_file: DefinitePath, config_file: OptionalPath = None) -
     if errors:
         return False
     # Collect and report bad paths found in config.
-    if bad_paths := _bad_paths(yaml_config.data, schema):
-        for bad_path in bad_paths:
-            logging.error("Path does not exist: %s", bad_path)
-        return False
+    if check_path:
+        if bad_paths := _bad_paths(yaml_config.data, schema):
+            for bad_path in bad_paths:
+                logging.error("Path does not exist: %s", bad_path)
+            return False
     # If no issues were detected, report success.
     return True
 
@@ -60,7 +63,7 @@ def _bad_paths(config: dict, schema: dict) -> List[str]:
     """
     paths = []
     for key, val in config.items():
-        subschema = schema["properties"][key]
+        subschema = schema.get("properties", {}).get(key, {})
         if isinstance(val, dict):
             paths += _bad_paths(val, subschema)
         else:
