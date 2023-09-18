@@ -79,6 +79,7 @@
                 "$ref": "#/$defs/task"
             },
             "required": ["var"]
+        }
     },
     "type": "object",
     "properties": {
