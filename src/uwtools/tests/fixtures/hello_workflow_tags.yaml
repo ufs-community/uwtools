@@ -15,15 +15,6 @@
       ACCOUNT: myaccount
       FOO: test.log
     log: /some/path/to/&FOO;
-    tasks:
+    task:
       task_hello:
-        attrs:
-          cycledefs: howdy
-          maxtries: "2"
-    metatask_ensemble_hello:
-      var:
-        member: foo bar baz
-      task_hello_#member#:
-        attrs:
-          cycledefs: howdy
-          maxtries: "1"
+        command: "echo hello $person"

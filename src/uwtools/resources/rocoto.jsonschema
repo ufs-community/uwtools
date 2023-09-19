@@ -3,48 +3,10 @@
         "dateTimePattern": {
             "type": "string",
             "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2})$"
-        },
+        }
+    },
+    "definitions": {
         "task": {
-            "type": "object",
-            "properties": {
-                "attrs": {
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "type": "object"
-                        },
-                        "maxtries": {
-                            "type": "integer",
-                            "minimum": 0
-                        },
-                        "throttle": {
-                            "type": "integer",
-                            "minimum": 0
-                        },
-                        "cycledefs": {
-                            "type": "string"
-                        },
-                        "final": {
-                            "type": "string",
-                            "enum": [
-                                "true",
-                                "false",
-                                "T",
-                                "F",
-                                "t",
-                                "f",
-                                "True",
-                                "False",
-                                "FALSE",
-                                "TRUE"
-                            ]
-                        }
-                    },
-                    "required": ["name"]
-                }
-            }
-        },
-        "metatask": {
             "type": "object",
             "properties": {
                 "attrs": {
@@ -53,108 +15,107 @@
                         "name": {
                             "type": "object",
                             "properties": {
-                                "name": {
-                                    "type": "string"
-                                },
-                                "mode": {
-                                    "type": "string"
+                                "maxtries": {
+                                    "type": "string",
+                                    "format": "number",
+                                    "minimum": 0
                                 },
                                 "throttle": {
                                     "type": "integer",
                                     "minimum": 0
+                                },
+                                "cycledefs": {
+                                    "type": "string"
+                                },
+                                "final": {
+                                    "type": "string",
+                                    "enum": [
+                                        "true",
+                                        "false",
+                                        "T",
+                                        "F",
+                                        "t",
+                                        "f",
+                                        "True",
+                                        "False",
+                                        "FALSE",
+                                        "TRUE"
+                                    ]
+                                },
+                                "command": {
+                                    "type": "string"
                                 }
-                            }
+                            },
+                            "required": ["command"]
                         }
-                    }
-                },
-                "var": {
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "$ref": "#/$defs/metatask",
-                "$ref": "#/$defs/task"
-            },
-            "required": ["var"]
+                    },
+                    "required": ["name"]
+                }
+            }
         }
     },
     "type": "object",
-    "properties": {
-        "workflow": {
-            "type": "object",
-            "properties": {
-                "attrs": {
-                    "type": "object",
-                    "properties": {
-                        "realtime": {
-                            "type": "boolean"
+        "properties": {
+            "workflow": {
+                "type": "object",
+                "properties": {
+                    "attrs": {
+                        "type": "object",
+                        "properties": {
+                            "realtime": {
+                                "type": "boolean"
+                            },
+                            "scheduler": {
+                                "type": "string",
+                                "enum": [
+                                    "sge",
+                                    "lsf",
+                                    "lsfcray",
+                                    "ll",
+                                    "torque",
+                                    "moabtorque",
+                                    "moab",
+                                    "pbspro",
+                                    "slurm",
+                                    "cobalt"
+                                ]
+                            },
+                            "cyclethrottle": {
+                                "type": "integer",
+                                "minimum": 0
+                            },
+                            "taskthrottle": {
+                                "type": "integer",
+                                "minimum": 0
+                            }
                         },
-                        "scheduler": {
-                            "type": "string",
-                            "enum": [
-                                "sge",
-                                "lsf",
-                                "lsfcray",
-                                "ll",
-                                "torque",
-                                "moabtorque",
-                                "moab",
-                                "pbspro",
-                                "slurm",
-                                "cobalt"
-                            ]
-                        },
-                        "cyclethrottle": {
-                            "type": "integer",
-                            "minimum": 0
-                        },
-                        "taskthrottle": {
-                            "type": "integer",
-                            "minimum": 0
+                        "required": ["realtime", "scheduler"]
+                    },
+                    "cycledefs": {
+                        "type": "object",
+                        "properties": {
+                            "groupname": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/$defs/dateTimePattern"
+                                }, 
+                                "required": ["ref"]
+                            },
+                            "required": ["items"]
                         }
                     },
-                    "required": ["realtime", "scheduler"]
-                },
-                "cycledefs": {
-                    "type": "object",
-                    "properties": {
-                        "groupname": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/$defs/dateTimePattern"
-                            }, 
-                            "required": ["ref"]
-                        },
-                        "required": ["items"]
+                    "log": {
+                        "type": "string",
+                        "format": "uri"
+                    },
+                    "entities": {
+                        "type": "object"
+                    },
+                    "task": {
+                        "$ref": "#/definitions/task"
                     }
                 },
-                "log": {
-                    "type": "string",
-                    "format": "uri"
-                },
-                "entities": {
-                    "type": "object"
-                },
-                "metatask": {
-                    "$ref": "#/$defs/metatask"
-                },
-                "task": {
-                    "$ref": "#/$defs/task"
-                }
-            },
-            "required": ["attrs", "cycledefs", "log"],
-            "oneOf": [
-                {
-                    "required": ["task"]
-                },
-                {
-                    "required": ["metatask"]
-                }
-            ]
+                "required": ["attrs", "cycledefs", "log", "task"]
+            }
         }
-    }
 }
-                
