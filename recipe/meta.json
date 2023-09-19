@@ -1,0 +1,34 @@
+{
+  "build": "pyh28a5fc4_0",
+  "buildnum": "0",
+  "name": "uwtools",
+  "packages": {
+    "dev": [
+      "black =23.3.*",
+      "boto3 =1.22.*",
+      "coverage =7.2.*",
+      "docformatter =1.7.*",
+      "f90nml =1.4.*",
+      "isort =5.12.*",
+      "jinja2 =3.0.*",
+      "jsonschema =4.17.*",
+      "lxml =4.9.*",
+      "mypy =1.4.*",
+      "pip",
+      "pylint =2.17.*",
+      "pytest =7.4.*",
+      "python =3.11",
+      "pyyaml =6.0.*"
+    ],
+    "run": [
+      "boto3 =1.22.*",
+      "f90nml =1.4.*",
+      "jinja2 =3.0.*",
+      "jsonschema =4.17.*",
+      "lxml =4.9.*",
+      "python =3.11",
+      "pyyaml =6.0.*"
+    ]
+  },
+  "version": "1.0.0"
+}
