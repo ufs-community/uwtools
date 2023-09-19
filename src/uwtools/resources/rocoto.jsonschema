@@ -3,55 +3,59 @@
         "dateTimePattern": {
             "type": "string",
             "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2})$"
-        }
-    },
-    "definitions": {
+        },
         "task": {
             "type": "object",
-            "properties": {
-                "attrs": {
+            "patternProperties": {
+                "^task_.*$": {
                     "type": "object",
                     "properties": {
-                        "name": {
-                            "type": "object",
-                            "properties": {
-                                "maxtries": {
-                                    "type": "string",
-                                    "format": "number",
-                                    "minimum": 0
-                                },
-                                "throttle": {
-                                    "type": "integer",
-                                    "minimum": 0
-                                },
-                                "cycledefs": {
-                                    "type": "string"
-                                },
-                                "final": {
-                                    "type": "string",
-                                    "enum": [
-                                        "true",
-                                        "false",
-                                        "T",
-                                        "F",
-                                        "t",
-                                        "f",
-                                        "True",
-                                        "False",
-                                        "FALSE",
-                                        "TRUE"
-                                    ]
-                                },
-                                "command": {
-                                    "type": "string"
-                                }
+                        "attrs": {
+                            "maxtries": {
+                                "type": "string",
+                                "format": "number",
+                                "minimum": 0
                             },
-                            "required": ["command"]
+                            "throttle": {
+                                "type": "integer",
+                                "minimum": 0
+                            },
+                            "cycledefs": {
+                                "type": "string"
+                            },
+                            "final": {
+                                "type": "string",
+                                "enum": [
+                                    "true",
+                                    "false",
+                                    "T",
+                                    "F",
+                                    "t",
+                                    "f",
+                                    "True",
+                                    "False",
+                                    "FALSE",
+                                    "TRUE"
+                                ]
+                            }
+                        },
+                        "account": {
+                            "type": "string"
+                        },
+                        "command": {
+                            "type": "string"
+                        },
+                        "jobname": {
+                            "type": "string"
+                        },
+                        "queue": {
+                            "type": "string"
                         }
                     },
-                    "required": ["name"]
+                    "required": ["attrs", "account", "command"]
                 }
-            }
+            },
+            "additionalProperties": false
         }
     },
     "type": "object",
@@ -112,7 +116,7 @@
                         "type": "object"
                     },
                     "task": {
-                        "$ref": "#/definitions/task"
+                        "$ref": "#/$defs/task"
                     }
                 },
                 "required": ["attrs", "cycledefs", "log", "task"]

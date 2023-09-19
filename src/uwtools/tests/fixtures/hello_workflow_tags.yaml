@@ -17,4 +17,7 @@
     log: /some/path/to/&FOO;
     task:
       task_hello:
+        attrs:
+          cycledef: howdy
+        account: "&ACCOUNT;"
         command: "echo hello $person"
