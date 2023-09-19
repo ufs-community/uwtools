@@ -50,6 +50,9 @@
                         },
                         "queue": {
                             "type": "string"
+                        },
+                        "partition": {
+                            "type": "string"
                         }
                     },
                     "required": ["attrs", "account", "command"]
