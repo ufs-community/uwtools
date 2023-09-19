@@ -1,4 +1,4 @@
-ependency:
+dependency:
     or:
       and:
         streq:
