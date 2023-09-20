@@ -66,11 +66,11 @@
                 "$ref": "#/$defs/dateTimePattern"
               },
               "required": [
-                "ref"
+                "groupname"
               ]
             },
             "required": [
-              "items"
+              "groupname"
             ]
           }
         },
@@ -87,120 +87,43 @@
         "cycledefs",
         "log"
       ]
-    },
-    "dependency": {
+    }
+  },
+  "patternProperties": {
+    "^(task|metatask)(_.*)?$": {
       "type": "object",
-      "patternProperties": {
-        "^(and|or|not|nand|nor|xor)(_.*)?$": {
-          "$ref": "#/$defs/BoolLoop"
-        },
-        "^datadep(_.*)?$": {
+      "properties": {
+        "dependency": {
           "type": "object",
-          "properties": {
-            "attrs": {
+          "patternProperties": {
+            "^(and|or|not|nand|nor|xor)(_.*)?$": {
+              "$ref": "#/$defs/BoolLoop"
+            },
+            "^datadep(_.*)?$": {
               "type": "object",
               "properties": {
-                "age": {
-                  "$ref": "#/$defs/TimePattern"
+                "attrs": {
+                  "type": "object",
+                  "properties": {
+                    "age": {
+                      "$ref": "#/$defs/TimePattern"
+                    },
+                    "minsize": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
                 },
-                "minsize": {
+                "text": {
                   "type": "string"
                 }
               },
               "additionalProperties": false
             },
-            "text": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "properties": {
-        "taskdep": {
-          "type": "object",
-          "properties": {
-            "task": {
-              "type": "string"
-            },
-            "cycle_offset": {
-              "$ref": "#/$defs/TimePattern"
-            },
-            "state": {
-              "type": "string",
-              "enum": [
-                "RUNNING",
-                "Running",
-                "running",
-                "SUCCEEDED",
-                "DEAD",
-                "Succeeded",
-                "Dead",
-                "succeeded",
-                "dead"
-              ]
-            }
-          },
-          "required": [
-            "task"
-          ]
-        },
-        "streq": {
-          "type": "object",
-          "properties": {
-            "left": {
-              "type": "string"
-            },
-            "right": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "left",
-            "right"
-          ]
-        },
-        "strneq": {
-          "type": "object",
-          "properties": {
-            "left": {
-              "type": "string"
-            },
-            "right": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "left",
-            "right"
-          ],
-          "additionalProperties": false
-        },
-        "cycleexistdep": {
-          "type": "object",
-          "properties": {
-            "cycle_offset": {
-              "$ref": "#/$defs/TimePattern"
-            }
-          },
-          "additionalProperties": false
-        },
-        "taskvalid": {
-          "type": "object",
-          "properties": {
-            "task": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false
-        },
-        "metataskdep": {
-          "type": "object",
-          "properties": {
-            "attrs": {
+            "^taskdep(_.*)?$": {
               "type": "object",
               "properties": {
-                "metatask": {
+                "task": {
                   "type": "string"
                 },
                 "cycle_offset": {
@@ -209,6 +132,9 @@
                 "state": {
                   "type": "string",
                   "enum": [
+                    "RUNNING",
+                    "Running",
+                    "running",
                     "SUCCEEDED",
                     "DEAD",
                     "Succeeded",
@@ -216,34 +142,100 @@
                     "succeeded",
                     "dead"
                   ]
-                },
-                "threshold": {
-                  "type": "number",
-                  "minimum": 0,
-                  "maximum": 1
                 }
               },
               "required": [
-                "metatask"
+                "task"
               ],
               "additionalProperties": false
+            },
+            "^(streq|strneq)(_.*)?$": {
+              "type": "object",
+              "properties": {
+                "left": {
+                  "type": "string"
+                },
+                "right": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "left",
+                "right"
+              ],
+              "additionalProperties": false
+            },
+            "^cycleexistdep(_.*)?$": {
+              "type": "object",
+              "properties": {
+                "cycle_offset": {
+                  "$ref": "#/$defs/TimePattern"
+                }
+              },
+              "additionalProperties": false
+            },
+            "^taskvalid(_.*)?$": {
+              "type": "object",
+              "properties": {
+                "task": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "^metataskdep(_.*)?$": {
+              "type": "object",
+              "properties": {
+                "attrs": {
+                  "type": "object",
+                  "properties": {
+                    "metatask": {
+                      "type": "string"
+                    },
+                    "cycle_offset": {
+                      "$ref": "#/$defs/TimePattern"
+                    },
+                    "state": {
+                      "type": "string",
+                      "enum": [
+                        "SUCCEEDED",
+                        "DEAD",
+                        "Succeeded",
+                        "Dead",
+                        "succeeded",
+                        "dead"
+                      ]
+                    },
+                    "threshold": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  },
+                  "required": [
+                    "metatask"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
+            "^timedep(_.*)?$": {
+              "$ref": "#/$defs/TimePattern"
+            },
+            "^some(_.*)?$": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            },
+            "^threshold(_.*)?$": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
             }
           }
-        },
-        "timedep": {
-          "$ref": "#/$defs/TimePattern"
-        },
-        "some": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "minItems": 1
-        },
-        "threshold": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
         }
       }
     }
