@@ -27,3 +27,5 @@
         deadline: 202209290000
         envar:
           name: siri
+        nodesize: "&NCORES_PER_NODE;"
+        native: hello

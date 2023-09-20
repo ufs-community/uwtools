@@ -83,9 +83,52 @@
                                 }
                             },
                             "required": ["name"]
+                        },
+                        "nodesize": {
+                            "type": "string"
+                        },
+                        "cores": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "nodes": {
+                            "type": "string"
+                        },
+                        "native": {
+                            "type": "string"
                         }
                     },
-                    "required": ["attrs", "account", "command", "jobname", "walltime"]
+                    "required": ["attrs", "account", "command", "jobname", "walltime"],
+                    "oneOf": [
+                        {
+                        "type": "object",
+                        "properties": {
+                            "cores": {
+                            "type": "integer",
+                            "minimum": 0
+                            }
+                        },
+                        "required": ["cores"]
+                        },
+                        {
+                        "type": "object",
+                        "properties": {
+                            "nodes": {
+                            "type": "string"
+                            }
+                        },
+                        "required": ["nodes"]
+                        },
+                        {
+                        "type": "object",
+                        "properties": {
+                            "native": {
+                            "type": "string"
+                            }
+                        },
+                        "required": ["native"]
+                        }
+                    ]
                 }
             }
         }
