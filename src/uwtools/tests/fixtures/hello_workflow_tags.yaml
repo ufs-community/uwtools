@@ -21,3 +21,9 @@
           cycledef: howdy
         account: "&ACCOUNT;"
         command: "echo hello $person"
+        jobname: hello
+        walltime: 00:01:00
+        memory: 512M
+        deadline: 202209290000
+        envar:
+          name: siri

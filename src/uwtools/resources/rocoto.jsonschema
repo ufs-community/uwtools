@@ -4,6 +4,15 @@
             "type": "string",
             "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2})$"
         },
+        "TimePattern": {
+            "type": "string",
+            "pattern": "^(\\d{2}):(\\d{2}):(\\d{2})$$"
+        },
+        "DatePattern": {
+            "type": "integer",
+            "format": "string",
+            "pattern": "^(\\d{12}) (\\d{12})$"
+        },
         "task": {
             "type": "object",
             "patternProperties": {
@@ -53,12 +62,32 @@
                         },
                         "partition": {
                             "type": "string"
+                        },
+                        "walltime": {
+                            "$ref": "#/$defs/TimePattern"
+                        }, 
+                        "memory": {
+                            "type": "string"
+                        },
+                        "deadline": {
+                            "$ref": "#/$defs/DatePattern"
+                        },
+                        "envar": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "type": "integer"
+                                }
+                            },
+                            "required": ["name"]
                         }
                     },
-                    "required": ["attrs", "account", "command"]
+                    "required": ["attrs", "account", "command", "jobname", "walltime"]
                 }
-            },
-            "additionalProperties": false
+            }
         }
     },
     "type": "object",
@@ -124,5 +153,6 @@
                 },
                 "required": ["attrs", "cycledefs", "log", "task"]
             }
-        }
+        },
+        "additionalProperties": false
 }
