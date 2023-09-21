@@ -64,10 +64,7 @@
               "type": "array",
               "items": {
                 "$ref": "#/$defs/dateTimePattern"
-              },
-              "required": [
-                "groupname"
-              ]
+              }
             },
             "required": [
               "groupname"
