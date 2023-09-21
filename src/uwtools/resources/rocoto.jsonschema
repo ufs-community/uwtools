@@ -107,36 +107,35 @@
                         }
                     },
                     "required": ["attrs", "command", "walltime"],
-                    "allOf": [
-                        {
-                            "oneOf": [
-                                {
-                                    "required": ["cores"]
-                                },
-                                {
-                                    "required": ["nodes"]
-                                },
-                                {
-                                    "required": ["native"]
-                                }
-                            ],
-                            "oneOf": [
-                                {
-                                    "required": ["shared"]
-                                },
-                                {
-                                    "required": ["exclusive"]
-                                }
-                            ]
-                        }
-                    ],
-                    "dependencies": {
-                        "stdout": ["stderr"],
-                        "stderr": ["stdout"]
-                    },
                     "oneOf": [
                         {
-                            "required": ["stdout"]
+                            "required": ["cores"]
+                        },
+                        {
+                            "required": ["nodes"]
+                        },
+                        {
+                            "required": ["native"]
+                        }
+                    ],
+                    "oneOf": [
+                        {
+                            "required": ["shared"]
+                        },
+                        {
+                            "required": ["exclusive"]
+                        }
+                    ],
+                    "oneOf": [
+                        {
+                            "allOf": [
+                                {
+                                    "required": ["stdout"]
+                                },
+                                {
+                                    "required": ["stderr"]
+                                }
+                            ]
                         },
                         {
                             "required": ["join"]
@@ -163,10 +162,10 @@
                     },
                     "oneOf": [
                         {
-                            "$ref": "#/$defs/taskPattern"
+                            "required": ["taskPattern"]
                         },
                         {
-                            "$ref": "#/$defs/metataskPattern"
+                            "required": ["metataskPattern"]
                         }
                     ]
                 }
@@ -232,8 +231,7 @@
                     },
                     "tasks": {
                         "type": "object",
-                        "$ref": "#/$defs/taskPattern",
-                        "$ref": "#/$defs/metataskPattern"
+                        "$ref": "#/$defs/taskPattern"
                     }
                 },
                 "required": ["attrs", "cycledefs", "log", "tasks"]
