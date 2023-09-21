@@ -8,11 +8,164 @@
       "type": "string",
       "pattern": "^(\\d{2}:){3}\\d{2}$"
     },
-    "BoolLoop": {
-      "type": "object",
+    "DatePattern": {
+      "type": "integer",
+      "format": "string",
+      "pattern": "^(\\d{12}) (\\d{12})$"
+    },
+    "taskPattern": {
       "patternProperties": {
-        "^(and|or|not|nand|nor|xor)(_.*)?$": {
-          "$ref": "#/$defs/BoolLoop"
+        "^task_.*$": {
+          "type": "object",
+          "properties": {}
+        }
+      }
+    },
+    "DependencyPattern": {
+      "type": "object",
+      "dependency": {
+        "type": "object",
+        "patternProperties": {
+          "^(and|or|not|nand|nor|xor)(_.*)?$": {
+            "$ref": "#/$defs/DependencyPattern"
+          },
+          "^some(_.*)?$": {
+            "type": "array",
+            "patternProperties": {
+              "^threshold(_.*)?$": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "properties": {
+              "$ref": "#/$defs/DependencyPattern"
+            }
+          },
+          "^datadep(_.*)?$": {
+            "type": "object",
+            "properties": {
+              "attrs": {
+                "type": "object",
+                "properties": {
+                  "age": {
+                    "$ref": "#/$defs/TimePattern"
+                  },
+                  "minsize": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "text": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "^taskdep(_.*)?$": {
+            "type": "object",
+            "properties": {
+              "task": {
+                "type": "string"
+              },
+              "cycle_offset": {
+                "$ref": "#/$defs/TimePattern"
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "RUNNING",
+                  "Running",
+                  "running",
+                  "SUCCEEDED",
+                  "DEAD",
+                  "Succeeded",
+                  "Dead",
+                  "succeeded",
+                  "dead"
+                ]
+              }
+            },
+            "required": [
+              "task"
+            ],
+            "additionalProperties": false
+          },
+          "^(streq|strneq)(_.*)?$": {
+            "type": "object",
+            "properties": {
+              "left": {
+                "type": "string"
+              },
+              "right": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "left",
+              "right"
+            ],
+            "additionalProperties": false
+          },
+          "^cycleexistdep(_.*)?$": {
+            "type": "object",
+            "properties": {
+              "cycle_offset": {
+                "$ref": "#/$defs/TimePattern"
+              }
+            },
+            "additionalProperties": false
+          },
+          "^taskvalid(_.*)?$": {
+            "type": "object",
+            "properties": {
+              "task": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "^metataskdep(_.*)?$": {
+            "type": "object",
+            "properties": {
+              "attrs": {
+                "type": "object",
+                "properties": {
+                  "metatask": {
+                    "type": "string"
+                  },
+                  "cycle_offset": {
+                    "$ref": "#/$defs/TimePattern"
+                  },
+                  "state": {
+                    "type": "string",
+                    "enum": [
+                      "SUCCEEDED",
+                      "DEAD",
+                      "Succeeded",
+                      "Dead",
+                      "succeeded",
+                      "dead"
+                    ]
+                  },
+                  "threshold": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "required": [
+                  "metatask"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "^timedep(_.*)?$": {
+            "$ref": "#/$defs/TimePattern"
+          }
         }
       }
     }
@@ -77,6 +230,14 @@
         },
         "entities": {
           "type": "object"
+        },
+        "tasks": {
+          "type": "object",
+          "$ref": "#/$defs/taskPattern"
+        },
+        "dependency": {
+          "type": "object",
+          "$ref": "#/$defs/DependencyPattern"
         }
       },
       "required": [
@@ -86,156 +247,5 @@
       ]
     }
   },
-  "patternProperties": {
-    "^(task|metatask)(_.*)?$": {
-      "type": "object",
-      "properties": {
-        "dependency": {
-          "type": "object",
-          "patternProperties": {
-            "^(and|or|not|nand|nor|xor)(_.*)?$": {
-              "$ref": "#/$defs/BoolLoop"
-            },
-            "^some(_.*)?$": {
-              "type": "array",
-              "patternProperties": {
-                "^threshold(_.*)?$": {
-                  "type": "number",
-                  "minimum": 0,
-                  "maximum": 1
-                }
-              },
-              "properties":{
-                "$ref": "#/$defs/BoolLoop"
-              }
-            },
-            "^datadep(_.*)?$": {
-              "type": "object",
-              "properties": {
-                "attrs": {
-                  "type": "object",
-                  "properties": {
-                    "age": {
-                      "$ref": "#/$defs/TimePattern"
-                    },
-                    "minsize": {
-                      "type": "string"
-                    }
-                  },
-                  "additionalProperties": false
-                },
-                "text": {
-                  "type": "string"
-                }
-              },
-              "additionalProperties": false
-            },
-            "^taskdep(_.*)?$": {
-              "type": "object",
-              "properties": {
-                "task": {
-                  "type": "string"
-                },
-                "cycle_offset": {
-                  "$ref": "#/$defs/TimePattern"
-                },
-                "state": {
-                  "type": "string",
-                  "enum": [
-                    "RUNNING",
-                    "Running",
-                    "running",
-                    "SUCCEEDED",
-                    "DEAD",
-                    "Succeeded",
-                    "Dead",
-                    "succeeded",
-                    "dead"
-                  ]
-                }
-              },
-              "required": [
-                "task"
-              ],
-              "additionalProperties": false
-            },
-            "^(streq|strneq)(_.*)?$": {
-              "type": "object",
-              "properties": {
-                "left": {
-                  "type": "string"
-                },
-                "right": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "left",
-                "right"
-              ],
-              "additionalProperties": false
-            },
-            "^cycleexistdep(_.*)?$": {
-              "type": "object",
-              "properties": {
-                "cycle_offset": {
-                  "$ref": "#/$defs/TimePattern"
-                }
-              },
-              "additionalProperties": false
-            },
-            "^taskvalid(_.*)?$": {
-              "type": "object",
-              "properties": {
-                "task": {
-                  "type": "string"
-                }
-              },
-              "additionalProperties": false
-            },
-            "^metataskdep(_.*)?$": {
-              "type": "object",
-              "properties": {
-                "attrs": {
-                  "type": "object",
-                  "properties": {
-                    "metatask": {
-                      "type": "string"
-                    },
-                    "cycle_offset": {
-                      "$ref": "#/$defs/TimePattern"
-                    },
-                    "state": {
-                      "type": "string",
-                      "enum": [
-                        "SUCCEEDED",
-                        "DEAD",
-                        "Succeeded",
-                        "Dead",
-                        "succeeded",
-                        "dead"
-                      ]
-                    },
-                    "threshold": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 1
-                    }
-                  },
-                  "required": [
-                    "metatask"
-                  ],
-                  "additionalProperties": false
-                }
-              },
-              "additionalProperties": false
-            },
-            "^timedep(_.*)?$": {
-              "$ref": "#/$defs/TimePattern"
-            }
-          }
-        }
-      }
-    }
-  }
+  "additionalProperties": false
 }
