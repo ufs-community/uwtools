@@ -15,23 +15,19 @@
       ACCOUNT: myaccount
       FOO: test.log
     log: /some/path/to/&FOO;
-    task:
+    tasks:
       task_hello:
         attrs:
           cycledef: howdy
         account: "&ACCOUNT;"
         command: "echo hello $person"
-        jobname: hello
         walltime: 00:01:00
         memory: 512M
         deadline: 202209290000
         envar:
           name: siri
-        nodesize: "&NCORES_PER_NODE;"
+        cores: 3
         native: hello
-        shared: hello
-        stderr: hello
-        stdout: hello
       metatask_ensemble_hello:
         var:
           member: foo bar baz
@@ -43,7 +39,3 @@
           command: "echo hello #member#"
           nodes: 1:ppn=1
           walltime: 00:01:00
-          dependency:
-            taskdep:
-              attrs:
-                task: hello

@@ -72,16 +72,7 @@
                             "$ref": "#/$defs/DatePattern"
                         },
                         "envar": {
-                            "type": "object",
-                            "properties": {
-                                "name": {
-                                    "type": "string"
-                                },
-                                "value": {
-                                    "type": "integer"
-                                }
-                            },
-                            "required": ["name"]
+                            "type": "object"
                         },
                         "nodesize": {
                             "type": "string"
@@ -115,7 +106,7 @@
                             "type": "string"
                         }
                     },
-                    "required": ["attrs", "command", "jobname", "walltime"],
+                    "required": ["attrs", "command", "walltime"],
                     "allOf": [
                         {
                             "oneOf": [
@@ -239,13 +230,13 @@
                     "entities": {
                         "type": "object"
                     },
-                    "task": {
+                    "tasks": {
                         "type": "object",
                         "$ref": "#/$defs/taskPattern",
                         "$ref": "#/$defs/metataskPattern"
                     }
                 },
-                "required": ["attrs", "cycledefs", "log", "task"]
+                "required": ["attrs", "cycledefs", "log", "tasks"]
             }
         },
         "additionalProperties": false
