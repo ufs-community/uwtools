@@ -17,7 +17,12 @@
       "patternProperties": {
         "^task_.*$": {
           "type": "object",
-          "properties": {}
+          "properties": {
+            "dependency": {
+              "type": "object",
+              "$ref": "#/$defs/DependencyPattern"
+            }
+          }
         }
       }
     },
@@ -234,10 +239,6 @@
         "tasks": {
           "type": "object",
           "$ref": "#/$defs/taskPattern"
-        },
-        "dependency": {
-          "type": "object",
-          "$ref": "#/$defs/DependencyPattern"
         }
       },
       "required": [
