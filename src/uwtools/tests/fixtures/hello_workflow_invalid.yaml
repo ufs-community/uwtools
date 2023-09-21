@@ -9,3 +9,25 @@
       ACCOUNT: myaccount
       FOO: test.log
     log: /some/path/to/&FOO;
+    task:
+      task_hello:
+        attrs:
+          cycledef: howdy
+        account: "&ACCOUNT;"
+        jobname: hello
+        memory: 512M
+        deadline: 202209290000
+        envar:
+          name: siri
+        nodesize: "&NCORES_PER_NODE;"
+        native: hello
+        shared: hello
+        stdout: hello
+        join: hello
+      metatask_ensemble_hello:
+        var:
+          member: foo bar baz
+        metatask_ensemble_hello:
+          var:
+            member: foo bar baz
+        
