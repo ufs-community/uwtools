@@ -32,3 +32,18 @@
         shared: hello
         stderr: hello
         stdout: hello
+      metatask_ensemble_hello:
+        var:
+          member: foo bar baz
+        task_hello_#member#:
+          attrs:
+            cycledefs: howdy
+            maxtries: "1"
+          account: "&ACCOUNT;"
+          command: "echo hello #member#"
+          nodes: 1:ppn=1
+          walltime: 00:01:00
+          dependency:
+            taskdep:
+              attrs:
+                task: hello

@@ -13,8 +13,7 @@
             "format": "string",
             "pattern": "^(\\d{12}) (\\d{12})$"
         },
-        "task": {
-            "type": "object",
+        "taskPattern": {
             "patternProperties": {
                 "^task_.*$": {
                     "type": "object",
@@ -154,6 +153,33 @@
                     ]
                 }
             }
+        },
+        "metataskPattern": {
+            "patternProperties": {
+                "^metatask_.*$": {
+                    "type": "object",
+                    "properties": {
+                        "var": {
+                            "type": "object",
+                            "patternProperties": {
+                                "^.*$": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "$ref": "#/$defs/taskPattern",
+                        "$ref": "#/$defs/metataskPattern"
+                    },
+                    "oneOf": [
+                        {
+                            "$ref": "#/$defs/taskPattern"
+                        },
+                        {
+                            "$ref": "#/$defs/metataskPattern"
+                        }
+                    ]
+                }
+            }
         }
     },
     "type": "object",
@@ -214,7 +240,9 @@
                         "type": "object"
                     },
                     "task": {
-                        "$ref": "#/$defs/task"
+                        "type": "object",
+                        "$ref": "#/$defs/taskPattern",
+                        "$ref": "#/$defs/metataskPattern"
                     }
                 },
                 "required": ["attrs", "cycledefs", "log", "task"]
