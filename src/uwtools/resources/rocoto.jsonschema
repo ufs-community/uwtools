@@ -96,6 +96,19 @@
             "^(and|or|not|nand|nor|xor)(_.*)?$": {
               "$ref": "#/$defs/BoolLoop"
             },
+            "^some(_.*)?$": {
+              "type": "array",
+              "patternProperties": {
+                "^threshold(_.*)?$": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "properties":{
+                "$ref": "#/$defs/BoolLoop"
+              }
+            },
             "^datadep(_.*)?$": {
               "type": "object",
               "properties": {
@@ -219,18 +232,6 @@
             },
             "^timedep(_.*)?$": {
               "$ref": "#/$defs/TimePattern"
-            },
-            "^some(_.*)?$": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minItems": 1
-            },
-            "^threshold(_.*)?$": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1
             }
           }
         }
