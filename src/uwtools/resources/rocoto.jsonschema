@@ -117,83 +117,38 @@
                         }
                     },
                     "required": ["attrs", "command", "jobname", "walltime"],
-                    "oneOf": [
+                    "allOf": [
                         {
-                            "type": "object",
-                            "properties": {
-                                "cores": {
-                                    "type": "integer",
-                                    "minimum": 0
+                            "oneOf": [
+                                {
+                                    "required": ["cores"]
+                                },
+                                {
+                                    "required": ["nodes"]
+                                },
+                                {
+                                    "required": ["native"]
                                 }
-                            },
-                            "required": ["cores"]
-                        },
-                        {
-                            "type": "object",
-                            "properties": {
-                                "nodes": {
-                                    "type": "string"
+                            ],
+                            "oneOf": [
+                                {
+                                    "required": ["shared"]
+                                },
+                                {
+                                    "required": ["exclusive"]
                                 }
-                            },
-                            "required": ["nodes"]
-                        },
-                        {
-                            "type": "object",
-                            "properties": {
-                                "native": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": ["native"]
+                            ]
                         }
                     ],
+                    "dependencies": {
+                        "stdout": ["stderr"],
+                        "stderr": ["stdout"]
+                    },
                     "oneOf": [
                         {
-                            "type": "object",
-                            "properties": {
-                                "shared": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": ["shared"]
+                            "required": ["stdout"]
                         },
                         {
-                            "type": "object",
-                            "properties": {
-                                "exclusive": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": ["exclusive"]
-                        }
-                    ],
-                    "oneOf": [
-                        {
-                            "type": "object",
-                            "properties": {
-                                "allOf": [
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "stdout": {
-                                                "type": "string"
-                                            },
-                                            "stderr": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "required": ["stdout", "stderr"]
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "type": "object",
-                            "properties": {
-                                "join": {
-                                    "type": "string"
-                                }
-                            },
                             "required": ["join"]
                         }
                     ]

@@ -29,4 +29,6 @@
           name: siri
         nodesize: "&NCORES_PER_NODE;"
         native: hello
-        exclusive: hello
+        shared: hello
+        stderr: hello
+        stdout: hello
