@@ -118,29 +118,34 @@
                             "required": ["native"]
                         }
                     ],
-                    "oneOf": [
+                    "anyOf": [
                         {
-                            "required": ["shared"]
+                            "not": {
+                                "required": ["shared"]
+                            }
                         },
                         {
-                            "required": ["exclusive"]
+                            "not": {
+                                "required": ["exclusive"]
+                            }
                         }
                     ],
-                    "oneOf": [
+                    "anyOf":[
                         {
-                            "allOf": [
-                                {
-                                    "required": ["stdout"]
-                                },
-                                {
-                                    "required": ["stderr"]
-                                }
-                            ]
+                            "not": {
+                                "required": ["stdout"]
+                            }
                         },
                         {
-                            "required": ["join"]
+                            "not": {
+                                "required": ["join"]
+                            }
                         }
-                    ]
+                    ],
+                    "dependencies": {
+                        "stdout": ["stderr"],
+                        "stderr": ["stdout"]
+                    }
                 }
             }
         },

@@ -21,12 +21,16 @@
           cycledef: howdy
         account: "&ACCOUNT;"
         command: "echo hello $person"
+        jobname: hello
         walltime: 00:01:00
         memory: 512M
         deadline: 202209290000
         envar:
           name: siri
-        join: hello
+        cores: 3
+        shared: hello
+        stdout: hello
+        stderr: hello
       metatask_trace1:
         var:
           member: foo bar baz
@@ -42,5 +46,6 @@
                 maxtries: "1"
               account: "&ACCOUNT;"
               command: "echo hello #member#"
+              nodes: 1:ppn=1
               walltime: 00:01:00
               join: hello
