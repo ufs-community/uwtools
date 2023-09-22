@@ -32,19 +32,7 @@
                                 "type": "string"
                             },
                             "final": {
-                                "type": "string",
-                                "enum": [
-                                    "true",
-                                    "false",
-                                    "T",
-                                    "F",
-                                    "t",
-                                    "f",
-                                    "True",
-                                    "False",
-                                    "FALSE",
-                                    "TRUE"
-                                ]
+                                "type": "boolean"
                             }
                         },
                         "account": {
@@ -106,7 +94,8 @@
                             "type": "string"
                         }
                     },
-                    "required": ["attrs", "command", "walltime"],
+                    "required": ["command", "walltime"],
+                    "additionalProperties": false,
                     "oneOf": [
                         {
                             "required": ["cores"]
@@ -136,6 +125,7 @@
                                 "required": ["stdout"]
                             }
                         },
+
                         {
                             "not": {
                                 "required": ["join"]
@@ -146,7 +136,7 @@
                         "stdout": ["stderr"],
                         "stderr": ["stdout"]
                     }
-                }
+                }            
             }
         },
         "metataskPattern": {
@@ -165,14 +155,16 @@
                         "$ref": "#/$defs/taskPattern",
                         "$ref": "#/$defs/metataskPattern"
                     },
-                    "oneOf": [
+                    "anyOf": [
                         {
                             "required": ["taskPattern"]
                         },
                         {
                             "required": ["metataskPattern"]
                         }
-                    ]
+                    ],
+                    "required": ["var"],
+                    "additionalProperties": false
                 }
             }
         }
@@ -236,10 +228,18 @@
                     },
                     "tasks": {
                         "type": "object",
-                        "$ref": "#/$defs/taskPattern"
+                        "anyOf": [
+                            { 
+                                "$ref": "#/$defs/taskPattern" 
+                            },
+                            { 
+                                "$ref": "#/$defs/metataskPattern" 
+                            }
+                        ]
                     }
                 },
-                "required": ["attrs", "cycledefs", "log", "tasks"]
+                "required": ["attrs", "cycledefs", "log", "tasks"],
+                "additionalProperties": false
             }
         },
         "additionalProperties": false

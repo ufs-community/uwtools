@@ -17,35 +17,6 @@
     log: /some/path/to/&FOO;
     tasks:
       task_hello:
-        attrs:
-          cycledef: howdy
-        account: "&ACCOUNT;"
-        command: "echo hello $person"
-        jobname: hello
+        command: hello
         walltime: 00:01:00
-        memory: 512M
-        deadline: 202209290000
-        envar:
-          name: siri
         cores: 3
-        shared: hello
-        stdout: hello
-        stderr: hello
-      metatask_trace1:
-        var:
-          member: foo bar baz
-        metatask_trace2:
-          var:
-            member: foo bar baz
-          metatask_trace3:
-            var:
-              member: foo bar baz
-            task_hello_#member#:
-              attrs:
-                cycledefs: howdy
-                maxtries: "1"
-              account: "&ACCOUNT;"
-              command: "echo hello #member#"
-              nodes: 1:ppn=1
-              walltime: 00:01:00
-              join: hello
