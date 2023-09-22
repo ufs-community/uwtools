@@ -209,7 +209,7 @@
                     "cycledefs": {
                         "type": "object",
                         "properties": {
-                            "groupname": {
+                            "^.*$": {
                                 "type": "array",
                                 "items": {
                                     "$ref": "#/$defs/dateTimePattern"
