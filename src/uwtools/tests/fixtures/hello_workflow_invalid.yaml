@@ -9,7 +9,7 @@
       ACCOUNT: myaccount
       FOO: test.log
     log: /some/path/to/&FOO;
-    task:
+    tasks:
       task_hello:
         attrs:
           cycledef: howdy

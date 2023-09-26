@@ -137,36 +137,28 @@
                         "stderr": ["stdout"]
                     }
                 }            
-            }
+            },
+            "additionalProperties": false
         },
         "metataskPattern": {
             "patternProperties": {
                 "^metatask_.*$": {
                     "type": "object",
                     "properties": {
-                        "var": {
-                            "type": "object",
-                            "patternProperties": {
-                                "^.*$": {
-                                    "type": "string"
-                                }
-                            }
-                        },
-                        "$ref": "#/$defs/taskPattern",
-                        "$ref": "#/$defs/metataskPattern"
+                        "$ref": "#/$defs/metataskPattern",
+                        "$ref": "#/$defs/taskPattern"
                     },
                     "anyOf": [
-                        {
-                            "required": ["taskPattern"]
+                        { 
+                            "$ref": "#/$defs/metataskPattern"
                         },
-                        {
-                            "required": ["metataskPattern"]
+                        { 
+                            "$ref": "#/$defs/taskPattern" 
                         }
-                    ],
-                    "required": ["var"],
-                    "additionalProperties": false
+                    ]
                 }
-            }
+            },
+            "additionalProperties": false
         }
     },
     "type": "object",
@@ -228,17 +220,21 @@
                     },
                     "tasks": {
                         "type": "object",
+                        "properties": {
+                            "$ref": "#/$defs/metataskPattern",
+                            "$ref": "#/$defs/taskPattern"
+                        },
                         "anyOf": [
                             { 
-                                "$ref": "#/$defs/taskPattern" 
+                                "$ref": "#/$defs/metataskPattern"
                             },
                             { 
-                                "$ref": "#/$defs/metataskPattern" 
+                                "$ref": "#/$defs/taskPattern" 
                             }
                         ]
                     }
                 },
-                "required": ["attrs", "cycledefs", "log", "tasks"],
+                "required": ["cycledefs", "log", "tasks"],
                 "additionalProperties": false
             }
         },

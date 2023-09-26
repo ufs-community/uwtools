@@ -16,7 +16,9 @@
       FOO: test.log
     log: /some/path/to/&FOO;
     tasks:
-      task_hello:
-        command: hello
-        walltime: 00:01:00
-        cores: 3
+      metatask_ensemble_hello1:
+        metatask_ensemble_hello2:
+          task_hello:
+            command: hello
+            walltime: 00:01:00
+            cores: 3
