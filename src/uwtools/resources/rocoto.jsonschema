@@ -145,7 +145,7 @@
                 "^metatask_.*$": {
                     "type": "object",
                     "properties": {
-                        "$ref": "#/$defs/metataskPattern",
+                        "$ref": "#/$defs/taskPattern",
                         "$ref": "#/$defs/taskPattern"
                     },
                     "anyOf": [
