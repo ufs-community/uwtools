@@ -4,6 +4,7 @@ Tests for forecast driver.
 """
 import datetime as dt
 import logging
+import os
 import subprocess
 from pathlib import Path
 from unittest.mock import patch
@@ -270,9 +271,12 @@ def test_stage_files(tmp_path, section, link_files):
     # create the test files.
     src_directory.mkdir()
     for dst_fn, src_path in files_to_stage.items():
-        fixed_src_path = src_directory / Path(src_path).name
-        files_to_stage[dst_fn] = str(fixed_src_path)
-        fixed_src_path.touch()
+        if isinstance(src_path, list):
+            files_to_stage[dst_fn] = [str(src_directory / Path(sp).name) for sp in src_path]
+        else:
+            fixed_src_path = src_directory / Path(src_path).name
+            files_to_stage[dst_fn] = str(fixed_src_path)
+            fixed_src_path.touch()
     # Test that none of the destination files exist yet:
     for dst_fn in files_to_stage.keys():
         assert not (run_directory / dst_fn).is_file()
@@ -280,11 +284,14 @@ def test_stage_files(tmp_path, section, link_files):
     FV3Forecast.create_directory_structure(run_directory)
     FV3Forecast.stage_files(run_directory, files_to_stage, link_files=link_files)
     # Test that all of the destination files now exist:
-    for dst_fn in files_to_stage.keys():
-        if link_files:
-            assert (run_directory / dst_fn).is_symlink()
+    link_or_file = Path.is_symlink if link_files else Path.is_file
+    for dst_fn, src_paths in files_to_stage.items():
+
+        if isinstance(src_paths, list):
+            dst_fns = [run_directory / dst_fn / os.path.basename(sp) for sp in src_paths]
+            assert all([link_or_file(d_fn) for d_fn in dst_fns])
         else:
-            assert (run_directory / dst_fn).is_file()
+            assert link_or_file(run_directory / dst_fn)
 
 
 @fixture
@@ -304,33 +311,55 @@ def test_run_direct(fv3_run_assets):
         with patch.object(forecast.subprocess, "run") as sprun:
             fcstobj = FV3Forecast(config_file=config_file)
             with patch.object(fcstobj, "_experiment_config", config):
-                print(fcstobj._config)
                 fcstobj.run(cycle=dt.datetime.now())
             sprun.assert_called_once_with(
-                "srun --export=None test_exec.py",
+                "KMP_AFFINITY=scatter OMP_NUM_THREADS=1 OMP_STACKSIZE=1 MPI_TYPE_DEPTH=20 ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4 srun --export=None test_exec.py",
                 stderr=subprocess.STDOUT,
                 check=False,
                 shell=True,
             )
 
+def test_FV3Forecast__config_deleter():
+    config_file = fixture_path("forecast.yaml")
+    with patch.object(Driver, "_validate", return_value=True):
+        forecast = FV3Forecast(config_file=config_file)
 
-def test_FV3Forecast_run_dry_run(caplog, fv3_run_assets):
+    assert forecast._config != {}
+    del(forecast._config)
+    assert forecast._config == {}
+
+def test_FV3Forecast__config_setter():
+    config_file = fixture_path("forecast.yaml")
+    with patch.object(Driver, "_validate", return_value=True):
+        forecast = FV3Forecast(config_file=config_file)
+    new_config = {"foo": 1, "bar": 2}
+    forecast._config = new_config
+    assert forecast._config_data == new_config
+    assert forecast._config == new_config
+
+@pytest.mark.parametrize("with_batch_script", [True, False])
+def test_FV3Forecast_run_dry_run(caplog, fv3_run_assets, with_batch_script):
     logging.getLogger().setLevel(logging.INFO)
     batch_script, config_file, config = fv3_run_assets
-    run_expected = """
-#!/bin/bash
-#SBATCH --account=user_account
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-KMP_AFFINITY=scatter
+    run_expected = """KMP_AFFINITY=scatter
 OMP_NUM_THREADS=1
 OMP_STACKSIZE=1
 MPI_TYPE_DEPTH=20
 ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4
 srun --export=None test_exec.py
-""".strip()
+"""
+    if with_batch_script:
+        run_expected = """#!/bin/bash
+#SBATCH --account=user_account
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --qos=batch
+#SBATCH --time=00:01:00
+""" + run_expected.strip()
+    else:
+        batch_script = None
+        run_expected = run_expected.replace("\n", " ").strip()
+
     with patch.object(FV3Forecast, "_validate", return_value=True):
         fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=batch_script)
         with patch.object(fcstobj, "_experiment_config", config):

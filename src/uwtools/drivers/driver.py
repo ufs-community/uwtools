@@ -8,7 +8,7 @@ import shutil
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from datetime import datetime
-from typing import Dict, Optional, Type
+from typing import Dict, Optional, Type, Union
 
 from uwtools.config import validator
 from uwtools.config.core import Config, YAMLConfig
@@ -101,7 +101,7 @@ class Driver(ABC):
 
     @staticmethod
     def stage_files(
-        run_directory: str, files_to_stage: Dict[str, str], link_files: bool = False
+        run_directory: str, files_to_stage: Dict[str, Union[list, str]], link_files: bool = False
     ) -> None:
         """
         Creates destination files in run directory and copies or links contents from the source path
@@ -114,12 +114,13 @@ class Driver(ABC):
         """
         link_or_copy = os.symlink if link_files else shutil.copyfile
 
+        logging.info(f"CRH: {files_to_stage} ")
         for dst_fn, src_path in files_to_stage.items():
             dst_path = os.path.join(run_directory, dst_fn)
             if isinstance(src_path, list):
                 Driver.stage_files(
-                    run_directory,
-                    {os.path.join(dst_path, os.path.basename(src)): src for src in src_path},
+                    dst_path,
+                    {os.path.basename(src): src for src in src_path},
                     link_files,
                 )
                 continue
