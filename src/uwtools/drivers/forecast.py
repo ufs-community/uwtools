@@ -173,16 +173,15 @@ class FV3Forecast(Driver):
             self.scheduler.run_job(outpath)
             return
 
-
-        logging.info(f"CRH: RTA = {run_time_args} {self._config['runtime_info']}")
         pre_run = self._mpi_env_variables(" ")
+        full_cmd = f"{pre_run} {self.run_cmd(*run_time_args)}"
         if self._dry_run:
             logging.info("Would run: ")
-            logging.info(f"{pre_run} {self.run_cmd(*run_time_args)}")
+            logging.info(full_cmd)
             return
 
         subprocess.run(
-            f"{pre_run} {self.run_cmd(*run_time_args)}",
+            full_cmd,
             stderr=subprocess.STDOUT,
             check=False,
             shell=True,

@@ -113,8 +113,6 @@ class Driver(ABC):
         :param link_files: Whether to link or copy the files.
         """
         link_or_copy = os.symlink if link_files else shutil.copyfile
-
-        logging.info(f"CRH: {files_to_stage} ")
         for dst_fn, src_path in files_to_stage.items():
             dst_path = os.path.join(run_directory, dst_fn)
             if isinstance(src_path, list):
@@ -124,7 +122,7 @@ class Driver(ABC):
                     link_files,
                 )
                 continue
-            link_or_copy(src_path, dst_path) # type: ignore
+            link_or_copy(src_path, dst_path)  # type: ignore
             msg = f"File {src_path} staged in run directory at {dst_fn}"
             logging.info(msg)
 

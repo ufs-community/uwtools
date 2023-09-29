@@ -286,10 +286,9 @@ def test_stage_files(tmp_path, section, link_files):
     # Test that all of the destination files now exist:
     link_or_file = Path.is_symlink if link_files else Path.is_file
     for dst_fn, src_paths in files_to_stage.items():
-
         if isinstance(src_paths, list):
             dst_fns = [run_directory / dst_fn / os.path.basename(sp) for sp in src_paths]
-            assert all([link_or_file(d_fn) for d_fn in dst_fns])
+            assert all(link_or_file(d_fn) for d_fn in dst_fns)
         else:
             assert link_or_file(run_directory / dst_fn)
 
@@ -307,26 +306,36 @@ def fv3_run_assets(tmp_path):
 
 def test_run_direct(fv3_run_assets):
     _, config_file, config = fv3_run_assets
+    expected_command = """
+KMP_AFFINITY=scatter
+OMP_NUM_THREADS=1
+OMP_STACKSIZE=1
+MPI_TYPE_DEPTH=20
+ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4
+srun --export=None test_exec.py"""
+    expected_command = expected_command.replace("\n", " ")
     with patch.object(FV3Forecast, "_validate", return_value=True):
         with patch.object(forecast.subprocess, "run") as sprun:
             fcstobj = FV3Forecast(config_file=config_file)
             with patch.object(fcstobj, "_experiment_config", config):
                 fcstobj.run(cycle=dt.datetime.now())
             sprun.assert_called_once_with(
-                "KMP_AFFINITY=scatter OMP_NUM_THREADS=1 OMP_STACKSIZE=1 MPI_TYPE_DEPTH=20 ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4 srun --export=None test_exec.py",
+                expected_command,
                 stderr=subprocess.STDOUT,
                 check=False,
                 shell=True,
             )
+
 
 def test_FV3Forecast__config_deleter():
     config_file = fixture_path("forecast.yaml")
     with patch.object(Driver, "_validate", return_value=True):
         forecast = FV3Forecast(config_file=config_file)
 
-    assert forecast._config != {}
-    del(forecast._config)
-    assert forecast._config == {}
+    assert forecast._config
+    del forecast._config
+    assert not forecast._config
+
 
 def test_FV3Forecast__config_setter():
     config_file = fixture_path("forecast.yaml")
@@ -336,6 +345,7 @@ def test_FV3Forecast__config_setter():
     forecast._config = new_config
     assert forecast._config_data == new_config
     assert forecast._config == new_config
+
 
 @pytest.mark.parametrize("with_batch_script", [True, False])
 def test_FV3Forecast_run_dry_run(caplog, fv3_run_assets, with_batch_script):
@@ -349,13 +359,16 @@ ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4
 srun --export=None test_exec.py
 """
     if with_batch_script:
-        run_expected = """#!/bin/bash
+        run_expected = (
+            """#!/bin/bash
 #SBATCH --account=user_account
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --qos=batch
 #SBATCH --time=00:01:00
-""" + run_expected.strip()
+"""
+            + run_expected.strip()
+        )
     else:
         batch_script = None
         run_expected = run_expected.replace("\n", " ").strip()
