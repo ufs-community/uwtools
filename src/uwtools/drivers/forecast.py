@@ -36,6 +36,7 @@ class FV3Forecast(Driver):
         """
 
         super().__init__(config_file=config_file, dry_run=dry_run, batch_script=batch_script)
+        self._config_data = self._experiment_config["forecast"]
 
     # Public methods
 
@@ -44,9 +45,10 @@ class FV3Forecast(Driver):
         Prepare batch script contents for interaction with system scheduler.
         """
         pre_run = self._mpi_env_variables("\n")
+        run_time_args = self._config["runtime_info"].get("mpi_args", [])
         bs = self.scheduler.batch_script
         bs.append(pre_run)
-        bs.append(self.run_cmd())
+        bs.append(self.run_cmd(*run_time_args))
         return bs
 
     @staticmethod
@@ -154,8 +156,10 @@ class FV3Forecast(Driver):
         for file_category in ["static", "cycle-dependent"]:
             self.stage_files(run_directory, self._config[file_category], link_files=True)
 
+        run_time_args = self._config["runtime_info"].get("mpi_args", [])
+
         if self._batch_script is not None:
-            batch_script = self.batch_script
+            batch_script = self.batch_script()
 
             if self._dry_run:
                 # Apply switch to allow user to view the run command of config.
@@ -169,13 +173,15 @@ class FV3Forecast(Driver):
             self.scheduler.run_job(outpath)
             return
 
+
+        logging.info(f"CRH: RTA = {run_time_args} {self._config['runtime_info']}")
         if self._dry_run:
             logging.info("Would run: ")
-            logging.info(self.run_cmd())
+            logging.info(self.run_cmd(*run_time_args))
             return
 
         subprocess.run(
-            f"{self.run_cmd()}",
+            f"{self.run_cmd(*run_time_args)}",
             stderr=subprocess.STDOUT,
             check=False,
             shell=True,
@@ -198,11 +204,15 @@ class FV3Forecast(Driver):
 
     @property
     def _config(self) -> Mapping:
-        """
-        The config object that describes the subset of an experiment config related to the
-        FV3Forecast.
-        """
-        return self._experiment_config["forecast"]
+        return self._config_data
+
+    @_config.deleter
+    def _config(self) -> None:
+        self._config_data = {}
+
+    @_config.setter
+    def _config(self, config_obj: Mapping) -> None:
+        self._config_data = config_obj
 
     def _define_boundary_files(self) -> Dict:
         """

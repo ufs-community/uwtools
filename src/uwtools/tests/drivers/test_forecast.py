@@ -18,21 +18,9 @@ from uwtools.drivers.forecast import FV3Forecast
 from uwtools.tests.support import compare_files, fixture_path
 
 
-@fixture
-def slurm_props():
-    return {
-        "account": "account_name",
-        "nodes": 1,
-        "queue": "batch",
-        "scheduler": "slurm",
-        "tasks_per_node": 1,
-        "walltime": "00:01:00",
-    }
-
-
 def test_batch_script():
     expected = """
-#SBATCH --account=account_name
+#SBATCH --account=user_account
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --qos=batch
@@ -42,7 +30,7 @@ OMP_NUM_THREADS=1
 OMP_STACKSIZE=1
 MPI_TYPE_DEPTH=20
 ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4
-srun  test_exec.py
+srun --export=None test_exec.py
 """.strip()
     config_file = fixture_path("forecast.yaml")
     with patch.object(Driver, "_validate", return_value=True):
@@ -303,21 +291,11 @@ def test_stage_files(tmp_path, section, link_files):
 def fv3_run_assets(tmp_path):
     batch_script = tmp_path / "batch.sh"
     config_file = fixture_path("forecast.yaml")
-    config = {
-        "platform": {
-            "MPICMD": "srun",
-            "account": "user_account",
-        },
-        "forecast": {
-            "MODEL": "FV3",
-            "EXEC_NAME": "test_exec.py",
-            "RUN_DIRECTORY": tmp_path.as_posix(),
-            "CYCLEDEP": {"foo-file": str(tmp_path / "foo")},
-            "STATIC": {"static-foo-file": str(tmp_path / "foo")},
-            "VERBOSE": "False",
-        },
-    }
-    return batch_script, config_file, config
+    config = YAMLConfig(config_file)
+    config["forecast"]["run_dir"] = tmp_path.as_posix()
+    config["forecast"]["cycle-dependent"] = {"foo-file": str(tmp_path / "foo")}
+    config["forecast"]["static"] = {"static-foo-file": str(tmp_path / "foo")}
+    return batch_script, config_file, config.data
 
 
 def test_run_direct(fv3_run_assets):
@@ -325,7 +303,8 @@ def test_run_direct(fv3_run_assets):
     with patch.object(FV3Forecast, "_validate", return_value=True):
         with patch.object(forecast.subprocess, "run") as sprun:
             fcstobj = FV3Forecast(config_file=config_file)
-            with patch.object(fcstobj, "_config", config):
+            with patch.object(fcstobj, "_experiment_config", config):
+                print(fcstobj._config)
                 fcstobj.run(cycle=dt.datetime.now())
             sprun.assert_called_once_with(
                 "srun --export=None test_exec.py",
@@ -345,11 +324,17 @@ def test_FV3Forecast_run_dry_run(caplog, fv3_run_assets):
 #SBATCH --ntasks-per-node=1
 #SBATCH --qos=batch
 #SBATCH --time=00:01:00
+KMP_AFFINITY=scatter
+OMP_NUM_THREADS=1
+OMP_STACKSIZE=1
+MPI_TYPE_DEPTH=20
+ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4
 srun --export=None test_exec.py
 """.strip()
     with patch.object(FV3Forecast, "_validate", return_value=True):
         fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=batch_script)
-        with patch.object(fcstobj, "_config", config):
+        with patch.object(fcstobj, "_experiment_config", config):
+            print(fcstobj._config)
             fcstobj.run(cycle=dt.datetime.now())
     assert run_expected in caplog.text
 
@@ -359,7 +344,7 @@ def test_run_submit(fv3_run_assets):
     with patch.object(FV3Forecast, "_validate", return_value=True):
         with patch.object(forecast.subprocess, "run") as sprun:
             fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
-            with patch.object(fcstobj, "_config", config):
+            with patch.object(fcstobj, "_experiment_config", config):
                 fcstobj.run(cycle=dt.datetime.now())
             sprun.assert_called_once_with(
                 f"sbatch {batch_script}",

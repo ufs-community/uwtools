@@ -1,5 +1,5 @@
 user:
-  account: account_name
+  account: user_account
 platform:
   mpicmd: srun
   scheduler: slurm
@@ -7,11 +7,14 @@ preprocessing:
   lateral_boundary_conditions:
     interval_hours: 3
     offset: 0
-    output_file_template: "gfs_bndy.tile{tile}.f{fhr}.nc"
+    output_file_template: "gfs_bndy.tile{tile}.f{forecast_hour}.nc"
 forecast:
   model: FV3
   exec_name: test_exec.py
-  run_dir: src/uwtools/tests/drivers/
+  run_dir: some/path
+  tiles:
+    - 7
+  length: 12
   jobinfo:
     nodes: 1
     tasks_per_node: 1
@@ -20,6 +23,8 @@ forecast:
   runtime_info:
     threads: 1
     stacksize: 512m
+    mpi_args:
+      - "--export=None"
   cycle-dependent:
     INPUT/gfs_data.nc: path/to/gfs_data.tile7.halo0.nc
     INPUT/sfc_data.nc: path/to/sfc_data.tile7.halo0.nc

@@ -37,6 +37,7 @@ class Driver(ABC):
         self._validate()
         self._experiment_config = YAMLConfig(config_file=config_file)
         self._platform_config = self._experiment_config.get("platform", {})
+        self._config_data = {}
 
     # Public methods
 
@@ -78,6 +79,7 @@ class Driver(ABC):
 
         :param args: Any number of native flags for the run command
         """
+        print(args)
         run_cmd = self._platform_config["mpicmd"]
         exec_name = self._config["exec_name"]
         args_str = " ".join(str(arg) for arg in args)
@@ -133,6 +135,13 @@ class Driver(ABC):
         """
         The config object that describes the subset of an experiment config related to a subclass of
         Driver.
+        """
+
+    @_config.deleter
+    @abstractmethod
+    def _config(self) -> None:
+        """
+        Deleter for _config.
         """
 
     @staticmethod
