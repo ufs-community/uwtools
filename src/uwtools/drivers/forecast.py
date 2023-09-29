@@ -202,18 +202,6 @@ class FV3Forecast(Driver):
         end_hour = self._config["length"] + offset + 1
         return offset, lbcs_config["interval_hours"], end_hour
 
-    @property
-    def _config(self) -> Mapping:
-        return self._config_data
-
-    @_config.deleter
-    def _config(self) -> None:
-        self._config_data = {}
-
-    @_config.setter
-    def _config(self, config_obj: Mapping) -> None:
-        self._config_data = config_obj
-
     def _define_boundary_files(self) -> Dict:
         """
         Maps the prepared boundary conditions to the appropriate hours for the forecast.

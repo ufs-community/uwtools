@@ -8,7 +8,7 @@ import shutil
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from datetime import datetime
-from typing import Dict, Optional, Type, Union
+from typing import Any, Dict, Optional, Type, Union
 
 from uwtools.config import validator
 from uwtools.config.core import Config, YAMLConfig
@@ -37,7 +37,7 @@ class Driver(ABC):
         self._validate()
         self._experiment_config = YAMLConfig(config_file=config_file)
         self._platform_config = self._experiment_config.get("platform", {})
-        self._config_data = {}
+        self._config_data: Dict[str, Any] = {}
 
     # Public methods
 
@@ -79,7 +79,6 @@ class Driver(ABC):
 
         :param args: Any number of native flags for the run command
         """
-        print(args)
         run_cmd = self._platform_config["mpicmd"]
         exec_name = self._config["exec_name"]
         args_str = " ".join(str(arg) for arg in args)
@@ -129,19 +128,26 @@ class Driver(ABC):
     # Private methods
 
     @property
-    @abstractmethod
     def _config(self) -> Mapping:
         """
         The config object that describes the subset of an experiment config related to a subclass of
         Driver.
         """
+        return self._config_data
 
     @_config.deleter
-    @abstractmethod
     def _config(self) -> None:
         """
         Deleter for _config.
         """
+        self._config_data = {}
+
+    @_config.setter
+    def _config(self, config_obj: Dict[str, Any]) -> None:
+        """
+        Setter for _config.
+        """
+        self._config_data = config_obj
 
     @staticmethod
     def _create_user_updated_config(

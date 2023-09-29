@@ -306,8 +306,7 @@ def fv3_run_assets(tmp_path):
 
 def test_run_direct(fv3_run_assets):
     _, config_file, config = fv3_run_assets
-    expected_command = """
-KMP_AFFINITY=scatter
+    expected_command = """KMP_AFFINITY=scatter
 OMP_NUM_THREADS=1
 OMP_STACKSIZE=1
 MPI_TYPE_DEPTH=20
