@@ -7,7 +7,7 @@ import logging
 from importlib import resources
 from pathlib import Path
 from typing import Any, Dict
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 from pytest import fixture
@@ -240,7 +240,7 @@ def test_validate_yaml_rocoto_invalid_walltime_pattern(rocoto_assets, caplog):
         assert logged(caplog, "'0:01:00' does not match '^[0-9]{2}:[0-9]{2}:[0-9]{2}$'")
 
 
-def test_validate_yaml_rocoto_valid(rocoto_assets, caplog):
+def test_validate_yaml_rocoto_valid(rocoto_assets):
     schema_file, config_dict = rocoto_assets
     with patch.object(validator, "YAMLConfig") as YAMLConfig:
         yaml_config = YAMLConfig()
