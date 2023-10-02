@@ -1,24 +1,50 @@
-  workflow:
-    attrs:
-      realtime: false
-      scheduler: slurm
-      cyclethrottle: 5
-    cycledefs:
-      howdy: 
-        - 202209290000 202209300000 06:00:00
-        - 202210200000 202310201800 02:00:00
-      groupname: 
-        - 202209290000 202209300000 06:00:00
-      groupname2: 
-        - 202209290000 202209300000 06:00:00
-    entities:
-      ACCOUNT: myaccount
-      FOO: test.log
-    log: /some/path/to/&FOO;
-    tasks:
-      metatask_ensemble_hello1:
-        metatask_ensemble_hello2:
-          task_hello:
-            command: hello
-            walltime: 00:01:00
-            cores: 3
+workflow:
+  attrs:
+    realtime: false
+    scheduler: slurm
+  cycledefs:
+    howdy: 
+      - 202209290000 202209300000 06:00:00
+  entities:
+    ACCOUNT: myaccount
+    FOO: test.log
+  log: /some/path/to/&FOO;
+  tasks:
+    metatask_ensemble_hello1:
+      var:
+        member: foo bar baz
+      task_hello:
+        account: "&ACCOUNT;"
+        command: hello
+        cores: 3
+        walltime: 00:01:00
+        envar:
+          name: HOME
+          value: "&HOME"
+        join: hello-goodbye
+    metatask_2:
+      var:
+        x: ex
+        y: why
+      metatask_3:
+        var:
+          x: next
+          y: example
+        task_3:
+          jobname: hello
+          exclusive: option2
+          command: /bin/true
+          cores: 3
+          walltime: 00:00:01
+      task_2:
+        queue: nserial
+        partition: service
+        command: /bin/true
+        cores: 3
+        walltime: 00:00:01
+    task_goodbye:
+      memory: 512M
+      shared: option1
+      command: goodbye
+      cores: 3
+      walltime: 99:99:99
