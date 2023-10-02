@@ -1,0 +1,70 @@
+{
+    "$defs": {
+        "dateTimePattern": {
+            "type": "string",
+            "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2})$"
+        }
+    },
+    "type": "object",
+    "properties": {
+        "workflow": {
+            "type": "object",
+            "properties": {
+                "attrs": {
+                    "type": "object",
+                    "properties": {
+                        "realtime": {
+                            "type": "boolean"
+                        },
+                        "scheduler": {
+                            "type": "string",
+                            "enum": [
+                                "sge",
+                                "lsf",
+                                "lsfcray",
+                                "ll",
+                                "torque",
+                                "moabtorque",
+                                "moab",
+                                "pbspro",
+                                "slurm",
+                                "cobalt"
+                            ]
+                        },
+                        "cyclethrottle": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "taskthrottle": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    },
+                    "required": ["realtime", "scheduler"]
+                },
+                "cycledefs": {
+                    "type": "object",
+                    "properties": {
+                        "groupname": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/dateTimePattern"
+                            }, 
+                            "required": ["ref"]
+                        },
+                        "required": ["items"]
+                    }
+                },
+                "log": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "entities": {
+                    "type": "object"
+                }
+            },
+            "required": ["attrs", "cycledefs", "log"]
+        }
+    }
+}
+
