@@ -25,6 +25,23 @@
     "task": {
       "type": "object",
       "properties": {
+        "attrs": {
+            "maxtries": {
+                "type": "string",
+                "format": "number",
+                "minimum": 0
+            },
+            "throttle": {
+                "type": "integer",
+                "minimum": 0
+            },
+            "cycledefs": {
+                "type": "string"
+            },
+            "final": {
+                "type": "boolean"
+            }
+        },
         "command": {
           "type": "string"
         },
@@ -56,6 +73,9 @@
         "memory": {
             "type": "string"
         },
+        "rewind": {
+            "type": "string"
+        },
         "envar": {
             "type": "object"
         },
@@ -73,6 +93,9 @@
         },
         "join": {
             "type": "string"
+        },
+        "deadline": {
+            "$ref": "#/$defs/datePattern"
         }
       },
       "additionalProperties": false,
@@ -109,7 +132,6 @@
                 "required": ["stdout"]
             }
         },
-
         {
             "not": {
                 "required": ["join"]
@@ -138,6 +160,11 @@
     "dateTimePattern": {
         "type": "string",
         "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2})$"
+    },
+    "datePattern": {
+        "type": "integer",
+        "format": "string",
+        "pattern": "^(\\d{12}) (\\d{12})$"
     }
   },
   "type": "object",

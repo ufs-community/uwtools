@@ -18,33 +18,16 @@ workflow:
         command: hello
         cores: 3
         walltime: 00:01:00
-        envar:
-          name: HOME
-          value: "&HOME"
         join: hello-goodbye
     metatask_2:
       var:
         x: ex
         y: why
-      metatask_3:
-        var:
-          x: next
-          y: example
-        task_3:
-          jobname: hello
-          exclusive: option2
-          command: /bin/true
-          cores: 3
-          walltime: 00:00:01
       task_2:
-        queue: nserial
-        partition: service
         command: /bin/true
         cores: 3
         walltime: 00:00:01
     task_goodbye:
-      memory: 512M
-      shared: option1
       command: goodbye
       cores: 3
       walltime: 99:99:99
