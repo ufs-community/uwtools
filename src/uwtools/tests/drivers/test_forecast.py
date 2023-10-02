@@ -236,15 +236,14 @@ def test_forecast_run_cmd():
     with patch.object(FV3Forecast, "_validate", return_value=True):
         fcstobj = FV3Forecast(config_file=config_file)
         hera_expected = "srun --export=ALL test_exec.py"
-        assert hera_expected == fcstobj.run_cmd("--export=ALL")
+        fcstobj._config["runtime_info"]["mpi_args"] = ["--export=ALL"]
+        assert hera_expected == fcstobj.run_cmd()
         cheyenne_expected = "mpirun -np 4 test_exec.py"
-
         fcstobj._experiment_config["platform"]["mpicmd"] = "mpirun"
-        assert cheyenne_expected == fcstobj.run_cmd("-np", 4)
-
+        fcstobj._config["runtime_info"]["mpi_args"] = ["-np", 4]
+        assert cheyenne_expected == fcstobj.run_cmd()
         fcstobj._experiment_config["platform"]["mpicmd"] = "mpiexec"
-        wcoss2_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
-        assert wcoss2_expected == fcstobj.run_cmd(
+        fcstobj._config["runtime_info"]["mpi_args"] = [
             "-n",
             4,
             "-ppn",
@@ -253,7 +252,9 @@ def test_forecast_run_cmd():
             "core",
             "-depth",
             2,
-        )
+        ]
+        wcoss2_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
+        assert wcoss2_expected == fcstobj.run_cmd()
 
 
 @pytest.mark.parametrize("section", ["static", "cycledep"])

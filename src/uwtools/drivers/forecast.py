@@ -45,10 +45,9 @@ class FV3Forecast(Driver):
         Prepare batch script contents for interaction with system scheduler.
         """
         pre_run = self._mpi_env_variables("\n")
-        run_time_args = self._config["runtime_info"].get("mpi_args", [])
         bs = self.scheduler.batch_script
         bs.append(pre_run)
-        bs.append(self.run_cmd(*run_time_args))
+        bs.append(self.run_cmd())
         return bs
 
     @staticmethod
@@ -156,8 +155,6 @@ class FV3Forecast(Driver):
         for file_category in ["static", "cycle-dependent"]:
             self.stage_files(run_directory, self._config[file_category], link_files=True)
 
-        run_time_args = self._config["runtime_info"].get("mpi_args", [])
-
         if self._batch_script is not None:
             batch_script = self.batch_script()
 
@@ -174,7 +171,7 @@ class FV3Forecast(Driver):
             return
 
         pre_run = self._mpi_env_variables(" ")
-        full_cmd = f"{pre_run} {self.run_cmd(*run_time_args)}"
+        full_cmd = f"{pre_run} {self.run_cmd()}"
         if self._dry_run:
             logging.info("Would run: ")
             logging.info(full_cmd)

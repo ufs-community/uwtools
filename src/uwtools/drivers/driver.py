@@ -73,15 +73,14 @@ class Driver(ABC):
         :param cycle: The time stamp of the current cycle to run.
         """
 
-    def run_cmd(self, *args) -> str:
+    def run_cmd(self) -> str:
         """
         The command-line command to run the NWP tool.
-
-        :param args: Any number of native flags for the run command
         """
         run_cmd = self._platform_config["mpicmd"]
         exec_name = self._config["exec_name"]
-        args_str = " ".join(str(arg) for arg in args)
+        run_time_args = self._config["runtime_info"].get("mpi_args", [])
+        args_str = " ".join(str(arg) for arg in run_time_args)
         return f"{run_cmd} {args_str} {exec_name}"
 
     @property
