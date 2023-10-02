@@ -282,7 +282,7 @@ class Config(ABC, UserDict):
     @abstractmethod
     def dump(self, path: OptionalPath) -> None:
         """
-        Dumps the config as a file.
+        Dumps the config to stdout or a file.
 
         :param path: Path to dump config to.
         """
@@ -291,7 +291,7 @@ class Config(ABC, UserDict):
     @abstractmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
-        Dumps a provided config dictionary as a file.
+        Dumps a provided config dictionary to stdout or a file.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
@@ -429,7 +429,7 @@ class INIConfig(Config):
 
     def dump(self, path: OptionalPath) -> None:
         """
-        Dumps the config as an INI file.
+        Dumps the config in INI format.
 
         :param path: Path to dump config to.
         """
@@ -438,7 +438,7 @@ class INIConfig(Config):
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
-        Dumps a provided config dictionary as an INI file.
+        Dumps a provided config dictionary in INI format.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
@@ -481,7 +481,7 @@ class NMLConfig(Config):
 
     def dump(self, path: OptionalPath) -> None:
         """
-        Dumps the config as a Fortran namelist file.
+        Dumps the config in Fortran namelist format.
 
         :param path: Path to dump config to.
         """
@@ -490,7 +490,7 @@ class NMLConfig(Config):
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
-        Dumps a provided config dictionary as a Fortran namelist file.
+        Dumps a provided config dictionary in Fortran namelist format.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
@@ -566,7 +566,7 @@ class YAMLConfig(Config):
 
     def dump(self, path: OptionalPath) -> None:
         """
-        Dumps the config as a YAML file.
+        Dumps the config in YAML format.
 
         :param path: Path to dump config to.
         """
@@ -575,7 +575,7 @@ class YAMLConfig(Config):
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
-        Dumps a provided config dictionary as a YAML file.
+        Dumps a provided config dictionary in YAML format.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
@@ -595,7 +595,7 @@ class FieldTableConfig(YAMLConfig):
 
     def dump(self, path: OptionalPath) -> None:
         """
-        Dumps the config as a Field Table file.
+        Dumps the config in Field Table format.
 
         :param path: Path to dump config to.
         """
@@ -604,7 +604,7 @@ class FieldTableConfig(YAMLConfig):
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
-        Dumps a provided config dictionary as a Field Table file.
+        Dumps a provided config dictionary in Field Table format.
 
         FMS field and tracer managers must be registered in an ASCII table called 'field_table'.
         This table lists field type, target model and methods the querying model will ask for. See

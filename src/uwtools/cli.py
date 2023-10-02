@@ -272,8 +272,8 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> SubmodeChecks:
     """
     parser = _add_subparser(subparsers, STR.run, "Run a forecast")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_cycle(required)
     _add_arg_config_file(required)
+    _add_arg_cycle(required)
     _add_arg_model(required, choices=["FV3"])
     optional = _basic_setup(parser)
     _add_arg_dry_run(optional)
@@ -297,10 +297,9 @@ def _dispatch_forecast_run(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     forecast_class = uwtools.drivers.forecast.CLASSES[args.forecast_model]
-    forecast_class(config_file=args.config_file, dry_run=args.dry_run).run(
+    return forecast_class(config_file=args.config_file, dry_run=args.dry_run).run(
         cycle=args.cycle,
     )
-    return True
 
 
 # Mode template
@@ -370,15 +369,6 @@ def _dispatch_template_render(args: Namespace) -> bool:
 # pylint: disable=missing-function-docstring
 
 
-def _add_arg_cycle(group: Group) -> None:
-    group.add_argument(
-        "--cycle",
-        help="The cycle in ISO8601 format",
-        required=True,
-        type=datetime.date.fromisoformat,
-    )
-
-
 def _add_arg_config_file(group: Group) -> None:
     group.add_argument(
         _switch(STR.cfgfile),
@@ -387,6 +377,15 @@ def _add_arg_config_file(group: Group) -> None:
         metavar="PATH",
         required=True,
         type=str,
+    )
+
+
+def _add_arg_cycle(group: Group) -> None:
+    group.add_argument(
+        "--cycle",
+        help="The cycle in ISO8601 format",
+        required=True,
+        type=datetime.date.fromisoformat,
     )
 
 

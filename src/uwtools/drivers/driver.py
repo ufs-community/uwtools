@@ -66,11 +66,11 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def run(self, cycle: datetime) -> None:
+    def run(self, cycle: datetime) -> bool:
         """
         Run the NWP tool.
 
-        :param cycle: The time stamp of the current cycle to run.
+        :param cycle: The time stamp of the cycle to run.
         """
 
     def run_cmd(self) -> str:
@@ -121,7 +121,7 @@ class Driver(ABC):
                 )
                 continue
             link_or_copy(src_path, dst_path)  # type: ignore
-            msg = f"File {src_path} staged in run directory at {dst_fn}"
+            msg = f"File {src_path} staged as {dst_fn}"
             logging.info(msg)
 
     # Private methods
@@ -163,15 +163,15 @@ class Driver(ABC):
 
         # User-supplied values that override any settings in the base
         # file.
-        update_values = config_values.get("update_values", {})
+        user_values = config_values.get("update_values", {})
 
         if base_file := config_values.get("base_file"):
             config_obj = config_class(base_file)
-            config_obj.update_values(update_values)
+            config_obj.update_values(user_values)
             config_obj.dereference_all()
             config_obj.dump(output_path)
         else:
-            config_class.dump_dict(path=output_path, cfg=update_values)
+            config_class.dump_dict(path=output_path, cfg=user_values)
 
         msg = f"Configure file {output_path} created"
         logging.info(msg)

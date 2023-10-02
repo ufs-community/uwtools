@@ -142,7 +142,7 @@ class FV3Forecast(Driver):
             **self._config["jobinfo"],
         }
 
-    def run(self, cycle: datetime) -> None:
+    def run(self, cycle: datetime) -> bool:
         """
         Runs FV3 either as a subprocess or by submitting a batch script.
         """
@@ -163,19 +163,19 @@ class FV3Forecast(Driver):
                 # This will not run the job.
                 logging.info("Batch Script:")
                 logging.info(batch_script)
-                return
+                return True
 
             outpath = Path(run_directory) / self._batch_script
             BatchScript.dump(str(batch_script), outpath)
             self.scheduler.run_job(outpath)
-            return
+            return True
 
         pre_run = self._mpi_env_variables(" ")
         full_cmd = f"{pre_run} {self.run_cmd()}"
         if self._dry_run:
             logging.info("Would run: ")
             logging.info(full_cmd)
-            return
+            return True
 
         subprocess.run(
             full_cmd,
@@ -183,6 +183,8 @@ class FV3Forecast(Driver):
             check=False,
             shell=True,
         )
+
+        return True
 
     @property
     def schema_file(self) -> str:
