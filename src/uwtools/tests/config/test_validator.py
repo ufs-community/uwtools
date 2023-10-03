@@ -213,6 +213,35 @@ def test_validate_yaml_rocoto_invalid_walltime_pattern(rocoto_assets, caplog):
         assert logged(caplog, "'0:01:00' does not match '^[0-9]{2}:[0-9]{2}:[0-9]{2}$'")
 
 
+def test_validate_yaml_rocoto_invalid_dependency_bool(rocoto_assets, caplog):
+    kwargs, config = rocoto_assets
+    config["workflow"]["tasks"]["metatask"]["task"]["dependency"].update(
+        {"maybe": {"taskdep": {"attrs": {"task": "hello"}}}}
+    )
+    with patch.object(validator, "YAMLConfig") as YAMLConfig:
+        YAMLConfig().data = config
+        assert not validator.validate_yaml(**kwargs)
+        assert logged(
+            caplog,
+            "'maybe' does not match any of the regexes: "
+            "'^(and|or|not|nand|nor|xor)(_.*)?$', '^(streq|strneq)(_.*)?$', "
+            "'^cycleexistdep(_.*)?$', '^datadep(_.*)?$', '^metataskdep(_.*)?$', "
+            "'^some(_.*)?$', '^taskdep(_.*)?$', '^taskvalid(_.*)?$', '^timedep(_.*)?$'",
+        )
+
+
+def test_validate_yaml_rocoto_invalid_dependency_no_task(rocoto_assets, caplog):
+    kwargs, config = rocoto_assets
+    del config["workflow"]["tasks"]["metatask"]["task"]["dependency"]["taskdep"]["attrs"]["task"]
+    config["workflow"]["tasks"]["metatask"]["task"]["dependency"]["taskdep"]["attrs"][
+        "state"
+    ] = "RUNNING"
+    with patch.object(validator, "YAMLConfig") as YAMLConfig:
+        YAMLConfig().data = config
+        assert not validator.validate_yaml(**kwargs)
+        assert logged(caplog, "'task' is a required property")
+
+
 def test_validate_yaml_rocoto_valid(rocoto_assets):
     kwargs, config = rocoto_assets
     with patch.object(validator, "YAMLConfig") as YAMLConfig:

@@ -158,7 +158,9 @@
         "^timedep(_.*)?$": {
           "$ref": "#/$defs/TimePattern"
         }
-      }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
     },
     "metatask": {
       "type": "object",
