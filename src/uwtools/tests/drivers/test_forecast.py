@@ -293,11 +293,11 @@ def fv3_run_assets(tmp_path):
 def test_run_direct(fv3_run_assets):
     _, config_file, config = fv3_run_assets
     with patch.object(FV3Forecast, "_validate", return_value=True):
-        with patch.object(forecast, "run") as sprun:
+        with patch.object(forecast, "run") as run:
             fcstobj = FV3Forecast(config_file=config_file)
             with patch.object(fcstobj, "_config", config):
                 fcstobj.run()
-            sprun.assert_called_once_with(cmd="srun --export=None test_exec.py")
+            run.assert_called_once_with(cmd="srun --export=None test_exec.py")
 
 
 def test_FV3Forecast_run_dry_run(caplog, fv3_run_assets):
@@ -322,8 +322,8 @@ srun --export=None test_exec.py
 def test_run_submit(fv3_run_assets):
     batch_script, config_file, config = fv3_run_assets
     with patch.object(FV3Forecast, "_validate", return_value=True):
-        with patch.object(forecast, "run") as sprun:
+        with patch.object(forecast, "run") as run:
             fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
             with patch.object(fcstobj, "_config", config):
                 fcstobj.run()
-            sprun.assert_called_once_with(cmd=f"sbatch {batch_script}")
+            run.assert_called_once_with(cmd=f"sbatch {batch_script}")
