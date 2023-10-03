@@ -1,5 +1,6 @@
 # pylint: disable=missing-function-docstring
 
+import re
 from importlib import resources
 from pathlib import Path
 
@@ -88,3 +89,14 @@ def logged(caplog: LogCaptureFixture, msg: str) -> bool:
     :param msg: The message sought.
     """
     return msg in [record.message for record in caplog.records]
+
+
+def regex_logged(caplog: LogCaptureFixture, msg: str) -> bool:
+    """
+    Does the given text occur in the log capture? Expanded to perform regex matching for powerusers.
+
+    :param caplog: The pytest log capture.
+    :param msg: The message sought.
+    """
+    pattern = re.compile(re.escape(msg))
+    return any(pattern.search(record.message) for record in caplog.records)

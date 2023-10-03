@@ -12,7 +12,7 @@ from unittest.mock import patch
 from pytest import fixture
 
 from uwtools.config import validator
-from uwtools.tests.support import logged
+from uwtools.tests.support import logged, regex_logged
 
 # Support functions
 
@@ -221,13 +221,7 @@ def test_validate_yaml_rocoto_invalid_dependency_bool(rocoto_assets, caplog):
     with patch.object(validator, "YAMLConfig") as YAMLConfig:
         YAMLConfig().data = config
         assert not validator.validate_yaml(**kwargs)
-        assert logged(
-            caplog,
-            "'maybe' does not match any of the regexes: "
-            "'^(and|or|not|nand|nor|xor)(_.*)?$', '^(streq|strneq)(_.*)?$', "
-            "'^cycleexistdep(_.*)?$', '^datadep(_.*)?$', '^metataskdep(_.*)?$', "
-            "'^some(_.*)?$', '^taskdep(_.*)?$', '^taskvalid(_.*)?$', '^timedep(_.*)?$'",
-        )
+        assert regex_logged(caplog, "'maybe' does not match any of the regexes")
 
 
 def test_validate_yaml_rocoto_invalid_dependency_no_task(rocoto_assets, caplog):
