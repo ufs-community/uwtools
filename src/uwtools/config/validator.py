@@ -16,7 +16,7 @@ from uwtools.types import DefinitePath, OptionalPath
 
 
 def validate_yaml(
-    schema_file: DefinitePath, config_file: OptionalPath = None, check_path: Optional[bool] = True
+    schema_file: DefinitePath, config_file: OptionalPath = None, check_paths: Optional[bool] = True
 ) -> bool:
     """
     Check whether the given config file conforms to the given JSON Schema spec and whether any
@@ -24,6 +24,7 @@ def validate_yaml(
 
     :param schema_file: The JSON Schema file to use for validation.
     :param config_file: The YAML file to validate (stdin will be used by default)
+    :param check_paths: Check for filesystem paths that do not exist
     :return: Did the YAML file conform to the schema?
     """
     # Load the config and schema.
@@ -42,7 +43,7 @@ def validate_yaml(
     if errors:
         return False
     # Collect and report bad paths found in config.
-    if check_path:
+    if check_paths:
         if bad_paths := _bad_paths(yaml_config.data, schema):
             for bad_path in bad_paths:
                 logging.error("Path does not exist: %s", bad_path)
