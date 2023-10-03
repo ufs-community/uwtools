@@ -31,8 +31,8 @@ class ConcreteDriver(Driver):
     def resources(self, platform: dict) -> Mapping:
         return {}
 
-    def run(self) -> None:
-        pass
+    def run(self) -> bool:
+        return True
 
     def run_cmd(self, *args, run_cmd, exec_name):
         pass
