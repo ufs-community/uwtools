@@ -1,5 +1,5 @@
 """
-Helpers for executing processes in subshells.
+Helpers for executing commands in subshells.
 """
 
 import logging
