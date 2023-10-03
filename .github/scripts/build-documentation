@@ -5,7 +5,6 @@
 set -e
 source conda/etc/profile.d/conda.sh
 conda activate
-make meta # to make recipe/meta.json available to doc-build logic
 pip install sphinx sphinx-gallery sphinx_rtd_theme
 set +e
 
