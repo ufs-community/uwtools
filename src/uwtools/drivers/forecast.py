@@ -155,7 +155,7 @@ class FV3Forecast(Driver):
 
     def run(self) -> bool:
         """
-        Runs FV3 either as a subprocess or by submitting a batch script.
+        Runs FV3 either locally or via a batch-script submission.
 
         :return: Did the FV3 run exit with success status?
         """
