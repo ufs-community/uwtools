@@ -272,6 +272,22 @@
         {
           "not": {
             "required": [
+              "exclusive"
+            ]
+          }
+        },
+        {
+          "not": {
+            "required": [
+              "shared"
+            ]
+          }
+        }
+      ],
+      "anyOf": [
+        {
+          "not": {
+            "required": [
               "join"
             ]
           }
