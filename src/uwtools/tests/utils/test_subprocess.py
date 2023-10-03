@@ -1,9 +1,11 @@
+# pylint: disable=missing-function-docstring
 """
 Tests for uwtools.utils.run module.
 """
 
-from uwtools.utils import run
 from uwtools.tests.support import logged
+from uwtools.utils import run
+
 
 def test_run_failure(caplog):
     run.logging.getLogger().setLevel(run.logging.INFO)
