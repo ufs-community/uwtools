@@ -413,4 +413,252 @@
   "required": [
     "workflow"
   ]
+=======
+        "type": "integer",
+        "format": "string",
+        "pattern": "^(\\d{12}) (\\d{12})$"
+    },
+    "dateTimePattern": {
+        "type": "string",
+        "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2})$"
+    },
+    "metatask": {
+      "type": "object",
+      "properties": {
+        "var": {
+          "$ref": "#/$defs/var"
+        }
+      },
+      "patternProperties": {
+        "^task(_[a-z0-9_]+)?$": {
+          "$ref": "#/$defs/task"
+        },
+        "^metatask(_[a-z0-9_]+)?$": {
+          "$ref": "#/$defs/metatask"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "var"
+      ],
+      "minProperties": 2,
+      "maxProperties": 3
+    },
+    "task": {
+      "type": "object",
+      "properties": {
+        "account": {
+            "type": "string"
+        },
+        "attrs": {
+            "cycledefs": {
+                "type": "string"
+            },
+            "final": {
+                "type": "boolean"
+            },
+            "maxtries": {
+                "type": "string",
+                "format": "number",
+                "minimum": 0
+            },
+            "throttle": {
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "command": {
+          "type": "string"
+        },
+        "cores": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deadline": {
+            "$ref": "#/$defs/datePattern"
+        },
+        "envar": {
+            "type": "object"
+        },
+        "exclusive": {
+            "type": "string"
+        },
+        "jobname": {
+            "type": "string"
+        },
+        "join": {
+            "type": "string"
+        },
+        "memory": {
+            "type": "string"
+        },
+        "native": {
+            "type": "string"
+        },
+        "nodes": {
+          "type": "string"
+        },
+        "partition": {
+            "type": "string"
+        },
+        "queue": {
+            "type": "string"
+        },
+        "rewind": {
+            "type": "string"
+        },
+        "shared": {
+            "type": "string"
+        },
+        "stderr": {
+            "type": "string"
+        },
+        "stdout": {
+            "type": "string"
+        },
+        "walltime": {
+          "$ref": "#/$defs/timestr"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "command",
+        "walltime"
+      ],
+      "anyOf": [
+        {
+            "not": {
+                "required": ["exclusive"]
+            }
+        },
+        {
+            "not": {
+                "required": ["shared"]
+            }
+        }
+      ],
+      "anyOf":[
+        {
+            "not": {
+                "required": ["join"]
+            }
+        },
+        {
+            "not": {
+                "required": ["stdout"]
+            }
+        }
+      ],
+      "oneOf": [
+        {
+            "required": ["cores"]
+        },
+        {
+            "required": ["native"]
+        },
+        {
+            "required": ["nodes"]
+        }
+      ],
+      "dependencies": {
+        "stdout": ["stderr"],
+        "stderr": ["stdout"]
+      }
+    },
+    "timestr": {
+      "type": "string",
+      "pattern": "^[0-9]{2}:[0-9]{2}:[0-9]{2}$"
+    },
+    "var": {
+      "type": "object",
+      "patternProperties": {
+        "^.+$": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    }
+  },
+  "type": "object",
+  "properties": {
+        "workflow": {
+            "type": "object",
+            "properties": {
+                "attrs": {
+                    "type": "object",
+                    "properties": {
+                        "cyclethrottle": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "realtime": {
+                            "type": "boolean"
+                        },
+                        "scheduler": {
+                            "type": "string",
+                            "enum": [
+                                "sge",
+                                "lsf",
+                                "lsfcray",
+                                "ll",
+                                "torque",
+                                "moabtorque",
+                                "moab",
+                                "pbspro",
+                                "slurm",
+                                "cobalt"
+                            ]
+                        },
+                        "taskthrottle": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    },
+                    "required": ["realtime", "scheduler"]
+                },
+                "cycledefs": {
+                    "type": "object",
+                    "properties": {
+                        "groupname": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/dateTimePattern"
+                            } 
+                        },
+                        "required": ["items"]
+                    }
+                },
+                "entities": {
+                    "type": "object"
+                },
+                "log": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "tasks": {
+                    "type": "object",
+                    "patternProperties": {
+                        "^metatask(_[a-z0-9_]+)?$": {
+                        "$ref": "#/$defs/metatask"
+                        },
+                        "^task(_[a-z0-9_]+)?$": {
+                        "$ref": "#/$defs/task"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "minProperties": 1
+                    }
+                },
+                "additionalProperties": false,
+                "required": [
+                    "cycledefs",
+                    "log",
+                    "tasks"
+                ]
+            }
+        },
+    "required": [
+        "workflow"
+    ]
 }
