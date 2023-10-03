@@ -1,5 +1,14 @@
 {
   "$defs": {
+    "datePattern": {
+        "type": "integer",
+        "format": "string",
+        "pattern": "^(\\d{12}) (\\d{12})$"
+    },
+    "dateTimePattern": {
+        "type": "string",
+        "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2})$"
+    },
     "metatask": {
       "type": "object",
       "properties": {
@@ -25,7 +34,16 @@
     "task": {
       "type": "object",
       "properties": {
+        "account": {
+            "type": "string"
+        },
         "attrs": {
+            "cycledefs": {
+                "type": "string"
+            },
+            "final": {
+                "type": "boolean"
+            },
             "maxtries": {
                 "type": "string",
                 "format": "number",
@@ -34,12 +52,6 @@
             "throttle": {
                 "type": "integer",
                 "minimum": 0
-            },
-            "cycledefs": {
-                "type": "string"
-            },
-            "final": {
-                "type": "boolean"
             }
         },
         "command": {
@@ -49,53 +61,50 @@
           "type": "integer",
           "minimum": 0
         },
-        "nodes": {
-          "type": "string"
+        "deadline": {
+            "$ref": "#/$defs/datePattern"
         },
-        "native": {
-            "type": "string"
+        "envar": {
+            "type": "object"
         },
-        "walltime": {
-          "$ref": "#/$defs/timestr"
-        },
-        "account": {
+        "exclusive": {
             "type": "string"
         },
         "jobname": {
             "type": "string"
         },
-        "queue": {
-            "type": "string"
-        },
-        "partition": {
+        "join": {
             "type": "string"
         },
         "memory": {
             "type": "string"
         },
+        "native": {
+            "type": "string"
+        },
+        "nodes": {
+          "type": "string"
+        },
+        "partition": {
+            "type": "string"
+        },
+        "queue": {
+            "type": "string"
+        },
         "rewind": {
             "type": "string"
         },
-        "envar": {
-            "type": "object"
-        },
         "shared": {
-            "type": "string"
-        },
-        "exclusive": {
-            "type": "string"
-        },
-        "stdout": {
             "type": "string"
         },
         "stderr": {
             "type": "string"
         },
-        "join": {
+        "stdout": {
             "type": "string"
         },
-        "deadline": {
-            "$ref": "#/$defs/datePattern"
+        "walltime": {
+          "$ref": "#/$defs/timestr"
         }
       },
       "additionalProperties": false,
@@ -103,39 +112,39 @@
         "command",
         "walltime"
       ],
-      "oneOf": [
-        {
-            "required": ["cores"]
-        },
-        {
-            "required": ["nodes"]
-        },
-        {
-            "required": ["native"]
-        }
-      ],
       "anyOf": [
         {
             "not": {
-                "required": ["shared"]
+                "required": ["exclusive"]
             }
         },
         {
             "not": {
-                "required": ["exclusive"]
+                "required": ["shared"]
             }
         }
       ],
       "anyOf":[
         {
             "not": {
-                "required": ["stdout"]
+                "required": ["join"]
             }
         },
         {
             "not": {
-                "required": ["join"]
+                "required": ["stdout"]
             }
+        }
+      ],
+      "oneOf": [
+        {
+            "required": ["cores"]
+        },
+        {
+            "required": ["native"]
+        },
+        {
+            "required": ["nodes"]
         }
       ],
       "dependencies": {
@@ -156,15 +165,6 @@
       },
       "additionalProperties": false,
       "minProperties": 1
-    },
-    "dateTimePattern": {
-        "type": "string",
-        "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2})$"
-    },
-    "datePattern": {
-        "type": "integer",
-        "format": "string",
-        "pattern": "^(\\d{12}) (\\d{12})$"
     }
   },
   "type": "object",
@@ -175,6 +175,10 @@
                 "attrs": {
                     "type": "object",
                     "properties": {
+                        "cyclethrottle": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
                         "realtime": {
                             "type": "boolean"
                         },
@@ -192,10 +196,6 @@
                                 "slurm",
                                 "cobalt"
                             ]
-                        },
-                        "cyclethrottle": {
-                            "type": "integer",
-                            "minimum": 0
                         },
                         "taskthrottle": {
                             "type": "integer",
@@ -216,12 +216,12 @@
                         "required": ["items"]
                     }
                 },
+                "entities": {
+                    "type": "object"
+                },
                 "log": {
                     "type": "string",
                     "format": "uri"
-                },
-                "entities": {
-                    "type": "object"
                 },
                 "tasks": {
                     "type": "object",
