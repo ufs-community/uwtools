@@ -4,5 +4,5 @@ channels:
   - maddenp
 dependencies:
   - condev=0.5.3
-  - sphinx-gallery
-  - sphinxcontrib-bibtex
+  - sphinx-gallery=5.3.0
+  - sphinxcontrib-bibtex=2.6.1
