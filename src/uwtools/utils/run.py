@@ -22,7 +22,7 @@ def run(
     :param cwd: Change to this directory before running cmd.
     :param env: Environment variables to set before running cmd.
     :param log: Log output from successful cmd? (Error output is always logged.)
-    :return: A result object providing stderr, stdout and success info.
+    :return: A result object providing combined stder/stdout output and success values.
     """
 
     indent = "  "
