@@ -4,10 +4,11 @@ This file contains the specific drivers for a particular app, using the facade p
 
 import logging
 import shutil
-import subprocess
 
 from uwtools.drivers.facade import Facade
+from uwtools.exceptions import UWError
 from uwtools.utils.file import FORMAT, get_file_type
+from uwtools.utils.processing import execute
 
 
 class SRW210(Facade):
@@ -29,15 +30,19 @@ class SRW210(Facade):
         """
         file_type = get_file_type(config_file)
         if file_type == FORMAT.ini:
-            with open("config.yaml", "w", encoding="utf-8") as file:
+            with open("config.yaml", "w", encoding="utf-8") as f:
                 # Note: This is a temporary path until parsing the SRW directory is implemented.
-                subprocess.run(
-                    f"python config_utils.py -c {config_file} -t $PWD/config_defaults.yaml -o yaml",
-                    capture_output=True,
-                    check=False,
-                    shell=True,
-                    stdout=file,
-                )
+                cmd_components = [
+                    "python config_utils.py",
+                    "-c %s" % config_file,
+                    "-t $PWD/config_defaults.yaml",
+                    "-o yaml",
+                    ">%s" % f,
+                ]
+                cmd = " ".join(cmd_components)
+                result = execute(cmd=cmd)
+                if not result.success:
+                    raise UWError(f"Command failed: {cmd}")
         elif file_type == FORMAT.yaml:
             shutil.copy2(config_file, "config.yaml")
         else:
@@ -58,7 +63,10 @@ class SRW210(Facade):
         FV3LAM_wflow.xml.
         """
         # Note: This is a temporary path until parsing the SRW directory is implemented.
-        subprocess.run("python generate_FV3LAM_wflow.py", check=False, shell=True)
+        cmd = "python generate_FV3LAM_wflow.py"
+        result = execute(cmd=cmd)
+        if not result.success:
+            raise UWError(f"Command failed: {cmd}")
 
     def create_manager_files(self) -> None:
         """

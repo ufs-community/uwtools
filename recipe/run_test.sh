@@ -2,7 +2,7 @@
 
 # This script is called 1. By conda-build, to test code at package-build time, and 2. By "make test"
 # to test code in a live development shell. Its name is dictated by conda-build (see URL below for
-# details), but its contents drive from https://github.com/maddenp/condev/tree/main/demo. If run
+# details), but its contents derive from https://github.com/maddenp/condev/tree/main/demo. If run
 # with no arguments, it executes all test types: linting, typechecking, unit testing, and basic CLI-
 # tool verification. It can also be run with "lint", "typecheck", "unittest", or "cli" arguments to
 # run only a single test type. (The "make lint", "make typecheck", and "make unittest" targets in
