@@ -265,9 +265,12 @@ class Config(ABC, UserDict):
                             msg = f"{func_name}: {tmpl} raised {err}"
                             logging.debug(msg)
 
+                    for tmpl, rendered in zip(templates, data):
+                        v_str = v_str.replace(tmpl, rendered)
+
                     # Put the full template line back together as it was, filled or not, and make a
                     # guess on its intended type.
-                    ref_dict[key] = self.reify_scalar_str("".join(data))
+                    ref_dict[key] = self.reify_scalar_str(v_str)
 
     def dereference_all(self) -> None:
         """
@@ -342,7 +345,7 @@ class Config(ABC, UserDict):
             r = yaml.safe_load(s)
         except yaml.YAMLError:
             return s
-        return s if type(r) in [dict, list] else r
+        return r
 
     def update_values(self, src: Union[dict, Config], dst: Optional[Config] = None):
         """
@@ -741,6 +744,7 @@ def realize_config(
     :raises: UWConfigError if errors are encountered.
     """
 
+    logging.info("CRH here")
     input_obj = format_to_config(input_format)(config_file=input_file)
     input_obj.dereference_all()
     input_obj = _realize_config_update(input_obj, values_file, values_format)

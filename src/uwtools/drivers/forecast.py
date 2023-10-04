@@ -16,7 +16,7 @@ from typing import Dict
 from uwtools.config.core import FieldTableConfig, NMLConfig, YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript
-from uwtools.types import Optional, OptionalPath
+from uwtools.types import DefinitePath, Optional, OptionalPath
 from uwtools.utils.file import handle_existing
 
 
@@ -150,6 +150,8 @@ class FV3Forecast(Driver):
         run_directory = self._config["run_dir"]
         self.create_directory_structure(run_directory, "delete")
 
+        self._prepare_config_files(Path(run_directory))
+
         self._config["cycle-dependent"].update(self._define_boundary_files())
 
         for file_category in ["static", "cycle-dependent"]:
@@ -213,7 +215,7 @@ class FV3Forecast(Driver):
         for tile in self._config["tiles"]:
             for boundary_hour in range(offset, endhour, interval):
                 forecast_hour = boundary_hour - offset
-                link_name = f"gfs_bndy.tile{tile}.{forecast_hour:03d}.nc"
+                link_name = f"INPUT/gfs_bndy.tile{tile}.{forecast_hour:03d}.nc"
                 boundary_file_path = boudary_file_template.format(
                     tile=tile,
                     forecast_hour=boundary_hour,
@@ -221,6 +223,15 @@ class FV3Forecast(Driver):
                 boundary_files[link_name] = boundary_file_path
 
         return boundary_files
+
+    def _prepare_config_files(self, run_directory: DefinitePath) -> None:
+        """
+        Collect all the configuration files needed for FV3
+        """
+
+        self.create_field_table(run_directory / "field_table")
+        self.create_model_configure(run_directory / "model_configure")
+        self.create_namelist(run_directory / "input.nml")
 
     def _mpi_env_variables(self, delimiter=" "):
         """

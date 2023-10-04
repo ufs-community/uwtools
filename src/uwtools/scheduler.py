@@ -25,9 +25,7 @@ class RequiredAttribs:
     """
 
     ACCOUNT = "account"
-    NODES = "nodes"
     QUEUE = "queue"
-    TASKS_PER_NODE = "tasks_per_node"
     WALLTIME = "walltime"
 
 
@@ -39,6 +37,7 @@ class OptionalAttribs:
     CORES = "cores"
     DEBUG = "debug"
     EXCLUSIVE = "exclusive"
+    EXPORT = "export"
     JOB_NAME = "jobname"
     JOIN = "join"
     MEMORY = "memory"
@@ -145,8 +144,9 @@ class JobScheduler(UserDict):
                     self._map[key](value) if callable(self._map[key]) else self._map[key]
                 )
                 scheduler_value = "" if callable(self._map[key]) else value
+                key_value_separator = "" if callable(self._map[key]) else self.key_value_separator
                 directive = (
-                    f"{self.prefix} {scheduler_flag}{self.key_value_separator}{scheduler_value}"
+                    f"{self.prefix} {scheduler_flag}{key_value_separator}{scheduler_value}"
                 )
                 known.append(directive.strip())
 
@@ -219,7 +219,8 @@ class Slurm(JobScheduler):
         RequiredAttribs.QUEUE: "--qos",
         RequiredAttribs.WALLTIME: "--time",
         OptionalAttribs.CORES: "--ntasks",
-        OptionalAttribs.EXCLUSIVE: "--exclusive",
+        OptionalAttribs.EXCLUSIVE: lambda x: "--exclusive",
+        OptionalAttribs.EXPORT: "--export",
         OptionalAttribs.JOB_NAME: "--job-name",
         OptionalAttribs.MEMORY: "--mem",
         OptionalAttribs.NODES: "--nodes",
@@ -229,7 +230,6 @@ class Slurm(JobScheduler):
         OptionalAttribs.TASKS_PER_NODE: "--ntasks-per-node",
         OptionalAttribs.THREADS: "--cpus-per-task",
     }
-
 
 class PBS(JobScheduler):
     """
@@ -242,9 +242,9 @@ class PBS(JobScheduler):
 
     _map = {
         RequiredAttribs.ACCOUNT: "-A",
-        RequiredAttribs.NODES: lambda x: f"-l select={x}",
+        OptionalAttribs.NODES: lambda x: f"-l select={x}",
         RequiredAttribs.QUEUE: "-q",
-        RequiredAttribs.TASKS_PER_NODE: "mpiprocs",
+        OptionalAttribs.TASKS_PER_NODE: "mpiprocs",
         RequiredAttribs.WALLTIME: "-l walltime=",
         OptionalAttribs.DEBUG: lambda x: f"-l debug={str(x).lower()}",
         OptionalAttribs.JOB_NAME: "-N",
@@ -259,8 +259,8 @@ class PBS(JobScheduler):
         output.update(self._select(output))
         output.update(self._placement(output))
 
-        output.pop(RequiredAttribs.TASKS_PER_NODE, None)
-        output.pop(RequiredAttribs.NODES, None)
+        output.pop(OptionalAttribs.TASKS_PER_NODE, None)
+        output.pop(OptionalAttribs.NODES, None)
         output.pop(OptionalAttribs.THREADS, None)
         output.pop(OptionalAttribs.MEMORY, None)
         output.pop("exclusive", None)
@@ -272,15 +272,15 @@ class PBS(JobScheduler):
         """
         Select logic.
         """
-        total_nodes = items.get(RequiredAttribs.NODES, "")
-        tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
+        total_nodes = items.get(OptionalAttribs.NODES, "")
+        tasks_per_node = items.get(OptionalAttribs.TASKS_PER_NODE, "")
         # Set default threads=1 to address job variability with PBS
         threads = items.get(OptionalAttribs.THREADS, 1)
         memory = items.get(OptionalAttribs.MEMORY, "")
 
         select = [
             f"{total_nodes}",
-            f"{self._map[RequiredAttribs.TASKS_PER_NODE]}={tasks_per_node}",
+            f"{self._map[OptionalAttribs.TASKS_PER_NODE]}={tasks_per_node}",
             f"{self._map[OptionalAttribs.THREADS]}={threads}",
             f"ncpus={int(tasks_per_node) * int(threads)}",
         ]
@@ -328,9 +328,9 @@ class LSF(JobScheduler):
 
     _map = {
         RequiredAttribs.ACCOUNT: "-P",
-        RequiredAttribs.NODES: lambda x: f"-n {x}",
+        OptionalAttribs.NODES: lambda x: f"-n {x}",
         RequiredAttribs.QUEUE: "-q",
-        RequiredAttribs.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
+        OptionalAttribs.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
         RequiredAttribs.WALLTIME: "-W",
         OptionalAttribs.JOB_NAME: "-J",
         OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
@@ -343,14 +343,14 @@ class LSF(JobScheduler):
         items = self.data
         # LSF requires threads to be set (if None is provided, default to 1)
         items[OptionalAttribs.THREADS] = items.get(OptionalAttribs.THREADS, 1)
-        nodes = items.get(RequiredAttribs.NODES, "")
-        tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
+        nodes = items.get(OptionalAttribs.NODES, "")
+        tasks_per_node = items.get(OptionalAttribs.TASKS_PER_NODE, "")
 
         memory = items.get(OptionalAttribs.MEMORY, None)
         if memory is not None:
             mem_value = Memory(memory).convert("KB")
             items[self._map[OptionalAttribs.MEMORY](mem_value)] = ""
 
-        items[RequiredAttribs.NODES] = int(tasks_per_node) * int(nodes)
+        items[OptionalAttribs.NODES] = int(tasks_per_node) * int(nodes)
         items.pop(OptionalAttribs.MEMORY, None)
         return items
