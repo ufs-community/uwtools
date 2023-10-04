@@ -1,5 +1,5 @@
 """
-Helpers for executing commands in subshells.
+Utilities for interacting with external processes.
 """
 
 import logging
@@ -9,24 +9,24 @@ from types import SimpleNamespace as ns
 from typing import Dict, Optional, Union
 
 
-def run(
+def execute(
     cmd: str,
     cwd: Optional[Union[Path, str]] = None,
     env: Optional[Dict[str, str]] = None,
     log: Optional[bool] = False,
 ) -> ns:
     """
-    Run a command in a subshell.
+    Execute a command in a subshell.
 
-    :param cmd: The command to run.
-    :param cwd: Change to this directory before running cmd.
-    :param env: Environment variables to set before running cmd.
+    :param cmd: The command to execute.
+    :param cwd: Change to this directory before executing cmd.
+    :param env: Environment variables to set before executing cmd.
     :param log: Log output from successful cmd? (Error output is always logged.)
     :return: A result object providing combined stder/stdout output and success values.
     """
 
     indent = "  "
-    logging.info("Running: %s", cmd)
+    logging.info("Executing: %s", cmd)
     if cwd:
         logging.info("%sin %s", indent, cwd)
     if env:

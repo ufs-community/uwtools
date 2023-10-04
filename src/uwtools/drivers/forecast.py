@@ -17,7 +17,7 @@ from uwtools.config.core import FieldTableConfig, NMLConfig, realize_config
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript, JobScheduler
 from uwtools.utils.file import FORMAT, handle_existing
-from uwtools.utils.run import run
+from uwtools.utils.processing import execute
 
 
 class FV3Forecast(Driver):
@@ -196,9 +196,9 @@ class FV3Forecast(Driver):
             with open(outpath, "w+", encoding="utf-8") as file_:
                 print(batch_script, file=file_)
                 batch_command = JobScheduler.get_scheduler(platform_resources).submit_command
-            result = run(cmd=f"{batch_command} {outpath}")
+            result = execute(cmd=f"{batch_command} {outpath}")
         else:
-            result = run(cmd=run_command)
+            result = execute(cmd=run_command)
         return result.success
 
     def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:

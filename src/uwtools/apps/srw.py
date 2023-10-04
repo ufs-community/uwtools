@@ -8,7 +8,7 @@ import shutil
 from uwtools.drivers.facade import Facade
 from uwtools.exceptions import UWError
 from uwtools.utils.file import FORMAT, get_file_type
-from uwtools.utils.run import run
+from uwtools.utils.processing import execute
 
 
 class SRW210(Facade):
@@ -40,7 +40,7 @@ class SRW210(Facade):
                     ">%s" % f,
                 ]
                 cmd = " ".join(cmd_components)
-                result = run(cmd=cmd)
+                result = execute(cmd=cmd)
                 if not result.success:
                     raise UWError(f"Command failed: {cmd}")
         elif file_type == FORMAT.yaml:
@@ -64,7 +64,7 @@ class SRW210(Facade):
         """
         # Note: This is a temporary path until parsing the SRW directory is implemented.
         cmd = "python generate_FV3LAM_wflow.py"
-        result = run(cmd=cmd)
+        result = execute(cmd=cmd)
         if not result.success:
             raise UWError(f"Command failed: {cmd}")
 
