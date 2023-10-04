@@ -24,6 +24,7 @@ test:
     - coverage 7.2.*
     - docformatter 1.7.*
     - isort 5.12.*
+    - jq 1.6.*
     - mypy 1.4.*
     - pylint 2.17.*
     - pytest 7.4.*
