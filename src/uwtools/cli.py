@@ -175,7 +175,6 @@ def _dispatch_config(args: Namespace) -> bool:
 
     :param args: Parsed command-line args.
     """
-    logging.info("CRH HERE")
     return {
         STR.compare: _dispatch_config_compare,
         STR.realize: _dispatch_config_realize,
@@ -298,11 +297,11 @@ def _dispatch_forecast_run(args: Namespace) -> bool:
 
     :param args: Parsed command-line args.
     """
-    forecast_class = uwtools.drivers.forecast.CLASSES[args.model]
-    cfg = uwtools.config.core.YAMLConfig(args.config_file)
-    cfg.dereference_all()
-    cfg.dump(args.config_file)
-    return forecast_class(batch_script=args.batch_script, config_file=args.config_file, dry_run=args.dry_run).run(
+    forecast_class = uwtools.drivers.forecast.CLASSES[args.forecast_model]
+    print(args)
+    return forecast_class(
+        batch_script=args.batch_script, config_file=args.config_file, dry_run=args.dry_run
+    ).run(
         cycle=args.cycle,
     )
 
@@ -373,12 +372,14 @@ def _dispatch_template_render(args: Namespace) -> bool:
 
 # pylint: disable=missing-function-docstring
 
+
 def _add_arg_batch_script(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.batch_script),
         help="Path to output batch file (defaults to stdout)",
         metavar="PATH",
         required=required,
+        default=None,
         type=str,
     )
 
@@ -399,7 +400,7 @@ def _add_arg_cycle(group: Group) -> None:
         "--cycle",
         help="The cycle in ISO8601 format",
         required=True,
-        type=lambda s: datetime.datetime.strptime(str(s), '%Y-%m-%dT%H:%M:%S'),
+        type=lambda s: datetime.datetime.strptime(str(s), "%Y-%m-%dT%H:%M:%S"),
     )
 
 
@@ -563,6 +564,7 @@ def _abort(msg: str) -> None:
     :param msg: The message to print.
     """
     logging.exception(msg)
+    print(msg, file=sys.stderr)
     sys.exit(1)
 
 

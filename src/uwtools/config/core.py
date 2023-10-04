@@ -125,11 +125,14 @@ class Config(ABC, UserDict):
                 c, e, t = self.characterize_values(val, f"{parent}{key}.")
                 complete, empty, template = complete + c, empty + e, template + t
             elif isinstance(val, list):
-                complete.append(f"    {parent}{key}")
                 for item in val:
                     if isinstance(item, dict):
                         c, e, t = self.characterize_values(item, parent)
                         complete, empty, template = complete + c, empty + e, template + t
+                        complete.append(f"    {parent}{key}")
+                    elif "{{" in str(val) or "{%" in str(val):
+                        template.append(f"    {parent}{key}: {val}")
+                        break
             elif "{{" in str(val) or "{%" in str(val):
                 template.append(f"    {parent}{key}: {val}")
             elif val == "" or val is None:
@@ -744,7 +747,6 @@ def realize_config(
     :raises: UWConfigError if errors are encountered.
     """
 
-    logging.info("CRH here")
     input_obj = format_to_config(input_format)(config_file=input_file)
     input_obj.dereference_all()
     input_obj = _realize_config_update(input_obj, values_file, values_format)

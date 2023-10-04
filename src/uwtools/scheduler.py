@@ -145,9 +145,7 @@ class JobScheduler(UserDict):
                 )
                 scheduler_value = "" if callable(self._map[key]) else value
                 key_value_separator = "" if callable(self._map[key]) else self.key_value_separator
-                directive = (
-                    f"{self.prefix} {scheduler_flag}{key_value_separator}{scheduler_value}"
-                )
+                directive = f"{self.prefix} {scheduler_flag}{key_value_separator}{scheduler_value}"
                 known.append(directive.strip())
 
         unknown = [
@@ -230,6 +228,7 @@ class Slurm(JobScheduler):
         OptionalAttribs.TASKS_PER_NODE: "--ntasks-per-node",
         OptionalAttribs.THREADS: "--cpus-per-task",
     }
+
 
 class PBS(JobScheduler):
     """

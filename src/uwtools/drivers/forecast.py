@@ -16,7 +16,7 @@ from typing import Dict
 from uwtools.config.core import FieldTableConfig, NMLConfig, YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript
-from uwtools.types import DefinitePath, Optional, OptionalPath
+from uwtools.types import Optional, OptionalPath
 from uwtools.utils.file import handle_existing
 
 
@@ -224,9 +224,9 @@ class FV3Forecast(Driver):
 
         return boundary_files
 
-    def _prepare_config_files(self, run_directory: DefinitePath) -> None:
+    def _prepare_config_files(self, run_directory: Path) -> None:
         """
-        Collect all the configuration files needed for FV3
+        Collect all the configuration files needed for FV3.
         """
 
         self.create_field_table(run_directory / "field_table")

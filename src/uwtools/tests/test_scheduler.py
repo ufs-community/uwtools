@@ -261,7 +261,7 @@ def test_slurm_5(slurm_props):
     slurm_props.update({"exclusive": "True"})
     expected = """
 #SBATCH --account=account_name
-#SBATCH --exclusive=True
+#SBATCH --exclusive
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --qos=batch

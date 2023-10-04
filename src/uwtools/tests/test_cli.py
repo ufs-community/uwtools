@@ -273,7 +273,13 @@ def test__dispatch_forecast(params):
 
 
 def test__dispatch_forecast_run():
-    args = ns(cycle="2023-01-01T00:00:00", config_file=1, dry_run=True, forecast_model="foo")
+    args = ns(
+        batch_script=None,
+        cycle="2023-01-01T00:00:00",
+        config_file=1,
+        dry_run=True,
+        forecast_model="foo",
+    )
     vars(args).update({STR.cfgfile: 1, "forecast_model": "foo"})
     with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as m:
         CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
