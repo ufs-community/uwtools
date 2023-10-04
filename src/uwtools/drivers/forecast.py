@@ -6,7 +6,6 @@ Drivers for forecast models.
 import logging
 import os
 import shutil
-import subprocess
 import sys
 from collections.abc import Mapping
 from functools import cached_property
@@ -18,6 +17,7 @@ from uwtools.config.core import FieldTableConfig, NMLConfig, realize_config
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript, JobScheduler
 from uwtools.utils.file import FORMAT, handle_existing
+from uwtools.utils.processing import execute
 
 
 class FV3Forecast(Driver):
@@ -153,9 +153,11 @@ class FV3Forecast(Driver):
             "walltime": "00:01:00",
         }
 
-    def run(self) -> None:
+    def run(self) -> bool:
         """
-        Runs FV3 either as a subprocess or by submitting a batch script.
+        Runs FV3 either locally or via a batch-script submission.
+
+        :return: Did the FV3 run exit with success status?
         """
         # Read in the config file.
         forecast_config = self._config["forecast"]
@@ -186,7 +188,7 @@ class FV3Forecast(Driver):
             # This will not run the job.
             logging.info("Batch Script:")
             logging.info(batch_script)
-            return
+            return True
 
         # Run the job.
         if self._batch_script is not None:
@@ -194,19 +196,10 @@ class FV3Forecast(Driver):
             with open(outpath, "w+", encoding="utf-8") as file_:
                 print(batch_script, file=file_)
                 batch_command = JobScheduler.get_scheduler(platform_resources).submit_command
-            subprocess.run(
-                f"{batch_command} {outpath}",
-                stderr=subprocess.STDOUT,
-                check=False,
-                shell=True,
-            )
+            result = execute(cmd=f"{batch_command} {outpath}")
         else:
-            subprocess.run(
-                f"{run_command}",
-                stderr=subprocess.STDOUT,
-                check=False,
-                shell=True,
-            )
+            result = execute(cmd=run_command)
+        return result.success
 
     def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:
         """

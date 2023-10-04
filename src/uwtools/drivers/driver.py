@@ -59,7 +59,7 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def run(self) -> None:
+    def run(self) -> bool:
         """
         Run the NWP tool.
         """
