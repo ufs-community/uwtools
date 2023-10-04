@@ -25,10 +25,10 @@
             "type": "object",
             "properties": {
                 "MODEL": {
-                    "type": "string",
+                    "type": "string"
                 },
                 "EXEC_NAME": {
-                    "type": "string",
+                    "type": "string"
                 },
                 "RUN_DIRECTORY": {
                     "type": "string",
