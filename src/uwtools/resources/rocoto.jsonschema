@@ -268,38 +268,44 @@
         "command",
         "walltime"
       ],
-      "anyOf": [
-        {
+      "dependentSchemas": {
+        "join": {
+          "not": {
+            "required": [
+              "stdout"
+            ]
+          }
+        },
+        "stdout": {
+          "not": {
+            "required": [
+              "join"
+            ]
+          },
+          "required": [
+            "stderr"
+          ]
+        },
+        "stderr": {
+          "required": [
+            "stdout"
+          ]
+        },
+        "shared": {
           "not": {
             "required": [
               "exclusive"
             ]
           }
         },
-        {
+        "exclusive": {
           "not": {
             "required": [
               "shared"
             ]
           }
         }
-      ],
-      "anyOf": [
-        {
-          "not": {
-            "required": [
-              "join"
-            ]
-          }
-        },
-        {
-          "not": {
-            "required": [
-              "stdout"
-            ]
-          }
-        }
-      ],
+      },
       "oneOf": [
         {
           "required": [
@@ -316,15 +322,7 @@
             "nodes"
           ]
         }
-      ],
-      "dependencies": {
-        "stdout": [
-          "stderr"
-        ],
-        "stderr": [
-          "stdout"
-        ]
-      }
+      ]
     },
     "TimePattern": {
       "type": "string",

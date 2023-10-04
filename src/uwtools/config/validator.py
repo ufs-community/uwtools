@@ -77,5 +77,5 @@ def _validation_errors(config: dict, schema: dict) -> List[str]:
     """
     Identify schema-validation errors.
     """
-    validator = jsonschema.Draft7Validator(schema)
+    validator = jsonschema.Draft202012Validator(schema)
     return list(validator.iter_errors(config))

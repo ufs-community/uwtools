@@ -165,7 +165,7 @@ def test_validate_yaml_rocoto_invalid_dependency(rocoto_assets, caplog):
     with patch.object(validator, "YAMLConfig") as YAMLConfig:
         YAMLConfig().data = config
         assert not validator.validate_yaml(**kwargs)
-        assert logged(caplog, "'stderr' is a dependency of 'stdout'")
+        assert logged(caplog, "'stderr' is a required property")
 
 
 def test_validate_yaml_rocoto_invalid_no_command(rocoto_assets, caplog):
