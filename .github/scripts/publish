@@ -1,0 +1,11 @@
+#!/bin/bash -eux
+
+set +ux
+source conda/etc/profile.d/conda.sh
+conda activate
+set -ux
+f=recipe/meta.json
+pkg=$(jq -r .name $f)-$(jq -r .version $f)-$(jq -r .build $f).tar.bz2
+for x in $(find conda/conda-bld -type f -name $pkg); do
+  anaconda -t $ANACONDA_TOKEN upload $x
+done
