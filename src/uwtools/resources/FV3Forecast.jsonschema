@@ -1,55 +1,55 @@
 {
-    "title": "FV3 Forecast config",
-    "description": "This document is to validate user-defined FV3 forecast config files",
-    "type": "object",
-    "properties": {
-        "platform": {
-            "description": "Expected resources for the given platform",
-            "type": "object",
-            "properties": {
-                "MPICMD": {
-                    "type": "string",
-                    "enum": [
-                        "mpirun",
-                        "mpiexec",
-                        "srun"
-                    ]
-                },
-                "ACCOUNT": {
-                    "type": "string"
-                }
-            }
-        },
+  "description": "This document is to validate user-defined FV3 forecast config files",
+  "properties": {
     "forecast": {
-            "description": "parameters of the forecast",
-            "type": "object",
-            "properties": {
-                "MODEL": {
-                    "type": "string"
-                },
-                "EXEC_NAME": {
-                    "type": "string"
-                },
-                "RUN_DIRECTORY": {
-                    "type": "string",
-                    "format": "uri"
-                },
-                "CYCLEDEP": {
-                    "type": "string",
-                    "format": "uri"
-                },
-                "STATIC": {
-                    "type": "string",
-                    "format": "uri"
-                },
-                "VERBOSE": {
-                    "type": "string",
-                    "enum": [
-                        "true",
-                        "false"
-                    ]
-                }
-            }
-        }    
+      "description": "parameters of the forecast",
+      "properties": {
+        "CYCLEDEP": {
+          "format": "uri",
+          "type": "string"
+        },
+        "EXEC_NAME": {
+          "type": "string"
+        },
+        "MODEL": {
+          "type": "string"
+        },
+        "RUN_DIRECTORY": {
+          "format": "uri",
+          "type": "string"
+        },
+        "STATIC": {
+          "format": "uri",
+          "type": "string"
+        },
+        "VERBOSE": {
+          "enum": [
+            "true",
+            "false"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "platform": {
+      "description": "Expected resources for the given platform",
+      "properties": {
+        "ACCOUNT": {
+          "type": "string"
+        },
+        "MPICMD": {
+          "enum": [
+            "mpirun",
+            "mpiexec",
+            "srun"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
     }
+  },
+  "title": "FV3 Forecast config",
+  "type": "object"
 }
