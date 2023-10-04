@@ -28,7 +28,7 @@ def test_batch_script():
 #SBATCH --time=00:01:00
 KMP_AFFINITY=scatter
 OMP_NUM_THREADS=1
-OMP_STACKSIZE=1
+OMP_STACKSIZE=512m
 MPI_TYPE_DEPTH=20
 ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4
 srun --export=NONE test_exec.py
@@ -257,12 +257,12 @@ def test_forecast_run_cmd():
         assert mpiexec_expected == fcstobj.run_cmd()
 
 
-@pytest.mark.parametrize("section", ["static", "cycledep"])
+@pytest.mark.parametrize("section", ["static", "cycle-dependent"])
 @pytest.mark.parametrize("link_files", [True, False])
 def test_stage_files(tmp_path, section, link_files):
     """
-    Tests that files from static or cycledep sections of the config obj are being staged (copied or
-    linked) to the run directory.
+    Tests that files from static or cycle-dependent sections of the config obj are being staged
+    (copied or linked) to the run directory.
     """
 
     run_directory = tmp_path / "run"
@@ -292,7 +292,7 @@ def test_stage_files(tmp_path, section, link_files):
             assert all(link_or_file(d_fn) for d_fn in dst_paths)
         else:
             assert link_or_file(run_directory / dst_rel_path)
-    if section == "cycledep":
+    if section == "cycle-dependent":
         assert link_or_file(run_directory / "INPUT" / "gfs_bndy.tile7.006.nc")
 
 
@@ -312,7 +312,7 @@ def fv3_mpi_assets():
     return [
         "KMP_AFFINITY=scatter",
         "OMP_NUM_THREADS=1",
-        "OMP_STACKSIZE=1",
+        "OMP_STACKSIZE=512m",
         "MPI_TYPE_DEPTH=20",
         "ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4",
         "srun --export=NONE test_exec.py",
@@ -328,26 +328,6 @@ def test_run_direct(fv3_mpi_assets, fv3_run_assets):
             with patch.object(fcstobj, "_config", config):
                 fcstobj.run(cycle=dt.datetime.now())
             execute.assert_called_once_with(cmd=expected_command)
-
-
-def test_FV3Forecast__config_deleter():
-    config_file = fixture_path("forecast.yaml")
-    with patch.object(Driver, "_validate", return_value=True):
-        forecast = FV3Forecast(config_file=config_file)
-
-    assert forecast._config
-    del forecast._config
-    assert not forecast._config
-
-
-def test_FV3Forecast__config_setter():
-    config_file = fixture_path("forecast.yaml")
-    with patch.object(Driver, "_validate", return_value=True):
-        forecast = FV3Forecast(config_file=config_file)
-    new_config = {"foo": 1, "bar": 2}
-    forecast._config = new_config
-    assert forecast._config_data == new_config
-    assert forecast._config == new_config
 
 
 @pytest.mark.parametrize("with_batch_script", [True, False])

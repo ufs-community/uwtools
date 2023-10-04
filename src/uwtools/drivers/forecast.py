@@ -36,7 +36,7 @@ class FV3Forecast(Driver):
         """
 
         super().__init__(config_file=config_file, dry_run=dry_run, batch_script=batch_script)
-        self._config_data = self._experiment_config["forecast"]
+        self._config = self._experiment_config["forecast"]
 
     # Public methods
 
@@ -235,7 +235,7 @@ class FV3Forecast(Driver):
         envvars = {
             "KMP_AFFINITY": "scatter",
             "OMP_NUM_THREADS": self._config["runtime_info"].get("threads", 1),
-            "OMP_STACKSIZE": self._config["runtime_info"].get("threads", "512m"),
+            "OMP_STACKSIZE": "512m",
             "MPI_TYPE_DEPTH": 20,
             "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
         }

@@ -37,7 +37,7 @@ class Driver(ABC):
         self._validate()
         self._experiment_config = YAMLConfig(config_file=config_file)
         self._platform_config = self._experiment_config.get("platform", {})
-        self._config_data: Dict[str, Any] = {}
+        self._config: Dict[str, Any] = {}
 
     # Public methods
 
@@ -127,28 +127,6 @@ class Driver(ABC):
 
     # Private methods
 
-    @property
-    def _config(self) -> Mapping:
-        """
-        The config object that describes the subset of an experiment config related to a subclass of
-        Driver.
-        """
-        return self._config_data
-
-    @_config.deleter
-    def _config(self) -> None:
-        """
-        Deleter for _config.
-        """
-        self._config_data = {}
-
-    @_config.setter
-    def _config(self, config_obj: Dict[str, Any]) -> None:
-        """
-        Setter for _config.
-        """
-        self._config_data = config_obj
-
     @staticmethod
     def _create_user_updated_config(
         config_class: Type[Config], config_values: dict, output_path: OptionalPath
@@ -157,9 +135,9 @@ class Driver(ABC):
         The standard procedure for updating a file of a configuration class type with user-provided
         values.
 
-        :param config_class: the Config subclass matching the configure file type
-        :param config_values: the in-memory configuration object to update base values with
-        :param output_path: optional path to dump file to
+        :param config_class: The Config subclass matching the configure file type.
+        :param config_values: The in-memory configuration object to update base values with.
+        :param output_path: Optional path to dump file to.
         """
 
         # User-supplied values that override any settings in the base
