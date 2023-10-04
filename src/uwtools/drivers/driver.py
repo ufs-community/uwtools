@@ -103,8 +103,8 @@ class Driver(ABC):
     ) -> None:
         """
         Creates destination files in run directory and copies or links contents from the source path
-        provided. Source paths could be provided as a single path or a list of paths to be staged
-        in a common directory.
+        provided. Source paths could be provided as a single path or a list of paths to be staged in
+        a common directory.
 
         :param run_directory: Path of desired run directory.
         :param files_to_stage: File names in the run directory (keys) and their source paths
@@ -122,7 +122,7 @@ class Driver(ABC):
                 )
             else:
                 link_or_copy(src_path_or_paths, dst_path)  # type: ignore
-                msg = f"File {src_path} staged as {dst_fn}"
+                msg = f"File {src_path_or_paths} staged as {dst_path}"
                 logging.info(msg)
 
     # Private methods

@@ -156,7 +156,9 @@ def test_create_model_configure_call_private(tmp_path):
     with patch.object(Driver, "_create_user_updated_config") as _create_user_updated_config:
         with patch.object(FV3Forecast, "_validate", return_value=True):
             FV3Forecast(config_file=infile).create_model_configure(outfile)
-    _create_user_updated_config.assert_called_with(config_class=YAMLConfig, config_values=None, output_path=outfile)
+    _create_user_updated_config.assert_called_with(
+        config_class=YAMLConfig, config_values={}, output_path=outfile
+    )
 
 
 @fixture
@@ -290,7 +292,8 @@ def test_stage_files(tmp_path, section, link_files):
             assert all(link_or_file(d_fn) for d_fn in dst_paths)
         else:
             assert link_or_file(run_directory / dst_rel_path)
-    assert link_or_file(run_directory / "gfs_bndy.tile7.006.nc")
+    if section == "cycledep":
+        assert link_or_file(run_directory / "INPUT" / "gfs_bndy.tile7.006.nc")
 
 
 @fixture
@@ -303,6 +306,7 @@ def fv3_run_assets(tmp_path):
     config["forecast"]["static"] = {"static-foo-file": str(tmp_path / "foo")}
     return batch_script, config_file, config.data["forecast"]
 
+
 @fixture
 def fv3_mpi_assets():
     return [
@@ -313,6 +317,7 @@ def fv3_mpi_assets():
         "ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4",
         "srun --export=NONE test_exec.py",
     ]
+
 
 def test_run_direct(fv3_mpi_assets, fv3_run_assets):
     _, config_file, config = fv3_run_assets
@@ -351,7 +356,7 @@ def test_FV3Forecast__config_setter():
 
 
 @pytest.mark.parametrize("with_batch_script", [True, False])
-def test_FV3Forecast_run_dry_run(caplog, fv3_mpi_assets, fv3_run_assets, with_batch_script):
+def test_FV3Forecast_run_dry_run(capsys, fv3_mpi_assets, fv3_run_assets, with_batch_script):
     logging.getLogger().setLevel(logging.INFO)
     batch_script, config_file, config = fv3_run_assets
     if with_batch_script:
@@ -362,7 +367,7 @@ def test_FV3Forecast_run_dry_run(caplog, fv3_mpi_assets, fv3_run_assets, with_ba
             "#SBATCH --ntasks-per-node=1",
             "#SBATCH --qos=batch",
             "#SBATCH --time=00:01:00",
-            ] + fv3_mpi_assets
+        ] + fv3_mpi_assets
         run_expected = "\n".join(batch_components)
     else:
         batch_script = None
@@ -373,7 +378,7 @@ def test_FV3Forecast_run_dry_run(caplog, fv3_mpi_assets, fv3_run_assets, with_ba
         with patch.object(fcstobj, "_config", config):
             print(fcstobj._config)
             fcstobj.run(cycle=dt.datetime.now())
-    assert run_expected in caplog.text
+    assert run_expected in capsys.readouterr().out
 
 
 def test_run_submit(fv3_run_assets):

@@ -92,7 +92,7 @@ class FV3Forecast(Driver):
         """
         self._create_user_updated_config(
             config_class=FieldTableConfig,
-            config_values=self._config.get("field_table"),
+            config_values=self._config.get("field_table", {}),
             output_path=output_path,
         )
 
@@ -104,7 +104,7 @@ class FV3Forecast(Driver):
         """
         self._create_user_updated_config(
             config_class=YAMLConfig,
-            config_values=self._config.get("model_configure"),
+            config_values=self._config.get("model_configure", {}),
             output_path=output_path,
         )
 
@@ -117,7 +117,7 @@ class FV3Forecast(Driver):
         """
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=self._config.get("namelist"),
+            config_values=self._config.get("namelist", {}),
             output_path=output_path,
         )
 
@@ -155,6 +155,7 @@ class FV3Forecast(Driver):
         for file_category in ["static", "cycle-dependent"]:
             self.stage_files(run_directory, self._config[file_category], link_files=True)
 
+        outpath: OptionalPath
         if self._batch_script is not None:
             batch_script = self.batch_script()
             outpath = Path(run_directory) / self._batch_script
@@ -170,12 +171,11 @@ class FV3Forecast(Driver):
                 self.scheduler.run_job(outpath)
             return True
 
-
         pre_run = self._mpi_env_variables(" ")
         full_cmd = f"{pre_run} {self.run_cmd()}"
         if self._dry_run:
             logging.info("Would run: ")
-            logging.info(full_cmd)
+            print(full_cmd, file=sys.stdout)
             return True
 
         subprocess.run(

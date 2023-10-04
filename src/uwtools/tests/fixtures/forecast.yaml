@@ -41,5 +41,3 @@ forecast:
     co2historicaldata_2016.txt: src/uwtools/drivers/global_co2historicaldata_2016.txt
     co2historicaldata_2017.txt: src/uwtools/drivers/global_co2historicaldata_2017.txt
     co2historicaldata_2018.txt: src/uwtools/drivers/global_co2historicaldata_2018.txt
-  model_configure:
-  field_table:
