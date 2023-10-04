@@ -5,7 +5,6 @@ Tests for forecast driver.
 import datetime as dt
 import logging
 import os
-import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
@@ -327,7 +326,7 @@ def test_run_direct(fv3_mpi_assets, fv3_run_assets):
             fcstobj = FV3Forecast(config_file=config_file)
             with patch.object(fcstobj, "_config", config):
                 fcstobj.run(cycle=dt.datetime.now())
-            execute.assert_called_once_with(cmd="srun --export=NONE test_exec.py")
+            execute.assert_called_once_with(cmd=expected_command)
 
 
 def test_FV3Forecast__config_deleter():
@@ -379,8 +378,8 @@ def test_FV3Forecast_run_dry_run(capsys, fv3_mpi_assets, fv3_run_assets, with_ba
 def test_run_submit(fv3_run_assets):
     batch_script, config_file, config = fv3_run_assets
     with patch.object(FV3Forecast, "_validate", return_value=True):
-        with patch.object(forecast, "execute") as execute:
+        with patch.object(forecast, "submit_job") as submit_job:
             fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
             with patch.object(fcstobj, "_config", config):
                 fcstobj.run(cycle=dt.datetime.now())
-            execute.assert_called_once_with(cmd=f"sbatch {batch_script}")
+            submit_job.assert_called_once_with(cmd=f"sbatch {batch_script}")

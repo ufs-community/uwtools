@@ -5,8 +5,6 @@ Drivers for forecast models.
 
 import logging
 import os
-import subprocess
-import shutil
 import sys
 from collections.abc import Mapping
 from datetime import datetime

@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import logging
 import re
-import subprocess
 from collections import UserDict, UserList
 from collections.abc import Mapping
 from typing import Any, Dict, List
