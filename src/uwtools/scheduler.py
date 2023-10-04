@@ -14,6 +14,7 @@ from typing import Any, Dict, List
 from uwtools.types import OptionalPath
 from uwtools.utils import Memory
 from uwtools.utils.file import writable
+from uwtools.utils.processing import execute
 
 NONEISH = [None, "", " ", "None", "none", False]
 IGNORED_ATTRIBS = ["scheduler"]
@@ -192,16 +193,12 @@ class JobScheduler(UserDict):
             ) from error
         return scheduler(props)
 
-    def run_job(self, script_path: OptionalPath) -> None:
+    def submit_job(self, script_path: OptionalPath) -> bool:
         """
         Submits a job to the scheduler.
         """
-        subprocess.run(
-            f"{self.submit_command} {script_path}",
-            stderr=subprocess.STDOUT,
-            check=False,
-            shell=True,
-        )
+        result = execute(f"{self.submit_command} {script_path}")
+        return result.success
 
 
 class Slurm(JobScheduler):

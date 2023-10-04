@@ -6,6 +6,7 @@ Drivers for forecast models.
 import logging
 import os
 import subprocess
+import shutil
 import sys
 from collections.abc import Mapping
 from datetime import datetime
@@ -18,6 +19,7 @@ from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript
 from uwtools.types import Optional, OptionalPath
 from uwtools.utils.file import handle_existing
+from uwtools.utils.processing import execute
 
 
 class FV3Forecast(Driver):
@@ -144,7 +146,9 @@ class FV3Forecast(Driver):
 
     def run(self, cycle: datetime) -> bool:
         """
-        Runs FV3 either as a subprocess or by submitting a batch script.
+        Runs FV3 either locally or via a batch-script submission.
+
+        :return: Did the FV3 run exit with success status?
         """
         # Prepare directories.
         run_directory = self._config["run_dir"]
@@ -170,8 +174,7 @@ class FV3Forecast(Driver):
 
             BatchScript.dump(str(batch_script), outpath)
             if not self._dry_run:
-                self.scheduler.run_job(outpath)
-            return True
+                return self.scheduler.submit_job(outpath)
 
         pre_run = self._mpi_env_variables(" ")
         full_cmd = f"{pre_run} {self.run_cmd()}"
@@ -180,14 +183,8 @@ class FV3Forecast(Driver):
             print(full_cmd, file=sys.stdout)
             return True
 
-        subprocess.run(
-            full_cmd,
-            stderr=subprocess.STDOUT,
-            check=False,
-            shell=True,
-        )
-
-        return True
+        result = execute(cmd=full_cmd)
+        return result.success
 
     @property
     def schema_file(self) -> str:

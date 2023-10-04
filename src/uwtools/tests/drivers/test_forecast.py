@@ -323,16 +323,11 @@ def test_run_direct(fv3_mpi_assets, fv3_run_assets):
     _, config_file, config = fv3_run_assets
     expected_command = " ".join(fv3_mpi_assets)
     with patch.object(FV3Forecast, "_validate", return_value=True):
-        with patch.object(forecast.subprocess, "run") as sprun:
+        with patch.object(forecast, "execute") as execute:
             fcstobj = FV3Forecast(config_file=config_file)
             with patch.object(fcstobj, "_config", config):
                 fcstobj.run(cycle=dt.datetime.now())
-            sprun.assert_called_once_with(
-                expected_command,
-                stderr=subprocess.STDOUT,
-                check=False,
-                shell=True,
-            )
+            execute.assert_called_once_with(cmd="srun --export=NONE test_exec.py")
 
 
 def test_FV3Forecast__config_deleter():
@@ -384,13 +379,8 @@ def test_FV3Forecast_run_dry_run(capsys, fv3_mpi_assets, fv3_run_assets, with_ba
 def test_run_submit(fv3_run_assets):
     batch_script, config_file, config = fv3_run_assets
     with patch.object(FV3Forecast, "_validate", return_value=True):
-        with patch.object(forecast.subprocess, "run") as sprun:
+        with patch.object(forecast, "execute") as execute:
             fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
             with patch.object(fcstobj, "_config", config):
                 fcstobj.run(cycle=dt.datetime.now())
-            sprun.assert_called_once_with(
-                f"sbatch {batch_script}",
-                stderr=subprocess.STDOUT,
-                check=False,
-                shell=True,
-            )
+            execute.assert_called_once_with(cmd=f"sbatch {batch_script}")
