@@ -103,7 +103,8 @@ class Driver(ABC):
     ) -> None:
         """
         Creates destination files in run directory and copies or links contents from the source path
-        provided.
+        provided. Source paths could be provided as a single path or a list of paths to be staged
+        in a common directory.
 
         :param run_directory: Path of desired run directory.
         :param files_to_stage: File names in the run directory (keys) and their source paths
@@ -111,18 +112,18 @@ class Driver(ABC):
         :param link_files: Whether to link or copy the files.
         """
         link_or_copy = os.symlink if link_files else shutil.copyfile
-        for dst_fn, src_path in files_to_stage.items():
-            dst_path = os.path.join(run_directory, dst_fn)
-            if isinstance(src_path, list):
+        for dst_rel_path, src_path_or_paths in files_to_stage.items():
+            dst_path = os.path.join(run_directory, dst_rel_path)
+            if isinstance(src_path_or_paths, list):
                 Driver.stage_files(
                     dst_path,
-                    {os.path.basename(src): src for src in src_path},
+                    {os.path.basename(src): src for src in src_path_or_paths},
                     link_files,
                 )
-                continue
-            link_or_copy(src_path, dst_path)  # type: ignore
-            msg = f"File {src_path} staged as {dst_fn}"
-            logging.info(msg)
+            else:
+                link_or_copy(src_path_or_paths, dst_path)  # type: ignore
+                msg = f"File {src_path} staged as {dst_fn}"
+                logging.info(msg)
 
     # Private methods
 

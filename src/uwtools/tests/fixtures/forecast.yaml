@@ -24,7 +24,7 @@ forecast:
     threads: 1
     stacksize: 512m
     mpi_args:
-      - "--export=None"
+      - "--export=NONE"
   cycle-dependent:
     INPUT/gfs_data.nc: path/to/gfs_data.tile7.halo0.nc
     INPUT/sfc_data.nc: path/to/sfc_data.tile7.halo0.nc

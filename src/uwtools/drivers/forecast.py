@@ -92,7 +92,7 @@ class FV3Forecast(Driver):
         """
         self._create_user_updated_config(
             config_class=FieldTableConfig,
-            config_values=self._config["field_table"],
+            config_values=self._config.get("field_table"),
             output_path=output_path,
         )
 
@@ -104,7 +104,7 @@ class FV3Forecast(Driver):
         """
         self._create_user_updated_config(
             config_class=YAMLConfig,
-            config_values=self._config["model_configure"],
+            config_values=self._config.get("model_configure"),
             output_path=output_path,
         )
 
@@ -117,7 +117,7 @@ class FV3Forecast(Driver):
         """
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=self._config["namelist"],
+            config_values=self._config.get("namelist"),
             output_path=output_path,
         )
 
@@ -157,18 +157,19 @@ class FV3Forecast(Driver):
 
         if self._batch_script is not None:
             batch_script = self.batch_script()
+            outpath = Path(run_directory) / self._batch_script
 
             if self._dry_run:
                 # Apply switch to allow user to view the run command of config.
                 # This will not run the job.
                 logging.info("Batch Script:")
-                logging.info(batch_script)
-                return True
+                outpath = None
 
-            outpath = Path(run_directory) / self._batch_script
             BatchScript.dump(str(batch_script), outpath)
-            self.scheduler.run_job(outpath)
+            if not self._dry_run:
+                self.scheduler.run_job(outpath)
             return True
+
 
         pre_run = self._mpi_env_variables(" ")
         full_cmd = f"{pre_run} {self.run_cmd()}"
@@ -201,7 +202,7 @@ class FV3Forecast(Driver):
         end_hour = self._config["length"] + offset + 1
         return offset, lbcs_config["interval_hours"], end_hour
 
-    def _define_boundary_files(self) -> Dict:
+    def _define_boundary_files(self) -> Dict[str, str]:
         """
         Maps the prepared boundary conditions to the appropriate hours for the forecast.
         """
@@ -212,12 +213,12 @@ class FV3Forecast(Driver):
         for tile in self._config["tiles"]:
             for boundary_hour in range(offset, endhour, interval):
                 forecast_hour = boundary_hour - offset
-                link_name = f"gfs_bndy.tile{tile}.{forecast_hour}.nc"
+                link_name = f"gfs_bndy.tile{tile}.{forecast_hour:03d}.nc"
                 boundary_file_path = boudary_file_template.format(
                     tile=tile,
                     forecast_hour=boundary_hour,
                 )
-                boundary_files.update({link_name: boundary_file_path})
+                boundary_files[link_name] = boundary_file_path
 
         return boundary_files
 

@@ -385,7 +385,7 @@ def _add_arg_cycle(group: Group) -> None:
         "--cycle",
         help="The cycle in ISO8601 format",
         required=True,
-        type=datetime.date.fromisoformat,
+        type=lambda s: datetime.date.fromisoformat(str(s)),
     )
 
 
