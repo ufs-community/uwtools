@@ -196,7 +196,7 @@ class JobScheduler(UserDict):
         """
         Submits a job to the scheduler.
         """
-        result = execute(f"{self.submit_command} {script_path}")
+        result = execute(cmd=f"{self.submit_command} {script_path}")
         return result.success
 
 

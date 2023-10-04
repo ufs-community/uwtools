@@ -11,6 +11,7 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture, raises
 
+from uwtools import scheduler
 from uwtools.config.core import NMLConfig, YAMLConfig
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
@@ -378,8 +379,8 @@ def test_FV3Forecast_run_dry_run(capsys, fv3_mpi_assets, fv3_run_assets, with_ba
 def test_run_submit(fv3_run_assets):
     batch_script, config_file, config = fv3_run_assets
     with patch.object(FV3Forecast, "_validate", return_value=True):
-        with patch.object(forecast, "submit_job") as submit_job:
+        with patch.object(scheduler, "execute") as execute:
             fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
             with patch.object(fcstobj, "_config", config):
                 fcstobj.run(cycle=dt.datetime.now())
-            submit_job.assert_called_once_with(cmd=f"sbatch {batch_script}")
+            execute.assert_called_once_with(cmd=f"sbatch {batch_script}")
