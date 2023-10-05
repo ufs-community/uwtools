@@ -1,0 +1,23 @@
+name: release
+env:
+  ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+on:
+  push:
+    branches:
+      - main
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install conda
+        run:  .github/scripts/install-conda
+      - name: Make Package
+        run:  .github/scripts/make-package
+      - name: Check For Existing Tag
+        run:  .github/scripts/tag-check
+      - name: Tag
+        run: .github/scripts/tag-create
+      - name: Publish
+        run: .github/scripts/publish
