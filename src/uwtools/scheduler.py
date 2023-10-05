@@ -10,7 +10,7 @@ from collections import UserDict, UserList
 from collections.abc import Mapping
 from typing import Any, Dict, List
 
-from uwtools.types import OptionalPath
+from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils import Memory
 from uwtools.utils.file import writable
 from uwtools.utils.processing import execute
@@ -74,15 +74,14 @@ class BatchScript(UserList):
         """
         return line_separator.join(self)
 
-    @staticmethod
-    def dump(contents: str, output_file: OptionalPath) -> None:
+    def dump(self, output_file: OptionalPath) -> None:
         """
         Write a batch script to an output location.
 
         :param output_file: Path to the file to write the batch script to
         """
         with writable(output_file) as f:
-            print(str(contents).strip(), file=f)
+            print(str(self).strip(), file=f)
 
 
 class JobScheduler(UserDict):
@@ -192,9 +191,12 @@ class JobScheduler(UserDict):
             ) from error
         return scheduler(props)
 
-    def submit_job(self, script_path: OptionalPath) -> bool:
+    def submit_job(self, script_path: DefinitePath) -> bool:
         """
         Submits a job to the scheduler.
+
+        :param script_path: Path to the batch script.
+        :return: Did the run exit with a success status?
         """
         result = execute(cmd=f"{self.submit_command} {script_path}")
         return result.success

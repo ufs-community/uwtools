@@ -10,12 +10,12 @@ from collections.abc import Mapping
 from datetime import datetime
 from importlib import resources
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 from uwtools.config.core import FieldTableConfig, NMLConfig, YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript
-from uwtools.types import Optional, OptionalPath
+from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import handle_existing
 from uwtools.utils.processing import execute
 
@@ -43,6 +43,8 @@ class FV3Forecast(Driver):
     def batch_script(self) -> BatchScript:
         """
         Prepare batch script contents for interaction with system scheduler.
+
+        :return: The batch script object with all run commands needed for executing the program.
         """
         pre_run = self._mpi_env_variables("\n")
         bs = self.scheduler.batch_script
@@ -51,7 +53,7 @@ class FV3Forecast(Driver):
         return bs
 
     @staticmethod
-    def create_directory_structure(run_directory, exist_act="delete"):
+    def create_directory_structure(run_directory: DefinitePath, exist_act: str = "delete") -> None:
         """
         Collects the name of the desired run directory, and has an optional flag for what to do if
         the run directory specified already exists. Creates the run directory and adds
@@ -75,7 +77,7 @@ class FV3Forecast(Driver):
 
         # Delete or rename directory if it exists.
 
-        handle_existing(run_directory, exist_act)
+        handle_existing(str(run_directory), exist_act)
 
         # Create new run directory with two required subdirectories.
 
@@ -133,7 +135,9 @@ class FV3Forecast(Driver):
 
     def resources(self) -> Mapping:
         """
-        Parses the config and returns a formatted dictionary for the batch script.
+        Parses the experiment configuration to provide the information needed for the batch script.
+
+        :return: A formatted dictionary needed to create a batch script
         """
 
         return {
@@ -159,7 +163,6 @@ class FV3Forecast(Driver):
         for file_category in ["static", "cycle-dependent"]:
             self.stage_files(run_directory, self._config[file_category], link_files=True)
 
-        outpath: OptionalPath
         if self._batch_script is not None:
             batch_script = self.batch_script()
             outpath = Path(run_directory) / self._batch_script
@@ -168,11 +171,11 @@ class FV3Forecast(Driver):
                 # Apply switch to allow user to view the run command of config.
                 # This will not run the job.
                 logging.info("Batch Script:")
-                outpath = None
+                batch_script.dump(None)
+                return True
 
-            BatchScript.dump(str(batch_script), outpath)
-            if not self._dry_run:
-                return self.scheduler.submit_job(outpath)
+            batch_script.dump(outpath)
+            return self.scheduler.submit_job(outpath)
 
         pre_run = self._mpi_env_variables(" ")
         full_cmd = f"{pre_run} {self.run_cmd()}"
@@ -195,6 +198,13 @@ class FV3Forecast(Driver):
     # Private methods
 
     def _boundary_hours(self, lbcs_config: Dict) -> tuple[int, int, int]:
+        """
+        Prepares parameters to generate the lateral boundary condition (LBCS) forecast hours from an
+        external intput data source, e.g. GFS, RAP, etc.
+
+        :return: The offset hours between the cycle and the external input data, the hours between
+            LBC ingest, and the last hour of the external input data forecast
+        """
         offset = abs(lbcs_config["offset"])
         end_hour = self._config["length"] + offset + 1
         return offset, lbcs_config["interval_hours"], end_hour
@@ -202,16 +212,18 @@ class FV3Forecast(Driver):
     def _define_boundary_files(self) -> Dict[str, str]:
         """
         Maps the prepared boundary conditions to the appropriate hours for the forecast.
+
+        :return: A dict of boundary file names mapped to source input file paths
         """
         boundary_files = {}
         lbcs_config = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
-        boudary_file_template = lbcs_config["output_file_template"]
+        boundary_file_template = lbcs_config["output_file_template"]
         offset, interval, endhour = self._boundary_hours(lbcs_config)
         for tile in self._config["tiles"]:
             for boundary_hour in range(offset, endhour, interval):
                 forecast_hour = boundary_hour - offset
                 link_name = f"INPUT/gfs_bndy.tile{tile}.{forecast_hour:03d}.nc"
-                boundary_file_path = boudary_file_template.format(
+                boundary_file_path = boundary_file_template.format(
                     tile=tile,
                     forecast_hour=boundary_hour,
                 )
@@ -228,9 +240,11 @@ class FV3Forecast(Driver):
         self.create_model_configure(run_directory / "model_configure")
         self.create_namelist(run_directory / "input.nml")
 
-    def _mpi_env_variables(self, delimiter=" "):
+    def _mpi_env_variables(self, delimiter: str = " ") -> str:
         """
-        Returns a bash string of environment variables needed to run the MPI job.
+        Set the environment variables needed for the MPI job.
+
+        :return: A bash string of environment variables
         """
         envvars = {
             "KMP_AFFINITY": "scatter",

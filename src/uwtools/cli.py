@@ -298,7 +298,6 @@ def _dispatch_forecast_run(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     forecast_class = uwtools.drivers.forecast.CLASSES[args.forecast_model]
-    print(args)
     return forecast_class(
         batch_script=args.batch_script, config_file=args.config_file, dry_run=args.dry_run
     ).run(
@@ -400,7 +399,7 @@ def _add_arg_cycle(group: Group) -> None:
         "--cycle",
         help="The cycle in ISO8601 format",
         required=True,
-        type=lambda s: datetime.datetime.strptime(str(s), "%Y-%m-%dT%H:%M:%S"),
+        type=datetime.datetime.fromisoformat,
     )
 
 

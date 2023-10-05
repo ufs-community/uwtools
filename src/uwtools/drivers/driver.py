@@ -45,6 +45,8 @@ class Driver(ABC):
     def batch_script(self) -> BatchScript:
         """
         Create a script for submission to the batch scheduler.
+
+        :return: The batch script object with all run commands needed for executing the program.
         """
 
     @abstractmethod
@@ -71,11 +73,14 @@ class Driver(ABC):
         Run the NWP tool.
 
         :param cycle: The time stamp of the cycle to run.
+        :return: Did the driver exit with success status?
         """
 
     def run_cmd(self) -> str:
         """
         The command-line command to run the NWP tool.
+
+        :return: The fully formed string that executes the program
         """
         run_cmd = self._platform_config["mpicmd"]
         exec_name = self._config["exec_name"]
@@ -87,6 +92,8 @@ class Driver(ABC):
     def scheduler(self) -> JobScheduler:
         """
         The job scheduler speficied by the platform information.
+
+        :return: The scheduler object
         """
         return JobScheduler.get_scheduler(self.resources())
 
@@ -158,6 +165,8 @@ class Driver(ABC):
     def _validate(self) -> bool:
         """
         Validate the user-supplied config file.
+
+        :return: Was the input configuration file valid against its schema?
         """
         return validator.validate_yaml(
             config_file=self._config_file,
