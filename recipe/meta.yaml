@@ -1,12 +1,12 @@
 package:
   name: uwtools
-  version: 1.0.1
+  version: 1.1.0
 source:
   path: ../src
 build:
   include_recipe: false
   noarch: python
-  number: 0 # <= always reset to 0 when incrementing version
+  number: 0 # <= always reset to 0 when version changes
 requirements:
   host:
     - pip
