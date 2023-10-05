@@ -1,13 +1,166 @@
 {
   "$defs": {
     "datePattern": {
-        "type": "integer",
-        "format": "string",
-        "pattern": "^(\\d{12}) (\\d{12})$"
+      "type": "integer",
+      "format": "string",
+      "pattern": "^(\\d{12}) (\\d{12})$"
     },
     "dateTimePattern": {
-        "type": "string",
-        "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2})$"
+      "type": "string",
+      "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2})$"
+    },
+    "dependency": {
+      "type": "object",
+      "patternProperties": {
+        "^(and|or|not|nand|nor|xor)(_.*)?$": {
+          "$ref": "#/$defs/dependency"
+        },
+        "^some(_.*)?$": {
+          "type": "array",
+          "patternProperties": {
+            "^threshold(_.*)?$": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "properties": {
+            "$ref": "#/$defs/dependency"
+          }
+        },
+        "^datadep(_.*)?$": {
+          "type": "object",
+          "properties": {
+            "attrs": {
+              "type": "object",
+              "properties": {
+                "age": {
+                  "$ref": "#/$defs/TimePattern"
+                },
+                "minsize": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            },
+            "text": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "^taskdep(_.*)?$": {
+          "type": "object",
+          "properties": {
+            "attrs": {
+              "type": "object",
+              "properties": {
+                "task": {
+                  "type": "string"
+                },
+                "cycle_offset": {
+                  "$ref": "#/$defs/TimePattern"
+                },
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "RUNNING",
+                    "Running",
+                    "running",
+                    "SUCCEEDED",
+                    "DEAD",
+                    "Succeeded",
+                    "Dead",
+                    "succeeded",
+                    "dead"
+                  ]
+                }
+              },
+              "required": [
+                "task"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "^(streq|strneq)(_.*)?$": {
+          "type": "object",
+          "properties": {
+            "left": {
+              "type": "string"
+            },
+            "right": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "left",
+            "right"
+          ],
+          "additionalProperties": false
+        },
+        "^cycleexistdep(_.*)?$": {
+          "type": "object",
+          "properties": {
+            "cycle_offset": {
+              "$ref": "#/$defs/TimePattern"
+            }
+          },
+          "additionalProperties": false
+        },
+        "^taskvalid(_.*)?$": {
+          "type": "object",
+          "properties": {
+            "task": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "^metataskdep(_.*)?$": {
+          "type": "object",
+          "properties": {
+            "attrs": {
+              "type": "object",
+              "properties": {
+                "metatask": {
+                  "type": "string"
+                },
+                "cycle_offset": {
+                  "$ref": "#/$defs/TimePattern"
+                },
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "SUCCEEDED",
+                    "DEAD",
+                    "Succeeded",
+                    "Dead",
+                    "succeeded",
+                    "dead"
+                  ]
+                },
+                "threshold": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "metatask"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "^timedep(_.*)?$": {
+          "$ref": "#/$defs/TimePattern"
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
     },
     "metatask": {
       "type": "object",
@@ -35,24 +188,24 @@
       "type": "object",
       "properties": {
         "account": {
-            "type": "string"
+          "type": "string"
         },
         "attrs": {
-            "cycledefs": {
-                "type": "string"
-            },
-            "final": {
-                "type": "boolean"
-            },
-            "maxtries": {
-                "type": "string",
-                "format": "number",
-                "minimum": 0
-            },
-            "throttle": {
-                "type": "integer",
-                "minimum": 0
-            }
+          "cycledefs": {
+            "type": "string"
+          },
+          "final": {
+            "type": "boolean"
+          },
+          "maxtries": {
+            "type": "string",
+            "format": "number",
+            "minimum": 0
+          },
+          "throttle": {
+            "type": "integer",
+            "minimum": 0
+          }
         },
         "command": {
           "type": "string"
@@ -62,46 +215,49 @@
           "minimum": 0
         },
         "deadline": {
-            "$ref": "#/$defs/datePattern"
+          "$ref": "#/$defs/datePattern"
+        },
+        "dependency": {
+          "$ref": "#/$defs/dependency"
         },
         "envar": {
-            "type": "object"
+          "type": "object"
         },
         "exclusive": {
-            "type": "string"
+          "type": "string"
         },
         "jobname": {
-            "type": "string"
+          "type": "string"
         },
         "join": {
-            "type": "string"
+          "type": "string"
         },
         "memory": {
-            "type": "string"
+          "type": "string"
         },
         "native": {
-            "type": "string"
+          "type": "string"
         },
         "nodes": {
           "type": "string"
         },
         "partition": {
-            "type": "string"
+          "type": "string"
         },
         "queue": {
-            "type": "string"
+          "type": "string"
         },
         "rewind": {
-            "type": "string"
+          "type": "string"
         },
         "shared": {
-            "type": "string"
+          "type": "string"
         },
         "stderr": {
-            "type": "string"
+          "type": "string"
         },
         "stdout": {
-            "type": "string"
+          "type": "string"
         },
         "walltime": {
           "$ref": "#/$defs/timestr"
@@ -112,45 +268,65 @@
         "command",
         "walltime"
       ],
-      "anyOf": [
-        {
-            "not": {
-                "required": ["exclusive"]
-            }
+      "dependentSchemas": {
+        "join": {
+          "not": {
+            "required": [
+              "stdout"
+            ]
+          }
         },
-        {
-            "not": {
-                "required": ["shared"]
-            }
-        }
-      ],
-      "anyOf":[
-        {
-            "not": {
-                "required": ["join"]
-            }
+        "stdout": {
+          "not": {
+            "required": [
+              "join"
+            ]
+          },
+          "required": [
+            "stderr"
+          ]
         },
-        {
-            "not": {
-                "required": ["stdout"]
-            }
+        "stderr": {
+          "required": [
+            "stdout"
+          ]
+        },
+        "shared": {
+          "not": {
+            "required": [
+              "exclusive"
+            ]
+          }
+        },
+        "exclusive": {
+          "not": {
+            "required": [
+              "shared"
+            ]
+          }
         }
-      ],
+      },
       "oneOf": [
         {
-            "required": ["cores"]
+          "required": [
+            "cores"
+          ]
         },
         {
-            "required": ["native"]
+          "required": [
+            "native"
+          ]
         },
         {
-            "required": ["nodes"]
+          "required": [
+            "nodes"
+          ]
         }
-      ],
-      "dependencies": {
-        "stdout": ["stderr"],
-        "stderr": ["stdout"]
-      }
+      ]
+    },
+    "TimePattern": {
+      "type": "string",
+      "pattern": "^(\\d{2}:){3}\\d{2}$"
     },
     "timestr": {
       "type": "string",
@@ -169,83 +345,88 @@
   },
   "type": "object",
   "properties": {
-        "workflow": {
-            "type": "object",
-            "properties": {
-                "attrs": {
-                    "type": "object",
-                    "properties": {
-                        "cyclethrottle": {
-                            "type": "integer",
-                            "minimum": 0
-                        },
-                        "realtime": {
-                            "type": "boolean"
-                        },
-                        "scheduler": {
-                            "type": "string",
-                            "enum": [
-                                "sge",
-                                "lsf",
-                                "lsfcray",
-                                "ll",
-                                "torque",
-                                "moabtorque",
-                                "moab",
-                                "pbspro",
-                                "slurm",
-                                "cobalt"
-                            ]
-                        },
-                        "taskthrottle": {
-                            "type": "integer",
-                            "minimum": 0
-                        }
-                    },
-                    "required": ["realtime", "scheduler"]
-                },
-                "cycledefs": {
-                    "type": "object",
-                    "properties": {
-                        "groupname": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/$defs/dateTimePattern"
-                            } 
-                        },
-                        "required": ["items"]
-                    }
-                },
-                "entities": {
-                    "type": "object"
-                },
-                "log": {
-                    "type": "string",
-                    "format": "uri"
-                },
-                "tasks": {
-                    "type": "object",
-                    "patternProperties": {
-                        "^metatask(_[a-z0-9_]+)?$": {
-                        "$ref": "#/$defs/metatask"
-                        },
-                        "^task(_[a-z0-9_]+)?$": {
-                        "$ref": "#/$defs/task"
-                        }
-                    },
-                    "additionalProperties": false,
-                    "minProperties": 1
-                    }
-                },
-                "additionalProperties": false,
-                "required": [
-                    "cycledefs",
-                    "log",
-                    "tasks"
-                ]
+    "workflow": {
+      "type": "object",
+      "properties": {
+        "attrs": {
+          "type": "object",
+          "properties": {
+            "cyclethrottle": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "realtime": {
+              "type": "boolean"
+            },
+            "scheduler": {
+              "type": "string",
+              "enum": [
+                "sge",
+                "lsf",
+                "lsfcray",
+                "ll",
+                "torque",
+                "moabtorque",
+                "moab",
+                "pbspro",
+                "slurm",
+                "cobalt"
+              ]
+            },
+            "taskthrottle": {
+              "type": "integer",
+              "minimum": 0
             }
+          },
+          "required": [
+            "realtime",
+            "scheduler"
+          ]
         },
-    "required": [
-        "workflow"
-    ]
+        "cycledefs": {
+          "type": "object",
+          "properties": {
+            "groupname": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/dateTimePattern"
+              }
+            },
+            "required": [
+              "items"
+            ]
+          }
+        },
+        "entities": {
+          "type": "object"
+        },
+        "log": {
+          "type": "string",
+          "format": "uri"
+        },
+        "tasks": {
+          "type": "object",
+          "patternProperties": {
+            "^metatask(_[a-z0-9_]+)?$": {
+              "$ref": "#/$defs/metatask"
+            },
+            "^task(_[a-z0-9_]+)?$": {
+              "$ref": "#/$defs/task"
+            }
+          },
+          "additionalProperties": false,
+          "minProperties": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "cycledefs",
+        "log",
+        "tasks"
+      ]
+    }
+  },
+  "required": [
+    "workflow"
+  ]
 }
