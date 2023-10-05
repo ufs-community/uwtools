@@ -125,11 +125,14 @@ class Config(ABC, UserDict):
                 c, e, t = self.characterize_values(val, f"{parent}{key}.")
                 complete, empty, template = complete + c, empty + e, template + t
             elif isinstance(val, list):
-                complete.append(f"    {parent}{key}")
                 for item in val:
                     if isinstance(item, dict):
                         c, e, t = self.characterize_values(item, parent)
                         complete, empty, template = complete + c, empty + e, template + t
+                        complete.append(f"    {parent}{key}")
+                    elif "{{" in str(val) or "{%" in str(val):
+                        template.append(f"    {parent}{key}: {val}")
+                        break
             elif "{{" in str(val) or "{%" in str(val):
                 template.append(f"    {parent}{key}: {val}")
             elif val == "" or val is None:
@@ -265,9 +268,12 @@ class Config(ABC, UserDict):
                             msg = f"{func_name}: {tmpl} raised {err}"
                             logging.debug(msg)
 
+                    for tmpl, rendered in zip(templates, data):
+                        v_str = v_str.replace(tmpl, rendered)
+
                     # Put the full template line back together as it was, filled or not, and make a
                     # guess on its intended type.
-                    ref_dict[key] = self.reify_scalar_str("".join(data))
+                    ref_dict[key] = self.reify_scalar_str(v_str)
 
     def dereference_all(self) -> None:
         """
@@ -280,9 +286,9 @@ class Config(ABC, UserDict):
             prev = copy.deepcopy(self.data)
 
     @abstractmethod
-    def dump(self, path: DefinitePath) -> None:
+    def dump(self, path: OptionalPath) -> None:
         """
-        Dumps the config as a file.
+        Dumps the config to stdout or a file.
 
         :param path: Path to dump config to.
         """
@@ -291,7 +297,7 @@ class Config(ABC, UserDict):
     @abstractmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
-        Dumps a provided config dictionary as a file.
+        Dumps a provided config dictionary to stdout or a file.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
@@ -342,7 +348,7 @@ class Config(ABC, UserDict):
             r = yaml.safe_load(s)
         except yaml.YAMLError:
             return s
-        return s if type(r) in [dict, list] else r
+        return r
 
     def update_values(self, src: Union[dict, Config], dst: Optional[Config] = None):
         """
@@ -427,9 +433,9 @@ class INIConfig(Config):
 
     # Public methods
 
-    def dump(self, path: DefinitePath) -> None:
+    def dump(self, path: OptionalPath) -> None:
         """
-        Dumps the config as an INI file.
+        Dumps the config in INI format.
 
         :param path: Path to dump config to.
         """
@@ -438,7 +444,7 @@ class INIConfig(Config):
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
-        Dumps a provided config dictionary as an INI file.
+        Dumps a provided config dictionary in INI format.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
@@ -479,9 +485,9 @@ class NMLConfig(Config):
 
     # Public methods
 
-    def dump(self, path: DefinitePath) -> None:
+    def dump(self, path: OptionalPath) -> None:
         """
-        Dumps the config as a Fortran namelist file.
+        Dumps the config in Fortran namelist format.
 
         :param path: Path to dump config to.
         """
@@ -490,7 +496,7 @@ class NMLConfig(Config):
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
-        Dumps a provided config dictionary as a Fortran namelist file.
+        Dumps a provided config dictionary in Fortran namelist format.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
@@ -564,9 +570,9 @@ class YAMLConfig(Config):
 
     # Public methods
 
-    def dump(self, path: DefinitePath) -> None:
+    def dump(self, path: OptionalPath) -> None:
         """
-        Dumps the config as a YAML file.
+        Dumps the config in YAML format.
 
         :param path: Path to dump config to.
         """
@@ -575,7 +581,7 @@ class YAMLConfig(Config):
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
-        Dumps a provided config dictionary as a YAML file.
+        Dumps a provided config dictionary in YAML format.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
@@ -593,9 +599,9 @@ class FieldTableConfig(YAMLConfig):
 
     # Public methods
 
-    def dump(self, path: DefinitePath) -> None:
+    def dump(self, path: OptionalPath) -> None:
         """
-        Dumps the config as a Field Table file.
+        Dumps the config in Field Table format.
 
         :param path: Path to dump config to.
         """
@@ -604,7 +610,7 @@ class FieldTableConfig(YAMLConfig):
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
-        Dumps a provided config dictionary as a Field Table file.
+        Dumps a provided config dictionary in Field Table format.
 
         FMS field and tracer managers must be registered in an ASCII table called 'field_table'.
         This table lists field type, target model and methods the querying model will ask for. See

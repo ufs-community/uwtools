@@ -3,53 +3,128 @@
     "description": "This document is to validate user-defined FV3 forecast config files",
     "type": "object",
     "properties": {
-        "platform": {
-            "description": "Expected resources for the given platform",
-            "type": "object",
-            "properties": {
-                "MPICMD": {
-                    "type": "string",
-                    "enum": [
-                        "mpirun",
-                        "mpiexec",
-                        "srun"
-                    ]
-                },
-                "ACCOUNT": {
-                    "type": "string"
-                }
-            }
-        },
-    "forecast": {
+        "forecast": {
             "description": "parameters of the forecast",
             "type": "object",
             "properties": {
-                "MODEL": {
-                    "type": "string",
+                "cycle-dependent": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    }
                 },
-                "EXEC_NAME": {
-                    "type": "string",
+                "exec_name": {
+                    "type": "string"
                 },
-                "RUN_DIRECTORY": {
+                "field_table": {
+                    "type": "object",
+                    "properties": {
+                        "base_file": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "update_values": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "length": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "model": {
+                    "type": "string"
+                },
+                "model_configure": {
+                    "type": "object",
+                    "properties": {
+                        "base_file": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "update_values": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "mpicmd": {
+                    "type": "string"
+                },
+                "namelist": {
+                    "type": "object",
+                    "properties": {
+                        "base_file": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "update_values": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "run_dir": {
                     "type": "string",
                     "format": "uri"
                 },
-                "CYCLEDEP": {
-                    "type": "string",
-                    "format": "uri"
+                "static": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    }
                 },
-                "STATIC": {
-                    "type": "string",
-                    "format": "uri"
-                },
-                "VERBOSE": {
-                    "type": "string",
-                    "enum": [
-                        "true",
-                        "false"
-                    ]
+                "tiles": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
-        }    
+        },
+        "platform": {
+            "type": "object",
+            "properties": {
+                "scheduler": {
+                    "type": "string",
+                    "enum": [
+                      "lsf",
+                      "pbs",
+                      "slurm"
+                    ]
+                },
+                "required": ["mpicmd"]
+            }
+        },
+        "preprocessing": {
+            "type": "object",
+            "properties": {
+                "lateral_boundary_conditions": {
+                    "type": "object",
+                    "properties": {
+                        "interval_hours": {
+                            "type": "number",
+                            "minimum": 1,
+                            "default": 3
+                        },
+                        "offset": {
+                            "type": "number",
+                            "minimum": 0,
+                            "default": 0
+                        },
+                        "output_file_template": {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    }
+                }
+            }
+        },
+        "user": {
+            "type": "object",
+            "properties": {
+                "account": {
+                  "type": "string"
+                }
+            }
+        }
     }
 }

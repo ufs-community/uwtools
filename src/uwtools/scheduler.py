@@ -10,7 +10,10 @@ from collections import UserDict, UserList
 from collections.abc import Mapping
 from typing import Any, Dict, List
 
+from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils import Memory
+from uwtools.utils.file import writable
+from uwtools.utils.processing import execute
 
 NONEISH = [None, "", " ", "None", "none", False]
 IGNORED_ATTRIBS = ["scheduler"]
@@ -24,8 +27,6 @@ class RequiredAttribs:
     ACCOUNT = "account"
     QUEUE = "queue"
     WALLTIME = "walltime"
-    NODES = "nodes"
-    TASKS_PER_NODE = "tasks_per_node"
 
 
 class OptionalAttribs:
@@ -33,17 +34,21 @@ class OptionalAttribs:
     Key for optional attributes.
     """
 
-    SHELL = "shell"
-    JOB_NAME = "jobname"
-    STDOUT = "stdout"
-    STDERR = "stderr"
-    JOIN = "join"
-    PARTITION = "partition"
-    THREADS = "threads"
-    MEMORY = "memory"
+    CORES = "cores"
     DEBUG = "debug"
     EXCLUSIVE = "exclusive"
+    EXPORT = "export"
+    JOB_NAME = "jobname"
+    JOIN = "join"
+    MEMORY = "memory"
+    NODES = "nodes"
+    PARTITION = "partition"
     PLACEMENT = "placement"
+    SHELL = "shell"
+    STDERR = "stderr"
+    STDOUT = "stdout"
+    TASKS_PER_NODE = "tasks_per_node"
+    THREADS = "threads"
 
 
 class BatchScript(UserList):
@@ -68,6 +73,15 @@ class BatchScript(UserList):
             The character or characters to join the content lines with
         """
         return line_separator.join(self)
+
+    def dump(self, output_file: OptionalPath) -> None:
+        """
+        Write a batch script to an output location.
+
+        :param output_file: Path to the file to write the batch script to
+        """
+        with writable(output_file) as f:
+            print(str(self).strip(), file=f)
 
 
 class JobScheduler(UserDict):
@@ -129,9 +143,8 @@ class JobScheduler(UserDict):
                     self._map[key](value) if callable(self._map[key]) else self._map[key]
                 )
                 scheduler_value = "" if callable(self._map[key]) else value
-                directive = (
-                    f"{self.prefix} {scheduler_flag}{self.key_value_separator}{scheduler_value}"
-                )
+                key_value_separator = "" if callable(self._map[key]) else self.key_value_separator
+                directive = f"{self.prefix} {scheduler_flag}{key_value_separator}{scheduler_value}"
                 known.append(directive.strip())
 
         unknown = [
@@ -178,6 +191,16 @@ class JobScheduler(UserDict):
             ) from error
         return scheduler(props)
 
+    def submit_job(self, script_path: DefinitePath) -> bool:
+        """
+        Submits a job to the scheduler.
+
+        :param script_path: Path to the batch script.
+        :return: Did the run exit with a success status?
+        """
+        result = execute(cmd=f"{self.submit_command} {script_path}")
+        return result.success
+
 
 class Slurm(JobScheduler):
     """
@@ -185,28 +208,24 @@ class Slurm(JobScheduler):
     """
 
     prefix = "#SBATCH"
+    submit_command = "sbatch"
 
     _map = {
         RequiredAttribs.ACCOUNT: "--account",
-        RequiredAttribs.NODES: "--nodes",
         RequiredAttribs.QUEUE: "--qos",
-        RequiredAttribs.TASKS_PER_NODE: "--ntasks-per-node",
         RequiredAttribs.WALLTIME: "--time",
+        OptionalAttribs.CORES: "--ntasks",
+        OptionalAttribs.EXCLUSIVE: lambda x: "--exclusive",
+        OptionalAttribs.EXPORT: "--export",
         OptionalAttribs.JOB_NAME: "--job-name",
-        OptionalAttribs.STDOUT: "--output",
-        OptionalAttribs.STDERR: "--error",
-        OptionalAttribs.PARTITION: "--partition",
-        OptionalAttribs.THREADS: "--cpus-per-task",
         OptionalAttribs.MEMORY: "--mem",
-        OptionalAttribs.EXCLUSIVE: "--exclusive",
+        OptionalAttribs.NODES: "--nodes",
+        OptionalAttribs.PARTITION: "--partition",
+        OptionalAttribs.STDERR: "--error",
+        OptionalAttribs.STDOUT: "--output",
+        OptionalAttribs.TASKS_PER_NODE: "--ntasks-per-node",
+        OptionalAttribs.THREADS: "--cpus-per-task",
     }
-
-    @property
-    def submit_command(self) -> str:
-        """
-        Returns the command for running a batch script.
-        """
-        return "sbatch"
 
 
 class PBS(JobScheduler):
@@ -216,35 +235,29 @@ class PBS(JobScheduler):
 
     prefix = "#PBS"
     key_value_separator = " "
+    submit_command = "qsub"
 
     _map = {
         RequiredAttribs.ACCOUNT: "-A",
-        RequiredAttribs.NODES: lambda x: f"-l select={x}",
+        OptionalAttribs.NODES: lambda x: f"-l select={x}",
         RequiredAttribs.QUEUE: "-q",
+        OptionalAttribs.TASKS_PER_NODE: "mpiprocs",
         RequiredAttribs.WALLTIME: "-l walltime=",
-        RequiredAttribs.TASKS_PER_NODE: "mpiprocs",
-        OptionalAttribs.SHELL: "-S",
-        OptionalAttribs.JOB_NAME: "-N",
-        OptionalAttribs.STDOUT: "-o",
         OptionalAttribs.DEBUG: lambda x: f"-l debug={str(x).lower()}",
-        OptionalAttribs.THREADS: "ompthreads",
+        OptionalAttribs.JOB_NAME: "-N",
         OptionalAttribs.MEMORY: "mem",
+        OptionalAttribs.SHELL: "-S",
+        OptionalAttribs.STDOUT: "-o",
+        OptionalAttribs.THREADS: "ompthreads",
     }
-
-    @property
-    def submit_command(self) -> str:
-        """
-        Returns the command for running a batch script.
-        """
-        return "qsub"
 
     def pre_process(self) -> Dict[str, Any]:
         output = self.data
         output.update(self._select(output))
         output.update(self._placement(output))
 
-        output.pop(RequiredAttribs.TASKS_PER_NODE, None)
-        output.pop(RequiredAttribs.NODES, None)
+        output.pop(OptionalAttribs.TASKS_PER_NODE, None)
+        output.pop(OptionalAttribs.NODES, None)
         output.pop(OptionalAttribs.THREADS, None)
         output.pop(OptionalAttribs.MEMORY, None)
         output.pop("exclusive", None)
@@ -256,15 +269,15 @@ class PBS(JobScheduler):
         """
         Select logic.
         """
-        total_nodes = items.get(RequiredAttribs.NODES, "")
-        tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
+        total_nodes = items.get(OptionalAttribs.NODES, "")
+        tasks_per_node = items.get(OptionalAttribs.TASKS_PER_NODE, "")
         # Set default threads=1 to address job variability with PBS
         threads = items.get(OptionalAttribs.THREADS, 1)
         memory = items.get(OptionalAttribs.MEMORY, "")
 
         select = [
             f"{total_nodes}",
-            f"{self._map[RequiredAttribs.TASKS_PER_NODE]}={tasks_per_node}",
+            f"{self._map[OptionalAttribs.TASKS_PER_NODE]}={tasks_per_node}",
             f"{self._map[OptionalAttribs.THREADS]}={threads}",
             f"ncpus={int(tasks_per_node) * int(threads)}",
         ]
@@ -308,39 +321,33 @@ class LSF(JobScheduler):
 
     prefix = "#BSUB"
     key_value_separator = " "
+    submit_command = "bsub"
 
     _map = {
-        RequiredAttribs.QUEUE: "-q",
         RequiredAttribs.ACCOUNT: "-P",
+        OptionalAttribs.NODES: lambda x: f"-n {x}",
+        RequiredAttribs.QUEUE: "-q",
+        OptionalAttribs.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
         RequiredAttribs.WALLTIME: "-W",
-        RequiredAttribs.NODES: lambda x: f"-n {x}",
-        RequiredAttribs.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
-        OptionalAttribs.SHELL: "-L",
         OptionalAttribs.JOB_NAME: "-J",
+        OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
+        OptionalAttribs.SHELL: "-L",
         OptionalAttribs.STDOUT: "-o",
         OptionalAttribs.THREADS: lambda x: f"-R affinity[core({x})]",
-        OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
     }
-
-    @property
-    def submit_command(self) -> str:
-        """
-        Returns the command for running a batch script.
-        """
-        return "bsub"
 
     def pre_process(self) -> Dict[str, Any]:
         items = self.data
         # LSF requires threads to be set (if None is provided, default to 1)
         items[OptionalAttribs.THREADS] = items.get(OptionalAttribs.THREADS, 1)
-        nodes = items.get(RequiredAttribs.NODES, "")
-        tasks_per_node = items.get(RequiredAttribs.TASKS_PER_NODE, "")
+        nodes = items.get(OptionalAttribs.NODES, "")
+        tasks_per_node = items.get(OptionalAttribs.TASKS_PER_NODE, "")
 
         memory = items.get(OptionalAttribs.MEMORY, None)
         if memory is not None:
             mem_value = Memory(memory).convert("KB")
             items[self._map[OptionalAttribs.MEMORY](mem_value)] = ""
 
-        items[RequiredAttribs.NODES] = int(tasks_per_node) * int(nodes)
+        items[OptionalAttribs.NODES] = int(tasks_per_node) * int(nodes)
         items.pop(OptionalAttribs.MEMORY, None)
         return items

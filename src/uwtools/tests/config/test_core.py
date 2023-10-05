@@ -748,7 +748,7 @@ Keys that are complete:
 
 Keys that have unfilled Jinja2 templates:
     FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
-    FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio','gfs.t{{ hh }}z.sfcanl.nemsio']
+    FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
     FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
 
 Keys that are set to empty:
@@ -861,7 +861,7 @@ def test_Config___repr__(capsys, nml_cfgobj):
 def test_Config_characterize_values(nml_cfgobj):
     d = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
     complete, empty, template = nml_cfgobj.characterize_values(values=d, parent="p")
-    assert complete == ["    p4", "    p4.a", "    p5", "    pb", "    p6"]
+    assert complete == ["    p4", "    p4.a", "    pb", "    p5", "    p6"]
     assert empty == ["    p1", "    p2"]
     assert template == ["    p3: {{ n }}"]
 
