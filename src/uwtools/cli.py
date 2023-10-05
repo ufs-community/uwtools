@@ -562,7 +562,6 @@ def _abort(msg: str) -> None:
 
     :param msg: The message to print.
     """
-    logging.exception(msg)
     print(msg, file=sys.stderr)
     sys.exit(1)
 
