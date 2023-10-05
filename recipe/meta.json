@@ -1,5 +1,5 @@
 {
-  "build": "pyh28a5fc4_0",
+  "build": "pyh233a6f4_0",
   "buildnum": "0",
   "name": "uwtools",
   "packages": {
@@ -30,5 +30,5 @@
       "pyyaml =6.0.*"
     ]
   },
-  "version": "1.0.0"
+  "version": "1.1.0"
 }
