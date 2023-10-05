@@ -1,55 +1,130 @@
 {
-  "description": "This document is to validate user-defined FV3 forecast config files",
-  "properties": {
-    "forecast": {
-      "description": "parameters of the forecast",
-      "properties": {
-        "CYCLEDEP": {
-          "format": "uri",
-          "type": "string"
+    "title": "FV3 Forecast config",
+    "description": "This document is to validate user-defined FV3 forecast config files",
+    "type": "object",
+    "properties": {
+        "forecast": {
+            "description": "parameters of the forecast",
+            "type": "object",
+            "properties": {
+                "cycle-dependent": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    }
+                },
+                "exec_name": {
+                    "type": "string"
+                },
+                "field_table": {
+                    "type": "object",
+                    "properties": {
+                        "base_file": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "update_values": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "length": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "model": {
+                    "type": "string"
+                },
+                "model_configure": {
+                    "type": "object",
+                    "properties": {
+                        "base_file": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "update_values": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "mpicmd": {
+                    "type": "string"
+                },
+                "namelist": {
+                    "type": "object",
+                    "properties": {
+                        "base_file": {
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "update_values": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "run_dir": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "static": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    }
+                },
+                "tiles": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
         },
-        "EXEC_NAME": {
-          "type": "string"
+        "platform": {
+            "type": "object",
+            "properties": {
+                "scheduler": {
+                    "type": "string",
+                    "enum": [
+                      "lsf",
+                      "pbs",
+                      "slurm"
+                    ]
+                },
+                "required": ["mpicmd"]
+            }
         },
-        "MODEL": {
-          "type": "string"
+        "preprocessing": {
+            "type": "object",
+            "properties": {
+                "lateral_boundary_conditions": {
+                    "type": "object",
+                    "properties": {
+                        "interval_hours": {
+                            "type": "number",
+                            "minimum": 1,
+                            "default": 3
+                        },
+                        "offset": {
+                            "type": "number",
+                            "minimum": 0,
+                            "default": 0
+                        },
+                        "output_file_template": {
+                            "type": "string",
+                            "format": "uri"
+                        }
+                    }
+                }
+            }
         },
-        "RUN_DIRECTORY": {
-          "format": "uri",
-          "type": "string"
-        },
-        "STATIC": {
-          "format": "uri",
-          "type": "string"
-        },
-        "VERBOSE": {
-          "enum": [
-            "true",
-            "false"
-          ],
-          "type": "string"
+        "user": {
+            "type": "object",
+            "properties": {
+                "account": {
+                  "type": "string"
+                }
+            }
         }
-      },
-      "type": "object"
-    },
-    "platform": {
-      "description": "Expected resources for the given platform",
-      "properties": {
-        "ACCOUNT": {
-          "type": "string"
-        },
-        "MPICMD": {
-          "enum": [
-            "mpirun",
-            "mpiexec",
-            "srun"
-          ],
-          "type": "string"
-        }
-      },
-      "type": "object"
     }
-  },
-  "title": "FV3 Forecast config",
-  "type": "object"
 }

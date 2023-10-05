@@ -273,14 +273,20 @@ def test__dispatch_forecast(params):
 
 
 def test__dispatch_forecast_run():
-    args = ns()
+    args = ns(
+        batch_script=None,
+        cycle="2023-01-01T00:00:00",
+        config_file=1,
+        dry_run=True,
+        forecast_model="foo",
+    )
     vars(args).update({STR.cfgfile: 1, "forecast_model": "foo"})
     with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as m:
         CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
         with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):
             cli._dispatch_forecast_run(args)
     assert m.called_once_with(args)
-    m().run.assert_called_once_with()
+    m().run.assert_called_once_with(cycle="2023-01-01T00:00:00")
 
 
 @pytest.mark.parametrize("params", [(STR.render, "_dispatch_template_render")])

@@ -3,6 +3,7 @@
 Tests for uwtools.drivers.driver module.
 """
 
+import datetime
 import logging
 from collections.abc import Mapping
 from unittest.mock import patch
@@ -19,7 +20,7 @@ class ConcreteDriver(Driver):
     Driver subclass for testing purposes.
     """
 
-    def batch_script(self, platform_resources):
+    def batch_script(self):
         pass
 
     def output(self):
@@ -28,13 +29,13 @@ class ConcreteDriver(Driver):
     def requirements(self):
         pass
 
-    def resources(self, platform: dict) -> Mapping:
+    def resources(self) -> Mapping:
         return {}
 
-    def run(self) -> bool:
+    def run(self, cycle: datetime.date) -> bool:
         return True
 
-    def run_cmd(self, *args, run_cmd, exec_name):
+    def run_cmd(self, *args):
         pass
 
     @property

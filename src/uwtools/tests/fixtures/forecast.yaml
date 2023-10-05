@@ -1,17 +1,37 @@
-platform:
-  MPICMD: srun
+user:
   account: user_account
+platform:
+  mpicmd: srun
+  scheduler: slurm
+preprocessing:
+  lateral_boundary_conditions:
+    interval_hours: 3
+    offset: 0
+    output_file_template: "gfs_bndy.tile{tile}.f{forecast_hour}.nc"
 forecast:
-  MODEL: FV3
-  EXEC_NAME: test_exec.py
-  RUN_DIRECTORY: src/uwtools/tests/drivers/
-  CYCLEDEP:
-    INPUT/gfs_data.nc: path/to/gfs_data.tile7.halo0.nc 
+  model: FV3
+  exec_name: test_exec.py
+  run_dir: some/path
+  tiles:
+    - 7
+  length: 12
+  jobinfo:
+    nodes: 1
+    tasks_per_node: 1
+    walltime: 00:01:00
+    queue: batch
+  runtime_info:
+    threads: 1
+    stacksize: 512m
+    mpi_args:
+      - "--export=NONE"
+  cycle-dependent:
+    INPUT/gfs_data.nc: path/to/gfs_data.tile7.halo0.nc
     INPUT/sfc_data.nc: path/to/sfc_data.tile7.halo0.nc
     INPUT/gfs_bndy.tile7.000.nc: path/to/gfs_bndy.tile7.000.nc
-    INPUT/gfs_bndy.tile7.006.nc: path/to/gfs_bndy.tile7.006.nc 
+    INPUT/gfs_bndy.tile7.006.nc: path/to/gfs_bndy.tile7.006.nc
     INPUT/gfs_ctrl.nc: path/to/gfs_ctrl.nc
-  STATIC:
+  static:
     co2historicaldata_2010.txt: src/uwtools/drivers/global_co2historicaldata_2010.txt
     co2historicaldata_2011.txt: src/uwtools/drivers/global_co2historicaldata_2011.txt
     co2historicaldata_2012.txt: src/uwtools/drivers/global_co2historicaldata_2012.txt
@@ -21,4 +41,3 @@ forecast:
     co2historicaldata_2016.txt: src/uwtools/drivers/global_co2historicaldata_2016.txt
     co2historicaldata_2017.txt: src/uwtools/drivers/global_co2historicaldata_2017.txt
     co2historicaldata_2018.txt: src/uwtools/drivers/global_co2historicaldata_2018.txt
-  VERBOSE: false
