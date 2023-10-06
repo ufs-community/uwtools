@@ -19,10 +19,11 @@ The recommended installation mechanism uses the Python package and virtual-envir
 This recipe uses the `aarch64` (64-bit ARM) Miniforge for Linux, and installs into `$HOME/conda`. Adjust as necessary for your target system.
 
 ``` sh
-wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-aarch64.sh
-bash Miniforge3-Linux-aarch64.sh -bfp ~/conda
-rm Miniforge3-Linux-aarch64.sh
-source ~/conda/etc/profile.d/conda.sh
+conda_loc=~/conda
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh
+bash Miniforge3-$(uname)-$(uname -m).sh -bfp $conda_loc
+rm Miniforge3-$(uname)-$(uname -m).sh
+source $conda_loc/etc/profile.d/conda.sh
 conda activate
 conda install -y conda-build conda-verify
 cd /to/your/workflow-tools/clone
@@ -34,7 +35,8 @@ conda activate uwtools
 In future shells, you can activate and use this environment with
 
 ``` sh
-source ~/conda/etc/profile.d/conda.sh
+conda_loc=~/conda
+source $conda_loc/etc/profile.d/conda.sh
 conda activate uwtools
 ```
 
@@ -53,10 +55,11 @@ To create an interactive development `bash` shell:
 This recipe uses the `aarch64` (64-bit ARM) Miniforge for Linux, and installs into `$HOME/conda`. Adjust as necessary for your target system.
 
 ``` sh
-wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-aarch64.sh
-bash Miniforge3-Linux-aarch64.sh -bfp ~/conda
-rm Miniforge3-Linux-aarch64.sh
-source ~/conda/etc/profile.d/conda.sh
+conda_loc=~/conda
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh
+bash Miniforge3-$(uname)-$(uname -m).sh -bfp $conda_loc
+rm Miniforge3-$(uname)-$(uname -m).sh
+source $conda_loc/etc/profile.d/conda.sh
 conda activate
 conda install -y -c maddenp condev=0.5.3
 cd /to/your/workflow-tools/clone
