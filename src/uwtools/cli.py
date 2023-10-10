@@ -379,17 +379,27 @@ def _dispatch_rocoto(args: Namespace) -> bool:
 
 def _dispatch_rocoto_write(args: Namespace) -> bool:
     """
-    Dispatch logic for rocoto write submode.
+    Dispatch logic for rocoto write submode. Validate input and output.
 
     :param args: Parsed command-line args.
     """
     success = True
     if args.input_format == FORMAT.yaml and args.output_format == FORMAT.rocoto:
-        uwtools.rocoto.write_rocoto_xml(
-            input_yaml=args.input_file,
-            input_template=str(args.schema_file),
-            rendered_output=str(args.output_file),
+        valid_input = uwtools.config.validator.validate_yaml(
+            config_file=args.input_file, schema_file=args.schema_file
         )
+        if valid_input:
+            uwtools.rocoto.write_rocoto_xml(
+                input_yaml=args.input_file,
+                input_template=str(args.schema_file),
+                rendered_output=str(args.output_file),
+            )
+        else:
+            success = False
+        valid_output = uwtools.rocoto.validate_rocoto_xml(
+            input_xml=args.output_file, schema_file=args.schema_file
+        )
+        success = False if not valid_output else success
     else:
         success = False
     return success
