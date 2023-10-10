@@ -333,12 +333,13 @@ def _add_subparser_rocoto_write(subparsers: Subparsers) -> SubmodeChecks:
     parser = _add_subparser(subparsers, STR.write, "Write a Rocoto XML workflow document")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     optional = _basic_setup(parser)
-    _add_arg_output_file(required)
+    _add_arg_input_file(required)
     _add_arg_input_format(optional, choices=[FORMAT.yaml])
     _add_arg_schema_file(required)
     _add_arg_output_file(required)
     _add_arg_output_format(optional, choices=[FORMAT.rocoto])
-    return [
+    checks = _add_args_quiet_and_verbose(optional)
+    return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
         partial(_check_file_vs_format, STR.outfile, STR.outfmt),
     ]
@@ -356,7 +357,8 @@ def _add_subparser_rocoto_validate(subparsers: Subparsers) -> SubmodeChecks:
     optional = _basic_setup(parser)
     _add_arg_input_format(optional, choices=[FORMAT.rocoto])
     _add_arg_verbose(optional)
-    return [
+    checks = _add_args_quiet_and_verbose(optional)
+    return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
     ]
 
@@ -370,7 +372,9 @@ def _dispatch_rocoto(args: Namespace) -> bool:
     return {
         STR.write: _dispatch_rocoto_write,
         STR.validate: _dispatch_rocoto_validate,
-        }[args.submode](args)
+    }[
+        args.submode
+    ](args)
 
 
 def _dispatch_rocoto_write(args: Namespace) -> bool:
@@ -391,17 +395,21 @@ def _dispatch_rocoto_write(args: Namespace) -> bool:
     return success
 
 
-def _dispatch_rocoto_validate(args: Namespace) -> str:
+def _dispatch_rocoto_validate(args: Namespace) -> bool:
     """
     Dispatch logic for rocoto validate submode.
 
     :param args: Parsed command-line args.
     """
+
     success = True
-    success = uwtools.rocoto.validate_rocoto_xml(
-        input_xml=args.input_file, schema_file=args.schema_file
-    )
-    return "Yes" if success is True else "No"
+    if args.input_format == FORMAT.xml:
+        success = uwtools.rocoto.validate_rocoto_xml(
+            input_xml=args.input_file, schema_file=args.schema_file
+        )
+    else:
+        success = False
+    return success
 
 
 # Mode template

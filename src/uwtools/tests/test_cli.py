@@ -289,6 +289,52 @@ def test__dispatch_forecast_run():
     m().run.assert_called_once_with(cycle="2023-01-01T00:00:00")
 
 
+@pytest.mark.parametrize(
+    "params",
+    [
+        (STR.write, "_dispatch_rocoto_write"),
+        (STR.validate, "_dispatch_rocoto_validate"),
+    ],
+)
+def test__dispatch_rocoto(params):
+    submode, funcname = params
+    args = ns()
+    vars(args).update({STR.submode: submode})
+    with patch.object(cli, funcname) as m:
+        cli._dispatch_rocoto(args)
+    assert m.called_once_with(args)
+
+
+def test__dispatch_rocoto_write():
+    args = ns()
+    vars(args).update(
+        {
+            STR.infile: 1,
+            STR.infmt: 2,
+            STR.schemafile: 3,
+            STR.outfile: 4,
+            STR.outfmt: 5,
+        }
+    )
+    with patch.object(cli.uwtools.rocoto, "write_rocoto_xml") as m:
+        cli._dispatch_rocoto_write(args)
+    assert m.called_once_with(args)
+
+
+def test__dispatch_rocoto_validate_xml():
+    args = ns()
+    vars(args).update({STR.infile: 1, STR.infmt: FORMAT.xml, STR.schemafile: 3})
+    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as m:
+        cli._dispatch_rocoto_validate(args)
+    assert m.called_once_with(args)
+
+
+def test_dispath_rocoto_validate_unsupported():
+    args = ns()
+    vars(args).update({STR.infile: 1, STR.infmt: "jpg", STR.schemafile: 3})
+    assert cli._dispatch_rocoto_validate(args) is False
+
+
 @pytest.mark.parametrize("params", [(STR.render, "_dispatch_template_render")])
 def test__dispatch_template(params):
     submode, funcname = params

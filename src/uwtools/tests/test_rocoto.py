@@ -7,7 +7,6 @@ from importlib import resources
 
 import pytest
 import yaml
-from lxml import etree
 
 from uwtools import rocoto
 from uwtools.tests import support
@@ -61,9 +60,8 @@ def test_write_rocoto_xml(tmp_path):
 def test_rocoto_xml_is_valid(vals):
     fn, validity = vals
     with resources.as_file(resources.files("uwtools.resources")) as resc:
-        with open(resc / "schema_with_metatasks.rng", "r", encoding="utf-8") as f:
-            schema = etree.RelaxNG(etree.parse(f))
+        xml = support.fixture_path(fn)
+        schema = resc / "schema_with_metatasks.rng"
+    result = rocoto.validate_rocoto_xml(input_xml=xml, schema_file=str(schema))
 
-    xml = support.fixture_path(fn)
-    tree = etree.parse(xml)
-    assert schema.validate(tree) is validity
+    assert result is validity
