@@ -28,7 +28,6 @@ class _FORMAT:
     _ini: str = "ini"
     _jinja2: str = "jinja2"
     _nml: str = "nml"
-    _rocoto: str = "rocoto"
     _yaml: str = "yaml"
 
     # Variants:
@@ -40,9 +39,7 @@ class _FORMAT:
     ini: str = _ini
     jinja2: str = _jinja2
     nml: str = _nml
-    rocoto: str = _rocoto
     sh: str = _ini
-    xml: str = _rocoto
     yaml: str = _yaml
     yml: str = _yaml
 

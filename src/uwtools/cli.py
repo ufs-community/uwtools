@@ -332,12 +332,12 @@ def _add_subparser_rocoto_write(subparsers: Subparsers) -> SubmodeChecks:
     """
     parser = _add_subparser(subparsers, STR.write, "Write a Rocoto XML workflow document")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    optional = _basic_setup(parser)
     _add_arg_input_file(required)
-    _add_arg_input_format(optional, choices=[FORMAT.yaml])
     _add_arg_schema_file(required)
     _add_arg_output_file(required)
-    _add_arg_output_format(optional, choices=[FORMAT.rocoto])
+    optional = _basic_setup(parser)
+    _add_arg_input_format(optional, choices=[FORMAT.yaml])
+    _add_arg_output_format(optional, choices=[FORMAT.jinja2])
     checks = _add_args_quiet_and_verbose(optional)
     return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
@@ -355,8 +355,7 @@ def _add_subparser_rocoto_validate(subparsers: Subparsers) -> SubmodeChecks:
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_input_file(required)
     optional = _basic_setup(parser)
-    _add_arg_input_format(optional, choices=[FORMAT.rocoto])
-    _add_arg_verbose(optional)
+    _add_arg_input_format(optional, choices=[FORMAT.jinja2])
     checks = _add_args_quiet_and_verbose(optional)
     return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
@@ -384,7 +383,7 @@ def _dispatch_rocoto_write(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     success = True
-    if args.input_format == FORMAT.yaml and args.output_format == FORMAT.rocoto:
+    if args.input_format == FORMAT.yaml and args.output_format == FORMAT.jinja2:
         valid_input = uwtools.config.validator.validate_yaml(
             config_file=args.input_file, schema_file=args.schema_file
         )
@@ -413,7 +412,7 @@ def _dispatch_rocoto_validate(args: Namespace) -> bool:
     """
 
     success = True
-    if args.input_format == FORMAT.xml:
+    if args.input_format == FORMAT.jinja2:
         success = uwtools.rocoto.validate_rocoto_xml(
             input_xml=args.input_file, schema_file=args.schema_file
         )
