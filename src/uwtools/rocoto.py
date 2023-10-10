@@ -2,6 +2,8 @@
 Support for creating Rocoto XML workflow documents.
 """
 
+from lxml import etree
+
 from uwtools.config.core import YAMLConfig
 from uwtools.config.j2template import J2Template
 
@@ -42,3 +44,18 @@ def write_rocoto_xml(input_yaml: str, input_template: str, rendered_output: str)
     # Render the template.
     template = J2Template(values=values.data, template_path=input_template)
     template.dump(output_path=rendered_output)
+
+
+def validate_rocoto_xml(input_xml: str, schema_file: str) -> bool:
+    """
+    Main entry point.
+
+    :param input_XML: Path to rendered XML file.
+    :param schema_file: Path to schema file.
+    """
+
+    # Validate the XML.
+    with open(schema_file, "r", encoding="utf-8") as f:
+        schema = etree.RelaxNG(etree.parse(f))
+    tree = etree.parse(input_xml)
+    return schema.validate(tree)
