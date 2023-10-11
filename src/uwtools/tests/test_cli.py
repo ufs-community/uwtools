@@ -368,7 +368,7 @@ def test__dispatch_rocoto_realize_unsupported():
 
 def test__dispatch_rocoto_validate_xml():
     args = ns()
-    vars(args).update({STR.infile: 1, STR.infmt: FORMAT.rocoto})
+    vars(args).update({STR.infile: 1, STR.infmt: FORMAT.rocoto, STR.verbose: False})
     with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as m:
         cli._dispatch_rocoto_validate(args)
     assert m.called_once_with(args)
@@ -376,7 +376,7 @@ def test__dispatch_rocoto_validate_xml():
 
 def test__dispatch_rocoto_validate_unsupported():
     args = ns()
-    vars(args).update({STR.infile: 1, STR.infmt: "jpg"})
+    vars(args).update({STR.infile: 1, STR.infmt: "jpg", STR.verbose: False})
     assert cli._dispatch_rocoto_validate(args) is False
 
 

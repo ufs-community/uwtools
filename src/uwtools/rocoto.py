@@ -36,7 +36,7 @@ def realize_rocoto_xml(
     input_template: str,
     rendered_output: str,
     schema_file: str,
-) -> None: #pragma: no cover
+) -> None:  # pragma: no cover
     """
     Main entry point.
 

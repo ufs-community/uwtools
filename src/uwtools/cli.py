@@ -15,6 +15,8 @@ from importlib import resources
 from pathlib import Path
 from typing import Callable, Dict, List, Tuple
 
+from lxml import etree
+
 import uwtools.config.atparse_to_jinja2
 import uwtools.config.core
 import uwtools.config.templater
@@ -422,6 +424,14 @@ def _dispatch_rocoto_validate(args: Namespace) -> bool:
         )
     else:
         success = False
+    if args.verbose: #pragma: no cover
+        errors = str(etree.RelaxNG.error_log).split("\n")
+        log_method = logging.error if len(errors) else logging.info
+        log_method(
+            "%s Rocoto validation error%s found", len(errors), "" if len(errors) == 1 else "s"
+        )
+        for line in errors:
+            logging.error(line)
     return success
 
 
