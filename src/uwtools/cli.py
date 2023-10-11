@@ -11,6 +11,7 @@ from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
 from dataclasses import dataclass
 from functools import partial
+from importlib import resources
 from pathlib import Path
 from typing import Callable, Dict, List, Tuple
 
@@ -315,29 +316,28 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.rocoto, "Write and validate Rocoto XML Documents")
+    parser = _add_subparser(subparsers, STR.rocoto, "Realize and validate Rocoto XML Documents")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.submode)
     return {
-        STR.write: _add_subparser_rocoto_write(subparsers),
+        STR.realize: _add_subparser_rocoto_realize(subparsers),
         STR.validate: _add_subparser_rocoto_validate(subparsers),
     }
 
 
-def _add_subparser_rocoto_write(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_rocoto_realize(subparsers: Subparsers) -> SubmodeChecks:
     """
-    Subparser for mode: rocoto write
+    Subparser for mode: rocoto realize
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.write, "Write a Rocoto XML workflow document")
+    parser = _add_subparser(subparsers, STR.realize, "Realize a Rocoto XML workflow document")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_input_file(required)
-    _add_arg_schema_file(required)
     _add_arg_output_file(required)
     optional = _basic_setup(parser)
     _add_arg_input_format(optional, choices=[FORMAT.yaml])
-    _add_arg_output_format(optional, choices=[FORMAT.jinja2])
+    _add_arg_output_format(optional, choices=[FORMAT.rocoto])
     checks = _add_args_quiet_and_verbose(optional)
     return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
@@ -355,7 +355,7 @@ def _add_subparser_rocoto_validate(subparsers: Subparsers) -> SubmodeChecks:
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_input_file(required)
     optional = _basic_setup(parser)
-    _add_arg_input_format(optional, choices=[FORMAT.jinja2])
+    _add_arg_input_format(optional, choices=[FORMAT.rocoto])
     checks = _add_args_quiet_and_verbose(optional)
     return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
@@ -369,36 +369,38 @@ def _dispatch_rocoto(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     return {
-        STR.write: _dispatch_rocoto_write,
+        STR.realize: _dispatch_rocoto_realize,
         STR.validate: _dispatch_rocoto_validate,
     }[
         args.submode
     ](args)
 
 
-def _dispatch_rocoto_write(args: Namespace) -> bool:
+def _dispatch_rocoto_realize(args: Namespace) -> bool:
     """
-    Dispatch logic for rocoto write submode. Validate input and output.
+    Dispatch logic for rocoto realize submode. Validate input and output.
 
     :param args: Parsed command-line args.
     """
+    with resources.as_file(resources.files("uwtools.resources")) as resc:
+        input_template = resc / "rocoto.jinja2"
+        output_template = resc / "rocoto.jsonschema"
+
     success = True
-    if args.input_format == FORMAT.yaml and args.output_format == FORMAT.jinja2:
-        valid_input = uwtools.config.validator.validate_yaml(
-            config_file=args.input_file, schema_file=args.schema_file
-        )
-        if valid_input:
+    if args.input_format == FORMAT.yaml and args.output_format == FORMAT.rocoto:
+        if uwtools.config.validator.validate_yaml(
+            config_file=args.input_file, schema_file=input_template
+        ):
             uwtools.rocoto.write_rocoto_xml(
                 input_yaml=args.input_file,
-                input_template=str(args.schema_file),
+                input_template=str(input_template),
                 rendered_output=str(args.output_file),
+            )
+            success = uwtools.rocoto.validate_rocoto_xml(
+                input_xml=args.output_file, schema_file=str(output_template)
             )
         else:
             success = False
-        valid_output = uwtools.rocoto.validate_rocoto_xml(
-            input_xml=args.output_file, schema_file=args.schema_file
-        )
-        success = False if not valid_output else success
     else:
         success = False
     return success
@@ -410,11 +412,13 @@ def _dispatch_rocoto_validate(args: Namespace) -> bool:
 
     :param args: Parsed command-line args.
     """
+    with resources.as_file(resources.files("uwtools.resources")) as resc:
+        schema_file = resc / "rocoto.jsonschema"
 
     success = True
-    if args.input_format == FORMAT.jinja2:
+    if args.input_format == FORMAT.rocoto:
         success = uwtools.rocoto.validate_rocoto_xml(
-            input_xml=args.input_file, schema_file=args.schema_file
+            input_xml=args.input_file, schema_file=str(schema_file)
         )
     else:
         success = False

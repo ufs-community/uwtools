@@ -292,7 +292,7 @@ def test__dispatch_forecast_run():
 @pytest.mark.parametrize(
     "params",
     [
-        (STR.write, "_dispatch_rocoto_write"),
+        (STR.realize, "_dispatch_rocoto_realize"),
         (STR.validate, "_dispatch_rocoto_validate"),
     ],
 )
@@ -305,74 +305,70 @@ def test__dispatch_rocoto(params):
     assert m.called_once_with(args)
 
 
-def test__dispatch_rocoto_write():
+def test__dispatch_rocoto_realize():
     args = ns()
     vars(args).update(
         {
             STR.infile: 1,
             STR.infmt: FORMAT.yaml,
-            STR.schemafile: 3,
-            STR.outfile: 4,
-            STR.outfmt: FORMAT.jinja2,
+            STR.outfile: 3,
+            STR.outfmt: FORMAT.rocoto,
         }
     )
     with patch.object(cli.uwtools.rocoto, "write_rocoto_xml") as m:
         with patch.object(cli.uwtools.config.validator, "validate_yaml", return_value=True):
             with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml", return_value=True):
-                cli._dispatch_rocoto_write(args)
+                cli._dispatch_rocoto_realize(args)
     assert m.called_once_with(args)
 
 
-def test__dispatch_rocoto_write_invalid_input():
+def test__dispatch_rocoto_realize_invalid_input():
     args = ns()
     vars(args).update(
         {
             STR.infile: 1,
             STR.infmt: FORMAT.yaml,
-            STR.schemafile: 3,
-            STR.outfile: 4,
-            STR.outfmt: FORMAT.jinja2,
+            STR.outfile: 3,
+            STR.outfmt: FORMAT.rocoto,
         }
     )
     with patch.object(cli.uwtools.config.validator, "validate_yaml", return_value=False):
         with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml", return_value=True):
-            assert cli._dispatch_rocoto_write(args) is False
+            assert cli._dispatch_rocoto_realize(args) is False
 
 
-def test__dispatch_rocoto_write_invalid_output():
+def test__dispatch_rocoto_realize_invalid_output():
     args = ns()
     vars(args).update(
         {
             STR.infile: 1,
             STR.infmt: FORMAT.yaml,
-            STR.schemafile: 3,
-            STR.outfile: 4,
-            STR.outfmt: FORMAT.jinja2,
+            STR.outfile: 3,
+            STR.outfmt: FORMAT.rocoto,
         }
     )
     with patch.object(cli.uwtools.rocoto, "write_rocoto_xml", create=True):
         with patch.object(cli.uwtools.config.validator, "validate_yaml", return_value=True):
             with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml", return_value=False):
-                assert cli._dispatch_rocoto_write(args) is False
+                assert cli._dispatch_rocoto_realize(args) is False
 
 
-def test__dispatch_rocoto_write_unsupported():
+def test__dispatch_rocoto_realize_unsupported():
     args = ns()
     vars(args).update(
         {
             STR.infile: 1,
             STR.infmt: "jpg",
-            STR.schemafile: 3,
-            STR.outfile: 4,
+            STR.outfile: 3,
             STR.outfmt: "png",
         }
     )
-    assert cli._dispatch_rocoto_write(args) is False
+    assert cli._dispatch_rocoto_realize(args) is False
 
 
 def test__dispatch_rocoto_validate_xml():
     args = ns()
-    vars(args).update({STR.infile: 1, STR.infmt: FORMAT.jinja2, STR.schemafile: 3})
+    vars(args).update({STR.infile: 1, STR.infmt: FORMAT.rocoto})
     with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as m:
         cli._dispatch_rocoto_validate(args)
     assert m.called_once_with(args)
@@ -380,7 +376,7 @@ def test__dispatch_rocoto_validate_xml():
 
 def test__dispatch_rocoto_validate_unsupported():
     args = ns()
-    vars(args).update({STR.infile: 1, STR.infmt: "jpg", STR.schemafile: 3})
+    vars(args).update({STR.infile: 1, STR.infmt: "jpg"})
     assert cli._dispatch_rocoto_validate(args) is False
 
 
