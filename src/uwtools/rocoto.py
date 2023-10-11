@@ -3,6 +3,7 @@ Support for creating Rocoto XML workflow documents.
 """
 
 import logging
+from importlib import resources
 
 from lxml import etree
 
@@ -11,6 +12,22 @@ from uwtools.config.core import YAMLConfig
 from uwtools.config.j2template import J2Template
 
 # Private functions
+
+
+def _rocoto_template() -> str: #pragma: no cover
+    """
+    The path to the file containing the template to validate the config file against.
+    """
+    with resources.as_file(resources.files("uwtools.resources")) as path:
+        return (path / "rocoto.jinja2").as_posix()
+
+
+def _rocoto_schema() -> str: #pragma: no cover
+    """
+    The path to the file containing the schema to validate the XML file against.
+    """
+    with resources.as_file(resources.files("uwtools.resources")) as path:
+        return (path / "rocoto.jsonschema").as_posix()
 
 
 def _add_jobname(tree: dict) -> None:
@@ -33,10 +50,8 @@ def _add_jobname(tree: dict) -> None:
 # Public functions
 def realize_rocoto_xml(
     input_yaml: str,
-    input_template: str,
     rendered_output: str,
-    schema_file: str,
-) -> None:  # pragma: no cover
+) -> bool:  # pragma: no cover
     """
     Main entry point.
 
@@ -51,20 +66,23 @@ def realize_rocoto_xml(
         _add_jobname(tasks)
 
     # Validate the YAML.
-    if uwtools.config.validator.validate_yaml(config_file=input_yaml, schema_file=input_template):
+    if uwtools.config.validator.validate_yaml(
+        config_file=input_yaml, schema_file=str(_rocoto_schema)
+    ):
         # Render the template.
         write_rocoto_xml(
             input_yaml=input_yaml,
-            input_template=str(input_template),
+            input_template=str(_rocoto_template),
             rendered_output=str(rendered_output),
         )
         # Validate the XML.
-        if validate_rocoto_xml(input_xml=str(rendered_output), schema_file=str(schema_file)):
-            logging.info("%s successfully realized.", rendered_output)
-        else:
-            logging.error("Rocoto validation errors identified in %s", rendered_output)
-    else:
-        logging.error("YAML validation errors identified in %s", input_yaml)
+        if validate_rocoto_xml(input_xml=str(rendered_output), schema_file=str(_rocoto_template)):
+            # If no issues were detected, report success.
+            return True
+        logging.error("Rocoto validation errors identified in %s", rendered_output)
+        return False
+    logging.error("YAML validation errors identified in %s", input_yaml)
+    return False
 
 
 def validate_rocoto_xml(input_xml: str, schema_file: str) -> bool:
@@ -79,7 +97,16 @@ def validate_rocoto_xml(input_xml: str, schema_file: str) -> bool:
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = etree.RelaxNG(etree.parse(f))
     tree = etree.parse(input_xml)
-    return schema.validate(tree)
+    success = schema.validate(tree)
+
+    # Store validation errors in the main log.
+    errors = str(etree.RelaxNG.error_log).split("\n")
+    log_method = logging.debug if len(errors) else logging.info
+    log_method("%s Rocoto validation error%s found", len(errors), "" if len(errors) == 1 else "s")
+    for line in errors:
+        logging.debug(line)
+
+    return success
 
 
 def write_rocoto_xml(input_yaml: str, input_template: str, rendered_output: str) -> None:
