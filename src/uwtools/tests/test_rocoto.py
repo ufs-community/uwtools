@@ -43,6 +43,18 @@ metatask_howdy:
     assert expected == tree
 
 
+def test__rocoto_template():
+    with resources.as_file(resources.files("uwtools.resources")) as path:
+        expected = (path / "rocoto.jinja2").as_posix()
+    assert rocoto._rocoto_template() == expected
+
+
+def test__rocoto_schema():
+    with resources.as_file(resources.files("uwtools.resources")) as path:
+        expected = (path / "rocoto.jsonschema").as_posix()
+    assert rocoto._rocoto_schema() == expected
+
+
 def test_write_rocoto_xml(tmp_path):
     input_yaml = support.fixture_path("hello_workflow.yaml")
     with resources.as_file(resources.files("uwtools.resources")) as resc:
@@ -62,6 +74,6 @@ def test_rocoto_xml_is_valid(vals):
     with resources.as_file(resources.files("uwtools.resources")) as resc:
         xml = support.fixture_path(fn)
         schema = resc / "schema_with_metatasks.rng"
-    result = rocoto.validate_rocoto_xml(input_xml=xml, schema_file=str(schema))
+    result = rocoto.validate_rocoto_xml(input_xml=xml, schema_file=schema)
 
     assert result is validity

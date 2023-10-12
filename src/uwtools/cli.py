@@ -337,10 +337,7 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_output_file(required)
     optional = _basic_setup(parser)
     checks = _add_args_quiet_and_verbose(optional)
-    return checks + [
-        partial(_check_file_vs_format, STR.infile, FORMAT.yaml),
-        partial(_check_file_vs_format, STR.outfile, FORMAT.rocoto),
-    ]
+    return checks
 
 
 def _add_subparser_rocoto_validate(subparsers: Subparsers) -> SubmodeChecks:
@@ -354,9 +351,7 @@ def _add_subparser_rocoto_validate(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_input_file(required)
     optional = _basic_setup(parser)
     checks = _add_args_quiet_and_verbose(optional)
-    return checks + [
-        partial(_check_file_vs_format, STR.infile, FORMAT.rocoto),
-    ]
+    return checks
 
 
 def _dispatch_rocoto(args: Namespace) -> bool:
@@ -380,7 +375,7 @@ def _dispatch_rocoto_realize(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     success = uwtools.rocoto.realize_rocoto_xml(
-        input_yaml=args.input_file, rendered_output=str(args.output_file)
+        input_yaml=args.input_file, rendered_output=args.output_file
     )
     return success
 
@@ -395,7 +390,7 @@ def _dispatch_rocoto_validate(args: Namespace) -> bool:
         rocoto_schema = resc / "rocoto.jsonschema"
 
     success = uwtools.rocoto.validate_rocoto_xml(
-        input_xml=args.input_file, schema_file=str(rocoto_schema)
+        input_xml=args.input_file, schema_file=rocoto_schema
     )
     return success
 
@@ -824,7 +819,6 @@ class _STR:
     valsfmt: str = "values_format"
     valsneeded: str = "values_needed"
     verbose: str = "verbose"
-    write: str = "write"
 
 
 STR = _STR()
