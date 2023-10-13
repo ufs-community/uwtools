@@ -61,7 +61,7 @@ def test_write_rocoto_xml(tmp_path):
         input_template = resc / "rocoto.jinja2"
     output = tmp_path / "rendered.xml"
     rocoto.write_rocoto_xml(
-        input_yaml=input_yaml, input_template=str(input_template), rendered_output=str(output)
+        input_yaml=input_yaml, input_template=input_template, rendered_output=output
     )
 
     expected = support.fixture_path("hello_workflow.xml")

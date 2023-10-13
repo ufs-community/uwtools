@@ -11,6 +11,7 @@ import uwtools.config.validator
 from uwtools.config.core import YAMLConfig
 from uwtools.config.j2template import J2Template
 from uwtools.types import OptionalPath
+from uwtools.utils.file import readable
 
 # Private functions
 
@@ -109,7 +110,7 @@ def validate_rocoto_xml(input_xml: OptionalPath = None, schema_file: OptionalPat
     """
 
     # Validate the XML.
-    with open(str(schema_file), "r", encoding="utf-8") as f:
+    with readable(schema_file) as f:
         schema = etree.RelaxNG(etree.parse(f))
     tree = etree.parse(input_xml)
     success = schema.validate(tree)
