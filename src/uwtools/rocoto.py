@@ -3,6 +3,8 @@ Support for creating Rocoto XML workflow documents.
 """
 
 import logging
+import shutil
+import tempfile
 from importlib import resources
 
 from lxml import etree
@@ -70,8 +72,8 @@ def realize_rocoto_xml(
     rendered_output: OptionalPath = None,
 ) -> bool:
     """
-    Realize the given YAML file to XML, using the Rocoto RelaxNG schema. 
-    Validate both the YAML and the XML.
+    Realize the given YAML file to XML, using the Rocoto RelaxNG schema. Validate both the YAML and
+    the XML.
 
     :param input_yaml: Path to YAML input file.
     :param rendered_output: Path to write rendered XML file.
@@ -82,19 +84,19 @@ def realize_rocoto_xml(
     # Validate the YAML.
     if uwtools.config.validator.validate_yaml(config_file=input_yaml, schema_file=rocoto_schema):
         _add_tasks(input_yaml)
-        # Render the template.
-        write_rocoto_xml(
-            input_yaml=input_yaml,
-            rendered_output=rendered_output,
-        )
-        # Validate the XML.
-        if validate_rocoto_xml(input_xml=rendered_output):
-            # If no issues were detected, report success.
-            return True
-        logging.error(
-            "Rocoto validation errors identified in %s", rendered_output
-        )  # pragma: no cover
-        return False  # pragma: no cover
+        # Render the template to a temporary file.
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            write_rocoto_xml(
+                input_yaml=input_yaml,
+                rendered_output=temp_file.name,
+            )
+            # Validate the XML.
+            if validate_rocoto_xml(input_xml=temp_file.name):
+                # If no issues were detected, save temp file and report success.
+                shutil.move(temp_file.name, str(rendered_output))
+                return True
+        logging.error("Rocoto validation errors identified in %s", temp_file.name)
+        return False
     logging.error("YAML validation errors identified in %s", input_yaml)
     return False
 
