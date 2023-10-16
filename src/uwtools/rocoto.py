@@ -68,7 +68,7 @@ def _rocoto_template() -> str:
 
 # Public functions
 def realize_rocoto_xml(
-    input_yaml: OptionalPath = None,
+    config_file: OptionalPath = None,
     rendered_output: OptionalPath = None,
 ) -> bool:
     """
@@ -82,12 +82,12 @@ def realize_rocoto_xml(
     rocoto_schema = _rocoto_schema()
 
     # Validate the YAML.
-    if uwtools.config.validator.validate_yaml(config_file=input_yaml, schema_file=rocoto_schema):
-        _add_tasks(input_yaml)
+    if uwtools.config.validator.validate_yaml(config_file=config_file, schema_file=rocoto_schema):
+        _add_tasks(config_file)
         # Render the template to a temporary file.
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             write_rocoto_xml(
-                input_yaml=input_yaml,
+                config_file=config_file,
                 rendered_output=temp_file.name,
             )
             # Validate the XML.
@@ -97,7 +97,7 @@ def realize_rocoto_xml(
                 return True
         logging.error("Rocoto validation errors identified in %s", temp_file.name)
         return False
-    logging.error("YAML validation errors identified in %s", input_yaml)
+    logging.error("YAML validation errors identified in %s", config_file)
     return False
 
 
@@ -126,19 +126,19 @@ def validate_rocoto_xml(input_xml: OptionalPath = None) -> bool:
 
 
 def write_rocoto_xml(
-    input_yaml: OptionalPath = None,
+    config_file: OptionalPath = None,
     rendered_output: OptionalPath = None,
 ) -> None:
     """
     Render the given YAML file to XML using the given template.
 
-    :param input_yaml: Path to YAML input file.
+    :param config_file: Path to YAML input file.
     :param rendered_output: Path to write rendered XML file.
     """
 
     rocoto_template = _rocoto_template()
-    _add_tasks(input_yaml)
+    _add_tasks(config_file)
 
     # Render the template.
-    template = J2Template(values=YAMLConfig(input_yaml).data, template_path=str(rocoto_template))
+    template = J2Template(values=YAMLConfig(config_file).data, template_path=str(rocoto_template))
     template.dump(output_path=str(rendered_output))
