@@ -11,7 +11,6 @@ from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
 from dataclasses import dataclass
 from functools import partial
-from importlib import resources
 from pathlib import Path
 from typing import Callable, Dict, List, Tuple
 
@@ -307,7 +306,7 @@ def _dispatch_forecast_run(args: Namespace) -> bool:
     )
 
 
-# Mode Rocoto
+# Mode rocoto
 
 
 def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
@@ -386,12 +385,8 @@ def _dispatch_rocoto_validate(args: Namespace) -> bool:
 
     :param args: Parsed command-line args.
     """
-    with resources.as_file(resources.files("uwtools.resources")) as resc:
-        rocoto_schema = resc / "rocoto.jsonschema"
 
-    success = uwtools.rocoto.validate_rocoto_xml(
-        input_xml=args.input_file, schema_file=rocoto_schema
-    )
+    success = uwtools.rocoto.validate_rocoto_xml(input_xml=args.input_file)
     return success
 
 
