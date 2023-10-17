@@ -76,16 +76,16 @@ def test_realize_rocoto_xml(vals, tmp_path):
     with patch.object(rocoto, "validate_rocoto_xml", value=True):
         with patch.object(rocoto.uwtools.config.validator, "_bad_paths", return_value=None):
             with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
-                input_yaml = (path / fn).as_posix()
-                result = rocoto.realize_rocoto_xml(input_yaml=input_yaml, rendered_output=output)
+                config_file = (path / fn).as_posix()
+                result = rocoto.realize_rocoto_xml(config_file=config_file, rendered_output=output)
     assert result is validity
 
 
 def test_realize_rocoto_invalid_xml():
-    input_yaml = support.fixture_path("hello_workflow.yaml")
+    config_file = support.fixture_path("hello_workflow.yaml")
     output = support.fixture_path("rocoto_invalid.xml")
-    with patch.object(rocoto, "write_rocoto_xml", return_value=None):
-        result = rocoto.realize_rocoto_xml(input_yaml=input_yaml, rendered_output=output)
+    with patch.object(rocoto, "_write_rocoto_xml", return_value=None):
+        result = rocoto.realize_rocoto_xml(config_file=config_file, rendered_output=output)
     assert result is False
 
 
@@ -99,11 +99,11 @@ def test_rocoto_xml_is_valid(vals):
 
 
 def test__write_rocoto_xml(tmp_path):
-    input_yaml = support.fixture_path("hello_workflow.yaml")
+    config_file = support.fixture_path("hello_workflow.yaml")
     output = tmp_path / "rendered.xml"
 
     with patch.object(rocoto, "_add_tasks", return_value=None):
-        rocoto._write_rocoto_xml(input_yaml=input_yaml, rendered_output=output)
+        rocoto._write_rocoto_xml(config_file=config_file, rendered_output=output)
 
     expected = support.fixture_path("hello_workflow.xml")
     support.compare_files(expected, output)

@@ -65,7 +65,6 @@ def _rocoto_template() -> str:
         return (path / "schema_with_metatasks.rng").as_posix()
 
 
-
 def _write_rocoto_xml(
     config_file: OptionalPath = None,
     rendered_output: OptionalPath = None,
@@ -142,4 +141,3 @@ def validate_rocoto_xml(input_xml: OptionalPath = None) -> bool:
         logging.error(line)
 
     return success
-
