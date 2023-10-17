@@ -13,7 +13,6 @@ import uwtools.config.validator
 from uwtools.config.core import YAMLConfig
 from uwtools.config.j2template import J2Template
 from uwtools.types import OptionalPath
-from uwtools.utils.file import readable
 
 # Private functions
 
@@ -49,7 +48,7 @@ def _add_tasks(
         _add_jobname(tasks)
 
 
-def _rocoto_schema() -> str:
+def _rocoto_schema_yaml() -> str:
     """
     The path to the file containing the schema to validate the XML file against.
     """
@@ -57,7 +56,7 @@ def _rocoto_schema() -> str:
         return (path / "rocoto.jsonschema").as_posix()
 
 
-def _rocoto_template() -> str:
+def _rocoto_schema_xml() -> str:
     """
     The path to the file containing the Rocoto workflow document template to render.
     """
@@ -76,7 +75,7 @@ def _write_rocoto_xml(
     :param rendered_output: Path to write rendered XML file.
     """
 
-    rocoto_template = _rocoto_template()
+    rocoto_template = _rocoto_schema_xml()
     _add_tasks(config_file)
 
     # Render the template.
@@ -97,7 +96,7 @@ def realize_rocoto_xml(
     :param rendered_output: Path to write rendered XML file.
     """
 
-    rocoto_schema = _rocoto_schema()
+    rocoto_schema = _rocoto_schema_yaml()
 
     # Validate the YAML.
     if uwtools.config.validator.validate_yaml(config_file=config_file, schema_file=rocoto_schema):
@@ -125,10 +124,10 @@ def validate_rocoto_xml(input_xml: OptionalPath = None) -> bool:
 
     :param input_xml: Path to rendered XML file.
     """
-    rocoto_template = _rocoto_template()
+    rocoto_template = _rocoto_schema_xml()
 
     # Validate the XML.
-    with readable(rocoto_template) as f:
+    with open(rocoto_template, "r", encoding="utf-8") as f:
         schema = etree.RelaxNG(etree.parse(f))
     tree = etree.parse(input_xml)
     success = schema.validate(tree)

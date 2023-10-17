@@ -56,16 +56,16 @@ def test__add_tasks():
     assert module.called_once_with(tasks)
 
 
-def test__rocoto_template():
-    with resources.as_file(resources.files("uwtools.resources")) as path:
-        expected = (path / "schema_with_metatasks.rng").as_posix()
-    assert rocoto._rocoto_template() == expected
-
-
-def test__rocoto_schema():
+def test__rocoto_schema_yaml():
     with resources.as_file(resources.files("uwtools.resources")) as path:
         expected = (path / "rocoto.jsonschema").as_posix()
-    assert rocoto._rocoto_schema() == expected
+    assert rocoto._rocoto_schema_yaml() == expected
+
+
+def test__rocoto_schema_xml():
+    with resources.as_file(resources.files("uwtools.resources")) as path:
+        expected = (path / "schema_with_metatasks.rng").as_posix()
+    assert rocoto._rocoto_schema_xml() == expected
 
 
 @pytest.mark.parametrize("vals", [("hello_workflow.yaml", True), ("fruit_config.yaml", False)])
@@ -84,7 +84,7 @@ def test_realize_rocoto_xml(vals, tmp_path):
 def test_realize_rocoto_invalid_xml():
     config_file = support.fixture_path("hello_workflow.yaml")
     output = support.fixture_path("rocoto_invalid.xml")
-    with patch.object(rocoto, "_write_rocoto_xml", return_value=None):
+    with patch.object(rocoto.uwtools.config.validator, "_bad_paths", return_value=None):
         result = rocoto.realize_rocoto_xml(config_file=config_file, rendered_output=output)
     assert result is False
 
