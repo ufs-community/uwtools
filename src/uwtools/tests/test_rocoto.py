@@ -98,12 +98,12 @@ def test_rocoto_xml_is_valid(vals):
     assert result is validity
 
 
-def test_write_rocoto_xml(tmp_path):
+def test__write_rocoto_xml(tmp_path):
     input_yaml = support.fixture_path("hello_workflow.yaml")
     output = tmp_path / "rendered.xml"
 
     with patch.object(rocoto, "_add_tasks", return_value=None):
-        rocoto.write_rocoto_xml(input_yaml=input_yaml, rendered_output=output)
+        rocoto._write_rocoto_xml(input_yaml=input_yaml, rendered_output=output)
 
     expected = support.fixture_path("hello_workflow.xml")
     support.compare_files(expected, output)

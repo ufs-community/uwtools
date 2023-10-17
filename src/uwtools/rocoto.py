@@ -39,7 +39,7 @@ def _add_tasks(
     input_yaml: OptionalPath = None,
 ) -> None:
     """
-    Define "task" elements in the given config tree and request a "jobname" for each.
+    Load YAML config and add job names to each defined workflow task.
 
     :param input_yaml: Path to YAML input file.
     """
@@ -62,8 +62,27 @@ def _rocoto_template() -> str:
     The path to the file containing the Rocoto workflow document template to render.
     """
     with resources.as_file(resources.files("uwtools.resources")) as path:
-        # return (path / "rocoto.jinja2").as_posix()
         return (path / "schema_with_metatasks.rng").as_posix()
+
+
+
+def _write_rocoto_xml(
+    config_file: OptionalPath = None,
+    rendered_output: OptionalPath = None,
+) -> None:
+    """
+    Render the given YAML file to XML using the given template.
+
+    :param config_file: Path to YAML input file.
+    :param rendered_output: Path to write rendered XML file.
+    """
+
+    rocoto_template = _rocoto_template()
+    _add_tasks(config_file)
+
+    # Render the template.
+    template = J2Template(values=YAMLConfig(config_file).data, template_path=str(rocoto_template))
+    template.dump(output_path=str(rendered_output))
 
 
 # Public functions
@@ -86,7 +105,7 @@ def realize_rocoto_xml(
         _add_tasks(config_file)
         # Render the template to a temporary file.
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            write_rocoto_xml(
+            _write_rocoto_xml(
                 config_file=config_file,
                 rendered_output=temp_file.name,
             )
@@ -105,7 +124,7 @@ def validate_rocoto_xml(input_xml: OptionalPath = None) -> bool:
     """
     Given a rendered XML file, validate it against the Rocoto schema.
 
-    :param input_XML: Path to rendered XML file.
+    :param input_xml: Path to rendered XML file.
     """
     rocoto_template = _rocoto_template()
 
@@ -124,21 +143,3 @@ def validate_rocoto_xml(input_xml: OptionalPath = None) -> bool:
 
     return success
 
-
-def write_rocoto_xml(
-    config_file: OptionalPath = None,
-    rendered_output: OptionalPath = None,
-) -> None:
-    """
-    Render the given YAML file to XML using the given template.
-
-    :param config_file: Path to YAML input file.
-    :param rendered_output: Path to write rendered XML file.
-    """
-
-    rocoto_template = _rocoto_template()
-    _add_tasks(config_file)
-
-    # Render the template.
-    template = J2Template(values=YAMLConfig(config_file).data, template_path=str(rocoto_template))
-    template.dump(output_path=str(rendered_output))
