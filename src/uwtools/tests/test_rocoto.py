@@ -47,7 +47,7 @@ metatask_howdy:
 
 def test__add_tasks():
     with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
-        input_yaml = (path / "hello_workflow.yaml").as_posix()
+        input_yaml = path / "hello_workflow.yaml"
 
     values = YAMLConfig(input_yaml)
     tasks = values["workflow"]["tasks"]
@@ -58,13 +58,13 @@ def test__add_tasks():
 
 def test__rocoto_schema_yaml():
     with resources.as_file(resources.files("uwtools.resources")) as path:
-        expected = (path / "rocoto.jsonschema").as_posix()
+        expected = path / "rocoto.jsonschema"
     assert rocoto._rocoto_schema_yaml() == expected
 
 
 def test__rocoto_schema_xml():
     with resources.as_file(resources.files("uwtools.resources")) as path:
-        expected = (path / "schema_with_metatasks.rng").as_posix()
+        expected = path / "schema_with_metatasks.rng"
     assert rocoto._rocoto_schema_xml() == expected
 
 
@@ -76,7 +76,7 @@ def test_realize_rocoto_xml(vals, tmp_path):
     with patch.object(rocoto, "validate_rocoto_xml", value=True):
         with patch.object(rocoto.uwtools.config.validator, "_bad_paths", return_value=None):
             with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
-                config_file = (path / fn).as_posix()
+                config_file = path / fn
                 result = rocoto.realize_rocoto_xml(config_file=config_file, rendered_output=output)
     assert result is validity
 

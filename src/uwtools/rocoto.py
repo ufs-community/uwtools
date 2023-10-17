@@ -12,7 +12,8 @@ from lxml import etree
 import uwtools.config.validator
 from uwtools.config.core import YAMLConfig
 from uwtools.config.j2template import J2Template
-from uwtools.types import OptionalPath
+from uwtools.types import DefinitePath, OptionalPath
+from uwtools.utils.file import readable
 
 # Private functions
 
@@ -48,25 +49,25 @@ def _add_tasks(
         _add_jobname(tasks)
 
 
-def _rocoto_schema_yaml() -> str:
+def _rocoto_schema_yaml() -> DefinitePath:
     """
     The path to the file containing the schema to validate the XML file against.
     """
     with resources.as_file(resources.files("uwtools.resources")) as path:
-        return (path / "rocoto.jsonschema").as_posix()
+        return path / "rocoto.jsonschema"
 
 
-def _rocoto_schema_xml() -> str:
+def _rocoto_schema_xml() -> DefinitePath:
     """
     The path to the file containing the Rocoto workflow document template to render.
     """
     with resources.as_file(resources.files("uwtools.resources")) as path:
-        return (path / "schema_with_metatasks.rng").as_posix()
+        return path / "schema_with_metatasks.rng"
 
 
 def _write_rocoto_xml(
-    config_file: OptionalPath = None,
-    rendered_output: OptionalPath = None,
+    config_file: OptionalPath,
+    rendered_output: DefinitePath,
 ) -> None:
     """
     Render the given YAML file to XML using the given template.
@@ -79,14 +80,14 @@ def _write_rocoto_xml(
     _add_tasks(config_file)
 
     # Render the template.
-    template = J2Template(values=YAMLConfig(config_file).data, template_path=str(rocoto_template))
+    template = J2Template(values=YAMLConfig(config_file).data, template_path=rocoto_template)
     template.dump(output_path=str(rendered_output))
 
 
 # Public functions
 def realize_rocoto_xml(
-    config_file: OptionalPath = None,
-    rendered_output: OptionalPath = None,
+    config_file: OptionalPath,
+    rendered_output: DefinitePath,
 ) -> bool:
     """
     Realize the given YAML file to XML, using the Rocoto RelaxNG schema. Validate both the YAML and
@@ -110,7 +111,7 @@ def realize_rocoto_xml(
             # Validate the XML.
             if validate_rocoto_xml(input_xml=temp_file.name):
                 # If no issues were detected, save temp file and report success.
-                shutil.move(temp_file.name, str(rendered_output))
+                shutil.move(temp_file.name, rendered_output)
                 return True
         logging.error("Rocoto validation errors identified in %s", temp_file.name)
         return False
@@ -118,7 +119,7 @@ def realize_rocoto_xml(
     return False
 
 
-def validate_rocoto_xml(input_xml: OptionalPath = None) -> bool:
+def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
     """
     Given a rendered XML file, validate it against the Rocoto schema.
 
@@ -129,7 +130,9 @@ def validate_rocoto_xml(input_xml: OptionalPath = None) -> bool:
     # Validate the XML.
     with open(rocoto_template, "r", encoding="utf-8") as f:
         schema = etree.RelaxNG(etree.parse(f))
-    tree = etree.parse(input_xml)
+    with readable(input_xml) as f:
+        xml = f.read()
+    tree = etree.fromstring(bytes(xml, encoding="utf-8"))
     success = schema.validate(tree)
 
     # Store validation errors in the main log.
