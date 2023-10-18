@@ -327,7 +327,7 @@ def test__dispatch_rocoto_realize_invalid():
 
 def test__dispatch_rocoto_validate_xml():
     args = ns()
-    vars(args).update({STR.infile: 1, STR.infmt: FORMAT.rocoto, STR.verbose: False})
+    vars(args).update({STR.infile: 1})
     with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as module:
         cli._dispatch_rocoto_validate(args)
     assert module.called_once_with(args)

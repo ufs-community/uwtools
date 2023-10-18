@@ -40,9 +40,7 @@ class _FORMAT:
     ini: str = _ini
     jinja2: str = _jinja2
     nml: str = _nml
-    rocoto: str = _xml
     sh: str = _ini
-    xml: str = _xml
     yaml: str = _yaml
     yml: str = _yaml
 

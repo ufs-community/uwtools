@@ -101,7 +101,7 @@ def realize_rocoto_xml(
     Realize the Rocoto workflow defined in the given YAML as XML. Validate both the YAML input and
     XML output.
 
-    :param input_yaml: Path to YAML input file.
+    :param config_file: Path to YAML input file.
     :param rendered_output: Path to write rendered XML file.
     """
 
