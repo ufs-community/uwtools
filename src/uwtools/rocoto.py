@@ -51,7 +51,7 @@ def _add_tasks(
 
 def _rocoto_schema_xml() -> DefinitePath:
     """
-    The path to the file containing the Rocoto workflow document template to render.
+    The path to the file containing the schema to validate the XML file against.
     """
     with resources.as_file(resources.files("uwtools.resources")) as path:
         return path / "schema_with_metatasks.rng"
@@ -59,10 +59,18 @@ def _rocoto_schema_xml() -> DefinitePath:
 
 def _rocoto_schema_yaml() -> DefinitePath:
     """
-    The path to the file containing the schema to validate the XML file against.
+    The path to the file containing the schema to validate the YAML file against.
     """
     with resources.as_file(resources.files("uwtools.resources")) as path:
         return path / "rocoto.jsonschema"
+
+
+def _rocoto_template_xml() -> DefinitePath:
+    """
+    The path to the file containing the Rocoto workflow document template to render.
+    """
+    with resources.as_file(resources.files("uwtools.resources")) as path:
+        return path / "rocoto.jinja2"
 
 
 def _write_rocoto_xml(
@@ -79,7 +87,7 @@ def _write_rocoto_xml(
     _add_tasks(config_file)
 
     # Render the template.
-    template = J2Template(values=YAMLConfig(config_file).data, template_path=_rocoto_schema_xml())
+    template = J2Template(values=YAMLConfig(config_file).data, template_path=_rocoto_template_xml())
     template.dump(output_path=str(rendered_output))
 
 
