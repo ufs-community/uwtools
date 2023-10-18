@@ -3,6 +3,7 @@
 Tests for uwtools.rocoto module.
 """
 
+import tempfile
 from importlib import resources
 from unittest.mock import patch
 
@@ -86,7 +87,8 @@ def test_realize_rocoto_invalid_xml():
     xml = support.fixture_path("rocoto_invalid.xml")
     with patch.object(rocoto, "_write_rocoto_xml", return_value=None):
         with patch.object(rocoto.uwtools.config.validator, "_bad_paths", return_value=None):
-            with patch.object(rocoto.tempfile, "NamedTemporaryFile", return_value=xml):
+            with patch.object(tempfile, "NamedTemporaryFile") as context_manager:
+                context_manager.return_value.__enter__.return_value.name = xml
                 result = rocoto.realize_rocoto_xml(config_file=config_file, rendered_output=xml)
     assert result is False
 
