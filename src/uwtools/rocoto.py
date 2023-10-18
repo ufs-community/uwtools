@@ -35,9 +35,9 @@ def _add_jobname(tree: dict) -> None:
             _add_jobname(subtree)
 
 
-def _add_tasks(
+def _add_jobname_to_tasks(
     input_yaml: OptionalPath = None,
-) -> None:
+) -> YAMLConfig:
     """
     Load YAML config and add job names to each defined workflow task.
 
@@ -47,6 +47,7 @@ def _add_tasks(
     tasks = values["workflow"]["tasks"]
     if isinstance(tasks, dict):
         _add_jobname(tasks)
+    return values
 
 
 def _rocoto_schema_xml() -> DefinitePath:
@@ -84,10 +85,10 @@ def _write_rocoto_xml(
     :param rendered_output: Path to write rendered XML file.
     """
 
-    _add_tasks(config_file)
+    values = _add_jobname_to_tasks(config_file)
 
     # Render the template.
-    template = J2Template(values=YAMLConfig(config_file).data, template_path=_rocoto_template_xml())
+    template = J2Template(values=values.data, template_path=_rocoto_template_xml())
     template.dump(output_path=str(rendered_output))
 
 
@@ -108,7 +109,7 @@ def realize_rocoto_xml(
     if uwtools.config.validator.validate_yaml(
         config_file=config_file, schema_file=_rocoto_schema_yaml()
     ):
-        _add_tasks(config_file)
+        _add_jobname_to_tasks(config_file)
         # Render the template to a temporary file.
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             _write_rocoto_xml(

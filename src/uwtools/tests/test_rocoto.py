@@ -45,14 +45,14 @@ metatask_howdy:
     assert expected == tree
 
 
-def test__add_tasks():
+def test__add_jobname_to_tasks():
     with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
         input_yaml = path / "hello_workflow.yaml"
 
     values = YAMLConfig(input_yaml)
     tasks = values["workflow"]["tasks"]
     with patch.object(rocoto, "_add_jobname") as module:
-        rocoto._add_tasks(input_yaml)
+        rocoto._add_jobname_to_tasks(input_yaml)
     assert module.called_once_with(tasks)
 
 
@@ -83,9 +83,11 @@ def test_realize_rocoto_xml(vals, tmp_path):
 
 def test_realize_rocoto_invalid_xml():
     config_file = support.fixture_path("hello_workflow.yaml")
-    output = support.fixture_path("rocoto_invalid.xml")
-    with patch.object(rocoto.uwtools.config.validator, "_bad_paths", return_value=None):
-        result = rocoto.realize_rocoto_xml(config_file=config_file, rendered_output=output)
+    xml = support.fixture_path("rocoto_invalid.xml")
+    with patch.object(rocoto, "_write_rocoto_xml", return_value=None):
+        with patch.object(rocoto.uwtools.config.validator, "_bad_paths", return_value=None):
+            with patch.object(rocoto.tempfile, "NamedTemporaryFile", return_value=xml):
+                result = rocoto.realize_rocoto_xml(config_file=config_file, rendered_output=xml)
     assert result is False
 
 
@@ -101,8 +103,9 @@ def test_rocoto_xml_is_valid(vals):
 def test__write_rocoto_xml(tmp_path):
     config_file = support.fixture_path("hello_workflow.yaml")
     output = tmp_path / "rendered.xml"
+    config = YAMLConfig(config_file)
 
-    with patch.object(rocoto, "_add_tasks", return_value=None):
+    with patch.object(rocoto, "_add_jobname_to_tasks", return_value=config):
         rocoto._write_rocoto_xml(config_file=config_file, rendered_output=output)
 
     expected = support.fixture_path("hello_workflow.xml")
