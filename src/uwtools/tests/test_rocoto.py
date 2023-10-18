@@ -111,4 +111,4 @@ def test__write_rocoto_xml(tmp_path):
         rocoto._write_rocoto_xml(config_file=config_file, rendered_output=output)
 
     expected = support.fixture_path("hello_workflow.xml")
-    support.compare_files(expected, output)
+    assert support.compare_files(expected, output) is True

@@ -103,13 +103,13 @@ def realize_rocoto_xml(
 
     :param config_file: Path to YAML input file.
     :param rendered_output: Path to write rendered XML file.
+    :return: Did the input and output files conform to theirr schemas?
     """
 
     # Validate the YAML.
     if uwtools.config.validator.validate_yaml(
         config_file=config_file, schema_file=_rocoto_schema_yaml()
     ):
-        _add_jobname_to_tasks(config_file)
         # Render the template to a temporary file.
         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
             _write_rocoto_xml(
@@ -132,6 +132,7 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
     Given a rendered XML file, validate it against the Rocoto schema.
 
     :param input_xml: Path to rendered XML file.
+    :return: Did the XML file conform to the schema?
     """
 
     # Validate the XML.

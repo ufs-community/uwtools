@@ -75,7 +75,7 @@
     {%- endfor %}
   {%- endfor %}
 
-  <log>{{ log }}</log>
+  <log>{{ workflow.log }}</log>
 
 {%- for item, settings in workflow.tasks.items() %}
   {%- if item.split("_", 1)[0] == "task" %}
