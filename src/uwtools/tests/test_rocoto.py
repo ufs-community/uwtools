@@ -105,10 +105,8 @@ def test_rocoto_xml_is_valid(vals):
 def test__write_rocoto_xml(tmp_path):
     config_file = support.fixture_path("hello_workflow.yaml")
     output = tmp_path / "rendered.xml"
-    config = YAMLConfig(config_file)
 
-    with patch.object(rocoto, "_add_jobname_to_tasks", return_value=config):
-        rocoto._write_rocoto_xml(config_file=config_file, rendered_output=output)
+    rocoto._write_rocoto_xml(config_file=config_file, rendered_output=output)
 
     expected = support.fixture_path("hello_workflow.xml")
     assert support.compare_files(expected, output) is True
