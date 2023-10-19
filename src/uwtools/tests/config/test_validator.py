@@ -12,6 +12,7 @@ from unittest.mock import patch
 from pytest import fixture
 
 from uwtools.config import validator
+from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 
 # Support functions
@@ -77,7 +78,7 @@ def write_as_json(data: Dict[str, Any], path: Path) -> Path:
 
 def test_validate_yaml_fail_bad_dir_top(caplog, config, config_file, schema, schema_file, tmp_path):
     # Specify a non-existent directory for the topmost directory value.
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     d = str(tmp_path / "no-such-dir")
     config["dir"] = d
     write_as_json(config, config_file)
@@ -90,7 +91,7 @@ def test_validate_yaml_fail_bad_dir_nested(
     caplog, config, config_file, schema, schema_file, tmp_path
 ):
     # Specify a non-existent directory for the nested directory value.
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     d = str(tmp_path / "no-such-dir")
     config["sub"]["dir"] = d
     write_as_json(config, config_file)
@@ -101,7 +102,7 @@ def test_validate_yaml_fail_bad_dir_nested(
 
 def test_validate_yaml_fail_bad_enum_val(caplog, config, config_file, schema, schema_file):
     # Specify an invalid enum value.
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     config["color"] = "yellow"
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)
@@ -112,7 +113,7 @@ def test_validate_yaml_fail_bad_enum_val(caplog, config, config_file, schema, sc
 
 def test_validate_yaml_fail_bad_number_val(caplog, config, config_file, schema, schema_file):
     # Specify an invalid number value.
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     config["number"] = "string"
     write_as_json(config, config_file)
     write_as_json(schema, schema_file)

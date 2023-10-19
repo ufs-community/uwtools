@@ -2,7 +2,6 @@
 Provides an abstract class representing drivers for various NWP tools.
 """
 
-import logging
 import os
 import shutil
 from abc import ABC, abstractmethod
@@ -12,6 +11,7 @@ from typing import Any, Dict, Optional, Type, Union
 
 from uwtools.config import validator
 from uwtools.config.core import Config, YAMLConfig
+from uwtools.logging import log
 from uwtools.scheduler import BatchScript, JobScheduler
 from uwtools.types import OptionalPath
 
@@ -130,7 +130,7 @@ class Driver(ABC):
             else:
                 link_or_copy(src_path_or_paths, dst_path)  # type: ignore
                 msg = f"File {src_path_or_paths} staged as {dst_path}"
-                logging.info(msg)
+                log.info(msg)
 
     # Private methods
 
@@ -160,7 +160,7 @@ class Driver(ABC):
             config_class.dump_dict(path=output_path, cfg=user_values)
 
         msg = f"Configure file {output_path} created"
-        logging.info(msg)
+        log.info(msg)
 
     def _validate(self) -> bool:
         """

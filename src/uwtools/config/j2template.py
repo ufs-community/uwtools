@@ -2,12 +2,12 @@
 Support for handling Jinja2 templates.
 """
 
-import logging
 import os
 from typing import List, Optional, Set
 
 from jinja2 import BaseLoader, Environment, FileSystemLoader, Template, meta
 
+from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import readable
 
@@ -50,7 +50,7 @@ class J2Template:
         :param output_path: Path to file to write.
         """
         msg = f"Writing rendered template to output file: {output_path}"
-        logging.debug(msg)
+        log.debug(msg)
         with open(output_path, "w+", encoding="utf-8") as f:
             print(self.render(), file=f)
 
