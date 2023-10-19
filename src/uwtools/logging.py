@@ -5,6 +5,7 @@ Logging support.
 import logging
 import os
 import sys
+from typing import Any
 
 # The logging prefix
 #
@@ -15,7 +16,26 @@ import sys
 
 MSGWIDTH = 69
 
-log = logging.getLogger()  # default to Python base logger
+
+class _Logger:
+    """
+    Support for swappable loggers.
+    """
+
+    def __init__(self) -> None:
+        self.logger = logging.getLogger()  # default to Python base logger.
+
+    def __getattr__(self, attr: str) -> Any:
+        """
+        Delegate attribute access to the currently-used logger.
+
+        :param attr: The attribute to access.
+        :returns: The requested attribute.
+        """
+        return getattr(self.logger, attr)
+
+
+log = _Logger()
 
 
 def setup_logging(quiet: bool = False, verbose: bool = False) -> None:
@@ -46,5 +66,4 @@ def use_logger(logger: logging.Logger) -> None:
 
     :param logger: The logger to log to.
     """
-    global log  # pylint: disable=global-statement
-    log = logger
+    log.logger = logger
