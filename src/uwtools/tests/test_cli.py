@@ -13,6 +13,7 @@ from pytest import fixture, raises
 
 from uwtools import cli
 from uwtools.cli import STR
+from uwtools.logging import log
 from uwtools.utils.file import FORMAT
 
 # Test functions
@@ -126,7 +127,7 @@ def test__check_file_vs_format_pass_implicit(fmt):
 
 
 def test__check_quiet_vs_verbose_fail(capsys):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     args = ns()
     vars(args).update({STR.quiet: True, STR.verbose: True})
     with raises(SystemExit):
