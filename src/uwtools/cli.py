@@ -49,6 +49,7 @@ def main() -> None:
         modes = {
             STR.config: _dispatch_config,
             STR.forecast: _dispatch_forecast,
+            STR.rocoto: _dispatch_rocoto,
             STR.template: _dispatch_template,
         }
         sys.exit(0 if modes[args.mode](args) else 1)
@@ -303,6 +304,89 @@ def _dispatch_forecast_run(args: Namespace) -> bool:
     ).run(
         cycle=args.cycle,
     )
+
+
+# Mode rocoto
+
+
+def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: rocoto
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.rocoto, "Realize and validate Rocoto XML Documents")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.submode)
+    return {
+        STR.realize: _add_subparser_rocoto_realize(subparsers),
+        STR.validate: _add_subparser_rocoto_validate(subparsers),
+    }
+
+
+def _add_subparser_rocoto_realize(subparsers: Subparsers) -> SubmodeChecks:
+    """
+    Subparser for mode: rocoto realize
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.realize, "Realize a Rocoto XML workflow document")
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_output_file(required)
+    optional = _basic_setup(parser)
+    _add_arg_input_file(optional)
+    checks = _add_args_quiet_and_verbose(optional)
+    return checks
+
+
+def _add_subparser_rocoto_validate(subparsers: Subparsers) -> SubmodeChecks:
+    """
+    Subparser for mode: rocoto validate
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.validate, "Validate Rocoto XML")
+    optional = _basic_setup(parser)
+    _add_arg_input_file(optional)
+    checks = _add_args_quiet_and_verbose(optional)
+    return checks
+
+
+def _dispatch_rocoto(args: Namespace) -> bool:
+    """
+    Dispatch logic for rocoto mode.
+
+    :param args: Parsed command-line args.
+    """
+    return {
+        STR.realize: _dispatch_rocoto_realize,
+        STR.validate: _dispatch_rocoto_validate,
+    }[
+        args.submode
+    ](args)
+
+
+def _dispatch_rocoto_realize(args: Namespace) -> bool:
+    """
+    Dispatch logic for rocoto realize submode. Validate input and output.
+
+    :param args: Parsed command-line args.
+    """
+    success = uwtools.rocoto.realize_rocoto_xml(
+        config_file=args.input_file, rendered_output=args.output_file
+    )
+    return success
+
+
+def _dispatch_rocoto_validate(args: Namespace) -> bool:
+    """
+    Dispatch logic for rocoto validate submode.
+
+    :param args: Parsed command-line args.
+    """
+
+    success = uwtools.rocoto.validate_rocoto_xml(input_xml=args.input_file)
+    return success
 
 
 # Mode template
@@ -675,6 +759,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Namespace, Checks]:
     checks = {
         STR.config: _add_subparser_config(subparsers),
         STR.forecast: _add_subparser_forecast(subparsers),
+        STR.rocoto: _add_subparser_rocoto(subparsers),
         STR.template: _add_subparser_template(subparsers),
     }
     return parser.parse_args(raw_args), checks
@@ -717,6 +802,7 @@ class _STR:
     quiet: str = "quiet"
     realize: str = "realize"
     render: str = "render"
+    rocoto: str = "rocoto"
     run: str = "run"
     schemafile: str = "schema_file"
     submode: str = "submode"
