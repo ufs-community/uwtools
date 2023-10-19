@@ -23,7 +23,7 @@ class _Logger:
     """
 
     def __init__(self) -> None:
-        self.logger = logging.getLogger()  # default to Python base logger.
+        self.logger = logging.getLogger()  # default to Python root logger.
 
     def __getattr__(self, attr: str) -> Any:
         """
