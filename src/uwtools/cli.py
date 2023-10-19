@@ -3,7 +3,6 @@ Modal CLI.
 """
 
 import datetime
-import logging
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import HelpFormatter, Namespace
@@ -19,7 +18,7 @@ import uwtools.config.core
 import uwtools.config.templater
 import uwtools.config.validator
 import uwtools.drivers.forecast
-from uwtools.logging import setup_logging
+from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_type
 
 FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.yaml]
@@ -45,7 +44,7 @@ def main() -> None:
         for check in checks[args.mode][args.submode]:
             check(args)
         setup_logging(quiet=args.quiet, verbose=args.verbose)
-        logging.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
+        log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
             STR.config: _dispatch_config,
             STR.forecast: _dispatch_forecast,

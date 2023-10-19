@@ -15,6 +15,8 @@ import sys
 
 MSGWIDTH = 69
 
+log = logging.getLogger()  # default to Python base logger
+
 
 def setup_logging(quiet: bool = False, verbose: bool = False) -> None:
     """
@@ -36,3 +38,13 @@ def setup_logging(quiet: bool = False, verbose: bool = False) -> None:
         **({"filename": os.devnull} if quiet else {}),
     }
     logging.basicConfig(**kwargs)
+
+
+def use_logger(logger: logging.Logger) -> None:
+    """
+    Log hereafter via the given logger.
+
+    :param logger: The logger to log to.
+    """
+    global log  # pylint: disable=global-statement
+    log = logger

@@ -2,13 +2,12 @@
 Support for rendering Jinja2 templates.
 """
 
-import logging
 import os
 from typing import Dict, Optional
 
 from uwtools.config.core import format_to_config
 from uwtools.config.j2template import J2Template
-from uwtools.logging import MSGWIDTH
+from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import get_file_type, readable, writable
 
@@ -45,9 +44,9 @@ def render(
     # then return.
 
     if values_needed:
-        logging.info("Value(s) needed to render this template are:")
+        log.info("Value(s) needed to render this template are:")
         for var in sorted(undeclared_variables):
-            logging.info(var)
+            log.info(var)
         return True
 
     # Check for missing values required to render the template. If found, report them and raise an
@@ -56,9 +55,9 @@ def render(
     missing = [var for var in undeclared_variables if var not in values.keys()]
     if missing:
         msg = "Required value(s) not provided:"
-        logging.error(msg)
+        log.error(msg)
         for key in missing:
-            logging.error(key)
+            log.error(key)
         return False
 
     # In dry-run mode, display the rendered template and then return.
@@ -66,7 +65,7 @@ def render(
     if dry_run:
         rendered_template = template.render()
         for line in rendered_template.split("\n"):
-            logging.info(line)
+            log.info(line)
         return True
 
     # Write rendered template to file.
@@ -82,11 +81,11 @@ def _report(args: dict) -> None:
 
     :param args: The argument names and their values.
     """
-    dashes = lambda: logging.debug("-" * MSGWIDTH)
-    logging.debug("Internal arguments:")
+    dashes = lambda: log.debug("-" * MSGWIDTH)
+    log.debug("Internal arguments:")
     dashes()
     for varname, value in args.items():
-        logging.debug("%16s: %s", varname, value)
+        log.debug("%16s: %s", varname, value)
     dashes()
 
 
@@ -108,11 +107,11 @@ def _set_up_values_obj(
             values_format = get_file_type(values_file)
         values_class = format_to_config(values_format)
         values = values_class(values_file).data
-        logging.debug("Read initial values from %s", values_file)
+        log.debug("Read initial values from %s", values_file)
     else:
         values = dict(os.environ)  # Do not modify os.environ: Make a copy.
-        logging.debug("Initial values taken from environment")
+        log.debug("Initial values taken from environment")
     if overrides:
         values.update(overrides)
-        logging.debug("Updated values with overrides: %s", " ".join(overrides))
+        log.debug("Updated values with overrides: %s", " ".join(overrides))
     return values
