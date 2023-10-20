@@ -69,9 +69,19 @@ def test_create_model_configure(tmp_path):
     output_file = (tmp_path / "test_config_from_yaml.yaml").as_posix()
     with patch.object(FV3Forecast, "_validate", return_value=True):
         forecast_obj = FV3Forecast(config_file=fcst_config_file)
-    forecast_obj.create_model_configure(output_file)
+    cycle = dt.datetime.now()
+    date_values = {
+        "start_year": cycle.strftime("%Y"),
+        "start_month": cycle.strftime("%m"),
+        "start_day": cycle.strftime("%d"),
+        "start_hour": cycle.strftime("%H"),
+        "start_minute": cycle.strftime("%M"),
+        "start_second": cycle.strftime("%S"),
+    }
+    forecast_obj.create_model_configure(cycle, output_file)
     expected = YAMLConfig(base_file)
     expected.update_values(YAMLConfig(config_file)["forecast"]["model_configure"]["update_values"])
+    expected.update_values(date_values)
     expected_file = tmp_path / "expected_yaml.yaml"
     expected.dump(expected_file)
     assert compare_files(expected_file, output_file)
@@ -151,11 +161,12 @@ def test_create_model_configure_call_private(tmp_path):
     basefile = str(tmp_path / "base.yaml")
     infile = fixture_path("forecast.yaml")
     outfile = str(tmp_path / "out.yaml")
+    cycle = dt.datetime.now()
     for path in infile, basefile:
         Path(path).touch()
     with patch.object(Driver, "_create_user_updated_config") as _create_user_updated_config:
         with patch.object(FV3Forecast, "_validate", return_value=True):
-            FV3Forecast(config_file=infile).create_model_configure(outfile)
+            FV3Forecast(config_file=infile).create_model_configure(cycle, outfile)
     _create_user_updated_config.assert_called_with(
         config_class=YAMLConfig, config_values={}, output_path=outfile
     )

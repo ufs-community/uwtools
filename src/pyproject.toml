@@ -30,6 +30,7 @@ pretty = true
 disable = [
   "consider-using-f-string",
   "invalid-name",
+  "logging-fstring-interpolation",
   "missing-module-docstring",
   "too-few-public-methods",
   "too-many-arguments",

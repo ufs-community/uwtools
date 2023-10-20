@@ -5,6 +5,7 @@ Provides an abstract class representing drivers for various NWP tools.
 import logging
 import os
 import shutil
+import sys
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from datetime import datetime
@@ -13,7 +14,8 @@ from typing import Any, Dict, Optional, Type, Union
 from uwtools.config import validator
 from uwtools.config.core import Config, YAMLConfig
 from uwtools.scheduler import BatchScript, JobScheduler
-from uwtools.types import OptionalPath
+from uwtools.types import DefinitePath, OptionalPath
+from uwtools.utils.file import handle_existing
 
 
 class Driver(ABC):
@@ -49,11 +51,12 @@ class Driver(ABC):
         :return: The batch script object with all run commands needed for executing the program.
         """
 
-    def create_directory_structure(self, run_directory: DefinitePath, exist_act="delete"):
+    @staticmethod
+    def create_directory_structure(run_directory: DefinitePath, exist_act="delete"):
         """
-        Creates the run directory for the forecast
+        Creates the run directory for the forecast.
         """
-        self._create_run_directory(run_directory, exist_act)
+        Driver._create_run_directory(run_directory, exist_act)
 
     @abstractmethod
     def output(self) -> None:
@@ -142,17 +145,17 @@ class Driver(ABC):
 
     @staticmethod
     def _create_run_directory(run_dir: DefinitePath, exist_act="delete") -> None:
-
         """
-        Makes the run directory for the driver. If it already exists, handles it based on the
-        caller instruction.
+        Makes the run directory for the driver.
+
+        If it already exists, handles it based on the caller instruction.
         """
         if exist_act not in ["delete", "rename", "quit"]:
             raise ValueError(f"Bad argument: {exist_act}")
 
         # Exit program with error if caller chooses to quit.
 
-        if exist_act == "quit" and os.path.isdir(run_dir):
+        if exist_act == "quit" and run_dir.is_dir():
             logging.critical("User chose quit option when creating directory")
             sys.exit(1)
 

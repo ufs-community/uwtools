@@ -46,9 +46,11 @@ class _FORMAT:
 
 FORMAT = _FORMAT()
 
+
 @contextmanager
 def change_dir(path: Path) -> None:
-    """Sets a new working directory within the context
+    """
+    Sets a new working directory within the context.
 
     :param path: The path to change to.
     """
@@ -77,7 +79,7 @@ def get_file_type(path: DefinitePath) -> str:
     raise ValueError(msg)
 
 
-def handle_existing(directory: str, action: str) -> None:
+def handle_existing(directory: DefinitePath, action: str) -> None:
     """
     Given a run directory, and an action to do if directory exists, delete or rename directory.
 
@@ -88,7 +90,7 @@ def handle_existing(directory: str, action: str) -> None:
     # Try to delete existing run directory if option is delete.
 
     try:
-        if action == "delete" and os.path.isdir(directory):
+        if action == "delete" and directory.is_dir():
             shutil.rmtree(directory)
     except (FileExistsError, RuntimeError) as e:
         msg = f"Could not delete directory {directory}"
@@ -98,7 +100,7 @@ def handle_existing(directory: str, action: str) -> None:
     # Try to rename existing run directory if option is rename.
 
     try:
-        if action == "rename" and os.path.isdir(directory):
+        if action == "rename" and directory.is_dir():
             now = dt.now()
             save_dir = "%s%s" % (directory, now.strftime("_%Y%m%d_%H%M%S"))
             shutil.move(directory, save_dir)

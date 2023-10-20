@@ -6,6 +6,7 @@ Drivers for forecast models.
 import logging
 import os
 import sys
+from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from datetime import datetime
 from importlib import resources
@@ -13,15 +14,15 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from uwtools.config.core import FieldTableConfig, NMLConfig, YAMLConfig
+from uwtools.config.j2template import J2Template
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import change_dir, handle_existing
+from uwtools.utils.file import change_dir, readable, writable
 from uwtools.utils.processing import execute
 
 
-class Forecast(Driver):
-
+class Forecast(Driver, ABC):
     """
     The base class for any forecast driver.
     """
@@ -80,13 +81,14 @@ class Forecast(Driver):
         """
         Runs FV3 either locally or via a batch-script submission.
 
+        :param cycle: the date and start time for the forecast
         :return: Did the FV3 run exit with success status?
         """
         # Prepare directories.
-        run_directory = self._config["run_dir"]
+        run_directory = Path(self._config["run_dir"])
         self.create_directory_structure(run_directory, "delete")
 
-        self._prepare_config_files(Path(run_directory))
+        self._prepare_config_files(cycle, Path(run_directory))
 
         self._config["cycle-dependent"].update(self._define_boundary_files())
 
@@ -114,7 +116,7 @@ class Forecast(Driver):
             print(full_cmd, file=sys.stdout)
             return True
 
-        with change_dir(run_dir):
+        with change_dir(run_directory):
             result = execute(cmd=full_cmd)
         return result.success
 
@@ -132,10 +134,42 @@ class Forecast(Driver):
         end_hour = self._config["length"] + offset + 1
         return offset, lbcs_config["interval_hours"], end_hour
 
+    @abstractmethod
+    def _define_boundary_files(self) -> Dict[str, str]:
+        """
+        Sets the names of files used at boundary times that must be staged for a limited area
+        forecast run.
+        """
+
+    @abstractmethod
+    def _mpi_env_variables(self, delimiter: str = " ") -> str:
+        """
+        Sets the environment variables needed for running the mpi command.
+        """
+
+    @abstractmethod
+    def _prepare_config_files(self, cycle: datetime, run_directory: DefinitePath) -> None:
+        """
+        Calls the methods for the set of configuration files neeed by the given model.
+        """
+
+
 class FV3Forecast(Forecast):
     """
     A driver for the FV3 forecast model.
     """
+
+    def __init__(
+        self,
+        config_file: str,
+        dry_run: bool = False,
+        batch_script: Optional[str] = None,
+    ):
+        """
+        Initialize the Forecast Driver.
+        """
+
+        super().__init__(config_file=config_file, dry_run=dry_run, batch_script=batch_script)
 
     # Public methods
 
@@ -150,10 +184,10 @@ class FV3Forecast(Forecast):
             to a preexisting run directory. The default is to delete the old run directory.
         """
 
-        self._create_run_directory(run_directory, exist_act)
+        Driver._create_run_directory(run_directory, exist_act)  # pylint: disable=protected-access
         # Create the two required subdirectories.
         for subdir in ("INPUT", "RESTART"):
-            path = os.path.join(run_directory, subdir)
+            path = run_directory / subdir
             logging.info("Creating directory: %s", path)
             os.makedirs(path)
 
@@ -169,10 +203,11 @@ class FV3Forecast(Forecast):
             output_path=output_path,
         )
 
-    def create_model_configure(self, output_path: OptionalPath) -> None:
+    def create_model_configure(self, cycle: datetime, output_path: OptionalPath) -> None:
         """
         Uses the forecast config object to create a model_configure.
 
+        :param cycle: the date and start time for the forecast
         :param output_path: Optional location of the output model_configure file.
         """
         self._create_user_updated_config(
@@ -180,6 +215,19 @@ class FV3Forecast(Forecast):
             config_values=self._config.get("model_configure", {}),
             output_path=output_path,
         )
+        start_time = cycle.strftime("%Y-%m-%d_%H:%M:%S")
+        date_values = {
+            "start_year": cycle.strftime("%Y"),
+            "start_month": cycle.strftime("%m"),
+            "start_day": cycle.strftime("%d"),
+            "start_hour": cycle.strftime("%H"),
+            "start_minute": cycle.strftime("%M"),
+            "start_second": cycle.strftime("%S"),
+        }
+        logging.info(f"Updating namelist date values to start at: {start_time}")
+        config_obj = YAMLConfig(output_path)
+        config_obj.update_values(date_values)
+        config_obj.dump(output_path)
 
     def create_namelist(self, output_path: OptionalPath) -> None:
         """
@@ -193,8 +241,6 @@ class FV3Forecast(Forecast):
             config_values=self._config.get("namelist", {}),
             output_path=output_path,
         )
-
-
 
     @property
     def schema_file(self) -> str:
@@ -228,13 +274,13 @@ class FV3Forecast(Forecast):
 
         return boundary_files
 
-    def _prepare_config_files(self, run_directory: Path) -> None:
+    def _prepare_config_files(self, cycle: datetime, run_directory: DefinitePath) -> None:
         """
         Collect all the configuration files needed for FV3.
         """
 
         self.create_field_table(run_directory / "field_table")
-        self.create_model_configure(run_directory / "model_configure")
+        self.create_model_configure(cycle, run_directory / "model_configure")
         self.create_namelist(run_directory / "input.nml")
 
     def _mpi_env_variables(self, delimiter: str = " ") -> str:
@@ -252,8 +298,8 @@ class FV3Forecast(Forecast):
         }
         return delimiter.join([f"{k}={v}" for k, v in envvars.items()])
 
-class MPASForecast(Forecast):
 
+class MPASForecast(Forecast):
     """
     A Driver for the MPAS Atmosphere forecast model.
     """
@@ -270,8 +316,7 @@ class MPASForecast(Forecast):
 
         super().__init__(config_file=config_file, dry_run=dry_run, batch_script=batch_script)
 
-
-    def create_namelist(self, output_path: OptionalPath) -> None:
+    def create_namelist(self, cycle: datetime, output_path: OptionalPath) -> None:
         """
         Uses an object with user supplied values and an optional namelist base file to create an
         output namelist file. Will "dereference" the base file.
@@ -283,20 +328,18 @@ class MPASForecast(Forecast):
             config_values=self._config["namelist"],
             output_path=output_path,
         )
-        start_time = self._cycle.strftime("%Y-%m-%d_%H:%M:%S")
+        start_time = cycle.strftime("%Y-%m-%d_%H:%M:%S")
         date_values = {
             "nhyd_model": {
                 "config_start_time": start_time,
-                },
-            }
+            },
+        }
         logging.info(f"Updating namelist date values to start at: {start_time}")
         config_obj = NMLConfig(output_path)
         config_obj.update_values(date_values)
         config_obj.dump(output_path)
 
-
     def create_streams(self, output_path: OptionalPath) -> None:
-
         """
         Create the streams file from a template.
         """
@@ -322,8 +365,9 @@ class MPASForecast(Forecast):
     # Private methods
 
     def _define_boundary_files(self) -> Dict[str, str]:
-
-        """ No boundary files are currently needed for MPAS global support """
+        """
+        No boundary files are currently needed for MPAS global support.
+        """
         return {}
 
     def _mpi_env_variables(self, delimiter=" ") -> str:
@@ -332,14 +376,15 @@ class MPASForecast(Forecast):
         """
         return delimiter.join([f"{k}={v}" for k, v in self._config.get("mpi_settings", {}).items()])
 
-    def _prepare_config_files(self, run_directory: DefinitePath) -> None:
+    def _prepare_config_files(self, cycle: datetime, run_directory: DefinitePath) -> None:
         """
-        Collect all the configuration files needed for MPAS
+        Collect all the configuration files needed for MPAS.
         """
-        self.create_namelist(run_directory / "namelist.atmosphere")
+        self.create_namelist(cycle, run_directory / "namelist.atmosphere")
         self.create_streams(run_directory / "streams.atmosphere")
+
 
 CLASSES = {
     "FV3": FV3Forecast,
     "MPAS": MPASForecast,
-    }
+}
