@@ -15,7 +15,7 @@ from uwtools import scheduler
 from uwtools.config.core import NMLConfig, YAMLConfig
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
-from uwtools.drivers.forecast import FV3Forecast
+from uwtools.drivers.forecast import FV3Forecast, MPASForecast
 from uwtools.tests.support import compare_files, fixture_path
 
 
@@ -166,7 +166,8 @@ def test_create_model_configure_call_private(tmp_path):
         Path(path).touch()
     with patch.object(Driver, "_create_user_updated_config") as _create_user_updated_config:
         with patch.object(FV3Forecast, "_validate", return_value=True):
-            FV3Forecast(config_file=infile).create_model_configure(cycle, outfile)
+            with patch.object(forecast, "YAMLConfig") as YAMLConfig:
+                FV3Forecast(config_file=infile).create_model_configure(cycle, outfile)
     _create_user_updated_config.assert_called_with(
         config_class=YAMLConfig, config_values={}, output_path=outfile
     )
@@ -175,6 +176,21 @@ def test_create_model_configure_call_private(tmp_path):
 @fixture
 def create_namelist_assets(tmp_path):
     return NMLConfig(fixture_path("simple.nml")), tmp_path / "create_out.nml"
+
+def test_create_namelist_call_private(tmp_path):
+    basefile = str(tmp_path / "base.yaml")
+    infile = fixture_path("forecast.yaml")
+    outfile = str(tmp_path / "out.yaml")
+    cycle = dt.datetime.now()
+    for path in infile, basefile:
+        Path(path).touch()
+    with patch.object(Driver, "_create_user_updated_config") as _create_user_updated_config:
+        with patch.object(FV3Forecast, "_validate", return_value=True):
+            with patch.object(forecast, "YAMLConfig") as YAMLConfig:
+                FV3Forecast(config_file=infile).create_namelist(outfile)
+    _create_user_updated_config.assert_called_with(
+        config_class=NMLConfig, config_values={}, output_path=outfile
+    )
 
 
 def test_create_namelist_with_base_file(create_namelist_assets, tmp_path):
@@ -374,3 +390,79 @@ def test_run_submit(fv3_run_assets):
             with patch.object(fcstobj, "_config", config):
                 fcstobj.run(cycle=dt.datetime.now())
             execute.assert_called_once_with(cmd=f"sbatch {batch_script}")
+
+
+# MPAS Tests
+
+def test_MPAS_create_namelist(tmp_path):
+    """
+    Test that providing a YAML base input file and a config file will create and update the MPAS
+    namelist, including the cycle date.
+    """
+
+    # Create a fcst config file with a namelist entry
+    config_file = fixture_path("fruit_config_similar_for_fcst.yaml")
+    fcst_config = YAMLConfig(config_file)
+
+    # Update the config to have the same namelist settings as the model_configure section in the
+    # origional file.
+    base_file = fixture_path("fruit_config.nml")
+    fcst_config["forecast"]["namelist"] = {
+        "base_file": base_file,
+        "update_values": {
+            "config": fcst_config["forecast"]["model_configure"]["update_values"],
+            },
+        }
+
+    # Write it to a file
+    fcst_config_file = tmp_path / "fcst.yml"
+    fcst_config.dump(fcst_config_file)
+
+    # Use it to create a forecast object.
+    with patch.object(MPASForecast, "_validate", return_value=True):
+        forecast_obj = MPASForecast(config_file=fcst_config_file)
+
+
+    cycle = dt.datetime.now()
+    output_file = tmp_path / "output.nml"
+    forecast_obj.create_namelist(cycle, output_file)
+
+    date_values = {
+        "nhyd_model": {
+            "config_start_time": cycle.strftime("%Y-%m-%d_%H:%M:%S"),
+        },
+    }
+    expected = NMLConfig(base_file)
+    expected.update_values(fcst_config["forecast"]["namelist"]["update_values"])
+    expected.update_values(date_values)
+    expected_file = tmp_path / "expected.nml"
+    expected.dump(expected_file)
+
+    assert compare_files(expected_file, output_file)
+
+def test_create_streams():
+    pass
+
+
+def test_MPAS_schema_file():
+
+    """
+    Tests that the schema is properly defined with a file value.
+    """
+
+    config_file = fixture_path("forecast.yaml")
+    with patch.object(Driver, "_validate", return_value=True):
+        forecast = MPASForecast(config_file=config_file)
+
+    path = Path(forecast.schema_file)
+    assert path.is_file()
+
+def test__define_boundary_files():
+    pass
+
+
+def test__mpi_env_variables():
+    pass
+
+def test__prepare_config_files():
+    pass
