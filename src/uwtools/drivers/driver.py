@@ -49,6 +49,12 @@ class Driver(ABC):
         :return: The batch script object with all run commands needed for executing the program.
         """
 
+    def create_directory_structure(self, run_directory: DefinitePath, exist_act="delete"):
+        """
+        Creates the run directory for the forecast
+        """
+        self._create_run_directory(run_directory, exist_act)
+
     @abstractmethod
     def output(self) -> None:
         """
@@ -133,6 +139,28 @@ class Driver(ABC):
                 logging.info(msg)
 
     # Private methods
+
+    @staticmethod
+    def _create_run_directory(run_dir: DefinitePath, exist_act="delete") -> None:
+
+        """
+        Makes the run directory for the driver. If it already exists, handles it based on the
+        caller instruction.
+        """
+        if exist_act not in ["delete", "rename", "quit"]:
+            raise ValueError(f"Bad argument: {exist_act}")
+
+        # Exit program with error if caller chooses to quit.
+
+        if exist_act == "quit" and os.path.isdir(run_dir):
+            logging.critical("User chose quit option when creating directory")
+            sys.exit(1)
+
+        # Delete or rename directory if it exists.
+        handle_existing(run_dir, exist_act)
+
+        logging.info("Creating directory: %s", run_dir)
+        os.makedirs(run_dir)
 
     @staticmethod
     def _create_user_updated_config(

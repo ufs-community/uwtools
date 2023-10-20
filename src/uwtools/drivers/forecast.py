@@ -16,13 +16,14 @@ from uwtools.config.core import FieldTableConfig, NMLConfig, YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import handle_existing
+from uwtools.utils.file import change_dir, handle_existing
 from uwtools.utils.processing import execute
 
 
-class FV3Forecast(Driver):
+class Forecast(Driver):
+
     """
-    A driver for the FV3 forecast model.
+    The base class for any forecast driver.
     """
 
     def __init__(
@@ -51,77 +52,6 @@ class FV3Forecast(Driver):
         bs.append(pre_run)
         bs.append(self.run_cmd())
         return bs
-
-    @staticmethod
-    def create_directory_structure(run_directory: DefinitePath, exist_act: str = "delete") -> None:
-        """
-        Collects the name of the desired run directory, and has an optional flag for what to do if
-        the run directory specified already exists. Creates the run directory and adds
-        subdirectories INPUT and RESTART. Verifies creation of all directories.
-
-        :param run_directory: Path of desired run directory.
-        :param exist_act: Could be any of 'delete', 'rename', 'quit'. Sets how the program responds
-            to a preexisting run directory. The default is to delete the old run directory.
-        """
-
-        # Caller should only provide correct argument.
-
-        if exist_act not in ["delete", "rename", "quit"]:
-            raise ValueError(f"Bad argument: {exist_act}")
-
-        # Exit program with error if caller chooses to quit.
-
-        if exist_act == "quit" and os.path.isdir(run_directory):
-            logging.critical("User chose quit option when creating directory")
-            sys.exit(1)
-
-        # Delete or rename directory if it exists.
-
-        handle_existing(str(run_directory), exist_act)
-
-        # Create new run directory with two required subdirectories.
-
-        for subdir in ("INPUT", "RESTART"):
-            path = os.path.join(run_directory, subdir)
-            logging.info("Creating directory: %s", path)
-            os.makedirs(path)
-
-    def create_field_table(self, output_path: OptionalPath) -> None:
-        """
-        Uses the forecast config object to create a Field Table.
-
-        :param output_path: Optional location of output field table.
-        """
-        self._create_user_updated_config(
-            config_class=FieldTableConfig,
-            config_values=self._config.get("field_table", {}),
-            output_path=output_path,
-        )
-
-    def create_model_configure(self, output_path: OptionalPath) -> None:
-        """
-        Uses the forecast config object to create a model_configure.
-
-        :param output_path: Optional location of the output model_configure file.
-        """
-        self._create_user_updated_config(
-            config_class=YAMLConfig,
-            config_values=self._config.get("model_configure", {}),
-            output_path=output_path,
-        )
-
-    def create_namelist(self, output_path: OptionalPath) -> None:
-        """
-        Uses an object with user supplied values and an optional namelist base file to create an
-        output namelist file. Will "dereference" the base file.
-
-        :param output_path: Optional location of output namelist.
-        """
-        self._create_user_updated_config(
-            config_class=NMLConfig,
-            config_values=self._config.get("namelist", {}),
-            output_path=output_path,
-        )
 
     def output(self) -> None:
         """
@@ -184,16 +114,9 @@ class FV3Forecast(Driver):
             print(full_cmd, file=sys.stdout)
             return True
 
-        result = execute(cmd=full_cmd)
+        with change_dir(run_dir):
+            result = execute(cmd=full_cmd)
         return result.success
-
-    @property
-    def schema_file(self) -> str:
-        """
-        The path to the file containing the schema to validate the config file against.
-        """
-        with resources.as_file(resources.files("uwtools.resources")) as path:
-            return (path / "FV3Forecast.jsonschema").as_posix()
 
     # Private methods
 
@@ -208,6 +131,80 @@ class FV3Forecast(Driver):
         offset = abs(lbcs_config["offset"])
         end_hour = self._config["length"] + offset + 1
         return offset, lbcs_config["interval_hours"], end_hour
+
+class FV3Forecast(Forecast):
+    """
+    A driver for the FV3 forecast model.
+    """
+
+    # Public methods
+
+    @staticmethod
+    def create_directory_structure(run_directory: DefinitePath, exist_act: str = "delete") -> None:
+        """
+        Creates the run directory and adds subdirectories INPUT and RESTART. Verifies creation of
+        all directories.
+
+        :param run_directory: Path of desired run directory.
+        :param exist_act: Could be any of 'delete', 'rename', 'quit'. Sets how the program responds
+            to a preexisting run directory. The default is to delete the old run directory.
+        """
+
+        self._create_run_directory(run_directory, exist_act)
+        # Create the two required subdirectories.
+        for subdir in ("INPUT", "RESTART"):
+            path = os.path.join(run_directory, subdir)
+            logging.info("Creating directory: %s", path)
+            os.makedirs(path)
+
+    def create_field_table(self, output_path: OptionalPath) -> None:
+        """
+        Uses the forecast config object to create a Field Table.
+
+        :param output_path: Optional location of output field table.
+        """
+        self._create_user_updated_config(
+            config_class=FieldTableConfig,
+            config_values=self._config.get("field_table", {}),
+            output_path=output_path,
+        )
+
+    def create_model_configure(self, output_path: OptionalPath) -> None:
+        """
+        Uses the forecast config object to create a model_configure.
+
+        :param output_path: Optional location of the output model_configure file.
+        """
+        self._create_user_updated_config(
+            config_class=YAMLConfig,
+            config_values=self._config.get("model_configure", {}),
+            output_path=output_path,
+        )
+
+    def create_namelist(self, output_path: OptionalPath) -> None:
+        """
+        Uses an object with user supplied values and an optional namelist base file to create an
+        output namelist file. Will "dereference" the base file.
+
+        :param output_path: Optional location of output namelist.
+        """
+        self._create_user_updated_config(
+            config_class=NMLConfig,
+            config_values=self._config.get("namelist", {}),
+            output_path=output_path,
+        )
+
+
+
+    @property
+    def schema_file(self) -> str:
+        """
+        The path to the file containing the schema to validate the config file against.
+        """
+        with resources.as_file(resources.files("uwtools.resources")) as path:
+            return (path / "FV3Forecast.jsonschema").as_posix()
+
+    # Private methods
 
     def _define_boundary_files(self) -> Dict[str, str]:
         """
@@ -255,5 +252,94 @@ class FV3Forecast(Driver):
         }
         return delimiter.join([f"{k}={v}" for k, v in envvars.items()])
 
+class MPASForecast(Forecast):
 
-CLASSES = {"FV3": FV3Forecast}
+    """
+    A Driver for the MPAS Atmosphere forecast model.
+    """
+
+    def __init__(
+        self,
+        config_file: str,
+        dry_run: bool = False,
+        batch_script: Optional[str] = None,
+    ):
+        """
+        Initialize the Forecast Driver.
+        """
+
+        super().__init__(config_file=config_file, dry_run=dry_run, batch_script=batch_script)
+
+
+    def create_namelist(self, output_path: OptionalPath) -> None:
+        """
+        Uses an object with user supplied values and an optional namelist base file to create an
+        output namelist file. Will "dereference" the base file.
+
+        :param output_path: Optional location of output namelist.
+        """
+        self._create_user_updated_config(
+            config_class=NMLConfig,
+            config_values=self._config["namelist"],
+            output_path=output_path,
+        )
+        start_time = self._cycle.strftime("%Y-%m-%d_%H:%M:%S")
+        date_values = {
+            "nhyd_model": {
+                "config_start_time": start_time,
+                },
+            }
+        logging.info(f"Updating namelist date values to start at: {start_time}")
+        config_obj = NMLConfig(output_path)
+        config_obj.update_values(date_values)
+        config_obj.dump(output_path)
+
+
+    def create_streams(self, output_path: OptionalPath) -> None:
+
+        """
+        Create the streams file from a template.
+        """
+
+        template_file = self._config["streams"]["template"]
+        values = self._config["streams"]["vars"]
+
+        with readable(template_file) as f:
+            template_str = f.read()
+
+        template = J2Template(values=values, template_str=template_str)
+        with writable(output_path) as f:
+            print(template.render(), file=f)
+
+    @property
+    def schema_file(self) -> str:
+        """
+        The path to the file containing the schema to validate the config file against.
+        """
+        with resources.as_file(resources.files("uwtools.resources")) as path:
+            return (path / "MPASForecast.jsonschema").as_posix()
+
+    # Private methods
+
+    def _define_boundary_files(self) -> Dict[str, str]:
+
+        """ No boundary files are currently needed for MPAS global support """
+        return {}
+
+    def _mpi_env_variables(self, delimiter=" ") -> str:
+        """
+        Returns a bash string of environment variables needed to run the MPI job.
+        """
+        return delimiter.join([f"{k}={v}" for k, v in self._config.get("mpi_settings", {}).items()])
+
+    def _prepare_config_files(self, run_directory: DefinitePath) -> None:
+        """
+        Collect all the configuration files needed for MPAS
+        """
+        self.create_namelist(run_directory / "namelist.atmosphere")
+        self.create_streams(run_directory / "streams.atmosphere")
+
+CLASSES = {
+    "FV3": FV3Forecast,
+    "MPAS": MPASForecast,
+    }

@@ -46,6 +46,20 @@ class _FORMAT:
 
 FORMAT = _FORMAT()
 
+@contextmanager
+def change_dir(path: Path) -> None:
+    """Sets a new working directory within the context
+
+    :param path: The path to change to.
+    """
+
+    origin = Path().absolute()
+    try:
+        os.chdir(path)
+        yield
+    finally:
+        os.chdir(origin)
+
 
 def get_file_type(path: DefinitePath) -> str:
     """
