@@ -19,6 +19,7 @@ import uwtools.config.core
 import uwtools.config.templater
 import uwtools.config.validator
 import uwtools.drivers.forecast
+import uwtools.rocoto
 from uwtools.logging import setup_logging
 from uwtools.utils.file import FORMAT, get_file_type
 
