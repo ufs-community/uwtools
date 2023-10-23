@@ -102,6 +102,10 @@ def test_create_directory_structure(tmp_path):
         Driver.create_directory_structure(run_dir)
     _create_run_directory.assert_called_once_with(run_dir, "delete")
 
+def test_create_directory_structure_bad_existing_act():
+    with raises(ValueError):
+        FV3Forecast.create_directory_structure(run_directory="/some/path", exist_act="foo")
+
 def test_run_cmd_expected(mpi_config, tmp_path):
     config_file = tmp_path / "config.yaml"
     YAMLConfig.dump_dict(config_file, mpi_config)
