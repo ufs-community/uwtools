@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+import yaml
 from pytest import fixture, raises
 
 from uwtools import scheduler
@@ -350,6 +351,35 @@ class TestFV3Forecast:
         path = Path(forecast.schema_file)
         assert path.is_file()
 
+    def test__prepare_config_files(self, create_field_table_update_obj, tmp_path):
+
+        field_table_file = fixture_path("FV3_GFS_v16_update.yaml")
+
+        model_configure_file = fixture_path("fruit_config.yaml")
+        namelist_file = tmp_path / "namelist.IN"
+        namelist_file.touch()
+        config_file = tmp_path / "fcst.yaml"
+        fcst_config = {
+                "forecast": {
+                    "field_table": create_field_table_update_obj["forecast"]["field_table"],
+                    "model_configure": {
+                        "base_file": model_configure_file,
+                    },
+                    "namelist": {
+                        "base_file": namelist_file.as_posix(),
+                    },
+                    },
+                }
+        YAMLConfig.dump_dict(cfg=fcst_config, path=config_file)
+        with patch.object(Driver, "_validate", return_value=True):
+            forecast = FV3Forecast(config_file=config_file)
+        cycle = dt.datetime.now()
+        forecast._prepare_config_files(cycle=cycle, run_directory=tmp_path)
+
+        assert (tmp_path / "field_table" ).is_file()
+        assert (tmp_path / "model_configure" ).is_file()
+        assert (tmp_path / "input.nml" ).is_file()
+
 
 # MPAS Tests
 
@@ -464,12 +494,57 @@ class TestMPASForecast:
 
 
     def test__define_boundary_files(self):
-        pass
+        config_file = fixture_path("forecast.yaml")
+        with patch.object(Driver, "_validate", return_value=True):
+            forecast = MPASForecast(config_file=config_file)
+
+        assert forecast._define_boundary_files() == {}
 
 
-    def test__mpi_env_variables(self):
-        pass
+    @pytest.mark.parametrize("delimiter", [" ", "\n"])
+    def test__mpi_env_variables(self, delimiter, tmp_path):
+        config_file = tmp_path / "fcst.yaml"
+        fcst_config = yaml.safe_load("""
+forecast:
+  mpi_settings:
+    FI_PROVIDER: efa
+    I_MPI_DEBUG: 4
+    I_MPI_FABRICS: "shm:ofi"
+    I_MPI_OFI_LIBRARY_INTERNAL: 0
+    I_MPI_OFI_PROVIDER: efa
+""")
+        YAMLConfig.dump_dict(cfg=fcst_config, path=config_file)
+        with patch.object(Driver, "_validate", return_value=True):
+            forecast = MPASForecast(config_file=config_file)
+
+        output = forecast._mpi_env_variables(delimiter=delimiter)
+        expected = "FI_PROVIDER=efa I_MPI_DEBUG=4 I_MPI_FABRICS=shm:ofi I_MPI_OFI_LIBRARY_INTERNAL=0 I_MPI_OFI_PROVIDER=efa"
+        expected = expected.replace(" ", delimiter)
+        assert output == expected
 
 
-    def test__prepare_config_files(self):
-        pass
+    def test__prepare_config_files(self, tmp_path):
+        namelist_file = tmp_path / "namelist.IN"
+        streams_file = tmp_path / "streams.IN"
+        namelist_file.touch()
+        streams_file.touch()
+        config_file = tmp_path / "fcst.yaml"
+        fcst_config = {
+                "forecast": {
+                    "namelist": {
+                        "base_file": namelist_file.as_posix(),
+                    },
+                    "streams": {
+                        "template": streams_file.as_posix(),
+                        "vars": {},
+                    },
+                    },
+                }
+        YAMLConfig.dump_dict(cfg=fcst_config, path=config_file)
+        with patch.object(Driver, "_validate", return_value=True):
+            forecast = MPASForecast(config_file=config_file)
+        cycle = dt.datetime.now()
+        forecast._prepare_config_files(cycle=cycle, run_directory=tmp_path)
+
+        assert (tmp_path / "namelist.atmosphere" ).is_file()
+        assert (tmp_path / "streams.atmosphere" ).is_file()
