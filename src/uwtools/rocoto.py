@@ -89,7 +89,7 @@ def _write_rocoto_xml(
 
     # Render the template.
     template = J2Template(values=values.data, template_path=_rocoto_template_xml())
-    template.dump(output_path=rendered_output)
+    template.dump(output_path=str(rendered_output))
 
 
 # Public functions
