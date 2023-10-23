@@ -13,10 +13,12 @@ from pytest import fixture, raises
 
 from uwtools import scheduler
 from uwtools.config.core import NMLConfig, YAMLConfig
+from uwtools.config.j2template import J2Template
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast, MPASForecast
-from uwtools.tests.support import compare_files, fixture_path
+from uwtools.tests.support import compare_files, fixture_path, logged
+from uwtools.utils.file import readable, writable
 
 
 class TestForecast:
@@ -398,8 +400,55 @@ class TestMPASForecast:
         assert compare_files(expected_file, output_file)
 
 
-    def test_create_streams(self, tmp_path):
-        pass
+    @fixture
+    def streams_config(self, tmp_path):
+
+        template_path = tmp_path / "template.jinja2"
+        with open(template_path, "w", encoding="utf-8") as f:
+            f.write("roses are {{roses}}, violets are {{violets}}")
+
+        fcst_config = {
+                "forecast": {
+                    "streams": {
+                      "template": template_path.as_posix(),
+                      "vars": {
+                          "roses": "red",
+                          "violets": "blue",
+                          },
+                    },
+                },
+                }
+        fcst_config_file = tmp_path / "fcst.yaml"
+        YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
+        return str(template_path), fcst_config_file
+
+    @pytest.mark.parametrize("output_stream", ["stream.out", None])
+    def test_create_streams(self, capsys, output_stream, streams_config, tmp_path):
+        """
+        A stream file in MPAS is treated as a template.
+        Test that providing a Forecast config file with the correct structure will fill in the
+        template as requested.
+        """
+
+        template_path, fcst_config_file = streams_config
+        with patch.object(Driver, "_validate", return_value=True):
+            fcst_obj = MPASForecast(fcst_config_file)
+        if output_stream is not None:
+            output_stream = tmp_path / output_stream
+        fcst_obj.create_streams(output_stream)
+
+        with readable(template_path) as f:
+            template_str = f.read()
+        template = J2Template(values={"roses": "red", "violets": "blue"}, template_str=template_str)
+        expected = tmp_path / "expected.txt"
+        rendered = template.render()
+        with writable(expected) as f:
+            print(rendered, file=f)
+        if output_stream is None:
+            actual = capsys.readouterr().out
+            assert actual.strip() == rendered.strip()
+        else:
+            assert compare_files(expected, output_stream)
 
 
     def test_schema_file(self):
