@@ -1,3 +1,4 @@
+workflow:
   attrs:
     realtime: false
     scheduler: slurm
