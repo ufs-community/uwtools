@@ -183,7 +183,7 @@ class FV3Forecast(Forecast):
         :param exist_act: Could be any of 'delete', 'rename', 'quit'. Sets how the program responds
             to a preexisting run directory. The default is to delete the old run directory.
         """
-
+        run_directory = Path(run_directory)
         Driver._create_run_directory(run_directory, exist_act)  # pylint: disable=protected-access
         # Create the two required subdirectories.
         for subdir in ("INPUT", "RESTART"):
@@ -278,7 +278,7 @@ class FV3Forecast(Forecast):
         """
         Collect all the configuration files needed for FV3.
         """
-
+        run_directory = Path(run_directory)
         self.create_field_table(run_directory / "field_table")
         self.create_model_configure(cycle, run_directory / "model_configure")
         self.create_namelist(run_directory / "input.nml")
@@ -380,6 +380,7 @@ class MPASForecast(Forecast):
         """
         Collect all the configuration files needed for MPAS.
         """
+        run_directory = Path(run_directory)
         self.create_namelist(cycle, run_directory / "namelist.atmosphere")
         self.create_streams(run_directory / "streams.atmosphere")
 

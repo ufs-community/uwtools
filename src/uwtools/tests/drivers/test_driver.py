@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.drivers.driver module.
 """
@@ -18,14 +18,13 @@ from pytest import fixture, raises
 from uwtools.config.core import YAMLConfig
 from uwtools.drivers import driver
 from uwtools.drivers.driver import Driver
-from uwtools.tests.support import compare_files, logged, fixture_path
+from uwtools.tests.support import compare_files, fixture_path, logged
 
 
 class ConcreteDriver(Driver):
     """
     Driver subclass for testing purposes.
     """
-
 
     def batch_script(self):
         pass
@@ -59,9 +58,11 @@ platform:
 """
     return config_good, config_bad
 
+
 @fixture
 def mpi_config():
-    return yaml.safe_load("""
+    return yaml.safe_load(
+        """
 platform:
   mpicmd: srun
 component:
@@ -69,7 +70,9 @@ component:
   runtime_info:
     mpi_args:
       - bar
-""")
+"""
+    )
+
 
 @fixture
 def schema():
@@ -96,23 +99,27 @@ def schema():
 }
 """.strip()
 
+
 def test_create_directory_structure(tmp_path):
     run_dir = tmp_path / "run"
     with patch.object(Driver, "_create_run_directory") as _create_run_directory:
         Driver.create_directory_structure(run_dir)
     _create_run_directory.assert_called_once_with(run_dir, "delete")
 
+
 def test_create_directory_structure_bad_existing_act():
     with raises(ValueError):
         Driver.create_directory_structure(run_directory="/some/path", exist_act="foo")
+
 
 def test_run_cmd_expected(mpi_config, tmp_path):
     config_file = tmp_path / "config.yaml"
     YAMLConfig.dump_dict(config_file, mpi_config)
     with patch.object(Driver, "_validate", return_value=True):
         driver = ConcreteDriver(config_file=config_file)
-    driver._config = driver._experiment_config.get("component")
+    driver._config = driver._experiment_config.get("component", {})
     assert driver.run_cmd() == "srun bar foo"
+
 
 def test_run_cmd_no_runtime_info(mpi_config, tmp_path):
     config_file = tmp_path / "config.yaml"
@@ -120,21 +127,23 @@ def test_run_cmd_no_runtime_info(mpi_config, tmp_path):
     YAMLConfig.dump_dict(config_file, mpi_config)
     with patch.object(Driver, "_validate", return_value=True):
         driver = ConcreteDriver(config_file=config_file)
-    driver._config = driver._experiment_config.get("component")
+    driver._config = driver._experiment_config.get("component", {})
     with raises(KeyError):
         driver.run_cmd()
 
-def test_scheduler(tmp_path):
+
+def test_scheduler():
     config_file = fixture_path("fruit_config.yaml")
     with patch.object(Driver, "_validate", return_value=True):
         concretedriver = ConcreteDriver(config_file=config_file)
+        # pylint: disable=pointless-statement
         with patch.object(driver.JobScheduler, "get_scheduler") as _get_scheduler:
-            concretedriver.scheduler()
+            concretedriver.scheduler
     _get_scheduler.assert_called_once_with({})
+
 
 @pytest.mark.parametrize("link_files", [True, False])
 def test_stage_files(tmp_path, link_files):
-
     """
     Tests that files from static or cycle-dependent sections of the config obj are being staged
     (copied or linked) to the run directory.
@@ -142,14 +151,15 @@ def test_stage_files(tmp_path, link_files):
 
     run_directory = tmp_path / "run"
     src_directory = tmp_path / "src"
-    files_to_stage = yaml.safe_load("""
+    files_to_stage = yaml.safe_load(
+        """
 foo.yaml: some/foo/on/disk/foo.yml
 bar: somewhere/bar.txt
 ./:
   - a/file/with/same_name.x
   - another/file/with/same/name.f
 """
-)
+    )
     # Fix source paths so that they are relative to our test temp directory and
     # create the test files.
     src_directory.mkdir()
@@ -177,6 +187,7 @@ bar: somewhere/bar.txt
         else:
             assert link_or_file(run_directory / dst_rel_path)
 
+
 @pytest.mark.parametrize("exist_act", ["delete", "rename"])
 def test__create_run_directory_exists(exist_act, tmp_path):
     run_dir = tmp_path / "run"
@@ -185,6 +196,7 @@ def test__create_run_directory_exists(exist_act, tmp_path):
     run_dirs = len(glob.glob((tmp_path / "run*").as_posix()))
     assert run_dirs == 1 if exist_act == "delete" else run_dirs == 2
 
+
 @pytest.mark.parametrize("exist_act", ["delete", "rename"])
 def test__create_run_directory_handle_existing_call(exist_act, tmp_path):
     run_dir = tmp_path / "run"
@@ -192,21 +204,25 @@ def test__create_run_directory_handle_existing_call(exist_act, tmp_path):
         Driver._create_run_directory(run_dir, exist_act)
     handle_existing.called_once_with(run_dir, exist_act)
 
+
 def test__create_run_directory_quit(tmp_path):
     run_dir = tmp_path / "run"
     Driver._create_run_directory(run_dir, "quit")
-    with raises(SystemExit) as pytest_wrapped_e:
+    with raises(SystemExit):
         Driver._create_run_directory(run_dir, "quit")
 
+
 @fixture
-def update_config(tmp_path):
+def update_config():
     config_file = fixture_path("fruit_config.yaml")
-    return yaml.safe_load(f"""
+    return yaml.safe_load(
+        f"""
 base_file: {config_file}
 update_values:
   nuts: almonds
   dressing: vinaigrette
-""")
+"""
+    )
 
 
 def test__create_user_updated_config_base_file(tmp_path, update_config):
@@ -218,6 +234,7 @@ def test__create_user_updated_config_base_file(tmp_path, update_config):
     output_file = tmp_path / "output.yml"
     Driver._create_user_updated_config(YAMLConfig, update_config, output_file)
     assert compare_files(expected_file, output_file)
+
 
 def test__create_user_updated_config_no_base_file(tmp_path, update_config):
     expected_file = tmp_path / "expected.yml"

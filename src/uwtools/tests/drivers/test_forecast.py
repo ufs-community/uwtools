@@ -1,10 +1,9 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=missing-class-docstring, missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for forecast driver.
 """
 import datetime as dt
 import logging
-import os
 from pathlib import Path
 from unittest.mock import patch
 
@@ -18,12 +17,11 @@ from uwtools.config.j2template import J2Template
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast, MPASForecast
-from uwtools.tests.support import compare_files, fixture_path, logged
+from uwtools.tests.support import compare_files, fixture_path
 from uwtools.utils.file import readable, writable
 
 
 class TestForecast:
-
     def test_batch_script(self):
         expected = """
 #SBATCH --account=user_account
@@ -45,7 +43,6 @@ srun --export=NONE test_exec.py
 
 
 class TestFV3Forecast:
-
     def test_create_directory_structure(self, tmp_path):
         """
         Tests create_directory_structure method given a directory.
@@ -79,11 +76,9 @@ class TestFV3Forecast:
         assert pytest_wrapped_e.type == SystemExit
         assert pytest_wrapped_e.value.code == 1
 
-
     @fixture
     def create_field_table_update_obj(self):
         return YAMLConfig(fixture_path("FV3_GFS_v16_update.yaml"))
-
 
     def test_create_field_table_with_base_file(self, create_field_table_update_obj, tmp_path):
         """
@@ -99,7 +94,6 @@ class TestFV3Forecast:
         FV3Forecast(config_file).create_field_table(outfldtbl_file)
         assert compare_files(expected, outfldtbl_file)
 
-
     def test_create_field_table_without_base_file(self, tmp_path):
         """
         Tests create_field_table without optional base file.
@@ -110,11 +104,10 @@ class TestFV3Forecast:
         FV3Forecast(config_file).create_field_table(outfldtbl_file)
         assert compare_files(expected, outfldtbl_file)
 
-
     def test_create_model_configure(self, tmp_path):
         """
-        Test that providing a YAML base input file and a config file will create and update YAML config
-        file.
+        Test that providing a YAML base input file and a config file will create and update YAML
+        config file.
         """
 
         config_file = fixture_path("fruit_config_similar_for_fcst.yaml")
@@ -139,12 +132,13 @@ class TestFV3Forecast:
         }
         forecast_obj.create_model_configure(cycle, output_file)
         expected = YAMLConfig(base_file)
-        expected.update_values(YAMLConfig(config_file)["forecast"]["model_configure"]["update_values"])
+        expected.update_values(
+            YAMLConfig(config_file)["forecast"]["model_configure"]["update_values"]
+        )
         expected.update_values(date_values)
         expected_file = tmp_path / "expected_yaml.yaml"
         expected.dump(expected_file)
         assert compare_files(expected_file, output_file)
-
 
     def test_create_model_configure_call_private(self, tmp_path):
         basefile = str(tmp_path / "base.yaml")
@@ -161,7 +155,6 @@ class TestFV3Forecast:
             config_class=YAMLConfig, config_values={}, output_path=outfile
         )
 
-
     @fixture
     def create_namelist_assets(self, tmp_path):
         return NMLConfig(fixture_path("simple.nml")), tmp_path / "create_out.nml"
@@ -170,17 +163,16 @@ class TestFV3Forecast:
         basefile = str(tmp_path / "base.yaml")
         infile = fixture_path("forecast.yaml")
         outfile = str(tmp_path / "out.yaml")
-        cycle = dt.datetime.now()
         for path in infile, basefile:
             Path(path).touch()
         with patch.object(Driver, "_create_user_updated_config") as _create_user_updated_config:
             with patch.object(FV3Forecast, "_validate", return_value=True):
+                # pylint: disable=unused-variable
                 with patch.object(forecast, "YAMLConfig") as YAMLConfig:
                     FV3Forecast(config_file=infile).create_namelist(outfile)
         _create_user_updated_config.assert_called_with(
             config_class=NMLConfig, config_values={}, output_path=outfile
         )
-
 
     def test_create_namelist_with_base_file(self, create_namelist_assets, tmp_path):
         """
@@ -215,7 +207,6 @@ class TestFV3Forecast:
         with open(outnml_file, "r", encoding="utf-8") as out_file:
             assert out_file.read() == expected
 
-
     def test_create_namelist_without_base_file(self, create_namelist_assets, tmp_path):
         """
         Tests create_namelist method without optional base file.
@@ -242,7 +233,6 @@ class TestFV3Forecast:
 """.lstrip()
         with open(outnml_file, "r", encoding="utf-8") as out_file:
             assert out_file.read() == expected
-
 
     def test_forecast_run_cmd(self):
         """
@@ -293,7 +283,6 @@ class TestFV3Forecast:
         config["forecast"]["static"] = {"static-foo-file": str(tmp_path / "foo")}
         return batch_script, config_file, config.data["forecast"]
 
-
     def test_run_direct(self, fv3_mpi_assets, fv3_run_assets):
         _, config_file, config = fv3_run_assets
         expected_command = " ".join(fv3_mpi_assets)
@@ -303,7 +292,6 @@ class TestFV3Forecast:
                 with patch.object(fcstobj, "_config", config):
                     fcstobj.run(cycle=dt.datetime.now())
                 execute.assert_called_once_with(cmd=expected_command)
-
 
     @pytest.mark.parametrize("with_batch_script", [True, False])
     def test_run_dry_run(self, capsys, fv3_mpi_assets, fv3_run_assets, with_batch_script):
@@ -329,7 +317,6 @@ class TestFV3Forecast:
                 fcstobj.run(cycle=dt.datetime.now())
         assert run_expected in capsys.readouterr().out
 
-
     def test_run_submit(self, fv3_run_assets):
         batch_script, config_file, config = fv3_run_assets
         with patch.object(FV3Forecast, "_validate", return_value=True):
@@ -352,39 +339,36 @@ class TestFV3Forecast:
         assert path.is_file()
 
     def test__prepare_config_files(self, create_field_table_update_obj, tmp_path):
-
-        field_table_file = fixture_path("FV3_GFS_v16_update.yaml")
-
         model_configure_file = fixture_path("fruit_config.yaml")
         namelist_file = tmp_path / "namelist.IN"
         namelist_file.touch()
         config_file = tmp_path / "fcst.yaml"
         fcst_config = {
-                "forecast": {
-                    "field_table": create_field_table_update_obj["forecast"]["field_table"],
-                    "model_configure": {
-                        "base_file": model_configure_file,
-                    },
-                    "namelist": {
-                        "base_file": namelist_file.as_posix(),
-                    },
-                    },
-                }
+            "forecast": {
+                "field_table": create_field_table_update_obj["forecast"]["field_table"],
+                "model_configure": {
+                    "base_file": model_configure_file,
+                },
+                "namelist": {
+                    "base_file": namelist_file.as_posix(),
+                },
+            },
+        }
         YAMLConfig.dump_dict(cfg=fcst_config, path=config_file)
         with patch.object(Driver, "_validate", return_value=True):
             forecast = FV3Forecast(config_file=config_file)
         cycle = dt.datetime.now()
         forecast._prepare_config_files(cycle=cycle, run_directory=tmp_path)
 
-        assert (tmp_path / "field_table" ).is_file()
-        assert (tmp_path / "model_configure" ).is_file()
-        assert (tmp_path / "input.nml" ).is_file()
+        assert (tmp_path / "field_table").is_file()
+        assert (tmp_path / "model_configure").is_file()
+        assert (tmp_path / "input.nml").is_file()
 
 
 # MPAS Tests
 
-class TestMPASForecast:
 
+class TestMPASForecast:
     def test_create_namelist(self, tmp_path):
         """
         Test that providing a YAML base input file and a config file will create and update the MPAS
@@ -402,8 +386,8 @@ class TestMPASForecast:
             "base_file": base_file,
             "update_values": {
                 "config": fcst_config["forecast"]["model_configure"]["update_values"],
-                },
-            }
+            },
+        }
 
         # Write it to a file
         fcst_config_file = tmp_path / "fcst.yml"
@@ -429,25 +413,23 @@ class TestMPASForecast:
 
         assert compare_files(expected_file, output_file)
 
-
     @fixture
     def streams_config(self, tmp_path):
-
         template_path = tmp_path / "template.jinja2"
         with open(template_path, "w", encoding="utf-8") as f:
             f.write("roses are {{roses}}, violets are {{violets}}")
 
         fcst_config = {
-                "forecast": {
-                    "streams": {
-                      "template": template_path.as_posix(),
-                      "vars": {
-                          "roses": "red",
-                          "violets": "blue",
-                          },
+            "forecast": {
+                "streams": {
+                    "template": template_path.as_posix(),
+                    "vars": {
+                        "roses": "red",
+                        "violets": "blue",
                     },
                 },
-                }
+            },
+        }
         fcst_config_file = tmp_path / "fcst.yaml"
         YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
         return str(template_path), fcst_config_file
@@ -456,6 +438,7 @@ class TestMPASForecast:
     def test_create_streams(self, capsys, output_stream, streams_config, tmp_path):
         """
         A stream file in MPAS is treated as a template.
+
         Test that providing a Forecast config file with the correct structure will fill in the
         template as requested.
         """
@@ -480,7 +463,6 @@ class TestMPASForecast:
         else:
             assert compare_files(expected, output_stream)
 
-
     def test_schema_file(self):
         """
         Tests that the schema is properly defined with a file value.
@@ -492,19 +474,18 @@ class TestMPASForecast:
         path = Path(forecast.schema_file)
         assert path.is_file()
 
-
     def test__define_boundary_files(self):
         config_file = fixture_path("forecast.yaml")
         with patch.object(Driver, "_validate", return_value=True):
             forecast = MPASForecast(config_file=config_file)
 
-        assert forecast._define_boundary_files() == {}
-
+        assert not forecast._define_boundary_files()
 
     @pytest.mark.parametrize("delimiter", [" ", "\n"])
     def test__mpi_env_variables(self, delimiter, tmp_path):
         config_file = tmp_path / "fcst.yaml"
-        fcst_config = yaml.safe_load("""
+        fcst_config = yaml.safe_load(
+            """
 forecast:
   mpi_settings:
     FI_PROVIDER: efa
@@ -512,16 +493,23 @@ forecast:
     I_MPI_FABRICS: "shm:ofi"
     I_MPI_OFI_LIBRARY_INTERNAL: 0
     I_MPI_OFI_PROVIDER: efa
-""")
+"""
+        )
         YAMLConfig.dump_dict(cfg=fcst_config, path=config_file)
         with patch.object(Driver, "_validate", return_value=True):
             forecast = MPASForecast(config_file=config_file)
 
         output = forecast._mpi_env_variables(delimiter=delimiter)
-        expected = "FI_PROVIDER=efa I_MPI_DEBUG=4 I_MPI_FABRICS=shm:ofi I_MPI_OFI_LIBRARY_INTERNAL=0 I_MPI_OFI_PROVIDER=efa"
-        expected = expected.replace(" ", delimiter)
-        assert output == expected
+        expected = [
+            "FI_PROVIDER=efa",
+            "I_MPI_DEBUG=4",
+            "I_MPI_FABRICS=shm:ofi",
+            "I_MPI_OFI_LIBRARY_INTERNAL=0",
+            "I_MPI_OFI_PROVIDER=efa",
+        ]
 
+        expected = delimiter.join(expected)
+        assert output == expected
 
     def test__prepare_config_files(self, tmp_path):
         namelist_file = tmp_path / "namelist.IN"
@@ -530,21 +518,21 @@ forecast:
         streams_file.touch()
         config_file = tmp_path / "fcst.yaml"
         fcst_config = {
-                "forecast": {
-                    "namelist": {
-                        "base_file": namelist_file.as_posix(),
-                    },
-                    "streams": {
-                        "template": streams_file.as_posix(),
-                        "vars": {},
-                    },
-                    },
-                }
+            "forecast": {
+                "namelist": {
+                    "base_file": namelist_file.as_posix(),
+                },
+                "streams": {
+                    "template": streams_file.as_posix(),
+                    "vars": {},
+                },
+            },
+        }
         YAMLConfig.dump_dict(cfg=fcst_config, path=config_file)
         with patch.object(Driver, "_validate", return_value=True):
             forecast = MPASForecast(config_file=config_file)
         cycle = dt.datetime.now()
         forecast._prepare_config_files(cycle=cycle, run_directory=tmp_path)
 
-        assert (tmp_path / "namelist.atmosphere" ).is_file()
-        assert (tmp_path / "streams.atmosphere" ).is_file()
+        assert (tmp_path / "namelist.atmosphere").is_file()
+        assert (tmp_path / "streams.atmosphere").is_file()

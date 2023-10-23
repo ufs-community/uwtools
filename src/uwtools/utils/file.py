@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime as dt
 from pathlib import Path
-from typing import IO, Generator
+from typing import IO, Generator, Iterator
 
 from uwtools.types import DefinitePath, OptionalPath
 
@@ -48,7 +48,7 @@ FORMAT = _FORMAT()
 
 
 @contextmanager
-def change_dir(path: Path) -> None:
+def change_dir(path: Path) -> Iterator[None]:
     """
     Sets a new working directory within the context.
 
@@ -88,7 +88,7 @@ def handle_existing(directory: DefinitePath, action: str) -> None:
     """
 
     # Try to delete existing run directory if option is delete.
-
+    directory = Path(directory)
     try:
         if action == "delete" and directory.is_dir():
             shutil.rmtree(directory)
