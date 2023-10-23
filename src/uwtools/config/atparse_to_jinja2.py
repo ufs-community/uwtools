@@ -4,13 +4,14 @@ Utilities for rendering Jinja2 templates.
 
 import logging
 import re
-from typing import IO, Any, Generator, Optional
+from typing import IO, Any, Generator
 
+from uwtools.types import OptionalPath
 from uwtools.utils.file import readable, writable
 
 
 def convert(
-    input_file: Optional[str] = None, output_file: Optional[str] = None, dry_run: bool = False
+    input_file: OptionalPath = None, output_file: OptionalPath = None, dry_run: bool = False
 ) -> None:
     """
     Replaces atparse @[] tokens with Jinja2 {{}} equivalents.

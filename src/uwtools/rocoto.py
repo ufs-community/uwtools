@@ -76,7 +76,7 @@ def _rocoto_template_xml() -> DefinitePath:
 
 def _write_rocoto_xml(
     config_file: OptionalPath,
-    rendered_output: DefinitePath,
+    rendered_output: OptionalPath,
 ) -> None:
     """
     Render the Rocoto workflow defined in the given YAML to XML.
@@ -89,13 +89,13 @@ def _write_rocoto_xml(
 
     # Render the template.
     template = J2Template(values=values.data, template_path=_rocoto_template_xml())
-    template.dump(output_path=str(rendered_output))
+    template.dump(output_path=rendered_output)
 
 
 # Public functions
 def realize_rocoto_xml(
     config_file: OptionalPath,
-    rendered_output: DefinitePath,
+    rendered_output: OptionalPath,
 ) -> bool:
     """
     Realize the Rocoto workflow defined in the given YAML as XML. Validate both the YAML input and
@@ -119,7 +119,7 @@ def realize_rocoto_xml(
             # Validate the XML.
             if validate_rocoto_xml(input_xml=temp_file.name):
                 # If no issues were detected, save temp file and report success.
-                shutil.move(temp_file.name, rendered_output)
+                shutil.move(temp_file.name, str(rendered_output))
                 return True
         logging.error("Rocoto validation errors identified in %s", temp_file.name)
         return False
