@@ -21,7 +21,7 @@ from uwtools.tests.support import compare_files, fixture_path
 
 class TestForecast:
 
-    def test_batch_script():
+    def test_batch_script(self):
         expected = """
 #SBATCH --account=user_account
 #SBATCH --nodes=1
@@ -43,7 +43,7 @@ srun --export=NONE test_exec.py
 
 class TestFV3Forecast:
 
-    def test_create_directory_structure(tmp_path):
+    def test_create_directory_structure(self, tmp_path):
         """
         Tests create_directory_structure method given a directory.
         """
@@ -78,11 +78,11 @@ class TestFV3Forecast:
 
 
     @fixture
-    def create_field_table_update_obj():
+    def create_field_table_update_obj(self):
         return YAMLConfig(fixture_path("FV3_GFS_v16_update.yaml"))
 
 
-    def test_create_field_table_with_base_file(create_field_table_update_obj, tmp_path):
+    def test_create_field_table_with_base_file(self, create_field_table_update_obj, tmp_path):
         """
         Tests create_field_table method with optional base file.
         """
@@ -97,7 +97,7 @@ class TestFV3Forecast:
         assert compare_files(expected, outfldtbl_file)
 
 
-    def test_create_field_table_without_base_file(tmp_path):
+    def test_create_field_table_without_base_file(self, tmp_path):
         """
         Tests create_field_table without optional base file.
         """
@@ -108,7 +108,7 @@ class TestFV3Forecast:
         assert compare_files(expected, outfldtbl_file)
 
 
-    def test_create_model_configure(tmp_path):
+    def test_create_model_configure(self, tmp_path):
         """
         Test that providing a YAML base input file and a config file will create and update YAML config
         file.
@@ -143,7 +143,7 @@ class TestFV3Forecast:
         assert compare_files(expected_file, output_file)
 
 
-    def test_create_model_configure_call_private(tmp_path):
+    def test_create_model_configure_call_private(self, tmp_path):
         basefile = str(tmp_path / "base.yaml")
         infile = fixture_path("forecast.yaml")
         outfile = str(tmp_path / "out.yaml")
@@ -160,10 +160,10 @@ class TestFV3Forecast:
 
 
     @fixture
-    def create_namelist_assets(tmp_path):
+    def create_namelist_assets(self, tmp_path):
         return NMLConfig(fixture_path("simple.nml")), tmp_path / "create_out.nml"
 
-    def test_create_namelist_call_private(tmp_path):
+    def test_create_namelist_call_private(self, tmp_path):
         basefile = str(tmp_path / "base.yaml")
         infile = fixture_path("forecast.yaml")
         outfile = str(tmp_path / "out.yaml")
@@ -179,7 +179,7 @@ class TestFV3Forecast:
         )
 
 
-    def test_create_namelist_with_base_file(create_namelist_assets, tmp_path):
+    def test_create_namelist_with_base_file(self, create_namelist_assets, tmp_path):
         """
         Tests create_namelist method with optional base file.
         """
@@ -197,23 +197,23 @@ class TestFV3Forecast:
         YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
         FV3Forecast(fcst_config_file).create_namelist(outnml_file)
         expected = """
-    &salad
-        base = 'kale'
-        fruit = 'banana'
-        vegetable = 'tomato'
-        how_many = 12
-        dressing = 'balsamic'
-        toppings = ,
-        extras = 0
-        dessert = .false.
-        appetizer = ,
-    /
-    """.lstrip()
+&salad
+    base = 'kale'
+    fruit = 'banana'
+    vegetable = 'tomato'
+    how_many = 12
+    dressing = 'balsamic'
+    toppings = ,
+    extras = 0
+    dessert = .false.
+    appetizer = ,
+/
+""".lstrip()
         with open(outnml_file, "r", encoding="utf-8") as out_file:
             assert out_file.read() == expected
 
 
-    def test_create_namelist_without_base_file(create_namelist_assets, tmp_path):
+    def test_create_namelist_without_base_file(self, create_namelist_assets, tmp_path):
         """
         Tests create_namelist method without optional base file.
         """
@@ -229,19 +229,19 @@ class TestFV3Forecast:
         YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
         FV3Forecast(fcst_config_file).create_namelist(outnml_file)
         expected = """
-    &salad
-        base = 'kale'
-        fruit = 'banana'
-        vegetable = 'tomato'
-        how_many = 12
-        dressing = 'balsamic'
-    /
-    """.lstrip()
+&salad
+    base = 'kale'
+    fruit = 'banana'
+    vegetable = 'tomato'
+    how_many = 12
+    dressing = 'balsamic'
+/
+""".lstrip()
         with open(outnml_file, "r", encoding="utf-8") as out_file:
             assert out_file.read() == expected
 
 
-    def test_forecast_run_cmd():
+    def test_forecast_run_cmd(self):
         """
         Tests that the command to be used to run the forecast executable was built successfully.
         """
@@ -270,7 +270,7 @@ class TestFV3Forecast:
             assert mpiexec_expected == fcstobj.run_cmd()
 
     @fixture
-    def fv3_mpi_assets():
+    def fv3_mpi_assets(self):
         return [
             "KMP_AFFINITY=scatter",
             "OMP_NUM_THREADS=1",
@@ -281,7 +281,7 @@ class TestFV3Forecast:
         ]
 
     @fixture
-    def fv3_run_assets(tmp_path):
+    def fv3_run_assets(self, tmp_path):
         batch_script = tmp_path / "batch.sh"
         config_file = fixture_path("forecast.yaml")
         config = YAMLConfig(config_file)
@@ -291,7 +291,7 @@ class TestFV3Forecast:
         return batch_script, config_file, config.data["forecast"]
 
 
-    def test_run_direct(fv3_mpi_assets, fv3_run_assets):
+    def test_run_direct(self, fv3_mpi_assets, fv3_run_assets):
         _, config_file, config = fv3_run_assets
         expected_command = " ".join(fv3_mpi_assets)
         with patch.object(FV3Forecast, "_validate", return_value=True):
@@ -303,7 +303,7 @@ class TestFV3Forecast:
 
 
     @pytest.mark.parametrize("with_batch_script", [True, False])
-    def test_run_dry_run(capsys, fv3_mpi_assets, fv3_run_assets, with_batch_script):
+    def test_run_dry_run(self, capsys, fv3_mpi_assets, fv3_run_assets, with_batch_script):
         logging.getLogger().setLevel(logging.INFO)
         batch_script, config_file, config = fv3_run_assets
         if with_batch_script:
@@ -327,7 +327,7 @@ class TestFV3Forecast:
         assert run_expected in capsys.readouterr().out
 
 
-    def test_run_submit(fv3_run_assets):
+    def test_run_submit(self, fv3_run_assets):
         batch_script, config_file, config = fv3_run_assets
         with patch.object(FV3Forecast, "_validate", return_value=True):
             with patch.object(scheduler, "execute") as execute:
@@ -336,7 +336,7 @@ class TestFV3Forecast:
                     fcstobj.run(cycle=dt.datetime.now())
                 execute.assert_called_once_with(cmd=f"sbatch {batch_script}")
 
-    def test_schema_file():
+    def test_schema_file(self):
         """
         Tests that the schema is properly defined with a file value.
         """
@@ -353,7 +353,7 @@ class TestFV3Forecast:
 
 class TestMPASForecast:
 
-    def test_create_namelist(tmp_path):
+    def test_create_namelist(self, tmp_path):
         """
         Test that providing a YAML base input file and a config file will create and update the MPAS
         namelist, including the cycle date.
@@ -398,11 +398,11 @@ class TestMPASForecast:
         assert compare_files(expected_file, output_file)
 
 
-    def test_create_streams(tmp_path):
+    def test_create_streams(self, tmp_path):
         pass
 
 
-    def test_schema_file():
+    def test_schema_file(self):
         """
         Tests that the schema is properly defined with a file value.
         """
@@ -414,13 +414,13 @@ class TestMPASForecast:
         assert path.is_file()
 
 
-    def test__define_boundary_files():
+    def test__define_boundary_files(self):
         pass
 
 
-    def test__mpi_env_variables():
+    def test__mpi_env_variables(self):
         pass
 
 
-    def test__prepare_config_files():
+    def test__prepare_config_files(self):
         pass
