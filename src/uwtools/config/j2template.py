@@ -8,8 +8,8 @@ from typing import List, Optional, Set
 
 from jinja2 import BaseLoader, Environment, FileSystemLoader, Template, meta
 
-from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import readable
+from uwtools.types import OptionalPath
+from uwtools.utils.file import readable, writable
 
 
 class J2Template:
@@ -43,7 +43,7 @@ class J2Template:
 
     # Public methods
 
-    def dump(self, output_path: DefinitePath) -> None:
+    def dump(self, output_path: OptionalPath) -> None:
         """
         Write rendered template to the path provided.
 
@@ -51,7 +51,7 @@ class J2Template:
         """
         msg = f"Writing rendered template to output file: {output_path}"
         logging.debug(msg)
-        with open(output_path, "w+", encoding="utf-8") as f:
+        with writable(output_path) as f:
             print(self.render(), file=f)
 
     def render(self) -> str:
