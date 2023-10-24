@@ -18,8 +18,8 @@ import uwtools.config.core
 import uwtools.config.templater
 import uwtools.config.validator
 import uwtools.drivers.forecast
-from uwtools.logging import log, setup_logging
 import uwtools.rocoto
+from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_type
 
 FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.yaml]
