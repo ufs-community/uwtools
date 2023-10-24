@@ -8,7 +8,7 @@ from typing import List, Optional, Set
 from jinja2 import BaseLoader, Environment, FileSystemLoader, Template, meta
 
 from uwtools.logging import log
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.types import OptionalPath
 from uwtools.utils.file import readable, writable
 
 
