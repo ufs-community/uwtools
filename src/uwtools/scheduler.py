@@ -4,12 +4,12 @@ Job Scheduling.
 
 from __future__ import annotations
 
-import logging
 import re
 from collections import UserDict, UserList
 from collections.abc import Mapping
 from typing import Any, Dict, List
 
+from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils import Memory
 from uwtools.utils.file import writable
@@ -179,7 +179,7 @@ class JobScheduler(UserDict):
         if "scheduler" not in props:
             raise KeyError(f"No scheduler defined in props: [{', '.join(props.keys())}]")
         name = props["scheduler"]
-        logging.debug("Getting '%s' scheduler", name)
+        log.debug("Getting '%s' scheduler", name)
         schedulers = {"slurm": Slurm, "pbs": PBS, "lsf": LSF}
         try:
             scheduler = schedulers[name]

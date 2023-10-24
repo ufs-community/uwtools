@@ -2,11 +2,11 @@
 This file contains the specific drivers for a particular app, using the facade pattern base class.
 """
 
-import logging
 import shutil
 
 from uwtools.drivers.facade import Facade
 from uwtools.exceptions import UWError
+from uwtools.logging import log
 from uwtools.utils.file import FORMAT, get_file_type
 from uwtools.utils.processing import execute
 
@@ -47,7 +47,7 @@ class SRW210(Facade):
             shutil.copy2(config_file, "config.yaml")
         else:
             msg = f"Bad file type -- {file_type}. Cannot load configuration!"
-            logging.critical(msg)
+            log.critical(msg)
             raise ValueError(msg)
 
     def validate_config(self, config_file: str) -> None:

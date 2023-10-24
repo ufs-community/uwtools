@@ -20,6 +20,7 @@ from pytest import fixture, raises
 from uwtools import exceptions
 from uwtools.config import core
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path, logged
 from uwtools.utils.file import FORMAT, path_if_it_exists, writable
 
@@ -31,7 +32,7 @@ def test_compare_config(caplog, fmt, salad_base):
     """
     Compare two config objects.
     """
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     cfgobj = core.format_to_config(fmt)(fixture_path(f"simple.{fmt}"))
     if fmt == FORMAT.ini:
         salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini
@@ -55,7 +56,7 @@ def test_compare_config(caplog, fmt, salad_base):
 
 
 def test_compare_configs_good(compare_configs_assets, caplog):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     _, a, b = compare_configs_assets
     assert core.compare_configs(
         config_a_path=a, config_a_format=FORMAT.yaml, config_b_path=b, config_b_format=FORMAT.yaml
@@ -64,7 +65,7 @@ def test_compare_configs_good(compare_configs_assets, caplog):
 
 
 def test_compare_configs_changed_value(compare_configs_assets, caplog):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     d, a, b = compare_configs_assets
     d["baz"]["qux"] = 11
     with writable(b) as f:
@@ -76,7 +77,7 @@ def test_compare_configs_changed_value(compare_configs_assets, caplog):
 
 
 def test_compare_configs_missing_key(compare_configs_assets, caplog):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     d, a, b = compare_configs_assets
     del d["baz"]
     with writable(b) as f:
@@ -89,7 +90,7 @@ def test_compare_configs_missing_key(compare_configs_assets, caplog):
 
 
 def test_compare_configs_bad_format(caplog):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     with raises(UWConfigError) as e:
         core.compare_configs(
             config_a_path="/not/used",
@@ -187,7 +188,7 @@ def test_dereference_exceptions(caplog, tmp_path):
     """
     Test that dereference handles some standard mistakes.
     """
-    logging.getLogger().setLevel(logging.DEBUG)
+    log.setLevel(logging.DEBUG)
     path = tmp_path / "cfg.yaml"
     with open(path, "w", encoding="utf-8") as f:
         print(
@@ -204,7 +205,7 @@ type_prob: '{{ list_a / \"a\" }}'  # TypeError
         )
     cfgobj = core.YAMLConfig(config_file=path)
     cfgobj.dereference()
-    logging.info("HELLO")
+    log.info("HELLO")
     raised = [record.message for record in caplog.records if "raised" in record.message]
     assert "ZeroDivisionError" in raised[0]
     assert "TypeError" in raised[1]
@@ -425,7 +426,7 @@ def test_realize_config_dry_run(caplog):
     """
     Test that providing a YAML base file with a dry-run flag will print an YAML config file.
     """
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     infile = fixture_path("fruit_config.yaml")
     yaml_config = core.YAMLConfig(infile)
     yaml_config.dereference_all()
@@ -615,7 +616,7 @@ def test__realize_config_update(realize_config_testobj, tmp_path):
 
 
 def test__realize_config_values_needed(caplog, tmp_path):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
@@ -650,7 +651,7 @@ def test_values_needed_ini(caplog):
     Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
     and keys set to empty.
     """
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     core.realize_config(
         input_file=fixture_path("simple3.ini"),
         input_format=FORMAT.ini,
@@ -689,7 +690,7 @@ def test_values_needed_nml(caplog):
     Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
     and keys set to empty.
     """
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     core.realize_config(
         input_file=fixture_path("simple3.nml"),
         input_format=FORMAT.nml,
@@ -725,7 +726,7 @@ def test_values_needed_yaml(caplog):
     Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
     and keys set to empty.
     """
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     core.realize_config(
         input_file=fixture_path("srw_example.yaml"),
         input_format=FORMAT.yaml,
@@ -915,7 +916,7 @@ def test_YAMLConfig__load_paths_failure_stdin_plus_relpath(caplog):
     # provide YAML with an include directive specifying a relative path. Since a relative path
     # is meaningless relative to stdin, assert that an appropriate error is logged and exception
     # raised.
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     relpath = "../bar/baz.yaml"
     with patch.object(core.sys, "stdin", new=StringIO(f"foo: {core.INCLUDE_TAG} [{relpath}]")):
         with raises(UWConfigError) as e:

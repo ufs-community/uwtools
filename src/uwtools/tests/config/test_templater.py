@@ -11,6 +11,7 @@ import yaml
 from pytest import fixture
 
 from uwtools.config import templater
+from uwtools.logging import log
 from uwtools.tests.support import logged
 
 
@@ -52,7 +53,7 @@ def test_render(values_file, template, tmp_path):
 
 
 def test_render_dry_run(caplog, values_file, template):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     render_helper(
         input_file=template, values_file=values_file, output_file="/dev/null", dry_run=True
     )
@@ -61,7 +62,7 @@ def test_render_dry_run(caplog, values_file, template):
 
 def test_render_values_missing(caplog, values_file, template):
     # Read in the config, remove the "roses" key, then re-write it.
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     with open(values_file, "r", encoding="utf-8") as f:
         cfgobj = yaml.safe_load(f.read())
     del cfgobj["roses"]
@@ -73,7 +74,7 @@ def test_render_values_missing(caplog, values_file, template):
 
 
 def test_render_values_needed(caplog, values_file, template):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     render_helper(
         input_file=template, values_file=values_file, output_file="/dev/null", values_needed=True
     )
@@ -82,7 +83,7 @@ def test_render_values_needed(caplog, values_file, template):
 
 
 def test__report(caplog):
-    logging.getLogger().setLevel(logging.DEBUG)
+    log.setLevel(logging.DEBUG)
     expected = """
 Internal arguments:
 ---------------------------------------------------------------------
