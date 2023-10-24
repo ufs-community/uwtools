@@ -2,7 +2,6 @@
 Support for creating Rocoto XML workflow documents.
 """
 
-import logging
 import shutil
 import tempfile
 from importlib import resources
@@ -12,6 +11,7 @@ from lxml import etree
 import uwtools.config.validator
 from uwtools.config.core import YAMLConfig
 from uwtools.config.j2template import J2Template
+from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import readable
 
@@ -121,9 +121,9 @@ def realize_rocoto_xml(
                 # If no issues were detected, save temp file and report success.
                 shutil.move(temp_file.name, str(rendered_output))
                 return True
-        logging.error("Rocoto validation errors identified in %s", temp_file.name)
+        log.error("Rocoto validation errors identified in %s", temp_file.name)
         return False
-    logging.error("YAML validation errors identified in %s", config_file)
+    log.error("YAML validation errors identified in %s", config_file)
     return False
 
 
@@ -145,9 +145,9 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
 
     # Log validation errors.
     errors = str(etree.RelaxNG.error_log).split("\n")
-    log_method = logging.error if len(errors) else logging.info
+    log_method = log.error if len(errors) else log.info
     log_method("%s Rocoto validation error%s found", len(errors), "" if len(errors) == 1 else "s")
     for line in errors:
-        logging.error(line)
+        log.error(line)
 
     return success

@@ -2,13 +2,13 @@
 Unix-based, threaded, local file copying.
 """
 
-import logging
 import shutil
 from concurrent.futures import ThreadPoolExecutor, wait
 from pathlib import Path
 from typing import List, Tuple
 
 from uwtools.files.model import File
+from uwtools.logging import log
 
 
 class Copier:
@@ -41,7 +41,7 @@ def _copy(src: Path, dst: Path) -> None:
 
     Directories are copied recursively.
     """
-    logging.debug("Copying %s to %s", src, dst)
+    log.debug("Copying %s to %s", src, dst)
     if src.is_file():
         shutil.copy(src, dst)
     else:

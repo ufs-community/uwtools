@@ -2,13 +2,14 @@
 Gateway for interacting with S3.
 """
 
-import logging
 import os
 import pathlib
 from typing import Optional
 
 import boto3
 from botocore.exceptions import ClientError
+
+from uwtools.logging import log
 
 S3_CLIENT = boto3.client("s3")
 
@@ -46,6 +47,6 @@ def upload_file(source_path: str, bucket: str, target_name: Optional[str] = None
     try:
         S3_CLIENT.upload_file(source_path, bucket, target_name)
     except ClientError as error:
-        logging.error(error)
+        log.error(error)
         return False
     return True

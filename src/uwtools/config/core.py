@@ -7,7 +7,6 @@ from __future__ import annotations
 import configparser
 import copy
 import json
-import logging
 import os
 import re
 import sys
@@ -22,7 +21,7 @@ import yaml
 
 from uwtools.config.j2template import J2Template
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import MSGWIDTH
+from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import FORMAT, get_file_type, readable, writable
 
@@ -174,7 +173,7 @@ class Config(ABC, UserDict):
         for sect, keys in diffs.items():
             for key in keys:
                 msg = f"{sect}: {key:>15}: {keys[key]}"
-                logging.info(msg)
+                log.info(msg)
 
         return not diffs
 
@@ -260,13 +259,13 @@ class Config(ABC, UserDict):
                         except Exception as e:
                             # Fail on any other exception...something is probably wrong.
                             msg = f"{key}: {template}"
-                            logging.exception(msg)
+                            log.exception(msg)
                             raise e
 
                         data.append(rendered)
                         for tmpl, err in error_catcher.items():
                             msg = f"{func_name}: {tmpl} raised {err}"
-                            logging.debug(msg)
+                            log.debug(msg)
 
                     for tmpl, rendered in zip(templates, data):
                         v_str = v_str.replace(tmpl, rendered)
@@ -670,9 +669,9 @@ def compare_configs(
 
     cfg_a = format_to_config(config_a_format)(config_a_path)
     cfg_b = format_to_config(config_b_format)(config_b_path)
-    logging.info("- %s", config_a_path)
-    logging.info("+ %s", config_b_path)
-    logging.info("-" * MSGWIDTH)
+    log.info("- %s", config_a_path)
+    log.info("+ %s", config_b_path)
+    log.info("-" * MSGWIDTH)
     return cfg_a.compare_config(cfg_b.data)
 
 
@@ -754,7 +753,7 @@ def realize_config(
     if values_needed:
         return _realize_config_values_needed(input_obj)
     if dry_run:
-        logging.info(input_obj)
+        log.info(input_obj)
     else:
         format_to_config(output_format).dump_dict(path=output_file, cfg=input_obj.data)
     return True
@@ -769,7 +768,7 @@ def _log_and_error(msg: str) -> Exception:
 
     :param msg: The error message to log and to associate with raised exception.
     """
-    logging.error(msg)
+    log.error(msg)
     return UWConfigError(msg)
 
 
@@ -785,7 +784,7 @@ def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
         output_format == FORMAT.nml and input_obj.depth != 2
     ):
         msg = "Cannot write depth-%s input to type-'%s' output" % (input_obj.depth, output_format)
-        logging.error(msg)
+        log.error(msg)
         raise UWConfigError(msg)
 
 
@@ -801,15 +800,15 @@ def _realize_config_update(
     :return: The input config, possibly updated.
     """
     if values_file:
-        logging.debug("Before update, config has depth %s", input_obj.depth)
+        log.debug("Before update, config has depth %s", input_obj.depth)
         values_format = values_format or get_file_type(values_file)
         values_obj = format_to_config(values_format)(config_file=values_file)
-        logging.debug("Values config has depth %s", values_obj.depth)
+        log.debug("Values config has depth %s", values_obj.depth)
         input_obj.update_values(values_obj)
         input_obj.dereference_all()
-        logging.debug("After update, input config has depth %s", input_obj.depth)
+        log.debug("After update, input config has depth %s", input_obj.depth)
     else:
-        logging.debug("Input config has depth %s", input_obj.depth)
+        log.debug("Input config has depth %s", input_obj.depth)
     return input_obj
 
 
@@ -820,15 +819,15 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
     :param input_obj: The config to update.
     """
     complete, empty, template = input_obj.characterize_values(input_obj.data, parent="")
-    logging.info("Keys that are complete:")
+    log.info("Keys that are complete:")
     for var in complete:
-        logging.info(var)
-    logging.info("")
-    logging.info("Keys that have unfilled Jinja2 templates:")
+        log.info(var)
+    log.info("")
+    log.info("Keys that have unfilled Jinja2 templates:")
     for var in template:
-        logging.info(var)
-    logging.info("")
-    logging.info("Keys that are set to empty:")
+        log.info(var)
+    log.info("")
+    log.info("Keys that are set to empty:")
     for var in empty:
-        logging.info(var)
+        log.info(var)
     return True

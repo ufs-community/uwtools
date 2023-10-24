@@ -16,6 +16,7 @@ from uwtools.config.core import NMLConfig, YAMLConfig
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
+from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path
 
 
@@ -332,7 +333,7 @@ def test_run_direct(fv3_mpi_assets, fv3_run_assets):
 
 @pytest.mark.parametrize("with_batch_script", [True, False])
 def test_FV3Forecast_run_dry_run(capsys, fv3_mpi_assets, fv3_run_assets, with_batch_script):
-    logging.getLogger().setLevel(logging.INFO)
+    log.setLevel(logging.INFO)
     batch_script, config_file, config = fv3_run_assets
     if with_batch_script:
         batch_components = [

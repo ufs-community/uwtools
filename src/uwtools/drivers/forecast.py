@@ -3,7 +3,6 @@ Drivers for forecast models.
 """
 
 
-import logging
 import os
 import sys
 from collections.abc import Mapping
@@ -14,6 +13,7 @@ from typing import Dict, Optional
 
 from uwtools.config.core import FieldTableConfig, NMLConfig, YAMLConfig
 from uwtools.drivers.driver import Driver
+from uwtools.logging import log
 from uwtools.scheduler import BatchScript
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import handle_existing
@@ -72,7 +72,7 @@ class FV3Forecast(Driver):
         # Exit program with error if caller chooses to quit.
 
         if exist_act == "quit" and os.path.isdir(run_directory):
-            logging.critical("User chose quit option when creating directory")
+            log.critical("User chose quit option when creating directory")
             sys.exit(1)
 
         # Delete or rename directory if it exists.
@@ -83,7 +83,7 @@ class FV3Forecast(Driver):
 
         for subdir in ("INPUT", "RESTART"):
             path = os.path.join(run_directory, subdir)
-            logging.info("Creating directory: %s", path)
+            log.info("Creating directory: %s", path)
             os.makedirs(path)
 
     def create_field_table(self, output_path: OptionalPath) -> None:
@@ -170,7 +170,7 @@ class FV3Forecast(Driver):
             if self._dry_run:
                 # Apply switch to allow user to view the run command of config.
                 # This will not run the job.
-                logging.info("Batch Script:")
+                log.info("Batch Script:")
                 batch_script.dump(None)
                 return True
 
@@ -180,7 +180,7 @@ class FV3Forecast(Driver):
         pre_run = self._mpi_env_variables(" ")
         full_cmd = f"{pre_run} {self.run_cmd()}"
         if self._dry_run:
-            logging.info("Would run: ")
+            log.info("Would run: ")
             print(full_cmd, file=sys.stdout)
             return True
 
