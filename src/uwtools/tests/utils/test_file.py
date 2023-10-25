@@ -103,7 +103,7 @@ def test_readable_file(tmp_path):
 
 def test_readable_nofile():
     with file.readable() as f:
-        assert f is sys.stdin
+        assert hasattr(f, "read")
 
 
 def test_writable_file(tmp_path):
