@@ -2,15 +2,15 @@
 Support for creating Rocoto XML workflow documents.
 """
 
-import shutil
 import tempfile
 from importlib import resources
+from pathlib import Path
 
 from lxml import etree
 
-import uwtools.config.validator
 from uwtools.config.core import YAMLConfig
 from uwtools.config.j2template import J2Template
+from uwtools.config.validator import validate_yaml
 from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import readable
@@ -95,7 +95,7 @@ def _write_rocoto_xml(
 # Public functions
 def realize_rocoto_xml(
     config_file: OptionalPath,
-    rendered_output: OptionalPath,
+    rendered_output: OptionalPath = None,
 ) -> bool:
     """
     Realize the Rocoto workflow defined in the given YAML as XML. Validate both the YAML input and
@@ -106,25 +106,23 @@ def realize_rocoto_xml(
     :return: Did the input and output files conform to theirr schemas?
     """
 
-    # Validate the YAML.
-    if uwtools.config.validator.validate_yaml(
-        config_file=config_file, schema_file=_rocoto_schema_yaml()
-    ):
-        # Render the template to a temporary file.
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            _write_rocoto_xml(
-                config_file=config_file,
-                rendered_output=temp_file.name,
-            )
-            # Validate the XML.
-            if validate_rocoto_xml(input_xml=temp_file.name):
-                # If no issues were detected, save temp file and report success.
-                shutil.move(temp_file.name, str(rendered_output))
-                return True
+    if not validate_yaml(config_file=config_file, schema_file=_rocoto_schema_yaml()):
+        log.error("YAML validation errors identified in %s", config_file)
+        return False
+
+    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+        _write_rocoto_xml(config_file=config_file, rendered_output=temp_file.name)
+
+    if not validate_rocoto_xml(input_xml=temp_file.name):
         log.error("Rocoto validation errors identified in %s", temp_file.name)
         return False
-    log.error("YAML validation errors identified in %s", config_file)
-    return False
+
+    if rendered_output is None:
+        with open(temp_file.name, "r", encoding="utf-8") as f:
+            print(f.read())
+    else:
+        Path(temp_file.name).rename(rendered_output)
+    return True
 
 
 def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
