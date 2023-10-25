@@ -18,7 +18,7 @@ from uwtools.config.j2template import J2Template
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import change_dir, readable, writable
+from uwtools.utils.file import readable, writable
 from uwtools.utils.processing import execute
 
 
@@ -79,10 +79,10 @@ class Forecast(Driver, ABC):
 
     def run(self, cycle: datetime) -> bool:
         """
-        Runs FV3 either locally or via a batch-script submission.
+        Runs the forecast either locally or via a batch-script submission.
 
-        :param cycle: the date and start time for the forecast
-        :return: Did the FV3 run exit with success status?
+        :param cycle: The date and start time for the forecast.
+        :return: Did the model run exit with success status?
         """
         # Prepare directories.
         run_directory = Path(self._config["run_dir"])
@@ -116,8 +116,7 @@ class Forecast(Driver, ABC):
             print(full_cmd, file=sys.stdout)
             return True
 
-        with change_dir(run_directory):
-            result = execute(cmd=full_cmd)
+        result = execute(cmd=full_cmd, cwd=run_directory)
         return result.success
 
     # Private methods
@@ -126,6 +125,9 @@ class Forecast(Driver, ABC):
         """
         Prepares parameters to generate the lateral boundary condition (LBCS) forecast hours from an
         external intput data source, e.g. GFS, RAP, etc.
+
+        :param lbcs_config: The section of the config file specifying the lateral boundary
+            conditions settings.
 
         :return: The offset hours between the cycle and the external input data, the hours between
             LBC ingest, and the last hour of the external input data forecast
@@ -139,18 +141,27 @@ class Forecast(Driver, ABC):
         """
         Sets the names of files used at boundary times that must be staged for a limited area
         forecast run.
+
+        :return: A dict of boundary file names mapped to source input file paths
         """
 
     @abstractmethod
     def _mpi_env_variables(self, delimiter: str = " ") -> str:
         """
         Sets the environment variables needed for running the mpi command.
+
+        :param delimiter: The delimiter to be used between items in the configuration dictionary.
+
+        :return: A bash-formatted string of MPI environment variables.
         """
 
     @abstractmethod
     def _prepare_config_files(self, cycle: datetime, run_directory: DefinitePath) -> None:
         """
         Calls the methods for the set of configuration files neeed by the given model.
+
+        :param cycle: The date and start time for the forecast.
+        :param run_directory: Path of desired run directory.
         """
 
 
@@ -207,7 +218,7 @@ class FV3Forecast(Forecast):
         """
         Uses the forecast config object to create a model_configure.
 
-        :param cycle: the date and start time for the forecast
+        :param cycle: The date and start time for the forecast.
         :param output_path: Optional location of the output model_configure file.
         """
         self._create_user_updated_config(
@@ -243,12 +254,14 @@ class FV3Forecast(Forecast):
         )
 
     @property
-    def schema_file(self) -> str:
+    def schema_file(self) -> Path:
         """
         The path to the file containing the schema to validate the config file against.
+
+        :return: The string path to the schema file.
         """
         with resources.as_file(resources.files("uwtools.resources")) as path:
-            return (path / "FV3Forecast.jsonschema").as_posix()
+            return path / "FV3Forecast.jsonschema"
 
     # Private methods
 
@@ -277,6 +290,9 @@ class FV3Forecast(Forecast):
     def _prepare_config_files(self, cycle: datetime, run_directory: DefinitePath) -> None:
         """
         Collect all the configuration files needed for FV3.
+
+        :param cycle: The date and start time for the forecast.
+        :param run_directory: Path of desired run directory.
         """
         run_directory = Path(run_directory)
         self.create_field_table(run_directory / "field_table")
@@ -285,9 +301,11 @@ class FV3Forecast(Forecast):
 
     def _mpi_env_variables(self, delimiter: str = " ") -> str:
         """
-        Set the environment variables needed for the MPI job.
+        Sets the environment variables needed for running the mpi command.
 
-        :return: A bash string of environment variables
+        :param delimiter: The delimiter to be used between items in the configuration dictionary.
+
+        :return: A bash-formatted string of MPI environment variables.
         """
         envvars = {
             "KMP_AFFINITY": "scatter",
@@ -321,6 +339,7 @@ class MPASForecast(Forecast):
         Uses an object with user supplied values and an optional namelist base file to create an
         output namelist file. Will "dereference" the base file.
 
+        :param cycle: The date and start time for the forecast.
         :param output_path: Optional location of output namelist.
         """
         self._create_user_updated_config(
@@ -342,12 +361,14 @@ class MPASForecast(Forecast):
     def create_streams(self, output_path: OptionalPath) -> None:
         """
         Create the streams file from a template.
+
+        :param output_path: Optional location of output streams file.
         """
 
         template_file = self._config["streams"]["template"]
         values = self._config["streams"]["vars"]
 
-        with readable(template_file) as f:
+        with open(template_file, "r", encoding="utf-8") as f:
             template_str = f.read()
 
         template = J2Template(values=values, template_str=template_str)
@@ -355,30 +376,41 @@ class MPASForecast(Forecast):
             print(template.render(), file=f)
 
     @property
-    def schema_file(self) -> str:
+    def schema_file(self) -> Path:
         """
         The path to the file containing the schema to validate the config file against.
+
+        :return: The string path to the schema file.
         """
         with resources.as_file(resources.files("uwtools.resources")) as path:
-            return (path / "MPASForecast.jsonschema").as_posix()
+            return path / "MPASForecast.jsonschema"
 
     # Private methods
 
     def _define_boundary_files(self) -> Dict[str, str]:
         """
         No boundary files are currently needed for MPAS global support.
+
+        :return: A dict of boundary file names mapped to source input file paths
         """
         return {}
 
     def _mpi_env_variables(self, delimiter=" ") -> str:
         """
-        Returns a bash string of environment variables needed to run the MPI job.
+        Sets the environment variables needed for running the mpi command.
+
+        :param delimiter: The delimiter to be used between items in the configuration dictionary.
+
+        :return: A bash-formatted string of MPI environment variables.
         """
         return delimiter.join([f"{k}={v}" for k, v in self._config.get("mpi_settings", {}).items()])
 
     def _prepare_config_files(self, cycle: datetime, run_directory: DefinitePath) -> None:
         """
         Collect all the configuration files needed for MPAS.
+
+        :param cycle: The date and start time for the forecast.
+        :param run_directory: Path of desired run directory.
         """
         run_directory = Path(run_directory)
         self.create_namelist(cycle, run_directory / "namelist.atmosphere")

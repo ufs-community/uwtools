@@ -56,6 +56,9 @@ class Driver(ABC):
     def create_directory_structure(run_directory: DefinitePath, exist_act="delete"):
         """
         Creates the run directory for the forecast.
+
+        :param run_directory: Path of desired run directory.
+        :param exist_act: caller-specified action to delete, rename, or quit.
         """
         Driver._create_run_directory(run_directory, exist_act)
 
@@ -80,7 +83,7 @@ class Driver(ABC):
     @abstractmethod
     def run(self, cycle: datetime) -> bool:
         """
-        Run the NWP tool.
+        Run the NWP tool for a given date and time.
 
         :param cycle: The time stamp of the cycle to run.
         :return: Did the driver exit with success status?
@@ -148,18 +151,21 @@ class Driver(ABC):
     # Private methods
 
     @staticmethod
-    def _create_run_directory(run_dir: DefinitePath, exist_act="delete") -> None:
+    def _create_run_directory(run_directory: DefinitePath, exist_act="delete") -> None:
         """
         Makes the run directory for the driver.
 
-        If it already exists, handles it based on the caller instruction.
+        If it already exists, handles it based on the caller-specified action.
+
+        :param run_directory: Path of desired run directory.
+        :param exist_act: caller-specified action to delete, rename, or quit.
         """
         if exist_act not in ["delete", "rename", "quit"]:
             raise ValueError(f"Bad argument: {exist_act}")
 
         # Exit program with error if caller chooses to quit.
 
-        run_dir = Path(run_dir)
+        run_dir = Path(run_directory)
         if exist_act == "quit" and run_dir.is_dir():
             logging.critical("User chose quit option when creating directory")
             sys.exit(1)

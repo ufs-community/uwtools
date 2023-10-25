@@ -10,7 +10,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime as dt
 from pathlib import Path
-from typing import IO, Generator, Iterator
+from typing import IO, Generator
 
 from uwtools.types import DefinitePath, OptionalPath
 
@@ -45,22 +45,6 @@ class _FORMAT:
 
 
 FORMAT = _FORMAT()
-
-
-@contextmanager
-def change_dir(path: Path) -> Iterator[None]:
-    """
-    Sets a new working directory within the context.
-
-    :param path: The path to change to.
-    """
-
-    origin = Path().absolute()
-    try:
-        os.chdir(path)
-        yield
-    finally:
-        os.chdir(origin)
 
 
 def get_file_type(path: DefinitePath) -> str:

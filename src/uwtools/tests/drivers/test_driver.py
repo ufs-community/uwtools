@@ -117,7 +117,7 @@ def test_run_cmd_expected(mpi_config, tmp_path):
     YAMLConfig.dump_dict(config_file, mpi_config)
     with patch.object(Driver, "_validate", return_value=True):
         driver = ConcreteDriver(config_file=config_file)
-    driver._config = driver._experiment_config.get("component", {})
+    driver._config = driver._experiment_config["component"]
     assert driver.run_cmd() == "srun bar foo"
 
 
@@ -127,7 +127,7 @@ def test_run_cmd_no_runtime_info(mpi_config, tmp_path):
     YAMLConfig.dump_dict(config_file, mpi_config)
     with patch.object(Driver, "_validate", return_value=True):
         driver = ConcreteDriver(config_file=config_file)
-    driver._config = driver._experiment_config.get("component", {})
+    driver._config = driver._experiment_config["component"]
     with raises(KeyError):
         driver.run_cmd()
 
@@ -137,7 +137,7 @@ def test_scheduler():
     with patch.object(Driver, "_validate", return_value=True):
         concretedriver = ConcreteDriver(config_file=config_file)
         # pylint: disable=pointless-statement
-        with patch.object(driver.JobScheduler, "get_scheduler") as _get_scheduler:
+        with patch.object(driver.JobScheduler, "get_scheduler") as get_scheduler:
             concretedriver.scheduler
     _get_scheduler.assert_called_once_with({})
 
