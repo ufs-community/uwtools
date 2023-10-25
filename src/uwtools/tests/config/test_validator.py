@@ -76,30 +76,6 @@ def write_as_json(data: Dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
-def test_validate_yaml_fail_bad_dir_top(caplog, config, config_file, schema, schema_file, tmp_path):
-    # Specify a non-existent directory for the topmost directory value.
-    log.setLevel(logging.INFO)
-    d = str(tmp_path / "no-such-dir")
-    config["dir"] = d
-    write_as_json(config, config_file)
-    write_as_json(schema, schema_file)
-    assert not validator.validate_yaml(schema_file=schema_file, config_file=config_file)
-    assert len([x for x in caplog.records if f"Path does not exist: {d}" in x.message]) == 1
-
-
-def test_validate_yaml_fail_bad_dir_nested(
-    caplog, config, config_file, schema, schema_file, tmp_path
-):
-    # Specify a non-existent directory for the nested directory value.
-    log.setLevel(logging.INFO)
-    d = str(tmp_path / "no-such-dir")
-    config["sub"]["dir"] = d
-    write_as_json(config, config_file)
-    write_as_json(schema, schema_file)
-    assert not validator.validate_yaml(schema_file=schema_file, config_file=config_file)
-    assert len([x for x in caplog.records if f"Path does not exist: {d}" in x.message]) == 1
-
-
 def test_validate_yaml_fail_bad_enum_val(caplog, config, config_file, schema, schema_file):
     # Specify an invalid enum value.
     log.setLevel(logging.INFO)
@@ -133,7 +109,7 @@ def test_validate_yaml_pass(config, config_file, schema, schema_file):
 def rocoto_assets():
     with resources.as_file(resources.files("uwtools.resources")) as resc:
         schema_file = resc / "rocoto.jsonschema"
-    kwargs = {"schema_file": schema_file, "config_file": "/not/used", "check_paths": False}
+    kwargs = {"schema_file": schema_file, "config_file": "/not/used"}
     config = {
         "workflow": {
             "cycledefs": {"howdy": ["202209290000 202209300000 06:00:00"]},
@@ -242,22 +218,6 @@ def test_validate_yaml_rocoto_valid(rocoto_assets):
     with patch.object(validator, "YAMLConfig") as YAMLConfig:
         YAMLConfig().data = config
         assert validator.validate_yaml(**kwargs)
-
-
-def test__bad_paths_top(config, schema, tmp_path):
-    d = str(tmp_path / "no-such-dir")
-    config["dir"] = d
-    assert validator._bad_paths(config, schema) == [d]
-
-
-def test__bad_paths_nested(config, schema, tmp_path):
-    d = str(tmp_path / "no-such-dir")
-    config["sub"]["dir"] = d
-    assert validator._bad_paths(config, schema) == [d]
-
-
-def test__bad_paths_none(config, schema):
-    assert not validator._bad_paths(config, schema)
 
 
 def test__validation_errors_bad_enum_value(config, schema):
