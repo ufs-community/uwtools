@@ -533,7 +533,7 @@ class YAMLConfig(Config):
         loader = self._yaml_loader
         with readable(config_file) as f:
             try:
-                cfg = yaml.load(f, Loader=loader)
+                cfg = yaml.load(f.read(), Loader=loader)
             except yaml.constructor.ConstructorError as e:
                 if e.problem:
                     if "unhashable" in e.problem:

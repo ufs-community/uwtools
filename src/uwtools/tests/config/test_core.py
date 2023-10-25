@@ -7,6 +7,7 @@ import datetime
 import filecmp
 import logging
 import os
+import sys
 from collections import OrderedDict
 from io import StringIO
 from pathlib import Path
@@ -22,7 +23,7 @@ from uwtools.config import core
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path, logged
-from uwtools.utils.file import FORMAT, path_if_it_exists, writable
+from uwtools.utils.file import FORMAT, _stdinproxy, path_if_it_exists, writable
 
 # Test functions
 
@@ -917,8 +918,9 @@ def test_YAMLConfig__load_paths_failure_stdin_plus_relpath(caplog):
     # is meaningless relative to stdin, assert that an appropriate error is logged and exception
     # raised.
     log.setLevel(logging.INFO)
+    _stdinproxy.cache_clear()
     relpath = "../bar/baz.yaml"
-    with patch.object(core.sys, "stdin", new=StringIO(f"foo: {core.INCLUDE_TAG} [{relpath}]")):
+    with patch.object(sys, "stdin", new=StringIO(f"foo: {core.INCLUDE_TAG} [{relpath}]")):
         with raises(UWConfigError) as e:
             core.YAMLConfig()
     msg = f"Reading from stdin, a relative path was encountered: {relpath}"
