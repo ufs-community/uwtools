@@ -296,7 +296,7 @@ class TestFV3Forecast:
 
     @pytest.mark.parametrize("with_batch_script", [True, False])
     def test_run_dry_run(self, capsys, fv3_mpi_assets, fv3_run_assets, with_batch_script):
-        log.getLogger().setLevel(logging.INFO)
+        log.setLevel(logging.INFO)
         batch_script, config_file, config = fv3_run_assets
         if with_batch_script:
             batch_components = [

@@ -167,13 +167,13 @@ class Driver(ABC):
 
         run_dir = Path(run_directory)
         if exist_act == "quit" and run_dir.is_dir():
-            logging.critical("User chose quit option when creating directory")
+            log.critical("User chose quit option when creating directory")
             sys.exit(1)
 
         # Delete or rename directory if it exists.
         handle_existing(run_dir, exist_act)
 
-        logging.info("Creating directory: %s", run_dir)
+        log.info("Creating directory: %s", run_dir)
         os.makedirs(run_dir)
 
     @staticmethod
