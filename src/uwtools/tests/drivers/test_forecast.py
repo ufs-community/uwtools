@@ -291,7 +291,7 @@ class TestFV3Forecast:
                 fcstobj = FV3Forecast(config_file=config_file)
                 with patch.object(fcstobj, "_config", config):
                     fcstobj.run(cycle=dt.datetime.now())
-                execute.assert_called_once_with(cmd=expected_command)
+                execute.assert_called_once_with(cmd=expected_command, cwd=Path(config["run_dir"]))
 
     @pytest.mark.parametrize("with_batch_script", [True, False])
     def test_run_dry_run(self, capsys, fv3_mpi_assets, fv3_run_assets, with_batch_script):

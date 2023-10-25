@@ -18,7 +18,7 @@ from uwtools.config.j2template import J2Template
 from uwtools.drivers.driver import Driver
 from uwtools.scheduler import BatchScript
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import readable, writable
+from uwtools.utils.file import writable
 from uwtools.utils.processing import execute
 
 
@@ -128,7 +128,6 @@ class Forecast(Driver, ABC):
 
         :param lbcs_config: The section of the config file specifying the lateral boundary
             conditions settings.
-
         :return: The offset hours between the cycle and the external input data, the hours between
             LBC ingest, and the last hour of the external input data forecast
         """
@@ -151,7 +150,6 @@ class Forecast(Driver, ABC):
         Sets the environment variables needed for running the mpi command.
 
         :param delimiter: The delimiter to be used between items in the configuration dictionary.
-
         :return: A bash-formatted string of MPI environment variables.
         """
 
@@ -304,7 +302,6 @@ class FV3Forecast(Forecast):
         Sets the environment variables needed for running the mpi command.
 
         :param delimiter: The delimiter to be used between items in the configuration dictionary.
-
         :return: A bash-formatted string of MPI environment variables.
         """
         envvars = {
@@ -400,7 +397,6 @@ class MPASForecast(Forecast):
         Sets the environment variables needed for running the mpi command.
 
         :param delimiter: The delimiter to be used between items in the configuration dictionary.
-
         :return: A bash-formatted string of MPI environment variables.
         """
         return delimiter.join([f"{k}={v}" for k, v in self._config.get("mpi_settings", {}).items()])

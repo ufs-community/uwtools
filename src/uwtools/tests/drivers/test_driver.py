@@ -42,8 +42,8 @@ class ConcreteDriver(Driver):
         return True
 
     @property
-    def schema_file(self) -> str:
-        return ""
+    def schema_file(self) -> Path:
+        return Path()
 
 
 @fixture
@@ -139,7 +139,7 @@ def test_scheduler():
         # pylint: disable=pointless-statement
         with patch.object(driver.JobScheduler, "get_scheduler") as get_scheduler:
             concretedriver.scheduler
-    _get_scheduler.assert_called_once_with({})
+    get_scheduler.assert_called_once_with({})
 
 
 @pytest.mark.parametrize("link_files", [True, False])
@@ -253,7 +253,7 @@ def test_validation(caplog, configs, schema, tmp_path, valid):
     config_file = str(tmp_path / "config.yaml")
     with open(config_file, "w", encoding="utf-8") as f:
         print(config_good if valid else config_bad, file=f)
-    schema_file = str(tmp_path / "test.jsonschema")
+    schema_file = tmp_path / "test.jsonschema"
     with open(schema_file, "w", encoding="utf-8") as f:
         print(schema, file=f)
     with patch.object(ConcreteDriver, "schema_file", new=schema_file):

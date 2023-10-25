@@ -112,7 +112,7 @@ class Driver(ABC):
 
     @property
     @abstractmethod
-    def schema_file(self) -> str:
+    def schema_file(self) -> Path:
         """
         The path to the file containing the schema to validate the config file against.
         """

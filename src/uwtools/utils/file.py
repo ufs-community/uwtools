@@ -3,7 +3,6 @@ Helpers for working with files and directories.
 """
 
 import logging
-import os
 import shutil
 import sys
 from contextlib import contextmanager
