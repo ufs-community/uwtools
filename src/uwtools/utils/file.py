@@ -27,6 +27,7 @@ class _FORMAT:
     _ini: str = "ini"
     _jinja2: str = "jinja2"
     _nml: str = "nml"
+    _xml: str = "xml"
     _yaml: str = "yaml"
 
     # Variants:

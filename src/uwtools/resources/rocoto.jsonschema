@@ -171,10 +171,10 @@
       "maxProperties": 3,
       "minProperties": 2,
       "patternProperties": {
-        "^metatask(_[a-z0-9_]+)?$": {
+        "^metatask(_.*)?$": {
           "$ref": "#/$defs/metatask"
         },
-        "^task(_[a-z0-9_]+)?$": {
+        "^task(_.*)?$": {
           "$ref": "#/$defs/task"
         }
       },
@@ -279,7 +279,7 @@
         "dependency": {
           "$ref": "#/$defs/dependency"
         },
-        "envar": {
+        "envars": {
           "type": "object"
         },
         "exclusive": {
@@ -407,10 +407,10 @@
           "additionalProperties": false,
           "minProperties": 1,
           "patternProperties": {
-            "^metatask(_[a-z0-9_]+)?$": {
+            "^metatask(_.*)?$": {
               "$ref": "#/$defs/metatask"
             },
-            "^task(_[a-z0-9_]+)?$": {
+            "^task(_.*)?$": {
               "$ref": "#/$defs/task"
             }
           },

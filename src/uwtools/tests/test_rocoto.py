@@ -3,19 +3,21 @@
 Tests for uwtools.rocoto module.
 """
 
+import tempfile
 from importlib import resources
+from unittest.mock import patch
 
 import pytest
 import yaml
-from lxml import etree
 
 from uwtools import rocoto
+from uwtools.config.core import YAMLConfig
 from uwtools.tests import support
 
 # Test functions
 
 
-def test_add_jobname():
+def test__add_jobname():
     expected = yaml.safe_load(
         """
 task_hello:
@@ -44,26 +46,67 @@ metatask_howdy:
     assert expected == tree
 
 
-def test_write_rocoto_xml(tmp_path):
-    input_yaml = support.fixture_path("hello_workflow.yaml")
-    with resources.as_file(resources.files("uwtools.resources")) as resc:
-        input_template = resc / "rocoto.jinja2"
-    output = tmp_path / "rendered.xml"
-    rocoto.write_rocoto_xml(
-        input_yaml=input_yaml, input_template=str(input_template), rendered_output=str(output)
-    )
+def test__add_jobname_to_tasks():
+    with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
+        input_yaml = path / "hello_workflow.yaml"
 
-    expected = support.fixture_path("hello_workflow.xml")
-    support.compare_files(expected, output)
+    values = YAMLConfig(input_yaml)
+    tasks = values["workflow"]["tasks"]
+    with patch.object(rocoto, "_add_jobname") as module:
+        rocoto._add_jobname_to_tasks(input_yaml)
+    assert module.called_once_with(tasks)
+
+
+def test__rocoto_schema_yaml():
+    with resources.as_file(resources.files("uwtools.resources")) as path:
+        expected = path / "rocoto.jsonschema"
+    assert rocoto._rocoto_schema_yaml() == expected
+
+
+def test__rocoto_schema_xml():
+    with resources.as_file(resources.files("uwtools.resources")) as path:
+        expected = path / "schema_with_metatasks.rng"
+    assert rocoto._rocoto_schema_xml() == expected
+
+
+@pytest.mark.parametrize("vals", [("hello_workflow.yaml", True), ("fruit_config.yaml", False)])
+def test_realize_rocoto_xml(vals, tmp_path):
+    fn, validity = vals
+    output = tmp_path / "rendered.xml"
+
+    with patch.object(rocoto, "validate_rocoto_xml", value=True):
+        with patch.object(rocoto.uwtools.config.validator, "_bad_paths", return_value=None):
+            with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
+                config_file = path / fn
+                result = rocoto.realize_rocoto_xml(config_file=config_file, rendered_output=output)
+    assert result is validity
+
+
+def test_realize_rocoto_invalid_xml():
+    config_file = support.fixture_path("hello_workflow.yaml")
+    xml = support.fixture_path("rocoto_invalid.xml")
+    with patch.object(rocoto, "_write_rocoto_xml", return_value=None):
+        with patch.object(rocoto.uwtools.config.validator, "_bad_paths", return_value=None):
+            with patch.object(tempfile, "NamedTemporaryFile") as context_manager:
+                context_manager.return_value.__enter__.return_value.name = xml
+                result = rocoto.realize_rocoto_xml(config_file=config_file, rendered_output=xml)
+    assert result is False
 
 
 @pytest.mark.parametrize("vals", [("hello_workflow.xml", True), ("rocoto_invalid.xml", False)])
 def test_rocoto_xml_is_valid(vals):
     fn, validity = vals
-    with resources.as_file(resources.files("uwtools.resources")) as resc:
-        with open(resc / "schema_with_metatasks.rng", "r", encoding="utf-8") as f:
-            schema = etree.RelaxNG(etree.parse(f))
-
     xml = support.fixture_path(fn)
-    tree = etree.parse(xml)
-    assert schema.validate(tree) is validity
+    result = rocoto.validate_rocoto_xml(input_xml=xml)
+
+    assert result is validity
+
+
+def test__write_rocoto_xml(tmp_path):
+    config_file = support.fixture_path("hello_workflow.yaml")
+    output = tmp_path / "rendered.xml"
+
+    rocoto._write_rocoto_xml(config_file=config_file, rendered_output=output)
+
+    expected = support.fixture_path("hello_workflow.xml")
+    assert support.compare_files(expected, output) is True

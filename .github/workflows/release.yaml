@@ -1,4 +1,4 @@
-name: release
+name: Release
 env:
   ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
 on:

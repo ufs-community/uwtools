@@ -192,17 +192,17 @@ def test__dispatch_config(params):
     submode, funcname = params
     args = ns()
     vars(args).update({STR.submode: submode})
-    with patch.object(cli, funcname) as m:
+    with patch.object(cli, funcname) as func:
         cli._dispatch_config(args)
-    assert m.called_once_with(args)
+    assert func.called_once_with(args)
 
 
 def test__dispatch_config_compare():
     args = ns()
     vars(args).update({STR.file1path: 1, STR.file1fmt: 2, STR.file2path: 3, STR.file2fmt: 4})
-    with patch.object(cli.uwtools.config.core, "compare_configs") as m:
+    with patch.object(cli.uwtools.config.core, "compare_configs") as compare_configs:
         cli._dispatch_config_compare(args)
-    assert m.called_once_with(args)
+    assert compare_configs.called_once_with(args)
 
 
 def test__dispatch_config_realize():
@@ -219,9 +219,9 @@ def test__dispatch_config_realize():
             STR.dryrun: 8,
         }
     )
-    with patch.object(cli.uwtools.config.core, "realize_config") as m:
+    with patch.object(cli.uwtools.config.core, "realize_config") as realize_config:
         cli._dispatch_config_realize(args)
-    assert m.called_once_with(args)
+    assert realize_config.called_once_with(args)
 
 
 def test__dispatch_config_translate_arparse_to_jinja2():
@@ -235,12 +235,12 @@ def test__dispatch_config_translate_arparse_to_jinja2():
             STR.dryrun: 5,
         }
     )
-    with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as m:
+    with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as convert:
         cli._dispatch_config_translate(args)
-    assert m.called_once_with(args)
+    assert convert.called_once_with(args)
 
 
-def test_dispath_config_translate_unsupported():
+def test__dispatch_config_translate_unsupported():
     args = ns()
     vars(args).update(
         {STR.infile: 1, STR.infmt: "jpg", STR.outfile: 3, STR.outfmt: "png", STR.dryrun: 5}
@@ -251,12 +251,12 @@ def test_dispath_config_translate_unsupported():
 def test__dispatch_config_validate_yaml():
     args = ns()
     vars(args).update({STR.infile: 1, STR.infmt: FORMAT.yaml, STR.schemafile: 3})
-    with patch.object(cli.uwtools.config.validator, "validate_yaml") as m:
+    with patch.object(cli.uwtools.config.validator, "validate_yaml") as validate_yaml:
         cli._dispatch_config_validate(args)
-    assert m.called_once_with(args)
+    assert validate_yaml.called_once_with(args)
 
 
-def test_dispath_config_validate_unsupported():
+def test__dispatch_config_validate_unsupported():
     args = ns()
     vars(args).update({STR.infile: 1, STR.infmt: "jpg", STR.schemafile: 3})
     assert cli._dispatch_config_validate(args) is False
@@ -267,9 +267,9 @@ def test__dispatch_forecast(params):
     submode, funcname = params
     args = ns()
     vars(args).update({STR.submode: submode})
-    with patch.object(cli, funcname) as m:
+    with patch.object(cli, funcname) as module:
         cli._dispatch_forecast(args)
-    assert m.called_once_with(args)
+    assert module.called_once_with(args)
 
 
 def test__dispatch_forecast_run():
@@ -281,12 +281,63 @@ def test__dispatch_forecast_run():
         forecast_model="foo",
     )
     vars(args).update({STR.cfgfile: 1, "forecast_model": "foo"})
-    with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as m:
+    with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as FooForecast:
         CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
         with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):
             cli._dispatch_forecast_run(args)
-    assert m.called_once_with(args)
-    m().run.assert_called_once_with(cycle="2023-01-01T00:00:00")
+    assert FooForecast.called_once_with(args)
+    FooForecast().run.assert_called_once_with(cycle="2023-01-01T00:00:00")
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        (STR.realize, "_dispatch_rocoto_realize"),
+        (STR.validate, "_dispatch_rocoto_validate"),
+    ],
+)
+def test__dispatch_rocoto(params):
+    submode, funcname = params
+    args = ns()
+    vars(args).update({STR.submode: submode})
+    with patch.object(cli, funcname) as module:
+        cli._dispatch_rocoto(args)
+    assert module.called_once_with(args)
+
+
+def test__dispatch_rocoto_realize():
+    args = ns()
+    vars(args).update({STR.infile: 1, STR.outfile: 2})
+    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml") as module:
+        cli._dispatch_rocoto_realize(args)
+    assert module.called_once_with(args)
+
+
+def test__dispatch_rocoto_realize_invalid():
+    args = ns()
+    vars(args).update(
+        {
+            STR.infile: 1,
+            STR.outfile: 2,
+        }
+    )
+    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml", return_value=False):
+        assert cli._dispatch_rocoto_realize(args) is False
+
+
+def test__dispatch_rocoto_validate_xml():
+    args = ns()
+    vars(args).update({STR.infile: 1})
+    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as validate:
+        cli._dispatch_rocoto_validate(args)
+    assert validate.called_once_with(args)
+
+
+def test__dispatch_rocoto_validate_xml_invalid():
+    args = ns()
+    vars(args).update({STR.infile: 1, STR.verbose: False})
+    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml", return_value=False):
+        assert cli._dispatch_rocoto_validate(args) is False
 
 
 @pytest.mark.parametrize("params", [(STR.render, "_dispatch_template_render")])
@@ -294,9 +345,9 @@ def test__dispatch_template(params):
     submode, funcname = params
     args = ns()
     vars(args).update({STR.submode: submode})
-    with patch.object(cli, funcname) as m:
+    with patch.object(cli, funcname) as func:
         cli._dispatch_template(args)
-    assert m.called_once_with(args)
+    assert func.called_once_with(args)
 
 
 def test__dispatch_template_render_yaml():
@@ -312,9 +363,9 @@ def test__dispatch_template_render_yaml():
             STR.dryrun: 7,
         }
     )
-    with patch.object(cli.uwtools.config.templater, STR.render) as m:
+    with patch.object(cli.uwtools.config.templater, STR.render) as templater:
         cli._dispatch_template_render(args)
-    assert m.called_once_with(args)
+    assert templater.called_once_with(args)
 
 
 @pytest.mark.parametrize("quiet", [True])

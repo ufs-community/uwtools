@@ -8,6 +8,9 @@ from typing import List, Optional, Set
 
 from jinja2 import BaseLoader, Environment, FileSystemLoader, Template, meta
 
+from uwtools.types import DefinitePath, OptionalPath
+from uwtools.utils.file import readable
+
 
 class J2Template:
     """
@@ -17,7 +20,7 @@ class J2Template:
     def __init__(
         self,
         values: dict,
-        template_path: Optional[str] = None,
+        template_path: OptionalPath = None,
         template_str: Optional[str] = None,
         **kwargs,
     ) -> None:
@@ -40,7 +43,7 @@ class J2Template:
 
     # Public methods
 
-    def dump(self, output_path: str) -> None:
+    def dump(self, output_path: DefinitePath) -> None:
         """
         Write rendered template to the path provided.
 
@@ -70,13 +73,13 @@ class J2Template:
             j2_parsed = self._j2env.parse(self._template_str)
         else:
             assert self._template_path is not None
-            with open(self._template_path, encoding="utf-8") as file_:
+            with readable(self._template_path) as file_:
                 j2_parsed = self._j2env.parse(file_.read())
         return meta.find_undeclared_variables(j2_parsed)
 
     # Private methods
 
-    def _load_file(self, template_path: str) -> Template:
+    def _load_file(self, template_path: OptionalPath) -> Template:
         """
         Load the Jinja2 template from the file provided.
 
@@ -85,7 +88,7 @@ class J2Template:
         """
         self._j2env = Environment(loader=FileSystemLoader(searchpath="/"))
         _register_filters(self._j2env)
-        return self._j2env.get_template(template_path)
+        return self._j2env.get_template(str(template_path))
 
     def _load_string(self, template: str) -> Template:
         """
