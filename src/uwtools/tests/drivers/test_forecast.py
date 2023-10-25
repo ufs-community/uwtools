@@ -17,6 +17,7 @@ from uwtools.config.j2template import J2Template
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast, MPASForecast
+from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path
 from uwtools.utils.file import readable, writable
 
@@ -295,7 +296,7 @@ class TestFV3Forecast:
 
     @pytest.mark.parametrize("with_batch_script", [True, False])
     def test_run_dry_run(self, capsys, fv3_mpi_assets, fv3_run_assets, with_batch_script):
-        logging.getLogger().setLevel(logging.INFO)
+        log.getLogger().setLevel(logging.INFO)
         batch_script, config_file, config = fv3_run_assets
         if with_batch_script:
             batch_components = [

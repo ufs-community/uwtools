@@ -3,13 +3,13 @@ Support for validating a config using JSON Schema.
 """
 
 import json
-import logging
 from pathlib import Path
 from typing import List, Optional
 
 import jsonschema
 
 from uwtools.config.core import YAMLConfig
+from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
 
 # Public functions
@@ -34,11 +34,11 @@ def validate_yaml(
         schema = json.load(f)
     # Collect and report on schema-validation errors.
     errors = _validation_errors(yaml_config.data, schema)
-    log_method = logging.error if errors else logging.info
+    log_method = log.error if errors else log.info
     log_method("%s schema-validation error%s found", len(errors), "" if len(errors) == 1 else "s")
     for error in errors:
         for line in str(error).split("\n"):
-            logging.error(line)
+            log.error(line)
     # It's pointless to evaluate an invalid config, so return now if that's the case.
     if errors:
         return False
@@ -46,7 +46,7 @@ def validate_yaml(
     if check_paths:
         if bad_paths := _bad_paths(yaml_config.data, schema):
             for bad_path in bad_paths:
-                logging.error("Path does not exist: %s", bad_path)
+                log.error("Path does not exist: %s", bad_path)
             return False
     # If no issues were detected, report success.
     return True

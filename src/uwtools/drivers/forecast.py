@@ -3,7 +3,6 @@ Drivers for forecast models.
 """
 
 
-import logging
 import os
 import sys
 from abc import ABC, abstractmethod
@@ -16,6 +15,7 @@ from typing import Dict, Optional
 from uwtools.config.core import FieldTableConfig, NMLConfig, YAMLConfig
 from uwtools.config.j2template import J2Template
 from uwtools.drivers.driver import Driver
+from uwtools.logging import log
 from uwtools.scheduler import BatchScript
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import writable
@@ -102,7 +102,7 @@ class Forecast(Driver, ABC):
             if self._dry_run:
                 # Apply switch to allow user to view the run command of config.
                 # This will not run the job.
-                logging.info("Batch Script:")
+                log.info("Batch Script:")
                 batch_script.dump(None)
                 return True
 
@@ -112,7 +112,7 @@ class Forecast(Driver, ABC):
         pre_run = self._mpi_env_variables(" ")
         full_cmd = f"{pre_run} {self.run_cmd()}"
         if self._dry_run:
-            logging.info("Would run: ")
+            log.info("Would run: ")
             print(full_cmd, file=sys.stdout)
             return True
 
@@ -197,7 +197,7 @@ class FV3Forecast(Forecast):
         # Create the two required subdirectories.
         for subdir in ("INPUT", "RESTART"):
             path = run_directory / subdir
-            logging.info("Creating directory: %s", path)
+            log.info("Creating directory: %s", path)
             os.makedirs(path)
 
     def create_field_table(self, output_path: OptionalPath) -> None:
@@ -233,7 +233,7 @@ class FV3Forecast(Forecast):
             "start_minute": cycle.strftime("%M"),
             "start_second": cycle.strftime("%S"),
         }
-        logging.info(f"Updating namelist date values to start at: {start_time}")
+        log.info(f"Updating namelist date values to start at: {start_time}")
         config_obj = YAMLConfig(output_path)
         config_obj.update_values(date_values)
         config_obj.dump(output_path)
@@ -350,7 +350,7 @@ class MPASForecast(Forecast):
                 "config_start_time": start_time,
             },
         }
-        logging.info(f"Updating namelist date values to start at: {start_time}")
+        log.info(f"Updating namelist date values to start at: {start_time}")
         config_obj = NMLConfig(output_path)
         config_obj.update_values(date_values)
         config_obj.dump(output_path)

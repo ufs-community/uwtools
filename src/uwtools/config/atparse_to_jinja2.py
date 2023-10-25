@@ -2,10 +2,10 @@
 Utilities for rendering Jinja2 templates.
 """
 
-import logging
 import re
 from typing import IO, Any, Generator, Optional
 
+from uwtools.logging import log
 from uwtools.utils.file import readable, writable
 
 
@@ -34,7 +34,7 @@ def convert(
 
     if dry_run:
         for line in lines():
-            logging.info(line)
+            log.info(line)
     else:
         with writable(output_file) as f:
             write(f)

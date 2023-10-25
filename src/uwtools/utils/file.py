@@ -2,7 +2,6 @@
 Helpers for working with files and directories.
 """
 
-import logging
 import shutil
 import sys
 from contextlib import contextmanager
@@ -11,6 +10,7 @@ from datetime import datetime as dt
 from pathlib import Path
 from typing import IO, Generator
 
+from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
 
 
@@ -59,7 +59,7 @@ def get_file_type(path: DefinitePath) -> str:
     if fmt := vars(FORMAT).get(suffix):
         return fmt
     msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
-    logging.critical(msg)
+    log.critical(msg)
     raise ValueError(msg)
 
 
@@ -78,7 +78,7 @@ def handle_existing(directory: DefinitePath, action: str) -> None:
             shutil.rmtree(directory)
     except (FileExistsError, RuntimeError) as e:
         msg = f"Could not delete directory {directory}"
-        logging.critical(msg)
+        log.critical(msg)
         raise RuntimeError(msg) from e
 
     # Try to rename existing run directory if option is rename.
@@ -90,7 +90,7 @@ def handle_existing(directory: DefinitePath, action: str) -> None:
             shutil.move(directory, save_dir)
     except (FileExistsError, RuntimeError) as e:
         msg = f"Could not rename directory {directory}"
-        logging.critical(msg)
+        log.critical(msg)
         raise RuntimeError(msg) from e
 
 

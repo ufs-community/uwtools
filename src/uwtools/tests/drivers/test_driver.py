@@ -18,6 +18,7 @@ from pytest import fixture, raises
 from uwtools.config.core import YAMLConfig
 from uwtools.drivers import driver
 from uwtools.drivers.driver import Driver
+from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path, logged
 
 
@@ -257,7 +258,7 @@ def test_validation(caplog, configs, schema, tmp_path, valid):
     with open(schema_file, "w", encoding="utf-8") as f:
         print(schema, file=f)
     with patch.object(ConcreteDriver, "schema_file", new=schema_file):
-        logging.getLogger().setLevel(logging.INFO)
+        log.setLevel(logging.INFO)
         ConcreteDriver(config_file=config_file)
         if valid:
             assert logged(caplog, "0 schema-validation errors found")
