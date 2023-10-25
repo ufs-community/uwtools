@@ -182,8 +182,10 @@ class FV3Forecast(Forecast):
 
     # Public methods
 
-    @staticmethod
-    def create_directory_structure(run_directory: DefinitePath, exist_act: str = "delete") -> None:
+    @classmethod
+    def create_directory_structure(
+        cls, run_directory: DefinitePath, exist_act: str = "delete"
+    ) -> None:
         """
         Creates the run directory and adds subdirectories INPUT and RESTART. Verifies creation of
         all directories.
@@ -193,7 +195,7 @@ class FV3Forecast(Forecast):
             to a preexisting run directory. The default is to delete the old run directory.
         """
         run_directory = Path(run_directory)
-        Driver._create_run_directory(run_directory, exist_act)  # pylint: disable=protected-access
+        cls._create_run_directory(run_directory, exist_act)
         # Create the two required subdirectories.
         for subdir in ("INPUT", "RESTART"):
             path = run_directory / subdir

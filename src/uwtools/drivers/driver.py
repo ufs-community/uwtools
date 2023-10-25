@@ -52,15 +52,15 @@ class Driver(ABC):
         :return: The batch script object with all run commands needed for executing the program.
         """
 
-    @staticmethod
-    def create_directory_structure(run_directory: DefinitePath, exist_act="delete"):
+    @classmethod
+    def create_directory_structure(cls, run_directory: DefinitePath, exist_act="delete"):
         """
         Creates the run directory for the forecast.
 
         :param run_directory: Path of desired run directory.
         :param exist_act: caller-specified action to delete, rename, or quit.
         """
-        Driver._create_run_directory(run_directory, exist_act)
+        cls._create_run_directory(run_directory, exist_act)
 
     @abstractmethod
     def output(self) -> None:
