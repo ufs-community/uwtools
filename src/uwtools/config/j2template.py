@@ -8,7 +8,7 @@ from typing import List, Optional, Set
 from jinja2 import BaseLoader, Environment, FileSystemLoader, Template, meta
 
 from uwtools.logging import log
-from uwtools.types import OptionalPath
+from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import readable, writable
 
 
@@ -79,7 +79,7 @@ class J2Template:
 
     # Private methods
 
-    def _load_file(self, template_path: OptionalPath) -> Template:
+    def _load_file(self, template_path: DefinitePath) -> Template:
         """
         Load the Jinja2 template from the file provided.
 

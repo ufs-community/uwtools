@@ -372,7 +372,7 @@ def _dispatch_rocoto_realize(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     success = uwtools.rocoto.realize_rocoto_xml(
-        config_file=args.input_file, rendered_output=args.output_file
+        config_file=args.input_file, output_file=args.output_file
     )
     return success
 

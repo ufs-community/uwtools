@@ -76,33 +76,33 @@ def _rocoto_template_xml() -> DefinitePath:
 
 def _write_rocoto_xml(
     config_file: OptionalPath,
-    rendered_output: OptionalPath,
+    output_file: OptionalPath,
 ) -> None:
     """
     Render the Rocoto workflow defined in the given YAML to XML.
 
     :param config_file: Path to YAML input file.
-    :param rendered_output: Path to write rendered XML file.
+    :param output_file: Path to write rendered XML file.
     """
 
     values = _add_jobname_to_tasks(config_file)
 
     # Render the template.
     template = J2Template(values=values.data, template_path=_rocoto_template_xml())
-    template.dump(output_path=rendered_output)
+    template.dump(output_path=output_file)
 
 
 # Public functions
 def realize_rocoto_xml(
     config_file: OptionalPath,
-    rendered_output: OptionalPath = None,
+    output_file: OptionalPath = None,
 ) -> bool:
     """
     Realize the Rocoto workflow defined in the given YAML as XML. Validate both the YAML input and
     XML output.
 
     :param config_file: Path to YAML input file.
-    :param rendered_output: Path to write rendered XML file.
+    :param output_file: Path to write rendered XML file.
     :return: Did the input and output files conform to theirr schemas?
     """
 
@@ -110,19 +110,20 @@ def realize_rocoto_xml(
         log.error("YAML validation errors identified in %s", config_file)
         return False
 
-    temp_file = tempfile.NamedTemporaryFile(delete=False)  # pylint: disable=consider-using-with
-    _write_rocoto_xml(config_file=config_file, rendered_output=temp_file.name)
+    _, temp_file = tempfile.mkstemp(suffix=".xml")
 
-    if not validate_rocoto_xml(input_xml=temp_file.name):
-        log.error("Rocoto validation errors identified in %s", temp_file.name)
+    _write_rocoto_xml(config_file=config_file, output_file=temp_file)
+
+    if not validate_rocoto_xml(input_xml=temp_file):
+        log.error("Rocoto validation errors identified in %s", temp_file)
         return False
 
-    if rendered_output is None:
-        with open(temp_file.name, "r", encoding="utf-8") as f:
+    if output_file is None:
+        with open(temp_file, "r", encoding="utf-8") as f:
             print(f.read())
-        Path(temp_file.name).unlink()
+        Path(temp_file).unlink()
     else:
-        Path(temp_file.name).rename(rendered_output)
+        Path(temp_file).rename(output_file)
     return True
 
 
