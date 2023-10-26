@@ -5,9 +5,10 @@ Support for creating Rocoto XML workflow documents.
 import tempfile
 from importlib import resources
 from pathlib import Path
+from typing import Tuple
 
 from lxml import etree
-from lxml.etree import Element
+from lxml.etree import Element, SubElement
 
 from uwtools.config.core import YAMLConfig
 from uwtools.config.j2template import J2Template
@@ -154,35 +155,32 @@ class RocotoXML:
 
     def __init__(self, config_file: OptionalPath = None, output_file: OptionalPath = None) -> None:
         self._config_validate(config_file)
-        self._tree = self._element_workflow(YAMLConfig(config_file).data)
+        self._element_workflow(YAMLConfig(config_file).data)
         self.dump()
         
     def dump(self, path: OptionalPath = None) -> None:
         with writable(path) as f:
-            print(etree.tostring(self._tree, pretty_print=True).decode(), file=f)
-
+            print(etree.tostring(self._tree, pretty_print=True).decode().strip(), file=f)
+        
     def _config_validate(self, config_file: OptionalPath) -> None:
         if not validate_yaml(config_file=config_file, schema_file=_rocoto_schema_yaml()):
             raise UWConfigError("YAML validation errors identified in %s" % config_file)
 
-    def _element_attrs(self, config: dict, e: Element) -> None:
-        etree.SubElement(e, "attrs")
+    def _add_element(self, name: str, config: dict, e: Element) -> Tuple[dict, Element]:
+        return config[name], SubElement(e, name)
 
-    def _element_cycledefs(self, config: dict, e: Element) -> Element:
-        etree.SubElement(e, "cycledefs")
+    def _element_cycledefs(self, config: dict, e: Element) -> None:
+        for group, coords in config["cycledefs"].items():
+            for coord in coords:
+                SubElement(e, "cycledef", group=group).text = coord
 
-    def _element_entities(self, config: dict, e: Element) -> Element:
-        etree.SubElement(e, "entities")
-
-    def _element_log(self, config: dict, e: Element) -> Element:
-        etree.SubElement(e, "log")
-
-    def _element_tasks(self, config: dict, e: Element) -> Element:
-        etree.SubElement(e, "tasks")
-
-    def _element_workflow(self, config: dict) -> Element:
+    def _element_workflow(self, config: dict) -> None:
         name = "workflow"
         config, e = config[name], Element(name)
-        for key in sorted(config.keys()):
-            getattr(self, f"_element_{key}")(config[key], e)
-        return e
+        self._set_attrs(e, config["attrs"])
+        self._element_cycledefs(config, e)
+        self._tree = e
+
+    def _set_attrs(self, e: Element, attrs: dict) -> None:
+        for attr, val in attrs.items():
+            e.set(attr, str(val))
