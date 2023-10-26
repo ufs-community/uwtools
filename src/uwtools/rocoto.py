@@ -2,10 +2,10 @@
 Support for creating Rocoto XML workflow documents.
 """
 
+import re
 import tempfile
 from importlib import resources
 from pathlib import Path
-from typing import Tuple
 
 from lxml import etree
 from lxml.etree import Element, SubElement
@@ -160,7 +160,7 @@ class RocotoXML:
 
     def __init__(self, config_file: OptionalPath = None) -> None:
         self._config_validate(config_file)
-        self._element_workflow(YAMLConfig(config_file).data)
+        self._add_workflow(YAMLConfig(config_file).data)
         self.dump()
 
     def dump(self, path: OptionalPath = None) -> None:
@@ -175,26 +175,48 @@ class RocotoXML:
         if not validate_yaml(config_file=config_file, schema_file=_rocoto_schema_yaml()):
             raise UWConfigError("YAML validation errors identified in %s" % config_file)
 
-    def _add_element(self, name: str, config: dict, e: Element) -> Tuple[dict, Element]:
-        return config[name], SubElement(e, name)
-
-    def _element_cycledefs(self, config: dict, e: Element) -> None:
-        for group, coords in config["cycledefs"].items():
+    def _add_cycledefs(self, e: Element, config: dict) -> None:
+        for name, coords in config["cycledefs"].items():
             for coord in coords:
-                SubElement(e, "cycledef", group=group).text = coord
+                SubElement(e, "cycledef", group=name).text = coord
 
-    def _element_log(self, config: dict, e: Element) -> None:
+    def _add_envvar(self, e: Element, name: str, value: str) -> None:
+        envvar = SubElement(e, "envvar")
+        SubElement(envvar, "name").text = name
+        SubElement(envvar, "value").text = value
+
+    def _add_metatask(self, e: Element, config: dict, name: str) -> None:
+        print("@@@ adding metatask", e, config, name)
+
+    def _add_task(self, e: Element, config: dict, taskname: str) -> None:
+        e = SubElement(e, "task", name=taskname)
+        self._set_attrs(e, config)
+        for x in ("account", "command", "jobname", "nodes", "walltime"):
+            if x in config:
+                SubElement(e, x).text = config[x]
+        for name, value in config.get("envars", {}).items():
+            self._add_envvar(e, name, value)
+
+    def _add_tasks(self, e: Element, config: dict) -> None:
+        for key, block in config["tasks"].items():
+            m = re.match(r"^((meta)?task)(_(.*))?$", key)
+            assert m  # validated config => regex match
+            tag, name = m[1], m[4]
+            {"metatask": self._add_metatask, "task": self._add_task}[tag](e, block, name)
+
+    def _add_workflow(self, config: dict) -> None:
+        name = "workflow"
+        config, e = config[name], Element(name)
+        self._set_attrs(e, config)
+        self._add_cycledefs(e, config)
+        self._add_log(e, config)
+        self._add_tasks(e, config)
+        self._tree = e
+
+    def _add_log(self, e: Element, config: dict) -> None:
         name = "log"
         SubElement(e, name).text = config[name]
 
-    def _element_workflow(self, config: dict) -> None:
-        name = "workflow"
-        config, e = config[name], Element(name)
-        self._set_attrs(e, config["attrs"])
-        self._element_cycledefs(config, e)
-        self._element_log(config, e)
-        self._tree = e
-
-    def _set_attrs(self, e: Element, attrs: dict) -> None:
-        for attr, val in attrs.items():
+    def _set_attrs(self, e: Element, config: dict) -> None:
+        for attr, val in config["attrs"].items():
             e.set(attr, str(val))
