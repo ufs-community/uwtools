@@ -1,10 +1,11 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.utils.file module.
 """
 
 import sys
 from datetime import datetime as dt
+from io import StringIO
 from unittest.mock import patch
 
 import pytest
@@ -22,6 +23,35 @@ def assets(tmp_path):
     renamed = rundir.parent / ("rundir_%s" % now.strftime("%Y%m%d_%H%M%S"))
     assert not renamed.is_dir()
     return now, renamed, rundir
+
+
+def test_StdinProxy():
+    msg = "proxying stdin"
+    with patch.object(sys, "stdin", new=StringIO(msg)):
+        assert sys.stdin.read() == msg
+        # Reading from stdin a second time yields no input, as the stream has been exhausted:
+        assert sys.stdin.read() == ""
+    with patch.object(sys, "stdin", new=StringIO(msg)):
+        sp = file.StdinProxy()
+        assert sp.read() == msg
+        # But the stdin proxy can be read multiple times:
+        assert sp.read() == msg
+
+
+def test__stdinproxy():
+    file._stdinproxy.cache_clear()
+    msg0 = "hello world"
+    msg1 = "bonjour monde"
+    # Unsurprisingly, the first read from stdin finds the expected message:
+    with patch.object(sys, "stdin", new=StringIO(msg0)):
+        assert file._stdinproxy().read() == msg0
+    # But after re-patching stdin with a new message, a second read returns the old message:
+    with patch.object(sys, "stdin", new=StringIO(msg1)):
+        assert file._stdinproxy().read() == msg0  # <-- the OLD message
+    # However, if the cache is cleared, the second message is then read:
+    file._stdinproxy.cache_clear()
+    with patch.object(sys, "stdin", new=StringIO(msg1)):
+        assert file._stdinproxy().read() == msg1  # <-- the NEW message
 
 
 def test_get_file_type():
@@ -103,7 +133,7 @@ def test_readable_file(tmp_path):
 
 def test_readable_nofile():
     with file.readable() as f:
-        assert f is sys.stdin
+        assert hasattr(f, "read")
 
 
 def test_writable_file(tmp_path):

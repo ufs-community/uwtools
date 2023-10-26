@@ -8,8 +8,10 @@ import sys
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime as dt
+from functools import cache
+from io import StringIO
 from pathlib import Path
-from typing import IO, Generator
+from typing import IO, Any, Generator, Union
 
 from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
@@ -46,6 +48,33 @@ class _FORMAT:
 
 
 FORMAT = _FORMAT()
+
+
+class StdinProxy:
+    """
+    Reads stdin once but permits multiple reads of its data.
+    """
+
+    def __init__(self) -> None:
+        self._stdin = sys.stdin.read()
+        self._reset()
+
+    def __getattr__(self, attr: str) -> Any:
+        self._reset()
+        return getattr(self._stringio, attr)
+
+    def __iter__(self):
+        self._reset()
+        for line in self._stringio.read().split("\n"):
+            yield line
+
+    def _reset(self) -> None:
+        self._stringio = StringIO(self._stdin)
+
+
+@cache
+def _stdinproxy():
+    return StdinProxy()
 
 
 def get_file_type(path: DefinitePath) -> str:
@@ -112,7 +141,9 @@ def path_if_it_exists(path: str) -> str:
 
 
 @contextmanager
-def readable(filepath: OptionalPath = None, mode: str = "r") -> Generator[IO, None, None]:
+def readable(
+    filepath: OptionalPath = None, mode: str = "r"
+) -> Generator[Union[IO, StdinProxy], None, None]:
     """
     If a path to a file is specified, open it and return a readable handle; if not, return readable
     stdin.
@@ -123,7 +154,7 @@ def readable(filepath: OptionalPath = None, mode: str = "r") -> Generator[IO, No
         with open(filepath, mode, encoding="utf-8") as f:
             yield f
     else:
-        yield sys.stdin
+        yield _stdinproxy()
 
 
 @contextmanager
