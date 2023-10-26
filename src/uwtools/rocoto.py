@@ -149,19 +149,28 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
         log.error(err)
     return valid
 
+
 # @PM@ Make some functions methods in RocotoXML?
 
-class RocotoXML:
 
-    def __init__(self, config_file: OptionalPath = None, output_file: OptionalPath = None) -> None:
+class RocotoXML:
+    """
+    ???
+    """
+
+    def __init__(self, config_file: OptionalPath = None) -> None:
         self._config_validate(config_file)
         self._element_workflow(YAMLConfig(config_file).data)
         self.dump()
-        
+
     def dump(self, path: OptionalPath = None) -> None:
+        """
+        ???
+        """
+        xml = etree.tostring(self._tree, pretty_print=True, encoding="utf-8", xml_declaration=True)
         with writable(path) as f:
-            print(etree.tostring(self._tree, pretty_print=True).decode().strip(), file=f)
-        
+            print(xml.decode().strip(), file=f)
+
     def _config_validate(self, config_file: OptionalPath) -> None:
         if not validate_yaml(config_file=config_file, schema_file=_rocoto_schema_yaml()):
             raise UWConfigError("YAML validation errors identified in %s" % config_file)
@@ -174,11 +183,16 @@ class RocotoXML:
             for coord in coords:
                 SubElement(e, "cycledef", group=group).text = coord
 
+    def _element_log(self, config: dict, e: Element) -> None:
+        name = "log"
+        SubElement(e, name).text = config[name]
+
     def _element_workflow(self, config: dict) -> None:
         name = "workflow"
         config, e = config[name], Element(name)
         self._set_attrs(e, config["attrs"])
         self._element_cycledefs(config, e)
+        self._element_log(config, e)
         self._tree = e
 
     def _set_attrs(self, e: Element, attrs: dict) -> None:
