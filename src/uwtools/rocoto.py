@@ -118,13 +118,10 @@ def realize_rocoto_xml(
         log.error("Rocoto validation errors identified in %s", temp_file)
         return False
 
-    if output_file is None:
-        with open(temp_file, "r", encoding="utf-8") as f_in:
-            with writable(output_file) as f_out:
-                print(f_in.read(), file=f_out)
-        Path(temp_file).unlink()
-    else:
-        Path(temp_file).rename(output_file)
+    with open(temp_file, "r", encoding="utf-8") as f_in:
+        with writable(output_file) as f_out:
+            print(f_in.read(), file=f_out)
+    Path(temp_file).unlink()
     return True
 
 
