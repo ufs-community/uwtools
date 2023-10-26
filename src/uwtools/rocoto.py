@@ -7,10 +7,12 @@ from importlib import resources
 from pathlib import Path
 
 from lxml import etree
+from lxml.etree import Element
 
 from uwtools.config.core import YAMLConfig
 from uwtools.config.j2template import J2Template
 from uwtools.config.validator import validate_yaml
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import readable, writable
@@ -93,6 +95,8 @@ def _write_rocoto_xml(
 
 
 # Public functions
+
+
 def realize_rocoto_xml(
     config_file: OptionalPath,
     output_file: OptionalPath = None,
@@ -143,3 +147,42 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
     for err in list(schema.error_log):
         log.error(err)
     return valid
+
+# @PM@ Make some functions methods in RocotoXML?
+
+class RocotoXML:
+
+    def __init__(self, config_file: OptionalPath = None, output_file: OptionalPath = None) -> None:
+        self._config_validate(config_file)
+        self._tree = self._element_workflow(YAMLConfig(config_file).data)
+        self.dump()
+        
+    def dump(self, path: OptionalPath = None) -> None:
+        with writable(path) as f:
+            print(etree.tostring(self._tree, pretty_print=True).decode(), file=f)
+
+    def _config_validate(self, config_file: OptionalPath) -> None:
+        if not validate_yaml(config_file=config_file, schema_file=_rocoto_schema_yaml()):
+            raise UWConfigError("YAML validation errors identified in %s" % config_file)
+
+    def _element_attrs(self, config: dict, e: Element) -> None:
+        etree.SubElement(e, "attrs")
+
+    def _element_cycledefs(self, config: dict, e: Element) -> Element:
+        etree.SubElement(e, "cycledefs")
+
+    def _element_entities(self, config: dict, e: Element) -> Element:
+        etree.SubElement(e, "entities")
+
+    def _element_log(self, config: dict, e: Element) -> Element:
+        etree.SubElement(e, "log")
+
+    def _element_tasks(self, config: dict, e: Element) -> Element:
+        etree.SubElement(e, "tasks")
+
+    def _element_workflow(self, config: dict) -> Element:
+        name = "workflow"
+        config, e = config[name], Element(name)
+        for key in sorted(config.keys()):
+            getattr(self, f"_element_{key}")(config[key], e)
+        return e
