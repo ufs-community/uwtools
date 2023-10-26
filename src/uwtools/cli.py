@@ -331,10 +331,9 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> SubmodeChecks:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, STR.realize, "Realize a Rocoto XML workflow document")
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_output_file(required)
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
+    _add_arg_output_file(optional)
     checks = _add_args_quiet_and_verbose(optional)
     return checks
 
@@ -373,7 +372,7 @@ def _dispatch_rocoto_realize(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     success = uwtools.rocoto.realize_rocoto_xml(
-        config_file=args.input_file, rendered_output=args.output_file
+        config_file=args.input_file, output_file=args.output_file
     )
     return success
 

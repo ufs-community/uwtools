@@ -2,18 +2,18 @@
 Support for creating Rocoto XML workflow documents.
 """
 
-import shutil
 import tempfile
 from importlib import resources
+from pathlib import Path
 
 from lxml import etree
 
-import uwtools.config.validator
 from uwtools.config.core import YAMLConfig
 from uwtools.config.j2template import J2Template
+from uwtools.config.validator import validate_yaml
 from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import readable
+from uwtools.utils.file import readable, writable
 
 # Private functions
 
@@ -76,55 +76,53 @@ def _rocoto_template_xml() -> DefinitePath:
 
 def _write_rocoto_xml(
     config_file: OptionalPath,
-    rendered_output: DefinitePath,
+    output_file: OptionalPath,
 ) -> None:
     """
     Render the Rocoto workflow defined in the given YAML to XML.
 
     :param config_file: Path to YAML input file.
-    :param rendered_output: Path to write rendered XML file.
+    :param output_file: Path to write rendered XML file.
     """
 
     values = _add_jobname_to_tasks(config_file)
 
     # Render the template.
     template = J2Template(values=values.data, template_path=_rocoto_template_xml())
-    template.dump(output_path=str(rendered_output))
+    template.dump(output_path=output_file)
 
 
 # Public functions
 def realize_rocoto_xml(
     config_file: OptionalPath,
-    rendered_output: DefinitePath,
+    output_file: OptionalPath = None,
 ) -> bool:
     """
     Realize the Rocoto workflow defined in the given YAML as XML. Validate both the YAML input and
     XML output.
 
     :param config_file: Path to YAML input file.
-    :param rendered_output: Path to write rendered XML file.
+    :param output_file: Path to write rendered XML file.
     :return: Did the input and output files conform to theirr schemas?
     """
 
-    # Validate the YAML.
-    if uwtools.config.validator.validate_yaml(
-        config_file=config_file, schema_file=_rocoto_schema_yaml()
-    ):
-        # Render the template to a temporary file.
-        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-            _write_rocoto_xml(
-                config_file=config_file,
-                rendered_output=temp_file.name,
-            )
-            # Validate the XML.
-            if validate_rocoto_xml(input_xml=temp_file.name):
-                # If no issues were detected, save temp file and report success.
-                shutil.move(temp_file.name, rendered_output)
-                return True
-        log.error("Rocoto validation errors identified in %s", temp_file.name)
+    if not validate_yaml(config_file=config_file, schema_file=_rocoto_schema_yaml()):
+        log.error("YAML validation errors identified in %s", config_file)
         return False
-    log.error("YAML validation errors identified in %s", config_file)
-    return False
+
+    _, temp_file = tempfile.mkstemp(suffix=".xml")
+
+    _write_rocoto_xml(config_file=config_file, output_file=temp_file)
+
+    if not validate_rocoto_xml(input_xml=temp_file):
+        log.error("Rocoto validation errors identified in %s", temp_file)
+        return False
+
+    with open(temp_file, "r", encoding="utf-8") as f_in:
+        with writable(output_file) as f_out:
+            print(f_in.read(), file=f_out)
+    Path(temp_file).unlink()
+    return True
 
 
 def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
@@ -134,20 +132,14 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
     :param input_xml: Path to rendered XML file.
     :return: Did the XML file conform to the schema?
     """
-
-    # Validate the XML.
+    with readable(input_xml) as f:
+        tree = etree.fromstring(bytes(f.read(), encoding="utf-8"))
     with open(_rocoto_schema_xml(), "r", encoding="utf-8") as f:
         schema = etree.RelaxNG(etree.parse(f))
-    with readable(input_xml) as f:
-        xml = f.read()
-    tree = etree.fromstring(bytes(xml, encoding="utf-8"))
-    success = schema.validate(tree)
-
-    # Log validation errors.
-    errors = str(etree.RelaxNG.error_log).split("\n")
-    log_method = log.error if len(errors) else log.info
-    log_method("%s Rocoto validation error%s found", len(errors), "" if len(errors) == 1 else "s")
-    for line in errors:
-        log.error(line)
-
-    return success
+    valid = schema.validate(tree)
+    nerr = len(schema.error_log)
+    log_method = log.info if valid else log.error
+    log_method("%s Rocoto validation error%s found", nerr, "" if nerr == 1 else "s")
+    for err in list(schema.error_log):
+        log.error(err)
+    return valid

@@ -77,17 +77,24 @@ def test_realize_rocoto_xml(vals, tmp_path):
     with patch.object(rocoto, "validate_rocoto_xml", value=True):
         with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
             config_file = path / fn
-            result = rocoto.realize_rocoto_xml(config_file=config_file, rendered_output=output)
+            result = rocoto.realize_rocoto_xml(config_file=config_file, output_file=output)
     assert result is validity
+
+
+def test_realize_rocoto_default_output():
+    with patch.object(rocoto, "validate_rocoto_xml", value=True):
+        with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
+            config_file = path / "hello_workflow.yaml"
+            result = rocoto.realize_rocoto_xml(config_file=config_file)
+    assert result is True
 
 
 def test_realize_rocoto_invalid_xml():
     config_file = support.fixture_path("hello_workflow.yaml")
     xml = support.fixture_path("rocoto_invalid.xml")
     with patch.object(rocoto, "_write_rocoto_xml", return_value=None):
-        with patch.object(tempfile, "NamedTemporaryFile") as context_manager:
-            context_manager.return_value.__enter__.return_value.name = xml
-            result = rocoto.realize_rocoto_xml(config_file=config_file, rendered_output=xml)
+        with patch.object(tempfile, "mkstemp", return_value=(None, xml)):
+            result = rocoto.realize_rocoto_xml(config_file=config_file, output_file=xml)
     assert result is False
 
 
@@ -104,7 +111,7 @@ def test__write_rocoto_xml(tmp_path):
     config_file = support.fixture_path("hello_workflow.yaml")
     output = tmp_path / "rendered.xml"
 
-    rocoto._write_rocoto_xml(config_file=config_file, rendered_output=output)
+    rocoto._write_rocoto_xml(config_file=config_file, output_file=output)
 
     expected = support.fixture_path("hello_workflow.xml")
     assert support.compare_files(expected, output) is True
