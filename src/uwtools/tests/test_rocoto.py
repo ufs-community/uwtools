@@ -11,7 +11,6 @@ import pytest
 import yaml
 
 from uwtools import rocoto
-from uwtools.config import validator
 from uwtools.config.core import YAMLConfig
 from uwtools.tests import support
 
@@ -84,10 +83,9 @@ def test_realize_rocoto_xml(vals, tmp_path):
 
 def test_realize_rocoto_default_output():
     with patch.object(rocoto, "validate_rocoto_xml", value=True):
-        with patch.object(validator, "_bad_paths", return_value=None):
-            with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
-                config_file = path / "hello_workflow.yaml"
-                result = rocoto.realize_rocoto_xml(config_file=config_file)
+        with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
+            config_file = path / "hello_workflow.yaml"
+            result = rocoto.realize_rocoto_xml(config_file=config_file)
     assert result is True
 
 
@@ -95,8 +93,8 @@ def test_realize_rocoto_invalid_xml():
     config_file = support.fixture_path("hello_workflow.yaml")
     xml = support.fixture_path("rocoto_invalid.xml")
     with patch.object(rocoto, "_write_rocoto_xml", return_value=None):
-        with patch.object(tempfile, "NamedTemporaryFile") as context_manager:
-            context_manager.return_value.__enter__.return_value.name = xml
+        with patch.object(tempfile, "NamedTemporaryFile") as temp:
+            temp.return_value.name = xml
             result = rocoto.realize_rocoto_xml(config_file=config_file, rendered_output=xml)
     assert result is False
 
