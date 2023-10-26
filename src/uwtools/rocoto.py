@@ -13,7 +13,7 @@ from uwtools.config.j2template import J2Template
 from uwtools.config.validator import validate_yaml
 from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import readable
+from uwtools.utils.file import readable, writable
 
 # Private functions
 
@@ -119,8 +119,9 @@ def realize_rocoto_xml(
         return False
 
     if output_file is None:
-        with open(temp_file, "r", encoding="utf-8") as f:
-            print(f.read())
+        with open(temp_file, "r", encoding="utf-8") as f_in:
+            with writable(output_file) as f_out:
+                print(f_in.read(), file=f_out)
         Path(temp_file).unlink()
     else:
         Path(temp_file).rename(output_file)
@@ -135,7 +136,7 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
     :return: Did the XML file conform to the schema?
     """
     with readable(input_xml) as f:
-        tree = etree.parse(f)
+        tree = etree.fromstring(bytes(f.read(), encoding="utf-8"))
     with open(_rocoto_schema_xml(), "r", encoding="utf-8") as f:
         schema = etree.RelaxNG(etree.parse(f))
     valid = schema.validate(tree)
