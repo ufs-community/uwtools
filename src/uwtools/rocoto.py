@@ -6,7 +6,7 @@ import re
 import tempfile
 from importlib import resources
 from pathlib import Path
-from typing import Tuple
+from typing import Optional, Tuple
 
 from lxml import etree
 from lxml.etree import Element, SubElement
@@ -165,23 +165,31 @@ class RocotoXML:
 
     def __init__(self, config_file: OptionalPath = None) -> None:
         self._config_validate(config_file)
-        self._add_workflow(YAMLConfig(config_file).data)
+        self._config = YAMLConfig(config_file).data
+        self._add_workflow(self._config)
 
     def dump(self, path: OptionalPath = None) -> None:
         """
         ???
         """
-        # Render internal etree to string:
+        # Render internal etree to string, fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"),
+        # insert !DOCTYPE block, then write final XML.
         xml = (
             etree.tostring(self._tree, pretty_print=True, encoding="utf-8", xml_declaration=True)
             .decode()
             .strip()
         )
-        # Fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"):
         xml = re.sub(r"&amp;([^;]+);", r"&\1;", xml)
-        # Write final XML:
+        xml = self._insert_doctype(xml)
         with writable(path) as f:
             print(xml, file=f)
+
+    @property
+    def _doctype(self) -> Optional[str]:
+        if entities := self._config["workflow"].get("entities"):
+            tags = (f'  <!ENTITY {k} "{v}">' for k, v in entities.items())
+            return "<!DOCTYPE workflow [\n%s\n]>" % "\n".join(tags)
+        return None
 
     def _config_validate(self, config_file: OptionalPath) -> None:
         if not validate_yaml(config_file=config_file, schema_file=_rocoto_schema_yaml()):
@@ -251,6 +259,12 @@ class RocotoXML:
         for key, block in config["tasks"].items():
             tag, name = self._tag_name(key)
             {"metatask": self._add_metatask, "task": self._add_task}[tag](e, block, name)
+
+    def _insert_doctype(self, xml: str) -> str:
+        lines = xml.split("\n")
+        if doctype := self._doctype:
+            lines.insert(1, doctype)
+        return "\n".join(lines)
 
     def _set_attrs(self, e: Element, config: dict) -> None:
         for attr, val in config["attrs"].items():
