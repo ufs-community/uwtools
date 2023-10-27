@@ -180,11 +180,6 @@ class RocotoXML:
         if not validate_yaml(config_file=config_file, schema_file=_rocoto_schema_yaml()):
             raise UWConfigError("YAML validation errors identified in %s" % config_file)
 
-    def _add_envvar(self, e: Element, name: str, value: str) -> None:
-        envvar = SubElement(e, "envvar")
-        SubElement(envvar, "name").text = name
-        SubElement(envvar, "value").text = value
-
     def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
         e = SubElement(e, "metatask", name=taskname)
         for key, val in config.items():
@@ -207,7 +202,12 @@ class RocotoXML:
         SubElement(e, "jobname").text = config.get("jobname", taskname)
         # And environment-variable entities:
         for name, value in config.get("envars", {}).items():
-            self._add_envvar(e, name, value)
+            self._add_task_envvar(e, name, value)
+
+    def _add_task_envvar(self, e: Element, name: str, value: str) -> None:
+        envvar = SubElement(e, "envvar")
+        SubElement(envvar, "name").text = name
+        SubElement(envvar, "value").text = value
 
     def _add_workflow(self, config: dict) -> None:
         name = "workflow"
