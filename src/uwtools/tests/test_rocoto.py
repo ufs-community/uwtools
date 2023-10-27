@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring, protected-access
+# pylint: disable=missing-function-docstring,protected-access
 """
 Tests for uwtools.rocoto module.
 """
@@ -24,7 +24,7 @@ def test_realize_rocoto_invalid_xml(tmp_path):
     cfgfile = fixture_path("hello_workflow.yaml")
     outfile = tmp_path / "rocoto.xml"
     dump = lambda _, dst: shutil.copyfile(fixture_path("rocoto_invalid.xml"), dst)
-    with patch.object(rocoto.RocotoXML, "dump", dump):
+    with patch.object(rocoto._RocotoXML, "dump", dump):
         success = rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile)
     assert success is False
 

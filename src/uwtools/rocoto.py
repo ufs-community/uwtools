@@ -34,7 +34,7 @@ def realize_rocoto_xml(
 
     _, temp_file = tempfile.mkstemp(suffix=".xml")
 
-    RocotoXML(config_file).dump(temp_file)
+    _RocotoXML(config_file).dump(temp_file)
 
     if not validate_rocoto_xml(input_xml=temp_file):
         log.error("Rocoto validation errors identified in %s", temp_file)
@@ -67,7 +67,7 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
     return valid
 
 
-class RocotoXML:
+class _RocotoXML:
     """
     Generate a Rocoto XML document from a UW YAML config.
     """
