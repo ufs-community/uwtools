@@ -4,6 +4,7 @@ Support for creating Rocoto XML workflow documents.
 
 import re
 import tempfile
+from dataclasses import dataclass
 from importlib import resources
 from pathlib import Path
 from typing import Optional, Tuple
@@ -151,7 +152,6 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
     return valid
 
 
-# @PM@ Factor out magic strings.
 # @PM@ Make some functions methods in RocotoXML?
 
 
@@ -191,7 +191,7 @@ class RocotoXML:
 
         :return: The <!DOCTYPE> block if entities are defined, otherwise None.
         """
-        if entities := self._config["workflow"].get("entities"):
+        if entities := self._config[STR.workflow].get(STR.entities):
             tags = (f'  <!ENTITY {k} "{v}">' for k, v in entities.items())
             return "<!DOCTYPE workflow [\n%s\n]>" % "\n".join(tags)
         return None
@@ -213,15 +213,15 @@ class RocotoXML:
         :param config: Configuration data for this element.
         :param taskname: The name of the metatask being defined.
         """
-        e = SubElement(e, "metatask", name=taskname)
+        e = SubElement(e, STR.metatask, name=taskname)
         for key, val in config.items():
-            if key.startswith("metatask"):
+            if key.startswith(STR.metatask):
                 self._add_metatask(e, val, self._tag_name(key)[1])
-            elif key.startswith("task"):
+            elif key.startswith(STR.task):
                 self._add_task(e, val, self._tag_name(key)[1])
-            elif key == "var":
+            elif key == STR.var:
                 for name, value in val.items():
-                    SubElement(e, "var", name=name).text = value
+                    SubElement(e, STR.var, name=name).text = value
 
     def _add_task(self, e: Element, config: dict, taskname: str) -> None:
         """
@@ -231,19 +231,19 @@ class RocotoXML:
         :param config: Configuration data for this element.
         :param taskname: The name of the task being defined.
         """
-        e = SubElement(e, "task", name=taskname)
+        e = SubElement(e, STR.task, name=taskname)
         self._set_attrs(e, config)
         # These elements are simple enough to not require their own methods:
-        for name in ("account", "command", "nodes", "walltime"):
+        for name in (STR.account, STR.command, STR.nodes, STR.walltime):
             if name in config:
                 SubElement(e, name).text = config[name]
         # The job name, if unspecified, defaults to the task name.
-        SubElement(e, "jobname").text = config.get("jobname", taskname)
+        SubElement(e, STR.jobname).text = config.get(STR.jobname, taskname)
         # Add any dependencies:
-        if "dependency" in config:
-            self._add_task_dependency(e, config["dependency"])
+        if STR.dependency in config:
+            self._add_task_dependency(e, config[STR.dependency])
         # Add any environment-variable entities:
-        for name, value in config.get("envars", {}).items():
+        for name, value in config.get(STR.envars, {}).items():
             self._add_task_envar(e, name, value)
 
     def _add_task_dependency(self, e: Element, config: dict) -> None:
@@ -253,11 +253,11 @@ class RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        e = SubElement(e, "dependency")
+        e = SubElement(e, STR.dependency)
         for key, block in config.items():
             tag, _ = self._tag_name(key)
-            if tag == "taskdep":
-                d = SubElement(e, "taskdep")
+            if tag == STR.taskdep:
+                d = SubElement(e, STR.taskdep)
                 self._set_attrs(d, block)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
@@ -269,9 +269,9 @@ class RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        envar = SubElement(e, "envar")
-        SubElement(envar, "name").text = name
-        SubElement(envar, "value").text = value
+        envar = SubElement(e, STR.envar)
+        SubElement(envar, STR.name).text = name
+        SubElement(envar, STR.value).text = value
 
     def _add_workflow(self, config: dict) -> None:
         """
@@ -279,13 +279,12 @@ class RocotoXML:
 
         :param config: Configuration data for this element.
         """
-        name = "workflow"
-        config, e = config[name], Element(name)
+        config, e = config[STR.workflow], Element(STR.workflow)
         self._set_attrs(e, config)
         self._add_workflow_cycledefs(e, config)
         self._add_workflow_log(e, config)
         self._add_workflow_tasks(e, config)
-        self._root = e
+        self._root: Element = e
 
     def _add_workflow_cycledefs(self, e: Element, config: dict) -> None:
         """
@@ -294,9 +293,9 @@ class RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        for name, coords in config["cycledefs"].items():
+        for name, coords in config[STR.cycledefs].items():
             for coord in coords:
-                SubElement(e, "cycledef", group=name).text = coord
+                SubElement(e, STR.cycledef, group=name).text = coord
 
     def _add_workflow_log(self, e: Element, config: dict) -> None:
         """
@@ -305,8 +304,7 @@ class RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        name = "log"
-        SubElement(e, name).text = config[name]
+        SubElement(e, STR.log).text = config[STR.log]
 
     def _add_workflow_tasks(self, e: Element, config: dict) -> None:
         """
@@ -315,9 +313,9 @@ class RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for these elements.
         """
-        for key, block in config["tasks"].items():
+        for key, block in config[STR.tasks].items():
             tag, name = self._tag_name(key)
-            {"metatask": self._add_metatask, "task": self._add_task}[tag](e, block, name)
+            {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, block, name)
 
     def _insert_doctype(self, xml: str) -> str:
         """
@@ -338,14 +336,14 @@ class RocotoXML:
         :param e: The element to set the attributes on. :config: A config containing the attribute
             definitions.
         """
-        for attr, val in config["attrs"].items():
+        for attr, val in config[STR.attrs].items():
             e.set(attr, str(val))
 
     def _tag_name(self, key: str) -> Tuple[str, str]:
         """
         Split a metadata-bearing key into base tag and metadata.
 
-        :param key: A string of the form "tag_metadata" (or simply "tag").
+        :param key: A string of the form "tag_metadata" (or simply STR.tag).
         :return: The base tag and metadata, separated.
         """
         m = re.match(r"^([^_]+)(_(.*))?$", key)
@@ -369,3 +367,36 @@ class RocotoXML:
         for child in sorted(list(e), key=lambda x: x.tag):
             tidy_e.append(self._tidy(child))
         return tidy_e
+
+
+@dataclass(frozen=True)
+class _STR:
+    """
+    A lookup map for Rocoto-related strings.
+    """
+
+    account: str = "account"
+    attrs: str = "attrs"
+    command: str = "command"
+    cycledef: str = "cycledef"
+    cycledefs: str = "cycledefs"
+    dependency: str = "dependency"
+    entities: str = "entities"
+    envar: str = "envar"
+    envars: str = "envars"
+    jobname: str = "jobname"
+    log: str = "log"
+    metatask: str = "metatask"
+    name: str = "name"
+    nodes: str = "nodes"
+    tag: str = "tag"
+    task: str = "task"
+    taskdep: str = "taskdep"
+    tasks: str = "tasks"
+    value: str = "value"
+    var: str = "var"
+    walltime: str = "walltime"
+    workflow: str = "workflow"
+
+
+STR = _STR()
