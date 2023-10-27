@@ -113,13 +113,9 @@ def realize_rocoto_xml(
     :return: Did the input and output files conform to theirr schemas?
     """
 
-    if not validate_yaml(config_file=config_file, schema_file=_rocoto_schema_yaml()):
-        log.error("YAML validation errors identified in %s", config_file)
-        return False
-
     _, temp_file = tempfile.mkstemp(suffix=".xml")
 
-    _write_rocoto_xml(config_file=config_file, output_file=temp_file)
+    RocotoXML(config_file).dump(temp_file)
 
     if not validate_rocoto_xml(input_xml=temp_file):
         log.error("Rocoto validation errors identified in %s", temp_file)
