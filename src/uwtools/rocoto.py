@@ -153,6 +153,7 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
 
 # @PM@ Add entity block
 # @PM@ Fixup &amp;
+# @PM@ Recursive element sort?
 # @PM@ Factor out magic strings.
 # @PM@ Make some functions methods in RocotoXML?
 
