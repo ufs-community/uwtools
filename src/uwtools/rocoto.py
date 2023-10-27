@@ -83,10 +83,10 @@ class _RocotoXML:
 
         :param path: Optional path to write XML document to.
         """
-        # Tidy the tree, render to a string, fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"),
-        # insert !DOCTYPE block, then write final XML.
+        # Render the tree to a string, fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"), insert
+        # !DOCTYPE block, then write final XML.
         xml = etree.tostring(
-            self._tidy(self._root), pretty_print=True, encoding="utf-8", xml_declaration=True
+            self._root, pretty_print=True, encoding="utf-8", xml_declaration=True
         ).decode()
         xml = re.sub(r"&amp;([^;]+);", r"&\1;", xml)
         xml = self._insert_doctype(xml)
@@ -279,23 +279,6 @@ class _RocotoXML:
         tag = parts[0]
         name = "_".join(parts[1:]) if parts[1:] else ""
         return tag, name
-
-    def _tidy(self, e: Element) -> Element:
-        """
-        Construct a semantically-equivalent tree with child elements and attributes in sorted order.
-
-        :param e: The element tree to sort.
-        :return: A new element tree with child elements and attributes in sorted order.
-        """
-        # Create a new element named the same as the current element, add the attrs in sorted order,
-        # then add the (recursively tidied) children in sorted order.
-        tidy_e = Element(e.tag)
-        for attr, val in sorted(e.items(), key=lambda x: x[0]):
-            tidy_e.set(attr, val)
-        tidy_e.text = e.text
-        for child in sorted(list(e), key=lambda x: x.tag):
-            tidy_e.append(self._tidy(child))
-        return tidy_e
 
 
 @dataclass(frozen=True)
