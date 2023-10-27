@@ -186,8 +186,7 @@ class _RocotoXML:
         for key, block in config.items():
             tag, _ = self._tag_name(key)
             if tag == STR.taskdep:
-                d = SubElement(e, STR.taskdep)
-                self._set_attrs(d, block)
+                self._set_attrs(SubElement(e, STR.taskdep), block)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 

@@ -132,3 +132,55 @@ def test__RocotoXML__add_task_dependency_fail(instance, root):
     config = {"unrecognized": "whatever"}
     with raises(UWConfigError):
         instance._add_task_dependency(e=root, config=config)
+
+
+def test__RocotoXML__add_task_envar(instance, root):
+    instance._add_task_envar(root, "foo", "bar")
+    envar = root[0]
+    name, value = envar
+    assert name.tag == "name"
+    assert name.text == "foo"
+    assert value.tag == "value"
+    assert value.text == "bar"
+
+
+def test__RocotoXML__add_workflow(instance):
+    config = {
+        "workflow": {"attrs": {"foo": "1", "bar": "2"}, "cycledefs": "3", "log": "4", "tasks": "5"}
+    }
+    with patch.multiple(
+        instance, _add_workflow_cycledefs=D, _add_workflow_log=D, _add_workflow_tasks=D
+    ) as mocks:
+        instance._add_workflow(config=config)
+    workflow = instance._root
+    assert workflow.tag == "workflow"
+    assert workflow.get("foo") == "1"
+    assert workflow.get("bar") == "2"
+    mocks["_add_workflow_cycledefs"].assert_called_once_with(workflow, "3")
+    mocks["_add_workflow_log"].assert_called_once_with(workflow, "4")
+    mocks["_add_workflow_tasks"].assert_called_once_with(workflow, "5")
+
+
+def test__RocotoXML__add_workflow_cycledefs(instance, root):
+    config = {"foo": ["1", "2"], "bar": ["3", "4"]}
+    instance._add_workflow_cycledefs(e=root, config=config)
+    for i, group, coord in [(0, "foo", "1"), (1, "foo", "2"), (2, "bar", "3"), (3, "bar", "4")]:
+        assert root[i].tag == "cycledef"
+        assert root[i].get("group") == group
+        assert root[i].text == coord
+
+
+def test__RocotoXML__add_workflow_log(instance, root):
+    path = "/path/to/logfile"
+    instance._add_workflow_log(e=root, logfile=path)
+    log = root[0]
+    assert log.tag == "log"
+    assert log.text == path
+
+
+def test__RocotoXML__add_workflow_tasks(instance, root):
+    config = {"metatask_foo": "1", "task_bar": "2"}
+    with patch.multiple(instance, _add_metatask=D, _add_task=D) as mocks:
+        instance._add_workflow_tasks(e=root, config=config)
+    mocks["_add_metatask"].assert_called_once_with(root, "1", "foo")
+    mocks["_add_task"].assert_called_once_with(root, "2", "bar")
