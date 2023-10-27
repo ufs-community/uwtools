@@ -169,16 +169,6 @@ def resource_pathobj(suffix: str = "") -> Path:
         return prefix / suffix
 
 
-# def resource_path(suffix: str = "") -> str:
-#     """
-#     Returns a POSIX path to a uwtools resource file.
-
-#:param suffix: A subpath relative to the location of the uwtools resource files. The prefix path
-# to the resources files is known to Python and varies based on installation location.
-#     """
-#     return resource_pathobj(suffix).as_posix()
-
-
 @contextmanager
 def writable(filepath: OptionalPath = None, mode: str = "w") -> Generator[IO, None, None]:
     """
