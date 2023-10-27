@@ -72,20 +72,19 @@ def test__rocoto_schema_xml():
 # @pytest.mark.parametrize("vals", [("hello_workflow.yaml", True), ("fruit_config.yaml", False)])
 # def test_realize_rocoto_xml(vals, tmp_path):
 #     fn, validity = vals
-#     output = tmp_path / "rocoto.xml"
-#     with patch.object(rocoto, "validate_rocoto_xml", value=True):
-#         with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
-#             config_file = path / fn
-#             result = rocoto.realize_rocoto_xml(config_file=config_file, output_file=output)
-#     assert result is validity
+#     outfile = tmp_path / "rocoto.xml"
+#     with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
+#         cfgfile = path / fn
+#     with patch.object(rocoto.RocotoXML, "_config_validate", return_value=True):
+#         with patch.object(rocoto, "validate_rocoto_xml", value=True):
+#             success = rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile)
+#     assert success is validity
 
 
 def test_realize_rocoto_default_output():
+    cfgfile = support.fixture_path("hello_workflow.yaml")
     with patch.object(rocoto, "validate_rocoto_xml", value=True):
-        with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
-            config_file = path / "hello_workflow.yaml"
-            result = rocoto.realize_rocoto_xml(config_file=config_file)
-    assert result is True
+        assert rocoto.realize_rocoto_xml(config_file=cfgfile) is True
 
 
 def test_realize_rocoto_invalid_xml(tmp_path):
@@ -106,8 +105,8 @@ def test_rocoto_xml_is_valid(vals):
 
 
 def test__write_rocoto_xml(tmp_path):
-    config_file = support.fixture_path("hello_workflow.yaml")
+    cfgfile = support.fixture_path("hello_workflow.yaml")
     outfile = tmp_path / "rocoto.xml"
-    rocoto._write_rocoto_xml(config_file=config_file, output_file=outfile)
+    rocoto._write_rocoto_xml(config_file=cfgfile, output_file=outfile)
     expected = support.fixture_path("hello_workflow.xml")
     assert support.compare_files(expected, outfile) is True
