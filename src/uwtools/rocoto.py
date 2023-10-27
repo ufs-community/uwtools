@@ -126,11 +126,12 @@ class _RocotoXML:
         """
         e = SubElement(e, STR.metatask, name=taskname)
         for key, val in config.items():
-            if key.startswith(STR.metatask):
-                self._add_metatask(e, val, self._tag_name(key)[1])
-            elif key.startswith(STR.task):
-                self._add_task(e, val, self._tag_name(key)[1])
-            elif key == STR.var:
+            tag, taskname = self._tag_name(key)
+            if tag == STR.metatask:
+                self._add_metatask(e, val, taskname)
+            elif tag == STR.task:
+                self._add_task(e, val, taskname)
+            elif tag == STR.var:
                 for name, value in val.items():
                     SubElement(e, STR.var, name=name).text = value
 
