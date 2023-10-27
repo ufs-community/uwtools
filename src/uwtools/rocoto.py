@@ -171,7 +171,7 @@ class RocotoXML:
 
         :param path: Optional path to write XML document to.
         """
-        # Tidy the tree, render it to a string, fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"),
+        # Tidy the tree, render to a string, fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"),
         # insert !DOCTYPE block, then write final XML.
         tidy = self._tidy(self._root)
         xml = (
