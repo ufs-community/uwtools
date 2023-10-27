@@ -146,9 +146,27 @@ class _RocotoXML:
         e = SubElement(e, STR.task, name=taskname)
         self._set_attrs(e, config)
         # These elements are simple enough to not require their own methods:
-        for name in (STR.account, STR.command, STR.nodes, STR.walltime):
-            if name in config:
-                SubElement(e, name).text = config[name]
+        for tag in (
+            STR.account,
+            STR.command,
+            STR.cores,
+            STR.deadline,
+            STR.exclusive,
+            STR.join,
+            STR.memory,
+            STR.native,
+            STR.nodes,
+            STR.nodesize,
+            STR.partition,
+            STR.queue,
+            STR.rewind,
+            STR.shared,
+            STR.stderr,
+            STR.stdout,
+            STR.walltime,
+        ):
+            if tag in config:
+                SubElement(e, tag).text = config[tag]
         # The job name, if unspecified, defaults to the task name.
         SubElement(e, STR.jobname).text = config.get(STR.jobname, taskname)
         # Add any dependencies:
@@ -291,17 +309,30 @@ class _STR:
     account: str = "account"
     attrs: str = "attrs"
     command: str = "command"
+    cores: str = "cores"
     cycledef: str = "cycledef"
     cycledefs: str = "cycledefs"
+    deadline: str = "deadline"
     dependency: str = "dependency"
     entities: str = "entities"
     envar: str = "envar"
     envars: str = "envars"
+    exclusive: str = "exclusive"
     jobname: str = "jobname"
+    join: str = "join"
     log: str = "log"
+    memory: str = "memory"
     metatask: str = "metatask"
     name: str = "name"
+    native: str = "native"
     nodes: str = "nodes"
+    nodesize: str = "nodesize"
+    partition: str = "partition"
+    queue: str = "queue"
+    rewind: str = "rewind"
+    shared: str = "shared"
+    stderr: str = "stderr"
+    stdout: str = "stdout"
     tag: str = "tag"
     task: str = "task"
     taskdep: str = "taskdep"
