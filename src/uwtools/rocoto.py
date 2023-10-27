@@ -151,8 +151,6 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
     return valid
 
 
-# @PM@ Add entity block
-# @PM@ Fixup &amp;
 # @PM@ Recursive element sort?
 # @PM@ Factor out magic strings.
 # @PM@ Make some functions methods in RocotoXML?
@@ -160,7 +158,7 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
 
 class RocotoXML:
     """
-    ???
+    Generate a Rocoto XML document from a UW YAML config.
     """
 
     def __init__(self, config_file: OptionalPath = None) -> None:
@@ -170,7 +168,9 @@ class RocotoXML:
 
     def dump(self, path: OptionalPath = None) -> None:
         """
-        ???
+        Emit Rocoto XML document to file or stdout.
+
+        :param path: Optional path to write XML document to.
         """
         # Render internal etree to string, fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"),
         # insert !DOCTYPE block, then write final XML.
