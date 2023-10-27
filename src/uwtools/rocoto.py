@@ -183,9 +183,9 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        envar = SubElement(e, STR.envar)
-        SubElement(envar, STR.name).text = name
-        SubElement(envar, STR.value).text = value
+        e = SubElement(e, STR.envar)
+        SubElement(e, STR.name).text = name
+        SubElement(e, STR.value).text = value
 
     def _add_workflow(self, config: dict) -> None:
         """
