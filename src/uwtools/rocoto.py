@@ -67,13 +67,6 @@ def _rocoto_schema_yaml() -> DefinitePath:
     return resource_pathobj("rocoto.jsonschema")
 
 
-def _rocoto_template_xml() -> DefinitePath:
-    """
-    The path to the file containing the Rocoto workflow document template to render.
-    """
-    return resource_pathobj("rocoto.jinja2")
-
-
 # Public functions
 
 
