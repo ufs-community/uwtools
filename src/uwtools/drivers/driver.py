@@ -106,7 +106,10 @@ class Driver(ABC):
 
     @staticmethod
     def stage_files(
-        run_directory: str, files_to_stage: Dict[str, Union[list, str]], link_files: bool = False
+        run_directory: str,
+        files_to_stage: Dict[str, Union[list, str]],
+        link_files: bool = False,
+        dry_run: bool = False,
     ) -> None:
         """
         Creates destination files in run directory and copies or links contents from the source path
@@ -128,8 +131,11 @@ class Driver(ABC):
                     link_files,
                 )
             else:
-                link_or_copy(src_path_or_paths, dst_path)  # type: ignore
-                msg = f"File {src_path_or_paths} staged as {dst_path}"
+                if dry_run:
+                    msg = f"File {src_path_or_paths} would be staged as {dst_path}"
+                else:
+                    link_or_copy(src_path_or_paths, dst_path)  # type: ignore
+                    msg = f"File {src_path_or_paths} staged as {dst_path}"
                 log.info(msg)
 
     # Private methods

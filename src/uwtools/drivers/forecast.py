@@ -50,10 +50,15 @@ class FV3Forecast(Driver):
         bs = self.scheduler.batch_script
         bs.append(pre_run)
         bs.append(self.run_cmd())
+        if self._dry_run:
+            log.info("Batch Script: ")
+            bs.dump(None)
         return bs
 
     @staticmethod
-    def create_directory_structure(run_directory: DefinitePath, exist_act: str = "delete") -> None:
+    def create_directory_structure(
+        run_directory: DefinitePath, exist_act: str = "delete", dry_run: bool = False
+    ) -> None:
         """
         Collects the name of the desired run directory, and has an optional flag for what to do if
         the run directory specified already exists. Creates the run directory and adds
@@ -77,14 +82,20 @@ class FV3Forecast(Driver):
 
         # Delete or rename directory if it exists.
 
-        handle_existing(str(run_directory), exist_act)
+        if dry_run and os.path.isdir(run_directory):
+            log.info(f"Would {exist_act} directory")
+        else:
+            handle_existing(str(run_directory), exist_act)
 
         # Create new run directory with two required subdirectories.
 
         for subdir in ("INPUT", "RESTART"):
             path = os.path.join(run_directory, subdir)
-            log.info("Creating directory: %s", path)
-            os.makedirs(path)
+            if dry_run:
+                log.info("Would create directory: %s", path)
+            else:
+                log.info("Creating directory: %s", path)
+                os.makedirs(path)
 
     def create_field_table(self, output_path: OptionalPath) -> None:
         """
@@ -128,6 +139,23 @@ class FV3Forecast(Driver):
         ???
         """
 
+    def prepare_directories(self) -> str:
+        """
+        Prepares the run directory and stages static and cycle-dependent files.
+        """
+        run_directory = self._config["run_dir"]
+        self.create_directory_structure(run_directory, "delete", dry_run=self._dry_run)
+
+        self._prepare_config_files(Path(run_directory))
+
+        self._config["cycle-dependent"].update(self._define_boundary_files())
+
+        for file_category in ["static", "cycle-dependent"]:
+            self.stage_files(
+                run_directory, self._config[file_category], link_files=True, dry_run=self._dry_run
+            )
+        return run_directory
+
     def requirements(self) -> None:
         """
         ???
@@ -152,37 +180,15 @@ class FV3Forecast(Driver):
 
         :return: Did the FV3 run exit with success status?
         """
-        # Prepare directories.
-        run_directory = self._config["run_dir"]
-        self.create_directory_structure(run_directory, "delete")
-
-        self._prepare_config_files(Path(run_directory))
-
-        self._config["cycle-dependent"].update(self._define_boundary_files())
-
-        for file_category in ["static", "cycle-dependent"]:
-            self.stage_files(run_directory, self._config[file_category], link_files=True)
+        run_directory = self.prepare_directories()
 
         if self._batch_script is not None:
             batch_script = self.batch_script()
             outpath = Path(run_directory) / self._batch_script
-
-            if self._dry_run:
-                # Apply switch to allow user to view the run command of config.
-                # This will not run the job.
-                log.info("Batch Script:")
-                batch_script.dump(None)
-                return True
-
             batch_script.dump(outpath)
             return self.scheduler.submit_job(outpath)
 
-        pre_run = self._mpi_env_variables(" ")
-        full_cmd = f"{pre_run} {self.run_cmd()}"
-        if self._dry_run:
-            log.info("Would run: ")
-            print(full_cmd, file=sys.stdout)
-            return True
+        full_cmd = self._prepare_full_command()
 
         result = execute(cmd=full_cmd)
         return result.success
@@ -239,6 +245,16 @@ class FV3Forecast(Driver):
         self.create_field_table(run_directory / "field_table")
         self.create_model_configure(run_directory / "model_configure")
         self.create_namelist(run_directory / "input.nml")
+
+    def _prepare_full_command(self) -> str:
+        """
+        Collects the necessary MPI environment variables in order to construct full run command.
+        """
+        pre_run = self._mpi_env_variables(" ")
+        if self._dry_run:
+            log.info("Would run: ")
+            print(f"{pre_run} {self.run_cmd()}", file=sys.stdout)
+        return f"{pre_run} {self.run_cmd()}"
 
     def _mpi_env_variables(self, delimiter: str = " ") -> str:
         """
