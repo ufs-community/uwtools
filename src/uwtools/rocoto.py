@@ -151,7 +151,6 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
     return valid
 
 
-# @PM@ Recursive element sort?
 # @PM@ Factor out magic strings.
 # @PM@ Make some functions methods in RocotoXML?
 
@@ -174,6 +173,7 @@ class RocotoXML:
         """
         # Render internal etree to string, fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"),
         # insert !DOCTYPE block, then write final XML.
+        self._tree = self._tidy(self._tree)
         xml = (
             etree.tostring(self._tree, pretty_print=True, encoding="utf-8", xml_declaration=True)
             .decode()
@@ -275,3 +275,14 @@ class RocotoXML:
         assert m  # validated config => regex match
         tag, name = m[1], m[3]
         return tag, name
+
+    def _tidy(self, e: Element) -> Element:
+        # Create a new element named the same as the current element, add the attrs in sorted order,
+        # then add the (recursively tidied) children in sorted order.
+        tidy_e = Element(e.tag)
+        for attr, val in sorted(e.items(), key=lambda x: x[0]):
+            tidy_e.set(attr, val)
+        tidy_e.text = e.text
+        for child in sorted(list(e), key=lambda x: x.tag):
+            tidy_e.append(self._tidy(child))
+        return tidy_e
