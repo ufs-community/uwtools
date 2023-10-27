@@ -180,11 +180,6 @@ class RocotoXML:
         if not validate_yaml(config_file=config_file, schema_file=_rocoto_schema_yaml()):
             raise UWConfigError("YAML validation errors identified in %s" % config_file)
 
-    def _add_cycledefs(self, e: Element, config: dict) -> None:
-        for name, coords in config["cycledefs"].items():
-            for coord in coords:
-                SubElement(e, "cycledef", group=name).text = coord
-
     def _add_envvar(self, e: Element, name: str, value: str) -> None:
         envvar = SubElement(e, "envvar")
         SubElement(envvar, "name").text = name
@@ -199,38 +194,43 @@ class RocotoXML:
                 self._add_task(e, val, self._taskinfo(key)[1])
             elif key == "var":
                 for name, value in val.items():
-                    self._add_var(e, name, value)
+                    SubElement(e, "var", name=name).text = value
 
     def _add_task(self, e: Element, config: dict, taskname: str) -> None:
         e = SubElement(e, "task", name=taskname)
         self._set_attrs(e, config)
+        # These elements are simple enough to not require their own methods:
         for name in ("account", "command", "nodes", "walltime"):
             if name in config:
                 SubElement(e, name).text = config[name]
+        # The job name, if unspecified, defaults to the task name.
         SubElement(e, "jobname").text = config.get("jobname", taskname)
+        # And environment-variable entities:
         for name, value in config.get("envars", {}).items():
             self._add_envvar(e, name, value)
-
-    def _add_tasks(self, e: Element, config: dict) -> None:
-        for key, block in config["tasks"].items():
-            tag, name = self._taskinfo(key)
-            {"metatask": self._add_metatask, "task": self._add_task}[tag](e, block, name)
-
-    def _add_var(self, e: Element, name: str, value: str) -> None:
-        SubElement(e, "var", name=name).text = value
 
     def _add_workflow(self, config: dict) -> None:
         name = "workflow"
         config, e = config[name], Element(name)
         self._set_attrs(e, config)
-        self._add_cycledefs(e, config)
-        self._add_log(e, config)
-        self._add_tasks(e, config)
+        self._add_workflow_cycledefs(e, config)
+        self._add_workflow_log(e, config)
+        self._add_workflow_tasks(e, config)
         self._tree = e
 
-    def _add_log(self, e: Element, config: dict) -> None:
+    def _add_workflow_cycledefs(self, e: Element, config: dict) -> None:
+        for name, coords in config["cycledefs"].items():
+            for coord in coords:
+                SubElement(e, "cycledef", group=name).text = coord
+
+    def _add_workflow_log(self, e: Element, config: dict) -> None:
         name = "log"
         SubElement(e, name).text = config[name]
+
+    def _add_workflow_tasks(self, e: Element, config: dict) -> None:
+        for key, block in config["tasks"].items():
+            tag, name = self._taskinfo(key)
+            {"metatask": self._add_metatask, "task": self._add_task}[tag](e, block, name)
 
     def _set_attrs(self, e: Element, config: dict) -> None:
         for attr, val in config["attrs"].items():
