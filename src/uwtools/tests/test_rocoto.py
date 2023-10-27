@@ -7,7 +7,7 @@ Tests for uwtools.rocoto module.
 from importlib import resources
 from unittest.mock import patch
 
-# import pytest
+import pytest
 import yaml
 
 from uwtools import rocoto
@@ -97,12 +97,12 @@ def test_realize_rocoto_default_output():
 #     assert result is False
 
 
-# @pytest.mark.parametrize("vals", [("hello_workflow.xml", True), ("rocoto_invalid.xml", False)])
-# def test_rocoto_xml_is_valid(vals):
-#     fn, validity = vals
-#     xml = support.fixture_path(fn)
-#     result = rocoto.validate_rocoto_xml(input_xml=xml)
-#     assert result is validity
+@pytest.mark.parametrize("vals", [("hello_workflow.xml", True), ("rocoto_invalid.xml", False)])
+def test_rocoto_xml_is_valid(vals):
+    fn, validity = vals
+    xml = support.fixture_path(fn)
+    result = rocoto.validate_rocoto_xml(input_xml=xml)
+    assert result is validity
 
 
 def test__write_rocoto_xml(tmp_path):
