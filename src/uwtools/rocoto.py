@@ -151,8 +151,10 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
     return valid
 
 
-# @PM@ Make some functions methods in RocotoXML?
+# @PM@ Add entity block
+# @PM@ Fixup &amp;
 # @PM@ Factor out magic strings.
+# @PM@ Make some functions methods in RocotoXML?
 
 
 class RocotoXML:
@@ -201,9 +203,10 @@ class RocotoXML:
     def _add_task(self, e: Element, config: dict, taskname: str) -> None:
         e = SubElement(e, "task", name=taskname)
         self._set_attrs(e, config)
-        for x in ("account", "command", "jobname", "nodes", "walltime"):
-            if x in config:
-                SubElement(e, x).text = config[x]
+        for name in ("account", "command", "nodes", "walltime"):
+            if name in config:
+                SubElement(e, name).text = config[name]
+        SubElement(e, "jobname").text = config.get("jobname", taskname)
         for name, value in config.get("envars", {}).items():
             self._add_envvar(e, name, value)
 
