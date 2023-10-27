@@ -275,9 +275,9 @@ class _RocotoXML:
         :return: The base tag and metadata, separated.
         """
         # For example, key "task_foo"bar" will be split into tag "task" and name "foo_bar".
-        m = re.match(r"^([^_]+)(_(.*))?$", key)
-        assert m  # validated config => regex match
-        tag, name = m[1], m[3]
+        parts = key.split("_")
+        tag = parts[0]
+        name = "_".join(parts[1:]) if parts[1:] else ""
         return tag, name
 
     def _tidy(self, e: Element) -> Element:

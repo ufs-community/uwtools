@@ -206,6 +206,6 @@ def test__RocotoXML__setattrs(instance, root):
 
 
 def test__RocotoXML__tag_name(instance):
-    assert instance._tag_name("foo") == ("foo", None)
+    assert instance._tag_name("foo") == ("foo", "")
     assert instance._tag_name("foo_bar") == ("foo", "bar")
     assert instance._tag_name("foo_bar_baz") == ("foo", "bar_baz")
