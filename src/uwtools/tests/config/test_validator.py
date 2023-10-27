@@ -12,7 +12,8 @@ from pytest import fixture
 
 from uwtools.config import validator
 from uwtools.logging import log
-from uwtools.tests.support import logged, regex_logged, resource_pathobj
+from uwtools.tests.support import logged, regex_logged
+from uwtools.utils.file import resource_pathobj
 
 # Support functions
 

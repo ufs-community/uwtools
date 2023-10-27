@@ -5,7 +5,6 @@ Support for creating Rocoto XML workflow documents.
 import re
 import tempfile
 from dataclasses import dataclass
-from importlib import resources
 from pathlib import Path
 from typing import Optional, Tuple
 
@@ -18,7 +17,7 @@ from uwtools.config.validator import validate_yaml
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import readable, writable
+from uwtools.utils.file import readable, resource_pathobj, writable
 
 # Private functions
 
@@ -59,24 +58,21 @@ def _rocoto_schema_xml() -> DefinitePath:
     """
     The path to the file containing the schema to validate the XML file against.
     """
-    with resources.as_file(resources.files("uwtools.resources")) as path:
-        return path / "schema_with_metatasks.rng"
+    return resource_pathobj("schema_with_metatasks.rng")
 
 
 def _rocoto_schema_yaml() -> DefinitePath:
     """
     The path to the file containing the schema to validate the YAML file against.
     """
-    with resources.as_file(resources.files("uwtools.resources")) as path:
-        return path / "rocoto.jsonschema"
+    return resource_pathobj("rocoto.jsonschema")
 
 
 def _rocoto_template_xml() -> DefinitePath:
     """
     The path to the file containing the Rocoto workflow document template to render.
     """
-    with resources.as_file(resources.files("uwtools.resources")) as path:
-        return path / "rocoto.jinja2"
+    return resource_pathobj("rocoto.jinja2")
 
 
 def _write_rocoto_xml(

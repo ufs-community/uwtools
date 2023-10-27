@@ -11,7 +11,8 @@ import yaml
 
 from uwtools import rocoto
 from uwtools.config.core import YAMLConfig
-from uwtools.tests.support import compare_files, fixture_path, resource_pathobj
+from uwtools.tests.support import compare_files, fixture_path
+from uwtools.utils.file import resource_pathobj
 
 # Test functions
 
