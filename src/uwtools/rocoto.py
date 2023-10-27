@@ -245,8 +245,8 @@ class _RocotoXML:
         """
         Set attributes on an element.
 
-        :param e: The element to set the attributes on. :config: A config containing the attribute
-            definitions.
+        :param e: The element to set the attributes on.
+        :param config: A config containing the attribute definitions.
         """
         for attr, val in config[STR.attrs].items():
             e.set(attr, str(val))
