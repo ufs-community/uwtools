@@ -258,6 +258,7 @@ class _RocotoXML:
         :param key: A string of the form "tag_metadata" (or simply STR.tag).
         :return: The base tag and metadata, separated.
         """
+        # For example, key "task_foo"bar" will be split into tag "task" and name "foo_bar".
         m = re.match(r"^([^_]+)(_(.*))?$", key)
         assert m  # validated config => regex match
         tag, name = m[1], m[3]
