@@ -69,18 +69,6 @@ def test__rocoto_schema_xml():
     assert rocoto._rocoto_schema_xml() == expected
 
 
-# @pytest.mark.parametrize("vals", [("hello_workflow.yaml", True), ("fruit_config.yaml", False)])
-# def test_realize_rocoto_xml(vals, tmp_path):
-#     fn, validity = vals
-#     outfile = tmp_path / "rocoto.xml"
-#     with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
-#         cfgfile = path / fn
-#     with patch.object(rocoto.RocotoXML, "_config_validate", return_value=True):
-#         with patch.object(rocoto, "validate_rocoto_xml", value=True):
-#             success = rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile)
-#     assert success is validity
-
-
 def test_realize_rocoto_default_output():
     cfgfile = support.fixture_path("hello_workflow.yaml")
     with patch.object(rocoto, "validate_rocoto_xml", value=True):
