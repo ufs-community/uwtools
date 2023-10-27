@@ -6,6 +6,7 @@ import re
 import tempfile
 from importlib import resources
 from pathlib import Path
+from typing import Tuple
 
 from lxml import etree
 from lxml.etree import Element, SubElement
@@ -151,6 +152,7 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
 
 
 # @PM@ Make some functions methods in RocotoXML?
+# @PM@ Factor out magic strings.
 
 
 class RocotoXML:
@@ -185,8 +187,16 @@ class RocotoXML:
         SubElement(envvar, "name").text = name
         SubElement(envvar, "value").text = value
 
-    def _add_metatask(self, e: Element, config: dict, name: str) -> None:
-        print("@@@ adding metatask", e, config, name)
+    def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
+        e = SubElement(e, "metatask", name=taskname)
+        for key, val in config.items():
+            if key.startswith("metatask"):
+                self._add_metatask(e, val, self._taskinfo(key)[1])
+            elif key.startswith("task"):
+                self._add_task(e, val, self._taskinfo(key)[1])
+            elif key == "var":
+                for name, value in val.items():
+                    self._add_var(e, name, value)
 
     def _add_task(self, e: Element, config: dict, taskname: str) -> None:
         e = SubElement(e, "task", name=taskname)
@@ -199,10 +209,11 @@ class RocotoXML:
 
     def _add_tasks(self, e: Element, config: dict) -> None:
         for key, block in config["tasks"].items():
-            m = re.match(r"^((meta)?task)(_(.*))?$", key)
-            assert m  # validated config => regex match
-            tag, name = m[1], m[4]
+            tag, name = self._taskinfo(key)
             {"metatask": self._add_metatask, "task": self._add_task}[tag](e, block, name)
+
+    def _add_var(self, e: Element, name: str, value: str) -> None:
+        SubElement(e, "var", name=name).text = value
 
     def _add_workflow(self, config: dict) -> None:
         name = "workflow"
@@ -220,3 +231,9 @@ class RocotoXML:
     def _set_attrs(self, e: Element, config: dict) -> None:
         for attr, val in config["attrs"].items():
             e.set(attr, str(val))
+
+    def _taskinfo(self, key: str) -> Tuple[str, str]:
+        m = re.match(r"^((meta)?task)(_(.*))?$", key)
+        assert m  # validated config => regex match
+        tag, name = m[1], m[4]
+        return tag, name
