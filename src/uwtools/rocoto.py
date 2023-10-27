@@ -12,7 +12,6 @@ from lxml import etree
 from lxml.etree import Element, SubElement
 
 from uwtools.config.core import YAMLConfig
-from uwtools.config.j2template import J2Template
 from uwtools.config.validator import validate_yaml
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -75,24 +74,6 @@ def _rocoto_template_xml() -> DefinitePath:
     return resource_pathobj("rocoto.jinja2")
 
 
-def _write_rocoto_xml(
-    config_file: OptionalPath,
-    output_file: OptionalPath,
-) -> None:
-    """
-    Render the Rocoto workflow defined in the given YAML to XML.
-
-    :param config_file: Path to YAML input file.
-    :param output_file: Path to write rendered XML file.
-    """
-
-    values = _add_jobname_to_tasks(config_file)
-
-    # Render the template.
-    template = J2Template(values=values.data, template_path=_rocoto_template_xml())
-    template.dump(output_path=output_file)
-
-
 # Public functions
 
 
@@ -142,9 +123,6 @@ def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
     for err in list(schema.error_log):
         log.error(err)
     return valid
-
-
-# @PM@ Make some functions methods in RocotoXML?
 
 
 class RocotoXML:

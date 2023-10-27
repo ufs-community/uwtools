@@ -11,7 +11,7 @@ import yaml
 
 from uwtools import rocoto
 from uwtools.config.core import YAMLConfig
-from uwtools.tests.support import compare_files, fixture_path
+from uwtools.tests.support import fixture_path
 from uwtools.utils.file import resource_pathobj
 
 # Test functions
@@ -86,9 +86,9 @@ def test_rocoto_xml_is_valid(vals):
     assert result is validity
 
 
-def test__write_rocoto_xml(tmp_path):
-    cfgfile = fixture_path("hello_workflow.yaml")
-    outfile = tmp_path / "rocoto.xml"
-    rocoto._write_rocoto_xml(config_file=cfgfile, output_file=outfile)
-    expected = fixture_path("hello_workflow.xml")
-    assert compare_files(expected, outfile) is True
+# def test__write_rocoto_xml(tmp_path):
+#     cfgfile = fixture_path("hello_workflow.yaml")
+#     outfile = tmp_path / "rocoto.xml"
+#     rocoto._write_rocoto_xml(config_file=cfgfile, output_file=outfile)
+#     expected = fixture_path("hello_workflow.xml")
+#     assert compare_files(expected, outfile) is True
