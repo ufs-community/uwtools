@@ -166,7 +166,6 @@ class RocotoXML:
     def __init__(self, config_file: OptionalPath = None) -> None:
         self._config_validate(config_file)
         self._add_workflow(YAMLConfig(config_file).data)
-        self.dump()
 
     def dump(self, path: OptionalPath = None) -> None:
         """
