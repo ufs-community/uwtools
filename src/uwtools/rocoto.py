@@ -85,16 +85,13 @@ class _RocotoXML:
         """
         # Tidy the tree, render to a string, fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"),
         # insert !DOCTYPE block, then write final XML.
-        tidy = self._tidy(self._root)
-        xml = (
-            etree.tostring(tidy, pretty_print=True, encoding="utf-8", xml_declaration=True)
-            .decode()
-            .strip()
-        )
+        xml = etree.tostring(
+            self._tidy(self._root), pretty_print=True, encoding="utf-8", xml_declaration=True
+        ).decode()
         xml = re.sub(r"&amp;([^;]+);", r"&\1;", xml)
         xml = self._insert_doctype(xml)
         with writable(path) as f:
-            print(xml, file=f)
+            f.write(xml.strip())
 
     @property
     def _doctype(self) -> Optional[str]:
@@ -195,9 +192,9 @@ class _RocotoXML:
         """
         config, e = config[STR.workflow], Element(STR.workflow)
         self._set_attrs(e, config)
-        self._add_workflow_cycledefs(e, config)
-        self._add_workflow_log(e, config)
-        self._add_workflow_tasks(e, config)
+        self._add_workflow_cycledefs(e, config[STR.cycledefs])
+        self._add_workflow_log(e, config[STR.log])
+        self._add_workflow_tasks(e, config[STR.tasks])
         self._root: Element = e
 
     def _add_workflow_cycledefs(self, e: Element, config: dict) -> None:
@@ -207,18 +204,18 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        for name, coords in config[STR.cycledefs].items():
+        for name, coords in config.items():
             for coord in coords:
                 SubElement(e, STR.cycledef, group=name).text = coord
 
-    def _add_workflow_log(self, e: Element, config: dict) -> None:
+    def _add_workflow_log(self, e: Element, logfile: str) -> None:
         """
         Add <log> element(s) to the <workflow>.
 
         :param e: The parent element to add the new element to.
-        :param config: Configuration data for this element.
+        :param logfile: The path to the log file.
         """
-        SubElement(e, STR.log).text = config[STR.log]
+        SubElement(e, STR.log).text = logfile
 
     def _add_workflow_tasks(self, e: Element, config: dict) -> None:
         """
@@ -227,7 +224,7 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for these elements.
         """
-        for key, block in config[STR.tasks].items():
+        for key, block in config.items():
             tag, name = self._tag_name(key)
             {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, block, name)
 
