@@ -186,16 +186,33 @@ class RocotoXML:
 
     @property
     def _doctype(self) -> Optional[str]:
+        """
+        Generate the <!DOCTYPE> block with <!ENTITY> definitions.
+
+        :return: The <!DOCTYPE> block if entities are defined, otherwise None.
+        """
         if entities := self._config["workflow"].get("entities"):
             tags = (f'  <!ENTITY {k} "{v}">' for k, v in entities.items())
             return "<!DOCTYPE workflow [\n%s\n]>" % "\n".join(tags)
         return None
 
     def _config_validate(self, config_file: OptionalPath) -> None:
+        """
+        Validate the given YAML config.
+
+        :param config_file: Path to the YAML config (defaults to stdin).
+        """
         if not validate_yaml(config_file=config_file, schema_file=_rocoto_schema_yaml()):
             raise UWConfigError("YAML validation errors identified in %s" % config_file)
 
     def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
+        """
+        Add a <metatask> element to the <workflow>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        :param taskname: The name of the metatask being defined.
+        """
         e = SubElement(e, "metatask", name=taskname)
         for key, val in config.items():
             if key.startswith("metatask"):
@@ -207,6 +224,13 @@ class RocotoXML:
                     SubElement(e, "var", name=name).text = value
 
     def _add_task(self, e: Element, config: dict, taskname: str) -> None:
+        """
+        Add a <task> element to the <workflow>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        :param taskname: The name of the task being defined.
+        """
         e = SubElement(e, "task", name=taskname)
         self._set_attrs(e, config)
         # These elements are simple enough to not require their own methods:
@@ -220,9 +244,15 @@ class RocotoXML:
             self._add_task_dependency(e, config["dependency"])
         # Add any environment-variable entities:
         for name, value in config.get("envars", {}).items():
-            self._add_task_envvar(e, name, value)
+            self._add_task_envar(e, name, value)
 
     def _add_task_dependency(self, e: Element, config: dict) -> None:
+        """
+        Add a <dependency> element to the <task>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
         e = SubElement(e, "dependency")
         for key, block in config.items():
             tag, _ = self._tag_name(key)
@@ -232,12 +262,23 @@ class RocotoXML:
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
-    def _add_task_envvar(self, e: Element, name: str, value: str) -> None:
-        envvar = SubElement(e, "envvar")
-        SubElement(envvar, "name").text = name
-        SubElement(envvar, "value").text = value
+    def _add_task_envar(self, e: Element, name: str, value: str) -> None:
+        """
+        Add a <envar> element to the <task>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        envar = SubElement(e, "envar")
+        SubElement(envar, "name").text = name
+        SubElement(envar, "value").text = value
 
     def _add_workflow(self, config: dict) -> None:
+        """
+        Create the root <workflow> element.
+
+        :param config: Configuration data for this element.
+        """
         name = "workflow"
         config, e = config[name], Element(name)
         self._set_attrs(e, config)
@@ -247,36 +288,78 @@ class RocotoXML:
         self._root = e
 
     def _add_workflow_cycledefs(self, e: Element, config: dict) -> None:
+        """
+        Add <cycledef> element(s) to the <workflow>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
         for name, coords in config["cycledefs"].items():
             for coord in coords:
                 SubElement(e, "cycledef", group=name).text = coord
 
     def _add_workflow_log(self, e: Element, config: dict) -> None:
+        """
+        Add <log> element(s) to the <workflow>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
         name = "log"
         SubElement(e, name).text = config[name]
 
     def _add_workflow_tasks(self, e: Element, config: dict) -> None:
+        """
+        Add <task> and/or <metatask> element(s) to the <workflow>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for these elements.
+        """
         for key, block in config["tasks"].items():
             tag, name = self._tag_name(key)
             {"metatask": self._add_metatask, "task": self._add_task}[tag](e, block, name)
 
     def _insert_doctype(self, xml: str) -> str:
+        """
+        Insert the <!DOCTYPE> block in a rendered XML document.
+
+        :param xml: The XML document rendered as a string.
+        :return: The XML document with the <!DOCTYPE> block inserted.
+        """
         lines = xml.split("\n")
         if doctype := self._doctype:
             lines.insert(1, doctype)
         return "\n".join(lines)
 
     def _set_attrs(self, e: Element, config: dict) -> None:
+        """
+        Set attributes on an element.
+
+        :param e: The element to set the attributes on. :config: A config containing the attribute
+            definitions.
+        """
         for attr, val in config["attrs"].items():
             e.set(attr, str(val))
 
     def _tag_name(self, key: str) -> Tuple[str, str]:
+        """
+        Split a metadata-bearing key into base tag and metadata.
+
+        :param key: A string of the form "tag_metadata" (or simply "tag").
+        :return: The base tag and metadata, separated.
+        """
         m = re.match(r"^([^_]+)(_(.*))?$", key)
         assert m  # validated config => regex match
         tag, name = m[1], m[3]
         return tag, name
 
     def _tidy(self, e: Element) -> Element:
+        """
+        Construct a semantically-equivalent tree with child elements and attributes in sorted order.
+
+        :param e: The element tree to sort.
+        :return: A new element tree with child elements and attributes in sorted order.
+        """
         # Create a new element named the same as the current element, add the attrs in sorted order,
         # then add the (recursively tidied) children in sorted order.
         tidy_e = Element(e.tag)
