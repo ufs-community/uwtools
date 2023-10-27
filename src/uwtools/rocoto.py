@@ -184,9 +184,9 @@ class RocotoXML:
         e = SubElement(e, "metatask", name=taskname)
         for key, val in config.items():
             if key.startswith("metatask"):
-                self._add_metatask(e, val, self._taskinfo(key)[1])
+                self._add_metatask(e, val, self._tag_name(key)[1])
             elif key.startswith("task"):
-                self._add_task(e, val, self._taskinfo(key)[1])
+                self._add_task(e, val, self._tag_name(key)[1])
             elif key == "var":
                 for name, value in val.items():
                     SubElement(e, "var", name=name).text = value
@@ -200,9 +200,22 @@ class RocotoXML:
                 SubElement(e, name).text = config[name]
         # The job name, if unspecified, defaults to the task name.
         SubElement(e, "jobname").text = config.get("jobname", taskname)
-        # And environment-variable entities:
+        # Add any dependencies:
+        if "dependency" in config:
+            self._add_task_dependency(e, config["dependency"])
+        # Add any environment-variable entities:
         for name, value in config.get("envars", {}).items():
             self._add_task_envvar(e, name, value)
+
+    def _add_task_dependency(self, e: Element, config: dict) -> None:
+        e = SubElement(e, "dependency")
+        for key, block in config.items():
+            tag, _ = self._tag_name(key)
+            if tag == "taskdep":
+                d = SubElement(e, "taskdep")
+                self._set_attrs(d, block)
+            else:
+                raise UWConfigError("Unhandled dependency type %s" % tag)
 
     def _add_task_envvar(self, e: Element, name: str, value: str) -> None:
         envvar = SubElement(e, "envvar")
@@ -229,15 +242,15 @@ class RocotoXML:
 
     def _add_workflow_tasks(self, e: Element, config: dict) -> None:
         for key, block in config["tasks"].items():
-            tag, name = self._taskinfo(key)
+            tag, name = self._tag_name(key)
             {"metatask": self._add_metatask, "task": self._add_task}[tag](e, block, name)
 
     def _set_attrs(self, e: Element, config: dict) -> None:
         for attr, val in config["attrs"].items():
             e.set(attr, str(val))
 
-    def _taskinfo(self, key: str) -> Tuple[str, str]:
-        m = re.match(r"^((meta)?task)(_(.*))?$", key)
+    def _tag_name(self, key: str) -> Tuple[str, str]:
+        m = re.match(r"^([^_]+)(_(.*))?$", key)
         assert m  # validated config => regex match
-        tag, name = m[1], m[4]
+        tag, name = m[1], m[3]
         return tag, name
