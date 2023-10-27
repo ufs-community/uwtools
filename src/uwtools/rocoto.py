@@ -171,11 +171,11 @@ class RocotoXML:
 
         :param path: Optional path to write XML document to.
         """
-        # Render internal etree to string, fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"),
+        # Tidy the tree, render it to a string, fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"),
         # insert !DOCTYPE block, then write final XML.
-        self._tree = self._tidy(self._tree)
+        tidy = self._tidy(self._root)
         xml = (
-            etree.tostring(self._tree, pretty_print=True, encoding="utf-8", xml_declaration=True)
+            etree.tostring(tidy, pretty_print=True, encoding="utf-8", xml_declaration=True)
             .decode()
             .strip()
         )
@@ -244,7 +244,7 @@ class RocotoXML:
         self._add_workflow_cycledefs(e, config)
         self._add_workflow_log(e, config)
         self._add_workflow_tasks(e, config)
-        self._tree = e
+        self._root = e
 
     def _add_workflow_cycledefs(self, e: Element, config: dict) -> None:
         for name, coords in config["cycledefs"].items():
