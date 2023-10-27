@@ -86,3 +86,25 @@ def regex_logged(caplog: LogCaptureFixture, msg: str) -> bool:
     """
     pattern = re.compile(re.escape(msg))
     return any(pattern.search(record.message) for record in caplog.records)
+
+
+def resource_pathobj(suffix: str = "") -> Path:
+    """
+    Returns a pathlib Path object to a uwtools resource file.
+
+    :param suffix: A subpath relative to the location of the uwtools resource files. The prefix path
+        to the resources files is known to Python and varies based on installation location.
+    """
+    with resources.as_file(resources.files("uwtools.resources")) as prefix:
+        path = prefix / suffix
+    return path
+
+
+def resource_path(suffix: str = "") -> str:
+    """
+    Returns a POSIX path to a uwtools resource file.
+
+    :param suffix: A subpath relative to the location of the uwtools resource files. The prefix path
+        to the resources files is known to Python and varies based on installation location.
+    """
+    return fixture_pathobj(suffix).as_posix()
