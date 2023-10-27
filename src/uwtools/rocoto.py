@@ -171,9 +171,17 @@ class RocotoXML:
         """
         ???
         """
-        xml = etree.tostring(self._tree, pretty_print=True, encoding="utf-8", xml_declaration=True)
+        # Render internal etree to string:
+        xml = (
+            etree.tostring(self._tree, pretty_print=True, encoding="utf-8", xml_declaration=True)
+            .decode()
+            .strip()
+        )
+        # Fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"):
+        xml = re.sub(r"&amp;([^;]+);", r"&\1;", xml)
+        # Write final XML:
         with writable(path) as f:
-            print(xml.decode().strip(), file=f)
+            print(xml, file=f)
 
     def _config_validate(self, config_file: OptionalPath) -> None:
         if not validate_yaml(config_file=config_file, schema_file=_rocoto_schema_yaml()):
