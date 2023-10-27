@@ -47,13 +47,11 @@ metatask_howdy:
 
 
 def test__add_jobname_to_tasks():
-    with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
-        input_yaml = path / "hello_workflow.yaml"
-
-    values = YAMLConfig(input_yaml)
+    cfgfile = support.fixture_path("hello_workflow.yaml")
+    values = YAMLConfig(cfgfile)
     tasks = values["workflow"]["tasks"]
     with patch.object(rocoto, "_add_jobname") as module:
-        rocoto._add_jobname_to_tasks(input_yaml)
+        rocoto._add_jobname_to_tasks(cfgfile)
     assert module.called_once_with(tasks)
 
 
