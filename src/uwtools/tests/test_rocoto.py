@@ -5,7 +5,7 @@ Tests for uwtools.rocoto module.
 
 import shutil
 from unittest.mock import DEFAULT as D
-from unittest.mock import patch
+from unittest.mock import PropertyMock, patch
 
 import pytest
 from pytest import fixture, raises
@@ -184,3 +184,28 @@ def test__RocotoXML__add_workflow_tasks(instance, root):
         instance._add_workflow_tasks(e=root, config=config)
     mocks["_add_metatask"].assert_called_once_with(root, "1", "foo")
     mocks["_add_task"].assert_called_once_with(root, "2", "bar")
+
+
+def test__RocotoXML__insert_doctype(instance):
+    with patch.object(rocoto._RocotoXML, "_doctype", new_callable=PropertyMock) as _doctype:
+        _doctype.return_value = "bar"
+        assert instance._insert_doctype("foo\nbaz\n") == "foo\nbar\nbaz\n"
+
+
+def test__RocotoXML__insert_doctype_none(instance):
+    with patch.object(rocoto._RocotoXML, "_doctype", new_callable=PropertyMock) as _doctype:
+        _doctype.return_value = None
+        assert instance._insert_doctype("foo\nbaz\n") == "foo\nbaz\n"
+
+
+def test__RocotoXML__setattrs(instance, root):
+    config = {"attrs": {"foo": "1", "bar": "2"}}
+    instance._set_attrs(e=root, config=config)
+    assert root.get("foo") == "1"
+    assert root.get("bar") == "2"
+
+
+def test__RocotoXML__tag_name(instance):
+    assert instance._tag_name("foo") == ("foo", None)
+    assert instance._tag_name("foo_bar") == ("foo", "bar")
+    assert instance._tag_name("foo_bar_baz") == ("foo", "bar_baz")
