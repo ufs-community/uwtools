@@ -145,7 +145,6 @@ class _RocotoXML:
         """
         e = SubElement(e, STR.task, name=taskname)
         self._set_attrs(e, config)
-        # These elements are simple enough to not require their own methods:
         for tag in (
             STR.account,
             STR.command,
