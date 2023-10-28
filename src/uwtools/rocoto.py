@@ -168,12 +168,12 @@ class _RocotoXML:
                 SubElement(e, tag).text = config[tag]
         # The job name, if unspecified, defaults to the task name.
         SubElement(e, STR.jobname).text = config.get(STR.jobname, taskname)
-        # Add any dependencies:
-        if STR.dependency in config:
-            self._add_task_dependency(e, config[STR.dependency])
         # Add any environment-variable entities:
         for name, value in config.get(STR.envars, {}).items():
             self._add_task_envar(e, name, value)
+        # Add any dependencies:
+        if STR.dependency in config:
+            self._add_task_dependency(e, config[STR.dependency])
 
     def _add_task_dependency(self, e: Element, config: dict) -> None:
         """
