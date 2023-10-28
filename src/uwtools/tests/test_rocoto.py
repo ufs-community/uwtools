@@ -198,6 +198,15 @@ def test__RocotoXML__insert_doctype_none(instance):
         assert instance._insert_doctype("foo\nbaz\n") == "foo\nbaz\n"
 
 
+def test__RocotoXML__set_and_render_jobname(instance):
+    config = {"foo": "{{ jobname }}", "baz": "{{ qux }}"}
+    assert instance._set_and_render_jobname(config=config, taskname="bar") == {
+        "jobname": "bar",  # set
+        "foo": "bar",  # rendered
+        "baz": "{{ qux }}",  # ignored
+    }
+
+
 def test__RocotoXML__setattrs(instance, root):
     config = {"attrs": {"foo": "1", "bar": "2"}}
     instance._set_attrs(e=root, config=config)

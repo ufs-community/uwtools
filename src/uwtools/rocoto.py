@@ -8,6 +8,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Tuple
 
+import yaml
+from jinja2 import DebugUndefined, Template
 from lxml import etree
 from lxml.etree import Element, SubElement
 
@@ -145,12 +147,14 @@ class _RocotoXML:
         """
         e = SubElement(e, STR.task, name=taskname)
         self._set_attrs(e, config)
+        self._set_and_render_jobname(config, taskname)
         for tag in (
             STR.account,
             STR.command,
             STR.cores,
             STR.deadline,
             STR.exclusive,
+            STR.jobname,
             STR.join,
             STR.memory,
             STR.native,
@@ -166,12 +170,8 @@ class _RocotoXML:
         ):
             if tag in config:
                 SubElement(e, tag).text = config[tag]
-        # The job name, if unspecified, defaults to the task name.
-        SubElement(e, STR.jobname).text = config.get(STR.jobname, taskname)
-        # Add any environment-variable entities:
         for name, value in config.get(STR.envars, {}).items():
             self._add_task_envar(e, name, value)
-        # Add any dependencies:
         if STR.dependency in config:
             self._add_task_dependency(e, config[STR.dependency])
 
@@ -256,6 +256,21 @@ class _RocotoXML:
         if doctype := self._doctype:
             lines.insert(1, doctype)
         return "\n".join(lines)
+
+    def _set_and_render_jobname(self, config: dict, taskname: str) -> dict:
+        """
+        In the given config, ensure 'jobname' is set, then render {{ jobname }}.
+
+        :param config: Configuration data for this element.
+        :param taskname: The name of the task being defined.
+        """
+        if STR.jobname not in config:
+            config[STR.jobname] = taskname
+        return yaml.safe_load(
+            Template(yaml.dump(config), undefined=DebugUndefined).render(
+                jobname=config[STR.jobname]
+            )
+        )
 
     def _set_attrs(self, e: Element, config: dict) -> None:
         """
