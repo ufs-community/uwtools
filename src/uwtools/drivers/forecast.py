@@ -241,10 +241,13 @@ class FV3Forecast(Driver):
         """
         Collect all the configuration files needed for FV3.
         """
-
-        self.create_field_table(run_directory / "field_table")
-        self.create_model_configure(run_directory / "model_configure")
-        self.create_namelist(run_directory / "input.nml")
+        if self._dry_run:
+            for call in ("field_table", "model_configure", "input.nml"):
+                log.info(f"Would prepare: {run_directory}/{call}")
+        else:
+            self.create_field_table(run_directory / "field_table")
+            self.create_model_configure(run_directory / "model_configure")
+            self.create_namelist(run_directory / "input.nml")
 
     def _prepare_full_command(self) -> str:
         """
