@@ -185,10 +185,7 @@ class FV3Forecast(Driver):
         if self._batch_script is not None:
             return self._prepare_and_run_batch_script(run_directory)
 
-        full_cmd = self._prepare_full_command()
-
-        result = execute(cmd=full_cmd)
-        return result.success
+        return self._prepare_and_execute_command()
 
     @property
     def schema_file(self) -> str:
@@ -264,15 +261,17 @@ class FV3Forecast(Driver):
             self.create_model_configure(run_directory / "model_configure")
             self.create_namelist(run_directory / "input.nml")
 
-    def _prepare_full_command(self) -> str:
+    def _prepare_and_execute_command(self) -> bool:
         """
         Collects the necessary MPI environment variables in order to construct full run command.
         """
         pre_run = self._mpi_env_variables(" ")
+        full_cmd = f"{pre_run} {self.run_cmd()}"
         if self._dry_run:
             log.info("Would run: ")
-            print(f"{pre_run} {self.run_cmd()}", file=sys.stdout)
-        return f"{pre_run} {self.run_cmd()}"
+            print(full_cmd, file=sys.stdout)
+        result = execute(cmd=full_cmd)
+        return result.success
 
     def _mpi_env_variables(self, delimiter: str = " ") -> str:
         """
