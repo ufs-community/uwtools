@@ -183,10 +183,7 @@ class FV3Forecast(Driver):
         run_directory = self.prepare_directories()
 
         if self._batch_script is not None:
-            batch_script = self.batch_script()
-            outpath = Path(run_directory) / self._batch_script
-            batch_script.dump(outpath)
-            return self.scheduler.submit_job(outpath)
+            return self._prepare_and_run_batch_script(run_directory)
 
         full_cmd = self._prepare_full_command()
 
@@ -236,6 +233,24 @@ class FV3Forecast(Driver):
                 boundary_files[link_name] = boundary_file_path
 
         return boundary_files
+
+    def _prepare_and_run_batch_script(self, run_directory: str) -> bool:
+        """
+        Prepares and runs batch script.
+        """
+        batch_script = self.batch_script()
+        assert self._batch_script is not None
+        outpath = Path(run_directory) / self._batch_script
+
+        if self._dry_run:
+            # Apply switch to allow user to view the run command of config.
+            # This will not run the job.
+            log.info("Batch Script:")
+            batch_script.dump(None)
+            return True
+
+        batch_script.dump(outpath)
+        return self.scheduler.submit_job(outpath)
 
     def _prepare_config_files(self, run_directory: Path) -> None:
         """
