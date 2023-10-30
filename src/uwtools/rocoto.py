@@ -247,10 +247,9 @@ class _RocotoXML:
 
     def _insert_doctype(self, xml: str) -> str:
         """
-        Insert the <!DOCTYPE> block in a rendered XML document.
+        Return the given XML document with an Inserted <!DOCTYPE> block.
 
         :param xml: The XML document rendered as a string.
-        :return: The XML document with the <!DOCTYPE> block inserted.
         """
         lines = xml.split("\n")
         if doctype := self._doctype:
@@ -284,10 +283,9 @@ class _RocotoXML:
 
     def _tag_name(self, key: str) -> Tuple[str, str]:
         """
-        Split a metadata-bearing key into base tag and metadata.
+        Return the tag and metadata extracted from a metadata-bearing key.
 
         :param key: A string of the form "tag_metadata" (or simply STR.tag).
-        :return: The base tag and metadata, separated.
         """
         # For example, key "task_foo"bar" will be split into tag "task" and name "foo_bar".
         parts = key.split("_")
