@@ -103,7 +103,7 @@ class _RocotoXML:
         :return: The <!DOCTYPE> block if entities are defined, otherwise None.
         """
         if entities := self._config[STR.workflow].get(STR.entities):
-            tags = (f'  <!ENTITY {k} "{v}">' for k, v in entities.items())
+            tags = (f'  <!ENTITY {key} "{val}">' for key, val in entities.items())
             return "<!DOCTYPE workflow [\n%s\n]>" % "\n".join(tags)
         return None
 
