@@ -17,7 +17,7 @@ from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.logging import log
-from uwtools.tests.support import compare_files, fixture_path
+from uwtools.tests.support import compare_files, fixture_path, logged
 
 
 def test_batch_script():
@@ -332,7 +332,7 @@ def test_run_direct(fv3_mpi_assets, fv3_run_assets):
 
 
 @pytest.mark.parametrize("with_batch_script", [True, False])
-def test_FV3Forecast_run_dry_run(capsys, fv3_mpi_assets, fv3_run_assets, with_batch_script):
+def test_FV3Forecast_run_dry_run(caplog, fv3_mpi_assets, fv3_run_assets, with_batch_script):
     log.setLevel(logging.INFO)
     batch_script, config_file, config = fv3_run_assets
     if with_batch_script:
@@ -353,7 +353,8 @@ def test_FV3Forecast_run_dry_run(capsys, fv3_mpi_assets, fv3_run_assets, with_ba
         fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=batch_script)
         with patch.object(fcstobj, "_config", config):
             fcstobj.run(cycle=dt.datetime.now())
-    assert run_expected in capsys.readouterr().out
+    assert logged(caplog, run_expected)
+    # assert run_expected in capsys.readouterr().out
 
 
 def test_run_submit(fv3_run_assets):

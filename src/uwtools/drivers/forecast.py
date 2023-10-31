@@ -47,13 +47,14 @@ class FV3Forecast(Driver):
         :return: The batch script object with all run commands needed for executing the program.
         """
         pre_run = self._mpi_env_variables("\n")
-        bs = self.scheduler.batch_script
-        bs.append(pre_run)
-        bs.append(self.run_cmd())
+        batch_script = self.scheduler.batch_script
+        batch_script.append(pre_run)
+        batch_script.append(self.run_cmd())
         if self._dry_run:
-            log.info("Batch Script: ")
-            bs.dump(None)
-        return bs
+            log.info("Batch Script:")
+            for line in str(batch_script).split("\n"):
+                log.info(line)
+        return batch_script
 
     @staticmethod
     def create_directory_structure(
@@ -69,6 +70,8 @@ class FV3Forecast(Driver):
             to a preexisting run directory. The default is to delete the old run directory.
         """
 
+        run_directory = Path(run_directory)
+
         # Caller should only provide correct argument.
 
         if exist_act not in ["delete", "rename", "quit"]:
@@ -76,13 +79,13 @@ class FV3Forecast(Driver):
 
         # Exit program with error if caller chooses to quit.
 
-        if exist_act == "quit" and os.path.isdir(run_directory):
+        if exist_act == "quit" and run_directory.is_dir():
             log.critical("User chose quit option when creating directory")
             sys.exit(1)
 
         # Delete or rename directory if it exists.
 
-        if dry_run and os.path.isdir(run_directory):
+        if dry_run and run_directory.is_dir():
             log.info(f"Would {exist_act} directory")
         else:
             handle_existing(str(run_directory), exist_act)
@@ -90,7 +93,7 @@ class FV3Forecast(Driver):
         # Create new run directory with two required subdirectories.
 
         for subdir in ("INPUT", "RESTART"):
-            path = os.path.join(run_directory, subdir)
+            path = run_directory / subdir
             if dry_run:
                 log.info("Would create directory: %s", path)
             else:
@@ -139,7 +142,7 @@ class FV3Forecast(Driver):
         ???
         """
 
-    def prepare_directories(self) -> str:
+    def prepare_directories(self) -> Path:
         """
         Prepares the run directory and stages static and cycle-dependent files.
         """
@@ -231,19 +234,18 @@ class FV3Forecast(Driver):
 
         return boundary_files
 
-    def _prepare_and_run_batch_script(self, run_directory: str) -> bool:
+    def _prepare_and_run_batch_script(self, run_directory: Path) -> bool:
         """
         Prepares and runs batch script.
         """
         batch_script = self.batch_script()
         assert self._batch_script is not None
-        outpath = Path(run_directory) / self._batch_script
+        outpath = run_directory / self._batch_script
 
         if self._dry_run:
-            # Apply switch to allow user to view the run command of config.
-            # This will not run the job.
-            log.info("Batch Script:")
-            batch_script.dump(None)
+            # log.info("Batch Script:")
+            # for line in str(batch_script).split("\n"):
+            #     log.info(line)
             return True
 
         batch_script.dump(outpath)
@@ -268,8 +270,8 @@ class FV3Forecast(Driver):
         pre_run = self._mpi_env_variables(" ")
         full_cmd = f"{pre_run} {self.run_cmd()}"
         if self._dry_run:
-            log.info("Would run: ")
-            print(full_cmd, file=sys.stdout)
+            log.info("Would run:")
+            log.info(full_cmd)
         result = execute(cmd=full_cmd)
         return result.success
 
