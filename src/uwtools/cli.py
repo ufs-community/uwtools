@@ -775,7 +775,7 @@ def _switch(arg: str) -> str:
 
 
 @dataclass(frozen=True)
-class _STR:
+class STR:
     """
     A lookup map for CLI-related strings.
     """
@@ -812,6 +812,3 @@ class _STR:
     valsfmt: str = "values_format"
     valsneeded: str = "values_needed"
     verbose: str = "verbose"
-
-
-STR = _STR()
