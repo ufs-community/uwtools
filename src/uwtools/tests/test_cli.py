@@ -225,7 +225,26 @@ def test__dispatch_config_realize():
     assert realize_config.called_once_with(args)
 
 
-def test__dispatch_config_translate_arparse_to_jinja2():
+def test__dispatch_config_realize_no_optional():
+    args = ns()
+    vars(args).update(
+        {
+            STR.infile: None,
+            STR.infmt: None,
+            STR.outfile: None,
+            STR.outfmt: None,
+            STR.valsfile: 5,
+            STR.valsfmt: None,
+            STR.valsneeded: None,
+            STR.dryrun: None,
+        }
+    )
+    with patch.object(cli.uwtools.config.core, "realize_config") as realize_config:
+        cli._dispatch_config_realize(args)
+    assert realize_config.called_once_with(args)
+
+
+def test__dispatch_config_translate_atparse_to_jinja2():
     args = ns()
     vars(args).update(
         {
@@ -241,6 +260,22 @@ def test__dispatch_config_translate_arparse_to_jinja2():
     assert convert.called_once_with(args)
 
 
+def test__dispatch_config_translate_no_optional():
+    args = ns()
+    vars(args).update(
+        {
+            STR.infile: None,
+            STR.infmt: None,
+            STR.outfile: None,
+            STR.outfmt: None,
+            STR.dryrun: None,
+        }
+    )
+    with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as convert:
+        cli._dispatch_config_translate(args)
+    assert convert.called_once_with(args)
+
+
 def test__dispatch_config_translate_unsupported():
     args = ns()
     vars(args).update(
@@ -249,9 +284,9 @@ def test__dispatch_config_translate_unsupported():
     assert cli._dispatch_config_translate(args) is False
 
 
-def test__dispatch_config_validate_yaml():
+def test__dispatch_config_validate_no_optional():
     args = ns()
-    vars(args).update({STR.infile: 1, STR.infmt: FORMAT.yaml, STR.schemafile: 3})
+    vars(args).update({STR.infile: None, STR.infmt: None, STR.schemafile: 3})
     with patch.object(cli.uwtools.config.validator, "validate_yaml") as validate_yaml:
         cli._dispatch_config_validate(args)
     assert validate_yaml.called_once_with(args)
@@ -261,6 +296,14 @@ def test__dispatch_config_validate_unsupported():
     args = ns()
     vars(args).update({STR.infile: 1, STR.infmt: "jpg", STR.schemafile: 3})
     assert cli._dispatch_config_validate(args) is False
+
+
+def test__dispatch_config_validate_yaml():
+    args = ns()
+    vars(args).update({STR.infile: 1, STR.infmt: FORMAT.yaml, STR.schemafile: 3})
+    with patch.object(cli.uwtools.config.validator, "validate_yaml") as validate_yaml:
+        cli._dispatch_config_validate(args)
+    assert validate_yaml.called_once_with(args)
 
 
 @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
@@ -326,6 +369,14 @@ def test__dispatch_rocoto_realize_invalid():
         assert cli._dispatch_rocoto_realize(args) is False
 
 
+def test__dispatch_rocoto_realize_no_optional():
+    args = ns()
+    vars(args).update({STR.infile: None, STR.outfile: None})
+    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml") as module:
+        cli._dispatch_rocoto_realize(args)
+    assert module.called_once_with(args)
+
+
 def test__dispatch_rocoto_validate_xml():
     args = ns()
     vars(args).update({STR.infile: 1})
@@ -341,6 +392,14 @@ def test__dispatch_rocoto_validate_xml_invalid():
         assert cli._dispatch_rocoto_validate(args) is False
 
 
+def test__dispatch_rocoto_validate_xml_no_optional():
+    args = ns()
+    vars(args).update({STR.infile: None})
+    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as validate:
+        cli._dispatch_rocoto_validate(args)
+    assert validate.called_once_with(args)
+
+
 @pytest.mark.parametrize("params", [(STR.render, "_dispatch_template_render")])
 def test__dispatch_template(params):
     submode, funcname = params
@@ -349,6 +408,24 @@ def test__dispatch_template(params):
     with patch.object(cli, funcname) as func:
         cli._dispatch_template(args)
     assert func.called_once_with(args)
+
+
+def test__dispatch_template_render_no_optional():
+    args = ns()
+    vars(args).update(
+        {
+            STR.infile: None,
+            STR.outfile: None,
+            STR.valsfile: None,
+            STR.valsfmt: None,
+            STR.keyvalpairs: None,
+            STR.valsneeded: None,
+            STR.dryrun: None,
+        }
+    )
+    with patch.object(cli.uwtools.config.templater, STR.render) as templater:
+        cli._dispatch_template_render(args)
+    assert templater.called_once_with(args)
 
 
 def test__dispatch_template_render_yaml():

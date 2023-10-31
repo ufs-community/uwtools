@@ -11,7 +11,7 @@ from argparse import _SubParsersAction as Subparsers
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Optional, Tuple
 
 import uwtools.config.atparse_to_jinja2
 import uwtools.config.core
@@ -726,14 +726,14 @@ def _check_template_render_vals_args(args: Namespace) -> Namespace:
     return args
 
 
-def _dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:
+def _dict_from_key_eq_val_strings(config_items: Optional[List[str]] = None) -> Dict[str, str]:
     """
     Given a list of key=value strings, return a dictionary of key/value pairs.
 
     :param config_items: Strings in the form key=value.
     :return: A dictionary based on the input key=value strings.
     """
-    return dict([arg.split("=") for arg in config_items])
+    return dict([arg.split("=") for arg in config_items]) if config_items else {}
 
 
 def _formatter(prog: str) -> HelpFormatter:
