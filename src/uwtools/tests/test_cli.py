@@ -295,7 +295,7 @@ def test__dispatch_forecast_run():
         dry_run=True,
         forecast_model="foo",
     )
-    vars(args).update({STR.cfgfile: 1, "forecast_model": "foo"})
+    vars(args).update({STR.cfgfile: 1, "model": "foo"})
     with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as FooForecast:
         CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
         with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):

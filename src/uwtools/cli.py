@@ -42,9 +42,9 @@ def main() -> None:
     setup_logging(quiet=True)
     try:
         args, checks = _parse_args(sys.argv[1:])
-        for check in checks[args.mode][args.submode]:
+        for check in checks[vars(args)[STR.mode]][vars(args)[STR.submode]]:
             check(args)
-        setup_logging(quiet=args.quiet, verbose=args.verbose)
+        setup_logging(quiet=vars(args)[STR.quiet], verbose=vars(args)[STR.verbose])
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
             STR.config: _dispatch_config,
@@ -52,7 +52,7 @@ def main() -> None:
             STR.rocoto: _dispatch_rocoto,
             STR.template: _dispatch_template,
         }
-        sys.exit(0 if modes[args.mode](args) else 1)
+        sys.exit(0 if modes[vars(args)[STR.mode]](args) else 1)
     except Exception as e:  # pylint: disable=broad-exception-caught
         _abort(str(e))
 
@@ -181,7 +181,7 @@ def _dispatch_config(args: Namespace) -> bool:
         STR.realize: _dispatch_config_realize,
         STR.translate: _dispatch_config_translate,
         STR.validate: _dispatch_config_validate,
-    }[args.submode](args)
+    }[vars(args)[STR.submode]](args)
 
 
 def _dispatch_config_compare(args: Namespace) -> bool:
@@ -191,10 +191,10 @@ def _dispatch_config_compare(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.config.core.compare_configs(
-        config_a_path=args.file_1_path,
-        config_a_format=args.file_1_format,
-        config_b_path=args.file_2_path,
-        config_b_format=args.file_2_format,
+        config_a_path=vars(args)[STR.file1path],
+        config_a_format=vars(args)[STR.file1fmt],
+        config_b_path=vars(args)[STR.file2path],
+        config_b_format=vars(args)[STR.file2fmt],
     )
 
 
@@ -205,14 +205,14 @@ def _dispatch_config_realize(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.config.core.realize_config(
-        input_file=args.input_file,
-        input_format=args.input_format,
-        output_file=args.output_file,
-        output_format=args.output_format,
-        values_file=args.values_file,
-        values_format=args.values_format,
-        values_needed=args.values_needed,
-        dry_run=args.dry_run,
+        input_file=vars(args)[STR.infile],
+        input_format=vars(args)[STR.infmt],
+        output_file=vars(args)[STR.outfile],
+        output_format=vars(args)[STR.outfmt],
+        values_file=vars(args)[STR.valsfile],
+        values_format=vars(args)[STR.valsfmt],
+        values_needed=vars(args)[STR.valsneeded],
+        dry_run=vars(args)[STR.dryrun],
     )
 
 
@@ -223,9 +223,11 @@ def _dispatch_config_translate(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     success = True
-    if args.input_format == FORMAT.atparse and args.output_format == FORMAT.jinja2:
+    if vars(args)[STR.infmt] == FORMAT.atparse and vars(args)[STR.outfmt] == FORMAT.jinja2:
         uwtools.config.atparse_to_jinja2.convert(
-            input_file=args.input_file, output_file=args.output_file, dry_run=args.dry_run
+            input_file=vars(args)[STR.infile],
+            output_file=vars(args)[STR.outfile],
+            dry_run=vars(args)[STR.dryrun],
         )
     else:
         success = False
@@ -239,9 +241,9 @@ def _dispatch_config_validate(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     success = True
-    if args.input_format == FORMAT.yaml:
+    if vars(args)[STR.infmt] == FORMAT.yaml:
         success = uwtools.config.validator.validate_yaml(
-            config_file=args.input_file, schema_file=args.schema_file
+            config_file=vars(args)[STR.infile], schema_file=vars(args)[STR.schemafile]
         )
     else:
         success = False
@@ -289,7 +291,7 @@ def _dispatch_forecast(args: Namespace) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {STR.run: _dispatch_forecast_run}[args.submode](args)
+    return {STR.run: _dispatch_forecast_run}[vars(args)[STR.submode]](args)
 
 
 def _dispatch_forecast_run(args: Namespace) -> bool:
@@ -298,12 +300,12 @@ def _dispatch_forecast_run(args: Namespace) -> bool:
 
     :param args: Parsed command-line args.
     """
-    forecast_class = uwtools.drivers.forecast.CLASSES[args.forecast_model]
+    forecast_class = uwtools.drivers.forecast.CLASSES[vars(args)[STR.model]]
     return forecast_class(
-        batch_script=args.batch_script, config_file=args.config_file, dry_run=args.dry_run
-    ).run(
-        cycle=args.cycle,
-    )
+        batch_script=vars(args)[STR.batch_script],
+        config_file=vars(args)[STR.cfgfile],
+        dry_run=vars(args)[STR.dryrun],
+    ).run(cycle=vars(args)[STR.cycle])
 
 
 # Mode rocoto
@@ -361,7 +363,7 @@ def _dispatch_rocoto(args: Namespace) -> bool:
         STR.realize: _dispatch_rocoto_realize,
         STR.validate: _dispatch_rocoto_validate,
     }[
-        args.submode
+        vars(args)[STR.submode]
     ](args)
 
 
@@ -372,7 +374,7 @@ def _dispatch_rocoto_realize(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     success = uwtools.rocoto.realize_rocoto_xml(
-        config_file=args.input_file, output_file=args.output_file
+        config_file=vars(args)[STR.infile], output_file=vars(args)[STR.outfile]
     )
     return success
 
@@ -384,7 +386,7 @@ def _dispatch_rocoto_validate(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
 
-    success = uwtools.rocoto.validate_rocoto_xml(input_xml=args.input_file)
+    success = uwtools.rocoto.validate_rocoto_xml(input_xml=vars(args)[STR.infile])
     return success
 
 
@@ -430,7 +432,7 @@ def _dispatch_template(args: Namespace) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {STR.render: _dispatch_template_render}[args.submode](args)
+    return {STR.render: _dispatch_template_render}[vars(args)[STR.submode]](args)
 
 
 def _dispatch_template_render(args: Namespace) -> bool:
@@ -440,13 +442,13 @@ def _dispatch_template_render(args: Namespace) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.config.templater.render(
-        input_file=args.input_file,
-        output_file=args.output_file,
-        values_file=args.values_file,
-        values_format=args.values_format,
-        overrides=_dict_from_key_eq_val_strings(args.key_eq_val_pairs),
-        values_needed=args.values_needed,
-        dry_run=args.dry_run,
+        input_file=vars(args)[STR.infile],
+        output_file=vars(args)[STR.outfile],
+        values_file=vars(args)[STR.valsfile],
+        values_format=vars(args)[STR.valsfmt],
+        overrides=_dict_from_key_eq_val_strings(vars(args)[STR.keyvalpairs]),
+        values_needed=vars(args)[STR.valsneeded],
+        dry_run=vars(args)[STR.dryrun],
     )
 
 
@@ -479,7 +481,7 @@ def _add_arg_config_file(group: Group) -> None:
 
 def _add_arg_cycle(group: Group) -> None:
     group.add_argument(
-        "--cycle",
+        _switch(STR.cycle),
         help="The cycle in ISO8601 format",
         required=True,
         type=datetime.datetime.fromisoformat,
@@ -784,6 +786,7 @@ class STR:
     cfgfile: str = "config_file"
     compare: str = "compare"
     config: str = "config"
+    cycle: str = "cycle"
     dryrun: str = "dry_run"
     file1fmt: str = "file_1_format"
     file1path: str = "file_1_path"
