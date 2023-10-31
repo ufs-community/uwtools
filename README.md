@@ -97,8 +97,9 @@ In addition to the `make devshell` command, two other `make` targets are availab
 
 | Command          | Description                                                |
 | ---------------- | ---------------------------------------------------------- |
-| `make package`   | Builds a `uwtools` conda package                           |
 | `make env`       | Creates a conda environment based on the `uwtools` code    |
+| `make meta`      | Update `recipe/meta.json` from `recipe/meta.yaml`          |
+| `make package`   | Builds a `uwtools` conda package                           |
 
 These targets work from the code in its current state in the clone. `make env` calls `make package` automatically to create a local package, then builds an environment based on the package.
 
@@ -123,7 +124,7 @@ The following files in this repo are derived from their counterparts in the [con
 │   ├── build.sh
 │   ├── channels
 │   ├── conda_build_config.yaml
-│   ├── .gitignore
+│   ├── meta.json
 │   ├── meta.yaml
 │   └── run_test.sh
 ├── src
