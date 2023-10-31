@@ -11,8 +11,8 @@ from typing import Any, Dict, List
 
 from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils import Memory
 from uwtools.utils.file import writable
+from uwtools.utils.memory import Memory
 from uwtools.utils.processing import execute
 
 NONEISH = [None, "", " ", "None", "none", False]

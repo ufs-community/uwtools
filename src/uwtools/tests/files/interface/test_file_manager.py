@@ -6,9 +6,9 @@ Tests for uwtools.files FileManager and subclasses.
 import shutil
 from unittest.mock import patch
 
-from uwtools.files import FileManager, S3FileManager, UnixFileManager
 from uwtools.files.gateway import s3
-from uwtools.files.model import S3, Prefixes, Unix
+from uwtools.files.interface.file_manager import FileManager, S3FileManager, UnixFileManager
+from uwtools.files.model.file import S3, Prefixes, Unix
 from uwtools.tests.support import fixture_uri
 
 

@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, wait
 from pathlib import Path
 from typing import List, Tuple
 
-from uwtools.files.model import File
+from uwtools.files.model.file import File
 from uwtools.logging import log
 
 

@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from uwtools.files.gateway import s3, unix
-from uwtools.files.model import S3, File, Prefixes
+from uwtools.files.model.file import S3, File, Prefixes
 
 
 class FileManager(ABC):
