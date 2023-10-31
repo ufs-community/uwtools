@@ -19,7 +19,7 @@ from uwtools.types import DefinitePath, OptionalPath
 
 
 @dataclass(frozen=True)
-class _FORMAT:
+class FORMAT:
     """
     A mapping from config format names to literal strings.
     """
@@ -46,9 +46,6 @@ class _FORMAT:
     sh: str = _ini
     yaml: str = _yaml
     yml: str = _yaml
-
-
-FORMAT = _FORMAT()
 
 
 class StdinProxy:
