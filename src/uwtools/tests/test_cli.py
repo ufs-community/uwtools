@@ -295,7 +295,7 @@ def test__dispatch_forecast_run():
         dry_run=True,
         forecast_model="foo",
     )
-    vars(args).update({STR.cfgfile: 1, "model": "foo"})
+    vars(args).update({STR.cfgfile: 1, STR.model: "foo"})
     with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as FooForecast:
         CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
         with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):
@@ -330,12 +330,7 @@ def test__dispatch_rocoto_realize():
 
 def test__dispatch_rocoto_realize_invalid():
     args = ns()
-    vars(args).update(
-        {
-            STR.infile: 1,
-            STR.outfile: 2,
-        }
-    )
+    vars(args).update({STR.infile: 1, STR.outfile: 2})
     with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml", return_value=False):
         assert cli._dispatch_rocoto_realize(args) is False
 
