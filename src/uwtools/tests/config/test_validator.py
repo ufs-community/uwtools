@@ -4,7 +4,6 @@ Tests for uwtools.config.validator module.
 """
 import json
 import logging
-from importlib import resources
 from pathlib import Path
 from typing import Any, Dict
 from unittest.mock import patch
@@ -14,6 +13,7 @@ from pytest import fixture
 from uwtools.config import validator
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
+from uwtools.utils.file import resource_pathobj
 
 # Support functions
 
@@ -107,8 +107,7 @@ def test_validate_yaml_pass(config, config_file, schema, schema_file):
 
 @fixture
 def rocoto_assets():
-    with resources.as_file(resources.files("uwtools.resources")) as resc:
-        schema_file = resc / "rocoto.jsonschema"
+    schema_file = resource_pathobj("rocoto.jsonschema")
     kwargs = {"schema_file": schema_file, "config_file": "/not/used"}
     config = {
         "workflow": {

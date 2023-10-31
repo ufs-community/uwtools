@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime as dt
 from functools import cache
+from importlib import resources
 from io import StringIO
 from pathlib import Path
 from typing import IO, Any, Generator, Union
@@ -155,6 +156,17 @@ def readable(
             yield f
     else:
         yield _stdinproxy()
+
+
+def resource_pathobj(suffix: str = "") -> Path:
+    """
+    Returns a pathlib Path object to a uwtools resource file.
+
+    :param suffix: A subpath relative to the location of the uwtools resource files. The prefix path
+        to the resources files is known to Python and varies based on installation location.
+    """
+    with resources.as_file(resources.files("uwtools.resources")) as prefix:
+        return prefix / suffix
 
 
 @contextmanager

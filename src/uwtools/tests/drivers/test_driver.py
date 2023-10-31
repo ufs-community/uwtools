@@ -6,6 +6,7 @@ Tests for uwtools.drivers.driver module.
 import datetime
 import logging
 from collections.abc import Mapping
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -40,8 +41,8 @@ class ConcreteDriver(Driver):
         pass
 
     @property
-    def schema_file(self) -> str:
-        return ""
+    def schema_file(self) -> Path:
+        return Path()
 
 
 @fixture

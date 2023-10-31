@@ -1,117 +1,220 @@
-# pylint: disable=missing-function-docstring, protected-access
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.rocoto module.
 """
 
-import tempfile
-from importlib import resources
-from unittest.mock import patch
+import shutil
+from unittest.mock import DEFAULT as D
+from unittest.mock import PropertyMock, patch
 
 import pytest
-import yaml
+from pytest import fixture, raises
 
 from uwtools import rocoto
-from uwtools.config.core import YAMLConfig
-from uwtools.tests import support
+from uwtools.exceptions import UWConfigError
+from uwtools.tests.support import fixture_path
 
-# Test functions
-
-
-def test__add_jobname():
-    expected = yaml.safe_load(
-        """
-task_hello:
-  command: echo hello 
-  jobname: hello
-metatask_howdy:
-  foo: bar
-  task_howdy_#mem#:
-    command: echo hello 
-    jobname: howdy_#mem#
-"""
-    )
-
-    tree = yaml.safe_load(
-        """
-task_hello:
-  command: echo hello
-metatask_howdy:
-  foo: bar
-  task_howdy_#mem#:
-    command: echo hello 
-"""
-    )
-
-    rocoto._add_jobname(tree)
-    assert expected == tree
+# Fixtures
 
 
-def test__add_jobname_to_tasks():
-    with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
-        input_yaml = path / "hello_workflow.yaml"
-
-    values = YAMLConfig(input_yaml)
-    tasks = values["workflow"]["tasks"]
-    with patch.object(rocoto, "_add_jobname") as module:
-        rocoto._add_jobname_to_tasks(input_yaml)
-    assert module.called_once_with(tasks)
+@fixture
+def assets(tmp_path):
+    return fixture_path("hello_workflow.yaml"), tmp_path / "rocoto.xml"
 
 
-def test__rocoto_schema_yaml():
-    with resources.as_file(resources.files("uwtools.resources")) as path:
-        expected = path / "rocoto.jsonschema"
-    assert rocoto._rocoto_schema_yaml() == expected
+@fixture
+def instance(assets):
+    cfgfile, _ = assets
+    return rocoto._RocotoXML(config_file=cfgfile)
 
 
-def test__rocoto_schema_xml():
-    with resources.as_file(resources.files("uwtools.resources")) as path:
-        expected = path / "schema_with_metatasks.rng"
-    assert rocoto._rocoto_schema_xml() == expected
+@fixture
+def root():
+    return rocoto.Element("root")
 
 
-@pytest.mark.parametrize("vals", [("hello_workflow.yaml", True), ("fruit_config.yaml", False)])
-def test_realize_rocoto_xml(vals, tmp_path):
-    fn, validity = vals
-    output = tmp_path / "rendered.xml"
-
-    with patch.object(rocoto, "validate_rocoto_xml", value=True):
-        with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
-            config_file = path / fn
-            result = rocoto.realize_rocoto_xml(config_file=config_file, output_file=output)
-    assert result is validity
+# Tests
 
 
-def test_realize_rocoto_default_output():
-    with patch.object(rocoto, "validate_rocoto_xml", value=True):
-        with resources.as_file(resources.files("uwtools.tests.fixtures")) as path:
-            config_file = path / "hello_workflow.yaml"
-            result = rocoto.realize_rocoto_xml(config_file=config_file)
-    assert result is True
+def test_realize_rocoto_xml_to_file(assets):
+    cfgfile, outfile = assets
+    assert rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile) is True
 
 
-def test_realize_rocoto_invalid_xml():
-    config_file = support.fixture_path("hello_workflow.yaml")
-    xml = support.fixture_path("rocoto_invalid.xml")
-    with patch.object(rocoto, "_write_rocoto_xml", return_value=None):
-        with patch.object(tempfile, "mkstemp", return_value=(None, xml)):
-            result = rocoto.realize_rocoto_xml(config_file=config_file, output_file=xml)
-    assert result is False
+def test_realize_rocoto_xml_to_stdout(capsys, assets):
+    cfgfile, outfile = assets
+    assert rocoto.realize_rocoto_xml(config_file=cfgfile) is True
+    with open(outfile, "w", encoding="utf-8") as f:
+        f.write(capsys.readouterr().out)
+    assert rocoto.validate_rocoto_xml(outfile)
+
+
+def test_realize_rocoto_invalid_xml(assets):
+    cfgfile, outfile = assets
+    dump = lambda _, dst: shutil.copyfile(fixture_path("rocoto_invalid.xml"), dst)
+    with patch.object(rocoto._RocotoXML, "dump", dump):
+        assert rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile) is False
 
 
 @pytest.mark.parametrize("vals", [("hello_workflow.xml", True), ("rocoto_invalid.xml", False)])
-def test_rocoto_xml_is_valid(vals):
+def test_validate_rocoto_xml(vals):
     fn, validity = vals
-    xml = support.fixture_path(fn)
-    result = rocoto.validate_rocoto_xml(input_xml=xml)
-
-    assert result is validity
+    xml = fixture_path(fn)
+    assert rocoto.validate_rocoto_xml(input_xml=xml) is validity
 
 
-def test__write_rocoto_xml(tmp_path):
-    config_file = support.fixture_path("hello_workflow.yaml")
-    output = tmp_path / "rendered.xml"
+def test__RocotoXML__doctype_entities(instance):
+    assert '<!ENTITY ACCOUNT "myaccount">' in instance._doctype
+    assert '<!ENTITY FOO "test.log">' in instance._doctype
 
-    rocoto._write_rocoto_xml(config_file=config_file, output_file=output)
 
-    expected = support.fixture_path("hello_workflow.xml")
-    assert support.compare_files(expected, output) is True
+def test__RocotoXML__doctype_entities_none(instance):
+    del instance._config["workflow"]["entities"]
+    assert instance._doctype is None
+
+
+def test__RocotoXML__config_validate(assets, instance):
+    cfgfile, _ = assets
+    instance._config_validate(config_file=cfgfile)
+
+
+def test__RocotoXML__config_validate_fail(instance, tmp_path):
+    cfgfile = tmp_path / "bad.yaml"
+    with open(cfgfile, "w", encoding="utf-8") as f:
+        print("not: ok", file=f)
+    with raises(UWConfigError):
+        instance._config_validate(config_file=cfgfile)
+
+
+def test__RocotoXML__add_metatask(instance, root):
+    config = {"metatask_foo": "1", "task_bar": "2", "var": {"baz": "3", "qux": "4"}}
+    taskname = "test-metatask"
+    orig = instance._add_metatask
+    with patch.multiple(instance, _add_metatask=D, _add_task=D) as mocks:
+        orig(e=root, config=config, taskname=taskname)
+    metatask = root[0]
+    assert metatask.tag == "metatask"
+    assert metatask.get("name") == taskname
+    mocks["_add_metatask"].assert_called_once_with(metatask, "1", "foo")
+    mocks["_add_task"].assert_called_once_with(metatask, "2", "bar")
+
+
+def test__RocotoXML__add_task(instance, root):
+    config = {
+        "attrs": {"foo": "1", "bar": "2"},
+        "account": "baz",
+        "dependency": "qux",
+        "envars": {"A": "apple"},
+    }
+    taskname = "test-task"
+    with patch.multiple(instance, _add_task_dependency=D, _add_task_envar=D) as mocks:
+        instance._add_task(e=root, config=config, taskname=taskname)
+    task = root[0]
+    assert task.tag == "task"
+    assert task.get("name") == taskname
+    assert task.get("foo") == "1"
+    assert task.get("bar") == "2"
+    mocks["_add_task_dependency"].assert_called_once_with(task, "qux")
+    mocks["_add_task_envar"].assert_called_once_with(task, "A", "apple")
+
+
+def test__RocotoXML__add_task_dependency(instance, root):
+    config = {"taskdep": {"attrs": {"task": "foo"}}}
+    instance._add_task_dependency(e=root, config=config)
+    dependency = root[0]
+    assert dependency.tag == "dependency"
+    taskdep = dependency[0]
+    assert taskdep.tag == "taskdep"
+    assert taskdep.get("task") == "foo"
+
+
+def test__RocotoXML__add_task_dependency_fail(instance, root):
+    config = {"unrecognized": "whatever"}
+    with raises(UWConfigError):
+        instance._add_task_dependency(e=root, config=config)
+
+
+def test__RocotoXML__add_task_envar(instance, root):
+    instance._add_task_envar(root, "foo", "bar")
+    envar = root[0]
+    name, value = envar
+    assert name.tag == "name"
+    assert name.text == "foo"
+    assert value.tag == "value"
+    assert value.text == "bar"
+
+
+def test__RocotoXML__add_workflow(instance):
+    config = {
+        "workflow": {"attrs": {"foo": "1", "bar": "2"}, "cycledefs": "3", "log": "4", "tasks": "5"}
+    }
+    with patch.multiple(
+        instance, _add_workflow_cycledefs=D, _add_workflow_log=D, _add_workflow_tasks=D
+    ) as mocks:
+        instance._add_workflow(config=config)
+    workflow = instance._root
+    assert workflow.tag == "workflow"
+    assert workflow.get("foo") == "1"
+    assert workflow.get("bar") == "2"
+    mocks["_add_workflow_cycledefs"].assert_called_once_with(workflow, "3")
+    mocks["_add_workflow_log"].assert_called_once_with(workflow, "4")
+    mocks["_add_workflow_tasks"].assert_called_once_with(workflow, "5")
+
+
+def test__RocotoXML__add_workflow_cycledefs(instance, root):
+    config = {"foo": ["1", "2"], "bar": ["3", "4"]}
+    instance._add_workflow_cycledefs(e=root, config=config)
+    for i, group, coord in [(0, "foo", "1"), (1, "foo", "2"), (2, "bar", "3"), (3, "bar", "4")]:
+        assert root[i].tag == "cycledef"
+        assert root[i].get("group") == group
+        assert root[i].text == coord
+
+
+def test__RocotoXML__add_workflow_log(instance, root):
+    path = "/path/to/logfile"
+    instance._add_workflow_log(e=root, logfile=path)
+    log = root[0]
+    assert log.tag == "log"
+    assert log.text == path
+
+
+def test__RocotoXML__add_workflow_tasks(instance, root):
+    config = {"metatask_foo": "1", "task_bar": "2"}
+    with patch.multiple(instance, _add_metatask=D, _add_task=D) as mocks:
+        instance._add_workflow_tasks(e=root, config=config)
+    mocks["_add_metatask"].assert_called_once_with(root, "1", "foo")
+    mocks["_add_task"].assert_called_once_with(root, "2", "bar")
+
+
+def test__RocotoXML__insert_doctype(instance):
+    with patch.object(rocoto._RocotoXML, "_doctype", new_callable=PropertyMock) as _doctype:
+        _doctype.return_value = "bar"
+        assert instance._insert_doctype("foo\nbaz\n") == "foo\nbar\nbaz\n"
+
+
+def test__RocotoXML__insert_doctype_none(instance):
+    with patch.object(rocoto._RocotoXML, "_doctype", new_callable=PropertyMock) as _doctype:
+        _doctype.return_value = None
+        assert instance._insert_doctype("foo\nbaz\n") == "foo\nbaz\n"
+
+
+def test__RocotoXML__set_and_render_jobname(instance):
+    config = {"foo": "{{ jobname }}", "baz": "{{ qux }}"}
+    assert instance._set_and_render_jobname(config=config, taskname="bar") == {
+        "jobname": "bar",  # set
+        "foo": "bar",  # rendered
+        "baz": "{{ qux }}",  # ignored
+    }
+
+
+def test__RocotoXML__setattrs(instance, root):
+    config = {"attrs": {"foo": "1", "bar": "2"}}
+    instance._set_attrs(e=root, config=config)
+    assert root.get("foo") == "1"
+    assert root.get("bar") == "2"
+
+
+def test__RocotoXML__tag_name(instance):
+    assert instance._tag_name("foo") == ("foo", "")
+    assert instance._tag_name("foo_bar") == ("foo", "bar")
+    assert instance._tag_name("foo_bar_baz") == ("foo", "bar_baz")
