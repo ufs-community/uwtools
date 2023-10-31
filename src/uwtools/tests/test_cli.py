@@ -203,7 +203,12 @@ def test__dispatch_config_compare():
     vars(args).update({STR.file1path: 1, STR.file1fmt: 2, STR.file2path: 3, STR.file2fmt: 4})
     with patch.object(cli.uwtools.config.core, "compare_configs") as compare_configs:
         cli._dispatch_config_compare(args)
-    compare_configs.assert_called_once_with(args)
+    compare_configs.assert_called_once_with(
+        config_a_path=args.file_1_path,
+        config_a_format=args.file_1_format,
+        config_b_path=args.file_2_path,
+        config_b_format=args.file_2_format,
+    )
 
 
 def test__dispatch_config_realize():
@@ -222,7 +227,16 @@ def test__dispatch_config_realize():
     )
     with patch.object(cli.uwtools.config.core, "realize_config") as realize_config:
         cli._dispatch_config_realize(args)
-    realize_config.assert_called_once_with(args)
+    realize_config.assert_called_once_with(
+        input_file=1,
+        input_format=2,
+        output_file=3,
+        output_format=4,
+        values_file=5,
+        values_format=6,
+        values_needed=7,
+        dry_run=8,
+    )
 
 
 def test__dispatch_config_translate_arparse_to_jinja2():
@@ -238,7 +252,7 @@ def test__dispatch_config_translate_arparse_to_jinja2():
     )
     with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as convert:
         cli._dispatch_config_translate(args)
-    convert.assert_called_once_with(args)
+    convert.assert_called_once_with(input_file=1, output_file=3, dry_run=5)
 
 
 def test__dispatch_config_translate_unsupported():
@@ -254,7 +268,7 @@ def test__dispatch_config_validate_yaml():
     vars(args).update({STR.infile: 1, STR.infmt: FORMAT.yaml, STR.schemafile: 3})
     with patch.object(cli.uwtools.config.validator, "validate_yaml") as validate_yaml:
         cli._dispatch_config_validate(args)
-    validate_yaml.assert_called_once_with(args)
+    validate_yaml.assert_called_once_with(config_file=1, schema_file=3)
 
 
 def test__dispatch_config_validate_unsupported():
@@ -286,7 +300,7 @@ def test__dispatch_forecast_run():
         CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
         with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):
             cli._dispatch_forecast_run(args)
-    FooForecast.assert_called_once_with(args)
+    FooForecast.assert_called_once_with(batch_script=None, config_file=1, dry_run=True)
     FooForecast().run.assert_called_once_with(cycle="2023-01-01T00:00:00")
 
 
@@ -309,9 +323,9 @@ def test__dispatch_rocoto(params):
 def test__dispatch_rocoto_realize():
     args = ns()
     vars(args).update({STR.infile: 1, STR.outfile: 2})
-    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml") as module:
+    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml") as realize_rocoto_xml:
         cli._dispatch_rocoto_realize(args)
-    module.assert_called_once_with(args)
+    realize_rocoto_xml.assert_called_once_with(config_file=1, output_file=2)
 
 
 def test__dispatch_rocoto_realize_invalid():
@@ -329,9 +343,9 @@ def test__dispatch_rocoto_realize_invalid():
 def test__dispatch_rocoto_validate_xml():
     args = ns()
     vars(args).update({STR.infile: 1})
-    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as validate:
+    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as validate_rocoto_xml:
         cli._dispatch_rocoto_validate(args)
-    validate.assert_called_once_with(args)
+    validate_rocoto_xml.assert_called_once_with(input_xml=1)
 
 
 def test__dispatch_rocoto_validate_xml_invalid():
@@ -364,9 +378,17 @@ def test__dispatch_template_render_yaml():
             STR.dryrun: 7,
         }
     )
-    with patch.object(cli.uwtools.config.templater, STR.render) as templater:
+    with patch.object(cli.uwtools.config.templater, "render") as render:
         cli._dispatch_template_render(args)
-    templater.assert_called_once_with(args)
+    render.assert_called_once_with(
+        input_file=1,
+        output_file=2,
+        values_file=3,
+        values_format=4,
+        overrides={"foo": "88", "bar": "99"},
+        values_needed=6,
+        dry_run=7,
+    )
 
 
 @pytest.mark.parametrize("quiet", [True])
