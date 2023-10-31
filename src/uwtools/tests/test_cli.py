@@ -226,19 +226,7 @@ def test__dispatch_config_realize():
 
 
 def test__dispatch_config_realize_no_optional():
-    args = ns()
-    vars(args).update(
-        {
-            STR.infile: None,
-            STR.infmt: None,
-            STR.outfile: None,
-            STR.outfmt: None,
-            STR.valsfile: 5,
-            STR.valsfmt: None,
-            STR.valsneeded: None,
-            STR.dryrun: None,
-        }
-    )
+    args, _ = cli._parse_args("uw config realize --values-file /foo.vals".split()[1:])
     with patch.object(cli.uwtools.config.core, "realize_config") as realize_config:
         cli._dispatch_config_realize(args)
     assert realize_config.called_once_with(args)
@@ -261,16 +249,7 @@ def test__dispatch_config_translate_atparse_to_jinja2():
 
 
 def test__dispatch_config_translate_no_optional():
-    args = ns()
-    vars(args).update(
-        {
-            STR.infile: None,
-            STR.infmt: None,
-            STR.outfile: None,
-            STR.outfmt: None,
-            STR.dryrun: None,
-        }
-    )
+    args, _ = cli._parse_args("uw config translate".split()[1:])
     with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as convert:
         cli._dispatch_config_translate(args)
     assert convert.called_once_with(args)
@@ -285,8 +264,7 @@ def test__dispatch_config_translate_unsupported():
 
 
 def test__dispatch_config_validate_no_optional():
-    args = ns()
-    vars(args).update({STR.infile: None, STR.infmt: None, STR.schemafile: 3})
+    args, _ = cli._parse_args("uw config validate --schema-file /foo.schema".split()[1:])
     with patch.object(cli.uwtools.config.validator, "validate_yaml") as validate_yaml:
         cli._dispatch_config_validate(args)
     assert validate_yaml.called_once_with(args)
@@ -370,8 +348,7 @@ def test__dispatch_rocoto_realize_invalid():
 
 
 def test__dispatch_rocoto_realize_no_optional():
-    args = ns()
-    vars(args).update({STR.infile: None, STR.outfile: None})
+    args, _ = cli._parse_args("uw rocoto realize".split()[1:])
     with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml") as module:
         cli._dispatch_rocoto_realize(args)
     assert module.called_once_with(args)
@@ -393,8 +370,7 @@ def test__dispatch_rocoto_validate_xml_invalid():
 
 
 def test__dispatch_rocoto_validate_xml_no_optional():
-    args = ns()
-    vars(args).update({STR.infile: None})
+    args, _ = cli._parse_args("uw rocoto validate".split()[1:])
     with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as validate:
         cli._dispatch_rocoto_validate(args)
     assert validate.called_once_with(args)
@@ -411,18 +387,7 @@ def test__dispatch_template(params):
 
 
 def test__dispatch_template_render_no_optional():
-    args = ns()
-    vars(args).update(
-        {
-            STR.infile: None,
-            STR.outfile: None,
-            STR.valsfile: None,
-            STR.valsfmt: None,
-            STR.keyvalpairs: None,
-            STR.valsneeded: None,
-            STR.dryrun: None,
-        }
-    )
+    args, _ = cli._parse_args("uw template render".split()[1:])
     with patch.object(cli.uwtools.config.templater, STR.render) as templater:
         cli._dispatch_template_render(args)
     assert templater.called_once_with(args)
