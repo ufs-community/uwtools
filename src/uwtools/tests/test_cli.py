@@ -254,7 +254,13 @@ def test__dispatch_config_translate_atparse_to_jinja2():
 
 
 def test__dispatch_config_translate_no_optional():
-    args, _ = cli._parse_args("uw config translate".split()[1:])
+    args = {
+        STR.dryrun: False,
+        STR.infile: None,
+        STR.infmt: FORMAT.atparse,
+        STR.outfile: None,
+        STR.outfmt: FORMAT.jinja2,
+    }
     with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as convert:
         cli._dispatch_config_translate(args)
     convert.assert_called_once_with(input_file=None, output_file=None, dry_run=False)
@@ -266,7 +272,7 @@ def test__dispatch_config_translate_unsupported():
 
 
 def test__dispatch_config_validate_no_optional():
-    args, _ = cli._parse_args("uw config validate --schema-file /foo.schema".split()[1:])
+    args = {STR.infile: None, STR.infmt: FORMAT.yaml, STR.schemafile: "/foo.schema"}
     with patch.object(cli.uwtools.config.validator, "validate_yaml") as validate_yaml:
         cli._dispatch_config_validate(args)
     validate_yaml.assert_called_once_with(config_file=None, schema_file="/foo.schema")
