@@ -388,9 +388,9 @@ def test__dispatch_template(params):
 
 def test__dispatch_template_render_no_optional():
     args, _ = cli._parse_args("uw template render".split()[1:])
-    with patch.object(cli.uwtools.config.templater, STR.render) as templater:
+    with patch.object(cli.uwtools.config.templater, "render") as render:
         cli._dispatch_template_render(args)
-    assert templater.called_once_with(args)
+    assert render.called_once_with(args)
 
 
 def test__dispatch_template_render_yaml():
@@ -406,9 +406,9 @@ def test__dispatch_template_render_yaml():
             STR.dryrun: 7,
         }
     )
-    with patch.object(cli.uwtools.config.templater, STR.render) as templater:
+    with patch.object(cli.uwtools.config.templater, "render") as render:
         cli._dispatch_template_render(args)
-    assert templater.called_once_with(args)
+    assert render.called_once_with(args)
 
 
 @pytest.mark.parametrize("quiet", [True])
