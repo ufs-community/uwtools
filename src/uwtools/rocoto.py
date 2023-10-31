@@ -295,7 +295,7 @@ class _RocotoXML:
 
 
 @dataclass(frozen=True)
-class _STR:
+class STR:
     """
     A lookup map for Rocoto-related strings.
     """
@@ -335,6 +335,3 @@ class _STR:
     var: str = "var"
     walltime: str = "walltime"
     workflow: str = "workflow"
-
-
-STR = _STR()
