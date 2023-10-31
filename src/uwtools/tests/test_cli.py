@@ -225,7 +225,16 @@ def test__dispatch_config_realize():
 
 
 def test__dispatch_config_realize_no_optional():
-    args, _ = cli._parse_args("uw config realize --values-file /foo.vals".split()[1:])
+    args = {
+        STR.infile: None,
+        STR.infmt: None,
+        STR.outfile: None,
+        STR.outfmt: None,
+        STR.valsfile: "/foo.vals",
+        STR.valsfmt: None,
+        STR.valsneeded: False,
+        STR.dryrun: False,
+    }
     with patch.object(cli.uwtools.config.core, "realize_config") as realize_config:
         cli._dispatch_config_realize(args)
     realize_config.assert_called_once_with(
@@ -344,7 +353,7 @@ def test__dispatch_rocoto_realize_invalid():
 
 
 def test__dispatch_rocoto_realize_no_optional():
-    args, _ = cli._parse_args("uw rocoto realize".split()[1:])
+    args = {STR.infile: None, STR.outfile: None}
     with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml") as module:
         cli._dispatch_rocoto_realize(args)
     module.assert_called_once_with(config_file=None, output_file=None)
@@ -364,7 +373,7 @@ def test__dispatch_rocoto_validate_xml_invalid():
 
 
 def test__dispatch_rocoto_validate_xml_no_optional():
-    args, _ = cli._parse_args("uw rocoto validate".split()[1:])
+    args = {STR.infile: None, STR.verbose: False}
     with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as validate:
         cli._dispatch_rocoto_validate(args)
     validate.assert_called_once_with(input_xml=None)
@@ -380,7 +389,15 @@ def test__dispatch_template(params):
 
 
 def test__dispatch_template_render_no_optional():
-    args, _ = cli._parse_args("uw template render".split()[1:])
+    args = {
+        STR.infile: None,
+        STR.outfile: None,
+        STR.valsfile: None,
+        STR.valsfmt: None,
+        STR.keyvalpairs: "",
+        STR.valsneeded: False,
+        STR.dryrun: False,
+    }
     with patch.object(cli.uwtools.config.templater, "render") as render:
         cli._dispatch_template_render(args)
     render.assert_called_once_with(
