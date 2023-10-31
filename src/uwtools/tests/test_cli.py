@@ -110,7 +110,7 @@ def test__check_file_vs_format_pass_explicit():
         format_arg=STR.infmt,
         args=args,
     )
-    assert args.input_format == fmt
+    assert vars(args)[STR.infmt] == fmt
 
 
 @pytest.mark.parametrize("fmt", vars(FORMAT).keys())
@@ -123,7 +123,7 @@ def test__check_file_vs_format_pass_implicit(fmt):
         format_arg=STR.infmt,
         args=args,
     )
-    assert args.input_format == vars(FORMAT)[fmt]
+    assert vars(args)[STR.infmt] == vars(FORMAT)[fmt]
 
 
 def test__check_quiet_vs_verbose_fail(capsys):
@@ -204,10 +204,10 @@ def test__dispatch_config_compare():
     with patch.object(cli.uwtools.config.core, "compare_configs") as compare_configs:
         cli._dispatch_config_compare(args)
     compare_configs.assert_called_once_with(
-        config_a_path=args.file_1_path,
-        config_a_format=args.file_1_format,
-        config_b_path=args.file_2_path,
-        config_b_format=args.file_2_format,
+        config_a_path=vars(args)[STR.file1path],
+        config_a_format=vars(args)[STR.file1fmt],
+        config_b_path=vars(args)[STR.file2path],
+        config_b_format=vars(args)[STR.file2fmt],
     )
 
 
