@@ -1,4 +1,4 @@
-name: Make Package
+name: Test
 on:
   pull_request:
     branches:
@@ -10,8 +10,8 @@ on:
     branches:
       - develop
 jobs:
-  make-package:
-    name: Make Package
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
