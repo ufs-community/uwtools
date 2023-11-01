@@ -1,0 +1,5 @@
+#!/bin/bash -eux
+
+# That script will run make devshell (or, probably, condev-shell directly)
+condev-shell
+unformatted() { make format; test -z "$(git status --porcelain)"; }
