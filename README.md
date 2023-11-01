@@ -1,4 +1,4 @@
-[![docs]](https://readthedocs.org/projects/unified-workflow/badge/?version=latest)
+![docs](https://readthedocs.org/projects/unified-workflow/badge/?version=latest)
 
 # workflow-tools
 
