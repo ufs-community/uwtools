@@ -48,4 +48,3 @@ extension-pkg-allow-list = [
 recursive = true
 
 [tool.pytest.ini_options]
-filterwarnings = ["ignore::DeprecationWarning:botocore.*"]

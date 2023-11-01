@@ -3,7 +3,7 @@
 Tests for uwtools.utils.file_helpers module.
 """
 
-from uwtools.utils import Memory
+from uwtools.utils.memory import Memory
 
 
 def test_memory_conversions():

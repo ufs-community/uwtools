@@ -7,5 +7,5 @@ bash $(basename $url) -bfp conda
   set -e +ux
   source conda/etc/profile.d/conda.sh
   conda activate
-  conda install -q -y -c maddenp --repodata-fn repodata.json anaconda-client condev
+  conda install -q -y -c maddenp --repodata-fn repodata.json anaconda-client condev=0.6.0
 )

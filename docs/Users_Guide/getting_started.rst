@@ -22,13 +22,6 @@ Package Dependencies
     - Source
     - Description 
 
-  * - boto3
-    - >=1.22.13
-    - https://anaconda.org/conda-forge/boto3
-    - 
-        allows Python developers to write software 
-        that makes use of services like Amazon 
-        S3 and Amazon EC2
   * - black
     -
     -

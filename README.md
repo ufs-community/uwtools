@@ -1,10 +1,15 @@
-[![Documentation](https://github.com/ufs-community/workflow-tools/actions/workflows/docs.yaml/badge.svg)](https://github.com/ufs-community/workflow-tools/actions/workflows/docs.yaml)
+[![docs](https://readthedocs.org/projects/unified-workflow/badge/?version=latest)](https://readthedocs.org/projects/unified-workflow/builds/)
 
 # workflow-tools
 
-Unified Workflow tools for use with applications with UFS and beyond
+Unified Workflow tools for use with UFS applications and beyond
+
+## Documentation
+
+Comprehensive documentation is available [here](https://unified-workflow.readthedocs.io/en/latest/).
 
 ## User Installation
+
 - If you are a Developer, skip the User Installation and continue on to the Development section
 
 The recommended installation mechanism uses the Python package and virtual-environment manager [conda](https://docs.conda.io/en/latest/). Specifically, these instructions detail the use of the minimal [Miniforge](https://github.com/conda-forge/miniforge) variant of [Miniconda](https://docs.conda.io/en/latest/miniconda.html), built to use, by default, packages from the [conda-forge](https://conda-forge.org/) project. Users of the original Miniconda (or the [Anaconda](https://anaconda.org/) distribution) may need to add the flags `-c conda-forge --override-channels` to `conda build`, `conda create`, and `conda install` commands to specify the use of conda-forge packages.
@@ -58,7 +63,7 @@ bash Miniforge3-Linux-aarch64.sh -bfp ~/conda
 rm Miniforge3-Linux-aarch64.sh
 source ~/conda/etc/profile.d/conda.sh
 conda activate
-conda install -y -c maddenp condev=0.5.3
+conda install -y -c maddenp condev=0.6.0
 cd /to/your/workflow-tools/clone
 make devshell
 ```
@@ -121,23 +126,15 @@ The following files in this repo are derived from their counterparts in the [con
 ``` sh
 ├── Makefile
 ├── recipe
-│   ├── build.sh
-│   ├── channels
-│   ├── conda_build_config.yaml
-│   ├── meta.json
-│   ├── meta.yaml
-│   └── run_test.sh
+│   ├── build.sh
+│   ├── channels
+│   ├── conda_build_config.yaml
+│   ├── meta.json
+│   ├── meta.yaml
+│   └── run_test.sh
 ├── src
-│   ├── pyproject.toml
-│   ├── setup.py
+│   ├── pyproject.toml
+│   ├── setup.py
 ```
 
 Behaviors described in previous sections may rely on these files continuing to follow `condev` conventions.
-
-## Documentation
-
-Documentation is automatically generated through [Read the Docs](https://readthedocs.org/) when [develop](https://github.com/ufs-community/workflow-tools/tree/develop) is updated and available [here](https://unified-workflow.readthedocs.io/en/latest/).
-
-[Developer Status](https://github.com/orgs/ufs-community/projects/1)
-
-[UW Tools Github Pages Site](https://ufs-community.github.io/workflow-tools/)
