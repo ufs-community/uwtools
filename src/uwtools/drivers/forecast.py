@@ -9,7 +9,7 @@ from collections.abc import Mapping
 from datetime import datetime
 from importlib import resources
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 from uwtools.config.core import FieldTableConfig, NMLConfig, YAMLConfig
 from uwtools.drivers.driver import Driver
@@ -50,10 +50,6 @@ class FV3Forecast(Driver):
         batch_script = self.scheduler.batch_script
         batch_script.append(pre_run)
         batch_script.append(self.run_cmd())
-        if self._dry_run:
-            log.info("Batch Script:")
-            for line in str(batch_script).split("\n"):
-                log.info(line)
         return batch_script
 
     @staticmethod
@@ -183,12 +179,15 @@ class FV3Forecast(Driver):
 
         :return: Did the FV3 run exit with success status?
         """
-        run_directory = self.prepare_directories()
-
-        if self._batch_script is not None:
-            return self._prepare_and_run_batch_script(run_directory)
-
-        return self._prepare_and_execute_command()
+        if self._batch_script:
+            method = self._run_via_batch_submission()
+        else:
+            method = self._run_via_local_execution()
+        status, output = method
+        if self._dry_run:
+            for line in output:
+                log.info(line)
+        return status
 
     @property
     def schema_file(self) -> str:
@@ -234,47 +233,6 @@ class FV3Forecast(Driver):
 
         return boundary_files
 
-    def _prepare_and_run_batch_script(self, run_directory: Path) -> bool:
-        """
-        Prepares and runs batch script.
-        """
-        batch_script = self.batch_script()
-        assert self._batch_script is not None
-        outpath = run_directory / self._batch_script
-
-        if self._dry_run:
-            # log.info("Batch Script:")
-            # for line in str(batch_script).split("\n"):
-            #     log.info(line)
-            return True
-
-        batch_script.dump(outpath)
-        return self.scheduler.submit_job(outpath)
-
-    def _prepare_config_files(self, run_directory: Path) -> None:
-        """
-        Collect all the configuration files needed for FV3.
-        """
-        if self._dry_run:
-            for call in ("field_table", "model_configure", "input.nml"):
-                log.info(f"Would prepare: {run_directory}/{call}")
-        else:
-            self.create_field_table(run_directory / "field_table")
-            self.create_model_configure(run_directory / "model_configure")
-            self.create_namelist(run_directory / "input.nml")
-
-    def _prepare_and_execute_command(self) -> bool:
-        """
-        Collects the necessary MPI environment variables in order to construct full run command.
-        """
-        pre_run = self._mpi_env_variables(" ")
-        full_cmd = f"{pre_run} {self.run_cmd()}"
-        if self._dry_run:
-            log.info("Would run:")
-            log.info(full_cmd)
-        result = execute(cmd=full_cmd)
-        return result.success
-
     def _mpi_env_variables(self, delimiter: str = " ") -> str:
         """
         Set the environment variables needed for the MPI job.
@@ -289,6 +247,52 @@ class FV3Forecast(Driver):
             "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
         }
         return delimiter.join([f"{k}={v}" for k, v in envvars.items()])
+
+    def _prepare_config_files(self, run_directory: Path) -> None:
+        """
+        Collect all the configuration files needed for FV3.
+        """
+        if self._dry_run:
+            for call in ("field_table", "model_configure", "input.nml"):
+                log.info(f"Would prepare: {run_directory}/{call}")
+        else:
+            self.create_field_table(run_directory / "field_table")
+            self.create_model_configure(run_directory / "model_configure")
+            self.create_namelist(run_directory / "input.nml")
+
+    def _run_via_batch_submission(self) -> Tuple[bool, List[str]]:
+        """
+        Prepares and runs batch script.
+
+        :return: A tuple that contains a boolean of success status of the FV3 run and a list of
+            strings that make up the batch script.
+        """
+        run_directory = self.prepare_directories()
+        batch_script = self.batch_script()
+        batch_lines = ["Batch script:", *str(batch_script).split("\n")]
+        if self._dry_run:
+            return True, batch_lines
+
+        assert self._batch_script is not None
+        outpath = run_directory / self._batch_script
+
+        batch_script.dump(outpath)
+        return self.scheduler.submit_job(outpath), batch_lines
+
+    def _run_via_local_execution(self) -> Tuple[bool, List[str]]:
+        """
+        Collects the necessary MPI environment variables in order to construct full run command.
+
+        :return: A tuple containing a boolean of the success status of the FV3 run and a list of
+            strings that make up the full command line.
+        """
+        pre_run = self._mpi_env_variables(" ")
+        full_cmd = f"{pre_run} {self.run_cmd()}"
+        command_lines = ["Command:", *full_cmd.split("\n")]
+        if self._dry_run:
+            return True, command_lines
+        result = execute(cmd=full_cmd)
+        return result.success, command_lines
 
 
 CLASSES = {"FV3": FV3Forecast}

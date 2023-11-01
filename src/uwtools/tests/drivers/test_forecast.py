@@ -344,17 +344,17 @@ def test_FV3Forecast_run_dry_run(caplog, fv3_mpi_assets, fv3_run_assets, with_ba
             "#SBATCH --qos=batch",
             "#SBATCH --time=00:01:00",
         ] + fv3_mpi_assets
-        run_expected = "\n".join(batch_components)
+        expected_lines = batch_components
     else:
         batch_script = None
-        run_expected = " ".join(fv3_mpi_assets)
+        expected_lines = [" ".join(fv3_mpi_assets)]
 
     with patch.object(FV3Forecast, "_validate", return_value=True):
         fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=batch_script)
         with patch.object(fcstobj, "_config", config):
             fcstobj.run(cycle=dt.datetime.now())
-    assert logged(caplog, run_expected)
-    # assert run_expected in capsys.readouterr().out
+    for line in expected_lines:
+        assert logged(caplog, line)
 
 
 def test_run_submit(fv3_run_assets):
