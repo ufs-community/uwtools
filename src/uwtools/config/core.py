@@ -11,7 +11,7 @@ import os
 import re
 import sys
 from abc import ABC, abstractmethod
-from collections import UserDict
+from collections import OrderedDict, UserDict
 from types import SimpleNamespace as ns
 from typing import Dict, List, Optional, Tuple, Type, Union
 
@@ -470,11 +470,11 @@ class NMLConfig(Config):
         # OrderedDict can cause problems downstream when serialing to YAML, convert OrderedDict
         # objects to standard dicts here.
 
-        def std(d: dict) -> dict:
-            return {k: std(v) if isinstance(v, dict) else v for k, v in d.items()}
+        def from_od(d: dict) -> dict:
+            return {k: from_od(v) if isinstance(v, dict) else v for k, v in d.items()}
 
         with readable(config_file) as f:
-            return std(f90nml.read(f).todict(complex_tuple=False))
+            return from_od(f90nml.read(f).todict(complex_tuple=False))
 
     # Public methods
 
@@ -495,12 +495,14 @@ class NMLConfig(Config):
         :param cfg: The in-memory config object to dump.
         :param opts: Other options required by a subclass.
         """
-        nml = dict(cfg)
-        for sect, keys in nml.items():
-            if isinstance(keys, dict):
-                nml[sect] = dict(keys)
+
+        def to_od(d: dict) -> OrderedDict:
+            return OrderedDict(
+                {k: OrderedDict(v) if isinstance(v, dict) else v for k, v in d.items()}
+            )
+
         with writable(path) as f:
-            f90nml.Namelist(nml).write(f, sort=False)
+            f90nml.Namelist(to_od(cfg)).write(f, sort=False)
 
 
 class YAMLConfig(Config):
