@@ -1,5 +1,9 @@
 #!/bin/bash -eux
 
-# That script will run make devshell (or, probably, condev-shell directly)
+# Run make devshell (condev-shell directly)
 condev-shell
+
+# call the helper function here?
+
+# check if PR is unformatted by running make format then a git status
 unformatted() { make format; test -z "$(git status --porcelain)"; }
