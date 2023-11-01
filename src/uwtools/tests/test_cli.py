@@ -389,12 +389,12 @@ def test__dispatch_template(params):
 
 
 def test__dispatch_template_render_no_optional():
-    args = {
+    args: dict = {
         STR.infile: None,
         STR.outfile: None,
         STR.valsfile: None,
         STR.valsfmt: None,
-        STR.keyvalpairs: "",
+        STR.keyvalpairs: [],
         STR.valsneeded: False,
         STR.dryrun: False,
     }
