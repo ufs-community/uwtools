@@ -6,7 +6,7 @@ Unified Workflow tools for use with UFS applications and beyond
 
 ## Documentation
 
-Documentation is available [here](https://unified-workflow.readthedocs.io/en/latest/).
+Comprehensive documentation is available [here](https://unified-workflow.readthedocs.io/en/latest/).
 
 ## User Installation
 
