@@ -11,7 +11,7 @@ import os
 import re
 import sys
 from abc import ABC, abstractmethod
-from collections import OrderedDict, UserDict
+from collections import UserDict
 from types import SimpleNamespace as ns
 from typing import Dict, List, Optional, Tuple, Type, Union
 
@@ -303,19 +303,6 @@ class Config(ABC, UserDict):
         :param opts: Other options required by a subclass.
         """
 
-    def from_ordereddict(self, in_dict: dict) -> dict:
-        """
-        Recursively replaces all OrderedDict objects with basic dict objects.
-
-        :param: in_dict: A dictionary potentially containing OrderedDict objects
-        """
-        if isinstance(in_dict, OrderedDict):
-            in_dict = dict(in_dict)
-        for sect, keys in in_dict.items():
-            if isinstance(keys, OrderedDict):
-                in_dict[sect] = dict(keys)
-        return in_dict
-
     def parse_include(self, ref_dict: Optional[dict] = None) -> None:
         """
         Recursively process include directives in a config object.
@@ -417,18 +404,17 @@ class INIConfig(Config):
         # The protected _sections method is the most straightforward way to get at the dict
         # representation of the parse config.
 
-        cfg = configparser.ConfigParser(dict_type=OrderedDict)
+        cfg = configparser.ConfigParser()
         cfg.optionxform = str  # type: ignore
         sections = cfg._sections  # type: ignore # pylint: disable=protected-access
         with readable(config_file) as f:
             raw = f.read()
         try:
             cfg.read_string(raw)
-            d = dict(sections)
+            return dict(sections)
         except configparser.MissingSectionHeaderError:
             cfg.read_string("[top]\n" + raw)
-            d = dict(sections.get("top"))
-        return self.from_ordereddict(d)
+            return dict(sections.get("top"))
 
     # Public methods
 
@@ -479,8 +465,7 @@ class NMLConfig(Config):
         :param config_file: Path to config file to load.
         """
         with readable(config_file) as f:
-            cfg = f90nml.read(f).todict(complex_tuple=False)
-        return self.from_ordereddict(cfg)
+            return f90nml.read(f).todict(complex_tuple=False)
 
     # Public methods
 
@@ -501,10 +486,10 @@ class NMLConfig(Config):
         :param cfg: The in-memory config object to dump.
         :param opts: Other options required by a subclass.
         """
-        nml = OrderedDict(cfg)
+        nml = dict(cfg)
         for sect, keys in nml.items():
             if isinstance(keys, dict):
-                nml[sect] = OrderedDict(keys)
+                nml[sect] = dict(keys)
         with writable(path) as f:
             f90nml.Namelist(nml).write(f, sort=False)
 
@@ -533,7 +518,7 @@ class YAMLConfig(Config):
         loader = self._yaml_loader
         with readable(config_file) as f:
             try:
-                cfg = yaml.load(f.read(), Loader=loader)
+                return yaml.load(f.read(), Loader=loader)
             except yaml.constructor.ConstructorError as e:
                 if e.problem:
                     if "unhashable" in e.problem:
@@ -546,7 +531,6 @@ class YAMLConfig(Config):
                 else:
                     msg = str(e)
                 raise _log_and_error(msg) from e
-        return self.from_ordereddict(cfg)
 
     def _yaml_include(self, loader: yaml.Loader, node: yaml.SequenceNode) -> dict:
         """
