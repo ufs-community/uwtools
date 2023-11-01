@@ -470,7 +470,7 @@ class NMLConfig(Config):
         # OrderedDict can cause problems downstream when serialing to YAML, convert OrderedDict
         # objects to standard dicts here.
 
-        def from_od(d: dict) -> dict:
+        def from_od(d):
             return {key: from_od(val) if isinstance(val, dict) else val for key, val in d.items()}
 
         with readable(config_file) as f:
@@ -499,7 +499,7 @@ class NMLConfig(Config):
         # f90nml honors namelist and variable order if it receives an OrderedDict as input, so
         # ensure that it receives one.
 
-        def to_od(d: dict) -> dict:
+        def to_od(d):
             return OrderedDict(
                 {key: to_od(val) if isinstance(val, dict) else val for key, val in d.items()}
             )
