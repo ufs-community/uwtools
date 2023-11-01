@@ -464,8 +464,17 @@ class NMLConfig(Config):
 
         :param config_file: Path to config file to load.
         """
+
+        # f90nml returns OrderedDict objects to maintain the order of namelists in the namelist
+        # files that it reads. But in Python 3.6+ the standard dict maintains order as well. Since
+        # OrderedDict can cause problems downstream when serialing to YAML, convert OrderedDict
+        # objects to standard dicts here.
+
+        def std(d: dict) -> dict:
+            return {k: std(v) if isinstance(v, dict) else v for k, v in d.items()}
+
         with readable(config_file) as f:
-            return f90nml.read(f).todict(complex_tuple=False)
+            return std(f90nml.read(f).todict(complex_tuple=False))
 
     # Public methods
 
