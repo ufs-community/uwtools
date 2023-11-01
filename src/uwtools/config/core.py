@@ -474,7 +474,7 @@ class NMLConfig(Config):
             return {key: from_od(val) if isinstance(val, dict) else val for key, val in d.items()}
 
         with readable(config_file) as f:
-            return from_od(f90nml.read(f).todict(complex_tuple=False))
+            return from_od(f90nml.read(f).todict())
 
     # Public methods
 
