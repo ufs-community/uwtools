@@ -5,13 +5,13 @@ Modal CLI.
 import datetime
 import sys
 from argparse import ArgumentParser as Parser
-from argparse import HelpFormatter, Namespace
+from argparse import HelpFormatter
 from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
-from typing import Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple
 
 import uwtools.config.atparse_to_jinja2
 import uwtools.config.core
@@ -25,7 +25,8 @@ from uwtools.utils.file import FORMAT, get_file_type
 FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.yaml]
 TITLE_REQ_ARG = "Required arguments"
 
-SubmodeChecks = List[Callable[[Namespace], Namespace]]
+Args = Dict[str, Any]
+SubmodeChecks = List[Callable[[Args], Args]]
 ModeChecks = Dict[str, SubmodeChecks]
 Checks = Dict[str, ModeChecks]
 
@@ -42,9 +43,9 @@ def main() -> None:
     setup_logging(quiet=True)
     try:
         args, checks = _parse_args(sys.argv[1:])
-        for check in checks[args.mode][args.submode]:
+        for check in checks[args[STR.mode]][args[STR.submode]]:
             check(args)
-        setup_logging(quiet=args.quiet, verbose=args.verbose)
+        setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
             STR.config: _dispatch_config,
@@ -52,7 +53,7 @@ def main() -> None:
             STR.rocoto: _dispatch_rocoto,
             STR.template: _dispatch_template,
         }
-        sys.exit(0 if modes[args.mode](args) else 1)
+        sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except Exception as e:  # pylint: disable=broad-exception-caught
         _abort(str(e))
 
@@ -170,7 +171,7 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> SubmodeChecks:
     ]
 
 
-def _dispatch_config(args: Namespace) -> bool:
+def _dispatch_config(args: Args) -> bool:
     """
     Dispatch logic for config mode.
 
@@ -181,67 +182,69 @@ def _dispatch_config(args: Namespace) -> bool:
         STR.realize: _dispatch_config_realize,
         STR.translate: _dispatch_config_translate,
         STR.validate: _dispatch_config_validate,
-    }[args.submode](args)
+    }[args[STR.submode]](args)
 
 
-def _dispatch_config_compare(args: Namespace) -> bool:
+def _dispatch_config_compare(args: Args) -> bool:
     """
     Dispatch logic for config compare submode.
 
     :param args: Parsed command-line args.
     """
     return uwtools.config.core.compare_configs(
-        config_a_path=args.file_1_path,
-        config_a_format=args.file_1_format,
-        config_b_path=args.file_2_path,
-        config_b_format=args.file_2_format,
+        config_a_path=args[STR.file1path],
+        config_a_format=args[STR.file1fmt],
+        config_b_path=args[STR.file2path],
+        config_b_format=args[STR.file2fmt],
     )
 
 
-def _dispatch_config_realize(args: Namespace) -> bool:
+def _dispatch_config_realize(args: Args) -> bool:
     """
     Dispatch logic for config realize submode.
 
     :param args: Parsed command-line args.
     """
     return uwtools.config.core.realize_config(
-        input_file=args.input_file,
-        input_format=args.input_format,
-        output_file=args.output_file,
-        output_format=args.output_format,
-        values_file=args.values_file,
-        values_format=args.values_format,
-        values_needed=args.values_needed,
-        dry_run=args.dry_run,
+        input_file=args[STR.infile],
+        input_format=args[STR.infmt],
+        output_file=args[STR.outfile],
+        output_format=args[STR.outfmt],
+        values_file=args[STR.valsfile],
+        values_format=args[STR.valsfmt],
+        values_needed=args[STR.valsneeded],
+        dry_run=args[STR.dryrun],
     )
 
 
-def _dispatch_config_translate(args: Namespace) -> bool:
+def _dispatch_config_translate(args: Args) -> bool:
     """
     Dispatch logic for config translate submode.
 
     :param args: Parsed command-line args.
     """
     success = True
-    if args.input_format == FORMAT.atparse and args.output_format == FORMAT.jinja2:
+    if args[STR.infmt] == FORMAT.atparse and args[STR.outfmt] == FORMAT.jinja2:
         uwtools.config.atparse_to_jinja2.convert(
-            input_file=args.input_file, output_file=args.output_file, dry_run=args.dry_run
+            input_file=args[STR.infile],
+            output_file=args[STR.outfile],
+            dry_run=args[STR.dryrun],
         )
     else:
         success = False
     return success
 
 
-def _dispatch_config_validate(args: Namespace) -> bool:
+def _dispatch_config_validate(args: Args) -> bool:
     """
     Dispatch logic for config validate submode.
 
     :param args: Parsed command-line args.
     """
     success = True
-    if args.input_format == FORMAT.yaml:
+    if args[STR.infmt] == FORMAT.yaml:
         success = uwtools.config.validator.validate_yaml(
-            config_file=args.input_file, schema_file=args.schema_file
+            config_file=args[STR.infile], schema_file=args[STR.schemafile]
         )
     else:
         success = False
@@ -283,27 +286,27 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> SubmodeChecks:
     return checks
 
 
-def _dispatch_forecast(args: Namespace) -> bool:
+def _dispatch_forecast(args: Args) -> bool:
     """
     Dispatch logic for forecast mode.
 
     :param args: Parsed command-line args.
     """
-    return {STR.run: _dispatch_forecast_run}[args.submode](args)
+    return {STR.run: _dispatch_forecast_run}[args[STR.submode]](args)
 
 
-def _dispatch_forecast_run(args: Namespace) -> bool:
+def _dispatch_forecast_run(args: Args) -> bool:
     """
     Dispatch logic for forecast run submode.
 
     :param args: Parsed command-line args.
     """
-    forecast_class = uwtools.drivers.forecast.CLASSES[args.forecast_model]
+    forecast_class = uwtools.drivers.forecast.CLASSES[args[STR.model]]
     return forecast_class(
-        batch_script=args.batch_script, config_file=args.config_file, dry_run=args.dry_run
-    ).run(
-        cycle=args.cycle,
-    )
+        batch_script=args[STR.batch_script],
+        config_file=args[STR.cfgfile],
+        dry_run=args[STR.dryrun],
+    ).run(cycle=args[STR.cycle])
 
 
 # Mode rocoto
@@ -351,7 +354,7 @@ def _add_subparser_rocoto_validate(subparsers: Subparsers) -> SubmodeChecks:
     return checks
 
 
-def _dispatch_rocoto(args: Namespace) -> bool:
+def _dispatch_rocoto(args: Args) -> bool:
     """
     Dispatch logic for rocoto mode.
 
@@ -361,30 +364,30 @@ def _dispatch_rocoto(args: Namespace) -> bool:
         STR.realize: _dispatch_rocoto_realize,
         STR.validate: _dispatch_rocoto_validate,
     }[
-        args.submode
+        args[STR.submode]
     ](args)
 
 
-def _dispatch_rocoto_realize(args: Namespace) -> bool:
+def _dispatch_rocoto_realize(args: Args) -> bool:
     """
     Dispatch logic for rocoto realize submode. Validate input and output.
 
     :param args: Parsed command-line args.
     """
     success = uwtools.rocoto.realize_rocoto_xml(
-        config_file=args.input_file, output_file=args.output_file
+        config_file=args[STR.infile], output_file=args[STR.outfile]
     )
     return success
 
 
-def _dispatch_rocoto_validate(args: Namespace) -> bool:
+def _dispatch_rocoto_validate(args: Args) -> bool:
     """
     Dispatch logic for rocoto validate submode.
 
     :param args: Parsed command-line args.
     """
 
-    success = uwtools.rocoto.validate_rocoto_xml(input_xml=args.input_file)
+    success = uwtools.rocoto.validate_rocoto_xml(input_xml=args[STR.infile])
     return success
 
 
@@ -424,29 +427,29 @@ def _add_subparser_template_render(subparsers: Subparsers) -> SubmodeChecks:
     return checks + [_check_template_render_vals_args]
 
 
-def _dispatch_template(args: Namespace) -> bool:
+def _dispatch_template(args: Args) -> bool:
     """
     Dispatch logic for template mode.
 
     :param args: Parsed command-line args.
     """
-    return {STR.render: _dispatch_template_render}[args.submode](args)
+    return {STR.render: _dispatch_template_render}[args[STR.submode]](args)
 
 
-def _dispatch_template_render(args: Namespace) -> bool:
+def _dispatch_template_render(args: Args) -> bool:
     """
     Dispatch logic for template render submode.
 
     :param args: Parsed command-line args.
     """
     return uwtools.config.templater.render(
-        input_file=args.input_file,
-        output_file=args.output_file,
-        values_file=args.values_file,
-        values_format=args.values_format,
-        overrides=_dict_from_key_eq_val_strings(args.key_eq_val_pairs),
-        values_needed=args.values_needed,
-        dry_run=args.dry_run,
+        input_file=args[STR.infile],
+        output_file=args[STR.outfile],
+        values_file=args[STR.valsfile],
+        values_format=args[STR.valsfmt],
+        overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
+        values_needed=args[STR.valsneeded],
+        dry_run=args[STR.dryrun],
     )
 
 
@@ -479,7 +482,7 @@ def _add_arg_config_file(group: Group) -> None:
 
 def _add_arg_cycle(group: Group) -> None:
     group.add_argument(
-        "--cycle",
+        _switch(STR.cycle),
         help="The cycle in ISO8601 format",
         required=True,
         type=datetime.datetime.fromisoformat,
@@ -698,31 +701,28 @@ def _basic_setup(parser: Parser) -> Group:
     return optional
 
 
-def _check_file_vs_format(file_arg: str, format_arg: str, args: Namespace) -> Namespace:
-    a = vars(args)
-    if a[format_arg] is None:
-        if a[file_arg] is None:
+def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
+    if args.get(format_arg) is None:
+        if args.get(file_arg) is None:
             _abort("Specify %s when %s is not specified" % (_switch(format_arg), _switch(file_arg)))
-        a[format_arg] = get_file_type(a[file_arg])
+        args[format_arg] = get_file_type(args[file_arg])
     return args
 
 
-def _check_quiet_vs_verbose(args) -> Namespace:
-    a = vars(args)
-    if a.get(STR.quiet) and a.get(STR.verbose):
+def _check_quiet_vs_verbose(args) -> Args:
+    if args.get(STR.quiet) and args.get(STR.verbose):
         _abort("Specify at most one of %s, %s" % (_switch(STR.quiet), _switch(STR.verbose)))
     return args
 
 
-def _check_template_render_vals_args(args: Namespace) -> Namespace:
+def _check_template_render_vals_args(args: Args) -> Args:
     # In "template render" mode, a values file is optional, as values used to render the template
     # will be taken from the environment or from key=value command-line pairs by default. But if a
     # values file IS specified, its format must either be explicitly specified, or deduced from its
     # extension.
-    a = vars(args)
-    if a.get(STR.valsfile) is not None:
-        if a.get(STR.valsfmt) is None:
-            a[STR.valsfmt] = get_file_type(a[STR.valsfile])
+    if args.get(STR.valsfile) is not None:
+        if args.get(STR.valsfmt) is None:
+            args[STR.valsfmt] = get_file_type(args[STR.valsfile])
     return args
 
 
@@ -743,7 +743,7 @@ def _formatter(prog: str) -> HelpFormatter:
     return HelpFormatter(prog, max_help_position=8)
 
 
-def _parse_args(raw_args: List[str]) -> Tuple[Namespace, Checks]:
+def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     """
     Parse command-line arguments.
 
@@ -761,7 +761,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Namespace, Checks]:
         STR.rocoto: _add_subparser_rocoto(subparsers),
         STR.template: _add_subparser_template(subparsers),
     }
-    return parser.parse_args(raw_args), checks
+    return vars(parser.parse_args(raw_args)), checks
 
 
 def _switch(arg: str) -> str:
@@ -775,7 +775,7 @@ def _switch(arg: str) -> str:
 
 
 @dataclass(frozen=True)
-class _STR:
+class STR:
     """
     A lookup map for CLI-related strings.
     """
@@ -784,6 +784,7 @@ class _STR:
     cfgfile: str = "config_file"
     compare: str = "compare"
     config: str = "config"
+    cycle: str = "cycle"
     dryrun: str = "dry_run"
     file1fmt: str = "file_1_format"
     file1path: str = "file_1_path"
@@ -812,6 +813,3 @@ class _STR:
     valsfmt: str = "values_format"
     valsneeded: str = "values_needed"
     verbose: str = "verbose"
-
-
-STR = _STR()

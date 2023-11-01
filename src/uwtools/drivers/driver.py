@@ -7,6 +7,7 @@ import shutil
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, Optional, Type, Union
 
 from uwtools.config import validator
@@ -99,7 +100,7 @@ class Driver(ABC):
 
     @property
     @abstractmethod
-    def schema_file(self) -> str:
+    def schema_file(self) -> Path:
         """
         The path to the file containing the schema to validate the config file against.
         """

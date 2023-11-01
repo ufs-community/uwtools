@@ -3,7 +3,6 @@
 import logging
 import sys
 from argparse import ArgumentParser as Parser
-from argparse import Namespace as ns
 from argparse import _SubParsersAction
 from typing import List
 from unittest.mock import patch
@@ -90,8 +89,7 @@ def test__check_file_vs_format_fail(capsys, vals):
     # When reading/writing from/to stdin/stdout, the data format must be specified, since there is
     # no filename to deduce it from.
     file_arg, format_arg = vals
-    args = ns()
-    vars(args).update({file_arg: None, format_arg: None})
+    args = dict(file_arg=None, format_arg=None)
     with raises(SystemExit):
         cli._check_file_vs_format(file_arg=file_arg, format_arg=format_arg, args=args)
     assert (
@@ -103,33 +101,30 @@ def test__check_file_vs_format_fail(capsys, vals):
 def test__check_file_vs_format_pass_explicit():
     # Accept explcitly-specified format, whatever it is.
     fmt = "jpg"
-    args = ns()
-    vars(args).update({STR.infile: "/path/to/input.txt", STR.infmt: fmt})
+    args = {STR.infile: "/path/to/input.txt", STR.infmt: fmt}
     args = cli._check_file_vs_format(
         file_arg=STR.infile,
         format_arg=STR.infmt,
         args=args,
     )
-    assert args.input_format == fmt
+    assert args[STR.infmt] == fmt
 
 
 @pytest.mark.parametrize("fmt", vars(FORMAT).keys())
 def test__check_file_vs_format_pass_implicit(fmt):
     # The format is correctly deduced for a file with a known extension.
-    args = ns()
-    vars(args).update({STR.infile: f"/path/to/input.{fmt}", STR.infmt: None})
+    args = {STR.infile: f"/path/to/input.{fmt}", STR.infmt: None}
     args = cli._check_file_vs_format(
         file_arg=STR.infile,
         format_arg=STR.infmt,
         args=args,
     )
-    assert args.input_format == vars(FORMAT)[fmt]
+    assert args[STR.infmt] == vars(FORMAT)[fmt]
 
 
 def test__check_quiet_vs_verbose_fail(capsys):
     log.setLevel(logging.INFO)
-    args = ns()
-    vars(args).update({STR.quiet: True, STR.verbose: True})
+    args = {STR.quiet: True, STR.verbose: True}
     with raises(SystemExit):
         cli._check_quiet_vs_verbose(args)
     assert (
@@ -139,14 +134,13 @@ def test__check_quiet_vs_verbose_fail(capsys):
 
 
 def test__check_quiet_vs_verbose_ok():
-    args = ns(foo=88)
+    args = {"foo": 88}
     assert cli._check_quiet_vs_verbose(args) == args
 
 
 def test__check_template_render_vals_args_implicit_fail():
     # The values-file format cannot be deduced from the filename.
-    args = ns()
-    vars(args)[STR.valsfile] = "a.jpg"
+    args = {STR.valsfile: "a.jpg"}
     with raises(ValueError) as e:
         cli._check_template_render_vals_args(args)
     assert "Cannot deduce format" in str(e.value)
@@ -154,24 +148,20 @@ def test__check_template_render_vals_args_implicit_fail():
 
 def test__check_template_render_vals_args_implicit_pass():
     # The values-file format is deduced from the filename.
-    args = ns()
-    vars(args)[STR.valsfile] = "a.yaml"
+    args = {STR.valsfile: "a.yaml"}
     checked = cli._check_template_render_vals_args(args)
-    assert vars(checked)[STR.valsfmt] == FORMAT.yaml
+    assert checked[STR.valsfmt] == FORMAT.yaml
 
 
 def test__check_template_render_vals_args_noop_no_valsfile():
     # No values file is provided, so format is irrelevant.
-    args = ns()
-    vars(args)[STR.valsfile] = None
+    args = {STR.valsfile: None}
     assert cli._check_template_render_vals_args(args) == args
 
 
 def test__check_template_render_vals_args_noop_explicit_valsfmt():
     # An explicit values format is honored, valid or not.
-    args = ns()
-    vars(args)[STR.valsfile] = "a.txt"
-    vars(args)[STR.valsfmt] = "jpg"
+    args = {STR.valsfile: "a.txt", STR.valsfmt: "jpg"}
     assert cli._check_template_render_vals_args(args) == args
 
 
@@ -191,102 +181,146 @@ def test__dict_from_key_eq_val_strings():
 )
 def test__dispatch_config(params):
     submode, funcname = params
-    args = ns()
-    vars(args).update({STR.submode: submode})
+    args = {STR.submode: submode}
     with patch.object(cli, funcname) as func:
         cli._dispatch_config(args)
-    assert func.called_once_with(args)
+    func.assert_called_once_with(args)
 
 
 def test__dispatch_config_compare():
-    args = ns()
-    vars(args).update({STR.file1path: 1, STR.file1fmt: 2, STR.file2path: 3, STR.file2fmt: 4})
+    args = {STR.file1path: 1, STR.file1fmt: 2, STR.file2path: 3, STR.file2fmt: 4}
     with patch.object(cli.uwtools.config.core, "compare_configs") as compare_configs:
         cli._dispatch_config_compare(args)
-    assert compare_configs.called_once_with(args)
+    compare_configs.assert_called_once_with(
+        config_a_path=args[STR.file1path],
+        config_a_format=args[STR.file1fmt],
+        config_b_path=args[STR.file2path],
+        config_b_format=args[STR.file2fmt],
+    )
 
 
 def test__dispatch_config_realize():
-    args = ns()
-    vars(args).update(
-        {
-            STR.infile: 1,
-            STR.infmt: 2,
-            STR.outfile: 3,
-            STR.outfmt: 4,
-            STR.valsfile: 5,
-            STR.valsfmt: 6,
-            STR.valsneeded: 7,
-            STR.dryrun: 8,
-        }
-    )
+    args = {
+        STR.infile: 1,
+        STR.infmt: 2,
+        STR.outfile: 3,
+        STR.outfmt: 4,
+        STR.valsfile: 5,
+        STR.valsfmt: 6,
+        STR.valsneeded: 7,
+        STR.dryrun: 8,
+    }
     with patch.object(cli.uwtools.config.core, "realize_config") as realize_config:
         cli._dispatch_config_realize(args)
-    assert realize_config.called_once_with(args)
-
-
-def test__dispatch_config_translate_arparse_to_jinja2():
-    args = ns()
-    vars(args).update(
-        {
-            STR.infile: 1,
-            STR.infmt: FORMAT.atparse,
-            STR.outfile: 3,
-            STR.outfmt: FORMAT.jinja2,
-            STR.dryrun: 5,
-        }
+    realize_config.assert_called_once_with(
+        input_file=1,
+        input_format=2,
+        output_file=3,
+        output_format=4,
+        values_file=5,
+        values_format=6,
+        values_needed=7,
+        dry_run=8,
     )
+
+
+def test__dispatch_config_realize_no_optional():
+    args = {
+        STR.infile: None,
+        STR.infmt: None,
+        STR.outfile: None,
+        STR.outfmt: None,
+        STR.valsfile: "/foo.vals",
+        STR.valsfmt: None,
+        STR.valsneeded: False,
+        STR.dryrun: False,
+    }
+    with patch.object(cli.uwtools.config.core, "realize_config") as realize_config:
+        cli._dispatch_config_realize(args)
+    realize_config.assert_called_once_with(
+        input_file=None,
+        input_format=None,
+        output_file=None,
+        output_format=None,
+        values_file="/foo.vals",
+        values_format=None,
+        values_needed=False,
+        dry_run=False,
+    )
+
+
+def test__dispatch_config_translate_atparse_to_jinja2():
+    args = {
+        STR.infile: 1,
+        STR.infmt: FORMAT.atparse,
+        STR.outfile: 3,
+        STR.outfmt: FORMAT.jinja2,
+        STR.dryrun: 5,
+    }
     with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as convert:
         cli._dispatch_config_translate(args)
-    assert convert.called_once_with(args)
+    convert.assert_called_once_with(input_file=1, output_file=3, dry_run=5)
+
+
+def test__dispatch_config_translate_no_optional():
+    args = {
+        STR.dryrun: False,
+        STR.infile: None,
+        STR.infmt: FORMAT.atparse,
+        STR.outfile: None,
+        STR.outfmt: FORMAT.jinja2,
+    }
+    with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as convert:
+        cli._dispatch_config_translate(args)
+    convert.assert_called_once_with(input_file=None, output_file=None, dry_run=False)
 
 
 def test__dispatch_config_translate_unsupported():
-    args = ns()
-    vars(args).update(
-        {STR.infile: 1, STR.infmt: "jpg", STR.outfile: 3, STR.outfmt: "png", STR.dryrun: 5}
-    )
+    args = {STR.infile: 1, STR.infmt: "jpg", STR.outfile: 3, STR.outfmt: "png", STR.dryrun: 5}
     assert cli._dispatch_config_translate(args) is False
 
 
-def test__dispatch_config_validate_yaml():
-    args = ns()
-    vars(args).update({STR.infile: 1, STR.infmt: FORMAT.yaml, STR.schemafile: 3})
+def test__dispatch_config_validate_no_optional():
+    args = {STR.infile: None, STR.infmt: FORMAT.yaml, STR.schemafile: "/foo.schema"}
     with patch.object(cli.uwtools.config.validator, "validate_yaml") as validate_yaml:
         cli._dispatch_config_validate(args)
-    assert validate_yaml.called_once_with(args)
+    validate_yaml.assert_called_once_with(config_file=None, schema_file="/foo.schema")
 
 
 def test__dispatch_config_validate_unsupported():
-    args = ns()
-    vars(args).update({STR.infile: 1, STR.infmt: "jpg", STR.schemafile: 3})
+    args = {STR.infile: 1, STR.infmt: "jpg", STR.schemafile: 3}
     assert cli._dispatch_config_validate(args) is False
+
+
+def test__dispatch_config_validate_yaml():
+    args = {STR.infile: 1, STR.infmt: FORMAT.yaml, STR.schemafile: 3}
+    with patch.object(cli.uwtools.config.validator, "validate_yaml") as validate_yaml:
+        cli._dispatch_config_validate(args)
+    validate_yaml.assert_called_once_with(config_file=1, schema_file=3)
 
 
 @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
 def test__dispatch_forecast(params):
     submode, funcname = params
-    args = ns()
-    vars(args).update({STR.submode: submode})
+    args = {STR.submode: submode}
     with patch.object(cli, funcname) as module:
         cli._dispatch_forecast(args)
-    assert module.called_once_with(args)
+    module.assert_called_once_with(args)
 
 
 def test__dispatch_forecast_run():
-    args = ns(
-        batch_script=None,
-        cycle="2023-01-01T00:00:00",
-        config_file=1,
-        dry_run=True,
-        forecast_model="foo",
-    )
-    vars(args).update({STR.cfgfile: 1, "forecast_model": "foo"})
+    args = {
+        STR.batch_script: None,
+        STR.cfgfile: 1,
+        STR.cycle: "2023-01-01T00:00:00",
+        STR.dryrun: True,
+        STR.model: "foo",
+    }
     with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as FooForecast:
         CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
         with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):
             cli._dispatch_forecast_run(args)
-    assert FooForecast.called_once_with(args)
+    FooForecast.assert_called_once_with(batch_script=None, config_file=1, dry_run=True)
     FooForecast().run.assert_called_once_with(cycle="2023-01-01T00:00:00")
 
 
@@ -299,74 +333,105 @@ def test__dispatch_forecast_run():
 )
 def test__dispatch_rocoto(params):
     submode, funcname = params
-    args = ns()
-    vars(args).update({STR.submode: submode})
+    args = {STR.submode: submode}
     with patch.object(cli, funcname) as module:
         cli._dispatch_rocoto(args)
-    assert module.called_once_with(args)
+    module.assert_called_once_with(args)
 
 
 def test__dispatch_rocoto_realize():
-    args = ns()
-    vars(args).update({STR.infile: 1, STR.outfile: 2})
-    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml") as module:
+    args = {STR.infile: 1, STR.outfile: 2}
+    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml") as realize_rocoto_xml:
         cli._dispatch_rocoto_realize(args)
-    assert module.called_once_with(args)
+    realize_rocoto_xml.assert_called_once_with(config_file=1, output_file=2)
 
 
 def test__dispatch_rocoto_realize_invalid():
-    args = ns()
-    vars(args).update(
-        {
-            STR.infile: 1,
-            STR.outfile: 2,
-        }
-    )
+    args = {STR.infile: 1, STR.outfile: 2}
     with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml", return_value=False):
         assert cli._dispatch_rocoto_realize(args) is False
 
 
+def test__dispatch_rocoto_realize_no_optional():
+    args = {STR.infile: None, STR.outfile: None}
+    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml") as module:
+        cli._dispatch_rocoto_realize(args)
+    module.assert_called_once_with(config_file=None, output_file=None)
+
+
 def test__dispatch_rocoto_validate_xml():
-    args = ns()
-    vars(args).update({STR.infile: 1})
-    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as validate:
+    args = {STR.infile: 1}
+    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as validate_rocoto_xml:
         cli._dispatch_rocoto_validate(args)
-    assert validate.called_once_with(args)
+    validate_rocoto_xml.assert_called_once_with(input_xml=1)
 
 
 def test__dispatch_rocoto_validate_xml_invalid():
-    args = ns()
-    vars(args).update({STR.infile: 1, STR.verbose: False})
+    args = {STR.infile: 1, STR.verbose: False}
     with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml", return_value=False):
         assert cli._dispatch_rocoto_validate(args) is False
+
+
+def test__dispatch_rocoto_validate_xml_no_optional():
+    args = {STR.infile: None, STR.verbose: False}
+    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as validate:
+        cli._dispatch_rocoto_validate(args)
+    validate.assert_called_once_with(input_xml=None)
 
 
 @pytest.mark.parametrize("params", [(STR.render, "_dispatch_template_render")])
 def test__dispatch_template(params):
     submode, funcname = params
-    args = ns()
-    vars(args).update({STR.submode: submode})
+    args = {STR.submode: submode}
     with patch.object(cli, funcname) as func:
         cli._dispatch_template(args)
-    assert func.called_once_with(args)
+    func.assert_called_once_with(args)
+
+
+def test__dispatch_template_render_no_optional():
+    args: dict = {
+        STR.infile: None,
+        STR.outfile: None,
+        STR.valsfile: None,
+        STR.valsfmt: None,
+        STR.keyvalpairs: [],
+        STR.valsneeded: False,
+        STR.dryrun: False,
+    }
+    with patch.object(cli.uwtools.config.templater, "render") as render:
+        cli._dispatch_template_render(args)
+    render.assert_called_once_with(
+        input_file=None,
+        output_file=None,
+        values_file=None,
+        values_format=None,
+        overrides={},
+        values_needed=False,
+        dry_run=False,
+    )
 
 
 def test__dispatch_template_render_yaml():
-    args = ns()
-    vars(args).update(
-        {
-            STR.infile: 1,
-            STR.outfile: 2,
-            STR.valsfile: 3,
-            STR.valsfmt: 4,
-            STR.keyvalpairs: ["foo=88", "bar=99"],
-            STR.valsneeded: 6,
-            STR.dryrun: 7,
-        }
-    )
-    with patch.object(cli.uwtools.config.templater, STR.render) as templater:
+    args = {
+        STR.infile: 1,
+        STR.outfile: 2,
+        STR.valsfile: 3,
+        STR.valsfmt: 4,
+        STR.keyvalpairs: ["foo=88", "bar=99"],
+        STR.valsneeded: 6,
+        STR.dryrun: 7,
+    }
+    with patch.object(cli.uwtools.config.templater, "render") as render:
         cli._dispatch_template_render(args)
-    assert templater.called_once_with(args)
+    render.assert_called_once_with(
+        input_file=1,
+        output_file=2,
+        values_file=3,
+        values_format=4,
+        overrides={"foo": "88", "bar": "99"},
+        values_needed=6,
+        dry_run=7,
+    )
 
 
 @pytest.mark.parametrize("quiet", [True])

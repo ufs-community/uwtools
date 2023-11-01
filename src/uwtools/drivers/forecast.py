@@ -7,7 +7,6 @@ import os
 import sys
 from collections.abc import Mapping
 from datetime import datetime
-from importlib import resources
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -16,7 +15,7 @@ from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.scheduler import BatchScript
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import handle_existing
+from uwtools.utils.file import handle_existing, resource_pathobj
 from uwtools.utils.processing import execute
 
 
@@ -190,12 +189,11 @@ class FV3Forecast(Driver):
         return status
 
     @property
-    def schema_file(self) -> str:
+    def schema_file(self) -> Path:
         """
         The path to the file containing the schema to validate the config file against.
         """
-        with resources.as_file(resources.files("uwtools.resources")) as path:
-            return (path / "FV3Forecast.jsonschema").as_posix()
+        return resource_pathobj("FV3Forecast.jsonschema")
 
     # Private methods
 
