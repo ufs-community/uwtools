@@ -471,7 +471,7 @@ class NMLConfig(Config):
         # objects to standard dicts here.
 
         def from_od(d: dict) -> dict:
-            return {k: from_od(v) if isinstance(v, dict) else v for k, v in d.items()}
+            return {key: from_od(val) if isinstance(val, dict) else val for key, val in d.items()}
 
         with readable(config_file) as f:
             return from_od(f90nml.read(f).todict(complex_tuple=False))
@@ -496,9 +496,12 @@ class NMLConfig(Config):
         :param opts: Other options required by a subclass.
         """
 
-        def to_od(d: dict) -> OrderedDict:
+        # f90nml honors namelist and variable order if it receives an OrderedDict as input, so
+        # ensure that it receives one.
+
+        def to_od(d: dict) -> dict:
             return OrderedDict(
-                {k: OrderedDict(v) if isinstance(v, dict) else v for k, v in d.items()}
+                {key: to_od(val) if isinstance(val, dict) else val for key, val in d.items()}
             )
 
         with writable(path) as f:
