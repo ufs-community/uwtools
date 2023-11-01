@@ -1,9 +1,11 @@
 #!/bin/bash -eux
 
-# Run make devshell (condev-shell directly)
-condev-shell
+unformatted() { 
+    set -x
+    make format
+    test -z "$(git status --porcelain)"
+}
 
-# call the helper function here?
+export -f unformatted
 
-# check if PR is unformatted by running make format then a git status
-unformatted() { make format; test -z "$(git status --porcelain)"; }
+CONDEV_SHELL_CMD=unformatted condev-shell
