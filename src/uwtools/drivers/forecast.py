@@ -3,7 +3,6 @@ Drivers for forecast models.
 """
 
 
-import os
 import sys
 from collections.abc import Mapping
 from datetime import datetime
@@ -64,27 +63,31 @@ class FV3Forecast(Driver):
         :param exist_act: Action when run directory exists: "delete" (default), "quit", or "rename"
         """
 
-        # Caller should only provide correct argument.
+        valid_actions = [ExistAct.delete, ExistAct.quit, ExistAct.rename]
+        if exist_act not in valid_actions:
+            raise ValueError(
+                'Specify one of %s as exist_act, not "%s"'
+                % (", ".join(f'"{x}"' for x in valid_actions), exist_act)
+            )
 
-        if exist_act not in [ExistAct.delete, ExistAct.quit, ExistAct.rename]:
-            raise ValueError(f"Bad argument: {exist_act}")
+        run_directory = Path(run_directory)
 
-        # Exit program with error if caller chooses to quit.
+        # Exit program with error if caller specified the "quit" action.
 
-        if exist_act == ExistAct.quit and os.path.isdir(run_directory):
-            log.critical("User chose quit option when creating directory")
+        if exist_act == ExistAct.quit and run_directory.is_dir():
+            log.critical(f"Option {exist_act} specified, exiting")
             sys.exit(1)
 
-        # Delete or rename directory if it exists.
+        # Handle a potentially pre-existing directory appropriately.
 
         handle_existing(str(run_directory), exist_act)
 
         # Create new run directory with two required subdirectories.
 
         for subdir in ("INPUT", "RESTART"):
-            path = os.path.join(run_directory, subdir)
+            path = run_directory / subdir
             log.info("Creating directory: %s", path)
-            os.makedirs(path)
+            path.mkdir(parents=True)
 
     def create_field_table(self, output_path: OptionalPath) -> None:
         """
