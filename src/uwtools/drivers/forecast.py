@@ -63,7 +63,9 @@ class FV3Forecast(Driver):
         :param exist_act: Action when run directory exists: "delete" (default), "quit", or "rename"
         """
 
-        validate_existing_action(exist_act, [ExistAct.delete, ExistAct.quit, ExistAct.rename])
+        validate_existing_action(
+            exist_act, valid_actions=[ExistAct.delete, ExistAct.quit, ExistAct.rename]
+        )
 
         run_directory = Path(run_directory)
 

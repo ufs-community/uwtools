@@ -98,7 +98,7 @@ def handle_existing(directory: DefinitePath, exist_act: str) -> None:
     :param exist_act: Action ("delete" or "rename") to take when directory exists.
     """
 
-    validate_existing_action(exist_act, [ExistAct.delete, ExistAct.rename])
+    validate_existing_action(exist_act, valid_actions=[ExistAct.delete, ExistAct.rename])
     if Path(directory).is_dir():
         try:
             if exist_act == ExistAct.delete:
