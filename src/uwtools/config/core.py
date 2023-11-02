@@ -19,7 +19,7 @@ import f90nml
 import jinja2
 import yaml
 
-from uwtools.config.j2template import J2Template
+from uwtools.config.templater import J2Template
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
