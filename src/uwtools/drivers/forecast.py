@@ -137,6 +137,8 @@ class FV3Forecast(Driver):
     def prepare_directories(self) -> Path:
         """
         Prepares the run directory and stages static and cycle-dependent files.
+
+        :return: Path to the run directory.
         """
         run_directory = self._config["run_dir"]
         self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
