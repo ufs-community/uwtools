@@ -81,7 +81,7 @@ class Driver(ABC):
         """
         The command-line command to run the NWP tool.
 
-        :return: The fully formed string that executes the program
+        :return: Collated string that contains MPI command, run time arguments, and exec name.
         """
         run_cmd = self._platform_config["mpicmd"]
         exec_name = self._config["exec_name"]
