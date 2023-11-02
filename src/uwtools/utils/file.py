@@ -2,7 +2,6 @@
 Helpers for working with files and directories.
 """
 
-import os
 import shutil
 import sys
 from contextlib import contextmanager
@@ -14,6 +13,7 @@ from io import StringIO
 from pathlib import Path
 from typing import IO, Any, Generator, Union
 
+from uwtools.exceptions import UWError
 from uwtools.logging import log
 from uwtools.types import DefinitePath, ExistAct, OptionalPath
 
@@ -91,7 +91,7 @@ def get_file_type(path: DefinitePath) -> str:
     raise ValueError(msg)
 
 
-def handle_existing(directory: str, exist_act: str) -> None:
+def handle_existing(directory: DefinitePath, exist_act: str) -> None:
     """
     Take specified action on a directory.
 
@@ -99,27 +99,19 @@ def handle_existing(directory: str, exist_act: str) -> None:
     :param exist_act: Action ("delete" or "rename") to take when directory exists.
     """
 
-    # Try to delete existing directory if option is delete.
-
-    try:
-        if exist_act == ExistAct.delete and os.path.isdir(directory):
-            shutil.rmtree(directory)
-    except (FileExistsError, RuntimeError) as e:
-        msg = f"Could not {ExistAct.delete} directory {directory}"
-        log.critical(msg)
-        raise RuntimeError(msg) from e
-
-    # Try to rename existing directory if option is rename.
-
-    try:
-        if exist_act == ExistAct.rename and os.path.isdir(directory):
-            now = dt.now()
-            save_dir = "%s%s" % (directory, now.strftime("_%Y%m%d_%H%M%S"))
-            shutil.move(directory, save_dir)
-    except (FileExistsError, RuntimeError) as e:
-        msg = f"Could not {ExistAct.rename} directory {directory}"
-        log.critical(msg)
-        raise RuntimeError(msg) from e
+    if Path(directory).is_dir():
+        try:
+            if exist_act == ExistAct.delete:
+                shutil.rmtree(directory)
+            elif exist_act == ExistAct.rename:
+                save_dir = "%s%s" % (directory, dt.now().strftime("_%Y%m%d_%H%M%S"))
+                shutil.move(directory, save_dir)
+            else:
+                raise UWError(f"Unrecognized action: {exist_act}")
+        except (FileExistsError, RuntimeError) as e:
+            msg = f"Could not {exist_act} directory {directory}"
+            log.critical(msg)
+            raise RuntimeError(msg) from e
 
 
 def path_if_it_exists(path: str) -> str:
