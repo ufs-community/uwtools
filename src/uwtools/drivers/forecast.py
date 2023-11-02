@@ -14,7 +14,7 @@ from uwtools.config.core import FieldTableConfig, NMLConfig, YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.scheduler import BatchScript
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.types import DefinitePath, ExistAct, OptionalPath
 from uwtools.utils.file import handle_existing, resource_pathobj
 from uwtools.utils.processing import execute
 
@@ -52,25 +52,26 @@ class FV3Forecast(Driver):
         return bs
 
     @staticmethod
-    def create_directory_structure(run_directory: DefinitePath, exist_act: str = "delete") -> None:
+    def create_directory_structure(
+        run_directory: DefinitePath, exist_act: str = ExistAct.delete
+    ) -> None:
         """
         Collects the name of the desired run directory, and has an optional flag for what to do if
         the run directory specified already exists. Creates the run directory and adds
         subdirectories INPUT and RESTART. Verifies creation of all directories.
 
         :param run_directory: Path of desired run directory.
-        :param exist_act: Could be any of 'delete', 'rename', 'quit'. Sets how the program responds
-            to a preexisting run directory. The default is to delete the old run directory.
+        :param exist_act: Action when run directory exists: "delete" (default), "quit", or "rename"
         """
 
         # Caller should only provide correct argument.
 
-        if exist_act not in ["delete", "rename", "quit"]:
+        if exist_act not in [ExistAct.delete, ExistAct.rename, ExistAct.quit]:
             raise ValueError(f"Bad argument: {exist_act}")
 
         # Exit program with error if caller chooses to quit.
 
-        if exist_act == "quit" and os.path.isdir(run_directory):
+        if exist_act == ExistAct.quit and os.path.isdir(run_directory):
             log.critical("User chose quit option when creating directory")
             sys.exit(1)
 
@@ -153,7 +154,7 @@ class FV3Forecast(Driver):
         """
         # Prepare directories.
         run_directory = self._config["run_dir"]
-        self.create_directory_structure(run_directory, "delete")
+        self.create_directory_structure(run_directory, ExistAct.delete)
 
         self._prepare_config_files(Path(run_directory))
 

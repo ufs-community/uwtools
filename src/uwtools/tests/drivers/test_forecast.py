@@ -18,6 +18,7 @@ from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path
+from uwtools.types import ExistAct
 
 
 def test_batch_script():
@@ -86,7 +87,7 @@ def test_create_directory_structure(tmp_path):
     rundir = tmp_path / "rundir"
 
     # Test delete behavior when run directory does not exist.
-    FV3Forecast.create_directory_structure(rundir, "delete")
+    FV3Forecast.create_directory_structure(rundir, ExistAct.delete)
     assert (rundir / "RESTART").is_dir()
 
     # Create a file in the run directory.
@@ -96,18 +97,18 @@ def test_create_directory_structure(tmp_path):
 
     # Test delete behavior when run directory exists. Test file should be gone
     # since old run directory was deleted.
-    FV3Forecast.create_directory_structure(rundir, "delete")
+    FV3Forecast.create_directory_structure(rundir, ExistAct.delete)
     assert (rundir / "RESTART").is_dir()
     assert not test_file.is_file()
 
     # Test rename behavior when run directory exists.
-    FV3Forecast.create_directory_structure(rundir, "rename")
+    FV3Forecast.create_directory_structure(rundir, ExistAct.rename)
     copy_directory = next(tmp_path.glob("%s_*" % rundir.name))
     assert (copy_directory / "RESTART").is_dir()
 
     # Test quit behavior when run directory exists.
     with raises(SystemExit) as pytest_wrapped_e:
-        FV3Forecast.create_directory_structure(rundir, "quit")
+        FV3Forecast.create_directory_structure(rundir, ExistAct.quit)
     assert pytest_wrapped_e.type == SystemExit
     assert pytest_wrapped_e.value.code == 1
 

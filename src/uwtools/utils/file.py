@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import IO, Any, Generator, Union
 
 from uwtools.logging import log
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.types import DefinitePath, ExistAct, OptionalPath
 
 
 @dataclass(frozen=True)
@@ -91,33 +91,33 @@ def get_file_type(path: DefinitePath) -> str:
     raise ValueError(msg)
 
 
-def handle_existing(directory: str, action: str) -> None:
+def handle_existing(directory: str, exist_act: str) -> None:
     """
     Given a run directory, and an action to do if directory exists, delete or rename directory.
 
     :param directory: The directory to delete or rename.
-    :param action: The action to take on an existing directory ("delete" or "rename")
+    :param exist_act: Action when run directory exists: "delete" or "rename"
     """
 
     # Try to delete existing run directory if option is delete.
 
     try:
-        if action == "delete" and os.path.isdir(directory):
+        if exist_act == ExistAct.delete and os.path.isdir(directory):
             shutil.rmtree(directory)
     except (FileExistsError, RuntimeError) as e:
-        msg = f"Could not delete directory {directory}"
+        msg = f"Could not {ExistAct.delete} directory {directory}"
         log.critical(msg)
         raise RuntimeError(msg) from e
 
     # Try to rename existing run directory if option is rename.
 
     try:
-        if action == "rename" and os.path.isdir(directory):
+        if exist_act == ExistAct.rename and os.path.isdir(directory):
             now = dt.now()
             save_dir = "%s%s" % (directory, now.strftime("_%Y%m%d_%H%M%S"))
             shutil.move(directory, save_dir)
     except (FileExistsError, RuntimeError) as e:
-        msg = f"Could not rename directory {directory}"
+        msg = f"Could not {ExistAct.rename} directory {directory}"
         log.critical(msg)
         raise RuntimeError(msg) from e
 

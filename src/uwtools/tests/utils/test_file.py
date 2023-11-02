@@ -11,6 +11,7 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture, raises
 
+from uwtools.types import ExistAct
 from uwtools.utils import file
 
 
@@ -80,14 +81,14 @@ def test_handle_existing_delete_failure(exc, assets):
     _, _, rundir = assets
     with patch.object(file.shutil, "rmtree", side_effect=exc):
         with raises(RuntimeError) as e:
-            file.handle_existing(directory=rundir, action="delete")
-        assert "Could not delete directory" in str(e.value)
+            file.handle_existing(directory=rundir, exist_act=ExistAct.delete)
+        assert f"Could not {ExistAct.delete} directory" in str(e.value)
     assert rundir.is_dir()
 
 
 def test_handle_existing_delete_success(assets):
     _, _, rundir = assets
-    file.handle_existing(directory=rundir, action="delete")
+    file.handle_existing(directory=rundir, exist_act=ExistAct.delete)
     assert not rundir.is_dir()
 
 
@@ -96,8 +97,8 @@ def test_handle_existing_rename_failure(exc, assets):
     _, renamed, rundir = assets
     with patch.object(file.shutil, "move", side_effect=exc):
         with raises(RuntimeError) as e:
-            file.handle_existing(directory=rundir, action="rename")
-        assert "Could not rename directory" in str(e.value)
+            file.handle_existing(directory=rundir, exist_act=ExistAct.rename)
+        assert f"Could not {ExistAct.rename} directory" in str(e.value)
     assert not renamed.is_dir()
     assert rundir.is_dir()
 
@@ -106,7 +107,7 @@ def test_handle_existing_rename_success(assets):
     now, renamed, rundir = assets
     with patch.object(file, "dt") as dt:
         dt.now.return_value = now
-        file.handle_existing(directory=rundir, action="rename")
+        file.handle_existing(directory=rundir, exist_act=ExistAct.rename)
     assert renamed.is_dir()
     assert not rundir.is_dir()
 
