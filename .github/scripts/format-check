@@ -1,14 +1,7 @@
-#!/bin/bash -eux
-
-unformatted() { 
-    set -x
-    make format
-    test -z "$(git status --porcelain)"
-}
-
-export -f unformatted
+#!/bin/bash
 
 source conda/etc/profile.d/conda.sh
 conda activate
-
-CONDEV_SHELL_CMD=unformatted condev-shell
+set -x
+export CONDEV_SHELL_CMD='set -x && make format && test -z "$(git status --porcelain)"'
+condev-shell
