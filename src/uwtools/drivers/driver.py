@@ -134,10 +134,11 @@ class Driver(ABC):
             else:
                 if dry_run:
                     msg = f"File {src_path_or_paths} would be staged as {dst_path}"
+                    log.info(msg)
                 else:
-                    link_or_copy(src_path_or_paths, dst_path)  # type: ignore
                     msg = f"File {src_path_or_paths} staged as {dst_path}"
-                log.info(msg)
+                    log.info(msg)
+                    link_or_copy(src_path_or_paths, dst_path)  # type: ignore
 
     # Private methods
 
