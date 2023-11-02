@@ -178,11 +178,11 @@ class FV3Forecast(Driver):
 
         :return: Did the FV3 run exit with success status?
         """
-        if self._batch_script:
-            method = self._run_via_batch_submission()
-        else:
-            method = self._run_via_local_execution()
-        status, output = method
+        status, output = (
+            self._run_via_batch_submission()
+            if self._batch_script
+            else self._run_via_local_execution()
+        )
         if self._dry_run:
             for line in output:
                 log.info(line)
@@ -260,7 +260,7 @@ class FV3Forecast(Driver):
 
     def _run_via_batch_submission(self) -> Tuple[bool, List[str]]:
         """
-        Prepares and runs batch script.
+        Prepares and submits a batch script.
 
         :return: A tuple that contains a boolean of success status of the FV3 run and a list of
             strings that make up the batch script.
@@ -279,7 +279,8 @@ class FV3Forecast(Driver):
 
     def _run_via_local_execution(self) -> Tuple[bool, List[str]]:
         """
-        Collects the necessary MPI environment variables in order to construct full run command.
+        Collects the necessary MPI environment variables in order to construct full run command,
+        then executes said command.
 
         :return: A tuple containing a boolean of the success status of the FV3 run and a list of
             strings that make up the full command line.
