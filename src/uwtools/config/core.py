@@ -467,7 +467,7 @@ class NMLConfig(Config):
 
         # f90nml returns OrderedDict objects to maintain the order of namelists in the namelist
         # files that it reads. But in Python 3.6+ the standard dict maintains order as well. Since
-        # OrderedDict can cause problems downstream when serialing to YAML, convert OrderedDict
+        # OrderedDict can cause problems downstream when serializing to YAML, convert OrderedDict
         # objects to standard dicts here.
 
         def from_od(d):
