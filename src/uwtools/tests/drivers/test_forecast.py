@@ -363,8 +363,8 @@ def test_FV3Forecast_run_dry_run(caplog, fv3_mpi_assets, fv3_run_assets, with_ba
 )
 def test_FV3Forecast_run(fv3_run_assets, vals):
     batch_script, config_file, _ = fv3_run_assets
-    usebatch, helper_method = vals
-    fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script if usebatch else None)
+    use_batch, helper_method = vals
+    fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script if us_ebatch else None)
     with patch.object(fcstobj, helper_method) as helper:
         helper.return_value = (True, None)
         assert fcstobj.run(cycle=dt.datetime.now()) is True
