@@ -66,7 +66,7 @@ class FV3Forecast(Driver):
 
         # Caller should only provide correct argument.
 
-        if exist_act not in [ExistAct.delete, ExistAct.rename, ExistAct.quit]:
+        if exist_act not in [ExistAct.delete, ExistAct.quit, ExistAct.rename]:
             raise ValueError(f"Bad argument: {exist_act}")
 
         # Exit program with error if caller chooses to quit.
