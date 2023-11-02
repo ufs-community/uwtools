@@ -146,6 +146,15 @@ def test_resource_pathobj():
     assert file.resource_pathobj().is_dir()
 
 
+def test_validate_existing_action_fail():
+    with raises(ValueError):
+        file.validate_existing_action(ExistAct.quit, [ExistAct.delete])
+
+
+def test_validate_existing_action_pass():
+    file.validate_existing_action(ExistAct.quit, [ExistAct.delete, ExistAct.quit])
+
+
 def test_writable_file(tmp_path):
     apath = tmp_path / "afile"
     with file.writable(filepath=apath) as f:
