@@ -303,19 +303,6 @@ class Config(ABC, UserDict):
         :param opts: Other options required by a subclass.
         """
 
-    def from_ordereddict(self, in_dict: dict) -> dict:
-        """
-        Recursively replaces all OrderedDict objects with basic dict objects.
-
-        :param: in_dict: A dictionary potentially containing OrderedDict objects
-        """
-        if isinstance(in_dict, OrderedDict):
-            in_dict = dict(in_dict)
-        for sect, keys in in_dict.items():
-            if isinstance(keys, OrderedDict):
-                in_dict[sect] = dict(keys)
-        return in_dict
-
     def parse_include(self, ref_dict: Optional[dict] = None) -> None:
         """
         Recursively process include directives in a config object.
@@ -417,18 +404,17 @@ class INIConfig(Config):
         # The protected _sections method is the most straightforward way to get at the dict
         # representation of the parse config.
 
-        cfg = configparser.ConfigParser(dict_type=OrderedDict)
+        cfg = configparser.ConfigParser()
         cfg.optionxform = str  # type: ignore
         sections = cfg._sections  # type: ignore # pylint: disable=protected-access
         with readable(config_file) as f:
             raw = f.read()
         try:
             cfg.read_string(raw)
-            d = dict(sections)
+            return dict(sections)
         except configparser.MissingSectionHeaderError:
             cfg.read_string("[top]\n" + raw)
-            d = dict(sections.get("top"))
-        return self.from_ordereddict(d)
+            return dict(sections.get("top"))
 
     # Public methods
 
@@ -478,9 +464,17 @@ class NMLConfig(Config):
 
         :param config_file: Path to config file to load.
         """
+
+        # f90nml returns OrderedDict objects to maintain the order of namelists in the namelist
+        # files that it reads. But in Python 3.6+ the standard dict maintains order as well. Since
+        # OrderedDict can cause problems downstream when serializing to YAML, convert OrderedDict
+        # objects to standard dicts here.
+
+        def from_od(d):
+            return {key: from_od(val) if isinstance(val, dict) else val for key, val in d.items()}
+
         with readable(config_file) as f:
-            cfg = f90nml.read(f).todict(complex_tuple=False)
-        return self.from_ordereddict(cfg)
+            return from_od(f90nml.read(f).todict())
 
     # Public methods
 
@@ -501,12 +495,17 @@ class NMLConfig(Config):
         :param cfg: The in-memory config object to dump.
         :param opts: Other options required by a subclass.
         """
-        nml = OrderedDict(cfg)
-        for sect, keys in nml.items():
-            if isinstance(keys, dict):
-                nml[sect] = OrderedDict(keys)
+
+        # f90nml honors namelist and variable order if it receives an OrderedDict as input, so
+        # ensure that it receives one.
+
+        def to_od(d):
+            return OrderedDict(
+                {key: to_od(val) if isinstance(val, dict) else val for key, val in d.items()}
+            )
+
         with writable(path) as f:
-            f90nml.Namelist(nml).write(f, sort=False)
+            f90nml.Namelist(to_od(cfg)).write(f, sort=False)
 
 
 class YAMLConfig(Config):
@@ -533,7 +532,7 @@ class YAMLConfig(Config):
         loader = self._yaml_loader
         with readable(config_file) as f:
             try:
-                cfg = yaml.load(f.read(), Loader=loader)
+                return yaml.load(f.read(), Loader=loader)
             except yaml.constructor.ConstructorError as e:
                 if e.problem:
                     if "unhashable" in e.problem:
@@ -546,7 +545,6 @@ class YAMLConfig(Config):
                 else:
                     msg = str(e)
                 raise _log_and_error(msg) from e
-        return self.from_ordereddict(cfg)
 
     def _yaml_include(self, loader: yaml.Loader, node: yaml.SequenceNode) -> dict:
         """

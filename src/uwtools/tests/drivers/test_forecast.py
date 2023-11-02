@@ -6,7 +6,8 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from unittest.mock import patch
+from types import SimpleNamespace as ns
+from unittest.mock import ANY, patch
 
 import pytest
 from pytest import fixture, raises
@@ -17,7 +18,7 @@ from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.logging import log
-from uwtools.tests.support import compare_files, fixture_path
+from uwtools.tests.support import compare_files, fixture_path, logged
 
 
 def test_batch_script():
@@ -332,7 +333,7 @@ def test_run_direct(fv3_mpi_assets, fv3_run_assets):
 
 
 @pytest.mark.parametrize("with_batch_script", [True, False])
-def test_FV3Forecast_run_dry_run(capsys, fv3_mpi_assets, fv3_run_assets, with_batch_script):
+def test_FV3Forecast_run_dry_run(caplog, fv3_mpi_assets, fv3_run_assets, with_batch_script):
     log.setLevel(logging.INFO)
     batch_script, config_file, config = fv3_run_assets
     if with_batch_script:
@@ -344,23 +345,48 @@ def test_FV3Forecast_run_dry_run(capsys, fv3_mpi_assets, fv3_run_assets, with_ba
             "#SBATCH --qos=batch",
             "#SBATCH --time=00:01:00",
         ] + fv3_mpi_assets
-        run_expected = "\n".join(batch_components)
+        expected_lines = batch_components
     else:
         batch_script = None
-        run_expected = " ".join(fv3_mpi_assets)
+        expected_lines = [" ".join(fv3_mpi_assets)]
 
     with patch.object(FV3Forecast, "_validate", return_value=True):
         fcstobj = FV3Forecast(config_file=config_file, dry_run=True, batch_script=batch_script)
         with patch.object(fcstobj, "_config", config):
             fcstobj.run(cycle=dt.datetime.now())
-    assert run_expected in capsys.readouterr().out
+    for line in expected_lines:
+        assert logged(caplog, line)
 
 
-def test_run_submit(fv3_run_assets):
+@pytest.mark.parametrize(
+    "vals", [(True, "_run_via_batch_submission"), (False, "_run_via_local_execution")]
+)
+def test_FV3Forecast_run(fv3_run_assets, vals):
+    batch_script, config_file, _ = fv3_run_assets
+    use_batch, helper_method = vals
+    fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script if use_batch else None)
+    with patch.object(fcstobj, helper_method) as helper:
+        helper.return_value = (True, None)
+        assert fcstobj.run(cycle=dt.datetime.now()) is True
+        helper.assert_called_once_with()
+
+
+def test_FV3Forecast__run_via_batch_submission(fv3_run_assets):
     batch_script, config_file, config = fv3_run_assets
-    with patch.object(FV3Forecast, "_validate", return_value=True):
-        with patch.object(scheduler, "execute") as execute:
-            fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
-            with patch.object(fcstobj, "_config", config):
-                fcstobj.run(cycle=dt.datetime.now())
-            execute.assert_called_once_with(cmd=f"sbatch {batch_script}")
+    with patch.object(scheduler, "execute") as execute:
+        fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
+        with patch.object(fcstobj, "_config", config):
+            fcstobj._run_via_batch_submission()
+        execute.assert_called_once_with(cmd=ANY)
+
+
+def test_FV3Forecast__run_via_local_execution(fv3_run_assets):
+    _, config_file, config = fv3_run_assets
+    fcstobj = FV3Forecast(config_file=config_file)
+    with patch.object(fcstobj, "_config", config):
+        with patch.object(forecast, "execute") as execute:
+            execute.return_value = ns(success=True)
+            success, lines = fcstobj._run_via_local_execution()
+            assert success is True
+            assert lines[0] == "Command:"
+            execute.assert_called_once_with(cmd=ANY)
