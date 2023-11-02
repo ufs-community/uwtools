@@ -18,9 +18,8 @@ from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.logging import log
-from uwtools.tests.support import compare_files, fixture_path
-from uwtools.types import ExistAct
 from uwtools.tests.support import compare_files, fixture_path, logged
+from uwtools.types import ExistAct
 
 
 def test_batch_script():

@@ -51,7 +51,9 @@ class FV3Forecast(Driver):
         return batch_script
 
     @staticmethod
-    def create_directory_structure(run_directory: DefinitePath, exist_act: str = ExistAct.delete, dry_run: bool = False) -> None:
+    def create_directory_structure(
+        run_directory: DefinitePath, exist_act: str = ExistAct.delete, dry_run: bool = False
+    ) -> None:
         """
         Collects the name of the desired run directory, and has an optional flag for what to do if
         the run directory specified already exists. Creates the run directory and adds
@@ -61,7 +63,9 @@ class FV3Forecast(Driver):
         :param exist_act: Action when run directory exists: "delete" (default), "quit", or "rename"
         """
 
-        validate_existing_action(exist_act, valid_actions=[ExistAct.delete, ExistAct.quit, ExistAct.rename])
+        validate_existing_action(
+            exist_act, valid_actions=[ExistAct.delete, ExistAct.quit, ExistAct.rename]
+        )
 
         run_directory = Path(run_directory)
 
