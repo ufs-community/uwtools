@@ -8,7 +8,6 @@ import filecmp
 import logging
 import os
 import sys
-from collections import OrderedDict
 from io import StringIO
 from pathlib import Path
 from typing import Any, Dict
@@ -888,16 +887,6 @@ def test_Config_dereference_unexpected_error(nml_cfgobj):
     with patch.object(core.J2Template, "render", side_effect=exctype):
         with raises(exctype):
             nml_cfgobj.dereference(ref_dict={"n": "{{ n }}"})
-
-
-def test_Config_from_ordereddict(nml_cfgobj):
-    d: dict[Any, Any] = OrderedDict([("z", 26), ("a", OrderedDict([("alpha", 1)]))])
-    d = nml_cfgobj.from_ordereddict(d)
-    # Assert that every OrderedDict is now just a dict. The second assert is needed because
-    # isinstance(OrderedDict(), dict) is True.
-    for x in d, d["a"]:
-        assert isinstance(x, dict)
-        assert not isinstance(x, OrderedDict)
 
 
 def test_YAMLConfig__load_unexpected_error(tmp_path):
