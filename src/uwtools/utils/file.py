@@ -100,7 +100,7 @@ def handle_existing(directory: DefinitePath, exist_act: str) -> None:
     """
 
     if exist_act not in [ExistAct.delete, ExistAct.rename]:
-        raise UWError(f"Unrecognized action: {exist_act}")
+        raise UWError(f"Unsupported action: {exist_act}")
     if Path(directory).is_dir():
         try:
             if exist_act == ExistAct.delete:
