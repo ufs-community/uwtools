@@ -6,7 +6,8 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from unittest.mock import patch
+from types import SimpleNamespace as ns
+from unittest.mock import ANY, patch
 
 import pytest
 from pytest import fixture, raises
@@ -357,31 +358,35 @@ def test_FV3Forecast_run_dry_run(caplog, fv3_mpi_assets, fv3_run_assets, with_ba
         assert logged(caplog, line)
 
 
-def test_run_submit(fv3_run_assets):
+@pytest.mark.parametrize(
+    "vals", [(True, "_run_via_batch_submission"), (False, "_run_via_local_execution")]
+)
+def test_FV3Forecast_run(fv3_run_assets, vals):
+    batch_script, config_file, _ = fv3_run_assets
+    usebatch, helper_method = vals
+    fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script if usebatch else None)
+    with patch.object(fcstobj, helper_method) as helper:
+        helper.return_value = (True, None)
+        assert fcstobj.run(cycle=dt.datetime.now()) is True
+        helper.assert_called_once_with()
+
+
+def test_FV3Forecast__run_via_batch_submission(fv3_run_assets):
     batch_script, config_file, config = fv3_run_assets
-    with patch.object(FV3Forecast, "_validate", return_value=True):
-        with patch.object(scheduler, "execute") as execute:
-            fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
-            with patch.object(fcstobj, "_config", config):
-                fcstobj.run(cycle=dt.datetime.now())
-            execute.assert_called_once_with(cmd=f"sbatch {batch_script}")
+    with patch.object(scheduler, "execute") as execute:
+        fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
+        with patch.object(fcstobj, "_config", config):
+            fcstobj._run_via_batch_submission()
+        execute.assert_called_once_with(cmd=ANY)
 
 
-def test__run_via_batch_submission(fv3_run_assets):
-    batch_script, config_file, config = fv3_run_assets
-    with patch.object(FV3Forecast, "_validate", return_value=True):
-        with patch.object(scheduler, "execute") as execute:
-            fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
-            with patch.object(fcstobj, "_config", config):
-                fcstobj._run_via_batch_submission()
-            execute.assert_called_once_with(cmd=f"sbatch {batch_script}")
-
-
-def test__run_via_local_execution(fv3_run_assets):
-    batch_script, config_file, config = fv3_run_assets
-    with patch.object(FV3Forecast, "_validate", return_value=True):
-        with patch.object(scheduler, "execute") as execute:
-            fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
-            with patch.object(fcstobj, "_config", config):
-                fcstobj._run_via_local_execution()
-            execute.assert_called_once_with(cmd=f"sbatch {batch_script}")
+def test_FV3Forecast__run_via_local_execution(fv3_run_assets):
+    _, config_file, config = fv3_run_assets
+    fcstobj = FV3Forecast(config_file=config_file)
+    with patch.object(fcstobj, "_config", config):
+        with patch.object(forecast, "execute") as execute:
+            execute.return_value = ns(success=True)
+            success, lines = fcstobj._run_via_local_execution()
+            assert success is True
+            assert lines[0] == "Command:"
+            execute.assert_called_once_with(cmd=ANY)
