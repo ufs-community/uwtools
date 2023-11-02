@@ -99,6 +99,8 @@ def handle_existing(directory: DefinitePath, exist_act: str) -> None:
     :param exist_act: Action ("delete" or "rename") to take when directory exists.
     """
 
+    if exist_act not in [ExistAct.delete, ExistAct.rename]:
+        raise UWError(f"Unrecognized action: {exist_act}")
     if Path(directory).is_dir():
         try:
             if exist_act == ExistAct.delete:
@@ -106,8 +108,6 @@ def handle_existing(directory: DefinitePath, exist_act: str) -> None:
             elif exist_act == ExistAct.rename:
                 save_dir = "%s%s" % (directory, dt.now().strftime("_%Y%m%d_%H%M%S"))
                 shutil.move(directory, save_dir)
-            else:
-                raise UWError(f"Unrecognized action: {exist_act}")
         except (FileExistsError, RuntimeError) as e:
             msg = f"Could not {exist_act} directory {directory}"
             log.critical(msg)

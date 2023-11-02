@@ -11,6 +11,7 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture, raises
 
+from uwtools.exceptions import UWError
 from uwtools.types import ExistAct
 from uwtools.utils import file
 
@@ -74,6 +75,11 @@ def test_get_file_type():
 def test_get_file_type_unrecignized():
     with raises(ValueError):
         file.get_file_type("a.jpg")
+
+
+def test_handle_existing_bad_action():
+    with raises(UWError):
+        file.handle_existing(directory="unused", exist_act="foo")
 
 
 @pytest.mark.parametrize("exc", [FileExistsError, RuntimeError])
