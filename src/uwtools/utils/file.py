@@ -93,13 +93,13 @@ def get_file_type(path: DefinitePath) -> str:
 
 def handle_existing(directory: str, exist_act: str) -> None:
     """
-    Given a run directory, and an action to do if directory exists, delete or rename directory.
+    Take specified action on a directory.
 
-    :param directory: The directory to delete or rename.
-    :param exist_act: Action when run directory exists: "delete" or "rename"
+    :param directory: The directory to handle.
+    :param exist_act: Action ("delete" or "rename") to take when directory exists.
     """
 
-    # Try to delete existing run directory if option is delete.
+    # Try to delete existing directory if option is delete.
 
     try:
         if exist_act == ExistAct.delete and os.path.isdir(directory):
@@ -109,7 +109,7 @@ def handle_existing(directory: str, exist_act: str) -> None:
         log.critical(msg)
         raise RuntimeError(msg) from e
 
-    # Try to rename existing run directory if option is rename.
+    # Try to rename existing directory if option is rename.
 
     try:
         if exist_act == ExistAct.rename and os.path.isdir(directory):
