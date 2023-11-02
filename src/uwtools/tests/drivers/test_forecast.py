@@ -374,11 +374,14 @@ def test_FV3Forecast_run(fv3_run_assets, vals):
 
 def test_FV3Forecast__run_via_batch_submission(fv3_run_assets):
     batch_script, config_file, config = fv3_run_assets
-    with patch.object(scheduler, "execute") as execute:
-        fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
-        with patch.object(fcstobj, "_config", config):
-            fcstobj._run_via_batch_submission()
-        execute.assert_called_once_with(cmd=ANY)
+    fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
+    with patch.object(fcstobj, "_config", config):
+        with patch.object(scheduler, "execute") as execute:
+            execute.return_value = ns(success=True)
+            success, lines = fcstobj._run_via_batch_submission()
+            assert success is True
+            assert lines[0] == "Batch script:"
+            execute.assert_called_once_with(cmd=ANY)
 
 
 def test_FV3Forecast__run_via_local_execution(fv3_run_assets):

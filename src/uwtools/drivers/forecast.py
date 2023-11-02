@@ -265,10 +265,8 @@ class FV3Forecast(Driver):
         batch_lines = ["Batch script:", *str(batch_script).split("\n")]
         if self._dry_run:
             return True, batch_lines
-
         assert self._batch_script is not None
         outpath = run_directory / self._batch_script
-
         batch_script.dump(outpath)
         return self.scheduler.submit_job(outpath), batch_lines
 
