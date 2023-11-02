@@ -80,7 +80,7 @@ class FV3Forecast(Driver):
 
         # Handle a potentially pre-existing directory appropriately.
 
-        handle_existing(str(run_directory), exist_act)
+        handle_existing(run_directory, exist_act)
 
         # Create new run directory with two required subdirectories.
 
