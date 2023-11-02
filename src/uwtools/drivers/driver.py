@@ -81,13 +81,14 @@ class Driver(ABC):
         """
         The command-line command to run the NWP tool.
 
-        :return: Collated string that contains MPI command, run time arguments, and exec name.
+        :return: Collated string that contains MPI command, runtime arguments, and exec name.
         """
-        run_cmd = self._platform_config["mpicmd"]
-        exec_name = self._config["exec_name"]
-        run_time_args = self._config["runtime_info"].get("mpi_args", [])
-        args_str = " ".join(str(arg) for arg in run_time_args)
-        return f"{run_cmd} {args_str} {exec_name}"
+        components = [
+            self._platform_config.get("mpicmd"),
+            *[str(x) for x in self._config["runtime_info"].get("mpi_args", [])],
+            self._config["exec_name"],
+        ]
+        return " ".join(filter(None, components))
 
     @property
     def scheduler(self) -> JobScheduler:
