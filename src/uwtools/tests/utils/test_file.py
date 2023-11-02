@@ -11,7 +11,6 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture, raises
 
-from uwtools.exceptions import UWError
 from uwtools.types import ExistAct
 from uwtools.utils import file
 
@@ -78,7 +77,7 @@ def test_get_file_type_unrecignized():
 
 
 def test_handle_existing_bad_action():
-    with raises(UWError):
+    with raises(ValueError):
         file.handle_existing(directory="unused", exist_act="foo")
 
 

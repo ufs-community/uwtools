@@ -11,9 +11,8 @@ from functools import cache
 from importlib import resources
 from io import StringIO
 from pathlib import Path
-from typing import IO, Any, Generator, Union
+from typing import IO, Any, Generator, List, Union
 
-from uwtools.exceptions import UWError
 from uwtools.logging import log
 from uwtools.types import DefinitePath, ExistAct, OptionalPath
 
@@ -99,8 +98,7 @@ def handle_existing(directory: DefinitePath, exist_act: str) -> None:
     :param exist_act: Action ("delete" or "rename") to take when directory exists.
     """
 
-    if exist_act not in [ExistAct.delete, ExistAct.rename]:
-        raise UWError(f"Unsupported action: {exist_act}")
+    validate_existing_action(exist_act, [ExistAct.delete, ExistAct.rename])
     if Path(directory).is_dir():
         try:
             if exist_act == ExistAct.delete:
@@ -156,6 +154,21 @@ def resource_pathobj(suffix: str = "") -> Path:
     """
     with resources.as_file(resources.files("uwtools.resources")) as prefix:
         return prefix / suffix
+
+
+def validate_existing_action(exist_act: str, valid_actions: List[str]) -> None:
+    """
+    Ensure that action specified for an existing directory is valid.
+
+    :param exist_act: Action to check.
+    :param valid_actions: Actions valid for the caller's context.
+    :raises: ValueError if specified action is invalid.
+    """
+    if exist_act not in valid_actions:
+        raise ValueError(
+            'Specify one of %s as exist_act, not "%s"'
+            % (", ".join(f'"{x}"' for x in valid_actions), exist_act)
+        )
 
 
 @contextmanager

@@ -14,7 +14,7 @@ from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.scheduler import BatchScript
 from uwtools.types import DefinitePath, ExistAct, OptionalPath
-from uwtools.utils.file import handle_existing, resource_pathobj
+from uwtools.utils.file import handle_existing, resource_pathobj, validate_existing_action
 from uwtools.utils.processing import execute
 
 
@@ -63,12 +63,7 @@ class FV3Forecast(Driver):
         :param exist_act: Action when run directory exists: "delete" (default), "quit", or "rename"
         """
 
-        valid_actions = [ExistAct.delete, ExistAct.quit, ExistAct.rename]
-        if exist_act not in valid_actions:
-            raise ValueError(
-                'Specify one of %s as exist_act, not "%s"'
-                % (", ".join(f'"{x}"' for x in valid_actions), exist_act)
-            )
+        validate_existing_action(exist_act, [ExistAct.delete, ExistAct.quit, ExistAct.rename])
 
         run_directory = Path(run_directory)
 
