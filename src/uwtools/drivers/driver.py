@@ -81,7 +81,7 @@ class Driver(ABC):
         """
         The command-line command to run the NWP tool.
 
-        :return: The fully formed string that executes the program
+        :return: Collated string that contains MPI command, run time arguments, and exec name.
         """
         run_cmd = self._platform_config["mpicmd"]
         exec_name = self._config["exec_name"]
@@ -107,7 +107,10 @@ class Driver(ABC):
 
     @staticmethod
     def stage_files(
-        run_directory: str, files_to_stage: Dict[str, Union[list, str]], link_files: bool = False
+        run_directory: str,
+        files_to_stage: Dict[str, Union[list, str]],
+        link_files: bool = False,
+        dry_run: bool = False,
     ) -> None:
         """
         Creates destination files in run directory and copies or links contents from the source path
@@ -129,9 +132,13 @@ class Driver(ABC):
                     link_files,
                 )
             else:
-                link_or_copy(src_path_or_paths, dst_path)  # type: ignore
-                msg = f"File {src_path_or_paths} staged as {dst_path}"
-                log.info(msg)
+                if dry_run:
+                    msg = f"File {src_path_or_paths} would be staged as {dst_path}"
+                    log.info(msg)
+                else:
+                    msg = f"File {src_path_or_paths} staged as {dst_path}"
+                    log.info(msg)
+                    link_or_copy(src_path_or_paths, dst_path)  # type: ignore
 
     # Private methods
 
