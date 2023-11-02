@@ -8,4 +8,7 @@ unformatted() {
 
 export -f unformatted
 
+source conda/etc/profile.d/conda.sh
+conda activate
+
 CONDEV_SHELL_CMD=unformatted condev-shell
