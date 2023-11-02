@@ -262,8 +262,8 @@ class FV3Forecast(Driver):
         """
         Prepares and submits a batch script.
 
-        :return: A tuple that contains a boolean of success status of the FV3 run and a list of
-            strings that make up the batch script.
+        :return: A tuple containing the success status of submitting the job to the batch system,
+            and a list of strings that make up the batch script.
         """
         run_directory = self.prepare_directories()
         batch_script = self.batch_script()
