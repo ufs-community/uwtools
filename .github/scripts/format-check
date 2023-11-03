@@ -1,4 +1,8 @@
-#!/bin/bash -ae
+# -*- mode: sh -*-
+
+# Actions invokes script with: bash -e <script>
+
+set -a
 
 unformatted() {
   set -x
@@ -9,6 +13,7 @@ unformatted() {
 source /tmp/conda/etc/profile.d/conda.sh
 conda activate
 set -x
-CONDEV_SHELL_CMD=unformatted condev-shell
-
-echo Hello World!
+CONDEV_SHELL_CMD=unformatted
+#sed -i 's/set -eu/set -eux/g' $(which condev-shell)
+#condev-shell
+make devshell

@@ -3,12 +3,15 @@ on:
   pull_request:
     branches:
       - develop
+      - format
   push:
     branches:
       - develop
+      - format
   workflow_dispatch:
     branches:
       - develop
+      - format
 jobs:
   test:
     name: Test
@@ -17,10 +20,9 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install conda
         run:  .github/scripts/install-conda
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-      - shell: bash
-        name: Format Check
+#       - name: Setup tmate session
+#         uses: mxschmitt/action-tmate@v3
+      - name: Format Check
         run:  .github/scripts/format-check
-      - name: Make Package
-        run:  .github/scripts/make-package
+#       - name: Make Package
+#         run:  .github/scripts/make-package
