@@ -10,3 +10,5 @@ source /tmp/conda/etc/profile.d/conda.sh
 conda activate
 set -x
 CONDEV_SHELL_CMD=unformatted condev-shell
+
+echo Hello World!
