@@ -14,6 +14,5 @@ source /tmp/conda/etc/profile.d/conda.sh
 conda activate
 set -x
 CONDEV_SHELL_CMD=unformatted
-#sed -i 's/set -eu/set -eux/g' $(which condev-shell)
-#condev-shell
-make devshell
+sed -i 's/set -eu/set -eux/g' $(which condev-shell)
+condev-shell
