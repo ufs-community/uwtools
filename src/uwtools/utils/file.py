@@ -2,7 +2,6 @@
 Helpers for working with files and directories.
 """
 
-import os
 import shutil
 import sys
 from contextlib import contextmanager
@@ -12,10 +11,10 @@ from functools import cache
 from importlib import resources
 from io import StringIO
 from pathlib import Path
-from typing import IO, Any, Generator, Union
+from typing import IO, Any, Generator, List, Union
 
 from uwtools.logging import log
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.types import DefinitePath, ExistAct, OptionalPath
 
 
 @dataclass(frozen=True)
@@ -91,35 +90,26 @@ def get_file_type(path: DefinitePath) -> str:
     raise ValueError(msg)
 
 
-def handle_existing(directory: str, action: str) -> None:
+def handle_existing(directory: DefinitePath, exist_act: str) -> None:
     """
-    Given a run directory, and an action to do if directory exists, delete or rename directory.
+    Take specified action on a directory.
 
-    :param directory: The directory to delete or rename.
-    :param action: The action to take on an existing directory ("delete" or "rename")
+    :param directory: The directory to handle.
+    :param exist_act: Action ("delete" or "rename") to take when directory exists.
     """
 
-    # Try to delete existing run directory if option is delete.
-
-    try:
-        if action == "delete" and os.path.isdir(directory):
-            shutil.rmtree(directory)
-    except (FileExistsError, RuntimeError) as e:
-        msg = f"Could not delete directory {directory}"
-        log.critical(msg)
-        raise RuntimeError(msg) from e
-
-    # Try to rename existing run directory if option is rename.
-
-    try:
-        if action == "rename" and os.path.isdir(directory):
-            now = dt.now()
-            save_dir = "%s%s" % (directory, now.strftime("_%Y%m%d_%H%M%S"))
-            shutil.move(directory, save_dir)
-    except (FileExistsError, RuntimeError) as e:
-        msg = f"Could not rename directory {directory}"
-        log.critical(msg)
-        raise RuntimeError(msg) from e
+    validate_existing_action(exist_act, valid_actions=[ExistAct.delete, ExistAct.rename])
+    if Path(directory).is_dir():
+        try:
+            if exist_act == ExistAct.delete:
+                shutil.rmtree(directory)
+            elif exist_act == ExistAct.rename:
+                save_dir = "%s%s" % (directory, dt.now().strftime("_%Y%m%d_%H%M%S"))
+                shutil.move(directory, save_dir)
+        except (FileExistsError, RuntimeError) as e:
+            msg = f"Could not {exist_act} directory {directory}"
+            log.critical(msg)
+            raise RuntimeError(msg) from e
 
 
 def path_if_it_exists(path: str) -> str:
@@ -164,6 +154,21 @@ def resource_pathobj(suffix: str = "") -> Path:
     """
     with resources.as_file(resources.files("uwtools.resources")) as prefix:
         return prefix / suffix
+
+
+def validate_existing_action(exist_act: str, valid_actions: List[str]) -> None:
+    """
+    Ensure that action specified for an existing directory is valid.
+
+    :param exist_act: Action to check.
+    :param valid_actions: Actions valid for the caller's context.
+    :raises: ValueError if specified action is invalid.
+    """
+    if exist_act not in valid_actions:
+        raise ValueError(
+            'Specify one of %s as exist_act, not "%s"'
+            % (", ".join(f'"{x}"' for x in valid_actions), exist_act)
+        )
 
 
 @contextmanager

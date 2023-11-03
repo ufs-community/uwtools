@@ -3,7 +3,6 @@ Drivers for forecast models.
 """
 
 
-import os
 import sys
 from collections.abc import Mapping
 from datetime import datetime
@@ -14,8 +13,8 @@ from uwtools.config.core import FieldTableConfig, NMLConfig, YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.scheduler import BatchScript
-from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import handle_existing, resource_pathobj
+from uwtools.types import DefinitePath, ExistAct, OptionalPath
+from uwtools.utils.file import handle_existing, resource_pathobj, validate_existing_action
 from uwtools.utils.processing import execute
 
 
@@ -53,7 +52,7 @@ class FV3Forecast(Driver):
 
     @staticmethod
     def create_directory_structure(
-        run_directory: DefinitePath, exist_act: str = "delete", dry_run: bool = False
+        run_directory: DefinitePath, exist_act: str = ExistAct.delete, dry_run: bool = False
     ) -> None:
         """
         Collects the name of the desired run directory, and has an optional flag for what to do if
@@ -61,29 +60,27 @@ class FV3Forecast(Driver):
         subdirectories INPUT and RESTART. Verifies creation of all directories.
 
         :param run_directory: Path of desired run directory.
-        :param exist_act: Could be any of 'delete', 'rename', 'quit'. Sets how the program responds
-            to a preexisting run directory. The default is to delete the old run directory.
+        :param exist_act: Action when run directory exists: "delete" (default), "quit", or "rename"
         """
+
+        validate_existing_action(
+            exist_act, valid_actions=[ExistAct.delete, ExistAct.quit, ExistAct.rename]
+        )
 
         run_directory = Path(run_directory)
 
-        # Caller should only provide correct argument.
+        # Exit program with error if caller specified the "quit" action.
 
-        if exist_act not in ["delete", "rename", "quit"]:
-            raise ValueError(f"Bad argument: {exist_act}")
-
-        # Exit program with error if caller chooses to quit.
-
-        if exist_act == "quit" and run_directory.is_dir():
-            log.critical("User chose quit option when creating directory")
+        if exist_act == ExistAct.quit and run_directory.is_dir():
+            log.critical(f"Option {exist_act} specified, exiting")
             sys.exit(1)
 
-        # Delete or rename directory if it exists.
+        # Handle a potentially pre-existing directory appropriately.
 
         if dry_run and run_directory.is_dir():
             log.info(f"Would {exist_act} directory")
         else:
-            handle_existing(str(run_directory), exist_act)
+            handle_existing(run_directory, exist_act)
 
         # Create new run directory with two required subdirectories.
 
@@ -93,7 +90,7 @@ class FV3Forecast(Driver):
                 log.info("Would create directory: %s", path)
             else:
                 log.info("Creating directory: %s", path)
-                os.makedirs(path)
+                path.mkdir(parents=True)
 
     def create_field_table(self, output_path: OptionalPath) -> None:
         """
@@ -140,14 +137,13 @@ class FV3Forecast(Driver):
     def prepare_directories(self) -> Path:
         """
         Prepares the run directory and stages static and cycle-dependent files.
+
+        :return: Path to the run directory.
         """
         run_directory = self._config["run_dir"]
-        self.create_directory_structure(run_directory, "delete", dry_run=self._dry_run)
-
+        self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
         self._prepare_config_files(Path(run_directory))
-
         self._config["cycle-dependent"].update(self._define_boundary_files())
-
         for file_category in ["static", "cycle-dependent"]:
             self.stage_files(
                 run_directory, self._config[file_category], link_files=True, dry_run=self._dry_run
@@ -176,7 +172,8 @@ class FV3Forecast(Driver):
         """
         Runs FV3 either locally or via a batch-script submission.
 
-        :return: Did the FV3 run exit with success status?
+        :param cycle: The forecast cycle to run.
+        :return: Did the batch submission or FV3 run exit with success status?
         """
         status, output = (
             self._run_via_batch_submission()
@@ -270,10 +267,8 @@ class FV3Forecast(Driver):
         batch_lines = ["Batch script:", *str(batch_script).split("\n")]
         if self._dry_run:
             return True, batch_lines
-
         assert self._batch_script is not None
         outpath = run_directory / self._batch_script
-
         batch_script.dump(outpath)
         return self.scheduler.submit_job(outpath), batch_lines
 
