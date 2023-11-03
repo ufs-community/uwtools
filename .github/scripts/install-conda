@@ -8,5 +8,5 @@ set +ux
 source conda/etc/profile.d/conda.sh
 conda activate
 conda install -q -y -c maddenp --repodata-fn repodata.json anaconda-client condev=0.6.1
-apt-get update
-apt-get install -y bash
+sudo apt-get update
+sudo apt-get install -y bash
