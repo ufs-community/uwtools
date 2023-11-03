@@ -1,7 +1,6 @@
-#!/bin/bash -eux
+#!/bin/bash -e
 
-set +ux
-source conda/etc/profile.d/conda.sh
+source /tmp/conda/etc/profile.d/conda.sh
 conda activate
 set -ux
 f=recipe/meta.json

@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
-source conda/etc/profile.d/conda.sh
+source /tmp/conda/etc/profile.d/conda.sh
 conda activate
+set -x
 make package
