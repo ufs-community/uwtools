@@ -9,7 +9,7 @@ OptionalPath = Optional[DefinitePath]
 @dataclass
 class ExistAct:
     """
-    Possible actions to taken when a directory already exists.
+    Possible actions to take when a directory already exists.
     """
 
     delete: str = "delete"
