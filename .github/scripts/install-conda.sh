@@ -1,5 +1,3 @@
-# -*- mode: sh -*-
-
 # Actions invokes script with: bash -e <script>
 
 set -ux
