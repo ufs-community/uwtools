@@ -16,8 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install conda
-        run:  .github/scripts/install-conda
+        run:  .github/scripts/install-conda.sh
       - name: Make Package
-        run:  .github/scripts/make-package
+        run:  .github/scripts/make-package.sh
       - name: Format Check
-        run:  .github/scripts/format-check
+        run:  .github/scripts/format-check.sh
