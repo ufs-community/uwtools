@@ -7,7 +7,11 @@ set -a
 unformatted() {
   set -x
   make format
-  test -z "$(git status --porcelain)"
+  if [[ -n "$(git status --porcelain)" ]]; then
+    (set +x && echo UNFORMATTED CODE DETECTED)
+    return 1
+  fi
+  return 0
 }
 
 source /tmp/conda/etc/profile.d/conda.sh
