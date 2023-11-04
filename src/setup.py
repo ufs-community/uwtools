@@ -11,12 +11,11 @@ context where all build/run/test dependency packages are available; and 3. By pi
 the local package along with its dependencies from PyPI.
 """
 
-from setuptools import find_packages, setup  # type: ignore
-
-
 import json
 import os
 import re
+
+from setuptools import find_packages, setup  # type: ignore
 
 recipe = os.environ.get("RECIPE_DIR", "../recipe")
 with open(os.path.join(recipe, "meta.json"), "r", encoding="utf-8") as f:
