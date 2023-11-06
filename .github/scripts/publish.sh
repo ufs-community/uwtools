@@ -1,7 +1,6 @@
-#!/bin/bash -eux
+# Actions invokes script with: bash -e <script>
 
-set +ux
-source conda/etc/profile.d/conda.sh
+source /tmp/conda/etc/profile.d/conda.sh
 conda activate
 set -ux
 f=recipe/meta.json
