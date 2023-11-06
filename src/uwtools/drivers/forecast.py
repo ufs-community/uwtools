@@ -3,19 +3,18 @@ Drivers for forecast models.
 """
 
 
-import os
 import sys
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 from uwtools.config.core import FieldTableConfig, NMLConfig, YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.scheduler import BatchScript
-from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import handle_existing, resource_pathobj
+from uwtools.types import DefinitePath, ExistAct, OptionalPath
+from uwtools.utils.file import handle_existing, resource_pathobj, validate_existing_action
 from uwtools.utils.processing import execute
 
 
@@ -46,44 +45,52 @@ class FV3Forecast(Driver):
         :return: The batch script object with all run commands needed for executing the program.
         """
         pre_run = self._mpi_env_variables("\n")
-        bs = self.scheduler.batch_script
-        bs.append(pre_run)
-        bs.append(self.run_cmd())
-        return bs
+        batch_script = self.scheduler.batch_script
+        batch_script.append(pre_run)
+        batch_script.append(self.run_cmd())
+        return batch_script
 
     @staticmethod
-    def create_directory_structure(run_directory: DefinitePath, exist_act: str = "delete") -> None:
+    def create_directory_structure(
+        run_directory: DefinitePath, exist_act: str = ExistAct.delete, dry_run: bool = False
+    ) -> None:
         """
         Collects the name of the desired run directory, and has an optional flag for what to do if
         the run directory specified already exists. Creates the run directory and adds
         subdirectories INPUT and RESTART. Verifies creation of all directories.
 
         :param run_directory: Path of desired run directory.
-        :param exist_act: Could be any of 'delete', 'rename', 'quit'. Sets how the program responds
-            to a preexisting run directory. The default is to delete the old run directory.
+        :param exist_act: Action when run directory exists: "delete" (default), "quit", or "rename"
         """
 
-        # Caller should only provide correct argument.
+        validate_existing_action(
+            exist_act, valid_actions=[ExistAct.delete, ExistAct.quit, ExistAct.rename]
+        )
 
-        if exist_act not in ["delete", "rename", "quit"]:
-            raise ValueError(f"Bad argument: {exist_act}")
+        run_directory = Path(run_directory)
 
-        # Exit program with error if caller chooses to quit.
+        # Exit program with error if caller specified the "quit" action.
 
-        if exist_act == "quit" and os.path.isdir(run_directory):
-            log.critical("User chose quit option when creating directory")
+        if exist_act == ExistAct.quit and run_directory.is_dir():
+            log.critical(f"Option {exist_act} specified, exiting")
             sys.exit(1)
 
-        # Delete or rename directory if it exists.
+        # Handle a potentially pre-existing directory appropriately.
 
-        handle_existing(str(run_directory), exist_act)
+        if dry_run and run_directory.is_dir():
+            log.info(f"Would {exist_act} directory")
+        else:
+            handle_existing(run_directory, exist_act)
 
         # Create new run directory with two required subdirectories.
 
         for subdir in ("INPUT", "RESTART"):
-            path = os.path.join(run_directory, subdir)
-            log.info("Creating directory: %s", path)
-            os.makedirs(path)
+            path = run_directory / subdir
+            if dry_run:
+                log.info("Would create directory: %s", path)
+            else:
+                log.info("Creating directory: %s", path)
+                path.mkdir(parents=True)
 
     def create_field_table(self, output_path: OptionalPath) -> None:
         """
@@ -127,6 +134,22 @@ class FV3Forecast(Driver):
         ???
         """
 
+    def prepare_directories(self) -> Path:
+        """
+        Prepares the run directory and stages static and cycle-dependent files.
+
+        :return: Path to the run directory.
+        """
+        run_directory = self._config["run_dir"]
+        self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
+        self._prepare_config_files(Path(run_directory))
+        self._config["cycle-dependent"].update(self._define_boundary_files())
+        for file_category in ["static", "cycle-dependent"]:
+            self.stage_files(
+                run_directory, self._config[file_category], link_files=True, dry_run=self._dry_run
+            )
+        return run_directory
+
     def requirements(self) -> None:
         """
         ???
@@ -149,42 +172,18 @@ class FV3Forecast(Driver):
         """
         Runs FV3 either locally or via a batch-script submission.
 
-        :return: Did the FV3 run exit with success status?
+        :param cycle: The forecast cycle to run.
+        :return: Did the batch submission or FV3 run exit with success status?
         """
-        # Prepare directories.
-        run_directory = self._config["run_dir"]
-        self.create_directory_structure(run_directory, "delete")
-
-        self._prepare_config_files(Path(run_directory))
-
-        self._config["cycle-dependent"].update(self._define_boundary_files())
-
-        for file_category in ["static", "cycle-dependent"]:
-            self.stage_files(run_directory, self._config[file_category], link_files=True)
-
-        if self._batch_script is not None:
-            batch_script = self.batch_script()
-            outpath = Path(run_directory) / self._batch_script
-
-            if self._dry_run:
-                # Apply switch to allow user to view the run command of config.
-                # This will not run the job.
-                log.info("Batch Script:")
-                batch_script.dump(None)
-                return True
-
-            batch_script.dump(outpath)
-            return self.scheduler.submit_job(outpath)
-
-        pre_run = self._mpi_env_variables(" ")
-        full_cmd = f"{pre_run} {self.run_cmd()}"
+        status, output = (
+            self._run_via_batch_submission()
+            if self._batch_script
+            else self._run_via_local_execution()
+        )
         if self._dry_run:
-            log.info("Would run: ")
-            print(full_cmd, file=sys.stdout)
-            return True
-
-        result = execute(cmd=full_cmd)
-        return result.success
+            for line in output:
+                log.info(line)
+        return status
 
     @property
     def schema_file(self) -> Path:
@@ -229,15 +228,6 @@ class FV3Forecast(Driver):
 
         return boundary_files
 
-    def _prepare_config_files(self, run_directory: Path) -> None:
-        """
-        Collect all the configuration files needed for FV3.
-        """
-
-        self.create_field_table(run_directory / "field_table")
-        self.create_model_configure(run_directory / "model_configure")
-        self.create_namelist(run_directory / "input.nml")
-
     def _mpi_env_variables(self, delimiter: str = " ") -> str:
         """
         Set the environment variables needed for the MPI job.
@@ -252,6 +242,51 @@ class FV3Forecast(Driver):
             "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
         }
         return delimiter.join([f"{k}={v}" for k, v in envvars.items()])
+
+    def _prepare_config_files(self, run_directory: Path) -> None:
+        """
+        Collect all the configuration files needed for FV3.
+        """
+        if self._dry_run:
+            for call in ("field_table", "model_configure", "input.nml"):
+                log.info(f"Would prepare: {run_directory}/{call}")
+        else:
+            self.create_field_table(run_directory / "field_table")
+            self.create_model_configure(run_directory / "model_configure")
+            self.create_namelist(run_directory / "input.nml")
+
+    def _run_via_batch_submission(self) -> Tuple[bool, List[str]]:
+        """
+        Prepares and submits a batch script.
+
+        :return: A tuple containing the success status of submitting the job to the batch system,
+            and a list of strings that make up the batch script.
+        """
+        run_directory = self.prepare_directories()
+        batch_script = self.batch_script()
+        batch_lines = ["Batch script:", *str(batch_script).split("\n")]
+        if self._dry_run:
+            return True, batch_lines
+        assert self._batch_script is not None
+        outpath = run_directory / self._batch_script
+        batch_script.dump(outpath)
+        return self.scheduler.submit_job(outpath), batch_lines
+
+    def _run_via_local_execution(self) -> Tuple[bool, List[str]]:
+        """
+        Collects the necessary MPI environment variables in order to construct full run command,
+        then executes said command.
+
+        :return: A tuple containing a boolean of the success status of the FV3 run and a list of
+            strings that make up the full command line.
+        """
+        pre_run = self._mpi_env_variables(" ")
+        full_cmd = f"{pre_run} {self.run_cmd()}"
+        command_lines = ["Command:", *full_cmd.split("\n")]
+        if self._dry_run:
+            return True, command_lines
+        result = execute(cmd=full_cmd)
+        return result.success, command_lines
 
 
 CLASSES = {"FV3": FV3Forecast}
