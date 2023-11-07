@@ -187,11 +187,11 @@ class Config(ABC, UserDict):
         """
         Dereference iteratively until no Jinja2 templates remain.
         """
-        prev = copy.deepcopy(self.data)
-        self._dereference()
-        while prev != self.data:
-            self._dereference()
+        while True:
             prev = copy.deepcopy(self.data)
+            self._dereference()
+            if self.data == prev:
+                break
 
     @abstractmethod
     def dump(self, path: OptionalPath) -> None:
