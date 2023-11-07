@@ -190,10 +190,11 @@ class Config(ABC, UserDict):
         Dereference iteratively until no Jinja2 templates remain.
         """
         while True:
-            prev = copy.deepcopy(self.data)
-            _dereference(self.data, **{**os.environ, **self.data})
-            if self.data == prev:
+            dereferenced = _dereference(x=self.data, context={**os.environ, **self.data})
+            if dereferenced == self.data:
                 break
+            assert isinstance(dereferenced, dict)
+            self.data = dereferenced
 
     @abstractmethod
     def dump(self, path: OptionalPath) -> None:
