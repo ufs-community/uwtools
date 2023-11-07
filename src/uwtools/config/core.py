@@ -277,21 +277,21 @@ class Config(ABC, UserDict):
         """
         return (max(map(self._depth, tree.values())) + 1) if isinstance(tree, dict) else 0
 
-    def _dereference(self, d: Optional[dict] = None, value: Optional[dict] = None) -> None:
+    def _dereference(self, d: Optional[dict] = None, vals_dict: Optional[dict] = None) -> None:
         """
-        Recursively replace Jinja2 templates in a Config object.
+        Recursively render Jinja2 values in dictionary.
 
         In general, this method should be called without arguments. Recursive calls made by the
         method to itself will supply appropriate arguments.
 
-        :param d: Dictionary potentially containing to-be-rendered Jinja2 templates.
-        :param value: Dictionary providing values to be used for rendering Jinja2 templates.
+        :param d: Dictionary potentially containing Jinja2-template values.
+        :param vals_dict: Dictionary providing values to be used for rendering Jinja2 templates.
         """
         d = self.data if d is None else d
-        value = self.data if value is None else value
+        vals_dict = self.data if vals_dict is None else vals_dict
         for key, val in d.items():
             if isinstance(val, dict):
-                self._dereference(val, value)
+                self._dereference(val, vals_dict)
             else:
                 # Save a bit of compute and only do this part for strings that contain the jinja
                 # double brackets.
@@ -316,10 +316,10 @@ class Config(ABC, UserDict):
                         # all the keys in the current section without the need to reference the
                         # current section name, and to the other sections with dot values. Also make
                         # environment variables available with env prefix.
-                        if d == value:
-                            values = {**os.environ, **value}
+                        if d == vals_dict:
+                            values = {**os.environ, **vals_dict}
                         else:
-                            values = {**os.environ, **d, **value}
+                            values = {**os.environ, **d, **vals_dict}
                         try:
                             j2tmpl = J2Template(
                                 values=values,
