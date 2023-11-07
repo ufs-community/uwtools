@@ -183,93 +183,14 @@ class Config(ABC, UserDict):
         """
         return self._depth(self.data)
 
-    def dereference(self, d: Optional[dict] = None, value: Optional[dict] = None) -> None:
-        """
-        Recursively replace Jinja2 templates in a Config object.
-
-        In general, this method should be called without arguments. Recursive calls made by the
-        method to itself will supply appropriate arguments.
-
-        :param d: Dictionary potentially containing to-be-rendered Jinja2 templates.
-        :param value: Dictionary providing values to be used for rendering Jinja2 templates.
-        """
-        d = self.data if d is None else d
-        value = self.data if value is None else value
-        for key, val in d.items():
-            if isinstance(val, dict):
-                self.dereference(val, value)
-            else:
-                # Save a bit of compute and only do this part for strings that contain the jinja
-                # double brackets.
-                v_str = str(val)
-                is_a_template = any((ele for ele in ["{{", "{%"] if ele in v_str))
-                if is_a_template:
-                    error_catcher = {}
-                    # Find expressions first, and process them as a single template if they exist.
-                    # Find individual double curly brace template in the string otherwise. We need
-                    # one substitution template at a time so that we can opt to leave some un-filled
-                    # when they are not yet set. For example, we can save cycle-dependent templates
-                    # to fill in at run time.
-                    if "{%" in val:
-                        # Treat entire line as a single template.
-                        templates = [v_str]
-                    else:
-                        # Separate out all the double curly bracket pairs.
-                        templates = re.findall(r"{{[^}]*}}|\S", v_str)
-                    data = []
-                    for template in templates:
-                        # Creating the config object for the template like this, gives us access to
-                        # all the keys in the current section without the need to reference the
-                        # current section name, and to the other sections with dot values. Also make
-                        # environment variables available with env prefix.
-                        if d == value:
-                            values = {**os.environ, **value}
-                        else:
-                            values = {**os.environ, **d, **value}
-                        try:
-                            j2tmpl = J2Template(
-                                values=values,
-                                template_str=template,
-                                loader_args={"undefined": jinja2.StrictUndefined},
-                            )
-                        except jinja2.exceptions.TemplateAssertionError as e:
-                            msg = MSGS.unregistered_filter.format(
-                                filter=repr(e).split()[-1][:-3], key=key
-                            )
-                            raise _log_and_error(msg) from e
-                        rendered = template
-                        try:
-                            # Fill in a template that has the appropriate variables set.
-                            rendered = j2tmpl.render()
-                        except jinja2.exceptions.UndefinedError:
-                            # Leave a templated field as-is in the resulting dict.
-                            error_catcher[template] = "UndefinedError"
-                        except TypeError:
-                            error_catcher[template] = "TypeError"
-                        except ZeroDivisionError:
-                            error_catcher[template] = "ZeroDivisionError"
-                        except Exception as e:
-                            # Fail on any other exception...something is probably wrong.
-                            msg = f"{key}: {template}"
-                            log.exception(msg)
-                            raise e
-                        data.append(rendered)
-                        for tmpl, err in error_catcher.items():
-                            log.debug("%s raised %s", tmpl, err)
-                    for tmpl, rendered in zip(templates, data):
-                        v_str = v_str.replace(tmpl, rendered)
-                    # Put the full template line back together as it was, filled or not, and make a
-                    # guess on its intended type.
-                    d[key] = self.reify_scalar_str(v_str)
-
     def dereference_all(self) -> None:
         """
         Dereference iteratively until no Jinja2 templates remain.
         """
         prev = copy.deepcopy(self.data)
-        self.dereference()
+        self._dereference()
         while prev != self.data:
-            self.dereference()
+            self._dereference()
             prev = copy.deepcopy(self.data)
 
     @abstractmethod
@@ -355,6 +276,85 @@ class Config(ABC, UserDict):
         :return: The length of the longest path to a value in the config.
         """
         return (max(map(self._depth, tree.values())) + 1) if isinstance(tree, dict) else 0
+
+    def _dereference(self, d: Optional[dict] = None, value: Optional[dict] = None) -> None:
+        """
+        Recursively replace Jinja2 templates in a Config object.
+
+        In general, this method should be called without arguments. Recursive calls made by the
+        method to itself will supply appropriate arguments.
+
+        :param d: Dictionary potentially containing to-be-rendered Jinja2 templates.
+        :param value: Dictionary providing values to be used for rendering Jinja2 templates.
+        """
+        d = self.data if d is None else d
+        value = self.data if value is None else value
+        for key, val in d.items():
+            if isinstance(val, dict):
+                self._dereference(val, value)
+            else:
+                # Save a bit of compute and only do this part for strings that contain the jinja
+                # double brackets.
+                v_str = str(val)
+                is_a_template = any((ele for ele in ["{{", "{%"] if ele in v_str))
+                if is_a_template:
+                    error_catcher = {}
+                    # Find expressions first, and process them as a single template if they exist.
+                    # Find individual double curly brace template in the string otherwise. We need
+                    # one substitution template at a time so that we can opt to leave some un-filled
+                    # when they are not yet set. For example, we can save cycle-dependent templates
+                    # to fill in at run time.
+                    if "{%" in val:
+                        # Treat entire line as a single template.
+                        templates = [v_str]
+                    else:
+                        # Separate out all the double curly bracket pairs.
+                        templates = re.findall(r"{{[^}]*}}|\S", v_str)
+                    data = []
+                    for template in templates:
+                        # Creating the config object for the template like this, gives us access to
+                        # all the keys in the current section without the need to reference the
+                        # current section name, and to the other sections with dot values. Also make
+                        # environment variables available with env prefix.
+                        if d == value:
+                            values = {**os.environ, **value}
+                        else:
+                            values = {**os.environ, **d, **value}
+                        try:
+                            j2tmpl = J2Template(
+                                values=values,
+                                template_str=template,
+                                loader_args={"undefined": jinja2.StrictUndefined},
+                            )
+                        except jinja2.exceptions.TemplateAssertionError as e:
+                            msg = MSGS.unregistered_filter.format(
+                                filter=repr(e).split()[-1][:-3], key=key
+                            )
+                            raise _log_and_error(msg) from e
+                        rendered = template
+                        try:
+                            # Fill in a template that has the appropriate variables set.
+                            rendered = j2tmpl.render()
+                        except jinja2.exceptions.UndefinedError:
+                            # Leave a templated field as-is in the resulting dict.
+                            error_catcher[template] = "UndefinedError"
+                        except TypeError:
+                            error_catcher[template] = "TypeError"
+                        except ZeroDivisionError:
+                            error_catcher[template] = "ZeroDivisionError"
+                        except Exception as e:
+                            # Fail on any other exception...something is probably wrong.
+                            msg = f"{key}: {template}"
+                            log.exception(msg)
+                            raise e
+                        data.append(rendered)
+                        for tmpl, err in error_catcher.items():
+                            log.debug("%s raised %s", tmpl, err)
+                    for tmpl, rendered in zip(templates, data):
+                        v_str = v_str.replace(tmpl, rendered)
+                    # Put the full template line back together as it was, filled or not, and make a
+                    # guess on its intended type.
+                    d[key] = self.reify_scalar_str(v_str)
 
 
 class INIConfig(Config):
