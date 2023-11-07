@@ -97,7 +97,7 @@ longish_variable: 88
 
 def test__set_up_config_obj_env():
     expected = {"roses": "white", "violets": "blue"}
-    with patch.dict(os.environ, expected):
+    with patch.dict(os.environ, expected, clear=True):
         actual = templater._set_up_values_obj()
     assert actual["roses"] == "white"
     assert actual["violets"] == "blue"

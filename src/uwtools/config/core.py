@@ -745,13 +745,15 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
 
 def _dereference(x: _YAMLVal, context: dict) -> _YAMLVal:
     if isinstance(x, dict):
-        return {k: _dereference(v, context) for k, v in x.items()}
+        return {
+            k: _dereference(v, {**os.environ, **(v if isinstance(v, dict) else context)})
+            for k, v in x.items()
+        }
     if isinstance(x, list):
         return [_dereference(v, context) for v in x]
     if isinstance(x, str):
-        return yaml.safe_load(
-            jinja2.Template(f"'{x}'", undefined=jinja2.DebugUndefined).render(**context)
-        )
+        s = jinja2.Template(f"'{x}'", undefined=jinja2.DebugUndefined).render(**context)
+        return yaml.safe_load(s)
     return x
 
 
