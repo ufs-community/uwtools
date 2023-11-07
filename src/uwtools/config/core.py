@@ -9,7 +9,6 @@ import copy
 import json
 import os
 import re
-import sys
 from abc import ABC, abstractmethod
 from collections import OrderedDict, UserDict
 from types import SimpleNamespace as ns
@@ -184,28 +183,21 @@ class Config(ABC, UserDict):
         """
         return self._depth(self.data)
 
-    def dereference(
-        self, ref_dict: Optional[dict] = None, full_dict: Optional[dict] = None
-    ) -> None:
+    def dereference(self, d: Optional[dict] = None, value: Optional[dict] = None) -> None:
         """
         Recursively replace Jinja2 templates in a Config object.
 
         In general, this method should be called without arguments. Recursive calls made by the
         method to itself will supply appropriate arguments.
 
-        :param ref_dict: Dictionary potentially containing to-be-rendered Jinja2 templates.
-        :param full_dict: Dictionary providing values to be used for rendering Jinja2 templates.
+        :param d: Dictionary potentially containing to-be-rendered Jinja2 templates.
+        :param value: Dictionary providing values to be used for rendering Jinja2 templates.
         """
-        ref_dict = self.data if ref_dict is None else ref_dict
-        full_dict = self.data if full_dict is None else full_dict
-
-        # Choosing sys._getframe() here because it's more efficient than other inspect methods.
-
-        func_name = f"{self.__class__.__name__}.{sys._getframe().f_code.co_name}"  # pylint: disable=protected-access
-
-        for key, val in ref_dict.items():
+        d = self.data if d is None else d
+        value = self.data if value is None else value
+        for key, val in d.items():
             if isinstance(val, dict):
-                self.dereference(val, full_dict)
+                self.dereference(val, value)
             else:
                 # Save a bit of compute and only do this part for strings that contain the jinja
                 # double brackets.
@@ -230,10 +222,10 @@ class Config(ABC, UserDict):
                         # all the keys in the current section without the need to reference the
                         # current section name, and to the other sections with dot values. Also make
                         # environment variables available with env prefix.
-                        if ref_dict == full_dict:
-                            values = {**os.environ, **full_dict}
+                        if d == value:
+                            values = {**os.environ, **value}
                         else:
-                            values = {**os.environ, **ref_dict, **full_dict}
+                            values = {**os.environ, **d, **value}
                         try:
                             j2tmpl = J2Template(
                                 values=values,
@@ -261,18 +253,14 @@ class Config(ABC, UserDict):
                             msg = f"{key}: {template}"
                             log.exception(msg)
                             raise e
-
                         data.append(rendered)
                         for tmpl, err in error_catcher.items():
-                            msg = f"{func_name}: {tmpl} raised {err}"
-                            log.debug(msg)
-
+                            log.debug("%s raised %s", tmpl, err)
                     for tmpl, rendered in zip(templates, data):
                         v_str = v_str.replace(tmpl, rendered)
-
                     # Put the full template line back together as it was, filled or not, and make a
                     # guess on its intended type.
-                    ref_dict[key] = self.reify_scalar_str(v_str)
+                    d[key] = self.reify_scalar_str(v_str)
 
     def dereference_all(self) -> None:
         """
