@@ -18,14 +18,14 @@ import f90nml
 import jinja2
 import yaml
 
-from uwtools.config.j2template import J2Template
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import FORMAT, get_file_type, readable, writable
 
-INCLUDE_TAG = "!INCLUDE"
-MSGS = ns(
+_INCLUDE_TAG = "!INCLUDE"
+
+_MSGS = ns(
     unhashable="""
 ERROR:
 The input config file may contain a Jinja2 templated value at the location listed above. Ensure the
@@ -50,6 +50,8 @@ key: {key}
 Define the filter before proceeding.
 """.strip(),
 )
+
+_YAMLVal = Union[bool, dict, float, int, list, str]
 
 
 class Config(ABC, UserDict):
@@ -189,7 +191,7 @@ class Config(ABC, UserDict):
         """
         while True:
             prev = copy.deepcopy(self.data)
-            self._dereference()
+            _dereference(self.data, **{**os.environ, **self.data})
             if self.data == prev:
                 break
 
@@ -228,22 +230,22 @@ class Config(ABC, UserDict):
             if isinstance(value, dict):
                 self.parse_include(ref_dict[key])
             elif isinstance(value, str):
-                if m := re.match(r"^\s*%s\s+(.*)" % INCLUDE_TAG, value):
+                if m := re.match(r"^\s*%s\s+(.*)" % _INCLUDE_TAG, value):
                     filepaths = yaml.safe_load(m[1])
                     self.update_values(self._load_paths(filepaths))
                     del ref_dict[key]
 
-    def reify_scalar_str(self, s: str) -> Union[bool, float, int, str]:
-        """
-        Reify a string to a Python object, using YAML. Jinja2 templates will be passed as-is.
+    # def reify_scalar_str(self, s: str) -> Union[bool, float, int, str]:
+    #     """
+    #     Reify a string to a Python object, using YAML. Jinja2 templates will be passed as-is.
 
-        :param s: The string to reify.
-        """
-        try:
-            r = yaml.safe_load(s)
-        except yaml.YAMLError:
-            return s
-        return r
+    #     :param s: The string to reify.
+    #     """
+    #     try:
+    #         r = yaml.safe_load(s)
+    #     except yaml.YAMLError:
+    #         return s
+    #     return r
 
     def update_values(self, src: Union[dict, Config], dst: Optional[Config] = None):
         """
@@ -276,82 +278,6 @@ class Config(ABC, UserDict):
         :return: The length of the longest path to a value in the config.
         """
         return (max(map(self._depth, tree.values())) + 1) if isinstance(tree, dict) else 0
-
-    def _dereference(self, d: Optional[dict] = None, vals_dict: Optional[dict] = None) -> None:
-        """
-        Recursively render Jinja2 values in dictionary.
-
-        In general, this method should be called without arguments. Recursive calls made by the
-        method to itself will supply appropriate arguments.
-
-        :param d: Dictionary potentially containing Jinja2-template values.
-        :param vals_dict: Values to be used for rendering Jinja2 templates.
-        """
-        d = self.data if d is None else d
-        vals_dict = d if vals_dict is None else vals_dict
-        for key, val in d.items():
-            if isinstance(val, dict):
-                self._dereference(val, vals_dict)
-                continue
-            v_str = str(val)
-            if any((ele for ele in ["{{", "{%"] if ele in v_str)):
-                error_catcher = {}
-                # Find expressions first, and process them as a single template if they exist.
-                # Find individual double curly brace template in the string otherwise. We need
-                # one substitution template at a time so that we can opt to leave some un-filled
-                # when they are not yet set. For example, we can save cycle-dependent templates
-                # to fill in at run time.
-                if "{%" in val:
-                    # Treat entire line as a single template.
-                    templates = [v_str]
-                else:
-                    # Separate out all the double curly bracket pairs.
-                    templates = re.findall(r"{{[^}]*}}|\S", v_str)
-                data = []
-                for template in templates:
-                    # Creating the config object for the template like this, gives us access to
-                    # all the keys in the current section without the need to reference the
-                    # current section name, and to the other sections with dot values. Also make
-                    # environment variables available with env prefix.
-                    if d == vals_dict:
-                        values = {**os.environ, **vals_dict}
-                    else:
-                        values = {**os.environ, **d, **vals_dict}
-                    try:
-                        j2tmpl = J2Template(
-                            values=values,
-                            template_str=template,
-                            loader_args={"undefined": jinja2.StrictUndefined},
-                        )
-                    except jinja2.exceptions.TemplateAssertionError as e:
-                        msg = MSGS.unregistered_filter.format(
-                            filter=repr(e).split()[-1][:-3], key=key
-                        )
-                        raise _log_and_error(msg) from e
-                    rendered = template
-                    try:
-                        # Fill in a template that has the appropriate variables set.
-                        rendered = j2tmpl.render()
-                    except jinja2.exceptions.UndefinedError:
-                        # Leave a templated field as-is in the resulting dict.
-                        error_catcher[template] = "UndefinedError"
-                    except TypeError:
-                        error_catcher[template] = "TypeError"
-                    except ZeroDivisionError:
-                        error_catcher[template] = "ZeroDivisionError"
-                    except Exception as e:
-                        # Fail on any other exception...something is probably wrong.
-                        msg = f"{key}: {template}"
-                        log.exception(msg)
-                        raise e
-                    data.append(rendered)
-                    for tmpl, err in error_catcher.items():
-                        log.debug("%s raised %s", tmpl, err)
-                for tmpl, rendered in zip(templates, data):
-                    v_str = v_str.replace(tmpl, rendered)
-                # Put the full template line back together as it was, filled or not, and make a
-                # guess on its intended type.
-                d[key] = self.reify_scalar_str(v_str)
 
 
 class INIConfig(Config):
@@ -521,10 +447,10 @@ class YAMLConfig(Config):
             except yaml.constructor.ConstructorError as e:
                 if e.problem:
                     if "unhashable" in e.problem:
-                        msg = MSGS.unhashable
+                        msg = _MSGS.unhashable
                     else:
                         constructor = e.problem.split()[-1]
-                        msg = MSGS.unregistered_constructor.format(
+                        msg = _MSGS.unregistered_constructor.format(
                             config_file=config_file, constructor=constructor
                         )
                 else:
@@ -547,7 +473,7 @@ class YAMLConfig(Config):
         Set up the loader with the appropriate constructors.
         """
         loader = yaml.SafeLoader
-        loader.add_constructor(INCLUDE_TAG, self._yaml_include)
+        loader.add_constructor(_INCLUDE_TAG, self._yaml_include)
         return loader
 
     # Public methods
@@ -814,3 +740,92 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
     for var in empty:
         log.info(var)
     return True
+
+
+def _dereference(x: _YAMLVal, context: dict) -> _YAMLVal:
+    if isinstance(x, dict):
+        return {k: _dereference(v, context) for k, v in x.items()}
+    if isinstance(x, list):
+        return [_dereference(v, context) for v in x]
+    if isinstance(x, str):
+        return yaml.safe_load(
+            jinja2.Template(f"'{x}'", undefined=jinja2.DebugUndefined).render(**context)
+        )
+    return x
+
+
+# def _old_dereference(self, d: Optional[dict] = None, vals_dict: Optional[dict] = None) -> None:
+#     """
+#     Recursively render Jinja2 values in dictionary.
+
+#     In general, this method should be called without arguments. Recursive calls made by the
+#     method to itself will supply appropriate arguments.
+
+#     :param d: Dictionary potentially containing Jinja2-template values.
+#     :param vals_dict: Values to be used for rendering Jinja2 templates.
+#     """
+#     d = self.data if d is None else d
+#     vals_dict = d if vals_dict is None else vals_dict
+#     for key, val in d.items():
+#         if isinstance(val, dict):
+#             self._dereference(val, vals_dict)
+#             continue
+#         v_str = str(val)
+#         if any((ele for ele in ["{{", "{%"] if ele in v_str)):
+#             error_catcher = {}
+#             # Find expressions first, and process them as a single template if they exist.
+#             # Find individual double curly brace template in the string otherwise. We need
+#             # one substitution template at a time so that we can opt to leave some un-filled
+#             # when they are not yet set. For example, we can save cycle-dependent templates
+#             # to fill in at run time.
+#             if "{%" in val:
+#                 # Treat entire line as a single template.
+#                 templates = [v_str]
+#             else:
+#                 # Separate out all the double curly bracket pairs.
+#                 templates = re.findall(r"{{[^}]*}}|\S", v_str)
+#             data = []
+#             for template in templates:
+#                 # Creating the config object for the template like this, gives us access to
+#                 # all the keys in the current section without the need to reference the
+#                 # current section name, and to the other sections with dot values. Also make
+#                 # environment variables available with env prefix.
+#                 if d == vals_dict:
+#                     values = {**os.environ, **vals_dict}
+#                 else:
+#                     values = {**os.environ, **d, **vals_dict}
+#                 try:
+#                     j2tmpl = J2Template(
+#                         values=values,
+#                         template_str=template,
+#                         loader_args={"undefined": jinja2.StrictUndefined},
+#                     )
+#                 except jinja2.exceptions.TemplateAssertionError as e:
+#                     msg = _MSGS.unregistered_filter.format(
+#                         filter=repr(e).split()[-1][:-3], key=key
+#                     )
+#                     raise _log_and_error(msg) from e
+#                 rendered = template
+#                 try:
+#                     # Fill in a template that has the appropriate variables set.
+#                     rendered = j2tmpl.render()
+#                 except jinja2.exceptions.UndefinedError:
+#                     # Leave a templated field as-is in the resulting dict.
+#                     error_catcher[template] = "UndefinedError"
+#                 except TypeError:
+#                     error_catcher[template] = "TypeError"
+#                 except ZeroDivisionError:
+#                     error_catcher[template] = "ZeroDivisionError"
+#                 except Exception as e:
+#                     # Fail on any other exception...something is probably wrong.
+#                     msg = f"{key}: {template}"
+#                     log.exception(msg)
+#                     raise e
+#                 data.append(rendered)
+#                 for tmpl, err in error_catcher.items():
+#                     log.debug("%s raised %s", tmpl, err)
+#             for tmpl, rendered in zip(templates, data):
+#                 v_str = v_str.replace(tmpl, rendered)
+#             # Put the full template line back together as it was, filled or not, and make a
+#             # guess on its intended type.
+#             d[key] = self.reify_scalar_str(v_str)
