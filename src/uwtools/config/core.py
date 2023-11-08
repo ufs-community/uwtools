@@ -237,17 +237,17 @@ class Config(ABC, UserDict):
                     self.update_values(self._load_paths(filepaths))
                     del ref_dict[key]
 
-    def reify_scalar_str(self, s: str) -> Union[bool, float, int, str]:
-        """
-        Reify a string to a Python object, using YAML. Jinja2 templates will be passed as-is.
+    # def reify_scalar_str(self, s: str) -> Union[bool, float, int, str]:
+    #     """
+    #     Reify a string to a Python object, using YAML. Jinja2 templates will be passed as-is.
 
-        :param s: The string to reify.
-        """
-        try:
-            r = yaml.safe_load(s)
-        except yaml.YAMLError:
-            return s
-        return r
+    #     :param s: The string to reify.
+    #     """
+    #     try:
+    #         r = yaml.safe_load(s)
+    #     except yaml.YAMLError:
+    #         return s
+    #     return r
 
     def update_values(self, src: Union[dict, Config], dst: Optional[Config] = None):
         """
@@ -754,6 +754,13 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
 
 
 def _add_filters(env: jinja2.Environment) -> jinja2.Environment:
+    """
+    Add filters to a Jinja2 Environment.
+
+    :param env: The Environment to add the filters to.
+    :return: The input Environment, with filters added.
+    """
+
     def path_join(path_components: List[str]) -> str:
         if any(isinstance(x, jinja2.Undefined) for x in path_components):
             raise jinja2.exceptions.UndefinedError()
@@ -780,7 +787,7 @@ def _dereference(val: _YAMLVal, context: dict) -> _YAMLVal:
                     .render(**context)
                 )
             )
-        except Exception:  # pylint: disable=broad-exception-caught
+        except:  # pylint: disable=bare-except
             pass
     return val
 

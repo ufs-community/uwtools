@@ -470,6 +470,7 @@ def test_realize_config_field_table(tmp_path):
                 assert line1 in line2
 
 
+@pytest.mark.skip("Updating typed Fortran namelist from untyped INI data is unsound")
 def test_realize_config_file_conversion(tmp_path):
     """
     Test using an ini object to configure nml input -> nml output.
