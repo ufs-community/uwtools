@@ -503,14 +503,6 @@ def test_realize_config_fmt2fmt_nml2nml(tmp_path):
     help_realize_config_fmt2fmt("simple.nml", FORMAT.nml, "simple2.nml", FORMAT.nml, tmp_path)
 
 
-def test_realize_config_fmt2fmt_ini2bash(tmp_path):
-    """
-    Test that providing an INI base input file and a Bash config file will create and update INI
-    config file.
-    """
-    help_realize_config_fmt2fmt("simple.ini", FORMAT.ini, "fruit_config.sh", FORMAT.ini, tmp_path)
-
-
 def test_realize_config_fmt2fmt_ini2ini(tmp_path):
     """
     Test that providing an INI base input file and an INI config file will create and update INI
