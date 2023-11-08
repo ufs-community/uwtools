@@ -331,7 +331,7 @@ class INIConfig(Config):
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
-        Dumps a provided config dictionary in INI format.
+        Dumps a provided config dictionary in INI or sh format.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
