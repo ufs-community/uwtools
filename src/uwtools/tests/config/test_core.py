@@ -323,10 +323,10 @@ def test_path_if_it_exists(tmp_path):
     assert path_if_it_exists(goodfile)
 
 
-def test_print_config_section_ini(capsys):
+def test__print_config_section_ini(capsys):
     config_obj = INIConfig(fixture_path("simple3.ini"))
     section = ["dessert"]
-    tools.print_config_section(config_obj.data, section)
+    tools._print_config_section(config_obj.data, section)
     actual = capsys.readouterr().out
     expected = """
 flavor={{flavor}}
@@ -337,19 +337,19 @@ type=pie
     assert actual == expected
 
 
-def test_print_config_section_ini_missing_section():
+def test__print_config_section_ini_missing_section():
     config_obj = INIConfig(fixture_path("simple3.ini"))
     section = ["sandwich"]
     msg = "Bad config path: sandwich"
     with raises(UWConfigError) as e:
-        tools.print_config_section(config_obj.data, section)
+        tools._print_config_section(config_obj.data, section)
     assert msg in str(e.value)
 
 
-def test_print_config_section_yaml(capsys):
+def test__print_config_section_yaml(capsys):
     config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
     section = ["sgs_tke", "profile_type"]
-    tools.print_config_section(config_obj.data, section)
+    tools._print_config_section(config_obj.data, section)
     actual = capsys.readouterr().out
     expected = """
 name=fixed
@@ -358,27 +358,27 @@ surface_value=0.0
     assert actual == expected
 
 
-def test_print_config_section_yaml_for_nonscalar():
+def test__print_config_section_yaml_for_nonscalar():
     config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
     section = ["o3mr"]
     with raises(UWConfigError) as e:
-        tools.print_config_section(config_obj.data, section)
+        tools._print_config_section(config_obj.data, section)
     assert "Non-scalar value" in str(e.value)
 
 
-def test_print_config_section_yaml_list():
+def test__print_config_section_yaml_list():
     config_obj = YAMLConfig(fixture_path("srw_example.yaml"))
     section = ["FV3GFS", "nomads", "file_names", "grib2", "anl"]
     with raises(UWConfigError) as e:
-        tools.print_config_section(config_obj.data, section)
+        tools._print_config_section(config_obj.data, section)
     assert "must be a dictionary" in str(e.value)
 
 
-def test_print_config_section_yaml_not_dict():
+def test__print_config_section_yaml_not_dict():
     config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
     section = ["sgs_tke", "units"]
     with raises(UWConfigError) as e:
-        tools.print_config_section(config_obj.data, section)
+        tools._print_config_section(config_obj.data, section)
     assert "must be a dictionary" in str(e.value)
 
 

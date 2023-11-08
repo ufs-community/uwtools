@@ -38,31 +38,6 @@ def compare_configs(
     return cfg_a.compare_config(cfg_b.data)
 
 
-def print_config_section(config: dict, key_path: List[str]) -> None:
-    """
-    Descends into the config via the given keys, then prints the contents of the located subtree as
-    key=value pairs, one per line.
-    """
-    keys = []
-    current_path = "<unknown>"
-    for section in key_path:
-        keys.append(section)
-        current_path = " -> ".join(keys)
-        try:
-            subconfig = config[section]
-        except KeyError as e:
-            raise log_and_error(f"Bad config path: {current_path}") from e
-        if not isinstance(subconfig, dict):
-            raise log_and_error(f"Value at {current_path} must be a dictionary")
-        config = subconfig
-    output_lines = []
-    for key, value in config.items():
-        if type(value) not in (bool, float, int, str):
-            raise log_and_error(f"Non-scalar value {value} found at {current_path}")
-        output_lines.append(f"{key}={value}")
-    print("\n".join(sorted(output_lines)))
-
-
 def realize_config(
     input_file: OptionalPath,
     input_format: str,
@@ -102,6 +77,31 @@ def realize_config(
 
 
 # Private functions
+
+
+def _print_config_section(config: dict, key_path: List[str]) -> None:
+    """
+    Descends into the config via the given keys, then prints the contents of the located subtree as
+    key=value pairs, one per line.
+    """
+    keys = []
+    current_path = "<unknown>"
+    for section in key_path:
+        keys.append(section)
+        current_path = " -> ".join(keys)
+        try:
+            subconfig = config[section]
+        except KeyError as e:
+            raise log_and_error(f"Bad config path: {current_path}") from e
+        if not isinstance(subconfig, dict):
+            raise log_and_error(f"Value at {current_path} must be a dictionary")
+        config = subconfig
+    output_lines = []
+    for key, value in config.items():
+        if type(value) not in (bool, float, int, str):
+            raise log_and_error(f"Non-scalar value {value} found at {current_path}")
+        output_lines.append(f"{key}={value}")
+    print("\n".join(sorted(output_lines)))
 
 
 def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
