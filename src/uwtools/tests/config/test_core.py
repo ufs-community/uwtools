@@ -18,7 +18,7 @@ import yaml
 from pytest import fixture, raises
 
 from uwtools import exceptions
-from uwtools.config import core, support
+from uwtools.config import support, tools
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
@@ -37,7 +37,7 @@ def test_compare_config(caplog, fmt, salad_base):
     Compare two config objects.
     """
     log.setLevel(logging.INFO)
-    cfgobj = core.format_to_config(fmt)(fixture_path(f"simple.{fmt}"))
+    cfgobj = tools.format_to_config(fmt)(fixture_path(f"simple.{fmt}"))
     if fmt == FORMAT.ini:
         salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini
     assert cfgobj.compare_config(salad_base) is True
@@ -62,7 +62,7 @@ def test_compare_config(caplog, fmt, salad_base):
 def test_compare_configs_good(compare_configs_assets, caplog):
     log.setLevel(logging.INFO)
     _, a, b = compare_configs_assets
-    assert core.compare_configs(
+    assert tools.compare_configs(
         config_a_path=a, config_a_format=FORMAT.yaml, config_b_path=b, config_b_format=FORMAT.yaml
     )
     assert caplog.records
@@ -74,7 +74,7 @@ def test_compare_configs_changed_value(compare_configs_assets, caplog):
     d["baz"]["qux"] = 11
     with writable(b) as f:
         yaml.dump(d, f)
-    assert not core.compare_configs(
+    assert not tools.compare_configs(
         config_a_path=a, config_a_format=FORMAT.yaml, config_b_path=b, config_b_format=FORMAT.yaml
     )
     assert logged(caplog, "baz:             qux:  - 99 + 11")
@@ -87,7 +87,7 @@ def test_compare_configs_missing_key(compare_configs_assets, caplog):
     with writable(b) as f:
         yaml.dump(d, f)
     # Note that a and b are swapped:
-    assert not core.compare_configs(
+    assert not tools.compare_configs(
         config_a_path=b, config_a_format=FORMAT.yaml, config_b_path=a, config_b_format=FORMAT.yaml
     )
     assert logged(caplog, "baz:             qux:  - None + 99")
@@ -96,7 +96,7 @@ def test_compare_configs_missing_key(compare_configs_assets, caplog):
 def test_compare_configs_bad_format(caplog):
     log.setLevel(logging.INFO)
     with raises(UWConfigError) as e:
-        core.compare_configs(
+        tools.compare_configs(
             config_a_path="/not/used",
             config_a_format="jpg",
             config_b_path="/not/used",
@@ -132,7 +132,7 @@ def test_depth(depth, fn):
     """
     infile = fixture_path(fn)
     fmt = Path(infile).suffix.replace(".", "")
-    cfgobj = core.format_to_config(fmt)(infile)
+    cfgobj = tools.format_to_config(fmt)(infile)
     assert cfgobj.depth == depth
 
 
@@ -326,7 +326,7 @@ def test_path_if_it_exists(tmp_path):
 def test_print_config_section_ini(capsys):
     config_obj = INIConfig(fixture_path("simple3.ini"))
     section = ["dessert"]
-    core.print_config_section(config_obj.data, section)
+    tools.print_config_section(config_obj.data, section)
     actual = capsys.readouterr().out
     expected = """
 flavor={{flavor}}
@@ -342,14 +342,14 @@ def test_print_config_section_ini_missing_section():
     section = ["sandwich"]
     msg = "Bad config path: sandwich"
     with raises(UWConfigError) as e:
-        core.print_config_section(config_obj.data, section)
+        tools.print_config_section(config_obj.data, section)
     assert msg in str(e.value)
 
 
 def test_print_config_section_yaml(capsys):
     config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
     section = ["sgs_tke", "profile_type"]
-    core.print_config_section(config_obj.data, section)
+    tools.print_config_section(config_obj.data, section)
     actual = capsys.readouterr().out
     expected = """
 name=fixed
@@ -362,7 +362,7 @@ def test_print_config_section_yaml_for_nonscalar():
     config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
     section = ["o3mr"]
     with raises(UWConfigError) as e:
-        core.print_config_section(config_obj.data, section)
+        tools.print_config_section(config_obj.data, section)
     assert "Non-scalar value" in str(e.value)
 
 
@@ -370,7 +370,7 @@ def test_print_config_section_yaml_list():
     config_obj = YAMLConfig(fixture_path("srw_example.yaml"))
     section = ["FV3GFS", "nomads", "file_names", "grib2", "anl"]
     with raises(UWConfigError) as e:
-        core.print_config_section(config_obj.data, section)
+        tools.print_config_section(config_obj.data, section)
     assert "must be a dictionary" in str(e.value)
 
 
@@ -378,7 +378,7 @@ def test_print_config_section_yaml_not_dict():
     config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
     section = ["sgs_tke", "units"]
     with raises(UWConfigError) as e:
-        core.print_config_section(config_obj.data, section)
+        tools.print_config_section(config_obj.data, section)
     assert "must be a dictionary" in str(e.value)
 
 
@@ -388,7 +388,7 @@ def test_realize_config_conversion_cfg_to_yaml(tmp_path):
     """
     infile = fixture_path("srw_example_yaml.cfg")
     outfile = str(tmp_path / "test_ouput.yaml")
-    core.realize_config(
+    tools.realize_config(
         input_file=infile,
         input_format=FORMAT.yaml,
         output_file=outfile,
@@ -407,7 +407,7 @@ def test_realize_config_conversion_cfg_to_yaml(tmp_path):
 
 def test_realize_config_depth_mismatch_to_ini(realize_config_yaml_input):
     with raises(UWConfigError):
-        core.realize_config(
+        tools.realize_config(
             input_file=realize_config_yaml_input,
             input_format=FORMAT.yaml,
             output_file=None,
@@ -419,7 +419,7 @@ def test_realize_config_depth_mismatch_to_ini(realize_config_yaml_input):
 
 def test_realize_config_depth_mismatch_to_nml(realize_config_yaml_input):
     with raises(UWConfigError):
-        core.realize_config(
+        tools.realize_config(
             input_file=realize_config_yaml_input,
             input_format=FORMAT.yaml,
             output_file=None,
@@ -437,7 +437,7 @@ def test_realize_config_dry_run(caplog):
     infile = fixture_path("fruit_config.yaml")
     yaml_config = YAMLConfig(infile)
     yaml_config.dereference_all()
-    core.realize_config(
+    tools.realize_config(
         input_file=infile,
         input_format=FORMAT.yaml,
         output_file=None,
@@ -457,7 +457,7 @@ def test_realize_config_field_table(tmp_path):
     """
     infile = fixture_path("FV3_GFS_v16.yaml")
     outfile = str(tmp_path / "field_table_from_yaml.FV3_GFS")
-    core.realize_config(
+    tools.realize_config(
         input_file=infile,
         input_format=FORMAT.yaml,
         output_file=outfile,
@@ -482,7 +482,7 @@ def test_realize_config_file_conversion(tmp_path):
     infile = fixture_path("simple2.nml")
     cfgfile = fixture_path("simple2.ini")
     outfile = str(tmp_path / "test_config_conversion.nml")
-    core.realize_config(
+    tools.realize_config(
         input_file=infile,
         input_format=FORMAT.nml,
         output_file=outfile,
@@ -531,7 +531,7 @@ def test_realize_config_incompatible_file_type():
     Test that providing an incompatible file type for input base file will return print statement.
     """
     with raises(UWConfigError):
-        core.realize_config(
+        tools.realize_config(
             input_file=fixture_path("model_configure.sample"),
             input_format="sample",
             output_file=None,
@@ -547,7 +547,7 @@ def test_realize_config_output_file_conversion(tmp_path):
     """
     infile = fixture_path("simple.nml")
     outfile = str(tmp_path / "test_ouput.cfg")
-    core.realize_config(
+    tools.realize_config(
         input_file=infile,
         input_format=FORMAT.nml,
         output_file=outfile,
@@ -595,11 +595,11 @@ def test_realize_config_simple_yaml(tmp_path):
 @pytest.mark.parametrize("fmt", ["ini", "nml"])
 def test__realize_config_check_depths_fail_nml(fmt, realize_config_testobj):
     with raises(UWConfigError):
-        core._realize_config_check_depths(input_obj=realize_config_testobj, output_format=fmt)
+        tools._realize_config_check_depths(input_obj=realize_config_testobj, output_format=fmt)
 
 
 def test__realize_config_update_noop(realize_config_testobj):
-    assert realize_config_testobj == core._realize_config_update(
+    assert realize_config_testobj == tools._realize_config_update(
         input_obj=realize_config_testobj, values_file=None, values_format=None
     )
 
@@ -610,7 +610,7 @@ def test__realize_config_update(realize_config_testobj, tmp_path):
     path = tmp_path / "values.yaml"
     with writable(path) as f:
         yaml.dump({1: {2: {3: {4: 99}}}}, f)  # depth 4
-    o = core._realize_config_update(input_obj=o, values_file=path, values_format=FORMAT.yaml)
+    o = tools._realize_config_update(input_obj=o, values_file=path, values_format=FORMAT.yaml)
     assert o.depth == 4
     assert o[1][2][3][4] == 99
 
@@ -621,7 +621,7 @@ def test__realize_config_values_needed(caplog, tmp_path):
     with writable(path) as f:
         yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
     c = YAMLConfig(config_file=path)
-    core._realize_config_values_needed(input_obj=c)
+    tools._realize_config_values_needed(input_obj=c)
     msgs = "\n".join(record.message for record in caplog.records)
     assert "Keys that are complete:\n    1" in msgs
     assert "Keys that have unfilled Jinja2 templates:\n    2" in msgs
@@ -636,8 +636,8 @@ def test_transform_config(fmt1, fmt2, tmp_path):
     """
     outfile = tmp_path / f"test_{fmt1.lower()}to{fmt2.lower()}_dump.{fmt2}"
     reference = fixture_path(f"simple.{fmt2}")
-    cfgin = core.format_to_config(fmt1)(fixture_path(f"simple.{fmt1}"))
-    core.format_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)
+    cfgin = tools.format_to_config(fmt1)(fixture_path(f"simple.{fmt1}"))
+    tools.format_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)
     with open(reference, "r", encoding="utf-8") as f1:
         reflines = [line.strip().replace("'", "") for line in f1]
     with open(outfile, "r", encoding="utf-8") as f2:
@@ -652,7 +652,7 @@ def test_values_needed_ini(caplog):
     and keys set to empty.
     """
     log.setLevel(logging.INFO)
-    core.realize_config(
+    tools.realize_config(
         input_file=fixture_path("simple3.ini"),
         input_format=FORMAT.ini,
         output_file=None,
@@ -691,7 +691,7 @@ def test_values_needed_nml(caplog):
     and keys set to empty.
     """
     log.setLevel(logging.INFO)
-    core.realize_config(
+    tools.realize_config(
         input_file=fixture_path("simple3.nml"),
         input_format=FORMAT.nml,
         output_file=None,
@@ -727,7 +727,7 @@ def test_values_needed_yaml(caplog):
     and keys set to empty.
     """
     log.setLevel(logging.INFO)
-    core.realize_config(
+    tools.realize_config(
         input_file=fixture_path("srw_example.yaml"),
         input_format=FORMAT.yaml,
         output_file=None,
@@ -884,7 +884,7 @@ def test_Config_characterize_values(nml_cfgobj):
 
 # def test_Config__dereference_unexpected_error(nml_cfgobj):
 #     exctype = FloatingPointError
-#     with patch.object(core.J2Template, "render", side_effect=exctype):
+#     with patch.object(tools.J2Template, "render", side_effect=exctype):
 #         with raises(exctype):
 #             nml_cfgobj._dereference(d={"n": "{{ n }}"})
 
@@ -943,7 +943,7 @@ def help_realize_config_fmt2fmt(infn, infmt, cfgfn, cfgfmt, tmpdir):
     cfgfile = fixture_path(cfgfn)
     ext = Path(infile).suffix
     outfile = str(tmpdir / f"outfile{ext}")
-    core.realize_config(
+    tools.realize_config(
         input_file=infile,
         input_format=infmt,
         output_file=outfile,
@@ -951,7 +951,7 @@ def help_realize_config_fmt2fmt(infn, infmt, cfgfn, cfgfmt, tmpdir):
         values_file=cfgfile,
         values_format=cfgfmt,
     )
-    cfgclass = core.format_to_config(infmt)
+    cfgclass = tools.format_to_config(infmt)
     cfgobj = cfgclass(infile)
     cfgobj.update_values(cfgclass(cfgfile))
     reference = tmpdir / "expected"
@@ -963,7 +963,7 @@ def help_realize_config_simple(infn, infmt, tmpdir):
     infile = fixture_path(infn)
     ext = Path(infile).suffix
     outfile = str(tmpdir / f"outfile{ext}")
-    core.realize_config(
+    tools.realize_config(
         input_file=infile,
         input_format=infmt,
         output_file=outfile,
@@ -971,7 +971,7 @@ def help_realize_config_simple(infn, infmt, tmpdir):
         values_file=None,
         values_format=None,
     )
-    cfgobj = core.format_to_config(infmt)(infile)
+    cfgobj = tools.format_to_config(infmt)(infile)
     reference = tmpdir / f"reference{ext}"
     cfgobj.dump(reference)
     assert compare_files(reference, outfile)
