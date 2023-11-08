@@ -190,11 +190,11 @@ class Config(ABC, UserDict):
         Dereference iteratively until no Jinja2 templates remain.
         """
         while True:
-            dereferenced = _dereference(x=self.data, context={**os.environ, **self.data})
-            if dereferenced == self.data:
+            new = _dereference(val=self.data, context={**os.environ, **self.data})
+            if new == self.data:
                 break
-            assert isinstance(dereferenced, dict)
-            self.data = dereferenced
+            assert isinstance(new, dict)
+            self.data = new
 
     @abstractmethod
     def dump(self, path: OptionalPath) -> None:
@@ -236,17 +236,17 @@ class Config(ABC, UserDict):
                     self.update_values(self._load_paths(filepaths))
                     del ref_dict[key]
 
-    # def reify_scalar_str(self, s: str) -> Union[bool, float, int, str]:
-    #     """
-    #     Reify a string to a Python object, using YAML. Jinja2 templates will be passed as-is.
+    def reify_scalar_str(self, s: str) -> Union[bool, float, int, str]:
+        """
+        Reify a string to a Python object, using YAML. Jinja2 templates will be passed as-is.
 
-    #     :param s: The string to reify.
-    #     """
-    #     try:
-    #         r = yaml.safe_load(s)
-    #     except yaml.YAMLError:
-    #         return s
-    #     return r
+        :param s: The string to reify.
+        """
+        try:
+            r = yaml.safe_load(s)
+        except yaml.YAMLError:
+            return s
+        return r
 
     def update_values(self, src: Union[dict, Config], dst: Optional[Config] = None):
         """
@@ -743,18 +743,49 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
     return True
 
 
-def _dereference(x: _YAMLVal, context: dict) -> _YAMLVal:
-    if isinstance(x, dict):
-        return {
-            k: _dereference(v, {**os.environ, **(v if isinstance(v, dict) else context)})
-            for k, v in x.items()
-        }
-    if isinstance(x, list):
-        return [_dereference(v, context) for v in x]
-    if isinstance(x, str):
-        s = jinja2.Template(f"'{x}'", undefined=jinja2.DebugUndefined).render(**context)
-        return yaml.safe_load(s)
-    return x
+def _add_filters(env: jinja2.Environment) -> jinja2.Environment:
+    def path_join(path_components: List[str]) -> str:
+        if any(isinstance(x, jinja2.Undefined) for x in path_components):
+            raise jinja2.exceptions.UndefinedError()
+        return os.path.join(*path_components)
+
+    filters = dict(
+        path_join=path_join,
+    )
+    env.filters.update(filters)
+    return env
+
+
+def _dereference(val: _YAMLVal, context: dict) -> _YAMLVal:
+    if isinstance(val, dict):
+        return {k: _dereference(v, context) for k, v in val.items()}
+    if isinstance(val, list):
+        return [_dereference(v, context) for v in val]
+    if isinstance(val, str):
+        try:
+            return _reify_scalar_str(
+                yaml.safe_load(
+                    _add_filters(jinja2.Environment(undefined=jinja2.DebugUndefined))
+                    .from_string(f"'{val}'")
+                    .render(**context)
+                )
+            )
+        except Exception:
+            pass
+    return val
+
+
+def _reify_scalar_str(s: str) -> Union[bool, float, int, str]:
+    """
+    Reify a string to a Python object, using YAML. Jinja2 templates will be passed as-is.
+
+    :param s: The string to reify.
+    """
+    try:
+        r = yaml.safe_load(s)
+    except yaml.YAMLError:
+        return s
+    return r
 
 
 # def _old_dereference(self, d: Optional[dict] = None, vals_dict: Optional[dict] = None) -> None:

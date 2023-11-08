@@ -11,7 +11,7 @@ fcst:
   y_grid_points: 100
   length: 12
   freq: 3
-  output_hours: '{% for h in range(0, length, freq) %}{{ "%d " % h }}{% endfor %}'
+  output_hours: '{% for h in range(0, fcst.length, fcst.freq) %}{{ "%d " % h }}{% endfor %}'
 
 executable: '{{ UFSEXEC }}'
 undefined_env: '{{ NOPE }}'
@@ -25,8 +25,8 @@ testupdate: '{{ updatethis }}'
 updatethis: 'testpassed'
 
 grid_stats:
-  total_ens_points: '{{ (num_ens_members * total_points ) // 1 }}'
+  total_ens_points: '{{ (grid_stats.num_ens_members * grid_stats.total_points ) // 1 }}'
   num_ens_members: 30
-  points_per_level: '{{ total_ens_points // num_ens_members // fcst.vertical_resolution }}'
+  points_per_level: '{{ grid_stats.total_ens_points // grid_stats.num_ens_members // fcst.vertical_resolution }}'
   ref_fcst: '{{ fcst.vertical_resolution }}'
   total_points: '{{ fcst.x_grid_points * fcst.y_grid_points * fcst.vertical_resolution }}'
