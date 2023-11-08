@@ -1,5 +1,5 @@
 """
-Core classes and functions for working with configs.
+Core logic for working with configs.
 """
 
 from typing import List, Optional
