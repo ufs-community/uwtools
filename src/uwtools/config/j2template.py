@@ -3,13 +3,25 @@ Support for handling Jinja2 templates.
 """
 
 import os
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Union
 
-from jinja2 import BaseLoader, Environment, FileSystemLoader, Template, meta
+import yaml
+from jinja2 import (
+    BaseLoader,
+    DebugUndefined,
+    Environment,
+    FileSystemLoader,
+    Template,
+    Undefined,
+    meta,
+)
+from jinja2.exceptions import UndefinedError
 
 from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import readable, writable
+
+_YAMLVal = Union[bool, dict, float, int, list, str]
 
 
 class J2Template:
@@ -105,23 +117,63 @@ class J2Template:
 # Public functions
 
 
-def path_join(path_components: List[str]) -> str:
+def dereference(val: _YAMLVal, context: dict) -> _YAMLVal:
     """
-    A Jinja2 filter definition for joining paths.
+    Render Jinja2 syntax, wherever possible.
 
-    :param path_components: The filesystem path components to join into a single path.
-    :return: The joined path.
+    :param val: A value possibly containing Jinja2 syntax.
+    :param context: Values to use when rendering Jinja2 syntax.
+    :return: The input value, with Jinja2 syntax rendered.
     """
-    return os.path.join(*path_components)
+    if isinstance(val, dict):
+        return {k: dereference(v, context) for k, v in val.items()}
+    if isinstance(val, list):
+        return [dereference(v, context) for v in val]
+    if isinstance(val, str):
+        try:
+            return _reify_scalar_str(
+                yaml.safe_load(
+                    _register_filters(Environment(undefined=DebugUndefined))
+                    .from_string(f"'{val}'")
+                    .render(**context)
+                )
+            )
+        except:  # pylint: disable=bare-except
+            pass
+    return val
 
 
 # Private functions
 
 
-def _register_filters(j2env: Environment) -> None:
+def _register_filters(env: Environment) -> Environment:
     """
-    Register a set of filters with a Jinja2 Environment.
+    Add filters to a Jinja2 Environment.
 
-    :param j2env: The Jinja2 Environment with which to register filters.
+    :param env: The Environment to add the filters to.
+    :return: The input Environment, with filters added.
     """
-    j2env.filters["path_join"] = path_join
+
+    def path_join(path_components: List[str]) -> str:
+        if any(isinstance(x, Undefined) for x in path_components):
+            raise UndefinedError()
+        return os.path.join(*path_components)
+
+    filters = dict(
+        path_join=path_join,
+    )
+    env.filters.update(filters)
+    return env
+
+
+def _reify_scalar_str(s: str) -> Union[bool, float, int, str]:
+    """
+    Reify a string to a Python object, using YAML. Jinja2 templates will be passed as-is.
+
+    :param s: The string to reify.
+    """
+    try:
+        r = yaml.safe_load(s)
+    except yaml.YAMLError:
+        return s
+    return r
