@@ -175,49 +175,6 @@ def test_dereference_all():
         assert cfg["grid_stats"]["points_per_level"] == 10000
 
 
-# @PM@ DO WE NEED TO REVIVE THIS TEST?
-
-# def test__dereference_bad_filter(tmp_path):
-#     """
-#     Test that an unregistered filter is detected and treated as an error.
-#     """
-#     path = tmp_path / "cfg.yaml"
-#     with open(path, "w", encoding="utf-8") as f:
-#         print("undefined_filter: '{{ 34 | not_a_filter }}'", file=f)
-#     cfg = YAMLConfig(config_file=path)
-#     with raises(exceptions.UWConfigError) as e:
-#         cfg._dereference()
-#     assert "filter: 'not_a_filter'" in str(e.value)
-
-# @PM@ DO WE NEED TO REVIVE THIS TEST?
-
-# def test__dereference_exceptions(caplog, tmp_path):
-#     """
-#     Test that dereferencing handles some standard mistakes.
-#     """
-#     log.setLevel(logging.DEBUG)
-#     path = tmp_path / "cfg.yaml"
-#     with open(path, "w", encoding="utf-8") as f:
-#         print(
-#             """
-# divide: '{{ num // nada }}'  # ZeroDivisionError
-# foo: bar
-# list_a: [1, 2, 4]
-# nada: 0
-# num: 2
-# soap: '{{ foo }}'
-# type_prob: '{{ list_a / \"a\" }}'  # TypeError
-# """,
-#             file=f,
-#         )
-#     cfgobj = YAMLConfig(config_file=path)
-#     cfgobj._dereference()
-#     log.info("HELLO")
-#     raised = [record.message for record in caplog.records if "raised" in record.message]
-#     assert "ZeroDivisionError" in raised[0]
-#     assert "TypeError" in raised[1]
-
-
 def test_ini_config_bash(salad_base, tmp_path):
     """
     Test that INI config load and dump work with a basic bash file.
@@ -880,13 +837,6 @@ def test_Config_characterize_values(nml_cfgobj):
 #     with raises(AttributeError) as e:
 #         nml_cfgobj.reify_scalar_str([1, 2, 3])
 #     assert "'list' object has no attribute 'read'" in str(e.value)  # Exception on unintended list
-
-
-# def test_Config__dereference_unexpected_error(nml_cfgobj):
-#     exctype = FloatingPointError
-#     with patch.object(tools.J2Template, "render", side_effect=exctype):
-#         with raises(exctype):
-#             nml_cfgobj._dereference(d={"n": "{{ n }}"})
 
 
 def test_YAMLConfig__load_unexpected_error(tmp_path):
