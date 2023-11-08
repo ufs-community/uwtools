@@ -398,7 +398,7 @@ def test__dispatch_template_render_no_optional():
         STR.valsneeded: False,
         STR.dryrun: False,
     }
-    with patch.object(cli.uwtools.config.templater, "render") as render:
+    with patch.object(cli.uwtools.config.jinja2, "render") as render:
         cli._dispatch_template_render(args)
     render.assert_called_once_with(
         input_file=None,
@@ -421,7 +421,7 @@ def test__dispatch_template_render_yaml():
         STR.valsneeded: 6,
         STR.dryrun: 7,
     }
-    with patch.object(cli.uwtools.config.templater, "render") as render:
+    with patch.object(cli.uwtools.config.jinja2, "render") as render:
         cli._dispatch_template_render(args)
     render.assert_called_once_with(
         input_file=1,

@@ -11,7 +11,8 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Type, Union
 
 from uwtools.config import validator
-from uwtools.config.core import Config, YAMLConfig
+from uwtools.config.formats.base import Config
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.logging import log
 from uwtools.scheduler import BatchScript, JobScheduler
 from uwtools.types import OptionalPath

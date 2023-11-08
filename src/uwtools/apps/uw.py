@@ -2,7 +2,7 @@
 This file contains the specific drivers for a particular app, using the facade pattern base class.
 """
 
-from uwtools.config.core import YAMLConfig
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.facade import Facade
 
 

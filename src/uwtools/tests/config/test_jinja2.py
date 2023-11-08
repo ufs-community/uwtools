@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
-Tests for uwtools.utils.templater module.
+Tests for uwtools.utils.jinja2 module.
 """
 
 import logging
@@ -10,7 +10,7 @@ from unittest.mock import patch
 import yaml
 from pytest import fixture
 
-from uwtools.config import templater
+from uwtools.config import jinja2
 from uwtools.logging import log
 from uwtools.tests.support import logged
 
@@ -38,7 +38,7 @@ def template(tmp_path):
 
 
 def render_helper(input_file, values_file, **kwargs):
-    templater.render(
+    jinja2.render(
         input_file=input_file,
         values_file=values_file,
         **kwargs,
@@ -91,19 +91,19 @@ Internal arguments:
 longish_variable: 88
 ---------------------------------------------------------------------
 """.strip()
-    templater._report(dict(foo="bar", longish_variable=88))
+    jinja2._report(dict(foo="bar", longish_variable=88))
     assert "\n".join(record.message for record in caplog.records) == expected
 
 
 def test__set_up_config_obj_env():
     expected = {"roses": "white", "violets": "blue"}
     with patch.dict(os.environ, expected, clear=True):
-        actual = templater._set_up_values_obj()
+        actual = jinja2._set_up_values_obj()
     assert actual["roses"] == "white"
     assert actual["violets"] == "blue"
 
 
 def test__set_up_config_obj_file(values_file):
     expected = {"roses": "white", "violets": "blue", "cannot": {"override": "this"}}
-    actual = templater._set_up_values_obj(values_file=values_file, overrides={"roses": "white"})
+    actual = jinja2._set_up_values_obj(values_file=values_file, overrides={"roses": "white"})
     assert actual == expected

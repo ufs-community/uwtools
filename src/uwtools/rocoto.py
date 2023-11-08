@@ -13,7 +13,7 @@ from jinja2 import DebugUndefined, Template
 from lxml import etree
 from lxml.etree import Element, SubElement
 
-from uwtools.config.core import YAMLConfig
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_yaml
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log

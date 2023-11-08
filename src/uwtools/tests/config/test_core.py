@@ -18,7 +18,11 @@ import yaml
 from pytest import fixture, raises
 
 from uwtools import exceptions
-from uwtools.config import core
+from uwtools.config import core, support
+from uwtools.config.formats.fieldtable import FieldTableConfig
+from uwtools.config.formats.ini import INIConfig
+from uwtools.config.formats.nml import NMLConfig
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path, logged
@@ -110,7 +114,7 @@ def test_config_field_table(tmp_path):
     cfgfile = fixture_path("FV3_GFS_v16.yaml")
     outfile = tmp_path / "field_table_from_yaml.FV3_GFS"
     reference = fixture_path("field_table.FV3_GFS_v16")
-    core.FieldTableConfig(cfgfile).dump(outfile)
+    FieldTableConfig(cfgfile).dump(outfile)
     with open(reference, "r", encoding="utf-8") as f1:
         reflines = [line.strip().replace("'", "") for line in f1]
     with open(outfile, "r", encoding="utf-8") as f2:
@@ -137,7 +141,7 @@ def test_dereference_all():
     Test that the Jinja2 fields are filled in as expected.
     """
     with patch.dict(os.environ, {"UFSEXEC": "/my/path/"}, clear=True):
-        cfg = core.YAMLConfig(fixture_path("gfs.yaml"))
+        cfg = YAMLConfig(fixture_path("gfs.yaml"))
         cfg.dereference_all()
 
         # Check that existing dicts remain:
@@ -180,7 +184,7 @@ def test_dereference_all():
 #     path = tmp_path / "cfg.yaml"
 #     with open(path, "w", encoding="utf-8") as f:
 #         print("undefined_filter: '{{ 34 | not_a_filter }}'", file=f)
-#     cfg = core.YAMLConfig(config_file=path)
+#     cfg = YAMLConfig(config_file=path)
 #     with raises(exceptions.UWConfigError) as e:
 #         cfg._dereference()
 #     assert "filter: 'not_a_filter'" in str(e.value)
@@ -206,7 +210,7 @@ def test_dereference_all():
 # """,
 #             file=f,
 #         )
-#     cfgobj = core.YAMLConfig(config_file=path)
+#     cfgobj = YAMLConfig(config_file=path)
 #     cfgobj._dereference()
 #     log.info("HELLO")
 #     raised = [record.message for record in caplog.records if "raised" in record.message]
@@ -220,7 +224,7 @@ def test_ini_config_bash(salad_base, tmp_path):
     """
     infile = fixture_path("simple.sh")
     outfile = tmp_path / "outfile.sh"
-    cfgobj = core.INIConfig(infile, space_around_delimiters=False)
+    cfgobj = INIConfig(infile, space_around_delimiters=False)
     expected: Dict[str, Any] = {
         **salad_base["salad"],
         "how_many": "12",
@@ -241,7 +245,7 @@ def test_ini_config_simple(salad_base, tmp_path):
     """
     infile = fixture_path("simple.ini")
     outfile = tmp_path / "outfile.ini"
-    cfgobj = core.INIConfig(infile)
+    cfgobj = INIConfig(infile)
     expected = salad_base
     expected["salad"]["how_many"] = "12"  # str "12" (not int 12) for INI
     assert cfgobj == expected
@@ -258,7 +262,7 @@ def test_nml_config_simple(salad_base, tmp_path):
     """
     infile = fixture_path("simple.nml")
     outfile = tmp_path / "outfile.nml"
-    cfgobj = core.NMLConfig(infile)
+    cfgobj = NMLConfig(infile)
     expected = salad_base
     expected["salad"]["how_many"] = 12  # must be in for nml
     assert cfgobj == expected
@@ -273,7 +277,7 @@ def test_parse_include():
     """
     Test that non-YAML handles include tags properly.
     """
-    cfgobj = core.NMLConfig(fixture_path("include_files.nml"))
+    cfgobj = NMLConfig(fixture_path("include_files.nml"))
     assert cfgobj["config"]["fruit"] == "papaya"
     assert cfgobj["config"]["how_many"] == 17
     assert cfgobj["config"]["meat"] == "beef"
@@ -284,7 +288,7 @@ def test_parse_include_ini():
     """
     Test that non-YAML handles include tags properly for INI with no sections.
     """
-    cfgobj = core.INIConfig(fixture_path("include_files.sh"), space_around_delimiters=False)
+    cfgobj = INIConfig(fixture_path("include_files.sh"), space_around_delimiters=False)
     assert cfgobj.get("fruit") == "papaya"
     assert cfgobj.get("how_many") == "17"
     assert cfgobj.get("meat") == "beef"
@@ -295,7 +299,7 @@ def test_parse_include_mult_sect():
     """
     Test that non-YAML handles include tags with files that have multiple sections in separate file.
     """
-    cfgobj = core.NMLConfig(fixture_path("include_files_with_sect.nml"))
+    cfgobj = NMLConfig(fixture_path("include_files_with_sect.nml"))
     assert cfgobj["config"]["fruit"] == "papaya"
     assert cfgobj["config"]["how_many"] == 17
     assert cfgobj["config"]["meat"] == "beef"
@@ -320,7 +324,7 @@ def test_path_if_it_exists(tmp_path):
 
 
 def test_print_config_section_ini(capsys):
-    config_obj = core.INIConfig(fixture_path("simple3.ini"))
+    config_obj = INIConfig(fixture_path("simple3.ini"))
     section = ["dessert"]
     core.print_config_section(config_obj.data, section)
     actual = capsys.readouterr().out
@@ -334,7 +338,7 @@ type=pie
 
 
 def test_print_config_section_ini_missing_section():
-    config_obj = core.INIConfig(fixture_path("simple3.ini"))
+    config_obj = INIConfig(fixture_path("simple3.ini"))
     section = ["sandwich"]
     msg = "Bad config path: sandwich"
     with raises(UWConfigError) as e:
@@ -343,7 +347,7 @@ def test_print_config_section_ini_missing_section():
 
 
 def test_print_config_section_yaml(capsys):
-    config_obj = core.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
+    config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
     section = ["sgs_tke", "profile_type"]
     core.print_config_section(config_obj.data, section)
     actual = capsys.readouterr().out
@@ -355,7 +359,7 @@ surface_value=0.0
 
 
 def test_print_config_section_yaml_for_nonscalar():
-    config_obj = core.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
+    config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
     section = ["o3mr"]
     with raises(UWConfigError) as e:
         core.print_config_section(config_obj.data, section)
@@ -363,7 +367,7 @@ def test_print_config_section_yaml_for_nonscalar():
 
 
 def test_print_config_section_yaml_list():
-    config_obj = core.YAMLConfig(fixture_path("srw_example.yaml"))
+    config_obj = YAMLConfig(fixture_path("srw_example.yaml"))
     section = ["FV3GFS", "nomads", "file_names", "grib2", "anl"]
     with raises(UWConfigError) as e:
         core.print_config_section(config_obj.data, section)
@@ -371,7 +375,7 @@ def test_print_config_section_yaml_list():
 
 
 def test_print_config_section_yaml_not_dict():
-    config_obj = core.YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
+    config_obj = YAMLConfig(fixture_path("FV3_GFS_v16.yaml"))
     section = ["sgs_tke", "units"]
     with raises(UWConfigError) as e:
         core.print_config_section(config_obj.data, section)
@@ -392,7 +396,7 @@ def test_realize_config_conversion_cfg_to_yaml(tmp_path):
         values_file=None,
         values_format=None,
     )
-    expected = core.YAMLConfig(infile)
+    expected = YAMLConfig(infile)
     expected.dereference_all()
     expected_file = tmp_path / "test.yaml"
     expected.dump(expected_file)
@@ -431,7 +435,7 @@ def test_realize_config_dry_run(caplog):
     """
     log.setLevel(logging.INFO)
     infile = fixture_path("fruit_config.yaml")
-    yaml_config = core.YAMLConfig(infile)
+    yaml_config = YAMLConfig(infile)
     yaml_config.dereference_all()
     core.realize_config(
         input_file=infile,
@@ -486,8 +490,8 @@ def test_realize_config_file_conversion(tmp_path):
         values_file=cfgfile,
         values_format=FORMAT.ini,
     )
-    expected = core.NMLConfig(infile)
-    config_obj = core.INIConfig(cfgfile)
+    expected = NMLConfig(infile)
+    config_obj = INIConfig(cfgfile)
     expected.update_values(config_obj)
     expected_file = tmp_path / "expected.nml"
     expected.dump(expected_file)
@@ -551,7 +555,7 @@ def test_realize_config_output_file_conversion(tmp_path):
         values_file=None,
         values_format=None,
     )
-    expected = core.NMLConfig(infile)
+    expected = NMLConfig(infile)
     expected_file = tmp_path / "expected.nml"
     expected.dump(expected_file)
     assert compare_files(expected_file, outfile)
@@ -616,7 +620,7 @@ def test__realize_config_values_needed(caplog, tmp_path):
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
-    c = core.YAMLConfig(config_file=path)
+    c = YAMLConfig(config_file=path)
     core._realize_config_values_needed(input_obj=c)
     msgs = "\n".join(record.message for record in caplog.records)
     assert "Keys that are complete:\n    1" in msgs
@@ -759,7 +763,7 @@ def test_yaml_config_composite_types():
     """
     Test that YAML load and dump work with a YAML file that has multiple data structures and levels.
     """
-    cfgobj = core.YAMLConfig(fixture_path("result4.yaml"))
+    cfgobj = YAMLConfig(fixture_path("result4.yaml"))
 
     assert cfgobj["step_cycle"] == "PT6H"
     assert isinstance(cfgobj["init_cycle"], datetime.datetime)
@@ -777,7 +781,7 @@ def test_yaml_config_include_files():
     """
     Test that including files via the include constructor works as expected.
     """
-    cfgobj = core.YAMLConfig(fixture_path("include_files.yaml"))
+    cfgobj = YAMLConfig(fixture_path("include_files.yaml"))
 
     # 1-file include tests.
 
@@ -803,7 +807,7 @@ def test_yaml_config_simple(tmp_path):
     """
     infile = fixture_path("simple2.yaml")
     outfile = tmp_path / "outfile.yml"
-    cfgobj = core.YAMLConfig(infile)
+    cfgobj = YAMLConfig(infile)
     expected = {
         "account": "user_account",
         "extra_stuff": 12345,
@@ -834,7 +838,7 @@ bar: 2
 """
         )
     with raises(exceptions.UWConfigError) as e:
-        core.YAMLConfig(tmpfile)
+        YAMLConfig(tmpfile)
     assert "value is enclosed in quotes" in str(e.value)
 
 
@@ -845,7 +849,7 @@ def test_yaml_constructor_error_unregistered_constructor(tmp_path):
     with tmpfile.open("w", encoding="utf-8") as f:
         f.write("foo: !not_a_constructor bar")
     with raises(exceptions.UWConfigError) as e:
-        core.YAMLConfig(tmpfile)
+        YAMLConfig(tmpfile)
     assert "constructor: '!not_a_constructor'" in str(e.value)
     assert "Define the constructor before proceeding" in str(e.value)
 
@@ -889,11 +893,11 @@ def test_YAMLConfig__load_unexpected_error(tmp_path):
     cfgfile = tmp_path / "cfg.yaml"
     with open(cfgfile, "w", encoding="utf-8") as f:
         print("{n: 88}", file=f)
-    with patch.object(core.yaml, "load") as load:
+    with patch.object(yaml, "load") as load:
         msg = "Unexpected error"
         load.side_effect = yaml.constructor.ConstructorError(note=msg)
         with raises(UWConfigError) as e:
-            core.YAMLConfig(config_file=cfgfile)
+            YAMLConfig(config_file=cfgfile)
         assert msg in str(e.value)
 
 
@@ -905,17 +909,17 @@ def test_YAMLConfig__load_paths_failure_stdin_plus_relpath(caplog):
     log.setLevel(logging.INFO)
     _stdinproxy.cache_clear()
     relpath = "../bar/baz.yaml"
-    with patch.object(sys, "stdin", new=StringIO(f"foo: {core._INCLUDE_TAG} [{relpath}]")):
+    with patch.object(sys, "stdin", new=StringIO(f"foo: {support.INCLUDE_TAG} [{relpath}]")):
         with raises(UWConfigError) as e:
-            core.YAMLConfig()
+            YAMLConfig()
     msg = f"Reading from stdin, a relative path was encountered: {relpath}"
     assert msg in str(e.value)
     assert logged(caplog, msg)
 
 
-def test__log_and_error():
+def test_log_and_error():
     with raises(UWConfigError) as e:
-        raise core._log_and_error("Must be scalar value")
+        raise support.log_and_error("Must be scalar value")
     assert "Must be scalar value" in str(e.value)
 
 
@@ -979,12 +983,12 @@ def nml_cfgobj(tmp_path):
     path = tmp_path / "cfg.nml"
     with open(path, "w", encoding="utf-8") as f:
         f.write("&nl n = 88 /")
-    return core.NMLConfig(config_file=path)
+    return NMLConfig(config_file=path)
 
 
 @fixture
 def realize_config_testobj(realize_config_yaml_input):
-    return core.YAMLConfig(config_file=realize_config_yaml_input)
+    return YAMLConfig(config_file=realize_config_yaml_input)
 
 
 @fixture

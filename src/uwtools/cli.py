@@ -15,7 +15,7 @@ from typing import Any, Callable, Dict, List, Tuple
 
 import uwtools.config.atparse_to_jinja2
 import uwtools.config.core
-import uwtools.config.templater
+import uwtools.config.jinja2
 import uwtools.config.validator
 import uwtools.drivers.forecast
 import uwtools.rocoto
@@ -442,7 +442,7 @@ def _dispatch_template_render(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.config.templater.render(
+    return uwtools.config.jinja2.render(
         input_file=args[STR.infile],
         output_file=args[STR.outfile],
         values_file=args[STR.valsfile],

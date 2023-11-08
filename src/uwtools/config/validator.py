@@ -7,7 +7,7 @@ from typing import List
 
 import jsonschema
 
-from uwtools.config.core import YAMLConfig
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
 
