@@ -677,8 +677,8 @@ Keys that are complete:
     dessert.servings
 
 Keys that have unfilled Jinja2 templates:
-    salad.how_many: {{amount}}
-    dessert.flavor: {{flavor}}
+    salad.how_many: {{ amount }}
+    dessert.flavor: {{ flavor }}
 
 Keys that are set to empty:
     salad.toppings
