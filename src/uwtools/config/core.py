@@ -187,7 +187,7 @@ class Config(ABC, UserDict):
 
     def dereference_all(self) -> None:
         """
-        Dereference iteratively until no Jinja2 templates remain.
+        Render as much Jinja2 syntax as possible.
         """
         while True:
             new = _dereference(val=self.data, context={**os.environ, **self.data})
@@ -770,7 +770,7 @@ def _dereference(val: _YAMLVal, context: dict) -> _YAMLVal:
                     .render(**context)
                 )
             )
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             pass
     return val
 

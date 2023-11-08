@@ -20,7 +20,6 @@ filetype: gfs
 datapath: '{{ [experiment_dir, current_cycle] | path_join }}'
 filename_core: 'fv_core.res.nc'
 
-
 testupdate: '{{ updatethis }}'
 updatethis: 'testpassed'
 
