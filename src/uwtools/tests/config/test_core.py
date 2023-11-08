@@ -129,7 +129,7 @@ def test_depth(depth, fn):
     infile = fixture_path(fn)
     fmt = Path(infile).suffix.replace(".", "")
     cfgobj = core.format_to_config(fmt)(infile)
-    assert cfgobj._depth(cfgobj.data) == depth
+    assert cfgobj.depth == depth
 
 
 def test_dereference_all():

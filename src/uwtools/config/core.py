@@ -184,7 +184,7 @@ class Config(ABC, UserDict):
         """
         The depth of this config's hierarchy.
         """
-        return self._depth(self.data)
+        return depth(self.data)
 
     def dereference_all(self) -> None:
         """
@@ -270,17 +270,6 @@ class Config(ABC, UserDict):
             else:
                 dstcfg[key] = new_val
 
-    # Private methods
-
-    def _depth(self, tree: dict) -> int:
-        """
-        The depth of this config's hierarchy.
-
-        :param tree: A (sub)tree in the config.
-        :return: The length of the longest path to a value in the config.
-        """
-        return (max(map(self._depth, tree.values())) + 1) if isinstance(tree, dict) else 0
-
 
 class INIConfig(Config):
     """
@@ -354,10 +343,12 @@ class INIConfig(Config):
         # memory, then strip the trailing newline.
         parser = configparser.ConfigParser()
         s = StringIO()
-        try:
+        cfgdepth = depth(cfg)
+        assert cfgdepth in (1, 2)  # 1 => .sh, 2 => .ini
+        if cfgdepth == 2:
             parser.read_dict(cfg)
             parser.write(s, space_around_delimiters=opts.space if opts else True)
-        except AttributeError:
+        else:
             space = " " if not opts or opts.space else ""
             for key, value in cfg.items():
                 print(f"{key}{space}={space}{value}", file=s)
@@ -592,6 +583,16 @@ def compare_configs(
     log.info("+ %s", config_b_path)
     log.info("-" * MSGWIDTH)
     return cfg_a.compare_config(cfg_b.data)
+
+
+def depth(d: dict) -> int:
+    """
+    The depth of a dictionary.
+
+    :param d: The dictionary whose depth to calculate.
+    :return: The length of the longest path to a value in the dictionary.
+    """
+    return (max(map(depth, d.values())) + 1) if isinstance(d, dict) else 0
 
 
 def format_to_config(cli_name: str) -> Type[Config]:
