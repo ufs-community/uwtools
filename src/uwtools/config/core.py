@@ -11,6 +11,7 @@ import os
 import re
 from abc import ABC, abstractmethod
 from collections import OrderedDict, UserDict
+from io import StringIO
 from types import SimpleNamespace as ns
 from typing import Dict, List, Optional, Tuple, Type, Union
 
@@ -347,14 +348,22 @@ class INIConfig(Config):
         :param cfg: The in-memory config object to dump.
         :param space_around_delimiters: Place spaces around delimiters?
         """
+        # Configparser adds a newline after each section, presumably to create nice-looking output
+        # when an INI contains multiple sections. Unfortunately, it also adds a newline after the
+        # _final_ section, resulting in an anomalous trailing newline. To avoid this, write first to
+        # memory, then strip the trailing newline.
         parser = configparser.ConfigParser()
+        s = StringIO()
+        try:
+            parser.read_dict(cfg)
+            parser.write(s, space_around_delimiters=opts.space if opts else True)
+        except AttributeError:
+            space = " " if not opts or opts.space else ""
+            for key, value in cfg.items():
+                print(f"{key}{space}={space}{value}", file=s)
         with writable(path) as f:
-            try:
-                parser.read_dict(cfg)
-                parser.write(f, space_around_delimiters=opts.space if opts else True)
-            except AttributeError:
-                for key, value in cfg.items():
-                    print(f"{key}={value}", file=f)
+            print(s.getvalue().strip(), file=f)
+        s.close()
 
 
 class NMLConfig(Config):
