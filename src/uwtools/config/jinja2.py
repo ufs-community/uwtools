@@ -131,26 +131,14 @@ def dereference(val: _YAMLVal, context: dict) -> _YAMLVal:
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
-        environment = _register_filters(Environment(undefined=DebugUndefined))
-        template = environment.from_string(f"'{val}'")
+        template = _register_filters(Environment(undefined=DebugUndefined)).from_string(f"'{val}'")
         rendered = None
         try:
             rendered = template.render(**context)
         except:  # pylint: disable=bare-except
             pass
         if rendered:
-            newval = yaml.safe_load(rendered)
-            return _reify_scalar_str(newval)
-        # try:
-        #     return _reify_scalar_str(
-        #         yaml.safe_load(
-        #             _register_filters(Environment(undefined=DebugUndefined))
-        #             .from_string(f"'{val}'")
-        #             .render(**context)
-        #         )
-        #     )
-        # except:  # pylint: disable=bare-except
-        #     pass
+            return _reify_scalar_str(yaml.safe_load(rendered))
     return val
 
 
