@@ -86,9 +86,8 @@ class INIConfig(Config):
             parser.read_dict(cfg)
             parser.write(s, space_around_delimiters=opts.space if opts else True)
         else:
-            space = " " if not opts or opts.space else ""
             for key, value in cfg.items():
-                print(f"{key}{space}={space}{value}", file=s)
+                print(f"{key}={value}", file=s)
         with writable(path) as f:
             print(s.getvalue().strip(), file=f)
         s.close()
