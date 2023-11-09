@@ -14,5 +14,4 @@ unformatted() {
 
 source /tmp/conda/etc/profile.d/conda.sh
 conda activate
-CONDEV_SHELL_CMD=unformatted
-condev-shell
+CONDEV_SHELL_CMD=unformatted condev-shell
