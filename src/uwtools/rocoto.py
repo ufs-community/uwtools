@@ -183,21 +183,24 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         """
         e = SubElement(e, STR.dependency)
+        # block no longer relevant in this loop
+        # will be used in specific methods itself
+        for key in config.keys():
+            tag, _ = self._tag_name(key)
+            if tag in [STR.taskdep, STR.datadep, STR.timedep]:
+                self._add_task_dependency_operand(e, config[STR.taskdep])
+                # self._set_attrs(SubElement(e, STR.taskdep), block)
+            else:
+                raise UWConfigError("Unhandled dependency type %s" % tag)
+
+    def _add_task_dependency_operand(self, e: Element, config: dict) -> None:
+        """
+        ???
+        """
         for key, block in config.items():
             tag, _ = self._tag_name(key)
             if tag == STR.taskdep:
                 self._set_attrs(SubElement(e, STR.taskdep), block)
-            elif tag == STR.datadep:
-                self._add_data_dependency(e, config[STR.datatdep], block)
-            else:
-                raise UWConfigError("Unhandled dependency type %s" % tag)
-
-    def _add_data_dependency(self, e: Element, config: dict, block: dict) -> None:
-        """
-        ???
-        """
-        breakpoint()
-        self._set_attrs(SubElement(e, STR.datadep), block)
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """
@@ -341,6 +344,7 @@ class STR:
     task: str = "task"
     taskdep: str = "taskdep"
     tasks: str = "tasks"
+    timedep: str = "timedep"
     value: str = "value"
     var: str = "var"
     walltime: str = "walltime"
