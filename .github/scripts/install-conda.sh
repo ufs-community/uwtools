@@ -7,6 +7,5 @@ installer=/tmp/$(basename $url)
 wget --no-verbose -O $installer $url
 bash $installer -bfp $CI_CONDA_DIR
 set +ux
-source $CI_CONDA_SH
-conda activate
+ci_conda_activate
 conda install --quiet --yes --channel maddenp --repodata-fn repodata.json anaconda-client condev

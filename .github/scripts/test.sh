@@ -15,8 +15,7 @@ run_tests() {
 }
 
 source $(dirname ${BASH_SOURCE[0]})/common.sh
-source $CI_CONDA_SH
-conda activate
+ci_conda_activate
 for version in ${SUPPORTED_PYTHON_VERSIONS[*]}; do
   PYTHON_VERSION=$version
   CONDEV_SHELL_CMD=run_tests condev-shell

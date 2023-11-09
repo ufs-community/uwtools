@@ -13,6 +13,5 @@ unformatted() {
 }
 
 source $(dirname ${BASH_SOURCE[0]})/common.sh
-source $CI_CONDA_SH
-conda activate
+ci_conda_activate
 CONDEV_SHELL_CMD=unformatted condev-shell
