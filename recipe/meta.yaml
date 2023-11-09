@@ -15,7 +15,7 @@ requirements:
     - jinja2 3.0.*
     - jsonschema 4.17.*
     - lxml 4.9.*
-    - python {{ release }}
+    - python >=3.9,<3.12
     - pyyaml 6.0.*
 test:
   requires:
