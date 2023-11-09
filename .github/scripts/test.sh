@@ -7,7 +7,7 @@ SUPPORTED_PYTHON_VERSIONS=( 3.9 3.10 3.11 )
 run_tests() {
   echo TESTING PYTHON $PYTHON_VERSION
   set -x
-  conda install -y python=$PYTHON_VERSION
+  conda install -qy python=$PYTHON_VERSION
   make test
 }
 
