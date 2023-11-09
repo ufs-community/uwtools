@@ -6,15 +6,15 @@ SUPPORTED_PYTHON_VERSIONS=( 3.9 3.10 3.11 )
 
 run_tests() {
   echo TESTING PYTHON $PYTHON_VERSION
-  set -x
   conda install -qy python=$PYTHON_VERSION
+  set -x
   make test
 }
 
 source /tmp/conda/etc/profile.d/conda.sh
 conda activate
+CONDEV_SHELL_CMD=true condev-shell
 for version in ${SUPPORTED_PYTHON_VERSIONS[*]}; do
   PYTHON_VERSION=$version
-  CONDEV_SHELL_CMD=run_tests
-  condev-shell
+  CONDEV_SHELL_CMD=run_tests condev-shell
 done
