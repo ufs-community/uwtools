@@ -187,8 +187,17 @@ class _RocotoXML:
             tag, _ = self._tag_name(key)
             if tag == STR.taskdep:
                 self._set_attrs(SubElement(e, STR.taskdep), block)
+            elif tag == STR.datadep:
+                self._add_data_dependency(e, config[STR.datatdep], block)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
+
+    def _add_data_dependency(self, e: Element, config: dict, block: dict) -> None:
+        """
+        ???
+        """
+        breakpoint()
+        self._set_attrs(SubElement(e, STR.datadep), block)
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """
@@ -306,6 +315,7 @@ class STR:
     cores: str = "cores"
     cycledef: str = "cycledef"
     cycledefs: str = "cycledefs"
+    datadep: str = "datadep"
     deadline: str = "deadline"
     dependency: str = "dependency"
     entities: str = "entities"

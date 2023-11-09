@@ -129,6 +129,16 @@ class Test_RocotoXML:
         with raises(UWConfigError):
             instance._add_task_dependency(e=root, config=config)
 
+    def test__add_data_dependency(self, instance, root):
+      config = {"datadep": {"age": "120", "minsize": "1024", "text": "&CCPA_OBS_DIR;"}}
+      block = {"age": "120", "minsize": "1024", "text": "&CCPA_OBS_DIR;"}
+      instance._add_data_dependency(e=root, config=config, block=block)
+      dependency = root[0]
+      assert dependency.tag == "dependency"
+      datadep = dependency[0]
+      assert datadep.tag == "datadep"
+      assert datadep.get("minsize") == "1024"
+
     def test__add_task_envar(self, instance, root):
         instance._add_task_envar(root, "foo", "bar")
         envar = root[0]
