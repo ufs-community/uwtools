@@ -8,7 +8,7 @@ run_tests() {
   echo TESTING PYTHON $PYTHON_VERSION
   conda install --quiet --yes python=$PYTHON_VERSION
   set -x
-  pip install --editable src
+  pip install --editable src # set new Python version in entry-point scripts
   python --version
   make test
   return $?
