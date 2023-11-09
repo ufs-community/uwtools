@@ -1,11 +1,11 @@
 # Actions invokes script with: bash -e <script>
 
 set -ux
-cd /tmp
+source $(dirname ${BASH_SOURCE[0]})/common.sh
 url=https://github.com/conda-forge/miniforge/releases/download/23.1.0-4/Miniforge3-23.1.0-4-Linux-x86_64.sh
-wget --no-verbose $url
-bash $(basename $url) -bfp conda
+installer=/tmp/$(basename $url)
+wget --no-verbose -O $installer $url
+bash $installer -bfp $CI_CONDA_DIR
 set +ux
-source conda/etc/profile.d/conda.sh
-conda activate
-conda install -q -y -c maddenp --repodata-fn repodata.json anaconda-client condev
+ci_conda_activate
+conda install --quiet --yes --channel maddenp --repodata-fn repodata.json anaconda-client condev

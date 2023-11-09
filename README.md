@@ -128,7 +128,6 @@ The following files in this repo are derived from their counterparts in the [con
 ├── recipe
 │   ├── build.sh
 │   ├── channels
-│   ├── conda_build_config.yaml
 │   ├── meta.json
 │   ├── meta.yaml
 │   └── run_test.sh
