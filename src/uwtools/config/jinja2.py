@@ -140,8 +140,10 @@ def dereference(val: _YAMLVal, context: dict) -> _YAMLVal:
         rendered = None
         try:
             rendered = template.render(**context)
-        except:  # pylint: disable=bare-except
-            pass
+        except (TypeError, UndefinedError):
+            log.debug("Could not render value: %s", val)
+        except ZeroDivisionError:
+            log.debug("Rendering value resulted in divide-by-zero: %s", val)
         if rendered:
             return _reify_scalar_str(yaml.safe_load(rendered))
     return val
