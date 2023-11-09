@@ -2,11 +2,11 @@
 
 set -a
 
-SUPPORTED_PYTHON_VERSIONS=( 3.11 3.10 3.9 )
+SUPPORTED_PYTHON_VERSIONS=( 3.9 3.10 3.11 )
 
 run_tests() {
   echo TESTING PYTHON $PYTHON_VERSION
-  conda install --quiet --yes python=$PYTHON_VERSION
+  conda install --quiet --yes --repodata-fn repodata.json python=$PYTHON_VERSION
   set -x
   pip install --editable src # set new Python version in entry-point scripts
   python --version
