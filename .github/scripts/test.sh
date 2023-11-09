@@ -8,6 +8,7 @@ run_tests() {
   echo TESTING PYTHON $PYTHON_VERSION
   conda install -qy python=$PYTHON_VERSION
   set -x
+  python --version
   make test
   return $?
 }

@@ -2,7 +2,7 @@
 
 set -ux
 cd /tmp
-url=https://github.com/conda-forge/miniforge/releases/download/23.1.0-4/Miniforge3-23.1.0-4-Linux-x86_64.sh
+url=https://github.com/conda-forge/miniforge/releases/download/23.1.0-4/Miniforge3-23.1.0-4-Linux-aarch64.sh
 wget --no-verbose $url
 bash $(basename $url) -bfp conda
 set +ux
