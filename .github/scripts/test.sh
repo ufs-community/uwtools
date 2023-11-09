@@ -15,7 +15,7 @@ run_tests() {
 }
 
 source $(dirname ${BASH_SOURCE[0]})/common.sh
-source $CONDADIR/etc/profile.d/conda.sh
+source $CI_CONDA_SH
 conda activate
 for version in ${SUPPORTED_PYTHON_VERSIONS[*]}; do
   PYTHON_VERSION=$version

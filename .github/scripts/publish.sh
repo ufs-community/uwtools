@@ -1,7 +1,7 @@
 # Actions invokes script with: bash -e <script>
 
 source $(dirname ${BASH_SOURCE[0]})/common.sh
-source $CONDADIR/etc/profile.d/conda.sh
+source $CI_CONDA_SH
 conda activate
 set -ux
 f=recipe/meta.json
