@@ -2,13 +2,14 @@
 
 set -a
 
-SUPPORTED_PYTHON_VERSIONS=( 3.9 3.10 3.11 )
+SUPPORTED_PYTHON_VERSIONS=( 3.11 3.10 3.9 )
 
 run_tests() {
   echo TESTING PYTHON $PYTHON_VERSION
   conda install -qy python=$PYTHON_VERSION
   set -x
   make test
+  return $?
 }
 
 source /tmp/conda/etc/profile.d/conda.sh
