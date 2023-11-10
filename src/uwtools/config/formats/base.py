@@ -202,7 +202,7 @@ class Config(ABC, UserDict):
                     self.update_values(self._load_paths(filepaths))
                     del ref_dict[key]
 
-    def update_values(self, src: Union[dict, Config], dst: Optional[Config] = None):
+    def update_values(self, src: Union[dict, Config], dst: Optional[Config] = None) -> None:
         """
         Updates a Config object.
 
