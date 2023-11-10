@@ -8,7 +8,9 @@ import os
 from types import SimpleNamespace as ns
 from unittest.mock import patch
 
+import pytest
 import yaml
+from jinja2 import DebugUndefined, Environment, UndefinedError
 from pytest import fixture, raises
 
 from uwtools.config import jinja2
@@ -60,6 +62,18 @@ def validate(template):
 
 
 # Tests
+
+
+@pytest.mark.parametrize("key", ["foo", "bar"])
+def test_register_filters_path_join(key):
+    s = "{{ ['dir', %s] | path_join }}" % key
+    template = jinja2._register_filters(Environment(undefined=DebugUndefined)).from_string(s)
+    context = {"foo": "subdir"}
+    if key in context:
+        template.render(**context)  # path_join filter succeeds
+    else:
+        with raises(UndefinedError):
+            template.render(**context)  # path_join filter fails
 
 
 def test_render(values_file, template, tmp_path):
