@@ -91,7 +91,7 @@ def test_compare_config(caplog, fmt, salad_base):
     salad_base["salad"]["dressing"] = "italian"
     salad_base["salad"]["size"] = "large"
     del salad_base["salad"]["how_many"]
-    # assert not cfgobj.compare_config(cfgobj, salad_base)
+    assert not cfgobj.compare_config(cfgobj, salad_base)
     assert not cfgobj.compare_config(salad_base)
     # Expect to see the following differences logged:
     for msg in [
@@ -100,6 +100,10 @@ def test_compare_config(caplog, fmt, salad_base):
         "salad:            size:  - None + large",
     ]:
         assert logged(caplog, msg)
+
+
+def test_depth(config):
+    assert config.depth == 1
 
 
 @pytest.mark.parametrize("fmt1", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
