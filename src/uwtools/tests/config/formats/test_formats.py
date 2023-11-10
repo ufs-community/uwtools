@@ -1,5 +1,5 @@
 """
-Tests for the uwtools.config.formats package.
+Tests for the uwtools.config.base module.
 """
 
 import logging
