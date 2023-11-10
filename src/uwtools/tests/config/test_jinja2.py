@@ -64,6 +64,16 @@ def validate(template):
 # Tests
 
 
+def test_dereference_dict():
+    val = {"n": "{{ int }}"}
+    assert jinja2.dereference(val=val, context={"int": 88}) == {"n": 88}
+
+
+def test_dereference_list():
+    val = ["{{ n }}", "{{ s }}"]
+    assert jinja2.dereference(val=val, context={"n": 88, "s": "foo"}) == [88, "foo"]
+
+
 @pytest.mark.parametrize("val", (True, 3.14, 88, None))
 def test_dereference_no_op(val):
     # These types of values pass through dereferencing unmodified:
@@ -111,47 +121,6 @@ def test_dereference_str_variable_rendered_str():
     # A pure str result remains a str.
     val = "{{ greeting }}"
     assert jinja2.dereference(val=val, context={"greeting": "hello"}) == "hello"
-
-
-# def test_dereference():
-#     """
-#     Test that the Jinja2 fields are filled in as expected.
-#     """
-#     with patch.dict(os.environ, {"UFSEXEC": "/my/path/"}, clear=True):
-#         with open(fixture_path("gfs.yaml"), "r", encoding="utf-8") as f:
-#             val = yaml.safe_load(f)
-
-#         jinja2.dereference(val, context={**os.environ, **val})
-
-#         # Check that existing dicts remain:
-#         assert isinstance(val["fcst"], dict)
-#         assert isinstance(val["grid_stats"], dict)
-
-#         # Check references to other items at same level, and order doesn't
-#         # matter:
-#         assert val["testupdate"] == "testpassed"
-
-#         # Check references to other section items:
-#         assert val["grid_stats"]["ref_fcst"] == 64
-
-#         # Check environment values are included:
-#         assert val["executable"] == "/my/path/"
-
-#         # Check that env variables that are not defined do not change:
-#         assert val["undefined_env"] == "{{ NOPE }}"
-
-#         # Check undefined are left as-is:
-#         assert val["datapath"] == "{{ [experiment_dir, current_cycle] | path_join }}"
-
-#         # Check math:
-#         assert val["grid_stats"]["total_points"] == 640000
-#         assert val["grid_stats"]["total_ens_points"] == 19200000
-
-#         # Check that statements expand:
-#         assert val["fcst"]["output_hours"] == "0 3 6 9"
-
-#         # Check that order isn't a problem:
-#         assert val["grid_stats"]["points_per_level"] == 10000
 
 
 @pytest.mark.parametrize("key", ["foo", "bar"])
