@@ -16,7 +16,7 @@ from pytest import fixture, raises
 from uwtools.config import jinja2
 from uwtools.config.jinja2 import J2Template
 from uwtools.logging import log
-from uwtools.tests.support import logged
+from uwtools.tests.support import logged, regex_logged
 
 # Fixtures
 
@@ -80,10 +80,12 @@ def test_dereference_no_op(val):
     assert jinja2.dereference(val=val, context={}) == val
 
 
-def test_dereference_str_expression_rejected():
+def test_dereference_str_expression_rejected(caplog):
     # Unrenderable expressions are reported and returned unmodified:
+    log.setLevel(logging.DEBUG)
     val = "{% for a in as %}{{ a }}{% endfor %}"
     assert jinja2.dereference(val=val, context={}) == val
+    assert regex_logged(caplog, "'as' is undefined")
 
 
 def test_dereference_str_expression_rendered():
@@ -97,10 +99,12 @@ def test_dereference_str_filter_rendered():
     assert jinja2.dereference(val=val, context={"recipient": "world"}) == "hello, world"
 
 
-def test_dereference_str_variable_rejected():
+def test_dereference_str_variable_rejected(caplog):
     # Unrenderable variables are reported and returned unmodified:
+    log.setLevel(logging.DEBUG)
     val = "{{ n }}"
     assert jinja2.dereference(val=val, context={}) == val
+    assert regex_logged(caplog, "'n' is undefined")
 
 
 def test_dereference_str_variable_rendered_int():

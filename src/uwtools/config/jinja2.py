@@ -11,6 +11,7 @@ from jinja2 import (
     DebugUndefined,
     Environment,
     FileSystemLoader,
+    StrictUndefined,
     Template,
     Undefined,
     meta,
@@ -139,7 +140,7 @@ def dereference(val: _YAMLVal, context: dict) -> _YAMLVal:
     if isinstance(val, str):
         try:
             rendered = (
-                _register_filters(Environment(undefined=DebugUndefined))
+                _register_filters(Environment(undefined=StrictUndefined))
                 .from_string(val)
                 .render(**context)
             )
