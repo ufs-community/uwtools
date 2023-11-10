@@ -136,12 +136,14 @@ def dereference(val: _YAMLVal, context: dict) -> _YAMLVal:
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
-        if rendered := _reify_scalar_str(
-            _register_filters(Environment(undefined=DebugUndefined))
-            .from_string(val)
-            .render(**context)
-        ):
-            return rendered
+        return (
+            _reify_scalar_str(
+                _register_filters(Environment(undefined=DebugUndefined))
+                .from_string(val)
+                .render(**context)
+            )
+            or val
+        )
     return val
 
 
