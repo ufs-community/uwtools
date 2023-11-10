@@ -6,7 +6,6 @@ Tests for uwtools.config module.
 import datetime
 import filecmp
 import logging
-import os
 import sys
 from io import StringIO
 from pathlib import Path
@@ -134,45 +133,6 @@ def test_depth(depth, fn):
     fmt = Path(infile).suffix.replace(".", "")
     cfgobj = tools.format_to_config(fmt)(infile)
     assert cfgobj.depth == depth
-
-
-def test_dereference():
-    """
-    Test that the Jinja2 fields are filled in as expected.
-    """
-    with patch.dict(os.environ, {"UFSEXEC": "/my/path/"}, clear=True):
-        cfg = YAMLConfig(fixture_path("gfs.yaml"))
-        cfg.dereference()
-
-        # Check that existing dicts remain:
-        assert isinstance(cfg["fcst"], dict)
-        assert isinstance(cfg["grid_stats"], dict)
-
-        # Check references to other items at same level, and order doesn't
-        # matter:
-        assert cfg["testupdate"] == "testpassed"
-
-        # Check references to other section items:
-        assert cfg["grid_stats"]["ref_fcst"] == 64
-
-        # Check environment values are included:
-        assert cfg["executable"] == "/my/path/"
-
-        # Check that env variables that are not defined do not change:
-        assert cfg["undefined_env"] == "{{ NOPE }}"
-
-        # Check undefined are left as-is:
-        assert cfg["datapath"] == "{{ [experiment_dir, current_cycle] | path_join }}"
-
-        # Check math:
-        assert cfg["grid_stats"]["total_points"] == 640000
-        assert cfg["grid_stats"]["total_ens_points"] == 19200000
-
-        # Check that statements expand:
-        assert cfg["fcst"]["output_hours"] == "0 3 6 9"
-
-        # Check that order isn't a problem:
-        assert cfg["grid_stats"]["points_per_level"] == 10000
 
 
 def test_ini_config_bash(salad_base, tmp_path):

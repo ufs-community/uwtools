@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import copy
 import json
 import os
 import re
 from abc import ABC, abstractmethod
 from collections import UserDict
+from copy import deepcopy
 from types import SimpleNamespace as ns
 from typing import List, Optional, Tuple, Union
 
@@ -190,7 +190,7 @@ class Config(ABC, UserDict):
         """
         if ref_dict is None:
             ref_dict = self.data
-        for key, value in copy.deepcopy(ref_dict).items():
+        for key, value in deepcopy(ref_dict).items():
             if isinstance(value, dict):
                 self.parse_include(ref_dict[key])
             elif isinstance(value, str):

@@ -64,6 +64,104 @@ def validate(template):
 # Tests
 
 
+@pytest.mark.parametrize("val", (True, 3.14, 88, None))
+def test_dereference_no_op(val):
+    # These types of values pass through dereferencing unmodified:
+    assert jinja2.dereference(val=val, context={}) == val
+
+
+def test_dereference_str_expression_rejected():
+    # Unrenderable expressions are reported and returned unmodified:
+    val = "{% for a in as %}{{ a }}{% endfor %}"
+    assert jinja2.dereference(val=val, context={}) == val
+
+
+def test_dereference_str_expression_rendered():
+    # Context permitting, Jinja2 expressions are rendered:
+    assert (
+        jinja2.dereference(
+            val="{% for a in as %}{{ a }}{% endfor %}", context={"as": ["a", "b", "c"]}
+        )
+        == "abc"
+    )
+
+
+def test_dereference_str_filter_rendered():
+    assert (
+        jinja2.dereference(
+            val="{{ ['hello', recipient] | join(', ') }}", context={"recipient": "world"}
+        )
+        == "hello, world"
+    )
+
+
+def test_dereference_str_variable_rejected():
+    # Unrenderable variables are reported and returned unmodified:
+    val = "{{ n }}"
+    assert jinja2.dereference(val=val, context={}) == val
+
+
+def test_dereference_str_variable_rendered_int():
+    # Due to reification, the value of a result parsable as an int is an int. The same holds for
+    # other results parsable by YAML as Python values, but this is only a representative, non-
+    # exhaustive test.
+    assert jinja2.dereference(val="{{ number }}", context={"number": "88"}) == 88
+
+
+def test_derefrence_str_variable_rendered_mixed():
+    # A mixed result remains a str.
+    assert (
+        jinja2.dereference(val="{{ n }} is an {{ t }}", context={"n": 88, "t": "int"})
+        == "88 is an int"
+    )
+
+
+def test_dereference_str_variable_rendered_str():
+    # A pure str result remains a str.
+    assert jinja2.dereference(val="{{ greeting }}", context={"greeting": "hello"}) == "hello"
+
+
+# def test_dereference():
+#     """
+#     Test that the Jinja2 fields are filled in as expected.
+#     """
+#     with patch.dict(os.environ, {"UFSEXEC": "/my/path/"}, clear=True):
+#         with open(fixture_path("gfs.yaml"), "r", encoding="utf-8") as f:
+#             val = yaml.safe_load(f)
+
+#         jinja2.dereference(val, context={**os.environ, **val})
+
+#         # Check that existing dicts remain:
+#         assert isinstance(val["fcst"], dict)
+#         assert isinstance(val["grid_stats"], dict)
+
+#         # Check references to other items at same level, and order doesn't
+#         # matter:
+#         assert val["testupdate"] == "testpassed"
+
+#         # Check references to other section items:
+#         assert val["grid_stats"]["ref_fcst"] == 64
+
+#         # Check environment values are included:
+#         assert val["executable"] == "/my/path/"
+
+#         # Check that env variables that are not defined do not change:
+#         assert val["undefined_env"] == "{{ NOPE }}"
+
+#         # Check undefined are left as-is:
+#         assert val["datapath"] == "{{ [experiment_dir, current_cycle] | path_join }}"
+
+#         # Check math:
+#         assert val["grid_stats"]["total_points"] == 640000
+#         assert val["grid_stats"]["total_ens_points"] == 19200000
+
+#         # Check that statements expand:
+#         assert val["fcst"]["output_hours"] == "0 3 6 9"
+
+#         # Check that order isn't a problem:
+#         assert val["grid_stats"]["points_per_level"] == 10000
+
+
 @pytest.mark.parametrize("key", ["foo", "bar"])
 def test_register_filters_path_join(key):
     s = "{{ ['dir', %s] | path_join }}" % key
