@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for the uwtools.config.base module.
 """
@@ -54,6 +54,16 @@ class ConcreteConfig(Config):
 def test___repr__(capsys, config):
     print(config)
     assert yaml.safe_load(capsys.readouterr().out)["foo"] == 88
+
+
+def test__load_paths(config, tmp_path):
+    paths = (tmp_path / fn for fn in ("f1", "f2"))
+    for path in paths:
+        with open(path, "w", encoding="utf-8") as f:
+            yaml.dump({path.name: "defined"}, f)
+    cfg = config._load_paths(config_files=paths)
+    for path in paths:
+        assert cfg[path.name] == "present"
 
 
 def test_characterize_values(config):
