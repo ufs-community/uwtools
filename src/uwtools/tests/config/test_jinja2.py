@@ -78,21 +78,13 @@ def test_dereference_str_expression_rejected():
 
 def test_dereference_str_expression_rendered():
     # Context permitting, Jinja2 expressions are rendered:
-    assert (
-        jinja2.dereference(
-            val="{% for a in as %}{{ a }}{% endfor %}", context={"as": ["a", "b", "c"]}
-        )
-        == "abc"
-    )
+    val = "{% for a in as %}{{ a }}{% endfor %}"
+    assert jinja2.dereference(val=val, context={"as": ["a", "b", "c"]}) == "abc"
 
 
 def test_dereference_str_filter_rendered():
-    assert (
-        jinja2.dereference(
-            val="{{ ['hello', recipient] | join(', ') }}", context={"recipient": "world"}
-        )
-        == "hello, world"
-    )
+    val = "{{ ['hello', recipient] | join(', ') }}"
+    assert jinja2.dereference(val=val, context={"recipient": "world"}) == "hello, world"
 
 
 def test_dereference_str_variable_rejected():
@@ -105,20 +97,20 @@ def test_dereference_str_variable_rendered_int():
     # Due to reification, the value of a result parsable as an int is an int. The same holds for
     # other results parsable by YAML as Python values, but this is only a representative, non-
     # exhaustive test.
-    assert jinja2.dereference(val="{{ number }}", context={"number": "88"}) == 88
+    val = "{{ number }}"
+    assert jinja2.dereference(val=val, context={"number": "88"}) == 88
 
 
 def test_derefrence_str_variable_rendered_mixed():
     # A mixed result remains a str.
-    assert (
-        jinja2.dereference(val="{{ n }} is an {{ t }}", context={"n": 88, "t": "int"})
-        == "88 is an int"
-    )
+    val = "{{ n }} is an {{ t }}"
+    assert jinja2.dereference(val=val, context={"n": 88, "t": "int"}) == "88 is an int"
 
 
 def test_dereference_str_variable_rendered_str():
     # A pure str result remains a str.
-    assert jinja2.dereference(val="{{ greeting }}", context={"greeting": "hello"}) == "hello"
+    val = "{{ greeting }}"
+    assert jinja2.dereference(val=val, context={"greeting": "hello"}) == "hello"
 
 
 # def test_dereference():

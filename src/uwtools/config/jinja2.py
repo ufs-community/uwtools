@@ -136,16 +136,12 @@ def dereference(val: _YAMLVal, context: dict) -> _YAMLVal:
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
-        template = _register_filters(Environment(undefined=DebugUndefined)).from_string(val)
-        rendered = None
-        try:
-            rendered = template.render(**context)
-        except (TypeError, UndefinedError):
-            log.debug("Could not render value: %s", val)
-        except ZeroDivisionError:
-            log.debug("Rendering value resulted in divide-by-zero: %s", val)
-        if rendered:
-            return _reify_scalar_str(rendered)
+        if rendered := _reify_scalar_str(
+            _register_filters(Environment(undefined=DebugUndefined))
+            .from_string(val)
+            .render(**context)
+        ):
+            return rendered
     return val
 
 
