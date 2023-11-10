@@ -470,7 +470,7 @@ def test__print_config_section_ini(capsys):
     tools._print_config_section(config_obj.data, section)
     actual = capsys.readouterr().out
     expected = """
-flavor={{flavor}}
+flavor={{ flavor }}
 servings=0
 side=False
 type=pie
