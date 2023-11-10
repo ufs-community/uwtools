@@ -5,6 +5,8 @@ Tests for the uwtools.config.formats package.
 import logging
 
 import pytest
+import yaml
+from pytest import fixture
 
 from uwtools.config import tools
 from uwtools.logging import log
@@ -12,7 +14,24 @@ from uwtools.tests.config.formats.support import salad_base
 from uwtools.tests.support import fixture_path, logged
 from uwtools.utils.file import FORMAT
 
+# Fixtures
+
+
+@fixture
+def nml_cfgobj(tmp_path):
+    # Use NMLConfig to exercise methods in Config abstract base class.
+    path = tmp_path / "cfg.nml"
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("&nl n = 88 /")
+    return tools.format_to_config(FORMAT.nml)(config_file=path)
+
+
 # Tests
+
+
+def test_Config___repr__(capsys, nml_cfgobj):
+    print(nml_cfgobj)
+    assert yaml.safe_load(capsys.readouterr().out)["nl"]["n"] == 88
 
 
 @pytest.mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
