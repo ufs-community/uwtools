@@ -109,27 +109,6 @@ def test_depth(config):
     assert config.depth == 1
 
 
-@pytest.mark.parametrize(
-    "extra,logmsg",
-    [
-        ({"a": "{{ 'str' + 11 }}"}, "can only concatenate"),
-        ({"a": "{{ baz.qux }}"}, "is undefined"),
-        ({"a": "{{ 1 / 0 }}"}, "division by zero"),
-    ],
-)
-def test_dereference_error_no_op(caplog, config, extra, logmsg):
-    # Erroneous inputs cause:
-    # 1. A type error due to + operating on a str and an int.
-    # 2. An undefined error due to reference to a non-existent value.
-    # 3. A division-by-zero error.
-    log.setLevel(logging.DEBUG)
-    config.data.update(extra)
-    old = deepcopy(config.data)
-    config.dereference()
-    assert config == old
-    assert regex_logged(caplog, logmsg)
-
-
 # def test_dereference(config):
 #     log.setLevel(logging.DEBUG)
 #     # config.data.update({"bar": "{{ None | int + 11 }}", "baz": {"qux": "{{ NUMBER | int + 11 }}"}})

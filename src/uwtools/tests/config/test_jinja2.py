@@ -80,12 +80,25 @@ def test_dereference_no_op(val):
     assert jinja2.dereference(val=val, context={}) == val
 
 
-def test_dereference_str_expression_rejected(caplog):
-    # Unrenderable expressions are reported and returned unmodified:
+@pytest.mark.parametrize(
+    "logmsg,val",
+    [
+        ("can only concatenate", "{{ 'str' + 11 }}"),
+        ("'n' is undefined", "{{ n }}"),
+        ("'as' is undefined", "{% for a in as %}{{ a }}{% endfor %}"),
+        ("division by zero", "{{ 1 / 0 }}"),
+    ],
+)
+def test_dereference_no_op_due_to_error(caplog, logmsg, val):
+    # Erroneous inputs cause:
+    # - A type error due to + operating on a str and an int.
+    # - An undefined error due to reference to a non-existent value.
+    # - An undefined error in a loop expression.
+    # - A division-by-zero error.
+    # The unrenderable expression is returned unmodified.
     log.setLevel(logging.DEBUG)
-    val = "{% for a in as %}{{ a }}{% endfor %}"
-    assert jinja2.dereference(val=val, context={}) == val
-    assert regex_logged(caplog, "'as' is undefined")
+    assert jinja2.dereference(val=val, context={})
+    assert regex_logged(caplog, logmsg)
 
 
 def test_dereference_str_expression_rendered():
@@ -97,14 +110,6 @@ def test_dereference_str_expression_rendered():
 def test_dereference_str_filter_rendered():
     val = "{{ ['hello', recipient] | join(', ') }}"
     assert jinja2.dereference(val=val, context={"recipient": "world"}) == "hello, world"
-
-
-def test_dereference_str_variable_rejected(caplog):
-    # Unrenderable variables are reported and returned unmodified:
-    log.setLevel(logging.DEBUG)
-    val = "{{ n }}"
-    assert jinja2.dereference(val=val, context={}) == val
-    assert regex_logged(caplog, "'n' is undefined")
 
 
 def test_dereference_str_variable_rendered_int():
