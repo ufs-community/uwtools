@@ -164,7 +164,7 @@ class Driver(ABC):
         if base_file := config_values.get("base_file"):
             config_obj = config_class(base_file)
             config_obj.update_values(user_values)
-            config_obj.dereference_all()
+            config_obj.dereference()
             config_obj.dump(output_path)
         else:
             config_class.dump_dict(path=output_path, cfg=user_values)

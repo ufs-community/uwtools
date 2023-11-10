@@ -136,13 +136,13 @@ def test_depth(depth, fn):
     assert cfgobj.depth == depth
 
 
-def test_dereference_all():
+def test_dereference():
     """
     Test that the Jinja2 fields are filled in as expected.
     """
     with patch.dict(os.environ, {"UFSEXEC": "/my/path/"}, clear=True):
         cfg = YAMLConfig(fixture_path("gfs.yaml"))
-        cfg.dereference_all()
+        cfg.dereference()
 
         # Check that existing dicts remain:
         assert isinstance(cfg["fcst"], dict)
@@ -354,7 +354,7 @@ def test_realize_config_conversion_cfg_to_yaml(tmp_path):
         values_format=None,
     )
     expected = YAMLConfig(infile)
-    expected.dereference_all()
+    expected.dereference()
     expected_file = tmp_path / "test.yaml"
     expected.dump(expected_file)
     assert compare_files(expected_file, outfile)
@@ -393,7 +393,7 @@ def test_realize_config_dry_run(caplog):
     log.setLevel(logging.INFO)
     infile = fixture_path("fruit_config.yaml")
     yaml_config = YAMLConfig(infile)
-    yaml_config.dereference_all()
+    yaml_config.dereference()
     tools.realize_config(
         input_file=infile,
         input_format=FORMAT.yaml,

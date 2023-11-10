@@ -64,7 +64,7 @@ def realize_config(
     """
 
     input_obj = format_to_config(input_format)(config_file=input_file)
-    input_obj.dereference_all()
+    input_obj.dereference()
     input_obj = _realize_config_update(input_obj, values_file, values_format)
     _realize_config_check_depths(input_obj, output_format)
     if values_needed:
@@ -137,7 +137,7 @@ def _realize_config_update(
         values_obj = format_to_config(values_format)(config_file=values_file)
         log.debug("Values config has depth %s", values_obj.depth)
         input_obj.update_values(values_obj)
-        input_obj.dereference_all()
+        input_obj.dereference()
         log.debug("After update, input config has depth %s", input_obj.depth)
     else:
         log.debug("Input config has depth %s", input_obj.depth)

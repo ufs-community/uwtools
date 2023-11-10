@@ -148,7 +148,7 @@ class Config(ABC, UserDict):
         """
         return depth(self.data)
 
-    def dereference_all(self) -> None:
+    def dereference(self) -> None:
         """
         Render as much Jinja2 syntax as possible.
         """
