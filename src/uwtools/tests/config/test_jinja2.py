@@ -135,6 +135,21 @@ def test_register_filters_path_join(key):
             template.render(**context)  # path_join filter fails
 
 
+def test_reify_scalar_str():
+    for x in ["true", "yes", "TRUE"]:
+        assert jinja2._reify_scalar_str(x) is True
+    for x in ["false", "no", "FALSE"]:
+        assert jinja2._reify_scalar_str(x) is False
+    assert jinja2._reify_scalar_str("88") == 88
+    assert jinja2._reify_scalar_str("'88'") == "88"  # quoted int not converted
+    assert jinja2._reify_scalar_str("3.14") == 3.14
+    assert jinja2._reify_scalar_str("NA") == "NA"  # no conversion
+    assert jinja2._reify_scalar_str("@[foo]") == "@[foo]"  # no conversion for YAML exceptions
+    with raises(AttributeError) as e:
+        jinja2._reify_scalar_str([1, 2, 3])  # type: ignore
+    assert "'list' object has no attribute 'read'" in str(e.value)  # Exception on unintended list
+
+
 def test_render(values_file, template, tmp_path):
     outfile = str(tmp_path / "out.txt")
     render_helper(input_file=template, values_file=values_file, output_file=outfile)
