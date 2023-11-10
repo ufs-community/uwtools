@@ -122,19 +122,6 @@ def test_config_field_table(tmp_path):
         assert line1 == line2
 
 
-@pytest.mark.parametrize(
-    "fn,depth", [("FV3_GFS_v16.yaml", 3), ("simple.nml", 2), ("simple2.ini", 2)]
-)
-def test_depth(depth, fn):
-    """
-    Test that the proper dictionary depth is returned for each file type.
-    """
-    infile = fixture_path(fn)
-    fmt = Path(infile).suffix.replace(".", "")
-    cfgobj = tools.format_to_config(fmt)(infile)
-    assert cfgobj.depth == depth
-
-
 def test_ini_config_bash(salad_base, tmp_path):
     """
     Test that INI config load and dump work with a basic bash file.

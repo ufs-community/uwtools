@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
-Tests for uwtools.utils.jinja2 module.
+Tests for uwtools.config.jinja2 module.
 """
 
 import logging
