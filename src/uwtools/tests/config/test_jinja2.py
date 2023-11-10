@@ -91,10 +91,10 @@ def test_dereference_no_op(val):
 )
 def test_dereference_no_op_due_to_error(caplog, logmsg, val):
     # Erroneous inputs cause:
-    # - A type error due to + operating on a str and an int.
-    # - An undefined error due to reference to a non-existent value.
-    # - An undefined error in a loop expression.
-    # - A division-by-zero error.
+    #   - A type error due to + operating on a str and an int.
+    #   - An undefined error due to reference to a non-existent value.
+    #   - An undefined error in a loop expression.
+    #   - A division-by-zero error.
     # The unrenderable expression is returned unmodified.
     log.setLevel(logging.DEBUG)
     assert jinja2.dereference(val=val, context={})

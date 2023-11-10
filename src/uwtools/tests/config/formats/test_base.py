@@ -5,6 +5,7 @@ Tests for the uwtools.config.base module.
 
 import logging
 import os
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -13,6 +14,7 @@ from pytest import fixture
 
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
+from uwtools.config.support import INCLUDE_TAG
 from uwtools.logging import log
 from uwtools.tests.support import fixture_path, logged, regex_logged
 from uwtools.utils.file import FORMAT, readable
@@ -37,17 +39,23 @@ class ConcreteConfig(Config):
     Config subclass for testing purposes.
     """
 
+    def __init__(self, config_file):
+        yaml.SafeLoader.add_constructor(
+            INCLUDE_TAG,
+            lambda loader, node: self._load_paths(loader.construct_sequence(node)),  # type: ignore
+        )
+        super().__init__(config_file)
+
     def _load(self, config_file):
         with readable(config_file) as f:
             return yaml.safe_load(f.read())
 
     def dump(self, path):
-        assert path
+        pass
 
     @staticmethod
     def dump_dict(path, cfg, opts=None):
-        for x in (path, cfg, opts):
-            assert x
+        pass
 
 
 # Tests
@@ -110,10 +118,10 @@ def test_depth(config):
 
 def test_dereference(caplog, config):
     # Test demonstrates that:
-    # - Config dereferencing uses environment variables.
-    # - Initially-unrenderable values do not cause errors.
-    # - Initially-unrenderable values may be rendered via iteration.
-    # - Finally-unrenderable values do not cause errors and are returned unmodified.
+    #   - Config dereferencing uses environment variables.
+    #   - Initially-unrenderable values do not cause errors.
+    #   - Initially-unrenderable values may be rendered via iteration.
+    #   - Finally-unrenderable values do not cause errors and are returned unmodified.
     log.setLevel(logging.DEBUG)
     config.data.update({"a": "{{ b.c + 11 }}", "b": {"c": "{{ N | int + 11 }}"}, "d": "{{ X }}"})
     with patch.dict(os.environ, {"N": "55"}, clear=True):
@@ -125,6 +133,21 @@ def test_dereference(caplog, config):
     ]:
         assert regex_logged(caplog, excerpt)
     assert config == {"foo": 88, "a": 77, "b": {"c": 66}, "d": "{{ X }}"}
+
+
+def test_parse_include(tmp_path):
+    def mkfile(fn: str, content: str) -> Path:
+        path = tmp_path / fn
+        with open(path, "w", encoding="utf-8") as f:
+            print(content, file=f)
+        return path
+
+    with patch.object(ConcreteConfig, "parse_include") as parse_include:
+        f3 = mkfile("f3", "baz: 88")
+        f2 = mkfile("f2", f"bar: {INCLUDE_TAG} [{f3}]")
+        f1 = mkfile("f1", f"foo: {INCLUDE_TAG} [{f2}]")
+        assert ConcreteConfig(config_file=f1) == {"foo": {"bar": {"baz": 88}}}
+    parse_include.assert_not_called()
 
 
 @pytest.mark.parametrize("fmt1", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
