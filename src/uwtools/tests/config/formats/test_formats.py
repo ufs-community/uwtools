@@ -9,34 +9,56 @@ import yaml
 from pytest import fixture
 
 from uwtools.config import tools
+from uwtools.config.formats.base import Config
 from uwtools.logging import log
 from uwtools.tests.config.formats.support import salad_base
 from uwtools.tests.support import fixture_path, logged
-from uwtools.utils.file import FORMAT
+from uwtools.utils.file import FORMAT, readable
 
 # Fixtures
 
 
 @fixture
-def nml_cfgobj(tmp_path):
-    # Use NMLConfig to exercise methods in Config abstract base class.
-    path = tmp_path / "cfg.nml"
+def config(tmp_path):
+    path = tmp_path / "config.yaml"
+    data = {"foo": 88}
     with open(path, "w", encoding="utf-8") as f:
-        f.write("&nl n = 88 /")
-    return tools.format_to_config(FORMAT.nml)(config_file=path)
+        yaml.dump(data, f)
+    return ConcreteConfig(config_file=path)
+
+
+# Helpers
+
+
+class ConcreteConfig(Config):
+    """
+    Config subclass for testing purposes.
+    """
+
+    def _load(self, config_file):
+        with readable(config_file) as f:
+            return yaml.safe_load(f.read())
+
+    def dump(self, path):
+        assert path
+
+    @staticmethod
+    def dump_dict(path, cfg, opts):
+        for x in (path, cfg, opts):
+            assert x
 
 
 # Tests
 
 
-def test_Config___repr__(capsys, nml_cfgobj):
-    print(nml_cfgobj)
-    assert yaml.safe_load(capsys.readouterr().out)["nl"]["n"] == 88
+def test___repr__(capsys, config):
+    print(config)
+    assert yaml.safe_load(capsys.readouterr().out)["foo"] == 88
 
 
-def test_Config_characterize_values(nml_cfgobj):
+def test_characterize_values(config):
     d = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
-    complete, empty, template = nml_cfgobj.characterize_values(values=d, parent="p")
+    complete, empty, template = config.characterize_values(values=d, parent="p")
     assert complete == ["    p4", "    p4.a", "    pb", "    p5", "    p6"]
     assert empty == ["    p1", "    p2"]
     assert template == ["    p3: {{ n }}"]
