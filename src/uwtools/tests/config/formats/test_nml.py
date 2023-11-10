@@ -1,3 +1,4 @@
+# pylint: disable=duplicate-code
 """
 Tests for uwtools.config.formats.nml module.
 """
@@ -5,7 +6,6 @@ Tests for uwtools.config.formats.nml module.
 import filecmp
 
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.tests.config.formats.support import salad_base
 from uwtools.tests.support import fixture_path
 
 # Tests

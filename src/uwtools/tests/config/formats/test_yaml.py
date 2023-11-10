@@ -1,3 +1,4 @@
+# pylint: disable=missing-function-docstring
 """
 Tests for uwtools.config.formats.yaml module.
 """

@@ -6,7 +6,6 @@ import filecmp
 from typing import Any, Dict
 
 from uwtools.config.formats.ini import INIConfig
-from uwtools.tests.config.formats.support import salad_base
 from uwtools.tests.support import fixture_path
 
 # Tests

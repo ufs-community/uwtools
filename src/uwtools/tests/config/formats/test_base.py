@@ -1,3 +1,4 @@
+# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 Tests for the uwtools.config.base module.
 """
@@ -11,7 +12,6 @@ from pytest import fixture
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
 from uwtools.logging import log
-from uwtools.tests.config.formats.support import salad_base
 from uwtools.tests.support import fixture_path, logged
 from uwtools.utils.file import FORMAT, readable
 
@@ -43,7 +43,7 @@ class ConcreteConfig(Config):
         assert path
 
     @staticmethod
-    def dump_dict(path, cfg, opts):
+    def dump_dict(path, cfg, opts=None):
         for x in (path, cfg, opts):
             assert x
 
