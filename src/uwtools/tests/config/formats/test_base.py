@@ -113,14 +113,18 @@ def test_dereference(caplog, config):
     # - Config dereferencing uses environment variables.
     # - Initially-unrenderable values do not cause errors.
     # - Initially-unrenderable values may be rendered via iteration.
+    # - Finally-unrenderable values do not cause errors and are returned unmodified.
     log.setLevel(logging.DEBUG)
-    config.data.update({"a": "{{ b.c + 11 }}", "b": {"c": "{{ N | int + 11 }}"}})
+    config.data.update({"a": "{{ b.c + 11 }}", "b": {"c": "{{ N | int + 11 }}"}, "d": "{{ X }}"})
     with patch.dict(os.environ, {"N": "55"}, clear=True):
         config.dereference()
-    assert regex_logged(caplog, "'a': '{{ b.c + 11 }}', 'b': {'c': '{{ N | int + 11 }}'}}")
-    assert regex_logged(caplog, "'a': '{{ b.c + 11 }}', 'b': {'c': 66}}")
-    assert regex_logged(caplog, "'a': 77, 'b': {'c': 66}}")
-    assert config == {"foo": 88, "a": 77, "b": {"c": 66}}
+    for excerpt in [
+        "'a': '{{ b.c + 11 }}', 'b': {'c': '{{ N | int + 11 }}'}, 'd': '{{ X }}'",
+        "'a': '{{ b.c + 11 }}', 'b': {'c': 66}, 'd': '{{ X }}'",
+        "'a': 77, 'b': {'c': 66}, 'd': '{{ X }}'",
+    ]:
+        assert regex_logged(caplog, excerpt)
+    assert config == {"foo": 88, "a": 77, "b": {"c": 66}, "d": "{{ X }}"}
 
 
 @pytest.mark.parametrize("fmt1", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
