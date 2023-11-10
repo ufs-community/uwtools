@@ -131,19 +131,21 @@ def dereference(val: _YAMLVal, context: dict) -> _YAMLVal:
     # fail for valid reasons -- notably a replacement value not being available in the given context
     # object. In such cases, return the original value: Any unrendered Jinja2 syntax it contains may
     # may be rendered by later processing with better context.
+    log.debug("Rendering: %s", val)
     if isinstance(val, dict):
         return {k: dereference(v, context) for k, v in val.items()}
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
-        return (
-            _reify_scalar_str(
+        try:
+            rendered = (
                 _register_filters(Environment(undefined=DebugUndefined))
                 .from_string(val)
                 .render(**context)
             )
-            or val
-        )
+            return _reify_scalar_str(rendered)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            log.debug("Rendering ERROR: %s", e)
     return val
 
 

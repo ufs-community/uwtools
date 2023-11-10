@@ -4,6 +4,9 @@ Tests for the uwtools.config.base module.
 """
 
 import logging
+import os
+from copy import deepcopy
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -12,7 +15,7 @@ from pytest import fixture
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
 from uwtools.logging import log
-from uwtools.tests.support import fixture_path, logged
+from uwtools.tests.support import fixture_path, logged, regex_logged
 from uwtools.utils.file import FORMAT, readable
 
 # Fixtures
@@ -67,8 +70,8 @@ def test__load_paths(config, tmp_path):
 
 
 def test_characterize_values(config):
-    d = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
-    complete, empty, template = config.characterize_values(values=d, parent="p")
+    values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
+    complete, empty, template = config.characterize_values(values=values, parent="p")
     assert complete == ["    p4", "    p4.a", "    pb", "    p5", "    p6"]
     assert empty == ["    p1", "    p2"]
     assert template == ["    p3: {{ n }}"]
@@ -104,6 +107,37 @@ def test_compare_config(caplog, fmt, salad_base):
 
 def test_depth(config):
     assert config.depth == 1
+
+
+@pytest.mark.parametrize(
+    "extra,logmsg",
+    [
+        ({"a": "{{ 'str' + 11 }}"}, "can only concatenate"),
+        ({"a": "{{ baz.qux }}"}, "is undefined"),
+        ({"a": "{{ 1 / 0 }}"}, "division by zero"),
+    ],
+)
+def test_dereference_error_no_op(caplog, config, extra, logmsg):
+    # Erroneous inputs cause:
+    # 1. A type error due to + operating on a str and an int.
+    # 2. An undefined error due to reference to a non-existent value.
+    # 3. A division-by-zero error.
+    log.setLevel(logging.DEBUG)
+    config.data.update(extra)
+    old = deepcopy(config.data)
+    config.dereference()
+    assert config == old
+    assert regex_logged(caplog, logmsg)
+
+
+# def test_dereference(config):
+#     log.setLevel(logging.DEBUG)
+#     # config.data.update({"bar": "{{ None | int + 11 }}", "baz": {"qux": "{{ NUMBER | int + 11 }}"}})
+#     config.data.update({"bar": "{{ None + 11 }}"})
+#     with patch.dict(os.environ, {"NUMBER": "66"}, clear=True):
+#         config.dereference()
+#         print("@@@", config)
+#     assert config == {"foo": 88, "bar": 11, "baz": {"qux": 77}}
 
 
 @pytest.mark.parametrize("fmt1", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
