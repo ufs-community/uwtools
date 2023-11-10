@@ -4,12 +4,14 @@ Tests for uwtools.config.jinja2 module.
 """
 
 import pytest
+from pytest import raises
 
 from uwtools.config import support
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.exceptions import UWConfigError
 from uwtools.utils.file import FORMAT
 
 
@@ -29,3 +31,8 @@ def test_depth(d, n):
 )
 def test_format_to_config(cfgtype, fmt):
     assert support.format_to_config(fmt) is cfgtype
+
+
+def test_format_to_config_fail():
+    with raises(UWConfigError):
+        support.format_to_config("no-such-config-type")
