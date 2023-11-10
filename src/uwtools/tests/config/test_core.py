@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 import pytest
 import yaml
-from pytest import fixture, raises
+from pytest import raises
 
 from uwtools import exceptions
 from uwtools.config import support, tools
