@@ -814,12 +814,6 @@ def test_YAMLConfig__load_paths_failure_stdin_plus_relpath(caplog):
     assert logged(caplog, msg)
 
 
-def test_log_and_error():
-    with raises(UWConfigError) as e:
-        raise support.log_and_error("Must be scalar value")
-    assert "Must be scalar value" in str(e.value)
-
-
 # Helper functions
 
 
