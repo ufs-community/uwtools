@@ -152,12 +152,15 @@ class Config(ABC, UserDict):
         """
         Render as much Jinja2 syntax as possible.
         """
+        log.debug("Dereferencing, initial value: %s", self.data)
         while True:
             new = dereference(val=self.data, context={**os.environ, **self.data})
             if new == self.data:
                 break
+            log.debug("Dereferencing, current value: %s", self.data)
             assert isinstance(new, dict)
             self.data = new
+        log.debug("Dereferencing, final value: %s", self.data)
 
     @abstractmethod
     def dump(self, path: OptionalPath) -> None:

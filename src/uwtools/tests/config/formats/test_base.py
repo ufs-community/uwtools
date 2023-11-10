@@ -5,7 +5,6 @@ Tests for the uwtools.config.base module.
 
 import logging
 import os
-from copy import deepcopy
 from unittest.mock import patch
 
 import pytest
@@ -109,14 +108,19 @@ def test_depth(config):
     assert config.depth == 1
 
 
-# def test_dereference(config):
-#     log.setLevel(logging.DEBUG)
-#     # config.data.update({"bar": "{{ None | int + 11 }}", "baz": {"qux": "{{ NUMBER | int + 11 }}"}})
-#     config.data.update({"bar": "{{ None + 11 }}"})
-#     with patch.dict(os.environ, {"NUMBER": "66"}, clear=True):
-#         config.dereference()
-#         print("@@@", config)
-#     assert config == {"foo": 88, "bar": 11, "baz": {"qux": 77}}
+def test_dereference(caplog, config):
+    # Test demonstrates that:
+    # - Config dereferencing uses environment variables.
+    # - Initially-unrenderable values do not cause errors.
+    # - Initially-unrenderable values may be rendered via iteration.
+    log.setLevel(logging.DEBUG)
+    config.data.update({"a": "{{ b.c + 11 }}", "b": {"c": "{{ N | int + 11 }}"}})
+    with patch.dict(os.environ, {"N": "55"}, clear=True):
+        config.dereference()
+    assert regex_logged(caplog, "'a': '{{ b.c + 11 }}', 'b': {'c': '{{ N | int + 11 }}'}}")
+    assert regex_logged(caplog, "'a': '{{ b.c + 11 }}', 'b': {'c': 66}}")
+    assert regex_logged(caplog, "'a': 77, 'b': {'c': 66}}")
+    assert config == {"foo": 88, "a": 77, "b": {"c": 66}}
 
 
 @pytest.mark.parametrize("fmt1", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
