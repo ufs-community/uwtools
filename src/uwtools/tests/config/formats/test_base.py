@@ -5,9 +5,6 @@ Tests for the uwtools.config.base module.
 
 import logging
 import os
-
-# import re
-# from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -16,8 +13,6 @@ from pytest import fixture
 
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
-
-# from uwtools.config.support import INCLUDE_TAG
 from uwtools.logging import log
 from uwtools.tests.support import fixture_path, logged, regex_logged
 from uwtools.utils.file import FORMAT, readable
@@ -41,13 +36,6 @@ class ConcreteConfig(Config):
     """
     Config subclass for testing purposes.
     """
-
-    # def __init__(self, config_file):
-    #     yaml.SafeLoader.add_constructor(
-    #         INCLUDE_TAG,
-    #         lambda loader, node: self._load_paths(loader.construct_sequence(node)),
-    #     )
-    #     super().__init__(config_file)
 
     def _load(self, config_file):
         with readable(config_file) as f:
@@ -138,40 +126,9 @@ def test_dereference(caplog, config):
     assert config == {"foo": 88, "a": 77, "b": {"c": 66}, "d": "{{ X }}"}
 
 
-# def test_parse_include(tmp_path):
+# NB: Need direct test for parse_include().
 
-#     import json
-
-#     class ParseIncludeConfig(ConcreteConfig):
-
-#         def __init__(self, config_file):
-#             self.data = self._load(config_file)
-
-#         def _load(self, config_file):
-#             with readable(config_file) as f:
-#                 return json.loads(f.read())
-
-#         # def update_values(self, src):
-#         #     self.parse_include(src)
-#         #     self.data[list(self.data.keys())[0]] = src
-
-#     def mkfile(fn: str, content: str) -> Path:
-#         path = tmp_path / fn
-#         with open(path, "w", encoding="utf-8") as f:
-#             print(content, file=f)
-#         return path
-
-#     f3 = mkfile("f3", '{"key1": 88}')
-#     f2 = mkfile("f2", '{"section": {"key2": "%s [%s]"}}' % (INCLUDE_TAG, f3))
-#     # f1 = mkfile("f1", f"foo {INCLUDE_TAG} [{f2}]")
-
-#     config = ParseIncludeConfig(f2)
-#     config.parse_include()
-#     breakpoint()
-#     print(config)
-#     1/0
-#     return
-#     # assert ConcreteConfig(config_file=f1) == {"foo": {"bar": {"baz": 88}}}
+# NB: Need direct test for update_values().
 
 
 @pytest.mark.parametrize("fmt1", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])

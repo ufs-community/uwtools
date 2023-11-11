@@ -202,23 +202,21 @@ class Config(ABC, UserDict):
                     self.update_values(self._load_paths(filepaths))
                     del ref_dict[key]
 
-    def update_values(self, src: Union[dict, Config], dst: Optional[Config] = None) -> None:
+    def update_values(self, src: Union[dict, Config]) -> None:
         """
-        Updates a Config object.
-
-        Update the instance's own data (or, optionally, that of the specifed Config object) with the
-        values provided by another dictionary or Config object.
+        Updates a config.
 
         :param src: The dictionary with new data to use.
-        :param dst: The Config to update with the new data.
         """
-        srcdict = src.data if isinstance(src, Config) else src
-        dstcfg = self if dst is None else dst
-        for key, new_val in srcdict.items():
-            if isinstance(new_val, dict):
-                if isinstance(dstcfg.get(key), dict):
-                    self.update_values(new_val, dstcfg[key])
+
+        def update(src: dict, dst: dict) -> None:
+            for key, val in src.items():
+                if isinstance(val, dict):
+                    if isinstance(dst.get(key), dict):
+                        update(val, dst[key])
+                    else:
+                        dst[key] = val
                 else:
-                    dstcfg[key] = new_val
-            else:
-                dstcfg[key] = new_val
+                    dst[key] = val
+
+        update(src.data if isinstance(src, Config) else src, self.data)
