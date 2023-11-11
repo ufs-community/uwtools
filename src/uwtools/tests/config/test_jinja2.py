@@ -74,6 +74,27 @@ def test_dereference_list():
     assert jinja2.dereference(val=val, context={"n": 88, "s": "foo"}) == [88, "foo"]
 
 
+def test_dereference_local_values():
+    # Rendering can use values from the local contents of the enclosing dict, but are shadowed by
+    # values from the top-level context object.
+    val = {
+        "color": "blue",
+        "apple": {
+            "color": "red",
+            "description": "A {{ color }} apple",  # top-level "color" will be used
+        },
+        "banana": {
+            "description": "A banana, {{ state }}",  # local "state" will be used
+            "state": "unpeeled",
+        },
+    }
+    assert jinja2.dereference(val=val, context=val) == {
+        "color": "blue",
+        "apple": {"color": "red", "description": "A blue apple"},
+        "banana": {"description": "A banana, unpeeled", "state": "unpeeled"},
+    }
+
+
 @pytest.mark.parametrize("val", (True, 3.14, 88, None))
 def test_dereference_no_op(val):
     # These types of values pass through dereferencing unmodified:

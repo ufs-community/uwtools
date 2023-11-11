@@ -118,7 +118,7 @@ class J2Template:
 # Public functions
 
 
-def dereference(val: _YAMLVal, context: dict) -> _YAMLVal:
+def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _YAMLVal:
     """
     Render Jinja2 syntax, wherever possible.
 
@@ -126,14 +126,19 @@ def dereference(val: _YAMLVal, context: dict) -> _YAMLVal:
     :param context: Values to use when rendering Jinja2 syntax.
     :return: The input value, with Jinja2 syntax rendered.
     """
+
     # Build a replacement value with Jinja2 syntax rendered. Depend on recursion for dict and list
     # values; render strings; and return objects of any other type unmodified. Rendering may fail
     # fail for valid reasons -- notably a replacement value not being available in the given context
     # object. In such cases, return the original value: Any unrendered Jinja2 syntax it contains may
     # may be rendered by later processing with better context.
+
+    # Note that, for rendering performed on dict values, replacement values will be taken from, in
+    # priority order, 1. The full context dict, 2. Local sibling values in the dict.
+
     log.debug("Rendering: %s", val)
     if isinstance(val, dict):
-        return {k: dereference(v, context) for k, v in val.items()}
+        return {k: dereference(v, context, local=val) for k, v in val.items()}
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
@@ -141,11 +146,12 @@ def dereference(val: _YAMLVal, context: dict) -> _YAMLVal:
             rendered = (
                 _register_filters(Environment(undefined=StrictUndefined))
                 .from_string(val)
-                .render(**context)
+                .render({**(local or {}), **context})
             )
             return _reify_scalar_str(rendered)
         except Exception as e:  # pylint: disable=broad-exception-caught
             log.debug("Rendering ERROR: %s", e)
+    log.debug("Rendered: %s", val)
     return val
 
 
