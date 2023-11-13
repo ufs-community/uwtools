@@ -188,8 +188,7 @@ class _RocotoXML:
         for key in config.keys():
             tag, _ = self._tag_name(key)
             if tag in [STR.taskdep, STR.datadep, STR.timedep]:
-                self._add_task_dependency_operand(e, config[STR.taskdep])
-                # self._set_attrs(SubElement(e, STR.taskdep), block)
+                self._add_task_dependency_operand(e, config=config)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
@@ -201,6 +200,8 @@ class _RocotoXML:
             tag, _ = self._tag_name(key)
             if tag == STR.taskdep:
                 self._set_attrs(SubElement(e, STR.taskdep), block)
+            elif tag == STR.datadep:
+                pass
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """
