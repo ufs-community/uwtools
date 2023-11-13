@@ -129,12 +129,17 @@ class Test_RocotoXML:
         with raises(UWConfigError):
             instance._add_task_dependency(e=root, config=config)
 
-    def test__add_data_dependency(self, instance, root):
-        config = {"datadep": {"age": "120"}}
+    @pytest.mark.parametrize("config", [{"datadep": {"age": "120"}}, {"timedep": {"offset": "&DEADLINE;"}}])
+    @pytest.mark.parametrize("validity_tag", ["datadep", "timedep"])
+    @pytest.mark.parametrize("validity_items", [("age", "120"), ("offset", "&DEADLINE;")])
+    def test__add_operand_dependency(self, instance, root, config, validity_tag, validity_items):
+        # config = {"datadep": {"age": "120"}}
+        #breakpoint()
+        validity_key, validity_val = validity_items
         instance._add_task_dependency_operand(e=root, config=config)
-        datadep = root[0]
-        assert datadep.tag == "datadep"
-        assert datadep.get("age") == "120"
+        dependency = root[0]
+        assert dependency.tag == validity_tag
+        assert dependency.get(validity_key) == validity_val
 
     def test__add_time_dependency(self, instance, root):
         config = {"timedep": {"offset": "&DEADLINE;"}}
