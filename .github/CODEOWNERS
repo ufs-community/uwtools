@@ -1,10 +1,10 @@
 # See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-# Side-wide code owners:
+# Code owners:
 
 * @NaureenBharwaniNOAA @christinaholtNOAA @elcarpenterNOAA @fgabelmannjr @maddenp-noaa @weirae
 
-# Documentation-system config owners:
+# Documentation owners:
 
 .readthedocs.yaml @christinaholtNOAA @jprestop @maddenp-noaa
 docs/* @christinaholtNOAA @jprestop @maddenp-noaa

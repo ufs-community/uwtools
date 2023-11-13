@@ -63,7 +63,7 @@ bash Miniforge3-Linux-aarch64.sh -bfp ~/conda
 rm Miniforge3-Linux-aarch64.sh
 source ~/conda/etc/profile.d/conda.sh
 conda activate
-conda install -y -c maddenp condev=0.6.0
+conda install -y -c maddenp condev
 cd /to/your/workflow-tools/clone
 make devshell
 ```
@@ -128,7 +128,6 @@ The following files in this repo are derived from their counterparts in the [con
 ├── recipe
 │   ├── build.sh
 │   ├── channels
-│   ├── conda_build_config.yaml
 │   ├── meta.json
 │   ├── meta.yaml
 │   └── run_test.sh
