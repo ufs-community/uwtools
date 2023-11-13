@@ -201,8 +201,7 @@ class _RocotoXML:
             elif tag == STR.datadep:
                 self._set_attrs(SubElement(e, STR.datadep), config={"attrs": block})
             else:
-                pass
-                # self._set_attrs(SubElement(e, STR.timedep), config={"attrs": block})
+                self._set_attrs(SubElement(e, STR.timedep), config={"attrs": block})
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """

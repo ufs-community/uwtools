@@ -131,12 +131,17 @@ class Test_RocotoXML:
 
     def test__add_data_dependency(self, instance, root):
         config = {"datadep": {"age": "120"}}
-        instance._add_task_dependency(e=root, config=config)
-        dependency = root[0]
-        assert dependency.tag == "dependency"
-        datadep = dependency[0]
+        instance._add_task_dependency_operand(e=root, config=config)
+        datadep = root[0]
         assert datadep.tag == "datadep"
         assert datadep.get("age") == "120"
+
+    def test__add_time_dependency(self, instance, root):
+        config = {"timedep": {"offset": "&DEADLINE;"}}
+        instance._add_task_dependency_operand(e=root, config=config)
+        timedep = root[0]
+        assert timedep.tag == "timedep"
+        assert timedep.get("offset") == "&DEADLINE;"
 
     def test__add_task_envar(self, instance, root):
         instance._add_task_envar(root, "foo", "bar")
