@@ -183,8 +183,6 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         """
         e = SubElement(e, STR.dependency)
-        # block no longer relevant in this loop
-        # will be used in specific methods itself
         for key in config.keys():
             tag, _ = self._tag_name(key)
             if tag in [STR.taskdep, STR.datadep, STR.timedep]:
@@ -201,7 +199,10 @@ class _RocotoXML:
             if tag == STR.taskdep:
                 self._set_attrs(SubElement(e, STR.taskdep), block)
             elif tag == STR.datadep:
+                self._set_attrs(SubElement(e, STR.datadep), config={"attrs": block})
+            else:
                 pass
+                # self._set_attrs(SubElement(e, STR.timedep), config={"attrs": block})
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """
