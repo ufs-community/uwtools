@@ -129,7 +129,7 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
 
     # Build a replacement value with Jinja2 syntax rendered. Depend on recursion for dict and list
     # values; render strings; and return objects of any other type unmodified. Rendering may fail
-    # fail for valid reasons -- notably a replacement value not being available in the given context
+    # for valid reasons -- notably a replacement value not being available in the given context
     # object. In such cases, return the original value: Any unrendered Jinja2 syntax it contains may
     # may be rendered by later processing with better context.
 
