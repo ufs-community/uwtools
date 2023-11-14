@@ -25,7 +25,7 @@ from uwtools.tests.support import logged, regex_logged
 def template(tmp_path):
     path = tmp_path / "template.jinja2"
     with open(path, "w", encoding="utf-8") as f:
-        f.write("roses are {{roses}}, violets are {{violets}}")
+        f.write("roses are {{roses_color}}, violets are {{violets_color}}")
     return str(path)
 
 
@@ -33,8 +33,8 @@ def template(tmp_path):
 def values_file(tmp_path):
     path = tmp_path / "values.yaml"
     yaml = """
-roses: red
-violets: blue
+roses_color: red
+violets_color: blue
 cannot:
     override: this
 """
@@ -200,12 +200,12 @@ def test_render_values_missing(caplog, values_file, template):
     log.setLevel(logging.INFO)
     with open(values_file, "r", encoding="utf-8") as f:
         cfgobj = yaml.safe_load(f.read())
-    del cfgobj["roses"]
+    del cfgobj["roses_color"]
     with open(values_file, "w", encoding="utf-8") as f:
         f.write(yaml.dump(cfgobj))
     render_helper(input_file=template, values_file=values_file, output_file="/dev/null")
     assert logged(caplog, "Required value(s) not provided:")
-    assert logged(caplog, "roses")
+    assert logged(caplog, "roses_color")
 
 
 def test_render_values_needed(caplog, values_file, template):
@@ -213,7 +213,7 @@ def test_render_values_needed(caplog, values_file, template):
     render_helper(
         input_file=template, values_file=values_file, output_file="/dev/null", values_needed=True
     )
-    for var in ("roses", "violets"):
+    for var in ("roses_color", "violets_color"):
         assert logged(caplog, var)
 
 
@@ -231,16 +231,16 @@ longish_variable: 88
 
 
 def test__set_up_config_obj_env():
-    expected = {"roses": "white", "violets": "blue"}
+    expected = {"roses_color": "white", "violets_color": "blue"}
     with patch.dict(os.environ, expected, clear=True):
         actual = jinja2._set_up_values_obj()
-    assert actual["roses"] == "white"
-    assert actual["violets"] == "blue"
+    assert actual["roses_color"] == "white"
+    assert actual["violets_color"] == "blue"
 
 
 def test__set_up_config_obj_file(values_file):
-    expected = {"roses": "white", "violets": "blue", "cannot": {"override": "this"}}
-    actual = jinja2._set_up_values_obj(values_file=values_file, overrides={"roses": "white"})
+    expected = {"roses_color": "white", "violets_color": "blue", "cannot": {"override": "this"}}
+    actual = jinja2._set_up_values_obj(values_file=values_file, overrides={"roses_color": "white"})
     assert actual == expected
 
 
