@@ -155,6 +155,19 @@ class Test_RocotoXML:
             for attr, val in attrs.items():
                 assert element.get(attr) == val
 
+    @pytest.mark.parametrize(
+        "config",
+        [
+            {"&RUN_GSI"}
+            {"&RUN_GSI"} 
+        ],
+    )
+    def test__add_task_dependency_boolean(self, config, instance, root):
+        instance._add_task_dependency_boolean(e=root, config=config)
+        element = root[0]
+        for attr in config.items():
+            assert attr == element.tag
+
     def test__add_task_envar(self, instance, root):
         instance._add_task_envar(root, "foo", "bar")
         envar = root[0]

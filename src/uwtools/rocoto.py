@@ -189,6 +189,8 @@ class _RocotoXML:
                 self._add_task_dependency_operand(e, config=config)
             elif tag in [STR.streq, STR.strneq]:
                 self._add_task_dependency_strequality(e, config=config)
+            elif tag in [STR.True_, STR.False_]:
+                self._add_task_dependency_boolean(e, config=config)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
@@ -215,6 +217,17 @@ class _RocotoXML:
                 self._set_attrs(SubElement(e, STR.streq), config={"attrs": block})
             else:
                 self._set_attrs(SubElement(e, STR.strneq), config={"attrs": block})
+
+    def _add_task_dependency_boolean(self, e: Element, config: dict) -> None:
+        """
+        ???
+        """
+        for key, block in config.items():
+            tag, _ = self._tag_name(key)
+            if tag == STR.True_:
+                self._set_attrs(SubElement(e, STR.True_), config={"attrs": block})
+            else:
+                self._set_attrs(SubElement(e, STR.False_), config={"attrs": block})
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """
