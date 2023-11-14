@@ -114,7 +114,8 @@ def test_dereference(caplog, config):
     #   - Initially-unrenderable values may be rendered via iteration.
     #   - Finally-unrenderable values do not cause errors and are returned unmodified.
     log.setLevel(logging.DEBUG)
-    config.data.update({"a": "{{ b.c + 11 }}", "b": {"c": "{{ N | int + 11 }}"}, "d": "{{ X }}"})
+    assert config == {"foo": 88}
+    config.update({"a": "{{ b.c + 11 }}", "b": {"c": "{{ N | int + 11 }}"}, "d": "{{ X }}"})
     with patch.dict(os.environ, {"N": "55"}, clear=True):
         config.dereference()
     for excerpt in [
