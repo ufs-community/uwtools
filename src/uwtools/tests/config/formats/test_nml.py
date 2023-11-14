@@ -44,7 +44,7 @@ def test_simple(salad_base, tmp_path):
     outfile = tmp_path / "outfile.nml"
     cfgobj = NMLConfig(infile)
     expected = salad_base
-    expected["salad"]["how_many"] = 12  # must be in for nml
+    expected["salad"]["how_many"] = 12  # must be int for nml
     assert cfgobj == expected
     cfgobj.dump(outfile)
     assert filecmp.cmp(infile, outfile)
