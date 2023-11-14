@@ -187,10 +187,12 @@ class _RocotoXML:
             tag, _ = self._tag_name(key)
             if tag in [STR.taskdep, STR.datadep, STR.timedep]:
                 self._add_task_dependency_operand(e, config=config)
+            elif tag in [STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor]:
+                self._add_task_dependency_operator(e, config=config)
             elif tag in [STR.streq, STR.strneq]:
                 self._add_task_dependency_strequality(e, config=config)
-            elif tag in [STR.True_, STR.False_]:
-                self._add_task_dependency_boolean(e, config=config)
+            # elif tag in [STR.True_, STR.False_]:
+            #    self._add_task_dependency_boolean(e, config=config)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
@@ -207,6 +209,27 @@ class _RocotoXML:
             else:
                 self._set_attrs(SubElement(e, STR.timedep), config={"attrs": block})
 
+    def _add_task_dependency_operator(self, e: Element, config: dict) -> None:
+        """
+        ???
+        """
+        for key, block in config.items():
+            tag, _ = self._tag_name(key)
+            if tag == STR.and_:
+                self._set_attrs(SubElement(e, STR.and_), config={"attrs": block})
+            elif tag == STR.nand:
+                self._set_attrs(SubElement(e, STR.nand), config={"attrs": block})
+            elif tag == STR.nor:
+                self._set_attrs(SubElement(e, STR.nor), config={"attrs": block})
+            elif tag == STR.not_:
+                self._set_attrs(SubElement(e, STR.not_), config={"attrs": block})
+            elif tag == STR.or_:
+                self._set_attrs(SubElement(e, STR.or_), config={"attrs": block})
+            elif tag == STR.xor:
+                self._set_attrs(SubElement(e, STR.xor), config={"attrs": block})
+            else:
+                raise UWConfigError("Unhandled dependency type %s" % tag)
+                
     def _add_task_dependency_strequality(self, e: Element, config: dict) -> None:
         """
         ???
