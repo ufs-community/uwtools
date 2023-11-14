@@ -3,7 +3,8 @@
 Pytest fixtures for package uwtools.config.formats tests.
 """
 
-# NB: pytest implicitly imports files named conftest.py.
+# NB: pytest implicitly imports files named conftest.py into test modules in the current directory
+# and in subdirectories.
 
 from pytest import fixture
 
