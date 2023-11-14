@@ -38,9 +38,10 @@ def format_to_config(fmt: str) -> Type:
 
 def log_and_error(msg: str) -> Exception:
     """
-    Log an error message and raise an exception.
+    Log an error message and return an exception for the caller to potentially raise.
 
     :param msg: The error message to log and to associate with raised exception.
+    :return: An exception containing the same error message.
     """
     log.error(msg)
     return UWConfigError(msg)
