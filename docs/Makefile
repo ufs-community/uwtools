@@ -7,7 +7,7 @@ SPHINXOPTS  = -n
 .PHONY: help
 
 help:
-	$(SPHINXBUILD) -M help $(SOURCEDIR) $(BUILDDIR) $(SPHINXOPTS) $(O)
+	$(SPHINXBUILD) -M help $(SOURCEDIR) $(BUILDDIR) $(SPHINXOPTS)
 
 # clean:
 # 	$(RM) -f $(BUILDDIR)/*
