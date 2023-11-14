@@ -129,24 +129,16 @@ class Test_RocotoXML:
         with raises(UWConfigError):
             instance._add_task_dependency(e=root, config=config)
 
-    @pytest.mark.parametrize("config", [{"datadep": {"age": "120"}}, {"timedep": {"offset": "&DEADLINE;"}}])
-    @pytest.mark.parametrize("validity_tag", ["datadep", "timedep"])
-    @pytest.mark.parametrize("validity_items", [("age", "120"), ("offset", "&DEADLINE;")])
-    def test__add_operand_dependency(self, instance, root, config, validity_tag, validity_items):
-        # config = {"datadep": {"age": "120"}}
-        #breakpoint()
-        validity_key, validity_val = validity_items
+    @pytest.mark.parametrize(
+        "config", [{"datadep": {"age": "120"}}, {"timedep": {"offset": "&DEADLINE;"}}]
+    )
+    def test__add_operand_dependency(self, config, instance, root):
         instance._add_task_dependency_operand(e=root, config=config)
-        dependency = root[0]
-        assert dependency.tag == validity_tag
-        assert dependency.get(validity_key) == validity_val
-
-    def test__add_time_dependency(self, instance, root):
-        config = {"timedep": {"offset": "&DEADLINE;"}}
-        instance._add_task_dependency_operand(e=root, config=config)
-        timedep = root[0]
-        assert timedep.tag == "timedep"
-        assert timedep.get("offset") == "&DEADLINE;"
+        element = root[0]
+        for tag, attrs in config.items():
+            assert tag == element.tag
+            for attr, val in attrs.items():
+                assert element.get(attr) == val
 
     def test__add_task_envar(self, instance, root):
         instance._add_task_envar(root, "foo", "bar")
