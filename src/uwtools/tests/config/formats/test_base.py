@@ -127,9 +127,36 @@ def test_dereference(caplog, config):
     assert config == {"foo": 88, "a": 77, "b": {"c": 66}, "d": "{{ X }}"}
 
 
-# NB: Need direct test for parse_include().
+def test_parse_include(config):
+    """
+    Test that non-YAML handles include tags properly.
+    """
+    del config["foo"]
+    # Create a symlink for the include file:
+    include_path = fixture_path("fruit_config.yaml")
+    config.data.update(
+        {
+            "config": {
+                "salad_include": f"!INCLUDE [{include_path}]",
+                "meat": "beef",
+                "dressing": "poppyseed",
+            }
+        }
+    )
+    config.parse_include()
 
-# NB: Need direct test for update_values().
+    assert config["fruit"] == "papaya"
+    assert config["how_many"] == 17
+    assert config["config"]["meat"] == "beef"
+    assert len(config["config"]) == 2
+
+
+def test_update_values(config):
+    """
+    Test that a config object can be updated.
+    """
+    config.data.update({"a": "11", "b": "12", "c": "13"})
+    assert config == {"foo": 88, "a": "11", "b": "12", "c": "13"}
 
 
 @pytest.mark.parametrize("fmt1", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
