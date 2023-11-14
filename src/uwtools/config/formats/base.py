@@ -35,7 +35,7 @@ class Config(ABC, UserDict):
 
     def __repr__(self) -> str:
         """
-        The string representation of a Config object.
+        Returns the string representation of a Config object.
         """
         return json.dumps(self.data)
 
@@ -78,6 +78,7 @@ class Config(ABC, UserDict):
 
         :param values: The dictionary to examine.
         :param parent: Parent key.
+        :return: Lists of of complete, empty, and template-placeholder values.
         """
         complete: List[str] = []
         empty: List[str] = []
@@ -112,6 +113,7 @@ class Config(ABC, UserDict):
 
         :param dict1: The first dictionary.
         :param dict2: The second dictionary.
+        :return: True if the configs are identical, False otherwise.
         """
         dict2 = self.data if dict2 is None else dict2
         diffs: dict = {}
@@ -144,7 +146,7 @@ class Config(ABC, UserDict):
     @property
     def depth(self) -> int:
         """
-        The depth of this config's hierarchy.
+        Returns the depth of this config's hierarchy.
         """
         return depth(self.data)
 
