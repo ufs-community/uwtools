@@ -314,6 +314,7 @@ class STR:
     """
 
     account: str = "account"
+    and_: str = "and"
     attrs: str = "attrs"
     command: str = "command"
     cores: str = "cores"
@@ -337,6 +338,8 @@ class STR:
     nodes: str = "nodes"
     nodesize: str = "nodesize"
     nor: str = "nor"
+    not_: str = "not"
+    or_: str = "or"
     partition: str = "partition"
     queue: str = "queue"
     rewind: str = "rewind"
