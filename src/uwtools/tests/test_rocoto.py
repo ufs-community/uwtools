@@ -132,8 +132,23 @@ class Test_RocotoXML:
     @pytest.mark.parametrize(
         "config", [{"datadep": {"age": "120"}}, {"timedep": {"offset": "&DEADLINE;"}}]
     )
-    def test__add_operand_dependency(self, config, instance, root):
+    def test__add_task_dependency_operand(self, config, instance, root):
         instance._add_task_dependency_operand(e=root, config=config)
+        element = root[0]
+        for tag, attrs in config.items():
+            assert tag == element.tag
+            for attr, val in attrs.items():
+                assert element.get(attr) == val
+
+    @pytest.mark.parametrize(
+        "config",
+        [
+            {"streq": {"left": "&RUN_GSI;", "right": "YES"}},
+            {"strneq": {"left": "&RUN_GSI;", "right": "YES"}},
+        ],
+    )
+    def test__add_task_dependency_strequality(self, config, instance, root):
+        instance._add_task_dependency_strequality(e=root, config=config)
         element = root[0]
         for tag, attrs in config.items():
             assert tag == element.tag
