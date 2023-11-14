@@ -1,5 +1,5 @@
 {
-  "build": "pyh233a6f4_0",
+  "build": "py_0",
   "buildnum": "0",
   "name": "uwtools",
   "packages": {
@@ -18,7 +18,7 @@
       "pip",
       "pylint =2.17.*",
       "pytest =7.4.*",
-      "python =3.10",
+      "python >=3.9,<3.12",
       "pyyaml =6.0.*"
     ],
     "run": [
@@ -26,7 +26,7 @@
       "jinja2 =3.0.*",
       "jsonschema =4.17.*",
       "lxml =4.9.*",
-      "python =3.10",
+      "python >=3.9,<3.12",
       "pyyaml =6.0.*"
     ]
   },
