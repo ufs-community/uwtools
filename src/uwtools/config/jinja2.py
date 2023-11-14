@@ -124,6 +124,7 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
 
     :param val: A value possibly containing Jinja2 syntax.
     :param context: Values to use when rendering Jinja2 syntax.
+    :param local: Local sibling values to use if a match is not found in context.
     :return: The input value, with Jinja2 syntax rendered.
     """
 
