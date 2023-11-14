@@ -1,4 +1,4 @@
-# Read the Docs configuration (see https://docs.readthedocs.io/en/stable/config-file/v2.html)
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html
 
 version: 2
 build:
