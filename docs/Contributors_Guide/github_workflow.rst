@@ -1,4 +1,3 @@
-
 .. _github_workflow:
 
 ***************
@@ -13,7 +12,7 @@ that described in
 `A successful Git branching model <https://nvie.com/posts/a-successful-git-branching-model/>`__,
 where new or updated code is created on a 'feature' branch that is based on
 the `workflow-tools GitHub 'develop' branch <https://github.com/ufs-community/workflow-tools/tree/develop>`__.
-Developers should create an issue for each feature they plan to work on. 
+Developers should create an issue for each feature they plan to work on.
 
 The feature branch is named after the corresponding GitHub issue:
 
@@ -68,10 +67,10 @@ Create a GitHub Issue that reflects what needs to be done
 Generate a feature branch from the 'develop' branch for new development
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* Create a feature branch in the ufs-community/workflow-tools GitHub repository 
+* Create a feature branch in the ufs-community/workflow-tools GitHub repository
   following this naming convention: *feature/<Github Issue number>_<some_descriptive_name>*
 
-  For example, for GitHub issue #777 that creates new wrapper, xyz, 
+  For example, for GitHub issue #777 that creates new wrapper, xyz,
   the feature branch would be named: *feature_777_wrapper_xyz*
 
 * Create your feature branch based off the 'develop' branch
@@ -146,8 +145,8 @@ local repository.
   repository. The third command will merge the local 'develop' branch into
   the feature branch.
 
-   .. COMMENT: What does "step 4 above" reference? 
-      I don't see anything saying how to set an upstream remote. 
+   .. COMMENT: What does "step 4 above" reference?
+      I don't see anything saying how to set an upstream remote.
 
 Commit changes to feature branch
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -195,7 +194,7 @@ Open a pull request using a browser
 
 To request to have your changes incorporated into the remote repository
 (i.e., the `GitHub Unified Workflow repository <https://github.com/ufs-community/workflow-tools>`__),
-you will need to open a pull request. 
+you will need to open a pull request.
 An authorized Unified Workflow developer will need to approve the request and
 then merge your files into the repository's 'develop' branch. The 'develop'
 branch will be used to create a future Unified Workflow release.
@@ -204,7 +203,7 @@ branch will be used to create a future Unified Workflow release.
   *https://github.com/<your-github-user>/ufs-community/workflow-tools* replacing
   <your-github-user> with your GitHub username.
 
-* Click on the green 'Compare & pull request' button. 
+* Click on the green 'Compare & pull request' button.
   A web page with four grey buttons should appear:
 
     * On the left-most button (for setting the base repository), make sure
@@ -221,14 +220,14 @@ branch will be used to create a future Unified Workflow release.
       to the feature branch where you have been making your changes
       (e.g., *feature_777_wrapper_xyz*).
 
-    * In the 'write' window, follow the directions and fill in the template. 
+    * In the 'write' window, follow the directions and fill in the template.
       Add any additional comments/details. When filling in the template,
       users will need to "Define the PR metadata, as permissions allow.
       Select: **Reviewer(s), Project(s)**, and **Milestone**." When selecting a
       reviewer, internal contributors submitting pull requests should select
       the appropriate reviewer(s) and let the reviewer know that the pull
       request has been assigned to them.
-      
+
     * When everything looks satisfactory, click on the green 'Create pull
       request' button.
 
@@ -263,8 +262,8 @@ Approving a pull request
     were not successful or if there are conflicts with the base branch,
     ask the requestor to make changes.
 
-    .. figure:: ../figure/checks_pass_no_conflicts.png
-    
+    .. figure:: /static/figure/checks_pass_no_conflicts.png
+
 3.  Take a look at the description of the testing already performed for
     these changes, and then see what the recommended testing is for the
     reviewer to perform.
@@ -276,10 +275,10 @@ Approving a pull request
 7.  Review each file and ensure that the changes seem reasonable.
 
     A reviewer can suggest changes be made by:
-    
+
     a. Mousing over the line to comment on.
 
-    
+
          A blue box with a plus will appear. Click on the blue box.
 
          Click on the icon of a paper with +/- to “Insert a Suggestion”.  The line
@@ -306,13 +305,13 @@ Approving a pull request
 
      * **Comment**: Submit general feedback without explicitly approving the
        changes or requesting additional changes.
-     
+
      * **Approve**: Submit feedback and approve merging the changes proposed in
        the pull request.
 
      * **Request changes**: Submit feedback that must be addressed before the
        pull request can be merged.
-	    
+	
 
      A reviewer should click on "Review changes", add comments to
      the "Write box", select either  "Comment", "Approve",
@@ -320,7 +319,7 @@ Approving a pull request
 
 12. Once the recommended testing is complete and any necessary changes have
     been made, approve the request.
-					  
+					
 
 Merging pull requests
 ^^^^^^^^^^^^^^^^^^^^^
@@ -333,7 +332,7 @@ There are three merge methods to choose from: "Create a merge commit",
 "Squash and merge", and "Rebase and merge". It is recommended to use the
 **Squash and merge** method because all of the merge request’s commits are
 combined into one and a clean history is retained. Click on the chosen merge
-method.  
+method.
 
 After merging, the requestor can then decide whether or not to delete the branch.
 

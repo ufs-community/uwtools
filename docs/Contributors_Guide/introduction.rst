@@ -12,7 +12,7 @@ a pull request in this repository.
 * :ref:`GitHub Workflow <github_workflow>` - GitHub Workflow
 * :ref:`Code Quality <code_quality>` - Code Quality Check
 * :ref:`Testing <testing>` - How our code testing is implemented
-* :ref:`Code Format <code_format>` - How our code documentation is done 
+* :ref:`Code Format <code_format>` - How our code documentation is done
 * :ref:`Continous Integration <continuous_integration>` - How our Continous
   Integration works
 * :ref:`Documentation <documentation>` - How to format the documentation

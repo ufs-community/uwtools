@@ -1,7 +1,7 @@
 .. _working_with_templates:
 
 **************************
-Working with Templates 
+Working with Templates
 **************************
 
 .. _atp_j2:
@@ -49,7 +49,7 @@ The resulting Jinja2-enabled template is written to the specified outfile, ``jin
   $
      {{FLAGMASKCOMP}}  {{FLAGMASKOUT}}
   $
-  
+
 The created ``jinja2template.nml`` file can also now be used with the ``templater.py`` tool.
 
 .. _templater.py:
@@ -58,8 +58,8 @@ The created ``jinja2template.nml`` file can also now be used with the ``template
 templater.py
 ----------------
 
-``templater.py`` takes in any Jinja2 template file and renders it with user-supplied values. ``templater.py`` takes several command line arguments, including the path to the Jinja2 template file, an optional 
-path to a YAML configuration file, and any additional configuration settings which will override values found in the YAML 
+``templater.py`` takes in any Jinja2 template file and renders it with user-supplied values. ``templater.py`` takes several command line arguments, including the path to the Jinja2 template file, an optional
+path to a YAML configuration file, and any additional configuration settings which will override values found in the YAML
 configuration (config) file or user environment variables.  If the provided config settings do not contain values for every field in the input Jinja2 template file, ``templater.py`` will return an error.
 
 .. _temp_inp_conf:
@@ -208,7 +208,7 @@ Running ``templater.py`` with the ``-d`` or ``--dry-run`` flag will print the re
   $
 
      N
-   
+
 
 .. _temp_val_needed:
 
@@ -216,7 +216,7 @@ Running ``templater.py`` with the ``-d`` or ``--dry-run`` flag will print the re
 Values Needed Flag
 ^^^^^^^^^^^^^^^^^^
 If provided, the ``--values-needed`` flag will print a list of required configuration settings for the input template to stdout::
-    
+
   workflow-tools % python scripts/templater.py -i /<path-totemplate>/jinja2template.nml --values-needed
   Running script templater.py with args:
   ----------------------------------------------------------------------

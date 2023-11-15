@@ -8,7 +8,7 @@ A schematic of the above is shown in :numref:`Schematic_Layout_Unified_Workflow_
 
 .. _Schematic_Layout_Unified_Workflow_Framework:
 	
-.. figure:: figure/Schematic_Layout_Unified_Workflow_Framework.png
+.. figure:: /static/figure/Schematic_Layout_Unified_Workflow_Framework.png
 
    *Schematic layout of the various components of the Unified Workflow Framework.*
 

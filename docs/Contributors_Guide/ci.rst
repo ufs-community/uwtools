@@ -1,4 +1,3 @@
-
 .. _continuous_integration:
 
 *********************
@@ -38,7 +37,7 @@ name: Run tests
 Event Control
 -------------
 The “on” keyword is used to determine which events will trigger the workflow
-to run: 
+to run:
 
 on: [push, pull_request]
 

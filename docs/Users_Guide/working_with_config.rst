@@ -39,7 +39,7 @@ To run ``set_config.py`` with an input and config file::
 
     python scripts/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml -o /<path-to-outfile>/sample_outfile.yaml
 
-The output is a fully formed config file:: 
+The output is a fully formed config file::
 
   fruit: papaya
   vegetable: eggplant
@@ -55,33 +55,33 @@ The output is a fully formed config file::
 Generating a field table from YAML
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To generate a field table from a YAML config base file using ``set_config.py``, the outfile must include ``field_table`` in the outfile name. 
+To generate a field table from a YAML config base file using ``set_config.py``, the outfile must include ``field_table`` in the outfile name.
 
 YAML base file::
 
   sphum:
     longname: specific humidity
     units: kg/kg
-    profile_type: 
+    profile_type:
       name: fixed
       surface_value: 1.e30
   liq_wat:
     longname: cloud water mixing ratio
     units: kg/kg
-    profile_type: 
+    profile_type:
       name: fixed
       surface_value: 1.e30
   rainwat:
     longname: rain mixing ratio
     units: kg/kg
-    profile_type: 
+    profile_type:
       name: fixed
       surface_value: 1.e30
-      
-Command with ``field_table`` outfile type specified::     
+
+Command with ``field_table`` outfile type specified::
 
     python scripts/set_config.py -i /<path-to-input-file>/sample_base_field.yaml -o /<path-to-outfile>/sample_field_table.FV3_GFS_v16
-    
+
 Generated field table::
 
    "TRACER", "atmos_mod", "sphum"
@@ -96,7 +96,7 @@ Generated field table::
              "longname", "rain mixing ratio"
              "units", "kg/kg"
          "profile_type", "fixed", "surface_value=1.e30" /
-   
+
 .. _conf_dry:
 
 ^^^^^^^^^^^^
@@ -138,10 +138,10 @@ If provided, the ``values-needed`` flag will print to the stdout a list of which
         testzero: 0
       testempty:
 
-the command:: 
+the command::
 
   python scripts/set_config.py -i /<path-to-input-file>/sample_base.yaml -c /<path-to-config-file>/sample_config.yaml --values-needed
-  
+
 will print the following to the stdout::
 
   Keys that are complete:
