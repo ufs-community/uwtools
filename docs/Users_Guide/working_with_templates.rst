@@ -58,15 +58,14 @@ The created ``jinja2template.nml`` file can also now be used with the ``template
 templater.py
 ----------------
 
-``templater.py`` takes in any Jinja2 template file and renders it with user-supplied values. ``templater.py`` takes several command line arguments, including the path to the Jinja2 template file, an optional
-path to a YAML configuration file, and any additional configuration settings which will override values found in the YAML
-configuration (config) file or user environment variables.  If the provided config settings do not contain values for every field in the input Jinja2 template file, ``templater.py`` will return an error.
+``templater.py`` takes in any Jinja2 template file and renders it with user-supplied values. ``templater.py`` takes several command line arguments, including the path to the Jinja2 template file, an optional path to a YAML configuration file, and any additional configuration settings which will override values found in the YAML configuration (config) file or user environment variables.  If the provided config settings do not contain values for every field in the input Jinja2 template file, ``templater.py`` will return an error.
 
 .. _temp_inp_conf:
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Input file and config file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Here is an example template file, ``jinja2template.nml``::
 
   $ WAVEWATCH III multi-grid input file
@@ -175,6 +174,7 @@ Any configuration settings supplied through the ``config_items`` flag will overr
 ^^^^^^^^^^^^
 dry_run flag
 ^^^^^^^^^^^^
+
 Running ``templater.py`` with the ``-d`` or ``--dry-run`` flag will print the rendered template to stdout only and provide no other output::
 
     python scripts/templater.py -i /<path-totemplate>/jinja2template.nml -c /<path-to-config>/example_config.yaml -d
@@ -215,6 +215,7 @@ Running ``templater.py`` with the ``-d`` or ``--dry-run`` flag will print the re
 ^^^^^^^^^^^^^^^^^^
 Values Needed Flag
 ^^^^^^^^^^^^^^^^^^
+
 If provided, the ``--values-needed`` flag will print a list of required configuration settings for the input template to stdout::
 
   workflow-tools % python scripts/templater.py -i /<path-totemplate>/jinja2template.nml --values-needed

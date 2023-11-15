@@ -83,8 +83,7 @@ conda
 
 Conda is a package manager and environment management system for Python and other programming languages. You can use conda to create isolated environments for your projects, which can help you manage dependencies and package versions.
 
-To create a conda environment from the workflow-tools provide
-environment.yaml file, follow these steps:
+To create a conda environment from the workflow-tools provide environment.yaml file, follow these steps:
 
 #. Make sure you have conda installed on your system. If not, you can install it from the official website (https://docs.conda.io/en/latest/miniconda.html) or using your operating system's package manager.
 
