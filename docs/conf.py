@@ -8,7 +8,7 @@ with open("../recipe/meta.json", "r", encoding="utf-8") as f:
     _metadata = json.loads(f.read())
 
 copyright = str(dt.datetime.now().year)
-html_logo = os.path.join("_static", "UFS_image.png")
+html_logo = os.path.join("_static", "ufs.png")
 html_static_path = ["_static"]
 html_theme = "sphinx_rtd_theme"
 numfig = True
