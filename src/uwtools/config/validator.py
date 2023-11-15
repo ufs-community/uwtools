@@ -7,7 +7,7 @@ from typing import List
 
 import jsonschema
 
-from uwtools.config.core import YAMLConfig
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.logging import log
 from uwtools.types import DefinitePath, OptionalPath
 
@@ -25,7 +25,7 @@ def validate_yaml(schema_file: DefinitePath, config_file: OptionalPath = None) -
     """
     # Load the config and schema.
     yaml_config = YAMLConfig(config_file)
-    yaml_config.dereference_all()
+    yaml_config.dereference()
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
     # Collect and report on schema-validation errors.
