@@ -20,5 +20,5 @@ Using the tools on the right, any application can assemble a unique suite for it
    :hidden:
    :caption: Unified Workflow
 
-   sections/users_guide/index
-   sections/contributors_guide/index
+   sections/user_guide/index
+   sections/contributor_guide/index
