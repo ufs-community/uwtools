@@ -18,7 +18,6 @@ Using the tools on the right, any application can assemble a unique suite for it
 
 .. toctree::
    :hidden:
-   :caption: Unified Workflow
 
    sections/user_guide/index
    sections/contributor_guide/index
