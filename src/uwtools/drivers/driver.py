@@ -11,7 +11,8 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Type, Union
 
 from uwtools.config import validator
-from uwtools.config.core import Config, YAMLConfig
+from uwtools.config.formats.base import Config
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.logging import log
 from uwtools.scheduler import BatchScript, JobScheduler
 from uwtools.types import OptionalPath
@@ -163,7 +164,7 @@ class Driver(ABC):
         if base_file := config_values.get("base_file"):
             config_obj = config_class(base_file)
             config_obj.update_values(user_values)
-            config_obj.dereference_all()
+            config_obj.dereference()
             config_obj.dump(output_path)
         else:
             config_class.dump_dict(path=output_path, cfg=user_values)

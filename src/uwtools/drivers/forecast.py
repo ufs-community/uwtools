@@ -9,7 +9,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from uwtools.config.core import FieldTableConfig, NMLConfig, YAMLConfig
+from uwtools.config.formats.fieldtable import FieldTableConfig
+from uwtools.config.formats.nml import NMLConfig
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.scheduler import BatchScript
