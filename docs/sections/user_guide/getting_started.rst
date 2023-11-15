@@ -11,7 +11,7 @@ Package Dependencies
 ------------------------
 
 .. role:: raw-html(raw)
-   :format: html	  
+   :format: html	
 
 .. list-table:: UW Tools Requirements
   :widths: auto
@@ -20,7 +20,7 @@ Package Dependencies
   * - Name
     - Version
     - Source
-    - Description 
+    - Description
 
   * - black
     -
@@ -30,8 +30,8 @@ Package Dependencies
   * - f90nml
     - >=1.4.3
     - https://pypi.org/project/f90nml/
-    -   provides a simple interface for 
-        reading, writing, and modifying Fortran 
+    -   provides a simple interface for
+        reading, writing, and modifying Fortran
         namelist files
 
   * - Jinja2
@@ -45,13 +45,13 @@ Package Dependencies
     -   library used for scientific computing
 
   * - pylint
-    - 
+    -
     - https://pypi.org/project/pylint/
-    -   static code analyzer that checks for  
+    -   static code analyzer that checks for
         errors and enforces coding standards
- 
+
   * - pytest
-    - 
+    -
     - https://docs.pytest.org/en/7.2.x/
     -   testing framework
 
@@ -64,7 +64,7 @@ Package Dependencies
     -
     -
     -
-    
+
 .. _new_installation:
 
 -------------------
@@ -75,16 +75,15 @@ Installation [#f1]_
 Using a Python Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Users may follow the instructions provided in this section to install conda and/or create virtual environments for their projects. These steps are not required to install or run the Unified Workflow Tools package (``uwtools``). However, use of conda virtual environments can make it easier to work on multiple projects with conflicting dependencies on the same machine. Go to :numref:`Section %s <new_uwinstall>` to skip directly to ``uwtools`` installation. 
+Users may follow the instructions provided in this section to install conda and/or create virtual environments for their projects. These steps are not required to install or run the Unified Workflow Tools package (``uwtools``). However, use of conda virtual environments can make it easier to work on multiple projects with conflicting dependencies on the same machine. Go to :numref:`Section %s <new_uwinstall>` to skip directly to ``uwtools`` installation.
 
 ^^^^^
 conda
 ^^^^^
 
-Conda is a package manager and environment management system for Python and other programming languages. You can use conda to create isolated environments for your projects, which can help you manage dependencies and package versions. 
+Conda is a package manager and environment management system for Python and other programming languages. You can use conda to create isolated environments for your projects, which can help you manage dependencies and package versions.
 
-To create a conda environment from the workflow-tools provide
-environment.yaml file, follow these steps:
+To create a conda environment from the workflow-tools provide environment.yaml file, follow these steps:
 
 #. Make sure you have conda installed on your system. If not, you can install it from the official website (https://docs.conda.io/en/latest/miniconda.html) or using your operating system's package manager.
 
@@ -125,7 +124,7 @@ environment.yaml file, follow these steps:
 virtualenv
 ^^^^^^^^^^
 
-A virtual environment is a tool used to isolate specific Python environments on a single machine, allowing you to work on multiple projects with different packages and package versions. 
+A virtual environment is a tool used to isolate specific Python environments on a single machine, allowing you to work on multiple projects with different packages and package versions.
 
 To create a virtual environment, follow these steps:
 
@@ -216,9 +215,9 @@ To install the ``workflow-tools`` repository from GitHub, follow these steps:
       -v, --verbose If provided, print all logging messages.
       -q, --quiet If provided, print no logging messages
 
-   .. note:: 
+   .. note::
 
-      Additional flags/option may be added at any time. The development team will rarely remove or change flag, but this may also happen from time to time. 
+      Additional flags/option may be added at any time. The development team will rarely remove or change flag, but this may also happen from time to time.
 
 .. [#f1] The contents of the Installation Guide have been compiled with
    the help of OpenAI.
