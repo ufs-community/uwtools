@@ -191,8 +191,8 @@ class _RocotoXML:
                 self._add_task_dependency_operator(e, config=config)
             elif tag in [STR.streq, STR.strneq]:
                 self._add_task_dependency_strequality(e, config=config)
-            # elif tag in [STR.True_, STR.False_]:
-            #    self._add_task_dependency_boolean(e, config=config)
+            elif tag in [STR.true, STR.false]:
+                self._add_task_dependency_boolean(e, config=config)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
@@ -213,20 +213,18 @@ class _RocotoXML:
         """
         ???
         """
+        operands = (STR.datadep, STR.taskdep, STR.timedep)
+        operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
+        other = (STR.streq, STR.strneq) 
+
         for key, block in config.items():
             tag, _ = self._tag_name(key)
-            if tag == STR.and_:
-                self._set_attrs(SubElement(e, STR.and_), config={"attrs": block})
-            elif tag == STR.nand:
-                self._set_attrs(SubElement(e, STR.nand), config={"attrs": block})
-            elif tag == STR.nor:
-                self._set_attrs(SubElement(e, STR.nor), config={"attrs": block})
-            elif tag == STR.not_:
-                self._set_attrs(SubElement(e, STR.not_), config={"attrs": block})
-            elif tag == STR.or_:
-                self._set_attrs(SubElement(e, STR.or_), config={"attrs": block})
-            elif tag == STR.xor:
-                self._set_attrs(SubElement(e, STR.xor), config={"attrs": block})
+            if tag in operators:
+                self._add_task_dependency_operator(e, config=config)
+            elif tag in operands:
+                self._add_task_dependency_operand(e, config=config)
+            elif tag in other:
+                self._add_task_dependency_strequality(e, config=config)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
                 
@@ -245,12 +243,13 @@ class _RocotoXML:
         """
         ???
         """
+        breakpoint()
         for key, block in config.items():
             tag, _ = self._tag_name(key)
-            if tag == STR.True_:
-                self._set_attrs(SubElement(e, STR.True_), config={"attrs": block})
+            if tag == STR.true:
+                self._set_attrs(SubElement(e, STR.true), config={"attrs": block})
             else:
-                self._set_attrs(SubElement(e, STR.False_), config={"attrs": block})
+                self._set_attrs(SubElement(e, STR.false), config={"attrs": block})
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """
@@ -376,6 +375,7 @@ class STR:
     envar: str = "envar"
     envars: str = "envars"
     exclusive: str = "exclusive"
+    false: str = "false"
     jobname: str = "jobname"
     join: str = "join"
     log: str = "log"
@@ -402,6 +402,7 @@ class STR:
     taskdep: str = "taskdep"
     tasks: str = "tasks"
     timedep: str = "timedep"
+    true: str = "true"
     value: str = "value"
     var: str = "var"
     walltime: str = "walltime"
