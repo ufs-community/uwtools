@@ -13,7 +13,8 @@ import pytest
 from pytest import fixture, raises
 
 from uwtools import scheduler
-from uwtools.config.core import NMLConfig, YAMLConfig
+from uwtools.config.formats.nml import NMLConfig
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast

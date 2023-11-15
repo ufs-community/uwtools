@@ -189,7 +189,7 @@ def test__dispatch_config(params):
 
 def test__dispatch_config_compare():
     args = {STR.file1path: 1, STR.file1fmt: 2, STR.file2path: 3, STR.file2fmt: 4}
-    with patch.object(cli.uwtools.config.core, "compare_configs") as compare_configs:
+    with patch.object(cli.uwtools.config.tools, "compare_configs") as compare_configs:
         cli._dispatch_config_compare(args)
     compare_configs.assert_called_once_with(
         config_a_path=args[STR.file1path],
@@ -210,7 +210,7 @@ def test__dispatch_config_realize():
         STR.valsneeded: 7,
         STR.dryrun: 8,
     }
-    with patch.object(cli.uwtools.config.core, "realize_config") as realize_config:
+    with patch.object(cli.uwtools.config.tools, "realize_config") as realize_config:
         cli._dispatch_config_realize(args)
     realize_config.assert_called_once_with(
         input_file=1,
@@ -235,7 +235,7 @@ def test__dispatch_config_realize_no_optional():
         STR.valsneeded: False,
         STR.dryrun: False,
     }
-    with patch.object(cli.uwtools.config.core, "realize_config") as realize_config:
+    with patch.object(cli.uwtools.config.tools, "realize_config") as realize_config:
         cli._dispatch_config_realize(args)
     realize_config.assert_called_once_with(
         input_file=None,
@@ -398,7 +398,7 @@ def test__dispatch_template_render_no_optional():
         STR.valsneeded: False,
         STR.dryrun: False,
     }
-    with patch.object(cli.uwtools.config.templater, "render") as render:
+    with patch.object(cli.uwtools.config.jinja2, "render") as render:
         cli._dispatch_template_render(args)
     render.assert_called_once_with(
         input_file=None,
@@ -421,7 +421,7 @@ def test__dispatch_template_render_yaml():
         STR.valsneeded: 6,
         STR.dryrun: 7,
     }
-    with patch.object(cli.uwtools.config.templater, "render") as render:
+    with patch.object(cli.uwtools.config.jinja2, "render") as render:
         cli._dispatch_template_render(args)
     render.assert_called_once_with(
         input_file=1,

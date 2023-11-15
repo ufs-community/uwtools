@@ -14,8 +14,8 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple
 
 import uwtools.config.atparse_to_jinja2
-import uwtools.config.core
-import uwtools.config.templater
+import uwtools.config.jinja2
+import uwtools.config.tools
 import uwtools.config.validator
 import uwtools.drivers.forecast
 import uwtools.rocoto
@@ -191,7 +191,7 @@ def _dispatch_config_compare(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.config.core.compare_configs(
+    return uwtools.config.tools.compare_configs(
         config_a_path=args[STR.file1path],
         config_a_format=args[STR.file1fmt],
         config_b_path=args[STR.file2path],
@@ -205,7 +205,7 @@ def _dispatch_config_realize(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.config.core.realize_config(
+    return uwtools.config.tools.realize_config(
         input_file=args[STR.infile],
         input_format=args[STR.infmt],
         output_file=args[STR.outfile],
@@ -442,7 +442,7 @@ def _dispatch_template_render(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.config.templater.render(
+    return uwtools.config.jinja2.render(
         input_file=args[STR.infile],
         output_file=args[STR.outfile],
         values_file=args[STR.valsfile],
