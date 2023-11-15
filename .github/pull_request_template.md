@@ -19,8 +19,10 @@ INSTRUCTIONS
 Select one or more:
 
 - [ ] Bug fix (corrects a known issue)
-- [ ] Code maintenance (refactoring, etc.)
-- [ ] New feature (adds functionality)
+- [ ] Code maintenance (refactoring, etc. without behavior change)
+- [ ] Documentation
+- [ ] Enhancement (adds a new functionality)
+- [ ] Tooling (CI, code-quality, packaging, revision-control, etc.)
 
 **Impact**
 
