@@ -9,8 +9,8 @@ SPHINXOPTS  = -n
 help:
 	$(SPHINXBUILD) -M help $(SOURCEDIR) $(BUILDDIR) $(SPHINXOPTS)
 
-# clean:
-# 	$(RM) -f $(BUILDDIR)/*
+clean:
+	$(RM) -rv $(BUILDDIR)
 
 # %: Makefile
 %:
