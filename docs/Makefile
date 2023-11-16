@@ -3,7 +3,6 @@ SOURCEDIR   = .
 SPHINXBUILD = sphinx-build
 SPHINXOPTS  = -n
 
-# .PHONY: help Makefile
 .PHONY: help
 
 help:
@@ -12,7 +11,6 @@ help:
 clean:
 	$(RM) -rv $(BUILDDIR)
 
-# %: Makefile
 %:
 	mkdir -pv $(BUILDDIR)
 	$(SPHINXBUILD) -M $@ $(SOURCEDIR) $(BUILDDIR) $(SPHINXOPTS) -w $(BUILDDIR)/warnings.log
