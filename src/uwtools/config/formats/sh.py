@@ -8,33 +8,30 @@ from uwtools.config.support import depth
 from uwtools.utils.file import OptionalPath, readable, writable
 
 
-class INIConfig(Config):
+class SHConfig(Config):
     """
-    Concrete class to handle INI config files.
+    Concrete class to handle bash config files.
     """
 
     def __init__(
         self,
         config_file: str,
-        space_around_delimiters: bool = True,
     ):
         """
-        Construct an INIConfig object.
+        Construct a SHConfig object.
 
-        Spaces may be included for INI format, but should be excluded for bash.
+        Spaces should be excluded for bash.
 
         :param config_file: Path to the config file to load.
-        :param space_around_delimiters: Include spaces around delimiters?
         """
         super().__init__(config_file)
-        self.space_around_delimiters = space_around_delimiters
         self.parse_include()
 
     # Private methods
 
     def _load(self, config_file: OptionalPath) -> dict:
         """
-        Reads and parses an INI file.
+        Reads and parses a bash file.
 
         See docs for Config._load().
 
@@ -59,31 +56,25 @@ class INIConfig(Config):
 
     def dump(self, path: OptionalPath) -> None:
         """
-        Dumps the config in INI format.
+        Dumps the config in bash format.
 
         :param path: Path to dump config to.
         """
-        INIConfig.dump_dict(path, self.data, ns(space=self.space_around_delimiters))
+        SHConfig.dump_dict(path, self.data, ns(space=False))
 
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
         """
-        Dumps a provided config dictionary in INI format.
+        Dumps a provided config dictionary in bash format.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
-        :param space_around_delimiters: Place spaces around delimiters?
         """
-        # Configparser adds a newline after each section, presumably to create nice-looking output
-        # when an INI contains multiple sections. Unfortunately, it also adds a newline after the
-        # _final_ section, resulting in an anomalous trailing newline. To avoid this, write first to
-        # memory, then strip the trailing newline.
-        parser = configparser.ConfigParser()
         s = StringIO()
         cfgdepth = depth(cfg)
-        assert cfgdepth == 2  # 2 => .ini
-        parser.read_dict(cfg)
-        parser.write(s, space_around_delimiters=opts.space if opts else True)
+        assert cfgdepth == 1  # 1 => .sh
+        for key, value in cfg.items():
+            print(f"{key}={value}", file=s)
         with writable(path) as f:
             print(s.getvalue().strip(), file=f)
         s.close()

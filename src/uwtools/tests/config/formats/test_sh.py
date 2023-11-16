@@ -4,8 +4,9 @@ Tests for uwtools.config.formats.ini module.
 """
 
 import filecmp
+from typing import Any, Dict
 
-from uwtools.config.formats.ini import INIConfig
+from uwtools.config.formats.sh import SHConfig
 from uwtools.tests.support import fixture_path
 
 # Tests
@@ -13,26 +14,26 @@ from uwtools.tests.support import fixture_path
 
 def test_parse_include():
     """
-    Test that non-YAML handles include tags properly for INI with no sections.
+    Test that non-YAML handles include tags properly for bash with no sections.
     """
-    cfgobj = INIConfig(fixture_path("include_files.ini"), space_around_delimiters=True)
+    cfgobj = SHConfig(fixture_path("include_files.sh"))
     assert cfgobj.get("fruit") == "papaya"
     assert cfgobj.get("how_many") == "17"
     assert cfgobj.get("meat") == "beef"
     assert len(cfgobj) == 5
 
 
-def test_simple(salad_base, tmp_path):
+def test_bash(salad_base, tmp_path):
     """
-    Test that INI config load and dump work with a basic INI file.
-
-    Everything in INI is treated as a string!
+    Test that bash config load and dump work with a basic bash file.
     """
-    infile = fixture_path("simple.ini")
-    outfile = tmp_path / "outfile.ini"
-    cfgobj = INIConfig(infile)
-    expected = salad_base
-    expected["salad"]["how_many"] = "12"  # str "12" (not int 12) for INI
+    infile = fixture_path("simple.sh")
+    outfile = tmp_path / "outfile.sh"
+    cfgobj = SHConfig(infile)
+    expected: Dict[str, Any] = {
+        **salad_base["salad"],
+        "how_many": "12",
+    }
     assert cfgobj == expected
     cfgobj.dump(outfile)
     assert filecmp.cmp(infile, outfile)

@@ -30,19 +30,20 @@ class FORMAT:
     _ini: str = "ini"
     _jinja2: str = "jinja2"
     _nml: str = "nml"
+    _sh: str = "sh"
     _xml: str = "xml"
     _yaml: str = "yaml"
 
     # Variants:
 
     atparse: str = _atparse
-    bash: str = _ini
+    bash: str = _sh
     cfg: str = _ini
     fieldtable: str = _fieldtable
     ini: str = _ini
     jinja2: str = _jinja2
     nml: str = _nml
-    sh: str = _ini
+    sh: str = _sh
     yaml: str = _yaml
     yml: str = _yaml
 

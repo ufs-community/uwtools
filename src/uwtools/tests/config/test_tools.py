@@ -13,6 +13,7 @@ from pytest import fixture, raises
 from uwtools.config import tools
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
+from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -136,7 +137,7 @@ def test_compare_configs_bad_format(caplog):
             config_b_path="/not/used",
             config_b_format=FORMAT.yaml,
         )
-    msg = "Format 'jpg' should be one of: fieldtable, ini, nml, yaml"
+    msg = "Format 'jpg' should be one of: fieldtable, ini, nml, sh, yaml"
     assert logged(caplog, msg)
     assert msg in str(e.value)
 
@@ -324,9 +325,9 @@ def test_realize_config_output_file_conversion(tmp_path):
 
 def test_realize_config_simple_bash(tmp_path):
     """
-    Test that providing a bash file with necessary settings will create an INI config file.
+    Test that providing a bash file with necessary settings will create an sh config file.
     """
-    help_realize_config_simple("simple.sh", FORMAT.ini, tmp_path)
+    help_realize_config_simple("simple.sh", FORMAT.sh, tmp_path)
 
 
 def test_realize_config_simple_namelist(tmp_path):
