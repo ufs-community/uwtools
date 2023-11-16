@@ -1,4 +1,4 @@
-BUILDDIR    = _build
+BUILDDIR    = build
 SOURCEDIR   = .
 SPHINXBUILD = sphinx-build
 SPHINXOPTS  = -n
