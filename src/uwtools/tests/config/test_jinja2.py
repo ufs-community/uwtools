@@ -187,23 +187,7 @@ def test_render(values_file, template, tmp_path):
         assert f.read().strip() == "roses are red, violets are blue"
 
 
-def test_render_calls__values_needed(template, values_file, tmp_path):
-    outfile = str(tmp_path / "out.txt")
-    with patch.object(jinja2, "_values_needed") as vn:
-        render_helper(
-            input_file=template, values_file=values_file, output_file=outfile, values_needed=True
-        )
-        vn.assert_called_once_with({"roses_color", "violets_color"})
-
-
-def test_render_calls__write(template, values_file, tmp_path):
-    outfile = str(tmp_path / "out.txt")
-    with patch.object(jinja2, "_write_template_to_file") as write:
-        render_helper(input_file=template, values_file=values_file, output_file=outfile)
-        write.assert_called_once_with(outfile, "roses are red, violets are blue")
-
-
-def test_render_calls__dry_run(template, values_file, tmp_path):
+def test_render_calls__dry_run(template, tmp_path, values_file):
     outfile = str(tmp_path / "out.txt")
     with patch.object(jinja2, "_dry_run_template") as dr:
         render_helper(
@@ -212,7 +196,7 @@ def test_render_calls__dry_run(template, values_file, tmp_path):
         dr.assert_called_once_with("roses are red, violets are blue")
 
 
-def test_render_calls__log_missing(template, values_file, tmp_path):
+def test_render_calls__log_missing(template, tmp_path, values_file):
     outfile = str(tmp_path / "out.txt")
     with open(values_file, "r", encoding="utf-8") as f:
         cfgobj = yaml.safe_load(f.read())
@@ -227,7 +211,23 @@ def test_render_calls__log_missing(template, values_file, tmp_path):
         lmv.assert_called_once_with(["roses_color"])
 
 
-def test_render_dry_run(caplog, values_file, template):
+def test_render_calls__values_needed(template, tmp_path, values_file):
+    outfile = str(tmp_path / "out.txt")
+    with patch.object(jinja2, "_values_needed") as vn:
+        render_helper(
+            input_file=template, values_file=values_file, output_file=outfile, values_needed=True
+        )
+        vn.assert_called_once_with({"roses_color", "violets_color"})
+
+
+def test_render_calls__write(template, tmp_path, values_file):
+    outfile = str(tmp_path / "out.txt")
+    with patch.object(jinja2, "_write_template_to_file") as write:
+        render_helper(input_file=template, values_file=values_file, output_file=outfile)
+        write.assert_called_once_with(outfile, "roses are red, violets are blue")
+
+
+def test_render_dry_run(caplog, template, values_file):
     log.setLevel(logging.INFO)
     render_helper(
         input_file=template, values_file=values_file, output_file="/dev/null", dry_run=True
@@ -235,7 +235,7 @@ def test_render_dry_run(caplog, values_file, template):
     assert logged(caplog, "roses are red, violets are blue")
 
 
-def test_render_values_missing(caplog, values_file, template):
+def test_render_values_missing(caplog, template, values_file):
     # Read in the config, remove the "roses" key, then re-write it.
     log.setLevel(logging.INFO)
     with open(values_file, "r", encoding="utf-8") as f:
@@ -248,7 +248,7 @@ def test_render_values_missing(caplog, values_file, template):
     assert logged(caplog, "roses_color")
 
 
-def test_render_values_needed(caplog, values_file, template):
+def test_render_values_needed(caplog, template, values_file):
     log.setLevel(logging.INFO)
     render_helper(
         input_file=template, values_file=values_file, output_file="/dev/null", values_needed=True
@@ -269,22 +269,6 @@ def test__log_missing_values(caplog):
     assert logged(caplog, "Required value(s) not provided:")
     assert logged(caplog, "roses_color")
     assert logged(caplog, "violets_color")
-
-
-def test__values_needed(caplog):
-    undeclared_variables = {"roses_color", "lavender_smell"}
-    result = jinja2._values_needed(undeclared_variables)
-    assert result is True
-    assert logged(caplog, "Value(s) needed to render this template are:")
-    assert logged(caplog, "roses_color")
-    assert logged(caplog, "lavender_smell")
-
-
-def test__write_template_to_file(tmp_path):
-    outfile = str(tmp_path / "out.txt")
-    jinja2._write_template_to_file(outfile, "roses are red, violets are blue")
-    with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read().strip() == "roses are red, violets are blue"
 
 
 def test__report(caplog):
@@ -312,6 +296,22 @@ def test__set_up_config_obj_file(values_file):
     expected = {"roses_color": "white", "violets_color": "blue", "cannot": {"override": "this"}}
     actual = jinja2._set_up_values_obj(values_file=values_file, overrides={"roses_color": "white"})
     assert actual == expected
+
+
+def test__values_needed(caplog):
+    undeclared_variables = {"roses_color", "lavender_smell"}
+    result = jinja2._values_needed(undeclared_variables)
+    assert result is True
+    assert logged(caplog, "Value(s) needed to render this template are:")
+    assert logged(caplog, "roses_color")
+    assert logged(caplog, "lavender_smell")
+
+
+def test__write_template_to_file(tmp_path):
+    outfile = str(tmp_path / "out.txt")
+    jinja2._write_template_to_file(outfile, "roses are red, violets are blue")
+    with open(outfile, "r", encoding="utf-8") as f:
+        assert f.read().strip() == "roses are red, violets are blue"
 
 
 class Test_Jinja2Template:

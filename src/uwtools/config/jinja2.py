@@ -166,7 +166,7 @@ def render(
     dry_run: bool = False,
 ) -> bool:
     """
-    Render a Jinja2 template.
+    Check and render a Jinja2 template.
 
     :param input_file: Path to the Jinja2 template file to render.
     :param output_file: Path to the file to write the rendered Jinja2 template to.
@@ -174,6 +174,7 @@ def render(
     :param keq_eq_val_pairs: "key=value" strings to supplement values-file values.
     :param values_needed: Just issue a report about variables needed to render the template?
     :param dry_run: Run in dry-run mode?
+    :return: Jinja2 template was successfully rendered.
     """
 
     # Render template.
