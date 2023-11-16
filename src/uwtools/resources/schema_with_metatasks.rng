@@ -330,6 +330,9 @@
         <ref name="compoundTimeString" />
       </element>
       <element name="timedep">
+        <attribute name="offset">
+          <data type="string" />
+        </attribute>
         <ref name="compoundTimeString" />
       </element>
       <element name="not">
