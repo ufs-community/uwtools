@@ -187,6 +187,46 @@ def test_render(values_file, template, tmp_path):
         assert f.read().strip() == "roses are red, violets are blue"
 
 
+def test_render_calls__values_needed(template, values_file, tmp_path):
+    outfile = str(tmp_path / "out.txt")
+    with patch.object(jinja2, "_values_needed") as vn:
+        render_helper(
+            input_file=template, values_file=values_file, output_file=outfile, values_needed=True
+        )
+        vn.assert_called_once_with({"roses_color", "violets_color"})
+
+
+def test_render_calls__write(template, values_file, tmp_path):
+    outfile = str(tmp_path / "out.txt")
+    with patch.object(jinja2, "_write_template_to_file") as write:
+        render_helper(input_file=template, values_file=values_file, output_file=outfile)
+        write.assert_called_once_with(outfile, "roses are red, violets are blue")
+
+
+def test_render_calls__dry_run(template, values_file, tmp_path):
+    outfile = str(tmp_path / "out.txt")
+    with patch.object(jinja2, "_dry_run_template") as dr:
+        render_helper(
+            input_file=template, values_file=values_file, output_file=outfile, dry_run=True
+        )
+        dr.assert_called_once_with("roses are red, violets are blue")
+
+
+def test_render_calls__log_missing(template, values_file, tmp_path):
+    outfile = str(tmp_path / "out.txt")
+    with open(values_file, "r", encoding="utf-8") as f:
+        cfgobj = yaml.safe_load(f.read())
+    del cfgobj["roses_color"]
+    with open(values_file, "w", encoding="utf-8") as f:
+        f.write(yaml.dump(cfgobj))
+
+    with patch.object(jinja2, "_log_missing_values") as lmv:
+        render_helper(
+            input_file=template, values_file=values_file, output_file=outfile, dry_run=True
+        )
+        lmv.assert_called_once_with(["roses_color"])
+
+
 def test_render_dry_run(caplog, values_file, template):
     log.setLevel(logging.INFO)
     render_helper(
@@ -215,6 +255,36 @@ def test_render_values_needed(caplog, values_file, template):
     )
     for var in ("roses_color", "violets_color"):
         assert logged(caplog, var)
+
+
+def test__dry_run_template(caplog):
+    jinja2._dry_run_template("roses are red, violets are blue")
+    assert logged(caplog, "roses are red, violets are blue")
+
+
+def test__log_missing_values(caplog):
+    missing = ["roses_color", "violets_color"]
+    result = jinja2._log_missing_values(missing)
+    assert result is False
+    assert logged(caplog, "Required value(s) not provided:")
+    assert logged(caplog, "roses_color")
+    assert logged(caplog, "violets_color")
+
+
+def test__values_needed(caplog):
+    undeclared_variables = {"roses_color", "lavender_smell"}
+    result = jinja2._values_needed(undeclared_variables)
+    assert result is True
+    assert logged(caplog, "Value(s) needed to render this template are:")
+    assert logged(caplog, "roses_color")
+    assert logged(caplog, "lavender_smell")
+
+
+def test__write_template_to_file(tmp_path):
+    outfile = str(tmp_path / "out.txt")
+    jinja2._write_template_to_file(outfile, "roses are red, violets are blue")
+    with open(outfile, "r", encoding="utf-8") as f:
+        assert f.read().strip() == "roses are red, violets are blue"
 
 
 def test__report(caplog):
