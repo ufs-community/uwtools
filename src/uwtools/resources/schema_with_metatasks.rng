@@ -257,12 +257,6 @@
         <empty />
       </element>
       <ref name="rb_or_sh" />
-      <element name="true">
-        <empty />
-      </element>
-      <element name="false">
-        <empty />
-      </element>
       <element name="streq">
         <element name="left">
           <ref name="compoundTimeString" />
