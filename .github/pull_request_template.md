@@ -31,8 +31,9 @@ Select one:
 - [ ] This is a non-breaking change (existing functionality continues to work as expected)
 - [ ] This is a breaking change (changes existing functionality)
 
-**Documentation**
+**Checklist**
 
 Affirm:
 
+- [ ] I have added myself and any co-authors to the PR's _Assignees_ list.
 - [ ] I have reviewed the documentation and have made any updates necessitated by this change.
