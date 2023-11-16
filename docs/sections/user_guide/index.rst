@@ -4,7 +4,6 @@ User Guide
 
 .. toctree::
    :titlesonly:
-   :numbered:
 
    introduction
    installation

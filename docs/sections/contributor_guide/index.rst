@@ -4,7 +4,6 @@ Contributor Guide
 
 .. toctree::
    :titlesonly:
-   :numbered:
 
    introduction
    developer_setup
