@@ -161,7 +161,18 @@
           "type": "object"
         },
         "^timedep(_.*)?$": {
-          "$ref": "#/$defs/TimePattern"
+          "additionalProperties": false,
+          "properties": {
+            "attrs": {
+              "additionalProperties": false,
+              "properties": {
+                "offset": {
+                  "type": "string"
+                }
+              },
+              "$ref": "#/$defs/TimePattern"
+            }
+          }
         }
       },
       "type": "object"

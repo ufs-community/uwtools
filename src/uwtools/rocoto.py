@@ -191,8 +191,6 @@ class _RocotoXML:
                 self._add_task_dependency_operator(e, config=config)
             elif tag in [STR.streq, STR.strneq]:
                 self._add_task_dependency_strequality(e, config=config)
-            elif tag in [STR.true, STR.false]:
-                self._add_task_dependency_boolean(e, config=config)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
@@ -205,9 +203,9 @@ class _RocotoXML:
             if tag == STR.taskdep:
                 self._set_attrs(SubElement(e, STR.taskdep), block)
             elif tag == STR.datadep:
-                self._set_attrs(SubElement(e, STR.datadep), config={"attrs": block})
+                self._set_attrs(SubElement(e, STR.datadep), block)
             else:
-                self._set_attrs(SubElement(e, STR.timedep), config={"attrs": block})
+                self._set_attrs(SubElement(e, STR.timedep), block)
 
     def _add_task_dependency_operator(self, e: Element, config: dict) -> None:
         """
@@ -238,18 +236,6 @@ class _RocotoXML:
                 self._set_attrs(SubElement(e, STR.streq), config={"attrs": block})
             else:
                 self._set_attrs(SubElement(e, STR.strneq), config={"attrs": block})
-
-    def _add_task_dependency_boolean(self, e: Element, config: dict) -> None:
-        """
-        ???
-        """
-        breakpoint()
-        for key, block in config.items():
-            tag, _ = self._tag_name(key)
-            if tag == STR.true:
-                self._set_attrs(SubElement(e, STR.true), config={"attrs": block})
-            else:
-                self._set_attrs(SubElement(e, STR.false), config={"attrs": block})
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """
@@ -375,7 +361,6 @@ class STR:
     envar: str = "envar"
     envars: str = "envars"
     exclusive: str = "exclusive"
-    false: str = "false"
     jobname: str = "jobname"
     join: str = "join"
     log: str = "log"
@@ -402,7 +387,6 @@ class STR:
     taskdep: str = "taskdep"
     tasks: str = "tasks"
     timedep: str = "timedep"
-    true: str = "true"
     value: str = "value"
     var: str = "var"
     walltime: str = "walltime"
