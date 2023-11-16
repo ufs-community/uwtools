@@ -5,5 +5,5 @@ User Guide
 .. toctree::
    introduction
    installation
-   cli
-   api
+   cli/index
+   api/index
