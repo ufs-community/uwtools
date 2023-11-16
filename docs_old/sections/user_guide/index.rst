@@ -1,14 +1,21 @@
-################
-Unified Workflow
-################
+############
+User's Guide
+############
 
-TBD
+**Foreword: A Note to Unified Workflow Users**
+
+This User's Guide is provided as an aid to users of the Unified Workflow. The Unified Workflow is a set of tools intended to unify the workflow for various UFS applications under one framework. Introducing and implementing a unified set of workflow tools reduces the chances of everyone reinventing the wheel and facilitates collaboration and development across the UFS community. If the same tools, framework, and standards are used across multiple applications, gaining familiarity with one application will hopefully enable users and developers to gain some familiarity with other applications.
+
+**Table of Contents**
 
 .. toctree::
-   :hidden:
+   :titlesonly:
+   :numbered:
 
-   sections/user_guide/index
-   sections/contributor_guide/index
+   introduction
+   getting_started
+   working_with_templates
+   working_with_config
 
 **Disclaimer**
 

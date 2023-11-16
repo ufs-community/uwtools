@@ -1,18 +1,9 @@
-###################
-Contributor's Guide
-###################
-
+#################
+Contributor Guide
+#################
 
 .. toctree::
-   :titlesonly:
-   :numbered:
-
    introduction
-   code_coverage
-   github_workflow
+   developer_setup
    code_quality
-   testing
-   code_format
-   directory_tree
-   ci
-   documentation
+   fork_pr_model

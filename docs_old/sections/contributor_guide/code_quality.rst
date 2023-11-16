@@ -1,5 +1,7 @@
+.. _code_quality:
+
 ************
 Code Quality
 ************
 
-TBD
+* Coming soon

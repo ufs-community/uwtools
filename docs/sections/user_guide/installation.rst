@@ -1,5 +1,5 @@
 ************
-Code Quality
+Installation
 ************
 
 TBD
