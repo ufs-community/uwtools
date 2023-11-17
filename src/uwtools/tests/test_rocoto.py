@@ -142,7 +142,7 @@ class Test_RocotoXML:
                 assert element.get(attr) == val
 
     @pytest.mark.parametrize(
-        "config", [{"and": {"timedep": {"attrs": {"offset": "&DEADLINE;"}}}}]
+        "config", [{"and": {"datadep": {"attrs": {"age": "120"}}, "timedep": {"attrs": {"offset": "&DEADLINE;"}}}}]
     )
     def test__add_task_dependency_operator(self, config, instance, root):
         instance._add_task_dependency_operator(e=root, config=config)
