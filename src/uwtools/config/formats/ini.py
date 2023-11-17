@@ -81,7 +81,7 @@ class INIConfig(Config):
         parser = configparser.ConfigParser()
         s = StringIO()
         cfgdepth = depth(cfg)
-        assert cfgdepth == 2  # 2 => .ini
+        assert cfgdepth in (1, 2)  # 2 => .ini
         parser.read_dict(cfg)
         parser.write(s, space_around_delimiters=opts.space if opts else True)
         with writable(path) as f:
