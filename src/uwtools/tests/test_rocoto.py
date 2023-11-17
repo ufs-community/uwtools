@@ -137,7 +137,7 @@ class Test_RocotoXML:
         element = root[0]
         for tag, attrs in config.items():
             assert tag == element.tag
-            for attr, val in attrs.items():
+            for attr, val in attrs["attrs"].items():
                 assert element.get(attr) == val
 
     '''@pytest.mark.parametrize(
