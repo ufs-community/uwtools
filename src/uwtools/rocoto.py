@@ -182,14 +182,14 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         """
         e = SubElement(e, STR.dependency)
-        for key in config.keys():
+        for key, block in config.items():
             tag, _ = self._tag_name(key)
             if tag in [STR.taskdep, STR.datadep, STR.timedep]:
-                self._add_task_dependency_operand(e, config=config)
+                self._add_task_dependency_operand(e, config={key: block})
             elif tag in [STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor]:
-                self._add_task_dependency_operator(e, config=config)
+                self._add_task_dependency_operator(e, config={key: block})
             elif tag in [STR.streq, STR.strneq]:
-                self._add_task_dependency_strequality(e, config=config)
+                self._add_task_dependency_strequality(e, config={key: block})
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
@@ -210,7 +210,6 @@ class _RocotoXML:
         """
         ???
         """
-        # breakpoint()
         operands = (STR.datadep, STR.taskdep, STR.timedep)
         operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
         strequality = (STR.streq, STR.strneq)
@@ -233,9 +232,9 @@ class _RocotoXML:
         for key, block in config.items():
             tag, _ = self._tag_name(key)
             if tag == STR.streq:
-                self._set_attrs(SubElement(e, STR.streq), config={"attrs": block})
+                self._set_attrs(SubElement(e, STR.streq), block)
             else:
-                self._set_attrs(SubElement(e, STR.strneq), config={"attrs": block})
+                self._set_attrs(SubElement(e, STR.strneq), block)
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """

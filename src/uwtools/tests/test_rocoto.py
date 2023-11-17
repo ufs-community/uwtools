@@ -124,6 +124,24 @@ class Test_RocotoXML:
         assert taskdep.tag == "taskdep"
         assert taskdep.get("task") == "foo"
 
+    def test__add_task_dependency_and(self, instance, root):
+        config = {"and": {"or": {"datadep": {"attrs": {"age": "120"}}}}}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        and_ = dependency[0]
+        assert and_.tag == "datadep"
+        assert and_.get("age") == "120"
+
+    def test__add_task_dependency_streq(self, instance, root):
+        config = {"streq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        streq = dependency[0]
+        assert streq.tag == "streq"
+        assert streq.get("left") == "&RUN_GSI;"
+
     def test__add_task_dependency_fail(self, instance, root):
         config = {"unrecognized": "whatever"}
         with raises(UWConfigError):
@@ -151,8 +169,8 @@ class Test_RocotoXML:
     @pytest.mark.parametrize(
         "config",
         [
-            {"streq": {"left": "&RUN_GSI;", "right": "YES"}},
-            {"strneq": {"left": "&RUN_GSI;", "right": "YES"}},
+            {"streq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}},
+            {"strneq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}},
         ],
     )
     def test__add_task_dependency_strequality(self, config, instance, root):
@@ -160,7 +178,7 @@ class Test_RocotoXML:
         element = root[0]
         for tag, attrs in config.items():
             assert tag == element.tag
-            for attr, val in attrs.items():
+            for attr, val in attrs["attrs"].items():
                 assert element.get(attr) == val
 
     def test__add_task_envar(self, instance, root):
