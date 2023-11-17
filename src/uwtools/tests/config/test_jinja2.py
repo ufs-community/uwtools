@@ -316,8 +316,7 @@ def test__write_template_to_file(tmp_path):
 
 
 def test__write_template_stdout(capsys):
-    outfile = None
-    jinja2._write_template(outfile, "roses are red, violets are blue")
+    jinja2._write_template(None, "roses are red, violets are blue")
     actual = capsys.readouterr().out
     expected = "roses are red, violets are blue"
     assert actual.strip() == expected
