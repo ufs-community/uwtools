@@ -211,21 +211,22 @@ class _RocotoXML:
         """
         ???
         """
+        # breakpoint()
         operands = (STR.datadep, STR.taskdep, STR.timedep)
         operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
-        other = (STR.streq, STR.strneq) 
+        strequality = (STR.streq, STR.strneq)
 
-        for key, block in config.items():
+        for key, block  in config.items():
             tag, _ = self._tag_name(key)
             if tag in operators:
-                self._add_task_dependency_operator(e, config=config)
+                self._add_task_dependency_operator(e, config=block)
             elif tag in operands:
                 self._add_task_dependency_operand(e, config=config)
-            elif tag in other:
+            elif tag in strequality:
                 self._add_task_dependency_strequality(e, config=config)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
-                
+
     def _add_task_dependency_strequality(self, e: Element, config: dict) -> None:
         """
         ???
