@@ -201,11 +201,11 @@ def render(
     if missing:
         return _log_missing_values(missing)
 
-    # In dry-run mode, log the rendered template. Otherwisre, write rendered template to file.
+    # In dry-run mode, log the rendered template. Otherwise, write rendered template to file.
     return (
         _dry_run_template(template.render())
         if dry_run
-        else _write_template_to_file(output_file, template.render())
+        else _write_template(output_file, template.render())
     )
 
 
@@ -231,7 +231,7 @@ def _log_missing_values(missing: List[str]) -> bool:
 
     :param missing: A list containing the undeclared variables that do not have a corresponding
         match in values.
-    :return: Unable to sucessfully render template.
+    :return: Unable to successfully render template.
     """
 
     log.error("Required value(s) not provided:")
@@ -331,13 +331,13 @@ def _values_needed(undeclared_variables: Set[str]) -> bool:
     return True
 
 
-def _write_template_to_file(output_file: OptionalPath, rendered_template: str) -> bool:
+def _write_template(output_file: OptionalPath, rendered_template: str) -> bool:
     """
-    Write the rendered template to file.
+    Write the rendered template.
 
     :param output_file: Path to the file to write the rendered Jinja2 template to.
     :param rendered_template: A string containing a rendered Jinja2 template.
-    :return: The successful writing of the rendered template to the outfile.
+    :return: The successful writing of the rendered template.
     """
     with writable(output_file) as f:
         print(rendered_template, file=f)

@@ -222,7 +222,7 @@ def test_render_calls__values_needed(template, tmp_path, values_file):
 
 def test_render_calls__write(template, tmp_path, values_file):
     outfile = str(tmp_path / "out.txt")
-    with patch.object(jinja2, "_write_template_to_file") as write:
+    with patch.object(jinja2, "_write_template") as write:
         render_helper(input_file=template, values_file=values_file, output_file=outfile)
         write.assert_called_once_with(outfile, "roses are red, violets are blue")
 
@@ -258,8 +258,9 @@ def test_render_values_needed(caplog, template, values_file):
 
 
 def test__dry_run_template(caplog):
-    jinja2._dry_run_template("roses are red, violets are blue")
-    assert logged(caplog, "roses are red, violets are blue")
+    jinja2._dry_run_template("roses are red\nviolets are blue")
+    assert logged(caplog, "roses are red")
+    assert logged(caplog, "violets are blue")
 
 
 def test__log_missing_values(caplog):
@@ -309,9 +310,17 @@ def test__values_needed(caplog):
 
 def test__write_template_to_file(tmp_path):
     outfile = str(tmp_path / "out.txt")
-    jinja2._write_template_to_file(outfile, "roses are red, violets are blue")
+    jinja2._write_template(outfile, "roses are red, violets are blue")
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read().strip() == "roses are red, violets are blue"
+
+
+def test__write_template_stdout(capsys):
+    outfile = None
+    jinja2._write_template(outfile, "roses are red, violets are blue")
+    actual = capsys.readouterr().out
+    expected = "roses are red, violets are blue"
+    assert actual.strip() == expected
 
 
 class Test_Jinja2Template:
