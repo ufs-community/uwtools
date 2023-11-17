@@ -201,7 +201,8 @@ def render(
     if missing:
         return _log_missing_values(missing)
 
-    # In dry-run mode, log the rendered template. Otherwise, write rendered template to file.
+    # In dry-run mode, log the rendered template. Otherwise, write the rendered template.
+
     return (
         _dry_run_template(template.render())
         if dry_run
