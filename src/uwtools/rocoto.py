@@ -216,7 +216,7 @@ class _RocotoXML:
         operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
         strequality = (STR.streq, STR.strneq)
 
-        for key, block  in config.items():
+        for key, block in config.items():
             tag, _ = self._tag_name(key)
             if tag in operators:
                 self._add_task_dependency_operator(e, config=block)

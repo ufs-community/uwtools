@@ -131,7 +131,8 @@ class Test_RocotoXML:
 
     # pylint: disable=line-too-long
     @pytest.mark.parametrize(
-        "config", [{"datadep": {"attrs": {"age": "120"}}}, {"timedep": {"attrs": {"offset": "&DEADLINE;"}}}]
+        "config",
+        [{"datadep": {"attrs": {"age": "120"}}}, {"timedep": {"attrs": {"offset": "&DEADLINE;"}}}],
     )
     def test__add_task_dependency_operand(self, config, instance, root):
         instance._add_task_dependency_operand(e=root, config=config)
@@ -141,16 +142,11 @@ class Test_RocotoXML:
             for attr, val in attrs["attrs"].items():
                 assert element.get(attr) == val
 
-    @pytest.mark.parametrize(
-        "config", [{"and": {"datadep": {"attrs": {"age": "120"}}, "timedep": {"attrs": {"offset": "&DEADLINE;"}}}}]
-    )
+    @pytest.mark.parametrize("config", [{"and": {"or": {"datadep": {"attrs": {"age": "120"}}}}}])
     def test__add_task_dependency_operator(self, config, instance, root):
         instance._add_task_dependency_operator(e=root, config=config)
-        element = root[0]
-        for tag, attrs in config.items():
+        for tag, _ in config.items():
             assert tag == next(iter(config))
-            #for attr, val in attrs.items():
-            #    assert element.get(attr) == val
 
     @pytest.mark.parametrize(
         "config",
