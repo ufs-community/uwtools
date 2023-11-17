@@ -1,9 +1,5 @@
 {
   "$defs": {
-    "TimePattern": {
-      "pattern": "^(\\d{2}:){3}\\d{2}$",
-      "type": "string"
-    },
     "datePattern": {
       "format": "string",
       "pattern": "^(\\d{12}) (\\d{12})$",
@@ -161,15 +157,7 @@
           "type": "object"
         },
         "^timedep(_.*)?$": {
-          "additionalProperties": false,
-          "properties": {
-            "attrs": {
-              "additionalProperties": false,
-              "properties": {
-                "$ref": "#/$defs/TimePattern"
-              }
-            }
-          }
+          "type": "string"
         }
       },
       "type": "object"
