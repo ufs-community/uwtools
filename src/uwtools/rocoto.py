@@ -8,12 +8,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Tuple
 
-import yaml
-from jinja2 import DebugUndefined, Template
 from lxml import etree
 from lxml.etree import Element, SubElement
 
-from uwtools.config.core import YAMLConfig
+from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.jinja2 import dereference
 from uwtools.config.validator import validate_yaml
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -313,11 +312,9 @@ class _RocotoXML:
         """
         if STR.jobname not in config:
             config[STR.jobname] = taskname
-        return yaml.safe_load(
-            Template(yaml.dump(config), undefined=DebugUndefined).render(
-                jobname=config[STR.jobname]
-            )
-        )
+        new = dereference(val=config, context={STR.jobname: config[STR.jobname]})
+        assert isinstance(new, dict)
+        return new
 
     def _set_attrs(self, e: Element, config: dict) -> None:
         """

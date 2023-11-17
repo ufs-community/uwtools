@@ -78,10 +78,10 @@ def logged(caplog: LogCaptureFixture, msg: str) -> bool:
 
 def regex_logged(caplog: LogCaptureFixture, msg: str) -> bool:
     """
-    Does the given text occur in the log capture? Expanded to perform regex matching for powerusers.
+    Does the given regex match a line in the log capture?
 
     :param caplog: The pytest log capture.
-    :param msg: The message sought.
+    :param msg: The regex sought.
     :return: Does it?
     """
     pattern = re.compile(re.escape(msg))
