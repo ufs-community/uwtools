@@ -94,7 +94,7 @@ class Driver(ABC):
     @property
     def scheduler(self) -> JobScheduler:
         """
-        The job scheduler speficied by the platform information.
+        The job scheduler specified by the platform information.
 
         :return: The scheduler object
         """

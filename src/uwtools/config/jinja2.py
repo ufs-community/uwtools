@@ -166,7 +166,7 @@ def render(
     dry_run: bool = False,
 ) -> bool:
     """
-    Render a Jinja2 template.
+    Check and render a Jinja2 template.
 
     :param input_file: Path to the Jinja2 template file to render.
     :param output_file: Path to the file to write the rendered Jinja2 template to.
@@ -174,7 +174,11 @@ def render(
     :param keq_eq_val_pairs: "key=value" strings to supplement values-file values.
     :param values_needed: Just issue a report about variables needed to render the template?
     :param dry_run: Run in dry-run mode?
+    :return: Jinja2 template was successfully rendered.
     """
+
+    # Render template.
+
     _report(locals())
     values = _set_up_values_obj(
         values_file=values_file, values_format=values_format, overrides=overrides
@@ -188,38 +192,53 @@ def render(
     # then return.
 
     if values_needed:
-        log.info("Value(s) needed to render this template are:")
-        for var in sorted(undeclared_variables):
-            log.info(var)
-        return True
+        return _values_needed(undeclared_variables)
 
     # Check for missing values required to render the template. If found, report them and raise an
     # exception.
 
     missing = [var for var in undeclared_variables if var not in values.keys()]
     if missing:
-        msg = "Required value(s) not provided:"
-        log.error(msg)
-        for key in missing:
-            log.error(key)
-        return False
+        return _log_missing_values(missing)
 
-    # In dry-run mode, display the rendered template and then return.
+    # In dry-run mode, log the rendered template. Otherwise, write the rendered template.
 
-    if dry_run:
-        rendered_template = template.render()
-        for line in rendered_template.split("\n"):
-            log.info(line)
-        return True
-
-    # Write rendered template to file.
-
-    with writable(output_file) as f:
-        print(template.render(), file=f)
-    return True
+    return (
+        _dry_run_template(template.render())
+        if dry_run
+        else _write_template(output_file, template.render())
+    )
 
 
 # Private functions
+
+
+def _dry_run_template(rendered_template: str) -> bool:
+    """
+    Log the rendered template and then return as successful.
+
+    :param rendered_template: A string containing a rendered Jinja2 template.
+    :return: The successful logging of the template.
+    """
+
+    for line in rendered_template.split("\n"):
+        log.info(line)
+    return True
+
+
+def _log_missing_values(missing: List[str]) -> bool:
+    """
+    Log values missing from template and raise an exception.
+
+    :param missing: A list containing the undeclared variables that do not have a corresponding
+        match in values.
+    :return: Unable to successfully render template.
+    """
+
+    log.error("Required value(s) not provided:")
+    for key in missing:
+        log.error(key)
+    return False
 
 
 def _register_filters(env: Environment) -> Environment:
@@ -295,3 +314,32 @@ def _set_up_values_obj(
         values.update(overrides)
         log.debug("Updated values with overrides: %s", " ".join(overrides))
     return values
+
+
+def _values_needed(undeclared_variables: Set[str]) -> bool:
+    """
+    Log variables needed to render the template.
+
+    :param undeclared_variables: A set containing the variables needed to render the template.
+    :return: Successfully logged values needed.
+    """
+
+    # If a report of variables required to render the template was requested, make that report and
+    # then return.
+    log.info("Value(s) needed to render this template are:")
+    for var in sorted(undeclared_variables):
+        log.info(var)
+    return True
+
+
+def _write_template(output_file: OptionalPath, rendered_template: str) -> bool:
+    """
+    Write the rendered template.
+
+    :param output_file: Path to the file to write the rendered Jinja2 template to.
+    :param rendered_template: A string containing a rendered Jinja2 template.
+    :return: The successful writing of the rendered template.
+    """
+    with writable(output_file) as f:
+        print(rendered_template, file=f)
+    return True
