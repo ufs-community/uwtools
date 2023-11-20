@@ -1,10 +1,11 @@
+# pylint: disable=duplicate-code
 import configparser
 from io import StringIO
 from types import SimpleNamespace as ns
 from typing import Optional
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import depth
+from uwtools.config.support import config_sections, depth
 from uwtools.utils.file import OptionalPath, readable, writable
 
 
@@ -13,14 +14,14 @@ class SHConfig(Config):
     Concrete class to handle bash config files.
     """
 
+    _MAXDEPTH = 1
+
     def __init__(
         self,
         config_file: str,
     ):
         """
         Construct a SHConfig object.
-
-        Spaces should be excluded for bash.
 
         :param config_file: Path to the config file to load.
         """
@@ -37,18 +38,10 @@ class SHConfig(Config):
 
         :param config_file: Path to config file to load.
         """
-        # The protected _sections method is the most straightforward way to get at the dict
-        # representation of the parse config.
-
         cfg = configparser.ConfigParser()
-        cfg.optionxform = str  # type: ignore
-        sections = cfg._sections  # type: ignore # pylint: disable=protected-access
+        sections = config_sections(cfg)
         with readable(config_file) as f:
             raw = f.read()
-        try:
-            cfg.read_string(raw)
-            return dict(sections)
-        except configparser.MissingSectionHeaderError:
             cfg.read_string("[top]\n" + raw)
             return dict(sections.get("top"))
 
@@ -70,9 +63,9 @@ class SHConfig(Config):
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
         """
+        assert depth(cfg) == SHConfig._MAXDEPTH
+
         s = StringIO()
-        cfgdepth = depth(cfg)
-        assert cfgdepth == 1  # 1 => .sh
         for key, value in cfg.items():
             print(f"{key}={value}", file=s)
         with writable(path) as f:

@@ -1,11 +1,29 @@
+import configparser
 from importlib import import_module
-from typing import Type
+from typing import Dict, Type
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.utils.file import FORMAT
 
 INCLUDE_TAG = "!INCLUDE"
+
+
+def to_dict(config: configparser.ConfigParser) -> Dict[str, Dict[str, str]]:
+    """
+    Return a dictionary of sections from a config object.
+    """
+    return {section_name: dict(config[section_name]) for section_name in config.sections()}
+
+
+def config_sections(config: configparser.ConfigParser):
+    """
+    Access the _sections method of a config object.
+    """
+    # The protected _sections method is the most straightforward way to get at the dict
+    # representation of the parse config.
+    config.optionxform = str  # type: ignore
+    return config._sections  # type: ignore # pylint: disable=protected-access
 
 
 def depth(d: dict) -> int:

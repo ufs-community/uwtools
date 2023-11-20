@@ -39,6 +39,8 @@ class YAMLConfig(Config):
     Concrete class to handle YAML config files.
     """
 
+    _MAXDEPTH = 8
+
     def __repr__(self) -> str:
         """
         The string representation of a YAMLConfig object.

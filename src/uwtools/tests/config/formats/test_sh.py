@@ -1,6 +1,6 @@
 # pylint: disable=duplicate-code
 """
-Tests for uwtools.config.formats.ini module.
+Tests for uwtools.config.formats.sh module.
 """
 
 import filecmp
@@ -17,9 +17,9 @@ def test_parse_include():
     Test that non-YAML handles include tags properly for bash with no sections.
     """
     cfgobj = SHConfig(fixture_path("include_files.sh"))
-    assert cfgobj.get("fruit") == "papaya"
-    assert cfgobj.get("how_many") == "17"
-    assert cfgobj.get("meat") == "beef"
+    assert cfgobj["fruit"] == "papaya"
+    assert cfgobj["how_many"] == "17"
+    assert cfgobj["meat"] == "beef"
     assert len(cfgobj) == 5
 
 

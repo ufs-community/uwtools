@@ -15,11 +15,11 @@ def test_parse_include():
     """
     Test that non-YAML handles include tags properly for INI with no sections.
     """
-    cfgobj = INIConfig(fixture_path("include_files.ini"), space_around_delimiters=True)
-    assert cfgobj.get("fruit") == "papaya"
-    assert cfgobj.get("how_many") == "17"
-    assert cfgobj.get("meat") == "beef"
-    assert len(cfgobj) == 5
+    cfgobj = INIConfig(fixture_path("include_files.ini"))
+    assert cfgobj["config"]["fruit"] == "papaya"
+    assert cfgobj["config"]["how_many"] == "17"
+    assert cfgobj["config"]["meat"] == "beef"
+    assert len(cfgobj["config"]) == 5
 
 
 def test_simple(salad_base, tmp_path):

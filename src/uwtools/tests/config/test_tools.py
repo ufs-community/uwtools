@@ -13,7 +13,6 @@ from pytest import fixture, raises
 from uwtools.config import tools
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log

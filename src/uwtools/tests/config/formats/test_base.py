@@ -83,7 +83,7 @@ def test_compare_config(caplog, fmt, salad_base):
     log.setLevel(logging.INFO)
     cfgobj = tools.format_to_config(fmt)(fixture_path(f"simple.{fmt}"))
     if fmt == FORMAT.ini or FORMAT.sh:
-        salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini
+        salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini or sh
     assert cfgobj.compare_config(salad_base) is True
     # Expect no differences:
     assert not caplog.records
