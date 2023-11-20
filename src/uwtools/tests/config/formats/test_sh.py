@@ -14,7 +14,7 @@ from uwtools.tests.support import fixture_path
 
 def test_parse_include():
     """
-    Test that non-YAML handles include tags properly for bash with no sections.
+    Test that an sh file with no sections handles include tags properly.
     """
     cfgobj = SHConfig(fixture_path("include_files.sh"))
     assert cfgobj["fruit"] == "papaya"

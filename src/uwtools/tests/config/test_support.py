@@ -24,8 +24,8 @@ from uwtools.utils.file import FORMAT
 def test_config_sections():
     cfg = configparser.ConfigParser()
     sections = support.config_sections(cfg)
-    cfg.read_string("[top]\n")
-    assert not dict(sections.get("top"))
+    cfg.read_string("[flower]\nroses=red\n[fruit]\na=apple\n")
+    assert dict(sections) == {"flower": {"roses": "red"}, "fruit": {"a": "apple"}}
 
 
 @pytest.mark.parametrize("d,n", [({1: 88}, 1), ({1: {2: 88}}, 2), ({1: {2: {3: 88}}}, 3)])

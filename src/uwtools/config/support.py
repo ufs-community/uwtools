@@ -12,6 +12,9 @@ INCLUDE_TAG = "!INCLUDE"
 def config_sections(config: configparser.ConfigParser):
     """
     Access the _sections method of a config object.
+
+    :param config: The ConfigParser object
+    :return: the _sections method of the ConfigParser object
     """
     # The protected _sections method is the most straightforward way to get at the dict
     # representation of the parse config.

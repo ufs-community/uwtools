@@ -1,8 +1,6 @@
 # pylint: disable=duplicate-code
 import configparser
 from io import StringIO
-from types import SimpleNamespace as ns
-from typing import Optional
 
 from uwtools.config.formats.base import Config
 from uwtools.config.support import config_sections, depth
@@ -14,7 +12,7 @@ class SHConfig(Config):
     Concrete class to handle bash config files.
     """
 
-    _MAXDEPTH = 1
+    _DEPTH = 1
 
     def __init__(
         self,
@@ -32,7 +30,7 @@ class SHConfig(Config):
 
     def _load(self, config_file: OptionalPath) -> dict:
         """
-        Reads and parses a bash file.
+        Reads and parses shell code consisting solely of key=value lines.
 
         See docs for Config._load().
 
@@ -49,21 +47,21 @@ class SHConfig(Config):
 
     def dump(self, path: OptionalPath) -> None:
         """
-        Dumps the config in bash format.
+        Dumps the config as key=value lines.
 
         :param path: Path to dump config to.
         """
-        SHConfig.dump_dict(path, self.data, ns(space=False))
+        self.dump_dict(path, self.data)
 
     @staticmethod
-    def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
+    def dump_dict(path: OptionalPath, cfg: dict) -> None:
         """
         Dumps a provided config dictionary in bash format.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
         """
-        assert depth(cfg) == SHConfig._MAXDEPTH
+        assert depth(cfg) == SHConfig._DEPTH
 
         s = StringIO()
         for key, value in cfg.items():

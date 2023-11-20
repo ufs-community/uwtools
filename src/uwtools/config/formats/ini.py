@@ -1,8 +1,6 @@
 # pylint: disable=duplicate-code
 import configparser
 from io import StringIO
-from types import SimpleNamespace as ns
-from typing import Optional
 
 from uwtools.config.formats.base import Config
 from uwtools.config.support import config_sections, depth
@@ -14,7 +12,7 @@ class INIConfig(Config):
     Concrete class to handle INI config files.
     """
 
-    _MAXDEPTH = 2
+    _DEPTH = 2
 
     def __init__(
         self,
@@ -22,8 +20,6 @@ class INIConfig(Config):
     ):
         """
         Construct an INIConfig object.
-
-        Spaces may be included for INI format, but should be excluded for bash.
 
         :param config_file: Path to the config file to load.
         """
@@ -45,7 +41,7 @@ class INIConfig(Config):
         with readable(config_file) as f:
             raw = f.read()
             cfg.read_string(raw)
-            return sections
+        return sections
 
     # Public methods
 
@@ -55,27 +51,26 @@ class INIConfig(Config):
 
         :param path: Path to dump config to.
         """
-        INIConfig.dump_dict(path, self.data, space=True)
+        self.dump_dict(path, self.data)
 
     @staticmethod
-    def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None, **kwargs) -> None:
+    def dump_dict(path: OptionalPath, cfg: dict) -> None:
         """
         Dumps a provided config dictionary in INI format.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
-        :param space_around_delimiters: Place spaces around delimiters?
         """
         # Configparser adds a newline after each section, presumably to create nice-looking output
         # when an INI contains multiple sections. Unfortunately, it also adds a newline after the
         # _final_ section, resulting in an anomalous trailing newline. To avoid this, write first to
         # memory, then strip the trailing newline.
-        assert depth(cfg) == INIConfig._MAXDEPTH
+        assert depth(cfg) == INIConfig._DEPTH
 
         parser = configparser.ConfigParser()
         s = StringIO()
         parser.read_dict(cfg)
-        parser.write(s, space_around_delimiters=kwargs.get("space", True))
+        parser.write(s, space_around_delimiters=True)
         with writable(path) as f:
             print(s.getvalue().strip(), file=f)
         s.close()
