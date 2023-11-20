@@ -3,6 +3,7 @@
 Tests for uwtools.config.jinja2 module.
 """
 
+import configparser
 import logging
 
 import pytest
@@ -12,11 +13,19 @@ from uwtools.config import support
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
+from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
+
+
+def test_config_sections():
+    cfg = configparser.ConfigParser()
+    sections = support.config_sections(cfg)
+    cfg.read_string("[top]\n")
+    assert not dict(sections.get("top"))
 
 
 @pytest.mark.parametrize("d,n", [({1: 88}, 1), ({1: {2: 88}}, 2), ({1: {2: {3: 88}}}, 3)])
@@ -30,6 +39,7 @@ def test_depth(d, n):
         (FieldTableConfig, FORMAT.fieldtable),
         (INIConfig, FORMAT.ini),
         (NMLConfig, FORMAT.nml),
+        (SHConfig, FORMAT.sh),
         (YAMLConfig, FORMAT.yaml),
     ],
 )

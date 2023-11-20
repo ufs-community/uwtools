@@ -176,13 +176,13 @@ def test_realize_config_depth_mismatch_to_ini(realize_config_yaml_input):
         )
 
 
-def test_realize_config_depth_mismatch_to_nml(realize_config_yaml_input):
+def test_realize_config_depth_mismatch_to_sh(realize_config_yaml_input):
     with raises(UWConfigError):
         tools.realize_config(
             input_file=realize_config_yaml_input,
             input_format=FORMAT.yaml,
             output_file=None,
-            output_format=FORMAT.nml,
+            output_format=FORMAT.sh,
             values_file=None,
             values_format=None,
         )
@@ -523,8 +523,8 @@ def test__print_config_section_yaml_not_dict():
     assert "must be a dictionary" in str(e.value)
 
 
-@pytest.mark.parametrize("fmt", ["ini", "nml"])
-def test__realize_config_check_depths_fail_nml(fmt, realize_config_testobj):
+@pytest.mark.parametrize("fmt", ["ini", "sh"])
+def test__realize_config_check_depths_fail_sh(fmt, realize_config_testobj):
     with raises(UWConfigError):
         tools._realize_config_check_depths(input_obj=realize_config_testobj, output_format=fmt)
 

@@ -75,15 +75,15 @@ def test_characterize_values(config):
     assert template == ["    p3: {{ n }}"]
 
 
-@pytest.mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml])
+@pytest.mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
 def test_compare_config(caplog, fmt, salad_base):
     """
     Compare two config objects.
     """
     log.setLevel(logging.INFO)
     cfgobj = tools.format_to_config(fmt)(fixture_path(f"simple.{fmt}"))
-    if fmt == FORMAT.ini or FORMAT.sh:
-        salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini or sh
+    if fmt == FORMAT.ini:
+        salad_base["salad"]["how_many"] = "12"  # str "12" (not int 12) for ini
     assert cfgobj.compare_config(salad_base) is True
     # Expect no differences:
     assert not caplog.records
@@ -159,8 +159,8 @@ def test_update_values(config):
     assert config == {"foo": 88, "a": "11", "b": "12", "c": "13"}
 
 
-@pytest.mark.parametrize("fmt1", [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml])
-@pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml])
+@pytest.mark.parametrize("fmt1", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
+@pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
 def test_transform_config(fmt1, fmt2, tmp_path):
     """
     Test that transforms config objects to objects of other config subclasses.

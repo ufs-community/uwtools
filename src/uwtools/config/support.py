@@ -1,19 +1,12 @@
 import configparser
 from importlib import import_module
-from typing import Dict, Type
+from typing import Type
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.utils.file import FORMAT
 
 INCLUDE_TAG = "!INCLUDE"
-
-
-def to_dict(config: configparser.ConfigParser) -> Dict[str, Dict[str, str]]:
-    """
-    Return a dictionary of sections from a config object.
-    """
-    return {section_name: dict(config[section_name]) for section_name in config.sections()}
 
 
 def config_sections(config: configparser.ConfigParser):
