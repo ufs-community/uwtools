@@ -174,6 +174,17 @@ class _RocotoXML:
         if STR.dependency in config:
             self._add_task_dependency(e, config[STR.dependency])
 
+    @property
+    def _dependency_constants(self):
+        """
+        Returns a tuple for each of the resepctive dependency types.
+        """
+        operands = (STR.datadep, STR.taskdep, STR.timedep)
+        operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
+        strequality = (STR.streq, STR.strneq)
+
+        return operands, operators, strequality
+
     def _add_task_dependency(self, e: Element, config: dict) -> None:
         """
         Add a <dependency> element to the <task>.
@@ -181,14 +192,18 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
+        operands, operators, strequality = self._dependency_constants
         e = SubElement(e, STR.dependency)
+
         for tag, block in config.items():
             tag, _ = self._tag_name(tag)
-            if tag in [STR.taskdep, STR.datadep, STR.timedep]:
+            if tag in operands:
                 self._add_task_dependency_operand(e, tag=tag, block=block)
-            elif tag in [STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor]:
-                self._add_task_dependency_operator(e, config={tag: block})
-            elif tag in [STR.streq, STR.strneq]:
+            elif tag in operators:
+                self._add_task_dependency_operator(
+                    e, config={tag: block}, dependency_constants=self._dependency_constants
+                )
+            elif tag in strequality:
                 self._add_task_dependency_strequality(e, tag=tag, block=block)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
@@ -201,22 +216,25 @@ class _RocotoXML:
         """
         self._set_attrs(SubElement(e, tag), block)
 
-    def _add_task_dependency_operator(self, e: Element, config: dict) -> None:
+    def _add_task_dependency_operator(
+        self, e: Element, config: dict, dependency_constants: tuple
+    ) -> None:
         """
-        Add an operator  element to the <dependency>.
+        Add an operator element to the <dependency>.
 
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        operands = (STR.datadep, STR.taskdep, STR.timedep)
-        operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
-        strequality = (STR.streq, STR.strneq)
+
+        operands, operators, strequality = dependency_constants
 
         for tag, block in config.items():
             tag, _ = self._tag_name(tag)
             if tag in operators:
                 e = SubElement(e, tag)
-                self._add_task_dependency_operator(e, config=block)
+                self._add_task_dependency_operator(
+                    e, config=block, dependency_constants=dependency_constants
+                )
             elif tag in operands:
                 self._add_task_dependency_operand(e, tag=tag, block=block)
             elif tag in strequality:
