@@ -182,29 +182,21 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         """
         e = SubElement(e, STR.dependency)
-        for key, block in config.items():
-            tag, _ = self._tag_name(key)
+        for tag, block in config.items():
             if tag in [STR.taskdep, STR.datadep, STR.timedep]:
-                self._add_task_dependency_operand(e, config={key: block})
+                self._add_task_dependency_operand(e, tag=tag, block=block)
             elif tag in [STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor]:
-                self._add_task_dependency_operator(e, config={key: block})
+                self._add_task_dependency_operator(e, config={tag: block})
             elif tag in [STR.streq, STR.strneq]:
-                self._add_task_dependency_strequality(e, config={key: block})
+                self._add_task_dependency_strequality(e, tag=tag, block=block)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
-    def _add_task_dependency_operand(self, e: Element, config: dict) -> None:
+    def _add_task_dependency_operand(self, e: Element, tag: str, block: dict) -> None:
         """
         ???
         """
-        for key, block in config.items():
-            tag, _ = self._tag_name(key)
-            if tag == STR.taskdep:
-                self._set_attrs(SubElement(e, STR.taskdep), block)
-            elif tag == STR.datadep:
-                self._set_attrs(SubElement(e, STR.datadep), block)
-            else:
-                self._set_attrs(SubElement(e, STR.timedep), block)
+        self._set_attrs(SubElement(e, tag), block)
 
     def _add_task_dependency_operator(self, e: Element, config: dict) -> None:
         """
@@ -214,27 +206,22 @@ class _RocotoXML:
         operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
         strequality = (STR.streq, STR.strneq)
 
-        for key, block in config.items():
-            tag, _ = self._tag_name(key)
+        for tag, block in config.items():
             if tag in operators:
+                e = SubElement(e, tag)
                 self._add_task_dependency_operator(e, config=block)
             elif tag in operands:
-                self._add_task_dependency_operand(e, config=config)
+                self._add_task_dependency_operand(e, tag=tag, block=block)
             elif tag in strequality:
-                self._add_task_dependency_strequality(e, config=config)
+                self._add_task_dependency_strequality(e, tag=tag, block=block)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
-    def _add_task_dependency_strequality(self, e: Element, config: dict) -> None:
+    def _add_task_dependency_strequality(self, e: Element, tag: str, block: dict) -> None:
         """
         ???
         """
-        for key, block in config.items():
-            tag, _ = self._tag_name(key)
-            if tag == STR.streq:
-                self._set_attrs(SubElement(e, STR.streq), block)
-            else:
-                self._set_attrs(SubElement(e, STR.strneq), block)
+        self._set_attrs(SubElement(e, tag), block)
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """

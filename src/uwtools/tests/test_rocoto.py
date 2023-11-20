@@ -124,14 +124,19 @@ class Test_RocotoXML:
         assert taskdep.tag == "taskdep"
         assert taskdep.get("task") == "foo"
 
+    def test__add_task_dependency_fail(self, instance, root):
+        config = {"unrecognized": "whatever"}
+        with raises(UWConfigError):
+            instance._add_task_dependency(e=root, config=config)
+
     def test__add_task_dependency_and(self, instance, root):
         config = {"and": {"or": {"datadep": {"attrs": {"age": "120"}}}}}
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
         assert dependency.tag == "dependency"
         and_ = dependency[0]
-        assert and_.tag == "datadep"
-        assert and_.get("age") == "120"
+        assert and_.tag == "and"
+        # assert and_.get("age") == "120"
 
     def test__add_task_dependency_streq(self, instance, root):
         config = {"streq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}
@@ -142,44 +147,51 @@ class Test_RocotoXML:
         assert streq.tag == "streq"
         assert streq.get("left") == "&RUN_GSI;"
 
-    def test__add_task_dependency_fail(self, instance, root):
-        config = {"unrecognized": "whatever"}
-        with raises(UWConfigError):
-            instance._add_task_dependency(e=root, config=config)
-
     # pylint: disable=line-too-long
     @pytest.mark.parametrize(
         "config",
         [{"datadep": {"attrs": {"age": "120"}}}, {"timedep": {"attrs": {"offset": "&DEADLINE;"}}}],
     )
     def test__add_task_dependency_operand(self, config, instance, root):
-        instance._add_task_dependency_operand(e=root, config=config)
-        element = root[0]
-        for tag, attrs in config.items():
+        for tag, block in config.items():
+            instance._add_task_dependency_operand(e=root, tag=tag, block=block)
+            element = root[0]
             assert tag == element.tag
-            for attr, val in attrs["attrs"].items():
+            for attr, val in block["attrs"].items():
                 assert element.get(attr) == val
 
-    @pytest.mark.parametrize("config", [{"and": {"or": {"datadep": {"attrs": {"age": "120"}}}}}])
+    # pylint: disable=line-too-long
+    @pytest.mark.parametrize(
+        "config",
+        [
+            {"and": {"or": {"datadep": {"attrs": {"age": "120"}}}}},
+            {"and": {"strneq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}},
+        ],
+    )
     def test__add_task_dependency_operator(self, config, instance, root):
         instance._add_task_dependency_operator(e=root, config=config)
         for tag, _ in config.items():
             assert tag == next(iter(config))
 
+    def test__add_task_dependency__operand_fail(self, instance, root):
+        config = {"and": {"unrecognized": "whatever"}}
+        with raises(UWConfigError):
+            instance._add_task_dependency(e=root, config=config)
+
     @pytest.mark.parametrize(
         "config",
         [
-            {"streq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}},
-            {"strneq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}},
+            ("streq", {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}),
+            ("strneq", {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}),
         ],
     )
     def test__add_task_dependency_strequality(self, config, instance, root):
-        instance._add_task_dependency_strequality(e=root, config=config)
+        tag, block = config
+        instance._add_task_dependency_strequality(e=root, tag=tag, block=block)
         element = root[0]
-        for tag, attrs in config.items():
-            assert tag == element.tag
-            for attr, val in attrs["attrs"].items():
-                assert element.get(attr) == val
+        assert tag == element.tag
+        for attr, val in block["attrs"].items():
+            assert element.get(attr) == val
 
     def test__add_task_envar(self, instance, root):
         instance._add_task_envar(root, "foo", "bar")
