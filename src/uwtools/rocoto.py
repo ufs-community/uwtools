@@ -94,28 +94,7 @@ class _RocotoXML:
         with writable(path) as f:
             f.write(xml.strip())
 
-    @property
-    def _doctype(self) -> Optional[str]:
-        """
-        Generate the <!DOCTYPE> block with <!ENTITY> definitions.
-
-        :return: The <!DOCTYPE> block if entities are defined, otherwise None.
-        """
-        if entities := self._config[STR.workflow].get(STR.entities):
-            tags = (f'  <!ENTITY {key} "{val}">' for key, val in entities.items())
-            return "<!DOCTYPE workflow [\n%s\n]>" % "\n".join(tags)
-        return None
-
-    def _config_validate(self, config_file: OptionalPath) -> None:
-        """
-        Validate the given YAML config.
-
-        :param config_file: Path to the YAML config (defaults to stdin).
-        """
-        if not validate_yaml(
-            config_file=config_file, schema_file=resource_pathobj("rocoto.jsonschema")
-        ):
-            raise UWConfigError("YAML validation errors identified in %s" % config_file)
+    # Private methods
 
     def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
         """
@@ -173,17 +152,6 @@ class _RocotoXML:
             self._add_task_envar(e, name, value)
         if STR.dependency in config:
             self._add_task_dependency(e, config[STR.dependency])
-
-    @property
-    def _dependency_constants(self):
-        """
-        Returns a tuple for each of the resepctive dependency types.
-        """
-        operands = (STR.datadep, STR.taskdep, STR.timedep)
-        operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
-        strequality = (STR.streq, STR.strneq)
-
-        return operands, operators, strequality
 
     def _add_task_dependency(self, e: Element, config: dict) -> None:
         """
@@ -297,6 +265,38 @@ class _RocotoXML:
         for key, block in config.items():
             tag, name = self._tag_name(key)
             {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, block, name)
+
+    def _config_validate(self, config_file: OptionalPath) -> None:
+        """
+        Validate the given YAML config.
+
+        :param config_file: Path to the YAML config (defaults to stdin).
+        """
+        if not validate_yaml(
+            config_file=config_file, schema_file=resource_pathobj("rocoto.jsonschema")
+        ):
+            raise UWConfigError("YAML validation errors identified in %s" % config_file)
+
+    @property
+    def _dependency_constants(self):
+        """
+        Returns a tuple for each of the respective dependency types.
+        """
+        operands = (STR.datadep, STR.taskdep, STR.timedep)
+        operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
+        strequality = (STR.streq, STR.strneq)
+        return operands, operators, strequality
+
+    @property
+    def _doctype(self) -> Optional[str]:
+        """
+        Generate the <!DOCTYPE> block with <!ENTITY> definitions.
+
+        :return: The <!DOCTYPE> block if entities are defined, otherwise None.
+        """
+        if entities := self._config[STR.workflow].get(STR.entities):
+            tags = (f'  <!ENTITY {key} "{val}">' for key, val in entities.items())
+            return "<!DOCTYPE workflow [\n%s\n]>" % "\n".join(tags)
 
     def _insert_doctype(self, xml: str) -> str:
         """
