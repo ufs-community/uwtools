@@ -94,8 +94,6 @@ class _RocotoXML:
         with writable(path) as f:
             f.write(xml.strip())
 
-    # Private methods
-
     def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
         """
         Add a <metatask> element to the <workflow>.
@@ -297,6 +295,7 @@ class _RocotoXML:
         if entities := self._config[STR.workflow].get(STR.entities):
             tags = (f'  <!ENTITY {key} "{val}">' for key, val in entities.items())
             return "<!DOCTYPE workflow [\n%s\n]>" % "\n".join(tags)
+        return None
 
     def _insert_doctype(self, xml: str) -> str:
         """
