@@ -169,7 +169,7 @@ class Test_RocotoXML:
     )
     def test__add_task_dependency_operator(self, config, instance, root):
         instance._add_task_dependency_operator(
-            e=root, config=config, dependency_constants=instance._dependency_constants
+            e=root, config=config
         )
         for tag, _ in config.items():
             assert tag == next(iter(config))

@@ -201,7 +201,7 @@ class _RocotoXML:
                 self._add_task_dependency_operand(e, tag=tag, block=block)
             elif tag in operators:
                 self._add_task_dependency_operator(
-                    e, config={tag: block}, dependency_constants=self._dependency_constants
+                    e, config={tag: block} 
                 )
             elif tag in strequality:
                 self._add_task_dependency_strequality(e, tag=tag, block=block)
@@ -217,7 +217,7 @@ class _RocotoXML:
         self._set_attrs(SubElement(e, tag), block)
 
     def _add_task_dependency_operator(
-        self, e: Element, config: dict, dependency_constants: tuple
+        self, e: Element, config: dict
     ) -> None:
         """
         Add an operator element to the <dependency>.
@@ -226,15 +226,12 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         """
 
-        operands, operators, strequality = dependency_constants
+        operands, operators, strequality = self._dependency_constants
 
         for tag, block in config.items():
             tag, _ = self._tag_name(tag)
             if tag in operators:
-                e = SubElement(e, tag)
-                self._add_task_dependency_operator(
-                    e, config=block, dependency_constants=dependency_constants
-                )
+                self._add_task_dependency_operator(SubElement(e, tag), config=block)
             elif tag in operands:
                 self._add_task_dependency_operand(e, tag=tag, block=block)
             elif tag in strequality:
