@@ -164,15 +164,15 @@ class _RocotoXML:
         for tag, block in config.items():
             tag, _ = self._tag_name(tag)
             if tag in operands:
-                self._add_task_dependency_operand(e, tag=tag, block=block)
+                self._add_task_dependency_operand(e, block=block, tag=tag)
             elif tag in operators:
                 self._add_task_dependency_operator(e, config={tag: block})
             elif tag in strequality:
-                self._add_task_dependency_strequality(e, tag=tag, block=block)
+                self._add_task_dependency_strequality(e, block=block, tag=tag)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
-    def _add_task_dependency_operand(self, e: Element, tag: str, block: dict) -> None:
+    def _add_task_dependency_operand(self, e: Element, block: dict, tag: str) -> None:
         """
         :param e: The parent element to add the new element to.
         :param tag: Configuration new element to add.
@@ -201,7 +201,7 @@ class _RocotoXML:
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
-    def _add_task_dependency_strequality(self, e: Element, tag: str, block: dict) -> None:
+    def _add_task_dependency_strequality(self, e: Element, block: dict, tag: str) -> None:
         """
         :param e: The parent element to add the new element to.
         :param tag: Configuration new element to add.

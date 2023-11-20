@@ -125,7 +125,7 @@ class Test_RocotoXML:
     )
     def test__add_task_dependency_operand(self, config, instance, root):
         tag, block = config
-        instance._add_task_dependency_operand(e=root, tag=tag, block=block)
+        instance._add_task_dependency_operand(e=root, block=block, tag=tag)
         element = root[0]
         assert tag == element.tag
         for attr, val in block["attrs"].items():
@@ -166,7 +166,7 @@ class Test_RocotoXML:
     )
     def test__add_task_dependency_strequality(self, config, instance, root):
         tag, block = config
-        instance._add_task_dependency_strequality(e=root, tag=tag, block=block)
+        instance._add_task_dependency_strequality(e=root, block=block, tag=tag)
         element = root[0]
         assert tag == element.tag
         for attr, val in block["attrs"].items():
