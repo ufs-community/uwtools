@@ -200,9 +200,7 @@ class _RocotoXML:
             if tag in operands:
                 self._add_task_dependency_operand(e, tag=tag, block=block)
             elif tag in operators:
-                self._add_task_dependency_operator(
-                    e, config={tag: block} 
-                )
+                self._add_task_dependency_operator(e, config={tag: block})
             elif tag in strequality:
                 self._add_task_dependency_strequality(e, tag=tag, block=block)
             else:
@@ -216,9 +214,7 @@ class _RocotoXML:
         """
         self._set_attrs(SubElement(e, tag), block)
 
-    def _add_task_dependency_operator(
-        self, e: Element, config: dict
-    ) -> None:
+    def _add_task_dependency_operator(self, e: Element, config: dict) -> None:
         """
         Add an operator element to the <dependency>.
 
