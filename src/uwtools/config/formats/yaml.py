@@ -38,7 +38,7 @@ class YAMLConfig(Config):
     Concrete class to handle YAML config files.
     """
 
-    _DEPTH = None
+    DEPTH = None
 
     def __repr__(self) -> str:
         """

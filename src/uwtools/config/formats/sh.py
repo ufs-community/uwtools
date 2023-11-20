@@ -12,7 +12,7 @@ class SHConfig(Config):
     Concrete class to handle bash config files.
     """
 
-    _DEPTH = 1
+    DEPTH = 1
 
     def __init__(
         self,
@@ -61,7 +61,6 @@ class SHConfig(Config):
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
         """
-        assert depth(cfg) == SHConfig._DEPTH
 
         s = StringIO()
         for key, value in cfg.items():

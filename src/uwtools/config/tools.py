@@ -9,7 +9,7 @@ from uwtools.config.support import format_to_config, log_and_error
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import FORMAT, get_file_type
+from uwtools.utils.file import get_file_type
 
 # Public functions
 
@@ -112,9 +112,8 @@ def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
     :param output_format: The output format:
     :raises: UWConfigError on excessive input-config depth.
     """
-    if (output_format == (FORMAT.ini or FORMAT.nml) and input_obj.depth != 2) or (
-        output_format == FORMAT.sh and input_obj.depth != 1
-    ):
+    cfgclass = format_to_config(output_format)
+    if cfgclass.DEPTH and input_obj.depth != cfgclass.DEPTH:
         msg = "Cannot write depth-%s input to type-'%s' output" % (input_obj.depth, output_format)
         log.error(msg)
         raise UWConfigError(msg)

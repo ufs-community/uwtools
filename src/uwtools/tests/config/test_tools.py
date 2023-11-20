@@ -426,7 +426,7 @@ Keys that are set to empty:
     assert actual == expected
 
 
-def test_reallize_config_values_needed_yaml(caplog):
+def test_realize_config_values_needed_yaml(caplog):
     """
     Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
     and keys set to empty.

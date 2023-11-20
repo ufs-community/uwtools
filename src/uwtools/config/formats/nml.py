@@ -11,7 +11,7 @@ class NMLConfig(Config):
     Concrete class to handle Fortran namelist files.
     """
 
-    _DEPTH = 2
+    DEPTH = 2
 
     def __init__(self, config_file) -> None:
         super().__init__(config_file)

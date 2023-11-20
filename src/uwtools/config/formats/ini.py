@@ -12,7 +12,7 @@ class INIConfig(Config):
     Concrete class to handle INI config files.
     """
 
-    _DEPTH = 2
+    DEPTH = 2
 
     def __init__(
         self,
@@ -65,7 +65,6 @@ class INIConfig(Config):
         # when an INI contains multiple sections. Unfortunately, it also adds a newline after the
         # _final_ section, resulting in an anomalous trailing newline. To avoid this, write first to
         # memory, then strip the trailing newline.
-        assert depth(cfg) == INIConfig._DEPTH
 
         parser = configparser.ConfigParser()
         s = StringIO()
