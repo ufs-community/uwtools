@@ -276,7 +276,7 @@ class _RocotoXML:
             raise UWConfigError("YAML validation errors identified in %s" % config_file)
 
     @property
-    def _dependency_constants(self):
+    def _dependency_constants(self) -> Tuple[Tuple, Tuple, Tuple]:
         """
         Returns a tuple for each of the respective dependency types.
         """
