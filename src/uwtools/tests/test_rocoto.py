@@ -146,7 +146,6 @@ class Test_RocotoXML:
         assert streq.tag == "streq"
         assert streq.get("left") == "&RUN_GSI;"
 
-    # pylint: disable=line-too-long
     @pytest.mark.parametrize(
         "config",
         [("datadep", {"attrs": {"age": "120"}}), ("timedep", {"attrs": {"offset": "&DEADLINE;"}})],
@@ -159,7 +158,6 @@ class Test_RocotoXML:
         for attr, val in block["attrs"].items():
             assert element.get(attr) == val
 
-    # pylint: disable=line-too-long
     @pytest.mark.parametrize(
         "config",
         [
