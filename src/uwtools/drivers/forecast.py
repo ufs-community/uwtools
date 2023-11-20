@@ -199,7 +199,7 @@ class FV3Forecast(Driver):
     def _boundary_hours(self, lbcs_config: Dict) -> tuple[int, int, int]:
         """
         Prepares parameters to generate the lateral boundary condition (LBCS) forecast hours from an
-        external intput data source, e.g. GFS, RAP, etc.
+        external input data source, e.g. GFS, RAP, etc.
 
         :return: The offset hours between the cycle and the external input data, the hours between
             LBC ingest, and the last hour of the external input data forecast
