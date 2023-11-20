@@ -3,7 +3,7 @@ import configparser
 from io import StringIO
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import config_sections, depth
+from uwtools.config.support import config_sections
 from uwtools.utils.file import OptionalPath, readable, writable
 
 
