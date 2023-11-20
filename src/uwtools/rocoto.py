@@ -195,13 +195,18 @@ class _RocotoXML:
 
     def _add_task_dependency_operand(self, e: Element, tag: str, block: dict) -> None:
         """
-        ???
+        :param e: The parent element to add the new element to.
+        :param tag: Configuration new element to add.
+        :param block: Configuration data for the tag.
         """
         self._set_attrs(SubElement(e, tag), block)
 
     def _add_task_dependency_operator(self, e: Element, config: dict) -> None:
         """
-        ???
+        Add an operator  element to the <dependency>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
         """
         operands = (STR.datadep, STR.taskdep, STR.timedep)
         operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
@@ -221,7 +226,9 @@ class _RocotoXML:
 
     def _add_task_dependency_strequality(self, e: Element, tag: str, block: dict) -> None:
         """
-        ???
+        :param e: The parent element to add the new element to.
+        :param tag: Configuration new element to add.
+        :param block: Configuration data for the tag.
         """
         self._set_attrs(SubElement(e, tag), block)
 
