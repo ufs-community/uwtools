@@ -183,6 +183,7 @@ class _RocotoXML:
         """
         e = SubElement(e, STR.dependency)
         for tag, block in config.items():
+            tag, _ = self._tag_name(tag)
             if tag in [STR.taskdep, STR.datadep, STR.timedep]:
                 self._add_task_dependency_operand(e, tag=tag, block=block)
             elif tag in [STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor]:
@@ -207,6 +208,7 @@ class _RocotoXML:
         strequality = (STR.streq, STR.strneq)
 
         for tag, block in config.items():
+            tag, _ = self._tag_name(tag)
             if tag in operators:
                 e = SubElement(e, tag)
                 self._add_task_dependency_operator(e, config=block)

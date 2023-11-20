@@ -130,7 +130,7 @@ class Test_RocotoXML:
             instance._add_task_dependency(e=root, config=config)
 
     def test__add_task_dependency_and(self, instance, root):
-        config = {"and": {"or": {"datadep": {"attrs": {"age": "120"}}}}}
+        config = {"and": {"or_get_obs": {"datadep": {"attrs": {"age": "120"}}}}}
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
         assert dependency.tag == "dependency"
