@@ -66,25 +66,6 @@ class Test_RocotoXML:
     def root(self):
         return rocoto.Element("root")
 
-    def test__doctype_entities(self, instance):
-        assert '<!ENTITY ACCOUNT "myaccount">' in instance._doctype
-        assert '<!ENTITY FOO "test.log">' in instance._doctype
-
-    def test__doctype_entities_none(self, instance):
-        del instance._config["workflow"]["entities"]
-        assert instance._doctype is None
-
-    def test__config_validate(self, assets, instance):
-        cfgfile, _ = assets
-        instance._config_validate(config_file=cfgfile)
-
-    def test__config_validate_fail(self, instance, tmp_path):
-        cfgfile = tmp_path / "bad.yaml"
-        with open(cfgfile, "w", encoding="utf-8") as f:
-            print("not: ok", file=f)
-        with raises(UWConfigError):
-            instance._config_validate(config_file=cfgfile)
-
     def test__add_metatask(self, instance, root):
         config = {"metatask_foo": "1", "task_bar": "2", "var": {"baz": "3", "qux": "4"}}
         taskname = "test-metatask"
@@ -124,10 +105,83 @@ class Test_RocotoXML:
         assert taskdep.tag == "taskdep"
         assert taskdep.get("task") == "foo"
 
+    def test__add_task_dependency_and(self, instance, root):
+        config = {"and": {"or_get_obs": {"datadep": {"attrs": {"age": "120"}}}}}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        and_ = dependency[0]
+        assert and_.tag == "and"
+        assert and_.getchildren()[0].getchildren()[0].get("age") == "120"
+
     def test__add_task_dependency_fail(self, instance, root):
         config = {"unrecognized": "whatever"}
         with raises(UWConfigError):
             instance._add_task_dependency(e=root, config=config)
+
+    @pytest.mark.parametrize(
+        "config",
+        [{"datadep": {"attrs": {"age": "120"}}}, {"timedep": {"attrs": {"offset": "&DEADLINE;"}}}],
+    )
+    def test__add_task_dependency_operand(self, config, instance, root):
+        instance._add_task_dependency_operand_operator(e=root, config=config)
+        element = root[0]
+        for tag, block in config.items():
+            assert tag == element.tag
+            for attr, val in block["attrs"].items():
+                assert element.get(attr) == val
+
+    def test__add_task_dependency_operand_fail(self, instance, root):
+        config = {"and": {"unrecognized": "whatever"}}
+        with raises(UWConfigError):
+            instance._add_task_dependency(e=root, config=config)
+
+    @pytest.mark.parametrize(
+        "config",
+        [
+            {"and": {"or": {"datadep": {"attrs": {"age": "120"}}}}},
+            {"and": {"strneq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}},
+        ],
+    )
+    def test__add_task_dependency_operator(self, config, instance, root):
+        instance._add_task_dependency_operand_operator(e=root, config=config)
+        for tag, _ in config.items():
+            assert tag == next(iter(config))
+
+    def test__add_task_dependency_streq(self, instance, root):
+        config = {"streq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        streq = dependency[0]
+        assert streq.tag == "streq"
+        assert streq.get("left") == "&RUN_GSI;"
+
+    @pytest.mark.parametrize(
+        "config",
+        [
+            ("streq", {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}),
+            ("strneq", {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}),
+        ],
+    )
+    def test__add_task_dependency_strequality(self, config, instance, root):
+        tag, block = config
+        instance._add_task_dependency_strequality(e=root, block=block, tag=tag)
+        element = root[0]
+        assert tag == element.tag
+        for attr, val in block["attrs"].items():
+            assert element.get(attr) == val
+
+    def test__config_validate(self, assets, instance):
+        cfgfile, _ = assets
+        instance._config_validate(config_file=cfgfile)
+
+    def test__config_validate_fail(self, instance, tmp_path):
+        cfgfile = tmp_path / "bad.yaml"
+        with open(cfgfile, "w", encoding="utf-8") as f:
+            print("not: ok", file=f)
+        with raises(UWConfigError):
+            instance._config_validate(config_file=cfgfile)
 
     def test__add_task_envar(self, instance, root):
         instance._add_task_envar(root, "foo", "bar")
@@ -180,6 +234,14 @@ class Test_RocotoXML:
             instance._add_workflow_tasks(e=root, config=config)
         mocks["_add_metatask"].assert_called_once_with(root, "1", "foo")
         mocks["_add_task"].assert_called_once_with(root, "2", "bar")
+
+    def test__doctype_entities(self, instance):
+        assert '<!ENTITY ACCOUNT "myaccount">' in instance._doctype
+        assert '<!ENTITY FOO "test.log">' in instance._doctype
+
+    def test__doctype_entities_none(self, instance):
+        del instance._config["workflow"]["entities"]
+        assert instance._doctype is None
 
     def test__insert_doctype(self, instance):
         with patch.object(rocoto._RocotoXML, "_doctype", new_callable=PropertyMock) as _doctype:
