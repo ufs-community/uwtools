@@ -174,7 +174,7 @@ class _RocotoXML:
 
     def _add_task_dependency_operand_operator(self, e: Element, config: dict) -> None:
         """
-        Add an operator element to the <dependency>.
+        Add an operand or operator element to the <dependency>.
 
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
