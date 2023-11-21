@@ -13,7 +13,7 @@ from uwtools.tests.support import fixture_path
 
 def test_parse_include():
     """
-    Test that an INI file with no sections handles include tags properly.
+    Test that an INI file handles include tags properly.
     """
     cfgobj = INIConfig(fixture_path("include_files.ini"))
     assert cfgobj["config"]["fruit"] == "papaya"
