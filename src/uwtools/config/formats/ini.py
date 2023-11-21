@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code, unnecessary-comprehension
+# pylint: disable=duplicate-code
 import configparser
 from io import StringIO
 
@@ -38,7 +38,7 @@ class INIConfig(Config):
         cfg = configparser.ConfigParser()
         with readable(config_file) as f:
             cfg.read_string(f.read())
-        return {s: {k: v for k, v in cfg[s].items()} for s in cfg.sections()}
+        return {s: dict(cfg[s].items()) for s in cfg.sections()}
 
     # Public methods
 

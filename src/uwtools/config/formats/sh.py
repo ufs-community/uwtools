@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code, unnecessary-comprehension
+# pylint: disable=duplicate-code
 import configparser
 from io import StringIO
 
@@ -39,7 +39,7 @@ class SHConfig(Config):
         section = "top"
         with readable(config_file) as f:
             cfg.read_string(f"[{section}]\n" + f.read())
-        return {k: v for k, v in cfg[section].items()}
+        return dict(cfg[section].items())
 
     # Public methods
 
