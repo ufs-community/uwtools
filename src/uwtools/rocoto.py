@@ -94,29 +94,6 @@ class _RocotoXML:
         with writable(path) as f:
             f.write(xml.strip())
 
-    @property
-    def _doctype(self) -> Optional[str]:
-        """
-        Generate the <!DOCTYPE> block with <!ENTITY> definitions.
-
-        :return: The <!DOCTYPE> block if entities are defined, otherwise None.
-        """
-        if entities := self._config[STR.workflow].get(STR.entities):
-            tags = (f'  <!ENTITY {key} "{val}">' for key, val in entities.items())
-            return "<!DOCTYPE workflow [\n%s\n]>" % "\n".join(tags)
-        return None
-
-    def _config_validate(self, config_file: OptionalPath) -> None:
-        """
-        Validate the given YAML config.
-
-        :param config_file: Path to the YAML config (defaults to stdin).
-        """
-        if not validate_yaml(
-            config_file=config_file, schema_file=resource_pathobj("rocoto.jsonschema")
-        ):
-            raise UWConfigError("YAML validation errors identified in %s" % config_file)
-
     def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
         """
         Add a <metatask> element to the <workflow>.
@@ -181,13 +158,48 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
+        operands, operators, strequality = self._dependency_constants
         e = SubElement(e, STR.dependency)
-        for key, block in config.items():
-            tag, _ = self._tag_name(key)
-            if tag == STR.taskdep:
-                self._set_attrs(SubElement(e, STR.taskdep), block)
+
+        for tag, block in config.items():
+            tag, _ = self._tag_name(tag)
+            if tag in operands:
+                self._add_task_dependency_operand_operator(e, config={tag: block})
+            elif tag in operators:
+                self._add_task_dependency_operand_operator(e, config={tag: block})
+            elif tag in strequality:
+                self._add_task_dependency_strequality(e, block=block, tag=tag)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
+
+    def _add_task_dependency_operand_operator(self, e: Element, config: dict) -> None:
+        """
+        Add an operand or operator element to the <dependency>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+
+        operands, operators, strequality = self._dependency_constants
+
+        for tag, block in config.items():
+            tag, _ = self._tag_name(tag)
+            if tag in operands:
+                self._set_attrs(SubElement(e, tag), block)
+            elif tag in operators:
+                self._add_task_dependency_operand_operator(SubElement(e, tag), config=block)
+            elif tag in strequality:
+                self._add_task_dependency_strequality(e, block=block, tag=tag)
+            else:
+                raise UWConfigError("Unhandled dependency type %s" % tag)
+
+    def _add_task_dependency_strequality(self, e: Element, block: dict, tag: str) -> None:
+        """
+        :param e: The parent element to add the new element to.
+        :param block: Configuration data for the tag.
+        :param tag: Configuration new element to add.
+        """
+        self._set_attrs(SubElement(e, tag), block)
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """
@@ -244,6 +256,39 @@ class _RocotoXML:
             tag, name = self._tag_name(key)
             {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, block, name)
 
+    def _config_validate(self, config_file: OptionalPath) -> None:
+        """
+        Validate the given YAML config.
+
+        :param config_file: Path to the YAML config (defaults to stdin).
+        """
+        if not validate_yaml(
+            config_file=config_file, schema_file=resource_pathobj("rocoto.jsonschema")
+        ):
+            raise UWConfigError("YAML validation errors identified in %s" % config_file)
+
+    @property
+    def _dependency_constants(self) -> Tuple[Tuple, Tuple, Tuple]:
+        """
+        Returns a tuple for each of the respective dependency types.
+        """
+        operands = (STR.datadep, STR.taskdep, STR.timedep)
+        operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
+        strequality = (STR.streq, STR.strneq)
+        return operands, operators, strequality
+
+    @property
+    def _doctype(self) -> Optional[str]:
+        """
+        Generate the <!DOCTYPE> block with <!ENTITY> definitions.
+
+        :return: The <!DOCTYPE> block if entities are defined, otherwise None.
+        """
+        if entities := self._config[STR.workflow].get(STR.entities):
+            tags = (f'  <!ENTITY {key} "{val}">' for key, val in entities.items())
+            return "<!DOCTYPE workflow [\n%s\n]>" % "\n".join(tags)
+        return None
+
     def _insert_doctype(self, xml: str) -> str:
         """
         Return the given XML document with an Inserted <!DOCTYPE> block.
@@ -298,11 +343,13 @@ class STR:
     """
 
     account: str = "account"
+    and_: str = "and"
     attrs: str = "attrs"
     command: str = "command"
     cores: str = "cores"
     cycledef: str = "cycledef"
     cycledefs: str = "cycledefs"
+    datadep: str = "datadep"
     deadline: str = "deadline"
     dependency: str = "dependency"
     entities: str = "entities"
@@ -315,20 +362,28 @@ class STR:
     memory: str = "memory"
     metatask: str = "metatask"
     name: str = "name"
+    nand: str = "nand"
     native: str = "native"
     nodes: str = "nodes"
     nodesize: str = "nodesize"
+    nor: str = "nor"
+    not_: str = "not"
+    or_: str = "or"
     partition: str = "partition"
     queue: str = "queue"
     rewind: str = "rewind"
     shared: str = "shared"
     stderr: str = "stderr"
     stdout: str = "stdout"
+    streq: str = "streq"
+    strneq: str = "strneq"
     tag: str = "tag"
     task: str = "task"
     taskdep: str = "taskdep"
     tasks: str = "tasks"
+    timedep: str = "timedep"
     value: str = "value"
     var: str = "var"
     walltime: str = "walltime"
     workflow: str = "workflow"
+    xor: str = "xor"
