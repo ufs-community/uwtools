@@ -121,15 +121,15 @@ class Test_RocotoXML:
 
     @pytest.mark.parametrize(
         "config",
-        [("datadep", {"attrs": {"age": "120"}}), ("timedep", {"attrs": {"offset": "&DEADLINE;"}})],
+        [{"datadep": {"attrs": {"age": "120"}}}, {"timedep": {"attrs": {"offset": "&DEADLINE;"}}}],
     )
     def test__add_task_dependency_operand(self, config, instance, root):
-        tag, block = config
-        instance._add_task_dependency_operand(e=root, block=block, tag=tag)
+        instance._add_task_dependency_operand_operator(e=root, config=config)
         element = root[0]
-        assert tag == element.tag
-        for attr, val in block["attrs"].items():
-            assert element.get(attr) == val
+        for tag, block in config.items():
+            assert tag == element.tag
+            for attr, val in block["attrs"].items():
+                assert element.get(attr) == val
 
     def test__add_task_dependency_operand_fail(self, instance, root):
         config = {"and": {"unrecognized": "whatever"}}
@@ -144,7 +144,7 @@ class Test_RocotoXML:
         ],
     )
     def test__add_task_dependency_operator(self, config, instance, root):
-        instance._add_task_dependency_operator(e=root, config=config)
+        instance._add_task_dependency_operand_operator(e=root, config=config)
         for tag, _ in config.items():
             assert tag == next(iter(config))
 

@@ -164,23 +164,15 @@ class _RocotoXML:
         for tag, block in config.items():
             tag, _ = self._tag_name(tag)
             if tag in operands:
-                self._add_task_dependency_operand(e, block=block, tag=tag)
+                self._add_task_dependency_operand_operator(e, config={tag: block})
             elif tag in operators:
-                self._add_task_dependency_operator(e, config={tag: block})
+                self._add_task_dependency_operand_operator(e, config={tag: block})
             elif tag in strequality:
                 self._add_task_dependency_strequality(e, block=block, tag=tag)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
-    def _add_task_dependency_operand(self, e: Element, block: dict, tag: str) -> None:
-        """
-        :param e: The parent element to add the new element to.
-        :param block: Configuration data for the tag.
-        :param tag: Configuration new element to add.
-        """
-        self._set_attrs(SubElement(e, tag), block)
-
-    def _add_task_dependency_operator(self, e: Element, config: dict) -> None:
+    def _add_task_dependency_operand_operator(self, e: Element, config: dict) -> None:
         """
         Add an operator element to the <dependency>.
 
@@ -192,12 +184,12 @@ class _RocotoXML:
 
         for tag, block in config.items():
             tag, _ = self._tag_name(tag)
-            if tag in operators:
-                self._add_task_dependency_operator(SubElement(e, tag), config=block)
-            elif tag in operands:
-                self._add_task_dependency_operand(e, tag=tag, block=block)
+            if tag in operands:
+                self._set_attrs(SubElement(e, tag), block)
+            elif tag in operators:
+                self._add_task_dependency_operand_operator(SubElement(e, tag), config=block)
             elif tag in strequality:
-                self._add_task_dependency_strequality(e, tag=tag, block=block)
+                self._add_task_dependency_strequality(e, block=block, tag=tag)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
