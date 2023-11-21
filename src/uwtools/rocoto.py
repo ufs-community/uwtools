@@ -175,8 +175,8 @@ class _RocotoXML:
     def _add_task_dependency_operand(self, e: Element, block: dict, tag: str) -> None:
         """
         :param e: The parent element to add the new element to.
-        :param tag: Configuration new element to add.
         :param block: Configuration data for the tag.
+        :param tag: Configuration new element to add.
         """
         self._set_attrs(SubElement(e, tag), block)
 
@@ -204,8 +204,8 @@ class _RocotoXML:
     def _add_task_dependency_strequality(self, e: Element, block: dict, tag: str) -> None:
         """
         :param e: The parent element to add the new element to.
-        :param tag: Configuration new element to add.
         :param block: Configuration data for the tag.
+        :param tag: Configuration new element to add.
         """
         self._set_attrs(SubElement(e, tag), block)
 
