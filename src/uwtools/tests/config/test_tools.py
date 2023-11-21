@@ -322,11 +322,12 @@ def test_realize_config_output_file_conversion(tmp_path):
         assert f.read()[-1] == "\n"
 
 
-def test_realize_config_simple_bash(tmp_path):
+def test_realize_config_simple_ini(tmp_path):
     """
-    Test that providing a bash file with necessary settings will create an sh config file.
+    Test that providing an INI file with necessary settings will create an INI config file.
     """
-    help_realize_config_simple("simple.sh", FORMAT.sh, tmp_path)
+
+    help_realize_config_simple("simple.ini", FORMAT.ini, tmp_path)
 
 
 def test_realize_config_simple_namelist(tmp_path):
@@ -336,12 +337,11 @@ def test_realize_config_simple_namelist(tmp_path):
     help_realize_config_simple("simple.nml", FORMAT.nml, tmp_path)
 
 
-def test_realize_config_simple_ini(tmp_path):
+def test_realize_config_simple_sh(tmp_path):
     """
-    Test that providing an INI file with necessary settings will create an INI config file.
+    Test that providing an sh file with necessary settings will create an sh config file.
     """
-
-    help_realize_config_simple("simple.ini", FORMAT.ini, tmp_path)
+    help_realize_config_simple("simple.sh", FORMAT.sh, tmp_path)
 
 
 def test_realize_config_simple_yaml(tmp_path):

@@ -1,9 +1,8 @@
-# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code, unnecessary-comprehension
 import configparser
 from io import StringIO
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import config_sections
 from uwtools.utils.file import OptionalPath, readable, writable
 
 
@@ -37,11 +36,10 @@ class SHConfig(Config):
         :param config_file: Path to config file to load.
         """
         cfg = configparser.ConfigParser()
-        sections = config_sections(cfg)
+        section = "top"
         with readable(config_file) as f:
-            raw = f.read()
-            cfg.read_string("[top]\n" + raw)
-            return dict(sections.get("top"))
+            cfg.read_string(f"[{section}]\n" + f.read())
+        return {k: v for k, v in cfg[section].items()}
 
     # Public methods
 

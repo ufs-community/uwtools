@@ -23,9 +23,9 @@ def test_parse_include():
     assert len(cfgobj) == 5
 
 
-def test_bash(salad_base, tmp_path):
+def test_sh(salad_base, tmp_path):
     """
-    Test that bash config load and dump work with a basic bash file.
+    Test that sh config load and dump work with a basic sh file.
     """
     infile = fixture_path("simple.sh")
     outfile = tmp_path / "outfile.sh"

@@ -1,9 +1,8 @@
-# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code, unnecessary-comprehension
 import configparser
 from io import StringIO
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import config_sections
 from uwtools.utils.file import OptionalPath, readable, writable
 
 
@@ -37,11 +36,9 @@ class INIConfig(Config):
         :param config_file: Path to config file to load.
         """
         cfg = configparser.ConfigParser()
-        sections = config_sections(cfg)
         with readable(config_file) as f:
-            raw = f.read()
-            cfg.read_string(raw)
-        return sections
+            cfg.read_string(f.read())
+        return {s: {k: v for k, v in cfg[s].items()} for s in cfg.sections()}
 
     # Public methods
 
@@ -69,7 +66,7 @@ class INIConfig(Config):
         parser = configparser.ConfigParser()
         s = StringIO()
         parser.read_dict(cfg)
-        parser.write(s, space_around_delimiters=True)
+        parser.write(s)
         with writable(path) as f:
             print(s.getvalue().strip(), file=f)
         s.close()
