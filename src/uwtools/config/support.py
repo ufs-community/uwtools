@@ -29,6 +29,7 @@ def format_to_config(fmt: str) -> Type:
         FORMAT.fieldtable: "FieldTableConfig",
         FORMAT.ini: "INIConfig",
         FORMAT.nml: "NMLConfig",
+        FORMAT.sh: "SHConfig",
         FORMAT.yaml: "YAMLConfig",
     }
     if not fmt in lookup:

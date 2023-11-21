@@ -1,6 +1,3 @@
-from types import SimpleNamespace as ns
-from typing import Optional
-
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.utils.file import OptionalPath, writable
 
@@ -11,6 +8,7 @@ class FieldTableConfig(YAMLConfig):
     an input YAML file.
     """
 
+    DEPTH = None
     # Public methods
 
     def dump(self, path: OptionalPath) -> None:
@@ -19,10 +17,10 @@ class FieldTableConfig(YAMLConfig):
 
         :param path: Path to dump config to.
         """
-        FieldTableConfig.dump_dict(path, self.data)
+        self.dump_dict(path, self.data)
 
     @staticmethod
-    def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
+    def dump_dict(path: OptionalPath, cfg: dict) -> None:
         """
         Dumps a provided config dictionary in Field Table format.
 

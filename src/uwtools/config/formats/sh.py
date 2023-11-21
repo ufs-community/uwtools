@@ -6,19 +6,19 @@ from uwtools.config.formats.base import Config
 from uwtools.utils.file import OptionalPath, readable, writable
 
 
-class INIConfig(Config):
+class SHConfig(Config):
     """
-    Concrete class to handle INI config files.
+    Concrete class to handle bash config files.
     """
 
-    DEPTH = 2
+    DEPTH = 1
 
     def __init__(
         self,
         config_file: str,
     ):
         """
-        Construct an INIConfig object.
+        Construct a SHConfig object.
 
         :param config_file: Path to the config file to load.
         """
@@ -29,22 +29,23 @@ class INIConfig(Config):
 
     def _load(self, config_file: OptionalPath) -> dict:
         """
-        Reads and parses an INI file.
+        Reads and parses shell code consisting solely of key=value lines.
 
         See docs for Config._load().
 
         :param config_file: Path to config file to load.
         """
         cfg = configparser.ConfigParser()
+        section = "top"
         with readable(config_file) as f:
-            cfg.read_string(f.read())
-        return {s: dict(cfg[s].items()) for s in cfg.sections()}
+            cfg.read_string(f"[{section}]\n" + f.read())
+        return dict(cfg[section].items())
 
     # Public methods
 
     def dump(self, path: OptionalPath) -> None:
         """
-        Dumps the config in INI format.
+        Dumps the config as key=value lines.
 
         :param path: Path to dump config to.
         """
@@ -53,20 +54,15 @@ class INIConfig(Config):
     @staticmethod
     def dump_dict(path: OptionalPath, cfg: dict) -> None:
         """
-        Dumps a provided config dictionary in INI format.
+        Dumps a provided config dictionary in bash format.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
         """
-        # Configparser adds a newline after each section, presumably to create nice-looking output
-        # when an INI contains multiple sections. Unfortunately, it also adds a newline after the
-        # _final_ section, resulting in an anomalous trailing newline. To avoid this, write first to
-        # memory, then strip the trailing newline.
 
-        parser = configparser.ConfigParser()
         s = StringIO()
-        parser.read_dict(cfg)
-        parser.write(s)
+        for key, value in cfg.items():
+            print(f"{key}={value}", file=s)
         with writable(path) as f:
             print(s.getvalue().strip(), file=f)
         s.close()

@@ -1,5 +1,4 @@
 from types import SimpleNamespace as ns
-from typing import Optional
 
 import yaml
 
@@ -38,6 +37,8 @@ class YAMLConfig(Config):
     """
     Concrete class to handle YAML config files.
     """
+
+    DEPTH = None
 
     def __repr__(self) -> str:
         """
@@ -99,10 +100,10 @@ class YAMLConfig(Config):
 
         :param path: Path to dump config to.
         """
-        YAMLConfig.dump_dict(path, self.data)
+        self.dump_dict(path, self.data)
 
     @staticmethod
-    def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
+    def dump_dict(path: OptionalPath, cfg: dict) -> None:
         """
         Dumps a provided config dictionary in YAML format.
 

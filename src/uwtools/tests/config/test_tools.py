@@ -136,7 +136,7 @@ def test_compare_configs_bad_format(caplog):
             config_b_path="/not/used",
             config_b_format=FORMAT.yaml,
         )
-    msg = "Format 'jpg' should be one of: fieldtable, ini, nml, yaml"
+    msg = "Format 'jpg' should be one of: fieldtable, ini, nml, sh, yaml"
     assert logged(caplog, msg)
     assert msg in str(e.value)
 
@@ -176,13 +176,13 @@ def test_realize_config_depth_mismatch_to_ini(realize_config_yaml_input):
         )
 
 
-def test_realize_config_depth_mismatch_to_nml(realize_config_yaml_input):
+def test_realize_config_depth_mismatch_to_sh(realize_config_yaml_input):
     with raises(UWConfigError):
         tools.realize_config(
             input_file=realize_config_yaml_input,
             input_format=FORMAT.yaml,
             output_file=None,
-            output_format=FORMAT.nml,
+            output_format=FORMAT.sh,
             values_file=None,
             values_format=None,
         )
@@ -322,11 +322,12 @@ def test_realize_config_output_file_conversion(tmp_path):
         assert f.read()[-1] == "\n"
 
 
-def test_realize_config_simple_bash(tmp_path):
+def test_realize_config_simple_ini(tmp_path):
     """
-    Test that providing a bash file with necessary settings will create an INI config file.
+    Test that providing an INI file with necessary settings will create an INI config file.
     """
-    help_realize_config_simple("simple.sh", FORMAT.ini, tmp_path)
+
+    help_realize_config_simple("simple.ini", FORMAT.ini, tmp_path)
 
 
 def test_realize_config_simple_namelist(tmp_path):
@@ -336,12 +337,11 @@ def test_realize_config_simple_namelist(tmp_path):
     help_realize_config_simple("simple.nml", FORMAT.nml, tmp_path)
 
 
-def test_realize_config_simple_ini(tmp_path):
+def test_realize_config_simple_sh(tmp_path):
     """
-    Test that providing an INI file with necessary settings will create an INI config file.
+    Test that providing an sh file with necessary settings will create an sh config file.
     """
-
-    help_realize_config_simple("simple.ini", FORMAT.ini, tmp_path)
+    help_realize_config_simple("simple.sh", FORMAT.sh, tmp_path)
 
 
 def test_realize_config_simple_yaml(tmp_path):
@@ -426,7 +426,7 @@ Keys that are set to empty:
     assert actual == expected
 
 
-def test_reallize_config_values_needed_yaml(caplog):
+def test_realize_config_values_needed_yaml(caplog):
     """
     Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
     and keys set to empty.
@@ -523,8 +523,8 @@ def test__print_config_section_yaml_not_dict():
     assert "must be a dictionary" in str(e.value)
 
 
-@pytest.mark.parametrize("fmt", ["ini", "nml"])
-def test__realize_config_check_depths_fail_nml(fmt, realize_config_testobj):
+@pytest.mark.parametrize("fmt", ["ini", "sh"])
+def test__realize_config_check_depths_fail_sh(fmt, realize_config_testobj):
     with raises(UWConfigError):
         tools._realize_config_check_depths(input_obj=realize_config_testobj, output_format=fmt)
 

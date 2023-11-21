@@ -6,7 +6,6 @@ import re
 from abc import ABC, abstractmethod
 from collections import UserDict
 from copy import deepcopy
-from types import SimpleNamespace as ns
 from typing import List, Optional, Tuple, Union
 
 import yaml
@@ -174,13 +173,12 @@ class Config(ABC, UserDict):
 
     @staticmethod
     @abstractmethod
-    def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
+    def dump_dict(path: OptionalPath, cfg: dict) -> None:
         """
         Dumps a provided config dictionary to stdout or a file.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
-        :param opts: Other options required by a subclass.
         """
 
     def parse_include(self, ref_dict: Optional[dict] = None) -> None:

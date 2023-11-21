@@ -1,6 +1,4 @@
 from collections import OrderedDict
-from types import SimpleNamespace as ns
-from typing import Optional
 
 import f90nml
 
@@ -12,6 +10,8 @@ class NMLConfig(Config):
     """
     Concrete class to handle Fortran namelist files.
     """
+
+    DEPTH = 2
 
     def __init__(self, config_file) -> None:
         super().__init__(config_file)
@@ -47,16 +47,15 @@ class NMLConfig(Config):
 
         :param path: Path to dump config to.
         """
-        NMLConfig.dump_dict(path, self.data)
+        self.dump_dict(path, self.data)
 
     @staticmethod
-    def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
+    def dump_dict(path: OptionalPath, cfg: dict) -> None:
         """
         Dumps a provided config dictionary in Fortran namelist format.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
-        :param opts: Other options required by a subclass.
         """
 
         # f90nml honors namelist and variable order if it receives an OrderedDict as input, so
