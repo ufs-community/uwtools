@@ -189,9 +189,9 @@ def test__dispatch_config(params):
 
 def test__dispatch_config_compare():
     args = {STR.file1path: 1, STR.file1fmt: 2, STR.file2path: 3, STR.file2fmt: 4}
-    with patch.object(cli.uwtools.config.tools, "compare_configs") as compare_configs:
+    with patch.object(cli.uwtools.api.config, "compare") as compare:
         cli._dispatch_config_compare(args)
-    compare_configs.assert_called_once_with(
+    compare.assert_called_once_with(
         config_a_path=args[STR.file1path],
         config_a_format=args[STR.file1fmt],
         config_b_path=args[STR.file2path],

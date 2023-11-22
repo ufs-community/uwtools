@@ -13,6 +13,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple
 
+import uwtools.api.config
 import uwtools.config.atparse_to_jinja2
 import uwtools.config.jinja2
 import uwtools.config.tools
@@ -191,7 +192,7 @@ def _dispatch_config_compare(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.config.tools.compare_configs(
+    return uwtools.api.config.compare(
         config_a_path=args[STR.file1path],
         config_a_format=args[STR.file1fmt],
         config_b_path=args[STR.file2path],
