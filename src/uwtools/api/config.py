@@ -17,27 +17,22 @@ def translate(
     """
     ???
     """
-    success = True
     if input_format == FORMAT.atparse and output_format == FORMAT.jinja2:
         uwtools.config.atparse_to_jinja2.convert(
             input_file=input_file,
             output_file=output_file,
             dry_run=dry_run,
         )
-    else:
-        success = False
-    return success
+        return True
+    return False
 
 
 def validate(input_file: DefinitePath, input_format: str, schema_file: DefinitePath) -> bool:
     """
     ???
     """
-    success = True
     if input_format == FORMAT.yaml:
-        success = uwtools.config.validator.validate_yaml(
+        return uwtools.config.validator.validate_yaml(
             config_file=input_file, schema_file=schema_file
         )
-    else:
-        success = False
-    return success
+    return False
