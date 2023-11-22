@@ -13,6 +13,7 @@ from pytest import fixture, raises
 import uwtools.api.config
 import uwtools.api.forecast
 import uwtools.api.rocoto
+import uwtools.api.template
 import uwtools.drivers.forecast
 from uwtools import cli
 from uwtools.cli import STR
@@ -408,7 +409,7 @@ def test__dispatch_template_render_no_optional():
         STR.valsneeded: False,
         STR.dryrun: False,
     }
-    with patch.object(cli.uwtools.config.jinja2, "render") as render:
+    with patch.object(uwtools.api.template, "render") as render:
         cli._dispatch_template_render(args)
     render.assert_called_once_with(
         input_file=None,
@@ -431,7 +432,7 @@ def test__dispatch_template_render_yaml():
         STR.valsneeded: 6,
         STR.dryrun: 7,
     }
-    with patch.object(cli.uwtools.config.jinja2, "render") as render:
+    with patch.object(uwtools.api.template, "render") as render:
         cli._dispatch_template_render(args)
     render.assert_called_once_with(
         input_file=1,

@@ -16,6 +16,7 @@ from typing import Any, Callable, Dict, List, Tuple
 import uwtools.api.config
 import uwtools.api.forecast
 import uwtools.api.rocoto
+import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
 from uwtools.logging import log, setup_logging
@@ -431,7 +432,7 @@ def _dispatch_template_render(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.config.jinja2.render(
+    return uwtools.api.template.render(
         input_file=args[STR.infile],
         output_file=args[STR.outfile],
         values_file=args[STR.valsfile],
