@@ -210,9 +210,9 @@ def test__dispatch_config_realize():
         STR.valsneeded: 7,
         STR.dryrun: 8,
     }
-    with patch.object(cli.uwtools.config.tools, "realize_config") as realize_config:
+    with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
-    realize_config.assert_called_once_with(
+    realize.assert_called_once_with(
         input_file=1,
         input_format=2,
         output_file=3,
@@ -235,9 +235,9 @@ def test__dispatch_config_realize_no_optional():
         STR.valsneeded: False,
         STR.dryrun: False,
     }
-    with patch.object(cli.uwtools.config.tools, "realize_config") as realize_config:
+    with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
-    realize_config.assert_called_once_with(
+    realize.assert_called_once_with(
         input_file=None,
         input_format=None,
         output_file=None,

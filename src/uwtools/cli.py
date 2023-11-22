@@ -206,7 +206,7 @@ def _dispatch_config_realize(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.config.tools.realize_config(
+    return uwtools.api.config.realize(
         input_file=args[STR.infile],
         input_format=args[STR.infmt],
         output_file=args[STR.outfile],
