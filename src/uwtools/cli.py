@@ -224,16 +224,13 @@ def _dispatch_config_translate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    success = True
-    if args[STR.infmt] == FORMAT.atparse and args[STR.outfmt] == FORMAT.jinja2:
-        uwtools.config.atparse_to_jinja2.convert(
-            input_file=args[STR.infile],
-            output_file=args[STR.outfile],
-            dry_run=args[STR.dryrun],
-        )
-    else:
-        success = False
-    return success
+    return uwtools.api.config.translate(
+        input_file=args[STR.infile],
+        input_format=args[STR.infmt],
+        output_file=args[STR.outfile],
+        output_format=args[STR.outfmt],
+        dry_run=args[STR.dryrun],
+    )
 
 
 def _dispatch_config_validate(args: Args) -> bool:
