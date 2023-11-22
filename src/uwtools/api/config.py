@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from uwtools.config.atparse_to_jinja2 import convert as _a2j
+from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import validate_yaml as _validate
@@ -63,7 +63,7 @@ def translate(
     ???
     """
     if input_format == FORMAT.atparse and output_format == FORMAT.jinja2:
-        _a2j(input_file=input_file, output_file=output_file, dry_run=dry_run)
+        _convert_atparse_to_jinja2(input_file=input_file, output_file=output_file, dry_run=dry_run)
         return True
     return False
 

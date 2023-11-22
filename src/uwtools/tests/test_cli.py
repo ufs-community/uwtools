@@ -258,9 +258,11 @@ def test__dispatch_config_translate_atparse_to_jinja2():
         STR.outfmt: FORMAT.jinja2,
         STR.dryrun: 5,
     }
-    with patch.object(uwtools.api.config, "_a2j") as _a2j:
+    with patch.object(
+        uwtools.api.config, "_convert_atparse_to_jinja2"
+    ) as _convert_atparse_to_jinja2:
         cli._dispatch_config_translate(args)
-    _a2j.assert_called_once_with(input_file=1, output_file=3, dry_run=5)
+    _convert_atparse_to_jinja2.assert_called_once_with(input_file=1, output_file=3, dry_run=5)
 
 
 def test__dispatch_config_translate_no_optional():
@@ -271,9 +273,13 @@ def test__dispatch_config_translate_no_optional():
         STR.outfile: None,
         STR.outfmt: FORMAT.jinja2,
     }
-    with patch.object(uwtools.api.config, "_a2j") as _a2j:
+    with patch.object(
+        uwtools.api.config, "_convert_atparse_to_jinja2"
+    ) as _convert_atparse_to_jinja2:
         cli._dispatch_config_translate(args)
-    _a2j.assert_called_once_with(input_file=None, output_file=None, dry_run=False)
+    _convert_atparse_to_jinja2.assert_called_once_with(
+        input_file=None, output_file=None, dry_run=False
+    )
 
 
 def test__dispatch_config_translate_unsupported():
