@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import uwtools.drivers.forecast
+from uwtools.drivers.forecast import CLASSES as _CLASSES
 from uwtools.types import DefinitePath, OptionalPath
 
 
@@ -14,7 +14,7 @@ def run(
     """
     ???
     """
-    forecast_class = uwtools.drivers.forecast.CLASSES[model]
+    forecast_class = _CLASSES[model]
     return forecast_class(
         batch_script=batch_script,
         config_file=config_file,

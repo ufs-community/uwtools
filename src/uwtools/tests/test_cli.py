@@ -11,6 +11,9 @@ import pytest
 from pytest import fixture, raises
 
 import uwtools.api.config
+import uwtools.api.forecast
+import uwtools.api.rocoto
+import uwtools.drivers.forecast
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.logging import log
@@ -323,9 +326,9 @@ def test__dispatch_forecast_run():
         STR.dryrun: True,
         STR.model: "foo",
     }
-    with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as FooForecast:
-        CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
-        with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):
+    with patch.object(uwtools.drivers.forecast, "FooForecast", create=True) as FooForecast:
+        CLASSES = {"foo": getattr(uwtools.drivers.forecast, "FooForecast")}
+        with patch.object(uwtools.api.forecast, "_CLASSES", new=CLASSES):
             cli._dispatch_forecast_run(args)
     FooForecast.assert_called_once_with(batch_script=None, config_file=1, dry_run=True)
     FooForecast().run.assert_called_once_with(cycle="2023-01-01T00:00:00")
@@ -348,40 +351,40 @@ def test__dispatch_rocoto(params):
 
 def test__dispatch_rocoto_realize():
     args = {STR.infile: 1, STR.outfile: 2}
-    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml") as realize_rocoto_xml:
+    with patch.object(uwtools.api.rocoto, "_realize") as _realize:
         cli._dispatch_rocoto_realize(args)
-    realize_rocoto_xml.assert_called_once_with(config_file=1, output_file=2)
+    _realize.assert_called_once_with(config_file=1, output_file=2)
 
 
 def test__dispatch_rocoto_realize_invalid():
     args = {STR.infile: 1, STR.outfile: 2}
-    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml", return_value=False):
+    with patch.object(uwtools.api.rocoto, "_realize", return_value=False):
         assert cli._dispatch_rocoto_realize(args) is False
 
 
 def test__dispatch_rocoto_realize_no_optional():
     args = {STR.infile: None, STR.outfile: None}
-    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml") as module:
+    with patch.object(uwtools.api.rocoto, "_realize") as module:
         cli._dispatch_rocoto_realize(args)
     module.assert_called_once_with(config_file=None, output_file=None)
 
 
 def test__dispatch_rocoto_validate_xml():
     args = {STR.infile: 1}
-    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as validate_rocoto_xml:
+    with patch.object(uwtools.api.rocoto, "_validate") as _validate:
         cli._dispatch_rocoto_validate(args)
-    validate_rocoto_xml.assert_called_once_with(input_xml=1)
+    _validate.assert_called_once_with(input_xml=1)
 
 
 def test__dispatch_rocoto_validate_xml_invalid():
     args = {STR.infile: 1, STR.verbose: False}
-    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml", return_value=False):
+    with patch.object(uwtools.api.rocoto, "_validate", return_value=False):
         assert cli._dispatch_rocoto_validate(args) is False
 
 
 def test__dispatch_rocoto_validate_xml_no_optional():
     args = {STR.infile: None, STR.verbose: False}
-    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as validate:
+    with patch.object(uwtools.api.rocoto, "_validate") as validate:
         cli._dispatch_rocoto_validate(args)
     validate.assert_called_once_with(input_xml=None)
 
