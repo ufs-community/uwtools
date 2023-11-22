@@ -8,14 +8,14 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional, Type, Union
+from typing import Any, Dict, Type, Union
 
 from uwtools.config import validator
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.logging import log
 from uwtools.scheduler import BatchScript, JobScheduler
-from uwtools.types import OptionalPath
+from uwtools.types import DefinitePath, OptionalPath
 
 
 class Driver(ABC):
@@ -25,9 +25,9 @@ class Driver(ABC):
 
     def __init__(
         self,
-        config_file: str,
+        config_file: DefinitePath,
         dry_run: bool = False,
-        batch_script: Optional[str] = None,
+        batch_script: OptionalPath = None,
     ):
         """
         Initialize the driver.

@@ -4,7 +4,8 @@ import uwtools.config.atparse_to_jinja2
 import uwtools.config.validator
 from uwtools.config.tools import compare_configs as compare
 from uwtools.config.tools import realize_config as realize
-from uwtools.utils.file import FORMAT, DefinitePath
+from uwtools.types import DefinitePath
+from uwtools.utils.file import FORMAT
 
 
 def translate(

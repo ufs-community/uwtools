@@ -7,7 +7,7 @@ import sys
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
@@ -27,9 +27,9 @@ class FV3Forecast(Driver):
 
     def __init__(
         self,
-        config_file: str,
+        config_file: DefinitePath,
         dry_run: bool = False,
-        batch_script: Optional[str] = None,
+        batch_script: OptionalPath = None,
     ):
         """
         Initialize the Forecast Driver.
