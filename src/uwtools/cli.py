@@ -377,9 +377,7 @@ def _dispatch_rocoto_validate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-
-    success = uwtools.rocoto.validate_rocoto_xml(input_xml=args[STR.infile])
-    return success
+    return uwtools.api.rocoto.validate(input_file=args[STR.infile])
 
 
 # Mode template
