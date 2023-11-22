@@ -2,7 +2,7 @@
 Modal CLI.
 """
 
-import datetime
+import datetime as dt
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import HelpFormatter
@@ -14,11 +14,9 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple
 
 import uwtools.api.config
-import uwtools.config.atparse_to_jinja2
+import uwtools.api.forecast
+import uwtools.api.rocoto
 import uwtools.config.jinja2
-import uwtools.config.tools
-import uwtools.config.validator
-import uwtools.drivers.forecast
 import uwtools.rocoto
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_type
@@ -296,12 +294,13 @@ def _dispatch_forecast_run(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    forecast_class = uwtools.drivers.forecast.CLASSES[args[STR.model]]
-    return forecast_class(
-        batch_script=args[STR.batch_script],
+    return uwtools.api.forecast.run(
+        model=args[STR.model],
+        cycle=args[STR.cycle],
         config_file=args[STR.cfgfile],
+        batch_script=args[STR.batch_script],
         dry_run=args[STR.dryrun],
-    ).run(cycle=args[STR.cycle])
+    )
 
 
 # Mode rocoto
@@ -369,10 +368,7 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    success = uwtools.rocoto.realize_rocoto_xml(
-        config_file=args[STR.infile], output_file=args[STR.outfile]
-    )
-    return success
+    return uwtools.api.rocoto.realize(input_file=args[STR.infile], output_file=args[STR.outfile])
 
 
 def _dispatch_rocoto_validate(args: Args) -> bool:
@@ -480,7 +476,7 @@ def _add_arg_cycle(group: Group) -> None:
         _switch(STR.cycle),
         help="The cycle in ISO8601 format",
         required=True,
-        type=datetime.datetime.fromisoformat,
+        type=dt.datetime.fromisoformat,
     )
 
 
