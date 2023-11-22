@@ -239,14 +239,11 @@ def _dispatch_config_validate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    success = True
-    if args[STR.infmt] == FORMAT.yaml:
-        success = uwtools.config.validator.validate_yaml(
-            config_file=args[STR.infile], schema_file=args[STR.schemafile]
-        )
-    else:
-        success = False
-    return success
+    return uwtools.api.config.validate(
+        input_file=args[STR.infile],
+        input_format=args[STR.infmt],
+        schema_file=args[STR.schemafile],
+    )
 
 
 # Mode forecast
