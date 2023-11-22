@@ -10,6 +10,7 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture, raises
 
+import uwtools.api.config
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.logging import log
@@ -257,9 +258,9 @@ def test__dispatch_config_translate_atparse_to_jinja2():
         STR.outfmt: FORMAT.jinja2,
         STR.dryrun: 5,
     }
-    with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as convert:
+    with patch.object(uwtools.api.config, "_a2j") as _a2j:
         cli._dispatch_config_translate(args)
-    convert.assert_called_once_with(input_file=1, output_file=3, dry_run=5)
+    _a2j.assert_called_once_with(input_file=1, output_file=3, dry_run=5)
 
 
 def test__dispatch_config_translate_no_optional():
@@ -270,9 +271,9 @@ def test__dispatch_config_translate_no_optional():
         STR.outfile: None,
         STR.outfmt: FORMAT.jinja2,
     }
-    with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as convert:
+    with patch.object(uwtools.api.config, "_a2j") as _a2j:
         cli._dispatch_config_translate(args)
-    convert.assert_called_once_with(input_file=None, output_file=None, dry_run=False)
+    _a2j.assert_called_once_with(input_file=None, output_file=None, dry_run=False)
 
 
 def test__dispatch_config_translate_unsupported():
@@ -282,9 +283,9 @@ def test__dispatch_config_translate_unsupported():
 
 def test__dispatch_config_validate_no_optional():
     args = {STR.infile: None, STR.infmt: FORMAT.yaml, STR.schemafile: "/foo.schema"}
-    with patch.object(cli.uwtools.config.validator, "validate_yaml") as validate_yaml:
+    with patch.object(uwtools.api.config, "_validate") as _validate:
         cli._dispatch_config_validate(args)
-    validate_yaml.assert_called_once_with(config_file=None, schema_file="/foo.schema")
+    _validate.assert_called_once_with(config_file=None, schema_file="/foo.schema")
 
 
 def test__dispatch_config_validate_unsupported():
@@ -294,9 +295,9 @@ def test__dispatch_config_validate_unsupported():
 
 def test__dispatch_config_validate_yaml():
     args = {STR.infile: 1, STR.infmt: FORMAT.yaml, STR.schemafile: 3}
-    with patch.object(cli.uwtools.config.validator, "validate_yaml") as validate_yaml:
+    with patch.object(uwtools.api.config, "_validate") as _validate:
         cli._dispatch_config_validate(args)
-    validate_yaml.assert_called_once_with(config_file=1, schema_file=3)
+    _validate.assert_called_once_with(config_file=1, schema_file=3)
 
 
 @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
