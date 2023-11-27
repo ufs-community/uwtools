@@ -7,7 +7,7 @@ from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import validate_yaml as _validate
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import FORMAT
+from uwtools.utils.file import FORMAT as _FORMAT
 
 
 def compare(
@@ -62,7 +62,7 @@ def translate(
     """
     ???
     """
-    if input_format == FORMAT.atparse and output_format == FORMAT.jinja2:
+    if input_format == _FORMAT.atparse and output_format == _FORMAT.jinja2:
         _convert_atparse_to_jinja2(input_file=input_file, output_file=output_file, dry_run=dry_run)
         return True
     return False
@@ -72,6 +72,6 @@ def validate(input_file: DefinitePath, input_format: str, schema_file: DefiniteP
     """
     ???
     """
-    if input_format == FORMAT.yaml:
+    if input_format == _FORMAT.yaml:
         return _validate(config_file=input_file, schema_file=schema_file)
     return False
