@@ -10,6 +10,11 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture, raises
 
+import uwtools.api.config
+import uwtools.api.forecast
+import uwtools.api.rocoto
+import uwtools.api.template
+import uwtools.drivers.forecast
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.logging import log
@@ -189,9 +194,9 @@ def test__dispatch_config(params):
 
 def test__dispatch_config_compare():
     args = {STR.file1path: 1, STR.file1fmt: 2, STR.file2path: 3, STR.file2fmt: 4}
-    with patch.object(cli.uwtools.config.tools, "compare_configs") as compare_configs:
+    with patch.object(cli.uwtools.api.config, "compare") as compare:
         cli._dispatch_config_compare(args)
-    compare_configs.assert_called_once_with(
+    compare.assert_called_once_with(
         config_a_path=args[STR.file1path],
         config_a_format=args[STR.file1fmt],
         config_b_path=args[STR.file2path],
@@ -210,9 +215,9 @@ def test__dispatch_config_realize():
         STR.valsneeded: 7,
         STR.dryrun: 8,
     }
-    with patch.object(cli.uwtools.config.tools, "realize_config") as realize_config:
+    with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
-    realize_config.assert_called_once_with(
+    realize.assert_called_once_with(
         input_file=1,
         input_format=2,
         output_file=3,
@@ -235,9 +240,9 @@ def test__dispatch_config_realize_no_optional():
         STR.valsneeded: False,
         STR.dryrun: False,
     }
-    with patch.object(cli.uwtools.config.tools, "realize_config") as realize_config:
+    with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
-    realize_config.assert_called_once_with(
+    realize.assert_called_once_with(
         input_file=None,
         input_format=None,
         output_file=None,
@@ -257,9 +262,11 @@ def test__dispatch_config_translate_atparse_to_jinja2():
         STR.outfmt: FORMAT.jinja2,
         STR.dryrun: 5,
     }
-    with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as convert:
+    with patch.object(
+        uwtools.api.config, "_convert_atparse_to_jinja2"
+    ) as _convert_atparse_to_jinja2:
         cli._dispatch_config_translate(args)
-    convert.assert_called_once_with(input_file=1, output_file=3, dry_run=5)
+    _convert_atparse_to_jinja2.assert_called_once_with(input_file=1, output_file=3, dry_run=5)
 
 
 def test__dispatch_config_translate_no_optional():
@@ -270,9 +277,13 @@ def test__dispatch_config_translate_no_optional():
         STR.outfile: None,
         STR.outfmt: FORMAT.jinja2,
     }
-    with patch.object(cli.uwtools.config.atparse_to_jinja2, "convert") as convert:
+    with patch.object(
+        uwtools.api.config, "_convert_atparse_to_jinja2"
+    ) as _convert_atparse_to_jinja2:
         cli._dispatch_config_translate(args)
-    convert.assert_called_once_with(input_file=None, output_file=None, dry_run=False)
+    _convert_atparse_to_jinja2.assert_called_once_with(
+        input_file=None, output_file=None, dry_run=False
+    )
 
 
 def test__dispatch_config_translate_unsupported():
@@ -282,9 +293,9 @@ def test__dispatch_config_translate_unsupported():
 
 def test__dispatch_config_validate_no_optional():
     args = {STR.infile: None, STR.infmt: FORMAT.yaml, STR.schemafile: "/foo.schema"}
-    with patch.object(cli.uwtools.config.validator, "validate_yaml") as validate_yaml:
+    with patch.object(uwtools.api.config, "_validate") as _validate:
         cli._dispatch_config_validate(args)
-    validate_yaml.assert_called_once_with(config_file=None, schema_file="/foo.schema")
+    _validate.assert_called_once_with(config_file=None, schema_file="/foo.schema")
 
 
 def test__dispatch_config_validate_unsupported():
@@ -294,9 +305,9 @@ def test__dispatch_config_validate_unsupported():
 
 def test__dispatch_config_validate_yaml():
     args = {STR.infile: 1, STR.infmt: FORMAT.yaml, STR.schemafile: 3}
-    with patch.object(cli.uwtools.config.validator, "validate_yaml") as validate_yaml:
+    with patch.object(uwtools.api.config, "_validate") as _validate:
         cli._dispatch_config_validate(args)
-    validate_yaml.assert_called_once_with(config_file=1, schema_file=3)
+    _validate.assert_called_once_with(config_file=1, schema_file=3)
 
 
 @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
@@ -316,9 +327,9 @@ def test__dispatch_forecast_run():
         STR.dryrun: True,
         STR.model: "foo",
     }
-    with patch.object(cli.uwtools.drivers.forecast, "FooForecast", create=True) as FooForecast:
-        CLASSES = {"foo": getattr(cli.uwtools.drivers.forecast, "FooForecast")}
-        with patch.object(cli.uwtools.drivers.forecast, "CLASSES", new=CLASSES):
+    with patch.object(uwtools.drivers.forecast, "FooForecast", create=True) as FooForecast:
+        CLASSES = {"foo": getattr(uwtools.drivers.forecast, "FooForecast")}
+        with patch.object(uwtools.api.forecast, "_CLASSES", new=CLASSES):
             cli._dispatch_forecast_run(args)
     FooForecast.assert_called_once_with(batch_script=None, config_file=1, dry_run=True)
     FooForecast().run.assert_called_once_with(cycle="2023-01-01T00:00:00")
@@ -341,40 +352,40 @@ def test__dispatch_rocoto(params):
 
 def test__dispatch_rocoto_realize():
     args = {STR.infile: 1, STR.outfile: 2}
-    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml") as realize_rocoto_xml:
+    with patch.object(uwtools.api.rocoto, "_realize") as _realize:
         cli._dispatch_rocoto_realize(args)
-    realize_rocoto_xml.assert_called_once_with(config_file=1, output_file=2)
+    _realize.assert_called_once_with(config_file=1, output_file=2)
 
 
 def test__dispatch_rocoto_realize_invalid():
     args = {STR.infile: 1, STR.outfile: 2}
-    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml", return_value=False):
+    with patch.object(uwtools.api.rocoto, "_realize", return_value=False):
         assert cli._dispatch_rocoto_realize(args) is False
 
 
 def test__dispatch_rocoto_realize_no_optional():
     args = {STR.infile: None, STR.outfile: None}
-    with patch.object(cli.uwtools.rocoto, "realize_rocoto_xml") as module:
+    with patch.object(uwtools.api.rocoto, "_realize") as module:
         cli._dispatch_rocoto_realize(args)
     module.assert_called_once_with(config_file=None, output_file=None)
 
 
 def test__dispatch_rocoto_validate_xml():
     args = {STR.infile: 1}
-    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as validate_rocoto_xml:
+    with patch.object(uwtools.api.rocoto, "_validate") as _validate:
         cli._dispatch_rocoto_validate(args)
-    validate_rocoto_xml.assert_called_once_with(input_xml=1)
+    _validate.assert_called_once_with(input_xml=1)
 
 
 def test__dispatch_rocoto_validate_xml_invalid():
     args = {STR.infile: 1, STR.verbose: False}
-    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml", return_value=False):
+    with patch.object(uwtools.api.rocoto, "_validate", return_value=False):
         assert cli._dispatch_rocoto_validate(args) is False
 
 
 def test__dispatch_rocoto_validate_xml_no_optional():
     args = {STR.infile: None, STR.verbose: False}
-    with patch.object(cli.uwtools.rocoto, "validate_rocoto_xml") as validate:
+    with patch.object(uwtools.api.rocoto, "_validate") as validate:
         cli._dispatch_rocoto_validate(args)
     validate.assert_called_once_with(input_xml=None)
 
@@ -398,7 +409,7 @@ def test__dispatch_template_render_no_optional():
         STR.valsneeded: False,
         STR.dryrun: False,
     }
-    with patch.object(cli.uwtools.config.jinja2, "render") as render:
+    with patch.object(uwtools.api.template, "render") as render:
         cli._dispatch_template_render(args)
     render.assert_called_once_with(
         input_file=None,
@@ -421,7 +432,7 @@ def test__dispatch_template_render_yaml():
         STR.valsneeded: 6,
         STR.dryrun: 7,
     }
-    with patch.object(cli.uwtools.config.jinja2, "render") as render:
+    with patch.object(uwtools.api.template, "render") as render:
         cli._dispatch_template_render(args)
     render.assert_called_once_with(
         input_file=1,
