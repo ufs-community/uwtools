@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime as dt
 
 from uwtools.drivers.forecast import CLASSES as _CLASSES
 from uwtools.types import DefinitePath, OptionalPath
@@ -6,7 +6,7 @@ from uwtools.types import DefinitePath, OptionalPath
 
 def run(
     model: str,
-    cycle: datetime,
+    cycle: dt.datetime,
     config_file: DefinitePath,
     batch_script: OptionalPath = None,
     dry_run: bool = False,
