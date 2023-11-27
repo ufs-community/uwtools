@@ -47,9 +47,6 @@ If your development shell misses any functionality you’re used to in
 your main shell, you can create a ``~/.condevrc`` file, which will be
 sourced by ``make devshell``. When in doubt, you might
 
-
-sourced by ``make devshell``. When in doubt, you might
-
 .. code::
 
    cat <<EOF >~/.condevrc
