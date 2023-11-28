@@ -7,24 +7,31 @@ Creating a development shell
 
 To create an interactive development ``bash`` shell:
 
+This recipe uses the ``aarch64`` (64-bit ARM) Miniforge for Linux, and installs into ``$HOME/conda``. Adjust as necessary for your target system.
 
-1. Download, install, and activate the latest `Miniforge3`_ for your system. If an existing conda (Miniforge, Miniconda, Anaconda, etc.) installation is available and writable, you may activate that and skip the first 5 recipe steps below.
+1. Download, install, and activate the latest `Miniforge3`_ for your system. If an existing conda (Miniforge, Miniconda, Anaconda, etc.) installation is available and writable, you may activate that and skip this step and continue on to the next.
+
+   .. code:: sh
+   
+     wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-aarch64.sh
+     bash Miniforge3-Linux-aarch64.sh -bfp ~/conda
+     rm Miniforge3-Linux-aarch64.sh
+     source ~/conda/etc/profile.d/conda.sh
+     conda activate
+
 2. Install the `condev`_ package into the base environment.
+
+   .. code:: sh
+
+     conda install -y -c maddenp condev
+
 3. In a clone of the `workflow-tools repository`_, create the development shell.
 
 
-This recipe uses the ``aarch64`` (64-bit ARM) Miniforge for Linux, and installs into ``$HOME/conda``. Adjust as necessary for your target system.
+   .. code:: sh
 
-.. code::
-
-   wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-aarch64.sh
-   bash Miniforge3-Linux-aarch64.sh -bfp ~/conda
-   rm Miniforge3-Linux-aarch64.sh
-   source ~/conda/etc/profile.d/conda.sh
-   conda activate
-   conda install -y -c maddenp condev
-   cd /to/your/workflow-tools/clone
-   make devshell
+     cd /to/your/workflow-tools/clone
+     make devshell
 
 
 .. _paragraph: 
@@ -39,19 +46,20 @@ source code changes will be immediately live in the development shell,
 subject to execution, test, etc. But some changes – especially to the
 contents of the ``recipe/`` directory, or to the ``src/setup.py`` module
 – may require recreation of the development shell. If you know this is
-needed, or when in doubt: Exit the development shell, run
-``conda env remove -n DEV-uwtools`` to remove the old environment, then
-run ``make devshell`` to recreate it.
+needed, or when in doubt: 
+
+    1. Exit the development shell, run ``conda env remove -n DEV-uwtools`` to remove the old environment.
+    2. Run ``make devshell`` to recreate it.
 
 If your development shell misses any functionality you’re used to in
 your main shell, you can create a ``~/.condevrc`` file, which will be
-sourced by ``make devshell``. When in doubt, you might
+sourced by ``make devshell``. When in doubt, you might:
 
-.. code::
+   .. code::
 
-   cat <<EOF >~/.condevrc
-   source ~/.bashrc
-   EOF
+     cat <<EOF >~/.condevrc
+     source ~/.bashrc
+     EOF
 
 
 Using a development shell
@@ -60,11 +68,13 @@ Using a development shell
 In an active development shell, the following ``make`` targets are
 available and act on all ``.py`` files under ``src/``:
 
+.. |black| replace:: ``black``
+.. |isort| replace:: ``isort``
 
 +---------------------+------------------------------------------------------------+
 | Command             |  Description                                               |
 +=====================+============================================================+
-| ``make format``     | Format with ``black`` and ``isort``                        |
+| ``make format``     | Format with |black|_  and |isort|_                         |
 +---------------------+------------------------------------------------------------+
 | ``make lint``       | Lint with ``pylint``                                       |
 |                     |                                                            |
@@ -131,7 +141,7 @@ built locally, then installed into the local conda installation. Ensure
 that ``conda-build`` and ``conda-verify`` are installed in the base
 environment.
 
-.. code::
+.. code:: sh
 
    # Activate your conda
    git clone https://github.com/maddenp/condev.git
@@ -145,7 +155,7 @@ The following files in this repo are derived from their counterparts in
 the `condev demo`_:
 
 
-.. code::
+.. code:: sh
 
    ├── Makefile
    ├── recipe
@@ -165,7 +175,9 @@ continuing to follow ``condev`` conventions.
 .. _External Links:
 
 .. _anaconda.org: https://anaconda.org
+.. _black: https://github.com/black-software-Com/Black-Tool
 .. _condev: https://github.com/maddenp/condev
 .. _condev demo: https://github.com/maddenp/condev/tree/main/demo
+.. _isort: https://pycqa.github.io/isort/
 .. _Miniforge3: https://github.com/conda-forge/miniforge#download
 .. _workflow-tools repository: https://github.com/ufs-community/workflow-tools
