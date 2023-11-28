@@ -68,13 +68,13 @@ Using a development shell
 In an active development shell, the following ``make`` targets are
 available and act on all ``.py`` files under ``src/``:
 
-.. |black| replace:: ``black``
-.. |isort| replace:: ``isort``
 
 +---------------------+------------------------------------------------------------+
 | Command             |  Description                                               |
 +=====================+============================================================+
-| ``make format``     | Format with |black|_  and |isort|_                         |
+| ``make format``     | Format with |black|_ and |isort|_                          |
+|                     |                                                            |
+|                     | Formats docstrings and ``.jsonschema`` documents           |
 +---------------------+------------------------------------------------------------+
 | ``make lint``       | Lint with ``pylint``                                       |
 |                     |                                                            |
@@ -85,8 +85,9 @@ available and act on all ``.py`` files under ``src/``:
 |                     | ``coverage``                                               |
 +---------------------+------------------------------------------------------------+
 | ``make test``       | Equivalent to                                              |
-|                     | ``make lint && make typecheck && make unittest``, plus     |
-|                     | checks defined CLI scripts                                 |
+|                     | ``make lint && make typecheck && make unittest``           |
+|                     |                                                            |
+|                     | Checks defined CLI scripts                                 |
 +---------------------+------------------------------------------------------------+
 
 
@@ -96,22 +97,26 @@ developer. A useful development idiom is to periodically run
 ``make format && make test`` to perform a full code-quality sweep
 through the code.
 
-The order of the targets above is intentionally, and possibly useful:
-``make format`` will complain about certain kinds of syntax errors that
-would cause all the remaining code-quality tools to fail (and may change
-line numbers reported by other tools, if it ran after them);
-``make lint`` provides a good first check for obvious errors and
-anti-patterns in the code; ``make typecheck`` offers a more nuanced look
-at interfaces between functions, methods, etc. and may spot issues that
-would cause ``make unittest`` to fail.
-
 The ``make test`` command is also automatically executed when ``conda``
 builds a ``uwtools`` package, so it is important to periodically run
 these tests during development and, crucially, before merging changes,
 to ensure that the tests will pass when CI builds the ``workflow-tools``
 code.
 
-In addition to the ``make devshell`` command, two other ``make`` targets
+
+The order of the targets above is intentional, and possibly useful:
+
+   * ``make format`` will complain about certain kinds of syntax errors that
+     would cause all the remaining code-quality tools to fail (and may change
+     line numbers reported by other tools, if it ran after them).
+   * ``make lint`` provides a good first check for obvious errors and
+     anti-patterns in the code.
+   * ``make typecheck`` offers a more nuanced look at interfaces between 
+     functions, methods, etc. and may spot issues that would cause 
+     ``make unittest`` to fail.
+
+
+In addition to the ``make devshell`` command, other ``make`` targets
 are available for use *outside* a development shell, i.e. from the base
 conda environment (requires presence of the ``condev`` package):
 
@@ -136,17 +141,17 @@ Building condev locally
 -----------------------
 
 As an alternative to installing a prebuilt package from
-`anaconda.org`_, the ``condev`` package can be
-built locally, then installed into the local conda installation. Ensure
-that ``conda-build`` and ``conda-verify`` are installed in the base
-environment.
+`anaconda`_, the ``condev`` package can be
+built locally, then installed into the local conda installation. 
+Ensure that ``conda-build`` and ``conda-verify`` are installed in the base
+environment:
 
-.. code:: sh
+   .. code:: sh
 
-   # Activate your conda
-   git clone https://github.com/maddenp/condev.git
-   make -C condev package
-   conda install -y -c local condev
+     # Activate your conda
+     git clone https://github.com/maddenp/condev.git
+     make -C condev package
+     conda install -y -c local condev
 
 Files derived from condev
 -------------------------
@@ -155,18 +160,18 @@ The following files in this repo are derived from their counterparts in
 the `condev demo`_:
 
 
-.. code:: sh
+   .. code:: sh
 
-   ├── Makefile
-   ├── recipe
-   │   ├── build.sh
-   │   ├── channels
-   │   ├── meta.json
-   │   ├── meta.yaml
-   │   └── run_test.sh
-   ├── src
-   │   ├── pyproject.toml
-   │   ├── setup.py
+     ├── Makefile
+     ├── recipe
+     │   ├── build.sh
+     │   ├── channels
+     │   ├── meta.json
+     │   ├── meta.yaml
+     │   └── run_test.sh
+     ├── src
+     │   ├── pyproject.toml
+     │   ├── setup.py
 
 Behaviors described in previous sections may rely on these files
 continuing to follow ``condev`` conventions.
@@ -174,10 +179,14 @@ continuing to follow ``condev`` conventions.
 
 .. _External Links:
 
-.. _anaconda.org: https://anaconda.org
+.. _anaconda: https://anaconda.org/maddenp/condev  
 .. _black: https://github.com/black-software-Com/Black-Tool
 .. _condev: https://github.com/maddenp/condev
 .. _condev demo: https://github.com/maddenp/condev/tree/main/demo
 .. _isort: https://pycqa.github.io/isort/
 .. _Miniforge3: https://github.com/conda-forge/miniforge#download
 .. _workflow-tools repository: https://github.com/ufs-community/workflow-tools
+
+
+.. |black| replace:: ``black``
+.. |isort| replace:: ``isort``
