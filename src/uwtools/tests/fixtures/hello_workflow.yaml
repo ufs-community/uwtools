@@ -4,6 +4,7 @@ workflow:
     scheduler: slurm
   cycledef:
     - attrs:
+        activation_offset: -06:00
         group: howdy
       spec: 202209290000 202209300000 06:00:00
   entities:

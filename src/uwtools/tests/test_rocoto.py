@@ -317,10 +317,14 @@ def test_schema_workflow_cycledef(schema):
     assert not errors([{"spec": "202311291200 202312011200 3600"}])
     # Basic spec with group attribute:
     assert not errors([{"attrs": {"group": "g"}, "spec": spec}])
-    # Spec with negative activation offset attribute:
-    assert not errors([{"attrs": {"activation_offset": "-12:00:00"}, "spec": spec}])
     # Spec with positive activation offset attribute:
     assert not errors([{"attrs": {"activation_offset": "12:00:00"}, "spec": spec}])
+    # Spec with negative activation offset attribute:
+    assert not errors([{"attrs": {"activation_offset": "-12:00:00"}, "spec": spec}])
+    # Spec with activation offset specified as positive seconds:
+    assert not errors([{"attrs": {"activation_offset": "3600"}, "spec": spec}])
+    # Spec with activation offset specified as negative seconds:
+    assert not errors([{"attrs": {"activation_offset": "-3600"}, "spec": spec}])
     # Property spec is required:
     assert reported("'spec' is a required property", errors([{}]))
     # Additional properties are not allowed:
