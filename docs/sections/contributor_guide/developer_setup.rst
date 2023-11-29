@@ -71,7 +71,7 @@ In an active development shell, the following ``make`` targets are available and
 | ``make lint``       | Lint with `pylint`_                                        |
 |                     |                                                            |
 +---------------------+------------------------------------------------------------+
-| ``make type check`` | Typecheck with `mypy`_                                     |
+| ``make typecheck``  | Typecheck with `mypy`_                                     |
 +---------------------+------------------------------------------------------------+
 | ``make unittest``   | Run unit tests and report coverage with `pytest`_ and      |
 |                     | `coverage`_                                                |
@@ -83,11 +83,9 @@ In an active development shell, the following ``make`` targets are available and
 +---------------------+------------------------------------------------------------+
 
 
-Note that ``make format`` is never run automatically, to avoid reformatting under-development code in a way that might surprise the developer. A useful development idiom is to periodically run
-``make format && make test`` to perform a full code-quality sweep through the code.
+Note that ``make format`` is never run automatically, to avoid reformatting under-development code in a way that might surprise the developer. A useful development idiom is to periodically run ``make format && make test`` to perform a full code-quality sweep through the code.
 
-The ``make test`` command is also automatically executed when ``conda`` builds a ``uwtools`` package, so it is important to periodically run these tests during development and, crucially, before merging changes,
-to ensure that the tests will pass when CI builds the ``workflow-tools`` code.
+The ``make test`` command is also automatically executed when ``conda`` builds a ``uwtools`` package, so it is important to periodically run these tests during development and, crucially, before merging changes, to ensure that the tests will pass when CI builds the ``workflow-tools`` code.
 
 
 The order of the targets above is intentional, and possibly useful:
