@@ -58,7 +58,6 @@ Using a ``bash`` development shell
 
 In an active development shell, the following ``make`` targets are available and act on all ``.py`` files under ``src/``:
 
-Formats Python code with black, imports with isort, docstrings with docformatter, and .jsonschema documents with jq.
 
 +---------------------+------------------------------------------------------------+
 | Command             |  Description                                               |
@@ -118,8 +117,7 @@ These targets work from the code in its current state in the clone. ``make env``
 Building condev locally
 -----------------------
 
-As an alternative to installing a prebuilt package from `anaconda`_, the ``condev`` package can be
-built locally, then installed into the local conda installation. Ensure that ``conda-build`` and ``conda-verify`` are installed in the base environment:
+As an alternative to installing `a prebuilt package from anaconda <https://anaconda.org/maddenp/condev>`_, the ``condev`` package can be built locally, then installed into the local conda installation. Ensure that ``conda-build`` and ``conda-verify`` are installed in the base environment:
 
    .. code:: sh
 
