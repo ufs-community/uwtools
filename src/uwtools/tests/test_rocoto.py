@@ -4,6 +4,7 @@ Tests for uwtools.rocoto module.
 """
 
 import shutil
+from typing import List
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
@@ -218,14 +219,16 @@ class Test__RocotoXML:
         mocks["_add_workflow_log"].assert_called_once_with(workflow, "4")
         mocks["_add_workflow_tasks"].assert_called_once_with(workflow, "5")
 
-    @pytest.mark.skip("FIXME")
     def test__add_workflow_cycledef(self, instance, root):
-        config = {"foo": ["1", "2"], "bar": ["3", "4"]}
+        config: List[dict] = [
+            {"attrs": {"group": "g1"}, "spec": "t1"},
+            {"attrs": {"group": "g2"}, "spec": "t2"},
+        ]
         instance._add_workflow_cycledef(e=root, config=config)
-        for i, _, _ in [(0, "foo", "1"), (1, "foo", "2"), (2, "bar", "3"), (3, "bar", "4")]:
+        for i, item in enumerate(config):
+            assert root[i].get("group") == item["attrs"]["group"]
             assert root[i].tag == "cycledef"
-            # assert root[i].get("group") == group
-            # assert root[i].text == coord
+            assert root[i].text == item["spec"]
 
     def test__add_workflow_log(self, instance, root):
         path = "/path/to/logfile"
