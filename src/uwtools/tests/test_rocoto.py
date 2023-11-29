@@ -318,6 +318,12 @@ def test_schema_workflow_cycledef(schema):
     assert not errors([{"attrs": {"activation_offset": "-12:00:00"}, "spec": spec}])
     # Spec with positive activation offset attribute:
     assert not errors([{"attrs": {"activation_offset": "12:00:00"}, "spec": spec}])
+    # Property spec is required:
+    assert reported("'spec' is a required property", errors([{}]))
+    # Additional properties are not allowed:
+    assert reported("'foo' was unexpected", errors([{"spec": spec, "foo": "bar"}]))
+    # Additional attributes are not allowed:
+    assert reported("'foo' was unexpected", errors([{"attrs": {"foo": "bar"}, "spec": spec}]))
     # Bad spec:
     assert reported(
         "'x 202312011200 06:00:00' is not valid", errors([{"spec": "x 202312011200 06:00:00"}])
@@ -326,9 +332,3 @@ def test_schema_workflow_cycledef(schema):
     assert reported(
         "'foo' is not valid", errors([{"attrs": {"activation_offset": "foo"}, "spec": spec}])
     )
-    # Additional attributes are not allowed:
-    assert reported("'foo' was unexpected", errors([{"attrs": {"foo": "bar"}, "spec": spec}]))
-    # Property spec is required:
-    assert reported("'spec' is a required property", errors([{}]))
-    # Additional properties are not allowed:
-    assert reported("'foo' was unexpected", errors([{"spec": spec, "foo": "bar"}]))
