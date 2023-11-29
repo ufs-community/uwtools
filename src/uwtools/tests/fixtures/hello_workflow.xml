@@ -6,39 +6,26 @@
 ]>
 <workflow realtime="False" scheduler="slurm" >
   <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
-
   <log>/some/path/to/&FOO;</log>
-  
   <task name="hello" cycledefs="howdy" maxtries="2" >
     <account>&ACCOUNT;</account>
     <command>echo hello $person</command>
     <jobname>hello</jobname>
     <nodes>1:ppn=1</nodes>
     <walltime>00:01:00</walltime>
-
-    
     <envar><name>person</name><value>siri</value></envar>
-
-    
   </task>
-  
   <metatask name="ensemble_hello" >
-    
     <var name="member">foo bar baz</var>
-      
     <task name="hello_#member#" cycledefs="howdy" maxtries="1" >
       <account>&ACCOUNT;</account>
       <command>echo hello #member#</command>
       <nodes>1:ppn=1</nodes>
       <walltime>00:01:00</walltime>
       <jobname>hello_#member#</jobname>
-
-      
-
       <dependency>
         <taskdep task="hello"/>
       </dependency>
     </task>
   </metatask>
-
 </workflow>
