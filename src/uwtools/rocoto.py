@@ -234,7 +234,7 @@ class _RocotoXML:
         """
         for item in config:
             cycledef = SubElement(e, STR.cycledef)
-            cycledef.text = "%s %s %s" % (item["start"], item["stop"], item["step"])
+            cycledef.text = item["spec"]
             self._set_attrs(cycledef, item)
 
     def _add_workflow_log(self, e: Element, logfile: str) -> None:

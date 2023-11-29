@@ -390,21 +390,13 @@
                 },
                 "type": "object"
               },
-              "start": {
-                "type": "integer"
-              },
-              "step": {
-                "pattern": "^[0-9]{2}:[0-9]{2}:[0-9]{2}$",
+              "spec": {
+                "pattern": "^[0-9]{12} [0-9]{12} [0-9]{2}:[0-9]{2}:[0-9]{2}$",
                 "type": "string"
-              },
-              "stop": {
-                "type": "integer"
               }
             },
             "required": [
-              "start",
-              "step",
-              "stop"
+              "spec"
             ],
             "type": "object"
           },

@@ -5,9 +5,7 @@ workflow:
   cycledef:
     - attrs:
         group: howdy
-      start: 202209290000
-      step: 06:00:00
-      stop: 202209300000
+      spec: 202209290000 202209300000 06:00:00
   entities:
     ACCOUNT: myaccount
     FOO: test.log
