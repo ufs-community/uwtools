@@ -205,11 +205,12 @@ def test_validate_yaml_rocoto_invalid_type(rocoto_assets, caplog):
 
 def test_validate_yaml_rocoto_invalid_walltime_pattern(rocoto_assets, caplog):
     kwargs, config = rocoto_assets
-    config["workflow"]["tasks"]["metatask"]["task"]["walltime"] = "0:01:00"
+    badval = "0x:01:00"
+    config["workflow"]["tasks"]["metatask"]["task"]["walltime"] = badval
     with patch.object(validator, "YAMLConfig") as YAMLConfig:
         YAMLConfig().data = config
         assert not validator.validate_yaml(**kwargs)
-        assert logged(caplog, "'0:01:00' does not match '^[0-9]{2}:[0-9]{2}:[0-9]{2}$'")
+        assert logged(caplog, f"'{badval}' is not valid under any of the given schemas")
 
 
 def test_validate_yaml_rocoto_valid(rocoto_assets):
