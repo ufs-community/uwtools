@@ -4,7 +4,6 @@ Tests for uwtools.rocoto module.
 """
 
 import shutil
-from functools import partial
 from typing import Callable, List
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
@@ -28,23 +27,15 @@ def assets(tmp_path):
     return fixture_path("hello_workflow.yaml"), tmp_path / "rocoto.xml"
 
 
-@fixture
-def schema():
-    with open(resource_pathobj("rocoto.jsonschema"), "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
-
-
 # Helpers
 
 
-def reported(msg: str, errors: List[str]) -> bool:
-    return any(msg in str(error) for error in errors)
-
-
-def validator(schema: dict, *args) -> Callable:
+def validator(*args) -> Callable:
+    with open(resource_pathobj("rocoto.jsonschema"), "r", encoding="utf-8") as f:
+        schema = yaml.safe_load(f)
     for arg in args:
         schema = {"$defs": schema["$defs"], **schema["properties"][arg]}
-    return partial(_validation_errors, schema=schema)
+    return lambda config: "\n".join(str(x) for x in _validation_errors(config, schema))
 
 
 # Tests
@@ -308,8 +299,8 @@ class Test__RocotoXML:
 # Schema tests
 
 
-def test_schema_workflow_cycledef(schema):
-    errors = validator(schema, "workflow", "cycledef")
+def test_schema_workflow_cycledef():
+    errors = validator("workflow", "cycledef")
     # Basic spec:
     spec = "202311291200 202312011200 06:00:00"
     assert not errors([{"spec": spec}])
@@ -326,16 +317,12 @@ def test_schema_workflow_cycledef(schema):
     # Spec with activation offset specified as negative seconds:
     assert not errors([{"attrs": {"activation_offset": "-3600"}, "spec": spec}])
     # Property spec is required:
-    assert reported("'spec' is a required property", errors([{}]))
+    assert "'spec' is a required property" in errors([{}])
     # Additional properties are not allowed:
-    assert reported("'foo' was unexpected", errors([{"spec": spec, "foo": "bar"}]))
+    assert "'foo' was unexpected" in errors([{"spec": spec, "foo": "bar"}])
     # Additional attributes are not allowed:
-    assert reported("'foo' was unexpected", errors([{"attrs": {"foo": "bar"}, "spec": spec}]))
+    assert "'foo' was unexpected" in errors([{"attrs": {"foo": "bar"}, "spec": spec}])
     # Bad spec:
-    assert reported(
-        "'x 202312011200 06:00:00' is not valid", errors([{"spec": "x 202312011200 06:00:00"}])
-    )
+    assert "'x 202312011200 06:00:00' is not valid" in errors([{"spec": "x 202312011200 06:00:00"}])
     # Spec with bad activation offset attribute:
-    assert reported(
-        "'foo' is not valid", errors([{"attrs": {"activation_offset": "foo"}, "spec": spec}])
-    )
+    assert "'foo' is not valid" in errors([{"attrs": {"activation_offset": "foo"}, "spec": spec}])
