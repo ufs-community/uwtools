@@ -83,7 +83,7 @@ In an active development shell, the following ``make`` targets are available and
 +---------------------+------------------------------------------------------------+
 
 
-Note that ``make format`` is never run automatically, to avoid reformatting under-development code in a way that might surprise the developer. A useful development idiom is to periodically run ``make format && make test`` to perform a full code-quality sweep through the code.
+Note that ``make format`` is never run automatically, to avoid reformatting under-development code in a way that might surprise the developer. A useful development idiom is to periodically run ``make format && make test`` to perform a full code-quality sweep through the code. An additional check is run by the CI for unformatted code, ``make format`` must be run, and then changes from ``make format`` must be committed before CI will pass.
 
 The ``make test`` command is also automatically executed when ``conda`` builds a ``uwtools`` package, so it is important to periodically run these tests during development and, crucially, before merging changes, to ensure that the tests will pass when CI builds the ``workflow-tools`` code.
 
