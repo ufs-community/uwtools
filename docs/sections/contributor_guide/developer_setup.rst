@@ -35,7 +35,6 @@ This recipe uses the ``aarch64`` (64-bit ARM) Miniforge for Linux, and installs 
      make devshell
 
 
-.. _paragraph: 
 
 If the above is successful, you will be in a ``workflow-tools`` development shell. See below for usage information. You may exit the shell with ``exit`` or ``ctrl-d``.
 
