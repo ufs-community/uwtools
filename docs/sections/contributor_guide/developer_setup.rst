@@ -1,4 +1,4 @@
-.. include:: ../external_links.rst
+.. include:: ../links.rst
 
 ***************
 Developer Setup
@@ -63,13 +63,13 @@ Formats Python code with black, imports with isort, docstrings with docformatter
 +---------------------+------------------------------------------------------------+
 | Command             |  Description                                               |
 +=====================+============================================================+
-| ``make format``     | Formats python code  with |black|_,                        |
-|                     | imports with |isort|_,                                     |
+| ``make format``     | Formats python code  with `black`_,                        |
+|                     | imports with `isort`_,                                     |
 |                     |                                                            |  
-|                     | docstrings with |docformatter|_,                           |
-|                     | and ``.jsonschema`` documents with |jq|_                   |
+|                     | docstrings with `docformatter`_,                           |
+|                     | and ``.jsonschema`` documents with `jq`_                   |
 +---------------------+------------------------------------------------------------+
-| ``make lint``       | Lint with |pylint|_                                        |
+| ``make lint``       | Lint with `pylint`_                                        |
 |                     |                                                            |
 +---------------------+------------------------------------------------------------+
 | ``make type check`` | Typecheck with `mypy`_                                     |
@@ -145,10 +145,3 @@ The following files in this repo are derived from their counterparts in the `con
      ├── src
      │   ├── pyproject.toml
      │   ├── setup.py
-
-
-.. |black| replace:: ``black``
-.. |docformatter| replace:: ``docformatter``
-.. |isort| replace:: ``isort``
-.. |jq| replace:: ``jq``
-.. |pylint| replace:: ``pylint``
