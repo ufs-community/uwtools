@@ -3,7 +3,7 @@ Support for validating a config using JSON Schema.
 """
 
 import json
-from typing import List
+from typing import List, Union
 
 import jsonschema
 
@@ -45,7 +45,7 @@ def validate_yaml(schema_file: DefinitePath, config_file: OptionalPath = None) -
 # Private functions
 
 
-def _validation_errors(config: dict, schema: dict) -> List[str]:
+def _validation_errors(config: Union[dict, list], schema: dict) -> List[str]:
     """
     Identify schema-validation errors.
     """

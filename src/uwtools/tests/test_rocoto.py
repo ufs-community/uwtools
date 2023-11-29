@@ -4,17 +4,21 @@ Tests for uwtools.rocoto module.
 """
 
 import shutil
+from functools import partial
 from typing import List
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
 import pytest
+import yaml
 from lxml import etree
 from pytest import fixture, raises
 
 from uwtools import rocoto
+from uwtools.config.validator import _validation_errors as validation_errors
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
+from uwtools.utils.file import resource_pathobj
 
 # Fixtures
 
@@ -22,6 +26,25 @@ from uwtools.tests.support import fixture_path
 @fixture
 def assets(tmp_path):
     return fixture_path("hello_workflow.yaml"), tmp_path / "rocoto.xml"
+
+
+@fixture
+def schema():
+    with open(resource_pathobj("rocoto.jsonschema"), "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+# Helpers
+
+
+def reported(msg: str, errors: List[str]) -> bool:
+    return any(msg in str(error) for error in errors)
+
+
+def subschema(schema: dict, *args) -> dict:
+    for arg in args:
+        schema = {"$defs": schema["$defs"], **schema["properties"][arg]}
+    return schema
 
 
 # Tests
@@ -280,3 +303,32 @@ class Test__RocotoXML:
         assert instance._tag_name("foo") == ("foo", "")
         assert instance._tag_name("foo_bar") == ("foo", "bar")
         assert instance._tag_name("foo_bar_baz") == ("foo", "bar_baz")
+
+
+def test_schema_workflow_cycledef(schema):
+    errors = partial(validation_errors, schema=subschema(schema, "workflow", "cycledef"))
+    # Basic spec:
+    spec = "202311291200 202312011200 06:00:00"
+    assert not errors([{"spec": spec}])
+    # Spec with step specified as seconds:
+    assert not errors([{"spec": "202311291200 202312011200 3600"}])
+    # Basic spec with group attribute:
+    assert not errors([{"attrs": {"group": "g"}, "spec": spec}])
+    # Spec with negative activation offset attribute:
+    assert not errors([{"attrs": {"activation_offset": "-12:00:00"}, "spec": spec}])
+    # Spec with positive activation offset attribute:
+    assert not errors([{"attrs": {"activation_offset": "12:00:00"}, "spec": spec}])
+    # Bad spec:
+    assert reported(
+        "'x 202312011200 06:00:00' is not valid", errors([{"spec": "x 202312011200 06:00:00"}])
+    )
+    # Spec with bad activation offset attribute:
+    assert reported(
+        "'foo' is not valid", errors([{"attrs": {"activation_offset": "foo"}, "spec": spec}])
+    )
+    # Additional attributes are not allowed:
+    assert reported("'foo' was unexpected", errors([{"attrs": {"foo": "bar"}, "spec": spec}]))
+    # Property spec is required:
+    assert reported("'spec' is a required property", errors([{}]))
+    # Additional properties are not allowed:
+    assert reported("'foo' was unexpected", errors([{"spec": spec, "foo": "bar"}]))
