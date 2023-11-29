@@ -4,10 +4,9 @@
 Developer Setup
 ***************
 
-Creating a development shell
-============================
+Creating a ``bash`` development shell
+=====================================
 
-To create an interactive development ``bash`` shell:
 
 This recipe uses the ``aarch64`` (64-bit ARM) Miniforge for Linux, and installs into ``$HOME/conda``. Adjust as necessary for your target system.
 
@@ -38,24 +37,14 @@ This recipe uses the ``aarch64`` (64-bit ARM) Miniforge for Linux, and installs 
 
 .. _paragraph: 
 
-If the above is successful, you will be in a ``workflow-tools``
-development shell. See below for usage information. You may exit the
-shell with ``exit`` or ``ctrl-d``.
+If the above is successful, you will be in a ``workflow-tools`` development shell. See below for usage information. You may exit the shell with ``exit`` or ``ctrl-d``.
 
-Future ``make devshell`` invocations will be almost instantaneous, as
-the underlying virtual environment will already exist. In general, all
-source code changes will be immediately live in the development shell,
-subject to execution, test, etc. But some changes – especially to the
-contents of the ``recipe/`` directory, or to the ``src/setup.py`` module
-– may require recreation of the development shell. If you know this is
-needed, or when in doubt: 
+Future ``make devshell`` invocations will be almost instantaneous, as the underlying virtual environment will already exist. In general, all source code changes will be immediately live in the development shell, subject to execution, test, etc. But some changes – especially to the contents of the ``recipe/`` directory, or to the ``src/setup.py`` module – may require recreation of the development shell. If you know this is needed, or when in doubt: 
 
     1. Exit the development shell, run ``conda env remove -n DEV-uwtools`` to remove the old environment.
     2. Run ``make devshell`` to recreate it.
 
-If your development shell misses any functionality you’re used to in
-your main shell, you can create a ``~/.condevrc`` file, which will be
-sourced by ``make devshell``. When in doubt, you might:
+If your development shell misses any functionality you’re used to in your main (``bash``) shell, you can create a ``~/.condevrc`` file, which will be sourced by ``make devshell``. When in doubt, you might:
 
    .. code::
 
@@ -64,27 +53,29 @@ sourced by ``make devshell``. When in doubt, you might:
      EOF
 
 
-Using a development shell
-=========================
+Using a ``bash`` development shell
+==================================
 
-In an active development shell, the following ``make`` targets are
-available and act on all ``.py`` files under ``src/``:
+In an active development shell, the following ``make`` targets are available and act on all ``.py`` files under ``src/``:
 
+Formats Python code with black, imports with isort, docstrings with docformatter, and .jsonschema documents with jq.
 
 +---------------------+------------------------------------------------------------+
 | Command             |  Description                                               |
 +=====================+============================================================+
-| ``make format``     | Format with |black|_ and |isort|_                          |
+| ``make format``     | Formats python code  with |black|_,                        |
+|                     | imports with |isort|_,                                     |
+|                     |                                                            |  
+|                     | docstrings with |docformatter|_,                           |
+|                     | and ``.jsonschema`` documents with |jq|_                   |
++---------------------+------------------------------------------------------------+
+| ``make lint``       | Lint with |pylint|_                                        |
 |                     |                                                            |
-|                     | Formats docstrings and ``.jsonschema`` documents           |
 +---------------------+------------------------------------------------------------+
-| ``make lint``       | Lint with ``pylint``                                       |
-|                     |                                                            |
+| ``make type check`` | Typecheck with `mypy`_                                     |
 +---------------------+------------------------------------------------------------+
-| ``make type check`` | Typecheck with ``mypy``                                    |
-+---------------------+------------------------------------------------------------+
-| ``make unittest``   | Run unit tests and report coverage with ``pytest`` and     |
-|                     | ``coverage``                                               |
+| ``make unittest``   | Run unit tests and report coverage with `pytest`_ and      |
+|                     | `coverage`_                                                |
 +---------------------+------------------------------------------------------------+
 | ``make test``       | Equivalent to                                              |
 |                     | ``make lint && make typecheck && make unittest``           |
@@ -93,34 +84,21 @@ available and act on all ``.py`` files under ``src/``:
 +---------------------+------------------------------------------------------------+
 
 
-Note that ``make format`` is never run automatically, to avoid
-reformatting under-development code in a way that might surprise the
-developer. A useful development idiom is to periodically run
-``make format && make test`` to perform a full code-quality sweep
-through the code.
+Note that ``make format`` is never run automatically, to avoid reformatting under-development code in a way that might surprise the developer. A useful development idiom is to periodically run
+``make format && make test`` to perform a full code-quality sweep through the code.
 
-The ``make test`` command is also automatically executed when ``conda``
-builds a ``uwtools`` package, so it is important to periodically run
-these tests during development and, crucially, before merging changes,
-to ensure that the tests will pass when CI builds the ``workflow-tools``
-code.
+The ``make test`` command is also automatically executed when ``conda`` builds a ``uwtools`` package, so it is important to periodically run these tests during development and, crucially, before merging changes,
+to ensure that the tests will pass when CI builds the ``workflow-tools`` code.
 
 
 The order of the targets above is intentional, and possibly useful:
 
-   * ``make format`` will complain about certain kinds of syntax errors that
-     would cause all the remaining code-quality tools to fail (and may change
-     line numbers reported by other tools, if it ran after them).
-   * ``make lint`` provides a good first check for obvious errors and
-     anti-patterns in the code.
-   * ``make typecheck`` offers a more nuanced look at interfaces between 
-     functions, methods, etc. and may spot issues that would cause 
-     ``make unittest`` to fail.
+   * ``make format`` will complain about certain kinds of syntax errors that would cause all the remaining code-quality tools to fail (and may change line numbers reported by other tools, if it ran after them).
+   * ``make lint`` provides a good first check for obvious errors and anti-patterns in the code.
+   * ``make typecheck`` offers a more nuanced look at interfaces between functions, methods, etc. and may spot issues that would cause ``make unittest`` to fail.
 
 
-In addition to the ``make devshell`` command, other ``make`` targets
-are available for use *outside* a development shell, i.e. from the base
-conda environment (requires presence of the ``condev`` package):
+In addition to the ``make devshell`` command, other ``make`` targets are available for use *outside* a development shell, i.e. from the base conda environment (requires presence of the ``condev`` package):
 
 
 +------------------+-------------------------------------------------------+
@@ -135,18 +113,13 @@ conda environment (requires presence of the ``condev`` package):
 +------------------+-------------------------------------------------------+
 
 
-These targets work from the code in its current state in the clone.
-``make env`` calls ``make package`` automatically to create a local
-package, then builds an environment based on the package.
+These targets work from the code in its current state in the clone. ``make env`` calls ``make package`` automatically to create a local package, then builds an environment based on the package.
 
 Building condev locally
 -----------------------
 
-As an alternative to installing a prebuilt package from
-`anaconda`_, the ``condev`` package can be
-built locally, then installed into the local conda installation. 
-Ensure that ``conda-build`` and ``conda-verify`` are installed in the base
-environment:
+As an alternative to installing a prebuilt package from `anaconda`_, the ``condev`` package can be
+built locally, then installed into the local conda installation. Ensure that ``conda-build`` and ``conda-verify`` are installed in the base environment:
 
    .. code:: sh
 
@@ -158,9 +131,7 @@ environment:
 Files derived from condev
 -------------------------
 
-The following files in this repo are derived from their counterparts in
-the `condev demo`_:
-
+The following files in this repo are derived from their counterparts in the `condev demo`_ and are used by ``condev`` code when running certain make commands
 
    .. code:: sh
 
@@ -175,9 +146,9 @@ the `condev demo`_:
      │   ├── pyproject.toml
      │   ├── setup.py
 
-Behaviors described in previous sections may rely on these files
-continuing to follow ``condev`` conventions.
-
 
 .. |black| replace:: ``black``
+.. |docformatter| replace:: ``docformatter``
 .. |isort| replace:: ``isort``
+.. |jq| replace:: ``jq``
+.. |pylint| replace:: ``pylint``
