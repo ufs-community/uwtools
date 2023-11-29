@@ -13,6 +13,7 @@ workflow:
   tasks:
     task_hello:
       attrs:
+        cycledefs: howdy
         maxtries: "2"
       account: "&ACCOUNT;"
       command: "echo hello $person"
@@ -26,6 +27,7 @@ workflow:
         member: foo bar baz
       task_hello_#member#:
         attrs:
+          cycledefs: howdy
           maxtries: "1"
         account: "&ACCOUNT;"
         command: "echo hello #member#"
