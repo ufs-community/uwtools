@@ -111,7 +111,13 @@ def rocoto_assets():
     kwargs = {"schema_file": schema_file, "config_file": "/not/used"}
     config = {
         "workflow": {
-            "cycledefs": {"howdy": ["202209290000 202209300000 06:00:00"]},
+            "cycledef": [
+                {
+                    "start": 202209290000,
+                    "step": "06:00:00",
+                    "stop": 202209300000,
+                },
+            ],
             "log": "/some/path/to/&FOO;",
             "tasks": {
                 "metatask": {

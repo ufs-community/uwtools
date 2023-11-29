@@ -2,9 +2,12 @@ workflow:
   attrs:
     realtime: false
     scheduler: slurm
-  cycledefs:
-    howdy: 
-      - 202209290000 202209300000 06:00:00
+  cycledef:
+    - attrs:
+        group: howdy
+      start: 202209290000
+      step: 06:00:00
+      stop: 202209300000
   entities:
     ACCOUNT: myaccount
     FOO: test.log
@@ -12,7 +15,6 @@ workflow:
   tasks:
     task_hello:
       attrs:
-        cycledefs: howdy
         maxtries: "2"
       account: "&ACCOUNT;"
       command: "echo hello $person"
@@ -26,7 +28,6 @@ workflow:
         member: foo bar baz
       task_hello_#member#:
         attrs:
-          cycledefs: howdy
           maxtries: "1"
         account: "&ACCOUNT;"
         command: "echo hello #member#"

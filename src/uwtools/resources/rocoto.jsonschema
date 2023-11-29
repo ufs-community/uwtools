@@ -2,12 +2,8 @@
   "$defs": {
     "datePattern": {
       "format": "string",
-      "pattern": "^(\\d{12}) (\\d{12})$",
+      "pattern": "^[0-9]{12} [0-9]{12}$",
       "type": "integer"
-    },
-    "dateTimePattern": {
-      "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2})$",
-      "type": "string"
     },
     "dependency": {
       "additionalProperties": false,
@@ -378,19 +374,41 @@
           ],
           "type": "object"
         },
-        "cycledefs": {
-          "properties": {
-            "groupname": {
-              "items": {
-                "$ref": "#/$defs/dateTimePattern"
+        "cycledef": {
+          "items": {
+            "additionalproperties": false,
+            "properties": {
+              "attrs": {
+                "additionalProperties": false,
+                "properties": {
+                  "activation-offset": {
+                    "type": "string"
+                  },
+                  "group": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
               },
-              "type": "array"
+              "start": {
+                "type": "integer"
+              },
+              "step": {
+                "pattern": "^[0-9]{2}:[0-9]{2}:[0-9]{2}$",
+                "type": "string"
+              },
+              "stop": {
+                "type": "integer"
+              }
             },
             "required": [
-              "items"
-            ]
+              "start",
+              "step",
+              "stop"
+            ],
+            "type": "object"
           },
-          "type": "object"
+          "type": "array"
         },
         "entities": {
           "type": "object"
@@ -414,7 +432,7 @@
         }
       },
       "required": [
-        "cycledefs",
+        "cycledef",
         "log",
         "tasks"
       ],

@@ -6,7 +6,7 @@ import re
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from lxml import etree
 from lxml.etree import Element, SubElement
@@ -220,21 +220,22 @@ class _RocotoXML:
         """
         config, e = config[STR.workflow], Element(STR.workflow)
         self._set_attrs(e, config)
-        self._add_workflow_cycledefs(e, config[STR.cycledefs])
+        self._add_workflow_cycledef(e, config[STR.cycledef])
         self._add_workflow_log(e, config[STR.log])
         self._add_workflow_tasks(e, config[STR.tasks])
         self._root: Element = e
 
-    def _add_workflow_cycledefs(self, e: Element, config: dict) -> None:
+    def _add_workflow_cycledef(self, e: Element, config: List[dict]) -> None:
         """
         Add <cycledef> element(s) to the <workflow>.
 
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        for name, coords in config.items():
-            for coord in coords:
-                SubElement(e, STR.cycledef, group=name).text = coord
+        for item in config:
+            cycledef = SubElement(e, STR.cycledef)
+            cycledef.text = "%s %s %s" % (item["start"], item["stop"], item["step"])
+            self._set_attrs(cycledef, item)
 
     def _add_workflow_log(self, e: Element, logfile: str) -> None:
         """
@@ -320,7 +321,7 @@ class _RocotoXML:
         :param e: The element to set the attributes on.
         :param config: A config containing the attribute definitions.
         """
-        for attr, val in config[STR.attrs].items():
+        for attr, val in config.get(STR.attrs, {}).items():
             e.set(attr, str(val))
 
     def _tag_name(self, key: str) -> Tuple[str, str]:
