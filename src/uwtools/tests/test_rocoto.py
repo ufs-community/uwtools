@@ -305,6 +305,9 @@ class Test__RocotoXML:
         assert instance._tag_name("foo_bar_baz") == ("foo", "bar_baz")
 
 
+# Schema tests
+
+
 def test_schema_workflow_cycledef(schema):
     errors = partial(validation_errors, schema=subschema(schema, "workflow", "cycledef"))
     # Basic spec:
