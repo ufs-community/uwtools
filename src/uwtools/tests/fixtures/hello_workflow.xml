@@ -2,7 +2,6 @@
 <!DOCTYPE workflow [
   <!ENTITY ACCOUNT "myaccount">
   <!ENTITY FOO "test.log">
-
 ]>
 <workflow realtime="False" scheduler="slurm" >
   <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
