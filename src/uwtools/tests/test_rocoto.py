@@ -5,7 +5,7 @@ Tests for uwtools.rocoto module.
 
 import shutil
 from functools import partial
-from typing import List
+from typing import Callable, List
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
@@ -15,7 +15,7 @@ from lxml import etree
 from pytest import fixture, raises
 
 from uwtools import rocoto
-from uwtools.config.validator import _validation_errors as validation_errors
+from uwtools.config.validator import _validation_errors
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import resource_pathobj
@@ -41,10 +41,10 @@ def reported(msg: str, errors: List[str]) -> bool:
     return any(msg in str(error) for error in errors)
 
 
-def subschema(schema: dict, *args) -> dict:
+def validator(schema: dict, *args) -> Callable:
     for arg in args:
         schema = {"$defs": schema["$defs"], **schema["properties"][arg]}
-    return schema
+    return partial(_validation_errors, schema=schema)
 
 
 # Tests
@@ -309,7 +309,7 @@ class Test__RocotoXML:
 
 
 def test_schema_workflow_cycledef(schema):
-    errors = partial(validation_errors, schema=subschema(schema, "workflow", "cycledef"))
+    errors = validator(schema, "workflow", "cycledef")
     # Basic spec:
     spec = "202311291200 202312011200 06:00:00"
     assert not errors([{"spec": spec}])
