@@ -26,19 +26,6 @@ def assets(tmp_path):
 # Tests
 
 
-def test_realize_rocoto_xml_to_file(assets):
-    cfgfile, outfile = assets
-    assert rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile) is True
-
-
-def test_realize_rocoto_xml_to_stdout(capsys, assets):
-    cfgfile, outfile = assets
-    assert rocoto.realize_rocoto_xml(config_file=cfgfile) is True
-    with open(outfile, "w", encoding="utf-8") as f:
-        f.write(capsys.readouterr().out)
-    assert rocoto.validate_rocoto_xml(outfile)
-
-
 def test_realize_rocoto_invalid_xml(assets):
     cfgfile, outfile = assets
     with open(fixture_path("hello_workflow.xml"), "r", encoding="utf-8") as f:
@@ -51,6 +38,19 @@ def test_realize_rocoto_invalid_xml(assets):
     dump = lambda _, dst: shutil.copyfile(str(invalid), dst)
     with patch.object(rocoto._RocotoXML, "dump", dump):
         assert rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile) is False
+
+
+def test_realize_rocoto_xml_to_file(assets):
+    cfgfile, outfile = assets
+    assert rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile) is True
+
+
+def test_realize_rocoto_xml_to_stdout(capsys, assets):
+    cfgfile, outfile = assets
+    assert rocoto.realize_rocoto_xml(config_file=cfgfile) is True
+    with open(outfile, "w", encoding="utf-8") as f:
+        f.write(capsys.readouterr().out)
+    assert rocoto.validate_rocoto_xml(outfile)
 
 
 def test_validate_rocoto_xml():
