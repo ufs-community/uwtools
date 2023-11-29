@@ -8,6 +8,7 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
 import pytest
+from lxml import etree
 from pytest import fixture, raises
 
 from uwtools import rocoto
@@ -40,19 +41,23 @@ def test_realize_rocoto_xml_to_stdout(capsys, assets):
 
 def test_realize_rocoto_invalid_xml(assets):
     cfgfile, outfile = assets
-    dump = lambda _, dst: shutil.copyfile(fixture_path("rocoto_invalid.xml"), dst)
+    with open(fixture_path("hello_workflow.xml"), "r", encoding="utf-8") as f:
+        e = etree.parse(f)
+    cycledef = e.xpath("/workflow/cycledef")[0]
+    cycledef.getparent().remove(cycledef)
+    invalid = outfile.parent / "bad.xml"
+    with open(invalid, "w", encoding="utf-8") as f:
+        f.write(etree.tostring(e).decode())
+    dump = lambda _, dst: shutil.copyfile(str(invalid), dst)
     with patch.object(rocoto._RocotoXML, "dump", dump):
         assert rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile) is False
 
 
-@pytest.mark.parametrize("vals", [("hello_workflow.xml", True), ("rocoto_invalid.xml", False)])
-def test_validate_rocoto_xml(vals):
-    fn, validity = vals
-    xml = fixture_path(fn)
-    assert rocoto.validate_rocoto_xml(input_xml=xml) is validity
+def test_validate_rocoto_xml():
+    assert rocoto.validate_rocoto_xml(input_xml=fixture_path("hello_workflow.xml")) is True
 
 
-class Test_RocotoXML:
+class Test__RocotoXML:
     """
     Tests for class uwtools.rocoto._RocotoXML.
     """
