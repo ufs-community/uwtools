@@ -48,10 +48,10 @@
           "additionalProperties": false,
           "properties": {
             "left": {
-              "type": "string"
+              "$ref": "#/$defs/compoundTimeString"
             },
             "right": {
-              "type": "string"
+              "$ref": "#/$defs/compoundTimeString"
             }
           },
           "required": [
