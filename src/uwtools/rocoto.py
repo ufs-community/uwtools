@@ -106,10 +106,11 @@ class _RocotoXML:
         if isinstance(config, str):
             e.text = config
         else:
-            config = config[STR.cyclestr]
-            cyclestr = SubElement(e, STR.cyclestr)
-            cyclestr.text = config["value"]
-            self._set_attrs(cyclestr, config)
+            self._set_attrs(e, config)
+            if config := config.get(STR.cyclestr, {}):
+                cyclestr = SubElement(e, STR.cyclestr)
+                cyclestr.text = config["value"]
+                self._set_attrs(cyclestr, config)
 
     def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
         """
@@ -203,7 +204,10 @@ class _RocotoXML:
         for tag, block in config.items():
             tag, _ = self._tag_name(tag)
             if tag in operands:
-                self._set_attrs(SubElement(e, tag), block)
+                if tag == STR.taskdep:
+                    self._set_attrs(SubElement(e, tag), block)
+                else:
+                    self._add_compound_time_string(e, tag, config)
             elif tag in operators:
                 self._add_task_dependency_operand_operator(SubElement(e, tag), config=block)
             elif tag in strequality:
