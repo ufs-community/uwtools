@@ -50,7 +50,7 @@ def validate_yaml_file(schema_file: DefinitePath, config_file: OptionalPath = No
     :return: Did the YAML file conform to the schema?
     """
     config = YAMLConfig(config_file)
-    return validate_yaml_config(schema_file, config)
+    return validate_yaml_config(schema_file=schema_file, config=config)
 
 
 # Private functions

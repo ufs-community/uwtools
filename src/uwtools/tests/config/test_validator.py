@@ -79,6 +79,11 @@ def write_as_json(data: Dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
+def test_validate_yaml_config(assets):
+    schema_file, _, cfgobj = assets
+    assert validator.validate_yaml_config(schema_file=schema_file, config=cfgobj)
+
+
 def test_validate_yaml_config_fail_bad_enum_val(assets, caplog):
     log.setLevel(logging.INFO)
     schema_file, _, cfgobj = assets
@@ -97,9 +102,13 @@ def test_validate_yaml_config_fail_bad_number_val(assets, caplog):
     assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
 
 
-def test_validate_yaml_config_pass(assets):
-    schema_file, _, cfgobj = assets
-    assert validator.validate_yaml_config(schema_file=schema_file, config=cfgobj)
+def test_validate_yaml_file(assets):
+    schema_file, config_file, _ = assets
+    with patch.object(validator, "validate_yaml_config") as validate_yaml_config:
+        validator.validate_yaml_file(schema_file=schema_file, config_file=config_file)
+    validate_yaml_config.assert_called_once_with(
+        schema_file=schema_file, config=YAMLConfig(config_file)
+    )
 
 
 @fixture
