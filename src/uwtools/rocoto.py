@@ -130,7 +130,6 @@ class _RocotoXML:
             STR.cores,
             STR.deadline,
             STR.exclusive,
-            STR.jobname,
             STR.join,
             STR.memory,
             STR.native,
@@ -146,10 +145,30 @@ class _RocotoXML:
         ):
             if tag in config:
                 SubElement(e, tag).text = config[tag]
+        for tag in (STR.jobname,):
+            if tag in config:
+                self._add_task_element_cyclestr_opt(e, tag, config)
         for name, value in config.get(STR.envars, {}).items():
             self._add_task_envar(e, name, value)
         if STR.dependency in config:
             self._add_task_dependency(e, config[STR.dependency])
+
+    def _add_task_element_cyclestr_opt(self, e: Element, tag: str, config: dict) -> None:
+        """
+        Add to the task an element possibly containing a <cyclestr>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        config = config[tag]
+        e = SubElement(e, tag)
+        if isinstance(config, str):
+            e.text = config
+        else:
+            config = config[STR.cyclestr]
+            cyclestr = SubElement(e, STR.cyclestr)
+            cyclestr.text = config["value"]
+            self._set_attrs(cyclestr, config)
 
     def _add_task_dependency(self, e: Element, config: dict) -> None:
         """
@@ -160,7 +179,6 @@ class _RocotoXML:
         """
         operands, operators, strequality = self._dependency_constants
         e = SubElement(e, STR.dependency)
-
         for tag, block in config.items():
             tag, _ = self._tag_name(tag)
             if tag in operands:
@@ -179,9 +197,7 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-
         operands, operators, strequality = self._dependency_constants
-
         for tag, block in config.items():
             tag, _ = self._tag_name(tag)
             if tag in operands:
@@ -350,6 +366,7 @@ class STR:
     cores: str = "cores"
     cycledef: str = "cycledef"
     cycledefs: str = "cycledefs"
+    cyclestr: str = "cyclestr"
     datadep: str = "datadep"
     deadline: str = "deadline"
     dependency: str = "dependency"
