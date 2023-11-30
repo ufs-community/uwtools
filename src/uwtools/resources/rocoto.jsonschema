@@ -215,8 +215,8 @@
     "nonNegativeTime": {
       "oneOf": [
         {
-          "pattern": "^([0-9]+|(#[^# ]+#))+$",
-          "type": "string"
+          "minimum": 0,
+          "type": "integer"
         },
         {
           "pattern": "^([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
@@ -375,8 +375,7 @@
     "time": {
       "oneOf": [
         {
-          "pattern": "^-?([0-9]+|(#[^# ]+#))+$",
-          "type": "string"
+          "type": "integer"
         },
         {
           "pattern": "^-?([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
