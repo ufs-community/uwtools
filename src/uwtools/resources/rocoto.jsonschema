@@ -84,8 +84,8 @@
               },
               "type": "object"
             },
-            "text": {
-              "type": "string"
+            "value": {
+              "$ref": "#/$defs/compoundTimeString"
             }
           },
           "type": "object"
