@@ -185,7 +185,7 @@
           "type": "object"
         },
         "^timedep(_.*)?$": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         }
       },
       "type": "object"
