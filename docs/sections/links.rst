@@ -1,4 +1,4 @@
-.. _anaconda: https://anaconda.org/maddenp/condev  
+.. _Anaconda: https://anaconda.org
 .. _black: https://black.readthedocs.io/en/stable/ 
 .. _conda: https://docs.conda.io/en/latest/
 .. _conda-forge: https://conda-forge.org/
@@ -16,6 +16,3 @@
 .. _pytest: https://docs.pytest.org/en/stable/ 
 .. _semver: https://semver.org/
 .. _workflow-tools repository: https://github.com/ufs-community/workflow-tools
-
-
-.. _Anaconda: https://anaconda.org

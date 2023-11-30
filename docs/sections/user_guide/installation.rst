@@ -65,11 +65,3 @@ In future shells, you can activate and use this environment with:
 
 
 Note that the ``uwtools`` package’s actual name will contain version and build information, e.g. ``uwtools-0.1.0-py_0``. The ``conda create`` command will find and use the most recent `semver`_ - compliant package name given the base name ``uwtools``. It could also be explicitly specified as ``uwtools=0.1.0=py_0``.
-
-
-.. _Anaconda: https://anaconda.org
-.. _conda: https://docs.conda.io/en/latest/
-.. _conda-forge: https://conda-forge.org/
-.. _Miniconda: https://docs.conda.io/en/latest/miniconda.html
-.. _Miniforge: https://github.com/conda-forge/miniforge
-.. _semver: https://semver.org/
