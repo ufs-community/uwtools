@@ -330,16 +330,16 @@
           "type": "string"
         },
         "jobname": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "join": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "memory": {
           "type": "string"
         },
         "native": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "nodes": {
           "type": "string"
@@ -357,10 +357,10 @@
           "type": "string"
         },
         "stderr": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "stdout": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "walltime": {
           "$ref": "#/$defs/nonNegativeTime"
