@@ -96,11 +96,11 @@ class _RocotoXML:
 
     def _add_compound_time_string(self, e: Element, config: dict, tag: str) -> None:
         """
-        Add to the task an element possibly containing a <cyclestr>.
+        Add to the given element a child element possibly containing a <cyclestr>.
 
-        :param e: The parent element to add the new element to.
-        :param config: Configuration data for this element.
-        :param tag: Name of new element to add.
+        :param e: The element to add the child element to.
+        :param config: Configuration data for the child element.
+        :param tag: Name of child element to add.
         """
         config = config[tag]
         e = SubElement(e, tag)
