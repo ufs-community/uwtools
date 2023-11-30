@@ -5,17 +5,27 @@ Tests for uwtools.config.validator module.
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 from unittest.mock import patch
 
 from pytest import fixture
 
 from uwtools.config import validator
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 from uwtools.utils.file import resource_pathobj
 
-# Support functions
+# Fixtures
+
+
+@fixture
+def assets(config, schema, tmp_path) -> Tuple[Path, Path, YAMLConfig]:
+    config_file = tmp_path / "config.yaml"
+    schema_file = tmp_path / "schema.yaml"
+    write_as_json(config, config_file)
+    write_as_json(schema, schema_file)
+    return schema_file, config_file, YAMLConfig(config_file)
 
 
 @fixture
@@ -28,11 +38,6 @@ def config(tmp_path) -> Dict[str, Any]:
             "dir": str(tmp_path),
         },
     }
-
-
-@fixture
-def config_file(tmp_path) -> str:
-    return str(tmp_path / "config.yaml")
 
 
 @fixture
@@ -62,9 +67,7 @@ def schema() -> Dict[str, Any]:
     }
 
 
-@fixture
-def schema_file(tmp_path) -> str:
-    return str(tmp_path / "schema.yaml")
+# Helpers
 
 
 def write_as_json(data: Dict[str, Any], path: Path) -> Path:
@@ -76,33 +79,27 @@ def write_as_json(data: Dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
-def test_validate_yaml_file_fail_bad_enum_val(caplog, config, config_file, schema, schema_file):
-    # Specify an invalid enum value.
+def test_validate_yaml_config_fail_bad_enum_val(assets, caplog):
     log.setLevel(logging.INFO)
-    config["color"] = "yellow"
-    write_as_json(config, config_file)
-    write_as_json(schema, schema_file)
-    assert not validator.validate_yaml_file(schema_file=schema_file, config_file=config_file)
+    schema_file, _, cfgobj = assets
+    cfgobj["color"] = "yellow"  # invalid enum value
+    assert not validator.validate_yaml_config(schema_file=schema_file, config=cfgobj)
     assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
 
 
-def test_validate_yaml_file_fail_bad_number_val(caplog, config, config_file, schema, schema_file):
-    # Specify an invalid number value.
+def test_validate_yaml_config_fail_bad_number_val(assets, caplog):
     log.setLevel(logging.INFO)
-    config["number"] = "string"
-    write_as_json(config, config_file)
-    write_as_json(schema, schema_file)
-    assert not validator.validate_yaml_file(schema_file=schema_file, config_file=config_file)
+    schema_file, _, cfgobj = assets
+    cfgobj["number"] = "string"  # invalid number value
+    assert not validator.validate_yaml_config(schema_file=schema_file, config=cfgobj)
     assert any(x for x in caplog.records if "1 schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
 
 
-def test_validate_yaml_file_pass(config, config_file, schema, schema_file):
-    # Test a fully valid config file.
-    write_as_json(config, config_file)
-    write_as_json(schema, schema_file)
-    assert validator.validate_yaml_file(schema_file=schema_file, config_file=config_file)
+def test_validate_yaml_config_pass(assets):
+    schema_file, _, cfgobj = assets
+    assert validator.validate_yaml_config(schema_file=schema_file, config=cfgobj)
 
 
 @fixture
