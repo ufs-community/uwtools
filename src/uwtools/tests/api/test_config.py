@@ -3,8 +3,10 @@
 from unittest.mock import patch
 
 import pytest
+import yaml
 
 from uwtools.api import config
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.utils.file import FORMAT
 
 
@@ -62,10 +64,31 @@ def test_translate(infmt, outfmt, success_expected):
         )
 
 
-def test_validate():
-    kwargs: dict = {"config": "infile", "schema_file": "schema"}
+def test_validate_config(tmp_path):
+    config_file = tmp_path / "config.yaml"
+    with open(config_file, "w", encoding="utf-8") as f:
+        yaml.dump({}, f)
+    kwargs: dict = {"schema_file": "schema-file", "config": YAMLConfig(config_file)}
+    with patch.object(config, "_validate_yaml_config", return_value=True) as _validate_yaml_config:
+        assert config.validate(**kwargs)
+    _validate_yaml_config.assert_called_once_with(
+        schema_file=kwargs["schema_file"], config=kwargs["config"]
+    )
+
+
+def test_validate_dict():
+    kwargs: dict = {"schema_file": "schema-file", "config": {"foo": "bar"}}
+    with patch.object(config, "_validate_yaml_config", return_value=True) as _validate_yaml_config:
+        assert config.validate(**kwargs)
+    _validate_yaml_config.assert_called_once_with(
+        schema_file=kwargs["schema_file"], config=kwargs["config"]
+    )
+
+
+def test_validate_file():
+    kwargs: dict = {"schema_file": "schema-file", "config": "config-file"}
     with patch.object(config, "_validate_yaml_file", return_value=True) as _validate_yaml_file:
         assert config.validate(**kwargs)
     _validate_yaml_file.assert_called_once_with(
-        config_file=kwargs["config"], schema_file=kwargs["schema_file"]
+        schema_file=kwargs["schema_file"], config_file=kwargs["config"]
     )

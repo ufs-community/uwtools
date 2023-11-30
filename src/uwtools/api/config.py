@@ -73,7 +73,7 @@ def translate(
     return False
 
 
-def validate(config: Union[OptionalPath, _YAMLConfig, dict], schema_file: DefinitePath) -> bool:
+def validate(schema_file: DefinitePath, config: Union[OptionalPath, _YAMLConfig, dict]) -> bool:
     """
     ???
     """
@@ -81,6 +81,8 @@ def validate(config: Union[OptionalPath, _YAMLConfig, dict], schema_file: Defini
         return _validate_yaml_config(schema_file=schema_file, config=config)
     if isinstance(config, dict):
         with NamedTemporaryFile(mode="w", encoding="utf-8") as f:
-            yaml.dump(config, f)
-            return _validate_yaml_file(schema_file=schema_file, config_file=f.name)
+            yaml.dump({}, f)
+            cfgobj = _YAMLConfig(f.name)
+            cfgobj.data = config
+            return _validate_yaml_config(schema_file=schema_file, config=cfgobj)
     return _validate_yaml_file(schema_file=schema_file, config_file=config)
