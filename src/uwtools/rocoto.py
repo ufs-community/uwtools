@@ -94,6 +94,23 @@ class _RocotoXML:
         with writable(path) as f:
             f.write(xml.strip())
 
+    def _add_compound_time_string(self, e: Element, tag: str, config: dict) -> None:
+        """
+        Add to the task an element possibly containing a <cyclestr>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        config = config[tag]
+        e = SubElement(e, tag)
+        if isinstance(config, str):
+            e.text = config
+        else:
+            config = config[STR.cyclestr]
+            cyclestr = SubElement(e, STR.cyclestr)
+            cyclestr.text = config["value"]
+            self._set_attrs(cyclestr, config)
+
     def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
         """
         Add a <metatask> element to the <workflow>.
@@ -126,28 +143,30 @@ class _RocotoXML:
         self._set_and_render_jobname(config, taskname)
         for tag in (
             STR.account,
-            STR.command,
             STR.cores,
-            STR.deadline,
             STR.exclusive,
-            STR.join,
             STR.memory,
-            STR.native,
             STR.nodes,
             STR.nodesize,
             STR.partition,
             STR.queue,
             STR.rewind,
             STR.shared,
-            STR.stderr,
-            STR.stdout,
             STR.walltime,
         ):
             if tag in config:
                 SubElement(e, tag).text = config[tag]
-        for tag in (STR.jobname,):
+        for tag in (
+            STR.command,
+            STR.deadline,
+            STR.jobname,
+            STR.join,
+            STR.native,
+            STR.stderr,
+            STR.stdout,
+        ):
             if tag in config:
-                self._add_task_element_cyclestr_opt(e, tag, config)
+                self._add_compound_time_string(e, tag, config)
         for name, value in config.get(STR.envars, {}).items():
             self._add_task_envar(e, name, value)
         if STR.dependency in config:
@@ -199,23 +218,6 @@ class _RocotoXML:
         :param tag: Configuration new element to add.
         """
         self._set_attrs(SubElement(e, tag), block)
-
-    def _add_task_element_cyclestr_opt(self, e: Element, tag: str, config: dict) -> None:
-        """
-        Add to the task an element possibly containing a <cyclestr>.
-
-        :param e: The parent element to add the new element to.
-        :param config: Configuration data for this element.
-        """
-        config = config[tag]
-        e = SubElement(e, tag)
-        if isinstance(config, str):
-            e.text = config
-        else:
-            config = config[STR.cyclestr]
-            cyclestr = SubElement(e, STR.cyclestr)
-            cyclestr.text = config["value"]
-            self._set_attrs(cyclestr, config)
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """
