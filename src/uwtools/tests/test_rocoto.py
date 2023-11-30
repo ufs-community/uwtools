@@ -230,7 +230,7 @@ class Test__RocotoXML:
         assert workflow.get("foo") == "1"
         assert workflow.get("bar") == "2"
         mocks["_add_workflow_cycledef"].assert_called_once_with(workflow, "3")
-        mocks["_add_workflow_log"].assert_called_once_with(workflow, "4")
+        mocks["_add_workflow_log"].assert_called_once_with(workflow, config["workflow"])
         mocks["_add_workflow_tasks"].assert_called_once_with(workflow, "5")
 
     def test__add_workflow_cycledef(self, instance, root):
@@ -244,9 +244,9 @@ class Test__RocotoXML:
             assert root[i].tag == "cycledef"
             assert root[i].text == item["spec"]
 
-    def test__add_workflow_log(self, instance, root):
+    def test__add_workflow_log_simple(self, instance, root):
         path = "/path/to/logfile"
-        instance._add_workflow_log(e=root, logfile=path)
+        instance._add_workflow_log(e=root, config={"log": path})
         log = root[0]
         assert log.tag == "log"
         assert log.text == path

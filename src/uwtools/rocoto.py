@@ -239,7 +239,7 @@ class _RocotoXML:
         config, e = config[STR.workflow], Element(STR.workflow)
         self._set_attrs(e, config)
         self._add_workflow_cycledef(e, config[STR.cycledef])
-        self._add_workflow_log(e, config[STR.log])
+        self._add_workflow_log(e, config)
         self._add_workflow_tasks(e, config[STR.tasks])
         self._root: Element = e
 
@@ -255,14 +255,14 @@ class _RocotoXML:
             cycledef.text = item["spec"]
             self._set_attrs(cycledef, item)
 
-    def _add_workflow_log(self, e: Element, logfile: str) -> None:
+    def _add_workflow_log(self, e: Element, config: dict) -> None:
         """
         Add <log> element(s) to the <workflow>.
 
         :param e: The parent element to add the new element to.
         :param logfile: The path to the log file.
         """
-        SubElement(e, STR.log).text = logfile
+        self._add_compound_time_string(e, STR.log, config)
 
     def _add_workflow_tasks(self, e: Element, config: dict) -> None:
         """
