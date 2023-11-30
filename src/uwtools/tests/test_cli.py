@@ -293,9 +293,9 @@ def test__dispatch_config_translate_unsupported():
 
 def test__dispatch_config_validate_no_optional():
     args = {STR.infile: None, STR.infmt: FORMAT.yaml, STR.schemafile: "/foo.schema"}
-    with patch.object(uwtools.api.config, "_validate") as _validate:
+    with patch.object(uwtools.api.config, "_validate_yaml_file") as _validate_yaml_file:
         cli._dispatch_config_validate(args)
-    _validate.assert_called_once_with(config_file=None, schema_file="/foo.schema")
+    _validate_yaml_file.assert_called_once_with(config_file=None, schema_file="/foo.schema")
 
 
 def test__dispatch_config_validate_unsupported():
@@ -305,9 +305,9 @@ def test__dispatch_config_validate_unsupported():
 
 def test__dispatch_config_validate_yaml():
     args = {STR.infile: 1, STR.infmt: FORMAT.yaml, STR.schemafile: 3}
-    with patch.object(uwtools.api.config, "_validate") as _validate:
+    with patch.object(uwtools.api.config, "_validate_yaml_file") as _validate_yaml_file:
         cli._dispatch_config_validate(args)
-    _validate.assert_called_once_with(config_file=1, schema_file=3)
+    _validate_yaml_file.assert_called_once_with(config_file=1, schema_file=3)
 
 
 @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])

@@ -14,22 +14,20 @@ from uwtools.types import DefinitePath, OptionalPath
 # Public functions
 
 
-def validate_yaml(schema_file: DefinitePath, config_file: OptionalPath = None) -> bool:
+def validate_yaml_config(schema_file: DefinitePath, config: YAMLConfig) -> bool:
     """
-    Check whether the given config file conforms to the given JSON Schema spec and whether any
-    filesystem paths it identifies do not exist.
+    Check whether the given config conforms to the given JSON Schema spec and whether any filesystem
+    paths it identifies do not exist.
 
     :param schema_file: The JSON Schema file to use for validation.
-    :param config_file: The YAML file to validate (stdin will be used by default)
+    :param config: The config to validate.
     :return: Did the YAML file conform to the schema?
     """
-    # Load the config and schema.
-    yaml_config = YAMLConfig(config_file)
-    yaml_config.dereference()
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
+    config.dereference()
     # Collect and report on schema-validation errors.
-    errors = _validation_errors(yaml_config.data, schema)
+    errors = _validation_errors(config.data, schema)
     log_method = log.error if errors else log.info
     log_method("%s schema-validation error%s found", len(errors), "" if len(errors) == 1 else "s")
     for error in errors:
@@ -40,6 +38,19 @@ def validate_yaml(schema_file: DefinitePath, config_file: OptionalPath = None) -
         return False
     # If no issues were detected, report success.
     return True
+
+
+def validate_yaml_file(schema_file: DefinitePath, config_file: OptionalPath = None) -> bool:
+    """
+    Check whether the given config file conforms to the given JSON Schema spec and whether any
+    filesystem paths it identifies do not exist.
+
+    :param schema_file: The JSON Schema file to use for validation.
+    :param config_file: The YAML file to validate (stdin will be used by default)
+    :return: Did the YAML file conform to the schema?
+    """
+    config = YAMLConfig(config_file)
+    return validate_yaml_config(schema_file, config)
 
 
 # Private functions

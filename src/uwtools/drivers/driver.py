@@ -178,7 +178,7 @@ class Driver(ABC):
 
         :return: Was the input configuration file valid against its schema?
         """
-        return validator.validate_yaml(
+        return validator.validate_yaml_file(
             config_file=self._config_file,
             schema_file=self.schema_file,
         )

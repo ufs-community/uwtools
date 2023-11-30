@@ -69,9 +69,9 @@ def test_validate(infmt, success_expected):
         "input_format": infmt,
         "schema_file": "schema",
     }
-    with patch.object(config, "_validate", return_value=True) as _validate:
+    with patch.object(config, "_validate_yaml_file", return_value=True) as _validate_yaml_file:
         assert config.validate(**kwargs) is success_expected
     if success_expected:
-        _validate.assert_called_once_with(
+        _validate_yaml_file.assert_called_once_with(
             config_file=kwargs["input_file"], schema_file=kwargs["schema_file"]
         )

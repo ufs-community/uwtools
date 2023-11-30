@@ -1,11 +1,11 @@
 # pylint: disable=unused-import
 
-from typing import Optional
+from typing import Optional, Union
 
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
-from uwtools.config.validator import validate_yaml as _validate
+from uwtools.config.validator import validate_yaml_file as _validate_yaml_file
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import FORMAT as _FORMAT
 
@@ -73,5 +73,5 @@ def validate(input_file: DefinitePath, input_format: str, schema_file: DefiniteP
     ???
     """
     if input_format == _FORMAT.yaml:
-        return _validate(config_file=input_file, schema_file=schema_file)
+        return _validate_yaml_file(config_file=input_file, schema_file=schema_file)
     return False

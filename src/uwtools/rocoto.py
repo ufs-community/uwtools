@@ -13,7 +13,7 @@ from lxml.etree import Element, SubElement
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import dereference
-from uwtools.config.validator import validate_yaml
+from uwtools.config.validator import validate_yaml_file
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.types import OptionalPath
@@ -263,7 +263,7 @@ class _RocotoXML:
 
         :param config_file: Path to the YAML config (defaults to stdin).
         """
-        if not validate_yaml(
+        if not validate_yaml_file(
             config_file=config_file, schema_file=resource_pathobj("rocoto.jsonschema")
         ):
             raise UWConfigError("YAML validation errors identified in %s" % config_file)
