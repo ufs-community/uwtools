@@ -244,12 +244,19 @@ class Test__RocotoXML:
             assert root[i].tag == "cycledef"
             assert root[i].text == item["spec"]
 
-    def test__add_workflow_log_simple(self, instance, root):
-        path = "/path/to/logfile"
-        instance._add_workflow_log(e=root, config={"log": path})
+    def test__add_workflow_log_basic(self, instance, root):
+        val = "/path/to/logfile"
+        instance._add_workflow_log(e=root, config={"log": val})
         log = root[0]
         assert log.tag == "log"
-        assert log.text == path
+        assert log.text == val
+
+    def test__add_workflow_log_cyclestr(self, instance, root):
+        val = "/path/to/logfile-@Y@m@d@H"
+        instance._add_workflow_log(e=root, config={"log": {"cyclestr": {"value": val}}})
+        log = root[0]
+        assert log.tag == "log"
+        assert log.xpath("cyclestr")[0].text == val
 
     def test__add_workflow_tasks(self, instance, root):
         config = {"metatask_foo": "1", "task_bar": "2"}
