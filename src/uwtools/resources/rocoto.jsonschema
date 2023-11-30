@@ -311,7 +311,7 @@
           }
         },
         "command": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "cores": {
           "minimum": 0,
