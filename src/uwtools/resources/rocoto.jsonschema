@@ -490,8 +490,7 @@
           "type": "object"
         },
         "log": {
-          "format": "uri",
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "tasks": {
           "additionalProperties": false,
