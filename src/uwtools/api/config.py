@@ -1,16 +1,18 @@
 # pylint: disable=unused-import
 
+from tempfile import NamedTemporaryFile
 from typing import Optional, Union
 
+import yaml
+
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
-from uwtools.config.formats.base import Config as _Config
+from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
+from uwtools.config.validator import validate_yaml_config as _validate_yaml_config
 from uwtools.config.validator import validate_yaml_file as _validate_yaml_file
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import FORMAT as _FORMAT
-
-ConfigOrPath = Union[_Config, OptionalPath, dict]
 
 
 def compare(
@@ -71,12 +73,14 @@ def translate(
     return False
 
 
-def validate(config: ConfigOrPath, schema_file: DefinitePath) -> bool:
+def validate(config: Union[OptionalPath, _YAMLConfig, dict], schema_file: DefinitePath) -> bool:
     """
     ???
     """
-    if isinstance(config, _Config):
-        return False
+    if isinstance(config, _YAMLConfig):
+        return _validate_yaml_config(schema_file=schema_file, config=config)
     if isinstance(config, dict):
-        return False
-    return _validate_yaml_file(config_file=config, schema_file=schema_file)
+        with NamedTemporaryFile(mode="w", encoding="utf-8") as f:
+            yaml.dump(config, f)
+            return _validate_yaml_file(schema_file=schema_file, config_file=f.name)
+    return _validate_yaml_file(schema_file=schema_file, config_file=config)
