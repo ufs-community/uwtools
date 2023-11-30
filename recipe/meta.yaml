@@ -12,21 +12,21 @@ requirements:
     - pip
   run:
     - f90nml 1.4.*
-    - jinja2 3.0.*
-    - jsonschema 4.17.*
+    - jinja2 3.1.*
+    - jsonschema 4.20.*
     - lxml 4.9.*
     - python >=3.9,<3.12
     - pyyaml 6.0.*
 test:
   requires:
-    - black 23.3.*
-    - coverage 7.2.*
+    - black 23.11.*
+    - coverage 7.3.*
     - docformatter 1.7.*
     - isort 5.12.*
-    - jq 1.6.*
+    - jq 1.7.*
     - make >=3.8
-    - mypy 1.4.*
-    - pylint 2.17.*
+    - mypy 1.7.*
+    - pylint 3.0.*
     - pytest 7.4.*
 about:
   license: LGPL
