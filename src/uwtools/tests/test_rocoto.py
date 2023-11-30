@@ -34,7 +34,7 @@ def validator(*args) -> Callable:
     with open(resource_pathobj("rocoto.jsonschema"), "r", encoding="utf-8") as f:
         schema = yaml.safe_load(f)
     for arg in args:
-        schema = {"$defs": schema["$defs"], **schema["properties"][arg]}
+        schema = {"$defs": schema["$defs"], **schema[arg]}
     return lambda config: "\n".join(str(x) for x in _validation_errors(config, schema))
 
 
@@ -299,8 +299,26 @@ class Test__RocotoXML:
 # Schema tests
 
 
+def test_schema_compoundTimeString():
+    errors = validator("$defs", "compoundTimeString")
+    # Just a string is ok:
+    assert not errors("foo")
+    # Non-string types are not ok:
+    assert "88 is not valid" in errors(88)
+    # A simple cycle string is ok:
+    assert not errors({"cyclestr": {"value": "@Y@m@d@H"}})
+    # The "value" entry is required:
+    assert "is not valid" in errors({"cyclestr": {}})
+    # Unknown properties are not allowed:
+    assert "is not valid" in errors({"cyclestr": {"foo": "bar"}})
+    # An "offset" attribute may be provided:
+    assert not errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "06:00:00"}}})
+    # The "offset" value must be a valid time string:
+    assert "is not valid" in errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "x"}}})
+
+
 def test_schema_workflow_cycledef():
-    errors = validator("workflow", "cycledef")
+    errors = validator("properties", "workflow", "properties", "cycledef")
     # Basic spec:
     spec = "202311291200 202312011200 06:00:00"
     assert not errors([{"spec": spec}])
