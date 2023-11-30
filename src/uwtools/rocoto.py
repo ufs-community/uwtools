@@ -94,12 +94,13 @@ class _RocotoXML:
         with writable(path) as f:
             f.write(xml.strip())
 
-    def _add_compound_time_string(self, e: Element, tag: str, config: dict) -> None:
+    def _add_compound_time_string(self, e: Element, config: dict, tag: str) -> None:
         """
         Add to the task an element possibly containing a <cyclestr>.
 
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
+        :param tag: Name of new element to add.
         """
         config = config[tag]
         e = SubElement(e, tag)
@@ -167,7 +168,7 @@ class _RocotoXML:
             STR.stdout,
         ):
             if tag in config:
-                self._add_compound_time_string(e, tag, config)
+                self._add_compound_time_string(e, config, tag)
         for name, value in config.get(STR.envars, {}).items():
             self._add_task_envar(e, name, value)
         if STR.dependency in config:
@@ -207,7 +208,7 @@ class _RocotoXML:
                 if tag == STR.taskdep:
                     self._set_attrs(SubElement(e, tag), subconfig)
                 else:
-                    self._add_compound_time_string(e, tag, config)
+                    self._add_compound_time_string(e, config, tag)
             elif tag in operators:
                 self._add_task_dependency_operand_operator(SubElement(e, tag), config=subconfig)
             elif tag in strequality:
@@ -219,7 +220,7 @@ class _RocotoXML:
         """
         :param e: The parent element to add the new element to.
         :param subconfig: Configuration data for the tag.
-        :param tag: Configuration new element to add.
+        :param tag: Name of new element to add.
         """
         self._set_attrs(SubElement(e, tag), subconfig)
 
@@ -266,7 +267,7 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param logfile: The path to the log file.
         """
-        self._add_compound_time_string(e, STR.log, config)
+        self._add_compound_time_string(e, config, STR.log)
 
     def _add_workflow_tasks(self, e: Element, config: dict) -> None:
         """
