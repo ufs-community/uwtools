@@ -182,14 +182,14 @@ class _RocotoXML:
         """
         operands, operators, strequality = self._dependency_constants
         e = SubElement(e, STR.dependency)
-        for tag, block in config.items():
+        for tag, subconfig in config.items():
             tag, _ = self._tag_name(tag)
             if tag in operands:
-                self._add_task_dependency_operand_operator(e, config={tag: block})
+                self._add_task_dependency_operand_operator(e, config={tag: subconfig})
             elif tag in operators:
-                self._add_task_dependency_operand_operator(e, config={tag: block})
+                self._add_task_dependency_operand_operator(e, config={tag: subconfig})
             elif tag in strequality:
-                self._add_task_dependency_strequality(e, block=block, tag=tag)
+                self._add_task_dependency_strequality(e, subconfig=subconfig, tag=tag)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
@@ -201,27 +201,27 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         """
         operands, operators, strequality = self._dependency_constants
-        for tag, block in config.items():
+        for tag, subconfig in config.items():
             tag, _ = self._tag_name(tag)
             if tag in operands:
                 if tag == STR.taskdep:
-                    self._set_attrs(SubElement(e, tag), block)
+                    self._set_attrs(SubElement(e, tag), subconfig)
                 else:
                     self._add_compound_time_string(e, tag, config)
             elif tag in operators:
-                self._add_task_dependency_operand_operator(SubElement(e, tag), config=block)
+                self._add_task_dependency_operand_operator(SubElement(e, tag), config=subconfig)
             elif tag in strequality:
-                self._add_task_dependency_strequality(e, block=block, tag=tag)
+                self._add_task_dependency_strequality(e, subconfig=subconfig, tag=tag)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
-    def _add_task_dependency_strequality(self, e: Element, block: dict, tag: str) -> None:
+    def _add_task_dependency_strequality(self, e: Element, subconfig: dict, tag: str) -> None:
         """
         :param e: The parent element to add the new element to.
-        :param block: Configuration data for the tag.
+        :param subconfig: Configuration data for the tag.
         :param tag: Configuration new element to add.
         """
-        self._set_attrs(SubElement(e, tag), block)
+        self._set_attrs(SubElement(e, tag), subconfig)
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """
@@ -275,9 +275,9 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for these elements.
         """
-        for key, block in config.items():
+        for key, subconfig in config.items():
             tag, name = self._tag_name(key)
-            {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, block, name)
+            {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, subconfig, name)
 
     def _config_validate(self, config_file: OptionalPath) -> None:
         """
