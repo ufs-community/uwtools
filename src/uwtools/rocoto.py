@@ -153,23 +153,6 @@ class _RocotoXML:
         if STR.dependency in config:
             self._add_task_dependency(e, config[STR.dependency])
 
-    def _add_task_element_cyclestr_opt(self, e: Element, tag: str, config: dict) -> None:
-        """
-        Add to the task an element possibly containing a <cyclestr>.
-
-        :param e: The parent element to add the new element to.
-        :param config: Configuration data for this element.
-        """
-        config = config[tag]
-        e = SubElement(e, tag)
-        if isinstance(config, str):
-            e.text = config
-        else:
-            config = config[STR.cyclestr]
-            cyclestr = SubElement(e, STR.cyclestr)
-            cyclestr.text = config["value"]
-            self._set_attrs(cyclestr, config)
-
     def _add_task_dependency(self, e: Element, config: dict) -> None:
         """
         Add a <dependency> element to the <task>.
@@ -216,6 +199,23 @@ class _RocotoXML:
         :param tag: Configuration new element to add.
         """
         self._set_attrs(SubElement(e, tag), block)
+
+    def _add_task_element_cyclestr_opt(self, e: Element, tag: str, config: dict) -> None:
+        """
+        Add to the task an element possibly containing a <cyclestr>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        config = config[tag]
+        e = SubElement(e, tag)
+        if isinstance(config, str):
+            e.text = config
+        else:
+            config = config[STR.cyclestr]
+            cyclestr = SubElement(e, STR.cyclestr)
+            cyclestr.text = config["value"]
+            self._set_attrs(cyclestr, config)
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """
