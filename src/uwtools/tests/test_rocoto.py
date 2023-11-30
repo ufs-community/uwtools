@@ -4,15 +4,20 @@ Tests for uwtools.rocoto module.
 """
 
 import shutil
+from typing import Callable, List
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
 import pytest
+import yaml
+from lxml import etree
 from pytest import fixture, raises
 
 from uwtools import rocoto
+from uwtools.config.validator import _validation_errors
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
+from uwtools.utils.file import resource_pathobj
 
 # Fixtures
 
@@ -22,7 +27,32 @@ def assets(tmp_path):
     return fixture_path("hello_workflow.yaml"), tmp_path / "rocoto.xml"
 
 
+# Helpers
+
+
+def validator(*args) -> Callable:
+    with open(resource_pathobj("rocoto.jsonschema"), "r", encoding="utf-8") as f:
+        schema = yaml.safe_load(f)
+    for arg in args:
+        schema = {"$defs": schema["$defs"], **schema["properties"][arg]}
+    return lambda config: "\n".join(str(x) for x in _validation_errors(config, schema))
+
+
 # Tests
+
+
+def test_realize_rocoto_invalid_xml(assets):
+    cfgfile, outfile = assets
+    with open(fixture_path("hello_workflow.xml"), "r", encoding="utf-8") as f:
+        e = etree.parse(f)
+    cycledef = e.xpath("/workflow/cycledef")[0]
+    cycledef.getparent().remove(cycledef)
+    invalid = outfile.parent / "bad.xml"
+    with open(invalid, "w", encoding="utf-8") as f:
+        f.write(etree.tostring(e).decode())
+    dump = lambda _, dst: shutil.copyfile(str(invalid), dst)
+    with patch.object(rocoto._RocotoXML, "dump", dump):
+        assert rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile) is False
 
 
 def test_realize_rocoto_xml_to_file(assets):
@@ -38,21 +68,11 @@ def test_realize_rocoto_xml_to_stdout(capsys, assets):
     assert rocoto.validate_rocoto_xml(outfile)
 
 
-def test_realize_rocoto_invalid_xml(assets):
-    cfgfile, outfile = assets
-    dump = lambda _, dst: shutil.copyfile(fixture_path("rocoto_invalid.xml"), dst)
-    with patch.object(rocoto._RocotoXML, "dump", dump):
-        assert rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile) is False
+def test_validate_rocoto_xml():
+    assert rocoto.validate_rocoto_xml(input_xml=fixture_path("hello_workflow.xml")) is True
 
 
-@pytest.mark.parametrize("vals", [("hello_workflow.xml", True), ("rocoto_invalid.xml", False)])
-def test_validate_rocoto_xml(vals):
-    fn, validity = vals
-    xml = fixture_path(fn)
-    assert rocoto.validate_rocoto_xml(input_xml=xml) is validity
-
-
-class Test_RocotoXML:
+class Test__RocotoXML:
     """
     Tests for class uwtools.rocoto._RocotoXML.
     """
@@ -196,30 +216,33 @@ class Test_RocotoXML:
         config = {
             "workflow": {
                 "attrs": {"foo": "1", "bar": "2"},
-                "cycledefs": "3",
+                "cycledef": "3",
                 "log": "4",
                 "tasks": "5",
             }
         }
         with patch.multiple(
-            instance, _add_workflow_cycledefs=D, _add_workflow_log=D, _add_workflow_tasks=D
+            instance, _add_workflow_cycledef=D, _add_workflow_log=D, _add_workflow_tasks=D
         ) as mocks:
             instance._add_workflow(config=config)
         workflow = instance._root
         assert workflow.tag == "workflow"
         assert workflow.get("foo") == "1"
         assert workflow.get("bar") == "2"
-        mocks["_add_workflow_cycledefs"].assert_called_once_with(workflow, "3")
+        mocks["_add_workflow_cycledef"].assert_called_once_with(workflow, "3")
         mocks["_add_workflow_log"].assert_called_once_with(workflow, "4")
         mocks["_add_workflow_tasks"].assert_called_once_with(workflow, "5")
 
-    def test__add_workflow_cycledefs(self, instance, root):
-        config = {"foo": ["1", "2"], "bar": ["3", "4"]}
-        instance._add_workflow_cycledefs(e=root, config=config)
-        for i, group, coord in [(0, "foo", "1"), (1, "foo", "2"), (2, "bar", "3"), (3, "bar", "4")]:
+    def test__add_workflow_cycledef(self, instance, root):
+        config: List[dict] = [
+            {"attrs": {"group": "g1"}, "spec": "t1"},
+            {"attrs": {"group": "g2"}, "spec": "t2"},
+        ]
+        instance._add_workflow_cycledef(e=root, config=config)
+        for i, item in enumerate(config):
+            assert root[i].get("group") == item["attrs"]["group"]
             assert root[i].tag == "cycledef"
-            assert root[i].get("group") == group
-            assert root[i].text == coord
+            assert root[i].text == item["spec"]
 
     def test__add_workflow_log(self, instance, root):
         path = "/path/to/logfile"
@@ -271,3 +294,35 @@ class Test_RocotoXML:
         assert instance._tag_name("foo") == ("foo", "")
         assert instance._tag_name("foo_bar") == ("foo", "bar")
         assert instance._tag_name("foo_bar_baz") == ("foo", "bar_baz")
+
+
+# Schema tests
+
+
+def test_schema_workflow_cycledef():
+    errors = validator("workflow", "cycledef")
+    # Basic spec:
+    spec = "202311291200 202312011200 06:00:00"
+    assert not errors([{"spec": spec}])
+    # Spec with step specified as seconds:
+    assert not errors([{"spec": "202311291200 202312011200 3600"}])
+    # Basic spec with group attribute:
+    assert not errors([{"attrs": {"group": "g"}, "spec": spec}])
+    # Spec with positive activation offset attribute:
+    assert not errors([{"attrs": {"activation_offset": "12:00:00"}, "spec": spec}])
+    # Spec with negative activation offset attribute:
+    assert not errors([{"attrs": {"activation_offset": "-12:00:00"}, "spec": spec}])
+    # Spec with activation offset specified as positive seconds:
+    assert not errors([{"attrs": {"activation_offset": "3600"}, "spec": spec}])
+    # Spec with activation offset specified as negative seconds:
+    assert not errors([{"attrs": {"activation_offset": "-3600"}, "spec": spec}])
+    # Property spec is required:
+    assert "'spec' is a required property" in errors([{}])
+    # Additional properties are not allowed:
+    assert "'foo' was unexpected" in errors([{"spec": spec, "foo": "bar"}])
+    # Additional attributes are not allowed:
+    assert "'foo' was unexpected" in errors([{"attrs": {"foo": "bar"}, "spec": spec}])
+    # Bad spec:
+    assert "'x 202312011200 06:00:00' is not valid" in errors([{"spec": "x 202312011200 06:00:00"}])
+    # Spec with bad activation offset attribute:
+    assert "'foo' is not valid" in errors([{"attrs": {"activation_offset": "foo"}, "spec": spec}])
