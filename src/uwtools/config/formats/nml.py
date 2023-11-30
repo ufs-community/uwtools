@@ -3,6 +3,7 @@ from collections import OrderedDict
 import f90nml
 
 from uwtools.config.formats.base import Config
+from uwtools.config.support import depth
 from uwtools.utils.file import OptionalPath, readable, writable
 
 
@@ -60,6 +61,8 @@ class NMLConfig(Config):
 
         # f90nml honors namelist and variable order if it receives an OrderedDict as input, so
         # ensure that it receives one.
+
+        assert depth(cfg) <= NMLConfig.DEPTH
 
         def to_od(d):
             return OrderedDict(

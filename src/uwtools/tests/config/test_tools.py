@@ -144,7 +144,7 @@ def test_compare_configs_bad_format(caplog):
 @pytest.mark.parametrize("fmt", ["ini", "sh"])
 def test__config_check_depths_fail_sh(fmt, realize_config_testobj):
     with raises(UWConfigError):
-        tools._config_check_depths(input_obj=realize_config_testobj, target_format=fmt)
+        tools.config_check_depths(input_obj=realize_config_testobj, target_format=fmt)
 
 
 def test_realize_config_conversion_cfg_to_yaml(tmp_path):

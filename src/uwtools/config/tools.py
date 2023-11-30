@@ -38,6 +38,24 @@ def compare_configs(
     return cfg_a.compare_config(cfg_b.data)
 
 
+def config_check_depths(input_obj: Config, target_format: Optional[str]) -> None:
+    """
+    Check that the depth of the input config does not exceed the target format's max.
+
+    :param input_obj: The input config.
+    :param target_format: The target config.:
+    :raises: UWConfigError on excessive input-config depth.
+    """
+    cfgclass = format_to_config(str(target_format))
+    if cfgclass.DEPTH and input_obj.depth != cfgclass.DEPTH:
+        msg = "Cannot write depth-%s input to type-'%s' target" % (
+            input_obj.depth,
+            cfgclass.depth,
+        )
+        log.error(msg)
+        raise UWConfigError(msg)
+
+
 def realize_config(
     input_file: OptionalPath,
     input_format: str,
@@ -66,7 +84,7 @@ def realize_config(
     input_obj = format_to_config(input_format)(config_file=input_file)
     input_obj.dereference()
     input_obj = _realize_config_update(input_obj, values_file, values_format)
-    _config_check_depths(input_obj, output_format)
+    config_check_depths(input_obj, output_format)
     if values_needed:
         return _realize_config_values_needed(input_obj)
     if dry_run:
@@ -104,21 +122,6 @@ def _print_config_section(config: dict, key_path: List[str]) -> None:
     print("\n".join(sorted(output_lines)))
 
 
-def _config_check_depths(input_obj: Config, target_format: Optional[str]) -> None:
-    """
-    Check that the depth of the input config does not exceed the target format's max.
-
-    :param input_obj: The input config.
-    :param target_format: The target format. Could be realize output or update input.:
-    :raises: UWConfigError on excessive input-config depth.
-    """
-    cfgclass = format_to_config(str(target_format))
-    if cfgclass.DEPTH and input_obj.depth != cfgclass.DEPTH:
-        msg = "Cannot write depth-%s input to type-'%s' target" % (input_obj.depth, target_format)
-        log.error(msg)
-        raise UWConfigError(msg)
-
-
 def _realize_config_update(
     input_obj: Config, values_file: OptionalPath, values_format: Optional[str]
 ) -> Config:
@@ -132,11 +135,11 @@ def _realize_config_update(
     """
 
     if values_file:
-        _config_check_depths(input_obj, values_format)
         log.debug("Before update, config has depth %s", input_obj.depth)
         values_format = values_format or get_file_type(values_file)
         values_obj = format_to_config(values_format)(config_file=values_file)
         log.debug("Values config has depth %s", values_obj.depth)
+        config_check_depths(input_obj, values_format)
         input_obj.update_values(values_obj)
         input_obj.dereference()
         log.debug("After update, input config has depth %s", input_obj.depth)
