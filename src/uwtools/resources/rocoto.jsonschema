@@ -1,9 +1,38 @@
 {
   "$defs": {
-    "datePattern": {
-      "format": "string",
-      "pattern": "^[0-9]{12} [0-9]{12}$",
-      "type": "integer"
+    "compoundTimestring": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "cyclestr": {
+              "additionalProperties": false,
+              "properties": {
+                "attrs": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "offset": {
+                      "$ref": "#/$defs/time"
+                    }
+                  },
+                  "type": "object"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "cyclestr"
+          ],
+          "type": "object"
+        }
+      ]
     },
     "dependency": {
       "additionalProperties": false,
@@ -286,7 +315,7 @@
           "type": "integer"
         },
         "deadline": {
-          "$ref": "#/$defs/datePattern"
+          "$ref": "#/$defs/compoundtimestring"
         },
         "dependency": {
           "$ref": "#/$defs/dependency"
