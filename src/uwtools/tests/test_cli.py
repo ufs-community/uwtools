@@ -298,11 +298,6 @@ def test__dispatch_config_validate_no_optional():
     _validate_yaml_file.assert_called_once_with(config_file=None, schema_file="/foo.schema")
 
 
-def test__dispatch_config_validate_unsupported():
-    args = {STR.infile: 1, STR.infmt: "jpg", STR.schemafile: 3}
-    assert cli._dispatch_config_validate(args) is False
-
-
 def test__dispatch_config_validate_yaml():
     args = {STR.infile: 1, STR.infmt: FORMAT.yaml, STR.schemafile: 3}
     with patch.object(uwtools.api.config, "_validate_yaml_file") as _validate_yaml_file:

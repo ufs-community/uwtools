@@ -164,11 +164,7 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_schema_file(required)
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
-    _add_arg_input_format(optional, choices=[FORMAT.yaml])
-    checks = _add_args_quiet_and_verbose(optional)
-    return checks + [
-        partial(_check_file_vs_format, STR.infile, STR.infmt),
-    ]
+    return _add_args_quiet_and_verbose(optional)
 
 
 def _dispatch_config(args: Args) -> bool:
@@ -239,8 +235,7 @@ def _dispatch_config_validate(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.config.validate(
-        input_file=args[STR.infile],
-        input_format=args[STR.infmt],
+        config=args[STR.infile],
         schema_file=args[STR.schemafile],
     )
 

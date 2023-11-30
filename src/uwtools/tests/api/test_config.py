@@ -62,16 +62,10 @@ def test_translate(infmt, outfmt, success_expected):
         )
 
 
-@pytest.mark.parametrize("infmt,success_expected", [(FORMAT.yaml, True), ("invalid", False)])
-def test_validate(infmt, success_expected):
-    kwargs: dict = {
-        "input_file": "infile",
-        "input_format": infmt,
-        "schema_file": "schema",
-    }
+def test_validate():
+    kwargs: dict = {"config": "infile", "schema_file": "schema"}
     with patch.object(config, "_validate_yaml_file", return_value=True) as _validate_yaml_file:
-        assert config.validate(**kwargs) is success_expected
-    if success_expected:
-        _validate_yaml_file.assert_called_once_with(
-            config_file=kwargs["input_file"], schema_file=kwargs["schema_file"]
-        )
+        assert config.validate(**kwargs)
+    _validate_yaml_file.assert_called_once_with(
+        config_file=kwargs["config"], schema_file=kwargs["schema_file"]
+    )
