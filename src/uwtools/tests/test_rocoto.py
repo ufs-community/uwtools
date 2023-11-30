@@ -86,6 +86,24 @@ class Test__RocotoXML:
     def root(self):
         return rocoto.Element("root")
 
+    def test__add_compound_time_string_basic(self, instance, root):
+        config = {"foo": "bar"}
+        instance._add_compound_time_string(e=root, config=config, tag="foo")
+        child = root[0]
+        assert child.tag == "foo"
+        assert child.text == "bar"
+
+    def test__add_compound_time_string_cyclestr(self, instance, root):
+        config = {
+            "foo": {"attrs": {"bar": "88"}, "cyclestr": {"attrs": {"baz": "99"}, "value": "qux"}}
+        }
+        instance._add_compound_time_string(e=root, config=config, tag="foo")
+        child = root[0]
+        assert child.get("bar") == "88"
+        cyclestr = child[0]
+        assert cyclestr.get("baz") == "99"
+        assert cyclestr.text == "qux"
+
     def test__add_metatask(self, instance, root):
         config = {"metatask_foo": "1", "task_bar": "2", "var": {"baz": "3", "qux": "4"}}
         taskname = "test-metatask"
