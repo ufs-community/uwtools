@@ -141,6 +141,12 @@ def test_compare_configs_bad_format(caplog):
     assert msg in str(e.value)
 
 
+@pytest.mark.parametrize("fmt", ["ini", "sh"])
+def test__config_check_depths_fail_sh(fmt, realize_config_testobj):
+    with raises(UWConfigError):
+        tools._config_check_depths(input_obj=realize_config_testobj, target_format=fmt)
+
+
 def test_realize_config_conversion_cfg_to_yaml(tmp_path):
     """
     Test that a .cfg file can be used to create a YAML object.
@@ -521,12 +527,6 @@ def test__print_config_section_yaml_not_dict():
     with raises(UWConfigError) as e:
         tools._print_config_section(config_obj.data, section)
     assert "must be a dictionary" in str(e.value)
-
-
-@pytest.mark.parametrize("fmt", ["ini", "sh"])
-def test__realize_config_check_depths_fail_sh(fmt, realize_config_testobj):
-    with raises(UWConfigError):
-        tools._realize_config_check_depths(input_obj=realize_config_testobj, output_format=fmt)
 
 
 def test__realize_config_update_noop(realize_config_testobj):

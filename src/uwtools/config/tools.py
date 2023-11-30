@@ -66,7 +66,7 @@ def realize_config(
     input_obj = format_to_config(input_format)(config_file=input_file)
     input_obj.dereference()
     input_obj = _realize_config_update(input_obj, values_file, values_format)
-    _realize_config_check_depths(input_obj, output_format)
+    _config_check_depths(input_obj, output_format)
     if values_needed:
         return _realize_config_values_needed(input_obj)
     if dry_run:
@@ -104,17 +104,17 @@ def _print_config_section(config: dict, key_path: List[str]) -> None:
     print("\n".join(sorted(output_lines)))
 
 
-def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
+def _config_check_depths(input_obj: Config, target_format: Optional[str]) -> None:
     """
-    Check that the depth of the input config does not exceed the output format's max.
+    Check that the depth of the input config does not exceed the target format's max.
 
     :param input_obj: The input config.
-    :param output_format: The output format:
+    :param target_format: The target format. Could be realize output or update input.:
     :raises: UWConfigError on excessive input-config depth.
     """
-    cfgclass = format_to_config(output_format)
+    cfgclass = format_to_config(str(target_format))
     if cfgclass.DEPTH and input_obj.depth != cfgclass.DEPTH:
-        msg = "Cannot write depth-%s input to type-'%s' output" % (input_obj.depth, output_format)
+        msg = "Cannot write depth-%s input to type-'%s' target" % (input_obj.depth, target_format)
         log.error(msg)
         raise UWConfigError(msg)
 
@@ -130,7 +130,9 @@ def _realize_config_update(
     :param values_format: Format of the values config file.
     :return: The input config, possibly updated.
     """
+
     if values_file:
+        _config_check_depths(input_obj, values_format)
         log.debug("Before update, config has depth %s", input_obj.depth)
         values_format = values_format or get_file_type(values_file)
         values_obj = format_to_config(values_format)(config_file=values_file)
