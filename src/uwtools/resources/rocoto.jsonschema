@@ -1,6 +1,6 @@
 {
   "$defs": {
-    "compoundTimestring": {
+    "compoundTimeString": {
       "anyOf": [
         {
           "type": "string"
@@ -315,7 +315,7 @@
           "type": "integer"
         },
         "deadline": {
-          "$ref": "#/$defs/compoundtimestring"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "dependency": {
           "$ref": "#/$defs/dependency"
