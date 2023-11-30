@@ -31,6 +31,9 @@ def assets(tmp_path):
 
 
 def validator(*args) -> Callable:
+    # Supply, as args, zero or more keys leading through the schema dict to the sub-schema to be
+    # used to validate some input. This function returns a lambda that, when called with the input
+    # to test, returns a string (possibly empty) containing the validation errors.
     with open(resource_pathobj("rocoto.jsonschema"), "r", encoding="utf-8") as f:
         schema = yaml.safe_load(f)
     for arg in args:
