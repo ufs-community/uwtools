@@ -7,7 +7,8 @@ def realize(input_file: OptionalPath, output_file: OptionalPath) -> bool:
     """
     ???
     """
-    return _realize(config=input_file, output_file=output_file)
+    _realize(config=input_file, output_file=output_file)
+    return True
 
 
 def validate(input_file: OptionalPath) -> bool:

@@ -352,12 +352,6 @@ def test__dispatch_rocoto_realize():
     _realize.assert_called_once_with(config=1, output_file=2)
 
 
-def test__dispatch_rocoto_realize_invalid():
-    args = {STR.infile: 1, STR.outfile: 2}
-    with patch.object(uwtools.api.rocoto, "_realize", return_value=False):
-        assert cli._dispatch_rocoto_realize(args) is False
-
-
 def test__dispatch_rocoto_realize_no_optional():
     args = {STR.infile: None, STR.outfile: None}
     with patch.object(uwtools.api.rocoto, "_realize") as module:
