@@ -6,14 +6,14 @@ import re
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from lxml import etree
 from lxml.etree import Element, SubElement
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import dereference
-from uwtools.config.validator import validate_yaml_file
+from uwtools.config.validator import validate_yaml_config, validate_yaml_file
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.types import OptionalPath
@@ -73,9 +73,10 @@ class _RocotoXML:
     Generate a Rocoto XML document from a UW YAML config.
     """
 
-    def __init__(self, config_file: OptionalPath = None) -> None:
-        self._config_validate(config_file)
-        self._config = YAMLConfig(config_file).data
+    def __init__(self, config: Union[OptionalPath, YAMLConfig] = None) -> None:
+        self._config_validate(config)
+        cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
+        self._config = cfgobj.data
         self._add_workflow(self._config)
 
     def dump(self, path: OptionalPath = None) -> None:
@@ -257,16 +258,19 @@ class _RocotoXML:
             tag, name = self._tag_name(key)
             {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, block, name)
 
-    def _config_validate(self, config_file: OptionalPath) -> None:
+    def _config_validate(self, config: Union[OptionalPath, YAMLConfig]) -> None:
         """
         Validate the given YAML config.
 
-        :param config_file: Path to the YAML config (defaults to stdin).
+        :param config_file: Path to YAML config file, or a YAMLConfig object.
         """
-        if not validate_yaml_file(
-            config_file=config_file, schema_file=resource_pathobj("rocoto.jsonschema")
-        ):
-            raise UWConfigError("YAML validation errors identified in %s" % config_file)
+        schema_file = resource_pathobj("rocoto.jsonschema")
+        if isinstance(config, YAMLConfig):
+            ok = validate_yaml_config(schema_file=schema_file, config=config)
+        else:
+            ok = validate_yaml_file(schema_file=schema_file, config_file=config)
+        if not ok:
+            raise UWConfigError("YAML validation errors")
 
     @property
     def _dependency_constants(self) -> Tuple[Tuple, Tuple, Tuple]:

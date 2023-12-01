@@ -14,6 +14,7 @@ from lxml import etree
 from pytest import fixture, raises
 
 from uwtools import rocoto
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import _validation_errors
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
@@ -80,11 +81,15 @@ class Test__RocotoXML:
     @fixture
     def instance(self, assets):
         cfgfile, _ = assets
-        return rocoto._RocotoXML(config_file=cfgfile)
+        return rocoto._RocotoXML(config=cfgfile)
 
     @fixture
     def root(self):
         return rocoto.Element("root")
+
+    def test_instantiate_from_cfgobj(self, assets):
+        cfgfile, _ = assets
+        assert rocoto._RocotoXML(config=YAMLConfig(cfgfile))._root.tag == "workflow"
 
     def test__add_metatask(self, instance, root):
         config = {"metatask_foo": "1", "task_bar": "2", "var": {"baz": "3", "qux": "4"}}
@@ -192,16 +197,27 @@ class Test__RocotoXML:
         for attr, val in block["attrs"].items():
             assert element.get(attr) == val
 
-    def test__config_validate(self, assets, instance):
+    def test__config_validate_config(self, assets, instance):
         cfgfile, _ = assets
-        instance._config_validate(config_file=cfgfile)
+        instance._config_validate(config=YAMLConfig(cfgfile))
 
-    def test__config_validate_fail(self, instance, tmp_path):
+    def test__config_validate_file(self, assets, instance):
+        cfgfile, _ = assets
+        instance._config_validate(config=cfgfile)
+
+    def test__config_validate_config_fail(self, instance, tmp_path):
         cfgfile = tmp_path / "bad.yaml"
         with open(cfgfile, "w", encoding="utf-8") as f:
             print("not: ok", file=f)
         with raises(UWConfigError):
-            instance._config_validate(config_file=cfgfile)
+            instance._config_validate(config=YAMLConfig(cfgfile))
+
+    def test__config_validate_file_fail(self, instance, tmp_path):
+        cfgfile = tmp_path / "bad.yaml"
+        with open(cfgfile, "w", encoding="utf-8") as f:
+            print("not: ok", file=f)
+        with raises(UWConfigError):
+            instance._config_validate(config=cfgfile)
 
     def test__add_task_envar(self, instance, root):
         instance._add_task_envar(root, "foo", "bar")
