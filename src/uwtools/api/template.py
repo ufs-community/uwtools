@@ -5,9 +5,9 @@ from uwtools.types import DefinitePath, OptionalPath
 
 
 def render(
-    input_file: OptionalPath,
-    output_file: OptionalPath,
     values_file: DefinitePath,
+    input_file: OptionalPath = None,
+    output_file: OptionalPath = None,
     values_format: Optional[str] = None,
     overrides: Optional[Dict[str, str]] = None,
     values_needed: bool = False,
