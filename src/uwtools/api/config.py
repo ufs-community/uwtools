@@ -1,9 +1,6 @@
 # pylint: disable=unused-import
 
-from tempfile import NamedTemporaryFile
 from typing import Optional, Union
-
-import yaml
 
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
@@ -78,10 +75,8 @@ def validate(schema_file: DefinitePath, config: Union[dict, _YAMLConfig, Optiona
     ???
     """
     if isinstance(config, dict):
-        with NamedTemporaryFile(mode="w", encoding="utf-8") as f:
-            yaml.dump({}, f)
-            cfgobj = _YAMLConfig(f.name)
-        cfgobj.data = config
+        cfgobj = _YAMLConfig(empty=True)
+        cfgobj.update(config)
         return _validate_yaml_config(schema_file=schema_file, config=cfgobj)
     if isinstance(config, _YAMLConfig):
         return _validate_yaml_config(schema_file=schema_file, config=config)
