@@ -6,7 +6,7 @@ from typing import List, Optional
 
 from uwtools.config.formats.base import Config
 from uwtools.config.support import format_to_config, log_and_error
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import get_file_type
@@ -39,12 +39,12 @@ def compare_configs(
 
 
 def realize_config(
-    input_file: OptionalPath,
-    input_format: str,
-    output_file: OptionalPath,
-    output_format: str,
-    values_file: OptionalPath,
-    values_format: Optional[str],
+    input_file: OptionalPath = None,
+    input_format: Optional[str] = None,
+    output_file: OptionalPath = None,
+    output_format: Optional[str] = None,
+    values_file: OptionalPath = None,
+    values_format: Optional[str] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> bool:
@@ -63,9 +63,14 @@ def realize_config(
     :raises: UWConfigError if errors are encountered.
     """
 
+    # #PM# get_file_type() -> get_file_format()
+    # #PM# _ensure_format() unit tests
+
+    input_format = _ensure_format(input_format, input_file, "input")
     input_obj = format_to_config(input_format)(config_file=input_file)
     input_obj.dereference()
     input_obj = _realize_config_update(input_obj, values_file, values_format)
+    output_format = _ensure_format(output_format, output_file, "output")
     _realize_config_check_depths(input_obj, output_format)
     if values_needed:
         return _realize_config_values_needed(input_obj)
@@ -77,6 +82,24 @@ def realize_config(
 
 
 # Private functions
+
+
+def _ensure_format(fmt: Optional[str], path: OptionalPath, desc: str) -> str:
+    """
+    Return the given file format, or the the format deduced from the path.
+
+    :param fmt: The config format name.
+    :param path: The path to the file.
+    :param desc: A description of the file.
+    :return: The specified or deduced format.
+    :raises: UWError if the format cannot be determined.
+    """
+    if fmt is None:
+        if path is not None:
+            fmt = get_file_type(path)
+        else:
+            raise UWError(f"Either {desc} file format or name must be specified")
+    return fmt
 
 
 def _print_config_section(config: dict, key_path: List[str]) -> None:

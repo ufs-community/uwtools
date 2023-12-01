@@ -30,12 +30,12 @@ def compare(
 
 
 def realize(
-    input_file: OptionalPath,
-    input_format: str,
-    output_file: OptionalPath,
-    output_format: str,
-    values_file: OptionalPath,
-    values_format: Optional[str],
+    input_file: OptionalPath = None,
+    input_format: Optional[str] = None,
+    output_file: OptionalPath = None,
+    output_format: Optional[str] = None,
+    values_file: OptionalPath = None,
+    values_format: Optional[str] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> bool:
@@ -70,7 +70,9 @@ def translate(
     return False
 
 
-def validate(schema_file: DefinitePath, config: Union[dict, _YAMLConfig, OptionalPath]) -> bool:
+def validate(
+    schema_file: DefinitePath, config: Optional[Union[dict, _YAMLConfig, OptionalPath]] = None
+) -> bool:
     """
     ???
     """

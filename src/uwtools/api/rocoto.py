@@ -5,7 +5,7 @@ from uwtools.rocoto import validate_rocoto_xml_file as _validate
 from uwtools.types import OptionalPath
 
 
-def realize(input_file: OptionalPath, output_file: OptionalPath) -> bool:
+def realize(input_file: OptionalPath = None, output_file: OptionalPath = None) -> bool:
     """
     ???
     """
@@ -13,14 +13,14 @@ def realize(input_file: OptionalPath, output_file: OptionalPath) -> bool:
     return True
 
 
-def realize_as_str(input_file: OptionalPath) -> str:
+def realize_as_str(input_file: OptionalPath = None) -> str:
     """
     ???
     """
     return _realize(config=input_file, output_file=os.devnull)
 
 
-def validate(input_file: OptionalPath) -> bool:
+def validate(input_file: OptionalPath = None) -> bool:
     """
     ???
     """
