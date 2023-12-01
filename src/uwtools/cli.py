@@ -20,7 +20,7 @@ import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
 from uwtools.logging import log, setup_logging
-from uwtools.utils.file import FORMAT, get_file_type
+from uwtools.utils.file import FORMAT, get_file_format
 
 FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
 TITLE_REQ_ARG = "Required arguments"
@@ -690,7 +690,7 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
     if args.get(format_arg) is None:
         if args.get(file_arg) is None:
             _abort("Specify %s when %s is not specified" % (_switch(format_arg), _switch(file_arg)))
-        args[format_arg] = get_file_type(args[file_arg])
+        args[format_arg] = get_file_format(args[file_arg])
     return args
 
 
@@ -707,7 +707,7 @@ def _check_template_render_vals_args(args: Args) -> Args:
     # extension.
     if args.get(STR.valsfile) is not None:
         if args.get(STR.valsfmt) is None:
-            args[STR.valsfmt] = get_file_type(args[STR.valsfile])
+            args[STR.valsfmt] = get_file_format(args[STR.valsfile])
     return args
 
 

@@ -9,7 +9,7 @@ from uwtools.config.support import format_to_config, log_and_error
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import get_file_type
+from uwtools.utils.file import get_file_format
 
 # Public functions
 
@@ -63,7 +63,6 @@ def realize_config(
     :raises: UWConfigError if errors are encountered.
     """
 
-    # #PM# get_file_type() -> get_file_format()
     # #PM# _ensure_format() unit tests
 
     input_format = _ensure_format(input_format, input_file, "input")
@@ -96,7 +95,7 @@ def _ensure_format(fmt: Optional[str], path: OptionalPath, desc: str) -> str:
     """
     if fmt is None:
         if path is not None:
-            fmt = get_file_type(path)
+            fmt = get_file_format(path)
         else:
             raise UWError(f"Either {desc} file format or name must be specified")
     return fmt
@@ -155,7 +154,7 @@ def _realize_config_update(
     """
     if values_file:
         log.debug("Before update, config has depth %s", input_obj.depth)
-        values_format = values_format or get_file_type(values_file)
+        values_format = values_format or get_file_format(values_file)
         values_obj = format_to_config(values_format)(config_file=values_file)
         log.debug("Values config has depth %s", values_obj.depth)
         input_obj.update_values(values_obj)

@@ -20,7 +20,7 @@ from jinja2.exceptions import UndefinedError
 from uwtools.config.support import format_to_config
 from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import get_file_type, readable, writable
+from uwtools.utils.file import get_file_format, readable, writable
 
 _YAMLVal = Union[bool, dict, float, int, list, str]
 
@@ -303,7 +303,7 @@ def _set_up_values_obj(
     """
     if values_file:
         if values_format is None:
-            values_format = get_file_type(values_file)
+            values_format = get_file_format(values_file)
         values_class = format_to_config(values_format)
         values = values_class(values_file).data
         log.debug("Read initial values from %s", values_file)
