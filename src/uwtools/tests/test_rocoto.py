@@ -61,7 +61,7 @@ def test_realize_rocoto_xml_to_file(assets):
     assert rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile) is True
 
 
-def test_realize_rocoto_xml_to_stdout(capsys, assets):
+def test_realize_rocoto_xml_file_to_stdout(capsys, assets):
     cfgfile, outfile = assets
     assert rocoto.realize_rocoto_xml(config_file=cfgfile) is True
     with open(outfile, "w", encoding="utf-8") as f:
@@ -71,6 +71,11 @@ def test_realize_rocoto_xml_to_stdout(capsys, assets):
 
 def test_validate_rocoto_xml_file():
     assert rocoto.validate_rocoto_xml_file(xml_file=fixture_path("hello_workflow.xml")) is True
+
+
+def test_validate_rocoto_xml_string():
+    with open(fixture_path("hello_workflow.xml"), "r", encoding="utf-8") as f:
+        assert rocoto.validate_rocoto_xml_string(xml=f.read()) is True
 
 
 class Test__RocotoXML:
