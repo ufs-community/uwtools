@@ -19,11 +19,14 @@ from uwtools.logging import log
 from uwtools.types import OptionalPath
 from uwtools.utils.file import readable, resource_pathobj, writable
 
+# def realize_rocoto_xml_FIXME(config: YAMLConfig) -> str:
+#     """
+#     ???
+#     """
+#     rx = _RocotoXML(config)
 
-def realize_rocoto_xml(
-    config_file: OptionalPath,
-    output_file: OptionalPath = None,
-) -> bool:
+
+def realize_rocoto_xml(config_file: OptionalPath, output_file: OptionalPath = None) -> bool:
     """
     Realize the Rocoto workflow defined in the given YAML as XML. Validate both the YAML input and
     XML output.
@@ -89,12 +92,7 @@ class _RocotoXML:
         self._config = cfgobj.data
         self._add_workflow(self._config)
 
-    def dump(self, path: OptionalPath = None) -> None:
-        """
-        Emit Rocoto XML document to file or stdout.
-
-        :param path: Optional path to write XML document to.
-        """
+    def __str__(self) -> str:
         # Render the tree to a string, fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"), insert
         # !DOCTYPE block, then write final XML.
         xml = etree.tostring(
@@ -102,8 +100,16 @@ class _RocotoXML:
         ).decode()
         xml = re.sub(r"&amp;([^;]+);", r"&\1;", xml)
         xml = self._insert_doctype(xml)
+        return xml
+
+    def dump(self, path: OptionalPath = None) -> None:
+        """
+        Emit Rocoto XML document to file or stdout.
+
+        :param path: Optional path to write XML document to.
+        """
         with writable(path) as f:
-            f.write(xml.strip())
+            f.write(str(self).strip())
 
     def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
         """
