@@ -17,12 +17,6 @@ from uwtools.logging import log
 from uwtools.types import OptionalPath
 from uwtools.utils.file import readable, resource_pathobj, writable
 
-# def realize_rocoto_xml_FIXME(config: YAMLConfig) -> str:
-#     """
-#     ???
-#     """
-#     rx = _RocotoXML(config)
-
 
 def realize_rocoto_xml(
     config: Union[OptionalPath, YAMLConfig], output_file: OptionalPath = None
