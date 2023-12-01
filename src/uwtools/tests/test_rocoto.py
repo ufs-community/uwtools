@@ -60,9 +60,22 @@ def test_realize_rocoto_invalid_xml(assets):
             rocoto.realize_rocoto_xml(config=cfgfile, output_file=outfile)
 
 
-def test_realize_rocoto_xml_to_file(assets):
+def test_realize_rocoto_xml_cfg_to_file(assets):
+    cfgfile, outfile = assets
+    assert rocoto.realize_rocoto_xml(config=YAMLConfig(cfgfile), output_file=outfile) is True
+
+
+def test_realize_rocoto_xml_file_to_file(assets):
     cfgfile, outfile = assets
     assert rocoto.realize_rocoto_xml(config=cfgfile, output_file=outfile) is True
+
+
+def test_realize_rocoto_xml_cfg_to_stdout(capsys, assets):
+    cfgfile, outfile = assets
+    assert rocoto.realize_rocoto_xml(config=YAMLConfig(cfgfile)) is True
+    with open(outfile, "w", encoding="utf-8") as f:
+        f.write(capsys.readouterr().out)
+    assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
 
 
 def test_realize_rocoto_xml_file_to_stdout(capsys, assets):
