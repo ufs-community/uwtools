@@ -28,6 +28,18 @@ def assets(tmp_path):
     return fixture_path("hello_workflow.yaml"), tmp_path / "rocoto.xml"
 
 
+@fixture
+def validation_assets(tmp_path):
+    xml_file_good = fixture_path("hello_workflow.xml")
+    with open(xml_file_good, "r", encoding="utf-8") as f:
+        xml_string_good = f.read()
+    xml_string_bad = "<bad/>"
+    xml_file_bad = tmp_path / "bad.xml"
+    with open(xml_file_bad, "w", encoding="utf-8") as f:
+        print(xml_string_bad, file=f)
+    return xml_file_bad, xml_file_good, xml_string_bad, xml_string_good
+
+
 # Helpers
 
 
@@ -69,13 +81,24 @@ def test_realize_rocoto_xml_file_to_stdout(capsys, assets):
     assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
 
 
-def test_validate_rocoto_xml_file():
-    assert rocoto.validate_rocoto_xml_file(xml_file=fixture_path("hello_workflow.xml")) is True
+def test_validate_rocoto_xml_file_fail(validation_assets):
+    xml_file_bad, _, _, _ = validation_assets
+    assert rocoto.validate_rocoto_xml_file(xml_file=xml_file_bad) is False
 
 
-def test_validate_rocoto_xml_string():
-    with open(fixture_path("hello_workflow.xml"), "r", encoding="utf-8") as f:
-        assert rocoto.validate_rocoto_xml_string(xml=f.read()) is True
+def test_validate_rocoto_xml_file_pass(validation_assets):
+    _, xml_file_good, _, _ = validation_assets
+    assert rocoto.validate_rocoto_xml_file(xml_file=xml_file_good) is True
+
+
+def test_validate_rocoto_xml_string_fail(validation_assets):
+    _, _, xml_string_bad, _ = validation_assets
+    assert rocoto.validate_rocoto_xml_string(xml=xml_string_bad) is False
+
+
+def test_validate_rocoto_xml_string_pass(validation_assets):
+    _, _, _, xml_string_good = validation_assets
+    assert rocoto.validate_rocoto_xml_string(xml=xml_string_good) is True
 
 
 class Test__RocotoXML:
