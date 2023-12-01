@@ -349,7 +349,7 @@ def test__dispatch_rocoto_realize():
     args = {STR.infile: 1, STR.outfile: 2}
     with patch.object(uwtools.api.rocoto, "_realize") as _realize:
         cli._dispatch_rocoto_realize(args)
-    _realize.assert_called_once_with(config_file=1, output_file=2)
+    _realize.assert_called_once_with(config=1, output_file=2)
 
 
 def test__dispatch_rocoto_realize_invalid():
@@ -362,7 +362,7 @@ def test__dispatch_rocoto_realize_no_optional():
     args = {STR.infile: None, STR.outfile: None}
     with patch.object(uwtools.api.rocoto, "_realize") as module:
         cli._dispatch_rocoto_realize(args)
-    module.assert_called_once_with(config_file=None, output_file=None)
+    module.assert_called_once_with(config=None, output_file=None)
 
 
 def test__dispatch_rocoto_validate_xml():

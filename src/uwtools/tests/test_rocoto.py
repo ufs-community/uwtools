@@ -57,17 +57,17 @@ def test_realize_rocoto_invalid_xml(assets):
     with patch.object(rocoto, "validate_rocoto_xml_string") as vrxs:
         vrxs.return_value = False
         with raises(AssertionError):
-            rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile)
+            rocoto.realize_rocoto_xml(config=cfgfile, output_file=outfile)
 
 
 def test_realize_rocoto_xml_to_file(assets):
     cfgfile, outfile = assets
-    assert rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile) is True
+    assert rocoto.realize_rocoto_xml(config=cfgfile, output_file=outfile) is True
 
 
 def test_realize_rocoto_xml_file_to_stdout(capsys, assets):
     cfgfile, outfile = assets
-    assert rocoto.realize_rocoto_xml(config_file=cfgfile) is True
+    assert rocoto.realize_rocoto_xml(config=cfgfile) is True
     with open(outfile, "w", encoding="utf-8") as f:
         f.write(capsys.readouterr().out)
     assert rocoto.validate_rocoto_xml_file(xml_file=outfile)

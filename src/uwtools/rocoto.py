@@ -24,16 +24,18 @@ from uwtools.utils.file import readable, resource_pathobj, writable
 #     rx = _RocotoXML(config)
 
 
-def realize_rocoto_xml(config_file: OptionalPath, output_file: OptionalPath = None) -> bool:
+def realize_rocoto_xml(
+    config: Union[OptionalPath, YAMLConfig], output_file: OptionalPath = None
+) -> bool:
     """
     Realize the Rocoto workflow defined in the given YAML as XML. Validate both the YAML input and
     XML output.
 
-    :param config_file: Path to YAML input file.
+    :param config: Path to YAML input file.
     :param output_file: Path to write rendered XML file.
     :return: Did the input and output files conform to theirr schemas?
     """
-    rxml = _RocotoXML(config_file)
+    rxml = _RocotoXML(config)
     xml = str(rxml)
     assert validate_rocoto_xml_string(xml) is True
     with writable(output_file) as f:
