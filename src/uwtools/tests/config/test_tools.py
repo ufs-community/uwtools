@@ -14,7 +14,7 @@ from uwtools.config import tools
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path, logged
 from uwtools.utils.file import FORMAT, writable
@@ -462,6 +462,24 @@ Keys that are set to empty:
     FV3GFS.nomads.testempty
 """.strip()
     assert actual == expected
+
+
+def test__ensure_format_bad():
+    with raises(UWError) as e:
+        tools._ensure_format(desc="foo")
+    assert str(e.value) == "Either foo file format or name must be specified"
+
+
+def test__ensure_format_deduced():
+    assert tools._ensure_format(desc="foo", path="/tmp/config.yaml") == FORMAT.yaml
+
+
+def test__ensure_format_explicitly_specified_no_path():
+    assert tools._ensure_format(desc="foo", fmt=FORMAT.ini) == FORMAT.ini
+
+
+def test__ensure_format_explicitly_specified_with_path():
+    assert tools._ensure_format(desc="foo", fmt=FORMAT.ini, path="/tmp/config.yaml") == FORMAT.ini
 
 
 def test__print_config_section_ini(capsys):

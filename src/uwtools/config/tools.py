@@ -62,14 +62,11 @@ def realize_config(
     :return: True if no exception is raised.
     :raises: UWConfigError if errors are encountered.
     """
-
-    # #PM# _ensure_format() unit tests
-
-    input_format = _ensure_format(input_format, input_file, "input")
+    input_format = _ensure_format("input", input_format, input_file)
     input_obj = format_to_config(input_format)(config_file=input_file)
     input_obj.dereference()
     input_obj = _realize_config_update(input_obj, values_file, values_format)
-    output_format = _ensure_format(output_format, output_file, "output")
+    output_format = _ensure_format("output", output_format, output_file)
     _realize_config_check_depths(input_obj, output_format)
     if values_needed:
         return _realize_config_values_needed(input_obj)
@@ -83,7 +80,7 @@ def realize_config(
 # Private functions
 
 
-def _ensure_format(fmt: Optional[str], path: OptionalPath, desc: str) -> str:
+def _ensure_format(desc: str, fmt: Optional[str] = None, path: OptionalPath = None) -> str:
     """
     Return the given file format, or the the format deduced from the path.
 
