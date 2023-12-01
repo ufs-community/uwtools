@@ -14,4 +14,4 @@ def test_realize():
 def test_validate():
     with patch.object(rocoto, "_validate") as _validate:
         rocoto.validate(input_file="foo")
-    _validate.assert_called_once_with(input_xml="foo")
+    _validate.assert_called_once_with(xml_file="foo")

@@ -1,5 +1,5 @@
 from uwtools.rocoto import realize_rocoto_xml as _realize
-from uwtools.rocoto import validate_rocoto_xml as _validate
+from uwtools.rocoto import validate_rocoto_xml_file as _validate
 from uwtools.types import OptionalPath
 
 
@@ -14,4 +14,4 @@ def validate(input_file: OptionalPath) -> bool:
     """
     ???
     """
-    return _validate(input_xml=input_file)
+    return _validate(xml_file=input_file)

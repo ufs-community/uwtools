@@ -37,7 +37,7 @@ def realize_rocoto_xml(
 
     _RocotoXML(config_file).dump(temp_file)
 
-    if not validate_rocoto_xml(input_xml=temp_file):
+    if not validate_rocoto_xml_file(xml_file=temp_file):
         log.error("Rocoto validation errors identified in %s", temp_file)
         return False
 
@@ -48,15 +48,25 @@ def realize_rocoto_xml(
     return True
 
 
-def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
+def validate_rocoto_xml_file(xml_file: Union[OptionalPath, str]) -> bool:
     """
-    Given a rendered XML file, validate it against the Rocoto schema.
+    Validate purported Rocoto XML file against its schema.
 
-    :param input_xml: Path to rendered XML file.
-    :return: Did the XML file conform to the schema?
+    :param xml: Path to XML file (None => read stdin).
+    :return: Did the XML conform to the schema?
     """
-    with readable(input_xml) as f:
-        tree = etree.fromstring(bytes(f.read(), encoding="utf-8"))
+    with readable(xml_file) as f:
+        return validate_rocoto_xml_string(xml=f.read())
+
+
+def validate_rocoto_xml_string(xml: str) -> bool:
+    """
+    Validate purported Rocoto XML against its schema.
+
+    :param xml: XML to validate.
+    :return: Did the XML conform to the schema?
+    """
+    tree = etree.fromstring(xml.encode("utf-8"))
     with open(resource_pathobj("schema_with_metatasks.rng"), "r", encoding="utf-8") as f:
         schema = etree.RelaxNG(etree.parse(f))
     valid = schema.validate(tree)

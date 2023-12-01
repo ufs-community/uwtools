@@ -369,7 +369,7 @@ def test__dispatch_rocoto_validate_xml():
     args = {STR.infile: 1}
     with patch.object(uwtools.api.rocoto, "_validate") as _validate:
         cli._dispatch_rocoto_validate(args)
-    _validate.assert_called_once_with(input_xml=1)
+    _validate.assert_called_once_with(xml_file=1)
 
 
 def test__dispatch_rocoto_validate_xml_invalid():
@@ -382,7 +382,7 @@ def test__dispatch_rocoto_validate_xml_no_optional():
     args = {STR.infile: None, STR.verbose: False}
     with patch.object(uwtools.api.rocoto, "_validate") as validate:
         cli._dispatch_rocoto_validate(args)
-    validate.assert_called_once_with(input_xml=None)
+    validate.assert_called_once_with(xml_file=None)
 
 
 @pytest.mark.parametrize("params", [(STR.render, "_dispatch_template_render")])
