@@ -13,9 +13,16 @@ class NMLConfig(Config):
 
     DEPTH = 2
 
-    def __init__(self, config_file) -> None:
-        super().__init__(config_file)
-        self.parse_include()
+    def __init__(self, config_file: OptionalPath = None, empty: bool = False) -> None:
+        """
+        Construct an NMLConfig object.
+
+        :param config_file: Path to config file to load (None => read from stdin).
+        :param empty: Create empty config (do not read config file or stdin).
+        """
+        super().__init__(config_file, empty)
+        if not empty:
+            self.parse_include()
 
     # Private methods
 

@@ -127,6 +127,10 @@ def test_dereference(caplog, config):
     assert config == {"foo": 88, "a": 77, "b": {"c": 66}, "d": "{{ X }}"}
 
 
+def test_empty():
+    assert not ConcreteConfig(empty=True)
+
+
 def test_parse_include(config):
     """
     Test that non-YAML handles include tags properly.

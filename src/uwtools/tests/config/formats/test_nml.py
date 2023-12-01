@@ -11,6 +11,10 @@ from uwtools.tests.support import fixture_path
 # Tests
 
 
+def test_empty():
+    assert not NMLConfig(empty=True)
+
+
 def test_parse_include():
     """
     Test that non-YAML handles include tags properly.

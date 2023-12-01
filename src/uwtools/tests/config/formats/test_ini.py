@@ -11,6 +11,10 @@ from uwtools.tests.support import fixture_path
 # Tests
 
 
+def test_empty():
+    assert not INIConfig(empty=True)
+
+
 def test_parse_include():
     """
     Test that an INI file handles include tags properly.

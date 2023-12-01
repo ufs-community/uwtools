@@ -8,6 +8,10 @@ from uwtools.tests.support import fixture_path
 # Tests
 
 
+def test_empty():
+    assert not FieldTableConfig(empty=True)
+
+
 def test_simple(tmp_path):
     """
     Test reading a YAML config object and generating a field table file.

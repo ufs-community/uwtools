@@ -12,6 +12,10 @@ from uwtools.tests.support import fixture_path
 # Tests
 
 
+def test_empty():
+    assert not SHConfig(empty=True)
+
+
 def test_parse_include():
     """
     Test that an sh file with no sections handles include tags properly.

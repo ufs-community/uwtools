@@ -24,6 +24,10 @@ from uwtools.utils.file import _stdinproxy
 # Tests
 
 
+def test_empty():
+    assert not YAMLConfig(empty=True)
+
+
 def test_composite_types():
     """
     Test that YAML load and dump work with a YAML file that has multiple data structures and levels.

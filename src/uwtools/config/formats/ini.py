@@ -13,17 +13,16 @@ class INIConfig(Config):
 
     DEPTH = 2
 
-    def __init__(
-        self,
-        config_file: str,
-    ):
+    def __init__(self, config_file: OptionalPath = None, empty: bool = False):
         """
         Construct an INIConfig object.
 
-        :param config_file: Path to the config file to load.
+        :param config_file: Path to config file to load (None => read from stdin).
+        :param empty: Create empty config (do not read config file or stdin).
         """
-        super().__init__(config_file)
-        self.parse_include()
+        super().__init__(config_file, empty)
+        if not empty:
+            self.parse_include()
 
     # Private methods
 
