@@ -33,14 +33,15 @@ def realize_rocoto_xml(config_file: OptionalPath, output_file: OptionalPath = No
     :param output_file: Path to write rendered XML file.
     :return: Did the input and output files conform to theirr schemas?
     """
-    rx = _RocotoXML(config_file)
-    assert validate_rocoto_xml_string(str(rx)) is True
+    rxml = _RocotoXML(config_file)
+    xml = str(rxml)
+    assert validate_rocoto_xml_string(xml) is True
     with writable(output_file) as f:
-        print(str(rx), file=f)
+        print(rxml, file=f)
     return True
 
 
-def validate_rocoto_xml_file(xml_file: Union[OptionalPath, str]) -> bool:
+def validate_rocoto_xml_file(xml_file: OptionalPath) -> bool:
     """
     Validate purported Rocoto XML file against its schema.
 
