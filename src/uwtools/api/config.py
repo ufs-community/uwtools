@@ -80,9 +80,9 @@ def validate(schema_file: DefinitePath, config: Union[dict, _YAMLConfig, Optiona
     if isinstance(config, dict):
         with NamedTemporaryFile(mode="w", encoding="utf-8") as f:
             yaml.dump({}, f)
-            cfgobj = _YAMLConfig(f.name)
-            cfgobj.data = config
-            return _validate_yaml_config(schema_file=schema_file, config=cfgobj)
+        cfgobj = _YAMLConfig(f.name)
+        cfgobj.data = config
+        return _validate_yaml_config(schema_file=schema_file, config=cfgobj)
     if isinstance(config, _YAMLConfig):
         return _validate_yaml_config(schema_file=schema_file, config=config)
     return _validate_yaml_file(schema_file=schema_file, config_file=config)
