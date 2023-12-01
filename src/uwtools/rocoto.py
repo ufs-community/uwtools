@@ -22,11 +22,11 @@ def realize_rocoto_xml(
     config: Union[OptionalPath, YAMLConfig], output_file: OptionalPath = None
 ) -> bool:
     """
-    Realize the Rocoto workflow defined in the given YAML as XML. Validate both the YAML input and
+    Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
     XML output.
 
-    :param config: Path to YAML input file.
-    :param output_file: Path to write rendered XML file.
+    :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
+    :param output_file: Path to write rendered XML file (None => write to stdout).
     :return: Did the input and output files conform to their schemas?
     """
     rxml = _RocotoXML(config)
