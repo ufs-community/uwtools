@@ -3,9 +3,7 @@ Support for creating Rocoto XML workflow documents.
 """
 
 import re
-import tempfile
 from dataclasses import dataclass
-from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 from lxml import etree
@@ -35,19 +33,10 @@ def realize_rocoto_xml(config_file: OptionalPath, output_file: OptionalPath = No
     :param output_file: Path to write rendered XML file.
     :return: Did the input and output files conform to theirr schemas?
     """
-
-    _, temp_file = tempfile.mkstemp(suffix=".xml")
-
-    _RocotoXML(config_file).dump(temp_file)
-
-    if not validate_rocoto_xml_file(xml_file=temp_file):
-        log.error("Rocoto validation errors identified in %s", temp_file)
-        return False
-
-    with open(temp_file, "r", encoding="utf-8") as f_in:
-        with writable(output_file) as f_out:
-            print(f_in.read(), file=f_out)
-    Path(temp_file).unlink()
+    rx = _RocotoXML(config_file)
+    assert validate_rocoto_xml_string(str(rx)) is True
+    with writable(output_file) as f:
+        print(str(rx), file=f)
     return True
 
 

@@ -3,14 +3,12 @@
 Tests for uwtools.rocoto module.
 """
 
-import shutil
 from typing import Callable, List
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
 import pytest
 import yaml
-from lxml import etree
 from pytest import fixture, raises
 
 from uwtools import rocoto
@@ -56,16 +54,10 @@ def validator(*args) -> Callable:
 
 def test_realize_rocoto_invalid_xml(assets):
     cfgfile, outfile = assets
-    with open(fixture_path("hello_workflow.xml"), "r", encoding="utf-8") as f:
-        e = etree.parse(f)
-    cycledef = e.xpath("/workflow/cycledef")[0]
-    cycledef.getparent().remove(cycledef)
-    invalid = outfile.parent / "bad.xml"
-    with open(invalid, "w", encoding="utf-8") as f:
-        f.write(etree.tostring(e).decode())
-    dump = lambda _, dst: shutil.copyfile(str(invalid), dst)
-    with patch.object(rocoto._RocotoXML, "dump", dump):
-        assert rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile) is False
+    with patch.object(rocoto, "validate_rocoto_xml_string") as vrxs:
+        vrxs.return_value = False
+        with raises(AssertionError):
+            rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile)
 
 
 def test_realize_rocoto_xml_to_file(assets):
