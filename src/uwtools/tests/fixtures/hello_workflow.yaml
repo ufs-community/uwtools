@@ -18,7 +18,11 @@ workflow:
         maxtries: "2"
       account: "&ACCOUNT;"
       command: "echo hello $person"
-      jobname: hello
+      jobname:
+        cyclestr:
+          attrs:
+            offset: 01:00
+          value: hello-@Y@m@d@H
       nodes: 1:ppn=1
       walltime: 00:01:00
       envars:
