@@ -27,7 +27,7 @@ def realize_rocoto_xml(
 
     :param config: Path to YAML input file.
     :param output_file: Path to write rendered XML file.
-    :return: Did the input and output files conform to theirr schemas?
+    :return: Did the input and output files conform to their schemas?
     """
     rxml = _RocotoXML(config)
     xml = str(rxml)
