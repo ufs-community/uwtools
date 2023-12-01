@@ -157,10 +157,10 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
 
 
 def render(
-    input_file: OptionalPath,
-    output_file: OptionalPath,
     values_file: DefinitePath,
     values_format: Optional[str] = None,
+    input_file: OptionalPath = None,
+    output_file: OptionalPath = None,
     overrides: Optional[Dict[str, str]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
@@ -168,10 +168,11 @@ def render(
     """
     Check and render a Jinja2 template.
 
+    :param values_file: Path to the file supplying values to render the template.
+    :param values_format: Format of the values file.
     :param input_file: Path to the Jinja2 template file to render.
     :param output_file: Path to the file to write the rendered Jinja2 template to.
-    :param values_file: Path to the file supplying values to render the template.
-    :param keq_eq_val_pairs: "key=value" strings to supplement values-file values.
+    :param overrides: "key=value" strings to supplement values-file values.
     :param values_needed: Just issue a report about variables needed to render the template?
     :param dry_run: Run in dry-run mode?
     :return: Jinja2 template was successfully rendered.
@@ -298,7 +299,8 @@ def _set_up_values_obj(
     environment; and supplemented with override values from given "key=value" strings.
 
     :param values_file: Path to the file supplying values to render the template.
-    :param keq_eq_val_pairs: "key=value" strings to supplement values-file values.
+    :param values_format: Format of the values file.
+    :param overrides: "key=value" strings to supplement values-file values.
     :returns: The collected values.
     """
     if values_file:
