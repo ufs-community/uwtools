@@ -331,6 +331,11 @@ class Test__RocotoXML:
         assert instance._tag_name("foo_bar") == ("foo", "bar")
         assert instance._tag_name("foo_bar_baz") == ("foo", "bar_baz")
 
+    def test_dump(self, instance, tmp_path):
+        path = tmp_path / "out.xml"
+        instance.dump(path=path)
+        assert rocoto.validate_rocoto_xml_file(path)
+
 
 # Schema tests
 
