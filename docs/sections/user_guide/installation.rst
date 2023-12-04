@@ -5,7 +5,7 @@ Installation
 ************
 
 
--  If you are a Developer, skip the User Installation and continue on to the `Developer Setup`_ located in the Contributor Guide.
+-  If you are a Developer, skip the User Installation and continue on to the `Developer Setup <../contributor_guide/developer_setup.html>`_ located in the Contributor Guide.
 
 The recommended installation mechanism uses the Python package and virtual-environment manager `conda`_. Specifically, these instructions detail the use of the minimal `Miniforge`_ variant of `Miniconda`_, built to use, by default, packages from the `conda-forge`_ project. 
 
