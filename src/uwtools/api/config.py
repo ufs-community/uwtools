@@ -3,6 +3,7 @@
 from typing import Optional, Union
 
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
+from uwtools.config.formats.yaml import Config as _Config
 from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
@@ -71,7 +72,7 @@ def translate(
 
 
 def validate(
-    schema_file: DefinitePath, config: Optional[Union[dict, _YAMLConfig, OptionalPath]] = None
+    schema_file: DefinitePath, config: Optional[Union[dict, _Config, OptionalPath]] = None
 ) -> bool:
     """
     ???
@@ -80,6 +81,6 @@ def validate(
         cfgobj = _YAMLConfig(empty=True)
         cfgobj.update(config)
         return _validate_yaml_config(schema_file=schema_file, config=cfgobj)
-    if isinstance(config, _YAMLConfig):
-        return _validate_yaml_config(schema_file=schema_file, config=config)
+    if isinstance(config, _Config):
+        return validate(schema_file=schema_file, config=config.data)
     return _validate_yaml_file(schema_file=schema_file, config_file=config)
