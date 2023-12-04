@@ -1,9 +1,41 @@
 {
   "$defs": {
-    "datePattern": {
-      "format": "string",
-      "pattern": "^[0-9]{12} [0-9]{12}$",
-      "type": "integer"
+    "compoundTimeString": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "cyclestr": {
+              "additionalProperties": false,
+              "properties": {
+                "attrs": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "offset": {
+                      "$ref": "#/$defs/time"
+                    }
+                  },
+                  "type": "object"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "cyclestr"
+          ],
+          "type": "object"
+        }
+      ]
     },
     "dependency": {
       "additionalProperties": false,
@@ -16,10 +48,10 @@
           "additionalProperties": false,
           "properties": {
             "left": {
-              "type": "string"
+              "$ref": "#/$defs/compoundTimeString"
             },
             "right": {
-              "type": "string"
+              "$ref": "#/$defs/compoundTimeString"
             }
           },
           "required": [
@@ -52,8 +84,8 @@
               },
               "type": "object"
             },
-            "text": {
-              "type": "string"
+            "value": {
+              "$ref": "#/$defs/compoundTimeString"
             }
           },
           "type": "object"
@@ -153,7 +185,7 @@
           "type": "object"
         },
         "^timedep(_.*)?$": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         }
       },
       "type": "object"
@@ -183,8 +215,8 @@
     "nonNegativeTime": {
       "oneOf": [
         {
-          "pattern": "^([0-9]+|(#[^# ]+#))+$",
-          "type": "string"
+          "minimum": 0,
+          "type": "integer"
         },
         {
           "pattern": "^([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
@@ -279,14 +311,14 @@
           }
         },
         "command": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "cores": {
           "minimum": 0,
           "type": "integer"
         },
         "deadline": {
-          "$ref": "#/$defs/datePattern"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "dependency": {
           "$ref": "#/$defs/dependency"
@@ -298,16 +330,16 @@
           "type": "string"
         },
         "jobname": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "join": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "memory": {
           "type": "string"
         },
         "native": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "nodes": {
           "type": "string"
@@ -325,10 +357,10 @@
           "type": "string"
         },
         "stderr": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "stdout": {
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "walltime": {
           "$ref": "#/$defs/nonNegativeTime"
@@ -343,8 +375,7 @@
     "time": {
       "oneOf": [
         {
-          "pattern": "^-?([0-9]+|(#[^# ]+#))+$",
-          "type": "string"
+          "type": "integer"
         },
         {
           "pattern": "^-?([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
@@ -458,8 +489,7 @@
           "type": "object"
         },
         "log": {
-          "format": "uri",
-          "type": "string"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "tasks": {
           "additionalProperties": false,
