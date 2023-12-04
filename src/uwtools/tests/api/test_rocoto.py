@@ -11,10 +11,10 @@ def test_realize():
     _realize.assert_called_once_with(config="foo", output_file="bar")
 
 
-def test_realize_as_str():
+def test_realizt_to_str():
     val = "an-xml-string"
     with patch.object(rocoto, "_realize", return_value=val) as _realize:
-        assert rocoto.realize_as_str(input_file="foo") == val
+        assert rocoto.realizt_to_str(input_file="foo") == val
     _realize.assert_called_once_with(config="foo", output_file=os.devnull)
 
 

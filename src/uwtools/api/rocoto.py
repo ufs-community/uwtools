@@ -13,7 +13,7 @@ def realize(input_file: OptionalPath = None, output_file: OptionalPath = None) -
     return True
 
 
-def realize_as_str(input_file: OptionalPath = None) -> str:
+def realizt_to_str(input_file: OptionalPath = None) -> str:
     """
     ???
     """
