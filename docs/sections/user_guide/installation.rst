@@ -15,7 +15,7 @@ Users of the original Miniconda (or the `Anaconda`_ distribution) may need to ad
 Using a fresh Miniforge installation
 ====================================
 
-.. include:: ../reusable_text.rst
+.. include:: ../Miniforge3_instructions.rst
 
 
 2. Install the ``conda-build`` and ``conda-verify`` packages into the base environment. If ``conda-build`` and ``conda-verify`` are already installed in the your installation’s base environment, you may skip this step.
