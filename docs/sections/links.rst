@@ -5,6 +5,7 @@
 .. _condev: https://github.com/maddenp/condev
 .. _condev demo: https://github.com/maddenp/condev/tree/main/demo
 .. _coverage: https://coverage.readthedocs.io/en/7.2.7/ 
+.. _Developer Guide: https://unified-workflow.readthedocs.io/en/latest/Contributors_Guide/index.html
 .. _docformatter: https://docformatter.readthedocs.io/en/stable/ 
 .. _isort: https://pycqa.github.io/isort/
 .. _jq: https://jqlang.github.io/jq/manual/v1.6/ 
