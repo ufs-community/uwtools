@@ -290,7 +290,7 @@ class _RocotoXML:
         :param config: YAMLConfig object or path to YAML file (None => read stdin).
         """
         schema_file = resource_pathobj("rocoto.jsonschema")
-        config_obj = config if isinstance(config, YAMLConfig) else YAMLConfig(config_file=config)
+        config_obj = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
         ok = validate_yaml(schema_file=schema_file, config=config_obj)
         if not ok:
             raise UWConfigError("YAML validation errors")

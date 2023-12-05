@@ -65,7 +65,7 @@ def realize_config(
     input_obj = (
         input_config
         if isinstance(input_config, Config)
-        else format_to_config(input_format)(config_file=input_config)
+        else format_to_config(input_format)(config=input_config)
     )
     input_obj.dereference()
     input_obj = _realize_config_update(input_obj, values, values_format)
@@ -164,7 +164,7 @@ def _realize_config_update(
             values_obj = values
         else:
             values_format = values_format or get_file_format(values)
-            values_obj = format_to_config(values_format)(config_file=values)
+            values_obj = format_to_config(values_format)(config=values)
         log.debug("Values config has depth %s", values_obj.depth)
         config_obj.update_values(values_obj)
         config_obj.dereference()

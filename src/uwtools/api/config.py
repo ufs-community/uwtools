@@ -104,12 +104,11 @@ def validate(
     ???
     """
     if isinstance(config, dict):
-        cfgobj = _YAMLConfig(empty=True)
-        cfgobj.update(config)
+        cfgobj = _YAMLConfig(config=config)
     elif isinstance(config, _YAMLConfig):
         cfgobj = config
     else:
-        cfgobj = _YAMLConfig(config_file=config)
+        cfgobj = _YAMLConfig(config=config)
     return _validate_yaml(schema_file=schema_file, config=cfgobj)
 
 
@@ -125,7 +124,5 @@ def _ensure_config_arg_type(
     :param config: A config as a dict, Config, or path.
     """
     if isinstance(config, dict):
-        cfgobj = _YAMLConfig(empty=True)
-        cfgobj.update(config)
-        return cfgobj
+        return _YAMLConfig(config=config)
     return config

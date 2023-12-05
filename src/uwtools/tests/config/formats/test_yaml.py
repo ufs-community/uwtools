@@ -24,10 +24,6 @@ from uwtools.utils.file import _stdinproxy
 # Tests
 
 
-def test_empty():
-    assert not YAMLConfig(empty=True)
-
-
 def test_composite_types():
     """
     Test that YAML load and dump work with a YAML file that has multiple data structures and levels.
@@ -147,5 +143,5 @@ def test_unexpected_error(tmp_path):
         msg = "Unexpected error"
         load.side_effect = yaml.constructor.ConstructorError(note=msg)
         with raises(UWConfigError) as e:
-            YAMLConfig(config_file=cfgfile)
+            YAMLConfig(config=cfgfile)
         assert msg in str(e.value)

@@ -81,7 +81,7 @@ def test_translate(infmt, outfmt, success_expected):
         )
 
 
-@pytest.mark.parametrize("cfg", [{"foo": "bar"}, YAMLConfig(empty=True)])
+@pytest.mark.parametrize("cfg", [{"foo": "bar"}, YAMLConfig(config={})])
 def test_validate(cfg):
     kwargs: dict = {"schema_file": "schema-file", "config": cfg}
     with patch.object(config, "_validate_yaml", return_value=True) as _validate_yaml:
@@ -104,7 +104,7 @@ def test_validate_config_file(tmp_path):
 
 
 def test__ensure_config_arg_type_config_obj():
-    config_obj = YAMLConfig(empty=True)
+    config_obj = YAMLConfig(config={})
     assert config._ensure_config_arg_type(config=config_obj) is config_obj
 
 

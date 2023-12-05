@@ -26,7 +26,7 @@ def config(tmp_path):
     data = {"foo": 88}
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(data, f)
-    return ConcreteConfig(config_file=path)
+    return ConcreteConfig(config=path)
 
 
 # Helpers
@@ -125,10 +125,6 @@ def test_dereference(caplog, config):
     ]:
         assert regex_logged(caplog, excerpt)
     assert config == {"foo": 88, "a": 77, "b": {"c": 66}, "d": "{{ X }}"}
-
-
-def test_empty():
-    assert not ConcreteConfig(empty=True)
 
 
 def test_parse_include(config):

@@ -36,7 +36,7 @@ def compare_configs_assets(tmp_path):
 
 @fixture
 def realize_config_testobj(realize_config_yaml_input):
-    return YAMLConfig(config_file=realize_config_yaml_input)
+    return YAMLConfig(config=realize_config_yaml_input)
 
 
 @fixture
@@ -471,7 +471,7 @@ def test__ensure_format_bad():
 
 
 def test__ensure_format_config_obj():
-    assert tools._ensure_format(desc="foo", config=YAMLConfig(empty=True)) == FORMAT.yaml
+    assert tools._ensure_format(desc="foo", config=YAMLConfig(config={})) == FORMAT.yaml
 
 
 def test__ensure_format_deduced():
@@ -569,7 +569,7 @@ def test__realize_config_update(realize_config_testobj, tmp_path):
 
 
 def test__realize_config_config_obj(realize_config_testobj):
-    values_obj = YAMLConfig(empty=True)
+    values_obj = YAMLConfig(config={})
     values_obj.update({"foo": 88})
     o = tools._realize_config_update(config_obj=realize_config_testobj, values=values_obj)
     assert o["foo"] == 88
@@ -580,7 +580,7 @@ def test__realize_config_values_needed(caplog, tmp_path):
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({1: "complete", 2: "{{ jinja2 }}", 3: ""}, f)
-    c = YAMLConfig(config_file=path)
+    c = YAMLConfig(config=path)
     tools._realize_config_values_needed(input_obj=c)
     msgs = "\n".join(record.message for record in caplog.records)
     assert "Keys that are complete:\n    1" in msgs

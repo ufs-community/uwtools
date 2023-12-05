@@ -37,7 +37,7 @@ class Driver(ABC):
         self._dry_run = dry_run
         self._batch_script = batch_script
         self._validate()
-        self._experiment_config = YAMLConfig(config_file=config_file)
+        self._experiment_config = YAMLConfig(config=config_file)
         self._platform_config = self._experiment_config.get("platform", {})
         self._config: Dict[str, Any] = {}
 
@@ -179,6 +179,6 @@ class Driver(ABC):
         :return: Was the input configuration file valid against its schema?
         """
         return validator.validate_yaml(
-            config=YAMLConfig(config_file=self._config_file),
+            config=YAMLConfig(config=self._config_file),
             schema_file=self.schema_file,
         )

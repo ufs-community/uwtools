@@ -1,6 +1,8 @@
 # pylint: disable=duplicate-code
+
 import configparser
 from io import StringIO
+from typing import Union
 
 from uwtools.config.formats.base import Config
 from uwtools.utils.file import OptionalPath, readable, writable
@@ -13,16 +15,14 @@ class INIConfig(Config):
 
     DEPTH = 2
 
-    def __init__(self, config_file: OptionalPath = None, empty: bool = False):
+    def __init__(self, config: Union[dict, OptionalPath] = None):
         """
         Construct an INIConfig object.
 
-        :param config_file: Path to config file to load (None => read from stdin).
-        :param empty: Create empty config (do not read config file or stdin).
+        :param config: Config file to load (None => read from stdin), or initial dict.
         """
-        super().__init__(config_file, empty)
-        if not empty:
-            self.parse_include()
+        super().__init__(config)
+        self.parse_include()
 
     # Private methods
 

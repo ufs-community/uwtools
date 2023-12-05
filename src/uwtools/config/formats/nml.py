@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Union
 
 import f90nml
 
@@ -13,16 +14,14 @@ class NMLConfig(Config):
 
     DEPTH = 2
 
-    def __init__(self, config_file: OptionalPath = None, empty: bool = False) -> None:
+    def __init__(self, config: Union[dict, OptionalPath] = None) -> None:
         """
         Construct an NMLConfig object.
 
-        :param config_file: Path to config file to load (None => read from stdin).
-        :param empty: Create empty config (do not read config file or stdin).
+        :param config: Config file to load (None => read from stdin), or initial dict.
         """
-        super().__init__(config_file, empty)
-        if not empty:
-            self.parse_include()
+        super().__init__(config)
+        self.parse_include()
 
     # Private methods
 

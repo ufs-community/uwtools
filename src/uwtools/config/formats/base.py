@@ -22,16 +22,18 @@ class Config(ABC, UserDict):
     several configuration-file formats.
     """
 
-    def __init__(self, config_file: OptionalPath = None, empty: bool = False) -> None:
+    def __init__(self, config: Union[dict, OptionalPath] = None) -> None:
         """
         Construct a Config object.
 
-        :param config_file: Path to config file to load (None => read from stdin).
-        :param empty: Create empty config (do not read config file or stdin).
+        :param config: Config file to load (None => read from stdin), or initial dict.
         """
         super().__init__()
-        self._config_file = str(config_file) if config_file else None
-        if not empty:
+        if isinstance(config, dict):
+            self._config_file = None
+            self.update(config)
+        else:
+            self._config_file = str(config) if config else None
             self.update(self._load(self._config_file))
 
     def __repr__(self) -> str:
