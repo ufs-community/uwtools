@@ -12,6 +12,8 @@ from uwtools.config.validator import validate_yaml_file as _validate_yaml_file
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import FORMAT as _FORMAT
 
+# Public
+
 
 def compare(
     config_a_path: DefinitePath,
@@ -31,11 +33,11 @@ def compare(
 
 
 def realize(
-    input_file: OptionalPath = None,
+    input_config: Union[dict, _Config, OptionalPath] = None,
     input_format: Optional[str] = None,
     output_file: OptionalPath = None,
     output_format: Optional[str] = None,
-    values_file: OptionalPath = None,
+    values: Union[dict, _Config, OptionalPath] = None,
     values_format: Optional[str] = None,
     values_needed: bool = False,
     dry_run: bool = False,
@@ -44,11 +46,11 @@ def realize(
     ???
     """
     return _realize(
-        input_file=input_file,
+        input_config=_ensure_config_arg_type(input_config),
         input_format=input_format,
         output_file=output_file,
         output_format=output_format,
-        values_file=values_file,
+        values=_ensure_config_arg_type(values),
         values_format=values_format,
         values_needed=values_needed,
         dry_run=dry_run,
@@ -84,3 +86,19 @@ def validate(
     if isinstance(config, _Config):
         return validate(schema_file=schema_file, config=config.data)
     return _validate_yaml_file(schema_file=schema_file, config_file=config)
+
+
+# Private
+
+
+def _ensure_config_arg_type(
+    config: Union[dict, _Config, OptionalPath]
+) -> Union[_Config, OptionalPath]:
+    """
+    ???
+    """
+    if isinstance(config, dict):
+        cfgobj = _YAMLConfig(empty=True)
+        cfgobj.update(config)
+        return cfgobj
+    return config

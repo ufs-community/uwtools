@@ -24,11 +24,11 @@ def test_compare():
 
 def test_realize():
     kwargs: dict = {
-        "input_file": "path1",
+        "input_config": "path1",
         "input_format": "fmt1",
         "output_file": "path2",
         "output_format": "fmt2",
-        "values_file": "path3",
+        "values": "path3",
         "values_format": "fmt3",
         "values_needed": True,
         "dry_run": True,
