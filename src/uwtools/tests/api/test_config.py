@@ -33,8 +33,24 @@ def test_realize():
         "values_needed": True,
         "dry_run": True,
     }
-    with patch.object(config, "_realize") as _realize:
+    with patch.object(config, "realize_to_str") as realize_to_str:
         config.realize(**kwargs)
+    realize_to_str.assert_called_once_with(**kwargs)
+
+
+def test_realize_to_str():
+    kwargs: dict = {
+        "input_config": "path1",
+        "input_format": "fmt1",
+        "output_file": "path2",
+        "output_format": "fmt2",
+        "values": "path3",
+        "values_format": "fmt3",
+        "values_needed": True,
+        "dry_run": True,
+    }
+    with patch.object(config, "_realize") as _realize:
+        config.realize_to_str(**kwargs)
     _realize.assert_called_once_with(**kwargs)
 
 
