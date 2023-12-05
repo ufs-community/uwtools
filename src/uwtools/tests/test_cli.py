@@ -291,18 +291,12 @@ def test__dispatch_config_translate_unsupported():
     assert cli._dispatch_config_translate(args) is False
 
 
-def test__dispatch_config_validate_no_optional():
-    args = {STR.schemafile: "/foo.schema", STR.infile: None}
-    with patch.object(uwtools.api.config, "_validate_yaml_file") as _validate_yaml_file:
+def test__dispath_config_validate_config_obj():
+    config = uwtools.api.config._YAMLConfig(empty=True)
+    args = {STR.schemafile: 1, STR.config: config}
+    with patch.object(uwtools.api.config, "_validate_yaml_config") as _validate_yaml_config:
         cli._dispatch_config_validate(args)
-    _validate_yaml_file.assert_called_once_with(schema_file="/foo.schema", config_file=None)
-
-
-def test__dispatch_config_validate_yaml():
-    args = {STR.schemafile: 1, STR.infile: 2}
-    with patch.object(uwtools.api.config, "_validate_yaml_file") as _validate_yaml_file:
-        cli._dispatch_config_validate(args)
-    _validate_yaml_file.assert_called_once_with(schema_file=1, config_file=2)
+    _validate_yaml_config.assert_called_once_with(**args)
 
 
 @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])

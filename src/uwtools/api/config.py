@@ -9,7 +9,6 @@ from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import validate_yaml_config as _validate_yaml_config
-from uwtools.config.validator import validate_yaml_file as _validate_yaml_file
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import FORMAT as _FORMAT
 
@@ -99,7 +98,7 @@ def translate(
 
 
 def validate(
-    schema_file: DefinitePath, config: Optional[Union[dict, _Config, OptionalPath]] = None
+    schema_file: DefinitePath, config: Optional[Union[dict, _YAMLConfig, OptionalPath]] = None
 ) -> bool:
     """
     ???
@@ -107,10 +106,11 @@ def validate(
     if isinstance(config, dict):
         cfgobj = _YAMLConfig(empty=True)
         cfgobj.update(config)
-        return _validate_yaml_config(schema_file=schema_file, config=cfgobj)
-    if isinstance(config, _Config):
-        return validate(schema_file=schema_file, config=config.data)
-    return _validate_yaml_file(schema_file=schema_file, config_file=config)
+    elif isinstance(config, _YAMLConfig):
+        cfgobj = config
+    else:
+        cfgobj = _YAMLConfig(config_file=config)
+    return _validate_yaml_config(schema_file=schema_file, config=cfgobj)
 
 
 # Private

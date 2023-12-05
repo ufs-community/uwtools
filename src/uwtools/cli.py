@@ -234,10 +234,7 @@ def _dispatch_config_validate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.config.validate(
-        schema_file=args[STR.schemafile],
-        config=args[STR.infile],
-    )
+    return uwtools.api.config.validate(schema_file=args[STR.schemafile], config=args[STR.config])
 
 
 # Mode forecast

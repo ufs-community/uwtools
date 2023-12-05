@@ -6,14 +6,12 @@ import json
 import logging
 from pathlib import Path
 from typing import Any, Dict, Tuple
-from unittest.mock import patch
 
 from pytest import fixture
 
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.logging import log
-from uwtools.tests.support import logged, regex_logged
 from uwtools.utils.file import resource_pathobj
 
 # Fixtures
@@ -102,15 +100,6 @@ def test_validate_yaml_config_fail_bad_number_val(assets, caplog):
     assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
 
 
-def test_validate_yaml_file(assets):
-    schema_file, config_file, _ = assets
-    with patch.object(validator, "validate_yaml_config") as validate_yaml_config:
-        validator.validate_yaml_file(schema_file=schema_file, config_file=config_file)
-    validate_yaml_config.assert_called_once_with(
-        schema_file=schema_file, config=YAMLConfig(config_file)
-    )
-
-
 @fixture
 def rocoto_assets():
     schema_file = resource_pathobj("rocoto.jsonschema")
@@ -139,91 +128,6 @@ def rocoto_assets():
         }
     }
     return kwargs, config
-
-
-def test_validate_yaml_file_rocoto_invalid_dependency_bool(rocoto_assets, caplog):
-    kwargs, config = rocoto_assets
-    config["workflow"]["tasks"]["metatask"]["task"]["dependency"].update(
-        {"maybe": {"taskdep": {"attrs": {"task": "hello"}}}}
-    )
-    with patch.object(validator, "YAMLConfig") as YAMLConfig:
-        YAMLConfig().data = config
-        assert not validator.validate_yaml_file(**kwargs)
-        assert regex_logged(caplog, "'maybe' does not match any of the regexes")
-
-
-def test_validate_yaml_file_rocoto_invalid_dependency_no_task(rocoto_assets, caplog):
-    kwargs, config = rocoto_assets
-    del config["workflow"]["tasks"]["metatask"]["task"]["dependency"]["taskdep"]["attrs"]["task"]
-    config["workflow"]["tasks"]["metatask"]["task"]["dependency"]["taskdep"]["attrs"][
-        "state"
-    ] = "RUNNING"
-    with patch.object(validator, "YAMLConfig") as YAMLConfig:
-        YAMLConfig().data = config
-        assert not validator.validate_yaml_file(**kwargs)
-        assert logged(caplog, "'task' is a required property")
-
-
-def test_validate_yaml_file_rocoto_invalid_no_command(rocoto_assets, caplog):
-    kwargs, config = rocoto_assets
-    del config["workflow"]["tasks"]["metatask"]["task"]["command"]
-    with patch.object(validator, "YAMLConfig") as YAMLConfig:
-        YAMLConfig().data = config
-        assert not validator.validate_yaml_file(**kwargs)
-        assert logged(caplog, "'command' is a required property")
-
-
-def test_validate_yaml_file_rocoto_invalid_no_task(rocoto_assets, caplog):
-    kwargs, config = rocoto_assets
-    del config["workflow"]["tasks"]["metatask"]["task"]
-    with patch.object(validator, "YAMLConfig") as YAMLConfig:
-        YAMLConfig().data = config
-        assert not validator.validate_yaml_file(**kwargs)
-        assert logged(caplog, "{'var': {'member': 'foo bar baz'}} does not have enough properties")
-
-
-def test_validate_yaml_file_rocoto_invalid_no_var(rocoto_assets, caplog):
-    kwargs, config = rocoto_assets
-    del config["workflow"]["tasks"]["metatask"]["var"]
-    with patch.object(validator, "YAMLConfig") as YAMLConfig:
-        YAMLConfig().data = config
-        assert not validator.validate_yaml_file(**kwargs)
-        assert logged(caplog, "'var' is a required property")
-
-
-def test_validate_yaml_file_rocoto_invalid_required_stderr(rocoto_assets, caplog):
-    kwargs, config = rocoto_assets
-    config["workflow"]["tasks"]["metatask"]["task"].update({"stdout": "hello"})
-    with patch.object(validator, "YAMLConfig") as YAMLConfig:
-        YAMLConfig().data = config
-        assert not validator.validate_yaml_file(**kwargs)
-        assert logged(caplog, "'stderr' is a required property")
-
-
-def test_validate_yaml_file_rocoto_invalid_type(rocoto_assets, caplog):
-    kwargs, config = rocoto_assets
-    config["workflow"]["tasks"]["metatask"]["task"]["cores"] = "string"
-    with patch.object(validator, "YAMLConfig") as YAMLConfig:
-        YAMLConfig().data = config
-        assert not validator.validate_yaml_file(**kwargs)
-        assert logged(caplog, "'string' is not of type 'integer'")
-
-
-def test_validate_yaml_file_rocoto_invalid_walltime_pattern(rocoto_assets, caplog):
-    kwargs, config = rocoto_assets
-    badval = "0x:01:00"
-    config["workflow"]["tasks"]["metatask"]["task"]["walltime"] = badval
-    with patch.object(validator, "YAMLConfig") as YAMLConfig:
-        YAMLConfig().data = config
-        assert not validator.validate_yaml_file(**kwargs)
-        assert logged(caplog, f"'{badval}' is not valid under any of the given schemas")
-
-
-def test_validate_yaml_file_rocoto_valid(rocoto_assets):
-    kwargs, config = rocoto_assets
-    with patch.object(validator, "YAMLConfig") as YAMLConfig:
-        YAMLConfig().data = config
-        assert validator.validate_yaml_file(**kwargs)
 
 
 def test__validation_errors_bad_enum_value(config, schema):

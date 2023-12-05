@@ -9,7 +9,7 @@ import jsonschema
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.logging import log
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.types import DefinitePath
 
 # Public functions
 
@@ -38,19 +38,6 @@ def validate_yaml_config(schema_file: DefinitePath, config: YAMLConfig) -> bool:
         return False
     # If no issues were detected, report success.
     return True
-
-
-def validate_yaml_file(schema_file: DefinitePath, config_file: OptionalPath = None) -> bool:
-    """
-    Check whether the given config file conforms to the given JSON Schema spec and whether any
-    filesystem paths it identifies do not exist.
-
-    :param schema_file: The JSON Schema file to use for validation.
-    :param config_file: The YAML file to validate (stdin will be used by default)
-    :return: Did the YAML file conform to the schema?
-    """
-    config = YAMLConfig(config_file)
-    return validate_yaml_config(schema_file=schema_file, config=config)
 
 
 # Private functions
