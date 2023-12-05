@@ -98,9 +98,7 @@ def test_validate_config_file(tmp_path):
     kwargs: dict = {"schema_file": "schema-file", "config": cfg}
     with patch.object(config, "_validate_yaml", return_value=True) as _validate_yaml:
         assert config.validate(**kwargs)
-    _validate_yaml.assert_called_once_with(
-        schema_file=kwargs["schema_file"], config=YAMLConfig(cfg)
-    )
+    _validate_yaml.assert_called_once_with(schema_file=kwargs["schema_file"], config=cfg)
 
 
 def test__ensure_config_arg_type_config_obj():

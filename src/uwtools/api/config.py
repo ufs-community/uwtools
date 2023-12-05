@@ -103,13 +103,7 @@ def validate(
     """
     ???
     """
-    if isinstance(config, dict):
-        cfgobj = _YAMLConfig(config=config)
-    elif isinstance(config, _YAMLConfig):
-        cfgobj = config
-    else:
-        cfgobj = _YAMLConfig(config=config)
-    return _validate_yaml(schema_file=schema_file, config=cfgobj)
+    return _validate_yaml(schema_file=schema_file, config=config)
 
 
 # Private

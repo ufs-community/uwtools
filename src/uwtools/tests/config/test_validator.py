@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, Tuple
 
+import yaml
 from pytest import fixture
 
 from uwtools.config import validator
@@ -36,6 +37,41 @@ def config(tmp_path) -> Dict[str, Any]:
             "dir": str(tmp_path),
         },
     }
+
+
+@fixture
+def prep_config_dict():
+    return {"roses": "{{ color }}", "color": "red"}
+
+
+@fixture
+def rocoto_assets():
+    schema_file = resource_pathobj("rocoto.jsonschema")
+    kwargs = {"schema_file": schema_file, "config_file": "/not/used"}
+    config = {
+        "workflow": {
+            "cycledef": [{"spec": "202209290000 202209300000 06:00:00"}],
+            "log": "/some/path/to/&FOO;",
+            "tasks": {
+                "metatask": {
+                    "var": {"member": "foo bar baz"},
+                    "task": {
+                        "cores": 88,
+                        "command": "some-command",
+                        "walltime": "00:01:00",
+                        "dependency": {
+                            "taskdep": {
+                                "attrs": {
+                                    "task": "hello",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    }
+    return kwargs, config
 
 
 @fixture
@@ -100,34 +136,25 @@ def test_validate_yaml_fail_bad_number_val(assets, caplog):
     assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
 
 
-@fixture
-def rocoto_assets():
-    schema_file = resource_pathobj("rocoto.jsonschema")
-    kwargs = {"schema_file": schema_file, "config_file": "/not/used"}
-    config = {
-        "workflow": {
-            "cycledef": [{"spec": "202209290000 202209300000 06:00:00"}],
-            "log": "/some/path/to/&FOO;",
-            "tasks": {
-                "metatask": {
-                    "var": {"member": "foo bar baz"},
-                    "task": {
-                        "cores": 88,
-                        "command": "some-command",
-                        "walltime": "00:01:00",
-                        "dependency": {
-                            "taskdep": {
-                                "attrs": {
-                                    "task": "hello",
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        }
-    }
-    return kwargs, config
+def test_prep_config_cfgobj(prep_config_dict):
+    cfgobj = validator._prep_config(config=YAMLConfig(config=prep_config_dict))
+    assert isinstance(cfgobj, YAMLConfig)
+    assert cfgobj == {"roses": "red", "color": "red"}
+
+
+def test__prep_config_dict(prep_config_dict):
+    cfgobj = validator._prep_config(config=prep_config_dict)
+    assert isinstance(cfgobj, YAMLConfig)
+    assert cfgobj == {"roses": "red", "color": "red"}
+
+
+def test__prep_config_file(prep_config_dict, tmp_path):
+    path = tmp_path / "config.yaml"
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.dump(prep_config_dict, f)
+    cfgobj = validator._prep_config(config=path)
+    assert isinstance(cfgobj, YAMLConfig)
+    assert cfgobj == {"roses": "red", "color": "red"}
 
 
 def test__validation_errors_bad_enum_value(config, schema):

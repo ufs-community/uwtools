@@ -9,12 +9,12 @@ import jsonschema
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.logging import log
-from uwtools.types import DefinitePath
+from uwtools.types import DefinitePath, OptionalPath
 
 # Public functions
 
 
-def validate_yaml(schema_file: DefinitePath, config: YAMLConfig) -> bool:
+def validate_yaml(schema_file: DefinitePath, config: Union[dict, YAMLConfig, OptionalPath]) -> bool:
     """
     Check whether the given config conforms to the given JSON Schema spec.
 
@@ -24,9 +24,9 @@ def validate_yaml(schema_file: DefinitePath, config: YAMLConfig) -> bool:
     """
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
-    config.dereference()
+    cfgobj = _prep_config(config)
     # Collect and report on schema-validation errors.
-    errors = _validation_errors(config.data, schema)
+    errors = _validation_errors(cfgobj.data, schema)
     log_method = log.error if errors else log.info
     log_method("%s schema-validation error%s found", len(errors), "" if len(errors) == 1 else "s")
     for error in errors:
@@ -40,6 +40,23 @@ def validate_yaml(schema_file: DefinitePath, config: YAMLConfig) -> bool:
 
 
 # Private functions
+
+
+def _prep_config(config: Union[dict, YAMLConfig, OptionalPath]) -> YAMLConfig:
+    """
+    Ensure a dereferenced YAMLConfig object for various input types.
+
+    :param config: The config to validate.
+    :return: A dereferenced YAMLConfig object based on the input config.
+    """
+    if isinstance(config, dict):
+        cfgobj = YAMLConfig(config=config)
+    elif isinstance(config, YAMLConfig):
+        cfgobj = config
+    else:
+        cfgobj = YAMLConfig(config=config)
+    cfgobj.dereference()
+    return cfgobj
 
 
 def _validation_errors(config: Union[dict, list], schema: dict) -> List[str]:
