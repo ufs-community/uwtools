@@ -403,7 +403,7 @@ def test__dispatch_template_render_no_optional():
     render.assert_called_once_with(
         input_file=None,
         output_file=None,
-        values_file=None,
+        values=None,
         values_format=None,
         overrides={},
         values_needed=False,
@@ -426,7 +426,7 @@ def test__dispatch_template_render_yaml():
     render.assert_called_once_with(
         input_file=1,
         output_file=2,
-        values_file=3,
+        values=3,
         values_format=4,
         overrides={"foo": "88", "bar": "99"},
         values_needed=6,

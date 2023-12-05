@@ -157,7 +157,7 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
 
 
 def render(
-    values_file: DefinitePath,
+    values: Union[dict, DefinitePath],
     values_format: Optional[str] = None,
     input_file: OptionalPath = None,
     output_file: OptionalPath = None,
@@ -168,7 +168,7 @@ def render(
     """
     Check and render a Jinja2 template.
 
-    :param values_file: Path to the file supplying values to render the template.
+    :param values: Source of values to render the template.
     :param values_format: Format of the values file.
     :param input_file: Path to the Jinja2 template file to render.
     :param output_file: Path to the file to write the rendered Jinja2 template to.
@@ -181,9 +181,10 @@ def render(
     # Render template.
 
     _report(locals())
-    values = _set_up_values_obj(
-        values_file=values_file, values_format=values_format, overrides=overrides
-    )
+    if not isinstance(values, dict):
+        values = _set_up_values_obj(
+            values_file=values, values_format=values_format, overrides=overrides
+        )
     with readable(input_file) as f:
         template_str = f.read()
     template = J2Template(values=values, template_str=template_str)

@@ -428,7 +428,7 @@ def _dispatch_template_render(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.template.render(
-        values_file=args[STR.valsfile],
+        values=args[STR.valsfile],
         values_format=args[STR.valsfmt],
         input_file=args[STR.infile],
         output_file=args[STR.outfile],
