@@ -42,10 +42,13 @@ def validation_assets(tmp_path):
 
 
 def validator(*args) -> Callable:
+    # Supply, as args, zero or more keys leading through the schema dict to the sub-schema to be
+    # used to validate some input. This function returns a lambda that, when called with the input
+    # to test, returns a string (possibly empty) containing the validation errors.
     with open(resource_pathobj("rocoto.jsonschema"), "r", encoding="utf-8") as f:
         schema = yaml.safe_load(f)
     for arg in args:
-        schema = {"$defs": schema["$defs"], **schema["properties"][arg]}
+        schema = {"$defs": schema["$defs"], **schema[arg]}
     return lambda config: "\n".join(str(x) for x in _validation_errors(config, schema))
 
 
@@ -126,6 +129,24 @@ class Test__RocotoXML:
         cfgfile, _ = assets
         assert rocoto._RocotoXML(config=YAMLConfig(cfgfile))._root.tag == "workflow"
 
+    def test__add_compound_time_string_basic(self, instance, root):
+        config = {"foo": "bar"}
+        instance._add_compound_time_string(e=root, config=config, tag="foo")
+        child = root[0]
+        assert child.tag == "foo"
+        assert child.text == "bar"
+
+    def test__add_compound_time_string_cyclestr(self, instance, root):
+        config = {
+            "foo": {"attrs": {"bar": "88"}, "cyclestr": {"attrs": {"baz": "99"}, "value": "qux"}}
+        }
+        instance._add_compound_time_string(e=root, config=config, tag="foo")
+        child = root[0]
+        assert child.get("bar") == "88"
+        cyclestr = child[0]
+        assert cyclestr.get("baz") == "99"
+        assert cyclestr.text == "qux"
+
     def test__add_metatask(self, instance, root):
         config = {"metatask_foo": "1", "task_bar": "2", "var": {"baz": "3", "qux": "4"}}
         taskname = "test-metatask"
@@ -186,9 +207,9 @@ class Test__RocotoXML:
     def test__add_task_dependency_operand(self, config, instance, root):
         instance._add_task_dependency_operand_operator(e=root, config=config)
         element = root[0]
-        for tag, block in config.items():
+        for tag, subconfig in config.items():
             assert tag == element.tag
-            for attr, val in block["attrs"].items():
+            for attr, val in subconfig["attrs"].items():
                 assert element.get(attr) == val
 
     def test__add_task_dependency_operand_fail(self, instance, root):
@@ -225,11 +246,11 @@ class Test__RocotoXML:
         ],
     )
     def test__add_task_dependency_strequality(self, config, instance, root):
-        tag, block = config
-        instance._add_task_dependency_strequality(e=root, block=block, tag=tag)
+        tag, subconfig = config
+        instance._add_task_dependency_strequality(e=root, subconfig=subconfig, tag=tag)
         element = root[0]
         assert tag == element.tag
-        for attr, val in block["attrs"].items():
+        for attr, val in subconfig["attrs"].items():
             assert element.get(attr) == val
 
     def test__config_validate_config(self, assets, instance):
@@ -281,7 +302,7 @@ class Test__RocotoXML:
         assert workflow.get("foo") == "1"
         assert workflow.get("bar") == "2"
         mocks["_add_workflow_cycledef"].assert_called_once_with(workflow, "3")
-        mocks["_add_workflow_log"].assert_called_once_with(workflow, "4")
+        mocks["_add_workflow_log"].assert_called_once_with(workflow, config["workflow"])
         mocks["_add_workflow_tasks"].assert_called_once_with(workflow, "5")
 
     def test__add_workflow_cycledef(self, instance, root):
@@ -295,12 +316,19 @@ class Test__RocotoXML:
             assert root[i].tag == "cycledef"
             assert root[i].text == item["spec"]
 
-    def test__add_workflow_log(self, instance, root):
-        path = "/path/to/logfile"
-        instance._add_workflow_log(e=root, logfile=path)
+    def test__add_workflow_log_basic(self, instance, root):
+        val = "/path/to/logfile"
+        instance._add_workflow_log(e=root, config={"log": val})
         log = root[0]
         assert log.tag == "log"
-        assert log.text == path
+        assert log.text == val
+
+    def test__add_workflow_log_cyclestr(self, instance, root):
+        val = "/path/to/logfile-@Y@m@d@H"
+        instance._add_workflow_log(e=root, config={"log": {"cyclestr": {"value": val}}})
+        log = root[0]
+        assert log.tag == "log"
+        assert log.xpath("cyclestr")[0].text == val
 
     def test__add_workflow_tasks(self, instance, root):
         config = {"metatask_foo": "1", "task_bar": "2"}
@@ -355,8 +383,26 @@ class Test__RocotoXML:
 # Schema tests
 
 
+def test_schema_compoundTimeString():
+    errors = validator("$defs", "compoundTimeString")
+    # Just a string is ok:
+    assert not errors("foo")
+    # Non-string types are not ok:
+    assert "88 is not valid" in errors(88)
+    # A simple cycle string is ok:
+    assert not errors({"cyclestr": {"value": "@Y@m@d@H"}})
+    # The "value" entry is required:
+    assert "is not valid" in errors({"cyclestr": {}})
+    # Unknown properties are not allowed:
+    assert "is not valid" in errors({"cyclestr": {"foo": "bar"}})
+    # An "offset" attribute may be provided:
+    assert not errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "06:00:00"}}})
+    # The "offset" value must be a valid time string:
+    assert "is not valid" in errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "x"}}})
+
+
 def test_schema_workflow_cycledef():
-    errors = validator("workflow", "cycledef")
+    errors = validator("properties", "workflow", "properties", "cycledef")
     # Basic spec:
     spec = "202311291200 202312011200 06:00:00"
     assert not errors([{"spec": spec}])
@@ -369,9 +415,9 @@ def test_schema_workflow_cycledef():
     # Spec with negative activation offset attribute:
     assert not errors([{"attrs": {"activation_offset": "-12:00:00"}, "spec": spec}])
     # Spec with activation offset specified as positive seconds:
-    assert not errors([{"attrs": {"activation_offset": "3600"}, "spec": spec}])
+    assert not errors([{"attrs": {"activation_offset": 3600}, "spec": spec}])
     # Spec with activation offset specified as negative seconds:
-    assert not errors([{"attrs": {"activation_offset": "-3600"}, "spec": spec}])
+    assert not errors([{"attrs": {"activation_offset": -3600}, "spec": spec}])
     # Property spec is required:
     assert "'spec' is a required property" in errors([{}])
     # Additional properties are not allowed:
