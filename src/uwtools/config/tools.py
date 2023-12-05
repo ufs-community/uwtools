@@ -39,51 +39,51 @@ def compare_configs(
 
 def config_check_depths_dump(config_obj: dict, target_format: str) -> None:
     """
-    Check that the depth of the input config does not exceed the target format's max.
+    Check that the depth does not exceed the target format's max.
 
-    :param config_obj: The reference config object.
+    :param config_obj: The reference config dictionary.
     :param target_format: The target format.
-    :raises: UWConfigError on excessive input-config depth.
+    :raises: UWConfigError on excessive config object dictionary depth.
     """
     cfgclass = format_to_config(target_format)
     if cfgclass.DEPTH and depth(config_obj) > cfgclass.DEPTH:
-        msg = "Invalid depth-%s input for type-'%s' config" % (
+        msg = "Invalid depth-%s dictionary for type-'%s' config" % (
             depth(config_obj),
-            cfgclass.depth,
+            target_format,
         )
         raise log_and_error(msg)
 
 
 def config_check_depths_realize(config_obj: Config, target_format: str) -> None:
     """
-    Check that the depth of the input config does not exceed the target format's max.
+    Check that the depth does not exceed the target format's max.
 
     :param config_obj: The reference config object.
     :param target_format: The target format.
-    :raises: UWConfigError on excessive input-config depth.
+    :raises: UWConfigError on excessive config object depth.
     """
     cfgclass = format_to_config(target_format)
     if cfgclass.DEPTH and config_obj.depth != cfgclass.DEPTH:
-        msg = "Cannot write depth-%s input to type-'%s' config" % (
+        msg = "Cannot write depth-%s config to type-'%s' config" % (
             config_obj.depth,
-            cfgclass.depth,
+            target_format,
         )
         raise log_and_error(msg)
 
 
 def config_check_depths_update(config_obj: Config, target_format: str) -> None:
     """
-    Check that the depth of the input config does not exceed the target format's max.
+    Check that the depth does not exceed the target format's max.
 
     :param config_obj: The reference config object.
     :param target_format: The target format.
-    :raises: UWConfigError on excessive input-config depth.
+    :raises: UWConfigError on excessive config object depth.
     """
     cfgclass = format_to_config(target_format)
     if cfgclass.DEPTH and config_obj.depth > cfgclass.DEPTH:
-        msg = "Cannot update depth-%s input with type-'%s' values" % (
+        msg = "Cannot update depth-%s config with type-'%s' values" % (
             config_obj.depth,
-            cfgclass.depth,
+            target_format,
         )
         raise log_and_error(msg)
 
