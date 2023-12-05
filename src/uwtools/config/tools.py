@@ -2,10 +2,10 @@
 Tools for working with configs.
 """
 
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import format_to_config, log_and_error
+from uwtools.config.support import depth, format_to_config, log_and_error
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
@@ -38,20 +38,39 @@ def compare_configs(
     return cfg_a.compare_config(cfg_b.data)
 
 
-def config_check_depths(input_obj: Config, target_format: Optional[str]) -> None:
+def config_check_depths(
+    input_obj: Union[dict, Config], target_format: Optional[str], mode: Optional[str]
+) -> None:
     """
     Check that the depth of the input config does not exceed the target format's max.
 
     :param input_obj: The input config.
-    :param target_format: The target config.:
+    :param target_format: The target config.
+    :param mode: The type of config operation. One of 'dump', 'realize' or 'update'.
     :raises: UWConfigError on excessive input-config depth.
     """
     cfgclass = format_to_config(str(target_format))
-    if cfgclass.DEPTH and input_obj.depth != cfgclass.DEPTH:
-        msg = "Cannot write depth-%s input to type-'%s' target" % (
-            input_obj.depth,
-            cfgclass.depth,
-        )
+    msg = ""
+
+    if cfgclass.DEPTH and not isinstance(input_obj, dict):
+        if mode == "realize" and input_obj.depth != cfgclass.DEPTH:
+            msg = "Cannot write depth-%s input to type-'%s' config" % (
+                input_obj.depth,
+                cfgclass.depth,
+            )
+        if mode == "update" and input_obj.depth > cfgclass.DEPTH:
+            msg = "Cannot update depth-%s input with type-'%s' values" % (
+                input_obj.depth,
+                cfgclass.depth,
+            )
+    # assert depth(cfg) <= INIConfig.DEPTH
+    if cfgclass.DEPTH and isinstance(input_obj, dict) and mode == "dump":
+        if depth(input_obj) > cfgclass.DEPTH:
+            msg = "Invalid depth-%s input for type-'%s' config" % (
+                depth(input_obj),
+                cfgclass.depth,
+            )
+    if msg:
         log.error(msg)
         raise UWConfigError(msg)
 
@@ -84,7 +103,7 @@ def realize_config(
     input_obj = format_to_config(input_format)(config_file=input_file)
     input_obj.dereference()
     input_obj = _realize_config_update(input_obj, values_file, values_format)
-    config_check_depths(input_obj, output_format)
+    config_check_depths(input_obj, output_format, mode="realize")
     if values_needed:
         return _realize_config_values_needed(input_obj)
     if dry_run:
@@ -139,7 +158,7 @@ def _realize_config_update(
         values_format = values_format or get_file_type(values_file)
         values_obj = format_to_config(values_format)(config_file=values_file)
         log.debug("Values config has depth %s", values_obj.depth)
-        config_check_depths(input_obj, values_format)
+        config_check_depths(input_obj, values_format, mode="update")
         input_obj.update_values(values_obj)
         input_obj.dereference()
         log.debug("After update, input config has depth %s", input_obj.depth)

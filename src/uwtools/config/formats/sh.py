@@ -3,7 +3,7 @@ import configparser
 from io import StringIO
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import depth
+from uwtools.config.tools import config_check_depths
 from uwtools.utils.file import OptionalPath, readable, writable
 
 
@@ -60,7 +60,9 @@ class SHConfig(Config):
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
         """
-        assert depth(cfg) <= SHConfig.DEPTH
+
+        config_check_depths(cfg, target_format="sh", mode="dump")
+
         s = StringIO()
         for key, value in cfg.items():
             print(f"{key}={value}", file=s)

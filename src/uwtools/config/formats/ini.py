@@ -3,7 +3,7 @@ import configparser
 from io import StringIO
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import depth
+from uwtools.config.tools import config_check_depths
 from uwtools.utils.file import OptionalPath, readable, writable
 
 
@@ -63,7 +63,8 @@ class INIConfig(Config):
         # when an INI contains multiple sections. Unfortunately, it also adds a newline after the
         # _final_ section, resulting in an anomalous trailing newline. To avoid this, write first to
         # memory, then strip the trailing newline.
-        assert depth(cfg) <= INIConfig.DEPTH
+
+        config_check_depths(cfg, target_format="ini", mode="dump")
 
         parser = configparser.ConfigParser()
         s = StringIO()

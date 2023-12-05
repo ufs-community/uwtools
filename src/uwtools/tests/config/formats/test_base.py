@@ -9,10 +9,11 @@ from unittest.mock import patch
 
 import pytest
 import yaml
-from pytest import fixture
+from pytest import fixture, raises
 
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import fixture_path, logged, regex_logged
 from uwtools.utils.file import FORMAT, readable
@@ -127,6 +128,18 @@ def test_dereference(caplog, config):
     assert config == {"foo": 88, "a": 77, "b": {"c": 66}, "d": "{{ X }}"}
 
 
+@pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
+def test_invalid_config(fmt2, tmp_path):
+    """
+    Test that invalid config files will error when attempting to dump.
+    """
+    fmt1 = FORMAT.yaml
+    outfile = tmp_path / f"test_{fmt1.lower()}to{fmt2.lower()}_dump.{fmt2}"
+    cfgin = tools.format_to_config(fmt1)(fixture_path(f"hello_workflow.{fmt1}"))
+    with raises(UWConfigError):
+        tools.format_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)
+
+
 def test_parse_include(config):
     """
     Test that non-YAML handles include tags properly.
@@ -151,14 +164,6 @@ def test_parse_include(config):
     assert len(config["config"]) == 2
 
 
-def test_update_values(config):
-    """
-    Test that a config object can be updated.
-    """
-    config.data.update({"a": "11", "b": "12", "c": "13"})
-    assert config == {"foo": 88, "a": "11", "b": "12", "c": "13"}
-
-
 @pytest.mark.parametrize("fmt1", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
 @pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
 def test_transform_config(fmt1, fmt2, tmp_path):
@@ -175,3 +180,11 @@ def test_transform_config(fmt1, fmt2, tmp_path):
         outlines = [line.strip().replace("'", "") for line in f2]
     for line1, line2 in zip(reflines, outlines):
         assert line1 == line2
+
+
+def test_update_values(config):
+    """
+    Test that a config object can be updated.
+    """
+    config.data.update({"a": "11", "b": "12", "c": "13"})
+    assert config == {"foo": 88, "a": "11", "b": "12", "c": "13"}
