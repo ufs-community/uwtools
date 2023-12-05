@@ -79,7 +79,7 @@ def realize_config(
         return {}
     output_obj = format_to_config(output_format)
     output_obj.dump_dict(path=output_file, cfg=input_obj.data)
-    return output_obj.data
+    return input_obj.data
 
 
 # Private functions

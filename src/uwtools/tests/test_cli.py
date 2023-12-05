@@ -218,11 +218,11 @@ def test__dispatch_config_realize():
     with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
     realize.assert_called_once_with(
-        input_file=1,
+        input_config=1,
         input_format=2,
         output_file=3,
         output_format=4,
-        values_file=5,
+        values=5,
         values_format=6,
         values_needed=7,
         dry_run=8,
@@ -243,11 +243,11 @@ def test__dispatch_config_realize_no_optional():
     with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
     realize.assert_called_once_with(
-        input_file=None,
+        input_config=None,
         input_format=None,
         output_file=None,
         output_format=None,
-        values_file="/foo.vals",
+        values="/foo.vals",
         values_format=None,
         values_needed=False,
         dry_run=False,
