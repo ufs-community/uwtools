@@ -148,7 +148,7 @@ def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
 
 
 def _realize_config_update(
-    input_obj: Config, values: Union[Config, OptionalPath], values_format: Optional[str]
+    input_obj: Config, values: Union[Config, OptionalPath], values_format: Optional[str] = None
 ) -> Config:
     """
     Update config with values from another config, if given.

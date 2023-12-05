@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access
 
 from unittest.mock import patch
 
@@ -92,3 +92,22 @@ def test_validate_file():
     _validate_yaml_file.assert_called_once_with(
         schema_file=kwargs["schema_file"], config_file=kwargs["config"]
     )
+
+
+def test__ensure_config_arg_type_config_obj():
+    config_obj = YAMLConfig(empty=True)
+    assert config._ensure_config_arg_type(config=config_obj) is config_obj
+
+
+def test__ensure_config_arg_type_dict():
+    config_dict = {"foo": 88}
+    config_obj = config._ensure_config_arg_type(config=config_dict)
+    assert isinstance(config_obj, YAMLConfig)
+    assert config_obj.data == config_dict
+
+
+def test__ensure_config_arg_type_path():
+    config_path = "/path/to/config.yaml"
+    config_obj = config._ensure_config_arg_type(config=config_path)
+    assert isinstance(config_obj, str)
+    assert config_obj is config_path

@@ -470,6 +470,10 @@ def test__ensure_format_bad():
     assert str(e.value) == "Either foo file format or name must be specified"
 
 
+def test__ensure_format_config_obj():
+    assert tools._ensure_format(desc="foo", config=YAMLConfig(empty=True)) == FORMAT.yaml
+
+
 def test__ensure_format_deduced():
     assert tools._ensure_format(desc="foo", config="/tmp/config.yaml") == FORMAT.yaml
 
@@ -562,6 +566,13 @@ def test__realize_config_update(realize_config_testobj, tmp_path):
     o = tools._realize_config_update(input_obj=o, values=path, values_format=FORMAT.yaml)
     assert o.depth == 4
     assert o[1][2][3][4] == 99
+
+
+def test__realize_config_config_obj(realize_config_testobj):
+    values_obj = YAMLConfig(empty=True)
+    values_obj.update({"foo": 88})
+    o = tools._realize_config_update(input_obj=realize_config_testobj, values=values_obj)
+    assert o["foo"] == 88
 
 
 def test__realize_config_values_needed(caplog, tmp_path):
