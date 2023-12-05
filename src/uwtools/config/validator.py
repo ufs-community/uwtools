@@ -16,8 +16,7 @@ from uwtools.types import DefinitePath
 
 def validate_yaml(schema_file: DefinitePath, config: YAMLConfig) -> bool:
     """
-    Check whether the given config conforms to the given JSON Schema spec and whether any filesystem
-    paths it identifies do not exist.
+    Check whether the given config conforms to the given JSON Schema spec.
 
     :param schema_file: The JSON Schema file to use for validation.
     :param config: The config to validate.
