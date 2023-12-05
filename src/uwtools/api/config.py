@@ -45,7 +45,7 @@ def realize(
     """
     ???
     """
-    return _realize(
+    _realize(
         input_config=_ensure_config_arg_type(input_config),
         input_format=input_format,
         output_file=output_file,
@@ -55,6 +55,7 @@ def realize(
         values_needed=values_needed,
         dry_run=dry_run,
     )
+    return True
 
 
 def translate(
