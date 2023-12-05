@@ -7,7 +7,7 @@ from typing import List, Optional
 from uwtools.config.formats.base import Config
 from uwtools.config.support import depth, format_to_config, log_and_error
 from uwtools.logging import MSGWIDTH, log
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.types import DefinitePath, OptionalPath, Union
 from uwtools.utils.file import get_file_type
 
 # Public functions
@@ -37,7 +37,7 @@ def compare_configs(
     return cfg_a.compare_config(cfg_b.data)
 
 
-def config_check_depths_dump(config_obj: dict, target_format: str) -> None:
+def config_check_depths_dump(config_obj: Union[Config, dict], target_format: str) -> None:
     """
     Check that the depth does not exceed the target format's max.
 
@@ -45,6 +45,7 @@ def config_check_depths_dump(config_obj: dict, target_format: str) -> None:
     :param target_format: The target format.
     :raises: UWConfigError on excessive config object dictionary depth.
     """
+    config_obj = config_obj.data if isinstance(config_obj, Config) else config_obj
     cfgclass = format_to_config(target_format)
     if cfgclass.DEPTH and depth(config_obj) > cfgclass.DEPTH:
         msg = "Invalid depth-%s dictionary for type-'%s' config" % (
@@ -54,7 +55,7 @@ def config_check_depths_dump(config_obj: dict, target_format: str) -> None:
         raise log_and_error(msg)
 
 
-def config_check_depths_realize(config_obj: Config, target_format: str) -> None:
+def config_check_depths_realize(config_obj: Union[Config, dict], target_format: str) -> None:
     """
     Check that the depth does not exceed the target format's max.
 
@@ -62,16 +63,17 @@ def config_check_depths_realize(config_obj: Config, target_format: str) -> None:
     :param target_format: The target format.
     :raises: UWConfigError on excessive config object depth.
     """
+    config_obj = config_obj.data if isinstance(config_obj, Config) else config_obj
     cfgclass = format_to_config(target_format)
-    if cfgclass.DEPTH and config_obj.depth != cfgclass.DEPTH:
+    if cfgclass.DEPTH and depth(config_obj) != cfgclass.DEPTH:
         msg = "Cannot write depth-%s config to type-'%s' config" % (
-            config_obj.depth,
+            depth(config_obj),
             target_format,
         )
         raise log_and_error(msg)
 
 
-def config_check_depths_update(config_obj: Config, target_format: str) -> None:
+def config_check_depths_update(config_obj: Union[Config, dict], target_format: str) -> None:
     """
     Check that the depth does not exceed the target format's max.
 
@@ -79,10 +81,11 @@ def config_check_depths_update(config_obj: Config, target_format: str) -> None:
     :param target_format: The target format.
     :raises: UWConfigError on excessive config object depth.
     """
+    config_obj = config_obj.data if isinstance(config_obj, Config) else config_obj
     cfgclass = format_to_config(target_format)
-    if cfgclass.DEPTH and config_obj.depth > cfgclass.DEPTH:
+    if cfgclass.DEPTH and depth(config_obj) > cfgclass.DEPTH:
         msg = "Cannot update depth-%s config with type-'%s' values" % (
-            config_obj.depth,
+            depth(config_obj),
             target_format,
         )
         raise log_and_error(msg)

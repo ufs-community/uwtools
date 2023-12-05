@@ -48,6 +48,8 @@ class NMLConfig(Config):
 
         :param path: Path to dump config to.
         """
+        config_check_depths_dump(config_obj=self, target_format=FORMAT.nml)
+
         self.dump_dict(path, self.data)
 
     @staticmethod
