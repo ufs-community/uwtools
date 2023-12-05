@@ -169,11 +169,11 @@ def render(
     Check and render a Jinja2 template.
 
     :param values: Source of values to render the template.
-    :param values_format: Format of the values file.
-    :param input_file: Path to the Jinja2 template file to render.
-    :param output_file: Path to the file to write the rendered Jinja2 template to.
-    :param overrides: "key=value" strings to supplement values-file values.
-    :param values_needed: Just issue a report about variables needed to render the template?
+    :param values_format: Format of values when sourced from file..
+    :param input_file: Path to read raw Jinja2 template from (None => read stdin).
+    :param output_file: Path to write rendered Jinja2 template to (None => write to stdout).
+    :param overrides: Supplemental "key=value" strings.
+    :param values_needed: Just report variables needed to render the template?
     :param dry_run: Run in dry-run mode?
     :return: Jinja2 template was successfully rendered.
     """
@@ -297,10 +297,10 @@ def _set_up_values_obj(
 ) -> dict:
     """
     Collect template-rendering values based on an input file, if given, or otherwise on the shell
-    environment; and supplemented with override values from given "key=value" strings.
+    environment. Supplement with "key=value" string overrides.
 
     :param values_file: Path to the file supplying values to render the template.
-    :param values_format: Format of the values file.
+    :param values_format: Format of values when sourced from file.
     :param overrides: "key=value" strings to supplement values-file values.
     :returns: The collected values.
     """

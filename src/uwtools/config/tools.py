@@ -51,13 +51,13 @@ def realize_config(
     """
     Realize an output config based on an input config and an optional values-providing config.
 
-    :param input_config: Input config file (stdin used when None).
+    :param input_config: Input config file (None => read stdin).
     :param input_format: Format of the input config.
-    :param output_file: Output config file (stdout used when None).
+    :param output_file: Output config file (None => write to stdout).
     :param output_format: Format of the output config.
-    :param values: File providing values to modify input.
-    :param values_format: Format of the values config file.
-    :param values_needed: Provide a report about complete, missing, and template values.
+    :param values: Source of values used to modify input.
+    :param values_format: Format of values when sourced from file.
+    :param values_needed: Report complete, missing, and template values.
     :param dry_run: Log output instead of writing to output.
     :return: The realized config (or an empty-dict for no-op modes).
     """
@@ -148,30 +148,30 @@ def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
 
 
 def _realize_config_update(
-    input_obj: Config, values: Union[Config, OptionalPath], values_format: Optional[str] = None
+    config_obj: Config, values: Union[Config, OptionalPath], values_format: Optional[str] = None
 ) -> Config:
     """
     Update config with values from another config, if given.
 
-    :param input_obj: The config to update.
+    :param config_obj: The config to update.
     :param values: Source of values to modify input.
-    :param values_format: Format of the values config file.
+    :param values_format: Format of values when sourced from file.
     :return: The input config, possibly updated.
     """
     if values:
-        log.debug("Before update, config has depth %s", input_obj.depth)
+        log.debug("Before update, config has depth %s", config_obj.depth)
         if isinstance(values, Config):
             values_obj = values
         else:
             values_format = values_format or get_file_format(values)
             values_obj = format_to_config(values_format)(config_file=values)
         log.debug("Values config has depth %s", values_obj.depth)
-        input_obj.update_values(values_obj)
-        input_obj.dereference()
-        log.debug("After update, input config has depth %s", input_obj.depth)
+        config_obj.update_values(values_obj)
+        config_obj.dereference()
+        log.debug("After update, input config has depth %s", config_obj.depth)
     else:
-        log.debug("Input config has depth %s", input_obj.depth)
-    return input_obj
+        log.debug("Input config has depth %s", config_obj.depth)
+    return config_obj
 
 
 def _realize_config_values_needed(input_obj: Config) -> bool:

@@ -19,7 +19,7 @@ from uwtools.utils.file import readable, resource_pathobj, writable
 
 
 def realize_rocoto_xml(
-    config: Union[OptionalPath, YAMLConfig], output_file: OptionalPath = None
+    config: Union[YAMLConfig, OptionalPath], output_file: OptionalPath = None
 ) -> str:
     """
     Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
@@ -92,7 +92,7 @@ class _RocotoXML:
         """
         Emit Rocoto XML document to file or stdout.
 
-        :param path: Optional path to write XML document to.
+        :param path: Path to write XML document to (None => write to stdout).
         """
         with writable(path) as f:
             f.write(str(self).strip())
@@ -283,11 +283,11 @@ class _RocotoXML:
             tag, name = self._tag_name(key)
             {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, subconfig, name)
 
-    def _config_validate(self, config: Union[OptionalPath, YAMLConfig]) -> None:
+    def _config_validate(self, config: Union[YAMLConfig, OptionalPath]) -> None:
         """
         Validate the given YAML config.
 
-        :param config_file: Path to YAML config file, or a YAMLConfig object.
+        :param config: YAMLConfig object or path to YAML file (None => read stdin).
         """
         schema_file = resource_pathobj("rocoto.jsonschema")
         config_obj = config if isinstance(config, YAMLConfig) else YAMLConfig(config_file=config)

@@ -80,7 +80,7 @@ def get_file_format(path: DefinitePath) -> str:
     Returns a standardized file format name given a path/filename.
 
     :param path: A path or filename.
-    :return: One of a set of supported file format names.
+    :return: One of a set of supported file-format names.
     :raises: ValueError if the path/filename suffix is unrecognized.
     """
     suffix = Path(path).suffix.replace(".", "")
