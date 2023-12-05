@@ -39,7 +39,7 @@ def test_realize():
     _realize.assert_called_once_with(**kwargs)
 
 
-def test_realize_to_str():
+def test_realize_to_dict():
     kwargs: dict = {
         "input_config": "path1",
         "input_format": "fmt1",
@@ -49,7 +49,7 @@ def test_realize_to_str():
         "dry_run": True,
     }
     with patch.object(config, "_realize") as _realize:
-        config.realize_to_str(**kwargs)
+        config.realize_to_dict(**kwargs)
     _realize.assert_called_once_with(
         **dict({**kwargs, **{"output_file": os.devnull, "output_format": None}})
     )

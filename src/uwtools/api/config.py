@@ -59,7 +59,7 @@ def realize(
     return True
 
 
-def realize_to_str(
+def realize_to_dict(
     input_config: Union[dict, _Config, OptionalPath] = None,
     input_format: Optional[str] = None,
     values: Union[dict, _Config, OptionalPath] = None,
