@@ -11,7 +11,7 @@ from lxml.etree import Element, SubElement
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import dereference
-from uwtools.config.validator import validate_yaml_config
+from uwtools.config.validator import validate_yaml
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.types import OptionalPath
@@ -291,7 +291,7 @@ class _RocotoXML:
         """
         schema_file = resource_pathobj("rocoto.jsonschema")
         config_obj = config if isinstance(config, YAMLConfig) else YAMLConfig(config_file=config)
-        ok = validate_yaml_config(schema_file=schema_file, config=config_obj)
+        ok = validate_yaml(schema_file=schema_file, config=config_obj)
         if not ok:
             raise UWConfigError("YAML validation errors")
 

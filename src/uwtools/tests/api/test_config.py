@@ -84,9 +84,9 @@ def test_translate(infmt, outfmt, success_expected):
 @pytest.mark.parametrize("cfg", [{"foo": "bar"}, YAMLConfig(empty=True)])
 def test_validate(cfg):
     kwargs: dict = {"schema_file": "schema-file", "config": cfg}
-    with patch.object(config, "_validate_yaml_config", return_value=True) as _validate_yaml_config:
+    with patch.object(config, "_validate_yaml", return_value=True) as _validate_yaml:
         assert config.validate(**kwargs)
-    _validate_yaml_config.assert_called_once_with(
+    _validate_yaml.assert_called_once_with(
         schema_file=kwargs["schema_file"], config=kwargs["config"]
     )
 
@@ -96,9 +96,9 @@ def test_validate_config_file(tmp_path):
     with open(cfg, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
     kwargs: dict = {"schema_file": "schema-file", "config": cfg}
-    with patch.object(config, "_validate_yaml_config", return_value=True) as _validate_yaml_config:
+    with patch.object(config, "_validate_yaml", return_value=True) as _validate_yaml:
         assert config.validate(**kwargs)
-    _validate_yaml_config.assert_called_once_with(
+    _validate_yaml.assert_called_once_with(
         schema_file=kwargs["schema_file"], config=YAMLConfig(cfg)
     )
 

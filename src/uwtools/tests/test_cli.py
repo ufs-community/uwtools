@@ -294,9 +294,9 @@ def test__dispatch_config_translate_unsupported():
 def test__dispath_config_validate_config_obj():
     config = uwtools.api.config._YAMLConfig(empty=True)
     args = {STR.schemafile: 1, STR.config: config}
-    with patch.object(uwtools.api.config, "_validate_yaml_config") as _validate_yaml_config:
+    with patch.object(uwtools.api.config, "_validate_yaml") as _validate_yaml:
         cli._dispatch_config_validate(args)
-    _validate_yaml_config.assert_called_once_with(**args)
+    _validate_yaml.assert_called_once_with(**args)
 
 
 @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
