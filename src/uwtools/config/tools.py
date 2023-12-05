@@ -5,6 +5,7 @@ Tools for working with configs.
 from typing import List, Optional, Union
 
 from uwtools.config.formats.base import Config
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import format_to_config, log_and_error
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import MSGWIDTH, log
@@ -43,7 +44,7 @@ def realize_config(
     input_format: Optional[str] = None,
     output_file: OptionalPath = None,
     output_format: Optional[str] = None,
-    values: Union[Config, OptionalPath] = None,
+    values: Union[dict, Config, OptionalPath] = None,
     values_format: Optional[str] = None,
     values_needed: bool = False,
     dry_run: bool = False,
@@ -148,7 +149,9 @@ def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
 
 
 def _realize_config_update(
-    config_obj: Config, values: Union[Config, OptionalPath], values_format: Optional[str] = None
+    config_obj: Config,
+    values: Union[dict, Config, OptionalPath],
+    values_format: Optional[str] = None,
 ) -> Config:
     """
     Update config with values from another config, if given.
@@ -160,7 +163,10 @@ def _realize_config_update(
     """
     if values:
         log.debug("Before update, config has depth %s", config_obj.depth)
-        if isinstance(values, Config):
+        values_obj: Config
+        if isinstance(values, dict):
+            values_obj = YAMLConfig(config=values)
+        elif isinstance(values, Config):
             values_obj = values
         else:
             values_format = values_format or get_file_format(values)

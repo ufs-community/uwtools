@@ -551,28 +551,21 @@ def test__realize_config_check_depths_fail_sh(fmt, realize_config_testobj):
         tools._realize_config_check_depths(input_obj=realize_config_testobj, output_format=fmt)
 
 
-def test__realize_config_update_noop(realize_config_testobj):
-    assert realize_config_testobj == tools._realize_config_update(
-        config_obj=realize_config_testobj, values=None, values_format=None
-    )
+@pytest.mark.parametrize("values", [YAMLConfig(config={1: {2: {3: 99}}}), {1: {2: {3: 99}}}])
+def test__realize_config_update(realize_config_testobj, values):
+    assert realize_config_testobj[1][2][3] == 88
+    o = tools._realize_config_update(config_obj=realize_config_testobj, values=values)
+    assert o[1][2][3] == 99
 
 
-def test__realize_config_update(realize_config_testobj, tmp_path):
-    o = realize_config_testobj
-    assert o.depth == 3
-    path = tmp_path / "values.yaml"
-    with writable(path) as f:
-        yaml.dump({1: {2: {3: {4: 99}}}}, f)  # depth 4
-    o = tools._realize_config_update(config_obj=o, values=path, values_format=FORMAT.yaml)
-    assert o.depth == 4
-    assert o[1][2][3][4] == 99
-
-
-def test__realize_config_config_obj(realize_config_testobj):
-    values_obj = YAMLConfig(config={})
-    values_obj.update({"foo": 88})
-    o = tools._realize_config_update(config_obj=realize_config_testobj, values=values_obj)
-    assert o["foo"] == 88
+def test__realize_config_update_file(realize_config_testobj, tmp_path):
+    values = {1: {2: {3: 99}}}
+    path = tmp_path / "config.yaml"
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.dump(values, f)
+    assert realize_config_testobj[1][2][3] == 88
+    o = tools._realize_config_update(config_obj=realize_config_testobj, values=path)
+    assert o[1][2][3] == 99
 
 
 def test__realize_config_values_needed(caplog, tmp_path):
