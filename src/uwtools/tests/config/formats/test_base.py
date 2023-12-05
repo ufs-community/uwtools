@@ -138,7 +138,7 @@ def test_invalid_config(caplog, fmt2, tmp_path):
     cfgin = tools.format_to_config(fmt1)(fixture_path("hello_workflow.yaml"))
     with raises(UWConfigError):
         tools.format_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)
-        assert logged(caplog, "Cannot write depth")
+        assert logged(caplog, "Invalid depth")
 
 
 def test_parse_include(config):

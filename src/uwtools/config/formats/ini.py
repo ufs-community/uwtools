@@ -3,8 +3,8 @@ import configparser
 from io import StringIO
 
 from uwtools.config.formats.base import Config
-from uwtools.config.tools import config_check_depths
-from uwtools.utils.file import OptionalPath, get_file_type, readable, writable
+from uwtools.config.tools import config_check_depths_dump
+from uwtools.utils.file import FORMAT, OptionalPath, readable, writable
 
 
 class INIConfig(Config):
@@ -63,8 +63,7 @@ class INIConfig(Config):
         # when an INI contains multiple sections. Unfortunately, it also adds a newline after the
         # _final_ section, resulting in an anomalous trailing newline. To avoid this, write first to
         # memory, then strip the trailing newline.
-        target_format = get_file_type(str(path))
-        config_check_depths(cfg, target_format=target_format, mode="dump")
+        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.ini)
 
         parser = configparser.ConfigParser()
         s = StringIO()

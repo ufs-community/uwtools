@@ -141,12 +141,20 @@ def test_compare_configs_bad_format(caplog):
     assert msg in str(e.value)
 
 
-@pytest.mark.parametrize("mode", ["realize", "update", "barbecue"])
-def test_config_check_depths_fail_sh(mode, realize_config_testobj):
+def test_config_check_depths_realize_fail(caplog, realize_config_testobj):
     with raises(UWConfigError):
-        tools.config_check_depths(
-            input_obj=realize_config_testobj, target_format=FORMAT.ini, mode=mode
+        tools.config_check_depths_realize(
+            config_obj=realize_config_testobj, target_format=FORMAT.ini
         )
+        assert logged(caplog, "Cannot write depth")
+
+
+def test_config_check_depths_update_fail(caplog, realize_config_testobj):
+    with raises(UWConfigError):
+        tools.config_check_depths_update(
+            config_obj=realize_config_testobj, target_format=FORMAT.ini
+        )
+        assert logged(caplog, "Cannot update depth")
 
 
 def test_realize_config_conversion_cfg_to_yaml(tmp_path):
