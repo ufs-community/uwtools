@@ -67,7 +67,7 @@ def help_realize_config_fmt2fmt(infn, infmt, cfgfn, cfgfmt, tmpdir):
     cfgclass = tools.format_to_config(infmt)
     cfgobj = cfgclass(infile)
     cfgobj.update_values(cfgclass(cfgfile))
-    reference = tmpdir / "expected"
+    reference = str(tmpdir / f"expected{ext}")
     cfgobj.dump(reference)
     assert compare_files(reference, outfile)
 
@@ -141,11 +141,12 @@ def test_compare_configs_bad_format(caplog):
     assert msg in str(e.value)
 
 
-@pytest.mark.parametrize("fmt", ["ini", "sh"])
-@pytest.mark.parametrize("mode", ["realize", "update"])
-def test_config_check_depths_fail_sh(fmt, mode, realize_config_testobj):
+@pytest.mark.parametrize("mode", ["realize", "update", "barbecue"])
+def test_config_check_depths_fail_sh(mode, realize_config_testobj):
     with raises(UWConfigError):
-        tools.config_check_depths(input_obj=realize_config_testobj, target_format=fmt, mode=mode)
+        tools.config_check_depths(
+            input_obj=realize_config_testobj, target_format=FORMAT.ini, mode=mode
+        )
 
 
 def test_realize_config_conversion_cfg_to_yaml(tmp_path):

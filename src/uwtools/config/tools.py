@@ -38,9 +38,7 @@ def compare_configs(
     return cfg_a.compare_config(cfg_b.data)
 
 
-def config_check_depths(
-    input_obj: Union[dict, Config], target_format: Optional[str], mode: Optional[str]
-) -> None:
+def config_check_depths(input_obj: Union[dict, Config], target_format: str, mode: str) -> None:
     """
     Check that the depth of the input config does not exceed the target format's max.
 
@@ -49,7 +47,14 @@ def config_check_depths(
     :param mode: The type of config operation. One of 'dump', 'realize' or 'update'.
     :raises: UWConfigError on excessive input-config depth.
     """
-    cfgclass = format_to_config(str(target_format))
+    lookup = {
+        "dump",
+        "realize",
+        "update",
+    }
+    if not mode in lookup:
+        raise log_and_error("Mode '%s' should be one of: %s" % (mode, ", ".join(lookup)))
+    cfgclass = format_to_config(target_format)
     msg = ""
 
     if cfgclass.DEPTH and not isinstance(input_obj, dict):
@@ -63,7 +68,6 @@ def config_check_depths(
                 input_obj.depth,
                 cfgclass.depth,
             )
-    # assert depth(cfg) <= INIConfig.DEPTH
     if cfgclass.DEPTH and isinstance(input_obj, dict) and mode == "dump":
         if depth(input_obj) > cfgclass.DEPTH:
             msg = "Invalid depth-%s input for type-'%s' config" % (

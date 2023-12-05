@@ -4,7 +4,7 @@ from io import StringIO
 
 from uwtools.config.formats.base import Config
 from uwtools.config.tools import config_check_depths
-from uwtools.utils.file import OptionalPath, readable, writable
+from uwtools.utils.file import OptionalPath, get_file_type, readable, writable
 
 
 class SHConfig(Config):
@@ -61,7 +61,8 @@ class SHConfig(Config):
         :param cfg: The in-memory config object to dump.
         """
 
-        config_check_depths(cfg, target_format="sh", mode="dump")
+        target_format = get_file_type(str(path))
+        config_check_depths(cfg, target_format=target_format, mode="dump")
 
         s = StringIO()
         for key, value in cfg.items():

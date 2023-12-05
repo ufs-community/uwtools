@@ -129,15 +129,16 @@ def test_dereference(caplog, config):
 
 
 @pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
-def test_invalid_config(fmt2, tmp_path):
+def test_invalid_config(caplog, fmt2, tmp_path):
     """
     Test that invalid config files will error when attempting to dump.
     """
     fmt1 = FORMAT.yaml
-    outfile = tmp_path / f"test_{fmt1.lower()}to{fmt2.lower()}_dump.{fmt2}"
-    cfgin = tools.format_to_config(fmt1)(fixture_path(f"hello_workflow.{fmt1}"))
+    outfile = tmp_path / f"test_{fmt1}to{fmt2}_dump.{fmt2}"
+    cfgin = tools.format_to_config(fmt1)(fixture_path("hello_workflow.yaml"))
     with raises(UWConfigError):
         tools.format_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)
+        assert logged(caplog, "Cannot write depth")
 
 
 def test_parse_include(config):
@@ -170,7 +171,7 @@ def test_transform_config(fmt1, fmt2, tmp_path):
     """
     Test that transforms config objects to objects of other config subclasses.
     """
-    outfile = tmp_path / f"test_{fmt1.lower()}to{fmt2.lower()}_dump.{fmt2}"
+    outfile = tmp_path / f"test_{fmt1}to{fmt2}_dump.{fmt2}"
     reference = fixture_path(f"simple.{fmt2}")
     cfgin = tools.format_to_config(fmt1)(fixture_path(f"simple.{fmt1}"))
     tools.format_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)

@@ -4,7 +4,7 @@ import f90nml
 
 from uwtools.config.formats.base import Config
 from uwtools.config.tools import config_check_depths
-from uwtools.utils.file import OptionalPath, readable, writable
+from uwtools.utils.file import OptionalPath, get_file_type, readable, writable
 
 
 class NMLConfig(Config):
@@ -62,7 +62,8 @@ class NMLConfig(Config):
         # f90nml honors namelist and variable order if it receives an OrderedDict as input, so
         # ensure that it receives one.
 
-        config_check_depths(cfg, target_format="nml", mode="dump")
+        target_format = get_file_type(str(path))
+        config_check_depths(cfg, target_format=target_format, mode="dump")
 
         def to_od(d):
             return OrderedDict(
