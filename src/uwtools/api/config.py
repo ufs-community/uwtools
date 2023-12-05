@@ -45,7 +45,33 @@ def realize(
     """
     ???
     """
-    _realize(
+    realize_to_str(
+        input_config=input_config,
+        input_format=input_format,
+        output_file=output_file,
+        output_format=output_format,
+        values=values,
+        values_format=values_format,
+        values_needed=values_needed,
+        dry_run=dry_run,
+    )
+    return True
+
+
+def realize_to_str(
+    input_config: Union[dict, _Config, OptionalPath] = None,
+    input_format: Optional[str] = None,
+    output_file: OptionalPath = None,
+    output_format: Optional[str] = None,
+    values: Union[dict, _Config, OptionalPath] = None,
+    values_format: Optional[str] = None,
+    values_needed: bool = False,
+    dry_run: bool = False,
+) -> dict:
+    """
+    ???
+    """
+    return _realize(
         input_config=_ensure_config_arg_type(input_config),
         input_format=input_format,
         output_file=output_file,
@@ -55,7 +81,6 @@ def realize(
         values_needed=values_needed,
         dry_run=dry_run,
     )
-    return True
 
 
 def translate(
