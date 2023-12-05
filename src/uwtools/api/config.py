@@ -120,7 +120,9 @@ def _ensure_config_arg_type(
     config: Union[dict, _Config, OptionalPath]
 ) -> Union[_Config, OptionalPath]:
     """
-    ???
+    Encapsulate a dict in a Config; return a Config or path argument as-is.
+
+    :param config: A config as a dict, Config, or path.
     """
     if isinstance(config, dict):
         cfgobj = _YAMLConfig(empty=True)
