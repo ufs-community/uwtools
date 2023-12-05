@@ -72,7 +72,7 @@ class _RocotoXML:
     Generate a Rocoto XML document from a UW YAML config.
     """
 
-    def __init__(self, config: Union[YAMLConfig, OptionalPath] = None) -> None:
+    def __init__(self, config: Union[dict, YAMLConfig, OptionalPath] = None) -> None:
         self._config_validate(config)
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
         self._config = cfgobj.data
@@ -283,7 +283,7 @@ class _RocotoXML:
             tag, name = self._tag_name(key)
             {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, subconfig, name)
 
-    def _config_validate(self, config: Union[YAMLConfig, OptionalPath]) -> None:
+    def _config_validate(self, config: Union[dict, YAMLConfig, OptionalPath]) -> None:
         """
         Validate the given YAML config.
 
