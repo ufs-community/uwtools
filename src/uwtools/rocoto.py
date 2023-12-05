@@ -72,7 +72,7 @@ class _RocotoXML:
     Generate a Rocoto XML document from a UW YAML config.
     """
 
-    def __init__(self, config: Union[OptionalPath, YAMLConfig] = None) -> None:
+    def __init__(self, config: Union[YAMLConfig, OptionalPath] = None) -> None:
         self._config_validate(config)
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
         self._config = cfgobj.data
@@ -290,8 +290,7 @@ class _RocotoXML:
         :param config: YAMLConfig object or path to YAML file (None => read stdin).
         """
         schema_file = resource_pathobj("rocoto.jsonschema")
-        config_obj = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
-        ok = validate_yaml(schema_file=schema_file, config=config_obj)
+        ok = validate_yaml(schema_file=schema_file, config=config)
         if not ok:
             raise UWConfigError("YAML validation errors")
 
