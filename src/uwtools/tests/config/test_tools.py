@@ -15,6 +15,7 @@ from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError, UWError
+from uwtools.config.support import depth
 from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path, logged
 from uwtools.utils.file import FORMAT, writable
@@ -67,7 +68,7 @@ def help_realize_config_fmt2fmt(infn, infmt, cfgfn, cfgfmt, tmpdir):
     cfgclass = tools.format_to_config(infmt)
     cfgobj = cfgclass(infile)
     cfgobj.update_values(cfgclass(cfgfile))
-    reference = tmpdir / "expected"
+    reference = str(tmpdir / f"expected{ext}")
     cfgobj.dump(reference)
     assert compare_files(reference, outfile)
 
@@ -137,6 +138,28 @@ def test_compare_configs_bad_format(caplog):
             config_b_format=FORMAT.yaml,
         )
     msg = "Format 'jpg' should be one of: fieldtable, ini, nml, sh, yaml"
+    assert logged(caplog, msg)
+    assert msg in str(e.value)
+
+
+def test_config_check_depths_realize_fail(caplog, realize_config_testobj):
+    depthin = depth(realize_config_testobj.data)
+    with raises(UWConfigError) as e:
+        tools.config_check_depths_realize(
+            config_obj=realize_config_testobj, target_format=FORMAT.ini
+        )
+    msg = f"Cannot realize depth-{depthin} config to type-'ini' config"
+    assert logged(caplog, msg)
+    assert msg in str(e.value)
+
+
+def test_config_check_depths_update_fail(caplog, realize_config_testobj):
+    depthin = depth(realize_config_testobj.data)
+    with raises(UWConfigError) as e:
+        tools.config_check_depths_update(
+            config_obj=realize_config_testobj, target_format=FORMAT.ini
+        )
+    msg = f"Cannot update depth-{depthin} config to type-'ini' config"
     assert logged(caplog, msg)
     assert msg in str(e.value)
 
@@ -545,17 +568,16 @@ def test__print_config_section_yaml_not_dict():
     assert "must be a dictionary" in str(e.value)
 
 
-@pytest.mark.parametrize("fmt", ["ini", "sh"])
-def test__realize_config_check_depths_fail_sh(fmt, realize_config_testobj):
-    with raises(UWConfigError):
-        tools._realize_config_check_depths(input_obj=realize_config_testobj, output_format=fmt)
-
-
 @pytest.mark.parametrize("values", [YAMLConfig(config={1: {2: {3: 99}}}), {1: {2: {3: 99}}}])
 def test__realize_config_update(realize_config_testobj, values):
     assert realize_config_testobj[1][2][3] == 88
     o = tools._realize_config_update(config_obj=realize_config_testobj, values=values)
     assert o[1][2][3] == 99
+
+def test__realize_config_update_noop(realize_config_testobj):
+    assert realize_config_testobj == tools._realize_config_update(
+        input_obj=realize_config_testobj, values_file=None, values_format=None
+    )
 
 
 def test__realize_config_update_file(realize_config_testobj, tmp_path):
