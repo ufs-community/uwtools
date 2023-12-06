@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,protected-access
+# pylint: disable=missing-function-docstring
 
 import logging as py_logging
 from unittest.mock import patch
