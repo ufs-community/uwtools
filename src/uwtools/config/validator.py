@@ -51,12 +51,7 @@ def _prep_config(config: Union[dict, YAMLConfig, OptionalPath]) -> YAMLConfig:
     :param config: The config to validate.
     :return: A dereferenced YAMLConfig object based on the input config.
     """
-    if isinstance(config, dict):
-        cfgobj = YAMLConfig(config=config)
-    elif isinstance(config, YAMLConfig):
-        cfgobj = config
-    else:
-        cfgobj = YAMLConfig(config=config)
+    cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
     cfgobj.dereference()
     return cfgobj
 
