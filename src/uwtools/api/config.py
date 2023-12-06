@@ -45,7 +45,7 @@ def get_fieldtable_config(config: Union[dict, OptionalPath] = None) -> _FieldTab
 
 def get_ini_config(config: Union[dict, OptionalPath] = None) -> _INIConfig:
     """
-    Get a INIConfig object.
+    Get an INIConfig object.
 
     :param config: Config file to load (None => read from stdin), or initial dict.
     """
@@ -54,7 +54,7 @@ def get_ini_config(config: Union[dict, OptionalPath] = None) -> _INIConfig:
 
 def get_nml_config(config: Union[dict, OptionalPath] = None) -> _NMLConfig:
     """
-    Get a NMLConfig object.
+    Get an NMLConfig object.
 
     :param config: Config file to load (None => read from stdin), or initial dict.
     """
