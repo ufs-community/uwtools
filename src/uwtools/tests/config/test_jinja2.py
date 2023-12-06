@@ -334,14 +334,9 @@ class Test_Jinja2Template:
             template="{{greeting}} to {{recipient}}",
         )
 
-    def test_bad_args(self, testdata):
-        # It is an error to pass in neither a template path or a template string.
-        with raises(RuntimeError):
-            J2Template(testdata.config)
-
     def test_dump(self, testdata, tmp_path):
         path = tmp_path / "rendered.txt"
-        j2template = J2Template(testdata.config, template_str=testdata.template)
+        j2template = J2Template(values=testdata.config, template_source=testdata.template)
         j2template.dump(output_path=path)
         with open(path, "r", encoding="utf-8") as f:
             assert f.read().strip() == "Hello to the world"
@@ -350,7 +345,7 @@ class Test_Jinja2Template:
         path = tmp_path / "template.jinja2"
         with path.open("w", encoding="utf-8") as f:
             print(testdata.template, file=f)
-        validate(J2Template(testdata.config, template_path=path))
+        validate(J2Template(values=testdata.config, template_source=path))
 
     def test_render_string(self, testdata):
-        validate(J2Template(testdata.config, template_str=testdata.template))
+        validate(J2Template(values=testdata.config, template_source=testdata.template))
