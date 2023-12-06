@@ -3,7 +3,8 @@ from collections import OrderedDict
 import f90nml
 
 from uwtools.config.formats.base import Config
-from uwtools.utils.file import OptionalPath, readable, writable
+from uwtools.config.tools import config_check_depths_dump
+from uwtools.utils.file import FORMAT, OptionalPath, readable, writable
 
 
 class NMLConfig(Config):
@@ -47,6 +48,8 @@ class NMLConfig(Config):
 
         :param path: Path to dump config to.
         """
+        config_check_depths_dump(config_obj=self, target_format=FORMAT.nml)
+
         self.dump_dict(path, self.data)
 
     @staticmethod
@@ -60,6 +63,8 @@ class NMLConfig(Config):
 
         # f90nml honors namelist and variable order if it receives an OrderedDict as input, so
         # ensure that it receives one.
+
+        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.nml)
 
         def to_od(d):
             return OrderedDict(

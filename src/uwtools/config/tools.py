@@ -2,13 +2,12 @@
 Tools for working with configs.
 """
 
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import format_to_config, log_and_error
-from uwtools.exceptions import UWConfigError
+from uwtools.config.support import depth, format_to_config, log_and_error
 from uwtools.logging import MSGWIDTH, log
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.types import DefinitePath, OptionalPath, Union
 from uwtools.utils.file import get_file_type
 
 # Public functions
@@ -36,6 +35,43 @@ def compare_configs(
     log.info("+ %s", config_b_path)
     log.info("-" * MSGWIDTH)
     return cfg_a.compare_config(cfg_b.data)
+
+
+def config_check_depths_dump(config_obj: Union[Config, dict], target_format: str) -> None:
+    """
+    Check that the depth does not exceed the target format's max.
+
+    :param config_obj: The reference config dictionary.
+    :param target_format: The target format.
+    :raises: UWConfigError on excessive config object dictionary depth.
+    """
+    # Define a function with the conditions of an invalid depth.
+    bad_depth = lambda need, have: need and have > need
+    _validate_depth(config_obj, target_format, "dump", bad_depth)
+
+
+def config_check_depths_realize(config_obj: Union[Config, dict], target_format: str) -> None:
+    """
+    Check that the depth does not exceed the target format's max.
+
+    :param config_obj: The reference config object.
+    :param target_format: The target format.
+    """
+    # Define a function with the conditions of an invalid depth.
+    bad_depth = lambda need, have: need and have != need
+    _validate_depth(config_obj, target_format, "realize", bad_depth)
+
+
+def config_check_depths_update(config_obj: Union[Config, dict], target_format: str) -> None:
+    """
+    Check that the depth does not exceed the target format's max.
+
+    :param config_obj: The reference config object.
+    :param target_format: The target format.
+    """
+    # Define a function with the conditions of an invalid depth.
+    bad_depth = lambda need, have: need and have > need
+    _validate_depth(config_obj, target_format, "update", bad_depth)
 
 
 def realize_config(
@@ -66,7 +102,7 @@ def realize_config(
     input_obj = format_to_config(input_format)(config_file=input_file)
     input_obj.dereference()
     input_obj = _realize_config_update(input_obj, values_file, values_format)
-    _realize_config_check_depths(input_obj, output_format)
+    config_check_depths_realize(input_obj, output_format)
     if values_needed:
         return _realize_config_values_needed(input_obj)
     if dry_run:
@@ -104,21 +140,6 @@ def _print_config_section(config: dict, key_path: List[str]) -> None:
     print("\n".join(sorted(output_lines)))
 
 
-def _realize_config_check_depths(input_obj: Config, output_format: str) -> None:
-    """
-    Check that the depth of the input config does not exceed the output format's max.
-
-    :param input_obj: The input config.
-    :param output_format: The output format:
-    :raises: UWConfigError on excessive input-config depth.
-    """
-    cfgclass = format_to_config(output_format)
-    if cfgclass.DEPTH and input_obj.depth != cfgclass.DEPTH:
-        msg = "Cannot write depth-%s input to type-'%s' output" % (input_obj.depth, output_format)
-        log.error(msg)
-        raise UWConfigError(msg)
-
-
 def _realize_config_update(
     input_obj: Config, values_file: OptionalPath, values_format: Optional[str]
 ) -> Config:
@@ -130,11 +151,13 @@ def _realize_config_update(
     :param values_format: Format of the values config file.
     :return: The input config, possibly updated.
     """
+
     if values_file:
         log.debug("Before update, config has depth %s", input_obj.depth)
         values_format = values_format or get_file_type(values_file)
         values_obj = format_to_config(values_format)(config_file=values_file)
         log.debug("Values config has depth %s", values_obj.depth)
+        config_check_depths_update(input_obj, values_format)
         input_obj.update_values(values_obj)
         input_obj.dereference()
         log.debug("After update, input config has depth %s", input_obj.depth)
@@ -162,3 +185,22 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
     for var in empty:
         log.info(var)
     return True
+
+
+def _validate_depth(
+    config_obj: Union[Config, dict], target_format: str, action: str, bad_depth: Callable
+) -> None:
+    """
+    :param config_obj: The reference config object.
+    :param target_format: The target format.
+    :param action: The action being performed.
+    :param bad_depth: A function that returns True if the depth is bad.
+    :raises: UWConfigError on excessive config object depth.
+    """
+    config_obj = config_obj.data if isinstance(config_obj, Config) else config_obj
+    cfgclass = format_to_config(target_format)
+    if bad_depth(cfgclass.DEPTH, depth(config_obj)):
+        raise log_and_error(
+            "Cannot %s depth-%s config to type-'%s' config"
+            % (action, depth(config_obj), target_format)
+        )
