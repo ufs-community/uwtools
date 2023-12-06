@@ -45,7 +45,7 @@ def config_check_depths_dump(config_obj: Union[Config, dict], target_format: str
     :param target_format: The target format.
     :raises: UWConfigError on excessive config object dictionary depth.
     """
-    # define a function with the conditions of an invalid depth
+    # Define a function with the conditions of an invalid depth.
     bad_depth = lambda need, have: need and have > need
     _validate_depth(config_obj, target_format, "dump", bad_depth)
 
@@ -57,7 +57,7 @@ def config_check_depths_realize(config_obj: Union[Config, dict], target_format: 
     :param config_obj: The reference config object.
     :param target_format: The target format.
     """
-    # define a function with the conditions of an invalid depth
+    # Define a function with the conditions of an invalid depth.
     bad_depth = lambda need, have: need and have != need
     _validate_depth(config_obj, target_format, "realize", bad_depth)
 
@@ -69,7 +69,7 @@ def config_check_depths_update(config_obj: Union[Config, dict], target_format: s
     :param config_obj: The reference config object.
     :param target_format: The target format.
     """
-    # define a function with the conditions of an invalid depth
+    # Define a function with the conditions of an invalid depth.
     bad_depth = lambda need, have: need and have > need
     _validate_depth(config_obj, target_format, "update", bad_depth)
 
