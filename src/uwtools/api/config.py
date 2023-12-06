@@ -1,5 +1,3 @@
-# pylint: disable=unused-import
-
 import os
 from typing import Optional, Union
 
