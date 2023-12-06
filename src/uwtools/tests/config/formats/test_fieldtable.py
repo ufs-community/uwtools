@@ -5,8 +5,13 @@ Tests for uwtools.config.formats.fieldtable module.
 
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.tests.support import fixture_path
+from uwtools.utils.file import FORMAT
 
 # Tests
+
+
+def test_format():
+    assert FieldTableConfig.get_format() == FORMAT.fieldtable
 
 
 def test_simple(tmp_path):

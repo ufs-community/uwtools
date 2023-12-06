@@ -19,9 +19,13 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import fixture_path, logged
-from uwtools.utils.file import _stdinproxy
+from uwtools.utils.file import FORMAT, _stdinproxy
 
 # Tests
+
+
+def test_format():
+    assert YAMLConfig.get_format() == FORMAT.yaml
 
 
 def test_composite_types():

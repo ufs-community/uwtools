@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code,missing-function-docstring
 """
 Tests for uwtools.config.formats.nml module.
 """
@@ -7,8 +7,13 @@ import filecmp
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.tests.support import fixture_path
+from uwtools.utils.file import FORMAT
 
 # Tests
+
+
+def test_format():
+    assert NMLConfig.get_format() == FORMAT.nml
 
 
 def test_parse_include():
