@@ -13,6 +13,7 @@ from pytest import fixture, raises
 
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
+from uwtools.config.support import depth
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import fixture_path, logged, regex_logged
@@ -136,9 +137,10 @@ def test_invalid_config(caplog, fmt2, tmp_path):
     fmt1 = FORMAT.yaml
     outfile = tmp_path / f"test_{fmt1}to{fmt2}_dump.{fmt2}"
     cfgin = tools.format_to_config(fmt1)(fixture_path("hello_workflow.yaml"))
+    depthin = depth(cfgin.data)
     with raises(UWConfigError) as e:
         tools.format_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)
-    msg = f"Cannot dump depth-8 config to type-'{fmt2}' config"
+    msg = f"Cannot dump depth-{depthin} config to type-'{fmt2}' config"
     assert logged(caplog, msg)
     assert msg in str(e.value)
 

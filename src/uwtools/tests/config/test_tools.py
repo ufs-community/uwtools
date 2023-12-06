@@ -14,6 +14,7 @@ from uwtools.config import tools
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.support import depth
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path, logged
@@ -142,21 +143,23 @@ def test_compare_configs_bad_format(caplog):
 
 
 def test_config_check_depths_realize_fail(caplog, realize_config_testobj):
+    depthin = depth(realize_config_testobj.data)
     with raises(UWConfigError) as e:
         tools.config_check_depths_realize(
             config_obj=realize_config_testobj, target_format=FORMAT.ini
         )
-    msg = "Cannot realize depth-3 config to type-'ini' config"
+    msg = f"Cannot realize depth-{depthin} config to type-'ini' config"
     assert logged(caplog, msg)
     assert msg in str(e.value)
 
 
 def test_config_check_depths_update_fail(caplog, realize_config_testobj):
+    depthin = depth(realize_config_testobj.data)
     with raises(UWConfigError) as e:
         tools.config_check_depths_update(
             config_obj=realize_config_testobj, target_format=FORMAT.ini
         )
-    msg = "Cannot update depth-3 config to type-'ini' config"
+    msg = f"Cannot update depth-{depthin} config to type-'ini' config"
     assert logged(caplog, msg)
     assert msg in str(e.value)
 
