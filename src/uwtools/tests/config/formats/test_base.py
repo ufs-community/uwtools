@@ -50,6 +50,10 @@ class ConcreteConfig(Config):
     def dump_dict(path, cfg, opts=None):
         pass
 
+    @staticmethod
+    def get_format():
+        pass
+
 
 # Tests
 
