@@ -14,7 +14,9 @@ from uwtools.types import DefinitePath, OptionalPath
 # Public functions
 
 
-def validate_yaml(schema_file: DefinitePath, config: Union[dict, YAMLConfig, OptionalPath]) -> bool:
+def validate_yaml(
+    schema_file: DefinitePath, config: Union[dict, YAMLConfig, OptionalPath] = None
+) -> bool:
     """
     Check whether the given config conforms to the given JSON Schema spec.
 
