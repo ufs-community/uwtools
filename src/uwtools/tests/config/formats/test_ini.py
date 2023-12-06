@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code,missing-function-docstring
+# pylint: disable=duplicate-code
 """
 Tests for uwtools.config.formats.ini module.
 """
