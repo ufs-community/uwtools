@@ -12,14 +12,6 @@ from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import FORMAT, get_file_format
 
-# from typing import Callable, List, Optional
-
-# from uwtools.config.formats.base import Config
-# from uwtools.config.support import depth, format_to_config, log_and_error
-# from uwtools.logging import MSGWIDTH, log
-# from uwtools.types import DefinitePath, OptionalPath, Union
-# from uwtools.utils.file import get_file_type
-
 
 # Public functions
 
@@ -119,8 +111,6 @@ def realize_config(
     output_format = _ensure_format("output", output_format, output_file)
     input_obj = _realize_config_update(input_obj, values, values_format)
     config_check_depths_realize(input_obj, output_format)
-    if values_needed:
-        return _realize_config_values_needed(input_obj)
     if dry_run:
         log.info(input_obj)
         return {}
@@ -206,10 +196,10 @@ def _realize_config_update(
             values_format = values_format or get_file_format(values)
             values_obj = format_to_config(values_format)(config=values)
         log.debug("Values config has depth %s", values_obj.depth)
+        config_check_depths_update(values_obj, config_obj.get_format())
         config_obj.update_values(values_obj)
         config_obj.dereference()
         log.debug("After update, config has depth %s", config_obj.depth)
-        # config_check_depths_update(input_obj, values_format)
     else:
         log.debug("Input config has depth %s", config_obj.depth)
     return config_obj
@@ -246,10 +236,10 @@ def _validate_depth(
     :param bad_depth: A function that returns True if the depth is bad.
     :raises: UWConfigError on excessive config object depth.
     """
-    config_obj = config_obj.data if isinstance(config_obj, Config) else config_obj
-    cfgclass = format_to_config(target_format)
-    if bad_depth(cfgclass.DEPTH, depth(config_obj)):
+    target_class = format_to_config(target_format)
+    config = config_obj.data if isinstance(config_obj, Config) else config_obj
+    if bad_depth(target_class.DEPTH, depth(config)):
         raise log_and_error(
             "Cannot %s depth-%s config to type-'%s' config"
-            % (action, depth(config_obj), target_format)
+            % (action, depth(config), target_format)
         )

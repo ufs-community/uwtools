@@ -185,6 +185,13 @@ class Config(ABC, UserDict):
         :param cfg: The in-memory config object to dump.
         """
 
+    @staticmethod
+    @abstractmethod
+    def get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+
     def parse_include(self, ref_dict: Optional[dict] = None) -> None:
         """
         Recursively process include directives in a config object.

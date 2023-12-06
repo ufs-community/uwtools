@@ -73,3 +73,10 @@ class INIConfig(Config):
         with writable(path) as f:
             print(s.getvalue().strip(), file=f)
         s.close()
+
+    @staticmethod
+    def get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.ini

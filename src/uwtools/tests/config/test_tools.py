@@ -574,9 +574,10 @@ def test__realize_config_update(realize_config_testobj, values):
     o = tools._realize_config_update(config_obj=realize_config_testobj, values=values)
     assert o[1][2][3] == 99
 
+
 def test__realize_config_update_noop(realize_config_testobj):
     assert realize_config_testobj == tools._realize_config_update(
-        input_obj=realize_config_testobj, values_file=None, values_format=None
+        config_obj=realize_config_testobj, values=None, values_format=None
     )
 
 

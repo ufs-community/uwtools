@@ -4,7 +4,7 @@ import yaml
 
 from uwtools.config.formats.base import Config
 from uwtools.config.support import INCLUDE_TAG, log_and_error
-from uwtools.utils.file import OptionalPath, readable, writable
+from uwtools.utils.file import FORMAT, OptionalPath, readable, writable
 
 _MSGS = ns(
     unhashable="""
@@ -113,3 +113,10 @@ class YAMLConfig(Config):
         """
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
+
+    @staticmethod
+    def get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.yaml

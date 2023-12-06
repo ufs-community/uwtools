@@ -79,3 +79,10 @@ class NMLConfig(Config):
 
         with writable(path) as f:
             f90nml.Namelist(to_od(cfg)).write(f, sort=False)
+
+    @staticmethod
+    def get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.nml
