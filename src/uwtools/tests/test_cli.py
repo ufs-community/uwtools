@@ -218,11 +218,11 @@ def test__dispatch_config_realize():
     with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
     realize.assert_called_once_with(
-        input_file=1,
+        input_config=1,
         input_format=2,
         output_file=3,
         output_format=4,
-        values_file=5,
+        values=5,
         values_format=6,
         values_needed=7,
         dry_run=8,
@@ -243,11 +243,11 @@ def test__dispatch_config_realize_no_optional():
     with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
     realize.assert_called_once_with(
-        input_file=None,
+        input_config=None,
         input_format=None,
         output_file=None,
         output_format=None,
-        values_file="/foo.vals",
+        values="/foo.vals",
         values_format=None,
         values_needed=False,
         dry_run=False,
@@ -291,23 +291,12 @@ def test__dispatch_config_translate_unsupported():
     assert cli._dispatch_config_translate(args) is False
 
 
-def test__dispatch_config_validate_no_optional():
-    args = {STR.infile: None, STR.infmt: FORMAT.yaml, STR.schemafile: "/foo.schema"}
-    with patch.object(uwtools.api.config, "_validate") as _validate:
+def test__dispath_config_validate_config_obj():
+    config = uwtools.api.config._YAMLConfig(config={})
+    args = {STR.schemafile: 1, STR.config: config}
+    with patch.object(uwtools.api.config, "_validate_yaml") as _validate_yaml:
         cli._dispatch_config_validate(args)
-    _validate.assert_called_once_with(config_file=None, schema_file="/foo.schema")
-
-
-def test__dispatch_config_validate_unsupported():
-    args = {STR.infile: 1, STR.infmt: "jpg", STR.schemafile: 3}
-    assert cli._dispatch_config_validate(args) is False
-
-
-def test__dispatch_config_validate_yaml():
-    args = {STR.infile: 1, STR.infmt: FORMAT.yaml, STR.schemafile: 3}
-    with patch.object(uwtools.api.config, "_validate") as _validate:
-        cli._dispatch_config_validate(args)
-    _validate.assert_called_once_with(config_file=1, schema_file=3)
+    _validate_yaml.assert_called_once_with(**args)
 
 
 @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
@@ -354,27 +343,21 @@ def test__dispatch_rocoto_realize():
     args = {STR.infile: 1, STR.outfile: 2}
     with patch.object(uwtools.api.rocoto, "_realize") as _realize:
         cli._dispatch_rocoto_realize(args)
-    _realize.assert_called_once_with(config_file=1, output_file=2)
-
-
-def test__dispatch_rocoto_realize_invalid():
-    args = {STR.infile: 1, STR.outfile: 2}
-    with patch.object(uwtools.api.rocoto, "_realize", return_value=False):
-        assert cli._dispatch_rocoto_realize(args) is False
+    _realize.assert_called_once_with(config=1, output_file=2)
 
 
 def test__dispatch_rocoto_realize_no_optional():
     args = {STR.infile: None, STR.outfile: None}
     with patch.object(uwtools.api.rocoto, "_realize") as module:
         cli._dispatch_rocoto_realize(args)
-    module.assert_called_once_with(config_file=None, output_file=None)
+    module.assert_called_once_with(config=None, output_file=None)
 
 
 def test__dispatch_rocoto_validate_xml():
     args = {STR.infile: 1}
     with patch.object(uwtools.api.rocoto, "_validate") as _validate:
         cli._dispatch_rocoto_validate(args)
-    _validate.assert_called_once_with(input_xml=1)
+    _validate.assert_called_once_with(xml_file=1)
 
 
 def test__dispatch_rocoto_validate_xml_invalid():
@@ -387,7 +370,7 @@ def test__dispatch_rocoto_validate_xml_no_optional():
     args = {STR.infile: None, STR.verbose: False}
     with patch.object(uwtools.api.rocoto, "_validate") as validate:
         cli._dispatch_rocoto_validate(args)
-    validate.assert_called_once_with(input_xml=None)
+    validate.assert_called_once_with(xml_file=None)
 
 
 @pytest.mark.parametrize("params", [(STR.render, "_dispatch_template_render")])
@@ -414,7 +397,7 @@ def test__dispatch_template_render_no_optional():
     render.assert_called_once_with(
         input_file=None,
         output_file=None,
-        values_file=None,
+        values=None,
         values_format=None,
         overrides={},
         values_needed=False,
@@ -437,7 +420,7 @@ def test__dispatch_template_render_yaml():
     render.assert_called_once_with(
         input_file=1,
         output_file=2,
-        values_file=3,
+        values=3,
         values_format=4,
         overrides={"foo": "88", "bar": "99"},
         values_needed=6,

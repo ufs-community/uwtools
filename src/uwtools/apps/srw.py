@@ -7,7 +7,7 @@ import shutil
 from uwtools.drivers.facade import Facade
 from uwtools.exceptions import UWError
 from uwtools.logging import log
-from uwtools.utils.file import FORMAT, get_file_type
+from uwtools.utils.file import FORMAT, get_file_format
 from uwtools.utils.processing import execute
 
 
@@ -28,7 +28,7 @@ class SRW210(Facade):
         """
         Load the configuration file.
         """
-        file_type = get_file_type(config_file)
+        file_type = get_file_format(config_file)
         if file_type == FORMAT.ini:
             with open("config.yaml", "w", encoding="utf-8") as f:
                 # Note: This is a temporary path until parsing the SRW directory is implemented.

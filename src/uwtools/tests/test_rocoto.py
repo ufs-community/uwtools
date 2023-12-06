@@ -3,17 +3,16 @@
 Tests for uwtools.rocoto module.
 """
 
-import shutil
 from typing import Callable, List
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
 import pytest
 import yaml
-from lxml import etree
 from pytest import fixture, raises
 
 from uwtools import rocoto
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import _validation_errors
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
@@ -25,6 +24,18 @@ from uwtools.utils.file import resource_pathobj
 @fixture
 def assets(tmp_path):
     return fixture_path("hello_workflow.yaml"), tmp_path / "rocoto.xml"
+
+
+@fixture
+def validation_assets(tmp_path):
+    xml_file_good = fixture_path("hello_workflow.xml")
+    with open(xml_file_good, "r", encoding="utf-8") as f:
+        xml_string_good = f.read()
+    xml_string_bad = "<bad/>"
+    xml_file_bad = tmp_path / "bad.xml"
+    with open(xml_file_bad, "w", encoding="utf-8") as f:
+        print(xml_string_bad, file=f)
+    return xml_file_bad, xml_file_good, xml_string_bad, xml_string_good
 
 
 # Helpers
@@ -46,33 +57,58 @@ def validator(*args) -> Callable:
 
 def test_realize_rocoto_invalid_xml(assets):
     cfgfile, outfile = assets
-    with open(fixture_path("hello_workflow.xml"), "r", encoding="utf-8") as f:
-        e = etree.parse(f)
-    cycledef = e.xpath("/workflow/cycledef")[0]
-    cycledef.getparent().remove(cycledef)
-    invalid = outfile.parent / "bad.xml"
-    with open(invalid, "w", encoding="utf-8") as f:
-        f.write(etree.tostring(e).decode())
-    dump = lambda _, dst: shutil.copyfile(str(invalid), dst)
-    with patch.object(rocoto._RocotoXML, "dump", dump):
-        assert rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile) is False
+    with patch.object(rocoto, "validate_rocoto_xml_string") as vrxs:
+        vrxs.return_value = False
+        with raises(AssertionError):
+            rocoto.realize_rocoto_xml(config=cfgfile, output_file=outfile)
 
 
-def test_realize_rocoto_xml_to_file(assets):
+def test_realize_rocoto_xml_cfg_to_file(assets):
     cfgfile, outfile = assets
-    assert rocoto.realize_rocoto_xml(config_file=cfgfile, output_file=outfile) is True
+    rocoto.realize_rocoto_xml(config=YAMLConfig(cfgfile), output_file=outfile)
+    assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
 
 
-def test_realize_rocoto_xml_to_stdout(capsys, assets):
+def test_realize_rocoto_xml_file_to_file(assets):
     cfgfile, outfile = assets
-    assert rocoto.realize_rocoto_xml(config_file=cfgfile) is True
+    rocoto.realize_rocoto_xml(config=cfgfile, output_file=outfile)
+    assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
+
+
+def test_realize_rocoto_xml_cfg_to_stdout(capsys, assets):
+    cfgfile, outfile = assets
+    rocoto.realize_rocoto_xml(config=YAMLConfig(cfgfile))
     with open(outfile, "w", encoding="utf-8") as f:
         f.write(capsys.readouterr().out)
-    assert rocoto.validate_rocoto_xml(outfile)
+    assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
 
 
-def test_validate_rocoto_xml():
-    assert rocoto.validate_rocoto_xml(input_xml=fixture_path("hello_workflow.xml")) is True
+def test_realize_rocoto_xml_file_to_stdout(capsys, assets):
+    cfgfile, outfile = assets
+    rocoto.realize_rocoto_xml(config=cfgfile)
+    with open(outfile, "w", encoding="utf-8") as f:
+        f.write(capsys.readouterr().out)
+    assert rocoto.validate_rocoto_xml_file(xml_file=outfile)
+
+
+def test_validate_rocoto_xml_file_fail(validation_assets):
+    xml_file_bad, _, _, _ = validation_assets
+    assert rocoto.validate_rocoto_xml_file(xml_file=xml_file_bad) is False
+
+
+def test_validate_rocoto_xml_file_pass(validation_assets):
+    _, xml_file_good, _, _ = validation_assets
+    assert rocoto.validate_rocoto_xml_file(xml_file=xml_file_good) is True
+
+
+def test_validate_rocoto_xml_string_fail(validation_assets):
+    _, _, xml_string_bad, _ = validation_assets
+    assert rocoto.validate_rocoto_xml_string(xml=xml_string_bad) is False
+
+
+def test_validate_rocoto_xml_string_pass(validation_assets):
+    _, _, _, xml_string_good = validation_assets
+    assert rocoto.validate_rocoto_xml_string(xml=xml_string_good) is True
 
 
 class Test__RocotoXML:
@@ -83,11 +119,15 @@ class Test__RocotoXML:
     @fixture
     def instance(self, assets):
         cfgfile, _ = assets
-        return rocoto._RocotoXML(config_file=cfgfile)
+        return rocoto._RocotoXML(config=cfgfile)
 
     @fixture
     def root(self):
         return rocoto.Element("root")
+
+    def test_instantiate_from_cfgobj(self, assets):
+        cfgfile, _ = assets
+        assert rocoto._RocotoXML(config=YAMLConfig(cfgfile))._root.tag == "workflow"
 
     def test__add_compound_time_string_basic(self, instance, root):
         config = {"foo": "bar"}
@@ -213,16 +253,27 @@ class Test__RocotoXML:
         for attr, val in subconfig["attrs"].items():
             assert element.get(attr) == val
 
-    def test__config_validate(self, assets, instance):
+    def test__config_validate_config(self, assets, instance):
         cfgfile, _ = assets
-        instance._config_validate(config_file=cfgfile)
+        instance._config_validate(config=YAMLConfig(cfgfile))
 
-    def test__config_validate_fail(self, instance, tmp_path):
+    def test__config_validate_file(self, assets, instance):
+        cfgfile, _ = assets
+        instance._config_validate(config=cfgfile)
+
+    def test__config_validate_config_fail(self, instance, tmp_path):
         cfgfile = tmp_path / "bad.yaml"
         with open(cfgfile, "w", encoding="utf-8") as f:
             print("not: ok", file=f)
         with raises(UWConfigError):
-            instance._config_validate(config_file=cfgfile)
+            instance._config_validate(config=YAMLConfig(cfgfile))
+
+    def test__config_validate_file_fail(self, instance, tmp_path):
+        cfgfile = tmp_path / "bad.yaml"
+        with open(cfgfile, "w", encoding="utf-8") as f:
+            print("not: ok", file=f)
+        with raises(UWConfigError):
+            instance._config_validate(config=cfgfile)
 
     def test__add_task_envar(self, instance, root):
         instance._add_task_envar(root, "foo", "bar")
@@ -322,6 +373,11 @@ class Test__RocotoXML:
         assert instance._tag_name("foo") == ("foo", "")
         assert instance._tag_name("foo_bar") == ("foo", "bar")
         assert instance._tag_name("foo_bar_baz") == ("foo", "bar_baz")
+
+    def test_dump(self, instance, tmp_path):
+        path = tmp_path / "out.xml"
+        instance.dump(path=path)
+        assert rocoto.validate_rocoto_xml_file(path)
 
 
 # Schema tests

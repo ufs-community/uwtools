@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import Union
 
 import f90nml
 
@@ -14,8 +15,13 @@ class NMLConfig(Config):
 
     DEPTH = 2
 
-    def __init__(self, config_file) -> None:
-        super().__init__(config_file)
+    def __init__(self, config: Union[dict, OptionalPath] = None) -> None:
+        """
+        Construct an NMLConfig object.
+
+        :param config: Config file to load (None => read from stdin), or initial dict.
+        """
+        super().__init__(config)
         self.parse_include()
 
     # Private methods
@@ -73,3 +79,10 @@ class NMLConfig(Config):
 
         with writable(path) as f:
             f90nml.Namelist(to_od(cfg)).write(f, sort=False)
+
+    @staticmethod
+    def get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.nml

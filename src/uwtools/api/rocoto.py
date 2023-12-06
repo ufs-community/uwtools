@@ -1,17 +1,18 @@
 from uwtools.rocoto import realize_rocoto_xml as _realize
-from uwtools.rocoto import validate_rocoto_xml as _validate
+from uwtools.rocoto import validate_rocoto_xml_file as _validate
 from uwtools.types import OptionalPath
 
 
-def realize(input_file: OptionalPath, output_file: OptionalPath) -> bool:
+def realize(input_file: OptionalPath = None, output_file: OptionalPath = None) -> bool:
     """
     ???
     """
-    return _realize(config_file=input_file, output_file=output_file)
+    _realize(config=input_file, output_file=output_file)
+    return True
 
 
-def validate(input_file: OptionalPath) -> bool:
+def validate(input_file: OptionalPath = None) -> bool:
     """
     ???
     """
-    return _validate(input_xml=input_file)
+    return _validate(xml_file=input_file)

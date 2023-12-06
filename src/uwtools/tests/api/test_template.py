@@ -9,7 +9,7 @@ def test_render():
     kwargs: dict = {
         "input_file": "infile",
         "output_file": "outfile",
-        "values_file": "valsfile",
+        "values": "valsfile",
         "values_format": "format",
         "overrides": {"key": "val"},
         "values_needed": True,

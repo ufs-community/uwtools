@@ -3,10 +3,8 @@ Support for creating Rocoto XML workflow documents.
 """
 
 import re
-import tempfile
 from dataclasses import dataclass
-from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from lxml import etree
 from lxml.etree import Element, SubElement
@@ -21,42 +19,43 @@ from uwtools.utils.file import readable, resource_pathobj, writable
 
 
 def realize_rocoto_xml(
-    config_file: OptionalPath,
-    output_file: OptionalPath = None,
-) -> bool:
+    config: Union[YAMLConfig, OptionalPath], output_file: OptionalPath = None
+) -> str:
     """
-    Realize the Rocoto workflow defined in the given YAML as XML. Validate both the YAML input and
+    Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
     XML output.
 
-    :param config_file: Path to YAML input file.
-    :param output_file: Path to write rendered XML file.
-    :return: Did the input and output files conform to theirr schemas?
+    :param config: Path to YAML input file (None => read stdin), or YAMLConfig object.
+    :param output_file: Path to write rendered XML file (None => write to stdout).
+    :return: An XML string.
     """
-
-    _, temp_file = tempfile.mkstemp(suffix=".xml")
-
-    _RocotoXML(config_file).dump(temp_file)
-
-    if not validate_rocoto_xml(input_xml=temp_file):
-        log.error("Rocoto validation errors identified in %s", temp_file)
-        return False
-
-    with open(temp_file, "r", encoding="utf-8") as f_in:
-        with writable(output_file) as f_out:
-            print(f_in.read(), file=f_out)
-    Path(temp_file).unlink()
-    return True
+    rxml = _RocotoXML(config)
+    xml = str(rxml)
+    assert validate_rocoto_xml_string(xml) is True
+    with writable(output_file) as f:
+        print(xml, file=f)
+    return xml
 
 
-def validate_rocoto_xml(input_xml: OptionalPath) -> bool:
+def validate_rocoto_xml_file(xml_file: OptionalPath) -> bool:
     """
-    Given a rendered XML file, validate it against the Rocoto schema.
+    Validate purported Rocoto XML file against its schema.
 
-    :param input_xml: Path to rendered XML file.
-    :return: Did the XML file conform to the schema?
+    :param xml: Path to XML file (None => read stdin).
+    :return: Did the XML conform to the schema?
     """
-    with readable(input_xml) as f:
-        tree = etree.fromstring(bytes(f.read(), encoding="utf-8"))
+    with readable(xml_file) as f:
+        return validate_rocoto_xml_string(xml=f.read())
+
+
+def validate_rocoto_xml_string(xml: str) -> bool:
+    """
+    Validate purported Rocoto XML against its schema.
+
+    :param xml: XML to validate.
+    :return: Did the XML conform to the schema?
+    """
+    tree = etree.fromstring(xml.encode("utf-8"))
     with open(resource_pathobj("schema_with_metatasks.rng"), "r", encoding="utf-8") as f:
         schema = etree.RelaxNG(etree.parse(f))
     valid = schema.validate(tree)
@@ -73,17 +72,13 @@ class _RocotoXML:
     Generate a Rocoto XML document from a UW YAML config.
     """
 
-    def __init__(self, config_file: OptionalPath = None) -> None:
-        self._config_validate(config_file)
-        self._config = YAMLConfig(config_file).data
+    def __init__(self, config: Union[dict, YAMLConfig, OptionalPath] = None) -> None:
+        self._config_validate(config)
+        cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
+        self._config = cfgobj.data
         self._add_workflow(self._config)
 
-    def dump(self, path: OptionalPath = None) -> None:
-        """
-        Emit Rocoto XML document to file or stdout.
-
-        :param path: Optional path to write XML document to.
-        """
+    def __str__(self) -> str:
         # Render the tree to a string, fix mangled entities (e.g. "&amp;FOO;" -> "&FOO;"), insert
         # !DOCTYPE block, then write final XML.
         xml = etree.tostring(
@@ -91,8 +86,16 @@ class _RocotoXML:
         ).decode()
         xml = re.sub(r"&amp;([^;]+);", r"&\1;", xml)
         xml = self._insert_doctype(xml)
+        return xml
+
+    def dump(self, path: OptionalPath = None) -> None:
+        """
+        Emit Rocoto XML document to file or stdout.
+
+        :param path: Path to write XML document to (None => write to stdout).
+        """
         with writable(path) as f:
-            f.write(xml.strip())
+            f.write(str(self).strip())
 
     def _add_compound_time_string(self, e: Element, config: dict, tag: str) -> None:
         """
@@ -280,16 +283,16 @@ class _RocotoXML:
             tag, name = self._tag_name(key)
             {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, subconfig, name)
 
-    def _config_validate(self, config_file: OptionalPath) -> None:
+    def _config_validate(self, config: Union[dict, YAMLConfig, OptionalPath]) -> None:
         """
         Validate the given YAML config.
 
-        :param config_file: Path to the YAML config (defaults to stdin).
+        :param config: YAMLConfig object or path to YAML file (None => read stdin).
         """
-        if not validate_yaml(
-            config_file=config_file, schema_file=resource_pathobj("rocoto.jsonschema")
-        ):
-            raise UWConfigError("YAML validation errors identified in %s" % config_file)
+        schema_file = resource_pathobj("rocoto.jsonschema")
+        ok = validate_yaml(schema_file=schema_file, config=config)
+        if not ok:
+            raise UWConfigError("YAML validation errors")
 
     @property
     def _dependency_constants(self) -> Tuple[Tuple, Tuple, Tuple]:

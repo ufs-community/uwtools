@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code,missing-function-docstring
 """
 Tests for uwtools.config.formats.ini module.
 """
@@ -7,8 +7,13 @@ import filecmp
 
 from uwtools.config.formats.ini import INIConfig
 from uwtools.tests.support import fixture_path
+from uwtools.utils.file import FORMAT
 
 # Tests
+
+
+def test_format():
+    assert INIConfig.get_format() == FORMAT.ini
 
 
 def test_parse_include():

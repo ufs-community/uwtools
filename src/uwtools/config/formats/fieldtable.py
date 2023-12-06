@@ -1,5 +1,5 @@
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.utils.file import OptionalPath, writable
+from uwtools.utils.file import FORMAT, OptionalPath, writable
 
 
 class FieldTableConfig(YAMLConfig):
@@ -59,3 +59,10 @@ class FieldTableConfig(YAMLConfig):
             lines[-1] += " /"
         with writable(path) as f:
             print("\n".join(lines), file=f)
+
+    @staticmethod
+    def get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.fieldtable

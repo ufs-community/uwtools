@@ -14,22 +14,21 @@ from uwtools.types import DefinitePath, OptionalPath
 # Public functions
 
 
-def validate_yaml(schema_file: DefinitePath, config_file: OptionalPath = None) -> bool:
+def validate_yaml(
+    schema_file: DefinitePath, config: Union[dict, YAMLConfig, OptionalPath] = None
+) -> bool:
     """
-    Check whether the given config file conforms to the given JSON Schema spec and whether any
-    filesystem paths it identifies do not exist.
+    Check whether the given config conforms to the given JSON Schema spec.
 
     :param schema_file: The JSON Schema file to use for validation.
-    :param config_file: The YAML file to validate (stdin will be used by default)
+    :param config: The config to validate.
     :return: Did the YAML file conform to the schema?
     """
-    # Load the config and schema.
-    yaml_config = YAMLConfig(config_file)
-    yaml_config.dereference()
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
+    cfgobj = _prep_config(config)
     # Collect and report on schema-validation errors.
-    errors = _validation_errors(yaml_config.data, schema)
+    errors = _validation_errors(cfgobj.data, schema)
     log_method = log.error if errors else log.info
     log_method("%s schema-validation error%s found", len(errors), "" if len(errors) == 1 else "s")
     for error in errors:
@@ -43,6 +42,18 @@ def validate_yaml(schema_file: DefinitePath, config_file: OptionalPath = None) -
 
 
 # Private functions
+
+
+def _prep_config(config: Union[dict, YAMLConfig, OptionalPath]) -> YAMLConfig:
+    """
+    Ensure a dereferenced YAMLConfig object for various input types.
+
+    :param config: The config to validate.
+    :return: A dereferenced YAMLConfig object based on the input config.
+    """
+    cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
+    cfgobj.dereference()
+    return cfgobj
 
 
 def _validation_errors(config: Union[dict, list], schema: dict) -> List[str]:

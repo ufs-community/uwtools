@@ -49,7 +49,7 @@ cannot:
 def render_helper(input_file, values_file, **kwargs):
     jinja2.render(
         input_file=input_file,
-        values_file=values_file,
+        values=values_file,
         **kwargs,
     )
 

@@ -20,7 +20,7 @@ import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
 from uwtools.logging import log, setup_logging
-from uwtools.utils.file import FORMAT, get_file_type
+from uwtools.utils.file import FORMAT, get_file_format
 
 FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
 TITLE_REQ_ARG = "Required arguments"
@@ -164,11 +164,7 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_schema_file(required)
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
-    _add_arg_input_format(optional, choices=[FORMAT.yaml])
-    checks = _add_args_quiet_and_verbose(optional)
-    return checks + [
-        partial(_check_file_vs_format, STR.infile, STR.infmt),
-    ]
+    return _add_args_quiet_and_verbose(optional)
 
 
 def _dispatch_config(args: Args) -> bool:
@@ -206,11 +202,11 @@ def _dispatch_config_realize(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.config.realize(
-        input_file=args[STR.infile],
+        input_config=args[STR.infile],
         input_format=args[STR.infmt],
         output_file=args[STR.outfile],
         output_format=args[STR.outfmt],
-        values_file=args[STR.valsfile],
+        values=args[STR.valsfile],
         values_format=args[STR.valsfmt],
         values_needed=args[STR.valsneeded],
         dry_run=args[STR.dryrun],
@@ -238,11 +234,7 @@ def _dispatch_config_validate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.config.validate(
-        input_file=args[STR.infile],
-        input_format=args[STR.infmt],
-        schema_file=args[STR.schemafile],
-    )
+    return uwtools.api.config.validate(schema_file=args[STR.schemafile], config=args[STR.config])
 
 
 # Mode forecast
@@ -433,10 +425,10 @@ def _dispatch_template_render(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.template.render(
+        values=args[STR.valsfile],
+        values_format=args[STR.valsfmt],
         input_file=args[STR.infile],
         output_file=args[STR.outfile],
-        values_file=args[STR.valsfile],
-        values_format=args[STR.valsfmt],
         overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
         values_needed=args[STR.valsneeded],
         dry_run=args[STR.dryrun],
@@ -695,7 +687,7 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
     if args.get(format_arg) is None:
         if args.get(file_arg) is None:
             _abort("Specify %s when %s is not specified" % (_switch(format_arg), _switch(file_arg)))
-        args[format_arg] = get_file_type(args[file_arg])
+        args[format_arg] = get_file_format(args[file_arg])
     return args
 
 
@@ -712,7 +704,7 @@ def _check_template_render_vals_args(args: Args) -> Args:
     # extension.
     if args.get(STR.valsfile) is not None:
         if args.get(STR.valsfmt) is None:
-            args[STR.valsfmt] = get_file_type(args[STR.valsfile])
+            args[STR.valsfmt] = get_file_format(args[STR.valsfile])
     return args
 
 

@@ -1,6 +1,8 @@
 # pylint: disable=duplicate-code
+
 import configparser
 from io import StringIO
+from typing import Union
 
 from uwtools.config.formats.base import Config
 from uwtools.config.tools import config_check_depths_dump
@@ -14,16 +16,13 @@ class INIConfig(Config):
 
     DEPTH = 2
 
-    def __init__(
-        self,
-        config_file: str,
-    ):
+    def __init__(self, config: Union[dict, OptionalPath] = None):
         """
         Construct an INIConfig object.
 
-        :param config_file: Path to the config file to load.
+        :param config: Config file to load (None => read from stdin), or initial dict.
         """
-        super().__init__(config_file)
+        super().__init__(config)
         self.parse_include()
 
     # Private methods
@@ -74,3 +73,10 @@ class INIConfig(Config):
         with writable(path) as f:
             print(s.getvalue().strip(), file=f)
         s.close()
+
+    @staticmethod
+    def get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.ini

@@ -28,7 +28,7 @@ def config(tmp_path):
     data = {"foo": 88}
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(data, f)
-    return ConcreteConfig(config_file=path)
+    return ConcreteConfig(config=path)
 
 
 # Helpers
@@ -48,6 +48,10 @@ class ConcreteConfig(Config):
 
     @staticmethod
     def dump_dict(path, cfg, opts=None):
+        pass
+
+    @staticmethod
+    def get_format():
         pass
 
 

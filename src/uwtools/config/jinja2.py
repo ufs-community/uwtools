@@ -20,7 +20,7 @@ from jinja2.exceptions import UndefinedError
 from uwtools.config.support import format_to_config
 from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import get_file_type, readable, writable
+from uwtools.utils.file import get_file_format, readable, writable
 
 _YAMLVal = Union[bool, dict, float, int, list, str]
 
@@ -157,10 +157,10 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
 
 
 def render(
-    input_file: OptionalPath,
-    output_file: OptionalPath,
-    values_file: DefinitePath,
+    values: Union[dict, DefinitePath],
     values_format: Optional[str] = None,
+    input_file: OptionalPath = None,
+    output_file: OptionalPath = None,
     overrides: Optional[Dict[str, str]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
@@ -168,11 +168,12 @@ def render(
     """
     Check and render a Jinja2 template.
 
-    :param input_file: Path to the Jinja2 template file to render.
-    :param output_file: Path to the file to write the rendered Jinja2 template to.
-    :param values_file: Path to the file supplying values to render the template.
-    :param keq_eq_val_pairs: "key=value" strings to supplement values-file values.
-    :param values_needed: Just issue a report about variables needed to render the template?
+    :param values: Source of values to render the template.
+    :param values_format: Format of values when sourced from file..
+    :param input_file: Path to read raw Jinja2 template from (None => read stdin).
+    :param output_file: Path to write rendered Jinja2 template to (None => write to stdout).
+    :param overrides: Supplemental override values.
+    :param values_needed: Just report variables needed to render the template?
     :param dry_run: Run in dry-run mode?
     :return: Jinja2 template was successfully rendered.
     """
@@ -180,9 +181,10 @@ def render(
     # Render template.
 
     _report(locals())
-    values = _set_up_values_obj(
-        values_file=values_file, values_format=values_format, overrides=overrides
-    )
+    if not isinstance(values, dict):
+        values = _set_up_values_obj(
+            values_file=values, values_format=values_format, overrides=overrides
+        )
     with readable(input_file) as f:
         template_str = f.read()
     template = J2Template(values=values, template_str=template_str)
@@ -295,15 +297,16 @@ def _set_up_values_obj(
 ) -> dict:
     """
     Collect template-rendering values based on an input file, if given, or otherwise on the shell
-    environment; and supplemented with override values from given "key=value" strings.
+    environment. Apply override values.
 
     :param values_file: Path to the file supplying values to render the template.
-    :param keq_eq_val_pairs: "key=value" strings to supplement values-file values.
+    :param values_format: Format of values when sourced from file.
+    :param overrides: Supplemental override values.
     :returns: The collected values.
     """
     if values_file:
         if values_format is None:
-            values_format = get_file_type(values_file)
+            values_format = get_file_format(values_file)
         values_class = format_to_config(values_format)
         values = values_class(values_file).data
         log.debug("Read initial values from %s", values_file)

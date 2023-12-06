@@ -22,15 +22,19 @@ class Config(ABC, UserDict):
     several configuration-file formats.
     """
 
-    def __init__(self, config_file: OptionalPath = None) -> None:
+    def __init__(self, config: Union[dict, OptionalPath] = None) -> None:
         """
         Construct a Config object.
 
-        :param config_file: Path to the config file to load.
+        :param config: Config file to load (None => read from stdin), or initial dict.
         """
         super().__init__()
-        self._config_file = str(config_file) if config_file else None
-        self.update(self._load(self._config_file))
+        if isinstance(config, dict):
+            self._config_file = None
+            self.update(config)
+        else:
+            self._config_file = str(config) if config else None
+            self.update(self._load(self._config_file))
 
     def __repr__(self) -> str:
         """
@@ -179,6 +183,13 @@ class Config(ABC, UserDict):
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def get_format() -> str:
+        """
+        Returns the config's format name.
         """
 
     def parse_include(self, ref_dict: Optional[dict] = None) -> None:

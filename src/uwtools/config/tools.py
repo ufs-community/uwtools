@@ -2,13 +2,15 @@
 Tools for working with configs.
 """
 
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Union
 
 from uwtools.config.formats.base import Config
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import depth, format_to_config, log_and_error
+from uwtools.exceptions import UWError
 from uwtools.logging import MSGWIDTH, log
-from uwtools.types import DefinitePath, OptionalPath, Union
-from uwtools.utils.file import get_file_type
+from uwtools.types import DefinitePath, OptionalPath
+from uwtools.utils.file import FORMAT, get_file_format
 
 # Public functions
 
@@ -75,44 +77,73 @@ def config_check_depths_update(config_obj: Union[Config, dict], target_format: s
 
 
 def realize_config(
-    input_file: OptionalPath,
-    input_format: str,
-    output_file: OptionalPath,
-    output_format: str,
-    values_file: OptionalPath,
-    values_format: Optional[str],
+    input_config: Union[Config, OptionalPath] = None,
+    input_format: Optional[str] = None,
+    output_file: OptionalPath = None,
+    output_format: Optional[str] = None,
+    values: Union[dict, Config, OptionalPath] = None,
+    values_format: Optional[str] = None,
     values_needed: bool = False,
     dry_run: bool = False,
-) -> bool:
+) -> dict:
     """
     Realize an output config based on an input config and an optional values-providing config.
 
-    :param input_file: Input config file (stdin used when None).
+    :param input_config: Input config file (None => read stdin).
     :param input_format: Format of the input config.
-    :param output_file: Output config file (stdout used when None).
+    :param output_file: Output config file (None => write to stdout).
     :param output_format: Format of the output config.
-    :param values_file: File providing values to modify input.
-    :param values_format: Format of the values config file.
-    :param values_needed: Provide a report about complete, missing, and template values.
+    :param values: Source of values used to modify input.
+    :param values_format: Format of values when sourced from file.
+    :param values_needed: Report complete, missing, and template values.
     :param dry_run: Log output instead of writing to output.
-    :return: True if no exception is raised.
-    :raises: UWConfigError if errors are encountered.
+    :return: The realized config (or an empty-dict for no-op modes).
     """
-
-    input_obj = format_to_config(input_format)(config_file=input_file)
+    input_format = _ensure_format("input", input_format, input_config)
+    input_obj = (
+        input_config
+        if isinstance(input_config, Config)
+        else format_to_config(input_format)(config=input_config)
+    )
     input_obj.dereference()
-    input_obj = _realize_config_update(input_obj, values_file, values_format)
+    input_obj = _realize_config_update(input_obj, values, values_format)
+    output_format = _ensure_format("output", output_format, output_file)
+    input_obj = _realize_config_update(input_obj, values, values_format)
     config_check_depths_realize(input_obj, output_format)
-    if values_needed:
-        return _realize_config_values_needed(input_obj)
     if dry_run:
         log.info(input_obj)
-    else:
-        format_to_config(output_format).dump_dict(path=output_file, cfg=input_obj.data)
-    return True
+        return {}
+    if values_needed:
+        _realize_config_values_needed(input_obj)
+        return {}
+    output_obj = format_to_config(output_format)
+    output_obj.dump_dict(path=output_file, cfg=input_obj.data)
+    return input_obj.data
 
 
 # Private functions
+
+
+def _ensure_format(
+    desc: str, fmt: Optional[str] = None, config: Union[Config, OptionalPath] = None
+) -> str:
+    """
+    Return the given file format, or the the appropriate format as deduced from the config.
+
+    :param desc: A description of the file.
+    :param fmt: The config format name.
+    :param config: The input config.
+    :return: The specified or deduced format.
+    :raises: UWError if the format cannot be determined.
+    """
+    if isinstance(config, Config):
+        return FORMAT.yaml
+    if fmt is None:
+        if config is not None:
+            fmt = get_file_format(config)
+        else:
+            raise UWError(f"Either {desc} file format or name must be specified")
+    return fmt
 
 
 def _print_config_section(config: dict, key_path: List[str]) -> None:
@@ -141,29 +172,36 @@ def _print_config_section(config: dict, key_path: List[str]) -> None:
 
 
 def _realize_config_update(
-    input_obj: Config, values_file: OptionalPath, values_format: Optional[str]
+    config_obj: Config,
+    values: Union[dict, Config, OptionalPath],
+    values_format: Optional[str] = None,
 ) -> Config:
     """
     Update config with values from another config, if given.
 
-    :param input_obj: The config to update.
-    :param values_file: File providing values to modify input.
-    :param values_format: Format of the values config file.
+    :param config_obj: The config to update.
+    :param values: Source of values to modify input.
+    :param values_format: Format of values when sourced from file.
     :return: The input config, possibly updated.
     """
-
-    if values_file:
-        log.debug("Before update, config has depth %s", input_obj.depth)
-        values_format = values_format or get_file_type(values_file)
-        values_obj = format_to_config(values_format)(config_file=values_file)
+    if values:
+        log.debug("Before update, config has depth %s", config_obj.depth)
+        values_obj: Config
+        if isinstance(values, dict):
+            values_obj = YAMLConfig(config=values)
+        elif isinstance(values, Config):
+            values_obj = values
+        else:
+            values_format = values_format or get_file_format(values)
+            values_obj = format_to_config(values_format)(config=values)
         log.debug("Values config has depth %s", values_obj.depth)
-        config_check_depths_update(input_obj, values_format)
-        input_obj.update_values(values_obj)
-        input_obj.dereference()
-        log.debug("After update, input config has depth %s", input_obj.depth)
+        config_check_depths_update(values_obj, config_obj.get_format())
+        config_obj.update_values(values_obj)
+        config_obj.dereference()
+        log.debug("After update, config has depth %s", config_obj.depth)
     else:
-        log.debug("Input config has depth %s", input_obj.depth)
-    return input_obj
+        log.debug("Input config has depth %s", config_obj.depth)
+    return config_obj
 
 
 def _realize_config_values_needed(input_obj: Config) -> bool:
@@ -197,10 +235,9 @@ def _validate_depth(
     :param bad_depth: A function that returns True if the depth is bad.
     :raises: UWConfigError on excessive config object depth.
     """
-    config_obj = config_obj.data if isinstance(config_obj, Config) else config_obj
-    cfgclass = format_to_config(target_format)
-    if bad_depth(cfgclass.DEPTH, depth(config_obj)):
+    target_class = format_to_config(target_format)
+    config = config_obj.data if isinstance(config_obj, Config) else config_obj
+    if bad_depth(target_class.DEPTH, depth(config)):
         raise log_and_error(
-            "Cannot %s depth-%s config to type-'%s' config"
-            % (action, depth(config_obj), target_format)
+            "Cannot %s depth-%s config to type-'%s' config" % (action, depth(config), target_format)
         )

@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code,missing-function-docstring
 """
 Tests for uwtools.config.formats.sh module.
 """
@@ -8,8 +8,13 @@ from typing import Any, Dict
 
 from uwtools.config.formats.sh import SHConfig
 from uwtools.tests.support import fixture_path
+from uwtools.utils.file import FORMAT
 
 # Tests
+
+
+def test_format():
+    assert SHConfig.get_format() == FORMAT.sh
 
 
 def test_parse_include():

@@ -1,10 +1,13 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access
 
+import os
 from unittest.mock import patch
 
 import pytest
+import yaml
 
 from uwtools.api import config
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.utils.file import FORMAT
 
 
@@ -22,11 +25,11 @@ def test_compare():
 
 def test_realize():
     kwargs: dict = {
-        "input_file": "path1",
+        "input_config": "path1",
         "input_format": "fmt1",
         "output_file": "path2",
         "output_format": "fmt2",
-        "values_file": "path3",
+        "values": "path3",
         "values_format": "fmt3",
         "values_needed": True,
         "dry_run": True,
@@ -34,6 +37,22 @@ def test_realize():
     with patch.object(config, "_realize") as _realize:
         config.realize(**kwargs)
     _realize.assert_called_once_with(**kwargs)
+
+
+def test_realize_to_dict():
+    kwargs: dict = {
+        "input_config": "path1",
+        "input_format": "fmt1",
+        "values": "path3",
+        "values_format": "fmt3",
+        "values_needed": True,
+        "dry_run": True,
+    }
+    with patch.object(config, "_realize") as _realize:
+        config.realize_to_dict(**kwargs)
+    _realize.assert_called_once_with(
+        **dict({**kwargs, **{"output_file": os.devnull, "output_format": None}})
+    )
 
 
 @pytest.mark.parametrize(
@@ -62,16 +81,40 @@ def test_translate(infmt, outfmt, success_expected):
         )
 
 
-@pytest.mark.parametrize("infmt,success_expected", [(FORMAT.yaml, True), ("invalid", False)])
-def test_validate(infmt, success_expected):
-    kwargs: dict = {
-        "input_file": "infile",
-        "input_format": infmt,
-        "schema_file": "schema",
-    }
-    with patch.object(config, "_validate", return_value=True) as _validate:
-        assert config.validate(**kwargs) is success_expected
-    if success_expected:
-        _validate.assert_called_once_with(
-            config_file=kwargs["input_file"], schema_file=kwargs["schema_file"]
-        )
+@pytest.mark.parametrize("cfg", [{"foo": "bar"}, YAMLConfig(config={})])
+def test_validate(cfg):
+    kwargs: dict = {"schema_file": "schema-file", "config": cfg}
+    with patch.object(config, "_validate_yaml", return_value=True) as _validate_yaml:
+        assert config.validate(**kwargs)
+    _validate_yaml.assert_called_once_with(
+        schema_file=kwargs["schema_file"], config=kwargs["config"]
+    )
+
+
+def test_validate_config_file(tmp_path):
+    cfg = tmp_path / "config.yaml"
+    with open(cfg, "w", encoding="utf-8") as f:
+        yaml.dump({}, f)
+    kwargs: dict = {"schema_file": "schema-file", "config": cfg}
+    with patch.object(config, "_validate_yaml", return_value=True) as _validate_yaml:
+        assert config.validate(**kwargs)
+    _validate_yaml.assert_called_once_with(schema_file=kwargs["schema_file"], config=cfg)
+
+
+def test__ensure_config_arg_type_config_obj():
+    config_obj = YAMLConfig(config={})
+    assert config._ensure_config_arg_type(config=config_obj) is config_obj
+
+
+def test__ensure_config_arg_type_dict():
+    config_dict = {"foo": 88}
+    config_obj = config._ensure_config_arg_type(config=config_dict)
+    assert isinstance(config_obj, YAMLConfig)
+    assert config_obj.data == config_dict
+
+
+def test__ensure_config_arg_type_path():
+    config_path = "/path/to/config.yaml"
+    config_obj = config._ensure_config_arg_type(config=config_path)
+    assert isinstance(config_obj, str)
+    assert config_obj is config_path
