@@ -23,6 +23,23 @@ def test_compare():
     _compare.assert_called_once_with(**kwargs)
 
 
+@pytest.mark.parametrize(
+    "classname,f",
+    [
+        ("_FieldTableConfig", config.get_fieldtable_config),
+        ("_INIConfig", config.get_ini_config),
+        ("_NMLConfig", config.get_nml_config),
+        ("_SHConfig", config.get_sh_config),
+        ("_YAMLConfig", config.get_yaml_config),
+    ],
+)
+def test_get_config(classname, f):
+    kwargs: dict = dict(config={})
+    with patch.object(config, classname) as constructor:
+        f(**kwargs)
+    constructor.assert_called_once_with(**kwargs)
+
+
 def test_realize():
     kwargs: dict = {
         "input_config": "path1",
