@@ -136,9 +136,11 @@ def test_invalid_config(caplog, fmt2, tmp_path):
     fmt1 = FORMAT.yaml
     outfile = tmp_path / f"test_{fmt1}to{fmt2}_dump.{fmt2}"
     cfgin = tools.format_to_config(fmt1)(fixture_path("hello_workflow.yaml"))
-    with raises(UWConfigError):
+    with raises(UWConfigError) as e:
         tools.format_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)
-        assert logged(caplog, "Invalid depth")
+    msg = f"Cannot dump depth-8 config to type-'{fmt2}' config"
+    assert logged(caplog, msg)
+    assert msg in str(e.value)
 
 
 def test_parse_include(config):
