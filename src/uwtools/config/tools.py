@@ -12,7 +12,6 @@ from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import FORMAT, get_file_format
 
-
 # Public functions
 
 
@@ -240,6 +239,5 @@ def _validate_depth(
     config = config_obj.data if isinstance(config_obj, Config) else config_obj
     if bad_depth(target_class.DEPTH, depth(config)):
         raise log_and_error(
-            "Cannot %s depth-%s config to type-'%s' config"
-            % (action, depth(config), target_format)
+            "Cannot %s depth-%s config to type-'%s' config" % (action, depth(config), target_format)
         )

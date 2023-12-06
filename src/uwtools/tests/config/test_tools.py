@@ -14,8 +14,8 @@ from uwtools.config import tools
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.exceptions import UWConfigError, UWError
 from uwtools.config.support import depth
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path, logged
 from uwtools.utils.file import FORMAT, writable

@@ -1,5 +1,5 @@
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.utils.file import OptionalPath, writable, FORMAT
+from uwtools.utils.file import FORMAT, OptionalPath, writable
 
 
 class FieldTableConfig(YAMLConfig):
