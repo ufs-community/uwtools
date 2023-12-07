@@ -2,7 +2,7 @@
 
 import configparser
 from io import StringIO
-from typing import Union
+from typing import Optional, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.config.tools import config_check_depths_dump
@@ -13,8 +13,6 @@ class INIConfig(Config):
     """
     Concrete class to handle INI config files.
     """
-
-    DEPTH = 2
 
     def __init__(self, config: Union[dict, OptionalPath] = None):
         """
@@ -73,6 +71,13 @@ class INIConfig(Config):
         with writable(path) as f:
             print(s.getvalue().strip(), file=f)
         s.close()
+
+    @staticmethod
+    def get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+        return 2
 
     @staticmethod
     def get_format() -> str:

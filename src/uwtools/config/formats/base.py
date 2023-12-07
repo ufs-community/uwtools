@@ -177,6 +177,13 @@ class Config(ABC, UserDict):
 
     @staticmethod
     @abstractmethod
+    def get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+
+    @staticmethod
+    @abstractmethod
     def dump_dict(path: OptionalPath, cfg: dict) -> None:
         """
         Dumps a provided config dictionary to stdout or a file.
