@@ -1,9 +1,11 @@
-# pylint: disable=unused-import
-
 import os
 from typing import Optional, Union
 
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
+from uwtools.config.formats.fieldtable import FieldTableConfig as _FieldTableConfig
+from uwtools.config.formats.ini import INIConfig as _INIConfig
+from uwtools.config.formats.nml import NMLConfig as _NMLConfig
+from uwtools.config.formats.sh import SHConfig as _SHConfig
 from uwtools.config.formats.yaml import Config as _Config
 from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.config.tools import compare_configs as _compare
@@ -30,6 +32,51 @@ def compare(
         config_b_path=config_b_path,
         config_b_format=config_b_format,
     )
+
+
+def get_fieldtable_config(config: Union[dict, OptionalPath] = None) -> _FieldTableConfig:
+    """
+    Get a FieldTableConfig object.
+
+    :param config: Config file to load (None => read from stdin), or initial dict.
+    """
+    return _FieldTableConfig(config=config)
+
+
+def get_ini_config(config: Union[dict, OptionalPath] = None) -> _INIConfig:
+    """
+    Get an INIConfig object.
+
+    :param config: Config file to load (None => read from stdin), or initial dict.
+    """
+    return _INIConfig(config=config)
+
+
+def get_nml_config(config: Union[dict, OptionalPath] = None) -> _NMLConfig:
+    """
+    Get an NMLConfig object.
+
+    :param config: Config file to load (None => read from stdin), or initial dict.
+    """
+    return _NMLConfig(config=config)
+
+
+def get_sh_config(config: Union[dict, OptionalPath] = None) -> _SHConfig:
+    """
+    Get a SHConfig object.
+
+    :param config: Config file to load (None => read from stdin), or initial dict.
+    """
+    return _SHConfig(config=config)
+
+
+def get_yaml_config(config: Union[dict, OptionalPath] = None) -> _YAMLConfig:
+    """
+    Get a YAMLConfig object.
+
+    :param config: Config file to load (None => read from stdin), or initial dict.
+    """
+    return _YAMLConfig(config=config)
 
 
 def realize(
