@@ -19,6 +19,10 @@ def run(  # pylint: disable=missing-function-docstring
     ).run(cycle=cycle)
 
 
+# The following statement dynamically interpolates values into run()'s docstring, which will not
+# work if the docstring is inlined in the function. It must remain a separate statement to avoid
+# hardcoding values into it.
+
 run.__doc__ = """
 Run a forecast model.
 
