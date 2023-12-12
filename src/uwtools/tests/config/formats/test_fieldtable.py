@@ -10,8 +10,17 @@ from uwtools.utils.file import FORMAT
 # Tests
 
 
-def test_format():
+def test_get_format():
     assert FieldTableConfig.get_format() == FORMAT.fieldtable
+
+
+def test_get_depth_threshold():
+    assert FieldTableConfig.get_depth_threshold() is None
+
+
+def test_instantiation_depth():
+    # Any depth is fine.
+    assert FieldTableConfig(config={1: {2: {3: 4}}})
 
 
 def test_simple(tmp_path):
