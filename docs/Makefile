@@ -3,7 +3,7 @@ SOURCEDIR   = .
 SPHINXBUILD = sphinx-build
 SPHINXOPTS  = -n
 
-.PHONY: help
+.PHONY: help clean
 
 help:
 	$(SPHINXBUILD) -M help $(SOURCEDIR) $(BUILDDIR) $(SPHINXOPTS)
