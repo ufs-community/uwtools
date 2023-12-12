@@ -19,6 +19,7 @@ import uwtools.api.rocoto
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
+from uwtools.drivers.forecast import CLASSES as FORECAST_CLASSES
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
@@ -264,7 +265,7 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> SubmodeChecks:
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_config_file(required)
     _add_arg_cycle(required)
-    _add_arg_model(required, choices=["FV3"])
+    _add_arg_model(required, choices=list(FORECAST_CLASSES.keys()))
     optional = _basic_setup(parser)
     _add_arg_batch_script(optional)
     _add_arg_dry_run(optional)
