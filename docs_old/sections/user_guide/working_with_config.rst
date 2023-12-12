@@ -173,7 +173,7 @@ Conversion flags
     --config-file-type
     --outfile-file-type
 
-``--input-file-type`` and ``--config-file-type`` accept YAML ('YAML'), bash/ini ('INI'), or namelist ('NML') file types; ``--outfile-file-type`` accepts these three as well as field table ('FieldTable').  This tool requires that the given file (input, config, or outfile) have a compatible structure with the provided file type.  A YAML file can have any depth, a bash/ini file can have a depth of 1 or 2, and a namelist file must have a depth of 2.
+``--input-file-type`` and ``--config-file-type`` accept YAML ('YAML'), bash ('SH'), ini ('INI'), or namelist ('NML') file types; ``--outfile-file-type`` accepts these three as well as field table ('FieldTable').  This tool requires that the given file (input, config, or outfile) have a compatible structure with the provided file type.  A YAML file can have any depth, an ini or namelist file must have a depth of 2, and an sh file can only have a depth of 1.
 
 .. _conf_compare:
 

@@ -2,7 +2,7 @@
 Modal CLI.
 """
 
-import datetime
+import datetime as dt
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import HelpFormatter
@@ -13,16 +13,16 @@ from functools import partial
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple
 
-import uwtools.config.atparse_to_jinja2
+import uwtools.api.config
+import uwtools.api.forecast
+import uwtools.api.rocoto
+import uwtools.api.template
 import uwtools.config.jinja2
-import uwtools.config.tools
-import uwtools.config.validator
-import uwtools.drivers.forecast
 import uwtools.rocoto
 from uwtools.logging import log, setup_logging
-from uwtools.utils.file import FORMAT, get_file_type
+from uwtools.utils.file import FORMAT, get_file_format
 
-FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.yaml]
+FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
 TITLE_REQ_ARG = "Required arguments"
 
 Args = Dict[str, Any]
@@ -164,11 +164,7 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_schema_file(required)
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
-    _add_arg_input_format(optional, choices=[FORMAT.yaml])
-    checks = _add_args_quiet_and_verbose(optional)
-    return checks + [
-        partial(_check_file_vs_format, STR.infile, STR.infmt),
-    ]
+    return _add_args_quiet_and_verbose(optional)
 
 
 def _dispatch_config(args: Args) -> bool:
@@ -191,7 +187,7 @@ def _dispatch_config_compare(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.config.tools.compare_configs(
+    return uwtools.api.config.compare(
         config_a_path=args[STR.file1path],
         config_a_format=args[STR.file1fmt],
         config_b_path=args[STR.file2path],
@@ -205,12 +201,12 @@ def _dispatch_config_realize(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.config.tools.realize_config(
-        input_file=args[STR.infile],
+    return uwtools.api.config.realize(
+        input_config=args[STR.infile],
         input_format=args[STR.infmt],
         output_file=args[STR.outfile],
         output_format=args[STR.outfmt],
-        values_file=args[STR.valsfile],
+        values=args[STR.valsfile],
         values_format=args[STR.valsfmt],
         values_needed=args[STR.valsneeded],
         dry_run=args[STR.dryrun],
@@ -223,16 +219,13 @@ def _dispatch_config_translate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    success = True
-    if args[STR.infmt] == FORMAT.atparse and args[STR.outfmt] == FORMAT.jinja2:
-        uwtools.config.atparse_to_jinja2.convert(
-            input_file=args[STR.infile],
-            output_file=args[STR.outfile],
-            dry_run=args[STR.dryrun],
-        )
-    else:
-        success = False
-    return success
+    return uwtools.api.config.translate(
+        input_file=args[STR.infile],
+        input_format=args[STR.infmt],
+        output_file=args[STR.outfile],
+        output_format=args[STR.outfmt],
+        dry_run=args[STR.dryrun],
+    )
 
 
 def _dispatch_config_validate(args: Args) -> bool:
@@ -241,14 +234,7 @@ def _dispatch_config_validate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    success = True
-    if args[STR.infmt] == FORMAT.yaml:
-        success = uwtools.config.validator.validate_yaml(
-            config_file=args[STR.infile], schema_file=args[STR.schemafile]
-        )
-    else:
-        success = False
-    return success
+    return uwtools.api.config.validate(schema_file=args[STR.schemafile], config=args[STR.config])
 
 
 # Mode forecast
@@ -301,12 +287,13 @@ def _dispatch_forecast_run(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    forecast_class = uwtools.drivers.forecast.CLASSES[args[STR.model]]
-    return forecast_class(
-        batch_script=args[STR.batch_script],
+    return uwtools.api.forecast.run(
+        model=args[STR.model],
+        cycle=args[STR.cycle],
         config_file=args[STR.cfgfile],
+        batch_script=args[STR.batch_script],
         dry_run=args[STR.dryrun],
-    ).run(cycle=args[STR.cycle])
+    )
 
 
 # Mode rocoto
@@ -374,10 +361,7 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    success = uwtools.rocoto.realize_rocoto_xml(
-        config_file=args[STR.infile], output_file=args[STR.outfile]
-    )
-    return success
+    return uwtools.api.rocoto.realize(input_file=args[STR.infile], output_file=args[STR.outfile])
 
 
 def _dispatch_rocoto_validate(args: Args) -> bool:
@@ -386,9 +370,7 @@ def _dispatch_rocoto_validate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-
-    success = uwtools.rocoto.validate_rocoto_xml(input_xml=args[STR.infile])
-    return success
+    return uwtools.api.rocoto.validate(input_file=args[STR.infile])
 
 
 # Mode template
@@ -442,11 +424,11 @@ def _dispatch_template_render(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.config.jinja2.render(
+    return uwtools.api.template.render(
+        values=args[STR.valsfile],
+        values_format=args[STR.valsfmt],
         input_file=args[STR.infile],
         output_file=args[STR.outfile],
-        values_file=args[STR.valsfile],
-        values_format=args[STR.valsfmt],
         overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
         values_needed=args[STR.valsneeded],
         dry_run=args[STR.dryrun],
@@ -485,7 +467,7 @@ def _add_arg_cycle(group: Group) -> None:
         _switch(STR.cycle),
         help="The cycle in ISO8601 format",
         required=True,
-        type=datetime.datetime.fromisoformat,
+        type=dt.datetime.fromisoformat,
     )
 
 
@@ -705,7 +687,7 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
     if args.get(format_arg) is None:
         if args.get(file_arg) is None:
             _abort("Specify %s when %s is not specified" % (_switch(format_arg), _switch(file_arg)))
-        args[format_arg] = get_file_type(args[file_arg])
+        args[format_arg] = get_file_format(args[file_arg])
     return args
 
 
@@ -722,7 +704,7 @@ def _check_template_render_vals_args(args: Args) -> Args:
     # extension.
     if args.get(STR.valsfile) is not None:
         if args.get(STR.valsfmt) is None:
-            args[STR.valsfmt] = get_file_type(args[STR.valsfile])
+            args[STR.valsfmt] = get_file_format(args[STR.valsfile])
     return args
 
 

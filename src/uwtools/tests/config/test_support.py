@@ -12,6 +12,7 @@ from uwtools.config import support
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
+from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -30,6 +31,7 @@ def test_depth(d, n):
         (FieldTableConfig, FORMAT.fieldtable),
         (INIConfig, FORMAT.ini),
         (NMLConfig, FORMAT.nml),
+        (SHConfig, FORMAT.sh),
         (YAMLConfig, FORMAT.yaml),
     ],
 )

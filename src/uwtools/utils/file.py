@@ -30,19 +30,20 @@ class FORMAT:
     _ini: str = "ini"
     _jinja2: str = "jinja2"
     _nml: str = "nml"
+    _sh: str = "sh"
     _xml: str = "xml"
     _yaml: str = "yaml"
 
     # Variants:
 
     atparse: str = _atparse
-    bash: str = _ini
+    bash: str = _sh
     cfg: str = _ini
     fieldtable: str = _fieldtable
     ini: str = _ini
     jinja2: str = _jinja2
     nml: str = _nml
-    sh: str = _ini
+    sh: str = _sh
     yaml: str = _yaml
     yml: str = _yaml
 
@@ -74,12 +75,12 @@ def _stdinproxy():
     return StdinProxy()
 
 
-def get_file_type(path: DefinitePath) -> str:
+def get_file_format(path: DefinitePath) -> str:
     """
-    Returns a standardized file type given a path/filename.
+    Returns a standardized file format name given a path/filename.
 
     :param path: A path or filename.
-    :return: One of a set of supported file types.
+    :return: One of a set of supported file-format names.
     :raises: ValueError if the path/filename suffix is unrecognized.
     """
     suffix = Path(path).suffix.replace(".", "")
