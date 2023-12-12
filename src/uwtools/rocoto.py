@@ -41,7 +41,7 @@ def validate_rocoto_xml_file(xml_file: OptionalPath) -> bool:
     """
     Validate purported Rocoto XML file against its schema.
 
-    :param xml: Path to XML file (None => read stdin).
+    :param xml_file: Path to XML file (None => read stdin).
     :return: Did the XML conform to the schema?
     """
     with readable(xml_file) as f:
