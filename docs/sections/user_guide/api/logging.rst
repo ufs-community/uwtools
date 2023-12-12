@@ -1,6 +1,6 @@
-*********************
-`uwtools.api.logging`
-*********************
+***********************
+``uwtools.api.logging``
+***********************
 
 .. automodule:: uwtools.api.logging
     :members:

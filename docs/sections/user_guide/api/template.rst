@@ -1,6 +1,6 @@
-**********************
-`uwtools.api.template`
-**********************
+************************
+``uwtools.api.template``
+************************
 
 .. automodule:: uwtools.api.template
     :members:
