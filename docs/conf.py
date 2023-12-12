@@ -3,6 +3,9 @@
 import datetime as dt
 import json
 import os
+import sys
+
+sys.path.insert(0, os.path.abspath("../src/uwtools"))
 
 with open("../recipe/meta.json", "r", encoding="utf-8") as f:
     _metadata = json.loads(f.read())
