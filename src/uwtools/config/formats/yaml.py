@@ -5,7 +5,7 @@ import yaml
 
 from uwtools.config.formats.base import Config
 from uwtools.config.support import INCLUDE_TAG, log_and_error
-from uwtools.utils.file import OptionalPath, readable, writable
+from uwtools.utils.file import FORMAT, OptionalPath, readable, writable
 
 _MSGS = ns(
     unhashable="""
@@ -99,10 +99,10 @@ class YAMLConfig(Config):
 
         :param path: Path to dump config to.
         """
-        YAMLConfig.dump_dict(path, self.data)
+        self.dump_dict(path, self.data)
 
     @staticmethod
-    def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
+    def dump_dict(path: OptionalPath, cfg: dict) -> None:
         """
         Dumps a provided config dictionary in YAML format.
 
@@ -112,3 +112,17 @@ class YAMLConfig(Config):
         """
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
+
+    @staticmethod
+    def get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+        return None
+
+    @staticmethod
+    def get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.yaml

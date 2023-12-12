@@ -1,11 +1,11 @@
 from collections import OrderedDict
-from types import SimpleNamespace as ns
-from typing import Optional
+from typing import Optional, Union
 
 import f90nml
 
 from uwtools.config.formats.base import Config
-from uwtools.utils.file import OptionalPath, readable, writable
+from uwtools.config.tools import config_check_depths_dump
+from uwtools.utils.file import FORMAT, OptionalPath, readable, writable
 
 
 class NMLConfig(Config):
@@ -13,8 +13,13 @@ class NMLConfig(Config):
     Concrete class to handle Fortran namelist files.
     """
 
-    def __init__(self, config_file) -> None:
-        super().__init__(config_file)
+    def __init__(self, config: Union[dict, OptionalPath] = None) -> None:
+        """
+        Construct an NMLConfig object.
+
+        :param config: Config file to load (None => read from stdin), or initial dict.
+        """
+        super().__init__(config)
         self.parse_include()
 
     # Private methods
@@ -47,20 +52,23 @@ class NMLConfig(Config):
 
         :param path: Path to dump config to.
         """
-        NMLConfig.dump_dict(path, self.data)
+        config_check_depths_dump(config_obj=self, target_format=FORMAT.nml)
+
+        self.dump_dict(path, self.data)
 
     @staticmethod
-    def dump_dict(path: OptionalPath, cfg: dict, opts: Optional[ns] = None) -> None:
+    def dump_dict(path: OptionalPath, cfg: dict) -> None:
         """
         Dumps a provided config dictionary in Fortran namelist format.
 
         :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
-        :param opts: Other options required by a subclass.
         """
 
         # f90nml honors namelist and variable order if it receives an OrderedDict as input, so
         # ensure that it receives one.
+
+        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.nml)
 
         def to_od(d):
             return OrderedDict(
@@ -69,3 +77,17 @@ class NMLConfig(Config):
 
         with writable(path) as f:
             f90nml.Namelist(to_od(cfg)).write(f, sort=False)
+
+    @staticmethod
+    def get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+        return 2
+
+    @staticmethod
+    def get_format() -> str:
+        """
+        Returns the config's format name.
+        """
+        return FORMAT.nml

@@ -1,14 +1,32 @@
-# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code,missing-function-docstring
 """
 Tests for uwtools.config.formats.nml module.
 """
 
 import filecmp
 
+from pytest import raises
+
 from uwtools.config.formats.nml import NMLConfig
+from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
+from uwtools.utils.file import FORMAT
 
 # Tests
+
+
+def test_get_format():
+    assert NMLConfig.get_format() == FORMAT.nml
+
+
+def test_get_depth_threshold():
+    assert NMLConfig.get_depth_threshold() == 2
+
+
+def test_instantiation_depth():
+    with raises(UWConfigError) as e:
+        NMLConfig(config={1: {2: {3: 4}}})
+    assert str(e.value) == "Cannot instantiate depth-2 NMLConfig with depth-3 config"
 
 
 def test_parse_include():

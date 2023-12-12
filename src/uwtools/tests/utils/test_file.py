@@ -55,25 +55,25 @@ def test__stdinproxy():
         assert file._stdinproxy().read() == msg1  # <-- the NEW message
 
 
-def test_get_file_type():
+def test_get_file_format():
     for ext, file_type in {
         "atparse": "atparse",
-        "bash": "ini",
+        "bash": "sh",
         "cfg": "ini",
         "fieldtable": "fieldtable",
         "ini": "ini",
         "jinja2": "jinja2",
         "nml": "nml",
-        "sh": "ini",
+        "sh": "sh",
         "yaml": "yaml",
         "yml": "yaml",
     }.items():
-        assert file.get_file_type(f"a.{ext}") == file_type
+        assert file.get_file_format(f"a.{ext}") == file_type
 
 
-def test_get_file_type_unrecignized():
+def test_get_file_format_unrecognized():
     with raises(ValueError):
-        file.get_file_type("a.jpg")
+        file.get_file_format("a.jpg")
 
 
 def test_handle_existing_bad_action():

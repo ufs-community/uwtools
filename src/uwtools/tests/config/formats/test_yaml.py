@@ -19,9 +19,22 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import fixture_path, logged
-from uwtools.utils.file import _stdinproxy
+from uwtools.utils.file import FORMAT, _stdinproxy
 
 # Tests
+
+
+def test_get_format():
+    assert YAMLConfig.get_format() == FORMAT.yaml
+
+
+def test_get_depth_threshold():
+    assert YAMLConfig.get_depth_threshold() is None
+
+
+def test_instantiation_depth():
+    # Any depth is fine.
+    assert YAMLConfig(config={1: {2: {3: 4}}})
 
 
 def test_composite_types():
@@ -143,5 +156,5 @@ def test_unexpected_error(tmp_path):
         msg = "Unexpected error"
         load.side_effect = yaml.constructor.ConstructorError(note=msg)
         with raises(UWConfigError) as e:
-            YAMLConfig(config_file=cfgfile)
+            YAMLConfig(config=cfgfile)
         assert msg in str(e.value)

@@ -8,14 +8,14 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional, Type, Union
+from typing import Any, Dict, Type, Union
 
 from uwtools.config import validator
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.logging import log
 from uwtools.scheduler import BatchScript, JobScheduler
-from uwtools.types import OptionalPath
+from uwtools.types import DefinitePath, OptionalPath
 
 
 class Driver(ABC):
@@ -25,9 +25,9 @@ class Driver(ABC):
 
     def __init__(
         self,
-        config_file: str,
+        config_file: DefinitePath,
         dry_run: bool = False,
-        batch_script: Optional[str] = None,
+        batch_script: OptionalPath = None,
     ):
         """
         Initialize the driver.
@@ -37,7 +37,7 @@ class Driver(ABC):
         self._dry_run = dry_run
         self._batch_script = batch_script
         self._validate()
-        self._experiment_config = YAMLConfig(config_file=config_file)
+        self._experiment_config = YAMLConfig(config=config_file)
         self._platform_config = self._experiment_config.get("platform", {})
         self._config: Dict[str, Any] = {}
 
@@ -94,7 +94,7 @@ class Driver(ABC):
     @property
     def scheduler(self) -> JobScheduler:
         """
-        The job scheduler speficied by the platform information.
+        The job scheduler specified by the platform information.
 
         :return: The scheduler object
         """
@@ -178,7 +178,4 @@ class Driver(ABC):
 
         :return: Was the input configuration file valid against its schema?
         """
-        return validator.validate_yaml(
-            config_file=self._config_file,
-            schema_file=self.schema_file,
-        )
+        return validator.validate_yaml(config=self._config_file, schema_file=self.schema_file)

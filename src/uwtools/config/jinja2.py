@@ -20,39 +20,29 @@ from jinja2.exceptions import UndefinedError
 from uwtools.config.support import format_to_config
 from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils.file import get_file_type, readable, writable
+from uwtools.utils.file import get_file_format, readable, writable
 
 _YAMLVal = Union[bool, dict, float, int, list, str]
 
 
 class J2Template:
     """
-    Reads Jinja templates from files or strings, and renders them using the user-provided values.
+    Reads Jinja2 templates from files or strings, and renders them using the user-provided values.
     """
 
-    def __init__(
-        self,
-        values: dict,
-        template_path: OptionalPath = None,
-        template_str: Optional[str] = None,
-        **kwargs,
-    ) -> None:
+    def __init__(self, values: dict, template_source: Union[str, DefinitePath]) -> None:
         """
         :param values: Values needed to render the provided template.
-        :param template_path: Path to a Jinja2 template file.
-        :param template_str: An in-memory Jinja2 template.
+        :param template_source: Jinja2 string or template file path (None => read stdin).
         :raises: RuntimeError: If neither a template file or path is provided.
         """
         self._values = values
-        self._template_path = template_path
-        self._template_str = template_str
-        self._loader_args = kwargs.get("loader_args", {})
-        if template_path is not None:
-            self._template = self._load_file(template_path)
-        elif template_str is not None:
-            self._template = self._load_string(template_str)
-        else:
-            raise RuntimeError("Must provide either a template path or a template string")
+        self._template = (
+            self._load_string(template_source)
+            if isinstance(template_source, str)
+            else self._load_file(template_source)
+        )
+        self._template_source = template_source
 
     # Public methods
 
@@ -82,12 +72,11 @@ class J2Template:
 
         :return: Names of variables needed to render the template.
         """
-        if self._template_str is not None:
-            j2_parsed = self._j2env.parse(self._template_str)
+        if isinstance(self._template_source, str):
+            j2_parsed = self._j2env.parse(self._template_source)
         else:
-            assert self._template_path is not None
-            with readable(self._template_path) as file_:
-                j2_parsed = self._j2env.parse(file_.read())
+            with open(self._template_source, "r", encoding="utf-8") as f:
+                j2_parsed = self._j2env.parse(f.read())
         return meta.find_undeclared_variables(j2_parsed)
 
     # Private methods
@@ -110,7 +99,7 @@ class J2Template:
         :param template: An in-memory Jinja2 template.
         :return: The Jinja2 template object.
         """
-        self._j2env = Environment(loader=BaseLoader(), **self._loader_args)
+        self._j2env = Environment(loader=BaseLoader())
         _register_filters(self._j2env)
         return self._j2env.from_string(template)
 
@@ -157,69 +146,90 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
 
 
 def render(
-    input_file: OptionalPath,
-    output_file: OptionalPath,
-    values_file: DefinitePath,
+    values: Union[dict, DefinitePath],
     values_format: Optional[str] = None,
+    input_file: OptionalPath = None,
+    output_file: OptionalPath = None,
     overrides: Optional[Dict[str, str]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> bool:
     """
-    Render a Jinja2 template.
+    Check and render a Jinja2 template.
 
-    :param input_file: Path to the Jinja2 template file to render.
-    :param output_file: Path to the file to write the rendered Jinja2 template to.
-    :param values_file: Path to the file supplying values to render the template.
-    :param keq_eq_val_pairs: "key=value" strings to supplement values-file values.
-    :param values_needed: Just issue a report about variables needed to render the template?
+    :param values: Source of values to render the template.
+    :param values_format: Format of values when sourced from file..
+    :param input_file: Path to read raw Jinja2 template from (None => read stdin).
+    :param output_file: Path to write rendered Jinja2 template to (None => write to stdout).
+    :param overrides: Supplemental override values.
+    :param values_needed: Just report variables needed to render the template?
     :param dry_run: Run in dry-run mode?
+    :return: Jinja2 template was successfully rendered.
     """
+
+    # Render template.
+
     _report(locals())
-    values = _set_up_values_obj(
-        values_file=values_file, values_format=values_format, overrides=overrides
-    )
+    if not isinstance(values, dict):
+        values = _set_up_values_obj(
+            values_file=values, values_format=values_format, overrides=overrides
+        )
     with readable(input_file) as f:
         template_str = f.read()
-    template = J2Template(values=values, template_str=template_str)
+    template = J2Template(values=values, template_source=template_str)
     undeclared_variables = template.undeclared_variables
 
     # If a report of variables required to render the template was requested, make that report and
     # then return.
 
     if values_needed:
-        log.info("Value(s) needed to render this template are:")
-        for var in sorted(undeclared_variables):
-            log.info(var)
-        return True
+        return _values_needed(undeclared_variables)
 
     # Check for missing values required to render the template. If found, report them and raise an
     # exception.
 
     missing = [var for var in undeclared_variables if var not in values.keys()]
     if missing:
-        msg = "Required value(s) not provided:"
-        log.error(msg)
-        for key in missing:
-            log.error(key)
-        return False
+        return _log_missing_values(missing)
 
-    # In dry-run mode, display the rendered template and then return.
+    # In dry-run mode, log the rendered template. Otherwise, write the rendered template.
 
-    if dry_run:
-        rendered_template = template.render()
-        for line in rendered_template.split("\n"):
-            log.info(line)
-        return True
-
-    # Write rendered template to file.
-
-    with writable(output_file) as f:
-        print(template.render(), file=f)
-    return True
+    return (
+        _dry_run_template(template.render())
+        if dry_run
+        else _write_template(output_file, template.render())
+    )
 
 
 # Private functions
+
+
+def _dry_run_template(rendered_template: str) -> bool:
+    """
+    Log the rendered template and then return as successful.
+
+    :param rendered_template: A string containing a rendered Jinja2 template.
+    :return: The successful logging of the template.
+    """
+
+    for line in rendered_template.split("\n"):
+        log.info(line)
+    return True
+
+
+def _log_missing_values(missing: List[str]) -> bool:
+    """
+    Log values missing from template and raise an exception.
+
+    :param missing: A list containing the undeclared variables that do not have a corresponding
+        match in values.
+    :return: Unable to successfully render template.
+    """
+
+    log.error("Required value(s) not provided:")
+    for key in missing:
+        log.error(key)
+    return False
 
 
 def _register_filters(env: Environment) -> Environment:
@@ -276,15 +286,16 @@ def _set_up_values_obj(
 ) -> dict:
     """
     Collect template-rendering values based on an input file, if given, or otherwise on the shell
-    environment; and supplemented with override values from given "key=value" strings.
+    environment. Apply override values.
 
     :param values_file: Path to the file supplying values to render the template.
-    :param keq_eq_val_pairs: "key=value" strings to supplement values-file values.
+    :param values_format: Format of values when sourced from file.
+    :param overrides: Supplemental override values.
     :returns: The collected values.
     """
     if values_file:
         if values_format is None:
-            values_format = get_file_type(values_file)
+            values_format = get_file_format(values_file)
         values_class = format_to_config(values_format)
         values = values_class(values_file).data
         log.debug("Read initial values from %s", values_file)
@@ -295,3 +306,32 @@ def _set_up_values_obj(
         values.update(overrides)
         log.debug("Updated values with overrides: %s", " ".join(overrides))
     return values
+
+
+def _values_needed(undeclared_variables: Set[str]) -> bool:
+    """
+    Log variables needed to render the template.
+
+    :param undeclared_variables: A set containing the variables needed to render the template.
+    :return: Successfully logged values needed.
+    """
+
+    # If a report of variables required to render the template was requested, make that report and
+    # then return.
+    log.info("Value(s) needed to render this template are:")
+    for var in sorted(undeclared_variables):
+        log.info(var)
+    return True
+
+
+def _write_template(output_file: OptionalPath, rendered_template: str) -> bool:
+    """
+    Write the rendered template.
+
+    :param output_file: Path to the file to write the rendered Jinja2 template to.
+    :param rendered_template: A string containing a rendered Jinja2 template.
+    :return: The successful writing of the rendered template.
+    """
+    with writable(output_file) as f:
+        print(rendered_template, file=f)
+    return True

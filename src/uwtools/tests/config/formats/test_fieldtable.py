@@ -1,11 +1,26 @@
+# pylint: disable=missing-function-docstring
 """
 Tests for uwtools.config.formats.fieldtable module.
 """
 
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.tests.support import fixture_path
+from uwtools.utils.file import FORMAT
 
 # Tests
+
+
+def test_get_format():
+    assert FieldTableConfig.get_format() == FORMAT.fieldtable
+
+
+def test_get_depth_threshold():
+    assert FieldTableConfig.get_depth_threshold() is None
+
+
+def test_instantiation_depth():
+    # Any depth is fine.
+    assert FieldTableConfig(config={1: {2: {3: 4}}})
 
 
 def test_simple(tmp_path):
