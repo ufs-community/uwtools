@@ -22,7 +22,7 @@ def run(  # pylint: disable=missing-function-docstring
 run.__doc__ = """
 Run a forecast model.
 
-If batch_script is specified, a batch script will be written that, when submitted to the appropriate
+If ``batch_script`` is specified, a batch script will be written that, when submitted to the appropriate
 scheduler, will run the forecast on batch resources. When not specified, the forecast will be run
 immediately on the current system, without creation of a batch script.
 

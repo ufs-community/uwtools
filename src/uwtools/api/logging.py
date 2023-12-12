@@ -6,7 +6,7 @@ from uwtools.logging import use_logger as _use_logger
 
 def use_custom_logger(logger: logging.Logger) -> None:
     """
-    Log to the specified logger object, configured according to your needs.
+    Log to the specified ``Logger`` object, configured according to your needs.
 
     :param logger: The custom logger to use.
     """
@@ -15,7 +15,7 @@ def use_custom_logger(logger: logging.Logger) -> None:
 
 def use_uwtools_logger(quiet: bool = False, verbose: bool = False) -> None:
     """
-    Log to a logger configured to follow uwtools conventions.
+    Log to a ``Logger`` configured to follow ``uwtools`` conventions.
 
     :param quiet: Supress all logging output.
     :param verbose: Log all messages.
