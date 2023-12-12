@@ -256,32 +256,6 @@ def test_realize_config_field_table(tmp_path):
                 assert line1 in line2
 
 
-@pytest.mark.skip("Updating typed Fortran namelist from untyped INI data is unsound")
-def test_realize_config_file_conversion(tmp_path):
-    """
-    Test using an ini object to configure nml input -> nml output.
-    """
-    infile = fixture_path("simple2.nml")
-    cfgfile = fixture_path("simple2.ini")
-    outfile = str(tmp_path / "test_config_conversion.nml")
-    tools.realize_config(
-        input_config=infile,
-        input_format=FORMAT.nml,
-        output_file=outfile,
-        output_format=FORMAT.nml,
-        values=cfgfile,
-        values_format=FORMAT.ini,
-    )
-    expected = NMLConfig(infile)
-    config_obj = INIConfig(cfgfile)
-    expected.update_values(config_obj)
-    expected_file = tmp_path / "expected.nml"
-    expected.dump(expected_file)
-    assert compare_files(expected_file, outfile)
-    with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read()[-1] == "\n"
-
-
 def test_realize_config_fmt2fmt_nml2nml(tmp_path):
     """
     Test that providing a namelist base input file and a config file will create and update namelist
