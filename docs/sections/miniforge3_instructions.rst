@@ -1,4 +1,4 @@
-.. include:: ./links.rst
+.. include:: links.rst
 
 This recipe uses the ``aarch64`` (64-bit ARM) Miniforge for Linux, and installs into ``$HOME/conda``. Adjust as necessary for your target system.
 
