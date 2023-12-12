@@ -6,15 +6,28 @@ Tests for uwtools.config.formats.sh module.
 import filecmp
 from typing import Any, Dict
 
+from pytest import raises
+
 from uwtools.config.formats.sh import SHConfig
+from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT
 
 # Tests
 
 
-def test_format():
+def test_get_format():
     assert SHConfig.get_format() == FORMAT.sh
+
+
+def test_get_depth_threshold():
+    assert SHConfig.get_depth_threshold() == 1
+
+
+def test_instantiation_depth():
+    with raises(UWConfigError) as e:
+        SHConfig(config={1: {2: {3: 4}}})
+    assert str(e.value) == "Cannot instantiate depth-1 SHConfig with depth-3 config"
 
 
 def test_parse_include():

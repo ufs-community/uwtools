@@ -12,6 +12,7 @@ import yaml
 
 from uwtools.config.jinja2 import dereference
 from uwtools.config.support import INCLUDE_TAG, depth, log_and_error
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.types import OptionalPath
 
@@ -35,6 +36,11 @@ class Config(ABC, UserDict):
         else:
             self._config_file = str(config) if config else None
             self.update(self._load(self._config_file))
+        if self.get_depth_threshold() and self.depth != self.get_depth_threshold():
+            raise UWConfigError(
+                "Cannot instantiate depth-%s %s with depth-%s config"
+                % (self.get_depth_threshold(), type(self).__name__, self.depth)
+            )
 
     def __repr__(self) -> str:
         """
@@ -173,6 +179,13 @@ class Config(ABC, UserDict):
         Dumps the config to stdout or a file.
 
         :param path: Path to dump config to.
+        """
+
+    @staticmethod
+    @abstractmethod
+    def get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
         """
 
     @staticmethod

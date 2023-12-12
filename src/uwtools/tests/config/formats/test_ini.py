@@ -5,15 +5,28 @@ Tests for uwtools.config.formats.ini module.
 
 import filecmp
 
+from pytest import raises
+
 from uwtools.config.formats.ini import INIConfig
+from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT
 
 # Tests
 
 
-def test_format():
+def test_get_format():
     assert INIConfig.get_format() == FORMAT.ini
+
+
+def test_get_depth_threshold():
+    assert INIConfig.get_depth_threshold() == 2
+
+
+def test_instantiation_depth():
+    with raises(UWConfigError) as e:
+        INIConfig(config={1: {2: {3: 4}}})
+    assert str(e.value) == "Cannot instantiate depth-2 INIConfig with depth-3 config"
 
 
 def test_parse_include():

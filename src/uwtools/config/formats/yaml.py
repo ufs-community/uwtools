@@ -1,4 +1,5 @@
 from types import SimpleNamespace as ns
+from typing import Optional
 
 import yaml
 
@@ -37,8 +38,6 @@ class YAMLConfig(Config):
     """
     Concrete class to handle YAML config files.
     """
-
-    DEPTH = None
 
     def __repr__(self) -> str:
         """
@@ -113,6 +112,13 @@ class YAMLConfig(Config):
         """
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
+
+    @staticmethod
+    def get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+        return None
 
     @staticmethod
     def get_format() -> str:

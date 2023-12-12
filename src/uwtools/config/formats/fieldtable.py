@@ -1,3 +1,5 @@
+from typing import Optional
+
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.utils.file import FORMAT, OptionalPath, writable
 
@@ -8,7 +10,6 @@ class FieldTableConfig(YAMLConfig):
     an input YAML file.
     """
 
-    DEPTH = None
     # Public methods
 
     def dump(self, path: OptionalPath) -> None:
@@ -59,6 +60,13 @@ class FieldTableConfig(YAMLConfig):
             lines[-1] += " /"
         with writable(path) as f:
             print("\n".join(lines), file=f)
+
+    @staticmethod
+    def get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+        return None
 
     @staticmethod
     def get_format() -> str:

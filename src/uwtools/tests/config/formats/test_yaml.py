@@ -24,8 +24,17 @@ from uwtools.utils.file import FORMAT, _stdinproxy
 # Tests
 
 
-def test_format():
+def test_get_format():
     assert YAMLConfig.get_format() == FORMAT.yaml
+
+
+def test_get_depth_threshold():
+    assert YAMLConfig.get_depth_threshold() is None
+
+
+def test_instantiation_depth():
+    # Any depth is fine.
+    assert YAMLConfig(config={1: {2: {3: 4}}})
 
 
 def test_composite_types():
