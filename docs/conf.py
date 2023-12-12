@@ -5,11 +5,12 @@ import json
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../src/uwtools"))
+sys.path.insert(0, os.path.abspath("../src"))
 
 with open("../recipe/meta.json", "r", encoding="utf-8") as f:
     _metadata = json.loads(f.read())
 
+autodoc_mock_imports = ["f90nml", "jsonschema", "lxml"]
 copyright = str(dt.datetime.now().year)
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.intersphinx"]
 html_logo = os.path.join("static", "ufs.png")
