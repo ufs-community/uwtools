@@ -14,6 +14,7 @@ copyright = str(dt.datetime.now().year)
 extensions = ["sphinx.ext.autodoc"]
 html_logo = os.path.join("static", "ufs.png")
 html_theme = "sphinx_rtd_theme"
+nitpick_ignore_regex = [("py:class", r".*")]
 numfig = True
 numfig_format = {"figure": "Figure %s"}
 project = "Unified Workflow"
