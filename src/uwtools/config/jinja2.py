@@ -27,32 +27,22 @@ _YAMLVal = Union[bool, dict, float, int, list, str]
 
 class J2Template:
     """
-    Reads Jinja templates from files or strings, and renders them using the user-provided values.
+    Reads Jinja2 templates from files or strings, and renders them using the user-provided values.
     """
 
-    def __init__(
-        self,
-        values: dict,
-        template_path: OptionalPath = None,
-        template_str: Optional[str] = None,
-        **kwargs,
-    ) -> None:
+    def __init__(self, values: dict, template_source: Union[str, DefinitePath]) -> None:
         """
         :param values: Values needed to render the provided template.
-        :param template_path: Path to a Jinja2 template file.
-        :param template_str: An in-memory Jinja2 template.
+        :param template_source: Jinja2 string or template file path (None => read stdin).
         :raises: RuntimeError: If neither a template file or path is provided.
         """
         self._values = values
-        self._template_path = template_path
-        self._template_str = template_str
-        self._loader_args = kwargs.get("loader_args", {})
-        if template_path is not None:
-            self._template = self._load_file(template_path)
-        elif template_str is not None:
-            self._template = self._load_string(template_str)
-        else:
-            raise RuntimeError("Must provide either a template path or a template string")
+        self._template = (
+            self._load_string(template_source)
+            if isinstance(template_source, str)
+            else self._load_file(template_source)
+        )
+        self._template_source = template_source
 
     # Public methods
 
@@ -82,12 +72,11 @@ class J2Template:
 
         :return: Names of variables needed to render the template.
         """
-        if self._template_str is not None:
-            j2_parsed = self._j2env.parse(self._template_str)
+        if isinstance(self._template_source, str):
+            j2_parsed = self._j2env.parse(self._template_source)
         else:
-            assert self._template_path is not None
-            with readable(self._template_path) as file_:
-                j2_parsed = self._j2env.parse(file_.read())
+            with open(self._template_source, "r", encoding="utf-8") as f:
+                j2_parsed = self._j2env.parse(f.read())
         return meta.find_undeclared_variables(j2_parsed)
 
     # Private methods
@@ -110,7 +99,7 @@ class J2Template:
         :param template: An in-memory Jinja2 template.
         :return: The Jinja2 template object.
         """
-        self._j2env = Environment(loader=BaseLoader(), **self._loader_args)
+        self._j2env = Environment(loader=BaseLoader())
         _register_filters(self._j2env)
         return self._j2env.from_string(template)
 
@@ -187,7 +176,7 @@ def render(
         )
     with readable(input_file) as f:
         template_str = f.read()
-    template = J2Template(values=values, template_str=template_str)
+    template = J2Template(values=values, template_source=template_str)
     undeclared_variables = template.undeclared_variables
 
     # If a report of variables required to render the template was requested, make that report and

@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Union
+from typing import Optional, Union
 
 import f90nml
 
@@ -12,8 +12,6 @@ class NMLConfig(Config):
     """
     Concrete class to handle Fortran namelist files.
     """
-
-    DEPTH = 2
 
     def __init__(self, config: Union[dict, OptionalPath] = None) -> None:
         """
@@ -79,6 +77,13 @@ class NMLConfig(Config):
 
         with writable(path) as f:
             f90nml.Namelist(to_od(cfg)).write(f, sort=False)
+
+    @staticmethod
+    def get_depth_threshold() -> Optional[int]:
+        """
+        Returns the config's depth threshold.
+        """
+        return 2
 
     @staticmethod
     def get_format() -> str:
