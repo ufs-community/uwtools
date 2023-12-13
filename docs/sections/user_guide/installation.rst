@@ -3,7 +3,7 @@ Installation
 
 .. include:: links.rst
 
--  If you are a **developer**, please visit the `Developer Setup <../contributor_guide/developer_setup.html>`_ section located in the `Contributor Guide <../contributor_guide/index.html>`_.
+-  If you are a **developer**, please visit the :doc:`Developer Setup <../contributor_guide/developer_setup>` section located in the :doc:`Contributor Guide <../contributor_guide/index>`.
 
 The recommended installation mechanism uses the Python package and virtual-environment manager `conda`_. Specifically, these instructions detail the use of the minimal `Miniforge`_ variant of `Miniconda`_, built to use, by default, packages from the `conda-forge`_ project.
 

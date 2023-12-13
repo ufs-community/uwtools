@@ -10,16 +10,16 @@ Creating a ``bash`` development shell
 
 2. Install the `condev`_ package into the base environment.
 
-   .. code:: sh
+  .. code:: sh
 
-     conda install -y -c maddenp condev
+    conda install -y -c maddenp condev
 
 3. In a clone of the `workflow-tools repository`_, create the development shell.
 
-   .. code:: sh
+  .. code:: sh
 
-     cd /to/your/workflow-tools/clone
-     make devshell
+    cd /to/your/workflow-tools/clone
+    make devshell
 
 If the above is successful, you will be in a ``workflow-tools`` development shell. See below for usage information. You may exit the shell with ``exit`` or ``ctrl-d``.
 
@@ -30,33 +30,18 @@ Future ``make devshell`` invocations will be almost instantaneous, as the underl
 
 If your development shell misses any functionality you’re used to in your main (``bash``) shell, you can create a ``~/.condevrc`` file, which will be sourced by ``make devshell``. When in doubt, you might:
 
-   .. code::
+.. code::
 
-     cat <<EOF >~/.condevrc
-     source ~/.bashrc
-     EOF
+  cat <<EOF >~/.condevrc
+  source ~/.bashrc
+  EOF
 
 Using a ``bash`` development shell
 ----------------------------------
 
-In an active development shell, the following ``make`` targets are available and act on all ``.py`` files under ``src/``:
-
-.. include:: code_quality_tools_table.rst
-
-Note that ``make format`` is never run automatically, to avoid reformatting under-development code in a way that might surprise the developer. A useful development idiom is to periodically run ``make format && make test`` to perform a full code-quality sweep through the code. An additional check is run by the CI for unformatted code, ``make format`` must be run, and then changes from ``make format`` must be committed before CI will pass.
-
-The ``make test`` command is also automatically executed when ``conda`` builds a ``uwtools`` package, so it is important to periodically run these tests during development and, crucially, before merging changes, to ensure that the tests will pass when CI builds the ``workflow-tools`` code.
-
-
-The order of the targets above is intentional, and possibly useful:
-
-   * ``make format`` will complain about certain kinds of syntax errors that would cause all the remaining code-quality tools to fail (and may change line numbers reported by other tools, if it ran after them).
-   * ``make lint`` provides a good first check for obvious errors and anti-patterns in the code.
-   * ``make typecheck`` offers a more nuanced look at interfaces between functions, methods, etc. and may spot issues that would cause ``make unittest`` to fail.
-
+A development shell makes availabe several code-formatting and quality checkers, which should be periodically run during the development process. See :doc:`Code Quality <code_quality>` for full details.
 
 In addition to the ``make devshell`` command, other ``make`` targets are available for use *outside* a development shell, i.e. from the base conda environment (requires presence of the ``condev`` package):
-
 
 .. list-table::
    :widths: 15 85
@@ -78,27 +63,27 @@ Building condev locally
 
 As an alternative to installing `a prebuilt package from anaconda <https://anaconda.org/maddenp/condev>`_, the ``condev`` package can be built locally, then installed into the local conda installation. Ensure that ``conda-build`` and ``conda-verify`` are installed in the base environment:
 
-   .. code:: sh
+.. code:: sh
 
-     # Activate your conda
-     git clone https://github.com/maddenp/condev.git
-     make -C condev package
-     conda install -y -c local condev
+ # Activate your conda
+ git clone https://github.com/maddenp/condev.git
+ make -C condev package
+ conda install -y -c local condev
 
 Files derived from condev
 -------------------------
 
 The following files in this repo are derived from their counterparts in the `condev demo`_ and are used by ``condev`` code when running certain make commands
 
-   .. code:: sh
+.. code:: sh
 
-     ├── Makefile
-     ├── recipe
-     │   ├── build.sh
-     │   ├── channels
-     │   ├── meta.json
-     │   ├── meta.yaml
-     │   └── run_test.sh
-     ├── src
-     │   ├── pyproject.toml
-     │   ├── setup.py
+ ├── Makefile
+ ├── recipe
+ │   ├── build.sh
+ │   ├── channels
+ │   ├── meta.json
+ │   ├── meta.yaml
+ │   └── run_test.sh
+ ├── src
+ │   ├── pyproject.toml
+ │   ├── setup.py
