@@ -81,7 +81,7 @@ def realize_config(
     input_format: Optional[str] = None,
     output_file: OptionalPath = None,
     output_format: Optional[str] = None,
-    values: Union[dict, Config, OptionalPath] = None,
+    supplemental_values: Union[dict, Config, OptionalPath] = None,
     values_format: Optional[str] = None,
     values_needed: bool = False,
     dry_run: bool = False,
@@ -93,7 +93,7 @@ def realize_config(
     :param input_format: Format of the input config.
     :param output_file: Output config file (None => write to stdout).
     :param output_format: Format of the output config.
-    :param values: Source of values used to modify input.
+    :param supplemental_values: Source of values used to modify input.
     :param values_format: Format of values when sourced from file.
     :param values_needed: Report complete, missing, and template values.
     :param dry_run: Log output instead of writing to output.
@@ -105,9 +105,9 @@ def realize_config(
         if isinstance(input_config, Config)
         else format_to_config(input_format)(config=input_config)
     )
-    input_obj = _realize_config_update(input_obj, values, values_format)
+    input_obj = _realize_config_update(input_obj, supplemental_values, values_format)
     output_format = _ensure_format("output", output_format, output_file)
-    input_obj = _realize_config_update(input_obj, values, values_format)
+    input_obj = _realize_config_update(input_obj, supplemental_values, values_format)
     input_obj.dereference()
     config_check_depths_realize(input_obj, output_format)
     if dry_run:

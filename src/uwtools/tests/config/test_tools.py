@@ -413,6 +413,31 @@ Keys that are set to empty:
     assert actual == expected
 
 
+def test_realize_config_values_dereference(caplog, tmp_path):
+    path = tmp_path / "a.yaml"
+    supplemental_path = tmp_path / "b.yaml"
+    with writable(path) as f:
+        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}"}, f)
+    with writable(supplemental_path) as f2:
+        yaml.dump({"2": "b", "temporalis": "c"}, f2)
+    tools.realize_config(
+        input_config=path,
+        input_format=FORMAT.yaml,
+        output_file=None,
+        output_format=FORMAT.yaml,
+        supplemental_values=supplemental_path,
+        values_format=FORMAT.yaml,
+        dry_run=True,
+    )
+    expected = """'1': a
+'2': b
+'3': c
+temporalis: c
+"""
+    actual = "\n".join(record.message for record in caplog.records)
+    assert actual == expected
+
+
 def test_realize_config_values_needed_nml(caplog):
     """
     Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
