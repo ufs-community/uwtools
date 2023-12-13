@@ -31,11 +31,11 @@ scheduler, will run the forecast on batch resources. When not specified, the for
 immediately on the current system, without creation of a batch script.
 
 :param model: One of: {models}
-:param cycle: The cycle to run.
-:param config_file: Path to config file for the forecast run.
-:param batch_script: Path to a batch script to write.
-:param dry_run: Do not run forecast, just report what would have been done.
-:return: Success status of requested operation (immediate run or batch-script creation).
+:param cycle: The cycle to run
+:param config_file: Path to config file for the forecast run
+:param batch_script: Path to a batch script to write
+:param dry_run: Do not run forecast, just report what would have been done
+:return: Success status of requested operation (immediate run or batch-script creation)
 """.format(
     models=", ".join(list(_CLASSES.keys()))
 ).strip()
