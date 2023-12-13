@@ -44,7 +44,7 @@ def get_fieldtable_config(config: Union[dict, OptionalPath] = None) -> _FieldTab
     """
     Get a ``FieldTableConfig`` object.
 
-    :param config: Config file to load (``None`` or unspecified => read ``stdin``), or initial
+    :param config: FieldTable file to load (``None`` or unspecified => read ``stdin``), or initial
         ``dict``
     :return: An initialized ``FieldTableConfig`` object
     """
@@ -55,8 +55,7 @@ def get_ini_config(config: Union[dict, OptionalPath] = None) -> _INIConfig:
     """
     Get an ``INIConfig`` object.
 
-    :param config: Config file to load (``None`` or unspecified => read ``stdin``), or initial
-        ``dict``
+    :param config: INI file to load (``None`` or unspecified => read ``stdin``), or initial ``dict``
     :return: An initialized ``INIConfig`` object
     """
     return _INIConfig(config=config)
@@ -66,8 +65,8 @@ def get_nml_config(config: Union[dict, OptionalPath] = None) -> _NMLConfig:
     """
     Get an ``NMLConfig`` object.
 
-    :param config: Config file to load (``None`` or unspecified => read ``stdin``), or initial
-        ``dict``
+    :param config: Fortran namelist file to load (``None`` or unspecified => read ``stdin``), or
+        initial ``dict``
     :return: An initialized ``NMLConfig`` object
     """
     return _NMLConfig(config=config)
@@ -77,8 +76,8 @@ def get_sh_config(config: Union[dict, OptionalPath] = None) -> _SHConfig:
     """
     Get an ``SHConfig`` object.
 
-    :param config: Config file to load (``None`` or unspecified => read ``stdin``), or initial
-        ``dict``
+    :param config: File of shell 'key=value' pairs to load (``None`` or unspecified => read
+        ``stdin``), or initial ``dict``
     :return: An initialized ``SHConfig`` object
     """
     return _SHConfig(config=config)
@@ -88,7 +87,7 @@ def get_yaml_config(config: Union[dict, OptionalPath] = None) -> _YAMLConfig:
     """
     Get a ``YAMLConfig`` object.
 
-    :param config: Config file to load (``None`` or unspecified => read ``stdin``), or initial
+    :param config: YAML file to load (``None`` or unspecified => read ``stdin``), or initial
         ``dict``
     :return: An initialized ``YAMLConfig`` object
     """
