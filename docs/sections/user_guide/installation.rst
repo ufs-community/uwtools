@@ -1,8 +1,7 @@
-.. include:: links.rst
-
-************
 Installation
-************
+============
+
+.. include:: links.rst
 
 -  If you are a **developer**, please visit the `Developer Setup <../contributor_guide/developer_setup.html>`_ section located in the `Contributor Guide <../contributor_guide/index.html>`_.
 

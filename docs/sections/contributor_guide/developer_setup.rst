@@ -1,11 +1,10 @@
+Developer Setup
+===============
+
 .. include:: links.rst
 
-***************
-Developer Setup
-***************
-
 Creating a ``bash`` development shell
-=====================================
+-------------------------------------
 
 .. include:: ../miniforge3_instructions.rst
 
@@ -38,7 +37,7 @@ If your development shell misses any functionality you’re used to in your main
      EOF
 
 Using a ``bash`` development shell
-==================================
+----------------------------------
 
 In an active development shell, the following ``make`` targets are available and act on all ``.py`` files under ``src/``:
 
