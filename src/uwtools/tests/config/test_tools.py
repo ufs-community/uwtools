@@ -62,7 +62,7 @@ def help_realize_config_fmt2fmt(infn, infmt, cfgfn, cfgfmt, tmpdir):
         input_format=infmt,
         output_file=outfile,
         output_format=infmt,
-        values=cfgfile,
+        supplemental_files=cfgfile,
         values_format=cfgfmt,
     )
     cfgclass = tools.format_to_config(infmt)
@@ -82,7 +82,7 @@ def help_realize_config_simple(infn, infmt, tmpdir):
         input_format=infmt,
         output_file=outfile,
         output_format=infmt,
-        values=None,
+        supplemental_files=None,
         values_format=None,
     )
     cfgobj = tools.format_to_config(infmt)(infile)
@@ -175,7 +175,7 @@ def test_realize_config_conversion_cfg_to_yaml(tmp_path):
         input_format=FORMAT.yaml,
         output_file=outfile,
         output_format=FORMAT.yaml,
-        values=None,
+        supplemental_files=None,
         values_format=None,
     )
     expected = YAMLConfig(infile)
@@ -194,7 +194,7 @@ def test_realize_config_depth_mismatch_to_ini(realize_config_yaml_input):
             input_format=FORMAT.yaml,
             output_file=None,
             output_format=FORMAT.ini,
-            values=None,
+            supplemental_files=None,
             values_format=None,
         )
 
@@ -206,7 +206,7 @@ def test_realize_config_depth_mismatch_to_sh(realize_config_yaml_input):
             input_format=FORMAT.yaml,
             output_file=None,
             output_format=FORMAT.sh,
-            values=None,
+            supplemental_files=None,
             values_format=None,
         )
 
@@ -224,7 +224,7 @@ def test_realize_config_dry_run(caplog):
         input_format=FORMAT.yaml,
         output_file=None,
         output_format=FORMAT.yaml,
-        values=None,
+        supplemental_files=None,
         values_format=None,
         dry_run=True,
     )
@@ -244,7 +244,7 @@ def test_realize_config_field_table(tmp_path):
         input_format=FORMAT.yaml,
         output_file=outfile,
         output_format=FORMAT.fieldtable,
-        values=None,
+        supplemental_files=None,
         values_format=None,
     )
     with open(fixture_path("field_table.FV3_GFS_v16"), "r", encoding="utf-8") as f1:
@@ -269,7 +269,7 @@ def test_realize_config_file_conversion(tmp_path):
         input_format=FORMAT.nml,
         output_file=outfile,
         output_format=FORMAT.nml,
-        values=cfgfile,
+        supplemental_files=cfgfile,
         values_format=FORMAT.ini,
     )
     expected = NMLConfig(infile)
@@ -318,7 +318,7 @@ def test_realize_config_incompatible_file_type():
             input_format="sample",
             output_file=None,
             output_format=FORMAT.yaml,
-            values=None,
+            supplemental_files=None,
             values_format=None,
         )
 
@@ -334,7 +334,7 @@ def test_realize_config_output_file_conversion(tmp_path):
         input_format=FORMAT.nml,
         output_file=outfile,
         output_format=FORMAT.nml,
-        values=None,
+        supplemental_files=None,
         values_format=None,
     )
     expected = NMLConfig(infile)
@@ -385,7 +385,7 @@ def test_realize_config_values_needed_ini(caplog):
         input_format=FORMAT.ini,
         output_file=None,
         output_format=FORMAT.ini,
-        values=None,
+        supplemental_files=None,
         values_format=None,
         values_needed=True,
     )
@@ -425,7 +425,7 @@ def test_realize_config_values_dereference(caplog, tmp_path):
         input_format=FORMAT.yaml,
         output_file=None,
         output_format=FORMAT.yaml,
-        supplemental_values=supplemental_path,
+        supplemental_files=supplemental_path,
         values_format=FORMAT.yaml,
         dry_run=True,
     )
@@ -449,7 +449,7 @@ def test_realize_config_values_needed_nml(caplog):
         input_format=FORMAT.nml,
         output_file=None,
         output_format=FORMAT.yaml,
-        values=None,
+        supplemental_files=None,
         values_format=None,
         values_needed=True,
     )
@@ -485,7 +485,7 @@ def test_realize_config_values_needed_yaml(caplog):
         input_format=FORMAT.yaml,
         output_file=None,
         output_format=FORMAT.yaml,
-        values=None,
+        supplemental_files=None,
         values_format=None,
         values_needed=True,
     )
@@ -593,16 +593,20 @@ def test__print_config_section_yaml_not_dict():
     assert "must be a dictionary" in str(e.value)
 
 
-@pytest.mark.parametrize("values", [YAMLConfig(config={1: {2: {3: 99}}}), {1: {2: {3: 99}}}])
-def test__realize_config_update(realize_config_testobj, values):
+@pytest.mark.parametrize(
+    "supplemental_files", [YAMLConfig(config={1: {2: {3: 99}}}), {1: {2: {3: 99}}}]
+)
+def test__realize_config_update(realize_config_testobj, supplemental_files):
     assert realize_config_testobj[1][2][3] == 88
-    o = tools._realize_config_update(config_obj=realize_config_testobj, values=values)
+    o = tools._realize_config_update(
+        config_obj=realize_config_testobj, supplemental_files=supplemental_files
+    )
     assert o[1][2][3] == 99
 
 
 def test__realize_config_update_noop(realize_config_testobj):
     assert realize_config_testobj == tools._realize_config_update(
-        config_obj=realize_config_testobj, values=None, values_format=None
+        config_obj=realize_config_testobj, supplemental_files=None, values_format=None
     )
 
 
@@ -612,7 +616,7 @@ def test__realize_config_update_file(realize_config_testobj, tmp_path):
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(values, f)
     assert realize_config_testobj[1][2][3] == 88
-    o = tools._realize_config_update(config_obj=realize_config_testobj, values=path)
+    o = tools._realize_config_update(config_obj=realize_config_testobj, supplemental_files=path)
     assert o[1][2][3] == 99
 
 

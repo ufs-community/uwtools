@@ -116,7 +116,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> SubmodeChecks:
     """
     parser = _add_subparser(subparsers, STR.realize, "Realize config")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_values_file(required, required=True)
+    _add_arg_supplemental_files(required, required=True)
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_input_format(optional, choices=FORMATS)
@@ -129,7 +129,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> SubmodeChecks:
     return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
         partial(_check_file_vs_format, STR.outfile, STR.outfmt),
-        partial(_check_file_vs_format, STR.valsfile, STR.valsfmt),
+        partial(_check_file_vs_format, STR.suppfiles, STR.valsfmt),
     ]
 
 
@@ -206,7 +206,7 @@ def _dispatch_config_realize(args: Args) -> bool:
         input_format=args[STR.infmt],
         output_file=args[STR.outfile],
         output_format=args[STR.outfmt],
-        values=args[STR.valsfile],
+        supplemental_files=args[STR.suppfiles],
         values_format=args[STR.valsfmt],
         values_needed=args[STR.valsneeded],
         dry_run=args[STR.dryrun],
@@ -581,6 +581,16 @@ def _add_arg_schema_file(group: Group) -> None:
     )
 
 
+def _add_arg_supplemental_files(group: Group, required: bool = False) -> None:
+    group.add_argument(
+        _switch(STR.suppfiles),
+        help="Path to file providing override or interpolation values",
+        metavar="PATH",
+        required=required,
+        type=str,
+    )
+
+
 def _add_arg_values_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.valsfile),
@@ -788,6 +798,7 @@ class STR:
     run: str = "run"
     schemafile: str = "schema_file"
     submode: str = "submode"
+    suppfiles: str = "supplemental_files"
     template: str = "template"
     translate: str = "translate"
     validate: str = "validate"
