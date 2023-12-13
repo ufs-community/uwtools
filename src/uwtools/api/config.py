@@ -24,7 +24,13 @@ def compare(
     config_b_format: str,
 ) -> bool:
     """
-    ???
+    Compare two config files.
+
+    :param config_a_path: Path to first config file
+    :param config_a_format: Format of first config file
+    :param config_b_path: Path to second config file
+    :param config_b_format: Format of second config file
+    :return: ``False`` if config files had differences, otherwise ``True``
     """
     return _compare(
         config_a_path=config_a_path,
@@ -36,45 +42,54 @@ def compare(
 
 def get_fieldtable_config(config: Union[dict, OptionalPath] = None) -> _FieldTableConfig:
     """
-    Get a FieldTableConfig object.
+    Get a ``FieldTableConfig`` object.
 
-    :param config: Config file to load (None => read from stdin), or initial dict.
+    :param config: FieldTable file to load (``None`` or unspecified => read ``stdin``), or initial
+        ``dict``
+    :return: An initialized ``FieldTableConfig`` object
     """
     return _FieldTableConfig(config=config)
 
 
 def get_ini_config(config: Union[dict, OptionalPath] = None) -> _INIConfig:
     """
-    Get an INIConfig object.
+    Get an ``INIConfig`` object.
 
-    :param config: Config file to load (None => read from stdin), or initial dict.
+    :param config: INI file to load (``None`` or unspecified => read ``stdin``), or initial ``dict``
+    :return: An initialized ``INIConfig`` object
     """
     return _INIConfig(config=config)
 
 
 def get_nml_config(config: Union[dict, OptionalPath] = None) -> _NMLConfig:
     """
-    Get an NMLConfig object.
+    Get an ``NMLConfig`` object.
 
-    :param config: Config file to load (None => read from stdin), or initial dict.
+    :param config: Fortran namelist file to load (``None`` or unspecified => read ``stdin``), or
+        initial ``dict``
+    :return: An initialized ``NMLConfig`` object
     """
     return _NMLConfig(config=config)
 
 
 def get_sh_config(config: Union[dict, OptionalPath] = None) -> _SHConfig:
     """
-    Get a SHConfig object.
+    Get an ``SHConfig`` object.
 
-    :param config: Config file to load (None => read from stdin), or initial dict.
+    :param config: File of shell 'key=value' pairs to load (``None`` or unspecified => read
+        ``stdin``), or initial ``dict``
+    :return: An initialized ``SHConfig`` object
     """
     return _SHConfig(config=config)
 
 
 def get_yaml_config(config: Union[dict, OptionalPath] = None) -> _YAMLConfig:
     """
-    Get a YAMLConfig object.
+    Get a ``YAMLConfig`` object.
 
-    :param config: Config file to load (None => read from stdin), or initial dict.
+    :param config: YAML file to load (``None`` or unspecified => read ``stdin``), or initial
+        ``dict``
+    :return: An initialized ``YAMLConfig`` object
     """
     return _YAMLConfig(config=config)
 
@@ -90,7 +105,26 @@ def realize(
     dry_run: bool = False,
 ) -> bool:
     """
-    ???
+    Realize an output config based on an input config and an optional values-providing config.
+
+    If no input is specified, ``stdin`` is read. If no output is specified, ``stdout`` is written
+    to. A ``dict`` may also be provided as an input value. When a filename is specified for an input
+    or output, its format will be deduced from its extension, if possible. This can be overriden by
+    specifying the format explicitly, and it is required to do so for reads from ``stdin`` or writes
+    to ``stdout``, as no attempt is made to deduce the format of streamed data.
+
+    If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
+    ``dry_run`` mode, output is written to ``stderr``.
+
+    :param input_config: Input config file (``None`` or unspecified => read ``stdin``)
+    :param input_format: Format of the input config
+    :param output_file: Output config file (``None`` or unspecified => write to ``stdout``)
+    :param output_format: Format of the output config
+    :param values: Source of values used to modify input
+    :param values_format: Format of values when sourced from file
+    :param values_needed: Report complete, missing, and template values
+    :param dry_run: Log output instead of writing to output
+    :return: ``True``
     """
     _realize(
         input_config=_ensure_config_arg_type(input_config),
@@ -114,7 +148,23 @@ def realize_to_dict(
     dry_run: bool = False,
 ) -> dict:
     """
-    ???
+    Realize an output config based on an input config and an optional values-providing config.
+
+    If no input is specified, ``stdin`` is read. When a filename is specified for an input, its
+    format will be deduced from its extension, if possible. This can be overriden by specifying the
+    format explicitly, and it is required to do so for reads from ``stdin``, as no attempt is made
+    to deduce the format of streamed data. A ``dict`` may also be provided as an input value.
+
+    If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
+    ``dry_run`` mode, output is written to ``stderr``.
+
+    :param input_config: Input config file (``None`` or unspecified => read ``stdin``)
+    :param input_format: Format of the input config
+    :param values: Source of values used to modify input
+    :param values_format: Format of values when sourced from file
+    :param values_needed: Report complete, missing, and template values
+    :param dry_run: Log output instead of writing to output
+    :return: A ``dict`` representing the realized config
     """
     return _realize(
         input_config=_ensure_config_arg_type(input_config),
@@ -129,14 +179,24 @@ def realize_to_dict(
 
 
 def translate(
-    input_file: DefinitePath,
     input_format: str,
-    output_file: DefinitePath,
     output_format: str,
+    input_file: OptionalPath = None,
+    output_file: OptionalPath = None,
     dry_run: bool = False,
 ) -> bool:
     """
-    ???
+    Translate a config to a different format.
+
+    Currently supports atparse -> Jinja2 translation, in which ``@[]`` tokens are replaced with
+    Jinja2 ``{{}}`` equivalents. Specify ``input_format=atparse`` and ``output_format=jinja2``. If
+    no input file is specified, ``stdin`` is read. If no output file is specified, ``stdout`` is
+    written to. In ``dry_run`` mode, output is written to ``stderr``.
+
+    :param input_file: Path to the template containing atparse syntax
+    :param output_file: Path to the file to write the converted template to
+    :param dry_run: Run in dry-run mode?
+    :return: ``True`` if translation was successful, ``False`` otherwise
     """
     if input_format == _FORMAT.atparse and output_format == _FORMAT.jinja2:
         _convert_atparse_to_jinja2(input_file=input_file, output_file=output_file, dry_run=dry_run)
@@ -148,7 +208,14 @@ def validate(
     schema_file: DefinitePath, config: Optional[Union[dict, _YAMLConfig, OptionalPath]] = None
 ) -> bool:
     """
-    ???
+    Check whether the specified config conforms to the specified JSON Schema spec.
+
+    If no config is specified, ``stdin`` is read and will be parsed as YAML and then validated. A
+    ``dict`` or a YAMLConfig instance may also be provided for validation.
+
+    :param schema_file: The JSON Schema file to use for validation
+    :param config: The config to validate
+    :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise
     """
     return _validate_yaml(schema_file=schema_file, config=config)
 
@@ -162,7 +229,7 @@ def _ensure_config_arg_type(
     """
     Encapsulate a dict in a Config; return a Config or path argument as-is.
 
-    :param config: A config as a dict, Config, or path.
+    :param config: A config as a dict, Config, or path
     """
     if isinstance(config, dict):
         return _YAMLConfig(config=config)

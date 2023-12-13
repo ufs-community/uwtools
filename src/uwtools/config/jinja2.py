@@ -158,7 +158,7 @@ def render(
     Check and render a Jinja2 template.
 
     :param values: Source of values to render the template.
-    :param values_format: Format of values when sourced from file..
+    :param values_format: Format of values when sourced from file.
     :param input_file: Path to read raw Jinja2 template from (None => read stdin).
     :param output_file: Path to write rendered Jinja2 template to (None => write to stdout).
     :param overrides: Supplemental override values.
