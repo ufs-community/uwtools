@@ -105,10 +105,10 @@ def realize_config(
         if isinstance(input_config, Config)
         else format_to_config(input_format)(config=input_config)
     )
-    input_obj.dereference()
     input_obj = _realize_config_update(input_obj, values, values_format)
     output_format = _ensure_format("output", output_format, output_file)
     input_obj = _realize_config_update(input_obj, values, values_format)
+    input_obj.dereference()
     config_check_depths_realize(input_obj, output_format)
     if dry_run:
         log.info(input_obj)
