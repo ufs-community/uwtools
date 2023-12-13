@@ -41,28 +41,23 @@ Using a ``bash`` development shell
 
 In an active development shell, the following ``make`` targets are available and act on all ``.py`` files under ``src/``:
 
-+---------------------+------------------------------------------------------------+
-| Command             |  Description                                               |
-+=====================+============================================================+
-| ``make format``     | Formats python code  with `black`_,                        |
-|                     | imports with `isort`_,                                     |
-|                     |                                                            |
-|                     | docstrings with `docformatter`_,                           |
-|                     | and ``.jsonschema`` documents with `jq`_                   |
-+---------------------+------------------------------------------------------------+
-| ``make lint``       | Lint with `pylint`_                                        |
-|                     |                                                            |
-+---------------------+------------------------------------------------------------+
-| ``make typecheck``  | Typecheck with `mypy`_                                     |
-+---------------------+------------------------------------------------------------+
-| ``make unittest``   | Run unit tests and report coverage with `pytest`_ and      |
-|                     | `coverage`_                                                |
-+---------------------+------------------------------------------------------------+
-| ``make test``       | Equivalent to                                              |
-|                     | ``make lint && make typecheck && make unittest``           |
-|                     |                                                            |
-|                     | Checks defined CLI scripts                                 |
-+---------------------+------------------------------------------------------------+
+.. list-table::
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Command
+     - Description
+   * - ``make format``
+     - Formats code with `black`_, imports with `isort`_, docstrings with `docformatter`_, and ``.jsonschema`` documents with `jq`_
+   * - ``make lint``
+     - Lints code with `pylint`_
+   * - ``make typecheck``
+     - Typechecks code with `mypy`_
+   * - ``make unittest``
+     - Runs unit tests and reports coverage with `pytest`_ and `coverage`_
+   * - ``make test``
+     - Equivalent to ``make lint && make typecheck && make unittest``, plus checks defined CLI scripts.
+
 
 Note that ``make format`` is never run automatically, to avoid reformatting under-development code in a way that might surprise the developer. A useful development idiom is to periodically run ``make format && make test`` to perform a full code-quality sweep through the code. An additional check is run by the CI for unformatted code, ``make format`` must be run, and then changes from ``make format`` must be committed before CI will pass.
 
@@ -78,16 +73,19 @@ The order of the targets above is intentional, and possibly useful:
 
 In addition to the ``make devshell`` command, other ``make`` targets are available for use *outside* a development shell, i.e. from the base conda environment (requires presence of the ``condev`` package):
 
-+------------------+-------------------------------------------------------+
-| Command          | Description                                           |
-+==================+=======================================================+
-| ``make env``     | Creates a conda environment based on the ``uwtools``  |
-|                  | code                                                  |
-+------------------+-------------------------------------------------------+
-| ``make meta``    | Update ``recipe/meta.json`` from ``recipe/meta.yaml`` |
-+------------------+-------------------------------------------------------+
-| ``make package`` | Builds a ``uwtools`` conda package                    |
-+------------------+-------------------------------------------------------+
+
+.. list-table::
+   :widths: 15 85
+   :header-rows: 1
+
+   * - Command
+     - Description
+   * - ``make env``
+     - Creates a conda environment based on the ``uwtools`` code
+   * - ``make meta``
+     - Update ``recipe/meta.json`` from ``recipe/meta.yaml``
+   * - ``make package``
+     - Builds a ``uwtools`` conda package
 
 These targets work from the code in its current state in the clone. ``make env`` calls ``make package`` automatically to create a local package, then builds an environment based on the package.
 
