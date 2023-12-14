@@ -22,13 +22,15 @@ In an active development shell, the following ``make`` targets are available and
    * - ``make test``
      - Equivalent to ``make lint && make typecheck && make unittest``, plus checks defined CLI scripts.
 
-Note that ``make format`` is never run automatically, to avoid reformatting under-development code in a way that might surprise the developer. A useful development idiom is to periodically run ``make format && make test`` to perform a full code-quality sweep through the code. An additional check is run by the CI for unformatted code, ``make format`` must be run, and then changes from ``make format`` must be committed before CI will pass.
+Configuration for these tools is provided by the file ``src/pyproject.toml``.
 
-The ``make test`` command is also automatically executed when ``conda`` builds a ``uwtools`` package, so it is important to periodically run these tests during development and, crucially, before merging changes, to ensure that the tests will pass when CI builds the ``workflow-tools`` code.
-
-
-The order of the targets above is intentional, and possibly useful:
+The order of the targets above is intentional:
 
    * ``make format`` will complain about certain kinds of syntax errors that would cause all the remaining code-quality tools to fail (and may change line numbers reported by other tools, if it ran after them).
    * ``make lint`` provides a good first check for obvious errors and anti-patterns in the code.
-   * ``make typecheck`` offers a more nuanced look at interfaces between functions, methods, etc. and may spot issues that would cause ``make unittest`` to fail.
+   * ``make typecheck`` offers a more nuanced look at interfaces between functions, methods, etc. and may spot issues missed by the linter.
+   * ``make unittest`` provides higher-level semantic-correctness checks once code syntax and typing is deemed correct.
+
+All the above tests are executed by the CI system when code is merged to specific git branches, and again when a conda package is built for release. To ensure that these processes succeed, be sure to run the tests and format the code in the development shell before opening a pull request, and throughout the PR's lifecycle if changes are made and pushed. Note that ``make format`` requires explicit manual execution by the developer: It is not run automatically by ``make test``, to avoid reformatting under-development code in a way that might surprise the developer. A useful development idiom is to periodically run ``make format && make test`` to perform a full code-quality sweep through the code. The CI system is configured to rejected unformatted code, so formatting via ``make format`` is first-class code-quality citizen.
+
+The ``workflow-tools`` repository has standardized on 100% unit-test coverage, enforced by ``make unittest`` and its configuration in ``pyproject.toml``. Please help maintain this high standard.
