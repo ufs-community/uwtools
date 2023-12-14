@@ -20,7 +20,7 @@ Specifics for ``workflow-tools``
 When creating your PR, please follow these guidelines, specific to the ``workflow-tools`` project:
 
 * Ensure that your PR is targeting base repository ``ufs-community/workflow-tools`` and base branch ``develop``.
-* Complete the template that you will find the **Description** field pre-populated with. Provide an informative synopsis of your contribution, then mark appropriate checklist items by placing an "x" between their square brackets. You may tidy up the description by removing boilerplate text and non-selected checklist items.
+* Your PR's **Add a description** field will appear pre-populated with a template that you should complete. Provide an informative synopsis of your contribution, then mark appropriate checklist items by placing an "x" between their square brackets. You may tidy up the description by removing boilerplate text and non-selected checklist items.
 * Use the pull-down arrow on the green button below the description to initially create a `Draft pull request <https://github.blog/2019-02-14-introducing-draft-pull-requests/>`_.
 * Once your draft PR is open, visit its **Files changed** tab and add comments on any lines of code that you think reviewers will benefit from. Try to save time by proactively answering questions you suspect reviewers will ask.
 * Once your draft PR is marked up with your comments, return to the **Conversation** tab and click the **Ready for review** button.

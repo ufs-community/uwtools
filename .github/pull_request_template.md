@@ -10,7 +10,7 @@ INSTRUCTIONS
 
 -->
 
-**Description**
+**Synopsis**
 
 <!-- A summary of the change, including relevant motivation, context, useful links, etc. -->
 
