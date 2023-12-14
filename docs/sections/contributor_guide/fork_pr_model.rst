@@ -17,15 +17,15 @@ For future contributions, you may delete and then re-create your fork, or config
 Specifics for ``workflow-tools``
 --------------------------------
 
-When creating your PR, please follow the following guidelines, specific to the ``workflow-tools`` project:
+When creating your PR, please follow these guidelines, specific to the ``workflow-tools`` project:
 
-* Complete the template that you will find the **Description** section pre-populated with. Provide an informative synopsis of your contribution, then mark appropriate checklist items by placing an "x" between their square brackets. You may tidy up the description by removing boilerplate text and non-selected checklist items.
 * Ensure that your PR is targeting base repository ``ufs-community/workflow-tools`` and base branch ``develop``.
+* Complete the template that you will find the **Description** field pre-populated with. Provide an informative synopsis of your contribution, then mark appropriate checklist items by placing an "x" between their square brackets. You may tidy up the description by removing boilerplate text and non-selected checklist items.
 * Use the pull-down arrow on the green button below the description to initially create a `Draft pull request <https://github.blog/2019-02-14-introducing-draft-pull-requests/>`_.
 * Once your draft PR is open, visit its **Files changed** tab and add comments on any lines of code that you think reviewers will benefit from. Try to save time by proactively answering questions you suspect reviewers will ask.
-* Once your draft PR is marked up with you comments, return to the **Conversation** tab and click the **Ready for review** button.
+* Once your draft PR is marked up with your comments, return to the **Conversation** tab and click the **Ready for review** button.
 
-A default set of reviewers will automatically be added to your PR. Feel free to add others, if appropriate. Reviews may make comments, ask questions, or request changes on your PR. Respond to these as needed, making commits in your clone and pushing to your fork/branch. Your PR will automatically be updated when commits are pushed to its source branch in your fork, so reviewers will immediately see your updates.
+A default set of reviewers will automatically be added to your PR. You may add others, if appropriate. Reviewers may make comments, ask questions, or request changes on your PR. Respond to these as needed, making commits in your clone and pushing to your fork/branch. Your PR will automatically be updated when commits are pushed to its source branch in your fork, so reviewers will immediately see your updates.
 
 Merging
 -------
