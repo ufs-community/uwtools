@@ -8,11 +8,11 @@ Contributions to the ``workflow-tools`` project are made via `Forks <https://doc
 
 #. `Fork <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#forking-a-repository>`_ the ``workflow-tools`` `repository <https://github.com/ufs-community/workflow-tools>`_ into your personal GitHub account.
 #. `Clone <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#cloning-a-fork>`_ your fork onto your development system.
-#. `Create a branch <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#creating-a-branch-to-work-on>`_ for your changes in your clone.
-#. `Make, commit, and push changes <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#making-and-pushing-changes>`_ in your clone, to your fork. (Refer to the :doc:`Developer Setup <developer_setup>` page for setting up a development shell, formatting and testing your code, etc.)
+#. `Create a branch <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#creating-a-branch-to-work-on>`_ in your clone for your changes.
+#. `Make, commit, and push changes <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#making-and-pushing-changes>`_ in your clone / to your fork. (Refer to the :doc:`Developer Setup <developer_setup>` page for setting up a development shell, formatting and testing your code, etc.)
 #. When your work is complete, `create a pull request <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#making-a-pull-request>`_ to merge your changes.
 
-For future contributions, you may delete and then re-create your fork, or configure the official ``workflow-tools`` repo as `remote repository <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/configuring-a-remote-repository-for-a-fork>`_ on your clone and `sync upstream changes <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork>`_ as needed.
+For future contributions, you may delete and then re-create your fork, or configure the official ``workflow-tools`` repo as `remote repository <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/configuring-a-remote-repository-for-a-fork>`_ on your clone and `sync upstream changes <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork>`_ to stay up-to-date with the official repo.
 
 Specifics for ``workflow-tools``
 --------------------------------
