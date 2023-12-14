@@ -16,7 +16,7 @@ INSTRUCTIONS
 
 **Type**
 
-Select one or more:
+<!-- Select one or more -->
 
 - [ ] Bug fix (corrects a known issue)
 - [ ] Code maintenance (refactoring, etc. without behavior change)
@@ -26,14 +26,14 @@ Select one or more:
 
 **Impact**
 
-Select one:
+<!-- Select one -->
 
 - [ ] This is a non-breaking change (existing functionality continues to work as expected)
 - [ ] This is a breaking change (changes existing functionality)
 
 **Checklist**
 
-Affirm:
+<!-- Affirm -->
 
 - [ ] I have added myself and any co-authors to the PR's _Assignees_ list.
 - [ ] I have reviewed the documentation and have made any updates necessitated by this change.
