@@ -43,4 +43,4 @@ If you have write access to the ``workflow-tools`` repo, you may merge your PR y
 Need Help?
 ----------
 
-Please use comments in the **Conversation** tab of your PR to ask for help with any difficulties you encounter using this procedure!
+Please use comments in the **Conversation** tab of your PR to ask for help with any difficulties you encounter using this process!
