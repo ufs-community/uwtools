@@ -1,6 +1,5 @@
-***
 CLI
-***
+===
 
 .. toctree::
    mode_config

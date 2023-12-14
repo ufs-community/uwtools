@@ -14,6 +14,7 @@ autodoc_mock_imports = ["f90nml", "jsonschema", "lxml"]
 copyright = str(dt.datetime.now().year)
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.intersphinx"]
 html_logo = os.path.join("static", "ufs.png")
+html_static_path = ["static"]
 html_theme = "sphinx_rtd_theme"
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 nitpick_ignore_regex = [("py:class", r"^uwtools\..*")]
@@ -22,3 +23,6 @@ numfig_format = {"figure": "Figure %s"}
 project = "Unified Workflow"
 release = _metadata["version"]
 version = _metadata["version"]
+
+def setup(app):
+    app.add_css_file("custom.css")

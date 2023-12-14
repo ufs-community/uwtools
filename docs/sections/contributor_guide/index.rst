@@ -1,6 +1,5 @@
-#################
 Contributor Guide
-#################
+=================
 
 .. toctree::
    introduction

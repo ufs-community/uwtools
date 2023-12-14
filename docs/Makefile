@@ -1,7 +1,7 @@
 BUILDDIR    = build
 SOURCEDIR   = .
 SPHINXBUILD = sphinx-build
-SPHINXOPTS  = -n
+SPHINXOPTS  = -a -n
 
 .PHONY: help clean
 
