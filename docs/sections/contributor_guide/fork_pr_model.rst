@@ -6,7 +6,7 @@ Overview
 
 Contributions to the ``workflow-tools`` project are made via `Forks <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/about-forks>`_ and `PRs <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests>`_. GitHub provides a thorough description of this contribution model in their `Contributing to projects` `Quickstart <https://docs.github.com/en/get-started/quickstart/contributing-to-projects>`_, but the steps, with respect to ``workflow-tools`` contributions, can be summarized as:
 
-#. `Fork <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#forking-a-repository>`_ the ``workflow-tools`` `repository <https://github.com/ufs-community/workflow-tools>`_ repo into your personal GitHub account.
+#. `Fork <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#forking-a-repository>`_ the ``workflow-tools`` `repository <https://github.com/ufs-community/workflow-tools>`_ into your personal GitHub account.
 #. `Clone <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#cloning-a-fork>`_ your fork onto your development system.
 #. `Create a branch <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#creating-a-branch-to-work-on>`_ for your changes in your clone.
 #. `Make, commit, and push changes <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#making-and-pushing-changes>`_ in your clone, to your fork. (Refer to the :doc:`Developer Setup <developer_setup>` page for setting up a development shell, formatting and testing your code, etc.)
