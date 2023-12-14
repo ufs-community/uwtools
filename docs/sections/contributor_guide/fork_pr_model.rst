@@ -12,6 +12,8 @@ Contributions to the ``workflow-tools`` project are made via `Forks <https://doc
 #. `Make, commit, and push changes <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#making-and-pushing-changes>`_ in your clone, to your fork. (Refer to the :doc:`Developer Setup <developer_setup>` page for setting up a development shell, formatting and testing your code, etc.)
 #. When your work is complete, `create a pull request <https://docs.github.com/en/get-started/quickstart/contributing-to-projects#making-a-pull-request>`_ to merge your changes.
 
+For future contributions, you may delete and then re-create your fork, or configure the official ``workflow-tools`` repo as `remote repository <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/configuring-a-remote-repository-for-a-fork>`_ on your clone and `sync upstream changes <https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork>`_ as needed.
+
 Specifics for ``workflow-tools``
 --------------------------------
 
@@ -20,25 +22,25 @@ When creating your PR, please follow the following guidelines, specific to the `
 * Complete the template that you will find the **Description** section pre-populated with. Provide an informative synopsis of your contribution, then mark appropriate checklist items by placing an "x" between their square brackets. You may tidy up the description by removing boilerplate text and non-selected checklist items.
 * Ensure that your PR is targeting base repository ``ufs-community/workflow-tools`` and base branch ``develop``.
 * Use the pull-down arrow on the green button below the description to initially create a `Draft pull request <https://github.blog/2019-02-14-introducing-draft-pull-requests/>`_.
-* Once the draft PR is open, visit its **Files changed** tab and add comments on any lines of code that you think reviewers will benefit from. Try to save time by proactively answering questions you suspect reviewers will ask.
+* Once your draft PR is open, visit its **Files changed** tab and add comments on any lines of code that you think reviewers will benefit from. Try to save time by proactively answering questions you suspect reviewers will ask.
 * Once your draft PR is marked up with you comments, return to the **Conversation** tab and click the **Ready for review** button.
 
-A default set of reviewers will automatically be added to your PR. Feel free to add others, if appropriate. Reviews may make comments, ask questions, or request changes on your PR. Respond to these as needed, making commits in your clone and pushing to your fork/branch. The PR will automatically be updated when commits are pushed to its source branch in your fork, so reviewers will immediately see your updates.
+A default set of reviewers will automatically be added to your PR. Feel free to add others, if appropriate. Reviews may make comments, ask questions, or request changes on your PR. Respond to these as needed, making commits in your clone and pushing to your fork/branch. Your PR will automatically be updated when commits are pushed to its source branch in your fork, so reviewers will immediately see your updates.
 
 Merging
 -------
 
-A PR is ready to merge when:
+Your PR is ready to merge when:
 
 #. It has been approved by a required number of ``workflow-tools`` core-developer reviewers.
 #. All conversations have been marked as resolved.
 #. All required checks have passed.
 
-These criteria and their current statuses are detailed in a section at the bottom of the PR's **Conversation** tab. Checks take some time to run, so please be patient.
+These criteria and their current statuses are detailed in a section at the bottom of your PR's **Conversation** tab. Checks take some time to run, so please be patient.
 
 If you have write access to the ``workflow-tools`` repo, you may merge your PR yourself once the above conditions are met. If not, a ``workflow-tools`` core developer will perform the merge for you.
 
 Need Help?
 ----------
 
-Please use the PR comments to ask for help with any difficulties you encounter using this procedure!
+Please use comments in the **Conversation** tab of your PR to ask for help with any difficulties you encounter using this procedure!
