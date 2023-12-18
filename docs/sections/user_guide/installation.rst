@@ -18,7 +18,7 @@ Using a fresh Miniforge installation
 
   .. code:: sh
 
-     conda install -y conda-build conda-verify
+    conda install -y conda-build conda-verify
 
 3. In a clone of the `workflow-tools repository`_, build and install the ``uwtools`` package.
 
@@ -34,7 +34,7 @@ Using a fresh Miniforge installation
 
     conda activate uwtools
 
-In future shells, you can activate and use this environment with:
+  In future shells, you can activate and use this environment with:
 
   .. code:: sh
 
