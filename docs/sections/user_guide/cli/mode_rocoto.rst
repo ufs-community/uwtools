@@ -21,8 +21,8 @@ The ``uw`` mode for realizing and validating Rocoto XML documents
       validate
           Validate Rocoto XML
 
-Submode ``realize``
--------------------
+``realize``
+-----------
 
 .. code:: sh
 
@@ -49,8 +49,8 @@ Examples
 TBD
 
 
-Submode ``validate``
---------------------
+``validate``
+------------
 
 .. code:: sh
 

@@ -25,8 +25,8 @@ The ``uw`` mode for handling configs.
       validate
           Validate config
 
-Submode ``compare``
--------------------
+``compare``
+-----------
 
 .. code:: sh
 
@@ -58,8 +58,8 @@ Examples
 
 TBD
 
-Submode ``realize``
--------------------
+``realize``
+-----------
 
 .. code:: sh
 
@@ -100,8 +100,8 @@ Examples
 
 TBD
 
-Submode ``translate``
----------------------
+``translate``
+-------------
 
 .. code:: sh
 
@@ -133,8 +133,8 @@ Examples
 
 TBD
 
-Submode ``validate``
---------------------
+``validate``
+------------
 
 .. code:: sh
 

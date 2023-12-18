@@ -19,8 +19,8 @@ The ``uw`` mode for configuring and running forecasts.
       run
           Run a forecast
 
-Submode ``run``
----------------
+``run``
+-------
 
 .. code:: sh
 

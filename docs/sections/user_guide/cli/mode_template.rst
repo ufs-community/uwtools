@@ -19,8 +19,8 @@ The ``uw`` mode for handling (`Jinja2 <https://palletsprojects.com/p/jinja/>`_) 
      render
          Render a template
 
-Submode ``render``
-------------------
+``render``
+----------
 
 .. code:: sh
 
