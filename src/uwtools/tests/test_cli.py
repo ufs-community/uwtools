@@ -211,9 +211,8 @@ def test__dispatch_config_realize():
         STR.outfile: 3,
         STR.outfmt: 4,
         STR.suppfiles: 5,
-        STR.valsfmt: 6,
-        STR.valsneeded: 7,
-        STR.dryrun: 8,
+        STR.valsneeded: 6,
+        STR.dryrun: 7,
     }
     with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
@@ -222,10 +221,9 @@ def test__dispatch_config_realize():
         input_format=2,
         output_file=3,
         output_format=4,
-        supplemental_files=5,
-        values_format=6,
-        values_needed=7,
-        dry_run=8,
+        supplemental_configs=5,
+        values_needed=6,
+        dry_run=7,
     )
 
 
@@ -235,8 +233,7 @@ def test__dispatch_config_realize_no_optional():
         STR.infmt: None,
         STR.outfile: None,
         STR.outfmt: None,
-        STR.suppfiles: "/foo.vals",
-        STR.valsfmt: None,
+        STR.suppfiles: ["/foo.vals"],
         STR.valsneeded: False,
         STR.dryrun: False,
     }
@@ -247,8 +244,7 @@ def test__dispatch_config_realize_no_optional():
         input_format=None,
         output_file=None,
         output_format=None,
-        supplemental_files="/foo.vals",
-        values_format=None,
+        supplemental_configs=["/foo.vals"],
         values_needed=False,
         dry_run=False,
     )

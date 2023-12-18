@@ -81,8 +81,7 @@ def realize_config(
     input_format: Optional[str] = None,
     output_file: OptionalPath = None,
     output_format: Optional[str] = None,
-    supplemental_files: Union[dict, Config, OptionalPath] = None,
-    values_format: Optional[str] = None,
+    supplemental_configs: Optional[List[Union[dict, Config, DefinitePath]]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> dict:
@@ -93,8 +92,7 @@ def realize_config(
     :param input_format: Format of the input config.
     :param output_file: Output config file (None => write to stdout).
     :param output_format: Format of the output config.
-    :param supplemental_files: Source of values used to modify input.
-    :param values_format: Format of values when sourced from file.
+    :param supplemental_configs: Source of values used to modify input.
     :param values_needed: Report complete, missing, and template values.
     :param dry_run: Log output instead of writing to output.
     :return: The realized config (or an empty-dict for no-op modes).
@@ -105,10 +103,9 @@ def realize_config(
         if isinstance(input_config, Config)
         else format_to_config(input_format)(config=input_config)
     )
-    input_obj = _realize_config_update(input_obj, supplemental_files, values_format)
-    output_format = _ensure_format("output", output_format, output_file)
-    input_obj = _realize_config_update(input_obj, supplemental_files, values_format)
+    input_obj = _realize_config_update(input_obj, supplemental_configs)
     input_obj.dereference()
+    output_format = _ensure_format("output", output_format, output_file)
     config_check_depths_realize(input_obj, output_format)
     if dry_run:
         log.info(input_obj)
@@ -173,32 +170,30 @@ def _print_config_section(config: dict, key_path: List[str]) -> None:
 
 def _realize_config_update(
     config_obj: Config,
-    supplemental_files: Union[dict, Config, OptionalPath],
-    values_format: Optional[str] = None,
+    supplemental_configs: Optional[List[Union[dict, Config, DefinitePath]]] = None,
 ) -> Config:
     """
     Update config with values from another config, if given.
 
     :param config_obj: The config to update.
-    :param supplemental_files: Source of values to modify input.
-    :param values_format: Format of values when sourced from file.
+    :param supplemental_configs: Source of values to modify input.
     :return: The input config, possibly updated.
     """
-    if supplemental_files:
+    if supplemental_configs:
         log.debug("Before update, config has depth %s", config_obj.depth)
         values_obj: Config
-        if isinstance(supplemental_files, dict):
-            values_obj = YAMLConfig(config=supplemental_files)
-        elif isinstance(supplemental_files, Config):
-            values_obj = supplemental_files
-        else:
-            values_format = values_format or get_file_format(supplemental_files)
-            values_obj = format_to_config(values_format)(config=supplemental_files)
-        log.debug("Values config has depth %s", values_obj.depth)
-        config_check_depths_update(values_obj, config_obj.get_format())
-        config_obj.update_values(values_obj)
-        config_obj.dereference()
-        log.debug("After update, config has depth %s", config_obj.depth)
+        for config in supplemental_configs:
+            if isinstance(config, dict):
+                values_obj = YAMLConfig(config=config)
+            elif isinstance(config, Config):
+                values_obj = config
+            else:
+                values_format = get_file_format(config)
+                values_obj = format_to_config(values_format)(config=config)
+            log.debug("Values config has depth %s", values_obj.depth)
+            config_check_depths_update(values_obj, config_obj.get_format())
+            config_obj.update_values(values_obj)
+            log.debug("After update, config has depth %s", config_obj.depth)
     else:
         log.debug("Input config has depth %s", config_obj.depth)
     return config_obj

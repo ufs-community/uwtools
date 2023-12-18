@@ -46,8 +46,7 @@ def test_realize():
         "input_format": "fmt1",
         "output_file": "path2",
         "output_format": "fmt2",
-        "supplemental_files": "path3",
-        "values_format": "fmt3",
+        "supplemental_configs": ["path3"],
         "values_needed": True,
         "dry_run": True,
     }
@@ -60,8 +59,7 @@ def test_realize_to_dict():
     kwargs: dict = {
         "input_config": "path1",
         "input_format": "fmt1",
-        "supplemental_files": "path3",
-        "values_format": "fmt3",
+        "supplemental_configs": ["path3"],
         "values_needed": True,
         "dry_run": True,
     }

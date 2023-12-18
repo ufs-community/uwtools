@@ -115,21 +115,18 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> SubmodeChecks:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, STR.realize, "Realize config")
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_supplemental_files(required, required=True)
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_input_format(optional, choices=FORMATS)
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=FORMATS)
-    _add_arg_values_format(optional, choices=FORMATS)
     _add_arg_values_needed(optional)
     _add_arg_dry_run(optional)
     checks = _add_args_quiet_and_verbose(optional)
+    _add_arg_supplemental_files(optional)
     return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
         partial(_check_file_vs_format, STR.outfile, STR.outfmt),
-        partial(_check_file_vs_format, STR.suppfiles, STR.valsfmt),
     ]
 
 
@@ -206,8 +203,7 @@ def _dispatch_config_realize(args: Args) -> bool:
         input_format=args[STR.infmt],
         output_file=args[STR.outfile],
         output_format=args[STR.outfmt],
-        supplemental_files=args[STR.suppfiles],
-        values_format=args[STR.valsfmt],
+        supplemental_configs=args[STR.suppfiles],
         values_needed=args[STR.valsneeded],
         dry_run=args[STR.dryrun],
     )
@@ -404,8 +400,8 @@ def _add_subparser_template_render(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_values_format(optional, choices=FORMATS)
     _add_arg_values_needed(optional)
     _add_arg_dry_run(optional)
-    _add_arg_key_eq_val_pairs(optional)
     checks = _add_args_quiet_and_verbose(optional)
+    _add_arg_key_eq_val_pairs(optional)
     return checks + [_check_template_render_vals_args]
 
 
@@ -581,13 +577,12 @@ def _add_arg_schema_file(group: Group) -> None:
     )
 
 
-def _add_arg_supplemental_files(group: Group, required: bool = False) -> None:
+def _add_arg_supplemental_files(group: Group) -> None:
     group.add_argument(
-        _switch(STR.suppfiles),
-        help="Path to file providing override or interpolation values",
+        STR.suppfiles,
+        help="Additional files to supplement primary input",
         metavar="PATH",
-        required=required,
-        type=str,
+        nargs="*",
     )
 
 
@@ -732,7 +727,7 @@ def _formatter(prog: str) -> HelpFormatter:
     """
     A standard formatter for help messages.
     """
-    return HelpFormatter(prog, max_help_position=8)
+    return HelpFormatter(prog, max_help_position=3)
 
 
 def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
