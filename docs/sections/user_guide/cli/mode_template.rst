@@ -24,7 +24,7 @@ Submode ``render``
 
 .. code:: sh
 
-  uw template render --help
+  $ uw template render --help
   usage: uw template render [-h] [--input-file PATH] [--output-file PATH] [--values-file PATH] [--values-format {ini,nml,sh,yaml}] [--values-needed] [--dry-run] [--quiet] [--verbose] [KEY=VALUE ...]
 
   Render a template
@@ -51,3 +51,7 @@ Submode ``render``
    --verbose, -v
          Print all logging messages
 
+Examples
+~~~~~~~~
+
+TBD
