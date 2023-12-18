@@ -97,7 +97,7 @@ and YAML file ``values.yaml`` with content
 
     Hello, World!
 
-* With the ``--dry-run`` flag specified, nothning is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
+* With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
   .. code:: sh
 
