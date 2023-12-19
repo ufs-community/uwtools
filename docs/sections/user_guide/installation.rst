@@ -14,7 +14,7 @@ Using a fresh Miniforge installation
 
 .. include:: ../miniforge3_instructions.rst
 
-2. Install the ``conda-build`` and ``conda-verify`` packages into the base environment. If ``conda-build`` and ``conda-verify`` are already installed in the your installation’s base environment, you may skip this step.
+2. Install the ``conda-build`` and ``conda-verify`` packages into the base environment. If ``conda-build`` and ``conda-verify`` are already installed in your installation’s base environment, you may skip this step.
 
   .. code:: sh
 
