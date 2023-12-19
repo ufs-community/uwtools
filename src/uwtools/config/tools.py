@@ -86,7 +86,7 @@ def realize_config(
     dry_run: bool = False,
 ) -> dict:
     """
-    Realize an output config based on an input config and an optional values-providing config.
+    Realize an output config based on an input config and optional values-providing configs.
 
     :param input_config: Input config file (None => read stdin).
     :param input_format: Format of the input config.
@@ -174,7 +174,7 @@ def _realize_config_update(
     supplemental_configs: Optional[List[Union[dict, Config, DefinitePath]]] = None,
 ) -> Config:
     """
-    Update config with values from another config, if given.
+    Update config with values from other configs, if given.
 
     :param config_obj: The config to update.
     :param supplemental_configs: Source of values to modify input.
