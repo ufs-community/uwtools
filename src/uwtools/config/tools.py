@@ -92,7 +92,7 @@ def realize_config(
     :param input_format: Format of the input config.
     :param output_file: Output config file (None => write to stdout).
     :param output_format: Format of the output config.
-    :param supplemental_configs: Source of values used to modify input.
+    :param supplemental_configs: Sources of values used to modify input.
     :param values_needed: Report complete, missing, and template values.
     :param dry_run: Log output instead of writing to output.
     :return: The realized config (or an empty-dict for no-op modes).
@@ -177,7 +177,7 @@ def _realize_config_update(
     Update config with values from other configs, if given.
 
     :param config_obj: The config to update.
-    :param supplemental_configs: Source of values to modify input.
+    :param supplemental_configs: Sources of values to modify input.
     :return: The input config, possibly updated.
     """
     if supplemental_configs:
