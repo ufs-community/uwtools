@@ -120,6 +120,8 @@ and YAML file ``values.yaml`` with content
 
   In this case, the format can be explicitly specified:
 
+  .. code:: sh
+
     $ uw template render --input-file template --values-file values.txt --values-format yaml
     Hello, World!
 
