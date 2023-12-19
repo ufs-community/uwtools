@@ -3,6 +3,9 @@ Unified Workflow
 ################
 
 .. _Vision:
+
+Vision
+======================
 The idea of a unified workflow is to develop a wide array of tools in object-oriented Python that can be used in all `Unified Forecast System (UFS) <https://ufscommunity.org/>`__ applications. The Python programming language is widely used and now available on all  High-Performance Computing (HPC) platforms. It has many features that make it the language of choice for building modular, independent tool sets. These tools can be used to perform minuscule tasks such as movement of files within or across systems, manipulating datetime objects, parsing and populating configuration files, and executing and processing a series of functions in a job or a task within an application suite. The application suites can range from a single deterministic forecast to an ensemble of forecasts to cycled data assimilation systems. The application suites are not just limited to a model and data assimilation system. There are numerous examples of “workflows” in other applications, such as observation processing and ingest, post-processing of model and data assimilation generated data, reanalysis, verification and validation, deployment of products and graphics to web servers.
 
 A schematic of the above is shown in :numref:`Schematic_Layout_Unified_Workflow_Framework` below.
@@ -21,10 +24,8 @@ Using the tools on the right, any application can assemble a unique suite for it
 
 Directory Structure
 ======================
+The ``workflow-tools`` :term:`repository` is an NCO-compliant repository. Its structure follows the standards laid out in :term:`NCEP` Central Operations (NCO) WCOSS `Implementation Standards <https://www.nco.ncep.noaa.gov/idsb/implementation_standards/ImplementationStandards.v11.0.0.pdf?>`__. 
 
-.. _TopLevelDirStructure:
-
-The ``workflow-tools`` :term:`repository` is an NCO-compliant repository. Its structure follows the standards laid out in :term:`NCEP` Central Operations (NCO) WCOSS `Implementation Standards <https://www.nco.ncep.noaa.gov/idsb/implementation_standards/ImplementationStandards.v11.0.0.pdf?>`__. T
 .. code-block:: console
 
    workflow-tools
@@ -37,31 +38,31 @@ The ``workflow-tools`` :term:`repository` is an NCO-compliant repository. Its st
     	         ├── api
     	         ├── apps 
     	         ├── config
-                 │     └── formats
+               │     └── formats
     	         ├── drivers 
     	         ├── files
-                 │     ├── gateway
-                 │     ├── interface
-                 │     └── model
+               │     ├── gateway
+               │     ├── interface
+               │     └── model
     	         ├── resources
     	         ├── tests
-                 │     ├── api
-                 │     ├── config
-                 │     │     └── formats
-                 │     ├── drivers
-                 │     ├── files
-                 │     │     ├── gateway
-                 │     │     ├── interface
-                 │     │     └── model
-                 │     ├── fixtures
-                 │     │     └── files
-                 │     └── utils 
+               │     ├── api
+               │     ├── config
+               │     │     └── formats
+               │     ├── drivers
+               │     ├── files
+               │     │     ├── gateway
+               │     │     ├── interface
+               │     │     └── model
+               │     ├── fixtures
+               │     │     └── files
+               │     └── utils 
     	         └── (utils)
 
 
 Unified Workflow Tools SubDirectories
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-:numref:`Table %s <Subdirectories>` describes the contents of the most important UW Tools subdirectories. :numref:`Table %s <FilesAndSubDirs>` provides a more comprehensive explanation of the ``workflow-tools`` files and subdirectories. Users can reference the `NCO Implementation Standards <https://www.nco.ncep.noaa.gov/idsb/implementation_standards/ImplementationStandards.v11.0.0.pdf?>`__ (p. 19) for additional details on repository structure in NCO-compliant repositories. 
+:numref:`Table %s <Subdirectories>` describes the contents of the most important UW Tools subdirectories. Users can reference the `NCO Implementation Standards <https://www.nco.ncep.noaa.gov/idsb/implementation_standards/ImplementationStandards.v11.0.0.pdf?>`__ (p. 19) for additional details on repository structure in NCO-compliant repositories. 
 
 .. _Subdirectories:
 
@@ -88,7 +89,8 @@ Unified Workflow Tools SubDirectories
    +-------------------------+----------------------------------------------------+
 
 .. toctree::
-   :maxdepth: 2
+   :hidden:
+
    sections/user_guide/index
    sections/contributor_guide/index
 
