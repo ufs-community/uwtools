@@ -727,7 +727,8 @@ def _formatter(prog: str) -> HelpFormatter:
     """
     A standard formatter for help messages.
     """
-    return HelpFormatter(prog, max_help_position=3)
+    # max_help_positions sets the maximum starting column for option help text.
+    return HelpFormatter(prog, max_help_position=6)
 
 
 def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
