@@ -65,10 +65,10 @@ As an alternative to installing `a prebuilt package from anaconda <https://anaco
 
 .. code:: sh
 
- # Activate your conda
- git clone https://github.com/maddenp/condev.git
- make -C condev package
- conda install -y -c local condev
+  # Activate your conda
+  git clone https://github.com/maddenp/condev.git
+  make -C condev package
+  conda install -y -c local condev
 
 Files derived from condev
 -------------------------
@@ -77,13 +77,13 @@ The following files in this repo are derived from their counterparts in the `con
 
 .. code:: sh
 
- ├── Makefile
- ├── recipe
- │   ├── build.sh
- │   ├── channels
- │   ├── meta.json
- │   ├── meta.yaml
- │   └── run_test.sh
- ├── src
- │   ├── pyproject.toml
- │   ├── setup.py
+  ├── Makefile
+  ├── recipe
+  │   ├── build.sh
+  │   ├── channels
+  │   ├── meta.json
+  │   ├── meta.yaml
+  │   └── run_test.sh
+  ├── src
+  │   ├── pyproject.toml
+  │   ├── setup.py
