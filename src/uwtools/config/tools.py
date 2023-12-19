@@ -103,8 +103,9 @@ def realize_config(
         if isinstance(input_config, Config)
         else format_to_config(input_format)(config=input_config)
     )
-    input_obj = _realize_config_update(input_obj, supplemental_configs)
-    input_obj.dereference()
+    if supplemental_configs:
+        input_obj = _realize_config_update(input_obj, supplemental_configs)
+        input_obj.dereference()
     output_format = _ensure_format("output", output_format, output_file)
     config_check_depths_realize(input_obj, output_format)
     if dry_run:
@@ -125,7 +126,7 @@ def _ensure_format(
     desc: str, fmt: Optional[str] = None, config: Union[Config, OptionalPath] = None
 ) -> str:
     """
-    Return the given file format, or the the appropriate format as deduced from the config.
+    Return the given file format, or the appropriate format as deduced from the config.
 
     :param desc: A description of the file.
     :param fmt: The config format name.
@@ -181,18 +182,18 @@ def _realize_config_update(
     """
     if supplemental_configs:
         log.debug("Before update, config has depth %s", config_obj.depth)
-        values_obj: Config
+        supplemental_obj: Config
         for config in supplemental_configs:
             if isinstance(config, dict):
-                values_obj = YAMLConfig(config=config)
+                supplemental_obj = YAMLConfig(config=config)
             elif isinstance(config, Config):
-                values_obj = config
+                supplemental_obj = config
             else:
-                values_format = get_file_format(config)
-                values_obj = format_to_config(values_format)(config=config)
-            log.debug("Values config has depth %s", values_obj.depth)
-            config_check_depths_update(values_obj, config_obj.get_format())
-            config_obj.update_values(values_obj)
+                supplemental_format = get_file_format(config)
+                supplemental_obj = format_to_config(supplemental_format)(config=config)
+            log.debug("Supplemental config has depth %s", supplemental_obj.depth)
+            config_check_depths_update(supplemental_obj, config_obj.get_format())
+            config_obj.update_values(supplemental_obj)
             log.debug("After update, config has depth %s", config_obj.depth)
     else:
         log.debug("Input config has depth %s", config_obj.depth)

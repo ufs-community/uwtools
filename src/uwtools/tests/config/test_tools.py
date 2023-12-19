@@ -364,6 +364,80 @@ def test_realize_config_simple_yaml(tmp_path):
     help_realize_config_simple("simple2.yaml", FORMAT.yaml, tmp_path)
 
 
+def test_realize_config_single_dereference(caplog, tmp_path):
+    path = tmp_path / "a.yaml"
+    supplemental_path = tmp_path / "b.yaml"
+    with writable(path) as f:
+        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}"}, f)
+    with writable(supplemental_path) as f2:
+        yaml.dump({"2": "b", "temporalis": "c"}, f2)
+    tools.realize_config(
+        input_config=path,
+        input_format=FORMAT.yaml,
+        output_file=None,
+        output_format=FORMAT.yaml,
+        supplemental_configs=[supplemental_path],
+        dry_run=True,
+    )
+    expected = """'1': a
+'2': b
+'3': c
+temporalis: c
+"""
+    actual = "\n".join(record.message for record in caplog.records)
+    assert actual == expected
+
+
+def test_realize_config_supp_list(caplog, tmp_path):
+    path = tmp_path / "a.yaml"
+    supplemental_path = tmp_path / "b.yaml"
+    second_supp_path = tmp_path / "c.yaml"
+    with writable(path) as f:
+        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}"}, f)
+    with writable(supplemental_path) as f2:
+        yaml.dump({"2": "b", "temporalis": "c"}, f2)
+    with writable(second_supp_path) as f3:
+        yaml.dump({"4": "d", "tempus": "fugit", "deref": "{{ tempus }}"}, f3)
+    tools.realize_config(
+        input_config=path,
+        input_format=FORMAT.yaml,
+        output_file=None,
+        output_format=FORMAT.yaml,
+        supplemental_configs=[supplemental_path, second_supp_path],
+        dry_run=True,
+    )
+    expected = """'1': a
+'2': b
+'3': c
+'4': d
+deref: fugit
+temporalis: c
+tempus: fugit
+"""
+    actual = "\n".join(record.message for record in caplog.records)
+    assert actual == expected
+
+
+def test_realize_config_supp_none(caplog, tmp_path):
+    path = tmp_path / "a.yaml"
+    with writable(path) as f:
+        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}"}, f)
+    tools.realize_config(
+        input_config=path,
+        input_format=FORMAT.yaml,
+        output_file=None,
+        output_format=FORMAT.yaml,
+        supplemental_configs=None,
+        dry_run=True,
+    )
+    expected = """'1': a
+'2': '{{ deref }}'
+'3': '{{ temporalis }}'
+"""
+    actual = "\n".join(record.message for record in caplog.records)
+    assert actual == expected
+
+
 def test_realize_config_values_needed_ini(caplog):
     """
     Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
@@ -398,30 +472,6 @@ Keys that are set to empty:
     salad.toppings
     salad.meat
 """.strip()
-    actual = "\n".join(record.message for record in caplog.records)
-    assert actual == expected
-
-
-def test_realize_config_values_dereference(caplog, tmp_path):
-    path = tmp_path / "a.yaml"
-    supplemental_path = tmp_path / "b.yaml"
-    with writable(path) as f:
-        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}"}, f)
-    with writable(supplemental_path) as f2:
-        yaml.dump({"2": "b", "temporalis": "c"}, f2)
-    tools.realize_config(
-        input_config=path,
-        input_format=FORMAT.yaml,
-        output_file=None,
-        output_format=FORMAT.yaml,
-        supplemental_configs=[supplemental_path],
-        dry_run=True,
-    )
-    expected = """'1': a
-'2': b
-'3': c
-temporalis: c
-"""
     actual = "\n".join(record.message for record in caplog.records)
     assert actual == expected
 
@@ -604,6 +654,22 @@ def test__realize_config_update_file(realize_config_testobj, tmp_path):
     assert realize_config_testobj[1][2][3] == 88
     o = tools._realize_config_update(config_obj=realize_config_testobj, supplemental_configs=[path])
     assert o[1][2][3] == 99
+
+
+def test__realize_config_update_list(realize_config_testobj, tmp_path):
+    values = {1: {2: {3: 99}}}
+    path = tmp_path / "config.yaml"
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.dump(values, f)
+    values2 = {1: {2: {3: 77}}}
+    path2 = tmp_path / "config2.yaml"
+    with open(path2, "w", encoding="utf-8") as f2:
+        yaml.dump(values2, f2)
+    assert realize_config_testobj[1][2][3] == 88
+    o = tools._realize_config_update(
+        config_obj=realize_config_testobj, supplemental_configs=[path, path2]
+    )
+    assert o[1][2][3] == 77
 
 
 def test__realize_config_values_needed(caplog, tmp_path):

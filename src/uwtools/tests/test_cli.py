@@ -104,7 +104,7 @@ def test__check_file_vs_format_fail(capsys, vals):
 
 
 def test__check_file_vs_format_pass_explicit():
-    # Accept explcitly-specified format, whatever it is.
+    # Accept explicitly-specified format, whatever it is.
     fmt = "jpg"
     args = {STR.infile: "/path/to/input.txt", STR.infmt: fmt}
     args = cli._check_file_vs_format(
