@@ -21,6 +21,8 @@ The ``uw`` mode for realizing and validating Rocoto XML documents
       validate
           Validate Rocoto XML
 
+.. _realize_rocoto_cli_examples:
+
 ``realize``
 -----------
 
@@ -48,6 +50,7 @@ Examples
 
 TBD
 
+.. _validate_rocoto_cli_examples:
 
 ``validate``
 ------------

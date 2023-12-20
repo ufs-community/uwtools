@@ -25,6 +25,8 @@ The ``uw`` mode for handling configs.
       validate
           Validate config
 
+.. _compare_configs_cli_examples:
+
 ``compare``
 -----------
 
@@ -53,10 +55,13 @@ The ``uw`` mode for handling configs.
     --verbose, -v
           Print all logging messages
 
+
 Examples
 ~~~~~~~~
 
 TBD
+
+.. _realize_configs_cli_examples:
 
 ``realize``
 -----------
@@ -100,6 +105,8 @@ Examples
 
 TBD
 
+.. _translate_configs_cli_examples:
+
 ``translate``
 -------------
 
@@ -132,6 +139,8 @@ Examples
 ~~~~~~~~
 
 TBD
+
+.. _validate_configs_cli_examples:
 
 ``validate``
 ------------

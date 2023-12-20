@@ -19,6 +19,8 @@ The ``uw`` mode for handling (`Jinja2 <https://palletsprojects.com/p/jinja/>`_) 
      render
          Render a template
 
+.. _template_cli_examples:
+
 ``render``
 ----------
 

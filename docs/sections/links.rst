@@ -14,5 +14,6 @@
 .. _mypy: https://mypy.readthedocs.io/en/stable/
 .. _pylint: https://pylint.readthedocs.io/en/stable/
 .. _pytest: https://docs.pytest.org/en/stable/
+.. _Rocoto: https://christopherwharrop.github.io/rocoto/
 .. _semantic versioning: https://semver.org/
 .. _workflow-tools repository: https://github.com/ufs-community/workflow-tools
