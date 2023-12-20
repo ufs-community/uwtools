@@ -40,7 +40,7 @@ If your development shell misses any functionality you’re used to in your main
 Using a ``bash`` development shell
 ----------------------------------
 
-A development shell makes availabe several code-formatting and quality checkers, which should be periodically run during the development process. See :doc:`Code Quality <code_quality>` for full details.
+A development shell makes available several code-formatting and quality checkers, which should be periodically run during the development process. See :doc:`Code Quality <code_quality>` for full details.
 
 In addition to the ``make devshell`` command, other ``make`` targets are available for use *outside* a development shell, i.e. from the base conda environment (requires presence of the ``condev`` package):
 
