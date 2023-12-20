@@ -34,7 +34,7 @@ class SHConfig(Config):
         :param config_file: Path to config file to load.
         """
         with readable(config_file) as f:
-            strings = shlex.split(f.read())
+            strings = shlex.split(f.read(), comments=True)
         d = {}
         for s in strings:
             if m := re.match(r"^([a-zA-Z_]+[a-zA-Z0-9_]*)=(.*)$", s):
