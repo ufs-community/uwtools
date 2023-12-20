@@ -67,7 +67,7 @@ class SHConfig(Config):
         config_check_depths_dump(config_obj=cfg, target_format=FORMAT.sh)
         with writable(path) as f:
             for key, value in cfg.items():
-                print(f"{key}='{value}'", file=f)
+                print("%s=%s" % (key, shlex.quote(str(value))), file=f)
 
     @staticmethod
     def get_depth_threshold() -> Optional[int]:
