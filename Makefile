@@ -1,17 +1,22 @@
 CHANNELS    = $(addprefix -c ,$(shell tr '\n' ' ' <$(RECIPE_DIR)/channels)) -c local
 METAJSON    = $(RECIPE_DIR)/meta.json
 RECIPEFILES = $(addprefix $(RECIPE_DIR)/,meta.yaml)
-TARGETS     = devshell env format lint meta package test typecheck unittest
+TARGETS     = clean-devenv devshell env format lint meta package test typecheck unittest
+
 
 export RECIPE_DIR := $(shell cd ./recipe && pwd)
 
-spec = $(call val,name)$(2)$(call val,version)$(2)$(call val,$(1))
-val  = $(shell jq -r .$(1) $(METAJSON))
+clean = $(shell $(CONDA_EXE) env remove -n DEV-$(call val,name))
+spec  = $(call val,name)$(2)$(call val,version)$(2)$(call val,$(1))
+val   = $(shell jq -r .$(1) $(METAJSON))
 
 .PHONY: $(TARGETS)
 
 all:
 	$(error Valid targets are: $(TARGETS))
+
+clean-devenv:
+	$(if $(filter DEV-$(call val,name),$(CONDA_DEFAULT_ENV)),$(error EXIT DEVSHELL FIRST),$(call clean))
 
 devshell:
 	condev-shell || true
