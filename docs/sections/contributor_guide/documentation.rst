@@ -11,7 +11,13 @@ To locally build the docs:
 #. Install the required doc packages: ``source install-deps``
 #. Build the docs: ``make html``
 
-The ``make html`` command will build the docs under ``docs/build/html``, after which you can preview them in your web browser at the URL ``file://<path-to-your-clone>/docs/build/html/index.index.html``. Re-run ``make html`` and refresh your browser after making and saving changes.
+The ``make html`` command will build the docs under ``docs/build/html``, after which you can preview them in your web browser at the URL
+
+.. code::
+
+  file://<filesystem-path-to-your-clone>/docs/build/html/index.index.html
+
+Re-run ``make html`` and refresh your browser after making and saving changes.
 
 If, at some point, you remove and recreate the conda development environment underlying your development shell, you will need to re-run the ``source install-deps`` command in the new environment/shell. Until then, the installed doc packages will persist and support docs generation.
 
@@ -22,8 +28,8 @@ Online documentation generation and hosting for ``workflow-tools`` is provided b
 
 Docs are also built and published when Pull Requests (PRs) targeting the ``develop`` or ``main`` branches are opened. Visit the `Builds page <https://readthedocs.org/projects/unified-workflow/builds/>`__ to see recent builds, including those made for PRs. Click a PR-related build marked *Passed*, then the small *View docs* link (**not** the large green *View Docs* button) to see the docs built specifically for that PR. If your PR includes documentation updates, it may be helpful to include the URL of this build in your PR's description so that reviewers can see the rendered HTML docs and not just the modified ``.rst`` files. Note that, if commits are pushed to the PR's source branch, Read the Docs will rebuild the PR docs: See the checks section near the bottom of a PR for current status, and for another link to the PR docs via the *Details* link.
 
-Guidelines
-----------
+Documentation Guidelines
+------------------------
 
 Please follow these guidelines when contributing to the documentation:
 
