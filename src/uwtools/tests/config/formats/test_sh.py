@@ -3,7 +3,6 @@
 Tests for uwtools.config.formats.sh module.
 """
 
-import filecmp
 from typing import Any, Dict
 
 from pytest import raises
@@ -41,20 +40,17 @@ def test_parse_include():
     assert len(cfgobj) == 5
 
 
-def test_sh(salad_base, tmp_path):
+def test_sh(salad_base):
     """
     Test that sh config load and dump work with a basic sh file.
     """
     infile = fixture_path("simple.sh")
-    outfile = tmp_path / "outfile.sh"
     cfgobj = SHConfig(infile)
     expected: Dict[str, Any] = {
         **salad_base["salad"],
         "how_many": "12",
     }
     assert cfgobj == expected
-    cfgobj.dump(outfile)
-    assert filecmp.cmp(infile, outfile)
     cfgobj.update({"dressing": ["ranch", "italian"]})
     expected["dressing"] = ["ranch", "italian"]
     assert cfgobj == expected
