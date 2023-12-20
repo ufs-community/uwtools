@@ -35,18 +35,18 @@ The ``workflow-tools`` :term:`repository` is an NCO-compliant repository. Its st
    │           └── user_guide
    └── src
          └── (uwtools)
-    	         ├── api
-    	         ├── apps 
-    	         ├── config
-                │     └── formats
-    	         ├── drivers 
-    	         ├── files
-                │     ├── gateway
-                │     ├── interface
-                │     └── model
-    	         ├── resources
-    	         ├── utils               
-    	         └── tests
+               ├── api
+               ├── apps 
+               ├── config
+               │     └── formats
+               ├── drivers 
+               ├── files
+               │     ├── gateway
+               │     ├── interface
+               │     └── model
+               ├── resources
+               ├── utils               
+               └── tests
                      ├── api
                      ├── config
                      │     └── formats
