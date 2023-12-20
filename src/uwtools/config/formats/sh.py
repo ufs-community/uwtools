@@ -1,5 +1,6 @@
 import re
 import shlex
+from io import StringIO
 from typing import Optional, Union
 
 from uwtools.config.formats.base import Config
@@ -64,10 +65,16 @@ class SHConfig(Config):
         :param cfg: The in-memory config object to dump.
         """
 
+        # Write first to a StringIO object to avoid creating a partial file in case of problems
+        # rendering or quoting config values.
+
         config_check_depths_dump(config_obj=cfg, target_format=FORMAT.sh)
+        s = StringIO()
+        for key, value in cfg.items():
+            print("%s=%s" % (key, shlex.quote(str(value))), file=s)
         with writable(path) as f:
-            for key, value in cfg.items():
-                print("%s=%s" % (key, shlex.quote(str(value))), file=f)
+            print(s.getvalue().strip(), file=f)
+        s.close()
 
     @staticmethod
     def get_depth_threshold() -> Optional[int]:
