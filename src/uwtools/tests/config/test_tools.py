@@ -187,7 +187,6 @@ def test_realize_config_depth_mismatch_to_ini(realize_config_yaml_input):
         tools.realize_config(
             input_config=realize_config_yaml_input,
             input_format=FORMAT.yaml,
-            output_file=None,
             output_format=FORMAT.ini,
         )
 
@@ -197,7 +196,6 @@ def test_realize_config_depth_mismatch_to_sh(realize_config_yaml_input):
         tools.realize_config(
             input_config=realize_config_yaml_input,
             input_format=FORMAT.yaml,
-            output_file=None,
             output_format=FORMAT.sh,
         )
 
@@ -213,7 +211,6 @@ def test_realize_config_dry_run(caplog):
     tools.realize_config(
         input_config=infile,
         input_format=FORMAT.yaml,
-        output_file=None,
         output_format=FORMAT.yaml,
         dry_run=True,
     )
@@ -302,7 +299,6 @@ def test_realize_config_incompatible_file_type():
         tools.realize_config(
             input_config=fixture_path("model_configure.sample"),
             input_format="sample",
-            output_file=None,
             output_format=FORMAT.yaml,
         )
 
@@ -391,7 +387,6 @@ def test_realize_config_supp_bad_format(tmp_path):
         tools.realize_config(
             input_config=path,
             input_format=FORMAT.yaml,
-            output_file=None,
             output_format=FORMAT.yaml,
             supplemental_configs=[supplemental_path],
             dry_run=True,
@@ -454,7 +449,6 @@ def test_realize_config_values_needed_ini(caplog):
     tools.realize_config(
         input_config=fixture_path("simple3.ini"),
         input_format=FORMAT.ini,
-        output_file=None,
         output_format=FORMAT.ini,
         values_needed=True,
     )
@@ -491,7 +485,6 @@ def test_realize_config_values_needed_nml(caplog):
     tools.realize_config(
         input_config=fixture_path("simple3.nml"),
         input_format=FORMAT.nml,
-        output_file=None,
         output_format=FORMAT.yaml,
         values_needed=True,
     )
@@ -525,7 +518,6 @@ def test_realize_config_values_needed_yaml(caplog):
     tools.realize_config(
         input_config=fixture_path("srw_example.yaml"),
         input_format=FORMAT.yaml,
-        output_file=None,
         output_format=FORMAT.yaml,
         values_needed=True,
     )
