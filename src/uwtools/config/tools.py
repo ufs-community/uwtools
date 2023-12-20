@@ -81,7 +81,7 @@ def realize_config(
     input_format: Optional[str] = None,
     output_file: OptionalPath = None,
     output_format: Optional[str] = None,
-    supplemental_configs: SupplementalConfigs = None,
+    supplemental_configs: Optional[List[Union[dict, Config, DefinitePath]]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> dict:
@@ -171,7 +171,7 @@ def _print_config_section(config: dict, key_path: List[str]) -> None:
 
 def _realize_config_update(
     config_obj: Config,
-    supplemental_configs: SupplementalConfigs = None,
+    supplemental_configs: Optional[List[Union[dict, Config, DefinitePath]]] = None,
 ) -> Config:
     """
     Update config with values from other configs, if given.
