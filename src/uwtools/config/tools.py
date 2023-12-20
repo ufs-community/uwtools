@@ -105,7 +105,7 @@ def realize_config(
     )
     if supplemental_configs:
         input_obj = _realize_config_update(input_obj, supplemental_configs)
-        input_obj.dereference()
+    input_obj.dereference()
     output_format = _ensure_format("output", output_format, output_file)
     config_check_depths_realize(input_obj, output_format)
     if dry_run:

@@ -81,7 +81,6 @@ def help_realize_config_simple(infn, infmt, tmpdir):
         input_format=infmt,
         output_file=outfile,
         output_format=infmt,
-        supplemental_configs=None,
     )
     cfgobj = tools.format_to_config(infmt)(infile)
     reference = tmpdir / f"reference{ext}"
@@ -173,7 +172,6 @@ def test_realize_config_conversion_cfg_to_yaml(tmp_path):
         input_format=FORMAT.yaml,
         output_file=outfile,
         output_format=FORMAT.yaml,
-        supplemental_configs=None,
     )
     expected = YAMLConfig(infile)
     expected.dereference()
@@ -191,7 +189,6 @@ def test_realize_config_depth_mismatch_to_ini(realize_config_yaml_input):
             input_format=FORMAT.yaml,
             output_file=None,
             output_format=FORMAT.ini,
-            supplemental_configs=None,
         )
 
 
@@ -202,7 +199,6 @@ def test_realize_config_depth_mismatch_to_sh(realize_config_yaml_input):
             input_format=FORMAT.yaml,
             output_file=None,
             output_format=FORMAT.sh,
-            supplemental_configs=None,
         )
 
 
@@ -219,7 +215,6 @@ def test_realize_config_dry_run(caplog):
         input_format=FORMAT.yaml,
         output_file=None,
         output_format=FORMAT.yaml,
-        supplemental_configs=None,
         dry_run=True,
     )
     actual = "\n".join(record.message for record in caplog.records)
@@ -238,7 +233,6 @@ def test_realize_config_field_table(tmp_path):
         input_format=FORMAT.yaml,
         output_file=outfile,
         output_format=FORMAT.fieldtable,
-        supplemental_configs=None,
     )
     with open(fixture_path("field_table.FV3_GFS_v16"), "r", encoding="utf-8") as f1:
         with open(outfile, "r", encoding="utf-8") as f2:
@@ -310,7 +304,6 @@ def test_realize_config_incompatible_file_type():
             input_format="sample",
             output_file=None,
             output_format=FORMAT.yaml,
-            supplemental_configs=None,
         )
 
 
@@ -325,7 +318,6 @@ def test_realize_config_output_file_conversion(tmp_path):
         input_format=FORMAT.nml,
         output_file=outfile,
         output_format=FORMAT.nml,
-        supplemental_configs=None,
     )
     expected = NMLConfig(infile)
     expected_file = tmp_path / "expected.nml"
@@ -364,77 +356,92 @@ def test_realize_config_simple_yaml(tmp_path):
     help_realize_config_simple("simple2.yaml", FORMAT.yaml, tmp_path)
 
 
-def test_realize_config_single_dereference(caplog, tmp_path):
+def test_realize_config_single_dereference(capsys, tmp_path):
     path = tmp_path / "a.yaml"
     supplemental_path = tmp_path / "b.yaml"
     with writable(path) as f:
         yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}"}, f)
-    with writable(supplemental_path) as f2:
-        yaml.dump({"2": "b", "temporalis": "c"}, f2)
+    with writable(supplemental_path) as f:
+        yaml.dump({"2": "b", "temporalis": "c", "deref": "d"}, f)
     tools.realize_config(
         input_config=path,
         input_format=FORMAT.yaml,
-        output_file=None,
         output_format=FORMAT.yaml,
         supplemental_configs=[supplemental_path],
-        dry_run=True,
     )
     expected = """'1': a
 '2': b
 '3': c
+deref: d
 temporalis: c
 """
-    actual = "\n".join(record.message for record in caplog.records)
+    actual = capsys.readouterr().out
     assert actual == expected
 
 
-def test_realize_config_supp_list(caplog, tmp_path):
+def test_realize_config_supp_bad_format(tmp_path):
+    with raises(ValueError) as e:
+        path = tmp_path / "a.yaml"
+        supplemental_path = tmp_path / "b.clj"
+        msg = f"Cannot deduce format of '{supplemental_path}' from unknown extension 'clj'"
+        with writable(path) as f:
+            yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}", "deref": "b"}, f)
+        with writable(supplemental_path) as f:
+            yaml.dump({"2": "b", "temporalis": "c"}, f)
+        tools.realize_config(
+            input_config=path,
+            input_format=FORMAT.yaml,
+            output_file=None,
+            output_format=FORMAT.yaml,
+            supplemental_configs=[supplemental_path],
+            dry_run=True,
+        )
+    assert msg in str(e.value)
+
+
+def test_realize_config_supp_list(capsys, tmp_path):
     path = tmp_path / "a.yaml"
     supplemental_path = tmp_path / "b.yaml"
     second_supp_path = tmp_path / "c.yaml"
     with writable(path) as f:
         yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}"}, f)
-    with writable(supplemental_path) as f2:
-        yaml.dump({"2": "b", "temporalis": "c"}, f2)
-    with writable(second_supp_path) as f3:
-        yaml.dump({"4": "d", "tempus": "fugit", "deref": "{{ tempus }}"}, f3)
+    with writable(supplemental_path) as f:
+        yaml.dump({"2": "b", "temporalis": "c"}, f)
+    with writable(second_supp_path) as f:
+        yaml.dump({"4": "d", "tempus": "fugit", "deref": "{{ tempus }}"}, f)
     tools.realize_config(
         input_config=path,
         input_format=FORMAT.yaml,
-        output_file=None,
         output_format=FORMAT.yaml,
         supplemental_configs=[supplemental_path, second_supp_path],
-        dry_run=True,
     )
     expected = """'1': a
 '2': b
 '3': c
+temporalis: c
 '4': d
 deref: fugit
-temporalis: c
 tempus: fugit
 """
-    actual = "\n".join(record.message for record in caplog.records)
+    actual = capsys.readouterr().out
     assert actual == expected
 
 
-def test_realize_config_supp_none(caplog, tmp_path):
+def test_realize_config_supp_none(capsys, tmp_path):
     path = tmp_path / "a.yaml"
     with writable(path) as f:
-        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}"}, f)
+        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}", "deref": "b"}, f)
     tools.realize_config(
         input_config=path,
         input_format=FORMAT.yaml,
-        output_file=None,
         output_format=FORMAT.yaml,
-        supplemental_configs=None,
-        dry_run=True,
     )
     expected = """'1': a
-'2': '{{ deref }}'
+'2': b
 '3': '{{ temporalis }}'
+deref: b
 """
-    actual = "\n".join(record.message for record in caplog.records)
+    actual = capsys.readouterr().out
     assert actual == expected
 
 
@@ -449,7 +456,6 @@ def test_realize_config_values_needed_ini(caplog):
         input_format=FORMAT.ini,
         output_file=None,
         output_format=FORMAT.ini,
-        supplemental_configs=None,
         values_needed=True,
     )
     expected = """
@@ -487,7 +493,6 @@ def test_realize_config_values_needed_nml(caplog):
         input_format=FORMAT.nml,
         output_file=None,
         output_format=FORMAT.yaml,
-        supplemental_configs=None,
         values_needed=True,
     )
     expected = """
@@ -522,7 +527,6 @@ def test_realize_config_values_needed_yaml(caplog):
         input_format=FORMAT.yaml,
         output_file=None,
         output_format=FORMAT.yaml,
-        supplemental_configs=None,
         values_needed=True,
     )
     actual = "\n".join(record.message for record in caplog.records)
@@ -663,8 +667,8 @@ def test__realize_config_update_list(realize_config_testobj, tmp_path):
         yaml.dump(values, f)
     values2 = {1: {2: {3: 77}}}
     path2 = tmp_path / "config2.yaml"
-    with open(path2, "w", encoding="utf-8") as f2:
-        yaml.dump(values2, f2)
+    with open(path2, "w", encoding="utf-8") as f:
+        yaml.dump(values2, f)
     assert realize_config_testobj[1][2][3] == 88
     o = tools._realize_config_update(
         config_obj=realize_config_testobj, supplemental_configs=[path, path2]
