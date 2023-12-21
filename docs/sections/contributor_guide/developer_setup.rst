@@ -25,8 +25,9 @@ If the above is successful, you will be in a ``workflow-tools`` development shel
 
 Future ``make devshell`` invocations will be almost instantaneous, as the underlying virtual environment will already exist. In general, all source code changes will be immediately live in the development shell, subject to execution, test, etc. But some changes – especially to the contents of the ``recipe/`` directory, or to the ``src/setup.py`` module – may require recreation of the development shell. If you know this is needed, or when in doubt:
 
-  1. Exit the development shell, run ``conda env remove -n DEV-uwtools`` to remove the old environment.
-  2. Run ``make devshell`` to recreate it.
+  #. Exit the development shell.
+  #. Run ``make clean-devenv`` (or ``conda env remove -n DEV-uwtools``) to remove the old environment.
+  #. Run ``make devshell`` to recreate it.
 
 If your development shell misses any functionality you’re used to in your main (``bash``) shell, you can create a ``~/.condevrc`` file, which will be sourced by ``make devshell``. When in doubt, you might:
 
@@ -39,7 +40,7 @@ If your development shell misses any functionality you’re used to in your main
 Using a ``bash`` development shell
 ----------------------------------
 
-A development shell makes availabe several code-formatting and quality checkers, which should be periodically run during the development process. See :doc:`Code Quality <code_quality>` for full details.
+A development shell makes available several code-formatting and quality checkers, which should be periodically run during the development process. See :doc:`Code Quality <code_quality>` for full details.
 
 In addition to the ``make devshell`` command, other ``make`` targets are available for use *outside* a development shell, i.e. from the base conda environment (requires presence of the ``condev`` package):
 
