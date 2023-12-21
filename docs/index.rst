@@ -41,7 +41,7 @@ Compare Mode
 
 When the Linux diff tool just doesn't work for comparing unordered namelists with mixed-case keys, this is your go-to! It also works on the other configuration formats, but the Fortran namelists are the *real* catalyst behind this gem!
 
-| See CLI examples here: :any:`Examples<compare_configs_cli_examples>`
+| :any:`CLI documentation with examples<compare_configs_cli_examples>`
 
 
 Realize Mode
@@ -49,19 +49,19 @@ Realize Mode
 
 This mode renders values created by Jinja2 templates, and lets you override values in one file or object with those from others, not necessarily with the same configuration format. With ``uwtools``, you can even reference the content of other files to build up a configuration from its pieces.
 
-| See CLI examples here: :any:`Examples<realize_configs_cli_examples>`
+| :any:`CLI documentation with examples<realize_configs_cli_examples>`
 
 Translate Mode
 ..............
 This tool helps transform legacy configuration files templated with the atparse tool (common at NOAA) into Jinja2 templates for use with the ``uw config realize`` and ``uw template render`` tools, or their API equivalents.
 
-| See CLI examples here: :any:`Examples<translate_configs_cli_examples>`
+| :any:`CLI documentation with examples<translate_configs_cli_examples>`
 
 Validate Mode
 .............
 In this mode, you can provide a `JSON Schema`_ file alongside your configuration to validate that it meets the requirements set by the schema. We've enabled robust logging to make it easier to repair your configs when problems arise.
 
-| See CLI examples here: :any:`Examples<validate_configs_cli_examples>`
+| :any:`CLI documentation with examples<validate_configs_cli_examples>`
 
 
 Templating
@@ -73,7 +73,7 @@ Templating
 
 This one is pretty straightforward. It has a single ``render`` mode that gives you the full power of rendering a Jinja2 template in the same easy-to-use interface as your other workflow tools.
 
-| See CLI examples here: :any:`Examples<template_cli_examples>`
+| :any:`CLI documentation with examples<template_cli_examples>`
 
 
 Rocoto Configurability
@@ -90,13 +90,13 @@ Realize Mode
 ............
 This is where you put in your structured YAML that defines your workflow of choice and it pops out a verified Rocoto XML.
 
-| See CLI examples here: :any:`Examples<realize_rocoto_cli_examples>`
+| :any:`CLI documentation with examples<realize_rocoto_cli_examples>`
 
 Validate Mode
 .............
 Do you already have a Rocoto XML, but don't want to run Rocoto to make sure it works? Use the validate mode to check to see if Rocoto will be happy.
 
-| See CLI examples here: :any:`Examples<validate_rocoto_cli_examples>`
+| :any:`CLI documentation with examples<validate_rocoto_cli_examples>`
 
 
 
