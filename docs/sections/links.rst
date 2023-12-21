@@ -11,6 +11,7 @@
 .. _docformatter: https://docformatter.readthedocs.io/en/stable/
 .. _isort: https://pycqa.github.io/isort/
 .. _jq: https://jqlang.github.io/jq/manual/v1.6/
+.. _JSON Schema: https://json-schema.org/
 .. _mypy: https://mypy.readthedocs.io/en/stable/
 .. _pylint: https://pylint.readthedocs.io/en/stable/
 .. _pytest: https://docs.pytest.org/en/stable/

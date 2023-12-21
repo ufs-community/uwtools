@@ -10,7 +10,7 @@
 Unified Workflow
 ================
 
-``uwtools`` is an open-source modern Python package that helps automate common tasks needed for many standard numerical weather prediction (NWP) workflows and wraps Unified Forecast System (UFS) components in a highly configurable run-time interface (a driver) that maximizes flexibility, interoperability, and usability for any UFS Application.
+``uwtools`` is an open-source modern Python package that helps automate common tasks needed for many standard numerical weather prediction (NWP) workflows and provides drivers to automate the configuration and execution of Unified Forecast System (UFS) components, providing flexibility, interoperability, and usability to various UFS Applications.
 
 If you're interested in contributing, check out the :doc:`Contributor Guide <sections/contributor_guide/index>`.
 
@@ -25,7 +25,8 @@ For users who want to start using the toolbox and framework, take a peek at our 
 The Tools
 ---------
 
-All our tools are available by command line interface (CLI), with select operations supported in the Python API. The API will also give you access to the underlying object creation to do with those what you please. We hope these options will let you integrate the package into your pre-existing bash and Python scripts, and give you some handy tools to use in your day-to-day work with running NWP systems.
+The tools are accessible from both a command-line interface (CLI) and a Python API. The CLI automates many operations commonly needed in NWP workflows. The API supports all CLI operations, and additionally provides access to in-memory objects to facilitate more novel use cases. We hope these options will let you integrate the package into your pre-existing bash and Python scripts, and give you some handy tools to use in your day-to-day work with running NWP systems.
+
 
 Configuration Management
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,34 +34,32 @@ Configuration Management
 | **CLI**: ``uw config -h``
 | **API**: ``import uwtools.api.config``
 
-The uw config tool suite helps you compare, transform, modify, and even validate your configuration files. The package supports YAML, shell, Fortran namelist, and INI file formats. Each of these formats allows you to specify values as Jinja2 templates to enable referencing other values for direct substitution or derived information (math, path building, string manipulation, etc.).
+The config tool suite helps you compare, transform, modify, and even validate your configuration. The package supports YAML, shell, Fortran namelist, and INI file formats. Configuration in any of these formats may express values using Jinja2 syntax. These values can reference others, or compute new values by evaluating mathematical expressions, building paths, manipulating strings, etc.
 
 Compare Mode
 ............
 
-When the Linux diff tool just doesn't work for comparing unordered namelists with mixed-case keys, this is your go-to! It also works on the other file types, but the Fortran namelists are the *real* catalyst behind this gem!
+When the Linux diff tool just doesn't work for comparing unordered namelists with mixed-case keys, this is your go-to! It also works on the other configuration formats, but the Fortran namelists are the *real* catalyst behind this gem!
 
 | See CLI examples here: :any:`Examples<compare_configs_cli_examples>`
-| This mode is not supported in the API.
 
 
 Realize Mode
 ............
 
-This mode does the work of rendering values created by Jinja2 templates, and lets you override settings in one file with those from others, not necessarily with the same file type. With ``uwtools``, you can even reference the content of other files to build up a configuration file from its pieces.
+This mode renders values created by Jinja2 templates, and lets you override values in one file or object with those from others, not necessarily with the same configuration format. With ``uwtools``, you can even reference the content of other files to build up a configuration from its pieces.
 
 | See CLI examples here: :any:`Examples<realize_configs_cli_examples>`
 
 Translate Mode
 ..............
-This is a more limited tool that helps transform legacy configuration files templated with the atparse tool (common at NOAA) into a Jinja2 template for use with the uw config realize and uw template render tools.
+This tool helps transform legacy configuration files templated with the atparse tool (common at NOAA) into Jinja2 templates for use with the ``uw config realize`` and ``uw template render`` tools, or their API equivalents.
 
 | See CLI examples here: :any:`Examples<translate_configs_cli_examples>`
-| This mode is not supported in the API.
 
 Validate Mode
 .............
-In this mode, you can provide a JSON Schema file alongside your configuration file to check to ensure that it meets the requirements set by the schema. We’ve enabled robust logging to make it easier to repair your config files when problems arise.
+In this mode, you can provide a `JSON Schema`_ file alongside your configuration to validate that it meets the requirements set by the schema. We've enabled robust logging to make it easier to repair your configs when problems arise.
 
 | See CLI examples here: :any:`Examples<validate_configs_cli_examples>`
 
