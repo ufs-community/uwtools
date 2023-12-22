@@ -3,15 +3,12 @@ on:
   pull_request:
     branches:
       - develop
-      - doc-update
   push:
     branches:
       - develop
-      - doc-update
   workflow_dispatch:
     branches:
       - develop
-      - doc-update
 jobs:
   test:
     name: Test
