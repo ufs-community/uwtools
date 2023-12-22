@@ -12,13 +12,13 @@ In an active development shell, the following ``make`` targets are available and
    * - Command
      - Description
    * - ``make format``
-     - Formats code with `black`_, imports with `isort`_, docstrings with `docformatter`_, and ``.jsonschema`` documents with `jq`_
+     - Formats code with :black:`black<>`, imports with :isort:`isort<>`, docstrings with :docformatter:`docformatter<>`, and ``.jsonschema`` documents with :jq:`jq<>`
    * - ``make lint``
-     - Lints code with `pylint`_
+     - Lints code with :pylint:`pylint<>`
    * - ``make typecheck``
-     - Typechecks code with `mypy`_
+     - Typechecks code with :mypy:`mypy<>`
    * - ``make unittest``
-     - Runs unit tests and reports coverage with `pytest`_ and `coverage`_
+     - Runs unit tests and reports coverage with :pytest:`pytest<>` and :coverage:`coverage<>`
    * - ``make test``
      - Equivalent to ``make lint && make typecheck && make unittest``, plus checks defined CLI scripts.
 

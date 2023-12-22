@@ -5,9 +5,9 @@ Installation
 
 -  If you are a **developer**, please visit the :doc:`Developer Setup <../contributor_guide/developer_setup>` section located in the :doc:`Contributor Guide <../contributor_guide/index>`.
 
-The recommended installation mechanism uses the Python package and virtual-environment manager `conda`_. Specifically, these instructions detail the use of the minimal `Miniforge`_ variant of `Miniconda`_, built to use, by default, packages from the `conda-forge`_ project.
+The recommended installation mechanism uses the Python package and virtual-environment manager :conda:`conda<>`. Specifically, these instructions detail the use of the minimal :miniforge:`Miniforge<>` variant of :miniconda:`Miniconda<>`, built to use, by default, packages from the :conda-forge:`conda-forge<>` project.
 
-Users of the original Miniconda (or the `Anaconda`_ distribution) may need to add the flags ``-c conda-forge --override-channels`` to ``conda build``, ``conda create``, and ``conda install`` commands to specify the use of conda-forge packages.
+Users of the original Miniconda (or the :anaconda:`Anaconda distribution<>`) may need to add the flags ``-c conda-forge --override-channels`` to ``conda build``, ``conda create``, and ``conda install`` commands to specify the use of conda-forge packages.
 
 Using a fresh Miniforge installation
 ====================================
@@ -20,7 +20,7 @@ Using a fresh Miniforge installation
 
     conda install -y conda-build conda-verify
 
-3. In a clone of the `workflow-tools repository`_, build and install the ``uwtools`` package.
+3. In a clone of the :uwtools:`workflow-tools repository<>`, build and install the ``uwtools`` package.
 
   .. code:: sh
 
@@ -41,4 +41,4 @@ Using a fresh Miniforge installation
     source ~/conda/etc/profile.d/conda.sh
     conda activate uwtools
 
-Note that the ``uwtools`` package’s actual name will contain version and build information, e.g. ``uwtools-0.1.0-py_0``. The ``conda create`` command will find and use the most recent `semantic versioning`_ - compliant package name given the base name ``uwtools``. It could also be explicitly specified as ``uwtools=0.1.0=py_0``.
+Note that the ``uwtools`` package’s actual name will contain version and build information, e.g. ``uwtools-0.1.0-py_0``. The ``conda create`` command will find and use the most recent :semver:`Semantic Versioning<>`-compliant package name given the base name ``uwtools``. It could also be explicitly specified as ``uwtools=0.1.0=py_0``.

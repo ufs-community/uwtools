@@ -56,7 +56,7 @@ This tool helps transform legacy configuration files templated with the atparse 
 Validate Mode
 .............
 
-In this mode, you can provide a `JSON Schema`_ file alongside your configuration to validate that it meets the requirements set by the schema. We've enabled robust logging to make it easier to repair your configs when problems arise.
+In this mode, you can provide a :json-schema:`JSON Schema<>` file alongside your configuration to validate that it meets the requirements set by the schema. We've enabled robust logging to make it easier to repair your configs when problems arise.
 
 | :any:`CLI documentation with examples<validate_configs_cli_examples>`
 
@@ -76,7 +76,7 @@ Rocoto Configurability
 | **CLI**: ``uw rocoto -h``
 | **API**: ``import uwtools.api.rocoto``
 
-This tool is all about creating a configurable interface to the `Rocoto`_ workflow manager tool that produces the Rocoto XML for a totally arbitrary set of tasks. The ``uwtools`` package defines a structured YAML interface that relies on tasks you define to run. Paired with the uw config tool suite, this interface becomes highly configurable and requires no XML syntax!
+This tool is all about creating a configurable interface to the :rocoto:`Rocoto<>` workflow manager tool that produces the Rocoto XML for a totally arbitrary set of tasks. The ``uwtools`` package defines a structured YAML interface that relies on tasks you define to run. Paired with the uw config tool suite, this interface becomes highly configurable and requires no XML syntax!
 
 Realize Mode
 ............
