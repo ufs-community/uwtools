@@ -7,7 +7,7 @@
 Unified Workflow Tools
 ======================
 
-``uwtools`` is an open-source modern Python package that helps automate common tasks needed for many standard numerical weather prediction (NWP) workflows and provides drivers to automate the configuration and execution of Unified Forecast System (UFS) components, providing flexibility, interoperability, and usability to various UFS Applications.
+``uwtools`` is an open-source modern Python package that helps automate common tasks needed for many standard numerical weather prediction (NWP) workflows and provides drivers to automate the configuration and execution of :ufs:`Unified Forecast System (UFS)<>` components, providing flexibility, interoperability, and usability to various UFS Applications.
 
 If you're interested in contributing, check out the :doc:`Contributor Guide <sections/contributor_guide/index>`.
 
@@ -28,7 +28,7 @@ Configuration Management
 | **CLI**: ``uw config -h``
 | **API**: ``import uwtools.api.config``
 
-The config tool suite helps you compare, transform, modify, and even validate your configuration. The package supports YAML, shell, Fortran namelist, and INI file formats. Configuration in any of these formats may express values using Jinja2 syntax. These values can reference others, or compute new values by evaluating mathematical expressions, building paths, manipulating strings, etc.
+The config tool suite helps you compare, transform, modify, and even validate your configuration. The package supports YAML, shell, Fortran namelist, and INI file formats. Configuration in any of these formats may express values using :jinja2:`Jinja2 sytax<templates>`. These values can reference others, or compute new values by evaluating mathematical expressions, building paths, manipulating strings, etc.
 
 Compare Mode
 ............
@@ -40,14 +40,14 @@ When the Linux diff tool just doesn't work for comparing unordered namelists wit
 Realize Mode
 ............
 
-This mode renders values created by Jinja2 templates, and lets you override values in one file or object with those from others, not necessarily with the same configuration format. With ``uwtools``, you can even reference the content of other files to build up a configuration from its pieces.
+This mode renders values created by :jinja2:`Jinja2 templates<templates>`, and lets you override values in one file or object with those from others, not necessarily with the same configuration format. With ``uwtools``, you can even reference the content of other files to build up a configuration from its pieces.
 
 | :any:`CLI documentation with examples<realize_configs_cli_examples>`
 
 Translate Mode
 ..............
 
-This tool helps transform legacy configuration files templated with the atparse tool (common at NOAA) into Jinja2 templates for use with the ``uw config realize`` and ``uw template render`` tools, or their API equivalents.
+This tool helps transform legacy configuration files templated with the atparse tool (common at NOAA) into :jinja2:`Jinja2 templates<templates>` for use with the ``uw config realize`` and ``uw template render`` tools, or their API equivalents.
 
 | :any:`CLI documentation with examples<translate_configs_cli_examples>`
 
@@ -64,7 +64,7 @@ Templating
 | **CLI**: ``uw template -h``
 | **API**: ``import uwtools.api.template``
 
-This one is pretty straightforward. It has a single ``render`` mode that gives you the full power of rendering a Jinja2 template in the same easy-to-use interface as your other workflow tools.
+This one is pretty straightforward. It has a single ``render`` mode that gives you the full power of rendering a :jinja2:`Jinja2 template<templates>` in the same easy-to-use interface as your other workflow tools.
 
 | :any:`CLI documentation with examples<template_cli_examples>`
 

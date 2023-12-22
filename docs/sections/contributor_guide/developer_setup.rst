@@ -60,7 +60,7 @@ These targets work from the code in its current state in the clone. ``make env``
 Building condev locally
 -----------------------
 
-As an alternative to installing `a prebuilt package from anaconda <https://anaconda.org/maddenp/condev>`_, the ``condev`` package can be built locally, then installed into the local conda installation. Ensure that ``conda-build`` and ``conda-verify`` are installed in the base environment:
+As an alternative to installing :anaconda-condev:`pre-built package<>`, the ``condev`` package can be built locally, then installed into the local conda installation. Ensure that ``conda-build`` and ``conda-verify`` are installed in the base environment:
 
 .. code:: sh
 

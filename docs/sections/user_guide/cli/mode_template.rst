@@ -1,7 +1,7 @@
 Mode ``template``
 =================
 
-The ``uw`` mode for handling (`Jinja2 <https://palletsprojects.com/p/jinja/>`_) templates.
+The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 
 .. code:: sh
 

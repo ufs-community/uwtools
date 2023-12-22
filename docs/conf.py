@@ -34,7 +34,9 @@ extlinks = {
     "condev": ("https://github.com/maddenp/condev/%s", "%s"),
     "coverage": ("https://coverage.readthedocs.io/en/7.2.7/%s", "%s"),
     "docformatter": ("https://docformatter.readthedocs.io/en/stable/%s", "%s"),
+    "github-docs": ("https://docs.github.com/en/%s", "%s"),
     "isort": ("https://pycqa.github.io/isort/%s", "%s"),
+    "jinja2": ("https://jinja.palletsprojects.com/%s", "%s"),
     "jq": ("https://jqlang.github.io/jq/manual/v1.6/%s", "%s"),
     "json-schema": ("https://json-schema.org/%s", "%s"),
     "miniconda": ("https://docs.conda.io/projects/miniconda/en/latest/%s", "%s"),
@@ -44,7 +46,9 @@ extlinks = {
     "pylint": ("https://pylint.readthedocs.io/en/stable/%s", "%s"),
     "pytest": ("https://docs.pytest.org/en/stable/%s", "%s"),
     "rocoto": ("https://christopherwharrop.github.io/rocoto/%s", "%s"),
+    "rtd": ("https://readthedocs.org/projects/unified-workflow/%s", "%s"),
     "semver": ("https://semver.org/%s", "%s"),
+    "ufs": ("https://ufscommunity.org/%s", "%s"),
     "uwtools": ("https://github.com/ufs-community/workflow-tools/%s", "%s"),
 }
 
