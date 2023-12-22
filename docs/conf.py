@@ -18,6 +18,7 @@ html_logo = os.path.join("static", "ufs.png")
 html_static_path = ["static"]
 html_theme = "sphinx_rtd_theme"
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
+linkcheck_anchors_ignore = ["cloning-a-fork"] # silence warnings about valid anchors
 nitpick_ignore_regex = [("py:class", r"^uwtools\..*")]
 numfig = True
 numfig_format = {"figure": "Figure %s"}
