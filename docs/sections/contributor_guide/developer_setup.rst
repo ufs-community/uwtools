@@ -6,7 +6,7 @@ Developer Setup
 Creating a ``bash`` development shell
 -------------------------------------
 
-.. include:: ../../resources/miniforge3_instructions.rst
+.. include:: ../../shared/miniforge3_instructions.rst
 
 2. Install the `condev`_ package into the base environment.
 
