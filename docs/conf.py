@@ -26,7 +26,7 @@ release = _metadata["version"]
 version = _metadata["version"]
 
 extlinks = {
-    "anaconda": ("https://anaconda.org/%s", "%s"),
+    "anaconda": ("https://www.anaconda.com/%s", "%s"),
     "anaconda-condev": ("https://anaconda.org/maddenp/condev/%s", "%s"),
     "black": ("https://black.readthedocs.io/en/stable/%s", "%s"),
     "conda": ("https://docs.conda.io/en/latest/%s", "%s"),
