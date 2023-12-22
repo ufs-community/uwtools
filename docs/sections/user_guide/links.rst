@@ -1,1 +1,1 @@
-.. include:: ../links.rst
+.. include:: ../../resources/links.rst
