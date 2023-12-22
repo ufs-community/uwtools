@@ -1,8 +1,6 @@
 Developer Setup
 ===============
 
-.. include:: links.rst
-
 Creating a ``bash`` development shell
 -------------------------------------
 

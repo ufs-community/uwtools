@@ -1,8 +1,6 @@
 Code Quality
 ============
 
-.. include:: links.rst
-
 In an active development shell, the following ``make`` targets are available and act on all ``.py`` files under ``src/``:
 
 .. list-table::

@@ -1,5 +1,3 @@
-.. include:: shared/links.rst
-
 .. toctree::
    :hidden:
 
