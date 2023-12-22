@@ -28,7 +28,7 @@ Configuration Management
 | **CLI**: ``uw config -h``
 | **API**: ``import uwtools.api.config``
 
-The config tool suite helps you compare, transform, modify, and even validate your configuration. The package supports YAML, shell, Fortran namelist, and INI file formats. Configuration in any of these formats may express values using :jinja2:`Jinja2 sytax<templates>`. These values can reference others, or compute new values by evaluating mathematical expressions, building paths, manipulating strings, etc.
+The config tool suite helps you compare, transform, modify, and even validate your configuration. The package supports YAML, shell, Fortran namelist, and INI file formats. Configuration in any of these formats may express values using :jinja2:`Jinja2 syntax<templates>`. These values can reference others, or compute new values by evaluating mathematical expressions, building paths, manipulating strings, etc.
 
 Compare Mode
 ............
