@@ -7,3 +7,5 @@ User Guide
    installation
    cli/index
    api/index
+   rocoto_yaml
+

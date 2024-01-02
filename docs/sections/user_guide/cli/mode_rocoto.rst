@@ -27,7 +27,7 @@ The ``uw`` mode for realizing and validating Rocoto XML documents.
 ``realize``
 -----------
 
-In `uw` terminology, to `realize` a configuration file is to transform it from its raw from into its final, usable state. In the case of `rocoto`, that means to transform a structured YAML file into a :rocoto:`Rocoto XML<>` file. The structured YAML language required by UW closely follows the XML language defined by Rocoto 
+In ``uw`` terminology, to ``realize`` a configuration file is to transform it from its raw from into its final, usable state. In the case of ``uw rocoto``, that means transforming a structured YAML file into a :rocoto:`Rocoto XML<>` file. The structured YAML language required by UW closely follows the XML language defined by Rocoto.
 
 More information about the structured YAML file for Rocoto can be found here.
 
@@ -228,4 +228,100 @@ The examples that follow use a Rocoto YAML file ``rocoto.yaml`` with content
 Examples
 ~~~~~~~~
 
-TBD
+The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following content:
+
+.. code:: XML
+
+  <?xml version='1.0' encoding='utf-8'?>
+  <!DOCTYPE workflow [
+    <!ENTITY ACCOUNT "myaccount">
+    <!ENTITY FOO "test.log">
+  ]>
+  <workflow realtime="False" scheduler="slurm">
+    <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
+    <log>/some/path/to/&FOO;</log>
+    <task name="hello" cycledefs="howdy">
+      <account>&ACCOUNT;</account>
+      <nodes>1:ppn=1</nodes>
+      <walltime>00:01:00</walltime>
+      <command>echo hello $person</command>
+      <jobname>hello</jobname>
+      <envar>
+        <name>person</name>
+        <value>siri</value>
+      </envar>
+    </task>
+  </workflow>
+
+
+* To validate an XML from ``stdin``:
+
+  .. code:: sh
+
+    $ cat rocoto.xml | uw rocoto validate
+    [2024-01-02T14:18:46]     INFO 0 Rocoto validation errors found
+
+* To validate an XML from file ``rocoto.xml``:
+
+  .. code:: sh
+
+    $ uw rocoto validate --input-file rocoto.xml
+    [2024-01-02T14:18:46]     INFO 0 Rocoto validation errors found
+
+* When the XML is invalid:
+
+  In this example, the ``<command>`` line was removed from the XML.
+
+  .. code:: sh
+
+    $ uw rocoto validate --input-file rocoto.xml
+    [2024-01-02T14:26:09]    ERROR 3 Rocoto validation errors found
+    [2024-01-02T14:26:09]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_NOELEM: Expecting an element command, got nothing
+    [2024-01-02T14:26:09]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_INTERSEQ: Invalid sequence in interleave
+    [2024-01-02T14:26:09]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_CONTENTVALID: Element task failed to validate content
+
+  To decode this type of output, it is easiest to interpret it from the bottom up. It says:
+
+  * The task starting at Line 9 has invalid content.
+  * There was an invalid sequence.
+  * It was expecting a ``command`` element, but there wasn't one.
+
+  In the following example, an empty ``<dependency>`` element was added at the end of the task:
+
+  .. code:: XML
+
+    <?xml version='1.0' encoding='utf-8'?>
+    <!DOCTYPE workflow [
+      <!ENTITY ACCOUNT "myaccount">
+      <!ENTITY FOO "test.log">
+    ]>
+    <workflow realtime="False" scheduler="slurm">
+      <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
+      <log>/some/path/to/&FOO;</log>
+      <task name="hello" cycledefs="howdy">
+        <account>&ACCOUNT;</account>
+        <nodes>1:ppn=1</nodes>
+        <walltime>00:01:00</walltime>
+        <command>echo hello $person</command>
+        <jobname>hello</jobname>
+        <envar>
+          <name>person</name>
+          <value>siri</value>
+        </envar>
+        <dependency>
+        </dependency>
+      </task>
+    </workflow>
+
+
+  .. code:: sh
+
+     $ uw rocoto validate --input-file rocoto.xml
+     [2024-01-02T14:37:39]    ERROR 2 Rocoto validation errors found
+     [2024-01-02T14:37:39]    ERROR <string>:0:0:ERROR:RELAXNGV:RELAXNG_ERR_INTEREXTRA: Extra element dependency in interleave
+     [2024-01-02T14:37:39]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_CONTENTVALID: Element task failed to validate content
+
+  Once again, interpreting from the bottom:
+
+  * The content of the task starting at Line 9 is not valid.
+  * There is an extra element ``dependency`` in the task.
