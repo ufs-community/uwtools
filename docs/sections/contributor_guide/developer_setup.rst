@@ -1,20 +1,18 @@
 Developer Setup
 ===============
 
-.. include:: links.rst
-
 Creating a ``bash`` development shell
 -------------------------------------
 
-.. include:: ../miniforge3_instructions.rst
+.. include:: ../../shared/miniforge3_instructions.rst
 
-2. Install the `condev`_ package into the base environment.
+2. Install the :anaconda-condev:`condev package<>` into the base environment.
 
   .. code:: sh
 
     conda install -y -c maddenp condev
 
-3. In a clone of the `workflow-tools repository`_, create the development shell.
+3. In a clone of the :uwtools:`workflow-tools repository<>`, create the development shell.
 
   .. code:: sh
 
@@ -62,7 +60,7 @@ These targets work from the code in its current state in the clone. ``make env``
 Building condev locally
 -----------------------
 
-As an alternative to installing `a prebuilt package from anaconda <https://anaconda.org/maddenp/condev>`_, the ``condev`` package can be built locally, then installed into the local conda installation. Ensure that ``conda-build`` and ``conda-verify`` are installed in the base environment:
+As an alternative to installing :anaconda-condev:`pre-built package<>`, the ``condev`` package can be built locally, then installed into the local conda installation. Ensure that ``conda-build`` and ``conda-verify`` are installed in the base environment:
 
 .. code:: sh
 
@@ -74,7 +72,7 @@ As an alternative to installing `a prebuilt package from anaconda <https://anaco
 Files derived from condev
 -------------------------
 
-The following files in this repo are derived from their counterparts in the `condev demo`_ and are used by ``condev`` code when running certain make commands
+The following files in this repo are derived from their counterparts in the :condev:`condev demo<tree/main/demo>` and are used by ``condev`` code when running certain make commands
 
 .. code:: sh
 

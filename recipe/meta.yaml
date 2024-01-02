@@ -22,10 +22,10 @@ test:
     - black 23.11.*
     - coverage 7.3.*
     - docformatter 1.7.*
-    - isort 5.12.*
+    - isort 5.13.*
     - jq 1.7.*
     - make >=3.8
-    - mypy 1.7.*
+    - mypy 1.8.*
     - pylint 3.0.*
     - pytest 7.4.*
 about:

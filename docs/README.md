@@ -7,7 +7,7 @@ source install-deps
 To build docs:
 
 ```
-make html
+make docs
 ```
 
 To view docs in browser, visit URL
