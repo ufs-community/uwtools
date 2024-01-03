@@ -212,18 +212,6 @@ class Test__RocotoXML:
         with raises(UWConfigError):
             instance._add_task_dependency(e=root, config=config)
 
-    @pytest.mark.parametrize(
-        "config",
-        [{"timedep": {"attrs": {"offset": "&DEADLINE;"}}}],
-    )
-    def test__add_task_dependency_operand(self, config, instance, root):
-        instance._add_task_dependency_operand_operator(e=root, config=config)
-        element = root[0]
-        for tag, subconfig in config.items():
-            assert tag == element.tag
-            for attr, val in subconfig["attrs"].items():
-                assert element.get(attr) == val
-
     def test__add_task_dependency_operand_fail(self, instance, root):
         config = {"and": {"unrecognized": "whatever"}}
         with raises(UWConfigError):
@@ -270,6 +258,26 @@ class Test__RocotoXML:
         child = dependency[0]
         assert child.tag == "taskdep"
         assert child.get("task") == "foo"
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "202301031200",
+            202301031200,
+            {"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "06:00:00"}}},
+        ],
+    )
+    def test__add_task_dependency_timedep(self, instance, root, value):
+        config = {"timedep": value}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        child = dependency[0]
+        assert child.tag == "timedep"
+        if isinstance(value, dict):
+            assert child.xpath("cyclestr")[0].text == value["cyclestr"]["value"]
+        else:
+            assert child.text == str(value)
 
     def test__config_validate_config(self, assets, instance):
         cfgfile, _ = assets
@@ -405,6 +413,8 @@ def test_schema_compoundTimeString():
     errors = validator("$defs", "compoundTimeString")
     # Just a string is ok:
     assert not errors("foo")
+    # An int value is ok:
+    assert not errors(20240103120000)
     # A simple cycle string is ok:
     assert not errors({"cyclestr": {"value": "@Y@m@d@H"}})
     # The "value" entry is required:

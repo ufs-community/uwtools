@@ -234,12 +234,8 @@ class _RocotoXML:
                 self._add_task_dependency_operand_operator(SubElement(e, tag), config=subconfig)
             elif tag in strequality:
                 self._add_task_dependency_strequality(e, subconfig=subconfig, tag=tag)
-            elif tag == STR.datadep:
-                self._add_compound_time_string(e, config[tag], tag)
             elif tag == STR.taskdep:
                 self._set_attrs(SubElement(e, tag), subconfig)
-            elif tag == STR.timedep:
-                self._add_compound_time_string(e, config[tag], tag)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
 
