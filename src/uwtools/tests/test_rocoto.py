@@ -190,7 +190,10 @@ class Test__RocotoXML:
         assert and_.tag == "and"
         assert and_.getchildren()[0].getchildren()[0].get("age") == "120"
 
-    @pytest.mark.parametrize("value", ["/some/file", {"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "06:00:00"}}}])
+    @pytest.mark.parametrize(
+        "value",
+        ["/some/file", {"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "06:00:00"}}}],
+    )
     def test__add_task_dependency_datadep(self, instance, root, value):
         age = "00:00:02:00"
         minsize = "1K"
@@ -402,8 +405,6 @@ def test_schema_compoundTimeString():
     errors = validator("$defs", "compoundTimeString")
     # Just a string is ok:
     assert not errors("foo")
-    # Non-string types are not ok:
-    assert "88 is not valid" in errors(88)
     # A simple cycle string is ok:
     assert not errors({"cyclestr": {"value": "@Y@m@d@H"}})
     # The "value" entry is required:

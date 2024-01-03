@@ -3,6 +3,9 @@
     "compoundTimeString": {
       "anyOf": [
         {
+          "type": "integer"
+        },
+        {
           "type": "string"
         },
         {
