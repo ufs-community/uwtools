@@ -130,16 +130,14 @@ class Test__RocotoXML:
         assert rocoto._RocotoXML(config=YAMLConfig(cfgfile))._root.tag == "workflow"
 
     def test__add_compound_time_string_basic(self, instance, root):
-        config = {"foo": "bar"}
+        config = "bar"
         instance._add_compound_time_string(e=root, config=config, tag="foo")
         child = root[0]
         assert child.tag == "foo"
         assert child.text == "bar"
 
     def test__add_compound_time_string_cyclestr(self, instance, root):
-        config = {
-            "foo": {"attrs": {"bar": "88"}, "cyclestr": {"attrs": {"baz": "99"}, "value": "qux"}}
-        }
+        config = {"attrs": {"bar": "88"}, "cyclestr": {"attrs": {"baz": "99"}, "value": "qux"}}
         instance._add_compound_time_string(e=root, config=config, tag="foo")
         child = root[0]
         assert child.get("bar") == "88"
@@ -193,7 +191,7 @@ class Test__RocotoXML:
         assert taskdep.get("task") == "foo"
 
     def test__add_task_dependency_and(self, instance, root):
-        config = {"and": {"or_get_obs": {"datadep": {"attrs": {"age": "120"}}}}}
+        config = {"and": {"or_get_obs": {"taskdep": {"attrs": {"age": "120"}}}}}
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
         assert dependency.tag == "dependency"
@@ -208,7 +206,7 @@ class Test__RocotoXML:
 
     @pytest.mark.parametrize(
         "config",
-        [{"datadep": {"attrs": {"age": "120"}}}, {"timedep": {"attrs": {"offset": "&DEADLINE;"}}}],
+        [{"timedep": {"attrs": {"offset": "&DEADLINE;"}}}],
     )
     def test__add_task_dependency_operand(self, config, instance, root):
         instance._add_task_dependency_operand_operator(e=root, config=config)
@@ -225,10 +223,7 @@ class Test__RocotoXML:
 
     @pytest.mark.parametrize(
         "config",
-        [
-            {"and": {"or": {"datadep": {"attrs": {"age": "120"}}}}},
-            {"and": {"strneq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}},
-        ],
+        [{"and": {"strneq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}}],
     )
     def test__add_task_dependency_operator(self, config, instance, root):
         instance._add_task_dependency_operand_operator(e=root, config=config)

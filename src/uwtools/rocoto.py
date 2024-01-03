@@ -113,7 +113,6 @@ class _RocotoXML:
         :param config: Configuration data for the child element.
         :param tag: Name of child element to add.
         """
-        config = config[tag]
         e = SubElement(e, tag)
         if isinstance(config, str):
             e.text = config
@@ -179,7 +178,7 @@ class _RocotoXML:
             STR.stdout,
         ):
             if tag in config:
-                self._add_compound_time_string(e, config, tag)
+                self._add_compound_time_string(e, config[tag], tag)
         for name, value in config.get(STR.envars, {}).items():
             self._add_task_envar(e, name, value)
         if STR.dependency in config:
@@ -202,8 +201,19 @@ class _RocotoXML:
                 self._add_task_dependency_operand_operator(e, config={tag: subconfig})
             elif tag in strequality:
                 self._add_task_dependency_strequality(e, subconfig=subconfig, tag=tag)
+            elif tag == STR.datadep:
+                self._add_task_dependency_datadep(e, subconfig)
             else:
                 raise UWConfigError("Unhandled dependency type %s" % tag)
+
+    def _add_task_dependency_datadep(self, e: Element, config: dict) -> None:
+        """
+        Add a <datadep> element to the <dependency>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        self._add_compound_time_string(e, config[STR.value], STR.datadep)
 
     def _add_task_dependency_operand_operator(self, e: Element, config: dict) -> None:
         """
@@ -219,7 +229,7 @@ class _RocotoXML:
                 if tag == STR.taskdep:
                     self._set_attrs(SubElement(e, tag), subconfig)
                 else:
-                    self._add_compound_time_string(e, config, tag)
+                    self._add_compound_time_string(e, config[tag], tag)
             elif tag in operators:
                 self._add_task_dependency_operand_operator(SubElement(e, tag), config=subconfig)
             elif tag in strequality:
@@ -278,7 +288,8 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param logfile: The path to the log file.
         """
-        self._add_compound_time_string(e, config, STR.log)
+        tag = STR.log
+        self._add_compound_time_string(e, config[tag], tag)
 
     def _add_workflow_tasks(self, e: Element, config: dict) -> None:
         """
@@ -307,7 +318,7 @@ class _RocotoXML:
         """
         Returns a tuple for each of the respective dependency types.
         """
-        operands = (STR.datadep, STR.taskdep, STR.timedep)
+        operands = (STR.taskdep, STR.timedep)
         operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
         strequality = (STR.streq, STR.strneq)
         return operands, operators, strequality
