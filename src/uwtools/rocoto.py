@@ -160,7 +160,7 @@ class _RocotoXML:
             STR.walltime,
         ):
             if tag in config:
-                SubElement(e, tag).text = config[tag]
+                SubElement(e, tag).text = str(config[tag])
         for tag in (
             STR.command,
             STR.deadline,

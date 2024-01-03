@@ -177,6 +177,12 @@ class Test__RocotoXML:
         mocks["_add_task_dependency"].assert_called_once_with(task, "qux")
         mocks["_add_task_envar"].assert_called_once_with(task, "A", "apple")
 
+    @pytest.mark.parametrize("cores", [1, "1"])
+    def test__add_task_cores_int_or_str(self, cores, instance, root):
+        # Ensure that either int or str "cores" values are accepted.
+        config = {"command": "c", "cores": cores, "walltime": "00:00:01"}
+        instance._add_task(e=root, config=config, taskname="foo")
+
     def test__add_task_dependency(self, instance, root):
         config = {"taskdep": {"attrs": {"task": "foo"}}}
         instance._add_task_dependency(e=root, config=config)
