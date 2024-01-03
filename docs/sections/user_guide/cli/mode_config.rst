@@ -59,7 +59,92 @@ The ``uw`` mode for handling configs.
 Examples
 ~~~~~~~~
 
-TBD
+The examples that follow use YAML file ``values.yaml`` with content
+
+.. code:: sh
+  values:
+    greeting: Hello
+    recipient: World
+
+and namelist file ``values.nml`` with content
+
+.. code:: sh
+&values
+  greeting = "Hello"
+  recipient = "World"
+/
+
+
+* Compare two config files with the same contents:
+
+  .. code:: sh
+
+    $ uw config compare --file-1-path values.yaml --file-2-path values.nml
+[2024-01-03T16:20:46]     INFO - values.yaml
+[2024-01-03T16:20:46]     INFO + values.nml
+[2024-01-03T16:20:46]     INFO ---------------------------------------------------------------------
+
+
+* If there are differences between the config files, they will be shown below the dashed line. For example, with ``recipient: World`` removed from ``values.yaml``:
+
+  .. code:: sh
+
+[2024-01-03T16:23:29]     INFO - values.yaml
+[2024-01-03T16:23:29]     INFO + values.nml
+[2024-01-03T16:23:29]     INFO ---------------------------------------------------------------------
+[2024-01-03T16:23:29]     INFO values:       recipient:  - None + World
+
+
+* Currently, file paths must be provided explicitly. If either or both input files are read alone from ``stdin``, ``uw`` will not know how to parse its content:
+
+  .. code:: sh
+
+    $ cat values.yaml | uw config compare --file-2-path values.nml
+    uw config compare: error: the following arguments are required: --file-1-path
+
+* If a config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its content:
+
+  .. code:: sh
+
+    $ uw config compare --file-1-path values.txt --file-2-path values.nml
+    Cannot deduce format of 'values.txt' from unknown extension 'txt'
+
+  In this case, the format can be explicitly specified:
+
+  .. code:: sh
+
+    $ uw config compare --file-1-path values.txt --file-1-format yaml --file-2-path values.nml
+[2024-01-03T16:33:19]     INFO - values.txt
+[2024-01-03T16:33:19]     INFO + values.nml
+[2024-01-03T16:33:19]     INFO ---------------------------------------------------------------------
+[2024-01-03T16:33:19]     INFO values:       recipient:  - None + World
+
+* Request verbose log output:
+
+  .. code:: sh
+
+$ uw config compare --file-1-path values.yaml --file-2-path values.nml --verbose
+[2024-01-03T16:25:47]    DEBUG Command: uw config compare --file-1-path values.yaml --file-2-path values.nml --verbose
+[2024-01-03T16:25:47]     INFO - values.yaml
+[2024-01-03T16:25:47]     INFO + values.nml
+[2024-01-03T16:25:47]     INFO ---------------------------------------------------------------------
+[2024-01-03T16:25:47]     INFO values:       recipient:  - None + World
+
+  Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
+
+  .. code:: sh
+
+    $ uw config compare --file-1-path values.yaml --file-2-path values.nml --verbose 2>compare.log
+
+  The content of ``realized.log``:
+
+  .. code:: sh
+
+[2024-01-03T16:26:18]    DEBUG Command: uw config compare --file-1-path values.yaml --file-2-path values.nml --verbose
+[2024-01-03T16:26:18]     INFO - values.yaml
+[2024-01-03T16:26:18]     INFO + values.nml
+[2024-01-03T16:26:18]     INFO ---------------------------------------------------------------------
+[2024-01-03T16:26:18]     INFO values:       recipient:  - None + World
 
 .. _realize_configs_cli_examples:
 
@@ -103,7 +188,148 @@ TBD
 Examples
 ~~~~~~~~
 
-TBD
+The examples that follow use YAML file ``values.yaml`` with content
+
+.. code:: sh
+  values:
+    greeting: Hello
+    recipient: World
+
+* Show the values needed to realize the config file to YAML:
+
+  .. code:: sh
+
+    $ uw config realize --input-file values.yaml --output-format yaml --values-needed
+[2024-01-03T15:35:29]     INFO Keys that are complete:
+[2024-01-03T15:35:29]     INFO     values
+[2024-01-03T15:35:29]     INFO     values.greeting
+[2024-01-03T15:35:29]     INFO     values.recipient
+[2024-01-03T15:35:29]     INFO 
+[2024-01-03T15:35:29]     INFO Keys that have unfilled Jinja2 templates:
+[2024-01-03T15:35:29]     INFO 
+[2024-01-03T15:35:29]     INFO Keys that are set to empty:
+
+* To realize the config to ``stdout``, a target output format must be explicitly specified:
+
+  .. code:: sh
+
+    $ uw config realize --input-file values.yaml --output-format yaml
+  values:
+    greeting: Hello
+    recipient: World
+
+  Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
+
+* Realize the config to a file via command-line argument:
+
+  .. code:: sh
+
+    $ uw config realize --input-file values.yaml --output-file realized.yaml
+
+  The content of ``realized.yaml``:
+
+  .. code:: sh
+
+  values:
+    greeting: Hello
+    recipient: World
+
+* With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
+
+  .. code:: sh
+
+    $ uw config realize --input-file values.yaml --output-file realized.yaml --dry-run
+[2024-01-03T15:39:23]     INFO values:
+  greeting: Hello
+  recipient: World
+
+
+* If an input file is read alone from ``stdin``, ``uw`` will not know how to parse its content:
+
+  .. code:: sh
+
+    $ cat values.yaml | uw config realize --output-file realized.yaml
+    Specify --input-format when --input-file is not specified
+
+* Read the config from ``stdin`` and realize to ``stdout``:
+
+  .. code:: sh
+
+    $ cat values.yaml | uw config realize --input-format yaml --output-format yaml
+  values:
+    greeting: Hello
+    recipient: World
+
+
+* If the config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its content:
+
+  .. code:: sh
+
+    $ uw config realize --input-file values.txt --output-format yaml
+    Cannot deduce format of 'values.txt' from unknown extension 'txt'
+
+  In this case, the format can be explicitly specified:
+
+  .. code:: sh
+
+    $ uw config realize --input-file values.txt  --input-format yaml --output-format yaml
+  values:
+    greeting: Hello
+    recipient: World
+
+
+* Request verbose log output:
+
+  .. code:: sh
+
+$ uw config realize --input-file values.yaml --output-format yaml --verbose
+[2024-01-03T15:56:28]    DEBUG Command: uw config realize --input-file values.yaml --output-format yaml --verbose
+[2024-01-03T15:56:28]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+[2024-01-03T15:56:28]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+[2024-01-03T15:56:28]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World'}
+[2024-01-03T15:56:28]    DEBUG Rendering: Hello
+[2024-01-03T15:56:28]    DEBUG Rendering: World
+[2024-01-03T15:56:28]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+values:
+  greeting: Hello
+  recipient: World
+
+  Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
+
+  .. code:: sh
+
+    $ uw config realize --input-file values.yaml --output-format yaml --verbose >realized.yaml 2>realized.log
+
+  The content of ``realized.yaml``:
+
+  .. code:: sh
+
+    values:
+  greeting: Hello
+  recipient: World
+
+  The content of ``realized.log``:
+
+  .. code:: sh
+
+[2024-01-03T15:58:07]    DEBUG Command: uw config realize --input-file values.yaml --output-format yaml --verbose
+[2024-01-03T15:58:07]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+[2024-01-03T15:58:07]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+[2024-01-03T15:58:07]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World'}
+[2024-01-03T15:58:07]    DEBUG Rendering: Hello
+[2024-01-03T15:58:07]    DEBUG Rendering: World
+[2024-01-03T15:58:07]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+
+* It is important to note that ``uw`` does not allow invalid conversions. 
+
+  For example, if you try to generate an ``sh`` config from a depth-2 ``yaml``:
+
+  .. code:: sh
+
+    $ uw config realize --input-file values.yaml --output-format sh
+    Cannot realize depth-2 config to type-'sh' config
+
+  Note that ``ini`` and ``nml`` configs are, by definition, depth-2 configs, while ``sh`` configs are depth-1 and ``yaml`` configs have arbitrary depth.
 
 .. _translate_configs_cli_examples:
 
@@ -138,7 +364,55 @@ TBD
 Examples
 ~~~~~~~~
 
-TBD
+The examples that follow use atparse-formatted template file ``atparse.txt`` with content
+
+.. code:: sh
+  @[greeting], @[recipient]!
+
+
+* Convert an atparse-formatted template file to Jinja2 format:
+
+  .. code:: sh
+
+    $ uw config translate --input-file atparse.txt --input-format atparse --output-format jinja2
+   {{greeting}}, {{recipient}}!
+
+  Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
+
+* Convert the template to a file via command-line argument:
+
+  .. code:: sh
+
+    $ uw config realize --input-file values.yaml --output-file realized.yaml
+
+  The content of ``jinja2.txt``:
+
+  .. code:: sh
+
+  {{greeting}}, {{recipient}}!
+
+* With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
+
+  .. code:: sh
+
+    $ uw config translate --input-file atparse.txt --input-format atparse --output-format jinja2 --dry-run
+  [2024-01-03T16:41:13]     INFO {{greeting}}, {{recipient}}!
+
+
+* If an input file is read alone from ``stdin``, ``uw`` know how to parse its content as we must always specify the formats:
+
+  .. code:: sh
+
+    $ cat atparse.txt | uw config translate --input-format atparse --output-format jinja2
+  {{greeting}}, {{recipient}}!
+
+
+* Request verbose log output:
+
+  .. code:: sh
+
+$ uw config translate --input-file atparse.txt --input-format atparse --output-format jinja2 --verbose
+  {{greeting}}, {{recipient}}!
 
 .. _validate_configs_cli_examples:
 
