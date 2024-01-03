@@ -443,4 +443,112 @@ $ uw config translate --input-file atparse.txt --input-format atparse --output-f
 Examples
 ~~~~~~~~
 
-TBD
+The examples that follow use JSON Schema file ``schema.jsonschema`` with content
+
+.. code:: sh
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "values": {
+      "type": "object",
+      "properties": {
+        "greeting": {
+          "type": "string"
+        },
+        "recipient": {
+          "type": "string"
+        }
+      },
+      "required": ["greeting", "recipient"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["values"],
+  "additionalProperties": false
+}
+
+
+and YAML file ``values.yaml`` with content
+
+.. code:: sh
+
+values:
+  greeting: Hello
+  recipient: World
+
+* Validate a YAML config against a given JSON schema:
+
+  .. code:: sh
+
+    $ uw config validate --schema-file schema.jsonschema --input-file values.yaml
+    [2024-01-03T17:23:07]     INFO 0 schema-validation errors found
+
+  Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
+
+
+* Read the config from ``stdin`` and render to ``stdout``:
+
+  .. code:: sh
+
+    $ cat values.yaml | uw config validate --schema-file schema.jsonschema
+    [2024-01-03T17:26:29]     INFO 0 schema-validation errors found
+
+
+* However, you cannot read the schema from ``stdin`` and render to ``stdout``:
+
+  .. code:: sh
+
+    $ cat schema.jsonschema | uw config validate -input-file values.yaml
+    uw config validate: error: the following arguments are required: --schema-file
+
+* If there are differences between the config files, they will be shown with the schema. For example, with ``recipient: World`` removed from ``values.yaml``:
+
+  .. code:: sh
+
+    $ uw config validate --schema-file schema.jsonschema --input-file values.yaml
+[2024-01-03T17:31:19]    ERROR 1 schema-validation error found
+[2024-01-03T17:31:19]    ERROR 'recipient' is a required property
+[2024-01-03T17:31:19]    ERROR 
+[2024-01-03T17:31:19]    ERROR Failed validating 'required' in schema['properties']['values']:
+[2024-01-03T17:31:19]    ERROR     {'additionalProperties': False,
+[2024-01-03T17:31:19]    ERROR      'properties': {'greeting': {'type': 'string'},
+[2024-01-03T17:31:19]    ERROR                     'recipient': {'type': 'string'}},
+[2024-01-03T17:31:19]    ERROR      'required': ['greeting', 'recipient'],
+[2024-01-03T17:31:19]    ERROR      'type': 'object'}
+[2024-01-03T17:31:19]    ERROR 
+[2024-01-03T17:31:19]    ERROR On instance['values']:
+[2024-01-03T17:31:19]    ERROR     {'greeting': 'Hello'}
+
+* Request verbose log output:
+
+  .. code:: sh
+
+    $ uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
+[2024-01-03T17:29:46]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
+[2024-01-03T17:29:46]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+[2024-01-03T17:29:46]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+[2024-01-03T17:29:46]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World'}
+[2024-01-03T17:29:46]    DEBUG Rendering: Hello
+[2024-01-03T17:29:46]    DEBUG Rendering: World
+[2024-01-03T17:29:46]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+[2024-01-03T17:29:46]     INFO 0 schema-validation errors found
+
+  Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
+
+  .. code:: sh
+
+    $ uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose 2>validate.log
+
+  The content of ``validate.log``:
+
+  .. code:: sh
+
+[2024-01-03T17:30:49]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
+[2024-01-03T17:30:49]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+[2024-01-03T17:30:49]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+[2024-01-03T17:30:49]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World'}
+[2024-01-03T17:30:49]    DEBUG Rendering: Hello
+[2024-01-03T17:30:49]    DEBUG Rendering: World
+[2024-01-03T17:30:49]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+[2024-01-03T17:30:49]     INFO 0 schema-validation errors found
