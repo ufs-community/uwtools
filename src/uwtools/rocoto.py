@@ -118,10 +118,12 @@ class _RocotoXML:
             e.text = config
         else:
             self._set_attrs(e, config)
-            if config := config.get(STR.cyclestr, {}):
+            if subconfig := config.get(STR.cyclestr, {}):
                 cyclestr = SubElement(e, STR.cyclestr)
-                cyclestr.text = config["value"]
-                self._set_attrs(cyclestr, config)
+                cyclestr.text = subconfig[STR.value]
+                self._set_attrs(cyclestr, subconfig)
+            elif value := config.get(STR.value, {}):
+                e.text = value
 
     def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
         """
@@ -213,7 +215,7 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        self._add_compound_time_string(e, config[STR.value], STR.datadep)
+        self._add_compound_time_string(e, config, STR.datadep)
 
     def _add_task_dependency_operand_operator(self, e: Element, config: dict) -> None:
         """

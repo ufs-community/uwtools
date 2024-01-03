@@ -181,15 +181,6 @@ class Test__RocotoXML:
         config = {"command": "c", "cores": cores, "walltime": "00:00:01"}
         instance._add_task(e=root, config=config, taskname="foo")
 
-    def test__add_task_dependency(self, instance, root):
-        config = {"taskdep": {"attrs": {"task": "foo"}}}
-        instance._add_task_dependency(e=root, config=config)
-        dependency = root[0]
-        assert dependency.tag == "dependency"
-        taskdep = dependency[0]
-        assert taskdep.tag == "taskdep"
-        assert taskdep.get("task") == "foo"
-
     def test__add_task_dependency_and(self, instance, root):
         config = {"and": {"or_get_obs": {"taskdep": {"attrs": {"age": "120"}}}}}
         instance._add_task_dependency(e=root, config=config)
@@ -198,6 +189,20 @@ class Test__RocotoXML:
         and_ = dependency[0]
         assert and_.tag == "and"
         assert and_.getchildren()[0].getchildren()[0].get("age") == "120"
+
+    def test__add_task_dependency_datadep(self, instance, root):
+        age = "00:00:02:00"
+        minsize = "1K"
+        value = "/some/file"
+        config = {"datadep": {"attrs": {"age": age, "minsize": minsize}, "value": value}}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        child = dependency[0]
+        assert child.tag == "datadep"
+        assert child.get("age") == age
+        assert child.get("minsize") == minsize
+        assert child.text == value
 
     def test__add_task_dependency_fail(self, instance, root):
         config = {"unrecognized": "whatever"}
@@ -253,6 +258,15 @@ class Test__RocotoXML:
         assert tag == element.tag
         for attr, val in subconfig["attrs"].items():
             assert element.get(attr) == val
+
+    def test__add_task_dependency_taskdep(self, instance, root):
+        config = {"taskdep": {"attrs": {"task": "foo"}}}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        child = dependency[0]
+        assert child.tag == "taskdep"
+        assert child.get("task") == "foo"
 
     def test__config_validate_config(self, assets, instance):
         cfgfile, _ = assets
