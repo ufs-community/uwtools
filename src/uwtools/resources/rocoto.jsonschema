@@ -195,10 +195,10 @@
       "maxProperties": 3,
       "minProperties": 2,
       "patternProperties": {
-        "^metatask(_.*)?$": {
+        "^metatask(_.+)?$": {
           "$ref": "#/$defs/metatask"
         },
-        "^task(_.*)?$": {
+        "^task_.+$": {
           "$ref": "#/$defs/task"
         }
       },
@@ -495,10 +495,10 @@
           "additionalProperties": false,
           "minProperties": 1,
           "patternProperties": {
-            "^metatask(_.*)?$": {
+            "^metatask(_.+)?$": {
               "$ref": "#/$defs/metatask"
             },
-            "^task(_.*)?$": {
+            "^task_.+$": {
               "$ref": "#/$defs/task"
             }
           },

@@ -151,8 +151,7 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         :param taskname: The name of the task being defined.
         """
-        kwargs = {"name": taskname} if taskname else {}
-        e = SubElement(e, STR.task, **kwargs)
+        e = SubElement(e, STR.task, name=taskname)
         self._set_attrs(e, config)
         self._set_and_render_jobname(config, taskname)
         for tag in (
