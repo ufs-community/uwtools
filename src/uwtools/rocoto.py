@@ -105,13 +105,14 @@ class _RocotoXML:
         with writable(path) as f:
             f.write(str(self).strip())
 
-    def _add_compound_time_string(self, e: Element, config: dict, tag: str) -> None:
+    def _add_compound_time_string(self, e: Element, config: dict, tag: str) -> Element:
         """
         Add to the given element a child element possibly containing a <cyclestr>.
 
         :param e: The element to add the child element to.
         :param config: Configuration data for the child element.
         :param tag: Name of child element to add.
+        :return: The child element.
         """
         e = SubElement(e, tag)
         if isinstance(config, str):
@@ -122,8 +123,7 @@ class _RocotoXML:
                 cyclestr = SubElement(e, STR.cyclestr)
                 cyclestr.text = subconfig[STR.value]
                 self._set_attrs(cyclestr, subconfig)
-            elif value := config.get(STR.value, {}):
-                e.text = value
+        return e
 
     def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
         """
@@ -215,7 +215,8 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        self._add_compound_time_string(e, config, STR.datadep)
+        e = self._add_compound_time_string(e, config[STR.value], STR.datadep)
+        self._set_attrs(e, config)
 
     def _add_task_dependency_operand_operator(self, e: Element, config: dict) -> None:
         """

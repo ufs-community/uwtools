@@ -190,10 +190,10 @@ class Test__RocotoXML:
         assert and_.tag == "and"
         assert and_.getchildren()[0].getchildren()[0].get("age") == "120"
 
-    def test__add_task_dependency_datadep(self, instance, root):
+    @pytest.mark.parametrize("value", ["/some/file", {"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "06:00:00"}}}])
+    def test__add_task_dependency_datadep(self, instance, root, value):
         age = "00:00:02:00"
         minsize = "1K"
-        value = "/some/file"
         config = {"datadep": {"attrs": {"age": age, "minsize": minsize}, "value": value}}
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
@@ -202,7 +202,7 @@ class Test__RocotoXML:
         assert child.tag == "datadep"
         assert child.get("age") == age
         assert child.get("minsize") == minsize
-        assert child.text == value
+        assert child.text == value if isinstance(value, str) else value["cyclestr"]["value"]
 
     def test__add_task_dependency_fail(self, instance, root):
         config = {"unrecognized": "whatever"}
