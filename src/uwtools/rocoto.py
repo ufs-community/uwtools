@@ -33,7 +33,7 @@ def realize_rocoto_xml(
     xml = str(rxml)
     assert validate_rocoto_xml_string(xml) is True
     with writable(output_file) as f:
-        print(xml, file=f)
+        print(xml.strip(), file=f)
     return xml
 
 
