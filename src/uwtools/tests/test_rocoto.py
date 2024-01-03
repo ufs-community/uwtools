@@ -228,7 +228,7 @@ class Test__RocotoXML:
 
     def test__add_task_dependency_operator_datadep_operand(self, instance, root):
         value = "/some/file"
-        config = {"datadep": {"value" : value}}
+        config = {"datadep": {"value": value}}
         instance._add_task_dependency_operator(e=root, config=config)
         e = root[0]
         assert e.tag == "datadep"
