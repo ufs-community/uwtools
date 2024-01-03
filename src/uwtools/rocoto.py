@@ -4,6 +4,7 @@ Support for creating Rocoto XML workflow documents.
 
 import re
 from dataclasses import dataclass
+from math import log10
 from typing import List, Optional, Tuple, Union
 
 from lxml import etree
@@ -12,7 +13,7 @@ from lxml.etree import Element, SubElement
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import dereference
 from uwtools.config.validator import validate_yaml
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.types import OptionalPath
 from uwtools.utils.file import readable, resource_pathobj, writable
@@ -30,10 +31,11 @@ def realize_rocoto_xml(
     :return: An XML string.
     """
     rxml = _RocotoXML(config)
-    xml = str(rxml)
-    assert validate_rocoto_xml_string(xml) is True
+    xml = str(rxml).strip()
+    if not validate_rocoto_xml_string(xml):
+        raise UWError("Internal error: Invalid Rocoto XML")
     with writable(output_file) as f:
-        print(xml.strip(), file=f)
+        print(xml, file=f)
     return xml
 
 
@@ -64,6 +66,12 @@ def validate_rocoto_xml_string(xml: str) -> bool:
     log_method("%s Rocoto validation error%s found", nerr, "" if nerr == 1 else "s")
     for err in list(schema.error_log):
         log.error(err)
+    if not valid:
+        log.error("Invalid Rocoto XML:")
+        lines = xml.split("\n")
+        fmtstr = "%{n}d %s".format(n=int(log10(len(lines))) + 1)
+        for n, line in enumerate(lines):
+            log.error(fmtstr % (n + 1, line))
     return valid
 
 
@@ -143,7 +151,8 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         :param taskname: The name of the task being defined.
         """
-        e = SubElement(e, STR.task, name=taskname)
+        kwargs = {"name": taskname} if taskname else {}
+        e = SubElement(e, STR.task, **kwargs)
         self._set_attrs(e, config)
         self._set_and_render_jobname(config, taskname)
         for tag in (

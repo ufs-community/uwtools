@@ -14,7 +14,7 @@ from pytest import fixture, raises
 from uwtools import rocoto
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import _validation_errors
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import resource_pathobj
 
@@ -59,7 +59,7 @@ def test_realize_rocoto_invalid_xml(assets):
     cfgfile, outfile = assets
     with patch.object(rocoto, "validate_rocoto_xml_string") as vrxs:
         vrxs.return_value = False
-        with raises(AssertionError):
+        with raises(UWError):
             rocoto.realize_rocoto_xml(config=cfgfile, output_file=outfile)
 
 

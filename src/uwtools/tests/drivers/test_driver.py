@@ -97,6 +97,6 @@ def test_validation(caplog, configs, schema, tmp_path, valid):
         log.setLevel(logging.INFO)
         ConcreteDriver(config_file=config_file)
         if valid:
-            assert logged(caplog, "0 schema-validation errors found")
+            assert logged(caplog, "0 UW schema-validation errors found")
         else:
-            assert logged(caplog, "2 schema-validation errors found")
+            assert logged(caplog, "2 UW schema-validation errors found")
