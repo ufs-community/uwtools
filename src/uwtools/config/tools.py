@@ -209,6 +209,7 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
     Print a report characterizing input values as complete, empty, or template placeholders.
 
     :param input_obj: The config to update.
+    :return: True
     """
     complete, empty, template = input_obj.characterize_values(input_obj.data, parent="")
     if complete:
