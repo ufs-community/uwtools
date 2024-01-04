@@ -289,7 +289,7 @@ def test__dispatch_config_translate_unsupported():
 
 def test__dispatch_config_validate_config_obj():
     config = uwtools.api.config._YAMLConfig(config={})
-    args = {STR.schemafile: 1, STR.config: config}
+    args = {STR.schemafile: 1, STR.infile: config}
     with patch.object(uwtools.api.config, "_validate_yaml") as _validate_yaml:
         cli._dispatch_config_validate(args)
     _validate_yaml.assert_called_once_with(**args)
