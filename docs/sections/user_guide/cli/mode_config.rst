@@ -59,15 +59,7 @@ The ``uw`` mode for handling configs.
 Examples
 ~~~~~~~~
 
-The examples that follow use YAML file ``values.yaml`` with content
-
-.. code:: sh
-
-  values:
-    greeting: Hello
-    recipient: World
-
-and namelist file ``values.nml`` with content
+The examples that follow use namelist files ``values.nml`` and ``values2.nml`` with content
 
 .. code:: sh
 
@@ -81,18 +73,18 @@ and namelist file ``values.nml`` with content
 
   .. code:: sh
 
-    $ uw config compare --file-1-path values.yaml --file-2-path values.nml
-    [2024-01-03T16:20:46]     INFO - values.yaml
-    [2024-01-03T16:20:46]     INFO + values.nml
+    $ uw config compare --file-1-path values.mml --file-2-path values2.nml
+    [2024-01-03T16:20:46]     INFO - values.nml
+    [2024-01-03T16:20:46]     INFO + values2.nml
     [2024-01-03T16:20:46]     INFO ---------------------------------------------------------------------
 
 
-* If there are differences between the config files, they will be shown below the dashed line. For example, with ``recipient: World`` removed from ``values.yaml``:
+* If there are differences between the config files, they will be shown below the dashed line. For example, with ``recipient: World`` removed from ``values.nml``:
 
   .. code:: sh
 
-    [2024-01-03T16:23:29]     INFO - values.yaml
-    [2024-01-03T16:23:29]     INFO + values.nml
+    [2024-01-03T16:23:29]     INFO - values.nml
+    [2024-01-03T16:23:29]     INFO + values2.nml
     [2024-01-03T16:23:29]     INFO ---------------------------------------------------------------------
     [2024-01-03T16:23:29]     INFO values:       recipient:  - None + World
 
@@ -108,7 +100,7 @@ and namelist file ``values.nml`` with content
 
   .. code:: sh
 
-    $ uw config compare --file-1-path values.txt --file-1-format yaml --file-2-path values.nml
+    $ uw config compare --file-1-path values.txt --file-1-format nml --file-2-path values.nml
     [2024-01-03T16:33:19]     INFO - values.txt
     [2024-01-03T16:33:19]     INFO + values.nml
     [2024-01-03T16:33:19]     INFO ---------------------------------------------------------------------
@@ -118,26 +110,26 @@ and namelist file ``values.nml`` with content
 
   .. code:: sh
 
-    $ uw config compare --file-1-path values.yaml --file-2-path values.nml --verbose
-    [2024-01-03T16:25:47]    DEBUG Command: uw config compare --file-1-path values.yaml --file-2-path values.nml --verbose
-    [2024-01-03T16:25:47]     INFO - values.yaml
-    [2024-01-03T16:25:47]     INFO + values.nml
+    $ uw config compare --file-1-path values.nml --file-2-path values2.nml --verbose
+    [2024-01-03T16:25:47]    DEBUG Command: uw config compare --file-1-path values.nml --file-2-path values2.nml --verbose
+    [2024-01-03T16:25:47]     INFO - values.nml
+    [2024-01-03T16:25:47]     INFO + values2.nml
     [2024-01-03T16:25:47]     INFO ---------------------------------------------------------------------
     [2024-01-03T16:25:47]     INFO values:       recipient:  - None + World
 
-  Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
+  Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
 
   .. code:: sh
 
-    $ uw config compare --file-1-path values.yaml --file-2-path values.nml --verbose 2>compare.log
+    $ uw config compare --file-1-path values.nml --file-2-path values2.nml --verbose 2>compare.log
 
   The content of ``compare.log``:
 
   .. code:: sh
 
-    [2024-01-03T16:26:18]    DEBUG Command: uw config compare --file-1-path values.yaml --file-2-path values.nml --verbose
-    [2024-01-03T16:26:18]     INFO - values.yaml
-    [2024-01-03T16:26:18]     INFO + values.nml
+    [2024-01-03T16:26:18]    DEBUG Command: uw config compare --file-1-path values.nml --file-2-path values2.nml --verbose
+    [2024-01-03T16:26:18]     INFO - values.mml
+    [2024-01-03T16:26:18]     INFO + values3.nml
     [2024-01-03T16:26:18]     INFO ---------------------------------------------------------------------
     [2024-01-03T16:26:18]     INFO values:       recipient:  - None + World
 
@@ -484,11 +476,11 @@ and YAML file ``values.yaml`` with content
     [2024-01-03T17:26:29]     INFO 0 schema-validation errors found
 
 
-* However, reading the schema from ``stdin`` is not supported:
+* However, reading the schema from ``stdin`` is **not** supported:
 
   .. code:: sh
 
-    $ cat schema.jsonschema | uw config validate -input-file values.yaml
+    $ cat schema.jsonschema | uw config validate --input-file values.yaml
     uw config validate: error: the following arguments are required: --schema-file
 
 * If a config fails validation, differences from the schema will be displayed. For example, with ``recipient: World`` removed from ``values.yaml``:
@@ -523,7 +515,7 @@ and YAML file ``values.yaml`` with content
     [2024-01-03T17:29:46]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
     [2024-01-03T17:29:46]     INFO 0 schema-validation errors found
 
-  Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
+  Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
 
   .. code:: sh
 
