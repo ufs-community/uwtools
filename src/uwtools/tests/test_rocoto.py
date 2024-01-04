@@ -217,38 +217,39 @@ class Test__RocotoXML:
         with raises(UWConfigError):
             instance._add_task_dependency(e=root, config=config)
 
-    # @pytest.mark.parametrize(
-    #     "config",
-    #     [{"and": {"strneq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}}],
-    # )
-    # def test__add_task_dependency_operator(self, config, instance, root):
-    #     instance._add_task_dependency_operator(e=root, config=config)
-    #     for tag, _ in config.items():
-    #         assert tag == next(iter(config))
+    @pytest.mark.parametrize(
+        "tag_config",
+        [("and", {"strneq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}})],
+    )
+    def test__add_task_dependency_operator(self, instance, root, tag_config):
+        tag, config = tag_config
+        instance._add_task_dependency_child(e=root, config=config, tag=tag)
+        for tag, _ in config.items():
+            assert tag == next(iter(config))
 
-    # def test__add_task_dependency_operator_datadep_operand(self, instance, root):
-    #     value = "/some/file"
-    #     config = {"datadep": {"value": value}}
-    #     instance._add_task_dependency_operator(e=root, config=config)
-    #     e = root[0]
-    #     assert e.tag == "datadep"
-    #     assert e.text == value
+    def test__add_task_dependency_operator_datadep_operand(self, instance, root):
+        value = "/some/file"
+        config = {"value": value}
+        instance._add_task_dependency_child(e=root, config=config, tag="datadep")
+        e = root[0]
+        assert e.tag == "datadep"
+        assert e.text == value
 
-    # def test__add_task_dependency_operator_task_operand(self, instance, root):
-    #     taskname = "some-task"
-    #     config = {"taskdep": {"attrs": {"task": taskname}}}
-    #     instance._add_task_dependency_operator(e=root, config=config)
-    #     e = root[0]
-    #     assert e.tag == "taskdep"
-    #     assert e.get("task") == taskname
+    def test__add_task_dependency_operator_task_operand(self, instance, root):
+        taskname = "some-task"
+        config = {"attrs": {"task": taskname}}
+        instance._add_task_dependency_child(e=root, config=config, tag="taskdep")
+        e = root[0]
+        assert e.tag == "taskdep"
+        assert e.get("task") == taskname
 
-    # def test__add_task_dependency_operator_timedep_operand(self, instance, root):
-    #     value = 20230103120000
-    #     config = {"timedep": value}
-    #     instance._add_task_dependency_operator(e=root, config=config)
-    #     e = root[0]
-    #     assert e.tag == "timedep"
-    #     assert e.text == str(value)
+    def test__add_task_dependency_operator_timedep_operand(self, instance, root):
+        value = 20230103120000
+        config = value
+        instance._add_task_dependency_child(e=root, config=config, tag="timedep")
+        e = root[0]
+        assert e.tag == "timedep"
+        assert e.text == str(value)
 
     def test__add_task_dependency_streq(self, instance, root):
         config = {"streq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}
