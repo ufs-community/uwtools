@@ -602,3 +602,16 @@ def test__realize_config_values_needed(caplog, tmp_path):
     assert "Keys that are complete:\n    1" in msgs
     assert "Keys with unrendered Jinja2 variables/expressions:\n    2" in msgs
     assert "Keys that are set to empty:\n    3" in msgs
+
+
+def test__realize_config_values_needed_negative_results(caplog, tmp_path):
+    log.setLevel(logging.INFO)
+    path = tmp_path / "a.yaml"
+    with writable(path) as f:
+        yaml.dump({}, f)
+    c = YAMLConfig(config=path)
+    tools._realize_config_values_needed(input_obj=c)
+    msgs = "\n".join(record.message for record in caplog.records)
+    assert "No keys are complete." in msgs
+    assert "No keys have unrendered Jinja2 variables/expressions." in msgs
+    assert "No keys are set to empty." in msgs
