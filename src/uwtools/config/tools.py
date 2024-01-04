@@ -215,7 +215,7 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
     for var in complete:
         log.info(var)
     log.info("")
-    log.info("Keys that have unfilled Jinja2 templates:")
+    log.info("Keys with unrendered Jinja2 variables/expressions:")
     for var in template:
         log.info(var)
     log.info("")
