@@ -62,6 +62,7 @@ Examples
 The examples that follow use YAML file ``values.yaml`` with content
 
 .. code:: sh
+
   values:
     greeting: Hello
     recipient: World
@@ -69,6 +70,7 @@ The examples that follow use YAML file ``values.yaml`` with content
 and namelist file ``values.nml`` with content
 
 .. code:: sh
+
   &values
     greeting = "Hello"
     recipient = "World"
@@ -191,6 +193,7 @@ Examples
 The examples that follow use YAML file ``values.yaml`` with content
 
 .. code:: sh
+
   values:
     greeting: Hello
     recipient: World
