@@ -182,8 +182,18 @@ The examples that follow use YAML file ``values.yaml`` with content
   values:
     greeting: Hello
     recipient: World
+    date: '{{ yyyymmdd }}'
+    empty:
 
-* Show the values needed to realize the config file to YAML:
+and supplemental YAML file ``supp.yaml`` with content
+
+.. code:: sh
+
+  values:
+    greeting: Good Night
+    recipient: Moon
+
+* Show the values in the input config file that have unfilled Jinja2 templates or empty keys:
 
   .. code:: sh
 
@@ -194,8 +204,10 @@ The examples that follow use YAML file ``values.yaml`` with content
     [2024-01-03T15:35:29]     INFO     values.recipient
     [2024-01-03T15:35:29]     INFO 
     [2024-01-03T15:35:29]     INFO Keys that have unfilled Jinja2 templates:
+    [2024-01-03T15:35:29]     INFO     values.date: {{ yyyymmdd }}
     [2024-01-03T15:35:29]     INFO 
     [2024-01-03T15:35:29]     INFO Keys that are set to empty:
+    [2024-01-03T15:35:29]     INFO     values.empty
 
 * To realize the config to ``stdout``, a target output format must be explicitly specified:
 
@@ -205,8 +217,21 @@ The examples that follow use YAML file ``values.yaml`` with content
     values:
       greeting: Hello
       recipient: World
+      date: '{{ yyyymmdd }}'
+      empty: null
 
   Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
+
+* Existing values can be overwritten and Jinja2 variables can be filled in by appending supplemental files to the end of the argument:
+
+  .. code:: sh
+
+    $ uw config realize --input-file values.yaml --output-format yaml supp.yaml
+    values:
+      greeting: Good Night
+      recipient: Moon
+      date: '{{ yyyymmdd }}'
+      empty: null
 
 * Realize the config to a file via command-line argument:
 
@@ -221,6 +246,8 @@ The examples that follow use YAML file ``values.yaml`` with content
       values:
         greeting: Hello
         recipient: World
+        date: '{{ yyyymmdd }}'
+        empty: null
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
@@ -230,6 +257,8 @@ The examples that follow use YAML file ``values.yaml`` with content
     [2024-01-03T15:39:23]     INFO values:
       greeting: Hello
       recipient: World
+      date: '{{ yyyymmdd }}'
+      empty: null
 
 
 * If an input file is read alone from ``stdin``, ``uw`` will not know how to parse its content:
@@ -247,6 +276,8 @@ The examples that follow use YAML file ``values.yaml`` with content
     values:
       greeting: Hello
       recipient: World
+      date: '{{ yyyymmdd }}'
+      empty: null
 
 
 * If the config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its content:
@@ -260,10 +291,12 @@ The examples that follow use YAML file ``values.yaml`` with content
 
   .. code:: sh
 
-    $ uw config realize --input-file values.txt  --input-format yaml --output-format yaml
+    $ uw config realize --input-file values.txt --input-format yaml --output-format yaml
     values:
       greeting: Hello
       recipient: World
+      date: '{{ yyyymmdd }}'
+      empty: null
 
 
 * Request verbose log output:
@@ -295,6 +328,8 @@ The examples that follow use YAML file ``values.yaml`` with content
     values:
       greeting: Hello
       recipient: World
+      date: '{{ yyyymmdd }}'
+      empty: null
 
   The content of ``realized.log``:
 
