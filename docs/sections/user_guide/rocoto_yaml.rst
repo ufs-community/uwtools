@@ -106,7 +106,6 @@ Let's disect the following task example:
       cycledefs: howdy
     account: "&ACCOUNT;"
     command: "echo hello $person"
-    join: '&FOO;/{{ jobname }}.log'
     nodes: 1:ppn=1
     walltime: 00:01:00
     envars:
@@ -119,15 +118,12 @@ Each task is named by its YAML entry. Entries under ``tasks`` prefixed with ``ta
 
   <task name="hello" cycledefs="howdy">
     <jobname>hello</jobname>
-    <join>&FOO;/hello.log</join>
-
     ...
   </task>
 
-where the ``attrs`` section may set any of the Rocoto-allowed XML attributes. The ``<jobname>`` tag will use the same name. Even though it does not appear in the input YAML, you may use ``jobname`` in your YAML Jinja2 entries for consistency in naming. For example, here the ``join`` tag names the log consistently with the task name and the job name.
+where the ``attrs`` section may set any of the Rocoto-allowed XML attributes. The ``<jobname>`` tag will use the same name. 
 
 The name of the task can be any string accepted by Rocoto as a task name (including additional underscores), but must contain the leading ``task_`` to be recognized as a task.
-
 
 ``command``: The command that will be run in the batch job.
 
