@@ -3,7 +3,7 @@ Mode ``config``
 
 The ``uw`` mode for handling configs.
 
-.. code:: sh
+.. code-block:: text
 
   $ uw config --help
   usage: uw config [-h] MODE ...
@@ -30,7 +30,7 @@ The ``uw`` mode for handling configs.
 ``compare``
 -----------
 
-.. code:: sh
+.. code-block:: text
 
   $ uw config compare --help
   usage: uw config compare --file-1-path PATH --file-2-path PATH [-h] [--file-1-format {ini,nml,sh,yaml}] [--file-2-format {ini,nml,sh,yaml}] [--quiet] [--verbose]
@@ -66,11 +66,10 @@ TBD
 ``realize``
 -----------
 
-.. code:: sh
+.. code-block:: text
 
   $ uw config realize --help
-  usage: uw config realize --values-file PATH [-h] [--input-file PATH] [--input-format {ini,nml,sh,yaml}] [--output-file PATH] [--output-format {ini,nml,sh,yaml}] [--values-format {ini,nml,sh,yaml}]
-                           [--values-needed] [--dry-run] [--quiet] [--verbose]
+  usage: uw config realize --values-file PATH [-h] [--input-file PATH] [--input-format {ini,nml,sh,yaml}] [--output-file PATH] [--output-format {ini,nml,sh,yaml}] [--values-format {ini,nml,sh,yaml}] [--values-needed] [--dry-run] [--quiet] [--verbose]
 
   Realize config
 
@@ -110,7 +109,7 @@ TBD
 ``translate``
 -------------
 
-.. code:: sh
+.. code-block:: text
 
   $ uw config translate --help
   usage: uw config translate [-h] [--input-file PATH] [--input-format {atparse}] [--output-file PATH] [--output-format {jinja2}] [--dry-run] [--quiet] [--verbose]
@@ -145,7 +144,7 @@ TBD
 ``validate``
 ------------
 
-.. code:: sh
+.. code-block:: text
 
   $ uw config validate --help
   usage: uw config validate --schema-file PATH [-h] [--input-file PATH] [--quiet] [--verbose]

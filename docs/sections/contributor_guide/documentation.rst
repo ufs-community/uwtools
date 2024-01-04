@@ -13,7 +13,7 @@ To locally build the docs:
 
 The ``make docs`` command will build the docs under ``docs/build/html``, after which you can preview them in your web browser at the URL
 
-.. code::
+.. code-block:: text
 
   file://<filesystem-path-to-your-clone>/docs/build/html/index.index.html
 
@@ -36,6 +36,6 @@ Please follow these guidelines when contributing to the documentation:
 * Ensure that the ``make docs`` command completes with no errors or warnings.
 * If the link-check portion of ``make docs`` reports that a URL is ``permanently`` redirected, update the link in the docs to use the new URL. Non-permanent redirects can be left as-is.
 * Do not manually wrap lines in the ``.rst`` files. Insert newlines only as needed to achieve correctly formatted HTML, and let HTML handle wrapping long lines.
-* Indent ``.. code::`` directives 2 spaces per nesting level to achieve the required alignment. For example, indent 0 spaces for code blocks that should align with text on the left margin, and 2 spaces for code blocks that should align with bulleted or numbered list text. Indent actual code 2 **extra** spaces under the ``.. code::`` directive.
+* Indent ``.. code-block::`` directives 2 spaces per nesting level to achieve the required alignment. For example, indent 0 spaces for code blocks that should align with text on the left margin, and 2 spaces for code blocks that should align with bulleted or numbered list text. Indent actual code 2 **extra** spaces under the ``.. code-block::`` directive.
 * Use one blank line between documentation elements (headers, paragraphs, code blocks, etc.) unless additional lines are necessary to achieve correctly formatted HTML.
 * Remove all trailing whitespace.

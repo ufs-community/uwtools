@@ -14,13 +14,13 @@ Using a fresh Miniforge installation
 
 2. Install the ``conda-build`` and ``conda-verify`` packages into the base environment. If ``conda-build`` and ``conda-verify`` are already installed in your installation’s base environment, you may skip this step.
 
-  .. code:: sh
+  .. code-block:: text
 
     conda install -y conda-build conda-verify
 
 3. In a clone of the :uwtools:`workflow-tools repository<>`, build and install the ``uwtools`` package.
 
-  .. code:: sh
+  .. code-block:: text
 
     cd /to/your/workflow-tools/clone
     conda build recipe
@@ -28,13 +28,13 @@ Using a fresh Miniforge installation
 
 4. Activate the ``uwtools`` environment.
 
-  .. code:: sh
+  .. code-block:: text
 
     conda activate uwtools
 
   In future shells, you can activate and use this environment with:
 
-  .. code:: sh
+  .. code-block:: text
 
     source ~/conda/etc/profile.d/conda.sh
     conda activate uwtools

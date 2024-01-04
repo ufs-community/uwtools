@@ -3,7 +3,7 @@ Mode ``forecast``
 
 The ``uw`` mode for configuring and running forecasts.
 
-.. code:: sh
+.. code-block:: text
 
   $ uw forecast --help
   usage: uw forecast [-h] MODE ...
@@ -22,7 +22,7 @@ The ``uw`` mode for configuring and running forecasts.
 ``run``
 -------
 
-.. code:: sh
+.. code-block:: text
 
   $ uw forecast run --help
   usage: uw forecast run --config-file PATH --cycle CYCLE --model {FV3} [-h] [--batch-script PATH] [--dry-run] [--quiet] [--verbose]

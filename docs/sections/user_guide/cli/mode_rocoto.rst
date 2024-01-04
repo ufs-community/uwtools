@@ -3,7 +3,7 @@ Mode ``rocoto``
 
 The ``uw`` mode for realizing and validating Rocoto XML documents
 
-.. code:: sh
+.. code-block:: text
 
   $ uw rocoto --help
   usage: uw rocoto [-h] MODE ...
@@ -26,7 +26,7 @@ The ``uw`` mode for realizing and validating Rocoto XML documents
 ``realize``
 -----------
 
-.. code:: sh
+.. code-block:: text
 
   $ uw rocoto realize --help
   usage: uw rocoto realize [-h] [--input-file PATH] [--output-file PATH] [--quiet] [--verbose]
@@ -55,7 +55,7 @@ TBD
 ``validate``
 ------------
 
-.. code:: sh
+.. code-block:: text
 
   $ uw rocoto validate --help
   usage: uw rocoto validate [-h] [--input-file PATH] [--quiet] [--verbose]

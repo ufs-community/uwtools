@@ -8,13 +8,13 @@ Creating a ``bash`` development shell
 
 2. Install the :anaconda-condev:`condev package<>` into the base environment.
 
-  .. code:: sh
+  .. code-block:: text
 
     conda install -y -c maddenp condev
 
 3. In a clone of the :uwtools:`workflow-tools repository<>`, create the development shell.
 
-  .. code:: sh
+  .. code-block:: text
 
     cd /to/your/workflow-tools/clone
     make devshell
@@ -29,7 +29,7 @@ Future ``make devshell`` invocations will be almost instantaneous, as the underl
 
 If your development shell misses any functionality you’re used to in your main (``bash``) shell, you can create a ``~/.condevrc`` file, which will be sourced by ``make devshell``. When in doubt, you might:
 
-.. code::
+.. code-block::
 
   cat <<EOF >~/.condevrc
   source ~/.bashrc
@@ -62,7 +62,7 @@ Building condev locally
 
 As an alternative to installing :anaconda-condev:`pre-built package<>`, the ``condev`` package can be built locally, then installed into the local conda installation. Ensure that ``conda-build`` and ``conda-verify`` are installed in the base environment:
 
-.. code:: sh
+.. code-block:: text
 
   # Activate your conda
   git clone https://github.com/maddenp/condev.git
@@ -74,7 +74,7 @@ Files derived from condev
 
 The following files in this repo are derived from their counterparts in the :condev:`condev demo<tree/main/demo>` and are used by ``condev`` code when running certain make commands
 
-.. code:: sh
+.. code-block:: text
 
   ├── Makefile
   ├── recipe
