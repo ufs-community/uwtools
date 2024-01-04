@@ -193,22 +193,33 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        operators, strequality = self._dependency_constants
         e = SubElement(e, STR.dependency)
         for tag, subconfig in config.items():
-            tag, _ = self._tag_name(tag)
-            if tag in operators:
-                self._add_task_dependency_operator(e, config={tag: subconfig})
-            elif tag in strequality:
-                self._add_task_dependency_strequality(e, subconfig=subconfig, tag=tag)
-            elif tag == STR.datadep:
-                self._add_task_dependency_datadep(e, subconfig)
-            elif tag == STR.taskdep:
-                self._add_task_dependency_taskdep(e, subconfig)
-            elif tag == STR.timedep:
-                self._add_task_dependency_timedep(e, subconfig)
-            else:
-                raise UWConfigError("Unhandled dependency type %s" % tag)
+            self._add_task_dependency_child(e, subconfig, tag)
+
+    def _add_task_dependency_child(self, e: Element, config: dict, tag: str) -> None:
+        """
+        Add an operator/operand element to parent element.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        :param tag: Name of new element to add.
+        """
+        tag, _ = self._tag_name(tag)
+        if tag in (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor):
+            e = SubElement(e, tag)
+            for subtag, subconfig in config.items():
+                self._add_task_dependency_child(e, subconfig, subtag)
+        elif tag in (STR.streq, STR.strneq):
+            self._add_task_dependency_strequality(e, config, tag)
+        elif tag == STR.datadep:
+            self._add_task_dependency_datadep(e, config)
+        elif tag == STR.taskdep:
+            self._add_task_dependency_taskdep(e, config)
+        elif tag == STR.timedep:
+            self._add_task_dependency_timedep(e, config)
+        else:
+            raise UWConfigError("Unhandled dependency type %s" % tag)
 
     def _add_task_dependency_datadep(self, e: Element, config: dict) -> None:
         """
@@ -220,36 +231,13 @@ class _RocotoXML:
         e = self._add_compound_time_string(e, config[STR.value], STR.datadep)
         self._set_attrs(e, config)
 
-    def _add_task_dependency_operator(self, e: Element, config: dict) -> None:
-        """
-        Add an operator element to the <dependency>.
-
-        :param e: The parent element to add the new element to.
-        :param config: Configuration data for this element.
-        """
-        operators, strequality = self._dependency_constants
-        for tag, subconfig in config.items():
-            tag, _ = self._tag_name(tag)
-            if tag in operators:
-                self._add_task_dependency_operator(SubElement(e, tag), config=subconfig)
-            elif tag in strequality:
-                self._add_task_dependency_strequality(e, subconfig=subconfig, tag=tag)
-            elif tag == STR.datadep:
-                self._add_task_dependency_datadep(e, subconfig)
-            elif tag == STR.taskdep:
-                self._add_task_dependency_taskdep(e, subconfig)
-            elif tag == STR.timedep:
-                self._add_task_dependency_timedep(e, subconfig)
-            else:
-                raise UWConfigError("Unhandled dependency type %s" % tag)
-
-    def _add_task_dependency_strequality(self, e: Element, subconfig: dict, tag: str) -> None:
+    def _add_task_dependency_strequality(self, e: Element, config: dict, tag: str) -> None:
         """
         :param e: The parent element to add the new element to.
-        :param subconfig: Configuration data for the tag.
+        :param config: Configuration data for the tag.
         :param tag: Name of new element to add.
         """
-        self._set_attrs(SubElement(e, tag), subconfig)
+        self._set_attrs(SubElement(e, tag), config)
 
     def _add_task_dependency_taskdep(self, e: Element, config: dict) -> None:
         """
@@ -336,15 +324,6 @@ class _RocotoXML:
         ok = validate_yaml(schema_file=schema_file, config=config)
         if not ok:
             raise UWConfigError("YAML validation errors")
-
-    @property
-    def _dependency_constants(self) -> Tuple[Tuple, Tuple]:
-        """
-        Returns a tuple for each of the respective dependency types.
-        """
-        operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
-        strequality = (STR.streq, STR.strneq)
-        return operators, strequality
 
     @property
     def _doctype(self) -> Optional[str]:
