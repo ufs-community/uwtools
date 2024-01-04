@@ -29,6 +29,8 @@ Starting at the top level of the YAML config for Rocoto, there are several requr
     tasks:
       ...
 
+YAML Entries
+............
 
 ``attrs``: This section allows users to define any number of the available attributes available to the workflow tag in Rocoto's native XML language. Set them with a key/value that matches the exact syntax needed by Rocoto. These attributes work to fill in the ``<workflow>`` tag. For example,
 
@@ -63,6 +65,29 @@ Starting at the top level of the YAML config for Rocoto, there are several requr
 
 ``tasks``: This section will be explained in detail in the next section.
 
+
+Using Cycle Strings
+...................
+
+The ``<cyclestr>`` tag in Rocoto transforms specific flags to represent components of the current cycle at run time. For example, you can represent an ISO date string like ``2023-01-01T12:00:00`` as ``'@Y-@m-@dT@X'``. See the :rocoto:`Rocoto documentation<>` for full details. In the Rocoto YAML, you can use the ``cyclestr:`` entry anywhere that Rocoto will accept a ``<cyclestr>`` to acheive this result. The required structure of a ``cyclestr:`` entry is a ``value:``, like this:
+
+.. code::
+
+  entities:
+    FOO: test@Y-@m-@dT@X.log
+  log:
+    cyclestr:
+      value: /some/path/to/&FOO;
+
+In the example, the resulting log would appear in the XML file as:
+
+.. code:: XML
+
+  <log>
+    <cyclestr>/some/path/to/&FOO;</cyclestr>
+  </log>
+
+The ``attrs:`` section is optional within the ``cyclestr:`` entry, and can be used to specifiy the cycle offset.
 
 Tasks Section
 ~~~~~~~~~~~~~
@@ -119,6 +144,7 @@ The name of the task can be any string accepted by Rocoto as a task name (includ
 
 
 The other tags not specifically mentioned here are follow the same conventions as described in the :rocoto:`Rocoto<>` documentation.
+
 
 
 Defining Dependencies for Tasks
@@ -200,4 +226,33 @@ This example also demonstrates the use of Rocoto's **boolean operator tags** in 
 
 Defining Metatasks
 ..................
+
+A Rocoto ``metatask`` is a structure that allows for the single specification of a task or group of tasks to run with parameterized input. The ``metatask`` requires the definition of at least one parameter variable, but multiple may be specified, in which case there must be the same number of entries for all parameter variables. To achieve a combination of variables, nested metatasks would be necessary. Here is an example of the YAML specification for running our "hello world" example in a variety of languages:
+
+.. code::
+
+  metatask_greetings:
+    var:
+      greeting: hello hola bonjour
+      person: Jane John Jenn
+    task_#greeting#:
+      command: "echo #greeting# #world#"
+      ...
+
+This translates to Rocoto XML (whitespace added for readability):
+
+.. code:: XML
+
+  <metatask name=greetings/>
+
+    <var name="greeting">hello hola bonjour</var>
+    <var name="person">Jane John Jenn</var>
+
+    <task name='#greeting#'>
+
+      <command>echo #greeting# #person#<command>
+      ...
+
+    </task>
+  </metatask>
 
