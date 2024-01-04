@@ -69,7 +69,7 @@ YAML Entries
 Using Cycle Strings
 ...................
 
-The ``<cyclestr>`` tag in Rocoto transforms specific flags to represent components of the current cycle at run time. For example, you can represent an ISO date string like ``2023-01-01T12:00:00`` as ``'@Y-@m-@dT@X'``. See the :rocoto:`Rocoto documentation<>` for full details. In the Rocoto YAML, you can use the ``cyclestr:`` entry anywhere that Rocoto will accept a ``<cyclestr>`` to acheive this result. The required structure of a ``cyclestr:`` entry is a ``value:``, like this:
+The ``<cyclestr>`` tag in Rocoto transforms specific flags to represent components of the current cycle at run time. For example, an ISO date string like ``2023-01-01T12:00:00`` is represented as ``'@Y-@m-@dT@X'``. See the :rocoto:`Rocoto documentation<>` for full details. In the Rocoto YAML, the ``cyclestr:`` entry can be used anywhere that Rocoto will accept a ``<cyclestr>`` to acheive this result. The required structure of a ``cyclestr:`` entry is a ``value:``, like this:
 
 .. code::
 
@@ -146,7 +146,7 @@ The other tags not specifically mentioned here are follow the same conventions a
 Defining Dependencies for Tasks
 ...............................
 
-Rocoto dependencies are optional entries that are structured as boolean expressions defining the readiness of a task to be submitted to the queue. The :rocoto:`Rocoto documentation<>` explains each tag in detail. Here, we attempt to explain how those tags should be specified in YAML format.
+Rocoto dependencies are optional entries that are structured as boolean expressions defining the readiness of a task to be submitted to the queue. The :rocoto:`Rocoto documentation<>` explains each tag in detail. Here is an explanation for how those tags should be specified in YAML format.
 
 There are many similarities, but some nuanced differences must be clarified.
 
@@ -186,7 +186,7 @@ Here, the Rocoto ``taskdep`` says that the ``goodbye`` task cannot be submitted 
 Repeated Dependencies and Boolean Operators
 ___________________________________________
 
-Because YAML represents a hash table (a dictionary in Python), each entry at the same level must be unique. To accomplish this in the YAML format, any of the dependencies may be specified with an arbitrary unique suffix following an underscore (``_``). We recommend a descriptive one to make it easier to read. In the following example, we have multiple data dependencies for the basic ``hello`` task.
+Because YAML represents a hash table (a dictionary in Python), each entry at the same level must be unique. To accomplish this in the YAML format, any of the dependencies may be specified with an arbitrary unique suffix following an underscore (``_``). We recommend a descriptive one to make it easier to read. In the following example, there are multiple data dependencies for the basic ``hello`` task.
 
 .. code::
 
@@ -225,7 +225,7 @@ Defining Metatasks
 
 A Rocoto ``metatask`` is a structure that allows for the single specification of a task or group of tasks to run with parameterized input. The ``metatask`` requires the definition of at least one parameter variable, but multiple may be specified, in which case there must be the same number of entries for all parameter variables. To achieve a combination of variables, nested metatasks would be necessary. Here is an example of the YAML specification for running our "hello world" example in a variety of languages:
 
-.. code::
+.. code:: text
 
   metatask_greetings:
     var:
@@ -251,4 +251,176 @@ This translates to Rocoto XML (whitespace added for readability):
 
     </task>
   </metatask>
+
+
+YAML Definitions
+~~~~~~~~~~~~~~~~
+
+
+The ``<cyclestr>`` tag
+......................
+
+.. code::
+
+  cyclestr:
+    value: "/some/path/to/workflow_@Y@m@d@H.log"      # required
+    attrs:
+      offset: "1:00:00"
+
+.. code::
+
+  <cyclestr offset="1:00:00">"/some/path/to/workflow_@Y@m@d@H.log"</cyclestr>
+
+The ``<workflow>`` tags
+.......................
+
+.. code::
+
+  workflow:
+    attrs:
+      cyclethrottle: 2
+      realtime: true     # required
+      scheduler: slurm   # required
+      taskthrottle: 20
+
+.. code:: XML
+
+  <workflow cyclethrottle="2" realtime="true" scheduler="slurm" taskthrottle="20">
+    ...
+  <workflow>
+
+Defining Cycles
+_________________
+
+At least one ``cycledef:`` is required.
+
+.. code::
+
+  cycledef:
+    - attrs:
+        group: synop
+        activation_offset: "-1:00:00"
+      spec: 202301011200 202301021200 06:00:00    # Also accepts crontab-like string
+    - attrs:
+        group: hourly
+      spec: 202301011200 202301021200 01:00:00    # Also accepts crontab-like string
+
+.. code:: XML
+
+  <cycledef group="synop" activation_offset="-1:00:00">202301011200 202301021200 06:00:00</cycledef>
+  <cycledef group="hourly">202301011200 202301021200 01:00:00</cycledef>
+
+Defining Entities
+_________________
+
+Enties are optional. Any number of entities may be specified.
+
+.. code::
+
+  entities:
+    FOO: 12
+    BAR: baz
+
+.. code:: XML
+
+  <?xml version="1.0"?>
+  <!DOCTYPE workflow
+  [
+      <!ENTITY FOO "12">
+      <!ENTITY BAR "baz">
+  ]>
+
+Defining the worklfow log
+_________________________
+
+``log:`` is a required entry.
+
+
+.. code::
+
+  log: /some/path/to/workflow.log
+
+.. code:: XML
+
+  <log>/some/path/to/workflow.log</log>
+
+or
+
+.. code::
+
+  log:
+    cyclestr:
+      value: /some/path/to/workflow_@Y@m@d.log
+
+.. code:: XML
+
+  <log><cyclestr>/some/path/to/workflow_@Y@m@d.log</cyclestr></log>
+
+
+Defining the set of tasks
+_________________________
+
+At least one task or metatask must be defined in the task section.
+
+.. code::
+
+  tasks:
+    task_*:
+    metatask_*
+
+
+The ``<task>`` tag
+..................
+
+
+.. code::
+
+  task_foo:
+    attrs:
+      cycledefs: hourly
+      maxtries: 2
+      throttle: 10
+      final: false
+    command: echo hello world
+    walltime: 00:10:00
+    cores: 1
+
+
+.. code::
+
+  <task name="foo" cycledefs:"hourly" maxtries="2" throttle="10" final="False">
+    ...
+  </task>
+
+
+The following entries take strings just like in the ``command`` example above. Please see the :rocoto:`Rocoto documentation<>` for specifics on how to set them.
+
+.. code::
+
+  account:
+  exclusive:
+  jobname:
+  join:
+  memory:
+  native:
+  nodes:
+  partition:
+  queue:
+  rewind:
+  shared:
+  stderr:
+  stdout:
+
+The following YAML entries need values that can be integers, strings, or ``cyclestr:`` entries.
+
+.. code::
+
+  command:
+  deadline:
+  jobname:
+  join:
+  native:
+  stderr:
+  stdout:
+
 
