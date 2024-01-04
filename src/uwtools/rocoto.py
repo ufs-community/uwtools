@@ -4,7 +4,8 @@ Support for creating Rocoto XML workflow documents.
 
 import re
 from dataclasses import dataclass
-from typing import List, Optional, Tuple, Union
+from math import log10
+from typing import Any, List, Optional, Tuple, Union
 
 from lxml import etree
 from lxml.etree import Element, SubElement
@@ -12,7 +13,7 @@ from lxml.etree import Element, SubElement
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import dereference
 from uwtools.config.validator import validate_yaml
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.types import OptionalPath
 from uwtools.utils.file import readable, resource_pathobj, writable
@@ -30,8 +31,9 @@ def realize_rocoto_xml(
     :return: An XML string.
     """
     rxml = _RocotoXML(config)
-    xml = str(rxml)
-    assert validate_rocoto_xml_string(xml) is True
+    xml = str(rxml).strip()
+    if not validate_rocoto_xml_string(xml):
+        raise UWError("Internal error: Invalid Rocoto XML")
     with writable(output_file) as f:
         print(xml, file=f)
     return xml
@@ -64,6 +66,12 @@ def validate_rocoto_xml_string(xml: str) -> bool:
     log_method("%s Rocoto validation error%s found", nerr, "" if nerr == 1 else "s")
     for err in list(schema.error_log):
         log.error(err)
+    if not valid:
+        log.error("Invalid Rocoto XML:")
+        lines = xml.split("\n")
+        fmtstr = "%{n}d %s".format(n=int(log10(len(lines))) + 1)
+        for n, line in enumerate(lines):
+            log.error(fmtstr % (n + 1, line))
     return valid
 
 
@@ -97,24 +105,25 @@ class _RocotoXML:
         with writable(path) as f:
             f.write(str(self).strip())
 
-    def _add_compound_time_string(self, e: Element, config: dict, tag: str) -> None:
+    def _add_compound_time_string(self, e: Element, config: Any, tag: str) -> Element:
         """
         Add to the given element a child element possibly containing a <cyclestr>.
 
         :param e: The element to add the child element to.
         :param config: Configuration data for the child element.
         :param tag: Name of child element to add.
+        :return: The child element.
         """
-        config = config[tag]
         e = SubElement(e, tag)
-        if isinstance(config, str):
-            e.text = config
-        else:
+        if isinstance(config, dict):
             self._set_attrs(e, config)
-            if config := config.get(STR.cyclestr, {}):
+            if subconfig := config.get(STR.cyclestr, {}):
                 cyclestr = SubElement(e, STR.cyclestr)
-                cyclestr.text = config["value"]
-                self._set_attrs(cyclestr, config)
+                cyclestr.text = subconfig[STR.value]
+                self._set_attrs(cyclestr, subconfig)
+        else:
+            e.text = str(config)
+        return e
 
     def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
         """
@@ -160,7 +169,7 @@ class _RocotoXML:
             STR.walltime,
         ):
             if tag in config:
-                SubElement(e, tag).text = config[tag]
+                SubElement(e, tag).text = str(config[tag])
         for tag in (
             STR.command,
             STR.deadline,
@@ -171,7 +180,7 @@ class _RocotoXML:
             STR.stdout,
         ):
             if tag in config:
-                self._add_compound_time_string(e, config, tag)
+                self._add_compound_time_string(e, config[tag], tag)
         for name, value in config.get(STR.envars, {}).items():
             self._add_task_envar(e, name, value)
         if STR.dependency in config:
@@ -184,48 +193,69 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        operands, operators, strequality = self._dependency_constants
         e = SubElement(e, STR.dependency)
         for tag, subconfig in config.items():
-            tag, _ = self._tag_name(tag)
-            if tag in operands:
-                self._add_task_dependency_operand_operator(e, config={tag: subconfig})
-            elif tag in operators:
-                self._add_task_dependency_operand_operator(e, config={tag: subconfig})
-            elif tag in strequality:
-                self._add_task_dependency_strequality(e, subconfig=subconfig, tag=tag)
-            else:
-                raise UWConfigError("Unhandled dependency type %s" % tag)
+            self._add_task_dependency_child(e, subconfig, tag)
 
-    def _add_task_dependency_operand_operator(self, e: Element, config: dict) -> None:
+    def _add_task_dependency_child(self, e: Element, config: dict, tag: str) -> None:
         """
-        Add an operand or operator element to the <dependency>.
+        Add an operator/operand element to parent element.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        :param tag: Name of new element to add.
+        """
+        tag, _ = self._tag_name(tag)
+        if tag in (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor):
+            e = SubElement(e, tag)
+            for subtag, subconfig in config.items():
+                self._add_task_dependency_child(e, subconfig, subtag)
+        elif tag in (STR.streq, STR.strneq):
+            self._add_task_dependency_strequality(e, config, tag)
+        elif tag == STR.datadep:
+            self._add_task_dependency_datadep(e, config)
+        elif tag == STR.taskdep:
+            self._add_task_dependency_taskdep(e, config)
+        elif tag == STR.timedep:
+            self._add_task_dependency_timedep(e, config)
+        else:
+            raise UWConfigError("Unhandled dependency type %s" % tag)
+
+    def _add_task_dependency_datadep(self, e: Element, config: dict) -> None:
+        """
+        Add a <datadep> element to the <dependency>.
 
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        operands, operators, strequality = self._dependency_constants
-        for tag, subconfig in config.items():
-            tag, _ = self._tag_name(tag)
-            if tag in operands:
-                if tag == STR.taskdep:
-                    self._set_attrs(SubElement(e, tag), subconfig)
-                else:
-                    self._add_compound_time_string(e, config, tag)
-            elif tag in operators:
-                self._add_task_dependency_operand_operator(SubElement(e, tag), config=subconfig)
-            elif tag in strequality:
-                self._add_task_dependency_strequality(e, subconfig=subconfig, tag=tag)
-            else:
-                raise UWConfigError("Unhandled dependency type %s" % tag)
+        e = self._add_compound_time_string(e, config[STR.value], STR.datadep)
+        self._set_attrs(e, config)
 
-    def _add_task_dependency_strequality(self, e: Element, subconfig: dict, tag: str) -> None:
+    def _add_task_dependency_strequality(self, e: Element, config: dict, tag: str) -> None:
         """
         :param e: The parent element to add the new element to.
-        :param subconfig: Configuration data for the tag.
+        :param config: Configuration data for the tag.
         :param tag: Name of new element to add.
         """
-        self._set_attrs(SubElement(e, tag), subconfig)
+        self._set_attrs(SubElement(e, tag), config)
+
+    def _add_task_dependency_taskdep(self, e: Element, config: dict) -> None:
+        """
+        Add a <taskdep> element to the <dependency>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        self._set_attrs(SubElement(e, STR.taskdep), config)
+
+    def _add_task_dependency_timedep(self, e: Element, config: dict) -> None:
+        """
+        Add a <timedep> element to the <dependency>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        self._add_compound_time_string(e, config, STR.timedep)
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """
@@ -270,7 +300,8 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param logfile: The path to the log file.
         """
-        self._add_compound_time_string(e, config, STR.log)
+        tag = STR.log
+        self._add_compound_time_string(e, config[tag], tag)
 
     def _add_workflow_tasks(self, e: Element, config: dict) -> None:
         """
@@ -293,16 +324,6 @@ class _RocotoXML:
         ok = validate_yaml(schema_file=schema_file, config=config)
         if not ok:
             raise UWConfigError("YAML validation errors")
-
-    @property
-    def _dependency_constants(self) -> Tuple[Tuple, Tuple, Tuple]:
-        """
-        Returns a tuple for each of the respective dependency types.
-        """
-        operands = (STR.datadep, STR.taskdep, STR.timedep)
-        operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
-        strequality = (STR.streq, STR.strneq)
-        return operands, operators, strequality
 
     @property
     def _doctype(self) -> Optional[str]:

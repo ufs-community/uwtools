@@ -30,7 +30,9 @@ def validate_yaml(
     # Collect and report on schema-validation errors.
     errors = _validation_errors(cfgobj.data, schema)
     log_method = log.error if errors else log.info
-    log_method("%s schema-validation error%s found", len(errors), "" if len(errors) == 1 else "s")
+    log_method(
+        "%s UW schema-validation error%s found", len(errors), "" if len(errors) == 1 else "s"
+    )
     for error in errors:
         for line in str(error).split("\n"):
             log.error(line)
