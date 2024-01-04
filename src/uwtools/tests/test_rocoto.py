@@ -182,13 +182,13 @@ class Test__RocotoXML:
         instance._add_task(e=root, config=config, taskname="foo")
 
     def test__add_task_dependency_and(self, instance, root):
-        config = {"and": {"or_get_obs": {"taskdep": {"attrs": {"age": "120"}}}}}
+        config = {"and": {"or_get_obs": {"taskdep": {"attrs": {"task": "foo"}}}}}
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
         assert dependency.tag == "dependency"
         and_ = dependency[0]
         assert and_.tag == "and"
-        assert and_.getchildren()[0].getchildren()[0].get("age") == "120"
+        assert and_.xpath("or[1]/taskdep")[0].get("task") == "foo"
 
     @pytest.mark.parametrize(
         "value",
