@@ -305,15 +305,21 @@ and supplemental YAML file ``supp.yaml`` with content
 
     $ uw config realize --input-file values.yaml --output-format yaml --verbose
     [2024-01-03T15:56:28]    DEBUG Command: uw config realize --input-file values.yaml --output-format yaml --verbose
-    [2024-01-03T15:56:28]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-    [2024-01-03T15:56:28]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-    [2024-01-03T15:56:28]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World'}
+    [2024-01-03T15:56:28]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}}
+    [2024-01-03T15:56:28]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}}
+    [2024-01-03T15:56:28]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}
     [2024-01-03T15:56:28]    DEBUG Rendering: Hello
     [2024-01-03T15:56:28]    DEBUG Rendering: World
-    [2024-01-03T15:56:28]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+    [2024-01-03T15:56:28]    DEBUG Rendering: {{ yyyymmdd }}
+    [2024-01-03T15:56:28]    DEBUG Rendering ERROR: 'yyyymmdd' is undefined
+    [2024-01-03T15:56:28]    DEBUG Rendering: None
+    [2024-01-03T15:56:28]    DEBUG Rendered: None
+    [2024-01-03T15:56:28]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}}
     values:
       greeting: Hello
       recipient: World
+      date: '{{ yyyymmdd }}'
+      empty: null
 
   Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
 
@@ -336,12 +342,16 @@ and supplemental YAML file ``supp.yaml`` with content
   .. code:: sh
 
     [2024-01-03T15:58:07]    DEBUG Command: uw config realize --input-file values.yaml --output-format yaml --verbose
-    [2024-01-03T15:58:07]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-    [2024-01-03T15:58:07]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-    [2024-01-03T15:58:07]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World'}
+    [2024-01-03T15:58:07]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}}
+    [2024-01-03T15:58:07]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}}
+    [2024-01-03T15:58:07]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}
     [2024-01-03T15:58:07]    DEBUG Rendering: Hello
     [2024-01-03T15:58:07]    DEBUG Rendering: World
-    [2024-01-03T15:58:07]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
+    [2024-01-03T15:58:07]    DEBUG Rendering: {{ yyyymmdd }}
+    [2024-01-03T15:58:07]    DEBUG Rendering ERROR: 'yyyymmdd' is undefined
+    [2024-01-03T15:58:07]    DEBUG Rendering: None
+    [2024-01-03T15:58:07]    DEBUG Rendered: None
+    [2024-01-03T15:58:07]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}}
 
 * It is important to note that ``uw`` does not allow invalid conversions. 
 
