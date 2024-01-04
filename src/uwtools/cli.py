@@ -160,7 +160,7 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> SubmodeChecks:
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_schema_file(required)
     optional = _basic_setup(parser)
-    _add_arg_input_file(optional)
+    _add_arg_config_file(optional)
     return _add_args_quiet_and_verbose(optional)
 
 
