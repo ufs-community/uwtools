@@ -97,13 +97,6 @@ and namelist file ``values.nml`` with content
     [2024-01-03T16:23:29]     INFO values:       recipient:  - None + World
 
 
-* Currently, file paths must be provided explicitly. If either or both input files are read alone from ``stdin``, ``uw`` will not know how to parse its content:
-
-  .. code:: sh
-
-    $ cat values.yaml | uw config compare --file-2-path values.nml
-    uw config compare: error: the following arguments are required: --file-1-path
-
 * If a config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its content:
 
   .. code:: sh
@@ -138,7 +131,7 @@ and namelist file ``values.nml`` with content
 
     $ uw config compare --file-1-path values.yaml --file-2-path values.nml --verbose 2>compare.log
 
-  The content of ``realized.log``:
+  The content of ``compare.log``:
 
   .. code:: sh
 
@@ -325,7 +318,7 @@ The examples that follow use YAML file ``values.yaml`` with content
 
 * It is important to note that ``uw`` does not allow invalid conversions. 
 
-  For example, if you try to generate an ``sh`` config from a depth-2 ``yaml``:
+  For example, when attempting to generate an ``sh`` config from a depth-2 ``yaml``:
 
   .. code:: sh
 
@@ -370,6 +363,7 @@ Examples
 The examples that follow use atparse-formatted template file ``atparse.txt`` with content
 
 .. code:: sh
+
   @[greeting], @[recipient]!
 
 * Convert an atparse-formatted template file to Jinja2 format:
@@ -385,7 +379,7 @@ The examples that follow use atparse-formatted template file ``atparse.txt`` wit
 
   .. code:: sh
 
-    $ uw config realize --input-file values.yaml --output-file realized.yaml
+    $ uw config translate --input-file atparse.txt --input-format atparse --output-file jinja2.txt --output-format jinja2
 
   The content of ``jinja2.txt``:
 
@@ -401,20 +395,13 @@ The examples that follow use atparse-formatted template file ``atparse.txt`` wit
     [2024-01-03T16:41:13]     INFO {{greeting}}, {{recipient}}!
 
 
-* If an input file is read alone from ``stdin``, ``uw`` know how to parse its content as we must always specify the formats:
+* If an input is read alone from ``stdin``, ``uw`` will not know how to parse its content as we must always specify the formats:
 
   .. code:: sh
 
     $ cat atparse.txt | uw config translate --input-format atparse --output-format jinja2
     {{greeting}}, {{recipient}}!
 
-
-* Request verbose log output:
-
-  .. code:: sh
-
-    $ uw config translate --input-file atparse.txt --input-format atparse --output-format jinja2 --verbose
-    {{greeting}}, {{recipient}}!
 
 .. _validate_configs_cli_examples:
 
@@ -448,6 +435,7 @@ Examples
 The examples that follow use JSON Schema file ``schema.jsonschema`` with content
 
 .. code:: sh
+
   {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
@@ -488,7 +476,7 @@ and YAML file ``values.yaml`` with content
   Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
 
 
-* Read the config from ``stdin`` and render to ``stdout``:
+* Read the config from ``stdin`` and print validation results to ``stdout``:
 
   .. code:: sh
 
@@ -496,14 +484,14 @@ and YAML file ``values.yaml`` with content
     [2024-01-03T17:26:29]     INFO 0 schema-validation errors found
 
 
-* However, you cannot read the schema from ``stdin`` and render to ``stdout``:
+* However, reading the schema from ``stdin`` is not supported:
 
   .. code:: sh
 
     $ cat schema.jsonschema | uw config validate -input-file values.yaml
     uw config validate: error: the following arguments are required: --schema-file
 
-* If there are differences between the config files, they will be shown with the schema. For example, with ``recipient: World`` removed from ``values.yaml``:
+* If a config fails validation, differences from the schema will be displayed. For example, with ``recipient: World`` removed from ``values.yaml``:
 
   .. code:: sh
 
