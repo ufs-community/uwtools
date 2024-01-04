@@ -129,7 +129,7 @@ The examples that follow use namelist files ``values.nml`` and ``values2.nml`` w
 
     [2024-01-03T16:26:18]    DEBUG Command: uw config compare --file-1-path values.nml --file-2-path values2.nml --verbose
     [2024-01-03T16:26:18]     INFO - values.mml
-    [2024-01-03T16:26:18]     INFO + values3.nml
+    [2024-01-03T16:26:18]     INFO + values2.nml
     [2024-01-03T16:26:18]     INFO ---------------------------------------------------------------------
     [2024-01-03T16:26:18]     INFO values:       recipient:  - None + World
 
@@ -426,7 +426,7 @@ Examples
 
 The examples that follow use JSON Schema file ``schema.jsonschema`` with content
 
-.. code:: sh
+.. code:: json
 
   {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -463,7 +463,7 @@ and YAML file ``values.yaml`` with content
   .. code:: sh
 
     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml
-    [2024-01-03T17:23:07]     INFO 0 schema-validation errors found
+    [2024-01-03T17:23:07]     INFO 0 UW schema-validation errors found
 
   Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
 
@@ -473,7 +473,7 @@ and YAML file ``values.yaml`` with content
   .. code:: sh
 
     $ cat values.yaml | uw config validate --schema-file schema.jsonschema
-    [2024-01-03T17:26:29]     INFO 0 schema-validation errors found
+    [2024-01-03T17:26:29]     INFO 0 UW schema-validation errors found
 
 
 * However, reading the schema from ``stdin`` is **not** supported:
