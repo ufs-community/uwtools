@@ -182,7 +182,7 @@ The examples that follow use YAML file ``values.yaml`` with content
   values:
     greeting: Hello
     recipient: World
-    message: '{{ (greeting + " " + recipient) * repeat }}'
+    message: '{{ (greeting + " " + recipient + " ") * repeat }}'
     date: '{{ yyyymmdd }}'
     repeat: 1
     empty: 
@@ -231,7 +231,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Hello
       recipient: World
-      message: Hello World
+      message: Hello World 
       date: '{{ yyyymmdd }}'
       repeat: 1
       empty: null
@@ -246,7 +246,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night SunGood Night Sun
+      message: Good Night Sun Good Night Sun 
       date: 20240105
       repeat: 2
       empty: false
@@ -264,7 +264,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night MoonGood Night Moon
+      message: Good Night Moon Good Night Moon 
       date: 20240105
       repeat: 2
       empty: null
@@ -278,7 +278,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night MoonGood Night Moon
+      message: Good Night Moon Good Night Moon 
       date: 20240105
       repeat: 2
       empty: null
@@ -299,7 +299,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night MoonGood Night Moon
+      message: Good Night Moon Good Night Moon 
       date: 20240105
       repeat: 2
       empty: null
@@ -320,7 +320,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night MoonGood Night Moon
+      message: Good Night Moon Good Night Moon 
       date: 20240105
       repeat: 2
       empty: null
@@ -335,35 +335,35 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     [2024-01-05T11:37:23]    DEBUG Before update, config has depth 2
     [2024-01-05T11:37:23]    DEBUG Supplemental config has depth 2
     [2024-01-05T11:37:23]    DEBUG After update, config has depth 2
-    [2024-01-05T11:37:23]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
-    [2024-01-05T11:37:23]    DEBUG Rendering: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
-    [2024-01-05T11:37:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}
+    [2024-01-05T11:37:23]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient + " ") * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:37:23]    DEBUG Rendering: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient + " ") * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:37:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient + " ") * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}
     [2024-01-05T11:37:23]    DEBUG Rendering: Good Night
     [2024-01-05T11:37:23]    DEBUG Rendering: Moon
-    [2024-01-05T11:37:23]    DEBUG Rendering: {{ (greeting + " " + recipient) * repeat }}
+    [2024-01-05T11:37:23]    DEBUG Rendering: {{ (greeting + " " + recipient + " ") * repeat }}
     [2024-01-05T11:37:23]    DEBUG Rendering: 20240105
     [2024-01-05T11:37:23]    DEBUG Rendered: 20240105
     [2024-01-05T11:37:23]    DEBUG Rendering: 2
     [2024-01-05T11:37:23]    DEBUG Rendered: 2
     [2024-01-05T11:37:23]    DEBUG Rendering: None
     [2024-01-05T11:37:23]    DEBUG Rendered: None
-    [2024-01-05T11:37:23]    DEBUG Dereferencing, current value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
-    [2024-01-05T11:37:23]    DEBUG Rendering: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night MoonGood Night Moon', 'date': 20240105, 'repeat': 2, 'empty': None}}
-    [2024-01-05T11:37:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night MoonGood Night Moon', 'date': 20240105, 'repeat': 2, 'empty': None}
+    [2024-01-05T11:37:23]    DEBUG Dereferencing, current value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient + " ") * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:37:23]    DEBUG Rendering: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night Moon Good Night Moon ', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:37:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night Moon Good Night Moon ', 'date': 20240105, 'repeat': 2, 'empty': None}
     [2024-01-05T11:37:23]    DEBUG Rendering: Good Night
     [2024-01-05T11:37:23]    DEBUG Rendering: Moon
-    [2024-01-05T11:37:23]    DEBUG Rendering: Good Night MoonGood Night Moon
+    [2024-01-05T11:37:23]    DEBUG Rendering: Good Night Moon Good Night Moon 
     [2024-01-05T11:37:23]    DEBUG Rendering: 20240105
     [2024-01-05T11:37:23]    DEBUG Rendered: 20240105
     [2024-01-05T11:37:23]    DEBUG Rendering: 2
     [2024-01-05T11:37:23]    DEBUG Rendered: 2
     [2024-01-05T11:37:23]    DEBUG Rendering: None
     [2024-01-05T11:37:23]    DEBUG Rendered: None
-    [2024-01-05T11:37:23]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night MoonGood Night Moon', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:37:23]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night Moon Good Night Moon ', 'date': 20240105, 'repeat': 2, 'empty': None}}
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night MoonGood Night Moon
+      message: Good Night Moon Good Night Moon 
       date: 20240105
       repeat: 2
       empty: null
@@ -381,7 +381,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night MoonGood Night Moon
+      message: Good Night Moon Good Night Moon 
       date: 20240105
       repeat: 2
       empty: null
@@ -394,31 +394,31 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     [2024-01-05T11:39:23]    DEBUG Before update, config has depth 2
     [2024-01-05T11:39:23]    DEBUG Supplemental config has depth 2
     [2024-01-05T11:39:23]    DEBUG After update, config has depth 2
-    [2024-01-05T11:39:23]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
-    [2024-01-05T11:39:23]    DEBUG Rendering: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
-    [2024-01-05T11:39:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}
+    [2024-01-05T11:39:23]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient + " ") * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:39:23]    DEBUG Rendering: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient + " ") * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:39:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient + " ") * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}
     [2024-01-05T11:39:23]    DEBUG Rendering: Good Night
     [2024-01-05T11:39:23]    DEBUG Rendering: Moon
-    [2024-01-05T11:39:23]    DEBUG Rendering: {{ (greeting + " " + recipient) * repeat }}
+    [2024-01-05T11:39:23]    DEBUG Rendering: {{ (greeting + " " + recipient + " ") * repeat }}
     [2024-01-05T11:39:23]    DEBUG Rendering: 20240105
     [2024-01-05T11:39:23]    DEBUG Rendered: 20240105
     [2024-01-05T11:39:23]    DEBUG Rendering: 2
     [2024-01-05T11:39:23]    DEBUG Rendered: 2
     [2024-01-05T11:39:23]    DEBUG Rendering: None
     [2024-01-05T11:39:23]    DEBUG Rendered: None
-    [2024-01-05T11:39:23]    DEBUG Dereferencing, current value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
-    [2024-01-05T11:39:23]    DEBUG Rendering: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night MoonGood Night Moon', 'date': 20240105, 'repeat': 2, 'empty': None}}
-    [2024-01-05T11:39:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night MoonGood Night Moon', 'date': 20240105, 'repeat': 2, 'empty': None}
+    [2024-01-05T11:39:23]    DEBUG Dereferencing, current value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient + " ") * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:39:23]    DEBUG Rendering: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night Moon Good Night Moon ', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:39:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night Moon Good Night Moon ', 'date': 20240105, 'repeat': 2, 'empty': None}
     [2024-01-05T11:39:23]    DEBUG Rendering: Good Night
     [2024-01-05T11:39:23]    DEBUG Rendering: Moon
-    [2024-01-05T11:39:23]    DEBUG Rendering: Good Night MoonGood Night Moon
+    [2024-01-05T11:39:23]    DEBUG Rendering: Good Night Moon Good Night Moon 
     [2024-01-05T11:39:23]    DEBUG Rendering: 20240105
     [2024-01-05T11:39:23]    DEBUG Rendered: 20240105
     [2024-01-05T11:39:23]    DEBUG Rendering: 2
     [2024-01-05T11:39:23]    DEBUG Rendered: 2
     [2024-01-05T11:39:23]    DEBUG Rendering: None
     [2024-01-05T11:39:23]    DEBUG Rendered: None
-    [2024-01-05T11:39:23]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night MoonGood Night Moon', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:39:23]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night Moon Good Night Moon ', 'date': 20240105, 'repeat': 2, 'empty': None}}
 
 * It is important to note that ``uw`` does not allow invalid conversions. 
 
