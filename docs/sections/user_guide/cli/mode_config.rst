@@ -230,15 +230,15 @@ and supplemental YAML file ``config.yaml`` with content
 
   Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
 
-* Existing values can be overwritten and Jinja2 variables can be filled in by appending supplemental files to the end of the argument:
+* Values in the primary input file can be overridden via one or more supplemental files specified as positional arguments, each overriding the last; or by environment variables, which have the highest precedence.
 
   .. code:: sh
 
-    $ uw config realize --input-file values.yaml --output-format yaml config.yaml
+    $ recipient=Sun uw config realize --input-file values.yaml --output-format yaml config.yaml 
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night MoonGood Night Moon
+      message: Good Night SunGood Night Sun
       date: 20240105
       repeat: 2
       empty: null
