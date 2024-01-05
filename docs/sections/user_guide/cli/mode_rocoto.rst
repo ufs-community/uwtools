@@ -180,7 +180,7 @@ The examples that follow use a Rocoto YAML file ``rocoto.yaml`` with content
     $  uw rocoto realize --input-file rocoto.yaml --output-file rocoto.xml -q
     $
 
-  The contents of ``rocoto.xml`` are unchnaged from the previous example.
+  The contents of ``rocoto.xml`` are unchanged from the previous example.
 
 * For increased verbosity realizing a YAML file to a file named ``rocoto.xml``:
 
