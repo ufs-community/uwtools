@@ -469,7 +469,7 @@ The examples that follow use atparse-formatted template file ``atparse.txt`` wit
 Examples
 ~~~~~~~~
 
-The examples that follow use JSON Schema file ``schema.jsonschema`` with content
+The examples that follow use `JSON Schema <https://json-schema.org/understanding-json-schema/reference>`_ file ``schema.jsonschema`` with content
 
 .. code:: json
 
@@ -533,7 +533,7 @@ and YAML file ``values.yaml`` with content
   .. code:: sh
 
     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml
-    [2024-01-03T17:31:19]    ERROR 1 schema-validation error found
+    [2024-01-03T17:31:19]    ERROR 1 UW schema-validation error found
     [2024-01-03T17:31:19]    ERROR 'recipient' is a required property
     [2024-01-03T17:31:19]    ERROR 
     [2024-01-03T17:31:19]    ERROR Failed validating 'required' in schema['properties']['values']:
@@ -558,7 +558,7 @@ and YAML file ``values.yaml`` with content
     [2024-01-03T17:29:46]    DEBUG Rendering: Hello
     [2024-01-03T17:29:46]    DEBUG Rendering: World
     [2024-01-03T17:29:46]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-    [2024-01-03T17:29:46]     INFO 0 schema-validation errors found
+    [2024-01-03T17:29:46]     INFO 0 UW schema-validation errors found
 
   Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
 
@@ -577,4 +577,4 @@ and YAML file ``values.yaml`` with content
     [2024-01-03T17:30:49]    DEBUG Rendering: Hello
     [2024-01-03T17:30:49]    DEBUG Rendering: World
     [2024-01-03T17:30:49]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-    [2024-01-03T17:30:49]     INFO 0 schema-validation errors found
+    [2024-01-03T17:30:49]     INFO 0 UW schema-validation errors found
