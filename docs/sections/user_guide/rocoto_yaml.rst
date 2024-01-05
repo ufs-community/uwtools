@@ -1,3 +1,4 @@
+.. _defining_a_workflow:
 
 Defining a Rocoto Workflow
 ==========================
