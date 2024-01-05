@@ -182,32 +182,38 @@ The examples that follow use YAML file ``values.yaml`` with content
   values:
     greeting: Hello
     recipient: World
+    message: '{{ (greeting + " " + recipient) * repeat }}'
     date: '{{ yyyymmdd }}'
-    empty:
+    repeat: 1
+    empty: 
 
-and supplemental YAML file ``supp.yaml`` with content
+and supplemental YAML file ``config.yaml`` with content
 
 .. code:: sh
 
   values:
     greeting: Good Night
     recipient: Moon
+    date: 
+    repeat: 2
 
 * Show the values in the input config file that have unfilled Jinja2 templates or empty keys:
 
   .. code:: sh
 
     $ uw config realize --input-file values.yaml --output-format yaml --values-needed
-    [2024-01-03T15:35:29]     INFO Keys that are complete:
-    [2024-01-03T15:35:29]     INFO     values
-    [2024-01-03T15:35:29]     INFO     values.greeting
-    [2024-01-03T15:35:29]     INFO     values.recipient
-    [2024-01-03T15:35:29]     INFO 
-    [2024-01-03T15:35:29]     INFO Keys that have unfilled Jinja2 templates:
-    [2024-01-03T15:35:29]     INFO     values.date: {{ yyyymmdd }}
-    [2024-01-03T15:35:29]     INFO 
-    [2024-01-03T15:35:29]     INFO Keys that are set to empty:
-    [2024-01-03T15:35:29]     INFO     values.empty
+    [2024-01-05T11:34:22]     INFO Keys that are complete:
+    [2024-01-05T11:34:22]     INFO     values
+    [2024-01-05T11:34:22]     INFO     values.greeting
+    [2024-01-05T11:34:22]     INFO     values.recipient
+    [2024-01-05T11:34:22]     INFO     values.message
+    [2024-01-05T11:34:22]     INFO     values.repeat
+    [2024-01-05T11:34:22]     INFO 
+    [2024-01-05T11:34:22]     INFO Keys that have unfilled Jinja2 templates:
+    [2024-01-05T11:34:22]     INFO     values.date: {{ yyyymmdd }}
+    [2024-01-05T11:34:22]     INFO 
+    [2024-01-05T11:34:22]     INFO Keys that are set to empty:
+    [2024-01-05T11:34:22]     INFO     values.empty
 
 * To realize the config to ``stdout``, a target output format must be explicitly specified:
 
@@ -217,7 +223,9 @@ and supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Hello
       recipient: World
+      message: Hello World
       date: '{{ yyyymmdd }}'
+      repeat: 1
       empty: null
 
   Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
@@ -226,38 +234,45 @@ and supplemental YAML file ``supp.yaml`` with content
 
   .. code:: sh
 
-    $ uw config realize --input-file values.yaml --output-format yaml supp.yaml
+    $ uw config realize --input-file values.yaml --output-format yaml config.yaml
     values:
       greeting: Good Night
       recipient: Moon
-      date: '{{ yyyymmdd }}'
+      message: Good Night MoonGood Night Moon
+      date: 20240105
+      repeat: 2
       empty: null
 
 * Realize the config to a file via command-line argument:
 
   .. code:: sh
 
-    $ uw config realize --input-file values.yaml --output-file realized.yaml
+    $ uw config realize --input-file values.yaml --output-file realized.yaml config.yaml
 
   The content of ``realized.yaml``:
 
   .. code:: sh
 
-      values:
-        greeting: Hello
-        recipient: World
-        date: '{{ yyyymmdd }}'
-        empty: null
+    values:
+      greeting: Good Night
+      recipient: Moon
+      message: Good Night MoonGood Night Moon
+      date: 20240105
+      repeat: 2
+      empty: null
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
   .. code:: sh
 
-    $ uw config realize --input-file values.yaml --output-file realized.yaml --dry-run
-    [2024-01-03T15:39:23]     INFO values:
-      greeting: Hello
-      recipient: World
-      date: '{{ yyyymmdd }}'
+    $ uw config realize --input-file values.yaml --output-file realized.yaml --dry-run config.yaml
+    [2024-01-05T11:35:20]     INFO values:
+    values:
+      greeting: Good Night
+      recipient: Moon
+      message: Good Night MoonGood Night Moon
+      date: 20240105
+      repeat: 2
       empty: null
 
 
@@ -265,18 +280,20 @@ and supplemental YAML file ``supp.yaml`` with content
 
   .. code:: sh
 
-    $ cat values.yaml | uw config realize --output-file realized.yaml
+    $ cat values.yaml | uw config realize --output-file realized.yaml config.yaml
     Specify --input-format when --input-file is not specified
 
 * Read the config from ``stdin`` and realize to ``stdout``:
 
   .. code:: sh
 
-    $ cat values.yaml | uw config realize --input-format yaml --output-format yaml
+    $ cat values.yaml | uw config realize --input-format yaml --output-format yaml config.yaml
     values:
-      greeting: Hello
-      recipient: World
-      date: '{{ yyyymmdd }}'
+      greeting: Good Night
+      recipient: Moon
+      message: Good Night MoonGood Night Moon
+      date: 20240105
+      repeat: 2
       empty: null
 
 
@@ -284,18 +301,20 @@ and supplemental YAML file ``supp.yaml`` with content
 
   .. code:: sh
 
-    $ uw config realize --input-file values.txt --output-format yaml
+    $ uw config realize --input-file values.txt --output-format yaml config.yaml
     Cannot deduce format of 'values.txt' from unknown extension 'txt'
 
   In this case, the format can be explicitly specified:
 
   .. code:: sh
 
-    $ uw config realize --input-file values.txt --input-format yaml --output-format yaml
+    $ uw config realize --input-file values.txt --input-format yaml --output-format yaml config.yaml
     values:
-      greeting: Hello
-      recipient: World
-      date: '{{ yyyymmdd }}'
+      greeting: Good Night
+      recipient: Moon
+      message: Good Night MoonGood Night Moon
+      date: 20240105
+      repeat: 2
       empty: null
 
 
@@ -303,55 +322,95 @@ and supplemental YAML file ``supp.yaml`` with content
 
   .. code:: sh
 
-    $ uw config realize --input-file values.yaml --output-format yaml --verbose
-    [2024-01-03T15:56:28]    DEBUG Command: uw config realize --input-file values.yaml --output-format yaml --verbose
-    [2024-01-03T15:56:28]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}}
-    [2024-01-03T15:56:28]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}}
-    [2024-01-03T15:56:28]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}
-    [2024-01-03T15:56:28]    DEBUG Rendering: Hello
-    [2024-01-03T15:56:28]    DEBUG Rendering: World
-    [2024-01-03T15:56:28]    DEBUG Rendering: {{ yyyymmdd }}
-    [2024-01-03T15:56:28]    DEBUG Rendering ERROR: 'yyyymmdd' is undefined
-    [2024-01-03T15:56:28]    DEBUG Rendering: None
-    [2024-01-03T15:56:28]    DEBUG Rendered: None
-    [2024-01-03T15:56:28]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}}
+    $ uw config realize --input-file values.yaml --output-format yaml --verbose config.yaml
+    [2024-01-05T11:37:23]    DEBUG Command: uw config realize --input-file values.yaml --output-format yaml --verbose config.yaml
+    [2024-01-05T11:37:23]    DEBUG Before update, config has depth 2
+    [2024-01-05T11:37:23]    DEBUG Supplemental config has depth 2
+    [2024-01-05T11:37:23]    DEBUG After update, config has depth 2
+    [2024-01-05T11:37:23]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:37:23]    DEBUG Rendering: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:37:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}
+    [2024-01-05T11:37:23]    DEBUG Rendering: Good Night
+    [2024-01-05T11:37:23]    DEBUG Rendering: Moon
+    [2024-01-05T11:37:23]    DEBUG Rendering: {{ (greeting + " " + recipient) * repeat }}
+    [2024-01-05T11:37:23]    DEBUG Rendering: 20240105
+    [2024-01-05T11:37:23]    DEBUG Rendered: 20240105
+    [2024-01-05T11:37:23]    DEBUG Rendering: 2
+    [2024-01-05T11:37:23]    DEBUG Rendered: 2
+    [2024-01-05T11:37:23]    DEBUG Rendering: None
+    [2024-01-05T11:37:23]    DEBUG Rendered: None
+    [2024-01-05T11:37:23]    DEBUG Dereferencing, current value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:37:23]    DEBUG Rendering: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night MoonGood Night Moon', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:37:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night MoonGood Night Moon', 'date': 20240105, 'repeat': 2, 'empty': None}
+    [2024-01-05T11:37:23]    DEBUG Rendering: Good Night
+    [2024-01-05T11:37:23]    DEBUG Rendering: Moon
+    [2024-01-05T11:37:23]    DEBUG Rendering: Good Night MoonGood Night Moon
+    [2024-01-05T11:37:23]    DEBUG Rendering: 20240105
+    [2024-01-05T11:37:23]    DEBUG Rendered: 20240105
+    [2024-01-05T11:37:23]    DEBUG Rendering: 2
+    [2024-01-05T11:37:23]    DEBUG Rendered: 2
+    [2024-01-05T11:37:23]    DEBUG Rendering: None
+    [2024-01-05T11:37:23]    DEBUG Rendered: None
+    [2024-01-05T11:37:23]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night MoonGood Night Moon', 'date': 20240105, 'repeat': 2, 'empty': None}}
     values:
-      greeting: Hello
-      recipient: World
-      date: '{{ yyyymmdd }}'
+      greeting: Good Night
+      recipient: Moon
+      message: Good Night MoonGood Night Moon
+      date: 20240105
+      repeat: 2
       empty: null
 
   Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
 
   .. code:: sh
 
-    $ uw config realize --input-file values.yaml --output-format yaml --verbose >realized.yaml 2>realized.log
+    $ uw config realize --input-file values.yaml --output-format yaml --verbose config.yaml >realized.yaml 2>realized.log
 
   The content of ``realized.yaml``:
 
   .. code:: sh
 
     values:
-      greeting: Hello
-      recipient: World
-      date: '{{ yyyymmdd }}'
+      greeting: Good Night
+      recipient: Moon
+      message: Good Night MoonGood Night Moon
+      date: 20240105
+      repeat: 2
       empty: null
 
   The content of ``realized.log``:
 
   .. code:: sh
 
-    [2024-01-03T15:58:07]    DEBUG Command: uw config realize --input-file values.yaml --output-format yaml --verbose
-    [2024-01-03T15:58:07]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}}
-    [2024-01-03T15:58:07]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}}
-    [2024-01-03T15:58:07]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}
-    [2024-01-03T15:58:07]    DEBUG Rendering: Hello
-    [2024-01-03T15:58:07]    DEBUG Rendering: World
-    [2024-01-03T15:58:07]    DEBUG Rendering: {{ yyyymmdd }}
-    [2024-01-03T15:58:07]    DEBUG Rendering ERROR: 'yyyymmdd' is undefined
-    [2024-01-03T15:58:07]    DEBUG Rendering: None
-    [2024-01-03T15:58:07]    DEBUG Rendered: None
-    [2024-01-03T15:58:07]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World', 'date': '{{ yyyymmdd }}', 'empty': None}}
+    [2024-01-05T11:39:23]    DEBUG Command: uw config realize --input-file values.yaml --output-format yaml --verbose config.yaml
+    [2024-01-05T11:39:23]    DEBUG Before update, config has depth 2
+    [2024-01-05T11:39:23]    DEBUG Supplemental config has depth 2
+    [2024-01-05T11:39:23]    DEBUG After update, config has depth 2
+    [2024-01-05T11:39:23]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:39:23]    DEBUG Rendering: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:39:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}
+    [2024-01-05T11:39:23]    DEBUG Rendering: Good Night
+    [2024-01-05T11:39:23]    DEBUG Rendering: Moon
+    [2024-01-05T11:39:23]    DEBUG Rendering: {{ (greeting + " " + recipient) * repeat }}
+    [2024-01-05T11:39:23]    DEBUG Rendering: 20240105
+    [2024-01-05T11:39:23]    DEBUG Rendered: 20240105
+    [2024-01-05T11:39:23]    DEBUG Rendering: 2
+    [2024-01-05T11:39:23]    DEBUG Rendered: 2
+    [2024-01-05T11:39:23]    DEBUG Rendering: None
+    [2024-01-05T11:39:23]    DEBUG Rendered: None
+    [2024-01-05T11:39:23]    DEBUG Dereferencing, current value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': '{{ (greeting + " " + recipient) * repeat }}', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:39:23]    DEBUG Rendering: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night MoonGood Night Moon', 'date': 20240105, 'repeat': 2, 'empty': None}}
+    [2024-01-05T11:39:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night MoonGood Night Moon', 'date': 20240105, 'repeat': 2, 'empty': None}
+    [2024-01-05T11:39:23]    DEBUG Rendering: Good Night
+    [2024-01-05T11:39:23]    DEBUG Rendering: Moon
+    [2024-01-05T11:39:23]    DEBUG Rendering: Good Night MoonGood Night Moon
+    [2024-01-05T11:39:23]    DEBUG Rendering: 20240105
+    [2024-01-05T11:39:23]    DEBUG Rendered: 20240105
+    [2024-01-05T11:39:23]    DEBUG Rendering: 2
+    [2024-01-05T11:39:23]    DEBUG Rendered: 2
+    [2024-01-05T11:39:23]    DEBUG Rendering: None
+    [2024-01-05T11:39:23]    DEBUG Rendered: None
+    [2024-01-05T11:39:23]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night MoonGood Night Moon', 'date': 20240105, 'repeat': 2, 'empty': None}}
 
 * It is important to note that ``uw`` does not allow invalid conversions. 
 
