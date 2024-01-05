@@ -187,7 +187,7 @@ The examples that follow use YAML file ``values.yaml`` with content
     repeat: 1
     empty: 
 
-and supplemental YAML file ``config.yaml`` with content
+supplemental YAML file ``config.yaml`` with content
 
 .. code:: sh
 
@@ -196,6 +196,14 @@ and supplemental YAML file ``config.yaml`` with content
     recipient: Moon
     date: 20240105
     repeat: 2
+
+And an additional supplemental YAML file ``supp.yaml`` with content
+
+.. code:: sh
+
+  values:
+    repeat: 5
+    empty: false
 
 * Show the values in the input config file that have unfilled Jinja2 templates or empty keys:
 
@@ -234,14 +242,14 @@ and supplemental YAML file ``config.yaml`` with content
 
   .. code:: sh
 
-    $ recipient=Sun uw config realize --input-file values.yaml --output-format yaml config.yaml 
+    $ recipient=Sun uw config realize --input-file values.yaml --output-format yaml supp.yaml config.yaml 
     values:
       greeting: Good Night
       recipient: Moon
       message: Good Night SunGood Night Sun
       date: 20240105
       repeat: 2
-      empty: null
+      empty: false
 
 * Realize the config to a file via command-line argument:
 
