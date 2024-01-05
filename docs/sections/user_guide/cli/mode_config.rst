@@ -194,7 +194,7 @@ and supplemental YAML file ``config.yaml`` with content
   values:
     greeting: Good Night
     recipient: Moon
-    date: 
+    date: 20240105
     repeat: 2
 
 * Show the values in the input config file that have unfilled Jinja2 templates or empty keys:
