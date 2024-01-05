@@ -469,7 +469,7 @@ The examples that follow use atparse-formatted template file ``atparse.txt`` wit
 Examples
 ~~~~~~~~
 
-The examples that follow use `JSON Schema <https://json-schema.org/understanding-json-schema/reference>`_ file ``schema.jsonschema`` with content
+The examples that follow use :json-schema:`JSON Schema<understanding-json-schema/reference>` file ``schema.jsonschema`` with content
 
 .. code:: json
 
