@@ -257,6 +257,9 @@ YAML Definitions
 ~~~~~~~~~~~~~~~~
 
 
+In this section, the example in YAML will be followed by its representation in Rocoto XML.
+
+
 The ``<cyclestr>`` tag
 ......................
 
@@ -330,7 +333,7 @@ Enties are optional. Any number of entities may be specified.
       <!ENTITY BAR "baz">
   ]>
 
-Defining the worklfow log
+Defining the workflow log
 _________________________
 
 ``log:`` is a required entry.
@@ -344,7 +347,7 @@ _________________________
 
   <log>/some/path/to/workflow.log</log>
 
-or
+A cycle string may be specified here, instead.
 
 .. code::
 
@@ -360,7 +363,7 @@ or
 Defining the set of tasks
 _________________________
 
-At least one task or metatask must be defined in the task section.
+At least one task or metatask must be defined in the ``tasks:`` section.
 
 .. code::
 
@@ -372,6 +375,8 @@ At least one task or metatask must be defined in the task section.
 The ``<task>`` tag
 ..................
 
+Multiple ``task_*:`` YAML entries may exist under the ``dependency:`` entry, or any of the
+``metatask_*:`` entries. At least one must be specified per workflow.
 
 .. code::
 
@@ -411,7 +416,7 @@ The following entries take strings just like in the ``command`` example above. P
   stderr:
   stdout:
 
-The following YAML entries need values that can be integers, strings, or ``cyclestr:`` entries.
+The following YAML entries require values that are integers, strings, or ``cyclestr:`` entries.
 
 .. code::
 
@@ -431,9 +436,9 @@ The ``<dependency>`` tag has many different tags for defining the readiness of a
 Boolean Operator Tags
 _____________________
 
-All of the boolean operator tags require one or more additional dependency tags from any category in the subtree of the entry.
+All of the boolean operator tags require **one or more additional dependency tags** from any category in the subtree of the entry.
 
-.. code::
+.. code:: text
 
   and:
   or:
@@ -468,6 +473,8 @@ _______________
 
 These tags define dependencies on other tasks, metatasks, data, or wall time.
 
+* The task dependency
+
 .. code::
 
   taskdep:
@@ -482,6 +489,8 @@ These tags define dependencies on other tasks, metatasks, data, or wall time.
     <taskdep task="hello" state="succeeded" cycle_offset="-06:00:00"/>
   </dependency>
 
+
+* The metatask dependency
 
 .. code::
 
@@ -518,7 +527,7 @@ The ``value:`` entry for ``datadep:`` accepts a ``cyclestr:`` structure.
 
 The ``timedep:`` entry will almost certainly want a ``cyclestr:`` structure.
 
-.. code::
+.. code:: text
 
   timedep:
     cyclestr:
@@ -531,6 +540,66 @@ The ``timedep:`` entry will almost certainly want a ``cyclestr:`` structure.
   </dependency>
 
 
+The ``<metatask>`` tag
+......................
+
+One or more metatasks may be included under the ``dependency:`` entry, or nested under other
+``metatask_*:`` entries.
+
+Here is an example of specifying a nested metatask entry.
+
+.. code::
+
+  metatask_member:
+    var:
+      member: 001 002 003
+    metatask_graphics_#member#_field:
+      var:
+        field: temp u v
+      task_graphics_mem#member#_#field#:
+        command: "echo $member $field"
+        envars:
+          member: #member#
+          field: #field#
+        ...
 
 
+This will run tasks named:
 
+.. code::
+
+  graphics_mem001_temp
+  graphics_mem002_temp
+  graphics_mem003_temp
+  graphics_mem001_u
+  graphics_mem002_u
+  graphics_mem003_u
+  graphics_mem001_v
+  graphics_mem002_v
+  graphics_mem003_v
+
+The XML will look like this
+
+.. code::
+
+  <metatask name="member">
+    <var name="member">001 002 003</var>
+
+    <metatask name="graphics_#member#_field">
+      <var name="field">001 002 003</var>
+
+      <task name="graphics_mem#member#_#field#">
+        <command>"echo $member $field"</command>
+        <envar>
+          <name>member</name>
+          <value>mem#member#</value>
+        </envar>
+        <envar>
+          <name>field</name>
+          <value>#field#</value>
+        </envar>
+        ...
+      </task>
+
+    </metatask>
+  </metatask>
