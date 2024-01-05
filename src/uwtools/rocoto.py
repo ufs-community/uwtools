@@ -154,7 +154,7 @@ class _RocotoXML:
         """
         e = SubElement(e, STR.task, name=taskname)
         self._set_attrs(e, config)
-        config = self._set_and_render_jobname(config, taskname)
+        self._set_and_render_jobname(config, taskname)
         for tag in (
             STR.account,
             STR.cores,
