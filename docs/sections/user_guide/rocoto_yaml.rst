@@ -423,4 +423,114 @@ The following YAML entries need values that can be integers, strings, or ``cycle
   stderr:
   stdout:
 
+The ``<dependency>`` tag
+........................
+
+The ``<dependency>`` tag has many different tags for defining the readiness of a task to run. They may be categorized in several ways: boolean operator tags, comparison tags, and dependencies.
+
+Boolean Operator Tags
+_____________________
+
+All of the boolean operator tags require one or more additional dependency tags from any category in the subtree of the entry.
+
+.. code::
+
+  and:
+  or:
+  not:
+  nand:
+  nor:
+  xor:
+  some:
+
+Comparison Tags
+_______________
+
+Both the ``streq:`` and ``strneq:`` YAML entries are specified the same way. The subtree ``left:`` and ``right:`` entries both accept a ``cyclestr:`` if needed.
+
+.. code::
+
+  streq:
+    left: &FOO;
+    right: bar
+
+.. code:: XML
+
+  <dependency>
+    <streq>
+      <left>&FOO;</left>
+      <right>bar</right>
+    </streq>
+  </dependency>
+
+Dependency tags
+_______________
+
+These tags define dependencies on other tasks, metatasks, data, or wall time.
+
+.. code::
+
+  taskdep:
+    attrs:
+      cycle_offset: "-06:00:00"
+      state: succeeded
+      task: hello                # required
+
+.. code:: XML
+
+  <dependency>
+    <taskdep task="hello" state="succeeded" cycle_offset="-06:00:00"/>
+  </dependency>
+
+
+.. code::
+
+  metataskdep:
+    attrs:
+      cycle_offset: "-06:00:00"
+      state: succeeded
+      metatask: greetings            # required
+      threshold: 1
+
+.. code:: XML
+
+  <dependency>
+    <metataskdep metatask="greetings" state="succeeded" cycle_offset="-06:00:00" threshold="1"/>
+  </dependency>
+
+
+The ``value:`` entry for ``datadep:`` accepts a ``cyclestr:`` structure.
+
+.. code::
+
+  datadep:
+    attrs:
+      age: 120
+      minsize: 1024b
+    value: /path/to/a/file.txt     # required
+
+.. code:: XML
+
+  <dependency>
+    <datadep age="120" minsize="1024b">/path/to/a/file.txt</datadep>
+  </dependency>
+
+
+The ``timedep:`` entry will almost certainly want a ``cyclestr:`` structure.
+
+.. code::
+
+  timedep:
+    cyclestr:
+      value: @Y@m@d@H@M@S
+
+.. code:: XML
+
+  <dependency>
+    <timedep><cyclestr>@Y@m@d@H@M@S</cyclestr></timedep>
+  </dependency>
+
+
+
+
 
