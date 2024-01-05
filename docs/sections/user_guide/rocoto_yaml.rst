@@ -2,14 +2,14 @@
 Defining a Rocoto Workflow
 ==========================
 
-:rocoto:`Rocoto<>` is a workflow manager widely used by :ufs:`UFS<>` users and developers. It uses a custom XML language to define a set of tasks, their computatioal resource needs on a batch system, and their dependencies. 
+:rocoto:`Rocoto<>` is a workflow manager widely used by :ufs:`UFS<>` users and developers. It uses a custom XML language to define a set of tasks, their computational resource needs on a batch system, and their dependencies. 
 
-To date, it has been challenging to manage XML files that must support a multitude of workflow options. The ``uw rocoto`` tool defines a YAML language that can be easily manipulated like any other key/value configuration file and translates it into the syntax required by Rocoto. This enables flexibility to arbitrarily make changes to any workflow while UFS Apps can track the highest priority configurations for Commumity and Operational use.
+To date, it has been challenging to manage XML files that must support a multitude of workflow options. The ``uw rocoto`` tool defines a YAML language that can be easily manipulated like any other key/value configuration file and translates it into the syntax required by Rocoto. This enables flexibility to arbitrarily make changes to any workflow while UFS Apps can track the highest priority configurations for Community and Operational use.
 
 
 Workflow Section
 ~~~~~~~~~~~~~~~~
-Starting at the top level of the YAML config for Rocoto, there are several requried sections. See the example and explanation below:
+Starting at the top level of the YAML config for Rocoto, there are several required sections. See the example and explanation below:
 
 .. code::
 
@@ -40,7 +40,7 @@ YAML Entries
   ...
   </workflow>
 
-``cycledef``: This section is comprised of a list of grouped cycle definitions for a workflow. Any number of entries is supported. Similar to ``attrs`` for the ``workflow`` level, this entry, too has an ``attrs`` tag that follows the exact requirements of those in the Rocoto XML language. The ``spec`` entry is required and supports either the "start, stop, step" syntax, or the "crontab-like" method supported by Rocoto. The example above translates to a single cycledef:
+``cycledef``: This section is comprised of a list of grouped cycle definitions for a workflow. Any number of entries is supported. Similar to ``attrs`` for the ``workflow`` level, this entry, too has an ``attrs`` tag that follows the exact requirements of those in the Rocoto XML language. The ``spec`` entry is required and supports either the "start, stop, step" syntax, or the "crontab-like" method supported by Rocoto. The example above translates to a single ``<cycledef>`` tag:
 
 .. code:: XML
 
@@ -69,7 +69,7 @@ YAML Entries
 Using Cycle Strings
 ...................
 
-The ``<cyclestr>`` tag in Rocoto transforms specific flags to represent components of the current cycle at run time. For example, an ISO date string like ``2023-01-01T12:00:00`` is represented as ``'@Y-@m-@dT@X'``. See the :rocoto:`Rocoto documentation<>` for full details. In the Rocoto YAML, the ``cyclestr:`` entry can be used anywhere that Rocoto will accept a ``<cyclestr>`` to acheive this result. The required structure of a ``cyclestr:`` entry is a ``value:``, like this:
+The ``<cyclestr>`` tag in Rocoto transforms specific flags to represent components of the current cycle at run time. For example, an ISO date string like ``2023-01-01T12:00:00`` is represented as ``'@Y-@m-@dT@X'``. See the :rocoto:`Rocoto documentation<>` for full details. In the Rocoto YAML, the ``cyclestr:`` entry can be used anywhere that Rocoto will accept a ``<cyclestr>`` to achieve this result. The required structure of a ``cyclestr:`` entry is a ``value:``, like this:
 
 .. code::
 
@@ -87,7 +87,7 @@ In the example, the resulting log would appear in the XML file as:
     <cyclestr>/some/path/to/&FOO;</cyclestr>
   </log>
 
-The ``attrs:`` section is optional within the ``cyclestr:`` entry, and can be used to specifiy the cycle offset.
+The ``attrs:`` section is optional within the ``cyclestr:`` entry, and can be used to specify the cycle offset.
 
 Tasks Section
 ~~~~~~~~~~~~~
@@ -97,7 +97,7 @@ The ``tasks`` section is a nested structure that can be arbitrarily deep and def
 Defining Tasks
 ..............
 
-Let's disect the following task example:
+Let's dissect the following task example:
 
 .. code::
 
@@ -150,12 +150,12 @@ Rocoto dependencies are optional entries that are structured as boolean expressi
 
 There are many similarities, but some nuanced differences must be clarified.
 
-Each dependency represented in the YAML will be named exactly the same as a dependency in Rocoto XML, but can be suffixed with an arbitary descriptor for the dependency after an underscore (``_``). For example, a ``<streq>`` tag could be in the YAML under ``streq_check_flag:`` or similar. Additional underscores are allowed.
+Each dependency represented in the YAML will be named exactly the same as a dependency in Rocoto XML, but can be suffixed with an arbitrary descriptor for the dependency after an underscore (``_``). For example, a ``<streq>`` tag could be in the YAML under ``streq_check_flag:`` or similar. Additional underscores are allowed.
 
 Tag Attributes
 ______________
 
-Each of the dependiences that require XML attributes (the "key=value" parts inside the XML tag) can be specified with an ``attrs`` entry. For example:
+Each of the dependencies that require XML attributes (the "key=value" parts inside the XML tag) can be specified with an ``attrs`` entry. For example:
 
 .. code::
 
@@ -217,7 +217,7 @@ This would result in Rocoto XML in this form:
 
 The ``datadep_foo:`` and ``datadep_bar:`` YAML entries were named arbitrarily after the first ``_``, but could have been even more descriptive such as ``datadep_foo_file:`` or ``datadep_foo_text:``. The important part is that the leading tag match that in Rocoto.
 
-This example also demonstrates the use of Rocoto's **boolean operator tags** in the structured YAML, e.g. ``<or>``, ``<not>``, etc.. The structure follows the tree in the Rocoto XML language in that each of the sub-elements of the ``<and>`` tag translate to sub-entries in YAML. Multiple of the boolean operator tags can be set at the same level just as with any other tag type by adding a discriptive suffix starting with an underscore (``_``). In the above example, the ``and:`` entry could have equivalently been named ``and_data_files:`` to achieve an identical Rocoto XML result.
+This example also demonstrates the use of Rocoto's **boolean operator tags** in the structured YAML, e.g. ``<or>``, ``<not>``, etc.. The structure follows the tree in the Rocoto XML language in that each of the sub-elements of the ``<and>`` tag translate to sub-entries in YAML. Multiple of the boolean operator tags can be set at the same level just as with any other tag type by adding a descriptive suffix starting with an underscore (``_``). In the above example, the ``and:`` entry could have equivalently been named ``and_data_files:`` to achieve an identical Rocoto XML result.
 
 
 Defining Metatasks
@@ -235,7 +235,7 @@ A Rocoto ``metatask`` is a structure that allows for the single specification of
       command: "echo #greeting# #world#"
       ...
 
-This translates to Rocoto XML (whitespace added for readability):
+This translates to Rocoto XML (white space added for readability):
 
 .. code:: XML
 
@@ -316,7 +316,7 @@ At least one ``cycledef:`` is required.
 Defining Entities
 _________________
 
-Enties are optional. Any number of entities may be specified.
+Entities are optional. Any number of entities may be specified.
 
 .. code::
 
@@ -436,7 +436,7 @@ The ``<dependency>`` tag has many different tags for defining the readiness of a
 Boolean Operator Tags
 _____________________
 
-All of the boolean operator tags require **one or more additional dependency tags** from any category in the subtree of the entry.
+All of the boolean operator tags require **one or more additional dependency tags** from any category in the sub-tree of the entry.
 
 .. code:: text
 
@@ -451,7 +451,7 @@ All of the boolean operator tags require **one or more additional dependency tag
 Comparison Tags
 _______________
 
-Both the ``streq:`` and ``strneq:`` YAML entries are specified the same way. The subtree ``left:`` and ``right:`` entries both accept a ``cyclestr:`` if needed.
+Both the ``streq:`` and ``strneq:`` YAML entries are specified the same way. The sub-tree ``left:`` and ``right:`` entries both accept a ``cyclestr:`` if needed.
 
 .. code::
 
@@ -548,7 +548,7 @@ One or more metatasks may be included under the ``dependency:`` entry, or nested
 
 Here is an example of specifying a nested metatask entry.
 
-.. code::
+.. code:: text
 
   metatask_member:
     var:
@@ -580,7 +580,7 @@ This will run tasks named:
 
 The XML will look like this
 
-.. code::
+.. code:: XML
 
   <metatask name="member">
     <var name="member">001 002 003</var>
