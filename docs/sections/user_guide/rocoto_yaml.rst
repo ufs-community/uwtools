@@ -147,7 +147,7 @@ The other tags not specifically mentioned here are follow the same conventions a
 Defining Dependencies for Tasks
 ...............................
 
-Rocoto dependencies are optional entries that are structured as boolean expressions defining the readiness of a task to be submitted to the queue. The :rocoto:`Rocoto documentation<>` explains each tag in detail. Here is an explanation for how those tags should be specified in YAML format.
+Optional dependencies, structured as boolean expressions, define the readiness of a task to run. Dependency specification in YAML is described here; see the :rocoto:`Rocoto documentation<>` for more details.
 
 There are many similarities, but some nuanced differences must be clarified.
 
