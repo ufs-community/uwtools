@@ -61,7 +61,7 @@ Examples
 
 The examples that follow use namelist files ``values.nml`` and ``values2.nml`` with content
 
-.. code:: sh
+.. code-block:: fortran
 
   &values
     greeting = "Hello"
@@ -71,7 +71,7 @@ The examples that follow use namelist files ``values.nml`` and ``values2.nml`` w
 
 * Compare two config files with the same contents:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config compare --file-1-path values.mml --file-2-path values2.nml
     [2024-01-03T16:20:46]     INFO - values.nml
@@ -81,7 +81,7 @@ The examples that follow use namelist files ``values.nml`` and ``values2.nml`` w
 
 * If there are differences between the config files, they will be shown below the dashed line. For example, with ``recipient: World`` removed from ``values.nml``:
 
-  .. code:: sh
+  .. code-block:: text
 
     [2024-01-03T16:23:29]     INFO - values.nml
     [2024-01-03T16:23:29]     INFO + values2.nml
@@ -91,14 +91,14 @@ The examples that follow use namelist files ``values.nml`` and ``values2.nml`` w
 
 * If a config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its content:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config compare --file-1-path values.txt --file-2-path values.nml
     Cannot deduce format of 'values.txt' from unknown extension 'txt'
 
   In this case, the format can be explicitly specified:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config compare --file-1-path values.txt --file-1-format nml --file-2-path values.nml
     [2024-01-03T16:33:19]     INFO - values.txt
@@ -108,7 +108,7 @@ The examples that follow use namelist files ``values.nml`` and ``values2.nml`` w
 
 * Request verbose log output:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config compare --file-1-path values.nml --file-2-path values2.nml --verbose
     [2024-01-03T16:25:47]    DEBUG Command: uw config compare --file-1-path values.nml --file-2-path values2.nml --verbose
@@ -119,13 +119,13 @@ The examples that follow use namelist files ``values.nml`` and ``values2.nml`` w
 
   Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config compare --file-1-path values.nml --file-2-path values2.nml --verbose 2>compare.log
 
   The content of ``compare.log``:
 
-  .. code:: sh
+  .. code-block:: text
 
     [2024-01-03T16:26:18]    DEBUG Command: uw config compare --file-1-path values.nml --file-2-path values2.nml --verbose
     [2024-01-03T16:26:18]     INFO - values.mml
@@ -176,7 +176,7 @@ Examples
 
 The examples that follow use YAML file ``values.yaml`` with content
 
-.. code:: sh
+.. code-block:: yaml
 
   values:
     greeting: Hello
@@ -188,7 +188,7 @@ The examples that follow use YAML file ``values.yaml`` with content
 
 supplemental YAML file ``config.yaml`` with content
 
-.. code:: sh
+.. code-block:: yaml
 
   values:
     greeting: Good Night
@@ -198,7 +198,7 @@ supplemental YAML file ``config.yaml`` with content
 
 And an additional supplemental YAML file ``supp.yaml`` with content
 
-.. code:: sh
+.. code-block:: yaml
 
   values:
     repeat: 5
@@ -206,7 +206,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
 
 * Show the values in the input config file that have unfilled Jinja2 templates or empty keys:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config realize --input-file values.yaml --output-format yaml --values-needed
     [2024-01-05T11:34:22]     INFO Keys that are complete:
@@ -224,7 +224,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
 
 * To realize the config to ``stdout``, a target output format must be explicitly specified:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config realize --input-file values.yaml --output-format yaml
     values:
@@ -239,7 +239,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
 
 * Values in the primary input file can be overridden via one or more supplemental files specified as positional arguments, each overriding the last; or by environment variables, which have the highest precedence.
 
-  .. code:: sh
+  .. code-block:: text
 
     $ recipient=Sun uw config realize --input-file values.yaml --output-format yaml supp.yaml config.yaml 
     values:
@@ -252,13 +252,13 @@ And an additional supplemental YAML file ``supp.yaml`` with content
 
 * Realize the config to a file via command-line argument:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config realize --input-file values.yaml --output-file realized.yaml config.yaml
 
   The content of ``realized.yaml``:
 
-  .. code:: sh
+  .. code-block:: yaml
 
     values:
       greeting: Good Night
@@ -270,7 +270,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config realize --input-file values.yaml --output-file realized.yaml --dry-run config.yaml
     [2024-01-05T11:35:20]     INFO values:
@@ -285,14 +285,14 @@ And an additional supplemental YAML file ``supp.yaml`` with content
 
 * If an input file is read alone from ``stdin``, ``uw`` will not know how to parse its content:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ cat values.yaml | uw config realize --output-file realized.yaml config.yaml
     Specify --input-format when --input-file is not specified
 
 * Read the config from ``stdin`` and realize to ``stdout``:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ cat values.yaml | uw config realize --input-format yaml --output-format yaml config.yaml
     values:
@@ -306,14 +306,14 @@ And an additional supplemental YAML file ``supp.yaml`` with content
 
 * If the config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its content:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config realize --input-file values.txt --output-format yaml config.yaml
     Cannot deduce format of 'values.txt' from unknown extension 'txt'
 
   In this case, the format can be explicitly specified:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config realize --input-file values.txt --input-format yaml --output-format yaml config.yaml
     values:
@@ -327,7 +327,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
 
 * Request verbose log output:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config realize --input-file values.yaml --output-format yaml --verbose config.yaml
     [2024-01-05T11:37:23]    DEBUG Command: uw config realize --input-file values.yaml --output-format yaml --verbose config.yaml
@@ -369,13 +369,13 @@ And an additional supplemental YAML file ``supp.yaml`` with content
 
   Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config realize --input-file values.yaml --output-format yaml --verbose config.yaml >realized.yaml 2>realized.log
 
   The content of ``realized.yaml``:
 
-  .. code:: sh
+  .. code-block:: yaml
 
     values:
       greeting: Good Night
@@ -387,7 +387,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
 
   The content of ``realized.log``:
 
-  .. code:: sh
+  .. code-block:: text
 
     [2024-01-05T11:39:23]    DEBUG Command: uw config realize --input-file values.yaml --output-format yaml --verbose config.yaml
     [2024-01-05T11:39:23]    DEBUG Before update, config has depth 2
@@ -423,7 +423,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
 
   For example, when attempting to generate an ``sh`` config from a depth-2 ``yaml``:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config realize --input-file values.yaml --output-format sh
     Cannot realize depth-2 config to type-'sh' config
@@ -465,13 +465,13 @@ Examples
 
 The examples that follow use atparse-formatted template file ``atparse.txt`` with content
 
-.. code:: sh
+.. code-block:: text
 
   @[greeting], @[recipient]!
 
 * Convert an atparse-formatted template file to Jinja2 format:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config translate --input-file atparse.txt --input-format atparse --output-format jinja2
     {{greeting}}, {{recipient}}!
@@ -480,19 +480,19 @@ The examples that follow use atparse-formatted template file ``atparse.txt`` wit
 
 * Convert the template to a file via command-line argument:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config translate --input-file atparse.txt --input-format atparse --output-file jinja2.txt --output-format jinja2
 
   The content of ``jinja2.txt``:
 
-  .. code:: sh
+  .. code-block:: jinja
 
     {{greeting}}, {{recipient}}!
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config translate --input-file atparse.txt --input-format atparse --output-format jinja2 --dry-run
     [2024-01-03T16:41:13]     INFO {{greeting}}, {{recipient}}!
@@ -500,7 +500,7 @@ The examples that follow use atparse-formatted template file ``atparse.txt`` wit
 
 * If an input is read alone from ``stdin``, ``uw`` will not know how to parse its content as we must always specify the formats:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ cat atparse.txt | uw config translate --input-format atparse --output-format jinja2
     {{greeting}}, {{recipient}}!
@@ -563,7 +563,7 @@ The examples that follow use :json-schema:`JSON Schema<understanding-json-schema
 
 and YAML file ``values.yaml`` with content
 
-.. code:: sh
+.. code-block:: yaml
 
   values:
     greeting: Hello
@@ -571,7 +571,7 @@ and YAML file ``values.yaml`` with content
 
 * Validate a YAML config against a given JSON schema:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml
     [2024-01-03T17:23:07]     INFO 0 UW schema-validation errors found
@@ -581,7 +581,7 @@ and YAML file ``values.yaml`` with content
 
 * Read the config from ``stdin`` and print validation results to ``stdout``:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ cat values.yaml | uw config validate --schema-file schema.jsonschema
     [2024-01-03T17:26:29]     INFO 0 UW schema-validation errors found
@@ -589,14 +589,14 @@ and YAML file ``values.yaml`` with content
 
 * However, reading the schema from ``stdin`` is **not** supported:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ cat schema.jsonschema | uw config validate --input-file values.yaml
     uw config validate: error: the following arguments are required: --schema-file
 
 * If a config fails validation, differences from the schema will be displayed. For example, with ``recipient: World`` removed from ``values.yaml``:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml
     [2024-01-03T17:31:19]    ERROR 1 UW schema-validation error found
@@ -614,7 +614,7 @@ and YAML file ``values.yaml`` with content
 
 * Request verbose log output:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
     [2024-01-03T17:29:46]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
@@ -628,13 +628,13 @@ and YAML file ``values.yaml`` with content
 
   Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
 
-  .. code:: sh
+  .. code-block:: text
 
     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose 2>validate.log
 
   The content of ``validate.log``:
 
-  .. code:: sh
+  .. code-block:: text
 
     [2024-01-03T17:30:49]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
     [2024-01-03T17:30:49]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
