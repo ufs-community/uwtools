@@ -128,7 +128,7 @@ The name of the task can be any string accepted by Rocoto as a task name (includ
 
 ``command``: The command that will be run in the batch job.
 
-``envars``: Any number of key/value pairs to set up the environment for the ``<command>`` to run successfully. Here, keys translate to bash variable names and values translate to the bash variables' values. Each entry in this section will show up in the XML like this:
+``envars``: Any number of key/value pairs defining bash variable names and their corresponding values, to be exported to the environment in which ``<command>`` will run, each rendered in XML like this:
 
 .. code:: XML
 
