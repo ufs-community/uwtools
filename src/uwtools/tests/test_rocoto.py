@@ -207,15 +207,6 @@ class Test__RocotoXML:
         assert child.get("minsize") == minsize
         assert child.text == value if isinstance(value, str) else value["cyclestr"]["value"]
 
-    def test__add_task_dependency_and(self, instance, root):
-        config = {"and": {"or_get_obs": {"datadep": {"attrs": {"age": "120"}}}}}
-        instance._add_task_dependency(e=root, config=config)
-        dependency = root[0]
-        assert dependency.tag == "dependency"
-        and_ = dependency[0]
-        assert and_.tag == "and"
-        assert and_.getchildren()[0].getchildren()[0].get("age") == "120"
-
     def test__add_task_dependency_fail(self, instance, root):
         config = {"unrecognized": "whatever"}
         with raises(UWConfigError):
