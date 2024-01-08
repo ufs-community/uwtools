@@ -33,7 +33,9 @@ The ``uw`` mode for handling configs.
 .. code-block:: text
 
   $ uw config compare --help
-  usage: uw config compare --file-1-path PATH --file-2-path PATH [-h] [--file-1-format {ini,nml,sh,yaml}] [--file-2-format {ini,nml,sh,yaml}] [--quiet] [--verbose]
+  usage: uw config compare --file-1-path PATH --file-2-path PATH [-h]
+                           [--file-1-format {ini,nml,sh,yaml}] [--file-2-format {ini,nml,sh,yaml}]
+                           [--quiet] [--verbose]
 
   Compare configs
 
@@ -55,11 +57,10 @@ The ``uw`` mode for handling configs.
     --verbose, -v
           Print all logging messages
 
-
 Examples
 ~~~~~~~~
 
-The examples that follow use namelist files ``values.nml`` and ``values2.nml`` with content
+The examples that follow use namelist files ``values1.nml`` and ``values2.nml``, both initially with content
 
 .. code-block:: fortran
 
@@ -68,70 +69,68 @@ The examples that follow use namelist files ``values.nml`` and ``values2.nml`` w
     recipient = "World"
   /
 
-
 * Compare two config files with the same contents:
 
   .. code-block:: text
 
-    $ uw config compare --file-1-path values.mml --file-2-path values2.nml
-    [2024-01-03T16:20:46]     INFO - values.nml
-    [2024-01-03T16:20:46]     INFO + values2.nml
-    [2024-01-03T16:20:46]     INFO ---------------------------------------------------------------------
+    $ uw config compare --file-1-path values1.nml --file-2-path values2.nml
+    [2024-01-08T16:53:04]     INFO - values1.nml
+    [2024-01-08T16:53:04]     INFO + values2.nml
+    [2024-01-08T16:53:04]     INFO ---------------------------------------------------------------------
 
-
-* If there are differences between the config files, they will be shown below the dashed line. For example, with ``recipient: World`` removed from ``values.nml``:
+* If there are differences between the config files, they will be shown below the dashed line. For example, with ``recipient: World`` removed from ``values1.nml``:
 
   .. code-block:: text
 
-    [2024-01-03T16:23:29]     INFO - values.nml
-    [2024-01-03T16:23:29]     INFO + values2.nml
-    [2024-01-03T16:23:29]     INFO ---------------------------------------------------------------------
-    [2024-01-03T16:23:29]     INFO values:       recipient:  - None + World
-
+    $ uw config compare --file-1-path values1.nml --file-2-path values2.nml
+    [2024-01-08T16:54:03]     INFO - values1.nml
+    [2024-01-08T16:54:03]     INFO + values2.nml
+    [2024-01-08T16:54:03]     INFO ---------------------------------------------------------------------
+    [2024-01-08T16:54:03]     INFO values:       recipient:  - None + World
 
 * If a config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its content:
 
   .. code-block:: text
 
-    $ uw config compare --file-1-path values.txt --file-2-path values.nml
+    $ uw config compare --file-1-path values.txt --file-2-path values1.nml
     Cannot deduce format of 'values.txt' from unknown extension 'txt'
 
-  In this case, the format can be explicitly specified:
+  In this case, the format can be explicitly specified (``values.txt`` is a copy of ``values1.nml``):
 
   .. code-block:: text
 
-    $ uw config compare --file-1-path values.txt --file-1-format nml --file-2-path values.nml
-    [2024-01-03T16:33:19]     INFO - values.txt
-    [2024-01-03T16:33:19]     INFO + values.nml
-    [2024-01-03T16:33:19]     INFO ---------------------------------------------------------------------
-    [2024-01-03T16:33:19]     INFO values:       recipient:  - None + World
+    $ uw config compare --file-1-path values.txt --file-1-format nml --file-2-path values2.nml
+    [2024-01-08T16:56:54]     INFO - values.txt
+    [2024-01-08T16:56:54]     INFO + values2.nml
+    [2024-01-08T16:56:54]     INFO ---------------------------------------------------------------------
+    [2024-01-08T16:56:54]     INFO values:       recipient:  - None + World
 
 * Request verbose log output:
 
   .. code-block:: text
 
-    $ uw config compare --file-1-path values.nml --file-2-path values2.nml --verbose
-    [2024-01-03T16:25:47]    DEBUG Command: uw config compare --file-1-path values.nml --file-2-path values2.nml --verbose
-    [2024-01-03T16:25:47]     INFO - values.nml
-    [2024-01-03T16:25:47]     INFO + values2.nml
-    [2024-01-03T16:25:47]     INFO ---------------------------------------------------------------------
-    [2024-01-03T16:25:47]     INFO values:       recipient:  - None + World
+    $ uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose
+    [2024-01-08T16:57:28]    DEBUG Command: uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose
+    [2024-01-08T16:57:28]     INFO - values1.nml
+    [2024-01-08T16:57:28]     INFO + values2.nml
+    [2024-01-08T16:57:28]     INFO ---------------------------------------------------------------------
+    [2024-01-08T16:57:28]     INFO values:       recipient:  - None + World
 
   Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
 
   .. code-block:: text
 
-    $ uw config compare --file-1-path values.nml --file-2-path values2.nml --verbose 2>compare.log
+    $ uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose 2>compare.log
 
   The content of ``compare.log``:
 
   .. code-block:: text
 
-    [2024-01-03T16:26:18]    DEBUG Command: uw config compare --file-1-path values.nml --file-2-path values2.nml --verbose
-    [2024-01-03T16:26:18]     INFO - values.mml
-    [2024-01-03T16:26:18]     INFO + values2.nml
-    [2024-01-03T16:26:18]     INFO ---------------------------------------------------------------------
-    [2024-01-03T16:26:18]     INFO values:       recipient:  - None + World
+    [2024-01-08T16:59:20]    DEBUG Command: uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose
+    [2024-01-08T16:59:20]     INFO - values1.nml
+    [2024-01-08T16:59:20]     INFO + values2.nml
+    [2024-01-08T16:59:20]     INFO ---------------------------------------------------------------------
+    [2024-01-08T16:59:20]     INFO values:       recipient:  - None + World
 
 .. _realize_configs_cli_examples:
 
@@ -141,7 +140,10 @@ The examples that follow use namelist files ``values.nml`` and ``values2.nml`` w
 .. code-block:: text
 
   $ uw config realize --help
-  usage: uw config realize --values-file PATH [-h] [--input-file PATH] [--input-format {ini,nml,sh,yaml}] [--output-file PATH] [--output-format {ini,nml,sh,yaml}] [--values-format {ini,nml,sh,yaml}] [--values-needed] [--dry-run] [--quiet] [--verbose]
+  usage: uw config realize --values-file PATH [-h] [--input-file PATH]
+                           [--input-format {ini,nml,sh,yaml}] [--output-file PATH]
+                           [--output-format {ini,nml,sh,yaml}] [--values-format {ini,nml,sh,yaml}]
+                           [--values-needed] [--dry-run] [--quiet] [--verbose]
 
   Realize config
 
@@ -174,7 +176,7 @@ The examples that follow use namelist files ``values.nml`` and ``values2.nml`` w
 Examples
 ~~~~~~~~
 
-The examples that follow use YAML file ``values.yaml`` with content
+The examples that follow use YAML file ``config.yaml`` with content
 
 .. code-block:: yaml
 
@@ -184,9 +186,9 @@ The examples that follow use YAML file ``values.yaml`` with content
     message: '{{ (greeting + " " + recipient + " ") * repeat }}'
     date: '{{ yyyymmdd }}'
     repeat: 1
-    empty: 
+    empty:
 
-supplemental YAML file ``config.yaml`` with content
+supplemental YAML file ``values1.yaml`` with content
 
 .. code-block:: yaml
 
@@ -196,7 +198,7 @@ supplemental YAML file ``config.yaml`` with content
     date: 20240105
     repeat: 2
 
-And an additional supplemental YAML file ``supp.yaml`` with content
+and additional supplemental YAML file ``values2.yaml`` with content
 
 .. code-block:: yaml
 
@@ -207,7 +209,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
 * Show the values in the input config file that have unrendered Jinja2 variables/expressions or empty keys:
 
   .. code-block:: text
-
+TODO FIXME
     $ uw config realize --input-file values.yaml --output-format yaml --values-needed
     [2024-01-05T11:34:22]     INFO Keys that are complete:
     [2024-01-05T11:34:22]     INFO     values
@@ -215,10 +217,10 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     [2024-01-05T11:34:22]     INFO     values.recipient
     [2024-01-05T11:34:22]     INFO     values.message
     [2024-01-05T11:34:22]     INFO     values.repeat
-    [2024-01-05T11:34:22]     INFO 
+    [2024-01-05T11:34:22]     INFO
     [2024-01-05T11:34:22]     INFO Keys that have unfilled Jinja2 templates:
     [2024-01-05T11:34:22]     INFO     values.date: {{ yyyymmdd }}
-    [2024-01-05T11:34:22]     INFO 
+    [2024-01-05T11:34:22]     INFO
     [2024-01-05T11:34:22]     INFO Keys that are set to empty:
     [2024-01-05T11:34:22]     INFO     values.empty
 
@@ -230,7 +232,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Hello
       recipient: World
-      message: Hello World 
+      message: Hello World
       date: '{{ yyyymmdd }}'
       repeat: 1
       empty: null
@@ -241,11 +243,11 @@ And an additional supplemental YAML file ``supp.yaml`` with content
 
   .. code-block:: text
 
-    $ recipient=Sun uw config realize --input-file values.yaml --output-format yaml supp.yaml config.yaml 
+    $ recipient=Sun uw config realize --input-file values.yaml --output-format yaml supp.yaml config.yaml
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night Sun Good Night Sun 
+      message: Good Night Sun Good Night Sun
       date: 20240105
       repeat: 2
       empty: false
@@ -263,7 +265,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night Moon Good Night Moon 
+      message: Good Night Moon Good Night Moon
       date: 20240105
       repeat: 2
       empty: null
@@ -277,7 +279,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night Moon Good Night Moon 
+      message: Good Night Moon Good Night Moon
       date: 20240105
       repeat: 2
       empty: null
@@ -298,7 +300,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night Moon Good Night Moon 
+      message: Good Night Moon Good Night Moon
       date: 20240105
       repeat: 2
       empty: null
@@ -319,7 +321,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night Moon Good Night Moon 
+      message: Good Night Moon Good Night Moon
       date: 20240105
       repeat: 2
       empty: null
@@ -351,7 +353,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     [2024-01-05T11:37:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night Moon Good Night Moon ', 'date': 20240105, 'repeat': 2, 'empty': None}
     [2024-01-05T11:37:23]    DEBUG Rendering: Good Night
     [2024-01-05T11:37:23]    DEBUG Rendering: Moon
-    [2024-01-05T11:37:23]    DEBUG Rendering: Good Night Moon Good Night Moon 
+    [2024-01-05T11:37:23]    DEBUG Rendering: Good Night Moon Good Night Moon
     [2024-01-05T11:37:23]    DEBUG Rendering: 20240105
     [2024-01-05T11:37:23]    DEBUG Rendered: 20240105
     [2024-01-05T11:37:23]    DEBUG Rendering: 2
@@ -362,7 +364,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night Moon Good Night Moon 
+      message: Good Night Moon Good Night Moon
       date: 20240105
       repeat: 2
       empty: null
@@ -380,7 +382,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     values:
       greeting: Good Night
       recipient: Moon
-      message: Good Night Moon Good Night Moon 
+      message: Good Night Moon Good Night Moon
       date: 20240105
       repeat: 2
       empty: null
@@ -410,7 +412,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     [2024-01-05T11:39:23]    DEBUG Rendering: {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night Moon Good Night Moon ', 'date': 20240105, 'repeat': 2, 'empty': None}
     [2024-01-05T11:39:23]    DEBUG Rendering: Good Night
     [2024-01-05T11:39:23]    DEBUG Rendering: Moon
-    [2024-01-05T11:39:23]    DEBUG Rendering: Good Night Moon Good Night Moon 
+    [2024-01-05T11:39:23]    DEBUG Rendering: Good Night Moon Good Night Moon
     [2024-01-05T11:39:23]    DEBUG Rendering: 20240105
     [2024-01-05T11:39:23]    DEBUG Rendered: 20240105
     [2024-01-05T11:39:23]    DEBUG Rendering: 2
@@ -419,7 +421,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     [2024-01-05T11:39:23]    DEBUG Rendered: None
     [2024-01-05T11:39:23]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Good Night', 'recipient': 'Moon', 'message': 'Good Night Moon Good Night Moon ', 'date': 20240105, 'repeat': 2, 'empty': None}}
 
-* It is important to note that ``uw`` does not allow invalid conversions. 
+* It is important to note that ``uw`` does not allow invalid conversions.
 
   For example, when attempting to generate an ``sh`` config from a depth-2 ``yaml``:
 
@@ -601,14 +603,14 @@ and YAML file ``values.yaml`` with content
     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml
     [2024-01-03T17:31:19]    ERROR 1 UW schema-validation error found
     [2024-01-03T17:31:19]    ERROR 'recipient' is a required property
-    [2024-01-03T17:31:19]    ERROR 
+    [2024-01-03T17:31:19]    ERROR
     [2024-01-03T17:31:19]    ERROR Failed validating 'required' in schema['properties']['values']:
     [2024-01-03T17:31:19]    ERROR     {'additionalProperties': False,
     [2024-01-03T17:31:19]    ERROR      'properties': {'greeting': {'type': 'string'},
     [2024-01-03T17:31:19]    ERROR                     'recipient': {'type': 'string'}},
     [2024-01-03T17:31:19]    ERROR      'required': ['greeting', 'recipient'],
     [2024-01-03T17:31:19]    ERROR      'type': 'object'}
-    [2024-01-03T17:31:19]    ERROR 
+    [2024-01-03T17:31:19]    ERROR
     [2024-01-03T17:31:19]    ERROR On instance['values']:
     [2024-01-03T17:31:19]    ERROR     {'greeting': 'Hello'}
 
