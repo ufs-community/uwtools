@@ -11,7 +11,6 @@ from lxml import etree
 from lxml.etree import Element, SubElement
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.jinja2 import dereference
 from uwtools.config.validator import validate_yaml
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
@@ -348,7 +347,7 @@ class _RocotoXML:
             lines.insert(1, doctype)
         return "\n".join(lines)
 
-    def _set_and_render_jobname(self, config: dict, taskname: str) -> dict:
+    def _set_and_render_jobname(self, config: dict, taskname: str) -> None:
         """
         In the given config, ensure 'jobname' is set, then render {{ jobname }}.
 
@@ -357,9 +356,6 @@ class _RocotoXML:
         """
         if STR.jobname not in config:
             config[STR.jobname] = taskname
-        new = dereference(val=config, context={STR.jobname: config[STR.jobname]})
-        assert isinstance(new, dict)
-        return new
 
     def _set_attrs(self, e: Element, config: dict) -> None:
         """
