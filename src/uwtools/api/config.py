@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.formats.fieldtable import FieldTableConfig as _FieldTableConfig
@@ -99,8 +99,7 @@ def realize(
     input_format: Optional[str] = None,
     output_file: OptionalPath = None,
     output_format: Optional[str] = None,
-    values: Union[dict, _Config, OptionalPath] = None,
-    values_format: Optional[str] = None,
+    supplemental_configs: Optional[List[Union[dict, _Config, DefinitePath]]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> bool:
@@ -131,8 +130,7 @@ def realize(
         input_format=input_format,
         output_file=output_file,
         output_format=output_format,
-        values=_ensure_config_arg_type(values),
-        values_format=values_format,
+        supplemental_configs=supplemental_configs,
         values_needed=values_needed,
         dry_run=dry_run,
     )
@@ -142,8 +140,7 @@ def realize(
 def realize_to_dict(
     input_config: Union[dict, _Config, OptionalPath] = None,
     input_format: Optional[str] = None,
-    values: Union[dict, _Config, OptionalPath] = None,
-    values_format: Optional[str] = None,
+    supplemental_configs: Optional[List[Union[dict, _Config, DefinitePath]]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> dict:
@@ -171,8 +168,7 @@ def realize_to_dict(
         input_format=input_format,
         output_file=os.devnull,
         output_format=None,
-        values=_ensure_config_arg_type(values),
-        values_format=values_format,
+        supplemental_configs=supplemental_configs,
         values_needed=values_needed,
         dry_run=dry_run,
     )

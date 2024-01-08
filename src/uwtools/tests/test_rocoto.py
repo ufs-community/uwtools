@@ -207,49 +207,48 @@ class Test__RocotoXML:
         assert child.get("minsize") == minsize
         assert child.text == value if isinstance(value, str) else value["cyclestr"]["value"]
 
+    def test__add_task_dependency_and(self, instance, root):
+        config = {"and": {"or_get_obs": {"datadep": {"attrs": {"age": "120"}}}}}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        and_ = dependency[0]
+        assert and_.tag == "and"
+        assert and_.getchildren()[0].getchildren()[0].get("age") == "120"
+
     def test__add_task_dependency_fail(self, instance, root):
         config = {"unrecognized": "whatever"}
         with raises(UWConfigError):
             instance._add_task_dependency(e=root, config=config)
 
-    def test__add_task_dependency_fail_bad_operand(self, instance, root):
+    @pytest.mark.parametrize(
+        "config",
+        [{"datadep": {"attrs": {"age": "120"}}}, {"timedep": {"attrs": {"offset": "&DEADLINE;"}}}],
+    )
+    def test__add_task_dependency_operand(self, config, instance, root):
+        instance._add_task_dependency_operand_operator(e=root, config=config)
+        element = root[0]
+        for tag, subconfig in config.items():
+            assert tag == element.tag
+            for attr, val in subconfig["attrs"].items():
+                assert element.get(attr) == val
+
+    def test__add_task_dependency_operand_fail(self, instance, root):
         config = {"and": {"unrecognized": "whatever"}}
         with raises(UWConfigError):
             instance._add_task_dependency(e=root, config=config)
 
     @pytest.mark.parametrize(
-        "tag_config",
-        [("and", {"strneq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}})],
+        "config",
+        [
+            {"and": {"or": {"datadep": {"attrs": {"age": "120"}}}}},
+            {"and": {"strneq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}},
+        ],
     )
-    def test__add_task_dependency_operator(self, instance, root, tag_config):
-        tag, config = tag_config
-        instance._add_task_dependency_child(e=root, config=config, tag=tag)
+    def test__add_task_dependency_operator(self, config, instance, root):
+        instance._add_task_dependency_operand_operator(e=root, config=config)
         for tag, _ in config.items():
             assert tag == next(iter(config))
-
-    def test__add_task_dependency_operator_datadep_operand(self, instance, root):
-        value = "/some/file"
-        config = {"value": value}
-        instance._add_task_dependency_child(e=root, config=config, tag="datadep")
-        e = root[0]
-        assert e.tag == "datadep"
-        assert e.text == value
-
-    def test__add_task_dependency_operator_task_operand(self, instance, root):
-        taskname = "some-task"
-        config = {"attrs": {"task": taskname}}
-        instance._add_task_dependency_child(e=root, config=config, tag="taskdep")
-        e = root[0]
-        assert e.tag == "taskdep"
-        assert e.get("task") == taskname
-
-    def test__add_task_dependency_operator_timedep_operand(self, instance, root):
-        value = 20230103120000
-        config = value
-        instance._add_task_dependency_child(e=root, config=config, tag="timedep")
-        e = root[0]
-        assert e.tag == "timedep"
-        assert e.text == str(value)
 
     def test__add_task_dependency_streq(self, instance, root):
         config = {"streq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}
@@ -268,41 +267,12 @@ class Test__RocotoXML:
         ],
     )
     def test__add_task_dependency_strequality(self, config, instance, root):
-        tag, config = config
-        instance._add_task_dependency_strequality(e=root, config=config, tag=tag)
+        tag, subconfig = config
+        instance._add_task_dependency_strequality(e=root, subconfig=subconfig, tag=tag)
         element = root[0]
         assert tag == element.tag
-        for attr, val in config["attrs"].items():
+        for attr, val in subconfig["attrs"].items():
             assert element.get(attr) == val
-
-    def test__add_task_dependency_taskdep(self, instance, root):
-        config = {"taskdep": {"attrs": {"task": "foo"}}}
-        instance._add_task_dependency(e=root, config=config)
-        dependency = root[0]
-        assert dependency.tag == "dependency"
-        child = dependency[0]
-        assert child.tag == "taskdep"
-        assert child.get("task") == "foo"
-
-    @pytest.mark.parametrize(
-        "value",
-        [
-            "202301031200",
-            202301031200,
-            {"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "06:00:00"}}},
-        ],
-    )
-    def test__add_task_dependency_timedep(self, instance, root, value):
-        config = {"timedep": value}
-        instance._add_task_dependency(e=root, config=config)
-        dependency = root[0]
-        assert dependency.tag == "dependency"
-        child = dependency[0]
-        assert child.tag == "timedep"
-        if isinstance(value, dict):
-            assert child.xpath("cyclestr")[0].text == value["cyclestr"]["value"]
-        else:
-            assert child.text == str(value)
 
     def test__config_validate_config(self, assets, instance):
         cfgfile, _ = assets

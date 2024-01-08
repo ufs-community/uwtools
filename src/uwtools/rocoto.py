@@ -113,16 +113,16 @@ class _RocotoXML:
         :param tag: Name of child element to add.
         :return: The child element.
         """
+        config = config[tag]
         e = SubElement(e, tag)
-        if isinstance(config, dict):
-            self._set_attrs(e, config)
-            if subconfig := config.get(STR.cyclestr, {}):
-                cyclestr = SubElement(e, STR.cyclestr)
-                cyclestr.text = subconfig[STR.value]
-                self._set_attrs(cyclestr, subconfig)
+        if isinstance(config, str):
+            e.text = config
         else:
-            e.text = str(config)
-        return e
+            self._set_attrs(e, config)
+            if config := config.get(STR.cyclestr, {}):
+                cyclestr = SubElement(e, STR.cyclestr)
+                cyclestr.text = config["value"]
+                self._set_attrs(cyclestr, config)
 
     def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
         """
@@ -192,6 +192,7 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
+        operands, operators, strequality = self._dependency_constants
         e = SubElement(e, STR.dependency)
         for tag, subconfig in config.items():
             self._add_task_dependency_child(e, subconfig, tag)
@@ -255,6 +256,36 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         """
         self._add_compound_time_string(e, config, STR.timedep)
+
+    def _add_task_dependency_operand_operator(self, e: Element, config: dict) -> None:
+        """
+        Add an operand or operator element to the <dependency>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        operands, operators, strequality = self._dependency_constants
+        for tag, subconfig in config.items():
+            tag, _ = self._tag_name(tag)
+            if tag in operands:
+                if tag == STR.taskdep:
+                    self._set_attrs(SubElement(e, tag), subconfig)
+                else:
+                    self._add_compound_time_string(e, config, tag)
+            elif tag in operators:
+                self._add_task_dependency_operand_operator(SubElement(e, tag), config=subconfig)
+            elif tag in strequality:
+                self._add_task_dependency_strequality(e, subconfig=subconfig, tag=tag)
+            else:
+                raise UWConfigError("Unhandled dependency type %s" % tag)
+
+    def _add_task_dependency_strequality(self, e: Element, subconfig: dict, tag: str) -> None:
+        """
+        :param e: The parent element to add the new element to.
+        :param subconfig: Configuration data for the tag.
+        :param tag: Name of new element to add.
+        """
+        self._set_attrs(SubElement(e, tag), subconfig)
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """

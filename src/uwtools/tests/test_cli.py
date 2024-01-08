@@ -104,7 +104,7 @@ def test__check_file_vs_format_fail(capsys, vals):
 
 
 def test__check_file_vs_format_pass_explicit():
-    # Accept explcitly-specified format, whatever it is.
+    # Accept explicitly-specified format, whatever it is.
     fmt = "jpg"
     args = {STR.infile: "/path/to/input.txt", STR.infmt: fmt}
     args = cli._check_file_vs_format(
@@ -210,10 +210,9 @@ def test__dispatch_config_realize():
         STR.infmt: 2,
         STR.outfile: 3,
         STR.outfmt: 4,
-        STR.valsfile: 5,
-        STR.valsfmt: 6,
-        STR.valsneeded: 7,
-        STR.dryrun: 8,
+        STR.suppfiles: 5,
+        STR.valsneeded: 6,
+        STR.dryrun: 7,
     }
     with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
@@ -222,10 +221,9 @@ def test__dispatch_config_realize():
         input_format=2,
         output_file=3,
         output_format=4,
-        values=5,
-        values_format=6,
-        values_needed=7,
-        dry_run=8,
+        supplemental_configs=5,
+        values_needed=6,
+        dry_run=7,
     )
 
 
@@ -235,8 +233,7 @@ def test__dispatch_config_realize_no_optional():
         STR.infmt: None,
         STR.outfile: None,
         STR.outfmt: None,
-        STR.valsfile: "/foo.vals",
-        STR.valsfmt: None,
+        STR.suppfiles: ["/foo.vals"],
         STR.valsneeded: False,
         STR.dryrun: False,
     }
@@ -247,8 +244,7 @@ def test__dispatch_config_realize_no_optional():
         input_format=None,
         output_file=None,
         output_format=None,
-        values="/foo.vals",
-        values_format=None,
+        supplemental_configs=["/foo.vals"],
         values_needed=False,
         dry_run=False,
     )
@@ -291,12 +287,13 @@ def test__dispatch_config_translate_unsupported():
     assert cli._dispatch_config_translate(args) is False
 
 
-def test__dispath_config_validate_config_obj():
+def test__dispatch_config_validate_config_obj():
     config = uwtools.api.config._YAMLConfig(config={})
-    args = {STR.schemafile: 1, STR.config: config}
+    _dispatch_config_validate_args = {STR.schemafile: 1, STR.infile: config}
     with patch.object(uwtools.api.config, "_validate_yaml") as _validate_yaml:
-        cli._dispatch_config_validate(args)
-    _validate_yaml.assert_called_once_with(**args)
+        cli._dispatch_config_validate(_dispatch_config_validate_args)
+    _validate_yaml_args = {STR.schemafile: 1, STR.config: config}
+    _validate_yaml.assert_called_once_with(**_validate_yaml_args)
 
 
 @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
