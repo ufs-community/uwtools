@@ -27,7 +27,7 @@ The ``uw`` mode for realizing and validating Rocoto XML documents.
 ``realize``
 -----------
 
-In ``uw`` terminology, to ``realize`` a configuration file is to transform it from its raw from into its final, usable state. In the case of ``uw rocoto``, that means transforming a structured UW YAML file into a :rocoto:`Rocoto XML<>` file. The structured YAML language required by UW closely follows the XML language defined by Rocoto.
+In ``uw`` terminology, to ``realize`` a configuration file is to transform it from its raw form into its final, usable state. In the case of ``uw rocoto``, that means transforming a structured UW YAML file into a :rocoto:`Rocoto XML<>` file. The structured YAML language required by UW closely follows the XML language defined by Rocoto.
 
 More information about the structured UW YAML file for Rocoto can be found :any:`here<defining_a_workflow>`.
 
@@ -230,7 +230,8 @@ Examples
 
 The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following content:
 
-.. code:: XML
+.. code-block:: XML
+  :linenos:
 
   <?xml version='1.0' encoding='utf-8'?>
   <!DOCTYPE workflow [
@@ -288,7 +289,8 @@ The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following
 
   In the following example, an empty ``<dependency>`` element was added at the end of the task:
 
-  .. code:: XML
+  .. code-block:: XML
+    :linenos:
 
     <?xml version='1.0' encoding='utf-8'?>
     <!DOCTYPE workflow [
@@ -324,4 +326,4 @@ The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following
   Once again, interpreting from the bottom:
 
   * The content of the task starting at Line 9 is not valid.
-  * There is an extra element ``dependency`` in the task.
+  * There is an extra element ``<dependency>`` in the task.

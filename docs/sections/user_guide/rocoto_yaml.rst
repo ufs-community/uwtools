@@ -140,7 +140,7 @@ The name of the task can be any string accepted by Rocoto as a task name (includ
 ``dependencies:``: [Optional] Any number of dependencies accepted by Rocoto. This entry is described in more detail below.
 
 
-The other tags not specifically mentioned here are follow the same conventions as described in the :rocoto:`Rocoto<>` documentation.
+The other tags not specifically mentioned here follow the same conventions as described in the :rocoto:`Rocoto<>` documentation.
 
 
 
