@@ -113,16 +113,15 @@ class _RocotoXML:
         :param tag: Name of child element to add.
         :return: The child element.
         """
-        config = config[tag]
         e = SubElement(e, tag)
-        if isinstance(config, str):
-            e.text = config
-        else:
+        if isinstance(config, dict):
             self._set_attrs(e, config)
-            if config := config.get(STR.cyclestr, {}):
+            if subconfig := config.get(STR.cyclestr, {}):
                 cyclestr = SubElement(e, STR.cyclestr)
-                cyclestr.text = config["value"]
-                self._set_attrs(cyclestr, config)
+                cyclestr.text = subconfig[STR.value]
+                self._set_attrs(cyclestr, subconfig)
+        else:
+            e.text = str(config)
         return e
 
     def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
