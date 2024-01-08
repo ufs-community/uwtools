@@ -128,7 +128,7 @@ The name of the task can be any string accepted by Rocoto as a task name (includ
 
 ``command:``: The command that will be run in the batch job.
 
-``envars:``: Any number of key/value pairs to set up the environment for the ``<command>`` to run successfully. Here, keys translate to bash variable names and values translate to the bash variables' values. Each entry in this section will show up in the XML like this:
+``envars:``: Any number of key/value pairs defining bash variable names and their corresponding values, to be exported to the environment in which ``<command>`` will run, each rendered in XML like this:
 
 .. code:: XML
 
@@ -147,14 +147,14 @@ The other tags not specifically mentioned here are follow the same conventions a
 Defining Dependencies for Tasks
 ...............................
 
-Rocoto dependencies are optional entries that are structured as boolean expressions defining the readiness of a task to be submitted to the queue. The :rocoto:`Rocoto documentation<>` explains each tag in detail. Here is an explanation for how those tags should be specified in UW YAML format.
+Optional dependencies, structured as boolean expressions, define the readiness of a task to run. Dependency specification in YAML is described here; see the :rocoto:`Rocoto documentation<>` for more details.
 
 UW YAML dependency key names should mirror Rocoto XML dependency tag names, optionally suffixed with an underscore followed by an arbitrary descriptor. For example, a ``<streq>`` tag might appear in YAML as ``streq_check_flag:``.
 
 Tag Attributes
 ______________
 
-Each of the dependencies that require XML attributes (the "key=value" parts inside the XML tag) can be specified with an ``attrs:`` entry. For example:
+Each of the dependencies that require attributes (the ``key="value"`` parts inside the XML tag) can be specified with an ``attrs:`` entry. For example:
 
 .. code::
 
@@ -168,7 +168,7 @@ Each of the dependencies that require XML attributes (the "key=value" parts insi
          attrs:
            task: hello
 
-Here, the Rocoto ``taskdep:`` says that the ``goodbye`` task cannot be submitted until the ``hello`` task is complete. This will result in Rocoto XML that looks like the following snippet:
+Here, the ``taskdep:`` dependency says that the ``goodbye`` task cannot run until the ``hello`` task is complete. The resulting Rocoto XML looks like this:
 
 .. code:: XML
 
