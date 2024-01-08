@@ -170,7 +170,7 @@ Each of the dependencies that require XML attributes (the "key=value" parts insi
          attrs:
            task: hello
 
-Here, the Rocoto ``taskdep`` says that the ``goodbye`` task cannot be submitted until the ``hello`` task is complete. This will result in Rocoto XML that looks like the following snippet:
+Here, the ``taskdep`` dependency says that the ``goodbye`` task cannot run until the ``hello`` task is complete. The resulting Rocoto XML looks like this:
 
 .. code:: XML
 
