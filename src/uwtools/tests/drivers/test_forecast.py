@@ -331,7 +331,7 @@ def test_run_direct(fv3_mpi_assets, fv3_run_assets):
             fcstobj = FV3Forecast(config_file=config_file)
             with patch.object(fcstobj, "_config", config):
                 fcstobj.run(cycle=dt.datetime.now())
-            execute.assert_called_once_with(cmd=expected_command)
+            execute.assert_called_once_with(cmd=expected_command, cwd=ANY, log_output=True)
 
 
 @pytest.mark.parametrize("with_batch_script", [True, False])
@@ -395,4 +395,4 @@ def test_FV3Forecast__run_via_local_execution(fv3_run_assets):
             success, lines = fcstobj._run_via_local_execution()
             assert success is True
             assert lines[0] == "Command:"
-            execute.assert_called_once_with(cmd=ANY)
+            execute.assert_called_once_with(cmd=ANY, cwd=ANY, log_output=True)

@@ -15,7 +15,7 @@ def depth(d: dict) -> int:
     :param d: The dictionary whose depth to calculate.
     :return: The length of the longest path to a value in the dictionary.
     """
-    return (max(map(depth, d.values())) + 1) if isinstance(d, dict) else 0
+    return (max(map(depth, d.values())) + 1) if d and isinstance(d, dict) else 0
 
 
 def format_to_config(fmt: str) -> Type:
