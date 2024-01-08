@@ -415,8 +415,8 @@ Keys that are set to empty:
 
 def test_realize_config_values_needed_nml(caplog):
     """
-    Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
-    and keys set to empty.
+    Test that the values_needed flag logs keys completed, keys containing unrendered Jinja2
+    variables/expressions and keys set to empty.
     """
     log.setLevel(logging.INFO)
     tools.realize_config(
@@ -451,8 +451,8 @@ Keys that are set to empty:
 
 def test_realize_config_values_needed_yaml(caplog):
     """
-    Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
-    and keys set to empty.
+    Test that the values_needed flag logs keys completed, keys containing unrendered Jinja2
+    variables/expressions and keys set to empty.
     """
     log.setLevel(logging.INFO)
     tools.realize_config(

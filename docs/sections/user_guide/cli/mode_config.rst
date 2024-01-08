@@ -204,7 +204,7 @@ And an additional supplemental YAML file ``supp.yaml`` with content
     repeat: 5
     empty: false
 
-* Show the values in the input config file that have unfilled Jinja2 templates or empty keys:
+* Show the values in the input config file that have unrendered Jinja2 variables/expressions or empty keys:
 
   .. code-block:: text
 
