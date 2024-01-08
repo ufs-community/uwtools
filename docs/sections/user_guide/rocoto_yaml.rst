@@ -5,12 +5,12 @@ Defining a Rocoto Workflow
 
 :rocoto:`Rocoto<>` is a workflow manager widely used by :ufs:`UFS<>` users and developers. It uses a custom XML language to define a set of tasks, their computational resource needs on a batch system, and their dependencies. 
 
-To date, it has been challenging to manage XML files that must support a multitude of workflow options. The ``uw rocoto`` tool defines a YAML language that can be easily manipulated like any other key/value configuration file and translates it into the syntax required by Rocoto. This enables flexibility to arbitrarily make changes to any workflow while UFS Apps can track the highest priority configurations for Community and Operational use.
+To date, it has been challenging to manage XML files that must support a multitude of workflow options. The ``uw rocoto`` tool defines a UW YAML language that can be easily manipulated like any other key/value configuration file and translates it into the syntax required by Rocoto. This enables flexibility to arbitrarily make changes to any workflow while UFS Apps can track the highest priority configurations for Community and Operational use.
 
 
 Workflow Section
 ~~~~~~~~~~~~~~~~
-Starting at the top level of the YAML config for Rocoto, there are several required sections. See the example and explanation below:
+Starting at the top level of the UW YAML config for Rocoto, there are several required sections. See the example and explanation below:
 
 .. code::
 
@@ -30,10 +30,10 @@ Starting at the top level of the YAML config for Rocoto, there are several requi
     tasks:
       ...
 
-YAML Entries
-............
+UW YAML Entries
+...............
 
-``attrs``: This section allows users to define any number of the available attributes available to the workflow tag in Rocoto's native XML language. Set them with a key/value that matches the exact syntax needed by Rocoto. These attributes work to fill in the ``<workflow>`` tag. For example,
+``attrs:``: This section allows users to define any number of the available attributes to the ``<workflow>`` tag in Rocoto's native XML language. Set each with a key/value that matches the exact syntax needed by Rocoto. These attributes work to fill in the ``<workflow>`` tag. For example,
 
 .. code:: XML
 
@@ -41,13 +41,13 @@ YAML Entries
   ...
   </workflow>
 
-``cycledef``: This section is comprised of a list of grouped cycle definitions for a workflow. Any number of entries is supported. Similar to ``attrs`` for the ``workflow`` level, this entry, too has an ``attrs`` tag that follows the exact requirements of those in the Rocoto XML language. The ``spec`` entry is required and supports either the "start, stop, step" syntax, or the "crontab-like" method supported by Rocoto. The example above translates to a single ``<cycledef>`` tag:
+``cycledef:``: This section is a list of grouped cycle definitions for a workflow. Any number of entries is supported. Similar to ``attrs:`` for the ``workflow:`` level, this entry has an ``attrs:`` tag that follows the exact requirements of those in the Rocoto XML language. The ``spec:`` entry is required and supports either the "start, stop, step" syntax, or the "crontab-like" method supported by Rocoto. The example above translates to a single ``<cycledef>`` tag:
 
 .. code:: XML
 
   <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
 
-``entities``: This section is a set of key/value pairs where the keys are the named entities (or XML variables) and the values track to the values of those XML entities. Each entry shows up as an entry like ``<!ENTITY key "value">``. The example above would yield:
+``entities:``: This section defines key/value pairs -- each rendered as ``<!ENTITY key "value">`` -- to translate to named entities (variables) in XML. The example above would yield:
 
 .. code:: XML
 
@@ -57,20 +57,20 @@ YAML Entries
     <!ENTITY FOO "test.log">
   ]>
 
-``log``: This is a path-like string that defines where to put the Rocoto logs. It corresponds to the ``<log>`` tag. For example:
+``log:``: This is a path-like string that defines where to put the Rocoto logs. It corresponds to the ``<log>`` tag. For example:
 
 .. code:: XML
 
   <log>/some/path/to/&FOO;</log>
 
 
-``tasks``: This section will be explained in detail in the next section.
+``tasks:``: This section is explained in the ``Tasks Section``.
 
 
 Using Cycle Strings
 ...................
 
-The ``<cyclestr>`` tag in Rocoto transforms specific flags to represent components of the current cycle at run time. For example, an ISO date string like ``2023-01-01T12:00:00`` is represented as ``'@Y-@m-@dT@X'``. See the :rocoto:`Rocoto documentation<>` for full details. In the Rocoto YAML, the ``cyclestr:`` entry can be used anywhere that Rocoto will accept a ``<cyclestr>`` to achieve this result. The required structure of a ``cyclestr:`` entry is a ``value:``, like this:
+The ``<cyclestr>`` tag in Rocoto transforms specific flags to represent components of the current cycle at run time. For example, an ISO date string like ``2023-01-01T12:00:00`` is represented as ``'@Y-@m-@dT@X'``. See the :rocoto:`Rocoto documentation<>` for full details. In the UW YAML, the ``cyclestr:`` entry can be used anywhere that Rocoto will accept a ``<cyclestr>`` to achieve this result. The required structure of a ``cyclestr:`` entry is a ``value:``, like this:
 
 .. code::
 
@@ -93,7 +93,7 @@ The ``attrs:`` section is optional within the ``cyclestr:`` entry, and can be us
 Tasks Section
 ~~~~~~~~~~~~~
 
-The ``tasks`` section is a nested structure that can be arbitrarily deep and defines all the tasks and metatasks in a Rocoto workflow. One or more task or metatask entries is required in this high-level ``tasks`` section.
+The ``tasks:`` section is a nested structure that can be arbitrarily deep and defines all the tasks and metatasks in a Rocoto workflow. One or more task or metatask entries are required in this high-level ``tasks:`` section.
 
 Defining Tasks
 ..............
@@ -113,7 +113,7 @@ Let's dissect the following task example:
       person: siri
     dependencies:
 
-Each task is named by its YAML entry. Entries under ``tasks`` prefixed with ``task_`` will be named with what follows the prefix. In the example above the task will be named ``hello`` and will appear in the XML like this:
+Each task is named by its UW YAML entry. Entries under ``tasks:`` prefixed with ``task_`` will be named with what follows the prefix. In the example above the task will be named ``hello`` and will appear in the XML like this:
 
 .. code:: XML
 
@@ -122,13 +122,13 @@ Each task is named by its YAML entry. Entries under ``tasks`` prefixed with ``ta
     ...
   </task>
 
-where the ``attrs`` section may set any of the Rocoto-allowed XML attributes. The ``<jobname>`` tag will use the same name. 
+where the ``attrs:`` section may set any of the Rocoto-allowed XML attributes. The ``<jobname>`` tag will, by default, use the same name, but may be overridden with an explicit ``jobname:`` entry under the task.
 
 The name of the task can be any string accepted by Rocoto as a task name (including additional underscores), but must contain the leading ``task_`` to be recognized as a task.
 
-``command``: The command that will be run in the batch job.
+``command:``: The command that will be run in the batch job.
 
-``envars``: Any number of key/value pairs to set up the environment for the ``<command>`` to run successfully. Here, keys translate to bash variable names and values translate to the bash variables' values. Each entry in this section will show up in the XML like this:
+``envars:``: Any number of key/value pairs to set up the environment for the ``<command>`` to run successfully. Here, keys translate to bash variable names and values translate to the bash variables' values. Each entry in this section will show up in the XML like this:
 
 .. code:: XML
 
@@ -137,7 +137,7 @@ The name of the task can be any string accepted by Rocoto as a task name (includ
     <value>siri</value>
   </envar>
 
-``dependencies``: [Optional] Any number of dependencies accepted by Rocoto. This entry is described in more detail below.
+``dependencies:``: [Optional] Any number of dependencies accepted by Rocoto. This entry is described in more detail below.
 
 
 The other tags not specifically mentioned here are follow the same conventions as described in the :rocoto:`Rocoto<>` documentation.
@@ -147,16 +147,14 @@ The other tags not specifically mentioned here are follow the same conventions a
 Defining Dependencies for Tasks
 ...............................
 
-Rocoto dependencies are optional entries that are structured as boolean expressions defining the readiness of a task to be submitted to the queue. The :rocoto:`Rocoto documentation<>` explains each tag in detail. Here is an explanation for how those tags should be specified in YAML format.
+Rocoto dependencies are optional entries that are structured as boolean expressions defining the readiness of a task to be submitted to the queue. The :rocoto:`Rocoto documentation<>` explains each tag in detail. Here is an explanation for how those tags should be specified in UW YAML format.
 
-There are many similarities, but some nuanced differences must be clarified.
-
-Each dependency represented in the YAML will be named exactly the same as a dependency in Rocoto XML, but can be suffixed with an arbitrary descriptor for the dependency after an underscore (``_``). For example, a ``<streq>`` tag could be in the YAML under ``streq_check_flag:`` or similar. Additional underscores are allowed.
+UW YAML dependency key names should mirror Rocoto XML dependency tag names, optionally suffixed with an underscore followed by an arbitrary descriptor. For example, a ``<streq>`` tag might appear in YAML as ``streq_check_flag:``.
 
 Tag Attributes
 ______________
 
-Each of the dependencies that require XML attributes (the "key=value" parts inside the XML tag) can be specified with an ``attrs`` entry. For example:
+Each of the dependencies that require XML attributes (the "key=value" parts inside the XML tag) can be specified with an ``attrs:`` entry. For example:
 
 .. code::
 
@@ -170,7 +168,7 @@ Each of the dependencies that require XML attributes (the "key=value" parts insi
          attrs:
            task: hello
 
-Here, the Rocoto ``taskdep`` says that the ``goodbye`` task cannot be submitted until the ``hello`` task is complete. This will result in Rocoto XML that looks like the following snippet:
+Here, the Rocoto ``taskdep:`` says that the ``goodbye`` task cannot be submitted until the ``hello`` task is complete. This will result in Rocoto XML that looks like the following snippet:
 
 .. code:: XML
 
@@ -187,7 +185,7 @@ Here, the Rocoto ``taskdep`` says that the ``goodbye`` task cannot be submitted 
 Repeated Dependencies and Boolean Operators
 ___________________________________________
 
-Because YAML represents a hash table (a dictionary in Python), each entry at the same level must be unique. To accomplish this in the YAML format, any of the dependencies may be specified with an arbitrary unique suffix following an underscore (``_``). We recommend a descriptive one to make it easier to read. In the following example, there are multiple data dependencies for the basic ``hello`` task.
+Because UW YAML represents a hash table (a dictionary in Python), each entry at the same level must be unique. To accomplish this in the UW YAML format, any of the dependencies can be specified with an arbitrary unique suffix following an underscore. When duplicates appear at the same level, they *must* have unique names. In the following example, there are multiple data dependencies for the basic ``hello`` task.
 
 .. code::
 
@@ -216,15 +214,15 @@ This would result in Rocoto XML in this form:
     </dependency>
   </task>
 
-The ``datadep_foo:`` and ``datadep_bar:`` YAML entries were named arbitrarily after the first ``_``, but could have been even more descriptive such as ``datadep_foo_file:`` or ``datadep_foo_text:``. The important part is that the leading tag match that in Rocoto.
+The ``datadep_foo:`` and ``datadep_bar:`` UW YAML entries were named arbitrarily after the first ``_``, but could have been even more descriptive such as ``datadep_foo_file:`` or ``datadep_foo_text:``. The important part is that the YAML key prefix matches the Rocoto XML tag name.
 
-This example also demonstrates the use of Rocoto's **boolean operator tags** in the structured YAML, e.g. ``<or>``, ``<not>``, etc.. The structure follows the tree in the Rocoto XML language in that each of the sub-elements of the ``<and>`` tag translate to sub-entries in YAML. Multiple of the boolean operator tags can be set at the same level just as with any other tag type by adding a descriptive suffix starting with an underscore (``_``). In the above example, the ``and:`` entry could have equivalently been named ``and_data_files:`` to achieve an identical Rocoto XML result.
+This example also demonstrates the use of Rocoto's **boolean operator tags** in the structured UW YAML, e.g. ``<or>``, ``<not>``, etc.. The structure follows the tree in the Rocoto XML language in that each of the sub-elements of the ``<and>`` tag translate to sub-entries in UW YAML. Multiple of the boolean operator tags can be set at the same level just as with any other tag type by adding a descriptive suffix starting with an underscore (``_``). In the above example, the ``and:`` entry could have equivalently been named ``and_data_files:`` to achieve an identical Rocoto XML result.
 
 
 Defining Metatasks
 ..................
 
-A Rocoto ``metatask`` is a structure that allows for the single specification of a task or group of tasks to run with parameterized input. The ``metatask`` requires the definition of at least one parameter variable, but multiple may be specified, in which case there must be the same number of entries for all parameter variables. To achieve a combination of variables, nested metatasks would be necessary. Here is an example of the YAML specification for running our "hello world" example in a variety of languages:
+A Rocoto ``metatask`` is a structure that allows for the single specification of a task or group of tasks to run with parameterized input. The ``metatask`` requires the definition of at least one parameter variable, but multiple may be specified, in which case there must be the same number of entries for all parameter variables. To achieve a combination of variables, nested metatasks would be necessary. Here is an example of the UW YAML specification for running our "hello world" example in a variety of languages:
 
 .. code:: text
 
@@ -254,11 +252,11 @@ This translates to Rocoto XML (white space added for readability):
   </metatask>
 
 
-YAML Definitions
-~~~~~~~~~~~~~~~~
+UW YAML Definitions
+~~~~~~~~~~~~~~~~~~~
 
 
-In this section, the example in YAML will be followed by its representation in Rocoto XML.
+In this section, the example in UW YAML will be followed by its representation in Rocoto XML.
 
 
 The ``<cyclestr>`` tag
@@ -399,7 +397,7 @@ Multiple ``task_*:`` YAML entries may exist under the ``dependency:`` entry, or 
   </task>
 
 
-The following entries take strings just like in the ``command`` example above. Please see the :rocoto:`Rocoto documentation<>` for specifics on how to set them.
+The following entries take strings just like in the ``command:`` example above. Please see the :rocoto:`Rocoto documentation<>` for specifics on how to set them.
 
 .. code::
 
@@ -417,7 +415,7 @@ The following entries take strings just like in the ``command`` example above. P
   stderr:
   stdout:
 
-The following YAML entries require values that are integers, strings, or ``cyclestr:`` entries.
+The following UW YAML entries require values that are integers, strings, or ``cyclestr:`` entries.
 
 .. code::
 
@@ -452,7 +450,7 @@ All of the boolean operator tags require **one or more additional dependency tag
 Comparison Tags
 _______________
 
-Both the ``streq:`` and ``strneq:`` YAML entries are specified the same way. The sub-tree ``left:`` and ``right:`` entries both accept a ``cyclestr:`` if needed.
+Both the ``streq:`` and ``strneq:`` UW YAML entries are specified the same way. The sub-tree ``left:`` and ``right:`` entries both accept a ``cyclestr:`` if needed.
 
 .. code::
 

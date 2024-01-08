@@ -27,9 +27,9 @@ The ``uw`` mode for realizing and validating Rocoto XML documents.
 ``realize``
 -----------
 
-In ``uw`` terminology, to ``realize`` a configuration file is to transform it from its raw from into its final, usable state. In the case of ``uw rocoto``, that means transforming a structured YAML file into a :rocoto:`Rocoto XML<>` file. The structured YAML language required by UW closely follows the XML language defined by Rocoto.
+In ``uw`` terminology, to ``realize`` a configuration file is to transform it from its raw from into its final, usable state. In the case of ``uw rocoto``, that means transforming a structured UW YAML file into a :rocoto:`Rocoto XML<>` file. The structured YAML language required by UW closely follows the XML language defined by Rocoto.
 
-More information about the structured YAML file for Rocoto can be found :any:`here<defining_a_workflow>`.
+More information about the structured UW YAML file for Rocoto can be found :any:`here<defining_a_workflow>`.
 
 .. code:: sh
 
@@ -53,7 +53,7 @@ More information about the structured YAML file for Rocoto can be found :any:`he
 Examples
 ~~~~~~~~
 
-The examples that follow use a Rocoto YAML file ``rocoto.yaml`` with content
+The examples that follow use a UW YAML file ``rocoto.yaml`` with content
 
 .. code:: python
 
@@ -82,7 +82,7 @@ The examples that follow use a Rocoto YAML file ``rocoto.yaml`` with content
            person: siri
 
 
-* Realize a YAML input file to ``stdout`` in Rocoto XML format:
+* Realize a UW YAML input file to ``stdout`` in Rocoto XML format:
 
   .. code:: XML
 
@@ -110,11 +110,11 @@ The examples that follow use a Rocoto YAML file ``rocoto.yaml`` with content
       </task>
     </workflow>
 
-* Realize a YAML input file to a file named ``rocoto.xml``:
+* Realize a UW YAML input file to a file named ``rocoto.xml``:
 
   .. code:: sh
 
-    $  uw rocoto realize --input-file rocoto.yaml --output-file rocoto.xml
+    $ uw rocoto realize --input-file rocoto.yaml --output-file rocoto.xml
     [2024-01-02T13:45:46]     INFO 0 schema-validation errors found
     [2024-01-02T13:45:46]     INFO 0 Rocoto validation errors found
 
@@ -143,7 +143,7 @@ The examples that follow use a Rocoto YAML file ``rocoto.yaml`` with content
       </task>
     </workflow>
 
-* Read the YAML from ``stdin`` and write the XML to ``stdout``:
+* Read the UW YAML from ``stdin`` and write the XML to ``stdout``:
 
   .. code:: XML
 
@@ -173,16 +173,16 @@ The examples that follow use a Rocoto YAML file ``rocoto.yaml`` with content
 
 
 
-* Realize a YAML input file to a file named ``rocoto.xml`` in quiet mode:
+* Realize a UW YAML input file to a file named ``rocoto.xml`` in quiet mode:
 
   .. code:: sh
 
-    $  uw rocoto realize --input-file rocoto.yaml --output-file rocoto.xml -q
+    $ uw rocoto realize --input-file rocoto.yaml --output-file rocoto.xml -q
     $
 
   The contents of ``rocoto.xml`` are unchanged from the previous example.
 
-* For increased verbosity realizing a YAML file to a file named ``rocoto.xml``:
+* For increased verbosity realizing a UW YAML file to a file named ``rocoto.xml``:
 
   .. note:: This output has been shortened for demonstration purposes.
 
@@ -284,7 +284,7 @@ The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following
 
   * The task starting at Line 9 has invalid content.
   * There was an invalid sequence.
-  * It was expecting a ``command`` element, but there wasn't one.
+  * It was expecting a ``<command>`` element, but there wasn't one.
 
   In the following example, an empty ``<dependency>`` element was added at the end of the task:
 
