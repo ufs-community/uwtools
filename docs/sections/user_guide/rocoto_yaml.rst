@@ -156,7 +156,7 @@ Each dependency represented in the YAML will be named exactly the same as a depe
 Tag Attributes
 ______________
 
-Each of the dependencies that require XML attributes (the "key=value" parts inside the XML tag) can be specified with an ``attrs`` entry. For example:
+Each of the dependencies that require attributes (the `key="value"` parts inside the XML tag) can be specified with an ``attrs`` entry. For example:
 
 .. code::
 
