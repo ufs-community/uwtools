@@ -265,7 +265,7 @@ The ``<cyclestr>`` tag
 .. code::
 
   cyclestr:
-    value: "/some/path/to/workflow_@Y@m@d@H.log"      # required
+    value: "/some/path/to/workflow_@Y@m@d@H.log" # required
     attrs:
       offset: "1:00:00"
 
