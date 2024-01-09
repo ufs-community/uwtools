@@ -222,7 +222,7 @@ This example also demonstrates the use of Rocoto's **boolean operator tags** in 
 Defining Metatasks
 ..................
 
-A Rocoto ``metatask`` is a structure that allows for the single specification of a task or group of tasks to run with parameterized input. The ``metatask`` requires the definition of at least one parameter variable, but multiple may be specified, in which case there must be the same number of entries for all parameter variables. To achieve a combination of variables, nested metatasks would be necessary. Here is an example of the UW YAML specification for running our "hello world" example in a variety of languages:
+A Rocoto ``metatask`` expands into one or more tasks via substitution of values, defined under the ``var:`` key, into placeholders bracketed with ``#``s. Each variable must provide the same number of values. Here is UW YAML that localizes a greeting to a variety of languages:
 
 .. code-block:: text
 
@@ -234,7 +234,7 @@ A Rocoto ``metatask`` is a structure that allows for the single specification of
       command: "echo #greeting# #world#"
       ...
 
-This translates to Rocoto XML (white space added for readability):
+This translates to Rocoto XML (whitespace added for readability):
 
 .. code-block:: XML
 
