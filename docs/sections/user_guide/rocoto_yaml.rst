@@ -234,7 +234,7 @@ A Rocoto ``metatask`` expands into one or more tasks via substitution of values,
       command: "echo #greeting# #world#"
       ...
 
-This translates to Rocoto XML (white space added for readability):
+This translates to Rocoto XML (whitespace added for readability):
 
 .. code:: XML
 
