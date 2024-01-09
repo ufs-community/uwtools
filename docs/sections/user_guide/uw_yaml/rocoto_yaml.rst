@@ -389,7 +389,7 @@ Multiple ``task_*:`` YAML entries may exist under the ``tasks:`` and/or ``metata
 
 .. code-block:: XML
 
-  <task name="foo" cycledefs:"hourly" maxtries="2" throttle="10" final="False">
+  <task name="foo" cycledefs="hourly" maxtries="2" throttle="10" final="False">
     ...
   </task>
 
@@ -582,7 +582,7 @@ Here is an example of specifying a nested metatask.
 
 This will run tasks named:
 
-.. code-block:: txt
+.. code-block:: text
 
   graphics_mem001_temp
   graphics_mem002_temp
