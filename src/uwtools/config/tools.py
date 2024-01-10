@@ -109,7 +109,8 @@ def realize_config(
     output_format = _ensure_format("output", output_format, output_file)
     config_check_depths_realize(input_obj, output_format)
     if dry_run:
-        log.info(input_obj)
+        for line in str(input_obj).strip().split("\n"):
+            log.info(line)
         return {}
     if values_needed:
         _realize_config_values_needed(input_obj)

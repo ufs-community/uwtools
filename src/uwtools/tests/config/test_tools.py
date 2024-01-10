@@ -215,7 +215,7 @@ def test_realize_config_dry_run(caplog):
         dry_run=True,
     )
     actual = "\n".join(record.message for record in caplog.records)
-    expected = str(yaml_config)
+    expected = str(yaml_config).strip()
     assert actual == expected
 
 
