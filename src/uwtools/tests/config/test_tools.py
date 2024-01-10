@@ -215,7 +215,7 @@ def test_realize_config_dry_run(caplog):
         dry_run=True,
     )
     actual = "\n".join(record.message for record in caplog.records)
-    expected = str(yaml_config)
+    expected = str(yaml_config).strip()
     assert actual == expected
 
 
@@ -442,8 +442,8 @@ deref: b
 
 def test_realize_config_values_needed_ini(caplog):
     """
-    Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
-    and keys set to empty.
+    Test that the values_needed flag logs keys completed, keys containing unrendered Jinja2
+    variables/expressions, and keys set to empty.
     """
     log.setLevel(logging.INFO)
     tools.realize_config(
@@ -464,7 +464,7 @@ Keys that are complete:
     dessert.side
     dessert.servings
 
-Keys that have unfilled Jinja2 templates:
+Keys with unrendered Jinja2 variables/expressions:
     salad.how_many: {{ amount }}
     dessert.flavor: {{ flavor }}
 
@@ -478,8 +478,8 @@ Keys that are set to empty:
 
 def test_realize_config_values_needed_nml(caplog):
     """
-    Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
-    and keys set to empty.
+    Test that the values_needed flag logs keys completed, keys containing unrendered Jinja2
+    variables/expressions and keys set to empty.
     """
     log.setLevel(logging.INFO)
     tools.realize_config(
@@ -498,7 +498,7 @@ Keys that are complete:
     salad.extras
     salad.dessert
 
-Keys that have unfilled Jinja2 templates:
+Keys with unrendered Jinja2 variables/expressions:
     salad.dressing: {{ dressing }}
 
 Keys that are set to empty:
@@ -511,8 +511,8 @@ Keys that are set to empty:
 
 def test_realize_config_values_needed_yaml(caplog):
     """
-    Test that the values_needed flag logs keys completed, keys containing unfilled Jinja2 templates,
-    and keys set to empty.
+    Test that the values_needed flag logs keys completed, keys containing unrendered Jinja2
+    variables/expressions and keys set to empty.
     """
     log.setLevel(logging.INFO)
     tools.realize_config(
@@ -532,7 +532,7 @@ Keys that are complete:
     FV3GFS.nomads.file_names.testfalse
     FV3GFS.nomads.file_names.testzero
 
-Keys that have unfilled Jinja2 templates:
+Keys with unrendered Jinja2 variables/expressions:
     FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
     FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
     FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
@@ -677,5 +677,18 @@ def test__realize_config_values_needed(caplog, tmp_path):
     tools._realize_config_values_needed(input_obj=c)
     msgs = "\n".join(record.message for record in caplog.records)
     assert "Keys that are complete:\n    1" in msgs
-    assert "Keys that have unfilled Jinja2 templates:\n    2" in msgs
+    assert "Keys with unrendered Jinja2 variables/expressions:\n    2" in msgs
     assert "Keys that are set to empty:\n    3" in msgs
+
+
+def test__realize_config_values_needed_negative_results(caplog, tmp_path):
+    log.setLevel(logging.INFO)
+    path = tmp_path / "a.yaml"
+    with writable(path) as f:
+        yaml.dump({}, f)
+    c = YAMLConfig(config=path)
+    tools._realize_config_values_needed(input_obj=c)
+    msgs = "\n".join(record.message for record in caplog.records)
+    assert "No keys are complete." in msgs
+    assert "No keys have unrendered Jinja2 variables/expressions." in msgs
+    assert "No keys are set to empty." in msgs
