@@ -226,7 +226,7 @@ Examples
 
 The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following content:
 
-.. code-block:: XML
+.. code-block:: xml
   :linenos:
 
   <?xml version='1.0' encoding='utf-8'?>
@@ -305,7 +305,7 @@ The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following
 
   In the following example, an empty ``<dependency>`` element was added at the end of the task:
 
-  .. code-block:: XML
+  .. code-block:: xml
     :linenos:
 
     <?xml version='1.0' encoding='utf-8'?>
@@ -331,7 +331,7 @@ The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following
       </task>
     </workflow>
 
-  .. code:: sh
+  .. code:: text
 
     $ uw rocoto validate --input-file rocoto.xml
     [2024-01-10T11:13:25]    ERROR 2 Rocoto validation errors found

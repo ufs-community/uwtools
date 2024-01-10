@@ -29,7 +29,7 @@ Future ``make devshell`` invocations will be almost instantaneous, as the underl
 
 If your development shell misses any functionality you’re used to in your main (``bash``) shell, you can create a ``~/.condevrc`` file, which will be sourced by ``make devshell``. When in doubt, you might:
 
-.. code-block::
+.. code-block:: text
 
   cat <<EOF >~/.condevrc
   source ~/.bashrc
