@@ -139,10 +139,7 @@ The name of the task can be any string accepted by Rocoto as a task name (includ
 
 ``dependencies:``: [Optional] Any number of dependencies accepted by Rocoto. This section is described in more detail below.
 
-
 The other keys not specifically mentioned here follow the same conventions as described in the :rocoto:`Rocoto<>` documentation.
-
-
 
 Defining Dependencies for Tasks
 ...............................
@@ -218,7 +215,6 @@ The ``datadep_foo:`` and ``datadep_bar:`` UW YAML keys were named arbitrarily af
 
 This example also demonstrates the use of Rocoto's **boolean operator tags** in the structured UW YAML, e.g. ``<or>``, ``<not>``, etc.. The structure follows the tree in the Rocoto XML language in that each of the sub-elements of the ``<and>`` tag translate to sub-trees in UW YAML. Multiple of the boolean operator tags can be set at the same level just as with any other tag type by adding a descriptive suffix starting with an underscore. In the above example, the ``and:`` key could have equivalently been named ``and_data_files:`` to achieve an identical Rocoto XML result.
 
-
 Defining Metatasks
 ..................
 
@@ -253,11 +249,10 @@ This translates to Rocoto XML (whitespace added for readability):
     </task>
   </metatask>
 
-
 UW YAML Definitions
 ~~~~~~~~~~~~~~~~~~~
-In this section, the example in UW YAML will be followed by its representation in Rocoto XML. Please see the :rocoto:`Rocoto documentation<>` for specifics on their use when defining a workflow.
 
+In this section, the example in UW YAML will be followed by its representation in Rocoto XML. Please see the :rocoto:`Rocoto documentation<>` for specifics on their use when defining a workflow.
 
 The ``cyclestr:`` key
 .....................
@@ -337,7 +332,6 @@ _________________________
 
 ``log:`` is a required entry.
 
-
 .. code-block:: yaml
 
   log: /some/path/to/workflow.log
@@ -358,7 +352,6 @@ A cycle string may be specified here, instead.
 
   <log><cyclestr>/some/path/to/workflow_@Y@m@d.log</cyclestr></log>
 
-
 Defining the set of tasks
 _________________________
 
@@ -369,7 +362,6 @@ At least one task or metatask must be defined in the ``tasks:`` section.
   tasks:
     task_*:
     metatask_*:
-
 
 The ``task_*:`` key
 ...................
@@ -388,13 +380,11 @@ Multiple ``task_*:`` YAML entries may exist under the ``tasks:`` and/or ``metata
     walltime: 00:10:00
     cores: 1
 
-
 .. code-block:: XML
 
   <task name="foo" cycledefs="hourly" maxtries="2" throttle="10" final="False">
     ...
   </task>
-
 
 The following keys take strings values. Please see the :rocoto:`Rocoto documentation<>` for specifics on how to set them.
 
@@ -505,7 +495,6 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
     <taskdep task="hello" state="succeeded" cycle_offset="-06:00:00"/>
   </dependency>
 
-
 * The ``metataskdep:`` key
 
 .. code-block:: yaml
@@ -557,7 +546,6 @@ The ``timedep:`` key will almost certainly want a ``cyclestr:`` block.
     <timedep><cyclestr>@Y@m@d@H@M@S</cyclestr></timedep>
   </dependency>
 
-
 The ``metatask:`` key
 .....................
 
@@ -566,7 +554,7 @@ One or more metatasks may be included under the ``tasks:`` key, or nested under 
 
 Here is an example of specifying a nested metatask.
 
-.. Leaving this one as text because the #'s show up as comments, which is unhelpful
+.. Leaving this one as text because the #'s show up as comments, which is unhelpful.
 
 .. code-block:: text
 
@@ -582,7 +570,6 @@ Here is an example of specifying a nested metatask.
           member: #member#
           field: #field#
         ...
-
 
 This will run tasks named:
 

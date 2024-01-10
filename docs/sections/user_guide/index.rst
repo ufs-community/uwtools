@@ -8,4 +8,3 @@ User Guide
    cli/index
    api/index
    uw_yaml/index
-

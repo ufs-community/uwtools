@@ -21,7 +21,6 @@ The ``uw`` mode for realizing and validating Rocoto XML documents.
       validate
           Validate Rocoto XML
 
-
 .. _realize_rocoto_cli_examples:
 
 ``realize``
@@ -80,7 +79,6 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
          walltime: 00:01:00
          envars:
            person: siri
-
 
 * Realize a UW YAML input file to ``stdout`` in Rocoto XML format:
 
@@ -171,8 +169,6 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
       </task>
     </workflow>
 
-
-
 * Realize a UW YAML input file to a file named ``rocoto.xml`` in quiet mode:
 
   .. code:: sh
@@ -202,7 +198,6 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
     [2024-01-02T14:00:01]    DEBUG Rendering: siri
     [2024-01-02T14:00:01]     INFO 0 UW schema-validation errors found
     [2024-01-02T14:00:01]     INFO 0 Rocoto validation errors found
-
 
 .. _validate_rocoto_cli_examples:
 
@@ -254,7 +249,6 @@ The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following
       </envar>
     </task>
   </workflow>
-
 
 * To validate an XML from ``stdin``:
 
@@ -336,7 +330,6 @@ The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following
         </dependency>
       </task>
     </workflow>
-
 
   .. code:: sh
 

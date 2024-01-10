@@ -209,7 +209,7 @@ and additional supplemental YAML file ``values2.yaml`` with content
 * Show the values in the input config file that have unrendered Jinja2 variables/expressions or empty keys:
 
   .. code-block:: text
-TODO FIXME
+
     $ uw config realize --input-file values.yaml --output-format yaml --values-needed
     [2024-01-05T11:34:22]     INFO Keys that are complete:
     [2024-01-05T11:34:22]     INFO     values
@@ -284,7 +284,6 @@ TODO FIXME
       repeat: 2
       empty: null
 
-
 * If an input file is read alone from ``stdin``, ``uw`` will not know how to parse its content:
 
   .. code-block:: text
@@ -305,7 +304,6 @@ TODO FIXME
       repeat: 2
       empty: null
 
-
 * If the config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its content:
 
   .. code-block:: text
@@ -325,7 +323,6 @@ TODO FIXME
       date: 20240105
       repeat: 2
       empty: null
-
 
 * Request verbose log output:
 
@@ -507,7 +504,6 @@ The examples that follow use atparse-formatted template file ``atparse.txt`` wit
     $ cat atparse.txt | uw config translate --input-format atparse --output-format jinja2
     {{greeting}}, {{recipient}}!
 
-
 .. _validate_configs_cli_examples:
 
 ``validate``
@@ -580,14 +576,12 @@ and YAML file ``values.yaml`` with content
 
   Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
 
-
 * Read the config from ``stdin`` and print validation results to ``stdout``:
 
   .. code-block:: text
 
     $ cat values.yaml | uw config validate --schema-file schema.jsonschema
     [2024-01-03T17:26:29]     INFO 0 UW schema-validation errors found
-
 
 * However, reading the schema from ``stdin`` is **not** supported:
 
