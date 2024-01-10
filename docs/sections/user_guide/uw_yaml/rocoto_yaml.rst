@@ -222,7 +222,9 @@ This example also demonstrates the use of Rocoto's **boolean operator tags** in 
 Defining Metatasks
 ..................
 
-A Rocoto ``metatask`` expands into one or more tasks via substitution of values, defined under the ``var:`` key, into placeholders bracketed with ``#``s. Each variable must provide the same number of values. Here is UW YAML that localizes a greeting to a variety of languages:
+A Rocoto ``metatask`` expands into one or more tasks via substitution of values, defined under the ``var:`` key, into placeholders bracketed with pound signs. Each variable must provide the same number of values. Here is UW YAML that localizes a greeting to a variety of languages:
+
+.. Leaving this one as text because the #'s show up as comments, which is unhelpful
 
 .. code-block:: text
 
@@ -434,7 +436,7 @@ _____________________
 
 Boolean operator keys operate on **one or more additional dependency entries** from any category in their subtrees.
 
-.. code-block:: text
+.. code-block:: yaml
 
   and:
   or:
@@ -563,6 +565,8 @@ One or more metatasks may be included under the ``tasks:`` key, or nested under 
 ``metatask_*:`` keys.
 
 Here is an example of specifying a nested metatask.
+
+.. Leaving this one as text because the #'s show up as comments, which is unhelpful
 
 .. code-block:: text
 
