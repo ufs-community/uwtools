@@ -67,7 +67,7 @@ def validate_rocoto_xml_string(xml: str) -> bool:
         log.error(err)
     if not valid:
         log.error("Invalid Rocoto XML:")
-        lines = xml.split("\n")
+        lines = xml.strip().split("\n")
         fmtstr = "%{n}d %s".format(n=int(log10(len(lines))) + 1)
         for n, line in enumerate(lines):
             log.error(fmtstr % (n + 1, line))

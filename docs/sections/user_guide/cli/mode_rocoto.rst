@@ -271,31 +271,30 @@ The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following
   .. code:: sh
 
     $ uw rocoto validate --input-file rocoto.xml
-    [2024-01-10T11:09:58]    ERROR 3 Rocoto validation errors found
-    [2024-01-10T11:09:58]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_NOELEM: Expecting an element command, got nothing
-    [2024-01-10T11:09:58]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_INTERSEQ: Invalid sequence in interleave
-    [2024-01-10T11:09:58]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_CONTENTVALID: Element task failed to validate content
-    [2024-01-10T11:09:58]    ERROR Invalid Rocoto XML:
-    [2024-01-10T11:09:58]    ERROR  1 <?xml version='1.0' encoding='utf-8'?>
-    [2024-01-10T11:09:58]    ERROR  2 <!DOCTYPE workflow [
-    [2024-01-10T11:09:58]    ERROR  3   <!ENTITY ACCOUNT "myaccount">
-    [2024-01-10T11:09:58]    ERROR  4   <!ENTITY FOO "test.log">
-    [2024-01-10T11:09:58]    ERROR  5 ]>
-    [2024-01-10T11:09:58]    ERROR  6 <workflow realtime="False" scheduler="slurm">
-    [2024-01-10T11:09:58]    ERROR  7   <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
-    [2024-01-10T11:09:58]    ERROR  8   <log>/some/path/to/&FOO;</log>
-    [2024-01-10T11:09:58]    ERROR  9   <task name="hello" cycledefs="howdy">
-    [2024-01-10T11:09:58]    ERROR 10     <account>&ACCOUNT;</account>
-    [2024-01-10T11:09:58]    ERROR 11     <nodes>1:ppn=1</nodes>
-    [2024-01-10T11:09:58]    ERROR 12     <walltime>00:01:00</walltime>
-    [2024-01-10T11:09:58]    ERROR 13     <jobname>hello</jobname>
-    [2024-01-10T11:09:58]    ERROR 14     <envar>
-    [2024-01-10T11:09:58]    ERROR 15       <name>person</name>
-    [2024-01-10T11:09:58]    ERROR 16       <value>siri</value>
-    [2024-01-10T11:09:58]    ERROR 17     </envar>
-    [2024-01-10T11:09:58]    ERROR 18   </task>
-    [2024-01-10T11:09:58]    ERROR 19 </workflow>
-    [2024-01-10T11:09:58]    ERROR 20
+    [2024-01-10T21:54:51]    ERROR 3 Rocoto validation errors found
+    [2024-01-10T21:54:51]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_NOELEM: Expecting an element command, got nothing
+    [2024-01-10T21:54:51]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_INTERSEQ: Invalid sequence in interleave
+    [2024-01-10T21:54:51]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_CONTENTVALID: Element task failed to validate content
+    [2024-01-10T21:54:51]    ERROR Invalid Rocoto XML:
+    [2024-01-10T21:54:51]    ERROR  1 <?xml version='1.0' encoding='utf-8'?>
+    [2024-01-10T21:54:51]    ERROR  2 <!DOCTYPE workflow [
+    [2024-01-10T21:54:51]    ERROR  3   <!ENTITY ACCOUNT "myaccount">
+    [2024-01-10T21:54:51]    ERROR  4   <!ENTITY FOO "test.log">
+    [2024-01-10T21:54:51]    ERROR  5 ]>
+    [2024-01-10T21:54:51]    ERROR  6 <workflow realtime="False" scheduler="slurm">
+    [2024-01-10T21:54:51]    ERROR  7   <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
+    [2024-01-10T21:54:51]    ERROR  8   <log>/some/path/to/&FOO;</log>
+    [2024-01-10T21:54:51]    ERROR  9   <task name="hello" cycledefs="howdy">
+    [2024-01-10T21:54:51]    ERROR 10     <account>&ACCOUNT;</account>
+    [2024-01-10T21:54:51]    ERROR 11     <nodes>1:ppn=1</nodes>
+    [2024-01-10T21:54:51]    ERROR 12     <walltime>00:01:00</walltime>
+    [2024-01-10T21:54:51]    ERROR 13     <jobname>hello</jobname>
+    [2024-01-10T21:54:51]    ERROR 14     <envar>
+    [2024-01-10T21:54:51]    ERROR 15       <name>person</name>
+    [2024-01-10T21:54:51]    ERROR 16       <value>siri</value>
+    [2024-01-10T21:54:51]    ERROR 17     </envar>
+    [2024-01-10T21:54:51]    ERROR 18   </task>
+    [2024-01-10T21:54:51]    ERROR 19 </workflow>
 
   To decode this type of output, it is easiest to interpret it from the bottom up. It says:
 
@@ -334,33 +333,32 @@ The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following
   .. code:: text
 
     $ uw rocoto validate --input-file rocoto.xml
-    [2024-01-10T11:13:25]    ERROR 2 Rocoto validation errors found
-    [2024-01-10T11:13:25]    ERROR <string>:0:0:ERROR:RELAXNGV:RELAXNG_ERR_INTEREXTRA: Extra element dependency in interleave
-    [2024-01-10T11:13:25]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_CONTENTVALID: Element task failed to validate content
-    [2024-01-10T11:13:25]    ERROR Invalid Rocoto XML:
-    [2024-01-10T11:13:25]    ERROR  1 <?xml version='1.0' encoding='utf-8'?>
-    [2024-01-10T11:13:25]    ERROR  2 <!DOCTYPE workflow [
-    [2024-01-10T11:13:25]    ERROR  3   <!ENTITY ACCOUNT "myaccount">
-    [2024-01-10T11:13:25]    ERROR  4   <!ENTITY FOO "test.log">
-    [2024-01-10T11:13:25]    ERROR  5 ]>
-    [2024-01-10T11:13:25]    ERROR  6 <workflow realtime="False" scheduler="slurm">
-    [2024-01-10T11:13:25]    ERROR  7   <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
-    [2024-01-10T11:13:25]    ERROR  8   <log>/some/path/to/&FOO;</log>
-    [2024-01-10T11:13:25]    ERROR  9   <task name="hello" cycledefs="howdy">
-    [2024-01-10T11:13:25]    ERROR 10     <account>&ACCOUNT;</account>
-    [2024-01-10T11:13:25]    ERROR 11     <nodes>1:ppn=1</nodes>
-    [2024-01-10T11:13:25]    ERROR 12     <walltime>00:01:00</walltime>
-    [2024-01-10T11:13:25]    ERROR 13     <command>echo hello $person</command>
-    [2024-01-10T11:13:25]    ERROR 14     <jobname>hello</jobname>
-    [2024-01-10T11:13:25]    ERROR 15     <envar>
-    [2024-01-10T11:13:25]    ERROR 16       <name>person</name>
-    [2024-01-10T11:13:25]    ERROR 17       <value>siri</value>
-    [2024-01-10T11:13:25]    ERROR 18     </envar>
-    [2024-01-10T11:13:25]    ERROR 19   <dependency>
-    [2024-01-10T11:13:25]    ERROR 20   </dependency>
-    [2024-01-10T11:13:25]    ERROR 21   </task>
-    [2024-01-10T11:13:25]    ERROR 22 </workflow>
-    [2024-01-10T11:13:25]    ERROR 23
+    [2024-01-10T21:56:14]    ERROR 2 Rocoto validation errors found
+    [2024-01-10T21:56:14]    ERROR <string>:0:0:ERROR:RELAXNGV:RELAXNG_ERR_INTEREXTRA: Extra element dependency in interleave
+    [2024-01-10T21:56:14]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_CONTENTVALID: Element task failed to validate content
+    [2024-01-10T21:56:14]    ERROR Invalid Rocoto XML:
+    [2024-01-10T21:56:14]    ERROR  1 <?xml version='1.0' encoding='utf-8'?>
+    [2024-01-10T21:56:14]    ERROR  2 <!DOCTYPE workflow [
+    [2024-01-10T21:56:14]    ERROR  3   <!ENTITY ACCOUNT "myaccount">
+    [2024-01-10T21:56:14]    ERROR  4   <!ENTITY FOO "test.log">
+    [2024-01-10T21:56:14]    ERROR  5 ]>
+    [2024-01-10T21:56:14]    ERROR  6 <workflow realtime="False" scheduler="slurm">
+    [2024-01-10T21:56:14]    ERROR  7   <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
+    [2024-01-10T21:56:14]    ERROR  8   <log>/some/path/to/&FOO;</log>
+    [2024-01-10T21:56:14]    ERROR  9   <task name="hello" cycledefs="howdy">
+    [2024-01-10T21:56:14]    ERROR 10     <account>&ACCOUNT;</account>
+    [2024-01-10T21:56:14]    ERROR 11     <nodes>1:ppn=1</nodes>
+    [2024-01-10T21:56:14]    ERROR 12     <walltime>00:01:00</walltime>
+    [2024-01-10T21:56:14]    ERROR 13     <command>echo hello $person</command>
+    [2024-01-10T21:56:14]    ERROR 14     <jobname>hello</jobname>
+    [2024-01-10T21:56:14]    ERROR 15     <envar>
+    [2024-01-10T21:56:14]    ERROR 16       <name>person</name>
+    [2024-01-10T21:56:14]    ERROR 17       <value>siri</value>
+    [2024-01-10T21:56:14]    ERROR 18     </envar>
+    [2024-01-10T21:56:14]    ERROR 19     <dependency>
+    [2024-01-10T21:56:14]    ERROR 20     </dependency>
+    [2024-01-10T21:56:14]    ERROR 21   </task>
+    [2024-01-10T21:56:14]    ERROR 22 </workflow>
 
   Once again, interpreting from the bottom:
 
