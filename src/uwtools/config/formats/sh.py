@@ -1,11 +1,11 @@
-# pylint: disable=duplicate-code
-
-import configparser
+import re
+import shlex
 from io import StringIO
 from typing import Optional, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.config.tools import config_check_depths_dump
+from uwtools.logging import log
 from uwtools.utils.file import FORMAT, OptionalPath, readable, writable
 
 
@@ -27,17 +27,23 @@ class SHConfig(Config):
 
     def _load(self, config_file: OptionalPath) -> dict:
         """
-        Reads and parses shell code consisting solely of key=value lines.
+        Reads and parses key=value lines from shell code.
 
         See docs for Config._load().
 
         :param config_file: Path to config file to load.
         """
-        cfg = configparser.ConfigParser()
-        section = "top"
         with readable(config_file) as f:
-            cfg.read_string(f"[{section}]\n" + f.read())
-        return dict(cfg[section].items())
+            strings = shlex.split(f.read(), comments=True)
+        d = {}
+        for s in strings:
+            if m := re.match(r"^([a-zA-Z_]+[a-zA-Z0-9_]*)=(.*)$", s):
+                var, val = m[1], m[2]
+                d[var] = val
+                log.debug(f"Read variable '{var}' with value '{val}'")
+            else:
+                log.debug(f"Ignoring: {s}")
+        return d
 
     # Public methods
 
@@ -48,7 +54,6 @@ class SHConfig(Config):
         :param path: Path to dump config to.
         """
         config_check_depths_dump(config_obj=self, target_format=FORMAT.sh)
-
         self.dump_dict(path, self.data)
 
     @staticmethod
@@ -60,11 +65,13 @@ class SHConfig(Config):
         :param cfg: The in-memory config object to dump.
         """
 
-        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.sh)
+        # Write first to a StringIO object to avoid creating a partial file in case of problems
+        # rendering or quoting config values.
 
+        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.sh)
         s = StringIO()
         for key, value in cfg.items():
-            print(f"{key}={value}", file=s)
+            print("%s=%s" % (key, shlex.quote(str(value))), file=s)
         with writable(path) as f:
             print(s.getvalue().strip(), file=f)
         s.close()
