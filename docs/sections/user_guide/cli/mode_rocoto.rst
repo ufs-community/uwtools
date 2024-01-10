@@ -39,15 +39,15 @@ More information about the structured UW YAML file for Rocoto can be found :any:
 
   Optional arguments:
     -h, --help
-          Show help and exit
+        Show help and exit
     --input-file PATH, -i PATH
-          Path to input file (defaults to stdin)
+        Path to input file (defaults to stdin)
     --output-file PATH, -o PATH
-          Path to output file (defaults to stdout)
+        Path to output file (defaults to stdout)
     --quiet, -q
-          Print no logging messages
+        Print no logging messages
     --verbose, -v
-          Print all logging messages
+        Print all logging messages
 
 Examples
 ^^^^^^^^
@@ -213,13 +213,13 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
 
   Optional arguments:
     -h, --help
-          Show help and exit
+        Show help and exit
     --input-file PATH, -i PATH
-          Path to input file (defaults to stdin)
+        Path to input file (defaults to stdin)
     --quiet, -q
-          Print no logging messages
+        Print no logging messages
     --verbose, -v
-          Print all logging messages
+        Print all logging messages
 
 Examples
 ^^^^^^^^

@@ -437,27 +437,29 @@ and additional supplemental YAML file ``values2.yaml`` with content
 .. code-block:: text
 
   $ uw config translate --help
-  usage: uw config translate [-h] [--input-file PATH] [--input-format {atparse}] [--output-file PATH] [--output-format {jinja2}] [--dry-run] [--quiet] [--verbose]
+  usage: uw config translate [-h] [--input-file PATH] [--input-format {atparse}]
+                             [--output-file PATH] [--output-format {jinja2}] [--dry-run] [--quiet]
+                             [--verbose]
 
   Translate configs
 
   Optional arguments:
     -h, --help
-          Show help and exit
+        Show help and exit
     --input-file PATH, -i PATH
-          Path to input file (defaults to stdin)
+        Path to input file (defaults to stdin)
     --input-format {atparse}
-          Input format
+        Input format
     --output-file PATH, -o PATH
-          Path to output file (defaults to stdout)
+        Path to output file (defaults to stdout)
     --output-format {jinja2}
-          Output format
+        Output format
     --dry-run
-          Only log info, making no changes
+        Only log info, making no changes
     --quiet, -q
-          Print no logging messages
+        Print no logging messages
     --verbose, -v
-          Print all logging messages
+        Print all logging messages
 
 Examples
 ^^^^^^^^
@@ -518,17 +520,17 @@ The examples that follow use atparse-formatted template file ``atparse.txt`` wit
 
   Required arguments:
     --schema-file PATH
-          Path to schema file to use for validation
+        Path to schema file to use for validation
 
   Optional arguments:
     -h, --help
-          Show help and exit
+        Show help and exit
     --input-file PATH, -i PATH
-          Path to input file (defaults to stdin)
+        Path to input file (defaults to stdin)
     --quiet, -q
-          Print no logging messages
+        Print no logging messages
     --verbose, -v
-          Print all logging messages
+        Print all logging messages
 
 Examples
 ^^^^^^^^
