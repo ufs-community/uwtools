@@ -253,7 +253,7 @@ UW YAML Definitions
 
 In this section, the example in UW YAML will be followed by its representation in Rocoto XML. Please see the :rocoto:`Rocoto documentation<>` for specifics on their use when defining a workflow.
 
-The ``cyclestr:`` key
+The ``cyclestr:`` Key
 ^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
@@ -267,7 +267,7 @@ The ``cyclestr:`` key
 
   <cyclestr offset="1:00:00">"/some/path/to/workflow_@Y@m@d@H.log"</cyclestr>
 
-The ``workflow:`` key
+The ``workflow:`` Key
 ^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
@@ -307,7 +307,7 @@ At least one ``cycledef:`` is required.
   <cycledef group="hourly">202301011200 202301021200 01:00:00</cycledef>
 
 Defining Entities
-_________________
+-----------------
 
 Any number of entities may optionally be specified.
 
@@ -326,8 +326,8 @@ Any number of entities may optionally be specified.
       <!ENTITY BAR "baz">
   ]>
 
-Defining the workflow log
-_________________________
+Defining the Workflow Log
+-------------------------
 
 ``log:`` is a required entry.
 
@@ -351,8 +351,8 @@ A cycle string may be specified here, instead.
 
   <log><cyclestr>/some/path/to/workflow_@Y@m@d.log</cyclestr></log>
 
-Defining the set of tasks
-_________________________
+Defining the Set of Tasks
+-------------------------
 
 At least one task or metatask must be defined in the ``tasks:`` section.
 
@@ -362,7 +362,7 @@ At least one task or metatask must be defined in the ``tasks:`` section.
     task_*:
     metatask_*:
 
-The ``task_*:`` key
+The ``task_*:`` Key
 ^^^^^^^^^^^^^^^^^^^
 
 Multiple ``task_*:`` YAML entries may exist under the ``tasks:`` and/or ``metatask_*:`` keys. At least one must be specified per workflow.
@@ -415,7 +415,7 @@ The following UW YAML keys take integer, string, or ``cyclestr:`` values.
   stderr:
   stdout:
 
-The ``dependency:`` key
+The ``dependency:`` Key
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``dependency:`` key supports various child options that define task readiness. They may be categorized as boolean operators, comparison operators, and dependencies. Please see the :rocoto:`Rocoto documentation<>` for specifics on how to use any of these dependencies.
@@ -545,7 +545,7 @@ The ``timedep:`` key will almost certainly want a ``cyclestr:`` block.
     <timedep><cyclestr>@Y@m@d@H@M@S</cyclestr></timedep>
   </dependency>
 
-The ``metatask:`` key
+The ``metatask:`` Key
 ---------------------
 
 One or more metatasks may be included under the ``tasks:`` key, or nested under other

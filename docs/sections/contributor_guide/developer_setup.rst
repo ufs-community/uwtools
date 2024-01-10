@@ -1,7 +1,7 @@
 Developer Setup
 ===============
 
-Creating a ``bash`` development shell
+Creating a ``bash`` Development Shell
 -------------------------------------
 
 .. include:: ../../shared/miniforge3_instructions.rst
@@ -35,7 +35,7 @@ If your development shell misses any functionality you’re used to in your main
   source ~/.bashrc
   EOF
 
-Using a ``bash`` development shell
+Using a ``bash`` Development Shell
 ----------------------------------
 
 A development shell makes available several code-formatting and quality checkers, which should be periodically run during the development process. See :doc:`Code Quality <code_quality>` for full details.
@@ -57,8 +57,8 @@ In addition to the ``make devshell`` command, other ``make`` targets are availab
 
 These targets work from the code in its current state in the clone. ``make env`` calls ``make package`` automatically to create a local package, then builds an environment based on the package.
 
-Building condev locally
------------------------
+Building ``condev`` Locally
+---------------------------
 
 As an alternative to installing :anaconda-condev:`pre-built package<>`, the ``condev`` package can be built locally, then installed into the local conda installation. Ensure that ``conda-build`` and ``conda-verify`` are installed in the base environment:
 
@@ -69,8 +69,8 @@ As an alternative to installing :anaconda-condev:`pre-built package<>`, the ``co
   make -C condev package
   conda install -y -c local condev
 
-Files derived from condev
--------------------------
+Files Derived from ``condev``
+-----------------------------
 
 The following files in this repo are derived from their counterparts in the :condev:`condev demo<tree/main/demo>` and are used by ``condev`` code when running certain make commands
 

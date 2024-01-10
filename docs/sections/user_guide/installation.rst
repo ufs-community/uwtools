@@ -7,7 +7,7 @@ The recommended installation mechanism uses the Python package and virtual-envir
 
 Users of the original Miniconda (or the :anaconda:`Anaconda distribution<>`) may need to add the flags ``-c conda-forge --override-channels`` to ``conda build``, ``conda create``, and ``conda install`` commands to specify the use of conda-forge packages.
 
-Using a fresh Miniforge installation
+Using a Fresh Miniforge Installation
 ------------------------------------
 
 .. include:: ../../shared/miniforge3_instructions.rst
