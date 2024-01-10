@@ -50,7 +50,7 @@ More information about the structured UW YAML file for Rocoto can be found :any:
           Print all logging messages
 
 Examples
-~~~~~~~~
+^^^^^^^^
 
 The examples that follow use a UW YAML file ``rocoto.yaml`` with content
 
@@ -222,7 +222,7 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
           Print all logging messages
 
 Examples
-~~~~~~~~
+^^^^^^^^
 
 The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following content:
 

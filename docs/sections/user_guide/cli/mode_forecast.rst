@@ -50,6 +50,6 @@ The ``uw`` mode for configuring and running forecasts.
           Print all logging messages
 
 Examples
-~~~~~~~~
+^^^^^^^^
 
 TBD

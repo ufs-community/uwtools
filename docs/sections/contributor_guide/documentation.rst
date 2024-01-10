@@ -41,3 +41,5 @@ Please follow these guidelines when contributing to the documentation:
 * Remove all trailing whitespace.
 * In general, avoid pronouns like "we" and "you". (Using "we" may be appropriate when synonymous with "The UW Team", "The UFS Community", etc., when the context is clear.) Prefer direct, factual statements about what the code does, requires, etc.
 * The synopsis information printed by ``uw [mode [submode]] --help`` is automatically wrapped and indented based on current terminal size. For visual consistency, please set your terminal width to 100 columns when running such commands to produce output to copy into the docs.
+* Follow the :rst:`RST Sections<basics.html#sections>` guidelines, underlining section headings with = characters, subsections with - characters, and subsubsections with ^ characters. If a further level of refinement is needed, use " to underline paragraph headers.
+* Keep formatting consistent across pages.

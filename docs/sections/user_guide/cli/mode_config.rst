@@ -58,7 +58,7 @@ The ``uw`` mode for handling configs.
           Print all logging messages
 
 Examples
-~~~~~~~~
+^^^^^^^^
 
 The examples that follow use namelist files ``values1.nml`` and ``values2.nml``, both initially with content
 
@@ -174,7 +174,7 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
           Print all logging messages
 
 Examples
-~~~~~~~~
+^^^^^^^^
 
 The examples that follow use YAML file ``config.yaml`` with content
 
@@ -460,7 +460,7 @@ and additional supplemental YAML file ``values2.yaml`` with content
           Print all logging messages
 
 Examples
-~~~~~~~~
+^^^^^^^^
 
 The examples that follow use atparse-formatted template file ``atparse.txt`` with content
 
@@ -531,7 +531,7 @@ The examples that follow use atparse-formatted template file ``atparse.txt`` wit
           Print all logging messages
 
 Examples
-~~~~~~~~
+^^^^^^^^
 
 The examples that follow use :json-schema:`JSON Schema<understanding-json-schema/reference>` file ``schema.jsonschema`` with content
 

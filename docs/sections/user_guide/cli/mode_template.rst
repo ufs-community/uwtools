@@ -54,7 +54,7 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
          Print all logging messages
 
 Examples
-~~~~~~~~
+^^^^^^^^
 
 The examples that follow use template file ``template`` with content
 

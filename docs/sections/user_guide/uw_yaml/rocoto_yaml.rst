@@ -7,9 +7,9 @@ Defining a Rocoto Workflow
 
 To date, it has been challenging to manage XML files that must support a multitude of workflow options. The ``uw rocoto`` tool defines a UW YAML language that can be easily manipulated like any other key/value configuration file and translates it into the syntax required by Rocoto. This enables flexibility to arbitrarily make changes to any workflow while UFS Apps can track the highest priority configurations for Community and Operational use.
 
-
 Workflow Section
-~~~~~~~~~~~~~~~~
+----------------
+
 Starting at the top level of the UW YAML config for Rocoto, there are several required sections. See the example and explanation below:
 
 .. code-block:: yaml
@@ -31,7 +31,7 @@ Starting at the top level of the UW YAML config for Rocoto, there are several re
       ...
 
 UW YAML Keys
-............
+^^^^^^^^^^^^
 
 ``attrs:``: This section allows users to define any number of the available attributes to the ``<workflow>`` tag in Rocoto's native XML language. Set each with a key/value that matches the exact syntax needed by Rocoto. These attributes work to fill in the ``<workflow>`` tag. For example,
 
@@ -66,9 +66,8 @@ UW YAML Keys
 
 ``tasks:``: This section is explained in the ``Tasks Section``.
 
-
 Using Cycle Strings
-...................
+^^^^^^^^^^^^^^^^^^^
 
 The ``<cyclestr>`` tag in Rocoto transforms specific flags to represent components of the current cycle at run time. For example, an ISO date string like ``2023-01-01T12:00:00`` is represented as ``'@Y-@m-@dT@X'``. See the :rocoto:`Rocoto documentation<>` for full details. In the UW YAML, the ``cyclestr:`` block can be used anywhere that Rocoto will accept a ``<cyclestr>`` to achieve this result. The required structure of a ``cyclestr:`` block is a ``value:``, like this:
 
@@ -91,12 +90,12 @@ In the example, the resulting log would appear in the XML file as:
 The ``attrs:`` block is optional within the ``cyclestr:`` block, and can be used to specify the cycle offset.
 
 Tasks Section
-~~~~~~~~~~~~~
+-------------
 
 The ``tasks:`` section is a nested structure that can be arbitrarily deep and defines all the tasks and metatasks in a Rocoto workflow. One or more task or metatask keys are required in this high-level ``tasks:`` section.
 
 Defining Tasks
-..............
+^^^^^^^^^^^^^^
 
 Let's dissect the following task example:
 
@@ -142,14 +141,14 @@ The name of the task can be any string accepted by Rocoto as a task name (includ
 The other keys not specifically mentioned here follow the same conventions as described in the :rocoto:`Rocoto<>` documentation.
 
 Defining Dependencies for Tasks
-...............................
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Optional dependencies, structured as boolean expressions, define the readiness of a task to run. Dependency specification in YAML is described here; see the :rocoto:`Rocoto documentation<>` for more details.
 
 UW YAML dependency key names should mirror Rocoto XML dependency tag names, optionally suffixed with an underscore followed by an arbitrary descriptor. For example, a ``<streq>`` tag might appear in YAML as ``streq_check_flag:``.
 
 Specifying Tag Attributes
-_________________________
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Each of the dependencies that require attributes (the ``key="value"`` parts inside the XML tag) can be specified with an ``attrs:`` block. For example:
 
@@ -180,7 +179,7 @@ Here, the ``taskdep:`` dependency says that the ``goodbye`` task cannot run unti
   </task>
 
 Repeated Dependencies and Boolean Operators
-___________________________________________
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Because UW YAML represents a hash table (a dictionary in Python), each key at the same level must be unique. To accomplish this in the UW YAML format, any of the dependencies can be specified with an arbitrary unique suffix following an underscore. When duplicates appear at the same level, they *must* have unique names. In the following example, there are multiple data dependencies for the basic ``hello`` task.
 
@@ -216,7 +215,7 @@ The ``datadep_foo:`` and ``datadep_bar:`` UW YAML keys were named arbitrarily af
 This example also demonstrates the use of Rocoto's **boolean operator tags** in the structured UW YAML, e.g. ``<or>``, ``<not>``, etc.. The structure follows the tree in the Rocoto XML language in that each of the sub-elements of the ``<and>`` tag translate to sub-trees in UW YAML. Multiple of the boolean operator tags can be set at the same level just as with any other tag type by adding a descriptive suffix starting with an underscore. In the above example, the ``and:`` key could have equivalently been named ``and_data_files:`` to achieve an identical Rocoto XML result.
 
 Defining Metatasks
-..................
+------------------
 
 A Rocoto ``metatask`` expands into one or more tasks via substitution of values, defined under the ``var:`` key, into placeholders bracketed with pound signs. Each variable must provide the same number of values. Here is UW YAML that localizes a greeting to a variety of languages:
 
@@ -250,12 +249,12 @@ This translates to Rocoto XML (whitespace added for readability):
   </metatask>
 
 UW YAML Definitions
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 In this section, the example in UW YAML will be followed by its representation in Rocoto XML. Please see the :rocoto:`Rocoto documentation<>` for specifics on their use when defining a workflow.
 
 The ``cyclestr:`` key
-.....................
+^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -269,7 +268,7 @@ The ``cyclestr:`` key
   <cyclestr offset="1:00:00">"/some/path/to/workflow_@Y@m@d@H.log"</cyclestr>
 
 The ``workflow:`` key
-.....................
+^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
@@ -287,7 +286,7 @@ The ``workflow:`` key
   </workflow>
 
 Defining Cycles
-_______________
+---------------
 
 At least one ``cycledef:`` is required.
 
@@ -364,7 +363,7 @@ At least one task or metatask must be defined in the ``tasks:`` section.
     metatask_*:
 
 The ``task_*:`` key
-...................
+^^^^^^^^^^^^^^^^^^^
 
 Multiple ``task_*:`` YAML entries may exist under the ``tasks:`` and/or ``metatask_*:`` keys. At least one must be specified per workflow.
 
@@ -417,12 +416,12 @@ The following UW YAML keys take integer, string, or ``cyclestr:`` values.
   stdout:
 
 The ``dependency:`` key
-.......................
+^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``dependency:`` key supports various child options that define task readiness. They may be categorized as boolean operators, comparison operators, and dependencies. Please see the :rocoto:`Rocoto documentation<>` for specifics on how to use any of these dependencies.
 
 Boolean Operator Keys
-_____________________
+^^^^^^^^^^^^^^^^^^^^^
 
 Boolean operator keys operate on **one or more additional dependency entries** from any category in their subtrees.
 
@@ -455,7 +454,7 @@ Boolean operator keys operate on **one or more additional dependency entries** f
   </dependency>
 
 Comparison Depenedencies
-________________________
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``streq:`` and ``strneq:`` keys compare the values in their ``left:`` and ``right:`` children, and accept ``cyclestr:`` blocks as well as simple strings.
 
@@ -475,7 +474,7 @@ The ``streq:`` and ``strneq:`` keys compare the values in their ``left:`` and ``
   </dependency>
 
 Dependency Keys
-_______________
+^^^^^^^^^^^^^^^
 
 These keys define dependencies on other tasks, metatasks, data, or wall time.
 
@@ -547,7 +546,7 @@ The ``timedep:`` key will almost certainly want a ``cyclestr:`` block.
   </dependency>
 
 The ``metatask:`` key
-.....................
+---------------------
 
 One or more metatasks may be included under the ``tasks:`` key, or nested under other
 ``metatask_*:`` keys.
