@@ -55,4 +55,43 @@ The ``uw`` mode for configuring and running forecasts.
 Examples
 ^^^^^^^^
 
-TBD
+The examples use a configuration file named ``config.yaml``. Its contents are described in depth in Section :ref:`Forecast YAML`.
+
+* Run an FV3 forecast on an interactive node
+
+  .. code-block:: sh
+
+    $ uw forecast run -c config.yaml --cycle 2024-01-09T12 --model FV3
+
+  The forecast will run on the node where you have invoked this command. Optionally, capture the output in a log file using shell redirection 
+
+
+* Run an FV3 forecast using a batch system 
+
+  .. code-block:: sh
+
+    $ uw forecast run -c config.yaml --cycle 2024-01-09T12 --model FV3 --batch-script submit_fv3.sh
+
+  This command writes a file named ``submit_fv3.sh`` and submits it to the batch system.
+
+* With the ``--dry-run`` flag specified, nothing is written to ``stdout``, but a report of what would have been written is logged to ``stderr``:
+
+  .. code-block:: sh
+
+    $ uw forecast run -c config.yaml --cycle 2024-01-09T12 --model FV3 --batch-script --dry-run
+
+
+* Request verbose log output
+
+  .. code-block:: sh
+
+    $ uw forecast run -c config.yaml --cycle 2024-01-09T12 --model FV3 -v
+
+
+  Note that uw logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
+
+  .. code-block:: sh
+
+    $ uw forecast run -c config.yaml --cycle 2024-01-09T12 --model FV3 -v --dry-run --batch-script > submit_fv3.sh 2> forecast.log
+
+
