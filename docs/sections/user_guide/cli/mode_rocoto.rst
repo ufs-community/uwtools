@@ -301,7 +301,7 @@ The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following
     [2024-01-10T11:09:58]    ERROR 17     </envar>
     [2024-01-10T11:09:58]    ERROR 18   </task>
     [2024-01-10T11:09:58]    ERROR 19 </workflow>
-    [2024-01-10T11:09:58]    ERROR 20 
+    [2024-01-10T11:09:58]    ERROR 20
 
   To decode this type of output, it is easiest to interpret it from the bottom up. It says:
 
