@@ -41,7 +41,7 @@ UW YAML Keys
   ...
   </workflow>
 
-``cycledef:``: This section is a list of grouped cycle definitions for a workflow. Any number of ``cycledef:`` keys is supported. Similar to ``attrs:`` for the ``workflow:`` level, this node has an ``attrs:`` key that follows the exact requirements of those in the Rocoto XML language. The ``spec:`` key is required and supports either the "start, stop, step" syntax, or the "crontab-like" method supported by Rocoto. The example above translates to a single ``<cycledef>`` tag:
+``cycledef:``: This section is a list of grouped cycle definitions for a workflow. Any number of ``cycledef:`` keys is supported. Similar to ``attrs:`` for the ``workflow:`` level, this section has an ``attrs:`` key that follows the exact requirements of those in the Rocoto XML language. The ``spec:`` key is required and supports either the "start, stop, step" syntax, or the "crontab-like" method supported by Rocoto. The example above translates to a single ``<cycledef>`` tag:
 
 .. code-block:: XML
 
@@ -70,7 +70,7 @@ UW YAML Keys
 Using Cycle Strings
 ...................
 
-The ``<cyclestr>`` tag in Rocoto transforms specific flags to represent components of the current cycle at run time. For example, an ISO date string like ``2023-01-01T12:00:00`` is represented as ``'@Y-@m-@dT@X'``. See the :rocoto:`Rocoto documentation<>` for full details. In the UW YAML, the ``cyclestr:`` node can be used anywhere that Rocoto will accept a ``<cyclestr>`` to achieve this result. The required structure of a ``cyclestr:`` node is a ``value:``, like this:
+The ``<cyclestr>`` tag in Rocoto transforms specific flags to represent components of the current cycle at run time. For example, an ISO date string like ``2023-01-01T12:00:00`` is represented as ``'@Y-@m-@dT@X'``. See the :rocoto:`Rocoto documentation<>` for full details. In the UW YAML, the ``cyclestr:`` block can be used anywhere that Rocoto will accept a ``<cyclestr>`` to achieve this result. The required structure of a ``cyclestr:`` block is a ``value:``, like this:
 
 .. code-block:: yaml
 
@@ -88,7 +88,7 @@ In the example, the resulting log would appear in the XML file as:
     <cyclestr>/some/path/to/&FOO;</cyclestr>
   </log>
 
-The ``attrs:`` node is optional within the ``cyclestr:`` node, and can be used to specify the cycle offset.
+The ``attrs:`` block is optional within the ``cyclestr:`` block, and can be used to specify the cycle offset.
 
 Tasks Section
 ~~~~~~~~~~~~~
@@ -113,7 +113,7 @@ Let's dissect the following task example:
       person: siri
     dependencies:
 
-Each task is named by its UW YAML key. Nodes under ``tasks:`` prefixed with ``task_`` will be named with what follows the prefix. In the example above the task will be named ``hello`` and will appear in the XML like this:
+Each task is named by its UW YAML key. Blocks under ``tasks:`` prefixed with ``task_`` will be named with what follows the prefix. In the example above the task will be named ``hello`` and will appear in the XML like this:
 
 .. code-block:: XML
 
@@ -154,7 +154,7 @@ UW YAML dependency key names should mirror Rocoto XML dependency tag names, opti
 Specifying Tag Attributes
 _________________________
 
-Each of the dependencies that require attributes (the ``key="value"`` parts inside the XML tag) can be specified with an ``attrs:`` node. For example:
+Each of the dependencies that require attributes (the ``key="value"`` parts inside the XML tag) can be specified with an ``attrs:`` block. For example:
 
 .. code-block:: yaml
 
@@ -216,7 +216,7 @@ This would result in Rocoto XML in this form:
 
 The ``datadep_foo:`` and ``datadep_bar:`` UW YAML keys were named arbitrarily after the first ``_``, but could have been even more descriptive such as ``datadep_foo_file:`` or ``datadep_foo_text:``. The important part is that the YAML key prefix matches the Rocoto XML tag name.
 
-This example also demonstrates the use of Rocoto's **boolean operator tags** in the structured UW YAML, e.g. ``<or>``, ``<not>``, etc.. The structure follows the tree in the Rocoto XML language in that each of the sub-elements of the ``<and>`` tag translate to sub-nodes in UW YAML. Multiple of the boolean operator tags can be set at the same level just as with any other tag type by adding a descriptive suffix starting with an underscore. In the above example, the ``and:`` key could have equivalently been named ``and_data_files:`` to achieve an identical Rocoto XML result.
+This example also demonstrates the use of Rocoto's **boolean operator tags** in the structured UW YAML, e.g. ``<or>``, ``<not>``, etc.. The structure follows the tree in the Rocoto XML language in that each of the sub-elements of the ``<and>`` tag translate to sub-trees in UW YAML. Multiple of the boolean operator tags can be set at the same level just as with any other tag type by adding a descriptive suffix starting with an underscore. In the above example, the ``and:`` key could have equivalently been named ``and_data_files:`` to achieve an identical Rocoto XML result.
 
 
 Defining Metatasks
@@ -465,7 +465,7 @@ Boolean operator keys operate on **one or more additional dependency entries** f
 Comparison Depenedencies
 ________________________
 
-The ``streq:`` and ``strneq:`` keys compare the values in their ``left:`` and ``right:`` children, and accept ``cyclestr:`` nodes as well as simple strings.
+The ``streq:`` and ``strneq:`` keys compare the values in their ``left:`` and ``right:`` children, and accept ``cyclestr:`` blocks as well as simple strings.
 
 .. code-block:: yaml
 
@@ -523,7 +523,7 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
 
 * The ``datadep:`` key
 
-The ``value:`` key for ``datadep:`` accepts a ``cyclestr:`` node.
+The ``value:`` key for ``datadep:`` accepts a ``cyclestr:`` block.
 
 .. code-block:: yaml
 
@@ -541,7 +541,7 @@ The ``value:`` key for ``datadep:`` accepts a ``cyclestr:`` node.
 
 * The ``timedep:`` key
 
-The ``timedep:`` key will almost certainly want a ``cyclestr:`` node.
+The ``timedep:`` key will almost certainly want a ``cyclestr:`` block.
 
 .. code-block:: text
 
