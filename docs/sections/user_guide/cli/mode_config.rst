@@ -399,7 +399,7 @@ and additional supplemental YAML file ``values2.yaml`` with content
 
   .. code-block:: text
 
-    % uw config realize --input-file config.yaml --output-format sh
+    $ uw config realize --input-file config.yaml --output-format sh
     [2024-01-10T21:46:00]    ERROR Cannot realize depth-2 config to type-'sh' config
     Cannot realize depth-2 config to type-'sh' config
 
