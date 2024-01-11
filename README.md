@@ -1,4 +1,4 @@
-[![docs](https://readthedocs.org/projects/uwtools/badge/?version=latest)](https://readthedocs.org/projects/uwtools/builds/)
+[![docs](https://readthedocs.org/projects/uwtools/badge/?version=main)](https://uwtools.readthedocs.io/en/main/?badge=main)
 
 # uwtools
 
