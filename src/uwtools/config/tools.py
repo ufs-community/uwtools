@@ -109,7 +109,8 @@ def realize_config(
     output_format = _ensure_format("output", output_format, output_file)
     config_check_depths_realize(input_obj, output_format)
     if dry_run:
-        log.info(input_obj)
+        for line in str(input_obj).strip().split("\n"):
+            log.info(line)
         return {}
     if values_needed:
         _realize_config_values_needed(input_obj)
@@ -126,7 +127,7 @@ def _ensure_format(
     desc: str, fmt: Optional[str] = None, config: Union[Config, OptionalPath] = None
 ) -> str:
     """
-    Return the given file format, or the appropriate format as deduced from the config.
+    Return the given format, or the appropriate format as deduced from the config.
 
     :param desc: A description of the file.
     :param fmt: The config format name.
@@ -205,19 +206,29 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
     Print a report characterizing input values as complete, empty, or template placeholders.
 
     :param input_obj: The config to update.
+    :return: True
     """
     complete, empty, template = input_obj.characterize_values(input_obj.data, parent="")
-    log.info("Keys that are complete:")
-    for var in complete:
-        log.info(var)
+    if complete:
+        log.info("Keys that are complete:")
+        for var in complete:
+            log.info(var)
+    else:
+        log.info("No keys are complete.")
     log.info("")
-    log.info("Keys that have unfilled Jinja2 templates:")
-    for var in template:
-        log.info(var)
+    if template:
+        log.info("Keys with unrendered Jinja2 variables/expressions:")
+        for var in template:
+            log.info(var)
+    else:
+        log.info("No keys have unrendered Jinja2 variables/expressions.")
     log.info("")
-    log.info("Keys that are set to empty:")
-    for var in empty:
-        log.info(var)
+    if empty:
+        log.info("Keys that are set to empty:")
+        for var in empty:
+            log.info(var)
+    else:
+        log.info("No keys are set to empty.")
     return True
 
 

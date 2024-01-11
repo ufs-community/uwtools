@@ -1,25 +1,24 @@
-# Minimal makefile for Sphinx documentation
-#
+BUILDDIR     = build
+LINKCHECKDIR = $(BUILDDIR)/linkcheck
+SOURCEDIR    = .
+SPHINXBUILD  = sphinx-build
+SPHINXOPTS   = -a -n -W
 
-# You can set these variables from the command line, and also
-# from the environment for the first two.
-SPHINXOPTS    ?= -n
-SPHINXBUILD   ?= sphinx-build
-SOURCEDIR     = .
-BUILDDIR      = _build
+.PHONY: help clean docs linkcheck
 
-# Put it first so that "make" without argument is like "make help".
 help:
-	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	$(SPHINXBUILD) -M help $(SOURCEDIR) $(BUILDDIR) $(SPHINXOPTS)
 
-# Sphinx doesn't know to clean out the debris from sphinx-gallery
 clean:
-	rm -rf $(BUILDDIR)/*
+	$(RM) -rv $(BUILDDIR)
 
-.PHONY: help Makefile
+docs:
+	$(MAKE) linkcheck
+	$(MAKE) html
 
-# Catch-all target: route all unknown targets to Sphinx using the new
-# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
-%: Makefile
-	[ -d $(BUILDDIR) ] || mkdir -p $(BUILDDIR)
-	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) -w "$(BUILDDIR)/warnings.log"
+linkcheck:
+	$(SPHINXBUILD) -b linkcheck $(SPHINXOPTS) -c $(CURDIR) $(CURDIR) build/linkcheck
+
+%:
+	mkdir -pv $(BUILDDIR)
+	$(SPHINXBUILD) -M $@ $(SOURCEDIR) $(BUILDDIR) $(SPHINXOPTS) -w $(BUILDDIR)/warnings.log
