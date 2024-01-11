@@ -31,4 +31,4 @@ The order of the targets above is intentional:
 
 All the above tests are executed by the CI system when code is merged to specific git branches, and again when a conda package is built for release. To ensure that these processes succeed, be sure to run all the tests in a development shell before opening a pull request, and throughout the PR's lifecycle as subsequent changes are made. CI will reject unformatted code, so also run ``make format`` and commit any changes it makes. A useful development idiom is to periodically run ``make format && make test`` to perform a full code-quality sweep through the code.
 
-The ``workflow-tools`` repository has standardized on 100% unit-test coverage, enforced by ``make unittest`` and its configuration in ``pyproject.toml``. Please help maintain this high standard.
+The ``uwtools`` repository has standardized on 100% unit-test coverage, enforced by ``make unittest`` and its configuration in ``pyproject.toml``. Please help maintain this high standard.
