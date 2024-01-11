@@ -14,7 +14,24 @@ def render(
     dry_run: bool = False,
 ) -> bool:
     """
-    ???
+    Render a Jinja2 template based on specified values.
+
+    Primary values used to render the template are taken from the specified file. The format of the
+    values source will be deduced from the filename extension, if possible. This can be overriden
+    via the ``values_format`` argument. A ``dict`` object may alternatively be provided as the
+    primary values source. If no input file is specified, ``stdin`` is read. If no output file is
+    specified, ``stdout`` is written to.
+
+    :param values: Source of values to render the template
+    :param values_format: Format of values when sourced from file
+    :param input_file: Path to read raw Jinja2 template from (``None`` or unspecified => read
+        ``stdin``)
+    :param output_file: Path to write rendered Jinja2 template to (``None`` or unspecified => write
+        to ``stdout``)
+    :param overrides: Supplemental override values
+    :param values_needed: Just report variables needed to render the template?
+    :param dry_run: Run in dry-run mode?
+    :return: ``True`` if Jinja2 template was successfully rendered, ``False`` otherwise
     """
     return _render(
         values=values,

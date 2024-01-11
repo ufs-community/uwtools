@@ -1,89 +1,57 @@
-# Configuration file for the Sphinx documentation builder.                                                                                                                 
-#                                                                                                                                                                          
-# This file only contains a selection of the most common options. For a full                                                                                               
-# list see the documentation:                                                                                                                                              
-# http://www.sphinx-doc.org/en/master/config                                                                                                                               
+# See https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Path setup --------------------------------------------------------------                                                                                             
-
-# If extensions (or modules to document with autodoc) are in another directory,                                                                                            
-# add these directories to sys.path here. If the directory is relative to the                                                                                              
-# documentation root, use os.path.abspath to make it absolute, like shown here.                                                                                            
-#
+import datetime as dt
 import json
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('.'))
-print(sys.path)
-
-# -- Project information -----------------------------------------------------                                                                                             
+sys.path.insert(0, os.path.abspath("../src"))
 
 with open("../recipe/meta.json", "r", encoding="utf-8") as f:
-    version = json.loads(f.read())["version"]
+    _metadata = json.loads(f.read())
 
-project = 'Unified Workflow'
-author = ''
-author_list = 'Holt, C., E. Carpenter, J. Derrico, V. Hagerty, F. Gabelmann, R. Mahajan, B. Cash, O. Adejumo, J. Prestopnik'
-verinfo = version
-release = f'{version}'
-release_date = '2023-05-01'
-release_year = release_date.split("-")[0]
-release_month = release_date.split("-")[1]
-release_day = release_date.split("-")[2]
-copyright = f'{release_year}, {author_list}'
-
-# -- General configuration ---------------------------------------------------                                                                                             
-
-# Add any Sphinx extension module names here, as strings. They can be                                                                                                      
-# extensions coming with Sphinx (named 'sphinx.ext.*') or your custom                                                                                                      
-# ones.                                                                                                                                                                    
-extensions = ['sphinx.ext.autodoc','sphinx.ext.intersphinx',]
-
-# Add any paths that contain templates here, relative to this directory.                                                                                                   
-templates_path = ['_templates']
-
-# List of patterns, relative to source directory, that match files and                                                                                                     
-# directories to ignore when looking for source files.                                                                                                                     
-# This pattern also affects html_static_path and html_extra_path.                                                                                                          
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'Flowchart' ]
-
-# Suppress certain warning messages                                                                                                                                        
-suppress_warnings = ['ref.citation']
-
-# -- Options for HTML output -------------------------------------------------                                                                                             
-
-# The theme to use for HTML and HTML Help pages.  See the documentation for                                                                                                
-# a list of builtin themes.                                                                                                                                                
-#                                                                                                                                                                          
-html_theme = 'sphinx_rtd_theme'
-html_theme_path = ["_themes", ]
-html_css_files = ['theme_override.css']
-
-# Add any paths that contain custom static files (such as style sheets) here,                                                                                              
-# relative to this directory. They are copied after the builtin static files,                                                                                              
-# so a file named "default.css" will overwrite the builtin "default.css".                                                                                                  
-html_static_path = ['_static']
-
-# The name of an image file (relative to this directory) to place at the top                                                                                               
-# of the sidebar.                                                                                                                                                          
-html_logo = os.path.join('_static','UFS_image.png')
-
-# -- Intersphinx control -----------------------------------------------------                                                                                             
-intersphinx_mapping = {'numpy':("https://docs.scipy.org/doc/numpy/", None)}
-
+autodoc_mock_imports = ["f90nml", "jsonschema", "lxml"]
+copyright = str(dt.datetime.now().year)
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.extlinks", "sphinx.ext.intersphinx"]
+extlinks_detect_hardcoded_links = True
+html_logo = os.path.join("static", "ufs.png")
+html_static_path = ["static"]
+html_theme = "sphinx_rtd_theme"
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
+nitpick_ignore_regex = [("py:class", r"^uwtools\..*")]
 numfig = True
+numfig_format = {"figure": "Figure %s"}
+project = "Unified Workflow Tools"
+release = _metadata["version"]
+version = _metadata["version"]
 
-numfig_format = {
-    'figure': 'Figure %s',
+extlinks = {
+    "anaconda": ("https://www.anaconda.com/%s", "%s"),
+    "anaconda-condev": ("https://anaconda.org/maddenp/condev/%s", "%s"),
+    "black": ("https://black.readthedocs.io/en/stable/%s", "%s"),
+    "conda": ("https://docs.conda.io/en/latest/%s", "%s"),
+    "conda-forge": ("https://conda-forge.org/%s", "%s"),
+    "condev": ("https://github.com/maddenp/condev/%s", "%s"),
+    "coverage": ("https://coverage.readthedocs.io/en/7.3.4/%s", "%s"),
+    "docformatter": ("https://docformatter.readthedocs.io/en/stable/%s", "%s"),
+    "github-docs": ("https://docs.github.com/en/%s", "%s"),
+    "isort": ("https://pycqa.github.io/isort/%s", "%s"),
+    "jinja2": ("https://jinja.palletsprojects.com/%s", "%s"),
+    "jq": ("https://jqlang.github.io/jq/manual/v1.7/%s", "%s"),
+    "json-schema": ("https://json-schema.org/%s", "%s"),
+    "miniconda": ("https://docs.conda.io/projects/miniconda/en/latest/%s", "%s"),
+    "miniforge": ("https://github.com/conda-forge/miniforge/%s", "%s"),
+    "miniforge3": ("https://github.com/conda-forge/miniforge/%s", "%s"),
+    "mypy": ("https://mypy.readthedocs.io/en/stable/%s", "%s"),
+    "pylint": ("https://pylint.readthedocs.io/en/v3.0.3/%s", "%s"),
+    "pytest": ("https://docs.pytest.org/en/7.4.x/%s", "%s"),
+    "rocoto": ("https://christopherwharrop.github.io/rocoto/%s", "%s"),
+    "rst": ("https://www.sphinx-doc.org/en/master/usage/restructuredtext/%s", "%s"),
+    "rtd": ("https://readthedocs.org/projects/uwtools/%s", "%s"),
+    "semver": ("https://semver.org/%s", "%s"),
+    "ufs": ("https://ufscommunity.org/%s", "%s"),
+    "uwtools": ("https://github.com/ufs-community/uwtools/%s", "%s"),
 }
 
-# -- Export variables --------------------------------------------------------                                                                                             
-
-rst_epilog = f"""                                                                                                                                                          
-.. |copyright|    replace:: {copyright}                                                                                                                                    
-.. |author_list|  replace:: {author_list}                                                                                                                                  
-.. |release_date| replace:: {release_date}                                                                                                                                 
-.. |release_year| replace:: {release_year}                                                                                                                                 
-"""
-
+def setup(app):
+    app.add_css_file("custom.css")
