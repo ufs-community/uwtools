@@ -47,7 +47,7 @@ extlinks = {
     "pytest": ("https://docs.pytest.org/en/7.4.x/%s", "%s"),
     "rocoto": ("https://christopherwharrop.github.io/rocoto/%s", "%s"),
     "rst": ("https://www.sphinx-doc.org/en/master/usage/restructuredtext/%s", "%s"),
-    "rtd": ("https://readthedocs.org/projects/unified-workflow/%s", "%s"),
+    "rtd": ("https://readthedocs.org/projects/uwtools/%s", "%s"),
     "semver": ("https://semver.org/%s", "%s"),
     "ufs": ("https://ufscommunity.org/%s", "%s"),
     "uwtools": ("https://github.com/ufs-community/uwtools/%s", "%s"),
