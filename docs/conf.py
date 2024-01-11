@@ -21,7 +21,7 @@ intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 nitpick_ignore_regex = [("py:class", r"^uwtools\..*")]
 numfig = True
 numfig_format = {"figure": "Figure %s"}
-project = "Unified Workflow"
+project = "Unified Workflow Tools"
 release = _metadata["version"]
 version = _metadata["version"]
 
@@ -47,10 +47,10 @@ extlinks = {
     "pytest": ("https://docs.pytest.org/en/7.4.x/%s", "%s"),
     "rocoto": ("https://christopherwharrop.github.io/rocoto/%s", "%s"),
     "rst": ("https://www.sphinx-doc.org/en/master/usage/restructuredtext/%s", "%s"),
-    "rtd": ("https://readthedocs.org/projects/unified-workflow/%s", "%s"),
+    "rtd": ("https://readthedocs.org/projects/uwtools/%s", "%s"),
     "semver": ("https://semver.org/%s", "%s"),
     "ufs": ("https://ufscommunity.org/%s", "%s"),
-    "uwtools": ("https://github.com/ufs-community/workflow-tools/%s", "%s"),
+    "uwtools": ("https://github.com/ufs-community/uwtools/%s", "%s"),
 }
 
 def setup(app):

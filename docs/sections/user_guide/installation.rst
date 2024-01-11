@@ -18,11 +18,11 @@ Using a Fresh Miniforge Installation
 
     conda install -y conda-build conda-verify
 
-3. In a clone of the :uwtools:`workflow-tools repository<>`, build and install the ``uwtools`` package.
+3. In a clone of the :uwtools:`uwtools repository<>`, build and install the ``uwtools`` package.
 
   .. code-block:: text
 
-    cd /to/your/workflow-tools/clone
+    cd /to/your/uwtools/clone
     conda build recipe
     conda create -y -n uwtools -c local uwtools
 

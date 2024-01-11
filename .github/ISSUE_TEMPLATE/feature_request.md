@@ -18,7 +18,7 @@ Please copy any output files into a Github gist (for e.g.) and link to the gist,
 If this is a bug, please consider using the [Bug Report](./bug_report.md) template.
 Your issue may already have been created!
 
-Please look through the existing issues on the [Issue tracker](https://github.com/ufs-community/workflow-tools/issues) to see if this issue has been created.
+Please look through the existing issues on the [Issue tracker](https://github.com/ufs-community/uwtools/issues) to see if this issue has been created.
 If so, please consider using that Issue to add any additional information.
 
 **Description**

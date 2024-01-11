@@ -310,7 +310,7 @@ and additional supplemental YAML file ``values2.yaml`` with content
     $ uw config realize --input-file config.txt --output-format yaml values1.yaml
     Cannot deduce format of 'config.txt' from unknown extension 'txt'
 
-  In this case, the format can be explicitly specified  (``config.txt`` is a copy of ``config.yaml``)::
+  In this case, the format can be explicitly specified  (``config.txt`` is a copy of ``config.yaml``):
 
   .. code-block:: text
 
