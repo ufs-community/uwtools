@@ -82,7 +82,7 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
 
 * Realize a UW YAML input file to ``stdout`` in Rocoto XML format:
 
-  .. code-block:: XML
+  .. code-block:: xml
 
      $ uw rocoto realize --input-file rocoto.yaml
      [2024-01-02T13:41:25]     INFO 0 UW schema-validation errors found
