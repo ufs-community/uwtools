@@ -7,13 +7,13 @@ The ``uw`` mode for configuring and running forecasts.
 
    $ uw forecast --help
    usage: uw forecast [-h] MODE ...
- 
+
    Configure and run forecasts
- 
+
    Optional arguments:
      -h, --help
            Show help and exit
- 
+
    Positional arguments:
      MODE
        run
@@ -27,9 +27,9 @@ The ``uw`` mode for configuring and running forecasts.
    $ uw forecast run --help
    usage: uw forecast run --config-file PATH --cycle CYCLE --model {FV3} [-h] [--batch-script PATH]
                           [--dry-run] [--quiet] [--verbose]
- 
+
    Run a forecast
- 
+
    Required arguments:
      --config-file PATH, -c PATH
          Path to config file
@@ -37,7 +37,7 @@ The ``uw`` mode for configuring and running forecasts.
          The cycle in ISO8601 format
      --model {FV3}
          Model name
- 
+
    Optional arguments:
      -h, --help
          Show help and exit
@@ -49,7 +49,7 @@ The ``uw`` mode for configuring and running forecasts.
          Print no logging messages
      --verbose, -v
          Print all logging messages
- 
+
 Examples
 ^^^^^^^^
 

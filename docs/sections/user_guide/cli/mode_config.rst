@@ -115,25 +115,25 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
      [2024-01-08T16:57:28]     INFO + values2.nml
      [2024-01-08T16:57:28]     INFO ---------------------------------------------------------------------
      [2024-01-08T16:57:28]     INFO values:       recipient:  - None + World
- 
+
   Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
 
   .. code-block:: text
 
      $ uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose 2>compare.log
- 
+
   The content of ``compare.log``:
- 
+
    .. code-block:: text
- 
+
       [2024-01-08T16:59:20]    DEBUG Command: uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose
       [2024-01-08T16:59:20]     INFO - values1.nml
       [2024-01-08T16:59:20]     INFO + values2.nml
       [2024-01-08T16:59:20]     INFO ---------------------------------------------------------------------
       [2024-01-08T16:59:20]     INFO values:       recipient:  - None + World
-  
+
 .. _realize_configs_cli_examples:
- 
+
 ``realize``
 -----------
 

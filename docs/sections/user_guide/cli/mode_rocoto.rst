@@ -7,13 +7,13 @@ The ``uw`` mode for realizing and validating Rocoto XML documents.
 
    $ uw rocoto --help
    usage: uw rocoto [-h] MODE ...
- 
+
    Realize and validate Rocoto XML Documents
- 
+
    Optional arguments:
      -h, --help
            Show help and exit
- 
+
    Positional arguments:
      MODE
        realize
@@ -34,9 +34,9 @@ More information about the structured UW YAML file for Rocoto can be found :any:
 
    $ uw rocoto realize --help
    usage: uw rocoto realize [-h] [--input-file PATH] [--output-file PATH] [--quiet] [--verbose]
- 
+
    Realize a Rocoto XML workflow document
- 
+
    Optional arguments:
      -h, --help
          Show help and exit
@@ -208,9 +208,9 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
 
    $ uw rocoto validate --help
    usage: uw rocoto validate [-h] [--input-file PATH] [--quiet] [--verbose]
- 
+
    Validate Rocoto XML
- 
+
    Optional arguments:
      -h, --help
          Show help and exit
@@ -249,7 +249,7 @@ The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following
        </envar>
      </task>
    </workflow>
- 
+
 * To validate an XML from ``stdin``:
 
   .. code-block:: text

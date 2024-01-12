@@ -7,13 +7,13 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 
    $ uw template --help
    usage: uw template [-h] MODE ...
- 
+
    Handle templates
- 
+
    Optional arguments:
     -h, --help
           Show help and exit
- 
+
    Positional arguments:
     MODE
       render
@@ -31,9 +31,9 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
                              [--values-format {ini,nml,sh,yaml}] [--values-needed] [--dry-run]
                              [--quiet] [--verbose]
                              [KEY=VALUE ...]
- 
+
    Render a template
- 
+
    Optional arguments:
      -h, --help
          Show help and exit
