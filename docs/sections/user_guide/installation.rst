@@ -40,12 +40,12 @@ If no existing conda installation is available, install :miniforge:`Miniforge<>`
 
 .. include:: ../../shared/miniforge3_instructions.rst
 
-2. Continue with the `Using an Existing conda Installation`_ instructions.
+2. Continue with the `Use an Existing conda Installation`_ instructions.
 
 Build the ``uwtools`` Package Locally
 -------------------------------------
 
-1. Install the necessary build packages into the conda installation's base environment (see the `Using a Fresh Miniforge Installation`_ instructions if an installation is unavailable or not writable):
+1. Install the necessary build packages into the conda installation's base environment (see the `Use a Fresh Miniforge Installation`_ instructions if an installation is unavailable or not writable):
 
   .. code-block:: text
 
