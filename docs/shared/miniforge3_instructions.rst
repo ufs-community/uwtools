@@ -1,6 +1,6 @@
 This recipe uses the ``aarch64`` (64-bit ARM) Miniforge for Linux, and installs into ``$HOME/conda``. Adjust as necessary for the target system.
 
-1. Download, install, and activate the latest :miniforge3:`Miniforge<>` for the target system. If an existing conda (:miniforge:`Miniforge<>`, :miniconda:`Miniconda<>`, :anaconda:`Anaconda<>`, etc.) installation is available and writable, this step may be skipped.
+1. Download, install, and activate the latest :miniforge3:`Miniforge<>` for the target system.
 
   .. code-block:: text
 
