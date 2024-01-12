@@ -8,18 +8,18 @@ If an existing conda (:miniforge:`Miniforge<>`, :miniconda:`Miniconda<>`, :anaco
 
 .. include:: ../../shared/miniforge3_instructions.rst
 
-2. Install the :anaconda-condev:`condev package<>` into the base environment.
+#. Install the :anaconda-condev:`condev package<>` into the base environment.
 
-  .. code-block:: text
+   .. code-block:: text
 
-    conda install -y -c maddenp condev
+      conda install -y -c maddenp condev
 
-3. In a clone of the :uwtools:`uwtools repository<>`, create the development shell.
+#. In a clone of the :uwtools:`uwtools repository<>`, create the development shell.
 
-  .. code-block:: text
+   .. code-block:: text
 
-    cd /to/your/uwtools/clone
-    make devshell
+      cd /to/your/uwtools/clone
+      make devshell
 
 If the above is successful, you will be in a ``uwtools`` development shell. See below for usage information. You may exit the shell with ``exit`` or ``ctrl-d``.
 
@@ -33,9 +33,9 @@ If your development shell misses any functionality you’re used to in your main
 
 .. code-block:: text
 
-  cat <<EOF >~/.condevrc
-  source ~/.bashrc
-  EOF
+   cat <<EOF >~/.condevrc
+   source ~/.bashrc
+   EOF
 
 Using a ``bash`` Development Shell
 ----------------------------------
@@ -66,10 +66,10 @@ As an alternative to installing :anaconda-condev:`pre-built package<>`, the ``co
 
 .. code-block:: text
 
-  # Activate your conda
-  git clone https://github.com/maddenp/condev.git
-  make -C condev package
-  conda install -y -c local condev
+   # Activate your conda
+   git clone https://github.com/maddenp/condev.git
+   make -C condev package
+   conda install -y -c local condev
 
 Files Derived from ``condev``
 -----------------------------
@@ -78,13 +78,13 @@ The following files in this repo are derived from their counterparts in the :con
 
 .. code-block:: text
 
-  ├── Makefile
-  ├── recipe
-  │   ├── build.sh
-  │   ├── channels
-  │   ├── meta.json
-  │   ├── meta.yaml
-  │   └── run_test.sh
-  ├── src
-  │   ├── pyproject.toml
-  │   ├── setup.py
+   ├── Makefile
+   ├── recipe
+   │   ├── build.sh
+   │   ├── channels
+   │   ├── meta.json
+   │   ├── meta.yaml
+   │   └── run_test.sh
+   ├── src
+   │   ├── pyproject.toml
+   │   ├── setup.py
