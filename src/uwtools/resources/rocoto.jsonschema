@@ -38,7 +38,7 @@
           ],
           "type": "object"
         }
-      ]
+      ],
     },
     "dependency": {
       "additionalProperties": false,
