@@ -25,7 +25,7 @@ def convert(
 
     def lines() -> Generator[str, Any, Any]:
         with readable(input_file) as f_in:
-            for line in f_in:
+            for line in f_in.read().strip().split("\n"):
                 yield _replace(line.strip())
 
     def write(f_out: IO) -> None:

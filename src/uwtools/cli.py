@@ -357,9 +357,7 @@ def _add_subparser_template_translate(subparsers: Subparsers) -> SubmodeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(
-        subparsers, STR.translate, "Translate atparse to Jinja2"
-    )
+    parser = _add_subparser(subparsers, STR.translate, "Translate atparse to Jinja2")
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_output_file(optional)
