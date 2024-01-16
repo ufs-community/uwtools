@@ -21,7 +21,7 @@ The ``uw`` mode for realizing and validating Rocoto XML documents.
       validate
           Validate Rocoto XML
 
-.. _realize_rocoto_cli_examples:
+.. _cli_rocoto_realize_examples:
 
 ``realize``
 -----------
@@ -199,7 +199,7 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
     [2024-01-02T14:00:01]     INFO 0 UW schema-validation errors found
     [2024-01-02T14:00:01]     INFO 0 Rocoto validation errors found
 
-.. _validate_rocoto_cli_examples:
+.. _cli_rocoto_validate_examples:
 
 ``validate``
 ------------
