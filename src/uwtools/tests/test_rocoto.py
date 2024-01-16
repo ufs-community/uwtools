@@ -252,12 +252,13 @@ class Test__RocotoXML:
         assert e.text == str(value)
 
     def test__add_task_dependency_sh(self, instance, root):
-        config = {"sh": {"attrs": {"runopt": "-c", "shell": "/bin/bash"}, "command": "ls"}}
+        config = {"sh_foo": {"attrs": {"runopt": "-c", "shell": "/bin/bash"}, "command": "ls"}}
         instance._add_task_dependency(e=root, config=config)
         dependency = root[0]
         assert dependency.tag == "dependency"
         sh = dependency[0]
         assert sh.tag == "sh"
+        assert sh.get("name") == "foo"
         assert sh.get("runopt") == "-c"
         assert sh.get("shell") == "/bin/bash"
         assert sh.text == "ls"
@@ -439,6 +440,7 @@ class Test__RocotoXML:
 
 # PM MOVE THIS
 
+
 def test_schema_dependency_sh():
     errors = validator("$defs", "dependency")
     # Basic spec:
@@ -448,13 +450,19 @@ def test_schema_dependency_sh():
     # A _<name> suffix is allowed:
     assert not errors({"sh_foo": {"command": "foo"}})
     # Optional attributes "runopt" and "shell" are supported:
-    assert not errors({"sh_foo": {"attrs": {"runopt": "-c", "shell": "/bin/bash"}, "command": "foo"}})
+    assert not errors(
+        {"sh_foo": {"attrs": {"runopt": "-c", "shell": "/bin/bash"}, "command": "foo"}}
+    )
     # Other attributes are not allowed:
-    assert "Additional properties are not allowed ('color' was unexpected)" in errors({"sh_foo": {"attrs": {"color": "blue"}, "command": "foo"}})
+    assert "Additional properties are not allowed ('color' was unexpected)" in errors(
+        {"sh_foo": {"attrs": {"color": "blue"}, "command": "foo"}}
+    )
     # The command is a compoundTimeString:
     assert not errors({"sh": {"command": {"cyclestr": {"value": "foo-@Y@m@d@H"}}}})
-    
+
+
 # PM MOVE THIS
+
 
 def test_schema_compoundTimeString():
     errors = validator("$defs", "compoundTimeString")

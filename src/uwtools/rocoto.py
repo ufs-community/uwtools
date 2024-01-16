@@ -204,13 +204,13 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         :param tag: Name of new element to add.
         """
-        tag, _ = self._tag_name(tag)
+        tag, name = self._tag_name(tag)
         if tag in (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor):
             e = SubElement(e, tag)
             for subtag, subconfig in config.items():
                 self._add_task_dependency_child(e, subconfig, subtag)
         elif tag == STR.sh:
-            self._add_task_dependency_sh(e, config)
+            self._add_task_dependency_sh(e, config, name)
         elif tag in (STR.streq, STR.strneq):
             self._add_task_dependency_strequality(e, config, tag)
         elif tag == STR.datadep:
@@ -232,12 +232,14 @@ class _RocotoXML:
         e = self._add_compound_time_string(e, config[STR.value], STR.datadep)
         self._set_attrs(e, config)
 
-    def _add_task_dependency_sh(self, e: Element, config: dict) -> None:
+    def _add_task_dependency_sh(self, e: Element, config: dict, name: Optional[str] = None) -> None:
         """
         :param e: The parent element to add the new element to.
         :param config: Configuration data for the tag.
         """
         e = self._add_compound_time_string(e, config[STR.command], STR.sh)
+        if name:
+            config["attrs"]["name"] = name
         self._set_attrs(e, config)
 
     def _add_task_dependency_strequality(self, e: Element, config: dict, tag: str) -> None:
@@ -381,9 +383,9 @@ class _RocotoXML:
         """
         Return the tag and metadata extracted from a metadata-bearing key.
 
-        :param key: A string of the form "tag_metadata" (or simply STR.tag).
+        :param key: A string of the form "<tag>_<metadata>" (or simply STR.<tag>).
         """
-        # For example, key "task_foo"bar" will be split into tag "task" and name "foo_bar".
+        # For example, key "task_foo_bar" will be split into tag "task" and name "foo_bar".
         parts = key.split("_")
         tag = parts[0]
         name = "_".join(parts[1:]) if parts[1:] else ""
