@@ -1,5 +1,5 @@
 """
-Utilities for rendering Jinja2 templates.
+Convert atparse templates to Jinja2 templates.
 """
 
 import re

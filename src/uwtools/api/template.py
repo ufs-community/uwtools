@@ -1,5 +1,6 @@
 from typing import Dict, Optional, Union
 
+from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.jinja2 import render as _render
 from uwtools.types import DefinitePath, OptionalPath
 
@@ -42,3 +43,24 @@ def render(
         values_needed=values_needed,
         dry_run=dry_run,
     )
+
+
+def translate(
+    input_file: OptionalPath = None,
+    output_file: OptionalPath = None,
+    dry_run: bool = False,
+) -> bool:
+    """
+    Translate an atparse template to a Jinja2 template.
+
+    ``@[]`` tokens are replaced with Jinja2 ``{{}}`` equivalents. If no input file is specified,
+    ``stdin`` is read. If no output file is specified, ``stdout`` is written to. In ``dry_run``
+    mode, output is written to ``stderr``.
+
+    :param input_file: Path to the template containing atparse syntax
+    :param output_file: Path to the file to write the converted template to
+    :param dry_run: Run in dry-run mode?
+    :return: ``True``
+    """
+    _convert_atparse_to_jinja2(input_file=input_file, output_file=output_file, dry_run=dry_run)
+    return True
