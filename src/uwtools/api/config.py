@@ -1,7 +1,6 @@
 import os
 from typing import List, Optional, Union
 
-from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.formats.fieldtable import FieldTableConfig as _FieldTableConfig
 from uwtools.config.formats.ini import INIConfig as _INIConfig
 from uwtools.config.formats.nml import NMLConfig as _NMLConfig
@@ -172,32 +171,6 @@ def realize_to_dict(
         values_needed=values_needed,
         dry_run=dry_run,
     )
-
-
-def translate(
-    input_format: str,
-    output_format: str,
-    input_file: OptionalPath = None,
-    output_file: OptionalPath = None,
-    dry_run: bool = False,
-) -> bool:
-    """
-    Translate a config to a different format.
-
-    Currently supports atparse -> Jinja2 translation, in which ``@[]`` tokens are replaced with
-    Jinja2 ``{{}}`` equivalents. Specify ``input_format=atparse`` and ``output_format=jinja2``. If
-    no input file is specified, ``stdin`` is read. If no output file is specified, ``stdout`` is
-    written to. In ``dry_run`` mode, output is written to ``stderr``.
-
-    :param input_file: Path to the template containing atparse syntax
-    :param output_file: Path to the file to write the converted template to
-    :param dry_run: Run in dry-run mode?
-    :return: ``True`` if translation was successful, ``False`` otherwise
-    """
-    if input_format == _FORMAT.atparse and output_format == _FORMAT.jinja2:
-        _convert_atparse_to_jinja2(input_file=input_file, output_file=output_file, dry_run=dry_run)
-        return True
-    return False
 
 
 def validate(
