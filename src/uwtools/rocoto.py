@@ -133,6 +133,7 @@ class _RocotoXML:
         :param taskname: The name of the metatask being defined.
         """
         e = SubElement(e, STR.metatask, name=taskname)
+        self._set_attrs(e, config)
         for key, val in config.items():
             tag, taskname = self._tag_name(key)
             if tag == STR.metatask:
