@@ -8,7 +8,6 @@ import yaml
 
 from uwtools.api import config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.utils.file import FORMAT
 
 
 def test_compare():
@@ -68,32 +67,6 @@ def test_realize_to_dict():
     _realize.assert_called_once_with(
         **dict({**kwargs, **{"output_file": os.devnull, "output_format": None}})
     )
-
-
-@pytest.mark.parametrize(
-    "infmt,outfmt,success_expected",
-    [
-        (FORMAT.atparse, FORMAT.jinja2, True),
-        ("invalid", FORMAT.jinja2, False),
-        (FORMAT.atparse, "invalid", False),
-    ],
-)
-def test_translate(infmt, outfmt, success_expected):
-    kwargs: dict = {
-        "input_file": "path1",
-        "input_format": infmt,
-        "output_file": "path2",
-        "output_format": outfmt,
-        "dry_run": True,
-    }
-    with patch.object(config, "_convert_atparse_to_jinja2") as _catj:
-        assert config.translate(**kwargs) is success_expected
-    if success_expected:
-        _catj.assert_called_once_with(
-            input_file=kwargs["input_file"],
-            output_file=kwargs["output_file"],
-            dry_run=kwargs["dry_run"],
-        )
 
 
 @pytest.mark.parametrize("cfg", [{"foo": "bar"}, YAMLConfig(config={})])

@@ -74,7 +74,6 @@ def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
     return {
         STR.compare: _add_subparser_config_compare(subparsers),
         STR.realize: _add_subparser_config_realize(subparsers),
-        STR.translate: _add_subparser_config_translate(subparsers),
         STR.validate: _add_subparser_config_validate(subparsers),
     }
 
@@ -131,26 +130,6 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> SubmodeChecks:
     ]
 
 
-def _add_subparser_config_translate(subparsers: Subparsers) -> SubmodeChecks:
-    """
-    Subparser for mode: config translate
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.translate, "Translate configs")
-    optional = _basic_setup(parser)
-    _add_arg_input_file(optional)
-    _add_arg_input_format(optional, choices=[FORMAT.atparse])
-    _add_arg_output_file(optional)
-    _add_arg_output_format(optional, choices=[FORMAT.jinja2])
-    _add_arg_dry_run(optional)
-    checks = _add_args_quiet_and_verbose(optional)
-    return checks + [
-        partial(_check_file_vs_format, STR.infile, STR.infmt),
-        partial(_check_file_vs_format, STR.outfile, STR.outfmt),
-    ]
-
-
 def _add_subparser_config_validate(subparsers: Subparsers) -> SubmodeChecks:
     """
     Subparser for mode: config validate
@@ -174,7 +153,6 @@ def _dispatch_config(args: Args) -> bool:
     return {
         STR.compare: _dispatch_config_compare,
         STR.realize: _dispatch_config_realize,
-        STR.translate: _dispatch_config_translate,
         STR.validate: _dispatch_config_validate,
     }[args[STR.submode]](args)
 
@@ -206,21 +184,6 @@ def _dispatch_config_realize(args: Args) -> bool:
         output_format=args[STR.outfmt],
         supplemental_configs=args[STR.suppfiles],
         values_needed=args[STR.valsneeded],
-        dry_run=args[STR.dryrun],
-    )
-
-
-def _dispatch_config_translate(args: Args) -> bool:
-    """
-    Dispatch logic for config translate submode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.config.translate(
-        input_file=args[STR.infile],
-        input_format=args[STR.infmt],
-        output_file=args[STR.outfile],
-        output_format=args[STR.outfmt],
         dry_run=args[STR.dryrun],
     )
 
@@ -384,7 +347,22 @@ def _add_subparser_template(subparsers: Subparsers) -> ModeChecks:
     subparsers = _add_subparsers(parser, STR.submode)
     return {
         STR.render: _add_subparser_template_render(subparsers),
+        STR.translate: _add_subparser_template_translate(subparsers),
     }
+
+
+def _add_subparser_template_translate(subparsers: Subparsers) -> SubmodeChecks:
+    """
+    Subparser for mode: template translate
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.translate, "Translate atparse to Jinja2")
+    optional = _basic_setup(parser)
+    _add_arg_input_file(optional)
+    _add_arg_output_file(optional)
+    _add_arg_dry_run(optional)
+    return _add_args_quiet_and_verbose(optional)
 
 
 def _add_subparser_template_render(subparsers: Subparsers) -> SubmodeChecks:
@@ -412,7 +390,12 @@ def _dispatch_template(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {STR.render: _dispatch_template_render}[args[STR.submode]](args)
+    return {
+        STR.render: _dispatch_template_render,
+        STR.translate: _dispatch_template_translate,
+    }[
+        args[STR.submode]
+    ](args)
 
 
 def _dispatch_template_render(args: Args) -> bool:
@@ -428,6 +411,19 @@ def _dispatch_template_render(args: Args) -> bool:
         output_file=args[STR.outfile],
         overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
         values_needed=args[STR.valsneeded],
+        dry_run=args[STR.dryrun],
+    )
+
+
+def _dispatch_template_translate(args: Args) -> bool:
+    """
+    Dispatch logic for template translate submode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.template.translate(
+        input_file=args[STR.infile],
+        output_file=args[STR.outfile],
         dry_run=args[STR.dryrun],
     )
 

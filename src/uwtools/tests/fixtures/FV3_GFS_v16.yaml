@@ -1,54 +1,54 @@
 sphum:
   longname: specific humidity
   units: kg/kg
-  profile_type: 
+  profile_type:
     name: fixed
     surface_value: 1.e30
 liq_wat:
   longname: cloud water mixing ratio
   units: kg/kg
-  profile_type: 
+  profile_type:
     name: fixed
     surface_value: 1.e30
 rainwat:
   longname: rain mixing ratio
   units: kg/kg
-  profile_type: 
+  profile_type:
     name: fixed
     surface_value: 1.e30
 ice_wat:
   longname: cloud ice mixing ratio
   units: kg/kg
-  profile_type: 
+  profile_type:
     name: fixed
     surface_value: 1.e30
 snowwat:
   longname: snow mixing ratio
   units: kg/kg
-  profile_type: 
+  profile_type:
     name: fixed
     surface_value: 1.e30
 graupel:
   longname: graupel mixing ratio
   units: kg/kg
-  profile_type: 
+  profile_type:
     name: fixed
     surface_value: 1.e30
 o3mr:
   longname: ozone mixing ratio
   units: kg/kg
-  profile_type: 
+  profile_type:
     name: fixed
     surface_value: 1.e30
 sgs_tke:
   longname: subgrid scale turbulent kinetic energy
   units: m2/s2
-  profile_type: 
+  profile_type:
     name: fixed
     surface_value: 0.0
 cld_amt:
   longname: cloud amount
   units: 1
-  profile_type: 
+  profile_type:
     name: fixed
     surface_value: 1.e30

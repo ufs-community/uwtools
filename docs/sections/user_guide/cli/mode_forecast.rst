@@ -50,6 +50,8 @@ The ``uw`` mode for configuring and running forecasts.
      --verbose, -v
          Print all logging messages
 
+.. _cli_forecast_run_examples:
+
 Examples
 ^^^^^^^^
 
