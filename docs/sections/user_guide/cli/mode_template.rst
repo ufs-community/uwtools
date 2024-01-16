@@ -289,10 +289,3 @@ The examples that follow use atparse-formatted template file ``atparse.txt`` wit
 
      $ uw template translate --input-file atparse.txt --dry-run
      [2024-01-03T16:41:13]     INFO {{greeting}}, {{recipient}}!
-
-* If an input is read alone from ``stdin``, ``uw`` will not know how to parse its content as we must always specify the formats:
-
-  .. code-block:: text
-
-     $ cat atparse.txt | uw template translate
-     {{greeting}}, {{recipient}}!
