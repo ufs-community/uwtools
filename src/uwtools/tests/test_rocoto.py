@@ -437,6 +437,25 @@ class Test__RocotoXML:
 # Schema tests
 
 
+# PM MOVE THIS
+
+def test_schema_dependency_sh():
+    errors = validator("$defs", "dependency")
+    # Basic spec:
+    assert not errors({"sh": {"command": "foo"}})
+    # The "command" property is mandatory:
+    assert "command' is a required property" in errors({"sh": {}})
+    # A _<name> suffix is allowed:
+    assert not errors({"sh_foo": {"command": "foo"}})
+    # Optional attributes "runopt" and "shell" are supported:
+    assert not errors({"sh_foo": {"attrs": {"runopt": "-c", "shell": "/bin/bash"}, "command": "foo"}})
+    # Other attributes are not allowed:
+    assert "Additional properties are not allowed ('color' was unexpected)" in errors({"sh_foo": {"attrs": {"color": "blue"}, "command": "foo"}})
+    # The command is a compoundTimeString:
+    assert not errors({"sh": {"command": {"cyclestr": {"value": "foo-@Y@m@d@H"}}}})
+    
+# PM MOVE THIS
+
 def test_schema_compoundTimeString():
     errors = validator("$defs", "compoundTimeString")
     # Just a string is ok:
