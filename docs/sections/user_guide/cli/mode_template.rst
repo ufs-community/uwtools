@@ -5,19 +5,21 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 
 .. code-block:: text
 
-  $ uw template --help
-  usage: uw template [-h] MODE ...
-
-  Handle templates
-
-  Optional arguments:
-   -h, --help
+   $ uw template --help
+   usage: uw template [-h] MODE ...
+ 
+   Handle templates
+ 
+   Optional arguments:
+     -h, --help
          Show help and exit
-
-  Positional arguments:
-   MODE
-     render
+ 
+   Positional arguments:
+     MODE
+       render
          Render a template
+       translate
+         Translate atparse to Jinja2
 
 .. _cli_template_render_examples:
 
@@ -231,30 +233,25 @@ and YAML file ``values.yaml`` with content
 
 .. code-block:: text
 
-  $ uw config translate --help
-  usage: uw config translate [-h] [--input-file PATH] [--input-format {atparse}]
-                             [--output-file PATH] [--output-format {jinja2}] [--dry-run] [--quiet]
-                             [--verbose]
-
-  Translate configs
-
-  Optional arguments:
-    -h, --help
-        Show help and exit
-    --input-file PATH, -i PATH
-        Path to input file (defaults to stdin)
-    --input-format {atparse}
-        Input format
-    --output-file PATH, -o PATH
-        Path to output file (defaults to stdout)
-    --output-format {jinja2}
-        Output format
-    --dry-run
-        Only log info, making no changes
-    --quiet, -q
-        Print no logging messages
-    --verbose, -v
-        Print all logging messages
+   $ uw template translate --help
+   usage: uw template translate [-h] [--input-file PATH] [--output-file PATH] [--dry-run] [--quiet]
+                                [--verbose]
+   
+   Translate atparse to Jinja2
+   
+   Optional arguments:
+     -h, --help
+         Show help and exit
+     --input-file PATH, -i PATH
+         Path to input file (defaults to stdin)
+     --output-file PATH, -o PATH
+         Path to output file (defaults to stdout)
+     --dry-run
+         Only log info, making no changes
+     --quiet, -q
+         Print no logging messages
+     --verbose, -v
+         Print all logging messages
 
 Examples
 ^^^^^^^^
@@ -269,8 +266,8 @@ The examples that follow use atparse-formatted template file ``atparse.txt`` wit
 
   .. code-block:: text
 
-    $ uw config translate --input-file atparse.txt --input-format atparse --output-format jinja2
-    {{greeting}}, {{recipient}}!
+     $ uw template translate --input-file atparse.txt
+     {{greeting}}, {{recipient}}!
 
   Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
 
@@ -278,7 +275,7 @@ The examples that follow use atparse-formatted template file ``atparse.txt`` wit
 
   .. code-block:: text
 
-    $ uw config translate --input-file atparse.txt --input-format atparse --output-file jinja2.txt --output-format jinja2
+    $ uw template translate --input-file atparse.txt --output-file jinja2.txt
 
   The content of ``jinja2.txt``:
 
@@ -290,13 +287,12 @@ The examples that follow use atparse-formatted template file ``atparse.txt`` wit
 
   .. code-block:: text
 
-    $ uw config translate --input-file atparse.txt --input-format atparse --output-format jinja2 --dry-run
+    $ uw template translate --input-file atparse.txt --dry-run
     [2024-01-03T16:41:13]     INFO {{greeting}}, {{recipient}}!
-
 
 * If an input is read alone from ``stdin``, ``uw`` will not know how to parse its content as we must always specify the formats:
 
   .. code-block:: text
 
-    $ cat atparse.txt | uw config translate --input-format atparse --output-format jinja2
+    $ cat atparse.txt | uw template translate
     {{greeting}}, {{recipient}}!
