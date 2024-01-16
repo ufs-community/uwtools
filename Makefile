@@ -29,7 +29,7 @@ format:
 	black src
 	isort src
 	cd src && docformatter . || test $$? -eq 3
-	for x in $$(find src -type f -name "*.jsonschema"); do jq -S . $$x >$$x.tmp && mv $$x.tmp $$x || rm $$x.tmp; done
+	for x in $$(find src -type f -name "*.jsonschema"); do set -e && jq -S . $$x >$$x.tmp || false; mv $$x.tmp $$x; done
 
 lint:
 	recipe/run_test.sh lint
