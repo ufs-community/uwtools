@@ -130,6 +130,30 @@
           },
           "type": "object"
         },
+        "^sh(_.*)?$": {
+          "additionalProperties": false,
+          "properties": {
+            "attrs": {
+              "additionalProperties": false,
+              "properties": {
+                "runopt": {
+                  "type": "string"
+                },
+                "shell": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "command": {
+              "$ref": "#/$defs/compoundTimeString"
+            }
+          },
+          "required": [
+            "command"
+          ],
+          "type": "object"
+        },
         "^some(_.*)?$": {
           "patternProperties": {
             "^threshold(_.*)?$": {
