@@ -63,7 +63,6 @@ UW YAML Keys
 
    <log>/some/path/to/&FOO;</log>
 
-
 ``tasks:``: This section is explained in the ``Tasks Section``.
 
 Using Cycle Strings
