@@ -209,6 +209,8 @@ class _RocotoXML:
             e = SubElement(e, tag)
             for subtag, subconfig in config.items():
                 self._add_task_dependency_child(e, subconfig, subtag)
+        elif tag == STR.sh:
+            self._add_task_dependency_sh(e, config)
         elif tag in (STR.streq, STR.strneq):
             self._add_task_dependency_strequality(e, config, tag)
         elif tag == STR.datadep:
@@ -228,6 +230,14 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         """
         e = self._add_compound_time_string(e, config[STR.value], STR.datadep)
+        self._set_attrs(e, config)
+
+    def _add_task_dependency_sh(self, e: Element, config: dict) -> None:
+        """
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for the tag.
+        """
+        e = self._add_compound_time_string(e, config[STR.command], STR.sh)
         self._set_attrs(e, config)
 
     def _add_task_dependency_strequality(self, e: Element, config: dict, tag: str) -> None:
@@ -417,6 +427,7 @@ class STR:
     partition: str = "partition"
     queue: str = "queue"
     rewind: str = "rewind"
+    sh: str = "sh"
     shared: str = "shared"
     stderr: str = "stderr"
     stdout: str = "stdout"
