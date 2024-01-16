@@ -52,8 +52,6 @@ The ``uw`` mode for configuring and running forecasts.
 
 .. _cli_forecast_run_examples:
 
-.. _cli_forecast_run_examples:
-
 Examples
 ^^^^^^^^
 

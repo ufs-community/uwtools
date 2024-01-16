@@ -1,7 +1,7 @@
 CHANNELS    = $(addprefix -c ,$(shell tr '\n' ' ' <$(RECIPE_DIR)/channels)) -c local
 METAJSON    = $(RECIPE_DIR)/meta.json
 RECIPEFILES = $(addprefix $(RECIPE_DIR)/,meta.yaml)
-TARGETS     = clean-devenv devshell env format lint meta package test typecheck unittest
+TARGETS     = clean-devenv devshell docs env format lint meta package test typecheck unittest
 
 
 export RECIPE_DIR := $(shell cd ./recipe && pwd)
@@ -20,6 +20,9 @@ clean-devenv:
 
 devshell:
 	condev-shell || true
+
+docs:
+	$(MAKE) -C docs docs
 
 env: package
 	conda create -y -n $(call spec,buildnum,-) $(CHANNELS) $(call spec,build,=)
