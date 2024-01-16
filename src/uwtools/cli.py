@@ -425,9 +425,7 @@ def _dispatch_template_translate(args: Args) -> bool:
     """
     return uwtools.api.template.translate(
         input_file=args[STR.infile],
-        input_format=args[STR.infmt],
         output_file=args[STR.outfile],
-        output_format=args[STR.outfmt],
         dry_run=args[STR.dryrun],
     )
 

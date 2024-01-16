@@ -50,11 +50,6 @@ def test__add_subparser_config_realize(subparsers):
     assert subparsers.choices[STR.realize]
 
 
-def test__add_subparser_config_translate(subparsers):
-    cli._add_subparser_config_translate(subparsers)
-    assert subparsers.choices[STR.translate]
-
-
 def test__add_subparser_config_validate(subparsers):
     cli._add_subparser_config_validate(subparsers)
     assert subparsers.choices[STR.validate]
@@ -78,6 +73,11 @@ def test__add_subparser_template(subparsers):
 def test__add_subparser_template_render(subparsers):
     cli._add_subparser_template_render(subparsers)
     assert subparsers.choices[STR.render]
+
+
+def test__add_subparser_template_translate(subparsers):
+    cli._add_subparser_template_translate(subparsers)
+    assert subparsers.choices[STR.translate]
 
 
 @pytest.mark.parametrize(
@@ -250,43 +250,6 @@ def test__dispatch_config_realize_no_optional():
     )
 
 
-def test__dispatch_config_translate_atparse_to_jinja2():
-    args = {
-        STR.infile: 1,
-        STR.infmt: FORMAT.atparse,
-        STR.outfile: 3,
-        STR.outfmt: FORMAT.jinja2,
-        STR.dryrun: 5,
-    }
-    with patch.object(
-        uwtools.api.config, "_convert_atparse_to_jinja2"
-    ) as _convert_atparse_to_jinja2:
-        cli._dispatch_config_translate(args)
-    _convert_atparse_to_jinja2.assert_called_once_with(input_file=1, output_file=3, dry_run=5)
-
-
-def test__dispatch_config_translate_no_optional():
-    args = {
-        STR.dryrun: False,
-        STR.infile: None,
-        STR.infmt: FORMAT.atparse,
-        STR.outfile: None,
-        STR.outfmt: FORMAT.jinja2,
-    }
-    with patch.object(
-        uwtools.api.config, "_convert_atparse_to_jinja2"
-    ) as _convert_atparse_to_jinja2:
-        cli._dispatch_config_translate(args)
-    _convert_atparse_to_jinja2.assert_called_once_with(
-        input_file=None, output_file=None, dry_run=False
-    )
-
-
-def test__dispatch_config_translate_unsupported():
-    args = {STR.infile: 1, STR.infmt: "jpg", STR.outfile: 3, STR.outfmt: "png", STR.dryrun: 5}
-    assert cli._dispatch_config_translate(args) is False
-
-
 def test__dispatch_config_validate_config_obj():
     config = uwtools.api.config._YAMLConfig(config={})
     _dispatch_config_validate_args = {STR.schemafile: 1, STR.infile: config}
@@ -422,6 +385,34 @@ def test__dispatch_template_render_yaml():
         overrides={"foo": "88", "bar": "99"},
         values_needed=6,
         dry_run=7,
+    )
+
+
+def test__dispatch_template_translate():
+    args = {
+        STR.infile: 1,
+        STR.outfile: 2,
+        STR.dryrun: 3,
+    }
+    with patch.object(
+        uwtools.api.config, "_convert_atparse_to_jinja2"
+    ) as _convert_atparse_to_jinja2:
+        cli._dispatch_template_translate(args)
+    _convert_atparse_to_jinja2.assert_called_once_with(input_file=1, output_file=2, dry_run=3)
+
+
+def test__dispatch_template_translate_no_optional():
+    args = {
+        STR.dryrun: False,
+        STR.infile: None,
+        STR.outfile: None,
+    }
+    with patch.object(
+        uwtools.api.template, "_convert_atparse_to_jinja2"
+    ) as _convert_atparse_to_jinja2:
+        cli._dispatch_template_translate(args)
+    _convert_atparse_to_jinja2.assert_called_once_with(
+        input_file=None, output_file=None, dry_run=False
     )
 
 
