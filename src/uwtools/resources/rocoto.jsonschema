@@ -207,19 +207,22 @@
       },
       "properties": {
         "attrs": {
-          "mode": {
-            "enum": [
-              "parallel",
-              "serial"
-            ],
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "throttle": {
-            "minimum": 0,
-            "type": "integer"
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "enum": [
+                "parallel",
+                "serial"
+              ],
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "throttle": {
+              "minimum": 0,
+              "type": "integer"
+            }
           }
         },
         "var": {

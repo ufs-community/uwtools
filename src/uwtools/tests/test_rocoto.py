@@ -122,6 +122,15 @@ class Test__RocotoXML:
         return rocoto._RocotoXML(config=cfgfile)
 
     @fixture
+    def metatask_config(self):
+        return {
+            "metatask_foo": "1",
+            "attrs": {"mode": "serial", "throttle": 88},
+            "task_bar": "2",
+            "var": {"baz": "3", "qux": "4"},
+        }
+
+    @fixture
     def root(self):
         return rocoto.Element("root")
 
@@ -145,17 +154,30 @@ class Test__RocotoXML:
         assert cyclestr.get("baz") == "99"
         assert cyclestr.text == "qux"
 
-    def test__add_metatask(self, instance, root):
-        config = {"metatask_foo": "1", "task_bar": "2", "var": {"baz": "3", "qux": "4"}}
+    def test__add_metatask(self, instance, metatask_config, root):
         taskname = "test-metatask"
         orig = instance._add_metatask
         with patch.multiple(instance, _add_metatask=D, _add_task=D) as mocks:
-            orig(e=root, config=config, taskname=taskname)
+            orig(e=root, config=metatask_config, taskname=taskname)
         metatask = root[0]
         assert metatask.tag == "metatask"
+        assert metatask.get("mode") == "serial"
         assert metatask.get("name") == taskname
+        assert metatask.get("throttle") == "88"
+        assert {e.get("name"): e.text for e in metatask.xpath("var")} == {"baz": "3", "qux": "4"}
         mocks["_add_metatask"].assert_called_once_with(metatask, "1", "foo")
         mocks["_add_task"].assert_called_once_with(metatask, "2", "bar")
+
+    def test__add_metatask_explicit_name(self, instance, metatask_config, root):
+        name = "explicit-task-name"
+        metatask_config["attrs"]["name"] = name
+        taskname = "test-metatask"
+        orig = instance._add_metatask
+        with patch.multiple(instance, _add_metatask=D, _add_task=D):
+            orig(e=root, config=metatask_config, taskname=taskname)
+        metatask = root[0]
+        # Explicit name overrides default:
+        assert metatask.get("name") == name
 
     def test__add_task(self, instance, root):
         config = {
@@ -442,6 +464,22 @@ def test_schema_compoundTimeString():
     assert not errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "06:00:00"}}})
     # The "offset" value must be a valid time string:
     assert "is not valid" in errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "x"}}})
+
+
+def test_schema_metatask_attrs():
+    errors = validator("$defs", "metatask", "properties", "attrs")
+    # Valid modes are "parallel" and "serial":
+    assert not errors({"mode": "parallel"})
+    assert not errors({"mode": "serial"})
+    assert "'foo' is not one of ['parallel', 'serial']" in errors({"mode": "foo"})
+    # String name is ok, anything else (e.g. int) is not:
+    assert not errors({"name": "foo"})
+    assert "88 is not of type 'string'" in errors({"name": 88})
+    # Positive int is ok for throttle:
+    assert not errors({"throttle": 88})
+    assert not errors({"throttle": 0})
+    assert "-1 is less than the minimum of 0" in errors({"throttle": -1})
+    assert "'foo' is not of type 'integer'" in errors({"throttle": "foo"})
 
 
 def test_schema_workflow_cycledef():
