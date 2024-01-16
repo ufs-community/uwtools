@@ -14,21 +14,21 @@ Starting at the top level of the UW YAML config for Rocoto, there are several re
 
 .. code-block:: yaml
 
-  workflow:
-    attrs:
-      realtime: false
-      scheduler: slurm
-    cycledef:
-      - attrs:
-          activation_offset: -06:00
-          group: howdy
-        spec: 202209290000 202209300000 06:00:00
-    entities:
-      ACCOUNT: myaccount
-      FOO: test.log
-    log: /some/path/to/&FOO;
-    tasks:
-      ...
+   workflow:
+     attrs:
+       realtime: false
+       scheduler: slurm
+     cycledef:
+       - attrs:
+           activation_offset: -06:00
+           group: howdy
+         spec: 202209290000 202209300000 06:00:00
+     entities:
+       ACCOUNT: myaccount
+       FOO: test.log
+     log: /some/path/to/&FOO;
+     tasks:
+       ...
 
 UW YAML Keys
 ^^^^^^^^^^^^
@@ -37,31 +37,31 @@ UW YAML Keys
 
 .. code-block:: xml
 
-  <workflow realtime="false" scheduler="slurm">
-  ...
-  </workflow>
+   <workflow realtime="false" scheduler="slurm">
+   ...
+   </workflow>
 
 ``cycledef:``: This section is a list of grouped cycle definitions for a workflow. Any number of ``cycledef:`` keys is supported. Similar to ``attrs:`` for the ``workflow:`` level, this section has an ``attrs:`` key that follows the exact requirements of those in the Rocoto XML language. The ``spec:`` key is required and supports either the "start, stop, step" syntax, or the "crontab-like" method supported by Rocoto. The example above translates to a single ``<cycledef>`` tag:
 
 .. code-block:: xml
 
-  <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
+   <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
 
 ``entities:``: This section defines key/value pairs -- each rendered as ``<!ENTITY key "value">`` -- to translate to named entities (variables) in XML. The example above would yield:
 
 .. code-block:: xml
 
-  <?xml version='1.0' encoding='utf-8'?>
-  <!DOCTYPE workflow [
-    <!ENTITY ACCOUNT "myaccount">
-    <!ENTITY FOO "test.log">
-  ]>
+   <?xml version='1.0' encoding='utf-8'?>
+   <!DOCTYPE workflow [
+     <!ENTITY ACCOUNT "myaccount">
+     <!ENTITY FOO "test.log">
+   ]>
 
 ``log:``: This is a path-like string that defines where to put the Rocoto logs. It corresponds to the ``<log>`` tag. For example:
 
 .. code-block:: xml
 
-  <log>/some/path/to/&FOO;</log>
+   <log>/some/path/to/&FOO;</log>
 
 
 ``tasks:``: This section is explained in the ``Tasks Section``.
@@ -73,20 +73,20 @@ The ``<cyclestr>`` tag in Rocoto transforms specific flags to represent componen
 
 .. code-block:: yaml
 
-  entities:
-    FOO: test@Y-@m-@dT@X.log
-  log:
-    cyclestr:
-      value: /some/path/to/&FOO;
+   entities:
+     FOO: test@Y-@m-@dT@X.log
+   log:
+     cyclestr:
+       value: /some/path/to/&FOO;
 
 In the example, the resulting log would appear in the XML file as:
 
 .. code-block:: xml
 
-  <log>
-    <cyclestr>/some/path/to/&FOO;</cyclestr>
-  </log>
-
+   <log>
+     <cyclestr>/some/path/to/&FOO;</cyclestr>
+   </log>
+ 
 The ``attrs:`` block is optional within the ``cyclestr:`` block, and can be used to specify the cycle offset.
 
 Tasks Section
@@ -101,25 +101,25 @@ Let's dissect the following task example:
 
 .. code-block:: yaml
 
-  task_hello:
-    attrs:
-      cycledefs: howdy
-    account: "&ACCOUNT;"
-    command: "echo hello $person"
-    nodes: 1:ppn=1
-    walltime: 00:01:00
-    envars:
-      person: siri
-    dependencies:
+   task_hello:
+     attrs:
+       cycledefs: howdy
+     account: "&ACCOUNT;"
+     command: "echo hello $person"
+     nodes: 1:ppn=1
+     walltime: 00:01:00
+     envars:
+       person: siri
+     dependencies:
 
 Each task is named by its UW YAML key. Blocks under ``tasks:`` prefixed with ``task_`` will be named with what follows the prefix. In the example above the task will be named ``hello`` and will appear in the XML like this:
 
 .. code-block:: xml
 
-  <task name="hello" cycledefs="howdy">
-    <jobname>hello</jobname>
-    ...
-  </task>
+   <task name="hello" cycledefs="howdy">
+     <jobname>hello</jobname>
+     ...
+   </task>
 
 where the ``attrs:`` section may set any of the Rocoto-allowed XML attributes. The ``<jobname>`` tag will, by default, use the same name, but may be overridden with an explicit ``jobname:`` key under the task.
 
@@ -131,10 +131,10 @@ The name of the task can be any string accepted by Rocoto as a task name (includ
 
 .. code-block:: xml
 
-  <envar>
-    <name>person</name>
-    <value>siri</value>
-  </envar>
+   <envar>
+     <name>person</name>
+     <value>siri</value>
+   </envar>
 
 ``dependencies:``: [Optional] Any number of dependencies accepted by Rocoto. This section is described in more detail below.
 
@@ -154,29 +154,29 @@ Each of the dependencies that require attributes (the ``key="value"`` parts insi
 
 .. code-block:: yaml
 
-  task_hello:
-    command: "hello world"
-    ...
-  task_goodbye:
-    command: "goodbye"
-    dependencies:
-       taskdep:
-         attrs:
-           task: hello
+   task_hello:
+     command: "hello world"
+     ...
+   task_goodbye:
+     command: "goodbye"
+     dependencies:
+        taskdep:
+          attrs:
+            task: hello
 
 Here, the ``taskdep:`` dependency says that the ``goodbye`` task cannot run until the ``hello`` task is complete. The resulting Rocoto XML looks like this:
 
 .. code-block:: xml
 
-  <task name="hello">
-    ...
-  </task>
-  <task name="goodbye"/>
-    ...
-    <dependency>
-      <taskdep task="hello"/>
-    </dependency>
-  </task>
+   <task name="hello">
+     ...
+   </task>
+   <task name="goodbye"/>
+     ...
+     <dependency>
+       <taskdep task="hello"/>
+     </dependency>
+   </task>
 
 Repeated Dependencies and Boolean Operators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -185,30 +185,29 @@ Because UW YAML represents a hash table (a dictionary in Python), each key at th
 
 .. code-block:: yaml
 
-  task_hello:
-    command: "hello world"
-    ...
-    dependencies:
-      and:
-        datadep_foo:
-          value: "foo.txt"
-        datadep_bar:
-          value: "bar.txt"
-
+   task_hello:
+     command: "hello world"
+     ...
+     dependencies:
+       and:
+         datadep_foo:
+           value: "foo.txt"
+         datadep_bar:
+           value: "bar.txt"
 
 This would result in Rocoto XML in this form:
 
 .. code-block:: xml
 
-  <task name="hello"/>
-    ...
-    <dependency>
-      <and>
-        <datadep>"foo.txt"</datadep>
-        <datadep>"bar.txt"</datadep>
-      </and>
-    </dependency>
-  </task>
+   <task name="hello"/>
+     ...
+     <dependency>
+       <and>
+         <datadep>"foo.txt"</datadep>
+         <datadep>"bar.txt"</datadep>
+       </and>
+     </dependency>
+   </task>
 
 The ``datadep_foo:`` and ``datadep_bar:`` UW YAML keys were named arbitrarily after the first ``_``, but could have been even more descriptive such as ``datadep_foo_file:`` or ``datadep_foo_text:``. The important part is that the YAML key prefix matches the Rocoto XML tag name.
 
@@ -223,30 +222,30 @@ A Rocoto ``metatask`` expands into one or more tasks via substitution of values,
 
 .. code-block:: text
 
-  metatask_greetings:
-    var:
-      greeting: hello hola bonjour
-      person: Jane John Jenn
-    task_#greeting#:
-      command: "echo #greeting# #world#"
-      ...
+   metatask_greetings:
+     var:
+       greeting: hello hola bonjour
+       person: Jane John Jenn
+     task_#greeting#:
+       command: "echo #greeting# #world#"
+       ...
 
 This translates to Rocoto XML (whitespace added for readability):
 
 .. code-block:: xml
 
-  <metatask name=greetings/>
-
-    <var name="greeting">hello hola bonjour</var>
-    <var name="person">Jane John Jenn</var>
-
-    <task name='#greeting#'>
-
-      <command>echo #greeting# #person#<command>
-      ...
-
-    </task>
-  </metatask>
+   <metatask name=greetings/>
+ 
+     <var name="greeting">hello hola bonjour</var>
+     <var name="person">Jane John Jenn</var>
+ 
+     <task name='#greeting#'>
+ 
+       <command>echo #greeting# #person#<command>
+       ...
+ 
+     </task>
+   </metatask>
 
 UW YAML Definitions
 -------------------
@@ -258,32 +257,32 @@ The ``cyclestr:`` Key
 
 .. code-block:: yaml
 
-  cyclestr:
-    value: "/some/path/to/workflow_@Y@m@d@H.log" # required
-    attrs:
-      offset: "1:00:00"
+   cyclestr:
+     value: "/some/path/to/workflow_@Y@m@d@H.log" # required
+     attrs:
+       offset: "1:00:00"
 
 .. code-block:: xml
 
-  <cyclestr offset="1:00:00">"/some/path/to/workflow_@Y@m@d@H.log"</cyclestr>
+   <cyclestr offset="1:00:00">"/some/path/to/workflow_@Y@m@d@H.log"</cyclestr>
 
 The ``workflow:`` Key
 ^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: yaml
 
-  workflow:
-    attrs:
-      cyclethrottle: 2
-      realtime: true # required
-      scheduler: slurm # required
-      taskthrottle: 20
+   workflow:
+     attrs:
+       cyclethrottle: 2
+       realtime: true # required
+       scheduler: slurm # required
+       taskthrottle: 20
 
 .. code-block:: xml
 
-  <workflow cyclethrottle="2" realtime="true" scheduler="slurm" taskthrottle="20">
-    ...
-  </workflow>
+   <workflow cyclethrottle="2" realtime="true" scheduler="slurm" taskthrottle="20">
+     ...
+   </workflow>
 
 Defining Cycles
 ---------------
@@ -292,19 +291,19 @@ At least one ``cycledef:`` is required.
 
 .. code-block:: yaml
 
-  cycledef:
-    - attrs:
-        group: synop
-        activation_offset: "-1:00:00"
-      spec: 202301011200 202301021200 06:00:00 # Also accepts crontab-like string
-    - attrs:
-        group: hourly
-      spec: 202301011200 202301021200 01:00:00 # Also accepts crontab-like string
+   cycledef:
+     - attrs:
+         group: synop
+         activation_offset: "-1:00:00"
+       spec: 202301011200 202301021200 06:00:00 # Also accepts crontab-like string
+     - attrs:
+         group: hourly
+       spec: 202301011200 202301021200 01:00:00 # Also accepts crontab-like string
 
 .. code-block:: xml
 
-  <cycledef group="synop" activation_offset="-1:00:00">202301011200 202301021200 06:00:00</cycledef>
-  <cycledef group="hourly">202301011200 202301021200 01:00:00</cycledef>
+   <cycledef group="synop" activation_offset="-1:00:00">202301011200 202301021200 06:00:00</cycledef>
+   <cycledef group="hourly">202301011200 202301021200 01:00:00</cycledef>
 
 Defining Entities
 -----------------
@@ -313,19 +312,19 @@ Any number of entities may optionally be specified.
 
 .. code-block:: yaml
 
-  entities:
-    FOO: 12
-    BAR: baz
+   entities:
+     FOO: 12
+     BAR: baz
 
 .. code-block:: xml
 
-  <?xml version="1.0"?>
-  <!DOCTYPE workflow
-  [
-      <!ENTITY FOO "12">
-      <!ENTITY BAR "baz">
-  ]>
-
+   <?xml version="1.0"?>
+   <!DOCTYPE workflow
+   [
+       <!ENTITY FOO "12">
+       <!ENTITY BAR "baz">
+   ]>
+ 
 Defining the Workflow Log
 -------------------------
 
@@ -333,23 +332,23 @@ Defining the Workflow Log
 
 .. code-block:: yaml
 
-  log: /some/path/to/workflow.log
+   log: /some/path/to/workflow.log
 
 .. code-block:: xml
 
-  <log>/some/path/to/workflow.log</log>
+   <log>/some/path/to/workflow.log</log>
 
 A cycle string may be specified here, instead.
 
 .. code-block:: yaml
 
-  log:
-    cyclestr:
-      value: /some/path/to/workflow_@Y@m@d.log
+   log:
+     cyclestr:
+       value: /some/path/to/workflow_@Y@m@d.log
 
 .. code-block:: xml
 
-  <log><cyclestr>/some/path/to/workflow_@Y@m@d.log</cyclestr></log>
+   <log><cyclestr>/some/path/to/workflow_@Y@m@d.log</cyclestr></log>
 
 Defining the Set of Tasks
 -------------------------
@@ -358,9 +357,9 @@ At least one task or metatask must be defined in the ``tasks:`` section.
 
 .. code-block:: yaml
 
-  tasks:
-    task_*:
-    metatask_*:
+   tasks:
+     task_*:
+     metatask_*:
 
 The ``task_*:`` Key
 ^^^^^^^^^^^^^^^^^^^
@@ -369,51 +368,51 @@ Multiple ``task_*:`` YAML entries may exist under the ``tasks:`` and/or ``metata
 
 .. code-block:: yaml
 
-  task_foo:
-    attrs:
-      cycledefs: hourly
-      maxtries: 2
-      throttle: 10
-      final: false
-    command: echo hello world
-    walltime: 00:10:00
-    cores: 1
+   task_foo:
+     attrs:
+       cycledefs: hourly
+       maxtries: 2
+       throttle: 10
+       final: false
+     command: echo hello world
+     walltime: 00:10:00
+     cores: 1
 
 .. code-block:: xml
 
-  <task name="foo" cycledefs="hourly" maxtries="2" throttle="10" final="False">
-    ...
-  </task>
+   <task name="foo" cycledefs="hourly" maxtries="2" throttle="10" final="False">
+     ...
+   </task>
 
 The following keys take strings values. Please see the :rocoto:`Rocoto documentation<>` for specifics on how to set them.
 
 .. code-block:: yaml
 
-  account:
-  exclusive:
-  jobname:
-  join:
-  memory:
-  native:
-  nodes:
-  partition:
-  queue:
-  rewind:
-  shared:
-  stderr:
-  stdout:
+   account:
+   exclusive:
+   jobname:
+   join:
+   memory:
+   native:
+   nodes:
+   partition:
+   queue:
+   rewind:
+   shared:
+   stderr:
+   stdout:
 
 The following UW YAML keys take integer, string, or ``cyclestr:`` values.
 
 .. code-block:: yaml
 
-  command:
-  deadline:
-  jobname:
-  join:
-  native:
-  stderr:
-  stdout:
+   command:
+   deadline:
+   jobname:
+   join:
+   native:
+   stderr:
+   stdout:
 
 The ``dependency:`` Key
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -427,31 +426,31 @@ Boolean operator keys operate on **one or more additional dependency entries** f
 
 .. code-block:: yaml
 
-  and:
-  or:
-  not:
-  nand:
-  nor:
-  xor:
-  some:
+   and:
+   or:
+   not:
+   nand:
+   nor:
+   xor:
+   some:
 
 .. code-block:: yaml
 
-  or:
-    datadep:
-      value: /some/path/to/foo.txt
-    taskdep:
-      attrs:
-        task: foo
+   or:
+     datadep:
+       value: /some/path/to/foo.txt
+     taskdep:
+       attrs:
+         task: foo
 
 .. code-block:: xml
 
-  <dependency>
-    <or>
-      <datadep>/some/path/to/foo.txt</datadep>
-      <taskdep task="foo"/>
-    </or>
-  </dependency>
+   <dependency>
+     <or>
+       <datadep>/some/path/to/foo.txt</datadep>
+       <taskdep task="foo"/>
+     </or>
+   </dependency>
 
 Comparison Depenedencies
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -460,18 +459,18 @@ The ``streq:`` and ``strneq:`` keys compare the values in their ``left:`` and ``
 
 .. code-block:: yaml
 
-  streq:
-    left: &FOO;
-    right: bar
+   streq:
+     left: &FOO;
+     right: bar
 
 .. code-block:: xml
 
-  <dependency>
-    <streq>
-      <left>&FOO;</left>
-      <right>bar</right>
-    </streq>
-  </dependency>
+   <dependency>
+     <streq>
+       <left>&FOO;</left>
+       <right>bar</right>
+     </streq>
+   </dependency>
 
 Dependency Keys
 ^^^^^^^^^^^^^^^
@@ -482,34 +481,34 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
 
   .. code-block:: yaml
 
-    taskdep:
-      attrs:
-        cycle_offset: "-06:00:00"
-        state: succeeded
-        task: hello # required
+     taskdep:
+       attrs:
+         cycle_offset: "-06:00:00"
+         state: succeeded
+         task: hello # required
 
   .. code-block:: xml
 
-    <dependency>
-      <taskdep task="hello" state="succeeded" cycle_offset="-06:00:00"/>
-    </dependency>
+     <dependency>
+       <taskdep task="hello" state="succeeded" cycle_offset="-06:00:00"/>
+     </dependency>
 
 * The ``metataskdep:`` key
 
   .. code-block:: yaml
 
-    metataskdep:
-      attrs:
-        cycle_offset: "-06:00:00"
-        state: succeeded
-        metatask: greetings # required
-        threshold: 1
+     metataskdep:
+       attrs:
+         cycle_offset: "-06:00:00"
+         state: succeeded
+         metatask: greetings # required
+         threshold: 1
 
   .. code-block:: xml
 
-    <dependency>
-      <metataskdep metatask="greetings" state="succeeded" cycle_offset="-06:00:00" threshold="1"/>
-    </dependency>
+     <dependency>
+       <metataskdep metatask="greetings" state="succeeded" cycle_offset="-06:00:00" threshold="1"/>
+     </dependency>
 
 * The ``datadep:`` key
 
@@ -517,17 +516,17 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
 
   .. code-block:: yaml
 
-    datadep:
-      attrs:
-        age: 120
-        minsize: 1024b
-      value: /path/to/a/file.txt # required
+     datadep:
+       attrs:
+         age: 120
+         minsize: 1024b
+       value: /path/to/a/file.txt # required
 
   .. code-block:: xml
 
-    <dependency>
-      <datadep age="120" minsize="1024b">/path/to/a/file.txt</datadep>
-    </dependency>
+     <dependency>
+       <datadep age="120" minsize="1024b">/path/to/a/file.txt</datadep>
+     </dependency>
 
 * The ``timedep:`` key
 
@@ -535,15 +534,15 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
 
   .. code-block:: text
 
-    timedep:
-      cyclestr:
-        value: @Y@m@d@H@M@S
+     timedep:
+       cyclestr:
+         value: @Y@m@d@H@M@S
 
   .. code-block:: xml
 
-    <dependency>
-      <timedep><cyclestr>@Y@m@d@H@M@S</cyclestr></timedep>
-    </dependency>
+     <dependency>
+       <timedep><cyclestr>@Y@m@d@H@M@S</cyclestr></timedep>
+     </dependency>
 
 The ``metatask:`` Key
 ---------------------
@@ -557,55 +556,55 @@ Here is an example of specifying a nested metatask.
 
 .. code-block:: text
 
-  metatask_member:
-    var:
-      member: 001 002 003
-    metatask_graphics_#member#_field:
-      var:
-        field: temp u v
-      task_graphics_mem#member#_#field#:
-        command: "echo $member $field"
-        envars:
-          member: #member#
-          field: #field#
-        ...
+   metatask_member:
+     var:
+       member: 001 002 003
+     metatask_graphics_#member#_field:
+       var:
+         field: temp u v
+       task_graphics_mem#member#_#field#:
+         command: "echo $member $field"
+         envars:
+           member: #member#
+           field: #field#
+         ...
 
 This will run tasks named:
 
 .. code-block:: text
 
-  graphics_mem001_temp
-  graphics_mem002_temp
-  graphics_mem003_temp
-  graphics_mem001_u
-  graphics_mem002_u
-  graphics_mem003_u
-  graphics_mem001_v
-  graphics_mem002_v
-  graphics_mem003_v
+   graphics_mem001_temp
+   graphics_mem002_temp
+   graphics_mem003_temp
+   graphics_mem001_u
+   graphics_mem002_u
+   graphics_mem003_u
+   graphics_mem001_v
+   graphics_mem002_v
+   graphics_mem003_v
 
 The XML will look like this
 
 .. code-block:: xml
 
-  <metatask name="member">
-    <var name="member">001 002 003</var>
-
-    <metatask name="graphics_#member#_field">
-      <var name="field">001 002 003</var>
-
-      <task name="graphics_mem#member#_#field#">
-        <command>"echo $member $field"</command>
-        <envar>
-          <name>member</name>
-          <value>mem#member#</value>
-        </envar>
-        <envar>
-          <name>field</name>
-          <value>#field#</value>
-        </envar>
-        ...
-      </task>
-
-    </metatask>
-  </metatask>
+   <metatask name="member">
+     <var name="member">001 002 003</var>
+ 
+     <metatask name="graphics_#member#_field">
+       <var name="field">001 002 003</var>
+ 
+       <task name="graphics_mem#member#_#field#">
+         <command>"echo $member $field"</command>
+         <envar>
+           <name>member</name>
+           <value>mem#member#</value>
+         </envar>
+         <envar>
+           <name>field</name>
+           <value>#field#</value>
+         </envar>
+         ...
+       </task>
+ 
+     </metatask>
+   </metatask>
