@@ -547,8 +547,7 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
 The ``metatask:`` Key
 ---------------------
 
-One or more metatasks may be included under the ``tasks:`` key, or nested under other
-``metatask_*:`` keys.
+One or more metatasks may be included under the ``tasks:`` key, or nested under other ``metatask_*:`` keys.
 
 Here is an example of specifying a nested metatask.
 
