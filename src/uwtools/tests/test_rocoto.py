@@ -251,6 +251,17 @@ class Test__RocotoXML:
         assert e.tag == "timedep"
         assert e.text == str(value)
 
+    def test__add_task_dependency_sh(self, instance, root):
+        config = {"sh": {"attrs": {"runopt": "-c", "shell": "/bin/bash"}, "command": "ls"}}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        sh = dependency[0]
+        assert sh.tag == "sh"
+        assert sh.get("runopt") == "-c"
+        assert sh.get("shell") == "/bin/bash"
+        assert sh.text == "ls"
+
     def test__add_task_dependency_streq(self, instance, root):
         config = {"streq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}
         instance._add_task_dependency(e=root, config=config)
