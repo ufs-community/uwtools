@@ -124,37 +124,37 @@ class _RocotoXML:
             e.text = str(config)
         return e
 
-    def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
+    def _add_metatask(self, e: Element, config: dict, name_attr: str) -> None:
         """
         Add a <metatask> element to the <workflow>.
 
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
-        :param taskname: The name of the metatask being defined.
+        :param name_attr: XML name attribute for element.
         """
-        e = SubElement(e, STR.metatask, name=taskname)
+        e = SubElement(e, STR.metatask, name=name_attr)
         self._set_attrs(e, config)
         for key, val in config.items():
-            tag, taskname = self._tag_name(key)
+            tag, name = self._tag_name(key)
             if tag == STR.metatask:
-                self._add_metatask(e, val, taskname)
+                self._add_metatask(e, val, name)
             elif tag == STR.task:
-                self._add_task(e, val, taskname)
+                self._add_task(e, val, name)
             elif tag == STR.var:
-                for name, value in val.items():
-                    SubElement(e, STR.var, name=name).text = value
+                for varname, value in val.items():
+                    SubElement(e, STR.var, name=varname).text = value
 
-    def _add_task(self, e: Element, config: dict, taskname: str) -> None:
+    def _add_task(self, e: Element, config: dict, name_attr: str) -> None:
         """
         Add a <task> element to the <workflow>.
 
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
-        :param taskname: The name of the task being defined.
+        :param name_attr: XML name attribute for element.
         """
-        e = SubElement(e, STR.task, name=taskname)
+        e = SubElement(e, STR.task, name=name_attr)
         self._set_attrs(e, config)
-        self._set_and_render_jobname(config, taskname)
+        self._set_and_render_jobname(config, name_attr)
         for tag in (
             STR.account,
             STR.cores,
@@ -205,13 +205,15 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         :param tag: Name of new element to add.
         """
-        tag, _ = self._tag_name(tag)
+        tag, name = self._tag_name(tag)
         if tag in (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor):
             e = SubElement(e, tag)
             for subtag, subconfig in config.items():
                 self._add_task_dependency_child(e, subconfig, subtag)
         elif tag in (STR.streq, STR.strneq):
             self._add_task_dependency_strequality(e, config, tag)
+        elif tag == STR.sh:
+            self._add_task_dependency_sh(e, config, name)
         elif tag == STR.datadep:
             self._add_task_dependency_datadep(e, config)
         elif tag == STR.taskdep:
@@ -229,6 +231,18 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         """
         e = self._add_compound_time_string(e, config[STR.value], STR.datadep)
+        self._set_attrs(e, config)
+
+    def _add_task_dependency_sh(
+        self, e: Element, config: dict, name_attr: Optional[str] = None
+    ) -> None:
+        """
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for the tag.
+        :param name_attr: XML name attribute for element.
+        """
+        e = self._add_compound_time_string(e, config[STR.command], STR.sh)
+        config[STR.attrs][STR.name] = name_attr
         self._set_attrs(e, config)
 
     def _add_task_dependency_strequality(self, e: Element, config: dict, tag: str) -> None:
@@ -372,9 +386,9 @@ class _RocotoXML:
         """
         Return the tag and metadata extracted from a metadata-bearing key.
 
-        :param key: A string of the form "tag_metadata" (or simply STR.tag).
+        :param key: A string of the form "<tag>_<metadata>" (or simply STR.<tag>).
         """
-        # For example, key "task_foo"bar" will be split into tag "task" and name "foo_bar".
+        # For example, key "task_foo_bar" will be split into tag "task" and name "foo_bar".
         parts = key.split("_")
         tag = parts[0]
         name = "_".join(parts[1:]) if parts[1:] else ""
@@ -418,6 +432,7 @@ class STR:
     partition: str = "partition"
     queue: str = "queue"
     rewind: str = "rewind"
+    sh: str = "sh"
     shared: str = "shared"
     stderr: str = "stderr"
     stdout: str = "stdout"

@@ -85,7 +85,7 @@ In the example, the resulting log would appear in the XML file as:
    <log>
      <cyclestr>/some/path/to/&FOO;</cyclestr>
    </log>
- 
+
 The ``attrs:`` block is optional within the ``cyclestr:`` block, and can be used to specify the cycle offset.
 
 Tasks Section
@@ -234,15 +234,15 @@ This translates to Rocoto XML (whitespace added for readability):
 .. code-block:: xml
 
    <metatask name=greetings/>
- 
+
      <var name="greeting">hello hola bonjour</var>
      <var name="person">Jane John Jenn</var>
- 
+
      <task name='#greeting#'>
- 
+
        <command>echo #greeting# #person#<command>
        ...
- 
+
      </task>
    </metatask>
 
@@ -323,7 +323,7 @@ Any number of entities may optionally be specified.
        <!ENTITY FOO "12">
        <!ENTITY BAR "baz">
    ]>
- 
+
 Defining the Workflow Log
 -------------------------
 
@@ -474,9 +474,7 @@ The ``streq:`` and ``strneq:`` keys compare the values in their ``left:`` and ``
 Dependency Keys
 ^^^^^^^^^^^^^^^
 
-These keys define dependencies on other tasks, metatasks, data, or wall time.
-
-* The ``taskdep:`` key
+* The ``taskdep:`` key defines a dependency on another task:
 
   .. code-block:: yaml
 
@@ -492,7 +490,7 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
        <taskdep task="hello" state="succeeded" cycle_offset="-06:00:00"/>
      </dependency>
 
-* The ``metataskdep:`` key
+* The ``metataskdep:`` key defines a dependency on a metatask:
 
   .. code-block:: yaml
 
@@ -509,9 +507,7 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
        <metataskdep metatask="greetings" state="succeeded" cycle_offset="-06:00:00" threshold="1"/>
      </dependency>
 
-* The ``datadep:`` key
-
-  The ``value:`` key for ``datadep:`` accepts a ``cyclestr:`` block.
+* The ``datadep:`` key defines a dependency on on-disk data:
 
   .. code-block:: yaml
 
@@ -527,9 +523,9 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
        <datadep age="120" minsize="1024b">/path/to/a/file.txt</datadep>
      </dependency>
 
-* The ``timedep:`` key
+   * The ``value:`` key accepts a ``cyclestr:`` block.
 
-  The ``timedep:`` key will almost certainly want a ``cyclestr:`` block.
+* The ``timedep:`` key defines a dependency on a real-world time:
 
   .. code-block:: text
 
@@ -542,6 +538,25 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
      <dependency>
        <timedep><cyclestr>@Y@m@d@H@M@S</cyclestr></timedep>
      </dependency>
+
+  * The ``timedep:`` key will almost certainly want a ``cyclestr:`` block.
+
+* The ``sh:`` key defines a dependency on the successful execution of a shell command:
+
+  .. code-block:: yaml
+
+     sh:
+       command: test $(find /some/dir -type f -name "*.grib2" | wc -l) -eq 24
+
+  .. code-block:: xml
+
+     <dependency>
+       <sh>test $(find /some/dir -type f -name "*.grib2" | wc -l) -eq 24</sh>
+     </dependency>
+
+  * The ``command:`` key accepts a ``cyclestr:`` block.
+  * The ``sh:`` key may be suffixed with an underscore and a name to provide a unique name for the dependency, e.g. ``sh_count_grib:`` would translate to XML tag ``<sh name="count_grib">``.
+  * The optional attributes ``runopt`` and ``shell`` are accepted under an ``attrs:`` key. See the :rocoto:`Rocoto documentation<>` for details.
 
 The ``metatask:`` Key
 ---------------------
@@ -587,10 +602,10 @@ The XML will look like this
 
    <metatask name="member">
      <var name="member">001 002 003</var>
- 
+
      <metatask name="graphics_#member#_field">
        <var name="field">001 002 003</var>
- 
+
        <task name="graphics_mem#member#_#field#">
          <command>"echo $member $field"</command>
          <envar>
@@ -603,6 +618,6 @@ The XML will look like this
          </envar>
          ...
        </task>
- 
+
      </metatask>
    </metatask>
