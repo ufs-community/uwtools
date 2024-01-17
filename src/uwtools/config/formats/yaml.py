@@ -1,5 +1,5 @@
 from types import SimpleNamespace as ns
-from typing import Optional
+from typing import Dict, Optional, Union
 
 import yaml
 
@@ -89,6 +89,8 @@ class YAMLConfig(Config):
         """
         loader = yaml.SafeLoader
         loader.add_constructor(INCLUDE_TAG, self._yaml_include)
+        for tag in TaggedScalar.TAGS:
+            loader.add_constructor(tag, TaggedScalar)
         return loader
 
     # Public methods
@@ -126,3 +128,22 @@ class YAMLConfig(Config):
         Returns the config's format name.
         """
         return FORMAT.yaml
+
+
+class TaggedScalar:
+    """
+    PM WRITEME.
+    """
+
+    TAGS = ("!bool", "!float", "!int", "!str")
+
+    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
+        self.tag: str = node.tag
+        self.value: str = node.value
+
+    def reify(self) -> Union[bool, float, int, str]:
+        """
+        PM WRITEME.
+        """
+        converters: Dict[str, type] = dict(zip(self.TAGS, [bool, float, int, str]))
+        return converters[self.tag](self.value)

@@ -125,12 +125,7 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
     # Note that, for rendering performed on dict values, replacement values will be taken from, in
     # priority order, 1. The full context dict, 2. Local sibling values in the dict.
 
-    log.debug("Rendering: %s", val)
-    if isinstance(val, dict):
-        return {k: dereference(v, context, local=val) for k, v in val.items()}
-    if isinstance(val, list):
-        return [dereference(v, context) for v in val]
-    if isinstance(val, str):
+    def _render(val: str) -> str:
         try:
             return (
                 _register_filters(Environment(undefined=StrictUndefined))
@@ -139,8 +134,20 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
             log.debug("Rendering ERROR: %s", e)
-    log.debug("Rendered: %s", val)
-    return val
+        return val
+
+    rendered: _YAMLVal
+    log.debug("Rendering: %s", val)
+    if isinstance(val, dict):
+        return {k: dereference(v, context, local=val) for k, v in val.items()}
+    if isinstance(val, list):
+        return [dereference(v, context) for v in val]
+    if isinstance(val, str):
+        rendered = _render(val)
+    else:
+        rendered = val
+    log.debug("Rendered: %s", rendered)
+    return rendered
 
 
 def render(
