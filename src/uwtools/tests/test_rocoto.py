@@ -438,7 +438,22 @@ class Test__RocotoXML:
 # Schema tests
 
 
-# PM MOVE THIS
+def test_schema_compoundTimeString():
+    errors = validator("$defs", "compoundTimeString")
+    # Just a string is ok:
+    assert not errors("foo")
+    # An int value is ok:
+    assert not errors(20240103120000)
+    # A simple cycle string is ok:
+    assert not errors({"cyclestr": {"value": "@Y@m@d@H"}})
+    # The "value" entry is required:
+    assert "is not valid" in errors({"cyclestr": {}})
+    # Unknown properties are not allowed:
+    assert "is not valid" in errors({"cyclestr": {"foo": "bar"}})
+    # An "offset" attribute may be provided:
+    assert not errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "06:00:00"}}})
+    # The "offset" value must be a valid time string:
+    assert "is not valid" in errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "x"}}})
 
 
 def test_schema_dependency_sh():
@@ -459,27 +474,6 @@ def test_schema_dependency_sh():
     )
     # The command is a compoundTimeString:
     assert not errors({"sh": {"command": {"cyclestr": {"value": "foo-@Y@m@d@H"}}}})
-
-
-# PM MOVE THIS
-
-
-def test_schema_compoundTimeString():
-    errors = validator("$defs", "compoundTimeString")
-    # Just a string is ok:
-    assert not errors("foo")
-    # An int value is ok:
-    assert not errors(20240103120000)
-    # A simple cycle string is ok:
-    assert not errors({"cyclestr": {"value": "@Y@m@d@H"}})
-    # The "value" entry is required:
-    assert "is not valid" in errors({"cyclestr": {}})
-    # Unknown properties are not allowed:
-    assert "is not valid" in errors({"cyclestr": {"foo": "bar"}})
-    # An "offset" attribute may be provided:
-    assert not errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "06:00:00"}}})
-    # The "offset" value must be a valid time string:
-    assert "is not valid" in errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "x"}}})
 
 
 def test_schema_workflow_cycledef():
