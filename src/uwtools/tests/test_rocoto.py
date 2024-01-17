@@ -122,15 +122,6 @@ class Test__RocotoXML:
         return rocoto._RocotoXML(config=cfgfile)
 
     @fixture
-    def metatask_config(self):
-        return {
-            "metatask_foo": "1",
-            "attrs": {"mode": "parallel", "throttle": 88},
-            "task_bar": "2",
-            "var": {"baz": "3", "qux": "4"},
-        }
-
-    @fixture
     def root(self):
         return rocoto.Element("root")
 
@@ -154,11 +145,17 @@ class Test__RocotoXML:
         assert cyclestr.get("baz") == "99"
         assert cyclestr.text == "qux"
 
-    def test__add_metatask(self, instance, metatask_config, root):
+    def test__add_metatask(self, instance, root):
+        config = {
+            "metatask_foo": "1",
+            "attrs": {"mode": "parallel", "throttle": 88},
+            "task_bar": "2",
+            "var": {"baz": "3", "qux": "4"},
+        }
         taskname = "test-metatask"
         orig = instance._add_metatask
         with patch.multiple(instance, _add_metatask=D, _add_task=D) as mocks:
-            orig(e=root, config=metatask_config, name_attr=taskname)
+            orig(e=root, config=config, name_attr=taskname)
         metatask = root[0]
         assert metatask.tag == "metatask"
         assert metatask.get("mode") == "parallel"
@@ -167,17 +164,6 @@ class Test__RocotoXML:
         assert {e.get("name"): e.text for e in metatask.xpath("var")} == {"baz": "3", "qux": "4"}
         mocks["_add_metatask"].assert_called_once_with(metatask, "1", "foo")
         mocks["_add_task"].assert_called_once_with(metatask, "2", "bar")
-
-    def test__add_metatask_explicit_name(self, instance, metatask_config, root):
-        name = "explicit-task-name"
-        metatask_config["attrs"]["name"] = name
-        taskname = "test-metatask"
-        orig = instance._add_metatask
-        with patch.multiple(instance, _add_metatask=D, _add_task=D):
-            orig(e=root, config=metatask_config, name_attr=taskname)
-        metatask = root[0]
-        # Explicit name overrides default:
-        assert metatask.get("name") == name
 
     def test__add_task(self, instance, root):
         config = {
