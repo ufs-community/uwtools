@@ -490,7 +490,7 @@ Dependency Keys
        <taskdep task="hello" state="succeeded" cycle_offset="-06:00:00"/>
      </dependency>
 
-* The ``taskvalid`` key defines a dependency on another task being defined in the same cycle. In this example, the task defined with the ``validtask:`` dependency would be runnable only if a task ``bar`` was defined in the same cycle:
+* The ``taskvalid`` key defines a dependency on another task being defined in the same cycle. In this example, the task defined with the ``taskvalid:`` dependency would be runnable only if a task ``bar`` was defined in the same cycle:
 
   .. code-block:: yaml
 
