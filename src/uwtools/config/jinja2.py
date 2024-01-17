@@ -125,6 +125,8 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
     # Note that, for rendering performed on dict values, replacement values will be taken from, in
     # priority order, 1. The full context dict, 2. Local sibling values in the dict.
 
+    # PM FIX UP THIS DOCSTRING!
+
     def _render(val: str) -> str:
         try:
             return (
