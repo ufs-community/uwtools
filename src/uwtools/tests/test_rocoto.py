@@ -304,6 +304,15 @@ class Test__RocotoXML:
         assert child.tag == "taskdep"
         assert child.get("task") == "foo"
 
+    def test__add_task_dependency_taskvalid(self, instance, root):
+        config = {"taskvalid": {"attrs": {"task": "foo"}}}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        taskvalid = dependency[0]
+        assert taskvalid.tag == "taskvalid"
+        assert taskvalid.get("task") == "foo"
+
     @pytest.mark.parametrize(
         "value",
         [

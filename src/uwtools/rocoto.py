@@ -218,6 +218,8 @@ class _RocotoXML:
             self._add_task_dependency_datadep(e, config)
         elif tag == STR.taskdep:
             self._add_task_dependency_taskdep(e, config)
+        elif tag == STR.taskvalid:
+            self._add_task_dependency_taskvalid(e, config)
         elif tag == STR.timedep:
             self._add_task_dependency_timedep(e, config)
         else:
@@ -261,6 +263,15 @@ class _RocotoXML:
         :param config: Configuration data for this element.
         """
         self._set_attrs(SubElement(e, STR.taskdep), config)
+
+    def _add_task_dependency_taskvalid(self, e: Element, config: dict) -> None:
+        """
+        Add a <taskvalid> element to the <dependency>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        self._set_attrs(SubElement(e, STR.taskvalid), config)
 
     def _add_task_dependency_timedep(self, e: Element, config: dict) -> None:
         """
@@ -442,6 +453,7 @@ class STR:
     task: str = "task"
     taskdep: str = "taskdep"
     tasks: str = "tasks"
+    taskvalid: str = "taskvalid"
     timedep: str = "timedep"
     value: str = "value"
     var: str = "var"

@@ -474,7 +474,7 @@ The ``streq:`` and ``strneq:`` keys compare the values in their ``left:`` and ``
 Dependency Keys
 ^^^^^^^^^^^^^^^
 
-* The ``taskdep:`` key defines a dependency on another task:
+* The ``taskdep:`` key defines a dependency on another task's successful completion:
 
   .. code-block:: yaml
 
@@ -488,6 +488,20 @@ Dependency Keys
 
      <dependency>
        <taskdep task="hello" state="succeeded" cycle_offset="-06:00:00"/>
+     </dependency>
+
+* The ``taskvalid`` key defines a dependency on another task being defined in the same cycle. In this example, the task defined with the ``taskvalid:`` dependency would be runnable only if a task ``bar`` were defined in the same cycle:
+
+  .. code-block:: yaml
+
+     validtask:
+       attrs:
+         task: bar
+
+  .. code-block:: xml
+
+     <dependency>
+       <taskvalid task="bar"/>
      </dependency>
 
 * The ``metataskdep:`` key defines a dependency on a metatask:
