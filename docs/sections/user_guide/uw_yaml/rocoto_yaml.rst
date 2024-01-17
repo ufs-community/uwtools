@@ -85,7 +85,7 @@ In the example, the resulting log would appear in the XML file as:
    <log>
      <cyclestr>/some/path/to/&FOO;</cyclestr>
    </log>
- 
+
 The ``attrs:`` block is optional within the ``cyclestr:`` block, and can be used to specify the cycle offset.
 
 Tasks Section
@@ -234,15 +234,15 @@ This translates to Rocoto XML (whitespace added for readability):
 .. code-block:: xml
 
    <metatask name=greetings/>
- 
+
      <var name="greeting">hello hola bonjour</var>
      <var name="person">Jane John Jenn</var>
- 
+
      <task name='#greeting#'>
- 
+
        <command>echo #greeting# #person#<command>
        ...
- 
+
      </task>
    </metatask>
 
@@ -323,7 +323,7 @@ Any number of entities may optionally be specified.
        <!ENTITY FOO "12">
        <!ENTITY BAR "baz">
    ]>
- 
+
 Defining the Workflow Log
 -------------------------
 
@@ -602,10 +602,10 @@ The XML will look like this
 
    <metatask name="member">
      <var name="member">001 002 003</var>
- 
+
      <metatask name="graphics_#member#_field">
        <var name="field">001 002 003</var>
- 
+
        <task name="graphics_mem#member#_#field#">
          <command>"echo $member $field"</command>
          <envar>
@@ -618,6 +618,6 @@ The XML will look like this
          </envar>
          ...
        </task>
- 
+
      </metatask>
    </metatask>
