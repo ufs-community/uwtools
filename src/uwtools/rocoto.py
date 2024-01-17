@@ -241,7 +241,7 @@ class _RocotoXML:
         :param name_attr: XML name attribute for element.
         """
         e = self._add_compound_time_string(e, config[STR.command], STR.sh)
-        config["attrs"]["name"] = name_attr
+        config["attrs"][STR.name] = name_attr
         self._set_attrs(e, config)
 
     def _add_task_dependency_strequality(self, e: Element, config: dict, tag: str) -> None:
