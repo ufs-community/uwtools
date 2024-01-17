@@ -150,7 +150,7 @@ class Test__RocotoXML:
         taskname = "test-metatask"
         orig = instance._add_metatask
         with patch.multiple(instance, _add_metatask=D, _add_task=D) as mocks:
-            orig(e=root, config=config, taskname=taskname)
+            orig(e=root, config=config, name_attr=taskname)
         metatask = root[0]
         assert metatask.tag == "metatask"
         assert metatask.get("name") == taskname
@@ -166,7 +166,7 @@ class Test__RocotoXML:
         }
         taskname = "test-task"
         with patch.multiple(instance, _add_task_dependency=D, _add_task_envar=D) as mocks:
-            instance._add_task(e=root, config=config, taskname=taskname)
+            instance._add_task(e=root, config=config, name_attr=taskname)
         task = root[0]
         assert task.tag == "task"
         assert task.get("name") == taskname
@@ -179,7 +179,7 @@ class Test__RocotoXML:
     def test__add_task_cores_int_or_str(self, cores, instance, root):
         # Ensure that either int or str "cores" values are accepted.
         config = {"command": "c", "cores": cores, "walltime": "00:00:01"}
-        instance._add_task(e=root, config=config, taskname="foo")
+        instance._add_task(e=root, config=config, name_attr="foo")
 
     def test__add_task_dependency_and(self, instance, root):
         config = {"and": {"or_get_obs": {"taskdep": {"attrs": {"task": "foo"}}}}}

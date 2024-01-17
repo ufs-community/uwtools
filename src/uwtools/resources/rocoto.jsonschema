@@ -222,7 +222,7 @@
       "maxProperties": 3,
       "minProperties": 2,
       "patternProperties": {
-        "^metatask(_.+)?$": {
+        "^metatask_.+$": {
           "$ref": "#/$defs/metatask"
         },
         "^task_.+$": {
@@ -522,7 +522,7 @@
           "additionalProperties": false,
           "minProperties": 1,
           "patternProperties": {
-            "^metatask(_.+)?$": {
+            "^metatask_.+$": {
               "$ref": "#/$defs/metatask"
             },
             "^task_.+$": {
