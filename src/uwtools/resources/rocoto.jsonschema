@@ -130,6 +130,30 @@
           },
           "type": "object"
         },
+        "^sh(_.*)?$": {
+          "additionalProperties": false,
+          "properties": {
+            "attrs": {
+              "additionalProperties": false,
+              "properties": {
+                "runopt": {
+                  "type": "string"
+                },
+                "shell": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "command": {
+              "$ref": "#/$defs/compoundTimeString"
+            }
+          },
+          "required": [
+            "command"
+          ],
+          "type": "object"
+        },
         "^some(_.*)?$": {
           "patternProperties": {
             "^threshold(_.*)?$": {
@@ -198,7 +222,7 @@
       "maxProperties": 3,
       "minProperties": 2,
       "patternProperties": {
-        "^metatask(_.+)?$": {
+        "^metatask_.+$": {
           "$ref": "#/$defs/metatask"
         },
         "^task_.+$": {
@@ -498,7 +522,7 @@
           "additionalProperties": false,
           "minProperties": 1,
           "patternProperties": {
-            "^metatask(_.+)?$": {
+            "^metatask_.+$": {
               "$ref": "#/$defs/metatask"
             },
             "^task_.+$": {
