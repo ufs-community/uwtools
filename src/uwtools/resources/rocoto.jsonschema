@@ -205,9 +205,22 @@
         "^taskvalid(_.*)?$": {
           "additionalProperties": false,
           "properties": {
-            "task": {
-              "type": "string"
-            }
+            "attrs": {
+              "additionalProperties": false,
+              "properties": {
+                "task": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "task"
+              ],
+              "type": "object"
+            },
+            "required": [
+              "attrs"
+            ],
+            "type": "object"
           },
           "type": "object"
         },
