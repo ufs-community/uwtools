@@ -477,6 +477,7 @@ def test_schema_compoundTimeString():
     # The "offset" value must be a valid time string:
     assert "is not valid" in errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "x"}}})
 
+
 def test_schema_dependency_sh():
     errors = validator("$defs", "dependency")
     # Basic spec:
@@ -496,6 +497,7 @@ def test_schema_dependency_sh():
     # The command is a compoundTimeString:
     assert not errors({"sh": {"command": {"cyclestr": {"value": "foo-@Y@m@d@H"}}}})
 
+
 def test_schema_metatask_attrs():
     errors = validator("$defs", "metatask", "properties", "attrs")
     # Valid modes are "parallel" and "serial":
@@ -510,6 +512,7 @@ def test_schema_metatask_attrs():
     assert not errors({"throttle": 0})
     assert "-1 is less than the minimum of 0" in errors({"throttle": -1})
     assert "'foo' is not of type 'integer'" in errors({"throttle": "foo"})
+
 
 def test_schema_workflow_cycledef():
     errors = validator("properties", "workflow", "properties", "cycledef")
