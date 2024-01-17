@@ -140,8 +140,8 @@ class _RocotoXML:
             elif tag == STR.task:
                 self._add_task(e, val, name)
             elif tag == STR.var:
-                for name, value in val.items():
-                    SubElement(e, STR.var, name=name).text = value
+                for varname, value in val.items():
+                    SubElement(e, STR.var, name=varname).text = value
 
     def _add_task(self, e: Element, config: dict, name_attr: str) -> None:
         """
