@@ -1,10 +1,10 @@
 from types import SimpleNamespace as ns
-from typing import Dict, Optional, Union
+from typing import Optional
 
 import yaml
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import INCLUDE_TAG, log_and_error
+from uwtools.config.support import INCLUDE_TAG, TaggedScalar, log_and_error
 from uwtools.utils.file import FORMAT, OptionalPath, readable, writable
 
 _MSGS = ns(
@@ -128,22 +128,3 @@ class YAMLConfig(Config):
         Returns the config's format name.
         """
         return FORMAT.yaml
-
-
-class TaggedScalar:
-    """
-    PM WRITEME.
-    """
-
-    TAGS = ("!bool", "!float", "!int", "!str")
-
-    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
-        self.tag: str = node.tag
-        self.value: str = node.value
-
-    def reify(self) -> Union[bool, float, int, str]:
-        """
-        PM WRITEME.
-        """
-        converters: Dict[str, type] = dict(zip(self.TAGS, [bool, float, int, str]))
-        return converters[self.tag](self.value)

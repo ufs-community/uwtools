@@ -1,5 +1,7 @@
 from importlib import import_module
-from typing import Type
+from typing import Dict, Type, Union
+
+import yaml
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -46,3 +48,22 @@ def log_and_error(msg: str) -> Exception:
     """
     log.error(msg)
     return UWConfigError(msg)
+
+
+class TaggedScalar:
+    """
+    PM WRITEME.
+    """
+
+    TAGS = ("!bool", "!float", "!int", "!str")
+
+    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
+        self.tag: str = node.tag
+        self.value: str = node.value
+
+    def reify(self) -> Union[bool, float, int, str]:
+        """
+        PM WRITEME.
+        """
+        converters: Dict[str, type] = dict(zip(self.TAGS, [bool, float, int, str]))
+        return converters[self.tag](self.value)

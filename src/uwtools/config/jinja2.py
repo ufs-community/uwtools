@@ -16,7 +16,7 @@ from jinja2 import (
 )
 from jinja2.exceptions import UndefinedError
 
-from uwtools.config.support import format_to_config
+from uwtools.config.support import TaggedScalar, format_to_config
 from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import get_file_format, readable, writable
@@ -137,16 +137,21 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
         return val
 
     rendered: _YAMLVal
-    log.debug("Rendering: %s", val)
     if isinstance(val, dict):
         return {k: dereference(v, context, local=val) for k, v in val.items()}
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
+        log.debug("Rendering: %s", val)
         rendered = _render(val)
+        log.debug("Rendered: %s", rendered)
+    elif isinstance(val, TaggedScalar):
+        log.debug("Rendering: %s", val.value)
+        val.value = _render(val.value)
+        rendered = val
+        log.debug("Rendered: %s", val.value)
     else:
         rendered = val
-    log.debug("Rendered: %s", rendered)
     return rendered
 
 
