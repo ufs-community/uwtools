@@ -174,7 +174,7 @@ class Test__RocotoXML:
         taskname = "test-metatask"
         orig = instance._add_metatask
         with patch.multiple(instance, _add_metatask=D, _add_task=D):
-            orig(e=root, config=metatask_config, taskname=taskname)
+            orig(e=root, config=metatask_config, name_attr=taskname)
         metatask = root[0]
         # Explicit name overrides default:
         assert metatask.get("name") == name
