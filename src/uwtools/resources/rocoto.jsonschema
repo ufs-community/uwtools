@@ -240,9 +240,6 @@
               ],
               "type": "string"
             },
-            "name": {
-              "type": "string"
-            },
             "throttle": {
               "minimum": 0,
               "type": "integer"
