@@ -1,6 +1,5 @@
 *.DS_Store
 *.egg-info
 *.swp
-*.tmp
 .coverage
 __pycache__
