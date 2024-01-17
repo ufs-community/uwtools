@@ -133,7 +133,7 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
                 .render({**(local or {}), **context})
             )
         except Exception as e:  # pylint: disable=broad-exception-caught
-            log.debug("Rendering ERROR: %s", e)
+            log.debug("ERROR rendering: %s", e)
         return val
 
     rendered: _YAMLVal
@@ -148,9 +148,16 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
     elif isinstance(val, TaggedScalar):
         log.debug("Rendering: %s", val.value)
         val.value = _render(val.value)
-        rendered = val
         log.debug("Rendered: %s", val.value)
+        log.debug("Reifying: %s", val.value)
+        try:
+            rendered = val.reify()
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            log.debug(" ERROR reifying: %s", e)
+            rendered = val
+        log.debug("Reified: %s", val.value)
     else:
+        log.debug("Ignoring: %s", val)
         rendered = val
     return rendered
 
