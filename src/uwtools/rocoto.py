@@ -133,6 +133,7 @@ class _RocotoXML:
         :param name_attr: XML name attribute for element.
         """
         e = SubElement(e, STR.metatask, name=name_attr)
+        self._set_attrs(e, config)
         for key, val in config.items():
             tag, name = self._tag_name(key)
             if tag == STR.metatask:

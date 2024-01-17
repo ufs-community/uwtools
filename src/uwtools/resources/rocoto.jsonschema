@@ -219,7 +219,7 @@
     },
     "metatask": {
       "additionalProperties": false,
-      "maxProperties": 3,
+      "maxProperties": 4,
       "minProperties": 2,
       "patternProperties": {
         "^metatask_.+$": {
@@ -230,6 +230,22 @@
         }
       },
       "properties": {
+        "attrs": {
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "enum": [
+                "parallel",
+                "serial"
+              ],
+              "type": "string"
+            },
+            "throttle": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        },
         "var": {
           "$ref": "#/$defs/var"
         }
