@@ -474,9 +474,7 @@ The ``streq:`` and ``strneq:`` keys compare the values in their ``left:`` and ``
 Dependency Keys
 ^^^^^^^^^^^^^^^
 
-These keys define dependencies on other tasks, metatasks, data, or wall time.
-
-* The ``taskdep:`` key
+* The ``taskdep:`` key defines a dependency on another task:
 
   .. code-block:: yaml
 
@@ -492,7 +490,7 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
        <taskdep task="hello" state="succeeded" cycle_offset="-06:00:00"/>
      </dependency>
 
-* The ``metataskdep:`` key
+* The ``metataskdep:`` key defines a dependency on a metatask:
 
   .. code-block:: yaml
 
@@ -509,9 +507,7 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
        <metataskdep metatask="greetings" state="succeeded" cycle_offset="-06:00:00" threshold="1"/>
      </dependency>
 
-* The ``datadep:`` key
-
-  The ``value:`` key for ``datadep:`` accepts a ``cyclestr:`` block.
+* The ``datadep:`` key defines a dependency on on-disk data:
 
   .. code-block:: yaml
 
@@ -527,9 +523,9 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
        <datadep age="120" minsize="1024b">/path/to/a/file.txt</datadep>
      </dependency>
 
-* The ``timedep:`` key
+   * The ``value:`` key accepts a ``cyclestr:`` block.
 
-  The ``timedep:`` key will almost certainly want a ``cyclestr:`` block.
+* The ``timedep:`` key defines a dependency on a real-world time:
 
   .. code-block:: text
 
@@ -542,6 +538,25 @@ These keys define dependencies on other tasks, metatasks, data, or wall time.
      <dependency>
        <timedep><cyclestr>@Y@m@d@H@M@S</cyclestr></timedep>
      </dependency>
+
+  * The ``timedep:`` key will almost certainly want a ``cyclestr:`` block.
+
+* The ``sh:`` key defines a dependency on the successful execution of a shell command:
+
+  .. code-block:: yaml
+
+     sh:
+       command: test $(find /some/dir -type f -name "*.grib2" | wc -l) -eq 24
+
+  .. code-block:: xml
+
+     <dependency>
+       <sh>test $(find /some/dir -type f -name "*.grib2" | wc -l) -eq 24</sh>
+     </dependency>
+
+  * The ``command:`` key accepts a ``cyclestr:`` block.
+  * The ``sh:`` key may be suffixed with ``_<name>`` to provide a unique name for the dependency, e.g. ``sh_foo:`` would translate to XML tag ``<sh name="foo">``.
+  * The optional attributes ``runopt`` and ``shell`` are accepted under an ``attrs:`` key. See the :rocoto:`Rocoto documentation<>` for details.
 
 The ``metatask:`` Key
 ---------------------
