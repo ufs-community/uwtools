@@ -146,14 +146,22 @@ class Test__RocotoXML:
         assert cyclestr.text == "qux"
 
     def test__add_metatask(self, instance, root):
-        config = {"metatask_foo": "1", "task_bar": "2", "var": {"baz": "3", "qux": "4"}}
+        config = {
+            "metatask_foo": "1",
+            "attrs": {"mode": "parallel", "throttle": 88},
+            "task_bar": "2",
+            "var": {"baz": "3", "qux": "4"},
+        }
         taskname = "test-metatask"
         orig = instance._add_metatask
         with patch.multiple(instance, _add_metatask=D, _add_task=D) as mocks:
             orig(e=root, config=config, name_attr=taskname)
         metatask = root[0]
         assert metatask.tag == "metatask"
+        assert metatask.get("mode") == "parallel"
         assert metatask.get("name") == taskname
+        assert metatask.get("throttle") == "88"
+        assert {e.get("name"): e.text for e in metatask.xpath("var")} == {"baz": "3", "qux": "4"}
         mocks["_add_metatask"].assert_called_once_with(metatask, "1", "foo")
         mocks["_add_task"].assert_called_once_with(metatask, "2", "bar")
 
@@ -295,6 +303,15 @@ class Test__RocotoXML:
         child = dependency[0]
         assert child.tag == "taskdep"
         assert child.get("task") == "foo"
+
+    def test__add_task_dependency_taskvalid(self, instance, root):
+        config = {"taskvalid": {"attrs": {"task": "foo"}}}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        taskvalid = dependency[0]
+        assert taskvalid.tag == "taskvalid"
+        assert taskvalid.get("task") == "foo"
 
     @pytest.mark.parametrize(
         "value",
@@ -474,6 +491,19 @@ def test_schema_dependency_sh():
     )
     # The command is a compoundTimeString:
     assert not errors({"sh": {"command": {"cyclestr": {"value": "foo-@Y@m@d@H"}}}})
+
+
+def test_schema_metatask_attrs():
+    errors = validator("$defs", "metatask", "properties", "attrs")
+    # Valid modes are "parallel" and "serial":
+    assert not errors({"mode": "parallel"})
+    assert not errors({"mode": "serial"})
+    assert "'foo' is not one of ['parallel', 'serial']" in errors({"mode": "foo"})
+    # Positive int is ok for throttle:
+    assert not errors({"throttle": 88})
+    assert not errors({"throttle": 0})
+    assert "-1 is less than the minimum of 0" in errors({"throttle": -1})
+    assert "'foo' is not of type 'integer'" in errors({"throttle": "foo"})
 
 
 def test_schema_workflow_cycledef():

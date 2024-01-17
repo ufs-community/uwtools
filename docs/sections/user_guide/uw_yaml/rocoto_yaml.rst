@@ -474,7 +474,7 @@ The ``streq:`` and ``strneq:`` keys compare the values in their ``left:`` and ``
 Dependency Keys
 ^^^^^^^^^^^^^^^
 
-* The ``taskdep:`` key defines a dependency on another task:
+* The ``taskdep:`` key defines a dependency on another task's successful completion:
 
   .. code-block:: yaml
 
@@ -488,6 +488,20 @@ Dependency Keys
 
      <dependency>
        <taskdep task="hello" state="succeeded" cycle_offset="-06:00:00"/>
+     </dependency>
+
+* The ``taskvalid`` key defines a dependency on another task being defined in the same cycle. In this example, the task defined with the ``taskvalid:`` dependency would be runnable only if a task ``bar`` were defined in the same cycle:
+
+  .. code-block:: yaml
+
+     validtask:
+       attrs:
+         task: bar
+
+  .. code-block:: xml
+
+     <dependency>
+       <taskvalid task="bar"/>
      </dependency>
 
 * The ``metataskdep:`` key defines a dependency on a metatask:
@@ -570,6 +584,9 @@ Here is an example of specifying a nested metatask.
 .. code-block:: text
 
    metatask_member:
+     attrs:
+       mode: parallel
+       throttle: 2
      var:
        member: 001 002 003
      metatask_graphics_#member#_field:
@@ -600,7 +617,7 @@ The XML will look like this
 
 .. code-block:: xml
 
-   <metatask name="member">
+   <metatask mode="parallel" name="member" throttle="2">
      <var name="member">001 002 003</var>
 
      <metatask name="graphics_#member#_field">
@@ -621,3 +638,5 @@ The XML will look like this
 
      </metatask>
    </metatask>
+
+* The optional attributes ``mode`` and ``throttle`` are accepted under an ``attrs:`` key. See the :rocoto:`Rocoto documentation<>` for details.
