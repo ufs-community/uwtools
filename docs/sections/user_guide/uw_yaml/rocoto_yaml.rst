@@ -555,7 +555,7 @@ Dependency Keys
      </dependency>
 
   * The ``command:`` key accepts a ``cyclestr:`` block.
-  * The ``sh:`` key may be suffixed with ``_<name>`` to provide a unique name for the dependency, e.g. ``sh_foo:`` would translate to XML tag ``<sh name="foo">``.
+  * The ``sh:`` key may be suffixed with an underscore and a name to provide a unique name for the dependency, e.g. ``sh_count_grib:`` would translate to XML tag ``<sh name="count_grib">``.
   * The optional attributes ``runopt`` and ``shell`` are accepted under an ``attrs:`` key. See the :rocoto:`Rocoto documentation<>` for details.
 
 The ``metatask:`` Key
