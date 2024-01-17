@@ -584,6 +584,9 @@ Here is an example of specifying a nested metatask.
 .. code-block:: text
 
    metatask_member:
+     attrs:
+       mode: parallel
+       throttle: 2
      var:
        member: 001 002 003
      metatask_graphics_#member#_field:
@@ -614,7 +617,7 @@ The XML will look like this
 
 .. code-block:: xml
 
-   <metatask name="member">
+   <metatask mode="parallel" name="member" throttle="2">
      <var name="member">001 002 003</var>
 
      <metatask name="graphics_#member#_field">
@@ -635,3 +638,5 @@ The XML will look like this
 
      </metatask>
    </metatask>
+
+* The optional attributes ``mode`` and ``throttle`` are accepted under an ``attrs:`` key. See the :rocoto:`Rocoto documentation<>` for details.
