@@ -5,7 +5,6 @@ Support for rendering Jinja2 templates.
 import os
 from typing import Dict, List, Optional, Set, Union
 
-import yaml
 from jinja2 import (
     BaseLoader,
     Environment,
@@ -133,12 +132,11 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
         try:
-            rendered = (
+            return (
                 _register_filters(Environment(undefined=StrictUndefined))
                 .from_string(val)
                 .render({**(local or {}), **context})
             )
-            return _reify_scalar_str(rendered)
         except Exception as e:  # pylint: disable=broad-exception-caught
             log.debug("Rendering ERROR: %s", e)
     log.debug("Rendered: %s", val)
@@ -250,19 +248,6 @@ def _register_filters(env: Environment) -> Environment:
     )
     env.filters.update(filters)
     return env
-
-
-def _reify_scalar_str(s: str) -> Union[bool, float, int, str]:
-    """
-    Reify a string to a Python object, using YAML. Jinja2 templates will be passed as-is.
-
-    :param s: The string to reify.
-    """
-    try:
-        r = yaml.safe_load(s)
-    except yaml.YAMLError:
-        return s
-    return r
 
 
 def _report(args: dict) -> None:
