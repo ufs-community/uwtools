@@ -125,7 +125,7 @@ class Test__RocotoXML:
     def metatask_config(self):
         return {
             "metatask_foo": "1",
-            "attrs": {"mode": "serial", "throttle": 88},
+            "attrs": {"mode": "parallel", "throttle": 88},
             "task_bar": "2",
             "var": {"baz": "3", "qux": "4"},
         }
@@ -161,7 +161,7 @@ class Test__RocotoXML:
             orig(e=root, config=metatask_config, name_attr=taskname)
         metatask = root[0]
         assert metatask.tag == "metatask"
-        assert metatask.get("mode") == "serial"
+        assert metatask.get("mode") == "parallel"
         assert metatask.get("name") == taskname
         assert metatask.get("throttle") == "88"
         assert {e.get("name"): e.text for e in metatask.xpath("var")} == {"baz": "3", "qux": "4"}
@@ -504,9 +504,6 @@ def test_schema_metatask_attrs():
     assert not errors({"mode": "parallel"})
     assert not errors({"mode": "serial"})
     assert "'foo' is not one of ['parallel', 'serial']" in errors({"mode": "foo"})
-    # String name is ok, anything else (e.g. int) is not:
-    assert not errors({"name": "foo"})
-    assert "88 is not of type 'string'" in errors({"name": 88})
     # Positive int is ok for throttle:
     assert not errors({"throttle": 88})
     assert not errors({"throttle": 0})
