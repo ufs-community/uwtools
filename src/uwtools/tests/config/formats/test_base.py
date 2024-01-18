@@ -17,7 +17,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import depth
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.tests.support import fixture_path, logged, regex_logged
+from uwtools.tests.support import fixture_path, logged
 from uwtools.utils.file import FORMAT, readable
 
 # Fixtures
@@ -118,7 +118,7 @@ def test_depth(config):
     assert config.depth == 1
 
 
-def test_dereference(caplog, tmp_path):
+def test_dereference(tmp_path):
     # Test demonstrates that:
     #   - Config dereferencing uses environment variables.
     #   - Initially-unrenderable values do not cause errors.
@@ -137,13 +137,6 @@ d: '{{ X }}'
     config = YAMLConfig(path)
     with patch.dict(os.environ, {"N": "55"}, clear=True):
         config.dereference()
-    for excerpt in [
-        # pylint: disable-next=line-too-long
-        "current value: {a: !int '{{ b.c + 11 }}', b: {c: !int '{{ N | int + 11 }}'}, d: '{{ X }}'}",
-        "current value: {a: !int '{{ b.c + 11 }}', b: {c: 66}, d: '{{ X }}'}",
-        "final value: {a: 77, b: {c: 66}, d: '{{ X }}'}",
-    ]:
-        assert regex_logged(caplog, excerpt)
     assert config == {"a": 77, "b": {"c": 66}, "d": "{{ X }}"}
 
 

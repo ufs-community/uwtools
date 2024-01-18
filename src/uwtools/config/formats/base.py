@@ -163,14 +163,20 @@ class Config(ABC, UserDict):
         """
         Render as much Jinja2 syntax as possible.
         """
+
+        def logstate(state: str) -> None:
+            log.debug("Dereferencing, %s value:", state)
+            for line in str(self).split("\n"):
+                log.debug("  %s", line)
+
         while True:
-            log.debug("Dereferencing, current value: %s", str(self))
+            logstate("current")
             new = dereference(val=self.data, context={**os.environ, **self.data})
             assert isinstance(new, dict)
             if new == self.data:
                 break
             self.data = new
-        log.debug("Dereferencing, final value: %s", str(self))
+        logstate("final")
 
     @abstractmethod
     def dump(self, path: OptionalPath) -> None:

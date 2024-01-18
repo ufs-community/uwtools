@@ -44,7 +44,7 @@ class YAMLConfig(Config):
         The string representation of a YAMLConfig object.
         """
         yaml.add_representer(TaggedString, TaggedString.represent)
-        return yaml.dump(self.data, default_flow_style=True).strip()
+        return yaml.dump(self.data, default_flow_style=False).strip()
 
     # Private methods
 
