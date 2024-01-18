@@ -59,6 +59,9 @@ class Test_TaggedScalar:
     Tests for class uwtools.config.support.TaggedScalar.
     """
 
+    def comp(self, ts: support.TaggedScalar, s: str):
+        assert yaml.dump(ts, default_flow_style=True).strip() == s
+
     @fixture
     def loader(self):
         yaml.add_representer(support.TaggedScalar, support.TaggedScalar.represent)
@@ -67,9 +70,6 @@ class Test_TaggedScalar:
     # These tests bypass YAML parsing, constructing nodes with explicit string values. They then
     # demonstrate that those nodes' convert() methods return representations in type type specified
     # by the tag.
-
-    def comp(self, ts: support.TaggedScalar, s: str):
-        assert yaml.dump(ts, default_flow_style=True).strip() == s
 
     def test_float_no(self, loader):
         ts = support.TaggedScalar(loader, yaml.ScalarNode(tag="!float", value="foo"))
