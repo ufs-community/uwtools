@@ -110,23 +110,21 @@ def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) ->
     """
     Render Jinja2 syntax, wherever possible.
 
+    Build a replacement value with Jinja2 syntax rendered. Depend on recursion for dict and list
+    values; render strings; convert values tagged with explicit types; and return objects of other
+    types unmodified. Rendering may fail for valid reasons -- notably a replacement value not being
+    available in the given context object. In such cases, return the original value: Any unrendered
+    Jinja2 syntax it contains may may be rendered by later processing with better context.
+
+    When rendering dict values, replacement values will be taken from, in priority order
+      1. The full context dict
+      2. Local sibling values in the dict
+
     :param val: A value possibly containing Jinja2 syntax.
     :param context: Values to use when rendering Jinja2 syntax.
     :param local: Local sibling values to use if a match is not found in context.
     :return: The input value, with Jinja2 syntax rendered.
     """
-
-    # Build a replacement value with Jinja2 syntax rendered. Depend on recursion for dict and list
-    # values; render strings; and return objects of any other type unmodified. Rendering may fail
-    # for valid reasons -- notably a replacement value not being available in the given context
-    # object. In such cases, return the original value: Any unrendered Jinja2 syntax it contains may
-    # may be rendered by later processing with better context.
-
-    # Note that, for rendering performed on dict values, replacement values will be taken from, in
-    # priority order, 1. The full context dict, 2. Local sibling values in the dict.
-
-    # PM FIX UP THIS DOCSTRING!
-
     rendered: _ConfigVal = val  # fall-back value
     if isinstance(val, dict):
         return {k: dereference(v, context, local=val) for k, v in val.items()}
