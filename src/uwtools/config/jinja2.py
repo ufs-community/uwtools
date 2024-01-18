@@ -127,39 +127,46 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
 
     # PM FIX UP THIS DOCSTRING!
 
-    def _render(val: str) -> str:
+    def debug(action: str, val: _YAMLVal) -> None:
+        log.debug("[dereference] %s: %s", action, val)
+
+    def deref_render(val: str) -> str:
         try:
-            return (
+            rendered = (
                 _register_filters(Environment(undefined=StrictUndefined))
                 .from_string(val)
                 .render({**(local or {}), **context})
             )
+            debug("Rendered", rendered)
         except Exception as e:  # pylint: disable=broad-exception-caught
-            log.debug("ERROR rendering: %s", e)
-        return val
+            debug("Rendering failed", str(e))
+            rendered = val
+        return rendered
 
     rendered: _YAMLVal
     if isinstance(val, dict):
-        return {k: dereference(v, context, local=val) for k, v in val.items()}
+        new = {}
+        for k, v in val.items():
+            new[k] = dereference(v, context, local=val)
+        return new
+        # return {k: dereference(v, context, local=val) for k, v in val.items()}
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
-        log.debug("Rendering: %s", val)
-        rendered = _render(val)
-        log.debug("Rendered: %s", rendered)
+        debug("Rendering", val)
+        rendered = deref_render(val)
     elif isinstance(val, TaggedScalar):
-        log.debug("Rendering: %s", val.value)
-        val.value = _render(val.value)
-        log.debug("Rendered: %s", val.value)
-        log.debug("Reifying: %s", val.value)
+        debug("Rendering", val.value)
+        val.value = deref_render(val.value)
+        debug("Reifying", val.value)
         try:
             rendered = val.reify()
         except Exception as e:  # pylint: disable=broad-exception-caught
-            log.debug(" ERROR reifying: %s", e)
+            debug("Reifying failed", str(e))
             rendered = val
-        log.debug("Reified: %s", val.value)
+        debug("Reified", val.value)
     else:
-        log.debug("Ignoring: %s", val)
+        debug("Accepting", val)
         rendered = val
     return rendered
 

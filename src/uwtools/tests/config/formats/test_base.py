@@ -13,6 +13,7 @@ from pytest import fixture, raises
 
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import depth
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -117,25 +118,33 @@ def test_depth(config):
     assert config.depth == 1
 
 
-@pytest.mark.skip("PM FIX")
-def test_dereference(caplog, config):
+def test_dereference(caplog, tmp_path):
     # Test demonstrates that:
     #   - Config dereferencing uses environment variables.
     #   - Initially-unrenderable values do not cause errors.
     #   - Initially-unrenderable values may be rendered via iteration.
     #   - Finally-unrenderable values do not cause errors and are returned unmodified.
     log.setLevel(logging.DEBUG)
-    assert config == {"foo": 88}
-    config.update({"a": "{{ b.c + 11 }}", "b": {"c": "{{ N | int + 11 }}"}, "d": "{{ X }}"})
+    path = tmp_path / "config.yaml"
+    yaml = """
+a: !int '{{ b.c + 11 }}'
+b:
+  c: !int '{{ N | int + 11 }}'
+d: '{{ X }}'
+""".strip()
+    with open(path, "w", encoding="utf-8") as f:
+        print(yaml, file=f)
+    config = YAMLConfig(path)
     with patch.dict(os.environ, {"N": "55"}, clear=True):
         config.dereference()
     for excerpt in [
-        "'a': '{{ b.c + 11 }}', 'b': {'c': '{{ N | int + 11 }}'}, 'd': '{{ X }}'",
-        "'a': '{{ b.c + 11 }}', 'b': {'c': 66}, 'd': '{{ X }}'",
-        "'a': 77, 'b': {'c': 66}, 'd': '{{ X }}'",
+        # pylint: disable-next=line-too-long
+        "current value: {a: !int '{{ b.c + 11 }}', b: {c: !int '{{ N | int + 11 }}'}, d: '{{ X }}'}",
+        "current value: {a: !int '{{ b.c + 11 }}', b: {c: 66}, d: '{{ X }}'}",
+        "final value: {a: 77, b: {c: 66}, d: '{{ X }}'}",
     ]:
         assert regex_logged(caplog, excerpt)
-    assert config == {"foo": 88, "a": 77, "b": {"c": 66}, "d": "{{ X }}"}
+    assert config == {"a": 77, "b": {"c": 66}, "d": "{{ X }}"}
 
 
 @pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
