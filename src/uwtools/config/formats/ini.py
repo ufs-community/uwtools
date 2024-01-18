@@ -40,7 +40,7 @@ class INIConfig(Config):
 
     # Public methods
 
-    def dump(self, path: OptionalPath) -> None:
+    def dump(self, path: OptionalPath = None) -> None:
         """
         Dumps the config in INI format.
 
@@ -48,22 +48,23 @@ class INIConfig(Config):
         """
         config_check_depths_dump(config_obj=self, target_format=FORMAT.ini)
 
-        self.dump_dict(path, self.data)
+        self.dump_dict(self.data, path)
 
     @staticmethod
-    def dump_dict(path: OptionalPath, cfg: dict) -> None:
+    def dump_dict(cfg: dict, path: OptionalPath = None) -> None:
         """
         Dumps a provided config dictionary in INI format.
 
-        :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
+        :param path: Path to dump config to.
         """
+
         # Configparser adds a newline after each section, presumably to create nice-looking output
         # when an INI contains multiple sections. Unfortunately, it also adds a newline after the
         # _final_ section, resulting in an anomalous trailing newline. To avoid this, write first to
         # memory, then strip the trailing newline.
-        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.ini)
 
+        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.ini)
         parser = configparser.ConfigParser()
         s = StringIO()
         parser.read_dict(cfg)

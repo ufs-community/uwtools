@@ -43,6 +43,7 @@ class YAMLConfig(Config):
         """
         The string representation of a YAMLConfig object.
         """
+        yaml.add_representer(TaggedScalar, TaggedScalar.represent)
         return yaml.dump(self.data)
 
     # Private methods
@@ -95,22 +96,21 @@ class YAMLConfig(Config):
 
     # Public methods
 
-    def dump(self, path: OptionalPath) -> None:
+    def dump(self, path: OptionalPath = None) -> None:
         """
         Dumps the config in YAML format.
 
         :param path: Path to dump config to.
         """
-        self.dump_dict(path, self.data)
+        self.dump_dict(self.data, path)
 
     @staticmethod
-    def dump_dict(path: OptionalPath, cfg: dict) -> None:
+    def dump_dict(cfg: dict, path: OptionalPath = None) -> None:
         """
         Dumps a provided config dictionary in YAML format.
 
-        :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
-        :param opts: Other options required by a subclass.
+        :param path: Path to dump config to.
         """
         yaml.add_representer(TaggedScalar, TaggedScalar.represent)
         with writable(path) as f:

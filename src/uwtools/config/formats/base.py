@@ -190,12 +190,12 @@ class Config(ABC, UserDict):
 
     @staticmethod
     @abstractmethod
-    def dump_dict(path: OptionalPath, cfg: dict) -> None:
+    def dump_dict(cfg: dict, path: OptionalPath = None) -> None:
         """
         Dumps a provided config dictionary to stdout or a file.
 
-        :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
+        :param path: Path to dump config to.
         """
 
     @staticmethod

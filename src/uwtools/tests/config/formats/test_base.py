@@ -43,11 +43,11 @@ class ConcreteConfig(Config):
         with readable(config_file) as f:
             return yaml.safe_load(f.read())
 
-    def dump(self, path):
+    def dump(self, path=None):
         pass
 
     @staticmethod
-    def dump_dict(path, cfg, opts=None):
+    def dump_dict(cfg, path=None):
         pass
 
     @staticmethod
@@ -148,7 +148,7 @@ def test_invalid_config(caplog, fmt2, tmp_path):
     cfgin = tools.format_to_config(fmt1)(fixture_path("hello_workflow.yaml"))
     depthin = depth(cfgin.data)
     with raises(UWConfigError) as e:
-        tools.format_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)
+        tools.format_to_config(fmt2).dump_dict(cfg=cfgin.data, path=outfile)
     msg = f"Cannot dump depth-{depthin} config to type-'{fmt2}' config"
     assert logged(caplog, msg)
     assert msg in str(e.value)
@@ -187,7 +187,7 @@ def test_transform_config(fmt1, fmt2, tmp_path):
     outfile = tmp_path / f"test_{fmt1}to{fmt2}_dump.{fmt2}"
     reference = fixture_path(f"simple.{fmt2}")
     cfgin = tools.format_to_config(fmt1)(fixture_path(f"simple.{fmt1}"))
-    tools.format_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)
+    tools.format_to_config(fmt2).dump_dict(cfg=cfgin.data, path=outfile)
     with open(reference, "r", encoding="utf-8") as f1:
         reflines = [line.strip().replace("'", "") for line in f1]
     with open(outfile, "r", encoding="utf-8") as f2:
