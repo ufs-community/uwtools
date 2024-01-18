@@ -112,6 +112,7 @@ class YAMLConfig(Config):
         :param cfg: The in-memory config object to dump.
         :param opts: Other options required by a subclass.
         """
+        yaml.add_representer(TaggedScalar, TaggedScalar.represent)
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
 

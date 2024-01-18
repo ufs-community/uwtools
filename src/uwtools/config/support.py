@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from importlib import import_module
 from typing import Dict, Type, Union
 
@@ -67,3 +69,10 @@ class TaggedScalar:
         """
         converters: Dict[str, type] = dict(zip(self.TAGS, [bool, float, int, str]))
         return converters[self.tag](self.value)
+
+    @staticmethod
+    def represent(dumper: yaml.Dumper, data: TaggedScalar) -> yaml.nodes.ScalarNode:
+        """
+        PM WRITEME.
+        """
+        return dumper.represent_scalar(data.tag, data.value)
