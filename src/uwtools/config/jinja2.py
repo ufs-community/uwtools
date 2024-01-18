@@ -142,62 +142,6 @@ def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) ->
     return rendered
 
 
-def _deref_convert(val: TaggedScalar) -> _ConfigVal:
-    """
-    Convert a string tagged with an explicit type.
-
-    If conversion cannot be performed (e.g. the value was tagged as an int but int() is not a value
-    that can be represented as an int, the original value will be returned unchanged.
-
-    :param val: A scalar value tagged with an explicit type.
-    :return: The value translated to the specified type.
-    """
-    converted: _ConfigVal = val  # fall-back value
-    _deref_debug("Converting", val.value)
-    try:
-        converted = val.convert()
-    except Exception as e:  # pylint: disable=broad-exception-caught
-        _deref_debug("Conversion failed", str(e))
-    _deref_debug("Converted", val.value)
-    return converted
-
-
-def _deref_debug(action: str, val: _ConfigVal) -> None:
-    """
-    Log a debug-level message related to dereferencing.
-
-    :param action: The dereferencing activity being performed.
-    :param val: The value being dereferenced.
-    """
-    log.debug("[dereference] %s: %s", action, val)
-
-
-def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
-    """
-    Render a Jinja2 variable/expression as part of dereferencing.
-
-    If this function cannot render the value, either because it contains no Jinja2 syntax or because
-    insufficient context is currently available, a debug message will be logged and the original
-    value will be returned unchanged.
-
-    :param val: The value potentially containing Jinja2 syntax to render.
-    :param context: Values to use when rendering Jinja2 syntax.
-    :param local: Local sibling values to use if a match is not found in context.
-    :return: The rendered value (potentially unchanged).
-    """
-    try:
-        rendered = (
-            _register_filters(Environment(undefined=StrictUndefined))
-            .from_string(val)
-            .render({**(local or {}), **context})
-        )
-        _deref_debug("Rendered", rendered)
-    except Exception as e:  # pylint: disable=broad-exception-caught
-        _deref_debug("Rendering failed", str(e))
-        rendered = val
-    return rendered
-
-
 def render(
     values: Union[dict, DefinitePath],
     values_format: Optional[str] = None,
@@ -255,6 +199,62 @@ def render(
 
 
 # Private functions
+
+
+def _deref_convert(val: TaggedScalar) -> _ConfigVal:
+    """
+    Convert a string tagged with an explicit type.
+
+    If conversion cannot be performed (e.g. the value was tagged as an int but int() is not a value
+    that can be represented as an int, the original value will be returned unchanged.
+
+    :param val: A scalar value tagged with an explicit type.
+    :return: The value translated to the specified type.
+    """
+    converted: _ConfigVal = val  # fall-back value
+    _deref_debug("Converting", val.value)
+    try:
+        converted = val.convert()
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        _deref_debug("Conversion failed", str(e))
+    _deref_debug("Converted", val.value)
+    return converted
+
+
+def _deref_debug(action: str, val: _ConfigVal) -> None:
+    """
+    Log a debug-level message related to dereferencing.
+
+    :param action: The dereferencing activity being performed.
+    :param val: The value being dereferenced.
+    """
+    log.debug("[dereference] %s: %s", action, val)
+
+
+def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
+    """
+    Render a Jinja2 variable/expression as part of dereferencing.
+
+    If this function cannot render the value, either because it contains no Jinja2 syntax or because
+    insufficient context is currently available, a debug message will be logged and the original
+    value will be returned unchanged.
+
+    :param val: The value potentially containing Jinja2 syntax to render.
+    :param context: Values to use when rendering Jinja2 syntax.
+    :param local: Local sibling values to use if a match is not found in context.
+    :return: The rendered value (potentially unchanged).
+    """
+    try:
+        rendered = (
+            _register_filters(Environment(undefined=StrictUndefined))
+            .from_string(val)
+            .render({**(local or {}), **context})
+        )
+        _deref_debug("Rendered", rendered)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        _deref_debug("Rendering failed", str(e))
+        rendered = val
+    return rendered
 
 
 def _dry_run_template(rendered_template: str) -> bool:
