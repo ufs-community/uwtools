@@ -54,7 +54,10 @@ def log_and_error(msg: str) -> Exception:
 
 class TaggedScalar:
     """
-    PM WRITEME.
+    A class supporting custom YAML tags specifying type conversions.
+
+    The constructor implements the interface required by a pyyaml Loader object's add_consructor()
+    method. See the pyyaml documentation for details.
     """
 
     TAGS = ("!bool", "!float", "!int", "!str")
@@ -65,7 +68,9 @@ class TaggedScalar:
 
     def convert(self) -> Union[bool, float, int, str]:
         """
-        PM WRITEME.
+        Return the original YAML value converted to the specified type.
+
+        Will raise an exception if the value cannot be represented as the specified type.
         """
         converters: Dict[str, type] = dict(zip(self.TAGS, [bool, float, int, str]))
         return converters[self.tag](self.value)
@@ -73,6 +78,9 @@ class TaggedScalar:
     @staticmethod
     def represent(dumper: yaml.Dumper, data: TaggedScalar) -> yaml.nodes.ScalarNode:
         """
-        PM WRITEME.
+        Serialize a tagged scalar as "!type value".
+
+        Implements the interface required by pyyaml's add_representer() function. See the pyyaml
+        documentation for details.
         """
         return dumper.represent_scalar(data.tag, data.value)
