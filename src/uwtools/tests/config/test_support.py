@@ -54,17 +54,17 @@ def test_log_and_error(caplog):
     assert logged(caplog, msg)
 
 
-class Test_TaggedScalar:
+class Test_TaggedString:
     """
-    Tests for class uwtools.config.support.TaggedScalar.
+    Tests for class uwtools.config.support.TaggedString.
     """
 
-    def comp(self, ts: support.TaggedScalar, s: str):
+    def comp(self, ts: support.TaggedString, s: str):
         assert yaml.dump(ts, default_flow_style=True).strip() == s
 
     @fixture
     def loader(self):
-        yaml.add_representer(support.TaggedScalar, support.TaggedScalar.represent)
+        yaml.add_representer(support.TaggedString, support.TaggedString.represent)
         return YAMLConfig(config={})._yaml_loader
 
     # These tests bypass YAML parsing, constructing nodes with explicit string values. They then
@@ -72,21 +72,21 @@ class Test_TaggedScalar:
     # by the tag.
 
     def test_float_no(self, loader):
-        ts = support.TaggedScalar(loader, yaml.ScalarNode(tag="!float", value="foo"))
+        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!float", value="foo"))
         with raises(ValueError):
             ts.convert()
 
     def test_float_ok(self, loader):
-        ts = support.TaggedScalar(loader, yaml.ScalarNode(tag="!float", value="3.14"))
+        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!float", value="3.14"))
         assert ts.convert() == 3.14
         self.comp(ts, "!float '3.14'")
 
     def test_int_no(self, loader):
-        ts = support.TaggedScalar(loader, yaml.ScalarNode(tag="!int", value="foo"))
+        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!int", value="foo"))
         with raises(ValueError):
             ts.convert()
 
     def test_int_ok(self, loader):
-        ts = support.TaggedScalar(loader, yaml.ScalarNode(tag="!int", value="88"))
+        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!int", value="88"))
         assert ts.convert() == 88
         self.comp(ts, "!int '88'")

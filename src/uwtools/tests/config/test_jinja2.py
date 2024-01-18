@@ -15,7 +15,7 @@ from pytest import fixture, raises
 
 from uwtools.config import jinja2
 from uwtools.config.jinja2 import J2Template
-from uwtools.config.support import TaggedScalar
+from uwtools.config.support import TaggedString
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 
@@ -235,7 +235,7 @@ def test_render_values_needed(caplog, template, values_file):
 def test__deref_convert_no(caplog, tag):
     log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
-    val = TaggedScalar(loader, yaml.ScalarNode(tag=tag, value="foo"))
+    val = TaggedString(loader, yaml.ScalarNode(tag=tag, value="foo"))
     assert jinja2._deref_convert(val=val) == val
     assert not regex_logged(caplog, "Converted")
     assert regex_logged(caplog, "Conversion failed")
@@ -245,7 +245,7 @@ def test__deref_convert_no(caplog, tag):
 def test__deref_convert_ok(caplog, converted, tag, value):
     log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
-    val = TaggedScalar(loader, yaml.ScalarNode(tag=tag, value=value))
+    val = TaggedString(loader, yaml.ScalarNode(tag=tag, value=value))
     assert jinja2._deref_convert(val=val) == converted
     assert regex_logged(caplog, "Converted")
     assert not regex_logged(caplog, "Conversion failed")

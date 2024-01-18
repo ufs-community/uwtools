@@ -4,7 +4,7 @@ from typing import Optional
 import yaml
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import INCLUDE_TAG, TaggedScalar, log_and_error
+from uwtools.config.support import INCLUDE_TAG, TaggedString, log_and_error
 from uwtools.utils.file import FORMAT, OptionalPath, readable, writable
 
 _MSGS = ns(
@@ -43,7 +43,7 @@ class YAMLConfig(Config):
         """
         The string representation of a YAMLConfig object.
         """
-        yaml.add_representer(TaggedScalar, TaggedScalar.represent)
+        yaml.add_representer(TaggedString, TaggedString.represent)
         return yaml.dump(self.data, default_flow_style=True).strip()
 
     # Private methods
@@ -90,8 +90,8 @@ class YAMLConfig(Config):
         """
         loader = yaml.SafeLoader
         loader.add_constructor(INCLUDE_TAG, self._yaml_include)
-        for tag in TaggedScalar.TAGS:
-            loader.add_constructor(tag, TaggedScalar)
+        for tag in TaggedString.TAGS:
+            loader.add_constructor(tag, TaggedString)
         return loader
 
     # Public methods
@@ -112,7 +112,7 @@ class YAMLConfig(Config):
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to.
         """
-        yaml.add_representer(TaggedScalar, TaggedScalar.represent)
+        yaml.add_representer(TaggedString, TaggedString.represent)
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
 

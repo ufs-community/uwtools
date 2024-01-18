@@ -52,7 +52,7 @@ def log_and_error(msg: str) -> Exception:
     return UWConfigError(msg)
 
 
-class TaggedScalar:
+class TaggedString:
     """
     A class supporting custom YAML tags specifying type conversions.
 
@@ -76,7 +76,7 @@ class TaggedScalar:
         return converters[self.tag](self.value)
 
     @staticmethod
-    def represent(dumper: yaml.Dumper, data: TaggedScalar) -> yaml.nodes.ScalarNode:
+    def represent(dumper: yaml.Dumper, data: TaggedString) -> yaml.nodes.ScalarNode:
         """
         Serialize a tagged scalar as "!type value".
 

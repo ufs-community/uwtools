@@ -16,12 +16,12 @@ from jinja2 import (
 )
 from jinja2.exceptions import UndefinedError
 
-from uwtools.config.support import TaggedScalar, format_to_config
+from uwtools.config.support import TaggedString, format_to_config
 from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import get_file_format, readable, writable
 
-_ConfigVal = Union[bool, dict, float, int, list, str, TaggedScalar]
+_ConfigVal = Union[bool, dict, float, int, list, str, TaggedString]
 
 
 class J2Template:
@@ -133,7 +133,7 @@ def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) ->
     if isinstance(val, str):
         _deref_debug("Rendering", val)
         rendered = _deref_render(val, context, local)
-    elif isinstance(val, TaggedScalar):
+    elif isinstance(val, TaggedString):
         _deref_debug("Rendering", val.value)
         val.value = _deref_render(val.value, context, local)
         rendered = _deref_convert(val)
@@ -201,7 +201,7 @@ def render(
 # Private functions
 
 
-def _deref_convert(val: TaggedScalar) -> _ConfigVal:
+def _deref_convert(val: TaggedString) -> _ConfigVal:
     """
     Convert a string tagged with an explicit type.
 
