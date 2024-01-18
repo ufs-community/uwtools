@@ -215,9 +215,9 @@ def _deref_convert(val: TaggedScalar) -> _ConfigVal:
     _deref_debug("Converting", val.value)
     try:
         converted = val.convert()
+        _deref_debug("Converted", val.value)
     except Exception as e:  # pylint: disable=broad-exception-caught
         _deref_debug("Conversion failed", str(e))
-    _deref_debug("Converted", val.value)
     return converted
 
 

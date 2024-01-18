@@ -15,10 +15,17 @@ from pytest import fixture, raises
 
 from uwtools.config import jinja2
 from uwtools.config.jinja2 import J2Template
+from uwtools.config.support import TaggedScalar
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 
 # Fixtures
+
+
+@fixture
+def deref_render_assets():
+    log.setLevel(logging.DEBUG)
+    return "{{ greeting + ' ' + recipient }}", {"greeting": "hello"}, {"recipient": "world"}
 
 
 @fixture
@@ -222,6 +229,49 @@ def test_render_values_needed(caplog, template, values_file):
     )
     for var in ("roses_color", "violets_color"):
         assert logged(caplog, var)
+
+
+@pytest.mark.parametrize("tag", ["!float", "!int"])
+def test__deref_convert_no(caplog, tag):
+    log.setLevel(logging.DEBUG)
+    loader = yaml.SafeLoader(os.devnull)
+    val = TaggedScalar(loader, yaml.ScalarNode(tag=tag, value="foo"))
+    assert jinja2._deref_convert(val=val) == val
+    assert not regex_logged(caplog, "Converted")
+    assert regex_logged(caplog, "Conversion failed")
+
+
+@pytest.mark.parametrize(
+    "converted,tag,value",
+    [(3.14, "!float", "3.14"), (88, "!int", "88"), ("48:00:00", "!str", "48:00:00")],
+)
+def test__deref_convert_ok(caplog, converted, tag, value):
+    log.setLevel(logging.DEBUG)
+    loader = yaml.SafeLoader(os.devnull)
+    val = TaggedScalar(loader, yaml.ScalarNode(tag=tag, value=value))
+    assert jinja2._deref_convert(val=val) == converted
+    assert regex_logged(caplog, "Converted")
+    assert not regex_logged(caplog, "Conversion failed")
+
+
+def test__deref_debug(caplog):
+    log.setLevel(logging.DEBUG)
+    jinja2._deref_debug(action="Frobnicated", val="foo")
+    assert logged(caplog, "[dereference] Frobnicated: foo")
+
+
+def test__deref_render_no(caplog, deref_render_assets):
+    val, context, _ = deref_render_assets
+    assert val == jinja2._deref_render(val=val, context=context)
+    assert not regex_logged(caplog, "Rendered")
+    assert regex_logged(caplog, "Rendering failed")
+
+
+def test__deref_render_ok(caplog, deref_render_assets):
+    val, context, local = deref_render_assets
+    assert "hello world" == jinja2._deref_render(val=val, context=context, local=local)
+    assert regex_logged(caplog, "Rendered")
+    assert not regex_logged(caplog, "Rendering failed")
 
 
 def test__dry_run_template(caplog):
