@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access
 """
 Tests for uwtools.config.jinja2 module.
 """
@@ -6,7 +6,8 @@ Tests for uwtools.config.jinja2 module.
 import logging
 
 import pytest
-from pytest import raises
+import yaml
+from pytest import fixture, raises
 
 from uwtools.config import support
 from uwtools.config.formats.fieldtable import FieldTableConfig
@@ -51,3 +52,46 @@ def test_log_and_error(caplog):
         raise support.log_and_error(msg)
     assert msg in str(e.value)
     assert logged(caplog, msg)
+
+
+class Test_TaggedScalar:
+    """
+    Tests for class uwtools.config.support.TaggedScalar.
+    """
+
+    @fixture
+    def loader(self):
+        return YAMLConfig(config={})._yaml_loader
+
+    def test_float_no(self, loader):
+        ts = support.TaggedScalar(loader, yaml.ScalarNode(tag="!float", value="foo"))
+        with raises(ValueError):
+            ts.convert()
+
+    def test_float_ok(self, loader):
+        ts = support.TaggedScalar(loader, yaml.ScalarNode(tag="!float", value="3.14"))
+        assert ts.convert() == 3.14
+
+    def test_int_no(self, loader):
+        ts = support.TaggedScalar(loader, yaml.ScalarNode(tag="!int", value="foo"))
+        with raises(ValueError):
+            ts.convert()
+
+    def test_int_ok(self, loader):
+        ts = support.TaggedScalar(loader, yaml.ScalarNode(tag="!int", value="88"))
+        assert ts.convert() == 88
+
+    def test_str_no(self):
+        # Everything has a string representation.
+        pass
+
+    def test_str_ok(self, loader):
+        # Compare
+        #   >>> yaml.safe_load("48:00:00") # <-- YAML parsees this as an int
+        #   172800
+        # to
+        #   >>> yaml.safe_load("'48:00:00'") # <-- note interior quotes
+        #   '48:00:00'
+        # So a YAML input could either quote the value, or tag it with !str.
+        ts = support.TaggedScalar(loader, yaml.ScalarNode(tag="!str", value="48:00:00"))
+        assert ts.convert() == "48:00:00"

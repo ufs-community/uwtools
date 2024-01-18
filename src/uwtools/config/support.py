@@ -60,19 +60,19 @@ class TaggedScalar:
     method. See the pyyaml documentation for details.
     """
 
-    TAGS = ("!bool", "!float", "!int", "!str")
+    TAGS = ("!float", "!int", "!str")
 
     def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
         self.tag: str = node.tag
         self.value: str = node.value
 
-    def convert(self) -> Union[bool, float, int, str]:
+    def convert(self) -> Union[float, int, str]:
         """
         Return the original YAML value converted to the specified type.
 
         Will raise an exception if the value cannot be represented as the specified type.
         """
-        converters: Dict[str, type] = dict(zip(self.TAGS, [bool, float, int, str]))
+        converters: Dict[str, type] = dict(zip(self.TAGS, [float, int, str]))
         return converters[self.tag](self.value)
 
     @staticmethod
