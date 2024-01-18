@@ -125,13 +125,13 @@ def test_dereference(caplog, tmp_path):
     #   - Initially-unrenderable values may be rendered via iteration.
     #   - Finally-unrenderable values do not cause errors and are returned unmodified.
     log.setLevel(logging.DEBUG)
-    path = tmp_path / "config.yaml"
     yaml = """
 a: !int '{{ b.c + 11 }}'
 b:
   c: !int '{{ N | int + 11 }}'
 d: '{{ X }}'
 """.strip()
+    path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
         print(yaml, file=f)
     config = YAMLConfig(path)
