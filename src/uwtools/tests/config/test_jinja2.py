@@ -44,7 +44,7 @@ roses_color: red
 violets_color: blue
 cannot:
     override: this
-"""
+""".strip()
     with open(path, "w", encoding="utf-8") as f:
         f.write(yaml)
     return str(path)
