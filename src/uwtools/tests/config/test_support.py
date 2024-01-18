@@ -90,19 +90,3 @@ class Test_TaggedScalar:
         ts = support.TaggedScalar(loader, yaml.ScalarNode(tag="!int", value="88"))
         assert ts.convert() == 88
         self.comp(ts, "!int '88'")
-
-    def test_str_no(self):
-        # Everything has a string representation.
-        pass
-
-    def test_str_ok(self, loader):
-        # Compare
-        #   >>> yaml.safe_load("48:00:00") # <-- YAML parsees this as an int
-        #   172800
-        # to
-        #   >>> yaml.safe_load("'48:00:00'") # <-- note interior quotes
-        #   '48:00:00'
-        # So a YAML input could either quote the value, or tag it with !str.
-        ts = support.TaggedScalar(loader, yaml.ScalarNode(tag="!str", value="48:00:00"))
-        assert ts.convert() == "48:00:00"
-        self.comp(ts, "!str '48:00:00'")

@@ -241,10 +241,7 @@ def test__deref_convert_no(caplog, tag):
     assert regex_logged(caplog, "Conversion failed")
 
 
-@pytest.mark.parametrize(
-    "converted,tag,value",
-    [(3.14, "!float", "3.14"), (88, "!int", "88"), ("48:00:00", "!str", "48:00:00")],
-)
+@pytest.mark.parametrize("converted,tag,value", [(3.14, "!float", "3.14"), (88, "!int", "88")])
 def test__deref_convert_ok(caplog, converted, tag, value):
     log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
