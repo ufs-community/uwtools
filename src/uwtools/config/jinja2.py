@@ -145,11 +145,7 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
 
     rendered: _YAMLVal
     if isinstance(val, dict):
-        new = {}
-        for k, v in val.items():
-            new[k] = dereference(v, context, local=val)
-        return new
-        # return {k: dereference(v, context, local=val) for k, v in val.items()}
+        return {k: dereference(v, context, local=val) for k, v in val.items()}
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):

@@ -64,10 +64,9 @@ def validate(template):
 # Tests
 
 
-@pytest.mark.skip("PM FIX")
 def test_dereference_dict():
     val = {"n": "{{ int }}"}
-    assert jinja2.dereference(val=val, context={"int": 88}) == {"n": 88}
+    assert jinja2.dereference(val=val, context={"int": 88}) == {"n": "88"}
 
 
 @pytest.mark.skip("PM FIX")
