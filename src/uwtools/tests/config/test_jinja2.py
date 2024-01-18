@@ -262,14 +262,14 @@ def test__deref_debug(caplog):
 
 def test__deref_render_no(caplog, deref_render_assets):
     val, context, _ = deref_render_assets
-    assert val == jinja2._deref_render(val=val, context=context)
+    assert jinja2._deref_render(val=val, context=context) == val
     assert not regex_logged(caplog, "Rendered")
     assert regex_logged(caplog, "Rendering failed")
 
 
 def test__deref_render_ok(caplog, deref_render_assets):
     val, context, local = deref_render_assets
-    assert "hello world" == jinja2._deref_render(val=val, context=context, local=local)
+    assert jinja2._deref_render(val=val, context=context, local=local) == "hello world"
     assert regex_logged(caplog, "Rendered")
     assert not regex_logged(caplog, "Rendering failed")
 
