@@ -63,7 +63,7 @@ class TaggedScalar:
         self.tag: str = node.tag
         self.value: str = node.value
 
-    def reify(self) -> Union[bool, float, int, str]:
+    def convert(self) -> Union[bool, float, int, str]:
         """
         PM WRITEME.
         """

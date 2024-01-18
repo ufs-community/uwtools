@@ -21,7 +21,7 @@ from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import get_file_format, readable, writable
 
-_YAMLVal = Union[bool, dict, float, int, list, str]
+_ConfigVal = Union[bool, dict, float, int, list, str, TaggedScalar]
 
 
 class J2Template:
@@ -106,7 +106,7 @@ class J2Template:
 # Public functions
 
 
-def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _YAMLVal:
+def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) -> _ConfigVal:
     """
     Render Jinja2 syntax, wherever possible.
 
@@ -127,42 +127,75 @@ def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _
 
     # PM FIX UP THIS DOCSTRING!
 
-    def debug(action: str, val: _YAMLVal) -> None:
-        log.debug("[dereference] %s: %s", action, val)
-
-    def deref_render(val: str) -> str:
-        try:
-            rendered = (
-                _register_filters(Environment(undefined=StrictUndefined))
-                .from_string(val)
-                .render({**(local or {}), **context})
-            )
-            debug("Rendered", rendered)
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            debug("Rendering failed", str(e))
-            rendered = val
-        return rendered
-
-    rendered: _YAMLVal
+    rendered: _ConfigVal = val  # fall-back value
     if isinstance(val, dict):
         return {k: dereference(v, context, local=val) for k, v in val.items()}
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
-        debug("Rendering", val)
-        rendered = deref_render(val)
+        _deref_debug("Rendering", val)
+        rendered = _deref_render(val, context, local)
     elif isinstance(val, TaggedScalar):
-        debug("Rendering", val.value)
-        val.value = deref_render(val.value)
-        debug("Reifying", val.value)
-        try:
-            rendered = val.reify()
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            debug("Reifying failed", str(e))
-            rendered = val
-        debug("Reified", val.value)
+        _deref_debug("Rendering", val.value)
+        val.value = _deref_render(val.value, context, local)
+        rendered = _deref_convert(val)
     else:
-        debug("Accepting", val)
+        _deref_debug("Accepting", val)
+    return rendered
+
+
+def _deref_convert(val: TaggedScalar) -> _ConfigVal:
+    """
+    Convert a string tagged with an explicit type.
+
+    If conversion cannot be performed (e.g. the value was tagged as an int but int() is not a value
+    that can be represented as an int, the original value will be returned unchanged.
+
+    :param val: A scalar value tagged with an explicit type.
+    :return: The value translated to the specified type.
+    """
+    converted: _ConfigVal = val  # fall-back value
+    _deref_debug("Converting", val.value)
+    try:
+        converted = val.convert()
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        _deref_debug("Conversion failed", str(e))
+    _deref_debug("Converted", val.value)
+    return converted
+
+
+def _deref_debug(action: str, val: _ConfigVal) -> None:
+    """
+    Log a debug-level message related to dereferencing.
+
+    :param action: The dereferencing activity being performed.
+    :param val: The value being dereferenced.
+    """
+    log.debug("[dereference] %s: %s", action, val)
+
+
+def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
+    """
+    Render a Jinja2 variable/expression as part of dereferencing.
+
+    If this function cannot render the value, either because it contains no Jinja2 syntax or because
+    insufficient context is currently available, a debug message will be logged and the original
+    value will be returned unchanged.
+
+    :param val: The value potentially containing Jinja2 syntax to render.
+    :param context: Values to use when rendering Jinja2 syntax.
+    :param local: Local sibling values to use if a match is not found in context.
+    :return: The rendered value (potentially unchanged).
+    """
+    try:
+        rendered = (
+            _register_filters(Environment(undefined=StrictUndefined))
+            .from_string(val)
+            .render({**(local or {}), **context})
+        )
+        _deref_debug("Rendered", rendered)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        _deref_debug("Rendering failed", str(e))
         rendered = val
     return rendered
 
