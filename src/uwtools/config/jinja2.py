@@ -215,7 +215,7 @@ def _deref_convert(val: TaggedString) -> _ConfigVal:
     _deref_debug("Converting", val.value)
     try:
         converted = val.convert()
-        _deref_debug("Converted", val.value)
+        _deref_debug("Converted", converted)
     except Exception as e:  # pylint: disable=broad-exception-caught
         _deref_debug("Conversion failed", str(e))
     return converted
