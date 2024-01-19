@@ -90,3 +90,7 @@ class Test_TaggedString:
         ts = support.TaggedString(loader, yaml.ScalarNode(tag="!int", value="88"))
         assert ts.convert() == 88
         self.comp(ts, "!int '88'")
+
+    def test___repr__(self, loader):
+        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!int", value="88"))
+        assert str(ts) == "!int 88"

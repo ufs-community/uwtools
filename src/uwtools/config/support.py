@@ -66,6 +66,9 @@ class TaggedString:
         self.tag: str = node.tag
         self.value: str = node.value
 
+    def __repr__(self) -> str:
+        return "%s %s" % (self.tag, self.value)
+
     def convert(self) -> Union[float, int]:
         """
         Return the original YAML value converted to the specified type.
