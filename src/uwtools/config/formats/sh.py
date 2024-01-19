@@ -54,15 +54,15 @@ class SHConfig(Config):
         :param path: Path to dump config to.
         """
         config_check_depths_dump(config_obj=self, target_format=FORMAT.sh)
-        self.dump_dict(path, self.data)
+        self.dump_dict(self.data, path)
 
     @staticmethod
-    def dump_dict(path: OptionalPath, cfg: dict) -> None:
+    def dump_dict(cfg: dict, path: OptionalPath = None) -> None:
         """
         Dumps a provided config dictionary in bash format.
 
-        :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
+        :param path: Path to dump config to.
         """
 
         # Write first to a StringIO object to avoid creating a partial file in case of problems

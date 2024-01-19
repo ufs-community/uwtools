@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 from importlib import import_module
-from typing import Type
+from typing import Dict, Type, Union
+
+import yaml
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -46,3 +50,40 @@ def log_and_error(msg: str) -> Exception:
     """
     log.error(msg)
     return UWConfigError(msg)
+
+
+class TaggedString:
+    """
+    A class supporting custom YAML tags specifying type conversions.
+
+    The constructor implements the interface required by a pyyaml Loader object's add_consructor()
+    method. See the pyyaml documentation for details.
+    """
+
+    TAGS = ("!float", "!int")
+
+    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
+        self.tag: str = node.tag
+        self.value: str = node.value
+
+    def __repr__(self) -> str:
+        return "%s %s" % (self.tag, self.value)
+
+    def convert(self) -> Union[float, int]:
+        """
+        Return the original YAML value converted to the specified type.
+
+        Will raise an exception if the value cannot be represented as the specified type.
+        """
+        converters: Dict[str, type] = dict(zip(self.TAGS, [float, int]))
+        return converters[self.tag](self.value)
+
+    @staticmethod
+    def represent(dumper: yaml.Dumper, data: TaggedString) -> yaml.nodes.ScalarNode:
+        """
+        Serialize a tagged scalar as "!type value".
+
+        Implements the interface required by pyyaml's add_representer() function. See the pyyaml
+        documentation for details.
+        """
+        return dumper.represent_scalar(data.tag, data.value)

@@ -13,10 +13,11 @@ from pytest import fixture, raises
 
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import depth
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.tests.support import fixture_path, logged, regex_logged
+from uwtools.tests.support import fixture_path, logged
 from uwtools.utils.file import FORMAT, readable
 
 # Fixtures
@@ -43,11 +44,11 @@ class ConcreteConfig(Config):
         with readable(config_file) as f:
             return yaml.safe_load(f.read())
 
-    def dump(self, path):
+    def dump(self, path=None):
         pass
 
     @staticmethod
-    def dump_dict(path, cfg, opts=None):
+    def dump_dict(cfg, path=None):
         pass
 
     @staticmethod
@@ -117,24 +118,26 @@ def test_depth(config):
     assert config.depth == 1
 
 
-def test_dereference(caplog, config):
+def test_dereference(tmp_path):
     # Test demonstrates that:
     #   - Config dereferencing uses environment variables.
     #   - Initially-unrenderable values do not cause errors.
     #   - Initially-unrenderable values may be rendered via iteration.
     #   - Finally-unrenderable values do not cause errors and are returned unmodified.
     log.setLevel(logging.DEBUG)
-    assert config == {"foo": 88}
-    config.update({"a": "{{ b.c + 11 }}", "b": {"c": "{{ N | int + 11 }}"}, "d": "{{ X }}"})
+    yaml = """
+a: !int '{{ b.c + 11 }}'
+b:
+  c: !int '{{ N | int + 11 }}'
+d: '{{ X }}'
+""".strip()
+    path = tmp_path / "config.yaml"
+    with open(path, "w", encoding="utf-8") as f:
+        print(yaml, file=f)
+    config = YAMLConfig(path)
     with patch.dict(os.environ, {"N": "55"}, clear=True):
         config.dereference()
-    for excerpt in [
-        "'a': '{{ b.c + 11 }}', 'b': {'c': '{{ N | int + 11 }}'}, 'd': '{{ X }}'",
-        "'a': '{{ b.c + 11 }}', 'b': {'c': 66}, 'd': '{{ X }}'",
-        "'a': 77, 'b': {'c': 66}, 'd': '{{ X }}'",
-    ]:
-        assert regex_logged(caplog, excerpt)
-    assert config == {"foo": 88, "a": 77, "b": {"c": 66}, "d": "{{ X }}"}
+    assert config == {"a": 77, "b": {"c": 66}, "d": "{{ X }}"}
 
 
 @pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
@@ -147,7 +150,7 @@ def test_invalid_config(caplog, fmt2, tmp_path):
     cfgin = tools.format_to_config(fmt1)(fixture_path("hello_workflow.yaml"))
     depthin = depth(cfgin.data)
     with raises(UWConfigError) as e:
-        tools.format_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)
+        tools.format_to_config(fmt2).dump_dict(cfg=cfgin.data, path=outfile)
     msg = f"Cannot dump depth-{depthin} config to type-'{fmt2}' config"
     assert logged(caplog, msg)
     assert msg in str(e.value)
@@ -186,7 +189,7 @@ def test_transform_config(fmt1, fmt2, tmp_path):
     outfile = tmp_path / f"test_{fmt1}to{fmt2}_dump.{fmt2}"
     reference = fixture_path(f"simple.{fmt2}")
     cfgin = tools.format_to_config(fmt1)(fixture_path(f"simple.{fmt1}"))
-    tools.format_to_config(fmt2).dump_dict(path=outfile, cfg=cfgin.data)
+    tools.format_to_config(fmt2).dump_dict(cfg=cfgin.data, path=outfile)
     with open(reference, "r", encoding="utf-8") as f1:
         reflines = [line.strip().replace("'", "") for line in f1]
     with open(outfile, "r", encoding="utf-8") as f2:

@@ -116,7 +116,7 @@ def realize_config(
         _realize_config_values_needed(input_obj)
         return {}
     output_obj = format_to_config(output_format)
-    output_obj.dump_dict(path=output_file, cfg=input_obj.data)
+    output_obj.dump_dict(cfg=input_obj.data, path=output_file)
     return input_obj.data
 
 

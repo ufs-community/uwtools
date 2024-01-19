@@ -54,15 +54,15 @@ class NMLConfig(Config):
         """
         config_check_depths_dump(config_obj=self, target_format=FORMAT.nml)
 
-        self.dump_dict(path, self.data)
+        self.dump_dict(self.data, path)
 
     @staticmethod
-    def dump_dict(path: OptionalPath, cfg: dict) -> None:
+    def dump_dict(cfg: dict, path: OptionalPath = None) -> None:
         """
         Dumps a provided config dictionary in Fortran namelist format.
 
-        :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
+        :param path: Path to dump config to.
         """
 
         # f90nml honors namelist and variable order if it receives an OrderedDict as input, so
