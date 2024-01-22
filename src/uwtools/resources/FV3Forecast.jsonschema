@@ -10,6 +10,13 @@
           },
           "type": "object"
         },
+        "domain": {
+          "enum": [
+            "global",
+            "regional"
+          ],
+          "type": "string"
+        },
         "executable": {
           "format": "uri",
           "type": "string"
@@ -69,14 +76,8 @@
             "type": "string"
           },
           "type": "object"
-        },
-        "domain": {
-          "enum": [
-              "global",
-              "regional"
-          ],
-          "type": "string"
-        },
+        }
+      },
       "type": "object"
     },
     "platform": {
