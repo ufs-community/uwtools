@@ -30,6 +30,14 @@ def test__abort(capsys):
     assert msg in capsys.readouterr().err
 
 
+def test__abort_debug_logs_stacktrace(capsys):
+    msg = "Traceback (most recent call last)"
+    with patch.object(sys, "argv", STR.debug):
+        with raises(SystemExit):
+            cli._abort(msg)
+    assert msg in capsys.readouterr().err
+
+
 def test__add_subparser_config(subparsers):
     cli._add_subparser_config(subparsers)
     assert submodes(subparsers.choices[STR.config]) == [
@@ -133,7 +141,8 @@ def test__check_quiet_vs_verbose_fail(capsys):
     with raises(SystemExit):
         cli._check_quiet_vs_verbose(args)
     assert (
-        "Specify at most one of %s, %s" % (cli._switch(STR.quiet), cli._switch(STR.verbose))
+        "Specify at most one of %s, %s, or %s"
+        % (cli._switch(STR.debug), cli._switch(STR.quiet), cli._switch(STR.verbose))
         in capsys.readouterr().err
     )
 
@@ -425,11 +434,14 @@ def test__dispatch_template_render_yaml():
     )
 
 
+@pytest.mark.parametrize("debug", [False])
 @pytest.mark.parametrize("quiet", [True])
 @pytest.mark.parametrize("verbose", [False])
-def test_main_fail_checks(capsys, quiet, verbose):
+def test_main_fail_checks(capsys, debug, quiet, verbose):
     # Using mode 'template render' for testing.
     raw_args = ["testing", STR.template, STR.render]
+    if debug:
+        raw_args.append(cli._switch(STR.debug))
     if quiet:
         raw_args.append(cli._switch(STR.quiet))
     if verbose:

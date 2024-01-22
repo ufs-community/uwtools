@@ -46,7 +46,7 @@ def main() -> None:
         args, checks = _parse_args(sys.argv[1:])
         for check in checks[args[STR.mode]][args[STR.submode]]:
             check(args)
-        setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
+        setup_logging(quiet=args[STR.quiet], verbose=args[STR.debug or STR.verbose])
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
             STR.config: _dispatch_config,
@@ -468,6 +468,15 @@ def _add_arg_cycle(group: Group) -> None:
     )
 
 
+def _add_arg_debug(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.debug),
+        "--debug",
+        action="store_true",
+        help="Print all logging messages and the stack trace",
+    )
+
+
 def _add_arg_dry_run(group: Group) -> None:
     group.add_argument(
         _switch(STR.dryrun),
@@ -636,17 +645,20 @@ def _abort(msg: str) -> None:
 
     :param msg: The message to print.
     """
+    if STR.debug in sys.argv:
+        log.exception(msg)
     print(msg, file=sys.stderr)
     sys.exit(1)
 
 
 def _add_args_quiet_and_verbose(group: Group) -> SubmodeChecks:
     """
-    Add quiet and verbose arguments.
+    Add debug, quiet and verbose arguments.
 
     :param group: The group to add the arguments to.
-    :return: Check for mutual exclusivity of quiet/verbose arguments.
+    :return: Check for mutual exclusivity of debug/quiet/verbose arguments.
     """
+    _add_arg_debug(group)
     _add_arg_quiet(group)
     _add_arg_verbose(group)
     return [_check_quiet_vs_verbose]
@@ -698,8 +710,11 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
 
 
 def _check_quiet_vs_verbose(args) -> Args:
-    if args.get(STR.quiet) and args.get(STR.verbose):
-        _abort("Specify at most one of %s, %s" % (_switch(STR.quiet), _switch(STR.verbose)))
+    if sum([args.get(STR.debug, 0), args.get(STR.quiet, 0), args.get(STR.verbose, 0)]) > 1:
+        _abort(
+            "Specify at most one of %s, %s, or %s"
+            % (_switch(STR.debug), _switch(STR.quiet), _switch(STR.verbose))
+        )
     return args
 
 
@@ -774,6 +789,7 @@ class STR:
     compare: str = "compare"
     config: str = "config"
     cycle: str = "cycle"
+    debug: str = "debug"
     dryrun: str = "dry_run"
     file1fmt: str = "file_1_format"
     file1path: str = "file_1_path"
