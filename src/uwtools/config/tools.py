@@ -87,6 +87,7 @@ def realize_config(
     NB: This docstring is dynamically replaced: See __doc__ definition below.
     """
     input_format = _ensure_format("input", input_format, input_config)
+    output_format = _ensure_format("output", output_format, output_file)
     input_obj = (
         input_config
         if isinstance(input_config, Config)
@@ -95,7 +96,6 @@ def realize_config(
     if supplemental_configs:
         input_obj = _realize_config_update(input_obj, supplemental_configs)
     input_obj.dereference()
-    output_format = _ensure_format("output", output_format, output_file)
     config_check_depths_realize(input_obj, output_format)
     if dry_run:
         for line in str(input_obj).strip().split("\n"):
