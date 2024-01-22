@@ -94,7 +94,6 @@ Rendering Template Files
 
 Requires a path to a template file in the ``template_file:`` entry. There is no option to add values in the YAML. Instead, the driver is programmed to enter necessary values for the template.
 
-
 UW YAML Keys
 ^^^^^^^^^^^^
 
@@ -117,7 +116,6 @@ The diag_table is described :weather-model-io:`here<diag-table-file>`.
 
 A switch to differentiate between a global or regional configuration. Accepted values are ``global`` and ``regional``.
 
-
 ``executable:``
 """""""""""""""
 
@@ -137,13 +135,12 @@ The section requires a ``base_file:`` entry that contains the path to the YAML f
 
 If a pre-defined field table (i.e., not a configurable YAML) is to be used, include it in the ``static:`` section.
 
-The documentation for the ``field_table`` file is :weather-model-io:`here<field-table-file>`. Information on how to structure the UW YAML for configuring a ``field_table`` is :any:`here<defining_a_field_table>`.
+The documentation for the ``field_table`` file is :weather-model-io:`here<field-table-file>`. Information on how to structure the UW YAML for configuring a ``field_table`` is in the :ref:`defining_a_field_table` Section.
 
 ``length:``
 """""""""""
 
 The length of the forecast in hours.
-
 
 ``model_configure:``
 """"""""""""""""""""
@@ -171,13 +168,10 @@ The documentation for the ``ufs.configure`` file is :weather-model-io:`here<ufs-
 
 The path where the forecast input data will be staged and output data will appear after a successful forecast.
 
-
 ``static:``
 """""""""""
 
 This block contains a set of files to stage in the run directory: file names as they appear in the run directory are keys and their source paths are the values. Source paths can be provided as a single string path, or a list of paths to be staged in a common directory under their original names.
-
-
 
 The ``platform:`` section
 -------------------------
@@ -189,7 +183,6 @@ The ``platform:`` section describes necessary facts about the computational plat
   platform:
     mpicmd: srun # required
     scheduler: slurm
-
 
 ``mpicmd:``
 ^^^^^^^^^^^
@@ -214,7 +207,6 @@ The ``preprocessing:`` section
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The optional section describes how the lateral boundary conditions have been prepared for a limited-area configuration of the model forecast. It is required for a limited-area forecast. The following entries in its subtree are used for the forecast:
 
-
 ``interval_hours:``
 """""""""""""""""""
 The integer number of hours setting how frequently the lateral boundary conditions will be used in the model forecast.
@@ -226,8 +218,6 @@ The integer number of hours indicates how many hours earlier the external model 
 ``output_file_path:``
 """""""""""""""""""""""""
 The path to the lateral boundary conditions files prepared for the forecast. It accepts the integer ``forecast_hour`` as a Python template, e.g., ``/path/to/srw.t00z.gfs_bndy.tile7.f{forecast_hour:03d}.nc``.
-
-
 
 The ``user:`` section
 ---------------------

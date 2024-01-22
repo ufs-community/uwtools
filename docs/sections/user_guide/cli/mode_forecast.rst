@@ -63,8 +63,7 @@ The examples use a configuration file named ``config.yaml``. Its contents are de
 
     $ uw forecast run -c config.yaml --cycle 2024-01-09T12 --model FV3
 
-  The forecast will run on the node where you have invoked this command. Optionally, capture the output in a log file using shell redirection 
-
+  The forecast will run on the node where you have invoked this command. Optionally, capture the output in a log file using shell redirection.
 
 * Run an FV3 forecast using a batch system 
 
@@ -80,18 +79,14 @@ The examples use a configuration file named ``config.yaml``. Its contents are de
 
     $ uw forecast run -c config.yaml --cycle 2024-01-09T12 --model FV3 --batch-script --dry-run
 
-
 * Request verbose log output
 
   .. code-block:: sh
 
     $ uw forecast run -c config.yaml --cycle 2024-01-09T12 --model FV3 -v
 
-
   Note that uw logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
 
   .. code-block:: sh
 
     $ uw forecast run -c config.yaml --cycle 2024-01-09T12 --model FV3 -v --dry-run --batch-script > submit_fv3.sh 2> forecast.log
-
-

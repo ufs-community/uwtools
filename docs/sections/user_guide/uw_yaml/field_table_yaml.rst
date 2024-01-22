@@ -49,4 +49,4 @@ The units for the tracer. This entry directly corresponds to the tracer units in
 ``profile_type:``
 ^^^^^^^^^^^^^^^^^
 
-This block requires a ``name:`` entry that descrives the profile type. Acceptable values (per the ``field_table`` spec) are ``fixed`` or ``profile``. The ``surface_value:`` is required in both cases, while the ``top_value:`` is required for only the ``profile`` option.
+This block requires a ``name:`` entry that describes the profile type. Acceptable values (per the ``field_table`` spec) are ``fixed`` or ``profile``. The ``surface_value:`` is required in both cases, while the ``top_value:`` is required for only the ``profile`` option.
