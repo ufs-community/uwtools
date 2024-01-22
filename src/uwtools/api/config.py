@@ -186,13 +186,20 @@ Recognized file extensions are: {extensions}
 
 
 realize.__doc__ = """
-Realize an output config based on an input config and an optional values-providing config.
+Realize an output config based on an input config and optional supplemental configs.
 
-If no input is specified, ``stdin`` is read. If no output is specified, ``stdout`` is written
-to. A ``dict`` may also be provided as an input value. When a filename is specified for an input
-or output, its format will be deduced from its extension, if possible. This can be overriden by
-specifying the format explicitly, and it is required to do so for reads from ``stdin`` or writes
-to ``stdout``, as no attempt is made to deduce the format of streamed data.
+If no input is specified, ``stdin`` is read. A ``dict`` or ``Config`` object may also be provided as
+input.  If no output is specified, ``stdout`` is written to. When an input or output filename is
+specified, its format will be deduced from its extension, if possible. This can be overriden by
+specifying the format explicitly, and it is required to do so for reads from ``stdin`` or writes to
+``stdout``, as no attempt is made to deduce the format of streamed data.
+
+If optional supplemental configs (which may likewise be file paths or ``Config`` / ``dict`` objects)
+are provided, they will be merged, in the order specified, onto the input config. The format of all
+input configs must match.
+
+If the input-config format is YAML, any supported output format may be specified. For all other
+input formats, the output format must match the input.
 
 If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
 ``dry_run`` mode, output is written to ``stderr``.
@@ -200,11 +207,10 @@ If ``values_needed`` is ``True``, a report of values needed to realize the confi
 Recognized file extensions are: {extensions}
 
 :param input_config: Input config file (``None`` or unspecified => read ``stdin``)
-:param input_format: Format of the input config
+:param input_format: Format of the input config (optional if file's extension is recognized)
 :param output_file: Output config file (``None`` or unspecified => write to ``stdout``)
-:param output_format: Format of the output config
-:param values: Source of values used to modify input
-:param values_format: Format of values when sourced from file
+:param output_format: Format of the output config (optional if file's extension is recognized)
+:param supplemental_configs: Configs to merge, in order, onto the input
 :param values_needed: Report complete, missing, and template values
 :param dry_run: Log output instead of writing to output
 :return: ``True``
@@ -214,12 +220,16 @@ Recognized file extensions are: {extensions}
 
 
 realize_to_dict.__doc__ = """
-Realize an output config based on an input config and an optional values-providing config.
+Realize an output config based on an input config and optional supplemental configs.
 
-If no input is specified, ``stdin`` is read. When a filename is specified for an input, its
-format will be deduced from its extension, if possible. This can be overriden by specifying the
-format explicitly, and it is required to do so for reads from ``stdin``, as no attempt is made
-to deduce the format of streamed data. A ``dict`` may also be provided as an input value.
+If no input is specified, ``stdin`` is read. A ``dict`` or ``Config`` object may also be provided as
+input. When an input filename is specified, its format will be deduced from its extension, if
+possible. This can be overriden by specifying the format explicitly, and it is required to do so for
+reads from ``stdin``, as no attempt is made to deduce the format of streamed data.
+
+If optional supplemental configs (which may likewise be file paths or ``Config`` / ``dict`` objects)
+are provided, they will be merged, in the order specified, onto the input config. The format of all
+input configs must match.
 
 If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
 ``dry_run`` mode, output is written to ``stderr``.
@@ -227,9 +237,8 @@ If ``values_needed`` is ``True``, a report of values needed to realize the confi
 Recognized file extensions are: {extensions}
 
 :param input_config: Input config file (``None`` or unspecified => read ``stdin``)
-:param input_format: Format of the input config
-:param values: Source of values used to modify input
-:param values_format: Format of values when sourced from file
+:param input_format: Format of the input config (optional if file's extension is recognized)
+:param supplemental_configs: Configs to merge, in order, onto the input
 :param values_needed: Report complete, missing, and template values
 :param dry_run: Log output instead of writing to output
 :return: A ``dict`` representing the realized config

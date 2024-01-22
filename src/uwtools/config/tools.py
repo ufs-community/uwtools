@@ -84,16 +84,7 @@ def realize_config(
     dry_run: bool = False,
 ) -> dict:
     """
-    Realize an output config based on an input config and optional values-providing configs.
-
-    :param input_config: Input config file (None => read stdin).
-    :param input_format: Format of the input config.
-    :param output_file: Output config file (None => write to stdout).
-    :param output_format: Format of the output config.
-    :param supplemental_configs: Sources of values used to modify input.
-    :param values_needed: Report complete, missing, and template values.
-    :param dry_run: Log output instead of writing to output.
-    :return: The realized config (or an empty-dict for no-op modes).
+    NB: This docstring is dynamically replaced: See __doc__ definition below.
     """
     input_format = _ensure_format("input", input_format, input_config)
     input_obj = (
@@ -264,6 +255,24 @@ Recognized file extensions are: {extensions}
 :param config_1_format: Format of 1st config file (optional if file's extension is recognized)
 :param config_2_format: Format of 2nd config file (optional if file's extension is recognized)
 :return: ``False`` if config files had differences, otherwise ``True``
+""".format(
+    extensions=", ".join(FORMAT.formats())
+).strip()
+
+
+realize_config.__doc__ = """
+Realize an output config based on an input config and optional values-providing configs.
+
+Recognized file extensions are: {extensions}
+
+:param input_config: Input config file (None => read stdin).
+:param input_format: Format of the input config.
+:param output_file: Output config file (None => write to stdout).
+:param output_format: Format of the output config.
+:param supplemental_configs: Sources of values used to modify input.
+:param values_needed: Report complete, missing, and template values.
+:param dry_run: Log output instead of writing to output.
+:return: The realized config (or an empty-dict for no-op modes).
 """.format(
     extensions=", ".join(FORMAT.formats())
 ).strip()
