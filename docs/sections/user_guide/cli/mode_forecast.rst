@@ -55,7 +55,7 @@ The ``uw`` mode for configuring and running forecasts.
 Examples
 ^^^^^^^^
 
-The examples use a configuration file named ``config.yaml``. Its contents are described in depth in Section :ref:`Forecast YAML`.
+The examples use a configuration file named ``config.yaml``. Its contents are described in depth in Section :ref:`forecast_yaml`.
 
 * Run an FV3 forecast on an interactive node
 
