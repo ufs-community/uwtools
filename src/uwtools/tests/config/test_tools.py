@@ -95,7 +95,7 @@ def test_compare_configs_good(compare_configs_assets, caplog):
     log.setLevel(logging.INFO)
     _, a, b = compare_configs_assets
     assert tools.compare_configs(
-        config_a_path=a, config_a_format=FORMAT.yaml, config_b_path=b, config_b_format=FORMAT.yaml
+        config_1_path=a, config_1_format=FORMAT.yaml, config_2_path=b, config_2_format=FORMAT.yaml
     )
     assert caplog.records
 
@@ -107,7 +107,7 @@ def test_compare_configs_changed_value(compare_configs_assets, caplog):
     with writable(b) as f:
         yaml.dump(d, f)
     assert not tools.compare_configs(
-        config_a_path=a, config_a_format=FORMAT.yaml, config_b_path=b, config_b_format=FORMAT.yaml
+        config_1_path=a, config_1_format=FORMAT.yaml, config_2_path=b, config_2_format=FORMAT.yaml
     )
     assert logged(caplog, "baz:             qux:  - 99 + 11")
 
@@ -120,23 +120,21 @@ def test_compare_configs_missing_key(compare_configs_assets, caplog):
         yaml.dump(d, f)
     # Note that a and b are swapped:
     assert not tools.compare_configs(
-        config_a_path=b, config_a_format=FORMAT.yaml, config_b_path=a, config_b_format=FORMAT.yaml
+        config_1_path=b, config_1_format=FORMAT.yaml, config_2_path=a, config_2_format=FORMAT.yaml
     )
     assert logged(caplog, "baz:             qux:  - None + 99")
 
 
 def test_compare_configs_bad_format(caplog):
     log.setLevel(logging.INFO)
-    with raises(UWConfigError) as e:
-        tools.compare_configs(
-            config_a_path="/not/used",
-            config_a_format="jpg",
-            config_b_path="/not/used",
-            config_b_format=FORMAT.yaml,
-        )
-    msg = "Format 'jpg' should be one of: fieldtable, ini, nml, sh, yaml"
+    assert not tools.compare_configs(
+        config_1_path="/not/used",
+        config_1_format="jpg",
+        config_2_path="/not/used",
+        config_2_format=FORMAT.yaml,
+    )
+    msg = "Formats do not match: jpg vs yaml"
     assert logged(caplog, msg)
-    assert msg in str(e.value)
 
 
 def test_config_check_depths_realize_fail(caplog, realize_config_testobj):
@@ -351,14 +349,14 @@ temporalis: c
 
 
 def test_realize_config_supp_bad_format(tmp_path):
-    with raises(ValueError) as e:
-        path = tmp_path / "a.yaml"
-        supplemental_path = tmp_path / "b.clj"
-        msg = f"Cannot deduce format of '{supplemental_path}' from unknown extension 'clj'"
-        with writable(path) as f:
-            yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}", "deref": "b"}, f)
-        with writable(supplemental_path) as f:
-            yaml.dump({"2": "b", "temporalis": "c"}, f)
+    path = tmp_path / "a.yaml"
+    supplemental_path = tmp_path / "b.clj"
+    msg = f"Cannot deduce format of '{supplemental_path}' from unknown extension 'clj'"
+    with writable(path) as f:
+        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}", "deref": "b"}, f)
+    with writable(supplemental_path) as f:
+        yaml.dump({"2": "b", "temporalis": "c"}, f)
+    with raises(UWError) as e:
         tools.realize_config(
             input_config=path,
             input_format=FORMAT.yaml,

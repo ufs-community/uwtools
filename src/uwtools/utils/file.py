@@ -5,7 +5,7 @@ Helpers for working with files and directories.
 import shutil
 import sys
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from datetime import datetime as dt
 from functools import cache
 from importlib import resources
@@ -13,6 +13,7 @@ from io import StringIO
 from pathlib import Path
 from typing import IO, Any, Generator, List, Union
 
+from uwtools.exceptions import UWError
 from uwtools.logging import log
 from uwtools.types import DefinitePath, ExistAct, OptionalPath
 
@@ -46,6 +47,13 @@ class FORMAT:
     sh: str = _sh
     yaml: str = _yaml
     yml: str = _yaml
+
+    @staticmethod
+    def formats() -> List[str]:
+        """
+        Returns recognized format names.
+        """
+        return sorted(x.name for x in fields(FORMAT) if not x.name.startswith("_"))
 
 
 class StdinProxy:
@@ -88,7 +96,7 @@ def get_file_format(path: DefinitePath) -> str:
         return fmt
     msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
     log.critical(msg)
-    raise ValueError(msg)
+    raise UWError(msg)
 
 
 def handle_existing(directory: DefinitePath, exist_act: str) -> None:

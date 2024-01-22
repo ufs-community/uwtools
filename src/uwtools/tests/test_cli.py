@@ -17,6 +17,7 @@ import uwtools.api.template
 import uwtools.drivers.forecast
 from uwtools import cli
 from uwtools.cli import STR
+from uwtools.exceptions import UWError
 from uwtools.logging import log
 from uwtools.utils.file import FORMAT
 
@@ -141,7 +142,7 @@ def test__check_quiet_vs_verbose_ok():
 def test__check_template_render_vals_args_implicit_fail():
     # The values-file format cannot be deduced from the filename.
     args = {STR.valsfile: "a.jpg"}
-    with raises(ValueError) as e:
+    with raises(UWError) as e:
         cli._check_template_render_vals_args(args)
     assert "Cannot deduce format" in str(e.value)
 
@@ -191,10 +192,10 @@ def test__dispatch_config_compare():
     with patch.object(cli.uwtools.api.config, "compare") as compare:
         cli._dispatch_config_compare(args)
     compare.assert_called_once_with(
-        config_a_path=args[STR.file1path],
-        config_a_format=args[STR.file1fmt],
-        config_b_path=args[STR.file2path],
-        config_b_format=args[STR.file2fmt],
+        config_1_path=args[STR.file1path],
+        config_1_format=args[STR.file1fmt],
+        config_2_path=args[STR.file2path],
+        config_2_format=args[STR.file2fmt],
     )
 
 

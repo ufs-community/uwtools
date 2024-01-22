@@ -164,10 +164,10 @@ def _dispatch_config_compare(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.config.compare(
-        config_a_path=args[STR.file1path],
-        config_a_format=args[STR.file1fmt],
-        config_b_path=args[STR.file2path],
-        config_b_format=args[STR.file2fmt],
+        config_1_path=args[STR.file1path],
+        config_1_format=args[STR.file1fmt],
+        config_2_path=args[STR.file2path],
+        config_2_format=args[STR.file2fmt],
     )
 
 

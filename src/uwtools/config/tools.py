@@ -15,26 +15,22 @@ from uwtools.utils.file import FORMAT, get_file_format
 # Public functions
 
 
-def compare_configs(
-    config_a_path: DefinitePath,
-    config_a_format: str,
-    config_b_path: DefinitePath,
-    config_b_format: str,
+def compare_configs(  # pylint: disable=missing-function-docstring
+    # See dynamic docstring definition later in module.
+    config_1_path: DefinitePath,
+    config_2_path: DefinitePath,
+    config_1_format: Optional[str] = None,
+    config_2_format: Optional[str] = None,
 ) -> bool:
-    """
-    Compare two config files.
-
-    :param config_a_path: Path to first config file.
-    :param config_a_format: Format of first config file.
-    :param config_b_path: Path to second config file.
-    :param config_b_format: Format of second config file.
-    :return: False if config files had differences, otherwise True.
-    """
-
-    cfg_a = format_to_config(config_a_format)(config_a_path)
-    cfg_b = format_to_config(config_b_format)(config_b_path)
-    log.info("- %s", config_a_path)
-    log.info("+ %s", config_b_path)
+    config_1_format = _ensure_format("1st config file", config_1_format, config_1_path)
+    config_2_format = _ensure_format("2nd config file", config_2_format, config_2_path)
+    if config_1_format != config_2_format:
+        log.error("Formats do not match: %s vs %s", config_1_format, config_2_format)
+        return False
+    cfg_a = format_to_config(config_1_format)(config_1_path)
+    cfg_b = format_to_config(config_2_format)(config_2_path)
+    log.info("- %s", config_1_path)
+    log.info("+ %s", config_2_path)
     log.info("-" * MSGWIDTH)
     return cfg_a.compare_config(cfg_b.data)
 
@@ -248,3 +244,24 @@ def _validate_depth(
         raise log_and_error(
             "Cannot %s depth-%s config to type-'%s' config" % (action, depth(config), target_format)
         )
+
+
+# pylint: disable=duplicate-code
+
+# The following statement dynamically interpolates values into compare_configs()'s docstring, which
+# will not work if the docstring is inlined in the function. It must remain a separate statement to
+# avoid hardcoding values into it.
+
+compare_configs.__doc__ = """
+Compare two config files.
+
+Recognized file extensions are: {extensions}
+
+:param config_1_path: Path to 1st config file
+:param config_2_path: Path to 2nd config file
+:param config_1_format: Format of 1st config file (optional if file's extension is recognized)
+:param config_2_format: Format of 2nd config file (optional if file's extension is recognized)
+:return: ``False`` if config files had differences, otherwise ``True``
+""".format(
+    extensions=", ".join(FORMAT.formats())
+).strip()
