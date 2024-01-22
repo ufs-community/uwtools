@@ -16,7 +16,7 @@ from uwtools.utils.file import FORMAT, get_file_format
 
 
 def compare_configs(  # pylint: disable=missing-function-docstring
-    # See dynamic docstring definition later in module.
+    # See compare_configs.__doc__ dynamic docstring below.
     config_1_path: DefinitePath,
     config_2_path: DefinitePath,
     config_1_format: Optional[str] = None,
