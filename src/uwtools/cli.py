@@ -102,7 +102,7 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> SubmodeChecks:
         helpmsg="Format of file 2",
         choices=FORMATS,
     )
-    checks = _add_args_quiet_and_verbose(optional)
+    checks = _add_args_verbosity(optional)
     return checks + [
         partial(_check_file_vs_format, STR.file1path, STR.file1fmt),
         partial(_check_file_vs_format, STR.file2path, STR.file2fmt),
@@ -123,7 +123,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_output_format(optional, choices=FORMATS)
     _add_arg_values_needed(optional)
     _add_arg_dry_run(optional)
-    checks = _add_args_quiet_and_verbose(optional)
+    checks = _add_args_verbosity(optional)
     _add_arg_supplemental_files(optional)
     return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
@@ -144,7 +144,7 @@ def _add_subparser_config_translate(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=[FORMAT.jinja2])
     _add_arg_dry_run(optional)
-    checks = _add_args_quiet_and_verbose(optional)
+    checks = _add_args_verbosity(optional)
     return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
         partial(_check_file_vs_format, STR.outfile, STR.outfmt),
@@ -162,7 +162,7 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_schema_file(required)
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
-    return _add_args_quiet_and_verbose(optional)
+    return _add_args_verbosity(optional)
 
 
 def _dispatch_config(args: Args) -> bool:
@@ -265,7 +265,7 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> SubmodeChecks:
     optional = _basic_setup(parser)
     _add_arg_batch_script(optional)
     _add_arg_dry_run(optional)
-    checks = _add_args_quiet_and_verbose(optional)
+    checks = _add_args_verbosity(optional)
     return checks
 
 
@@ -321,7 +321,7 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> SubmodeChecks:
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_output_file(optional)
-    checks = _add_args_quiet_and_verbose(optional)
+    checks = _add_args_verbosity(optional)
     return checks
 
 
@@ -334,7 +334,7 @@ def _add_subparser_rocoto_validate(subparsers: Subparsers) -> SubmodeChecks:
     parser = _add_subparser(subparsers, STR.validate, "Validate Rocoto XML")
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
-    checks = _add_args_quiet_and_verbose(optional)
+    checks = _add_args_verbosity(optional)
     return checks
 
 
@@ -401,7 +401,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_values_format(optional, choices=FORMATS)
     _add_arg_values_needed(optional)
     _add_arg_dry_run(optional)
-    checks = _add_args_quiet_and_verbose(optional)
+    checks = _add_args_verbosity(optional)
     _add_arg_key_eq_val_pairs(optional)
     return checks + [_check_template_render_vals_args]
 
@@ -651,7 +651,7 @@ def _abort(msg: str) -> None:
     sys.exit(1)
 
 
-def _add_args_quiet_and_verbose(group: Group) -> SubmodeChecks:
+def _add_args_verbosity(group: Group) -> SubmodeChecks:
     """
     Add debug, quiet and verbose arguments.
 
@@ -661,7 +661,7 @@ def _add_args_quiet_and_verbose(group: Group) -> SubmodeChecks:
     _add_arg_debug(group)
     _add_arg_quiet(group)
     _add_arg_verbose(group)
-    return [_check_quiet_vs_verbose]
+    return [_check_verbosity]
 
 
 def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
@@ -709,7 +709,7 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
     return args
 
 
-def _check_quiet_vs_verbose(args) -> Args:
+def _check_verbosity(args) -> Args:
     if sum([args.get(STR.debug, 0), args.get(STR.quiet, 0), args.get(STR.verbose, 0)]) > 1:
         _abort(
             "Specify at most one of %s, %s, or %s"

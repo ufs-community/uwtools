@@ -135,23 +135,6 @@ def test__check_file_vs_format_pass_implicit(fmt):
     assert args[STR.infmt] == vars(FORMAT)[fmt]
 
 
-def test__check_quiet_vs_verbose_fail(capsys):
-    log.setLevel(logging.INFO)
-    args = {STR.quiet: True, STR.verbose: True}
-    with raises(SystemExit):
-        cli._check_quiet_vs_verbose(args)
-    assert (
-        "Specify at most one of %s, %s, or %s"
-        % (cli._switch(STR.debug), cli._switch(STR.quiet), cli._switch(STR.verbose))
-        in capsys.readouterr().err
-    )
-
-
-def test__check_quiet_vs_verbose_ok():
-    args = {"foo": 88}
-    assert cli._check_quiet_vs_verbose(args) == args
-
-
 def test__check_template_render_vals_args_implicit_fail():
     # The values-file format cannot be deduced from the filename.
     args = {STR.valsfile: "a.jpg"}
@@ -177,6 +160,23 @@ def test__check_template_render_vals_args_noop_explicit_valsfmt():
     # An explicit values format is honored, valid or not.
     args = {STR.valsfile: "a.txt", STR.valsfmt: "jpg"}
     assert cli._check_template_render_vals_args(args) == args
+
+
+def test__check_verbosity_fail(capsys):
+    log.setLevel(logging.INFO)
+    args = {STR.quiet: True, STR.verbose: True}
+    with raises(SystemExit):
+        cli._check_verbosity(args)
+    assert (
+        "Specify at most one of %s, %s, or %s"
+        % (cli._switch(STR.debug), cli._switch(STR.quiet), cli._switch(STR.verbose))
+        in capsys.readouterr().err
+    )
+
+
+def test__check_verbosity_ok():
+    args = {"foo": 88}
+    assert cli._check_verbosity(args) == args
 
 
 def test__dict_from_key_eq_val_strings():
