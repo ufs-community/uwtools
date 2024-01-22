@@ -29,7 +29,7 @@ Entries can be manage in YAML with the form:
 Additional tracers may be added at the same level of YAML indentation as ``sphum:`` in the above example.
 
 UW YAML Keys
-============
+------------
 
 ``sphum:``
 ^^^^^^^^^^

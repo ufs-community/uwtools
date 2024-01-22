@@ -5,7 +5,7 @@ Forecast YAML
 
 The structured YAML to run a forecast is described below. It is enforced via JSON Schema.
 
-In this section, there are entries that define where the forecast will run (``run_directory:``), what will run (``executable:``), the data files that should be staged (``cycle-dependent:`` and ``static:``), and blocks that correspond to the configuration files required by the forecast model (``fd_nems:``, ``field_table:``, ``namelist:``, etc.). Each of the configuration file blocks will allow the user to set a template file as input, or to define a configuration file in its native key/value pair format with an option to update the values (``update_values:``) contained in the original input file (``base_file:``).
+In this section, there are entries that define where the forecast will run (``run_directory:``), what will run (``executable:``), the data files that should be staged (``cycle-dependent:`` and ``static:``), and blocks that correspond to the configuration files required by the forecast model (``fd_ufs:``, ``field_table:``, ``namelist:``, etc.). Each of the configuration file blocks will allow the user to set a template file as input, or to define a configuration file in its native key/value pair format with an option to update the values (``update_values:``) contained in the original input file (``base_file:``).
 
 The configuration files required by the ufs-weather-model are documented :weather-model-io:`here<model-configuration-files>`.
 
@@ -25,8 +25,8 @@ The ``forecast:`` section describes the specifics of the FV3 atmosphere forecast
       template_file: /path/to/diag_table/template/file
     domain: regional
     executable: fv3.exe
-    fd_nems:
-      base_file: /path/to/base/fd_nems.yaml
+    fd_ufs:
+      base_file: /path/to/base/fd_ufs.yaml
     field_table:
       base_file: /path/to/field_table.yaml
       update_values:
@@ -61,9 +61,9 @@ The ``forecast:`` section describes the specifics of the FV3 atmosphere forecast
 .. _updating_values:
 
 Updating Values
----------------
+^^^^^^^^^^^^^^^
 
-Many of the sections describe the configuration files needed by the FV3 Forecast model, i.e. namelist, fd_nems, model_configure. The ``base_file:`` entry is required so that the file will be staged. Modifications to the base file can be made at run time by providing an ``update_values:`` block.
+Many of the sections describe the configuration files needed by the FV3 Forecast model, i.e. namelist, fd_ufs, model_configure. The ``base_file:`` entry is required so that the file will be staged. Modifications to the base file can be made at run time by providing an ``update_values:`` block.
 
 To ensure the correct values are updated, all keys that act as section headers above the entry to be updated need to be provided in the order in which they appear in the base file. Multiple entries within a block may be updated and they need not follow the same order as those in the base file. For example, the base file named ``people.yaml`` may contain:
 
@@ -90,90 +90,90 @@ Then the entries under the YAML section would edit this base file with the entri
          number: 99
 
 Rendering Template Files
-------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 Requires a path to a template file in the ``template_file:`` entry. There is no option to add values in the YAML. Instead, the driver is programmed to enter necessary values for the template.
 
 
 UW YAML Keys
-------------
+^^^^^^^^^^^^
 
 ``cycle-dependent:``
-^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""
 
 This block contains a set of files to stage in the run directory: file names as they appear in the run directory are keys and their source paths are the values. Source paths can be provided as a single string path, or a list of paths to be staged in a common directory under their original names.
 
   .. warning:: The beta version does not support adding cycle information to the content of the files, and this information must be hard-coded in the YAML file.
 
 ``diag_table:``
-^^^^^^^^^^^^^^^
+"""""""""""""""
 
 In ``uwtools``, the ``diag_table`` is treated as a template so that the date and time information in the header may be filled in appropriately. The ``template_file:`` is the path to the input Jinja2 template. Date information is provided in the command line or API interfaces.
 
 The diag_table is described :weather-model-io:`here<diag-table-file>`.
 
 ``domain:``
-^^^^^^^^^^^
+"""""""""""
 
 A switch to differentiate between a global or regional configuration. Accepted values are ``global`` and ``regional``.
 
 
 ``executable:``
-^^^^^^^^^^^^^^^
+"""""""""""""""
 
 The path to the compiled executable.
 
 ``fd_ufs:``
-^^^^^^^^^^^^
+""""""""""""
 
 The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
 
-The ``fd_ufs.yaml`` file is a structured YAML used by the FV3 weather model. The tested version can be found in the :ufs-weather-model:`ufs-weather-model repository<blob/develop/tests/parm/fd_ufs.yaml>`.
+The ``fd_ufs.yaml`` file is a structured YAML used by the FV3 weather model. The tested version can be found in the :ufs-weather-model:`ufs-weather-model repository<blob/develop/tests/parm/fd_ufs.yaml>`. The naming convention for the dictionary entries are documented :cmeps:`here<>`.
 
 ``field_table:``
-^^^^^^^^^^^^^^^^
+""""""""""""""""
 
 The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
 
 If a pre-defined field table (i.e., not a configurable YAML) is to be used, include it in the ``static:`` section.
 
-The documentation for the ``field_table`` file is :weather-model-io:`here<field-table-file>`. Information on how to structure the UW YAML for configuring a ``field_table`` is in section :any:`<defining_a_field_table>`.
+The documentation for the ``field_table`` file is :weather-model-io:`here<field-table-file>`. Information on how to structure the UW YAML for configuring a ``field_table`` is :any:`here<defining_a_field_table>`.
 
 ``length:``
-^^^^^^^^^^^
+"""""""""""
 
 The length of the forecast in hours.
 
 
 ``model_configure:``
-^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""
 
 The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
 
 The documentation for the ``model_configure`` file is :weather-model-io:`here<model-configure-file>`.
 
 ``namelist:``
-^^^^^^^^^^^^^
+"""""""""""""
 
 The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
 
 The documentation for the FV3 namelist, ``input.nml`` is :weather-model-io:`here<namelist-file-input-nml>`.
 
 ``ufs.configure:``
-^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""
 
 In ``uwtools``, the ``nems.configure`` file is treated as a template so that the date and time information in the header may be filled in appropriately. The ``template_file:`` is the path to the input Jinja2 template. There is no option to add values in the YAML. Instead, the driver is programmed to enter necessary values for the template.
 
 The documentation for the ``ufs.configure`` file is :weather-model-io:`here<ufs-configure-file>`.
 
 ``run_dir:``
-^^^^^^^^^^^^
+""""""""""""
 
 The path where the forecast input data will be staged and output data will appear after a successful forecast.
 
 
 ``static:``
-^^^^^^^^^^^
+"""""""""""
 
 This block contains a set of files to stage in the run directory: file names as they appear in the run directory are keys and their source paths are the values. Source paths can be provided as a single string path, or a list of paths to be staged in a common directory under their original names.
 
