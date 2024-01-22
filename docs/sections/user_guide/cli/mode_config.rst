@@ -39,21 +39,21 @@ The ``uw`` mode for handling configs.
 
    Required arguments:
      --file-1-path PATH
-           Path to file 1
+         Path to file 1
      --file-2-path PATH
-           Path to file 2
+         Path to file 2
 
    Optional arguments:
      -h, --help
-           Show help and exit
+         Show help and exit
      --file-1-format {ini,nml,sh,yaml}
-           Format of file 1
+         Format of file 1
      --file-2-format {ini,nml,sh,yaml}
-           Format of file 2
+         Format of file 2
      --quiet, -q
-           Print no logging messages
+         Print no logging messages
      --verbose, -v
-           Print all logging messages
+         Print all logging messages
 
 Examples
 ^^^^^^^^
