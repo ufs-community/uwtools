@@ -15,13 +15,15 @@ from uwtools.utils.file import FORMAT, get_file_format
 # Public functions
 
 
-def compare_configs(  # pylint: disable=missing-function-docstring
-    # See compare_configs.__doc__ dynamic docstring below.
+def compare_configs(
     config_1_path: DefinitePath,
     config_2_path: DefinitePath,
     config_1_format: Optional[str] = None,
     config_2_format: Optional[str] = None,
 ) -> bool:
+    """
+    NB: This docstring is dynamically replaced: See __doc__ definition below.
+    """
     config_1_format = _ensure_format("1st config file", config_1_format, config_1_path)
     config_2_format = _ensure_format("2nd config file", config_2_format, config_2_path)
     if config_1_format != config_2_format:
@@ -248,9 +250,9 @@ def _validate_depth(
 
 # pylint: disable=duplicate-code
 
-# The following statement dynamically interpolates values into compare_configs()'s docstring, which
-# will not work if the docstring is inlined in the function. It must remain a separate statement to
-# avoid hardcoding values into it.
+# The following statements dynamically interpolate values into functions' docstrings, which will not
+# work if the docstrings are inlined in the functions. They must remain separate statements to avoid
+# hardcoding values into them.
 
 compare_configs.__doc__ = """
 Compare two config files.

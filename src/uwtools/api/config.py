@@ -16,13 +16,15 @@ from uwtools.utils.file import FORMAT as _FORMAT
 # Public
 
 
-def compare(  # pylint: disable=missing-function-docstring
-    # See compare.__doc__ dynamic docstring below.
+def compare(
     config_1_path: DefinitePath,
     config_2_path: DefinitePath,
     config_1_format: Optional[str] = None,
     config_2_format: Optional[str] = None,
 ) -> bool:
+    """
+    NB: This docstring is dynamically replaced: See __doc__ definition below.
+    """
     return _compare(
         config_1_path=config_1_path,
         config_2_path=config_2_path,
@@ -95,26 +97,7 @@ def realize(
     dry_run: bool = False,
 ) -> bool:
     """
-    Realize an output config based on an input config and an optional values-providing config.
-
-    If no input is specified, ``stdin`` is read. If no output is specified, ``stdout`` is written
-    to. A ``dict`` may also be provided as an input value. When a filename is specified for an input
-    or output, its format will be deduced from its extension, if possible. This can be overriden by
-    specifying the format explicitly, and it is required to do so for reads from ``stdin`` or writes
-    to ``stdout``, as no attempt is made to deduce the format of streamed data.
-
-    If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
-    ``dry_run`` mode, output is written to ``stderr``.
-
-    :param input_config: Input config file (``None`` or unspecified => read ``stdin``)
-    :param input_format: Format of the input config
-    :param output_file: Output config file (``None`` or unspecified => write to ``stdout``)
-    :param output_format: Format of the output config
-    :param values: Source of values used to modify input
-    :param values_format: Format of values when sourced from file
-    :param values_needed: Report complete, missing, and template values
-    :param dry_run: Log output instead of writing to output
-    :return: ``True``
+    NB: This docstring is dynamically replaced: See __doc__ definition below.
     """
     _realize(
         input_config=_ensure_config_arg_type(input_config),
@@ -136,23 +119,7 @@ def realize_to_dict(
     dry_run: bool = False,
 ) -> dict:
     """
-    Realize an output config based on an input config and an optional values-providing config.
-
-    If no input is specified, ``stdin`` is read. When a filename is specified for an input, its
-    format will be deduced from its extension, if possible. This can be overriden by specifying the
-    format explicitly, and it is required to do so for reads from ``stdin``, as no attempt is made
-    to deduce the format of streamed data. A ``dict`` may also be provided as an input value.
-
-    If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
-    ``dry_run`` mode, output is written to ``stderr``.
-
-    :param input_config: Input config file (``None`` or unspecified => read ``stdin``)
-    :param input_format: Format of the input config
-    :param values: Source of values used to modify input
-    :param values_format: Format of values when sourced from file
-    :param values_needed: Report complete, missing, and template values
-    :param dry_run: Log output instead of writing to output
-    :return: A ``dict`` representing the realized config
+    NB: This docstring is dynamically replaced: See __doc__ definition below.
     """
     return _realize(
         input_config=_ensure_config_arg_type(input_config),
@@ -199,9 +166,9 @@ def _ensure_config_arg_type(
 
 # pylint: disable=duplicate-code
 
-# The following statement dynamically interpolates values into compare()'s docstring, which will not
-# work if the docstring is inlined in the function. It must remain a separate statement to avoid
-# hardcoding values into it.
+# The following statements dynamically interpolate values into functions' docstrings, which will not
+# work if the docstrings are inlined in the functions. They must remain separate statements to avoid
+# hardcoding values into them.
 
 compare.__doc__ = """
 Compare two config files.
@@ -213,6 +180,59 @@ Recognized file extensions are: {extensions}
 :param config_1_format: Format of 1st config file (optional if file's extension is recognized)
 :param config_2_format: Format of 2nd config file (optional if file's extension is recognized)
 :return: ``False`` if config files had differences, otherwise ``True``
+""".format(
+    extensions=", ".join(_FORMAT.formats())
+).strip()
+
+
+realize.__doc__ = """
+Realize an output config based on an input config and an optional values-providing config.
+
+If no input is specified, ``stdin`` is read. If no output is specified, ``stdout`` is written
+to. A ``dict`` may also be provided as an input value. When a filename is specified for an input
+or output, its format will be deduced from its extension, if possible. This can be overriden by
+specifying the format explicitly, and it is required to do so for reads from ``stdin`` or writes
+to ``stdout``, as no attempt is made to deduce the format of streamed data.
+
+If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
+``dry_run`` mode, output is written to ``stderr``.
+
+Recognized file extensions are: {extensions}
+
+:param input_config: Input config file (``None`` or unspecified => read ``stdin``)
+:param input_format: Format of the input config
+:param output_file: Output config file (``None`` or unspecified => write to ``stdout``)
+:param output_format: Format of the output config
+:param values: Source of values used to modify input
+:param values_format: Format of values when sourced from file
+:param values_needed: Report complete, missing, and template values
+:param dry_run: Log output instead of writing to output
+:return: ``True``
+""".format(
+    extensions=", ".join(_FORMAT.formats())
+).strip()
+
+
+realize_to_dict.__doc__ = """
+Realize an output config based on an input config and an optional values-providing config.
+
+If no input is specified, ``stdin`` is read. When a filename is specified for an input, its
+format will be deduced from its extension, if possible. This can be overriden by specifying the
+format explicitly, and it is required to do so for reads from ``stdin``, as no attempt is made
+to deduce the format of streamed data. A ``dict`` may also be provided as an input value.
+
+If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
+``dry_run`` mode, output is written to ``stderr``.
+
+Recognized file extensions are: {extensions}
+
+:param input_config: Input config file (``None`` or unspecified => read ``stdin``)
+:param input_format: Format of the input config
+:param values: Source of values used to modify input
+:param values_format: Format of values when sourced from file
+:param values_needed: Report complete, missing, and template values
+:param dry_run: Log output instead of writing to output
+:return: A ``dict`` representing the realized config
 """.format(
     extensions=", ".join(_FORMAT.formats())
 ).strip()
