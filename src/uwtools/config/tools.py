@@ -239,6 +239,8 @@ def _validate_depth(
         )
 
 
+# Import-time code
+
 # pylint: disable=duplicate-code
 
 # The following statements dynamically interpolate values into functions' docstrings, which will not
