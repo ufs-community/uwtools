@@ -216,13 +216,14 @@ class FV3Forecast(Driver):
         """
         boundary_files = {}
         lbcs_config = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
-        boundary_file_template = lbcs_config["output_file_template"]
+        boundary_file_path = lbcs_config["output_file_path"]
         offset, interval, endhour = self._boundary_hours(lbcs_config)
-        for tile in self._config["tiles"]:
+        tiles = [7] if self._config["domain"] == "global" else range(1, 7)
+        for tile in tiles:
             for boundary_hour in range(offset, endhour, interval):
                 forecast_hour = boundary_hour - offset
                 link_name = f"INPUT/gfs_bndy.tile{tile}.{forecast_hour:03d}.nc"
-                boundary_file_path = boundary_file_template.format(
+                boundary_file_path = boundary_file_path.format(
                     tile=tile,
                     forecast_hour=boundary_hour,
                 )

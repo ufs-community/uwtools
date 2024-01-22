@@ -7,7 +7,7 @@ The structured YAML to run a forecast is described below. It is enforced via JSO
 
 In this section, there are entries that define where the forecast will run (``run_directory:``), what will run (``executable:``), the data files that should be staged (``cycle-dependent:`` and ``static:``), and blocks that correspond to the configuration files required by the forecast model (``fd_nems:``, ``field_table:``, ``namelist:``, etc.). Each of the configuration file blocks will allow the user to set a template file as input, or to define a configuration file in its native key/value pair format with an option to update the values (``update_values:``) contained in the original input file (``base_file:``).
 
-
+The configuration files required by the ufs-weather-model are documented :weather-model-io:`here<model-configuration-files>`.
 
 The ``forecast:`` section
 -------------------------
@@ -23,7 +23,8 @@ The ``forecast:`` section describes the specifics of the FV3 atmosphere forecast
       INPUT/gfs_ctrl.nc: /path/to/gfs_ctrl.nc
     diag_table:
       template_file: /path/to/diag_table/template/file
-    exec_name: fv3.exe
+    domain: regional
+    executable: fv3.exe
     fd_nems:
       base_file: /path/to/base/fd_nems.yaml
     field_table:
@@ -56,8 +57,6 @@ The ``forecast:`` section describes the specifics of the FV3 atmosphere forecast
       data_table: /path/to/data_table
       eta_micro_lookup.data: /path/to/noahmptable.dat
       noahmptable.tbl: /path/to/noahmptable.tbl
-    tiles:
-      - 7
 
 Updating Values
 ---------------
@@ -109,19 +108,25 @@ This block contains a set of files to stage in the run directory: file names as 
 
 In ``uwtools``, the ``diag_table`` is treated as a template so that the date and time information in the header may be filled in appropriately. The ``template_file:`` is the path to the input Jinja2 template. Date information is provided in the command line or API interfaces.
 
-The diag_table is described :diag_table:`here<>`.
+The diag_table is described :weather-model-io:`here<diag-table-file>`.
+
+``domain:``
+^^^^^^^^^^^
+
+A switch to differentiate between a global or regional configuration. Accepted values are ``global`` and ``regional``.
+
 
 ``executable:``
 ^^^^^^^^^^^^^^^
 
 The path to the compiled executable.
 
-``fd_nems:``
+``fd_ufs:``
 ^^^^^^^^^^^^
 
 The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`Updating Values` for providing information in these entries.
 
-The fd.nems file is a structured YAML used by the FV3 weather model and is documented here.
+The ``fd_ufs.yaml`` file is a structured YAML used by the FV3 weather model. The tested version can be found in the :ufs-weather-model:`ufs-weather-model repository<blob/develop/tests/parm/fd_ufs.yaml>`.
 
 ``field_table:``
 ^^^^^^^^^^^^^^^^
@@ -130,7 +135,7 @@ The section requires a ``base_file:`` entry that contains the path to the YAML f
 
 If a pre-defined field table (i.e., not a configurable YAML) is to be used, include it in the ``static:`` section.
 
-The documentation for the field_table file is here. Information on how to structure the UW YAML for configuring a field_table is here.
+The documentation for the field_table file is :weather-modile-io:`here<field-table-file>`. Information on how to structure the UW YAML for configuring a field_table is in section :any:`<_defining_a_field_table>`.
 
 ``length:``
 ^^^^^^^^^^^
@@ -143,20 +148,21 @@ The length of the forecast in hours.
 
 The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`Updating Values` for providing information in these entries.
 
-The documentation for the ``model_configure`` file is here.
+The documentation for the ``model_configure`` file is :weather-model-io:`here<model-configure-file>`.
 
 ``namelist:``
 ^^^^^^^^^^^^^
 
 The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`Updating Values` for providing information in these entries.
 
-The documentation for the FV3 namelist, ``input.nml`` is here.
+The documentation for the FV3 namelist, ``input.nml`` is :weather-model-io:`here<namelist-file-input-nml>`.
 
-``nems.configure:``
+``ufs.configure:``
 ^^^^^^^^^^^^^^^^^^^
 
 In ``uwtools``, the ``nems.configure`` file is treated as a template so that the date and time information in the header may be filled in appropriately. The ``template_file:`` is the path to the input Jinja2 template. There is no option to add values in the YAML. Instead, the driver is programmed to enter necessary values for the template.
 
+The documentation for the ``ufs.configure`` file is :weather-model-io:`here<ufs-configure-file>`.
 
 ``run_dir:``
 ^^^^^^^^^^^^
@@ -200,7 +206,7 @@ The ``preprocessing:`` section
     lateral_boundary_conditions:
       interval_hours: 3 # optional, default
       offset: 0 # optional, default
-      output_file_template: # required
+      output_file_path: # required
 
 ``lateral_boundary_conditions:``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

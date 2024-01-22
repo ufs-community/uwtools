@@ -10,7 +10,8 @@
           },
           "type": "object"
         },
-        "exec_name": {
+        "executable": {
+          "format": "uri",
           "type": "string"
         },
         "field_table": {
@@ -69,13 +70,13 @@
           },
           "type": "object"
         },
-        "tiles": {
-          "items": {
-            "type": "integer"
-          },
-          "type": "array"
-        }
-      },
+        "domain": {
+          "enum": [
+              "global",
+              "regional"
+          ],
+          "type": "string"
+        },
       "type": "object"
     },
     "platform": {
@@ -108,7 +109,7 @@
               "minimum": 0,
               "type": "number"
             },
-            "output_file_template": {
+            "output_file_path": {
               "format": "uri",
               "type": "string"
             }
