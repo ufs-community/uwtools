@@ -58,6 +58,8 @@ The ``forecast:`` section describes the specifics of the FV3 atmosphere forecast
       eta_micro_lookup.data: /path/to/noahmptable.dat
       noahmptable.tbl: /path/to/noahmptable.tbl
 
+.. _updating_values:
+
 Updating Values
 ---------------
 
@@ -124,18 +126,18 @@ The path to the compiled executable.
 ``fd_ufs:``
 ^^^^^^^^^^^^
 
-The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`Updating Values` for providing information in these entries.
+The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
 
 The ``fd_ufs.yaml`` file is a structured YAML used by the FV3 weather model. The tested version can be found in the :ufs-weather-model:`ufs-weather-model repository<blob/develop/tests/parm/fd_ufs.yaml>`.
 
 ``field_table:``
 ^^^^^^^^^^^^^^^^
 
-The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`Updating Values` for providing information in these entries.
+The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
 
 If a pre-defined field table (i.e., not a configurable YAML) is to be used, include it in the ``static:`` section.
 
-The documentation for the field_table file is :weather-modile-io:`here<field-table-file>`. Information on how to structure the UW YAML for configuring a field_table is in section :any:`<_defining_a_field_table>`.
+The documentation for the ``field_table`` file is :weather-model-io:`here<field-table-file>`. Information on how to structure the UW YAML for configuring a ``field_table`` is in section :any:`<defining_a_field_table>`.
 
 ``length:``
 ^^^^^^^^^^^
@@ -146,14 +148,14 @@ The length of the forecast in hours.
 ``model_configure:``
 ^^^^^^^^^^^^^^^^^^^^
 
-The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`Updating Values` for providing information in these entries.
+The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
 
 The documentation for the ``model_configure`` file is :weather-model-io:`here<model-configure-file>`.
 
 ``namelist:``
 ^^^^^^^^^^^^^
 
-The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`Updating Values` for providing information in these entries.
+The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
 
 The documentation for the FV3 namelist, ``input.nml`` is :weather-model-io:`here<namelist-file-input-nml>`.
 

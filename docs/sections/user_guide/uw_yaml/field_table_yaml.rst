@@ -1,4 +1,4 @@
-.. _defining_a_field_table
+.. _defining_a_field_table:
 
 Defining a ``field_table``
 ==========================

@@ -51,7 +51,7 @@ extlinks = {
     "ufs": ("https://ufscommunity.org/%s", "%s"),
     "ufs-weather-model": ("https://github.com/ufs-community/ufs-weather-model/%s", "%s"),
     "uwtools": ("https://github.com/ufs-community/uwtools/%s", "%s"),
-    "weather-model-io": ("https://ufs-weather-model.readthedocs.io/en/latest/InputsOutputs.html#s", "%s"),
+    "weather-model-io": ("https://ufs-weather-model.readthedocs.io/en/latest/InputsOutputs.html#%s", "%s"),
 }
 
 def setup(app):
