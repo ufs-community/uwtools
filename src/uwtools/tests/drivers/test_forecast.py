@@ -13,7 +13,6 @@ import pytest
 from pytest import fixture, raises
 
 from uwtools import scheduler
-from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
@@ -167,20 +166,29 @@ def test_create_model_configure_call_private(tmp_path):
 
 @fixture
 def create_namelist_assets(tmp_path):
-    return NMLConfig(fixture_path("simple.nml")), tmp_path / "create_out.nml"
+    update_values = {
+        "salad": {
+            "base": "kale",
+            "fruit": "banana",
+            "vegetable": "tomato",
+            "how_many": 12,
+            "dressing": "balsamic",
+        }
+    }
+    return update_values, tmp_path / "create_out.nml"
 
 
 def test_create_namelist_with_base_file(create_namelist_assets, tmp_path):
     """
     Tests create_namelist method with optional base file.
     """
-    update_obj, outnml_file = create_namelist_assets
+    update_values, outnml_file = create_namelist_assets
     base_file = fixture_path("simple3.nml")
     fcst_config = {
         "forecast": {
             "namelist": {
                 "base_file": base_file,
-                "update_values": update_obj.data,
+                "update_values": update_values,
             },
         },
     }
@@ -208,11 +216,11 @@ def test_create_namelist_without_base_file(create_namelist_assets, tmp_path):
     """
     Tests create_namelist method without optional base file.
     """
-    update_obj, outnml_file = create_namelist_assets
+    update_values, outnml_file = create_namelist_assets
     fcst_config = {
         "forecast": {
             "namelist": {
-                "update_values": update_obj.data,
+                "update_values": update_values,
             },
         },
     }
