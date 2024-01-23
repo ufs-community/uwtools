@@ -2,6 +2,7 @@ from collections import OrderedDict
 from typing import Optional, Union
 
 import f90nml
+from f90nml import Namelist
 
 from uwtools.config.formats.base import Config
 from uwtools.config.tools import config_check_depths_dump
@@ -32,17 +33,8 @@ class NMLConfig(Config):
 
         :param config_file: Path to config file to load.
         """
-
-        # f90nml returns OrderedDict objects to maintain the order of namelists in the namelist
-        # files that it reads. But in Python 3.6+ the standard dict maintains order as well. Since
-        # OrderedDict can cause problems downstream when serializing to YAML, convert OrderedDict
-        # objects to standard dicts here.
-
-        def from_od(d):
-            return {key: from_od(val) if isinstance(val, dict) else val for key, val in d.items()}
-
         with readable(config_file) as f:
-            return from_od(f90nml.read(f).todict())
+            return f90nml.read(f)
 
     # Public methods
 
@@ -52,12 +44,10 @@ class NMLConfig(Config):
 
         :param path: Path to dump config to.
         """
-        config_check_depths_dump(config_obj=self, target_format=FORMAT.nml)
-
-        self.dump_dict(self.data, path)
+        self.dump_dict(cfg=self.data, path=path)
 
     @staticmethod
-    def dump_dict(cfg: dict, path: OptionalPath = None) -> None:
+    def dump_dict(cfg: Union[dict, Namelist], path: OptionalPath = None) -> None:
         """
         Dumps a provided config dictionary in Fortran namelist format.
 
@@ -65,18 +55,15 @@ class NMLConfig(Config):
         :param path: Path to dump config to.
         """
 
-        # f90nml honors namelist and variable order if it receives an OrderedDict as input, so
-        # ensure that it receives one.
-
-        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.nml)
-
         def to_od(d):
             return OrderedDict(
                 {key: to_od(val) if isinstance(val, dict) else val for key, val in d.items()}
             )
 
+        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.nml)
+        nml: Namelist = Namelist(to_od(cfg)) if not isinstance(cfg, Namelist) else cfg
         with writable(path) as f:
-            f90nml.Namelist(to_od(cfg)).write(f, sort=False)
+            nml.write(f, sort=False)
 
     @staticmethod
     def get_depth_threshold() -> Optional[int]:
