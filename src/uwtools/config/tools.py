@@ -266,7 +266,7 @@ def _validate_format_supplemental(
     :param idx: Index of supplemental config for identification purposes.
     :raises: UWError if supplemental config format is incompatible.
     """
-    pre = f"Supplemental config #{idx}"
+    pre = f"Supplemental config #{idx + 1}"
     if isinstance(supplemental_cfg, dict):
         log.debug("%s is a dict: Cannot validate its format vs %s", pre, config_fmt)
         return

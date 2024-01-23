@@ -130,6 +130,13 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
       [2024-01-08T16:59:20]     INFO ---------------------------------------------------------------------
       [2024-01-08T16:59:20]     INFO values:       recipient:  - None + World
 
+.. note:: Comparisons are supported only for configs of the same format, e.g. YAML vs YAML, Fortran namelist vs Fortran namelist, etc. ``uw`` will flag invalid comparisions:
+
+   .. code-block:: text
+
+      $ uw config compare --file-1-path a.yaml --file-2-path b.nml
+      [2024-01-23T23:21:37]    ERROR Formats do not match: yaml vs nml
+
 .. _cli_config_realize_examples:
 
 ``realize``
@@ -404,15 +411,34 @@ and additional supplemental YAML file ``values2.yaml`` with content
      [2024-01-23T23:01:23]    DEBUG     recipient: Moon
      [2024-01-23T23:01:23]    DEBUG     repeat: 2
 
-* Note that ``uw`` does not allow invalid conversions. For example, when attempting to generate an ``sh`` config from a depth-2 ``yaml``:
+.. note:: Combining configs with incompatible depths is not supported. ``ini`` and ``nml`` configs are depth-2, as they organize their key-value pairs (one level) under top-level sections or namelists (a second level). ``sh`` configs are depth-1, and ``yaml`` configs have arbitrary depth.
 
-  .. code-block:: text
+   For example, when attempting to generate an ``sh`` config from a depth-2 ``yaml``:
 
-     $ uw config realize --input-file config.yaml --output-format sh
-     [2024-01-23T23:02:42]    ERROR Cannot realize depth-2 config to type-'sh' config
-     Cannot realize depth-2 config to type-'sh' config
+   .. code-block:: text
 
-  Note that ``ini`` and ``nml`` configs are, by definition, depth-2 configs, while ``sh`` configs are depth-1 and ``yaml`` configs have arbitrary depth.
+      $ uw config realize --input-file config.yaml --output-format sh
+      [2024-01-23T23:02:42]    ERROR Cannot realize depth-2 config to type-'sh' config
+      Cannot realize depth-2 config to type-'sh' config
+
+.. note:: In recognition of the different sets of value types representable in each config format, ``uw`` supports two format-combination schemes:
+
+   1. Output matches input: The format of the output config matches that of the input config.
+   2. Input is YAML: If the input config is YAML, any output format may be requested. In the worst case, values always have a string representation; but note that, for example, he string representation of a YAML sequence (Python ``list``) in an INI output config may not be useful.
+
+   In all cases, any supplemental configs must be in the same format as the input config and must have recognized extensions.
+
+   ``uw`` considers invalid combination requests errors:
+
+   .. code-block:: text
+
+      $ uw config realize --input-file b.nml --output-file a.yaml
+      Output format yaml must match input format nml
+
+   .. code-block:: text
+
+      $ uw config realize --input-file a.yaml --output-file c.yaml b.nml
+      Supplemental config #1 format nml must match input format yaml
 
 .. _cli_config_validate_examples:
 
