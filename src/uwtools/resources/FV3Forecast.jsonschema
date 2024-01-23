@@ -1,10 +1,27 @@
 {
+  "$defs": {
+    "updatable_config": {
+      "properties": {
+        "base_file": {
+          "format": "uri",
+          "type": "string"
+        },
+        "update_values": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "base_file"
+      ],
+      "type": "object"
+    }
+  },
   "description": "This document is to validate user-defined FV3 forecast config files",
   "properties": {
     "forecast": {
       "description": "parameters of the forecast",
       "properties": {
-        "cycle-dependent": {
+        "cycle_dependent|static": {
           "propertyNames": {
             "type": "string"
           },
@@ -21,17 +38,8 @@
           "format": "uri",
           "type": "string"
         },
-        "field_table": {
-          "properties": {
-            "base_file": {
-              "format": "uri",
-              "type": "string"
-            },
-            "update_values": {
-              "type": "object"
-            }
-          },
-          "type": "object"
+        "fd_ufs|field_table|model_configure|namelist": {
+          "$ref": "#/$defs/updatable_config"
         },
         "length": {
           "minimum": 1,
@@ -40,42 +48,12 @@
         "model": {
           "type": "string"
         },
-        "model_configure": {
-          "properties": {
-            "base_file": {
-              "format": "uri",
-              "type": "string"
-            },
-            "update_values": {
-              "type": "object"
-            }
-          },
-          "type": "object"
-        },
         "mpicmd": {
           "type": "string"
-        },
-        "namelist": {
-          "properties": {
-            "base_file": {
-              "format": "uri",
-              "type": "string"
-            },
-            "update_values": {
-              "type": "object"
-            }
-          },
-          "type": "object"
         },
         "run_dir": {
           "format": "uri",
           "type": "string"
-        },
-        "static": {
-          "propertyNames": {
-            "type": "string"
-          },
-          "type": "object"
         }
       },
       "type": "object"

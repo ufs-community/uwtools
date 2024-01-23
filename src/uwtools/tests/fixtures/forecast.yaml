@@ -24,7 +24,7 @@ forecast:
     stacksize: 512m
     mpi_args:
       - "--export=NONE"
-  cycle-dependent:
+  cycle_dependent:
     INPUT/gfs_data.nc: path/to/gfs_data.tile7.halo0.nc
     INPUT/sfc_data.nc: path/to/sfc_data.tile7.halo0.nc
     INPUT/gfs_bndy.tile7.000.nc: path/to/gfs_bndy.tile7.000.nc

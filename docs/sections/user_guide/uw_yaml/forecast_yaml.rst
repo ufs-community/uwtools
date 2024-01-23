@@ -5,7 +5,7 @@ Forecast YAML
 
 The structured YAML to run a forecast is described below. It is enforced via JSON Schema.
 
-In this section, there are entries that define where the forecast will run (``run_directory:``), what will run (``executable:``), the data files that should be staged (``cycle-dependent:`` and ``static:``), and blocks that correspond to the configuration files required by the forecast model (``fd_ufs:``, ``field_table:``, ``namelist:``, etc.). Each of the configuration file blocks will allow the user to set a template file as input, or to define a configuration file in its native key/value pair format with an option to update the values (``update_values:``) contained in the original input file (``base_file:``).
+In this section, there are entries that define where the forecast will run (``run_directory:``), what will run (``executable:``), the data files that should be staged (``cycle_dependent:`` and ``static:``), and blocks that correspond to the configuration files required by the forecast model (``fd_ufs:``, ``field_table:``, ``namelist:``, etc.). Each of the configuration file blocks will allow the user to set a template file as input, or to define a configuration file in its native key/value pair format with an option to update the values (``update_values:``) contained in the original input file (``base_file:``).
 
 The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
 
@@ -17,7 +17,7 @@ This section describes the specifics of the FV3 atmosphere forecast component.
 .. code-block:: yaml
 
   forecast:
-    cycle-dependent:
+    cycle_dependent:
       INPUT/gfs_data.nc: /path/to/gfs_data.nc
       INPUT/sfc_data.nc: /path/to/sfc_data.nc
       INPUT/gfs_ctrl.nc: /path/to/gfs_ctrl.nc
@@ -97,7 +97,7 @@ Requires a path to a template file in the ``template_file:`` entry. There is no 
 UW YAML Keys
 ^^^^^^^^^^^^
 
-``cycle-dependent:``
+``cycle_dependent:``
 """"""""""""""""""""
 
 This block contains a set of files to stage in the run directory: File names as they appear in the run directory are keys and their source paths are the values. Source paths can be provided as a single string path, or a list of paths to be staged in a common directory under their original names.

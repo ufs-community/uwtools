@@ -261,11 +261,11 @@ def test_forecast_run_cmd():
         assert mpiexec_expected == fcstobj.run_cmd()
 
 
-@pytest.mark.parametrize("section", ["static", "cycle-dependent"])
+@pytest.mark.parametrize("section", ["static", "cycle_dependent"])
 @pytest.mark.parametrize("link_files", [True, False])
 def test_stage_files(tmp_path, section, link_files):
     """
-    Tests that files from static or cycle-dependent sections of the config obj are being staged
+    Tests that files from static or cycle_dependent sections of the config obj are being staged
     (copied or linked) to the run directory.
     """
 
@@ -296,7 +296,7 @@ def test_stage_files(tmp_path, section, link_files):
             assert all(link_or_file(d_fn) for d_fn in dst_paths)
         else:
             assert link_or_file(run_directory / dst_rel_path)
-    if section == "cycle-dependent":
+    if section == "cycle_dependent":
         assert link_or_file(run_directory / "INPUT" / "gfs_bndy.tile7.006.nc")
 
 
@@ -306,7 +306,7 @@ def fv3_run_assets(tmp_path):
     config_file = fixture_path("forecast.yaml")
     config = YAMLConfig(config_file)
     config["forecast"]["run_dir"] = tmp_path.as_posix()
-    config["forecast"]["cycle-dependent"] = {"foo-file": str(tmp_path / "foo")}
+    config["forecast"]["cycle_dependent"] = {"foo-file": str(tmp_path / "foo")}
     config["forecast"]["static"] = {"static-foo-file": str(tmp_path / "foo")}
     return batch_script, config_file, config.data["forecast"]
 
