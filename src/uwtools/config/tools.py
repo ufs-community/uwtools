@@ -2,7 +2,6 @@
 Tools for working with configs.
 """
 
-from dataclasses import dataclass, fields
 from typing import Callable, List, Optional, Union
 
 from uwtools.config.formats.base import Config
@@ -163,14 +162,14 @@ def _print_config_section(config: dict, key_path: List[str]) -> None:
 
 def _realize_config_update(
     config_obj: Config,
-    config_format: str,
+    config_fmt: str,
     supplemental_configs: Optional[List[Union[dict, Config, DefinitePath]]] = None,
 ) -> Config:
     """
     Update config with values from other configs, if given.
 
     :param config_obj: The config to update.
-    :param config_format: Format of config's source.
+    :param config_fmt: Format of config's source.
     :param supplemental_configs: Sources of values to modify input.
     :return: The input config, possibly updated.
     """
@@ -178,7 +177,7 @@ def _realize_config_update(
         log.debug("Before update, config has depth %s", config_obj.depth)
         supplemental_obj: Config
         for idx, supplemental_config in enumerate(supplemental_configs):
-            _validate_format_supplemental(config_format, supplemental_config, idx)
+            _validate_format_supplemental(config_fmt, supplemental_config, idx)
             if isinstance(supplemental_config, dict):
                 supplemental_obj = YAMLConfig(config=supplemental_config)
             elif isinstance(supplemental_config, Config):
@@ -252,7 +251,7 @@ def _validate_format_output(input_fmt: str, output_fmt: str) -> None:
     :param output_fmt: Output format.
     :raises: UWError if output format is incompatible.
     """
-    if input_fmt != FORMAT.yaml and output_fmt != input_fmt:
+    if input_fmt not in (FORMAT.yaml, input_fmt):
         raise UWError("Output format %s must match input format %s" % (output_fmt, input_fmt))
 
 

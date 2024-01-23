@@ -604,14 +604,16 @@ def test__print_config_section_yaml_not_dict():
 def test__realize_config_update(realize_config_testobj, supplemental_configs):
     assert realize_config_testobj[1][2][3] == 88
     o = tools._realize_config_update(
-        config_obj=realize_config_testobj, supplemental_configs=[supplemental_configs]
+        config_obj=realize_config_testobj,
+        config_fmt="yaml",
+        supplemental_configs=[supplemental_configs],
     )
     assert o[1][2][3] == 99
 
 
 def test__realize_config_update_noop(realize_config_testobj):
     assert realize_config_testobj == tools._realize_config_update(
-        config_obj=realize_config_testobj, supplemental_configs=None
+        config_obj=realize_config_testobj, config_fmt="yaml", supplemental_configs=None
     )
 
 
@@ -621,7 +623,9 @@ def test__realize_config_update_file(realize_config_testobj, tmp_path):
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(values, f)
     assert realize_config_testobj[1][2][3] == 88
-    o = tools._realize_config_update(config_obj=realize_config_testobj, supplemental_configs=[path])
+    o = tools._realize_config_update(
+        config_obj=realize_config_testobj, config_fmt="yaml", supplemental_configs=[path]
+    )
     assert o[1][2][3] == 99
 
 
@@ -636,7 +640,7 @@ def test__realize_config_update_list(realize_config_testobj, tmp_path):
         yaml.dump(values2, f)
     assert realize_config_testobj[1][2][3] == 88
     o = tools._realize_config_update(
-        config_obj=realize_config_testobj, supplemental_configs=[path, path2]
+        config_obj=realize_config_testobj, config_fmt="yaml", supplemental_configs=[path, path2]
     )
     assert o[1][2][3] == 77
 
