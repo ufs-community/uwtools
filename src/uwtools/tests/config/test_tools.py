@@ -20,6 +20,8 @@ from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path, logged
 from uwtools.utils.file import FORMAT, writable
 
+FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
+
 # Fixtures
 
 
@@ -268,7 +270,7 @@ def test_realize_config_incompatible_file_type():
     """
     Test that providing an incompatible file type for input base file will return print statement.
     """
-    with raises(UWConfigError):
+    with raises(UWError):
         tools.realize_config(
             input_config=fixture_path("model_configure.sample"),
             input_format="sample",
@@ -444,39 +446,6 @@ Keys with unrendered Jinja2 variables/expressions:
 Keys that are set to empty:
     salad.toppings
     salad.meat
-""".strip()
-    actual = "\n".join(record.message for record in caplog.records)
-    assert actual == expected
-
-
-def test_realize_config_values_needed_nml(caplog):
-    """
-    Test that the values_needed flag logs keys completed, keys containing unrendered Jinja2
-    variables/expressions and keys set to empty.
-    """
-    log.setLevel(logging.INFO)
-    tools.realize_config(
-        input_config=fixture_path("simple3.nml"),
-        input_format=FORMAT.nml,
-        output_format=FORMAT.yaml,
-        values_needed=True,
-    )
-    expected = """
-Keys that are complete:
-    salad
-    salad.base
-    salad.fruit
-    salad.vegetable
-    salad.how_many
-    salad.extras
-    salad.dessert
-
-Keys with unrendered Jinja2 variables/expressions:
-    salad.dressing: {{ dressing }}
-
-Keys that are set to empty:
-    salad.toppings
-    salad.appetizer
 """.strip()
     actual = "\n".join(record.message for record in caplog.records)
     assert actual == expected
@@ -669,3 +638,18 @@ def test__realize_config_values_needed_negative_results(caplog, tmp_path):
     assert "No keys are complete." in msgs
     assert "No keys have unrendered Jinja2 variables/expressions." in msgs
     assert "No keys are set to empty." in msgs
+
+
+@pytest.mark.parametrize("input_fmt", FORMATS)
+@pytest.mark.parametrize("output_fmt", FORMATS)
+def test__validate_format_output(input_fmt, output_fmt):
+    call = lambda: tools._validate_format_output(input_fmt=input_fmt, output_fmt=output_fmt)
+    if input_fmt in (FORMAT.yaml, output_fmt):
+        call()  # no exception raised
+    else:
+        with raises(UWError):
+            call()
+
+
+def test__validate_format_supplemental():
+    pass
