@@ -5,12 +5,12 @@ Forecast YAML
 
 The structured YAML to run a forecast is described below. It is enforced via JSON Schema.
 
-In this section, there are entries that define where the forecast will run (``run_directory:``), what will run (``executable:``), the data files that should be staged (``cycle_dependent:`` and ``static:``), and blocks that correspond to the configuration files required by the forecast model (``fd_ufs:``, ``field_table:``, ``namelist:``, etc.). Each of the configuration file blocks will allow the user to set a template file as input, or to define a configuration file in its native key/value pair format with an option to update the values (``update_values:``) contained in the original input file (``base_file:``).
+In this block, there are entries that define where the forecast will run (``run_directory:``), what will run (``executable:``), the data files that should be staged (``cycle_dependent:`` and ``static:``), and blocks that correspond to the configuration files required by the forecast model (``fd_ufs:``, ``field_table:``, ``namelist:``, etc.). Each of the configuration file blocks will allow the user to set a template file as input, or to define a configuration file in its native key/value pair format with an option to update the values (``update_values:``) contained in the original input file (``base_file:``).
 
 The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
 
-The ``forecast:`` section
--------------------------
+The ``forecast:`` block
+-----------------------
 
 This section describes the specifics of the FV3 atmosphere forecast component.
 
@@ -63,9 +63,9 @@ This section describes the specifics of the FV3 atmosphere forecast component.
 Updating Values
 ^^^^^^^^^^^^^^^
 
-Many of the sections describe configuration files needed by the UFS Weather Model, i.e. ``namelist:``, ``fd_ufs:``, ``model_configure:``. The ``base_file:`` sub-entry is required to initially stage the file; it can then be modified via an ``update_values:`` block.
+Many of the blocks describe configuration files needed by the UFS Weather Model, i.e. ``namelist:``, ``fd_ufs:``, ``model_configure:``. The ``base_file:`` entry in a given block is required to initially stage the file; it can then be modified via an ``update_values:`` block.
 
-To ensure the correct values are updated, all keys that act as section headers above the entry to be updated need to be provided in the order in which they appear in the base file. Multiple entries within a block may be updated and they need not follow the same order as those in the base file. For example, the base file named ``people.yaml`` may contain:
+To ensure the correct values are updated, the hierarchy of entries in the base file must be mirrord under the ``update_values:`` block. Multiple entries within a block may be updated and they need not follow the same order as those in the base file. For example, the base file named ``people.yaml`` may contain:
 
 .. code-block:: yaml
 
@@ -78,7 +78,7 @@ To ensure the correct values are updated, all keys that act as section headers a
        street: Acorn St
      name: Jane
 
-Then the entries under the YAML section would edit this base file with the entries:
+Then the entries in the ``update_values:`` YAML block would override this base file with the entries:
 
 .. code-block:: yaml
 
@@ -88,6 +88,20 @@ Then the entries under the YAML section would edit this base file with the entri
        address:
          street: Main St
          number: 99
+
+The contents of the staged ``people.yaml`` that results:
+
+.. code-block:: yaml
+
+   person:
+     age: 19
+     address:
+       city: Boston
+       number: 99
+       state: MA
+       street: Main St
+     name: Jane
+
 
 Rendering Template Files
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -124,16 +138,16 @@ The path to the compiled executable.
 ``fd_ufs:``
 """"""""""""
 
-The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
+This block requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` block may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
 
 The ``fd_ufs.yaml`` file is a structured YAML used by the FV3 weather model. The tested version can be found in the :ufs-weather-model:`ufs-weather-model repository<blob/develop/tests/parm/fd_ufs.yaml>`. The naming convention for the dictionary entries are documented :cmeps:`here<>`.
 
 ``field_table:``
 """"""""""""""""
 
-The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
+The block requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` block may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
 
-If a pre-defined field table (i.e., not a configurable YAML) is to be used, include it in the ``static:`` section.
+If a pre-defined field table (i.e., not a configurable YAML) is to be used, include it in the ``static:`` block.
 
 The documentation for the ``field_table`` file is :weather-model-io:`here<field-table-file>`. Information on how to structure the UW YAML for configuring a ``field_table`` is in the :ref:`defining_a_field_table` Section.
 
@@ -145,14 +159,14 @@ The length of the forecast in hours.
 ``model_configure:``
 """"""""""""""""""""
 
-The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
+The block requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` block may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
 
 The documentation for the ``model_configure`` file is :weather-model-io:`here<model-configure-file>`.
 
 ``namelist:``
 """""""""""""
 
-The section requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` section may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
+The block requires a ``base_file:`` entry that contains the path to the namelist file. An optional ``update_values:`` block may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
 
 The documentation for the FV3 namelist, ``input.nml`` is :weather-model-io:`here<namelist-file-input-nml>`.
 
@@ -174,10 +188,10 @@ In ``uwtools``, the ``ufs.configure`` file is treated as a template so that the 
 
 The documentation for the ``ufs.configure`` file is :weather-model-io:`here<ufs-configure-file>`.
 
-The ``platform:`` section
--------------------------
+The ``platform:`` block
+-----------------------
 
-This section describes necessary facts about the computational platform.
+This block describes necessary facts about the computational platform.
 
 .. code-block:: yaml
 
@@ -193,8 +207,8 @@ The MPI command used to run the model executable. Typical options are ``srun``, 
 ^^^^^^^^^^^^^^
 The name of the batch system. Supported options are ``lfs``, ``pbs``, and ``slurm``.
 
-The ``preprocessing:`` section
-------------------------------
+The ``preprocessing:`` block
+----------------------------
 
 .. code-block:: yaml
 
@@ -206,7 +220,7 @@ The ``preprocessing:`` section
 
 ``lateral_boundary_conditions:``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The optional section describes how the lateral boundary conditions have been prepared for a limited-area configuration of the model forecast. It is required for a limited-area forecast. The following entries in its subtree are used for the forecast:
+The optional block describes how the lateral boundary conditions have been prepared for a limited-area configuration of the model forecast. It is required for a limited-area forecast. The following entries in its subtree are used for the forecast:
 
 ``interval_hours:``
 """""""""""""""""""
@@ -220,8 +234,8 @@ The integer number of hours setting how many hours earlier the external model us
 """""""""""""""""""""""""
 The path to the lateral boundary conditions files prepared for the forecast. It accepts the integer ``forecast_hour`` as a Python template, e.g., ``/path/to/srw.t00z.gfs_bndy.tile7.f{forecast_hour:03d}.nc``.
 
-The ``user:`` section
----------------------
+The ``user:`` block
+-------------------
 
 .. code-block:: yaml
 
