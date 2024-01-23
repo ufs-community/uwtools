@@ -141,7 +141,7 @@ class FV3Forecast(Driver):
 
         :return: Path to the run directory.
         """
-        run_directory = self._config["run_dir"]
+        run_directory = Path(self._config["run_dir"])
         self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
         self._prepare_config_files(Path(run_directory))
         self._config["cycle-dependent"].update(self._define_boundary_files())
