@@ -84,9 +84,3 @@ The examples use a configuration file named ``config.yaml``. Its contents are de
   .. code-block:: sh
 
     $ uw forecast run -c config.yaml --cycle 2024-01-09T12 --model FV3 -v
-
-  Note that uw logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
-
-  .. code-block:: sh
-
-    $ uw forecast run -c config.yaml --cycle 2024-01-09T12 --model FV3 -v --dry-run --batch-script > submit_fv3.sh 2> forecast.log
