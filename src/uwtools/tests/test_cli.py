@@ -33,7 +33,7 @@ def test__abort(capsys):
 
 def test__add_subparser_config(subparsers):
     cli._add_subparser_config(subparsers)
-    assert submodes(subparsers.choices[STR.config]) == [STR.compare, STR.realize, STR.validate]
+    assert actions(subparsers.choices[STR.config]) == [STR.compare, STR.realize, STR.validate]
 
 
 def test__add_subparser_config_compare(subparsers):
@@ -53,7 +53,7 @@ def test__add_subparser_config_validate(subparsers):
 
 def test__add_subparser_forecast(subparsers):
     cli._add_subparser_forecast(subparsers)
-    assert submodes(subparsers.choices[STR.forecast]) == [STR.run]
+    assert actions(subparsers.choices[STR.forecast]) == [STR.run]
 
 
 def test__add_subparser_forecast_run(subparsers):
@@ -63,7 +63,7 @@ def test__add_subparser_forecast_run(subparsers):
 
 def test__add_subparser_template(subparsers):
     cli._add_subparser_template(subparsers)
-    assert submodes(subparsers.choices[STR.template]) == [STR.render, STR.translate]
+    assert actions(subparsers.choices[STR.template]) == [STR.render, STR.translate]
 
 
 def test__add_subparser_template_render(subparsers):
@@ -180,8 +180,8 @@ def test__dict_from_key_eq_val_strings():
     ],
 )
 def test__dispatch_config(params):
-    submode, funcname = params
-    args = {STR.submode: submode}
+    action, funcname = params
+    args = {STR.action: action}
     with patch.object(cli, funcname) as func:
         cli._dispatch_config(args)
     func.assert_called_once_with(args)
@@ -256,8 +256,8 @@ def test__dispatch_config_validate_config_obj():
 
 @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
 def test__dispatch_forecast(params):
-    submode, funcname = params
-    args = {STR.submode: submode}
+    action, funcname = params
+    args = {STR.action: action}
     with patch.object(cli, funcname) as module:
         cli._dispatch_forecast(args)
     module.assert_called_once_with(args)
@@ -287,8 +287,8 @@ def test__dispatch_forecast_run():
     ],
 )
 def test__dispatch_rocoto(params):
-    submode, funcname = params
-    args = {STR.submode: submode}
+    action, funcname = params
+    args = {STR.action: action}
     with patch.object(cli, funcname) as module:
         cli._dispatch_rocoto(args)
     module.assert_called_once_with(args)
@@ -333,8 +333,8 @@ def test__dispatch_rocoto_validate_xml_no_optional():
     [(STR.render, "_dispatch_template_render"), (STR.translate, "_dispatch_template_translate")],
 )
 def test__dispatch_template(params):
-    submode, funcname = params
-    args = {STR.submode: submode}
+    action, funcname = params
+    args = {STR.action: action}
     with patch.object(cli, funcname) as func:
         cli._dispatch_template(args)
     func.assert_called_once_with(args)
@@ -466,8 +466,8 @@ def test__parse_args():
 # Helper functions
 
 
-def submodes(parser: Parser) -> List[str]:
-    # Return submodes (named subparsers) belonging to the given parser. For some background, see
+def actions(parser: Parser) -> List[str]:
+    # Return actions (named subparsers) belonging to the given parser. For some background, see
     # https://stackoverflow.com/questions/43688450.
     if actions := [x for x in parser._actions if isinstance(x, _SubParsersAction)]:
         return list(actions[0].choices.keys())
