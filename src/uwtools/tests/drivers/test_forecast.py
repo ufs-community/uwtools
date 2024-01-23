@@ -391,7 +391,7 @@ def test_FV3Forecast__run_via_batch_submission(fv3_run_assets):
                 success, lines = fcstobj._run_via_batch_submission()
                 assert success is True
                 assert lines[0] == "Batch script:"
-                execute.assert_called_once_with(cmd=ANY)
+                execute.assert_called_once_with(cmd=ANY, cwd=ANY)
 
 
 def test_FV3Forecast__run_via_local_execution(fv3_run_assets):

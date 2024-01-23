@@ -7,6 +7,7 @@ from __future__ import annotations
 import re
 from collections import UserDict, UserList
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any, Dict, List
 
 from uwtools.logging import log
@@ -198,6 +199,7 @@ class JobScheduler(UserDict):
         :param script_path: Path to the batch script.
         :return: Did the run exit with a success status?
         """
+        script_path = Path(script_path)
         result = execute(cmd=f"{self.submit_command} {script_path}", cwd=f"{script_path.parent}")
         return result.success
 

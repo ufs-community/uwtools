@@ -109,7 +109,7 @@ class Driver(ABC):
 
     @staticmethod
     def stage_files(
-        run_directory: str,
+        run_directory: Path,
         files_to_stage: Dict[str, Union[list, str]],
         link_files: bool = False,
         dry_run: bool = False,
@@ -126,7 +126,7 @@ class Driver(ABC):
         """
         link_or_copy = os.symlink if link_files else shutil.copyfile
         for dst_rel_path, src_path_or_paths in files_to_stage.items():
-            dst_path = os.path.join(run_directory, dst_rel_path)
+            dst_path = run_directory / dst_rel_path
             if isinstance(src_path_or_paths, list):
                 Driver.stage_files(
                     dst_path,

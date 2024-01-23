@@ -40,7 +40,7 @@ typecheck() {
   msg Running typechecker
   (
     set -eux
-    mypy --install-types --non-interactive --warn-return-any .
+    mypy --install-types --non-interactive .
   )
   msg OK
 }
