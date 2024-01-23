@@ -73,7 +73,7 @@ The examples use a configuration file named ``config.yaml``. Its contents are de
 
   This command writes a file named ``submit_fv3.sh`` and submits it to the batch system.
 
-* With the ``--dry-run`` flag specified, nothing is written to ``stdout``, but a report of what would have been written is logged to ``stderr``:
+* With the ``--dry-run`` flag specified, nothing is written to ``stdout``, but a report of all the directories, files, symlinks, etc., that would have been created are logged to ``stderr``. None of these artifacts will actually be created and no jobs will be executed or submitted to the batch system.
 
   .. code-block:: sh
 

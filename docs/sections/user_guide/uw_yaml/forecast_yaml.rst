@@ -7,12 +7,12 @@ The structured YAML to run a forecast is described below. It is enforced via JSO
 
 In this section, there are entries that define where the forecast will run (``run_directory:``), what will run (``executable:``), the data files that should be staged (``cycle-dependent:`` and ``static:``), and blocks that correspond to the configuration files required by the forecast model (``fd_ufs:``, ``field_table:``, ``namelist:``, etc.). Each of the configuration file blocks will allow the user to set a template file as input, or to define a configuration file in its native key/value pair format with an option to update the values (``update_values:``) contained in the original input file (``base_file:``).
 
-The configuration files required by the ufs-weather-model are documented :weather-model-io:`here<model-configuration-files>`.
+The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
 
 The ``forecast:`` section
 -------------------------
 
-The ``forecast:`` section describes the specifics of the FV3 atmosphere forecast component.
+This section describes the specifics of the FV3 atmosphere forecast component.
 
 .. code-block:: yaml
 
@@ -63,7 +63,7 @@ The ``forecast:`` section describes the specifics of the FV3 atmosphere forecast
 Updating Values
 ^^^^^^^^^^^^^^^
 
-Many of the sections describe the configuration files needed by the FV3 Forecast model, i.e. namelist, fd_ufs, model_configure. The ``base_file:`` entry is required so that the file will be staged. Modifications to the base file can be made at run time by providing an ``update_values:`` block.
+Many of the sections describe configuration files needed by the UFS Weather Model, i.e. ``namelist:``, ``fd_ufs:``, ``model_configure:``. The ``base_file:`` sub-entry is required to initially stage the file; it can then be modified via an ``update_values:`` block.
 
 To ensure the correct values are updated, all keys that act as section headers above the entry to be updated need to be provided in the order in which they appear in the base file. Multiple entries within a block may be updated and they need not follow the same order as those in the base file. For example, the base file named ``people.yaml`` may contain:
 

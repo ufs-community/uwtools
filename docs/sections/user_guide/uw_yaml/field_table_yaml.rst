@@ -3,7 +3,7 @@
 Defining a ``field_table``
 ==========================
 
-The :ufs-weather-model:`UFS Weather Model<>` requires as one of its input files (:weather-model-io:`documented here<model-configuration-files>`) a ``field_table`` file. While the format required by the ufs-weather-model is not a YAML file, with ``uwtools`` package, the ``field_table`` entries may be managed as a YAML file, and written to the expected structure (:weather-model-io:`documented here<field-table-file>`).
+The :ufs-weather-model:`UFS Weather Model<>` requires as one of its inputs (:weather-model-io:`documented here<model-configuration-files>`) a ``field_table`` file in a :weather-model-io:`custom format<field-table-file>`. Its contents can be defined in a UW YAML, then created with ``uwtools``.
 
 To generate a given ``field_table`` entry with the form:
 
@@ -14,7 +14,7 @@ To generate a given ``field_table`` entry with the form:
              "units",        "kg/kg"
              "profile_type", "fixed", "surface_value=3.e-6" /
 
-Entries can be manage in YAML with the form:
+Entries can be represented in YAML with the form:
 
 .. code-block:: text
 
@@ -34,7 +34,7 @@ UW YAML Keys
 ``sphum:``
 ^^^^^^^^^^
 
-The name of the tracer. The entry corresponds to the name chosen for the first line of the native ``field_table`` entry.
+The short name of the tracer, to create the corresponding ``field_table`` entry's first line.
 
 ``longname:``
 ^^^^^^^^^^^^^
