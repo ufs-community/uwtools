@@ -102,7 +102,7 @@ UW YAML Keys
 
 This block contains a set of files to stage in the run directory: file names as they appear in the run directory are keys and their source paths are the values. Source paths can be provided as a single string path, or a list of paths to be staged in a common directory under their original names.
 
-  .. warning:: The beta version does not support adding cycle information to the content of the files, and this information must be hard-coded in the YAML file.
+  .. warning:: The current version does not support adding cycle information to the content of the files, and this information must be hard-coded in the YAML file.
 
 ``diag_table:``
 """""""""""""""
@@ -156,13 +156,6 @@ The section requires a ``base_file:`` entry that contains the path to the YAML f
 
 The documentation for the FV3 namelist, ``input.nml`` is :weather-model-io:`here<namelist-file-input-nml>`.
 
-``ufs.configure:``
-"""""""""""""""""""
-
-In ``uwtools``, the ``nems.configure`` file is treated as a template so that the date and time information in the header may be filled in appropriately. The ``template_file:`` is the path to the input Jinja2 template. There is no option to add values in the YAML. Instead, the driver is programmed to enter necessary values for the template.
-
-The documentation for the ``ufs.configure`` file is :weather-model-io:`here<ufs-configure-file>`.
-
 ``run_dir:``
 """"""""""""
 
@@ -172,6 +165,14 @@ The path where the forecast input data will be staged and output data will appea
 """""""""""
 
 This block contains a set of files to stage in the run directory: file names as they appear in the run directory are keys and their source paths are the values. Source paths can be provided as a single string path, or a list of paths to be staged in a common directory under their original names.
+
+``ufs_configure:``
+
+"""""""""""""""""""
+
+In ``uwtools``, the ``ufs.configure`` file is treated as a template so that the date and time information in the header may be filled in appropriately. The ``template_file:`` is the path to the input Jinja2 template. There is no option to add values in the YAML. Instead, the driver is programmed to enter necessary values for the template.
+
+The documentation for the ``ufs.configure`` file is :weather-model-io:`here<ufs-configure-file>`.
 
 The ``platform:`` section
 -------------------------
@@ -213,7 +214,7 @@ The integer number of hours setting how frequently the lateral boundary conditio
 
 ``offset:``
 """""""""""
-The integer number of hours indicates how many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle.
+The integer number of hours setting how many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle.
 
 ``output_file_path:``
 """""""""""""""""""""""""

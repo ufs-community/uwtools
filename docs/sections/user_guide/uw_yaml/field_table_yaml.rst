@@ -19,7 +19,7 @@ Entries can be represented in YAML with the form:
 .. code-block:: text
 
    sphum:
-     longname: "specific humidity"
+     longname: specific humidity
      units: kg/kg
      profile_type:
        name: fixed
