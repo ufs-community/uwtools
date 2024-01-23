@@ -100,14 +100,14 @@ UW YAML Keys
 ``cycle-dependent:``
 """"""""""""""""""""
 
-This block contains a set of files to stage in the run directory: file names as they appear in the run directory are keys and their source paths are the values. Source paths can be provided as a single string path, or a list of paths to be staged in a common directory under their original names.
+This block contains a set of files to stage in the run directory: File names as they appear in the run directory are keys and their source paths are the values. Source paths can be provided as a single string path, or a list of paths to be staged in a common directory under their original names.
 
   .. warning:: The current version does not support adding cycle information to the content of the files, and this information must be hard-coded in the YAML file.
 
 ``diag_table:``
 """""""""""""""
 
-In ``uwtools``, the ``diag_table`` is treated as a template so that the date and time information in the header may be filled in appropriately. The ``template_file:`` is the path to the input Jinja2 template. Date information is provided in the command line or API interfaces.
+In ``uwtools``, the ``diag_table`` is treated as a template so that the date and time information in the header may be filled in appropriately. The ``template_file:`` is the path to the input Jinja2 template. Date information is provided on the command line or via API interfaces.
 
 The diag_table is described :weather-model-io:`here<diag-table-file>`.
 
@@ -177,7 +177,7 @@ The documentation for the ``ufs.configure`` file is :weather-model-io:`here<ufs-
 The ``platform:`` section
 -------------------------
 
-The ``platform:`` section describes necessary facts about the computational platform.
+This section describes necessary facts about the computational platform.
 
 .. code-block:: yaml
 

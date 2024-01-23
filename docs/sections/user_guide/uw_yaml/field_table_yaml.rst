@@ -44,7 +44,7 @@ The descriptive name of the tracer.
 ``units:``
 ^^^^^^^^^^
 
-The units for the tracer. This entry directly corresponds to the tracer units in the native ``field_table`` entry.
+The units of the tracer, to create the corresponding ``field_table`` entry's ``"units"`` line.
 
 ``profile_type:``
 ^^^^^^^^^^^^^^^^^
