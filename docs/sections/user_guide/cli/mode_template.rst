@@ -11,15 +11,17 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
    Handle templates
 
    Optional arguments:
-    -h, --help
-          Show help and exit
+     -h, --help
+         Show help and exit
 
    Positional arguments:
-    MODE
-      render
-          Render a template
+     MODE
+       render
+         Render a template
+       translate
+         Translate atparse to Jinja2
 
-.. _template_cli_examples:
+.. _cli_template_render_examples:
 
 ``render``
 ----------
@@ -223,3 +225,67 @@ and YAML file ``values.yaml`` with content
      Hello, World!
 
   Note that ``ini`` and ``nml`` configs are, by definition, depth-2 configs, while ``sh`` configs are depth-1 and ``yaml`` configs have arbitrary depth.
+
+.. _cli_template_translate_examples:
+
+``translate``
+-------------
+
+.. code-block:: text
+
+   $ uw template translate --help
+   usage: uw template translate [-h] [--input-file PATH] [--output-file PATH] [--dry-run] [--quiet]
+                                [--verbose]
+
+   Translate atparse to Jinja2
+
+   Optional arguments:
+     -h, --help
+         Show help and exit
+     --input-file PATH, -i PATH
+         Path to input file (defaults to stdin)
+     --output-file PATH, -o PATH
+         Path to output file (defaults to stdout)
+     --dry-run
+         Only log info, making no changes
+     --quiet, -q
+         Print no logging messages
+     --verbose, -v
+         Print all logging messages
+
+Examples
+^^^^^^^^
+
+The examples that follow use atparse-formatted template file ``atparse.txt`` with content
+
+.. code-block:: text
+
+   @[greeting], @[recipient]!
+
+* Convert an atparse-formatted template file to Jinja2 format:
+
+  .. code-block:: text
+
+     $ uw template translate --input-file atparse.txt
+     {{greeting}}, {{recipient}}!
+
+  Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
+
+* Convert the template to a file via command-line argument:
+
+  .. code-block:: text
+
+     $ uw template translate --input-file atparse.txt --output-file jinja2.txt
+
+  The content of ``jinja2.txt``:
+
+  .. code-block:: jinja
+
+     {{greeting}}, {{recipient}}!
+
+* With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
+
+  .. code-block:: text
+
+     $ uw template translate --input-file atparse.txt --dry-run
+     [2024-01-03T16:41:13]     INFO {{greeting}}, {{recipient}}!

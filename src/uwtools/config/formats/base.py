@@ -163,15 +163,20 @@ class Config(ABC, UserDict):
         """
         Render as much Jinja2 syntax as possible.
         """
-        log.debug("Dereferencing, initial value: %s", self.data)
+
+        def logstate(state: str) -> None:
+            log.debug("Dereferencing, %s value:", state)
+            for line in str(self).split("\n"):
+                log.debug("  %s", line)
+
         while True:
+            logstate("current")
             new = dereference(val=self.data, context={**os.environ, **self.data})
+            assert isinstance(new, dict)
             if new == self.data:
                 break
-            log.debug("Dereferencing, current value: %s", self.data)
-            assert isinstance(new, dict)
             self.data = new
-        log.debug("Dereferencing, final value: %s", self.data)
+        logstate("final")
 
     @abstractmethod
     def dump(self, path: OptionalPath) -> None:
@@ -190,12 +195,12 @@ class Config(ABC, UserDict):
 
     @staticmethod
     @abstractmethod
-    def dump_dict(path: OptionalPath, cfg: dict) -> None:
+    def dump_dict(cfg: dict, path: OptionalPath = None) -> None:
         """
         Dumps a provided config dictionary to stdout or a file.
 
-        :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
+        :param path: Path to dump config to.
         """
 
     @staticmethod

@@ -167,7 +167,7 @@ class Driver(ABC):
             config_obj.dereference()
             config_obj.dump(output_path)
         else:
-            config_class.dump_dict(path=output_path, cfg=user_values)
+            config_class.dump_dict(cfg=user_values, path=output_path)
 
         msg = f"Configure file {output_path} created"
         log.info(msg)

@@ -146,14 +146,22 @@ class Test__RocotoXML:
         assert cyclestr.text == "qux"
 
     def test__add_metatask(self, instance, root):
-        config = {"metatask_foo": "1", "task_bar": "2", "var": {"baz": "3", "qux": "4"}}
+        config = {
+            "metatask_foo": "1",
+            "attrs": {"mode": "parallel", "throttle": 88},
+            "task_bar": "2",
+            "var": {"baz": "3", "qux": "4"},
+        }
         taskname = "test-metatask"
         orig = instance._add_metatask
         with patch.multiple(instance, _add_metatask=D, _add_task=D) as mocks:
-            orig(e=root, config=config, taskname=taskname)
+            orig(e=root, config=config, name_attr=taskname)
         metatask = root[0]
         assert metatask.tag == "metatask"
+        assert metatask.get("mode") == "parallel"
         assert metatask.get("name") == taskname
+        assert metatask.get("throttle") == "88"
+        assert {e.get("name"): e.text for e in metatask.xpath("var")} == {"baz": "3", "qux": "4"}
         mocks["_add_metatask"].assert_called_once_with(metatask, "1", "foo")
         mocks["_add_task"].assert_called_once_with(metatask, "2", "bar")
 
@@ -166,7 +174,7 @@ class Test__RocotoXML:
         }
         taskname = "test-task"
         with patch.multiple(instance, _add_task_dependency=D, _add_task_envar=D) as mocks:
-            instance._add_task(e=root, config=config, taskname=taskname)
+            instance._add_task(e=root, config=config, name_attr=taskname)
         task = root[0]
         assert task.tag == "task"
         assert task.get("name") == taskname
@@ -179,7 +187,7 @@ class Test__RocotoXML:
     def test__add_task_cores_int_or_str(self, cores, instance, root):
         # Ensure that either int or str "cores" values are accepted.
         config = {"command": "c", "cores": cores, "walltime": "00:00:01"}
-        instance._add_task(e=root, config=config, taskname="foo")
+        instance._add_task(e=root, config=config, name_attr="foo")
 
     def test__add_task_dependency_and(self, instance, root):
         config = {"and": {"or_get_obs": {"taskdep": {"attrs": {"task": "foo"}}}}}
@@ -251,6 +259,18 @@ class Test__RocotoXML:
         assert e.tag == "timedep"
         assert e.text == str(value)
 
+    def test__add_task_dependency_sh(self, instance, root):
+        config = {"sh_foo": {"attrs": {"runopt": "-c", "shell": "/bin/bash"}, "command": "ls"}}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        sh = dependency[0]
+        assert sh.tag == "sh"
+        assert sh.get("name") == "foo"
+        assert sh.get("runopt") == "-c"
+        assert sh.get("shell") == "/bin/bash"
+        assert sh.text == "ls"
+
     def test__add_task_dependency_streq(self, instance, root):
         config = {"streq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}}
         instance._add_task_dependency(e=root, config=config)
@@ -283,6 +303,15 @@ class Test__RocotoXML:
         child = dependency[0]
         assert child.tag == "taskdep"
         assert child.get("task") == "foo"
+
+    def test__add_task_dependency_taskvalid(self, instance, root):
+        config = {"taskvalid": {"attrs": {"task": "foo"}}}
+        instance._add_task_dependency(e=root, config=config)
+        dependency = root[0]
+        assert dependency.tag == "dependency"
+        taskvalid = dependency[0]
+        assert taskvalid.tag == "taskvalid"
+        assert taskvalid.get("task") == "foo"
 
     @pytest.mark.parametrize(
         "value",
@@ -442,6 +471,39 @@ def test_schema_compoundTimeString():
     assert not errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "06:00:00"}}})
     # The "offset" value must be a valid time string:
     assert "is not valid" in errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "x"}}})
+
+
+def test_schema_dependency_sh():
+    errors = validator("$defs", "dependency")
+    # Basic spec:
+    assert not errors({"sh": {"command": "foo"}})
+    # The "command" property is mandatory:
+    assert "command' is a required property" in errors({"sh": {}})
+    # A _<name> suffix is allowed:
+    assert not errors({"sh_foo": {"command": "foo"}})
+    # Optional attributes "runopt" and "shell" are supported:
+    assert not errors(
+        {"sh_foo": {"attrs": {"runopt": "-c", "shell": "/bin/bash"}, "command": "foo"}}
+    )
+    # Other attributes are not allowed:
+    assert "Additional properties are not allowed ('color' was unexpected)" in errors(
+        {"sh_foo": {"attrs": {"color": "blue"}, "command": "foo"}}
+    )
+    # The command is a compoundTimeString:
+    assert not errors({"sh": {"command": {"cyclestr": {"value": "foo-@Y@m@d@H"}}}})
+
+
+def test_schema_metatask_attrs():
+    errors = validator("$defs", "metatask", "properties", "attrs")
+    # Valid modes are "parallel" and "serial":
+    assert not errors({"mode": "parallel"})
+    assert not errors({"mode": "serial"})
+    assert "'foo' is not one of ['parallel', 'serial']" in errors({"mode": "foo"})
+    # Positive int is ok for throttle:
+    assert not errors({"throttle": 88})
+    assert not errors({"throttle": 0})
+    assert "-1 is less than the minimum of 0" in errors({"throttle": -1})
+    assert "'foo' is not of type 'integer'" in errors({"throttle": "foo"})
 
 
 def test_schema_workflow_cycledef():

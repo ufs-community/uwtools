@@ -130,6 +130,30 @@
           },
           "type": "object"
         },
+        "^sh(_.*)?$": {
+          "additionalProperties": false,
+          "properties": {
+            "attrs": {
+              "additionalProperties": false,
+              "properties": {
+                "runopt": {
+                  "type": "string"
+                },
+                "shell": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "command": {
+              "$ref": "#/$defs/compoundTimeString"
+            }
+          },
+          "required": [
+            "command"
+          ],
+          "type": "object"
+        },
         "^some(_.*)?$": {
           "patternProperties": {
             "^threshold(_.*)?$": {
@@ -181,9 +205,22 @@
         "^taskvalid(_.*)?$": {
           "additionalProperties": false,
           "properties": {
-            "task": {
-              "type": "string"
-            }
+            "attrs": {
+              "additionalProperties": false,
+              "properties": {
+                "task": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "task"
+              ],
+              "type": "object"
+            },
+            "required": [
+              "attrs"
+            ],
+            "type": "object"
           },
           "type": "object"
         },
@@ -195,10 +232,10 @@
     },
     "metatask": {
       "additionalProperties": false,
-      "maxProperties": 3,
+      "maxProperties": 4,
       "minProperties": 2,
       "patternProperties": {
-        "^metatask(_.+)?$": {
+        "^metatask_.+$": {
           "$ref": "#/$defs/metatask"
         },
         "^task_.+$": {
@@ -206,6 +243,22 @@
         }
       },
       "properties": {
+        "attrs": {
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "enum": [
+                "parallel",
+                "serial"
+              ],
+              "type": "string"
+            },
+            "throttle": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        },
         "var": {
           "$ref": "#/$defs/var"
         }
@@ -498,7 +551,7 @@
           "additionalProperties": false,
           "minProperties": 1,
           "patternProperties": {
-            "^metatask(_.+)?$": {
+            "^metatask_.+$": {
               "$ref": "#/$defs/metatask"
             },
             "^task_.+$": {

@@ -40,12 +40,7 @@ def test__abort_debug_logs_stacktrace(capsys):
 
 def test__add_subparser_config(subparsers):
     cli._add_subparser_config(subparsers)
-    assert submodes(subparsers.choices[STR.config]) == [
-        STR.compare,
-        STR.realize,
-        STR.translate,
-        STR.validate,
-    ]
+    assert submodes(subparsers.choices[STR.config]) == [STR.compare, STR.realize, STR.validate]
 
 
 def test__add_subparser_config_compare(subparsers):
@@ -56,11 +51,6 @@ def test__add_subparser_config_compare(subparsers):
 def test__add_subparser_config_realize(subparsers):
     cli._add_subparser_config_realize(subparsers)
     assert subparsers.choices[STR.realize]
-
-
-def test__add_subparser_config_translate(subparsers):
-    cli._add_subparser_config_translate(subparsers)
-    assert subparsers.choices[STR.translate]
 
 
 def test__add_subparser_config_validate(subparsers):
@@ -80,12 +70,17 @@ def test__add_subparser_forecast_run(subparsers):
 
 def test__add_subparser_template(subparsers):
     cli._add_subparser_template(subparsers)
-    assert submodes(subparsers.choices[STR.template]) == [STR.render]
+    assert submodes(subparsers.choices[STR.template]) == [STR.render, STR.translate]
 
 
 def test__add_subparser_template_render(subparsers):
     cli._add_subparser_template_render(subparsers)
     assert subparsers.choices[STR.render]
+
+
+def test__add_subparser_template_translate(subparsers):
+    cli._add_subparser_template_translate(subparsers)
+    assert subparsers.choices[STR.translate]
 
 
 @pytest.mark.parametrize(
@@ -189,7 +184,6 @@ def test__dict_from_key_eq_val_strings():
     [
         (STR.compare, "_dispatch_config_compare"),
         (STR.realize, "_dispatch_config_realize"),
-        (STR.translate, "_dispatch_config_translate"),
         (STR.validate, "_dispatch_config_validate"),
     ],
 )
@@ -257,43 +251,6 @@ def test__dispatch_config_realize_no_optional():
         values_needed=False,
         dry_run=False,
     )
-
-
-def test__dispatch_config_translate_atparse_to_jinja2():
-    args = {
-        STR.infile: 1,
-        STR.infmt: FORMAT.atparse,
-        STR.outfile: 3,
-        STR.outfmt: FORMAT.jinja2,
-        STR.dryrun: 5,
-    }
-    with patch.object(
-        uwtools.api.config, "_convert_atparse_to_jinja2"
-    ) as _convert_atparse_to_jinja2:
-        cli._dispatch_config_translate(args)
-    _convert_atparse_to_jinja2.assert_called_once_with(input_file=1, output_file=3, dry_run=5)
-
-
-def test__dispatch_config_translate_no_optional():
-    args = {
-        STR.dryrun: False,
-        STR.infile: None,
-        STR.infmt: FORMAT.atparse,
-        STR.outfile: None,
-        STR.outfmt: FORMAT.jinja2,
-    }
-    with patch.object(
-        uwtools.api.config, "_convert_atparse_to_jinja2"
-    ) as _convert_atparse_to_jinja2:
-        cli._dispatch_config_translate(args)
-    _convert_atparse_to_jinja2.assert_called_once_with(
-        input_file=None, output_file=None, dry_run=False
-    )
-
-
-def test__dispatch_config_translate_unsupported():
-    args = {STR.infile: 1, STR.infmt: "jpg", STR.outfile: 3, STR.outfmt: "png", STR.dryrun: 5}
-    assert cli._dispatch_config_translate(args) is False
 
 
 def test__dispatch_config_validate_config_obj():
@@ -379,7 +336,10 @@ def test__dispatch_rocoto_validate_xml_no_optional():
     validate.assert_called_once_with(xml_file=None)
 
 
-@pytest.mark.parametrize("params", [(STR.render, "_dispatch_template_render")])
+@pytest.mark.parametrize(
+    "params",
+    [(STR.render, "_dispatch_template_render"), (STR.translate, "_dispatch_template_translate")],
+)
 def test__dispatch_template(params):
     submode, funcname = params
     args = {STR.submode: submode}
@@ -434,7 +394,6 @@ def test__dispatch_template_render_yaml():
     )
 
 
-@pytest.mark.parametrize("debug", [False])
 @pytest.mark.parametrize("quiet", [True])
 @pytest.mark.parametrize("verbose", [False])
 def test_main_fail_checks(capsys, debug, quiet, verbose):

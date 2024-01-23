@@ -37,6 +37,9 @@ def test_StdinProxy():
         assert sp.read() == msg
         # But the stdin proxy can be read multiple times:
         assert sp.read() == msg
+        # And the proxy can be iterated over:
+        for line in sp:
+            assert line == msg
 
 
 def test__stdinproxy():

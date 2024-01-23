@@ -35,28 +35,21 @@ Compare Mode
 
 When the Linux diff tool just doesn't work for comparing unordered namelists with mixed-case keys, this is your go-to! It also works on the other configuration formats, but the Fortran namelists are the *real* catalyst behind this gem!
 
-| :any:`CLI documentation with examples<compare_configs_cli_examples>`
+| :any:`CLI documentation with examples<cli_config_compare_examples>`
 
 Realize Mode
 """"""""""""
 
 This mode renders values created by :jinja2:`Jinja2 templates<templates>`, and lets you override values in one file or object with those from others, not necessarily with the same configuration format. With ``uwtools``, you can even reference the content of other files to build up a configuration from its pieces.
 
-| :any:`CLI documentation with examples<realize_configs_cli_examples>`
-
-Translate Mode
-""""""""""""""
-
-This tool helps transform legacy configuration files templated with the atparse tool (common at NOAA) into :jinja2:`Jinja2 templates<templates>` for use with the ``uw config realize`` and ``uw template render`` tools, or their API equivalents.
-
-| :any:`CLI documentation with examples<translate_configs_cli_examples>`
+| :any:`CLI documentation with examples<cli_config_realize_examples>`
 
 Validate Mode
 """""""""""""
 
 In this mode, you can provide a :json-schema:`JSON Schema<>` file alongside your configuration to validate that it meets the requirements set by the schema. We've enabled robust logging to make it easier to repair your configs when problems arise.
 
-| :any:`CLI documentation with examples<validate_configs_cli_examples>`
+| :any:`CLI documentation with examples<cli_config_validate_examples>`
 
 Templating
 ^^^^^^^^^^
@@ -64,9 +57,19 @@ Templating
 | **CLI**: ``uw template -h``
 | **API**: ``import uwtools.api.template``
 
-This one is pretty straightforward. It has a single ``render`` mode that gives you the full power of rendering a :jinja2:`Jinja2 template<templates>` in the same easy-to-use interface as your other workflow tools.
+Render Mode
+"""""""""""
 
-| :any:`CLI documentation with examples<template_cli_examples>`
+The ``render`` mode that gives you the full power of rendering a :jinja2:`Jinja2 template<templates>` in the same easy-to-use interface as your other workflow tools.
+
+| :any:`CLI documentation with examples<cli_template_render_examples>`
+
+Translate Mode
+""""""""""""""
+
+This tool helps transform legacy configuration files templated with the atparse tool (common at NOAA) into :jinja2:`Jinja2 templates<templates>` for use with the ``uw config realize`` and ``uw template render`` tools, or their API equivalents.
+
+| :any:`CLI documentation with examples<cli_template_translate_examples>`
 
 Rocoto Configurability
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -81,14 +84,14 @@ Realize Mode
 
 This is where you put in your structured YAML that defines your workflow of choice and it pops out a verified Rocoto XML.
 
-| :any:`CLI documentation with examples<realize_rocoto_cli_examples>`
+| :any:`CLI documentation with examples<cli_rocoto_realize_examples>`
 
 Validate Mode
 """""""""""""
 
 Do you already have a Rocoto XML, but don't want to run Rocoto to make sure it works? Use the validate mode to check to see if Rocoto will be happy.
 
-| :any:`CLI documentation with examples<validate_rocoto_cli_examples>`
+| :any:`CLI documentation with examples<cli_rocoto_validate_examples>`
 
 The Drivers
 -----------

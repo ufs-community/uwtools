@@ -12,16 +12,16 @@ class FieldTableConfig(YAMLConfig):
 
     # Public methods
 
-    def dump(self, path: OptionalPath) -> None:
+    def dump(self, path: OptionalPath = None) -> None:
         """
         Dumps the config in Field Table format.
 
         :param path: Path to dump config to.
         """
-        self.dump_dict(path, self.data)
+        self.dump_dict(self.data, path)
 
     @staticmethod
-    def dump_dict(path: OptionalPath, cfg: dict) -> None:
+    def dump_dict(cfg: dict, path: OptionalPath = None) -> None:
         """
         Dumps a provided config dictionary in Field Table format.
 
@@ -40,9 +40,8 @@ class FieldTableConfig(YAMLConfig):
             name: fixed
             surface_value: 1.e30
 
-        :param path: Path to dump config to.
         :param cfg: The in-memory config object to dump.
-        :param opts: Other options required by a subclass.
+        :param path: Path to dump config to.
         """
         lines = []
         for field, settings in cfg.items():
