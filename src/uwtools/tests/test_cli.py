@@ -422,7 +422,7 @@ def test_main_debug_logs_stacktrace(caplog):
         with patch.object(sys, "argv", cli._switch(STR.debug)):
             with raises(SystemExit):
                 cli.main()
-    assert logged(caplog, "Traceback (most recent call last):")
+                assert logged(caplog, "Traceback (most recent call last):")
 
 
 @pytest.mark.parametrize("debug", [False])
