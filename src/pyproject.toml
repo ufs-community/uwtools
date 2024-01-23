@@ -41,11 +41,7 @@ disable = [
   "unnecessary-lambda-assignment",
   "use-dict-literal",
 ]
-
-extension-pkg-allow-list = [
-  "lxml",
-]
-
+extension-pkg-allow-list = ["lxml"]
 recursive = true
 
 [tool.pytest.ini_options]

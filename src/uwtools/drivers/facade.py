@@ -5,7 +5,7 @@ uwtools package to do the work. It will also be responsible for setting up the w
 moving files around.
 
 See UW documentation for more information:
-https://github.com/ufs-community/workflow-tools/wiki/
+https://github.com/ufs-community/uwtools/wiki/
   Implementation-of-a-Service-Oriented-Architecture-Fa%C3%A7ade
 """
 

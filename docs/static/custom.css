@@ -1,0 +1,17 @@
+/* Leave more space between lines of text in tables. */
+
+html.writer-html5 .rst-content table.docutils td>p {
+  line-height: 1.5em;
+}
+
+/* Let the content expand with the window. */
+
+.wy-nav-content {
+  max-width: none;
+}
+
+/* Disable the horizontal scrollbar on tables. */
+
+.wy-table-responsive {
+  overflow-x: hidden;
+}

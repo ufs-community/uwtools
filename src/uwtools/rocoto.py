@@ -4,15 +4,15 @@ Support for creating Rocoto XML workflow documents.
 
 import re
 from dataclasses import dataclass
-from typing import List, Optional, Tuple, Union
+from math import log10
+from typing import Any, List, Optional, Tuple, Union
 
 from lxml import etree
 from lxml.etree import Element, SubElement
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.jinja2 import dereference
 from uwtools.config.validator import validate_yaml
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.types import OptionalPath
 from uwtools.utils.file import readable, resource_pathobj, writable
@@ -30,8 +30,9 @@ def realize_rocoto_xml(
     :return: An XML string.
     """
     rxml = _RocotoXML(config)
-    xml = str(rxml)
-    assert validate_rocoto_xml_string(xml) is True
+    xml = str(rxml).strip()
+    if not validate_rocoto_xml_string(xml):
+        raise UWError("Internal error: Invalid Rocoto XML")
     with writable(output_file) as f:
         print(xml, file=f)
     return xml
@@ -41,7 +42,7 @@ def validate_rocoto_xml_file(xml_file: OptionalPath) -> bool:
     """
     Validate purported Rocoto XML file against its schema.
 
-    :param xml: Path to XML file (None => read stdin).
+    :param xml_file: Path to XML file (None => read stdin).
     :return: Did the XML conform to the schema?
     """
     with readable(xml_file) as f:
@@ -64,6 +65,12 @@ def validate_rocoto_xml_string(xml: str) -> bool:
     log_method("%s Rocoto validation error%s found", nerr, "" if nerr == 1 else "s")
     for err in list(schema.error_log):
         log.error(err)
+    if not valid:
+        log.error("Invalid Rocoto XML:")
+        lines = xml.strip().split("\n")
+        fmtstr = "%{n}d %s".format(n=int(log10(len(lines))) + 1)
+        for n, line in enumerate(lines):
+            log.error(fmtstr % (n + 1, line))
     return valid
 
 
@@ -97,55 +104,57 @@ class _RocotoXML:
         with writable(path) as f:
             f.write(str(self).strip())
 
-    def _add_compound_time_string(self, e: Element, config: dict, tag: str) -> None:
+    def _add_compound_time_string(self, e: Element, config: Any, tag: str) -> Element:
         """
         Add to the given element a child element possibly containing a <cyclestr>.
 
         :param e: The element to add the child element to.
         :param config: Configuration data for the child element.
         :param tag: Name of child element to add.
+        :return: The child element.
         """
-        config = config[tag]
         e = SubElement(e, tag)
-        if isinstance(config, str):
-            e.text = config
-        else:
+        if isinstance(config, dict):
             self._set_attrs(e, config)
-            if config := config.get(STR.cyclestr, {}):
+            if subconfig := config.get(STR.cyclestr, {}):
                 cyclestr = SubElement(e, STR.cyclestr)
-                cyclestr.text = config["value"]
-                self._set_attrs(cyclestr, config)
+                cyclestr.text = subconfig[STR.value]
+                self._set_attrs(cyclestr, subconfig)
+        else:
+            e.text = str(config)
+        return e
 
-    def _add_metatask(self, e: Element, config: dict, taskname: str) -> None:
+    def _add_metatask(self, e: Element, config: dict, name_attr: str) -> None:
         """
         Add a <metatask> element to the <workflow>.
 
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
-        :param taskname: The name of the metatask being defined.
+        :param name_attr: XML name attribute for element.
         """
-        e = SubElement(e, STR.metatask, name=taskname)
+        e = SubElement(e, STR.metatask, name=name_attr)
+        self._set_attrs(e, config)
         for key, val in config.items():
-            tag, taskname = self._tag_name(key)
+            tag, name = self._tag_name(key)
             if tag == STR.metatask:
-                self._add_metatask(e, val, taskname)
+                self._add_metatask(e, val, name)
             elif tag == STR.task:
-                self._add_task(e, val, taskname)
+                self._add_task(e, val, name)
             elif tag == STR.var:
-                for name, value in val.items():
-                    SubElement(e, STR.var, name=name).text = value
+                for varname, value in val.items():
+                    SubElement(e, STR.var, name=varname).text = value
 
-    def _add_task(self, e: Element, config: dict, taskname: str) -> None:
+    def _add_task(self, e: Element, config: dict, name_attr: str) -> None:
         """
         Add a <task> element to the <workflow>.
 
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
-        :param taskname: The name of the task being defined.
+        :param name_attr: XML name attribute for element.
         """
-        e = SubElement(e, STR.task, name=taskname)
+        e = SubElement(e, STR.task, name=name_attr)
         self._set_attrs(e, config)
-        self._set_and_render_jobname(config, taskname)
+        self._set_and_render_jobname(config, name_attr)
         for tag in (
             STR.account,
             STR.cores,
@@ -160,7 +169,7 @@ class _RocotoXML:
             STR.walltime,
         ):
             if tag in config:
-                SubElement(e, tag).text = config[tag]
+                SubElement(e, tag).text = str(config[tag])
         for tag in (
             STR.command,
             STR.deadline,
@@ -171,7 +180,7 @@ class _RocotoXML:
             STR.stdout,
         ):
             if tag in config:
-                self._add_compound_time_string(e, config, tag)
+                self._add_compound_time_string(e, config[tag], tag)
         for name, value in config.get(STR.envars, {}).items():
             self._add_task_envar(e, name, value)
         if STR.dependency in config:
@@ -184,48 +193,94 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        operands, operators, strequality = self._dependency_constants
         e = SubElement(e, STR.dependency)
         for tag, subconfig in config.items():
-            tag, _ = self._tag_name(tag)
-            if tag in operands:
-                self._add_task_dependency_operand_operator(e, config={tag: subconfig})
-            elif tag in operators:
-                self._add_task_dependency_operand_operator(e, config={tag: subconfig})
-            elif tag in strequality:
-                self._add_task_dependency_strequality(e, subconfig=subconfig, tag=tag)
-            else:
-                raise UWConfigError("Unhandled dependency type %s" % tag)
+            self._add_task_dependency_child(e, subconfig, tag)
 
-    def _add_task_dependency_operand_operator(self, e: Element, config: dict) -> None:
+    def _add_task_dependency_child(self, e: Element, config: dict, tag: str) -> None:
         """
-        Add an operand or operator element to the <dependency>.
+        Add an operator/operand element to parent element.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        :param tag: Name of new element to add.
+        """
+        tag, name = self._tag_name(tag)
+        if tag in (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor):
+            e = SubElement(e, tag)
+            for subtag, subconfig in config.items():
+                self._add_task_dependency_child(e, subconfig, subtag)
+        elif tag in (STR.streq, STR.strneq):
+            self._add_task_dependency_strequality(e, config, tag)
+        elif tag == STR.sh:
+            self._add_task_dependency_sh(e, config, name)
+        elif tag == STR.datadep:
+            self._add_task_dependency_datadep(e, config)
+        elif tag == STR.taskdep:
+            self._add_task_dependency_taskdep(e, config)
+        elif tag == STR.taskvalid:
+            self._add_task_dependency_taskvalid(e, config)
+        elif tag == STR.timedep:
+            self._add_task_dependency_timedep(e, config)
+        else:
+            raise UWConfigError("Unhandled dependency type %s" % tag)
+
+    def _add_task_dependency_datadep(self, e: Element, config: dict) -> None:
+        """
+        Add a <datadep> element to the <dependency>.
 
         :param e: The parent element to add the new element to.
         :param config: Configuration data for this element.
         """
-        operands, operators, strequality = self._dependency_constants
-        for tag, subconfig in config.items():
-            tag, _ = self._tag_name(tag)
-            if tag in operands:
-                if tag == STR.taskdep:
-                    self._set_attrs(SubElement(e, tag), subconfig)
-                else:
-                    self._add_compound_time_string(e, config, tag)
-            elif tag in operators:
-                self._add_task_dependency_operand_operator(SubElement(e, tag), config=subconfig)
-            elif tag in strequality:
-                self._add_task_dependency_strequality(e, subconfig=subconfig, tag=tag)
-            else:
-                raise UWConfigError("Unhandled dependency type %s" % tag)
+        e = self._add_compound_time_string(e, config[STR.value], STR.datadep)
+        self._set_attrs(e, config)
 
-    def _add_task_dependency_strequality(self, e: Element, subconfig: dict, tag: str) -> None:
+    def _add_task_dependency_sh(
+        self, e: Element, config: dict, name_attr: Optional[str] = None
+    ) -> None:
         """
         :param e: The parent element to add the new element to.
-        :param subconfig: Configuration data for the tag.
+        :param config: Configuration data for the tag.
+        :param name_attr: XML name attribute for element.
+        """
+        e = self._add_compound_time_string(e, config[STR.command], STR.sh)
+        config[STR.attrs][STR.name] = name_attr
+        self._set_attrs(e, config)
+
+    def _add_task_dependency_strequality(self, e: Element, config: dict, tag: str) -> None:
+        """
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for the tag.
         :param tag: Name of new element to add.
         """
-        self._set_attrs(SubElement(e, tag), subconfig)
+        self._set_attrs(SubElement(e, tag), config)
+
+    def _add_task_dependency_taskdep(self, e: Element, config: dict) -> None:
+        """
+        Add a <taskdep> element to the <dependency>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        self._set_attrs(SubElement(e, STR.taskdep), config)
+
+    def _add_task_dependency_taskvalid(self, e: Element, config: dict) -> None:
+        """
+        Add a <taskvalid> element to the <dependency>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        self._set_attrs(SubElement(e, STR.taskvalid), config)
+
+    def _add_task_dependency_timedep(self, e: Element, config: dict) -> None:
+        """
+        Add a <timedep> element to the <dependency>.
+
+        :param e: The parent element to add the new element to.
+        :param config: Configuration data for this element.
+        """
+        self._add_compound_time_string(e, config, STR.timedep)
 
     def _add_task_envar(self, e: Element, name: str, value: str) -> None:
         """
@@ -270,7 +325,8 @@ class _RocotoXML:
         :param e: The parent element to add the new element to.
         :param logfile: The path to the log file.
         """
-        self._add_compound_time_string(e, config, STR.log)
+        tag = STR.log
+        self._add_compound_time_string(e, config[tag], tag)
 
     def _add_workflow_tasks(self, e: Element, config: dict) -> None:
         """
@@ -295,16 +351,6 @@ class _RocotoXML:
             raise UWConfigError("YAML validation errors")
 
     @property
-    def _dependency_constants(self) -> Tuple[Tuple, Tuple, Tuple]:
-        """
-        Returns a tuple for each of the respective dependency types.
-        """
-        operands = (STR.datadep, STR.taskdep, STR.timedep)
-        operators = (STR.and_, STR.nand, STR.nor, STR.not_, STR.or_, STR.xor)
-        strequality = (STR.streq, STR.strneq)
-        return operands, operators, strequality
-
-    @property
     def _doctype(self) -> Optional[str]:
         """
         Generate the <!DOCTYPE> block with <!ENTITY> definitions.
@@ -327,7 +373,7 @@ class _RocotoXML:
             lines.insert(1, doctype)
         return "\n".join(lines)
 
-    def _set_and_render_jobname(self, config: dict, taskname: str) -> dict:
+    def _set_and_render_jobname(self, config: dict, taskname: str) -> None:
         """
         In the given config, ensure 'jobname' is set, then render {{ jobname }}.
 
@@ -336,9 +382,6 @@ class _RocotoXML:
         """
         if STR.jobname not in config:
             config[STR.jobname] = taskname
-        new = dereference(val=config, context={STR.jobname: config[STR.jobname]})
-        assert isinstance(new, dict)
-        return new
 
     def _set_attrs(self, e: Element, config: dict) -> None:
         """
@@ -354,9 +397,9 @@ class _RocotoXML:
         """
         Return the tag and metadata extracted from a metadata-bearing key.
 
-        :param key: A string of the form "tag_metadata" (or simply STR.tag).
+        :param key: A string of the form "<tag>_<metadata>" (or simply STR.<tag>).
         """
-        # For example, key "task_foo"bar" will be split into tag "task" and name "foo_bar".
+        # For example, key "task_foo_bar" will be split into tag "task" and name "foo_bar".
         parts = key.split("_")
         tag = parts[0]
         name = "_".join(parts[1:]) if parts[1:] else ""
@@ -400,6 +443,7 @@ class STR:
     partition: str = "partition"
     queue: str = "queue"
     rewind: str = "rewind"
+    sh: str = "sh"
     shared: str = "shared"
     stderr: str = "stderr"
     stdout: str = "stdout"
@@ -409,6 +453,7 @@ class STR:
     task: str = "task"
     taskdep: str = "taskdep"
     tasks: str = "tasks"
+    taskvalid: str = "taskvalid"
     timedep: str = "timedep"
     value: str = "value"
     var: str = "var"

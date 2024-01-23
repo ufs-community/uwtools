@@ -5,7 +5,6 @@ Support for rendering Jinja2 templates.
 import os
 from typing import Dict, List, Optional, Set, Union
 
-import yaml
 from jinja2 import (
     BaseLoader,
     Environment,
@@ -17,12 +16,12 @@ from jinja2 import (
 )
 from jinja2.exceptions import UndefinedError
 
-from uwtools.config.support import format_to_config
+from uwtools.config.support import TaggedString, format_to_config
 from uwtools.logging import MSGWIDTH, log
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import get_file_format, readable, writable
 
-_YAMLVal = Union[bool, dict, float, int, list, str]
+_ConfigVal = Union[bool, dict, float, int, list, str, TaggedString]
 
 
 class J2Template:
@@ -107,42 +106,40 @@ class J2Template:
 # Public functions
 
 
-def dereference(val: _YAMLVal, context: dict, local: Optional[dict] = None) -> _YAMLVal:
+def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) -> _ConfigVal:
     """
     Render Jinja2 syntax, wherever possible.
+
+    Build a replacement value with Jinja2 syntax rendered. Depend on recursion for dict and list
+    values; render strings; convert values tagged with explicit types; and return objects of other
+    types unmodified. Rendering may fail for valid reasons -- notably a replacement value not being
+    available in the given context object. In such cases, return the original value: Any unrendered
+    Jinja2 syntax it contains may may be rendered by later processing with better context.
+
+    When rendering dict values, replacement values will be taken from, in priority order
+      1. The full context dict
+      2. Local sibling values in the dict
 
     :param val: A value possibly containing Jinja2 syntax.
     :param context: Values to use when rendering Jinja2 syntax.
     :param local: Local sibling values to use if a match is not found in context.
     :return: The input value, with Jinja2 syntax rendered.
     """
-
-    # Build a replacement value with Jinja2 syntax rendered. Depend on recursion for dict and list
-    # values; render strings; and return objects of any other type unmodified. Rendering may fail
-    # for valid reasons -- notably a replacement value not being available in the given context
-    # object. In such cases, return the original value: Any unrendered Jinja2 syntax it contains may
-    # may be rendered by later processing with better context.
-
-    # Note that, for rendering performed on dict values, replacement values will be taken from, in
-    # priority order, 1. The full context dict, 2. Local sibling values in the dict.
-
-    log.debug("Rendering: %s", val)
+    rendered: _ConfigVal = val  # fall-back value
     if isinstance(val, dict):
         return {k: dereference(v, context, local=val) for k, v in val.items()}
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
-        try:
-            rendered = (
-                _register_filters(Environment(undefined=StrictUndefined))
-                .from_string(val)
-                .render({**(local or {}), **context})
-            )
-            return _reify_scalar_str(rendered)
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            log.debug("Rendering ERROR: %s", e)
-    log.debug("Rendered: %s", val)
-    return val
+        _deref_debug("Rendering", val)
+        rendered = _deref_render(val, context, local)
+    elif isinstance(val, TaggedString):
+        _deref_debug("Rendering", val.value)
+        val.value = _deref_render(val.value, context, local)
+        rendered = _deref_convert(val)
+    else:
+        _deref_debug("Accepting", val)
+    return rendered
 
 
 def render(
@@ -158,7 +155,7 @@ def render(
     Check and render a Jinja2 template.
 
     :param values: Source of values to render the template.
-    :param values_format: Format of values when sourced from file..
+    :param values_format: Format of values when sourced from file.
     :param input_file: Path to read raw Jinja2 template from (None => read stdin).
     :param output_file: Path to write rendered Jinja2 template to (None => write to stdout).
     :param overrides: Supplemental override values.
@@ -202,6 +199,62 @@ def render(
 
 
 # Private functions
+
+
+def _deref_convert(val: TaggedString) -> _ConfigVal:
+    """
+    Convert a string tagged with an explicit type.
+
+    If conversion cannot be performed (e.g. the value was tagged as an int but int() is not a value
+    that can be represented as an int, the original value will be returned unchanged.
+
+    :param val: A scalar value tagged with an explicit type.
+    :return: The value translated to the specified type.
+    """
+    converted: _ConfigVal = val  # fall-back value
+    _deref_debug("Converting", val.value)
+    try:
+        converted = val.convert()
+        _deref_debug("Converted", converted)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        _deref_debug("Conversion failed", str(e))
+    return converted
+
+
+def _deref_debug(action: str, val: _ConfigVal) -> None:
+    """
+    Log a debug-level message related to dereferencing.
+
+    :param action: The dereferencing activity being performed.
+    :param val: The value being dereferenced.
+    """
+    log.debug("[dereference] %s: %s", action, val)
+
+
+def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
+    """
+    Render a Jinja2 variable/expression as part of dereferencing.
+
+    If this function cannot render the value, either because it contains no Jinja2 syntax or because
+    insufficient context is currently available, a debug message will be logged and the original
+    value will be returned unchanged.
+
+    :param val: The value potentially containing Jinja2 syntax to render.
+    :param context: Values to use when rendering Jinja2 syntax.
+    :param local: Local sibling values to use if a match is not found in context.
+    :return: The rendered value (potentially unchanged).
+    """
+    try:
+        rendered = (
+            _register_filters(Environment(undefined=StrictUndefined))
+            .from_string(val)
+            .render({**(local or {}), **context})
+        )
+        _deref_debug("Rendered", rendered)
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        _deref_debug("Rendering failed", str(e))
+        rendered = val
+    return rendered
 
 
 def _dry_run_template(rendered_template: str) -> bool:
@@ -250,19 +303,6 @@ def _register_filters(env: Environment) -> Environment:
     )
     env.filters.update(filters)
     return env
-
-
-def _reify_scalar_str(s: str) -> Union[bool, float, int, str]:
-    """
-    Reify a string to a Python object, using YAML. Jinja2 templates will be passed as-is.
-
-    :param s: The string to reify.
-    """
-    try:
-        r = yaml.safe_load(s)
-    except yaml.YAMLError:
-        return s
-    return r
 
 
 def _report(args: dict) -> None:

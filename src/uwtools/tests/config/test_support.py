@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access
 """
 Tests for uwtools.config.jinja2 module.
 """
@@ -6,7 +6,8 @@ Tests for uwtools.config.jinja2 module.
 import logging
 
 import pytest
-from pytest import raises
+import yaml
+from pytest import fixture, raises
 
 from uwtools.config import support
 from uwtools.config.formats.fieldtable import FieldTableConfig
@@ -51,3 +52,45 @@ def test_log_and_error(caplog):
         raise support.log_and_error(msg)
     assert msg in str(e.value)
     assert logged(caplog, msg)
+
+
+class Test_TaggedString:
+    """
+    Tests for class uwtools.config.support.TaggedString.
+    """
+
+    def comp(self, ts: support.TaggedString, s: str):
+        assert yaml.dump(ts, default_flow_style=True).strip() == s
+
+    @fixture
+    def loader(self):
+        yaml.add_representer(support.TaggedString, support.TaggedString.represent)
+        return YAMLConfig(config={})._yaml_loader
+
+    # These tests bypass YAML parsing, constructing nodes with explicit string values. They then
+    # demonstrate that those nodes' convert() methods return representations in type type specified
+    # by the tag.
+
+    def test_float_no(self, loader):
+        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!float", value="foo"))
+        with raises(ValueError):
+            ts.convert()
+
+    def test_float_ok(self, loader):
+        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!float", value="3.14"))
+        assert ts.convert() == 3.14
+        self.comp(ts, "!float '3.14'")
+
+    def test_int_no(self, loader):
+        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!int", value="foo"))
+        with raises(ValueError):
+            ts.convert()
+
+    def test_int_ok(self, loader):
+        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!int", value="88"))
+        assert ts.convert() == 88
+        self.comp(ts, "!int '88'")
+
+    def test___repr__(self, loader):
+        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!int", value="88"))
+        assert str(ts) == "!int 88"

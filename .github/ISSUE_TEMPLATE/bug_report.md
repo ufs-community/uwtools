@@ -20,7 +20,7 @@ Your desired feature may already have an issue created!
 If so, please consider using that Issue to expand on the feature capabilities or requirements.
 
 Your bug may have already been reported!
-Please look through the existing issues on the [Issue tracker](https://github.com/ufs-community/workflow-tools/issues) to see if this issue has been created.
+Please look through the existing issues on the [Issue tracker](https://github.com/ufs-community/uwtools/issues) to see if this issue has been created.
 If so, please consider using that Issue to add any additional information.
 
 **Expected behavior**

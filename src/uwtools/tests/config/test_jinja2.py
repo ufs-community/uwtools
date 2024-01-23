@@ -15,10 +15,17 @@ from pytest import fixture, raises
 
 from uwtools.config import jinja2
 from uwtools.config.jinja2 import J2Template
+from uwtools.config.support import TaggedString
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 
 # Fixtures
+
+
+@fixture
+def deref_render_assets():
+    log.setLevel(logging.DEBUG)
+    return "{{ greeting + ' ' + recipient }}", {"greeting": "hello"}, {"recipient": "world"}
 
 
 @fixture
@@ -37,7 +44,7 @@ roses_color: red
 violets_color: blue
 cannot:
     override: this
-"""
+""".strip()
     with open(path, "w", encoding="utf-8") as f:
         f.write(yaml)
     return str(path)
@@ -62,16 +69,6 @@ def validate(template):
 
 
 # Tests
-
-
-def test_dereference_dict():
-    val = {"n": "{{ int }}"}
-    assert jinja2.dereference(val=val, context={"int": 88}) == {"n": 88}
-
-
-def test_dereference_list():
-    val = ["{{ n }}", "{{ s }}"]
-    assert jinja2.dereference(val=val, context={"n": 88, "s": "foo"}) == [88, "foo"]
 
 
 def test_dereference_local_values():
@@ -133,14 +130,6 @@ def test_dereference_str_filter_rendered():
     assert jinja2.dereference(val=val, context={"recipient": "world"}) == "hello, world"
 
 
-def test_dereference_str_variable_rendered_int():
-    # Due to reification, the value of a result parsable as an int is an int. The same holds for
-    # other results parsable by YAML as Python values, but this is only a representative, non-
-    # exhaustive test.
-    val = "{{ number }}"
-    assert jinja2.dereference(val=val, context={"number": "88"}) == 88
-
-
 def test_derefrence_str_variable_rendered_mixed():
     # A mixed result remains a str.
     val = "{{ n }} is an {{ t }}"
@@ -163,21 +152,6 @@ def test_register_filters_path_join(key):
     else:
         with raises(UndefinedError):
             template.render(**context)  # path_join filter fails
-
-
-def test_reify_scalar_str():
-    for x in ["true", "yes", "TRUE"]:
-        assert jinja2._reify_scalar_str(x) is True
-    for x in ["false", "no", "FALSE"]:
-        assert jinja2._reify_scalar_str(x) is False
-    assert jinja2._reify_scalar_str("88") == 88
-    assert jinja2._reify_scalar_str("'88'") == "88"  # quoted int not converted
-    assert jinja2._reify_scalar_str("3.14") == 3.14
-    assert jinja2._reify_scalar_str("NA") == "NA"  # no conversion
-    assert jinja2._reify_scalar_str("@[foo]") == "@[foo]"  # no conversion for YAML exceptions
-    with raises(AttributeError) as e:
-        jinja2._reify_scalar_str([1, 2, 3])  # type: ignore
-    assert "'list' object has no attribute 'read'" in str(e.value)  # Exception on unintended list
 
 
 def test_render(values_file, template, tmp_path):
@@ -255,6 +229,46 @@ def test_render_values_needed(caplog, template, values_file):
     )
     for var in ("roses_color", "violets_color"):
         assert logged(caplog, var)
+
+
+@pytest.mark.parametrize("tag", ["!float", "!int"])
+def test__deref_convert_no(caplog, tag):
+    log.setLevel(logging.DEBUG)
+    loader = yaml.SafeLoader(os.devnull)
+    val = TaggedString(loader, yaml.ScalarNode(tag=tag, value="foo"))
+    assert jinja2._deref_convert(val=val) == val
+    assert not regex_logged(caplog, "Converted")
+    assert regex_logged(caplog, "Conversion failed")
+
+
+@pytest.mark.parametrize("converted,tag,value", [(3.14, "!float", "3.14"), (88, "!int", "88")])
+def test__deref_convert_ok(caplog, converted, tag, value):
+    log.setLevel(logging.DEBUG)
+    loader = yaml.SafeLoader(os.devnull)
+    val = TaggedString(loader, yaml.ScalarNode(tag=tag, value=value))
+    assert jinja2._deref_convert(val=val) == converted
+    assert regex_logged(caplog, "Converted")
+    assert not regex_logged(caplog, "Conversion failed")
+
+
+def test__deref_debug(caplog):
+    log.setLevel(logging.DEBUG)
+    jinja2._deref_debug(action="Frobnicated", val="foo")
+    assert logged(caplog, "[dereference] Frobnicated: foo")
+
+
+def test__deref_render_no(caplog, deref_render_assets):
+    val, context, _ = deref_render_assets
+    assert jinja2._deref_render(val=val, context=context) == val
+    assert not regex_logged(caplog, "Rendered")
+    assert regex_logged(caplog, "Rendering failed")
+
+
+def test__deref_render_ok(caplog, deref_render_assets):
+    val, context, local = deref_render_assets
+    assert jinja2._deref_render(val=val, context=context, local=local) == "hello world"
+    assert regex_logged(caplog, "Rendered")
+    assert not regex_logged(caplog, "Rendering failed")
 
 
 def test__dry_run_template(caplog):
