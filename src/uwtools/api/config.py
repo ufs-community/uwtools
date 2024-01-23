@@ -23,7 +23,7 @@ def compare(
     config_2_format: Optional[str] = None,
 ) -> bool:
     """
-    NB: This docstring is dynamically replaced: See __doc__ definition below.
+    NB: This docstring is dynamically replaced: See compare.__doc__ definition below.
     """
     return _compare(
         config_1_path=config_1_path,
@@ -97,7 +97,7 @@ def realize(
     dry_run: bool = False,
 ) -> bool:
     """
-    NB: This docstring is dynamically replaced: See __doc__ definition below.
+    NB: This docstring is dynamically replaced: See realize.__doc__ definition below.
     """
     _realize(
         input_config=_ensure_config_arg_type(input_config),
@@ -119,7 +119,7 @@ def realize_to_dict(
     dry_run: bool = False,
 ) -> dict:
     """
-    NB: This docstring is dynamically replaced: See __doc__ definition below.
+    NB: This docstring is dynamically replaced: See realize_to_dict.__doc__ definition below.
     """
     return _realize(
         input_config=_ensure_config_arg_type(input_config),

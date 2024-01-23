@@ -2,6 +2,7 @@
 Tools for working with configs.
 """
 
+from dataclasses import dataclass, fields
 from typing import Callable, List, Optional, Union
 
 from uwtools.config.formats.base import Config
@@ -22,7 +23,7 @@ def compare_configs(
     config_2_format: Optional[str] = None,
 ) -> bool:
     """
-    NB: This docstring is dynamically replaced: See __doc__ definition below.
+    NB: This docstring is dynamically replaced: See compare_configs.__doc__ definition below.
     """
     config_1_format = _ensure_format("1st config file", config_1_format, config_1_path)
     config_2_format = _ensure_format("2nd config file", config_2_format, config_2_path)
@@ -84,17 +85,18 @@ def realize_config(
     dry_run: bool = False,
 ) -> dict:
     """
-    NB: This docstring is dynamically replaced: See __doc__ definition below.
+    NB: This docstring is dynamically replaced: See realize_config.__doc__ definition below.
     """
     input_format = _ensure_format("input", input_format, input_config)
     output_format = _ensure_format("output", output_format, output_file)
+    _validate_format_output(input_format, output_format)
     input_obj = (
         input_config
         if isinstance(input_config, Config)
         else format_to_config(input_format)(config=input_config)
     )
     if supplemental_configs:
-        input_obj = _realize_config_update(input_obj, supplemental_configs)
+        input_obj = _realize_config_update(input_obj, input_format, supplemental_configs)
     input_obj.dereference()
     config_check_depths_realize(input_obj, output_format)
     if dry_run:
@@ -161,26 +163,29 @@ def _print_config_section(config: dict, key_path: List[str]) -> None:
 
 def _realize_config_update(
     config_obj: Config,
+    config_format: str,
     supplemental_configs: Optional[List[Union[dict, Config, DefinitePath]]] = None,
 ) -> Config:
     """
     Update config with values from other configs, if given.
 
     :param config_obj: The config to update.
+    :param config_format: Format of config's source.
     :param supplemental_configs: Sources of values to modify input.
     :return: The input config, possibly updated.
     """
     if supplemental_configs:
         log.debug("Before update, config has depth %s", config_obj.depth)
         supplemental_obj: Config
-        for config in supplemental_configs:
-            if isinstance(config, dict):
-                supplemental_obj = YAMLConfig(config=config)
-            elif isinstance(config, Config):
-                supplemental_obj = config
+        for idx, supplemental_config in enumerate(supplemental_configs):
+            _validate_format_supplemental(config_format, supplemental_config, idx)
+            if isinstance(supplemental_config, dict):
+                supplemental_obj = YAMLConfig(config=supplemental_config)
+            elif isinstance(supplemental_config, Config):
+                supplemental_obj = supplemental_config
             else:
-                supplemental_format = get_file_format(config)
-                supplemental_obj = format_to_config(supplemental_format)(config=config)
+                supplemental_format = get_file_format(supplemental_config)
+                supplemental_obj = format_to_config(supplemental_format)(config=supplemental_config)
             log.debug("Supplemental config has depth %s", supplemental_obj.depth)
             config_check_depths_update(supplemental_obj, config_obj.get_format())
             config_obj.update_values(supplemental_obj)
@@ -239,6 +244,42 @@ def _validate_depth(
         )
 
 
+def _validate_format_output(input_fmt: str, output_fmt: str) -> None:
+    """
+    Ensure output format agrees with input.
+
+    :param input_fmt: Input format.
+    :param output_fmt: Output format.
+    :raises: UWError if output format is incompatible.
+    """
+    if input_fmt != FORMAT.yaml and output_fmt != input_fmt:
+        raise UWError("Output format %s must match input format %s" % (output_fmt, input_fmt))
+
+
+def _validate_format_supplemental(
+    config_fmt: str, supplemental_cfg: Union[dict, Config, DefinitePath], idx: int
+) -> None:
+    """
+    Ensure supplemental config format agrees with base config format.
+
+    :param config_fmt: Base config format.
+    :param supplemental_cfg: Supplemental config to check.
+    :param idx: Index of supplemental config for identification purposes.
+    :raises: UWError if supplemental config format is incompatible.
+    """
+    pre = f"Supplemental config #{idx}"
+    if isinstance(supplemental_cfg, dict):
+        log.debug("%s is a dict: Cannot validate its format vs %s", pre, config_fmt)
+        return
+    sc_fmt = (
+        supplemental_cfg.get_format()
+        if isinstance(supplemental_cfg, Config)
+        else _ensure_format(desc=pre, config=supplemental_cfg)
+    )
+    if sc_fmt != config_fmt:
+        raise UWError("%s format %s must match input format %s" % (pre, sc_fmt, config_fmt))
+
+
 # Import-time code
 
 # pylint: disable=duplicate-code
@@ -267,9 +308,9 @@ Realize an output config based on an input config and optional values-providing 
 
 Recognized file extensions are: {extensions}
 
-:param input_config: Input config file (None => read stdin).
+:param input_config: Input config source (None => read stdin).
 :param input_format: Format of the input config.
-:param output_file: Output config file (None => write to stdout).
+:param output_file: Output config destination (None => write to stdout).
 :param output_format: Format of the output config.
 :param supplemental_configs: Sources of values used to modify input.
 :param values_needed: Report complete, missing, and template values.
