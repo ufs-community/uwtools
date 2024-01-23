@@ -31,11 +31,12 @@ def test__abort(capsys):
 
 
 def test__abort_debug_logs_stacktrace(capsys):
-    msg = "Traceback (most recent call last)"
-    with patch.object(sys, "argv", STR.debug):
+    msg = "Aborting..."
+    trace = "Traceback (most recent call last)"
+    with patch.object(sys, "argv", cli._switch(STR.debug)):
         with raises(SystemExit):
             cli._abort(msg)
-    assert msg in capsys.readouterr().err
+    assert trace in capsys.readouterr().err
 
 
 def test__add_subparser_config(subparsers):
@@ -394,6 +395,35 @@ def test__dispatch_template_render_yaml():
     )
 
 
+def test__dispatch_template_translate():
+    args = {
+        STR.infile: 1,
+        STR.outfile: 2,
+        STR.dryrun: 3,
+    }
+    with patch.object(
+        uwtools.api.template, "_convert_atparse_to_jinja2"
+    ) as _convert_atparse_to_jinja2:
+        cli._dispatch_template_translate(args)
+    _convert_atparse_to_jinja2.assert_called_once_with(input_file=1, output_file=2, dry_run=3)
+
+
+def test__dispatch_template_translate_no_optional():
+    args = {
+        STR.dryrun: False,
+        STR.infile: None,
+        STR.outfile: None,
+    }
+    with patch.object(
+        uwtools.api.template, "_convert_atparse_to_jinja2"
+    ) as _convert_atparse_to_jinja2:
+        cli._dispatch_template_translate(args)
+    _convert_atparse_to_jinja2.assert_called_once_with(
+        input_file=None, output_file=None, dry_run=False
+    )
+
+
+@pytest.mark.parametrize("debug", [False])
 @pytest.mark.parametrize("quiet", [True])
 @pytest.mark.parametrize("verbose", [False])
 def test_main_fail_checks(capsys, debug, quiet, verbose):

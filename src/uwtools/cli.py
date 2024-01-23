@@ -46,7 +46,7 @@ def main() -> None:
         args, checks = _parse_args(sys.argv[1:])
         for check in checks[args[STR.mode]][args[STR.submode]]:
             check(args)
-        setup_logging(quiet=args[STR.quiet], verbose=args[STR.debug or STR.verbose])
+        setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
             STR.config: _dispatch_config,
@@ -362,7 +362,7 @@ def _add_subparser_template_translate(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_input_file(optional)
     _add_arg_output_file(optional)
     _add_arg_dry_run(optional)
-    return _add_args_quiet_and_verbose(optional)
+    return _add_args_verbosity(optional)
 
 
 def _add_subparser_template_render(subparsers: Subparsers) -> SubmodeChecks:
@@ -641,7 +641,7 @@ def _abort(msg: str) -> None:
 
     :param msg: The message to print.
     """
-    if STR.debug in sys.argv:
+    if _switch(STR.debug) in sys.argv:
         log.exception(msg)
     print(msg, file=sys.stderr)
     sys.exit(1)
@@ -649,10 +649,10 @@ def _abort(msg: str) -> None:
 
 def _add_args_verbosity(group: Group) -> SubmodeChecks:
     """
-    Add debug, quiet and verbose arguments.
+    Add debug, quiet, and verbose arguments.
 
     :param group: The group to add the arguments to.
-    :return: Check for mutual exclusivity of debug/quiet/verbose arguments.
+    :return: Check for mutual exclusivity of quiet/verbose arguments.
     """
     _add_arg_debug(group)
     _add_arg_quiet(group)
@@ -706,7 +706,7 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
 
 
 def _check_verbosity(args) -> Args:
-    if sum([args.get(STR.debug, 0), args.get(STR.quiet, 0), args.get(STR.verbose, 0)]) > 1:
+    if args.get(STR.quiet) and (args.get(STR.debug) or args.get(STR.verbose)):
         _abort(
             "Specify at most one of %s, %s, or %s"
             % (_switch(STR.debug), _switch(STR.quiet), _switch(STR.verbose))
