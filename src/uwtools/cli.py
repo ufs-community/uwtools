@@ -56,6 +56,8 @@ def main() -> None:
         }
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except Exception as e:  # pylint: disable=broad-exception-caught
+        if _switch(STR.debug) in sys.argv:
+            log.exception(str(e))
         _abort(str(e))
 
 
@@ -641,8 +643,6 @@ def _abort(msg: str) -> None:
 
     :param msg: The message to print.
     """
-    if _switch(STR.debug) in sys.argv:
-        log.exception(msg)
     print(msg, file=sys.stderr)
     sys.exit(1)
 

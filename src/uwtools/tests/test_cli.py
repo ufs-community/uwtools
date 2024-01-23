@@ -18,6 +18,7 @@ import uwtools.drivers.forecast
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.logging import log
+from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
 
 # Test functions
@@ -28,15 +29,6 @@ def test__abort(capsys):
     with raises(SystemExit):
         cli._abort(msg)
     assert msg in capsys.readouterr().err
-
-
-def test__abort_debug_logs_stacktrace(capsys):
-    msg = "Aborting..."
-    trace = "Traceback (most recent call last)"
-    with patch.object(sys, "argv", cli._switch(STR.debug)):
-        with raises(SystemExit):
-            cli._abort(msg)
-    assert trace in capsys.readouterr().err
 
 
 def test__add_subparser_config(subparsers):
@@ -421,6 +413,16 @@ def test__dispatch_template_translate_no_optional():
     _convert_atparse_to_jinja2.assert_called_once_with(
         input_file=None, output_file=None, dry_run=False
     )
+
+
+def test_main_debug_logs_stacktrace(caplog):
+    log.setLevel(logging.DEBUG)
+    msg = "Test failed intentionally"
+    with patch.object(cli, "_parse_args", side_effect=Exception(msg)):
+        with patch.object(sys, "argv", cli._switch(STR.debug)):
+            with raises(SystemExit):
+                cli.main()
+    assert logged(caplog, "Traceback (most recent call last):")
 
 
 @pytest.mark.parametrize("debug", [False])
