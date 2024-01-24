@@ -63,7 +63,7 @@ Updating Values
 
 Many of the blocks describe configuration files needed by the UFS Weather Model, i.e. ``namelist:``, ``fd_ufs:``, ``model_configure:``. The ``base_file:`` entry in a given block is required to initially stage the file; it can then be modified via an ``update_values:`` block.
 
-To ensure the correct values are updated, the hierarchy of entries in the base file must be mirrord under the ``update_values:`` block. Multiple entries within a block may be updated and they need not follow the same order as those in the base file. For example, the base file named ``people.yaml`` may contain:
+To ensure the correct values are updated, the hierarchy of entries in the base file must be mirrored under the ``update_values:`` block. Multiple entries within a block may be updated and they need not follow the same order as those in the base file. For example, the base file named ``people.yaml`` may contain:
 
 .. code-block:: yaml
 
@@ -140,7 +140,7 @@ The ``fd_ufs.yaml`` file is a structured YAML used by the FV3 weather model. The
 
 The block requires a ``base_file:`` entry that contains the path to the YAML file. An optional ``update_values:`` block may be provided to update any values contained in the base file. Please see the :ref:`updating_values` section for providing information in these entries.
 
-If a pre-defined field table (i.e., not a configurable YAML) is to be used, include it in the ``static:`` block.
+If a predefined field table (i.e., not a configurable YAML) is to be used, include it in the ``static:`` block.
 
 The documentation for the ``field_table`` file is :weather-model-io:`here<field-table-file>`. Information on how to structure the UW YAML for configuring a ``field_table`` is in the :ref:`defining_a_field_table` Section.
 
