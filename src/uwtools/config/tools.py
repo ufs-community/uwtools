@@ -98,7 +98,7 @@ def realize_config(
     :return: The realized config (or an empty-dict for no-op modes).
     """
     input_format = _ensure_format("input", input_format, input_config)
-    input_obj = (
+    input_obj: Config = (
         input_config
         if isinstance(input_config, Config)
         else format_to_config(input_format)(config=input_config)
