@@ -467,8 +467,7 @@ def test__parse_args():
 
 
 def actions(parser: Parser) -> List[str]:
-    # Return actions (named subparsers) belonging to the given parser. For some background, see
-    # https://stackoverflow.com/questions/43688450.
+    # Return actions (named subparsers) belonging to the given parser.
     if actions := [x for x in parser._actions if isinstance(x, _SubParsersAction)]:
         return list(actions[0].choices.keys())
     return []
