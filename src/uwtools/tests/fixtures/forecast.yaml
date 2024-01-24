@@ -7,13 +7,12 @@ preprocessing:
   lateral_boundary_conditions:
     interval_hours: 3
     offset: 0
-    output_file_template: "gfs_bndy.tile{tile}.f{forecast_hour}.nc"
+    output_file_path: "gfs_bndy.tile{tile}.f{forecast_hour}.nc"
 forecast:
   model: FV3
-  exec_name: test_exec.py
+  executable: test_exec.py
   run_dir: some/path
-  tiles:
-    - 7
+  domain: regional
   length: 12
   jobinfo:
     nodes: 1
@@ -25,7 +24,7 @@ forecast:
     stacksize: 512m
     mpi_args:
       - "--export=NONE"
-  cycle-dependent:
+  cycle_dependent:
     INPUT/gfs_data.nc: path/to/gfs_data.tile7.halo0.nc
     INPUT/sfc_data.nc: path/to/sfc_data.tile7.halo0.nc
     INPUT/gfs_bndy.tile7.000.nc: path/to/gfs_bndy.tile7.000.nc
