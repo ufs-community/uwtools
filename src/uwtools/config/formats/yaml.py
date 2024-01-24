@@ -1,5 +1,5 @@
 from types import SimpleNamespace as ns
-from typing import Optional, Union
+from typing import Optional
 
 import yaml
 

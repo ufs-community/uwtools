@@ -8,7 +8,7 @@ from math import log10
 from typing import Any, List, Optional, Tuple, Union
 
 from lxml import etree
-from lxml.etree import Element, SubElement
+from lxml.etree import Element, SubElement, _Element
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_yaml
@@ -104,7 +104,7 @@ class _RocotoXML:
         with writable(path) as f:
             f.write(str(self).strip())
 
-    def _add_compound_time_string(self, e: Element, config: Any, tag: str) -> Element:
+    def _add_compound_time_string(self, e: _Element, config: Any, tag: str) -> _Element:
         """
         Add to the given element a child element possibly containing a <cyclestr>.
 
@@ -124,7 +124,7 @@ class _RocotoXML:
             e.text = str(config)
         return e
 
-    def _add_metatask(self, e: Element, config: dict, name_attr: str) -> None:
+    def _add_metatask(self, e: _Element, config: dict, name_attr: str) -> None:
         """
         Add a <metatask> element to the <workflow>.
 
@@ -144,7 +144,7 @@ class _RocotoXML:
                 for varname, value in val.items():
                     SubElement(e, STR.var, name=varname).text = value
 
-    def _add_task(self, e: Element, config: dict, name_attr: str) -> None:
+    def _add_task(self, e: _Element, config: dict, name_attr: str) -> None:
         """
         Add a <task> element to the <workflow>.
 
@@ -186,7 +186,7 @@ class _RocotoXML:
         if STR.dependency in config:
             self._add_task_dependency(e, config[STR.dependency])
 
-    def _add_task_dependency(self, e: Element, config: dict) -> None:
+    def _add_task_dependency(self, e: _Element, config: dict) -> None:
         """
         Add a <dependency> element to the <task>.
 
@@ -197,7 +197,7 @@ class _RocotoXML:
         for tag, subconfig in config.items():
             self._add_task_dependency_child(e, subconfig, tag)
 
-    def _add_task_dependency_child(self, e: Element, config: dict, tag: str) -> None:
+    def _add_task_dependency_child(self, e: _Element, config: dict, tag: str) -> None:
         """
         Add an operator/operand element to parent element.
 
@@ -225,7 +225,7 @@ class _RocotoXML:
         else:
             raise UWConfigError("Unhandled dependency type %s" % tag)
 
-    def _add_task_dependency_datadep(self, e: Element, config: dict) -> None:
+    def _add_task_dependency_datadep(self, e: _Element, config: dict) -> None:
         """
         Add a <datadep> element to the <dependency>.
 
@@ -236,7 +236,7 @@ class _RocotoXML:
         self._set_attrs(e, config)
 
     def _add_task_dependency_sh(
-        self, e: Element, config: dict, name_attr: Optional[str] = None
+        self, e: _Element, config: dict, name_attr: Optional[str] = None
     ) -> None:
         """
         :param e: The parent element to add the new element to.
@@ -247,7 +247,7 @@ class _RocotoXML:
         config[STR.attrs][STR.name] = name_attr
         self._set_attrs(e, config)
 
-    def _add_task_dependency_strequality(self, e: Element, config: dict, tag: str) -> None:
+    def _add_task_dependency_strequality(self, e: _Element, config: dict, tag: str) -> None:
         """
         :param e: The parent element to add the new element to.
         :param config: Configuration data for the tag.
@@ -255,7 +255,7 @@ class _RocotoXML:
         """
         self._set_attrs(SubElement(e, tag), config)
 
-    def _add_task_dependency_taskdep(self, e: Element, config: dict) -> None:
+    def _add_task_dependency_taskdep(self, e: _Element, config: dict) -> None:
         """
         Add a <taskdep> element to the <dependency>.
 
@@ -264,7 +264,7 @@ class _RocotoXML:
         """
         self._set_attrs(SubElement(e, STR.taskdep), config)
 
-    def _add_task_dependency_taskvalid(self, e: Element, config: dict) -> None:
+    def _add_task_dependency_taskvalid(self, e: _Element, config: dict) -> None:
         """
         Add a <taskvalid> element to the <dependency>.
 
@@ -273,7 +273,7 @@ class _RocotoXML:
         """
         self._set_attrs(SubElement(e, STR.taskvalid), config)
 
-    def _add_task_dependency_timedep(self, e: Element, config: dict) -> None:
+    def _add_task_dependency_timedep(self, e: _Element, config: dict) -> None:
         """
         Add a <timedep> element to the <dependency>.
 
@@ -282,7 +282,7 @@ class _RocotoXML:
         """
         self._add_compound_time_string(e, config, STR.timedep)
 
-    def _add_task_envar(self, e: Element, name: str, value: str) -> None:
+    def _add_task_envar(self, e: _Element, name: str, value: str) -> None:
         """
         Add a <envar> element to the <task>.
 
@@ -304,9 +304,9 @@ class _RocotoXML:
         self._add_workflow_cycledef(e, config[STR.cycledef])
         self._add_workflow_log(e, config)
         self._add_workflow_tasks(e, config[STR.tasks])
-        self._root: Element = e
+        self._root: _Element = e
 
-    def _add_workflow_cycledef(self, e: Element, config: List[dict]) -> None:
+    def _add_workflow_cycledef(self, e: _Element, config: List[dict]) -> None:
         """
         Add <cycledef> element(s) to the <workflow>.
 
@@ -318,7 +318,7 @@ class _RocotoXML:
             cycledef.text = item["spec"]
             self._set_attrs(cycledef, item)
 
-    def _add_workflow_log(self, e: Element, config: dict) -> None:
+    def _add_workflow_log(self, e: _Element, config: dict) -> None:
         """
         Add <log> element(s) to the <workflow>.
 
@@ -328,7 +328,7 @@ class _RocotoXML:
         tag = STR.log
         self._add_compound_time_string(e, config[tag], tag)
 
-    def _add_workflow_tasks(self, e: Element, config: dict) -> None:
+    def _add_workflow_tasks(self, e: _Element, config: dict) -> None:
         """
         Add <task> and/or <metatask> element(s) to the <workflow>.
 
@@ -383,7 +383,7 @@ class _RocotoXML:
         if STR.jobname not in config:
             config[STR.jobname] = taskname
 
-    def _set_attrs(self, e: Element, config: dict) -> None:
+    def _set_attrs(self, e: _Element, config: dict) -> None:
         """
         Set attributes on an element.
 
