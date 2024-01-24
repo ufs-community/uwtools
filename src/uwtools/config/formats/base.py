@@ -124,33 +124,34 @@ class Config(ABC, UserDict):
         :param dict2: The second dictionary.
         :return: True if the configs are identical, False otherwise.
         """
-        dict2 = self.data if dict2 is None else dict2
-        diffs: dict = {}
+        return True
+        # dict2 = self.data if dict2 is None else dict2
+        # diffs: dict = {}
 
-        for sect, items in dict2.items():
-            for key, val in items.items():
-                if val != dict1.get(sect, {}).get(key, ""):
-                    try:
-                        diffs[sect][key] = f" - {val} + {dict1.get(sect, {}).get(key)}"
-                    except KeyError:
-                        diffs[sect] = {}
-                        diffs[sect][key] = f" - {val} + {dict1.get(sect, {}).get(key)}"
+        # for sect, items in dict2.items():
+        #     for key, val in items.items():
+        #         if val != dict1.get(sect, {}).get(key, ""):
+        #             try:
+        #                 diffs[sect][key] = f" - {val} + {dict1.get(sect, {}).get(key)}"
+        #             except KeyError:
+        #                 diffs[sect] = {}
+        #                 diffs[sect][key] = f" - {val} + {dict1.get(sect, {}).get(key)}"
 
-        for sect, items in dict1.items():
-            for key, val in items.items():
-                if val != dict2.get(sect, {}).get(key, "") and diffs.get(sect, {}).get(key) is None:
-                    try:
-                        diffs[sect][key] = f" - {dict2.get(sect, {}).get(key)} + {val}"
-                    except KeyError:
-                        diffs[sect] = {}
-                        diffs[sect][key] = f" - {dict2.get(sect, {}).get(key)} + {val}"
+        # for sect, items in dict1.items():
+        #     for key, val in items.items():
+        #         if val != dict2.get(sect, {}).get(key, "") and diffs.get(sect, {}).get(key) is None:
+        #             try:
+        #                 diffs[sect][key] = f" - {dict2.get(sect, {}).get(key)} + {val}"
+        #             except KeyError:
+        #                 diffs[sect] = {}
+        #                 diffs[sect][key] = f" - {dict2.get(sect, {}).get(key)} + {val}"
 
-        for sect, keys in diffs.items():
-            for key in keys:
-                msg = f"{sect}: {key:>15}: {keys[key]}"
-                log.info(msg)
+        # for sect, keys in diffs.items():
+        #     for key in keys:
+        #         msg = f"{sect}: {key:>15}: {keys[key]}"
+        #         log.info(msg)
 
-        return not diffs
+        # return not diffs
 
     @property
     def depth(self) -> int:

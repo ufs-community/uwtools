@@ -31,8 +31,8 @@ def compare_configs(
     :return: False if config files had differences, otherwise True.
     """
 
-    cfg_a = format_to_config(config_a_format)(config_a_path)
-    cfg_b = format_to_config(config_b_format)(config_b_path)
+    cfg_a: Config = format_to_config(config_a_format)(config_a_path)
+    cfg_b: Config = format_to_config(config_b_format)(config_b_path)
     log.info("- %s", config_a_path)
     log.info("+ %s", config_b_path)
     log.info("-" * MSGWIDTH)
