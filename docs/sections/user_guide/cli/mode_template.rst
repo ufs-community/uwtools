@@ -176,7 +176,7 @@ and YAML file ``values.yaml`` with content
      Hello, World!
 
   If additional information is needed, ``--debug`` can be used which will return the stack trace from any unhandled exception as well.
-  
+
   Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
 
   .. code-block:: text

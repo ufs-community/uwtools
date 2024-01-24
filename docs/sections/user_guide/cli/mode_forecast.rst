@@ -67,7 +67,7 @@ The examples use a configuration file named ``config.yaml``. Its contents are de
 
   The forecast will run on the node where you have invoked this command. Optionally, capture the output in a log file using shell redirection.
 
-* Run an FV3 forecast using a batch system 
+* Run an FV3 forecast using a batch system
 
   .. code-block:: sh
 
