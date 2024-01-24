@@ -117,7 +117,7 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
      [2024-01-08T16:57:28]     INFO values:       recipient:  - None + World
 
   If additional information is needed, ``--debug`` can be used which will return the stack trace from any unhandled exception as well.
-  
+
   Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
 
   .. code-block:: text
