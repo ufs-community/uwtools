@@ -652,7 +652,7 @@ def test__validate_format_output(input_fmt, output_fmt):
         assert str(e.value) == f"Output format {output_fmt} must match input format {input_fmt}"
 
 
-def test__validate_format_supplemental_no_obj():
+def test__validate_format_supplemental_fail_obj():
     config_fmt = FORMAT.yaml
     sc = NMLConfig(config={"n": {"k": "v"}})
     with raises(UWError) as e:
@@ -663,7 +663,7 @@ def test__validate_format_supplemental_no_obj():
     )
 
 
-def test__validate_format_supplemental_no_path():
+def test__validate_format_supplemental_fail_path():
     config_fmt = FORMAT.yaml
     sc = "/path/to/config.nml"
     with raises(UWError) as e:
@@ -675,7 +675,7 @@ def test__validate_format_supplemental_no_path():
     )
 
 
-def test__validate_format_supplemental_ok_dict(caplog):
+def test__validate_format_supplemental_pass_dict(caplog):
     log.setLevel(logging.DEBUG)
     config_fmt = FORMAT.yaml
     sc: dict = {}
@@ -684,13 +684,13 @@ def test__validate_format_supplemental_ok_dict(caplog):
     assert logged(caplog, msg)
 
 
-def test__validate_format_supplemental_ok_match_obj():
+def test__validate_format_supplemental_pass_match_obj():
     config_fmt = FORMAT.yaml
     sc = YAMLConfig(config={})
     tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
 
 
-def test__validate_format_supplemental_ok_match_path():
+def test__validate_format_supplemental_pass_match_path():
     config_fmt = FORMAT.yaml
     sc = "/path/to/config.yaml"
     tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
