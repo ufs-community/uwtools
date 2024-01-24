@@ -45,7 +45,7 @@ More information about the structured UW YAML file for Rocoto can be found :any:
      --output-file PATH, -o PATH
          Path to output file (defaults to stdout)
      --debug
-         Print all logging messages and the stack trace
+         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v
@@ -219,7 +219,7 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --debug
-         Print all logging messages and the stack trace
+         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v

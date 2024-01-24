@@ -51,7 +51,7 @@ The ``uw`` mode for handling configs.
      --file-2-format {ini,nml,sh,yaml}
            Format of file 2
      --debug
-           Print all logging messages and the stack trace
+           Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
            Print no logging messages
      --verbose, -v
@@ -116,7 +116,7 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
      [2024-01-08T16:57:28]     INFO ---------------------------------------------------------------------
      [2024-01-08T16:57:28]     INFO values:       recipient:  - None + World
 
-  If additional information is needed, ``--debug`` can be used which will return the stack trace as well.
+  If additional information is needed, ``--debug`` can be used which will return the the stack trace from any unhandled exception as well.
   
   Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
 
@@ -171,7 +171,7 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
     --dry-run
           Only log info, making no changes
     --debug
-          Print all logging messages and the stack trace
+          Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
     --quiet, -q
           Print no logging messages
     --verbose, -v
@@ -431,7 +431,7 @@ and additional supplemental YAML file ``values2.yaml`` with content
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --debug
-         Print all logging messages and the stack trace
+         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v

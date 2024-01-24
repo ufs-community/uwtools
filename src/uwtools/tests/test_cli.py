@@ -150,20 +150,20 @@ def test__check_template_render_vals_args_noop_explicit_valsfmt():
     assert cli._check_template_render_vals_args(args) == args
 
 
-def test__check_verbosity_fail(capsys):
+@pytest.mark.parametrize("flag", (STR.debug, STR.verbose))
+def test__check_verbosity_fail(capsys, flag):
     log.setLevel(logging.INFO)
-    args = {STR.quiet: True, STR.verbose: True}
+    args = {STR.quiet: True, flag: True}
     with raises(SystemExit):
         cli._check_verbosity(args)
-    assert (
-        "Specify at most one of %s, %s, or %s"
-        % (cli._switch(STR.debug), cli._switch(STR.quiet), cli._switch(STR.verbose))
-        in capsys.readouterr().err
-    )
+    assert "--quiet may not be used with --debug or --verbose" in capsys.readouterr().err
 
 
-def test__check_verbosity_ok():
-    args = {"foo": 88}
+@pytest.mark.parametrize(
+    "flags", ([STR.debug], [STR.quiet], [STR.verbose], [STR.debug, STR.verbose])
+)
+def test__check_verbosity_ok(flags):
+    args = {flag: True for flag in flags}
     assert cli._check_verbosity(args) == args
 
 
@@ -425,9 +425,9 @@ def test_main_debug_logs_stacktrace(caplog):
                 assert logged(caplog, "Traceback (most recent call last):")
 
 
-@pytest.mark.parametrize("debug", [False])
-@pytest.mark.parametrize("quiet", [True])
-@pytest.mark.parametrize("verbose", [False])
+@pytest.mark.parametrize("debug", [False, True])
+@pytest.mark.parametrize("quiet", [False, True])
+@pytest.mark.parametrize("verbose", [False, True])
 def test_main_fail_checks(capsys, debug, quiet, verbose):
     # Using mode 'template render' for testing.
     raw_args = ["testing", STR.template, STR.render]
@@ -441,9 +441,11 @@ def test_main_fail_checks(capsys, debug, quiet, verbose):
         with patch.object(cli, "_dispatch_template", return_value=True):
             with raises(SystemExit) as e:
                 cli.main()
-            if quiet and verbose:
+            if quiet and (debug or verbose):
                 assert e.value.code == 1
-                assert "Specify at most one of" in capsys.readouterr().err
+                assert (
+                    "--quiet may not be used with --debug or --verbose" in capsys.readouterr().err
+                )
             else:
                 assert e.value.code == 0
 

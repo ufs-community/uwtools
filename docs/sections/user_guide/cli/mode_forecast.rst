@@ -46,7 +46,7 @@ The ``uw`` mode for configuring and running forecasts.
      --dry-run
          Only log info, making no changes
      --debug
-         Print all logging messages and the stack trace
+         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v

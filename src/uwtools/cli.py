@@ -471,7 +471,9 @@ def _add_arg_debug(group: Group) -> None:
         _switch(STR.debug),
         "--debug",
         action="store_true",
-        help="Print all logging messages and the stack trace",
+        help="""
+        Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
+        """,
     )
 
 
@@ -707,10 +709,7 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
 
 def _check_verbosity(args) -> Args:
     if args.get(STR.quiet) and (args.get(STR.debug) or args.get(STR.verbose)):
-        _abort(
-            "Specify at most one of %s, %s, or %s"
-            % (_switch(STR.debug), _switch(STR.quiet), _switch(STR.verbose))
-        )
+        _abort("--quiet may not be used with --debug or --verbose")
     return args
 
 
