@@ -87,7 +87,7 @@ class Driver(ABC):
         components = [
             self._platform_config.get("mpicmd"),  # MPI run program
             *[str(x) for x in self._config["runtime_info"].get("mpi_args", [])],  # MPI arguments
-            self._config["exec_name"],  # NWP tool executable name
+            self._config["executable"],  # NWP tool executable name
         ]
         return " ".join(filter(None, components))
 
