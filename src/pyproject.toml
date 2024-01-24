@@ -25,6 +25,7 @@ check_untyped_defs = true
 follow_imports = "skip"
 ignore_missing_imports = true
 pretty = true
+warn_return_any = true
 
 [tool.pylint.messages_control]
 disable = [
