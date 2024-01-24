@@ -130,7 +130,7 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
       [2024-01-08T16:59:20]     INFO ---------------------------------------------------------------------
       [2024-01-08T16:59:20]     INFO values:       recipient:  - None + World
 
-.. note:: Comparisons are supported only for configs of the same format, e.g. YAML vs YAML, Fortran namelist vs Fortran namelist, etc. ``uw`` will flag invalid comparisions:
+.. note:: Comparisons are supported only for configs of the same format, e.g. YAML vs YAML, Fortran namelist vs Fortran namelist, etc. ``uw`` will flag invalid comparisons:
 
    .. code-block:: text
 
