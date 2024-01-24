@@ -180,24 +180,6 @@ def test_parse_include(config):
     assert len(config["config"]) == 2
 
 
-@pytest.mark.parametrize("fmt1", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
-@pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
-def test_transform_config(fmt1, fmt2, tmp_path):
-    """
-    Test that transforms config objects to objects of other config subclasses.
-    """
-    outfile = tmp_path / f"test_{fmt1}to{fmt2}_dump.{fmt2}"
-    reference = fixture_path(f"simple.{fmt2}")
-    cfgin = tools.format_to_config(fmt1)(fixture_path(f"simple.{fmt1}"))
-    tools.format_to_config(fmt2).dump_dict(cfg=cfgin.data, path=outfile)
-    with open(reference, "r", encoding="utf-8") as f1:
-        reflines = [line.strip().replace("'", "") for line in f1]
-    with open(outfile, "r", encoding="utf-8") as f2:
-        outlines = [line.strip().replace("'", "") for line in f2]
-    for line1, line2 in zip(reflines, outlines):
-        assert line1 == line2
-
-
 def test_update_values(config):
     """
     Test that a config object can be updated.

@@ -35,7 +35,7 @@ class Config(ABC, UserDict):
             self.update(config)
         else:
             self._config_file = str(config) if config else None
-            self.update(self._load(self._config_file))
+            self.data = self._load(self._config_file)
         if self.get_depth_threshold() and self.depth != self.get_depth_threshold():
             raise UWConfigError(
                 "Cannot instantiate depth-%s %s with depth-%s config"
