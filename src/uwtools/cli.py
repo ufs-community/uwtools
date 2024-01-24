@@ -23,7 +23,7 @@ from uwtools.drivers.forecast import CLASSES as FORECAST_CLASSES
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
-FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
+FORMATS = list(FORMAT.formats().keys())
 TITLE_REQ_ARG = "Required arguments"
 
 Args = Dict[str, Any]
