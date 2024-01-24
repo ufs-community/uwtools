@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from uwtools.logging import log
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.types import OptionalPath
 from uwtools.utils.file import writable
 from uwtools.utils.memory import Memory
 from uwtools.utils.processing import execute
@@ -192,16 +192,17 @@ class JobScheduler(UserDict):
             ) from error
         return scheduler(props)
 
-    def submit_job(self, script_path: DefinitePath) -> bool:
+    def submit_job(self, script_path: Path) -> bool:
         """
         Submits a job to the scheduler.
 
         :param script_path: Path to the batch script.
         :return: Did the run exit with a success status?
         """
-        script_path = Path(script_path)
-        result = execute(cmd=f"{self.submit_command} {script_path}", cwd=f"{script_path.parent}")
-        return result.success
+        success, _ = execute(
+            cmd=f"{self.submit_command} {script_path}", cwd=f"{script_path.parent}"
+        )
+        return success
 
 
 class Slurm(JobScheduler):
@@ -267,7 +268,7 @@ class PBS(JobScheduler):
         output.pop("select", None)
         return dict(output)
 
-    def _select(self, items) -> Dict[str, Any]:
+    def _select(self, items: Dict[str, Any]) -> Dict[str, Any]:
         """
         Select logic.
         """
@@ -276,7 +277,6 @@ class PBS(JobScheduler):
         # Set default threads=1 to address job variability with PBS
         threads = items.get(OptionalAttribs.THREADS, 1)
         memory = items.get(OptionalAttribs.MEMORY, "")
-
         select = [
             f"{total_nodes}",
             f"{self._map[OptionalAttribs.TASKS_PER_NODE]}={tasks_per_node}",
@@ -286,26 +286,17 @@ class PBS(JobScheduler):
         if memory not in NONEISH:
             select.append(f"{self._map[OptionalAttribs.MEMORY]}={memory}")
         items["-l select="] = ":".join(select)
-
         return items
 
     @staticmethod
-    def _placement(items) -> Dict[str, Any]:
+    def _placement(items: Dict[str, Any]) -> Dict[str, Any]:
         """
         Placement logic.
         """
-
         exclusive = items.get(OptionalAttribs.EXCLUSIVE, "")
         placement = items.get(OptionalAttribs.PLACEMENT, "")
-
-        if all(
-            [
-                exclusive in NONEISH,
-                placement in NONEISH,
-            ]
-        ):
+        if all([exclusive in NONEISH, placement in NONEISH]):
             return items
-
         output = []
         if placement not in NONEISH:
             output.append(str(placement))

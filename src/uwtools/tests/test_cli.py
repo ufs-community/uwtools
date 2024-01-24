@@ -112,7 +112,7 @@ def test__check_file_vs_format_pass_explicit():
     assert args[STR.infmt] == fmt
 
 
-@pytest.mark.parametrize("fmt", vars(FORMAT).keys())
+@pytest.mark.parametrize("fmt", FORMAT.formats())
 def test__check_file_vs_format_pass_implicit(fmt):
     # The format is correctly deduced for a file with a known extension.
     args = {STR.infile: f"/path/to/input.{fmt}", STR.infmt: None}

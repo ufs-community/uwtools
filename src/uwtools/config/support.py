@@ -38,7 +38,8 @@ def format_to_config(fmt: str) -> Type:
     }
     if not fmt in lookup:
         raise log_and_error("Format '%s' should be one of: %s" % (fmt, ", ".join(lookup)))
-    return getattr(import_module(f"uwtools.config.formats.{fmt}"), lookup[fmt])
+    cfgclass: Type = getattr(import_module(f"uwtools.config.formats.{fmt}"), lookup[fmt])
+    return cfgclass
 
 
 def log_and_error(msg: str) -> Exception:
@@ -60,7 +61,7 @@ class TaggedString:
     method. See the pyyaml documentation for details.
     """
 
-    TAGS = ("!float", "!int")
+    TAGS: Dict[str, type] = {"!float": float, "!int": int}
 
     def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
         self.tag: str = node.tag
@@ -75,7 +76,7 @@ class TaggedString:
 
         Will raise an exception if the value cannot be represented as the specified type.
         """
-        converters: Dict[str, type] = dict(zip(self.TAGS, [float, int]))
+        converters: Dict[str, Union[Type[float], Type[int]]] = dict(zip(self.TAGS, [float, int]))
         return converters[self.tag](self.value)
 
     @staticmethod

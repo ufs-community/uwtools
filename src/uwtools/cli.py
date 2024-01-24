@@ -23,7 +23,7 @@ from uwtools.drivers.forecast import CLASSES as FORECAST_CLASSES
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
-FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
+FORMATS = list(FORMAT.formats().keys())
 TITLE_REQ_ARG = "Required arguments"
 
 Args = Dict[str, Any]
@@ -670,9 +670,10 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     :param helpmsg: The help message for the subparser.
     :return: The new subparser.
     """
-    return subparsers.add_parser(
+    parser: Parser = subparsers.add_parser(
         name, add_help=False, help=helpmsg, formatter_class=_formatter, description=helpmsg
     )
+    return parser
 
 
 def _add_subparsers(parser: Parser, dest: str) -> Subparsers:
@@ -706,15 +707,6 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
     return args
 
 
-def _check_verbosity(args) -> Args:
-    if args.get(STR.quiet) and (args.get(STR.debug) or args.get(STR.verbose)):
-        _abort(
-            "%s may not be used with %s or %s"
-            % (_switch(STR.quiet), _switch(STR.debug), _switch(STR.verbose))
-        )
-    return args
-
-
 def _check_template_render_vals_args(args: Args) -> Args:
     # In "template render" mode, a values file is optional, as values used to render the template
     # will be taken from the environment or from key=value command-line pairs by default. But if a
@@ -723,6 +715,15 @@ def _check_template_render_vals_args(args: Args) -> Args:
     if args.get(STR.valsfile) is not None:
         if args.get(STR.valsfmt) is None:
             args[STR.valsfmt] = get_file_format(args[STR.valsfile])
+    return args
+
+
+def _check_verbosity(args: Args) -> Args:
+    if args.get(STR.quiet) and (args.get(STR.debug) or args.get(STR.verbose)):
+        _abort(
+            "%s may not be used with %s or %s"
+            % (_switch(STR.quiet), _switch(STR.debug), _switch(STR.verbose))
+        )
     return args
 
 

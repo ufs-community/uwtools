@@ -143,7 +143,7 @@ class FV3Forecast(Driver):
         """
         run_directory = Path(self._config["run_dir"])
         self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
-        self._prepare_config_files(Path(run_directory))
+        self._prepare_config_files(run_directory)
         self._config["cycle_dependent"].update(self._define_boundary_files())
         for file_category in ["static", "cycle_dependent"]:
             self.stage_files(
@@ -288,8 +288,8 @@ class FV3Forecast(Driver):
         command_lines = ["Command:", *full_cmd.split("\n")]
         if self._dry_run:
             return True, command_lines
-        result = execute(cmd=full_cmd, cwd=run_directory, log_output=True)
-        return result.success, command_lines
+        success, _ = execute(cmd=full_cmd, cwd=run_directory, log_output=True)
+        return success, command_lines
 
 
 CLASSES = {"FV3": FV3Forecast}

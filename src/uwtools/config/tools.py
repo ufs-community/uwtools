@@ -29,8 +29,8 @@ def compare_configs(
     if config_1_format != config_2_format:
         log.error("Formats do not match: %s vs %s", config_1_format, config_2_format)
         return False
-    cfg_1 = format_to_config(config_1_format)(config_1_path)
-    cfg_2 = format_to_config(config_2_format)(config_2_path)
+    cfg_1: Config = format_to_config(config_1_format)(config_1_path)
+    cfg_2: Config = format_to_config(config_2_format)(config_2_path)
     log.info("- %s", config_1_path)
     log.info("+ %s", config_2_path)
     log.info("-" * MSGWIDTH)
@@ -89,7 +89,7 @@ def realize_config(
     input_format = _ensure_format("input", input_format, input_config)
     output_format = _ensure_format("output", output_format, output_file)
     _validate_format_output(input_format, output_format)
-    input_obj = (
+    input_obj: Config = (
         input_config
         if isinstance(input_config, Config)
         else format_to_config(input_format)(config=input_config)

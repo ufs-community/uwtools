@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import Optional, Union
 
-import f90nml
+import f90nml  # type: ignore
 from f90nml import Namelist
 
 from uwtools.config.formats.base import Config
@@ -34,7 +34,8 @@ class NMLConfig(Config):
         :param config_file: Path to config file to load.
         """
         with readable(config_file) as f:
-            return f90nml.read(f)
+            config: dict = f90nml.read(f)
+            return config
 
     # Public methods
 
