@@ -2,7 +2,6 @@
 Drivers for forecast models.
 """
 
-
 import sys
 from collections.abc import Mapping
 from datetime import datetime
@@ -142,7 +141,7 @@ class FV3Forecast(Driver):
 
         :return: Path to the run directory.
         """
-        run_directory = self._config["run_dir"]
+        run_directory = Path(self._config["run_dir"])
         self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
         self._prepare_config_files(Path(run_directory))
         self._config["cycle_dependent"].update(self._define_boundary_files())
@@ -283,12 +282,13 @@ class FV3Forecast(Driver):
         :return: A tuple containing a boolean of the success status of the FV3 run and a list of
             strings that make up the full command line.
         """
+        run_directory = self.prepare_directories()
         pre_run = self._mpi_env_variables(" ")
         full_cmd = f"{pre_run} {self.run_cmd()}"
         command_lines = ["Command:", *full_cmd.split("\n")]
         if self._dry_run:
             return True, command_lines
-        result = execute(cmd=full_cmd)
+        result = execute(cmd=full_cmd, cwd=run_directory, log_output=True)
         return result.success, command_lines
 
 
