@@ -59,7 +59,7 @@ def validate_rocoto_xml_string(xml: str) -> bool:
     tree = etree.fromstring(xml.encode("utf-8"))
     with open(resource_pathobj("schema_with_metatasks.rng"), "r", encoding="utf-8") as f:
         schema = etree.RelaxNG(etree.parse(f))
-    valid = schema.validate(tree)
+    valid: bool = schema.validate(tree)
     nerr = len(schema.error_log)
     log_method = log.info if valid else log.error
     log_method("%s Rocoto validation error%s found", nerr, "" if nerr == 1 else "s")
