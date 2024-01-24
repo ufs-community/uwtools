@@ -7,6 +7,7 @@ from __future__ import annotations
 import re
 from collections import UserDict, UserList
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any, Dict, List
 
 from uwtools.logging import log
@@ -191,14 +192,14 @@ class JobScheduler(UserDict):
             ) from error
         return scheduler(props)
 
-    def submit_job(self, script_path: DefinitePath) -> bool:
+    def submit_job(self, script_path: Path) -> bool:
         """
         Submits a job to the scheduler.
 
         :param script_path: Path to the batch script.
         :return: Did the run exit with a success status?
         """
-        success, _ = execute(cmd=f"{self.submit_command} {script_path}")
+        success, _ = execute(cmd=f"{self.submit_command} {script_path}", cwd=f"{script_path.parent}")
         return success
 
 

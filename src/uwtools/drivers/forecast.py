@@ -2,7 +2,6 @@
 Drivers for forecast models.
 """
 
-
 import sys
 from collections.abc import Mapping
 from datetime import datetime
@@ -282,12 +281,13 @@ class FV3Forecast(Driver):
         :return: A tuple containing a boolean of the success status of the FV3 run and a list of
             strings that make up the full command line.
         """
+        run_directory = self.prepare_directories()
         pre_run = self._mpi_env_variables(" ")
         full_cmd = f"{pre_run} {self.run_cmd()}"
         command_lines = ["Command:", *full_cmd.split("\n")]
         if self._dry_run:
             return True, command_lines
-        success, _ = execute(cmd=full_cmd)
+        success, _ = execute(cmd=full_cmd, cwd=run_directory, log_output=True)
         return success, command_lines
 
 

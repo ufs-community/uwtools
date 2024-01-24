@@ -3,6 +3,7 @@
 Tests for uwtools.scheduler module.
 """
 
+import os
 from unittest.mock import patch
 
 from pytest import fixture, raises
@@ -312,4 +313,4 @@ def test_scheduler_submit_job(pbs_props):
     with patch.object(scheduler, "execute") as execute:
         execute.return_value = (True, "")
         js.submit_job(outpath)
-        execute.assert_called_once_with(cmd=expected_command)
+        execute.assert_called_once_with(cmd=expected_command, cwd=os.path.dirname(outpath))
