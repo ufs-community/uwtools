@@ -29,12 +29,12 @@ def compare_configs(
     if config_1_format != config_2_format:
         log.error("Formats do not match: %s vs %s", config_1_format, config_2_format)
         return False
-    cfg_a = format_to_config(config_1_format)(config_1_path)
-    cfg_b = format_to_config(config_2_format)(config_2_path)
+    cfg_1 = format_to_config(config_1_format)(config_1_path)
+    cfg_2 = format_to_config(config_2_format)(config_2_path)
     log.info("- %s", config_1_path)
     log.info("+ %s", config_2_path)
     log.info("-" * MSGWIDTH)
-    return cfg_a.compare_config(cfg_b.data)
+    return cfg_1.compare_config(cfg_2.data)
 
 
 def config_check_depths_dump(config_obj: Union[Config, dict], target_format: str) -> None:
