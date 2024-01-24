@@ -5,7 +5,7 @@ Helpers for working with files and directories.
 import shutil
 import sys
 from contextlib import contextmanager
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 from datetime import datetime as dt
 from functools import cache
 from importlib import resources
@@ -49,11 +49,11 @@ class FORMAT:
     yml: str = _yaml
 
     @staticmethod
-    def formats() -> List[str]:
+    def extensions() -> List[str]:
         """
-        Returns recognized format names.
+        Returns recognized filename extensions.
         """
-        return sorted(x.name for x in fields(FORMAT) if not x.name.startswith("_"))
+        return [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
 
 
 class StdinProxy:

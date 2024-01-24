@@ -20,8 +20,6 @@ from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path, logged
 from uwtools.utils.file import FORMAT, writable
 
-FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
-
 # Fixtures
 
 
@@ -640,8 +638,8 @@ def test__realize_config_values_needed_negative_results(caplog, tmp_path):
     assert "No keys are set to empty." in msgs
 
 
-@pytest.mark.parametrize("input_fmt", FORMATS)
-@pytest.mark.parametrize("output_fmt", FORMATS)
+@pytest.mark.parametrize("input_fmt", FORMAT.extensions())
+@pytest.mark.parametrize("output_fmt", FORMAT.extensions())
 def test__validate_format_output(input_fmt, output_fmt):
     call = lambda: tools._validate_format_output(input_fmt=input_fmt, output_fmt=output_fmt)
     if input_fmt in (FORMAT.yaml, output_fmt):

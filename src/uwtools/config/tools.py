@@ -298,7 +298,7 @@ Recognized file extensions are: {extensions}
 :param config_2_format: Format of 2nd config file (optional if file's extension is recognized)
 :return: ``False`` if config files had differences, otherwise ``True``
 """.format(
-    extensions=", ".join(FORMAT.formats())
+    extensions=", ".join(FORMAT.extensions())
 ).strip()
 
 
@@ -316,5 +316,5 @@ Recognized file extensions are: {extensions}
 :param dry_run: Log output instead of writing to output.
 :return: The realized config (or an empty-dict for no-op modes).
 """.format(
-    extensions=", ".join(FORMAT.formats())
+    extensions=", ".join(FORMAT.extensions())
 ).strip()
