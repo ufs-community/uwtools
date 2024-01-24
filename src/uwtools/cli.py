@@ -657,9 +657,10 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     :param helpmsg: The help message for the subparser.
     :return: The new subparser.
     """
-    return subparsers.add_parser(
+    parser: Parser = subparsers.add_parser(
         name, add_help=False, help=helpmsg, formatter_class=_formatter, description=helpmsg
     )
+    return parser
 
 
 def _add_subparsers(parser: Parser, dest: str) -> Subparsers:
@@ -693,7 +694,7 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
     return args
 
 
-def _check_quiet_vs_verbose(args) -> Args:
+def _check_quiet_vs_verbose(args: Args) -> Args:
     if args.get(STR.quiet) and args.get(STR.verbose):
         _abort("Specify at most one of %s, %s" % (_switch(STR.quiet), _switch(STR.verbose)))
     return args
