@@ -1,7 +1,7 @@
 Mode ``config``
 ===============
 
-The ``uw`` mode for handling configs.
+The ``uw`` mode for handling configuration files (configs).
 
 .. code-block:: text
 
@@ -27,6 +27,8 @@ The ``uw`` mode for handling configs.
 
 ``compare``
 -----------
+
+The ``compare`` mode lets users compare two config files. 
 
 .. code-block:: text
 
@@ -58,7 +60,7 @@ The ``uw`` mode for handling configs.
 Examples
 ^^^^^^^^
 
-The examples that follow use namelist files ``values1.nml`` and ``values2.nml``, both initially with content
+The examples that follow use namelist files ``values1.nml`` and ``values2.nml``, both initially with the following contents:
 
 .. code-block:: fortran
 
@@ -66,6 +68,8 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
      greeting = "Hello"
      recipient = "World"
    /
+
+Users have several options:
 
 * Compare two config files with the same contents:
 
@@ -86,7 +90,7 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
      [2024-01-08T16:54:03]     INFO ---------------------------------------------------------------------
      [2024-01-08T16:54:03]     INFO values:       recipient:  - None + World
 
-* If a config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its content:
+* If a config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its contents:
 
   .. code-block:: text
 
@@ -120,7 +124,7 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
 
      $ uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose 2>compare.log
 
-  The content of ``compare.log``:
+  The contents of ``compare.log``:
 
    .. code-block:: text
 
@@ -134,6 +138,8 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
 
 ``realize``
 -----------
+
+In ``uw`` terminology, to realize a configuration file is to transform it from its raw form into its final, usable state. The ``realize`` mode can build a complete config file from two or more separate files. 
 
 .. code-block:: text
 
@@ -174,7 +180,7 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
 Examples
 ^^^^^^^^
 
-The examples that follow use YAML file ``config.yaml`` with content
+The examples in this section use the YAML file ``config.yaml`` with the following contents:
 
 .. code-block:: yaml
 
@@ -186,7 +192,7 @@ The examples that follow use YAML file ``config.yaml`` with content
      recipient: World
      repeat: 1
 
-supplemental YAML file ``values1.yaml`` with content
+and the supplemental YAML file ``values1.yaml`` with the following contents:
 
 .. code-block:: yaml
 
@@ -196,7 +202,7 @@ supplemental YAML file ``values1.yaml`` with content
      recipient: Moon
      repeat: 2
 
-and additional supplemental YAML file ``values2.yaml`` with content
+and an additional supplemental YAML file ``values2.yaml`` with the following contents:
 
 .. code-block:: yaml
 
@@ -204,7 +210,7 @@ and additional supplemental YAML file ``values2.yaml`` with content
      empty: false
      repeat: 3
 
-* Show the values in the input config file that have unrendered Jinja2 variables/expressions or empty keys:
+* To show the values in the input config file that have unrendered Jinja2 variables/expressions or empty keys:
 
   .. code-block:: text
 
@@ -235,9 +241,9 @@ and additional supplemental YAML file ``values2.yaml`` with content
        recipient: World
        repeat: 1
 
-  Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
+  Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
 
-* Values in the primary input file can be overridden via one or more supplemental files specified as positional arguments, each overriding the last; or by environment variables, which have the highest precedence.
+* Values in the primary input file can be overridden via one or more supplemental files specified as positional arguments, each overriding the last, or by environment variables, which have the highest precedence.
 
   .. code-block:: text
 
@@ -250,13 +256,13 @@ and additional supplemental YAML file ``values2.yaml`` with content
        recipient: Moon
        repeat: 3
 
-* Realize the config to a file via command-line argument:
+* To realize the config to a file via command-line argument:
 
   .. code-block:: text
 
      $ uw config realize --input-file config.yaml --output-file realized.yaml values1.yaml
 
-  The content of ``realized.yaml``:
+  The contents of ``realized.yaml``:
 
   .. code-block:: yaml
 
@@ -281,14 +287,14 @@ and additional supplemental YAML file ``values2.yaml`` with content
      [2024-01-10T21:38:32]     INFO   recipient: Moon
      [2024-01-10T21:38:32]     INFO   repeat: 2
 
-* If an input file is read alone from ``stdin``, ``uw`` will not know how to parse its content:
+* If an input file is read alone from ``stdin``, ``uw`` will not know how to parse its contents:
 
   .. code-block:: text
 
      $ cat config.yaml | uw config realize --output-file realized.yaml values1.yaml
      Specify --input-format when --input-file is not specified
 
-* Read the config from ``stdin`` and realize to ``stdout``:
+* To read the config from ``stdin`` and realize to ``stdout``:
 
   .. code-block:: text
 
@@ -301,7 +307,7 @@ and additional supplemental YAML file ``values2.yaml`` with content
        recipient: Moon
        repeat: 2
 
-* If the config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its content:
+* If the config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its contents:
 
   .. code-block:: text
 
@@ -321,7 +327,7 @@ and additional supplemental YAML file ``values2.yaml`` with content
        recipient: Moon
        repeat: 2
 
-* Request verbose log output:
+* To request verbose log output:
 
   .. code-block:: text
 
@@ -369,7 +375,7 @@ and additional supplemental YAML file ``values2.yaml`` with content
 
      $ uw config realize --input-file config.yaml --output-format yaml --verbose values1.yaml >realized.yaml 2>realized.log
 
-  The content of ``realized.yaml``:
+  The contents of ``realized.yaml``:
 
   .. code-block:: yaml
 
@@ -381,7 +387,7 @@ and additional supplemental YAML file ``values2.yaml`` with content
        recipient: Moon
        repeat: 2
 
-  The content of ``realized.log``:
+  The contents of ``realized.log``:
 
   .. code-block:: text
 
@@ -393,20 +399,24 @@ and additional supplemental YAML file ``values2.yaml`` with content
      [2024-01-10T21:43:58]    DEBUG Rendered: 2
      [2024-01-10T21:43:58]    DEBUG Dereferencing, final value: {'values': {'date': 20240105, 'empty': None, 'greeting': 'Good Night', 'message': 'Good Night Moon Good Night Moon', 'recipient': 'Moon', 'repeat': 2}}
 
-* Note that ``uw`` does not allow invalid conversions. For example, when attempting to generate an ``sh`` config from a depth-2 ``yaml``:
+.. note::
 
-  .. code-block:: text
+   Note that ``uw`` does not allow invalid conversions. For example, when attempting to generate a ``sh`` config from a depth-2 ``yaml``:
 
-     $ uw config realize --input-file config.yaml --output-format sh
-     [2024-01-10T21:46:00]    ERROR Cannot realize depth-2 config to type-'sh' config
-     Cannot realize depth-2 config to type-'sh' config
+   .. code-block:: text
 
-  Note that ``ini`` and ``nml`` configs are, by definition, depth-2 configs, while ``sh`` configs are depth-1 and ``yaml`` configs have arbitrary depth.
+      $ uw config realize --input-file config.yaml --output-format sh
+      [2024-01-10T21:46:00]    ERROR Cannot realize depth-2 config to type-'sh' config
+      Cannot realize depth-2 config to type-'sh' config
+
+   Note that ``ini`` and ``nml`` configs are, by definition, depth-2 configs, while ``sh`` configs are depth-1 and ``yaml`` configs have arbitrary depth.
 
 .. _cli_config_validate_examples:
 
 ``validate``
 ------------
+
+The ``validate`` mode ensures that a given config file is structured properly.
 
 .. code-block:: text
 
@@ -432,7 +442,7 @@ and additional supplemental YAML file ``values2.yaml`` with content
 Examples
 ^^^^^^^^
 
-The examples that follow use :json-schema:`JSON Schema<understanding-json-schema/reference>` file ``schema.jsonschema`` with content
+The examples that follow use the :json-schema:`JSON Schema<understanding-json-schema/reference>` file ``schema.jsonschema`` with the following contents:
 
 .. code-block:: json
 
@@ -458,7 +468,7 @@ The examples that follow use :json-schema:`JSON Schema<understanding-json-schema
      "additionalProperties": false
    }
 
-and YAML file ``values.yaml`` with content
+and the YAML file ``values.yaml`` with the following contents:
 
 .. code-block:: yaml
 
@@ -466,23 +476,23 @@ and YAML file ``values.yaml`` with content
      greeting: Hello
      recipient: World
 
-* Validate a YAML config against a given JSON schema:
+* To validate a YAML config against a given JSON schema:
 
   .. code-block:: text
 
      $ uw config validate --schema-file schema.jsonschema --input-file values.yaml
      [2024-01-03T17:23:07]     INFO 0 UW schema-validation errors found
 
-  Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
+  Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
 
-* Read the config from ``stdin`` and print validation results to ``stdout``:
+* To read the *config* from ``stdin`` and print validation results to ``stdout``:
 
   .. code-block:: text
 
      $ cat values.yaml | uw config validate --schema-file schema.jsonschema
      [2024-01-03T17:26:29]     INFO 0 UW schema-validation errors found
 
-* However, reading the schema from ``stdin`` is **not** supported:
+* However, reading the *schema* from ``stdin`` is **not** supported:
 
   .. code-block:: text
 
@@ -507,7 +517,7 @@ and YAML file ``values.yaml`` with content
      [2024-01-03T17:31:19]    ERROR On instance['values']:
      [2024-01-03T17:31:19]    ERROR     {'greeting': 'Hello'}
 
-* Request verbose log output:
+* To request verbose log output:
 
   .. code-block:: text
 
@@ -527,7 +537,7 @@ and YAML file ``values.yaml`` with content
 
      $ uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose 2>validate.log
 
-  The content of ``validate.log``:
+  The contents of ``validate.log``:
 
   .. code-block:: text
 

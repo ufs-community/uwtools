@@ -1,4 +1,4 @@
-This recipe uses the ``aarch64`` (64-bit ARM) Miniforge for Linux, and installs into ``$HOME/conda``. Adjust as necessary for the target system.
+This recipe uses the ``aarch64`` (64-bit ARM) Miniforge for Linux and installs into ``$HOME/conda``. Adjust as necessary for the target system.
 
 #. Download, install, and activate the latest :miniforge3:`Miniforge<>` for the target system.
 
@@ -10,7 +10,7 @@ This recipe uses the ``aarch64`` (64-bit ARM) Miniforge for Linux, and installs 
       source ~/conda/etc/profile.d/conda.sh
       conda activate
 
-   After initial installation, this conda may be activated with the command
+   After initial installation, this conda may be activated with the command:
 
    .. code-block:: text
 

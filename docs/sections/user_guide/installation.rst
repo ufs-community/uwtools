@@ -1,7 +1,9 @@
 Installation
 ============
 
-**NOTE:** Developers should visit the :doc:`Developer Setup <../contributor_guide/developer_setup>` section located in the :doc:`Contributor Guide <../contributor_guide/index>`.
+.. note:: 
+   
+   Developers should visit the :doc:`Developer Setup <../contributor_guide/developer_setup>` section located in the :doc:`Contributor Guide <../contributor_guide/index>`.
 
 The recommended installation mechanism uses the Python package and virtual-environment manager :conda:`conda<>`. Specifically, these instructions assume use of the :miniforge:`Miniforge<>` variant of :miniconda:`Miniconda<>`, built to use, by default, packages from the :conda-forge:`conda-forge<>` project. Users of the original :miniconda:`Miniconda<>` or the :anaconda:`Anaconda distribution<>` should add the flags ``-c conda-forge --override-channels`` to ``conda`` commands to specify the required package channels.
 
@@ -11,7 +13,7 @@ Use an Existing conda Installation
 Install Into an Existing Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To install ``uwtools`` into an existing environment in an existing conda (e.g. :miniforge:`Miniforge<>`, :miniconda:`Miniconda<>`, :anaconda:`Anaconda<>`) installation:
+To install ``uwtools`` into an existing environment in an existing conda (e.g., :miniforge:`Miniforge<>`, :miniconda:`Miniconda<>`, :anaconda:`Anaconda<>`) installation:
 
 #. Activate that environment.
 #. Identify the ``uwtools`` version number to install from the available versions shown by ``conda search -c ufs-community --override-channels uwtools``.
@@ -36,7 +38,7 @@ To create a standalone conda environment providing ``uwtools``:
 Use a Fresh Miniforge Installation
 ----------------------------------
 
-If no existing conda installation is available, install :miniforge:`Miniforge<>`
+If no existing conda installation is available, install :miniforge:`Miniforge<>`.
 
 .. include:: ../../shared/miniforge3_instructions.rst
 
@@ -62,10 +64,10 @@ Build the ``uwtools`` Package Locally
 
    .. code-block:: text
 
-      conda search -c local --override-channels uwtools # do not add -c conda-forge to this command
+      conda search -c local --override-channels uwtools  # do not add -c conda-forge to this command
 
 #. Optionally, create an environment from the newly built package:
 
    .. code-block:: text
 
-      conda create -n uwtools -c local uwtools[=<version>] # specify version if multiple choices are available
+      conda create -n uwtools -c local uwtools[=<version>]  # specify version if multiple choices are available
