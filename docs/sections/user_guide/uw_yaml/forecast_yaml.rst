@@ -21,8 +21,7 @@ This section describes the specifics of the FV3 atmosphere forecast component.
       INPUT/gfs_data.nc: /path/to/gfs_data.nc
       INPUT/sfc_data.nc: /path/to/sfc_data.nc
       INPUT/gfs_ctrl.nc: /path/to/gfs_ctrl.nc
-    diag_table:
-      template_file: /path/to/diag_table/template/file
+    diag_table: /path/to/diag_table/template/file
     domain: regional
     executable: fv3.exe
     fd_ufs:
@@ -47,8 +46,6 @@ This section describes the specifics of the FV3 atmosphere forecast component.
         fv_core_nml:
           k_split: 2
           n_split: 6
-    nems.configure:
-      template_file: /path/to/template/nems.configure
     run_dir: /path/to/forecast/run/directory/{yyyymmddhh}
     static:
       fv3.exe: /path/to/executable/ufs_model
@@ -57,6 +54,7 @@ This section describes the specifics of the FV3 atmosphere forecast component.
       data_table: /path/to/data_table
       eta_micro_lookup.data: /path/to/noahmptable.dat
       noahmptable.tbl: /path/to/noahmptable.tbl
+    ufs_configure: /path/to/template/ufs.configure
 
 .. _updating_values:
 
@@ -103,11 +101,6 @@ The contents of the staged ``people.yaml`` that results:
      name: Jane
 
 
-Rendering Template Files
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-Requires a path to a template file in the ``template_file:`` entry. There is no option to add values in the YAML. Instead, the driver is programmed to enter necessary values for the template.
-
 UW YAML Keys
 ^^^^^^^^^^^^
 
@@ -121,7 +114,7 @@ This block contains a set of files to stage in the run directory: File names as 
 ``diag_table:``
 """""""""""""""
 
-In ``uwtools``, the ``diag_table`` is treated as a template so that the date and time information in the header may be filled in appropriately. The ``template_file:`` is the path to the input Jinja2 template. Date information is provided on the command line or via API interfaces.
+The path to the input Jinja2 template for the ``diag_table`` file.
 
 The diag_table is described :weather-model-io:`here<diag-table-file>`.
 
@@ -184,7 +177,7 @@ This block contains a set of files to stage in the run directory: file names as 
 
 """""""""""""""""""
 
-In ``uwtools``, the ``ufs.configure`` file is treated as a template so that the date and time information in the header may be filled in appropriately. The ``template_file:`` is the path to the input Jinja2 template. There is no option to add values in the YAML. Instead, the driver is programmed to enter necessary values for the template.
+The path to the input Jinja2 template for the ``ufs.configure`` file.
 
 The documentation for the ``ufs.configure`` file is :weather-model-io:`here<ufs-configure-file>`.
 

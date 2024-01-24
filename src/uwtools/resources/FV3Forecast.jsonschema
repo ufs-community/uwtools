@@ -1,24 +1,28 @@
 {
   "$defs": {
     "updatable_config": {
+      "additionalProperties": false,
       "properties": {
-        "base_file": {
-          "format": "uri",
-          "type": "string"
+        "properties": {
+          "base_file": {
+            "format": "uri",
+            "type": "string"
+          },
+          "update_values": {
+            "type": "object"
+          }
         },
-        "update_values": {
-          "type": "object"
-        }
-      },
-      "required": [
-        "base_file"
-      ],
-      "type": "object"
+        "required": [
+          "base_file"
+        ],
+        "type": "object"
+      }
     }
   },
   "description": "This document is to validate user-defined FV3 forecast config files",
   "properties": {
     "forecast": {
+      "additionalProperties": false,
       "description": "parameters of the forecast",
       "properties": {
         "cycle_dependent|static": {
@@ -26,6 +30,10 @@
             "type": "string"
           },
           "type": "object"
+        },
+        "diag_table": {
+          "format": "uri",
+          "type": "string"
         },
         "domain": {
           "enum": [
@@ -38,20 +46,30 @@
           "format": "uri",
           "type": "string"
         },
-        "fd_ufs|field_table|model_configure|namelist": {
+        "fd_ufs": {
+          "$ref": "#/$defs/updatable_config"
+        },
+        "field_table": {
           "$ref": "#/$defs/updatable_config"
         },
         "length": {
           "minimum": 1,
           "type": "integer"
         },
-        "model": {
-          "type": "string"
+        "model_configure": {
+          "$ref": "#/$defs/updatable_config"
         },
         "mpicmd": {
           "type": "string"
         },
+        "namelist": {
+          "$ref": "#/$defs/updatable_config"
+        },
         "run_dir": {
+          "format": "uri",
+          "type": "string"
+        },
+        "ufs_configure": {
           "format": "uri",
           "type": "string"
         }
