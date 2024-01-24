@@ -13,6 +13,7 @@ from io import StringIO
 from pathlib import Path
 from typing import IO, Any, Generator, List, Union
 
+from uwtools.exceptions import UWError
 from uwtools.logging import log
 from uwtools.types import DefinitePath, ExistAct, OptionalPath
 
@@ -46,6 +47,13 @@ class FORMAT:
     sh: str = _sh
     yaml: str = _yaml
     yml: str = _yaml
+
+    @staticmethod
+    def extensions() -> List[str]:
+        """
+        Returns recognized filename extensions.
+        """
+        return [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
 
 
 class StdinProxy:
@@ -88,7 +96,7 @@ def get_file_format(path: DefinitePath) -> str:
         return fmt
     msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
     log.critical(msg)
-    raise ValueError(msg)
+    raise UWError(msg)
 
 
 def handle_existing(directory: DefinitePath, exist_act: str) -> None:
