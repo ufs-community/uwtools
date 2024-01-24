@@ -468,7 +468,6 @@ def _add_arg_cycle(group: Group) -> None:
 
 def _add_arg_debug(group: Group) -> None:
     group.add_argument(
-        _switch(STR.debug),
         "--debug",
         action="store_true",
         help="""
@@ -649,7 +648,7 @@ def _abort(msg: str) -> None:
     sys.exit(1)
 
 
-def _add_args_verbosity(group: Group) -> SubmodeChecks:
+def _add_args_verbosity(group: Group) -> ActionChecks:
     """
     Add debug, quiet, and verbose arguments.
 
@@ -709,7 +708,10 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
 
 def _check_verbosity(args) -> Args:
     if args.get(STR.quiet) and (args.get(STR.debug) or args.get(STR.verbose)):
-        _abort("--quiet may not be used with --debug or --verbose")
+        _abort(
+            "%s may not be used with %s or %s"
+            % (_switch(STR.quiet), _switch(STR.debug), _switch(STR.verbose))
+        )
     return args
 
 

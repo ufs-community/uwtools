@@ -49,7 +49,7 @@ def setup_logging(quiet: bool = False, verbose: bool = False) -> None:
     for handler in logger.handlers:
         logger.removeHandler(handler)
     if quiet and verbose:
-        print("Specify at most one of 'quiet' and 'verbose'", file=sys.stderr)
+        print("--quiet may not be used with --debug or --verbose", file=sys.stderr)
         sys.exit(1)
     kwargs: dict = {
         "datefmt": "%Y-%m-%dT%H:%M:%S",
