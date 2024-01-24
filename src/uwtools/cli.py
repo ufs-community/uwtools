@@ -27,8 +27,8 @@ FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
 TITLE_REQ_ARG = "Required arguments"
 
 Args = Dict[str, Any]
-SubmodeChecks = List[Callable[[Args], Args]]
-ModeChecks = Dict[str, SubmodeChecks]
+ActionChecks = List[Callable[[Args], Args]]
+ModeChecks = Dict[str, ActionChecks]
 Checks = Dict[str, ModeChecks]
 
 
@@ -44,7 +44,7 @@ def main() -> None:
     setup_logging(quiet=True)
     try:
         args, checks = _parse_args(sys.argv[1:])
-        for check in checks[args[STR.mode]][args[STR.submode]]:
+        for check in checks[args[STR.mode]][args[STR.action]]:
             check(args)
         setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
@@ -70,7 +70,7 @@ def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.config, "Handle configs")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.submode)
+    subparsers = _add_subparsers(parser, STR.action)
     return {
         STR.compare: _add_subparser_config_compare(subparsers),
         STR.realize: _add_subparser_config_realize(subparsers),
@@ -78,7 +78,7 @@ def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
     }
 
 
-def _add_subparser_config_compare(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_config_compare(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: config compare
 
@@ -108,7 +108,7 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> SubmodeChecks:
     ]
 
 
-def _add_subparser_config_realize(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: config realize
 
@@ -130,7 +130,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> SubmodeChecks:
     ]
 
 
-def _add_subparser_config_validate(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_config_validate(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: config validate
 
@@ -154,26 +154,26 @@ def _dispatch_config(args: Args) -> bool:
         STR.compare: _dispatch_config_compare,
         STR.realize: _dispatch_config_realize,
         STR.validate: _dispatch_config_validate,
-    }[args[STR.submode]](args)
+    }[args[STR.action]](args)
 
 
 def _dispatch_config_compare(args: Args) -> bool:
     """
-    Dispatch logic for config compare submode.
+    Dispatch logic for config compare action.
 
     :param args: Parsed command-line args.
     """
     return uwtools.api.config.compare(
-        config_a_path=args[STR.file1path],
-        config_a_format=args[STR.file1fmt],
-        config_b_path=args[STR.file2path],
-        config_b_format=args[STR.file2fmt],
+        config_1_path=args[STR.file1path],
+        config_1_format=args[STR.file1fmt],
+        config_2_path=args[STR.file2path],
+        config_2_format=args[STR.file2fmt],
     )
 
 
 def _dispatch_config_realize(args: Args) -> bool:
     """
-    Dispatch logic for config realize submode.
+    Dispatch logic for config realize action.
 
     :param args: Parsed command-line args.
     """
@@ -190,7 +190,7 @@ def _dispatch_config_realize(args: Args) -> bool:
 
 def _dispatch_config_validate(args: Args) -> bool:
     """
-    Dispatch logic for config validate submode.
+    Dispatch logic for config validate action.
 
     :param args: Parsed command-line args.
     """
@@ -208,13 +208,13 @@ def _add_subparser_forecast(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.forecast, "Configure and run forecasts")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.submode)
+    subparsers = _add_subparsers(parser, STR.action)
     return {
         STR.run: _add_subparser_forecast_run(subparsers),
     }
 
 
-def _add_subparser_forecast_run(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_forecast_run(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: forecast run
 
@@ -238,12 +238,12 @@ def _dispatch_forecast(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {STR.run: _dispatch_forecast_run}[args[STR.submode]](args)
+    return {STR.run: _dispatch_forecast_run}[args[STR.action]](args)
 
 
 def _dispatch_forecast_run(args: Args) -> bool:
     """
-    Dispatch logic for forecast run submode.
+    Dispatch logic for forecast run action.
 
     :param args: Parsed command-line args.
     """
@@ -267,14 +267,14 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.rocoto, "Realize and validate Rocoto XML Documents")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.submode)
+    subparsers = _add_subparsers(parser, STR.action)
     return {
         STR.realize: _add_subparser_rocoto_realize(subparsers),
         STR.validate: _add_subparser_rocoto_validate(subparsers),
     }
 
 
-def _add_subparser_rocoto_realize(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: rocoto realize
 
@@ -288,7 +288,7 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> SubmodeChecks:
     return checks
 
 
-def _add_subparser_rocoto_validate(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_rocoto_validate(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: rocoto validate
 
@@ -311,13 +311,13 @@ def _dispatch_rocoto(args: Args) -> bool:
         STR.realize: _dispatch_rocoto_realize,
         STR.validate: _dispatch_rocoto_validate,
     }[
-        args[STR.submode]
+        args[STR.action]
     ](args)
 
 
 def _dispatch_rocoto_realize(args: Args) -> bool:
     """
-    Dispatch logic for rocoto realize submode. Validate input and output.
+    Dispatch logic for rocoto realize action. Validate input and output.
 
     :param args: Parsed command-line args.
     """
@@ -326,7 +326,7 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
 
 def _dispatch_rocoto_validate(args: Args) -> bool:
     """
-    Dispatch logic for rocoto validate submode.
+    Dispatch logic for rocoto validate action.
 
     :param args: Parsed command-line args.
     """
@@ -344,14 +344,14 @@ def _add_subparser_template(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.template, "Handle templates")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.submode)
+    subparsers = _add_subparsers(parser, STR.action)
     return {
         STR.render: _add_subparser_template_render(subparsers),
         STR.translate: _add_subparser_template_translate(subparsers),
     }
 
 
-def _add_subparser_template_translate(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_template_translate(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: template translate
 
@@ -365,7 +365,7 @@ def _add_subparser_template_translate(subparsers: Subparsers) -> SubmodeChecks:
     return _add_args_quiet_and_verbose(optional)
 
 
-def _add_subparser_template_render(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: template render
 
@@ -394,13 +394,13 @@ def _dispatch_template(args: Args) -> bool:
         STR.render: _dispatch_template_render,
         STR.translate: _dispatch_template_translate,
     }[
-        args[STR.submode]
+        args[STR.action]
     ](args)
 
 
 def _dispatch_template_render(args: Args) -> bool:
     """
-    Dispatch logic for template render submode.
+    Dispatch logic for template render action.
 
     :param args: Parsed command-line args.
     """
@@ -417,7 +417,7 @@ def _dispatch_template_render(args: Args) -> bool:
 
 def _dispatch_template_translate(args: Args) -> bool:
     """
-    Dispatch logic for template translate submode.
+    Dispatch logic for template translate action.
 
     :param args: Parsed command-line args.
     """
@@ -636,7 +636,7 @@ def _abort(msg: str) -> None:
     sys.exit(1)
 
 
-def _add_args_quiet_and_verbose(group: Group) -> SubmodeChecks:
+def _add_args_quiet_and_verbose(group: Group) -> ActionChecks:
     """
     Add quiet and verbose arguments.
 
@@ -765,6 +765,7 @@ class STR:
     A lookup map for CLI-related strings.
     """
 
+    action: str = "action"
     batch_script: str = "batch_script"
     cfgfile: str = "config_file"
     compare: str = "compare"
@@ -790,7 +791,6 @@ class STR:
     rocoto: str = "rocoto"
     run: str = "run"
     schemafile: str = "schema_file"
-    submode: str = "submode"
     suppfiles: str = "supplemental_files"
     template: str = "template"
     translate: str = "translate"

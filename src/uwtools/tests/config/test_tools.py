@@ -95,7 +95,7 @@ def test_compare_configs_good(compare_configs_assets, caplog):
     log.setLevel(logging.INFO)
     _, a, b = compare_configs_assets
     assert tools.compare_configs(
-        config_a_path=a, config_a_format=FORMAT.yaml, config_b_path=b, config_b_format=FORMAT.yaml
+        config_1_path=a, config_1_format=FORMAT.yaml, config_2_path=b, config_2_format=FORMAT.yaml
     )
     assert caplog.records
 
@@ -107,7 +107,7 @@ def test_compare_configs_changed_value(compare_configs_assets, caplog):
     with writable(b) as f:
         yaml.dump(d, f)
     assert not tools.compare_configs(
-        config_a_path=a, config_a_format=FORMAT.yaml, config_b_path=b, config_b_format=FORMAT.yaml
+        config_1_path=a, config_1_format=FORMAT.yaml, config_2_path=b, config_2_format=FORMAT.yaml
     )
     assert logged(caplog, "baz:             qux:  - 99 + 11")
 
@@ -120,23 +120,21 @@ def test_compare_configs_missing_key(compare_configs_assets, caplog):
         yaml.dump(d, f)
     # Note that a and b are swapped:
     assert not tools.compare_configs(
-        config_a_path=b, config_a_format=FORMAT.yaml, config_b_path=a, config_b_format=FORMAT.yaml
+        config_1_path=b, config_1_format=FORMAT.yaml, config_2_path=a, config_2_format=FORMAT.yaml
     )
     assert logged(caplog, "baz:             qux:  - None + 99")
 
 
 def test_compare_configs_bad_format(caplog):
     log.setLevel(logging.INFO)
-    with raises(UWConfigError) as e:
-        tools.compare_configs(
-            config_a_path="/not/used",
-            config_a_format="jpg",
-            config_b_path="/not/used",
-            config_b_format=FORMAT.yaml,
-        )
-    msg = "Format 'jpg' should be one of: fieldtable, ini, nml, sh, yaml"
+    assert not tools.compare_configs(
+        config_1_path="/not/used",
+        config_1_format="jpg",
+        config_2_path="/not/used",
+        config_2_format=FORMAT.yaml,
+    )
+    msg = "Formats do not match: jpg vs yaml"
     assert logged(caplog, msg)
-    assert msg in str(e.value)
 
 
 def test_config_check_depths_realize_fail(caplog, realize_config_testobj):
@@ -270,7 +268,7 @@ def test_realize_config_incompatible_file_type():
     """
     Test that providing an incompatible file type for input base file will return print statement.
     """
-    with raises(UWConfigError):
+    with raises(UWError):
         tools.realize_config(
             input_config=fixture_path("model_configure.sample"),
             input_format="sample",
@@ -351,14 +349,14 @@ temporalis: c
 
 
 def test_realize_config_supp_bad_format(tmp_path):
-    with raises(ValueError) as e:
-        path = tmp_path / "a.yaml"
-        supplemental_path = tmp_path / "b.clj"
-        msg = f"Cannot deduce format of '{supplemental_path}' from unknown extension 'clj'"
-        with writable(path) as f:
-            yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}", "deref": "b"}, f)
-        with writable(supplemental_path) as f:
-            yaml.dump({"2": "b", "temporalis": "c"}, f)
+    path = tmp_path / "a.yaml"
+    supplemental_path = tmp_path / "b.clj"
+    msg = f"Cannot deduce format of '{supplemental_path}' from unknown extension 'clj'"
+    with writable(path) as f:
+        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}", "deref": "b"}, f)
+    with writable(supplemental_path) as f:
+        yaml.dump({"2": "b", "temporalis": "c"}, f)
+    with raises(UWError) as e:
         tools.realize_config(
             input_config=path,
             input_format=FORMAT.yaml,
@@ -446,39 +444,6 @@ Keys with unrendered Jinja2 variables/expressions:
 Keys that are set to empty:
     salad.toppings
     salad.meat
-""".strip()
-    actual = "\n".join(record.message for record in caplog.records)
-    assert actual == expected
-
-
-def test_realize_config_values_needed_nml(caplog):
-    """
-    Test that the values_needed flag logs keys completed, keys containing unrendered Jinja2
-    variables/expressions and keys set to empty.
-    """
-    log.setLevel(logging.INFO)
-    tools.realize_config(
-        input_config=fixture_path("simple3.nml"),
-        input_format=FORMAT.nml,
-        output_format=FORMAT.yaml,
-        values_needed=True,
-    )
-    expected = """
-Keys that are complete:
-    salad
-    salad.base
-    salad.fruit
-    salad.vegetable
-    salad.how_many
-    salad.extras
-    salad.dessert
-
-Keys with unrendered Jinja2 variables/expressions:
-    salad.dressing: {{ dressing }}
-
-Keys that are set to empty:
-    salad.toppings
-    salad.appetizer
 """.strip()
     actual = "\n".join(record.message for record in caplog.records)
     assert actual == expected
@@ -606,14 +571,16 @@ def test__print_config_section_yaml_not_dict():
 def test__realize_config_update(realize_config_testobj, supplemental_configs):
     assert realize_config_testobj[1][2][3] == 88
     o = tools._realize_config_update(
-        config_obj=realize_config_testobj, supplemental_configs=[supplemental_configs]
+        config_obj=realize_config_testobj,
+        config_fmt="yaml",
+        supplemental_configs=[supplemental_configs],
     )
     assert o[1][2][3] == 99
 
 
 def test__realize_config_update_noop(realize_config_testobj):
     assert realize_config_testobj == tools._realize_config_update(
-        config_obj=realize_config_testobj, supplemental_configs=None
+        config_obj=realize_config_testobj, config_fmt="yaml", supplemental_configs=None
     )
 
 
@@ -623,7 +590,9 @@ def test__realize_config_update_file(realize_config_testobj, tmp_path):
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(values, f)
     assert realize_config_testobj[1][2][3] == 88
-    o = tools._realize_config_update(config_obj=realize_config_testobj, supplemental_configs=[path])
+    o = tools._realize_config_update(
+        config_obj=realize_config_testobj, config_fmt="yaml", supplemental_configs=[path]
+    )
     assert o[1][2][3] == 99
 
 
@@ -638,7 +607,7 @@ def test__realize_config_update_list(realize_config_testobj, tmp_path):
         yaml.dump(values2, f)
     assert realize_config_testobj[1][2][3] == 88
     o = tools._realize_config_update(
-        config_obj=realize_config_testobj, supplemental_configs=[path, path2]
+        config_obj=realize_config_testobj, config_fmt="yaml", supplemental_configs=[path, path2]
     )
     assert o[1][2][3] == 77
 
@@ -667,3 +636,59 @@ def test__realize_config_values_needed_negative_results(caplog, tmp_path):
     assert "No keys are complete." in msgs
     assert "No keys have unrendered Jinja2 variables/expressions." in msgs
     assert "No keys are set to empty." in msgs
+
+
+@pytest.mark.parametrize("input_fmt", FORMAT.extensions())
+@pytest.mark.parametrize("output_fmt", FORMAT.extensions())
+def test__validate_format_output(input_fmt, output_fmt):
+    call = lambda: tools._validate_format_output(input_fmt=input_fmt, output_fmt=output_fmt)
+    if input_fmt in (FORMAT.yaml, output_fmt):
+        call()  # no exception raised
+    else:
+        with raises(UWError) as e:
+            call()
+        assert str(e.value) == f"Output format {output_fmt} must match input format {input_fmt}"
+
+
+def test__validate_format_supplemental_fail_obj():
+    config_fmt = FORMAT.yaml
+    sc = NMLConfig(config={"n": {"k": "v"}})
+    with raises(UWError) as e:
+        tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
+    assert str(e.value) == "Supplemental config #88 format %s must match input format %s" % (
+        FORMAT.nml,
+        config_fmt,
+    )
+
+
+def test__validate_format_supplemental_fail_path():
+    config_fmt = FORMAT.yaml
+    sc = "/path/to/config.nml"
+    with raises(UWError) as e:
+        tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
+    assert str(e.value) == "Supplemental config #%s format %s must match input format %s" % (
+        88,
+        FORMAT.nml,
+        config_fmt,
+    )
+
+
+def test__validate_format_supplemental_pass_dict(caplog):
+    log.setLevel(logging.DEBUG)
+    config_fmt = FORMAT.yaml
+    sc: dict = {}
+    tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
+    msg = "Supplemental config #%s is a dict: Cannot validate its format vs %s" % (88, config_fmt)
+    assert logged(caplog, msg)
+
+
+def test__validate_format_supplemental_pass_match_obj():
+    config_fmt = FORMAT.yaml
+    sc = YAMLConfig(config={})
+    tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
+
+
+def test__validate_format_supplemental_pass_match_path():
+    config_fmt = FORMAT.yaml
+    sc = "/path/to/config.yaml"
+    tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
