@@ -19,6 +19,7 @@ from uwtools import cli
 from uwtools.cli import STR
 from uwtools.exceptions import UWError
 from uwtools.logging import log
+from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
 
 # Test functions
@@ -123,22 +124,6 @@ def test__check_file_vs_format_pass_implicit(fmt):
     assert args[STR.infmt] == vars(FORMAT)[fmt]
 
 
-def test__check_quiet_vs_verbose_fail(capsys):
-    log.setLevel(logging.INFO)
-    args = {STR.quiet: True, STR.verbose: True}
-    with raises(SystemExit):
-        cli._check_quiet_vs_verbose(args)
-    assert (
-        "Specify at most one of %s, %s" % (cli._switch(STR.quiet), cli._switch(STR.verbose))
-        in capsys.readouterr().err
-    )
-
-
-def test__check_quiet_vs_verbose_ok():
-    args = {"foo": 88}
-    assert cli._check_quiet_vs_verbose(args) == args
-
-
 def test__check_template_render_vals_args_implicit_fail():
     # The values-file format cannot be deduced from the filename.
     args = {STR.valsfile: "a.jpg"}
@@ -164,6 +149,23 @@ def test__check_template_render_vals_args_noop_explicit_valsfmt():
     # An explicit values format is honored, valid or not.
     args = {STR.valsfile: "a.txt", STR.valsfmt: "jpg"}
     assert cli._check_template_render_vals_args(args) == args
+
+
+@pytest.mark.parametrize("flag", (STR.debug, STR.verbose))
+def test__check_verbosity_fail(capsys, flag):
+    log.setLevel(logging.INFO)
+    args = {STR.quiet: True, flag: True}
+    with raises(SystemExit):
+        cli._check_verbosity(args)
+    assert "--quiet may not be used with --debug or --verbose" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "flags", ([STR.debug], [STR.quiet], [STR.verbose], [STR.debug, STR.verbose])
+)
+def test__check_verbosity_ok(flags):
+    args = {flag: True for flag in flags}
+    assert cli._check_verbosity(args) == args
 
 
 def test__dict_from_key_eq_val_strings():
@@ -414,11 +416,24 @@ def test__dispatch_template_translate_no_optional():
     )
 
 
-@pytest.mark.parametrize("quiet", [True])
-@pytest.mark.parametrize("verbose", [False])
-def test_main_fail_checks(capsys, quiet, verbose):
+def test_main_debug_logs_stacktrace(caplog):
+    log.setLevel(logging.DEBUG)
+    msg = "Test failed intentionally"
+    with patch.object(cli, "_parse_args", side_effect=Exception(msg)):
+        with patch.object(sys, "argv", cli._switch(STR.debug)):
+            with raises(SystemExit):
+                cli.main()
+                assert logged(caplog, "Traceback (most recent call last):")
+
+
+@pytest.mark.parametrize("debug", [False, True])
+@pytest.mark.parametrize("quiet", [False, True])
+@pytest.mark.parametrize("verbose", [False, True])
+def test_main_fail_checks(capsys, debug, quiet, verbose):
     # Using mode 'template render' for testing.
     raw_args = ["testing", STR.template, STR.render]
+    if debug:
+        raw_args.append(cli._switch(STR.debug))
     if quiet:
         raw_args.append(cli._switch(STR.quiet))
     if verbose:
@@ -427,9 +442,11 @@ def test_main_fail_checks(capsys, quiet, verbose):
         with patch.object(cli, "_dispatch_template", return_value=True):
             with raises(SystemExit) as e:
                 cli.main()
-            if quiet and verbose:
+            if quiet and (debug or verbose):
                 assert e.value.code == 1
-                assert "Specify at most one of" in capsys.readouterr().err
+                assert (
+                    "--quiet may not be used with --debug or --verbose" in capsys.readouterr().err
+                )
             else:
                 assert e.value.code == 0
 

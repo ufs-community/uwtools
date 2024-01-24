@@ -45,6 +45,8 @@ The ``uw`` mode for configuring and running forecasts.
          Path to output batch file (defaults to stdout)
      --dry-run
          Only log info, making no changes
+     --debug
+         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v
