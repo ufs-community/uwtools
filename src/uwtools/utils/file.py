@@ -85,7 +85,7 @@ def get_file_format(path: DefinitePath) -> str:
     """
     suffix = Path(path).suffix.replace(".", "")
     if fmt := vars(FORMAT).get(suffix):
-        return fmt
+        return str(fmt)
     msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
     log.critical(msg)
     raise ValueError(msg)
