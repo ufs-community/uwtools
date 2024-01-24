@@ -192,7 +192,7 @@ Realize an output config based on an input config and optional supplemental conf
 
 If no input is specified, ``stdin`` is read. A ``dict`` or ``Config`` object may also be provided as
 input.  If no output is specified, ``stdout`` is written to. When an input or output filename is
-specified, its format will be deduced from its extension, if possible. This can be overriden by
+specified, its format will be deduced from its extension, if possible. This can be overridden by
 specifying the format explicitly, and it is required to do so for reads from ``stdin`` or writes to
 ``stdout``, as no attempt is made to deduce the format of streamed data.
 
@@ -226,7 +226,7 @@ Realize an output config based on an input config and optional supplemental conf
 
 If no input is specified, ``stdin`` is read. A ``dict`` or ``Config`` object may also be provided as
 input. When an input filename is specified, its format will be deduced from its extension, if
-possible. This can be overriden by specifying the format explicitly, and it is required to do so for
+possible. This can be overridden by specifying the format explicitly, and it is required to do so for
 reads from ``stdin``, as no attempt is made to deduce the format of streamed data.
 
 If optional supplemental configs (which may likewise be file paths or ``Config`` / ``dict`` objects)

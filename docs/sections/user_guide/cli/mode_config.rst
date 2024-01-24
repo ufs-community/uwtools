@@ -424,7 +424,7 @@ and additional supplemental YAML file ``values2.yaml`` with content
 .. note:: In recognition of the different sets of value types representable in each config format, ``uw`` supports two format-combination schemes:
 
    1. Output matches input: The format of the output config matches that of the input config.
-   2. Input is YAML: If the input config is YAML, any output format may be requested. In the worst case, values always have a string representation; but note that, for example, he string representation of a YAML sequence (Python ``list``) in an INI output config may not be useful.
+   2. Input is YAML: If the input config is YAML, any output format may be requested. In the worst case, values always have a string representation; but note that, for example, the string representation of a YAML sequence (Python ``list``) in an INI output config may not be useful.
 
    In all cases, any supplemental configs must be in the same format as the input config and must have recognized extensions.
 
