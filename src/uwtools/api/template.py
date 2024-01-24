@@ -18,7 +18,7 @@ def render(
     Render a Jinja2 template based on specified values.
 
     Primary values used to render the template are taken from the specified file. The format of the
-    values source will be deduced from the filename extension, if possible. This can be overriden
+    values source will be deduced from the filename extension, if possible. This can be overridden
     via the ``values_format`` argument. A ``dict`` object may alternatively be provided as the
     primary values source. If no input file is specified, ``stdin`` is read. If no output file is
     specified, ``stdout`` is written to.

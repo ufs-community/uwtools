@@ -11,6 +11,7 @@ from unittest.mock import patch
 import pytest
 from pytest import fixture, raises
 
+from uwtools.exceptions import UWError
 from uwtools.types import ExistAct
 from uwtools.utils import file
 
@@ -75,7 +76,7 @@ def test_get_file_format():
 
 
 def test_get_file_format_unrecognized():
-    with raises(ValueError):
+    with raises(UWError):
         file.get_file_format("a.jpg")
 
 

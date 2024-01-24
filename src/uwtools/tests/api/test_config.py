@@ -12,10 +12,10 @@ from uwtools.config.formats.yaml import YAMLConfig
 
 def test_compare():
     kwargs: dict = {
-        "config_a_path": "path1",
-        "config_a_format": "fmt1",
-        "config_b_path": "path2",
-        "config_b_format": "fmt2",
+        "config_1_path": "path1",
+        "config_1_format": "fmt1",
+        "config_2_path": "path2",
+        "config_2_format": "fmt2",
     }
     with patch.object(config, "_compare") as _compare:
         config.compare(**kwargs)

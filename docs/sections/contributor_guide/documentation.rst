@@ -40,8 +40,8 @@ Please follow these guidelines when contributing to the documentation:
 * Use one blank line between documentation elements (headers, paragraphs, code blocks, etc.) unless additional lines are necessary to achieve correctly formatted HTML.
 * Remove all trailing whitespace.
 * In general, avoid pronouns like "we" and "you". (Using "we" may be appropriate when synonymous with "The UW Team", "The UFS Community", etc., when the context is clear.) Prefer direct, factual statements about what the code does, requires, etc.
-* Use an Oxford comma.
-* The synopsis information printed by ``uw [mode [submode]] --help`` is automatically wrapped and indented based on current terminal size. For visual consistency, please set your terminal width to 100 columns when running such commands to produce output to copy into the docs.
+* Use the `Oxford Comma <https://en.wikipedia.org/wiki/Serial_comma>`_.
+* The synopsis information printed by ``uw [mode [action]] --help`` is automatically wrapped and indented based on current terminal size. For visual consistency, please set your terminal width to 100 columns when running such commands to produce output to copy into the docs.
 * Follow the :rst:`RST Sections<basics.html#sections>` guidelines, underlining section headings with = characters, subsections with - characters, and subsubsections with ^ characters. If a further level of refinement is needed, use " to underline paragraph headers.
 * In [[sub]sub]section titles, capitalize all "principal" words. In practice this usually means all words but articles (a, an, the), logicals (and, etc.), and prepositions (for, of, etc.). Always fully capitalize acronyms (e.g., YAML).
 * Never capitalize proper names when their owners do not (e.g. write `"pandas" <https://pandas.pydata.org/>`_, not "Pandas", even at the start of a sentence) or when referring to a software artifact (e.g. write ``numpy`` when referring to the library, and "NumPy" when referring to the project).

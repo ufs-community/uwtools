@@ -21,7 +21,9 @@ from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
 
 
-@pytest.mark.parametrize("d,n", [({1: 88}, 1), ({1: {2: 88}}, 2), ({1: {2: {3: 88}}}, 3)])
+@pytest.mark.parametrize(
+    "d,n", [({1: 88}, 1), ({1: {2: 88}}, 2), ({1: {2: {3: 88}}}, 3), ({1: {}}, 2)]
+)
 def test_depth(d, n):
     assert support.depth(d) == n
 
