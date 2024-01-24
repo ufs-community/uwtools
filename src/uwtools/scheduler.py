@@ -198,8 +198,8 @@ class JobScheduler(UserDict):
         :param script_path: Path to the batch script.
         :return: Did the run exit with a success status?
         """
-        result = execute(cmd=f"{self.submit_command} {script_path}")
-        return result.success
+        success, _ = execute(cmd=f"{self.submit_command} {script_path}")
+        return success
 
 
 class Slurm(JobScheduler):

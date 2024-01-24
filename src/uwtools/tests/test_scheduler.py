@@ -310,5 +310,6 @@ def test_scheduler_submit_job(pbs_props):
     outpath = "/path/to/batch/script"
     expected_command = f"{submit_command} {outpath}"
     with patch.object(scheduler, "execute") as execute:
+        execute.return_value = (True, "")
         js.submit_job(outpath)
         execute.assert_called_once_with(cmd=expected_command)

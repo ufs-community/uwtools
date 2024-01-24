@@ -40,8 +40,8 @@ class SRW210(Facade):
                     ">%s" % f,
                 ]
                 cmd = " ".join(cmd_components)
-                result = execute(cmd=cmd)
-                if not result.success:
+                _, success = execute(cmd=cmd)
+                if not success:
                     raise UWError(f"Command failed: {cmd}")
         elif file_type == FORMAT.yaml:
             shutil.copy2(config_file, "config.yaml")
@@ -64,8 +64,8 @@ class SRW210(Facade):
         """
         # Note: This is a temporary path until parsing the SRW directory is implemented.
         cmd = "python generate_FV3LAM_wflow.py"
-        result = execute(cmd=cmd)
-        if not result.success:
+        _, success = execute(cmd=cmd)
+        if not success:
             raise UWError(f"Command failed: {cmd}")
 
     def create_manager_files(self) -> None:

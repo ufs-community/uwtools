@@ -287,8 +287,8 @@ class FV3Forecast(Driver):
         command_lines = ["Command:", *full_cmd.split("\n")]
         if self._dry_run:
             return True, command_lines
-        result = execute(cmd=full_cmd)
-        return result.success, command_lines
+        success, _ = execute(cmd=full_cmd)
+        return success, command_lines
 
 
 CLASSES = {"FV3": FV3Forecast}

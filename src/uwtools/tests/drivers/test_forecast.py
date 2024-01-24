@@ -6,7 +6,6 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from types import SimpleNamespace as ns
 from unittest.mock import ANY, patch
 
 import pytest
@@ -336,6 +335,7 @@ def test_run_direct(fv3_mpi_assets, fv3_run_assets):
     expected_command = " ".join(fv3_mpi_assets)
     with patch.object(FV3Forecast, "_validate", return_value=True):
         with patch.object(forecast, "execute") as execute:
+            execute.return_value = (True, "")
             fcstobj = FV3Forecast(config_file=config_file)
             with patch.object(fcstobj, "_config", config):
                 fcstobj.run(cycle=dt.datetime.now())
@@ -387,7 +387,7 @@ def test_FV3Forecast__run_via_batch_submission(fv3_run_assets):
     with patch.object(fcstobj, "_config", config):
         with patch.object(scheduler, "execute") as execute:
             with patch.object(Driver, "_create_user_updated_config"):
-                execute.return_value = ns(success=True)
+                execute.return_value = (True, "")
                 success, lines = fcstobj._run_via_batch_submission()
                 assert success is True
                 assert lines[0] == "Batch script:"
@@ -399,7 +399,7 @@ def test_FV3Forecast__run_via_local_execution(fv3_run_assets):
     fcstobj = FV3Forecast(config_file=config_file)
     with patch.object(fcstobj, "_config", config):
         with patch.object(forecast, "execute") as execute:
-            execute.return_value = ns(success=True)
+            execute.return_value = (True, "")
             success, lines = fcstobj._run_via_local_execution()
             assert success is True
             assert lines[0] == "Command:"
