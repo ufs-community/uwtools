@@ -29,6 +29,7 @@ extlinks = {
     "anaconda": ("https://www.anaconda.com/%s", "%s"),
     "anaconda-condev": ("https://anaconda.org/maddenp/condev/%s", "%s"),
     "black": ("https://black.readthedocs.io/en/stable/%s", "%s"),
+    "cmeps": ("https://escomp.github.io/CMEPS/versions/master/html/esmflds.html#%s", "%s"),
     "conda": ("https://docs.conda.io/en/latest/%s", "%s"),
     "conda-forge": ("https://conda-forge.org/%s", "%s"),
     "condev": ("https://github.com/maddenp/condev/%s", "%s"),
@@ -49,7 +50,9 @@ extlinks = {
     "rst": ("https://www.sphinx-doc.org/en/master/usage/restructuredtext/%s", "%s"),
     "rtd": ("https://readthedocs.org/projects/uwtools/%s", "%s"),
     "ufs": ("https://ufscommunity.org/%s", "%s"),
+    "ufs-weather-model": ("https://github.com/ufs-community/ufs-weather-model/%s", "%s"),
     "uwtools": ("https://github.com/ufs-community/uwtools/%s", "%s"),
+    "weather-model-io": ("https://ufs-weather-model.readthedocs.io/en/latest/InputsOutputs.html#%s", "%s"),
 }
 
 def setup(app):
