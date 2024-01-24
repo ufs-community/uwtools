@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from uwtools.logging import log
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.types import OptionalPath
 from uwtools.utils.file import writable
 from uwtools.utils.memory import Memory
 from uwtools.utils.processing import execute
@@ -199,7 +199,9 @@ class JobScheduler(UserDict):
         :param script_path: Path to the batch script.
         :return: Did the run exit with a success status?
         """
-        success, _ = execute(cmd=f"{self.submit_command} {script_path}", cwd=f"{script_path.parent}")
+        success, _ = execute(
+            cmd=f"{self.submit_command} {script_path}", cwd=f"{script_path.parent}"
+        )
         return success
 
 
