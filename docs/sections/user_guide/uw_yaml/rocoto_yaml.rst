@@ -33,7 +33,11 @@ Starting at the top level of the UW YAML config for Rocoto, there are several re
 UW YAML Keys
 ^^^^^^^^^^^^
 
-``attrs:``: This section allows users to define any number of the available attributes to the ``<workflow>`` tag in Rocoto's native XML language. Set each with a key/value that matches the exact syntax needed by Rocoto. These attributes work to fill in the ``<workflow>`` tag. For example,
+.. note::
+
+   For additional information on Rocoto tags mentioned in this section (e.g., ``<workflow>``, ``<cycledef>``, ``<log>``), please see the :rocoto:`Rocoto documentation<>`.
+
+``attrs:`` -- This section allows users to define any number of the available attributes to the ``<workflow>`` tag in Rocoto's native XML language. Set each with a key/value that matches the exact syntax needed by :rocoto:`Rocoto<>`. These attributes work to fill in the ``<workflow>`` tag. For example:
 
 .. code-block:: xml
 
@@ -41,13 +45,13 @@ UW YAML Keys
    ...
    </workflow>
 
-``cycledef:``: This section is a list of grouped cycle definitions for a workflow. Any number of ``cycledef:`` keys is supported. Similar to ``attrs:`` for the ``workflow:`` level, this section has an ``attrs:`` key that follows the exact requirements of those in the Rocoto XML language. The ``spec:`` key is required and supports either the "start, stop, step" syntax, or the "crontab-like" method supported by Rocoto. The example above translates to a single ``<cycledef>`` tag:
+``cycledef:`` -- This section is a list of grouped cycle definitions for a workflow. Any number of ``cycledef:`` keys is supported. Similar to ``attrs:`` for the ``workflow:`` level, this section has an ``attrs:`` key that follows the exact requirements of those in the Rocoto XML language. The ``spec:`` key is required and supports either the "start, stop, step" syntax, or the "crontab-like" method supported by Rocoto. The example above translates to a single ``<cycledef>`` tag:
 
 .. code-block:: xml
 
    <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
 
-``entities:``: This section defines key/value pairs -- each rendered as ``<!ENTITY key "value">`` -- to translate to named entities (variables) in XML. The example above would yield:
+``entities:`` -- This section defines key/value pairs --- each rendered as ``<!ENTITY key "value">`` --- to translate to named entities (variables) in XML. The example above would yield:
 
 .. code-block:: xml
 
@@ -57,13 +61,13 @@ UW YAML Keys
      <!ENTITY FOO "test.log">
    ]>
 
-``log:``: This is a path-like string that defines where to put the Rocoto logs. It corresponds to the ``<log>`` tag. For example:
+``log:`` -- This is a path-like string that defines where to put the Rocoto logs. It corresponds to the ``<log>`` tag. For example:
 
 .. code-block:: xml
 
    <log>/some/path/to/&FOO;</log>
 
-``tasks:``: This section is explained in the ``Tasks Section``.
+``tasks:`` -- This section is explained in the `Tasks Section`_.
 
 Using Cycle Strings
 ^^^^^^^^^^^^^^^^^^^
@@ -86,7 +90,7 @@ In the example, the resulting log would appear in the XML file as:
      <cyclestr>/some/path/to/&FOO;</cyclestr>
    </log>
 
-The ``attrs:`` block is optional within the ``cyclestr:`` block, and can be used to specify the cycle offset.
+The ``attrs:`` block is optional within the ``cyclestr:`` block and can be used to specify the cycle offset.
 
 Tasks Section
 -------------
@@ -120,13 +124,13 @@ Each task is named by its UW YAML key. Blocks under ``tasks:`` prefixed with ``t
      ...
    </task>
 
-where the ``attrs:`` section may set any of the Rocoto-allowed XML attributes. The ``<jobname>`` tag will, by default, use the same name, but may be overridden with an explicit ``jobname:`` key under the task.
+where the ``attrs:`` section may set any of the Rocoto-allowed XML attributes. The ``<jobname>`` tag will, by default, use the same name but may be overridden with an explicit ``jobname:`` key under the task.
 
 The name of the task can be any string accepted by Rocoto as a task name (including additional underscores), but must contain the leading ``task_`` to be recognized as a task.
 
-``command:``: The command that will be run in the batch job.
+``command:`` -- The command that will be run in the batch job.
 
-``envars:``: Any number of key/value pairs defining bash variable names and their corresponding values, to be exported to the environment in which ``<command>`` will run, each rendered in XML like this:
+``envars:`` -- Any number of key/value pairs defining bash variable names and their corresponding values, to be exported to the environment in which ``<command>`` will run, each rendered in XML like this:
 
 .. code-block:: xml
 
@@ -135,7 +139,7 @@ The name of the task can be any string accepted by Rocoto as a task name (includ
      <value>siri</value>
    </envar>
 
-``dependencies:``: [Optional] Any number of dependencies accepted by Rocoto. This section is described in more detail below.
+``dependencies:`` -- [Optional] Any number of dependencies accepted by Rocoto. This section is described in more detail below.
 
 The other keys not specifically mentioned here follow the same conventions as described in the :rocoto:`Rocoto<>` documentation.
 
@@ -149,7 +153,7 @@ UW YAML dependency key names should mirror Rocoto XML dependency tag names, opti
 Specifying Tag Attributes
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Each of the dependencies that require attributes (the ``key="value"`` parts inside the XML tag) can be specified with an ``attrs:`` block. For example:
+Each of the dependencies that requires attributes (the ``key="value"`` parts inside the XML tag) can be specified with an ``attrs:`` block. For example:
 
 .. code-block:: yaml
 
@@ -210,7 +214,7 @@ This would result in Rocoto XML in this form:
 
 The ``datadep_foo:`` and ``datadep_bar:`` UW YAML keys were named arbitrarily after the first ``_``, but could have been even more descriptive such as ``datadep_foo_file:`` or ``datadep_foo_text:``. The important part is that the YAML key prefix matches the Rocoto XML tag name.
 
-This example also demonstrates the use of Rocoto's **boolean operator tags** in the structured UW YAML, e.g. ``<or>``, ``<not>``, etc.. The structure follows the tree in the Rocoto XML language in that each of the sub-elements of the ``<and>`` tag translate to sub-trees in UW YAML. Multiple of the boolean operator tags can be set at the same level just as with any other tag type by adding a descriptive suffix starting with an underscore. In the above example, the ``and:`` key could have equivalently been named ``and_data_files:`` to achieve an identical Rocoto XML result.
+This example also demonstrates the use of Rocoto's **boolean operator tags** in the structured UW YAML, e.g., ``<or>``, ``<not>``, etc. The structure follows the tree in the Rocoto XML language in that each of the subelements of the ``<and>`` tag translates to a subtree in UW YAML. Multiple boolean operator tags can be set at the same level, just as with any other tag type, by adding a descriptive suffix starting with an underscore. In the above example, the ``and:`` key could have equivalently been named ``and_data_files:`` to achieve an identical Rocoto XML result.
 
 Defining Metatasks
 ------------------
@@ -245,6 +249,9 @@ This translates to Rocoto XML (whitespace added for readability):
 
      </task>
    </metatask>
+
+.. COMMENT: It might be good to explain further how the tasks will be named/how the substitution works. Will the task be named hello hola bonjour once rendered? Or will there be three tasks: hello, hola, and bonjour?
+   Delete this comment once addressed. 
 
 UW YAML Definitions
 -------------------
@@ -337,7 +344,7 @@ Defining the Workflow Log
 
    <log>/some/path/to/workflow.log</log>
 
-A cycle string may be specified here, instead.
+A cycle string may be specified here instead.
 
 .. code-block:: yaml
 
@@ -451,7 +458,7 @@ Boolean operator keys operate on **one or more additional dependency entries** f
      </or>
    </dependency>
 
-Comparison Depenedencies
+Comparison Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``streq:`` and ``strneq:`` keys compare the values in their ``left:`` and ``right:`` children, and accept ``cyclestr:`` blocks as well as simple strings.
@@ -537,7 +544,7 @@ Dependency Keys
        <datadep age="120" minsize="1024b">/path/to/a/file.txt</datadep>
      </dependency>
 
-   * The ``value:`` key accepts a ``cyclestr:`` block.
+  * The ``value:`` key accepts a ``cyclestr:`` block.
 
 * The ``timedep:`` key defines a dependency on a real-world time:
 
@@ -569,7 +576,7 @@ Dependency Keys
      </dependency>
 
   * The ``command:`` key accepts a ``cyclestr:`` block.
-  * The ``sh:`` key may be suffixed with an underscore and a name to provide a unique name for the dependency, e.g. ``sh_count_grib:`` would translate to XML tag ``<sh name="count_grib">``.
+  * The ``sh:`` key may be suffixed with an underscore and a name to provide a unique name for the dependency, e.g., ``sh_count_grib:`` would translate to XML tag ``<sh name="count_grib">``.
   * The optional attributes ``runopt`` and ``shell`` are accepted under an ``attrs:`` key. See the :rocoto:`Rocoto documentation<>` for details.
 
 The ``metatask:`` Key
@@ -613,7 +620,7 @@ This will run tasks named:
    graphics_mem002_v
    graphics_mem003_v
 
-The XML will look like this
+The XML will look like this:
 
 .. code-block:: xml
 
