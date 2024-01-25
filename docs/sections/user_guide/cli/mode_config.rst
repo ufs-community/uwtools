@@ -41,21 +41,23 @@ The ``compare`` mode lets users compare two config files.
 
    Required arguments:
      --file-1-path PATH
-           Path to file 1
+         Path to file 1
      --file-2-path PATH
-           Path to file 2
+         Path to file 2
 
    Optional arguments:
      -h, --help
-           Show help and exit
+         Show help and exit
      --file-1-format {ini,nml,sh,yaml}
-           Format of file 1
+         Format of file 1
      --file-2-format {ini,nml,sh,yaml}
-           Format of file 2
+         Format of file 2
+     --debug
+         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
-           Print no logging messages
+         Print no logging messages
      --verbose, -v
-           Print all logging messages
+         Print all logging messages
 
 Examples
 ^^^^^^^^
@@ -118,6 +120,8 @@ Users have several options:
      [2024-01-08T16:57:28]     INFO ---------------------------------------------------------------------
      [2024-01-08T16:57:28]     INFO values:       recipient:  - None + World
 
+  If additional information is needed, ``--debug`` can be used which will return the stack trace from any unhandled exception as well.
+
   Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
 
   .. code-block:: text
@@ -134,6 +138,13 @@ Users have several options:
       [2024-01-08T16:59:20]     INFO ---------------------------------------------------------------------
       [2024-01-08T16:59:20]     INFO values:       recipient:  - None + World
 
+.. note:: Comparisons are supported only for configs of the same format, e.g. YAML vs YAML, Fortran namelist vs Fortran namelist, etc. ``uw`` will flag invalid comparisons:
+
+   .. code-block:: text
+
+      $ uw config compare --file-1-path a.yaml --file-2-path b.nml
+      [2024-01-23T23:21:37]    ERROR Formats do not match: yaml vs nml
+
 .. _cli_config_realize_examples:
 
 ``realize``
@@ -143,39 +154,37 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
 
 .. code-block:: text
 
-  $ uw config realize --help
-  usage: uw config realize --values-file PATH [-h] [--input-file PATH]
-                           [--input-format {ini,nml,sh,yaml}] [--output-file PATH]
-                           [--output-format {ini,nml,sh,yaml}] [--values-format {ini,nml,sh,yaml}]
-                           [--values-needed] [--dry-run] [--quiet] [--verbose]
+   $ uw config realize --help
+   usage: uw config realize [-h] [--input-file PATH] [--input-format {ini,nml,sh,yaml}]
+                            [--output-file PATH] [--output-format {ini,nml,sh,yaml}]
+                            [--values-needed] [--dry-run] [--quiet] [--verbose]
+                            [PATH ...]
 
-  Realize config
+   Realize config
 
-  Required arguments:
-    --values-file PATH
-          Path to file providing override or interpolation values
-
-  Optional arguments:
-    -h, --help
-          Show help and exit
-    --input-file PATH, -i PATH
-          Path to input file (defaults to stdin)
-    --input-format {ini,nml,sh,yaml}
-          Input format
-    --output-file PATH, -o PATH
-          Path to output file (defaults to stdout)
-    --output-format {ini,nml,sh,yaml}
-          Output format
-    --values-format {ini,nml,sh,yaml}
-          Values format
-    --values-needed
-          Print report of values needed to render template
-    --dry-run
-          Only log info, making no changes
-    --quiet, -q
-          Print no logging messages
-    --verbose, -v
-          Print all logging messages
+   Optional arguments:
+     -h, --help
+         Show help and exit
+     --input-file PATH, -i PATH
+         Path to input file (defaults to stdin)
+     --input-format {ini,nml,sh,yaml}
+         Input format
+     --output-file PATH, -o PATH
+         Path to output file (defaults to stdout)
+     --output-format {ini,nml,sh,yaml}
+         Output format
+     --values-needed
+         Print report of values needed to render template
+     --dry-run
+         Only log info, making no changes
+     --debug
+         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
+     --quiet, -q
+         Print no logging messages
+     --verbose, -v
+         Print all logging messages
+     PATH
+         Additional files to supplement primary input
 
 Examples
 ^^^^^^^^
@@ -215,18 +224,18 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
   .. code-block:: text
 
      $ uw config realize --input-file config.yaml --output-format yaml --values-needed
-     [2024-01-10T21:29:20]     INFO Keys that are complete:
-     [2024-01-10T21:29:20]     INFO     values
-     [2024-01-10T21:29:20]     INFO     values.greeting
-     [2024-01-10T21:29:20]     INFO     values.message
-     [2024-01-10T21:29:20]     INFO     values.recipient
-     [2024-01-10T21:29:20]     INFO     values.repeat
-     [2024-01-10T21:29:20]     INFO
-     [2024-01-10T21:29:20]     INFO Keys with unrendered Jinja2 variables/expressions:
-     [2024-01-10T21:29:20]     INFO     values.date: {{ yyyymmdd }}
-     [2024-01-10T21:29:20]     INFO
-     [2024-01-10T21:29:20]     INFO Keys that are set to empty:
-     [2024-01-10T21:29:20]     INFO     values.empty
+     [2024-01-23T22:28:40]     INFO Keys that are complete:
+     [2024-01-23T22:28:40]     INFO     values
+     [2024-01-23T22:28:40]     INFO     values.greeting
+     [2024-01-23T22:28:40]     INFO     values.message
+     [2024-01-23T22:28:40]     INFO     values.recipient
+     [2024-01-23T22:28:40]     INFO     values.repeat
+     [2024-01-23T22:28:40]     INFO
+     [2024-01-23T22:28:40]     INFO Keys with unrendered Jinja2 variables/expressions:
+     [2024-01-23T22:28:40]     INFO     values.date: {{ yyyymmdd }}
+     [2024-01-23T22:28:40]     INFO
+     [2024-01-23T22:28:40]     INFO Keys that are set to empty:
+     [2024-01-23T22:28:40]     INFO     values.empty
 
 * To realize the config to ``stdout``, a target output format must be explicitly specified:
 
@@ -237,7 +246,7 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
        date: '{{ yyyymmdd }}'
        empty: null
        greeting: Hello
-       message: Hello World
+       message: 'Hello World '
        recipient: World
        repeat: 1
 
@@ -252,7 +261,7 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
        date: 20240105
        empty: false
        greeting: Good Night
-       message: Good Night Sun Good Night Sun Good Night Sun
+       message: 'Good Night Sun Good Night Sun Good Night Sun '
        recipient: Moon
        repeat: 3
 
@@ -270,7 +279,7 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
        date: 20240105
        empty: null
        greeting: Good Night
-       message: Good Night Moon Good Night Moon
+       message: 'Good Night Moon Good Night Moon '
        recipient: Moon
        repeat: 2
 
@@ -279,13 +288,13 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
   .. code-block:: text
 
      $ uw config realize --input-file config.yaml --output-file realized.yaml --dry-run values1.yaml
-     [2024-01-10T21:38:32]     INFO values:
-     [2024-01-10T21:38:32]     INFO   date: 20240105
-     [2024-01-10T21:38:32]     INFO   empty: null
-     [2024-01-10T21:38:32]     INFO   greeting: Good Night
-     [2024-01-10T21:38:32]     INFO   message: Good Night Moon Good Night Moon
-     [2024-01-10T21:38:32]     INFO   recipient: Moon
-     [2024-01-10T21:38:32]     INFO   repeat: 2
+     [2024-01-23T22:31:08]     INFO values:
+     [2024-01-23T22:31:08]     INFO   date: 20240105
+     [2024-01-23T22:31:08]     INFO   empty: null
+     [2024-01-23T22:31:08]     INFO   greeting: Good Night
+     [2024-01-23T22:31:08]     INFO   message: 'Good Night Moon Good Night Moon '
+     [2024-01-23T22:31:08]     INFO   recipient: Moon
+     [2024-01-23T22:31:08]     INFO   repeat: 2
 
 * If an input file is read alone from ``stdin``, ``uw`` will not know how to parse its contents:
 
@@ -303,7 +312,7 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
        date: 20240105
        empty: null
        greeting: Good Night
-       message: Good Night Moon Good Night Moon
+       message: 'Good Night Moon Good Night Moon '
        recipient: Moon
        repeat: 2
 
@@ -323,7 +332,7 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
        date: 20240105
        empty: null
        greeting: Good Night
-       message: Good Night Moon Good Night Moon
+       message: 'Good Night Moon Good Night Moon '
        recipient: Moon
        repeat: 2
 
@@ -332,40 +341,32 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
   .. code-block:: text
 
      $ uw config realize --input-file config.yaml --output-format yaml --verbose values1.yaml
-     [2024-01-10T21:42:17]    DEBUG Command: uw config realize --input-file config.yaml --output-format yaml --verbose values1.yaml
-     [2024-01-10T21:42:17]    DEBUG Before update, config has depth 2
-     [2024-01-10T21:42:17]    DEBUG Supplemental config has depth 2
-     [2024-01-10T21:42:17]    DEBUG After update, config has depth 2
-     [2024-01-10T21:42:17]    DEBUG Dereferencing, initial value: {'values': {'date': 20240105, 'empty': None, 'greeting': 'Good Night', 'message': '{{ (greeting + " " + recipient + " ") * repeat }}', 'recipient': 'Moon', 'repeat': 2}}
-     [2024-01-10T21:42:17]    DEBUG Rendering: {'values': {'date': 20240105, 'empty': None, 'greeting': 'Good Night', 'message': '{{ (greeting + " " + recipient + " ") * repeat }}', 'recipient': 'Moon', 'repeat': 2}}
-     [2024-01-10T21:42:17]    DEBUG Rendering: {'date': 20240105, 'empty': None, 'greeting': 'Good Night', 'message': '{{ (greeting + " " + recipient + " ") * repeat }}', 'recipient': 'Moon', 'repeat': 2}
-     [2024-01-10T21:42:17]    DEBUG Rendering: 20240105
-     [2024-01-10T21:42:17]    DEBUG Rendered: 20240105
-     [2024-01-10T21:42:17]    DEBUG Rendering: None
-     [2024-01-10T21:42:17]    DEBUG Rendered: None
-     [2024-01-10T21:42:17]    DEBUG Rendering: Good Night
-     [2024-01-10T21:42:17]    DEBUG Rendering: {{ (greeting + " " + recipient + " ") * repeat }}
-     [2024-01-10T21:42:17]    DEBUG Rendering: Moon
-     [2024-01-10T21:42:17]    DEBUG Rendering: 2
-     [2024-01-10T21:42:17]    DEBUG Rendered: 2
-     [2024-01-10T21:42:17]    DEBUG Dereferencing, current value: {'values': {'date': 20240105, 'empty': None, 'greeting': 'Good Night', 'message': '{{ (greeting + " " + recipient + " ") * repeat }}', 'recipient': 'Moon', 'repeat': 2}}
-     [2024-01-10T21:42:17]    DEBUG Rendering: {'values': {'date': 20240105, 'empty': None, 'greeting': 'Good Night', 'message': 'Good Night Moon Good Night Moon', 'recipient': 'Moon', 'repeat': 2}}
-     [2024-01-10T21:42:17]    DEBUG Rendering: {'date': 20240105, 'empty': None, 'greeting': 'Good Night', 'message': 'Good Night Moon Good Night Moon', 'recipient': 'Moon', 'repeat': 2}
-     [2024-01-10T21:42:17]    DEBUG Rendering: 20240105
-     [2024-01-10T21:42:17]    DEBUG Rendered: 20240105
-     [2024-01-10T21:42:17]    DEBUG Rendering: None
-     [2024-01-10T21:42:17]    DEBUG Rendered: None
-     [2024-01-10T21:42:17]    DEBUG Rendering: Good Night
-     [2024-01-10T21:42:17]    DEBUG Rendering: Good Night Moon Good Night Moon
-     [2024-01-10T21:42:17]    DEBUG Rendering: Moon
-     [2024-01-10T21:42:17]    DEBUG Rendering: 2
-     [2024-01-10T21:42:17]    DEBUG Rendered: 2
-     [2024-01-10T21:42:17]    DEBUG Dereferencing, final value: {'values': {'date': 20240105, 'empty': None, 'greeting': 'Good Night', 'message': 'Good Night Moon Good Night Moon', 'recipient': 'Moon', 'repeat': 2}}
+     [2024-01-23T22:59:58]    DEBUG Command: uw config realize --input-file config.yaml --output-format yaml --verbose values1.yaml
+     [2024-01-23T22:59:58]    DEBUG Before update, config has depth 2
+     [2024-01-23T22:59:58]    DEBUG Supplemental config has depth 2
+     [2024-01-23T22:59:58]    DEBUG After update, config has depth 2
+     [2024-01-23T22:59:58]    DEBUG Dereferencing, current value:
+     [2024-01-23T22:59:58]    DEBUG   values:
+     [2024-01-23T22:59:58]    DEBUG     date: 20240105
+     [2024-01-23T22:59:58]    DEBUG     empty: null
+     [2024-01-23T22:59:58]    DEBUG     greeting: Good Night
+     [2024-01-23T22:59:58]    DEBUG     message: '{{ (greeting + " " + recipient + " ") * repeat }}'
+     [2024-01-23T22:59:58]    DEBUG     recipient: Moon
+     [2024-01-23T22:59:58]    DEBUG     repeat: 2
+     ...
+     [2024-01-23T22:59:58]    DEBUG Dereferencing, final value:
+     [2024-01-23T22:59:58]    DEBUG   values:
+     [2024-01-23T22:59:58]    DEBUG     date: 20240105
+     [2024-01-23T22:59:58]    DEBUG     empty: null
+     [2024-01-23T22:59:58]    DEBUG     greeting: Good Night
+     [2024-01-23T22:59:58]    DEBUG     message: 'Good Night Moon Good Night Moon '
+     [2024-01-23T22:59:58]    DEBUG     recipient: Moon
+     [2024-01-23T22:59:58]    DEBUG     repeat: 2
      values:
        date: 20240105
        empty: null
        greeting: Good Night
-       message: Good Night Moon Good Night Moon
+       message: 'Good Night Moon Good Night Moon '
        recipient: Moon
        repeat: 2
 
@@ -383,7 +384,7 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
        date: 20240105
        empty: null
        greeting: Good Night
-       message: Good Night Moon Good Night Moon
+       message: 'Good Night Moon Good Night Moon '
        recipient: Moon
        repeat: 2
 
@@ -391,25 +392,65 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
 
   .. code-block:: text
 
-     [2024-01-10T21:43:58]    DEBUG Command: uw config realize --input-file config.yaml --output-format yaml --verbose values1.yaml
-     [2024-01-10T21:43:58]    DEBUG Before update, config has depth 2
-     [2024-01-10T21:43:58]    DEBUG Supplemental config has depth 2
+     [2024-01-23T23:01:23]    DEBUG Command: uw config realize --input-file config.yaml --output-format yaml --verbose values1.yaml
+     [2024-01-23T23:01:23]    DEBUG Before update, config has depth 2
+     [2024-01-23T23:01:23]    DEBUG Supplemental config has depth 2
+     [2024-01-23T23:01:23]    DEBUG After update, config has depth 2
+     [2024-01-23T23:01:23]    DEBUG Dereferencing, current value:
+     [2024-01-23T23:01:23]    DEBUG   values:
+     [2024-01-23T23:01:23]    DEBUG     date: 20240105
+     [2024-01-23T23:01:23]    DEBUG     empty: null
+     [2024-01-23T23:01:23]    DEBUG     greeting: Good Night
+     [2024-01-23T23:01:23]    DEBUG     message: '{{ (greeting + " " + recipient + " ") * repeat }}'
+     [2024-01-23T23:01:23]    DEBUG     recipient: Moon
+     [2024-01-23T23:01:23]    DEBUG     repeat: 2
+     [2024-01-23T23:01:23]    DEBUG [dereference] Accepting: 20240105
+     [2024-01-23T23:01:23]    DEBUG [dereference] Accepting: None
+     [2024-01-23T23:01:23]    DEBUG [dereference] Rendering: Good Night
+     [2024-01-23T23:01:23]    DEBUG [dereference] Rendered: Good Night
+     [2024-01-23T23:01:23]    DEBUG [dereference] Rendering: {{ (greeting + " " + recipient + " ") * repeat }}
+     [2024-01-23T23:01:23]    DEBUG [dereference] Rendered: Good Night Moon Good Night Moon
+     [2024-01-23T23:01:23]    DEBUG [dereference] Rendering: Moon
+     [2024-01-23T23:01:23]    DEBUG [dereference] Rendered: Moon
+     [2024-01-23T23:01:23]    DEBUG [dereference] Accepting: 2
      ...
-     [2024-01-10T21:43:58]    DEBUG Rendering: 2
-     [2024-01-10T21:43:58]    DEBUG Rendered: 2
-     [2024-01-10T21:43:58]    DEBUG Dereferencing, final value: {'values': {'date': 20240105, 'empty': None, 'greeting': 'Good Night', 'message': 'Good Night Moon Good Night Moon', 'recipient': 'Moon', 'repeat': 2}}
+     [2024-01-23T23:01:23]    DEBUG Dereferencing, final value:
+     [2024-01-23T23:01:23]    DEBUG   values:
+     [2024-01-23T23:01:23]    DEBUG     date: 20240105
+     [2024-01-23T23:01:23]    DEBUG     empty: null
+     [2024-01-23T23:01:23]    DEBUG     greeting: Good Night
+     [2024-01-23T23:01:23]    DEBUG     message: 'Good Night Moon Good Night Moon '
+     [2024-01-23T23:01:23]    DEBUG     recipient: Moon
+     [2024-01-23T23:01:23]    DEBUG     repeat: 2
 
-.. note::
+.. note:: Combining configs with incompatible depths is not supported. ``ini`` and ``nml`` configs are depth-2, as they organize their key-value pairs (one level) under top-level sections or namelists (a second level). ``sh`` configs are depth-1, and ``yaml`` configs have arbitrary depth.
 
-   Note that ``uw`` does not allow invalid conversions. For example, when attempting to generate a ``sh`` config from a depth-2 ``yaml``:
+   For example, when attempting to generate a ``sh`` config from a depth-2 ``yaml``:
 
    .. code-block:: text
 
       $ uw config realize --input-file config.yaml --output-format sh
-      [2024-01-10T21:46:00]    ERROR Cannot realize depth-2 config to type-'sh' config
+      [2024-01-23T23:02:42]    ERROR Cannot realize depth-2 config to type-'sh' config
       Cannot realize depth-2 config to type-'sh' config
 
-   By definition, ``ini`` and ``nml`` configs are depth-2 configs, while ``sh`` configs are depth-1 and ``yaml`` configs have arbitrary depth.
+.. note:: In recognition of the different sets of value types representable in each config format, ``uw`` supports two format-combination schemes:
+
+   1. Output matches input: The format of the output config matches that of the input config.
+   2. Input is YAML: If the input config is YAML, any output format may be requested. In the worst case, values always have a string representation, but note that, for example, the string representation of a YAML sequence (Python ``list``) in an INI output config may not be useful.
+
+   In all cases, any supplemental configs must be in the same format as the input config and must have recognized extensions.
+
+   ``uw`` considers invalid combination requests errors:
+
+   .. code-block:: text
+
+      $ uw config realize --input-file b.nml --output-file a.yaml
+      Output format yaml must match input format nml
+
+   .. code-block:: text
+
+      $ uw config realize --input-file a.yaml --output-file c.yaml b.nml
+      Supplemental config #1 format nml must match input format yaml
 
 .. _cli_config_validate_examples:
 
@@ -434,6 +475,8 @@ The ``validate`` mode ensures that a given config file is structured properly.
          Show help and exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
+     --debug
+         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v

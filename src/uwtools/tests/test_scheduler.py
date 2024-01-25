@@ -3,6 +3,8 @@
 Tests for uwtools.scheduler module.
 """
 
+import os
+from pathlib import Path
 from unittest.mock import patch
 
 from pytest import fixture, raises
@@ -307,8 +309,9 @@ def test_scheduler_submit_job(pbs_props):
     pbs_config, _ = pbs_props
     js = JobScheduler.get_scheduler(pbs_config)
     submit_command = js.submit_command
-    outpath = "/path/to/batch/script"
+    outpath = Path("/path/to/batch/script")
     expected_command = f"{submit_command} {outpath}"
     with patch.object(scheduler, "execute") as execute:
+        execute.return_value = (True, "")
         js.submit_job(outpath)
-        execute.assert_called_once_with(cmd=expected_command)
+        execute.assert_called_once_with(cmd=expected_command, cwd=os.path.dirname(outpath))

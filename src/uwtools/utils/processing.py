@@ -4,8 +4,7 @@ Utilities for interacting with external processes.
 
 from pathlib import Path
 from subprocess import STDOUT, CalledProcessError, check_output
-from types import SimpleNamespace as ns
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Tuple, Union
 
 from uwtools.logging import log
 
@@ -15,7 +14,7 @@ def execute(
     cwd: Optional[Union[Path, str]] = None,
     env: Optional[Dict[str, str]] = None,
     log_output: Optional[bool] = False,
-) -> ns:
+) -> Tuple[bool, str]:
     """
     Execute a command in a subshell.
 
@@ -49,4 +48,4 @@ def execute(
         logfunc("%sOutput:", indent)
         for line in output.split("\n"):
             logfunc("%s%s", indent * 2, line)
-    return ns(output=output, success=success)
+    return success, output

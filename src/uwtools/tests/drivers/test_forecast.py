@@ -6,7 +6,6 @@ import datetime as dt
 import logging
 import os
 from pathlib import Path
-from types import SimpleNamespace as ns
 from unittest.mock import ANY, patch
 
 import pytest
@@ -269,11 +268,11 @@ def test_forecast_run_cmd():
         assert mpiexec_expected == fcstobj.run_cmd()
 
 
-@pytest.mark.parametrize("section", ["static", "cycle-dependent"])
+@pytest.mark.parametrize("section", ["static", "cycle_dependent"])
 @pytest.mark.parametrize("link_files", [True, False])
 def test_stage_files(tmp_path, section, link_files):
     """
-    Tests that files from static or cycle-dependent sections of the config obj are being staged
+    Tests that files from static or cycle_dependent sections of the config obj are being staged
     (copied or linked) to the run directory.
     """
 
@@ -304,7 +303,7 @@ def test_stage_files(tmp_path, section, link_files):
             assert all(link_or_file(d_fn) for d_fn in dst_paths)
         else:
             assert link_or_file(run_directory / dst_rel_path)
-    if section == "cycle-dependent":
+    if section == "cycle_dependent":
         assert link_or_file(run_directory / "INPUT" / "gfs_bndy.tile7.006.nc")
 
 
@@ -314,7 +313,7 @@ def fv3_run_assets(tmp_path):
     config_file = fixture_path("forecast.yaml")
     config = YAMLConfig(config_file)
     config["forecast"]["run_dir"] = tmp_path.as_posix()
-    config["forecast"]["cycle-dependent"] = {"foo-file": str(tmp_path / "foo")}
+    config["forecast"]["cycle_dependent"] = {"foo-file": str(tmp_path / "foo")}
     config["forecast"]["static"] = {"static-foo-file": str(tmp_path / "foo")}
     return batch_script, config_file, config.data["forecast"]
 
@@ -336,10 +335,11 @@ def test_run_direct(fv3_mpi_assets, fv3_run_assets):
     expected_command = " ".join(fv3_mpi_assets)
     with patch.object(FV3Forecast, "_validate", return_value=True):
         with patch.object(forecast, "execute") as execute:
+            execute.return_value = (True, "")
             fcstobj = FV3Forecast(config_file=config_file)
             with patch.object(fcstobj, "_config", config):
                 fcstobj.run(cycle=dt.datetime.now())
-            execute.assert_called_once_with(cmd=expected_command)
+            execute.assert_called_once_with(cmd=expected_command, cwd=ANY, log_output=True)
 
 
 @pytest.mark.parametrize("with_batch_script", [True, False])
@@ -387,11 +387,11 @@ def test_FV3Forecast__run_via_batch_submission(fv3_run_assets):
     with patch.object(fcstobj, "_config", config):
         with patch.object(scheduler, "execute") as execute:
             with patch.object(Driver, "_create_user_updated_config"):
-                execute.return_value = ns(success=True)
+                execute.return_value = (True, "")
                 success, lines = fcstobj._run_via_batch_submission()
                 assert success is True
                 assert lines[0] == "Batch script:"
-                execute.assert_called_once_with(cmd=ANY)
+                execute.assert_called_once_with(cmd=ANY, cwd=ANY)
 
 
 def test_FV3Forecast__run_via_local_execution(fv3_run_assets):
@@ -399,8 +399,8 @@ def test_FV3Forecast__run_via_local_execution(fv3_run_assets):
     fcstobj = FV3Forecast(config_file=config_file)
     with patch.object(fcstobj, "_config", config):
         with patch.object(forecast, "execute") as execute:
-            execute.return_value = ns(success=True)
+            execute.return_value = (True, "")
             success, lines = fcstobj._run_via_local_execution()
             assert success is True
             assert lines[0] == "Command:"
-            execute.assert_called_once_with(cmd=ANY)
+            execute.assert_called_once_with(cmd=ANY, cwd=ANY, log_output=True)

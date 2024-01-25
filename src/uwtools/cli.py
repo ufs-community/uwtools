@@ -23,12 +23,12 @@ from uwtools.drivers.forecast import CLASSES as FORECAST_CLASSES
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
-FORMATS = [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
+FORMATS = list(FORMAT.formats().keys())
 TITLE_REQ_ARG = "Required arguments"
 
 Args = Dict[str, Any]
-SubmodeChecks = List[Callable[[Args], Args]]
-ModeChecks = Dict[str, SubmodeChecks]
+ActionChecks = List[Callable[[Args], Args]]
+ModeChecks = Dict[str, ActionChecks]
 Checks = Dict[str, ModeChecks]
 
 
@@ -44,7 +44,7 @@ def main() -> None:
     setup_logging(quiet=True)
     try:
         args, checks = _parse_args(sys.argv[1:])
-        for check in checks[args[STR.mode]][args[STR.submode]]:
+        for check in checks[args[STR.mode]][args[STR.action]]:
             check(args)
         setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
@@ -56,6 +56,8 @@ def main() -> None:
         }
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except Exception as e:  # pylint: disable=broad-exception-caught
+        if _switch(STR.debug) in sys.argv:
+            log.exception(str(e))
         _abort(str(e))
 
 
@@ -70,7 +72,7 @@ def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.config, "Handle configs")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.submode)
+    subparsers = _add_subparsers(parser, STR.action)
     return {
         STR.compare: _add_subparser_config_compare(subparsers),
         STR.realize: _add_subparser_config_realize(subparsers),
@@ -78,7 +80,7 @@ def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
     }
 
 
-def _add_subparser_config_compare(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_config_compare(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: config compare
 
@@ -101,14 +103,14 @@ def _add_subparser_config_compare(subparsers: Subparsers) -> SubmodeChecks:
         helpmsg="Format of file 2",
         choices=FORMATS,
     )
-    checks = _add_args_quiet_and_verbose(optional)
+    checks = _add_args_verbosity(optional)
     return checks + [
         partial(_check_file_vs_format, STR.file1path, STR.file1fmt),
         partial(_check_file_vs_format, STR.file2path, STR.file2fmt),
     ]
 
 
-def _add_subparser_config_realize(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: config realize
 
@@ -122,7 +124,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_output_format(optional, choices=FORMATS)
     _add_arg_values_needed(optional)
     _add_arg_dry_run(optional)
-    checks = _add_args_quiet_and_verbose(optional)
+    checks = _add_args_verbosity(optional)
     _add_arg_supplemental_files(optional)
     return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
@@ -130,7 +132,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> SubmodeChecks:
     ]
 
 
-def _add_subparser_config_validate(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_config_validate(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: config validate
 
@@ -141,7 +143,7 @@ def _add_subparser_config_validate(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_schema_file(required)
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
-    return _add_args_quiet_and_verbose(optional)
+    return _add_args_verbosity(optional)
 
 
 def _dispatch_config(args: Args) -> bool:
@@ -154,26 +156,26 @@ def _dispatch_config(args: Args) -> bool:
         STR.compare: _dispatch_config_compare,
         STR.realize: _dispatch_config_realize,
         STR.validate: _dispatch_config_validate,
-    }[args[STR.submode]](args)
+    }[args[STR.action]](args)
 
 
 def _dispatch_config_compare(args: Args) -> bool:
     """
-    Dispatch logic for config compare submode.
+    Dispatch logic for config compare action.
 
     :param args: Parsed command-line args.
     """
     return uwtools.api.config.compare(
-        config_a_path=args[STR.file1path],
-        config_a_format=args[STR.file1fmt],
-        config_b_path=args[STR.file2path],
-        config_b_format=args[STR.file2fmt],
+        config_1_path=args[STR.file1path],
+        config_1_format=args[STR.file1fmt],
+        config_2_path=args[STR.file2path],
+        config_2_format=args[STR.file2fmt],
     )
 
 
 def _dispatch_config_realize(args: Args) -> bool:
     """
-    Dispatch logic for config realize submode.
+    Dispatch logic for config realize action.
 
     :param args: Parsed command-line args.
     """
@@ -190,7 +192,7 @@ def _dispatch_config_realize(args: Args) -> bool:
 
 def _dispatch_config_validate(args: Args) -> bool:
     """
-    Dispatch logic for config validate submode.
+    Dispatch logic for config validate action.
 
     :param args: Parsed command-line args.
     """
@@ -208,13 +210,13 @@ def _add_subparser_forecast(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.forecast, "Configure and run forecasts")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.submode)
+    subparsers = _add_subparsers(parser, STR.action)
     return {
         STR.run: _add_subparser_forecast_run(subparsers),
     }
 
 
-def _add_subparser_forecast_run(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_forecast_run(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: forecast run
 
@@ -228,7 +230,7 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> SubmodeChecks:
     optional = _basic_setup(parser)
     _add_arg_batch_script(optional)
     _add_arg_dry_run(optional)
-    checks = _add_args_quiet_and_verbose(optional)
+    checks = _add_args_verbosity(optional)
     return checks
 
 
@@ -238,12 +240,12 @@ def _dispatch_forecast(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {STR.run: _dispatch_forecast_run}[args[STR.submode]](args)
+    return {STR.run: _dispatch_forecast_run}[args[STR.action]](args)
 
 
 def _dispatch_forecast_run(args: Args) -> bool:
     """
-    Dispatch logic for forecast run submode.
+    Dispatch logic for forecast run action.
 
     :param args: Parsed command-line args.
     """
@@ -267,14 +269,14 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.rocoto, "Realize and validate Rocoto XML Documents")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.submode)
+    subparsers = _add_subparsers(parser, STR.action)
     return {
         STR.realize: _add_subparser_rocoto_realize(subparsers),
         STR.validate: _add_subparser_rocoto_validate(subparsers),
     }
 
 
-def _add_subparser_rocoto_realize(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: rocoto realize
 
@@ -284,11 +286,11 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> SubmodeChecks:
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_output_file(optional)
-    checks = _add_args_quiet_and_verbose(optional)
+    checks = _add_args_verbosity(optional)
     return checks
 
 
-def _add_subparser_rocoto_validate(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_rocoto_validate(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: rocoto validate
 
@@ -297,7 +299,7 @@ def _add_subparser_rocoto_validate(subparsers: Subparsers) -> SubmodeChecks:
     parser = _add_subparser(subparsers, STR.validate, "Validate Rocoto XML")
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
-    checks = _add_args_quiet_and_verbose(optional)
+    checks = _add_args_verbosity(optional)
     return checks
 
 
@@ -311,13 +313,13 @@ def _dispatch_rocoto(args: Args) -> bool:
         STR.realize: _dispatch_rocoto_realize,
         STR.validate: _dispatch_rocoto_validate,
     }[
-        args[STR.submode]
+        args[STR.action]
     ](args)
 
 
 def _dispatch_rocoto_realize(args: Args) -> bool:
     """
-    Dispatch logic for rocoto realize submode. Validate input and output.
+    Dispatch logic for rocoto realize action. Validate input and output.
 
     :param args: Parsed command-line args.
     """
@@ -326,7 +328,7 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
 
 def _dispatch_rocoto_validate(args: Args) -> bool:
     """
-    Dispatch logic for rocoto validate submode.
+    Dispatch logic for rocoto validate action.
 
     :param args: Parsed command-line args.
     """
@@ -344,14 +346,14 @@ def _add_subparser_template(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.template, "Handle templates")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.submode)
+    subparsers = _add_subparsers(parser, STR.action)
     return {
         STR.render: _add_subparser_template_render(subparsers),
         STR.translate: _add_subparser_template_translate(subparsers),
     }
 
 
-def _add_subparser_template_translate(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_template_translate(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: template translate
 
@@ -362,10 +364,10 @@ def _add_subparser_template_translate(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_input_file(optional)
     _add_arg_output_file(optional)
     _add_arg_dry_run(optional)
-    return _add_args_quiet_and_verbose(optional)
+    return _add_args_verbosity(optional)
 
 
-def _add_subparser_template_render(subparsers: Subparsers) -> SubmodeChecks:
+def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     """
     Subparser for mode: template render
 
@@ -379,7 +381,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> SubmodeChecks:
     _add_arg_values_format(optional, choices=FORMATS)
     _add_arg_values_needed(optional)
     _add_arg_dry_run(optional)
-    checks = _add_args_quiet_and_verbose(optional)
+    checks = _add_args_verbosity(optional)
     _add_arg_key_eq_val_pairs(optional)
     return checks + [_check_template_render_vals_args]
 
@@ -394,13 +396,13 @@ def _dispatch_template(args: Args) -> bool:
         STR.render: _dispatch_template_render,
         STR.translate: _dispatch_template_translate,
     }[
-        args[STR.submode]
+        args[STR.action]
     ](args)
 
 
 def _dispatch_template_render(args: Args) -> bool:
     """
-    Dispatch logic for template render submode.
+    Dispatch logic for template render action.
 
     :param args: Parsed command-line args.
     """
@@ -417,7 +419,7 @@ def _dispatch_template_render(args: Args) -> bool:
 
 def _dispatch_template_translate(args: Args) -> bool:
     """
-    Dispatch logic for template translate submode.
+    Dispatch logic for template translate action.
 
     :param args: Parsed command-line args.
     """
@@ -461,6 +463,16 @@ def _add_arg_cycle(group: Group) -> None:
         help="The cycle in ISO8601 format",
         required=True,
         type=dt.datetime.fromisoformat,
+    )
+
+
+def _add_arg_debug(group: Group) -> None:
+    group.add_argument(
+        "--debug",
+        action="store_true",
+        help="""
+        Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
+        """,
     )
 
 
@@ -636,16 +648,17 @@ def _abort(msg: str) -> None:
     sys.exit(1)
 
 
-def _add_args_quiet_and_verbose(group: Group) -> SubmodeChecks:
+def _add_args_verbosity(group: Group) -> ActionChecks:
     """
-    Add quiet and verbose arguments.
+    Add debug, quiet, and verbose arguments.
 
     :param group: The group to add the arguments to.
     :return: Check for mutual exclusivity of quiet/verbose arguments.
     """
+    _add_arg_debug(group)
     _add_arg_quiet(group)
     _add_arg_verbose(group)
-    return [_check_quiet_vs_verbose]
+    return [_check_verbosity]
 
 
 def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
@@ -657,9 +670,10 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     :param helpmsg: The help message for the subparser.
     :return: The new subparser.
     """
-    return subparsers.add_parser(
+    parser: Parser = subparsers.add_parser(
         name, add_help=False, help=helpmsg, formatter_class=_formatter, description=helpmsg
     )
+    return parser
 
 
 def _add_subparsers(parser: Parser, dest: str) -> Subparsers:
@@ -693,12 +707,6 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
     return args
 
 
-def _check_quiet_vs_verbose(args) -> Args:
-    if args.get(STR.quiet) and args.get(STR.verbose):
-        _abort("Specify at most one of %s, %s" % (_switch(STR.quiet), _switch(STR.verbose)))
-    return args
-
-
 def _check_template_render_vals_args(args: Args) -> Args:
     # In "template render" mode, a values file is optional, as values used to render the template
     # will be taken from the environment or from key=value command-line pairs by default. But if a
@@ -707,6 +715,15 @@ def _check_template_render_vals_args(args: Args) -> Args:
     if args.get(STR.valsfile) is not None:
         if args.get(STR.valsfmt) is None:
             args[STR.valsfmt] = get_file_format(args[STR.valsfile])
+    return args
+
+
+def _check_verbosity(args: Args) -> Args:
+    if args.get(STR.quiet) and (args.get(STR.debug) or args.get(STR.verbose)):
+        _abort(
+            "%s may not be used with %s or %s"
+            % (_switch(STR.quiet), _switch(STR.debug), _switch(STR.verbose))
+        )
     return args
 
 
@@ -765,11 +782,13 @@ class STR:
     A lookup map for CLI-related strings.
     """
 
+    action: str = "action"
     batch_script: str = "batch_script"
     cfgfile: str = "config_file"
     compare: str = "compare"
     config: str = "config"
     cycle: str = "cycle"
+    debug: str = "debug"
     dryrun: str = "dry_run"
     file1fmt: str = "file_1_format"
     file1path: str = "file_1_path"
@@ -790,7 +809,6 @@ class STR:
     rocoto: str = "rocoto"
     run: str = "run"
     schemafile: str = "schema_file"
-    submode: str = "submode"
     suppfiles: str = "supplemental_files"
     template: str = "template"
     translate: str = "translate"

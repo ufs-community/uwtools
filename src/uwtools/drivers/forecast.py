@@ -2,7 +2,6 @@
 Drivers for forecast models.
 """
 
-
 import sys
 from collections.abc import Mapping
 from datetime import datetime
@@ -142,11 +141,11 @@ class FV3Forecast(Driver):
 
         :return: Path to the run directory.
         """
-        run_directory = self._config["run_dir"]
+        run_directory = Path(self._config["run_dir"])
         self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
-        self._prepare_config_files(Path(run_directory))
-        self._config["cycle-dependent"].update(self._define_boundary_files())
-        for file_category in ["static", "cycle-dependent"]:
+        self._prepare_config_files(run_directory)
+        self._config["cycle_dependent"].update(self._define_boundary_files())
+        for file_category in ["static", "cycle_dependent"]:
             self.stage_files(
                 run_directory, self._config[file_category], link_files=True, dry_run=self._dry_run
             )
@@ -216,13 +215,14 @@ class FV3Forecast(Driver):
         """
         boundary_files = {}
         lbcs_config = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
-        boundary_file_template = lbcs_config["output_file_template"]
+        boundary_file_path = lbcs_config["output_file_path"]
         offset, interval, endhour = self._boundary_hours(lbcs_config)
-        for tile in self._config["tiles"]:
+        tiles = [7] if self._config["domain"] == "global" else range(1, 7)
+        for tile in tiles:
             for boundary_hour in range(offset, endhour, interval):
                 forecast_hour = boundary_hour - offset
                 link_name = f"INPUT/gfs_bndy.tile{tile}.{forecast_hour:03d}.nc"
-                boundary_file_path = boundary_file_template.format(
+                boundary_file_path = boundary_file_path.format(
                     tile=tile,
                     forecast_hour=boundary_hour,
                 )
@@ -282,13 +282,14 @@ class FV3Forecast(Driver):
         :return: A tuple containing a boolean of the success status of the FV3 run and a list of
             strings that make up the full command line.
         """
+        run_directory = self.prepare_directories()
         pre_run = self._mpi_env_variables(" ")
         full_cmd = f"{pre_run} {self.run_cmd()}"
         command_lines = ["Command:", *full_cmd.split("\n")]
         if self._dry_run:
             return True, command_lines
-        result = execute(cmd=full_cmd)
-        return result.success, command_lines
+        success, _ = execute(cmd=full_cmd, cwd=run_directory, log_output=True)
+        return success, command_lines
 
 
 CLASSES = {"FV3": FV3Forecast}

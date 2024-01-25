@@ -5,14 +5,15 @@ Helpers for working with files and directories.
 import shutil
 import sys
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from datetime import datetime as dt
 from functools import cache
 from importlib import resources
 from io import StringIO
 from pathlib import Path
-from typing import IO, Any, Generator, List, Union
+from typing import IO, Any, Dict, Generator, List, Union
 
+from uwtools.exceptions import UWError
 from uwtools.logging import log
 from uwtools.types import DefinitePath, ExistAct, OptionalPath
 
@@ -46,6 +47,24 @@ class FORMAT:
     sh: str = _sh
     yaml: str = _yaml
     yml: str = _yaml
+
+    @staticmethod
+    def extensions() -> List[str]:
+        """
+        Returns recognized filename extensions.
+        """
+        return [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
+
+    @staticmethod
+    def formats() -> Dict[str, str]:
+        """
+        Returns the recognized format names.
+        """
+        return {
+            field.name: str(getattr(FORMAT, field.name))
+            for field in fields(FORMAT)
+            if not field.name.startswith("_")
+        }
 
 
 class StdinProxy:
@@ -84,11 +103,12 @@ def get_file_format(path: DefinitePath) -> str:
     :raises: ValueError if the path/filename suffix is unrecognized.
     """
     suffix = Path(path).suffix.replace(".", "")
-    if fmt := vars(FORMAT).get(suffix):
-        return fmt
-    msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
-    log.critical(msg)
-    raise ValueError(msg)
+    try:
+        return FORMAT.formats()[suffix]
+    except KeyError as e:
+        msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
+        log.critical(msg)
+        raise UWError(msg) from e
 
 
 def handle_existing(directory: DefinitePath, exist_act: str) -> None:

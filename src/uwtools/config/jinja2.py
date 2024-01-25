@@ -337,7 +337,7 @@ def _set_up_values_obj(
         if values_format is None:
             values_format = get_file_format(values_file)
         values_class = format_to_config(values_format)
-        values = values_class(values_file).data
+        values: dict = values_class(values_file).data
         log.debug("Read initial values from %s", values_file)
     else:
         values = dict(os.environ)  # Do not modify os.environ: Make a copy.

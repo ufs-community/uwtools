@@ -17,7 +17,9 @@ import uwtools.api.template
 import uwtools.drivers.forecast
 from uwtools import cli
 from uwtools.cli import STR
+from uwtools.exceptions import UWError
 from uwtools.logging import log
+from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
 
 # Test functions
@@ -32,7 +34,7 @@ def test__abort(capsys):
 
 def test__add_subparser_config(subparsers):
     cli._add_subparser_config(subparsers)
-    assert submodes(subparsers.choices[STR.config]) == [STR.compare, STR.realize, STR.validate]
+    assert actions(subparsers.choices[STR.config]) == [STR.compare, STR.realize, STR.validate]
 
 
 def test__add_subparser_config_compare(subparsers):
@@ -52,7 +54,7 @@ def test__add_subparser_config_validate(subparsers):
 
 def test__add_subparser_forecast(subparsers):
     cli._add_subparser_forecast(subparsers)
-    assert submodes(subparsers.choices[STR.forecast]) == [STR.run]
+    assert actions(subparsers.choices[STR.forecast]) == [STR.run]
 
 
 def test__add_subparser_forecast_run(subparsers):
@@ -62,7 +64,7 @@ def test__add_subparser_forecast_run(subparsers):
 
 def test__add_subparser_template(subparsers):
     cli._add_subparser_template(subparsers)
-    assert submodes(subparsers.choices[STR.template]) == [STR.render, STR.translate]
+    assert actions(subparsers.choices[STR.template]) == [STR.render, STR.translate]
 
 
 def test__add_subparser_template_render(subparsers):
@@ -110,7 +112,7 @@ def test__check_file_vs_format_pass_explicit():
     assert args[STR.infmt] == fmt
 
 
-@pytest.mark.parametrize("fmt", vars(FORMAT).keys())
+@pytest.mark.parametrize("fmt", FORMAT.formats())
 def test__check_file_vs_format_pass_implicit(fmt):
     # The format is correctly deduced for a file with a known extension.
     args = {STR.infile: f"/path/to/input.{fmt}", STR.infmt: None}
@@ -122,26 +124,10 @@ def test__check_file_vs_format_pass_implicit(fmt):
     assert args[STR.infmt] == vars(FORMAT)[fmt]
 
 
-def test__check_quiet_vs_verbose_fail(capsys):
-    log.setLevel(logging.INFO)
-    args = {STR.quiet: True, STR.verbose: True}
-    with raises(SystemExit):
-        cli._check_quiet_vs_verbose(args)
-    assert (
-        "Specify at most one of %s, %s" % (cli._switch(STR.quiet), cli._switch(STR.verbose))
-        in capsys.readouterr().err
-    )
-
-
-def test__check_quiet_vs_verbose_ok():
-    args = {"foo": 88}
-    assert cli._check_quiet_vs_verbose(args) == args
-
-
 def test__check_template_render_vals_args_implicit_fail():
     # The values-file format cannot be deduced from the filename.
     args = {STR.valsfile: "a.jpg"}
-    with raises(ValueError) as e:
+    with raises(UWError) as e:
         cli._check_template_render_vals_args(args)
     assert "Cannot deduce format" in str(e.value)
 
@@ -165,6 +151,23 @@ def test__check_template_render_vals_args_noop_explicit_valsfmt():
     assert cli._check_template_render_vals_args(args) == args
 
 
+@pytest.mark.parametrize("flag", (STR.debug, STR.verbose))
+def test__check_verbosity_fail(capsys, flag):
+    log.setLevel(logging.INFO)
+    args = {STR.quiet: True, flag: True}
+    with raises(SystemExit):
+        cli._check_verbosity(args)
+    assert "--quiet may not be used with --debug or --verbose" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    "flags", ([STR.debug], [STR.quiet], [STR.verbose], [STR.debug, STR.verbose])
+)
+def test__check_verbosity_ok(flags):
+    args = {flag: True for flag in flags}
+    assert cli._check_verbosity(args) == args
+
+
 def test__dict_from_key_eq_val_strings():
     assert not cli._dict_from_key_eq_val_strings([])
     assert cli._dict_from_key_eq_val_strings(["a=1", "b=2"]) == {"a": "1", "b": "2"}
@@ -179,8 +182,8 @@ def test__dict_from_key_eq_val_strings():
     ],
 )
 def test__dispatch_config(params):
-    submode, funcname = params
-    args = {STR.submode: submode}
+    action, funcname = params
+    args = {STR.action: action}
     with patch.object(cli, funcname) as func:
         cli._dispatch_config(args)
     func.assert_called_once_with(args)
@@ -191,10 +194,10 @@ def test__dispatch_config_compare():
     with patch.object(cli.uwtools.api.config, "compare") as compare:
         cli._dispatch_config_compare(args)
     compare.assert_called_once_with(
-        config_a_path=args[STR.file1path],
-        config_a_format=args[STR.file1fmt],
-        config_b_path=args[STR.file2path],
-        config_b_format=args[STR.file2fmt],
+        config_1_path=args[STR.file1path],
+        config_1_format=args[STR.file1fmt],
+        config_2_path=args[STR.file2path],
+        config_2_format=args[STR.file2fmt],
     )
 
 
@@ -255,8 +258,8 @@ def test__dispatch_config_validate_config_obj():
 
 @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
 def test__dispatch_forecast(params):
-    submode, funcname = params
-    args = {STR.submode: submode}
+    action, funcname = params
+    args = {STR.action: action}
     with patch.object(cli, funcname) as module:
         cli._dispatch_forecast(args)
     module.assert_called_once_with(args)
@@ -286,8 +289,8 @@ def test__dispatch_forecast_run():
     ],
 )
 def test__dispatch_rocoto(params):
-    submode, funcname = params
-    args = {STR.submode: submode}
+    action, funcname = params
+    args = {STR.action: action}
     with patch.object(cli, funcname) as module:
         cli._dispatch_rocoto(args)
     module.assert_called_once_with(args)
@@ -332,8 +335,8 @@ def test__dispatch_rocoto_validate_xml_no_optional():
     [(STR.render, "_dispatch_template_render"), (STR.translate, "_dispatch_template_translate")],
 )
 def test__dispatch_template(params):
-    submode, funcname = params
-    args = {STR.submode: submode}
+    action, funcname = params
+    args = {STR.action: action}
     with patch.object(cli, funcname) as func:
         cli._dispatch_template(args)
     func.assert_called_once_with(args)
@@ -413,11 +416,24 @@ def test__dispatch_template_translate_no_optional():
     )
 
 
-@pytest.mark.parametrize("quiet", [True])
-@pytest.mark.parametrize("verbose", [False])
-def test_main_fail_checks(capsys, quiet, verbose):
+def test_main_debug_logs_stacktrace(caplog):
+    log.setLevel(logging.DEBUG)
+    msg = "Test failed intentionally"
+    with patch.object(cli, "_parse_args", side_effect=Exception(msg)):
+        with patch.object(sys, "argv", cli._switch(STR.debug)):
+            with raises(SystemExit):
+                cli.main()
+                assert logged(caplog, "Traceback (most recent call last):")
+
+
+@pytest.mark.parametrize("debug", [False, True])
+@pytest.mark.parametrize("quiet", [False, True])
+@pytest.mark.parametrize("verbose", [False, True])
+def test_main_fail_checks(capsys, debug, quiet, verbose):
     # Using mode 'template render' for testing.
     raw_args = ["testing", STR.template, STR.render]
+    if debug:
+        raw_args.append(cli._switch(STR.debug))
     if quiet:
         raw_args.append(cli._switch(STR.quiet))
     if verbose:
@@ -426,9 +442,11 @@ def test_main_fail_checks(capsys, quiet, verbose):
         with patch.object(cli, "_dispatch_template", return_value=True):
             with raises(SystemExit) as e:
                 cli.main()
-            if quiet and verbose:
+            if quiet and (debug or verbose):
                 assert e.value.code == 1
-                assert "Specify at most one of" in capsys.readouterr().err
+                assert (
+                    "--quiet may not be used with --debug or --verbose" in capsys.readouterr().err
+                )
             else:
                 assert e.value.code == 0
 
@@ -465,9 +483,8 @@ def test__parse_args():
 # Helper functions
 
 
-def submodes(parser: Parser) -> List[str]:
-    # Return submodes (named subparsers) belonging to the given parser. For some background, see
-    # https://stackoverflow.com/questions/43688450.
+def actions(parser: Parser) -> List[str]:
+    # Return actions (named subparsers) belonging to the given parser.
     if actions := [x for x in parser._actions if isinstance(x, _SubParsersAction)]:
         return list(actions[0].choices.keys())
     return []
