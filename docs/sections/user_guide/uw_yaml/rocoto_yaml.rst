@@ -219,7 +219,7 @@ This example also demonstrates the use of Rocoto's **boolean operator tags** in 
 Defining Metatasks
 ------------------
 
-A Rocoto ``metatask`` expands into one or more tasks via substitution of values, defined under the ``var:`` key, into placeholders bracketed with pound signs. Each variable must provide the same number of values. Here is UW YAML that localizes a greeting to a variety of languages:
+A Rocoto ``metatask`` expands into one or more tasks (defined under the ``var:`` key) via substitution of values. Placeholders bracketed with pound signs are replaced with the values included under the ``var:`` key. Each variable must provide the same number of values. Here is UW YAML that localizes a greeting to a variety of languages:
 
 .. Leaving this one as text because the #'s show up as comments, which is unhelpful
 
@@ -250,9 +250,8 @@ This translates to Rocoto XML (whitespace added for readability):
      </task>
    </metatask>
 
-.. COMMENT: It might be good to explain further how the tasks will be named/how the substitution works. Will the task be named hello hola bonjour once rendered? Or will there be three tasks: hello, hola, and bonjour?
-   Delete this comment once addressed. 
 This example of Rocoto XML will be expanded during the workflow's execution to generate three individual tasks: ``hello``, ``hola``, and ``bonjour``. 
+
 UW YAML Definitions
 -------------------
 
