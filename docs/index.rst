@@ -7,7 +7,7 @@
 Unified Workflow Tools
 ======================
 
-``uwtools`` is an modern, open-source Python package that helps automate common tasks needed for many standard numerical weather prediction (NWP) workflows. It also provides drivers to automate the configuration and execution of :ufs:`Unified Forecast System (UFS)<>` components, providing flexibility, interoperability, and usability to various UFS Applications.
+``uwtools`` is a modern, open-source Python package that helps automate common tasks needed for many standard numerical weather prediction (NWP) workflows. It also provides drivers to automate the configuration and execution of :ufs:`Unified Forecast System (UFS)<>` components, providing flexibility, interoperability, and usability to various UFS Applications.
 
 If you're interested in contributing, check out the :doc:`Contributor Guide <sections/contributor_guide/index>`.
 
