@@ -171,7 +171,7 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
          Print report of values needed to render template
      --dry-run
          Only log info, making no changes
-    --debug
+     --debug
          Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
