@@ -2,12 +2,12 @@
 This file contains the specific drivers for a particular app, using the facade pattern base class.
 """
 
-import logging
 import shutil
 
 from uwtools.drivers.facade import Facade
 from uwtools.exceptions import UWError
-from uwtools.utils.file import FORMAT, get_file_type
+from uwtools.logging import log
+from uwtools.utils.file import FORMAT, get_file_format
 from uwtools.utils.processing import execute
 
 
@@ -28,7 +28,7 @@ class SRW210(Facade):
         """
         Load the configuration file.
         """
-        file_type = get_file_type(config_file)
+        file_type = get_file_format(config_file)
         if file_type == FORMAT.ini:
             with open("config.yaml", "w", encoding="utf-8") as f:
                 # Note: This is a temporary path until parsing the SRW directory is implemented.
@@ -40,14 +40,14 @@ class SRW210(Facade):
                     ">%s" % f,
                 ]
                 cmd = " ".join(cmd_components)
-                result = execute(cmd=cmd)
-                if not result.success:
+                _, success = execute(cmd=cmd)
+                if not success:
                     raise UWError(f"Command failed: {cmd}")
         elif file_type == FORMAT.yaml:
             shutil.copy2(config_file, "config.yaml")
         else:
             msg = f"Bad file type -- {file_type}. Cannot load configuration!"
-            logging.critical(msg)
+            log.critical(msg)
             raise ValueError(msg)
 
     def validate_config(self, config_file: str) -> None:
@@ -64,8 +64,8 @@ class SRW210(Facade):
         """
         # Note: This is a temporary path until parsing the SRW directory is implemented.
         cmd = "python generate_FV3LAM_wflow.py"
-        result = execute(cmd=cmd)
-        if not result.success:
+        _, success = execute(cmd=cmd)
+        if not success:
             raise UWError(f"Command failed: {cmd}")
 
     def create_manager_files(self) -> None:

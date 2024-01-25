@@ -3,16 +3,22 @@
 Tests for uwtools.scheduler module.
 """
 
+import os
+from pathlib import Path
+from unittest.mock import patch
+
 from pytest import fixture, raises
 
+from uwtools import scheduler
 from uwtools.scheduler import JobScheduler
+from uwtools.tests.support import compare_files
 
 # LFS tests
 
 
 @fixture
 def lsf_props():
-    return {
+    config = {
         "account": "account_name",
         "nodes": 1,
         "queue": "batch",
@@ -21,64 +27,58 @@ def lsf_props():
         "threads": 1,
         "walltime": "00:01:00",
     }
+    expected = [
+        "#BSUB -P account_name",
+        "#BSUB -R affinity[core(1)]",
+        "#BSUB -R span[ptile=1]",
+        "#BSUB -W 00:01:00",
+        "#BSUB -n 1",
+        "#BSUB -q batch",
+    ]
+    return config, expected
 
 
 def test_lsf_1(lsf_props):
-    expected = """
-#BSUB -P account_name
-#BSUB -R affinity[core(1)]
-#BSUB -R span[ptile=1]
-#BSUB -W 00:01:00
-#BSUB -n 1
-#BSUB -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(lsf_props).batch_script.content() == expected
+    lsf_config, expected_items = lsf_props
+    expected = "\n".join(expected_items)
+    assert JobScheduler.get_scheduler(lsf_config).batch_script.content() == expected
 
 
 def test_lsf_2(lsf_props):
-    lsf_props.update({"tasks_per_node": 12})
-    expected = """
-#BSUB -P account_name
-#BSUB -R affinity[core(1)]
-#BSUB -R span[ptile=12]
-#BSUB -W 00:01:00
-#BSUB -n 12
-#BSUB -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(lsf_props).batch_script.content() == expected
+    lsf_config, expected_items = lsf_props
+    lsf_config.update({"tasks_per_node": 12})
+    expected_items[2] = "#BSUB -R span[ptile=12]"
+    expected_items[4] = "#BSUB -n 12"
+    expected = "\n".join(expected_items)
+    assert JobScheduler.get_scheduler(lsf_config).batch_script.content() == expected
 
 
 def test_lsf_3(lsf_props):
-    lsf_props.update({"nodes": 2, "tasks_per_node": 6})
-    expected = """
-#BSUB -P account_name
-#BSUB -R affinity[core(1)]
-#BSUB -R span[ptile=6]
-#BSUB -W 00:01:00
-#BSUB -n 12
-#BSUB -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(lsf_props).batch_script.content() == expected
+    lsf_config, expected_items = lsf_props
+    lsf_config.update({"nodes": 2, "tasks_per_node": 6})
+    expected_items[2] = "#BSUB -R span[ptile=6]"
+    expected_items[4] = "#BSUB -n 12"
+    expected = "\n".join(expected_items)
+    assert JobScheduler.get_scheduler(lsf_config).batch_script.content() == expected
 
 
 def test_lsf_4(lsf_props):
-    lsf_props.update({"memory": "1MB", "nodes": 2, "tasks_per_node": 3, "threads": 2})
-    batch_script = JobScheduler.get_scheduler(lsf_props).batch_script
-    expected = """
-#BSUB -P account_name
-#BSUB -R affinity[core(2)]
-#BSUB -R rusage[mem=1000KB]
-#BSUB -R span[ptile=3]
-#BSUB -W 00:01:00
-#BSUB -n 6
-#BSUB -q batch
-""".strip()
-    assert batch_script.content() == expected
+    lsf_config, expected_items = lsf_props
+    lsf_config.update({"memory": "1MB", "nodes": 2, "tasks_per_node": 3, "threads": 2})
+    expected_items[1] = "#BSUB -R affinity[core(2)]"
+    expected_items[2] = "#BSUB -R span[ptile=3]"
+    expected_items[4] = "#BSUB -n 6"
+    new_items = [
+        "#BSUB -R rusage[mem=1000KB]",
+    ]
+    expected = "\n".join(sorted(expected_items + new_items))
+    assert JobScheduler.get_scheduler(lsf_config).batch_script.content() == expected
 
 
 def test_lsf_5(lsf_props):
+    lsf_config, _ = lsf_props
     expected = "bsub"
-    assert JobScheduler.get_scheduler(lsf_props).submit_command == expected
+    assert JobScheduler.get_scheduler(lsf_config).submit_command == expected
 
 
 # PBS tests
@@ -86,7 +86,7 @@ def test_lsf_5(lsf_props):
 
 @fixture
 def pbs_props():
-    return {
+    config = {
         "account": "account_name",
         "nodes": 1,
         "queue": "batch",
@@ -94,102 +94,89 @@ def pbs_props():
         "tasks_per_node": 1,
         "walltime": "00:01:00",
     }
+    expected = [
+        "#PBS -A account_name",
+        "#PBS -l select=1:mpiprocs=1:ompthreads=1:ncpus=1",
+        "#PBS -l walltime=00:01:00",
+        "#PBS -q batch",
+    ]
+    return config, expected
 
 
 def test_pbs_1(pbs_props):
-    expected = """
-#PBS -A account_name
-#PBS -l select=1:mpiprocs=1:ompthreads=1:ncpus=1
-#PBS -l walltime=00:01:00
-#PBS -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
+    pbs_config, expected_items = pbs_props
+    expected = "\n".join(expected_items)
+    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
 
 
 def test_pbs_2(pbs_props):
-    pbs_props.update({"memory": "512M", "tasks_per_node": 4})
-    expected = """
-#PBS -A account_name
-#PBS -l select=1:mpiprocs=4:ompthreads=1:ncpus=4:mem=512M
-#PBS -l walltime=00:01:00
-#PBS -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
+    pbs_config, expected_items = pbs_props
+    pbs_config.update({"memory": "512M", "tasks_per_node": 4})
+    expected_items[1] = "#PBS -l select=1:mpiprocs=4:ompthreads=1:ncpus=4:mem=512M"
+    expected = "\n".join(expected_items)
+    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
 
 
 def test_pbs_3(pbs_props):
-    pbs_props.update({"nodes": 3, "tasks_per_node": 4, "threads": 2})
-    expected = """
-#PBS -A account_name
-#PBS -l select=3:mpiprocs=4:ompthreads=2:ncpus=8
-#PBS -l walltime=00:01:00
-#PBS -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
+    pbs_config, expected_items = pbs_props
+    pbs_config.update({"nodes": 3, "tasks_per_node": 4, "threads": 2})
+    expected_items[1] = "#PBS -l select=3:mpiprocs=4:ompthreads=2:ncpus=8"
+    expected = "\n".join(expected_items)
+    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
 
 
 def test_pbs_4(pbs_props):
-    pbs_props.update({"memory": "512M", "nodes": 3, "tasks_per_node": 4, "threads": 2})
-    expected = """
-#PBS -A account_name
-#PBS -l select=3:mpiprocs=4:ompthreads=2:ncpus=8:mem=512M
-#PBS -l walltime=00:01:00
-#PBS -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
+    pbs_config, expected_items = pbs_props
+    pbs_config.update({"memory": "512M", "nodes": 3, "tasks_per_node": 4, "threads": 2})
+    expected_items[1] = "#PBS -l select=3:mpiprocs=4:ompthreads=2:ncpus=8:mem=512M"
+    expected = "\n".join(expected_items)
+    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
 
 
 def test_pbs_5(pbs_props):
-    pbs_props.update({"exclusive": "True"})
-    expected = """
-#PBS -A account_name
-#PBS -l place=excl
-#PBS -l select=1:mpiprocs=1:ompthreads=1:ncpus=1
-#PBS -l walltime=00:01:00
-#PBS -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
+    pbs_config, expected_items = pbs_props
+    pbs_config.update({"exclusive": "True"})
+    new_items = [
+        "#PBS -l place=excl",
+    ]
+    expected = "\n".join(sorted(expected_items + new_items))
+    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
 
 
 def test_pbs_6(pbs_props):
-    pbs_props.update({"exclusive": False, "placement": "vscatter"})
-    expected = """
-#PBS -A account_name
-#PBS -l place=vscatter
-#PBS -l select=1:mpiprocs=1:ompthreads=1:ncpus=1
-#PBS -l walltime=00:01:00
-#PBS -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
+    pbs_config, expected_items = pbs_props
+    pbs_config.update({"exclusive": False, "placement": "vscatter"})
+    new_items = [
+        "#PBS -l place=vscatter",
+    ]
+    expected = "\n".join(sorted(expected_items + new_items))
+    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
 
 
 def test_pbs_7(pbs_props):
-    pbs_props.update({"exclusive": True, "placement": "vscatter"})
-    expected = """
-#PBS -A account_name
-#PBS -l place=vscatter:excl
-#PBS -l select=1:mpiprocs=1:ompthreads=1:ncpus=1
-#PBS -l walltime=00:01:00
-#PBS -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
+    pbs_config, expected_items = pbs_props
+    pbs_config.update({"exclusive": True, "placement": "vscatter"})
+    new_items = [
+        "#PBS -l place=vscatter:excl",
+    ]
+    expected = "\n".join(sorted(expected_items + new_items))
+    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
 
 
 def test_pbs_8(pbs_props):
-    pbs_props.update({"debug": "True"})
-    expected = """
-#PBS -A account_name
-#PBS -l debug=true
-#PBS -l select=1:mpiprocs=1:ompthreads=1:ncpus=1
-#PBS -l walltime=00:01:00
-#PBS -q batch
-""".strip()
-    assert JobScheduler.get_scheduler(pbs_props).batch_script.content() == expected
+    pbs_config, expected_items = pbs_props
+    pbs_config.update({"debug": "True"})
+    new_items = [
+        "#PBS -l debug=true",
+    ]
+    expected = "\n".join(sorted(expected_items + new_items))
+    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
 
 
 def test_pbs_9(pbs_props):
+    pbs_config, _ = pbs_props
     expected = "qsub"
-    assert JobScheduler.get_scheduler(pbs_props).submit_command == expected
+    assert JobScheduler.get_scheduler(pbs_config).submit_command == expected
 
 
 # Slurm tests
@@ -197,7 +184,7 @@ def test_pbs_9(pbs_props):
 
 @fixture
 def slurm_props():
-    return {
+    config = {
         "account": "account_name",
         "nodes": 1,
         "queue": "batch",
@@ -205,81 +192,87 @@ def slurm_props():
         "tasks_per_node": 1,
         "walltime": "00:01:00",
     }
+    expected = [
+        "#SBATCH --account=account_name",
+        "#SBATCH --nodes=1",
+        "#SBATCH --ntasks-per-node=1",
+        "#SBATCH --qos=batch",
+        "#SBATCH --time=00:01:00",
+    ]
+    return config, expected
 
 
 def test_slurm_1(slurm_props):
-    expected = """
-#SBATCH --account=account_name
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-""".strip()
-    assert JobScheduler.get_scheduler(slurm_props).batch_script.content() == expected
+    slurm_config, expected_items = slurm_props
+    expected = "\n".join(expected_items)
+    assert JobScheduler.get_scheduler(slurm_config).batch_script.content() == expected
 
 
 def test_slurm_2(slurm_props):
-    slurm_props.update({"partition": "debug"})
-    expected = """
-#SBATCH --account=account_name
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --partition=debug
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-""".strip()
-    assert JobScheduler.get_scheduler(slurm_props).batch_script.content() == expected
+    slurm_config, expected_items = slurm_props
+    slurm_config.update({"partition": "debug"})
+    new_items = [
+        "#SBATCH --partition=debug",
+    ]
+    expected = "\n".join(sorted(expected_items + new_items))
+    assert JobScheduler.get_scheduler(slurm_config).batch_script.content() == expected
 
 
 def test_slurm_3(slurm_props):
-    slurm_props.update({"tasks_per_node": 2, "threads": 4})
-    expected = """
-#SBATCH --account=account_name
-#SBATCH --cpus-per-task=4
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=2
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-""".strip()
-    assert JobScheduler.get_scheduler(slurm_props).batch_script.content() == expected
+    slurm_config, expected_items = slurm_props
+    slurm_config.update({"tasks_per_node": 2, "threads": 4})
+    expected_items[2] = "#SBATCH --ntasks-per-node=2"
+    new_items = [
+        "#SBATCH --cpus-per-task=4",
+    ]
+    expected = "\n".join(sorted(expected_items + new_items))
+    assert JobScheduler.get_scheduler(slurm_config).batch_script.content() == expected
 
 
 def test_slurm_4(slurm_props):
-    slurm_props.update({"memory": "4MB", "tasks_per_node": 2})
-    expected = """
-#SBATCH --account=account_name
-#SBATCH --mem=4MB
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=2
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-""".strip()
-    assert JobScheduler.get_scheduler(slurm_props).batch_script.content() == expected
+    slurm_config, expected_items = slurm_props
+    slurm_config.update({"memory": "4MB", "tasks_per_node": 2})
+    expected_items[2] = "#SBATCH --ntasks-per-node=2"
+    new_items = [
+        "#SBATCH --mem=4MB",
+    ]
+    expected = "\n".join(sorted(expected_items + new_items))
+    assert JobScheduler.get_scheduler(slurm_config).batch_script.content() == expected
 
 
 def test_slurm_5(slurm_props):
-    slurm_props.update({"exclusive": "True"})
-    expected = """
-#SBATCH --account=account_name
-#SBATCH --exclusive=True
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-""".strip()
-    assert JobScheduler.get_scheduler(slurm_props).batch_script.content() == expected
+    slurm_config, expected_items = slurm_props
+    slurm_config.update({"exclusive": "True"})
+    new_items = [
+        "#SBATCH --exclusive",
+    ]
+    expected = "\n".join(sorted(expected_items + new_items))
+    assert JobScheduler.get_scheduler(slurm_config).batch_script.content() == expected
 
 
 def test_slurm_6(slurm_props):
+    slurm_config, _ = slurm_props
     expected = "sbatch"
-    assert JobScheduler.get_scheduler(slurm_props).submit_command == expected
+    assert JobScheduler.get_scheduler(slurm_config).submit_command == expected
 
 
 # Generic tests using PBS support.
 
 
+def test_batchscript_dump(pbs_props, tmpdir):
+    outfile = tmpdir / "outfile.sh"
+    pbs_config, expected_items = pbs_props
+    bs = JobScheduler.get_scheduler(pbs_config).batch_script
+    bs.dump(outfile)
+    reference = tmpdir / "reference.sh"
+    with open(reference, "w", encoding="utf-8") as f:
+        f.write("\n".join(["#!/bin/bash"] + expected_items))
+    assert compare_files(reference, outfile)
+
+
 def test_scheduler_bad_attr(pbs_props):
-    js = JobScheduler.get_scheduler(pbs_props)
+    pbs_config, _ = pbs_props
+    js = JobScheduler.get_scheduler(pbs_config)
     with raises(AttributeError):
         assert js.bad_attr
 
@@ -291,19 +284,34 @@ def test_scheduler_bad_scheduler():
 
 
 def test_scheduler_dot_notation(pbs_props):
-    js = JobScheduler.get_scheduler(pbs_props)
+    pbs_config, _ = pbs_props
+    js = JobScheduler.get_scheduler(pbs_config)
     assert js.account == "account_name"
 
 
 def test_scheduler_prop_not_defined_raises_key_error(pbs_props):
-    del pbs_props["scheduler"]
+    pbs_config, _ = pbs_props
+    del pbs_config["scheduler"]
     with raises(KeyError) as e:
-        JobScheduler.get_scheduler(pbs_props)
+        JobScheduler.get_scheduler(pbs_config)
     assert "No scheduler defined in props" in str(e.value)
 
 
 def test_scheduler_raises_exception_when_missing_required_attrs(pbs_props):
-    del pbs_props["account"]
+    pbs_config, _ = pbs_props
+    del pbs_config["account"]
     with raises(ValueError) as e:
-        JobScheduler.get_scheduler(pbs_props)
+        JobScheduler.get_scheduler(pbs_config)
     assert "Missing required attributes: [account]" in str(e.value)
+
+
+def test_scheduler_submit_job(pbs_props):
+    pbs_config, _ = pbs_props
+    js = JobScheduler.get_scheduler(pbs_config)
+    submit_command = js.submit_command
+    outpath = Path("/path/to/batch/script")
+    expected_command = f"{submit_command} {outpath}"
+    with patch.object(scheduler, "execute") as execute:
+        execute.return_value = (True, "")
+        js.submit_job(outpath)
+        execute.assert_called_once_with(cmd=expected_command, cwd=os.path.dirname(outpath))

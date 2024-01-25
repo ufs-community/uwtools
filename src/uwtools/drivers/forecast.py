@@ -2,21 +2,20 @@
 Drivers for forecast models.
 """
 
-
-import logging
-import os
-import shutil
 import sys
 from collections.abc import Mapping
-from functools import cached_property
-from importlib import resources
+from datetime import datetime
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Tuple
 
-from uwtools.config.core import FieldTableConfig, NMLConfig, realize_config
+from uwtools.config.formats.fieldtable import FieldTableConfig
+from uwtools.config.formats.nml import NMLConfig
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
-from uwtools.scheduler import BatchScript, JobScheduler
-from uwtools.utils.file import FORMAT, handle_existing
+from uwtools.logging import log
+from uwtools.scheduler import BatchScript
+from uwtools.types import DefinitePath, ExistAct, OptionalPath
+from uwtools.utils.file import handle_existing, resource_pathobj, validate_existing_action
 from uwtools.utils.processing import execute
 
 
@@ -25,242 +24,272 @@ class FV3Forecast(Driver):
     A driver for the FV3 forecast model.
     """
 
-    # Properties
-    @cached_property
-    def job_scheduler(self) -> str:
+    def __init__(
+        self,
+        config_file: DefinitePath,
+        dry_run: bool = False,
+        batch_script: OptionalPath = None,
+    ):
         """
-        Get the name of the job scheduler.
+        Initialize the Forecast Driver.
+        """
 
-        Currently hard-coded pending additional methods
-        """
-        return "slurm"
+        super().__init__(config_file=config_file, dry_run=dry_run, batch_script=batch_script)
+        self._config = self._experiment_config["forecast"]
 
     # Public methods
 
-    def batch_script(self, platform_resources: Mapping) -> BatchScript:
+    def batch_script(self) -> BatchScript:
         """
-        Write to disk, for submission to the batch scheduler, a script to run FV3.
+        Prepare batch script contents for interaction with system scheduler.
+
+        :return: The batch script object with all run commands needed for executing the program.
         """
-        return JobScheduler.get_scheduler(platform_resources).batch_script
+        pre_run = self._mpi_env_variables("\n")
+        batch_script = self.scheduler.batch_script
+        batch_script.append(pre_run)
+        batch_script.append(self.run_cmd())
+        return batch_script
 
     @staticmethod
-    def create_directory_structure(run_directory, exist_act="delete"):
+    def create_directory_structure(
+        run_directory: DefinitePath, exist_act: str = ExistAct.delete, dry_run: bool = False
+    ) -> None:
         """
         Collects the name of the desired run directory, and has an optional flag for what to do if
         the run directory specified already exists. Creates the run directory and adds
         subdirectories INPUT and RESTART. Verifies creation of all directories.
 
-        Args:
-           run_directory: path of desired run directory
-           exist_act: - could be any of 'delete', 'rename', 'quit'
-                      - how program should act if run directory exists
-                      - default is to delete old run directory
-           Returns: None
+        :param run_directory: Path of desired run directory.
+        :param exist_act: Action when run directory exists: "delete" (default), "quit", or "rename"
         """
 
-        # Caller should only provide correct argument.
+        validate_existing_action(
+            exist_act, valid_actions=[ExistAct.delete, ExistAct.quit, ExistAct.rename]
+        )
 
-        if exist_act not in ["delete", "rename", "quit"]:
-            raise ValueError(f"Bad argument: {exist_act}")
+        run_directory = Path(run_directory)
 
-        # Exit program with error if caller chooses to quit.
+        # Exit program with error if caller specified the "quit" action.
 
-        if exist_act == "quit" and os.path.isdir(run_directory):
-            logging.critical("User chose quit option when creating directory")
+        if exist_act == ExistAct.quit and run_directory.is_dir():
+            log.critical(f"Option {exist_act} specified, exiting")
             sys.exit(1)
 
-        # Delete or rename directory if it exists.
+        # Handle a potentially pre-existing directory appropriately.
 
-        handle_existing(run_directory, exist_act)
+        if dry_run and run_directory.is_dir():
+            log.info(f"Would {exist_act} directory")
+        else:
+            handle_existing(run_directory, exist_act)
 
         # Create new run directory with two required subdirectories.
 
         for subdir in ("INPUT", "RESTART"):
-            path = os.path.join(run_directory, subdir)
-            logging.info("Creating directory: %s", path)
-            os.makedirs(path)
+            path = run_directory / subdir
+            if dry_run:
+                log.info("Would create directory: %s", path)
+            else:
+                log.info("Creating directory: %s", path)
+                path.mkdir(parents=True)
 
-    @staticmethod
-    def create_field_table(update_obj: dict, outfldtab_file, base_file=None):
+    def create_field_table(self, output_path: OptionalPath) -> None:
         """
-        Uses an object with user supplied values and an optional base file to create an output field
-        table file. Will "dereference" the base file.
+        Uses the forecast config object to create a Field Table.
 
-        Args:
-            update_obj: in-memory dictionary initialized by object.
-                        values override any settings in base file
-            outfldtab_file: location of output field table
-            base_file: optional path to file to use as a base file
+        :param output_path: Optional location of output field table.
         """
-        if base_file:
-            config_obj = FieldTableConfig(base_file)
-            config_obj.update_values(update_obj)
-            config_obj.dereference_all()
-            config_obj.dump(outfldtab_file)
-        else:
-            # Dump update object to a Field Table file:
-            FieldTableConfig.dump_dict(path=outfldtab_file, cfg=update_obj)
+        self._create_user_updated_config(
+            config_class=FieldTableConfig,
+            config_values=self._config.get("field_table", {}),
+            output_path=output_path,
+        )
 
-        msg = f"Namelist file {outfldtab_file} created"
-        logging.info(msg)
+    def create_model_configure(self, output_path: OptionalPath) -> None:
+        """
+        Uses the forecast config object to create a model_configure.
 
-    @staticmethod
-    def create_namelist(update_obj, outnml_file, base_file=None):
+        :param output_path: Optional location of the output model_configure file.
+        """
+        self._create_user_updated_config(
+            config_class=YAMLConfig,
+            config_values=self._config.get("model_configure", {}),
+            output_path=output_path,
+        )
+
+    def create_namelist(self, output_path: OptionalPath) -> None:
         """
         Uses an object with user supplied values and an optional namelist base file to create an
         output namelist file. Will "dereference" the base file.
 
-        Args:
-            update_obj: in-memory dictionary initialized by object.
-                        values override any settings in base file
-            outnml_file: location of output namelist
-            base_file: optional path to file to use as a base file
+        :param output_path: Optional location of output namelist.
         """
-
-        if base_file:
-            config_obj = NMLConfig(base_file)
-            config_obj.update_values(update_obj)
-            config_obj.dereference_all()
-            config_obj.dump(outnml_file)
-        else:
-            update_obj.dump(outnml_file)
-
-        msg = f"Namelist file {outnml_file} created"
-        logging.info(msg)
+        self._create_user_updated_config(
+            config_class=NMLConfig,
+            config_values=self._config.get("namelist", {}),
+            output_path=output_path,
+        )
 
     def output(self) -> None:
         """
         ???
         """
 
+    def prepare_directories(self) -> Path:
+        """
+        Prepares the run directory and stages static and cycle-dependent files.
+
+        :return: Path to the run directory.
+        """
+        run_directory = Path(self._config["run_dir"])
+        self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
+        self._prepare_config_files(run_directory)
+        self._config["cycle_dependent"].update(self._define_boundary_files())
+        for file_category in ["static", "cycle_dependent"]:
+            self.stage_files(
+                run_directory, self._config[file_category], link_files=True, dry_run=self._dry_run
+            )
+        return run_directory
+
     def requirements(self) -> None:
         """
         ???
         """
 
-    def resources(self, platform: dict) -> Mapping:
+    def resources(self) -> Mapping:
         """
-        Parses the config and returns a formatted dictionary for the batch script.
+        Parses the experiment configuration to provide the information needed for the batch script.
+
+        :return: A formatted dictionary needed to create a batch script
         """
-        # Add required fields to platform.
-        # Currently supporting only slurm scheduler.
+
         return {
-            "account": platform["account"],
-            "nodes": 1,
-            "queue": "batch",
-            "scheduler": self.job_scheduler,
-            "tasks_per_node": 1,
-            "walltime": "00:01:00",
+            "account": self._experiment_config["user"]["account"],
+            "scheduler": self._experiment_config["platform"]["scheduler"],
+            **self._config["jobinfo"],
         }
 
-    def run(self) -> bool:
+    def run(self, cycle: datetime) -> bool:
         """
         Runs FV3 either locally or via a batch-script submission.
 
-        :return: Did the FV3 run exit with success status?
+        :param cycle: The forecast cycle to run.
+        :return: Did the batch submission or FV3 run exit with success status?
         """
-        # Read in the config file.
-        forecast_config = self._config["forecast"]
-        platform_config = self._config["platform"]
-
-        # Prepare directories.
-        run_directory = forecast_config["RUN_DIRECTORY"]
-        self.create_directory_structure(run_directory, "delete")
-
-        static_files = forecast_config["STATIC"]
-        self.stage_files(run_directory, static_files, link_files=True)
-        cycledep_files = forecast_config["CYCLEDEP"]
-        self.stage_files(run_directory, cycledep_files, link_files=True)
-
-        # Create the job script.
-        platform_resources = self.resources(platform_config)
-        batch_script = self.batch_script(platform_resources)
-        args = "--export=None"
-        run_command = self.run_cmd(
-            args,
-            run_cmd=platform_config["MPICMD"],
-            exec_name=forecast_config["EXEC_NAME"],
+        status, output = (
+            self._run_via_batch_submission()
+            if self._batch_script
+            else self._run_via_local_execution()
         )
-        batch_script.append(run_command)
-
         if self._dry_run:
-            # Apply switch to allow user to view the run command of config.
-            # This will not run the job.
-            logging.info("Batch Script:")
-            logging.info(batch_script)
-            return True
-
-        # Run the job.
-        if self._batch_script is not None:
-            outpath = Path(run_directory) / self._batch_script
-            with open(outpath, "w+", encoding="utf-8") as file_:
-                print(batch_script, file=file_)
-                batch_command = JobScheduler.get_scheduler(platform_resources).submit_command
-            result = execute(cmd=f"{batch_command} {outpath}")
-        else:
-            result = execute(cmd=run_command)
-        return result.success
-
-    def run_cmd(self, *args, run_cmd: str, exec_name: str) -> str:
-        """
-        Constructs the command to run FV3.
-        """
-        args_str = " ".join(str(arg) for arg in args)
-        return f"{run_cmd} {args_str} {exec_name}"
+            for line in output:
+                log.info(line)
+        return status
 
     @property
-    def schema_file(self) -> str:
+    def schema_file(self) -> Path:
         """
         The path to the file containing the schema to validate the config file against.
         """
-        with resources.as_file(resources.files("uwtools.resources")) as path:
-            return (path / "FV3Forecast.jsonschema").as_posix()
-
-    @staticmethod
-    def stage_files(
-        run_directory: str, files_to_stage: Dict[str, str], link_files: bool = False
-    ) -> None:
-        """
-        Takes in run directory and dictionary of file names and paths that need to be staged in the
-        run directory.
-
-        Creates dst file in run directory and copies or links contents from the src path provided.
-        """
-
-        os.makedirs(run_directory, exist_ok=True)
-        for dst_fn, src_path in files_to_stage.items():
-            dst_path = os.path.join(run_directory, dst_fn)
-            if link_files:
-                os.symlink(src_path, dst_path)
-            else:
-                shutil.copyfile(src_path, dst_path)
-            msg = f"File {src_path} staged in run directory at {dst_fn}"
-            logging.info(msg)
+        return resource_pathobj("FV3Forecast.jsonschema")
 
     # Private methods
 
-    def _create_model_config(self, base_file: str, outconfig_file: str) -> None:
+    def _boundary_hours(self, lbcs_config: Dict) -> tuple[int, int, int]:
         """
-        Collects all the user inputs required to create a model config file, calling the existing
-        model config tools. This will be unique to the app being run and will appropriately parse
-        subsequent stages of the workflow. Defaults will be filled in if not provided by the user.
-        Equivalent references to config_default.yaml or config.community.yaml from SRW will need to
-        be made for the other apps.
+        Prepares parameters to generate the lateral boundary condition (LBCS) forecast hours from an
+        external input data source, e.g. GFS, RAP, etc.
 
-        Args:
-            base_file: Path to base config file
-            outconfig_file: Path to output configuration file
+        :return: The offset hours between the cycle and the external input data, the hours between
+            LBC ingest, and the last hour of the external input data forecast
         """
-        realize_config(
-            input_file=base_file,
-            input_format=FORMAT.yaml,
-            output_file=outconfig_file,
-            output_format=FORMAT.yaml,
-            values_file=self._config_file,
-            values_format=FORMAT.yaml,
-        )
-        msg = f"Config file {outconfig_file} created"
-        logging.info(msg)
+        offset = abs(lbcs_config["offset"])
+        end_hour = self._config["length"] + offset + 1
+        return offset, lbcs_config["interval_hours"], end_hour
+
+    def _define_boundary_files(self) -> Dict[str, str]:
+        """
+        Maps the prepared boundary conditions to the appropriate hours for the forecast.
+
+        :return: A dict of boundary file names mapped to source input file paths
+        """
+        boundary_files = {}
+        lbcs_config = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
+        boundary_file_path = lbcs_config["output_file_path"]
+        offset, interval, endhour = self._boundary_hours(lbcs_config)
+        tiles = [7] if self._config["domain"] == "global" else range(1, 7)
+        for tile in tiles:
+            for boundary_hour in range(offset, endhour, interval):
+                forecast_hour = boundary_hour - offset
+                link_name = f"INPUT/gfs_bndy.tile{tile}.{forecast_hour:03d}.nc"
+                boundary_file_path = boundary_file_path.format(
+                    tile=tile,
+                    forecast_hour=boundary_hour,
+                )
+                boundary_files[link_name] = boundary_file_path
+
+        return boundary_files
+
+    def _mpi_env_variables(self, delimiter: str = " ") -> str:
+        """
+        Set the environment variables needed for the MPI job.
+
+        :return: A bash string of environment variables
+        """
+        envvars = {
+            "KMP_AFFINITY": "scatter",
+            "OMP_NUM_THREADS": self._config["runtime_info"].get("threads", 1),
+            "OMP_STACKSIZE": "512m",
+            "MPI_TYPE_DEPTH": 20,
+            "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
+        }
+        return delimiter.join([f"{k}={v}" for k, v in envvars.items()])
+
+    def _prepare_config_files(self, run_directory: Path) -> None:
+        """
+        Collect all the configuration files needed for FV3.
+        """
+        if self._dry_run:
+            for call in ("field_table", "model_configure", "input.nml"):
+                log.info(f"Would prepare: {run_directory}/{call}")
+        else:
+            self.create_field_table(run_directory / "field_table")
+            self.create_model_configure(run_directory / "model_configure")
+            self.create_namelist(run_directory / "input.nml")
+
+    def _run_via_batch_submission(self) -> Tuple[bool, List[str]]:
+        """
+        Prepares and submits a batch script.
+
+        :return: A tuple containing the success status of submitting the job to the batch system,
+            and a list of strings that make up the batch script.
+        """
+        run_directory = self.prepare_directories()
+        batch_script = self.batch_script()
+        batch_lines = ["Batch script:", *str(batch_script).split("\n")]
+        if self._dry_run:
+            return True, batch_lines
+        assert self._batch_script is not None
+        outpath = run_directory / self._batch_script
+        batch_script.dump(outpath)
+        return self.scheduler.submit_job(outpath), batch_lines
+
+    def _run_via_local_execution(self) -> Tuple[bool, List[str]]:
+        """
+        Collects the necessary MPI environment variables in order to construct full run command,
+        then executes said command.
+
+        :return: A tuple containing a boolean of the success status of the FV3 run and a list of
+            strings that make up the full command line.
+        """
+        run_directory = self.prepare_directories()
+        pre_run = self._mpi_env_variables(" ")
+        full_cmd = f"{pre_run} {self.run_cmd()}"
+        command_lines = ["Command:", *full_cmd.split("\n")]
+        if self._dry_run:
+            return True, command_lines
+        success, _ = execute(cmd=full_cmd, cwd=run_directory, log_output=True)
+        return success, command_lines
 
 
 CLASSES = {"FV3": FV3Forecast}

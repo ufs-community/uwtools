@@ -1,55 +1,130 @@
 {
-    "title": "FV3 Forecast config",
-    "description": "This document is to validate user-defined FV3 forecast config files",
-    "type": "object",
-    "properties": {
-        "platform": {
-            "description": "Expected resources for the given platform",
-            "type": "object",
-            "properties": {
-                "MPICMD": {
-                    "type": "string",
-                    "enum": [
-                        "mpirun",
-                        "mpiexec",
-                        "srun"
-                    ]
-                },
-                "ACCOUNT": {
-                    "type": "string"
-                }
-            }
+  "$defs": {
+    "updatable_config": {
+      "additionalProperties": false,
+      "properties": {
+        "properties": {
+          "base_file": {
+            "format": "uri",
+            "type": "string"
+          },
+          "update_values": {
+            "type": "object"
+          }
         },
-    "forecast": {
-            "description": "parameters of the forecast",
-            "type": "object",
-            "properties": {
-                "MODEL": {
-                    "type": "string",
-                },
-                "EXEC_NAME": {
-                    "type": "string",
-                },
-                "RUN_DIRECTORY": {
-                    "type": "string",
-                    "format": "uri"
-                },
-                "CYCLEDEP": {
-                    "type": "string",
-                    "format": "uri"
-                },
-                "STATIC": {
-                    "type": "string",
-                    "format": "uri"
-                },
-                "VERBOSE": {
-                    "type": "string",
-                    "enum": [
-                        "true",
-                        "false"
-                    ]
-                }
-            }
-        }    
+        "required": [
+          "base_file"
+        ],
+        "type": "object"
+      }
     }
+  },
+  "description": "This document is to validate user-defined FV3 forecast config files",
+  "properties": {
+    "forecast": {
+      "additionalProperties": false,
+      "description": "parameters of the forecast",
+      "properties": {
+        "cycle_dependent|static": {
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "diag_table": {
+          "format": "uri",
+          "type": "string"
+        },
+        "domain": {
+          "enum": [
+            "global",
+            "regional"
+          ],
+          "type": "string"
+        },
+        "executable": {
+          "format": "uri",
+          "type": "string"
+        },
+        "fd_ufs": {
+          "$ref": "#/$defs/updatable_config"
+        },
+        "field_table": {
+          "$ref": "#/$defs/updatable_config"
+        },
+        "length": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "model_configure": {
+          "$ref": "#/$defs/updatable_config"
+        },
+        "mpicmd": {
+          "type": "string"
+        },
+        "namelist": {
+          "$ref": "#/$defs/updatable_config"
+        },
+        "run_dir": {
+          "format": "uri",
+          "type": "string"
+        },
+        "ufs_configure": {
+          "format": "uri",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "platform": {
+      "properties": {
+        "required": [
+          "mpicmd"
+        ],
+        "scheduler": {
+          "enum": [
+            "lsf",
+            "pbs",
+            "slurm"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "preprocessing": {
+      "properties": {
+        "lateral_boundary_conditions": {
+          "properties": {
+            "interval_hours": {
+              "default": 3,
+              "minimum": 1,
+              "type": "number"
+            },
+            "offset": {
+              "default": 0,
+              "minimum": 0,
+              "type": "number"
+            },
+            "output_file_path": {
+              "format": "uri",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "user": {
+      "properties": {
+        "account": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "title": "FV3 Forecast config",
+  "type": "object"
 }

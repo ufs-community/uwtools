@@ -3,14 +3,17 @@
 Tests for uwtools.drivers.driver module.
 """
 
+import datetime
 import logging
 from collections.abc import Mapping
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 from pytest import fixture
 
 from uwtools.drivers.driver import Driver
+from uwtools.logging import log
 from uwtools.tests.support import logged
 
 
@@ -19,7 +22,7 @@ class ConcreteDriver(Driver):
     Driver subclass for testing purposes.
     """
 
-    def batch_script(self, platform_resources):
+    def batch_script(self):
         pass
 
     def output(self):
@@ -28,18 +31,18 @@ class ConcreteDriver(Driver):
     def requirements(self):
         pass
 
-    def resources(self, platform: dict) -> Mapping:
+    def resources(self) -> Mapping:
         return {}
 
-    def run(self) -> bool:
+    def run(self, cycle: datetime.date) -> bool:
         return True
 
-    def run_cmd(self, *args, run_cmd, exec_name):
+    def run_cmd(self, *args):
         pass
 
     @property
-    def schema_file(self) -> str:
-        return ""
+    def schema_file(self) -> Path:
+        return Path()
 
 
 @fixture
@@ -91,9 +94,9 @@ def test_validation(caplog, configs, schema, tmp_path, valid):
     with open(schema_file, "w", encoding="utf-8") as f:
         print(schema, file=f)
     with patch.object(ConcreteDriver, "schema_file", new=schema_file):
-        logging.getLogger().setLevel(logging.INFO)
+        log.setLevel(logging.INFO)
         ConcreteDriver(config_file=config_file)
         if valid:
-            assert logged(caplog, "0 schema-validation errors found")
+            assert logged(caplog, "0 UW schema-validation errors found")
         else:
-            assert logged(caplog, "2 schema-validation errors found")
+            assert logged(caplog, "2 UW schema-validation errors found")

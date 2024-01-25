@@ -1,15 +1,18 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.utils.file module.
 """
 
 import sys
 from datetime import datetime as dt
+from io import StringIO
 from unittest.mock import patch
 
 import pytest
 from pytest import fixture, raises
 
+from uwtools.exceptions import UWError
+from uwtools.types import ExistAct
 from uwtools.utils import file
 
 
@@ -24,25 +27,62 @@ def assets(tmp_path):
     return now, renamed, rundir
 
 
-def test_get_file_type():
+def test_StdinProxy():
+    msg = "proxying stdin"
+    with patch.object(sys, "stdin", new=StringIO(msg)):
+        assert sys.stdin.read() == msg
+        # Reading from stdin a second time yields no input, as the stream has been exhausted:
+        assert sys.stdin.read() == ""
+    with patch.object(sys, "stdin", new=StringIO(msg)):
+        sp = file.StdinProxy()
+        assert sp.read() == msg
+        # But the stdin proxy can be read multiple times:
+        assert sp.read() == msg
+        # And the proxy can be iterated over:
+        for line in sp:
+            assert line == msg
+
+
+def test__stdinproxy():
+    file._stdinproxy.cache_clear()
+    msg0 = "hello world"
+    msg1 = "bonjour monde"
+    # Unsurprisingly, the first read from stdin finds the expected message:
+    with patch.object(sys, "stdin", new=StringIO(msg0)):
+        assert file._stdinproxy().read() == msg0
+    # But after re-patching stdin with a new message, a second read returns the old message:
+    with patch.object(sys, "stdin", new=StringIO(msg1)):
+        assert file._stdinproxy().read() == msg0  # <-- the OLD message
+    # However, if the cache is cleared, the second message is then read:
+    file._stdinproxy.cache_clear()
+    with patch.object(sys, "stdin", new=StringIO(msg1)):
+        assert file._stdinproxy().read() == msg1  # <-- the NEW message
+
+
+def test_get_file_format():
     for ext, file_type in {
         "atparse": "atparse",
-        "bash": "ini",
+        "bash": "sh",
         "cfg": "ini",
         "fieldtable": "fieldtable",
         "ini": "ini",
         "jinja2": "jinja2",
         "nml": "nml",
-        "sh": "ini",
+        "sh": "sh",
         "yaml": "yaml",
         "yml": "yaml",
     }.items():
-        assert file.get_file_type(f"a.{ext}") == file_type
+        assert file.get_file_format(f"a.{ext}") == file_type
 
 
-def test_get_file_type_unrecignized():
+def test_get_file_format_unrecognized():
+    with raises(UWError):
+        file.get_file_format("a.jpg")
+
+
+def test_handle_existing_bad_action():
     with raises(ValueError):
-        file.get_file_type("a.jpg")
+        file.handle_existing(directory="unused", exist_act="foo")
 
 
 @pytest.mark.parametrize("exc", [FileExistsError, RuntimeError])
@@ -50,14 +90,14 @@ def test_handle_existing_delete_failure(exc, assets):
     _, _, rundir = assets
     with patch.object(file.shutil, "rmtree", side_effect=exc):
         with raises(RuntimeError) as e:
-            file.handle_existing(directory=rundir, action="delete")
-        assert "Could not delete directory" in str(e.value)
+            file.handle_existing(directory=rundir, exist_act=ExistAct.delete)
+        assert f"Could not {ExistAct.delete} directory" in str(e.value)
     assert rundir.is_dir()
 
 
 def test_handle_existing_delete_success(assets):
     _, _, rundir = assets
-    file.handle_existing(directory=rundir, action="delete")
+    file.handle_existing(directory=rundir, exist_act=ExistAct.delete)
     assert not rundir.is_dir()
 
 
@@ -66,8 +106,8 @@ def test_handle_existing_rename_failure(exc, assets):
     _, renamed, rundir = assets
     with patch.object(file.shutil, "move", side_effect=exc):
         with raises(RuntimeError) as e:
-            file.handle_existing(directory=rundir, action="rename")
-        assert "Could not rename directory" in str(e.value)
+            file.handle_existing(directory=rundir, exist_act=ExistAct.rename)
+        assert f"Could not {ExistAct.rename} directory" in str(e.value)
     assert not renamed.is_dir()
     assert rundir.is_dir()
 
@@ -76,7 +116,7 @@ def test_handle_existing_rename_success(assets):
     now, renamed, rundir = assets
     with patch.object(file, "dt") as dt:
         dt.now.return_value = now
-        file.handle_existing(directory=rundir, action="rename")
+        file.handle_existing(directory=rundir, exist_act=ExistAct.rename)
     assert renamed.is_dir()
     assert not rundir.is_dir()
 
@@ -103,7 +143,20 @@ def test_readable_file(tmp_path):
 
 def test_readable_nofile():
     with file.readable() as f:
-        assert f is sys.stdin
+        assert hasattr(f, "read")
+
+
+def test_resource_pathobj():
+    assert file.resource_pathobj().is_dir()
+
+
+def test_validate_existing_action_fail():
+    with raises(ValueError):
+        file.validate_existing_action(ExistAct.quit, [ExistAct.delete])
+
+
+def test_validate_existing_action_pass():
+    file.validate_existing_action(ExistAct.quit, [ExistAct.delete, ExistAct.quit])
 
 
 def test_writable_file(tmp_path):

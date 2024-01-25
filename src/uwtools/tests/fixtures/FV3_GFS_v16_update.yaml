@@ -1,19 +1,21 @@
-sphum:
-  longname: specific humidity
-  units: kg/kg
-  profile_type: 
-    name: fixed
-    surface_value: 2.0
-liq_wat:
-  longname: cloud water mixing ratio
-  units: kg/kg
-  profile_type: 
-    name: fixed
-    surface_value: 2.0
-rainwat:
-  longname: rain mixing ratio
-  units: kg/kg
-  profile_type: 
-    name: fixed
-    surface_value: 2.0
-
+forecast:
+  field_table:
+    update_values:
+      sphum:
+        longname: specific humidity
+        units: kg/kg
+        profile_type:
+          name: fixed
+          surface_value: 2.0
+      liq_wat:
+        longname: cloud water mixing ratio
+        units: kg/kg
+        profile_type:
+          name: fixed
+          surface_value: 2.0
+      rainwat:
+        longname: rain mixing ratio
+        units: kg/kg
+        profile_type:
+          name: fixed
+          surface_value: 2.0

@@ -1,16 +1,16 @@
 """
-Utilities for rendering Jinja2 templates.
+Convert atparse templates to Jinja2 templates.
 """
 
-import logging
 import re
-from typing import IO, Any, Generator, Optional
+from typing import IO, Any, Generator
 
-from uwtools.utils.file import readable, writable
+from uwtools.logging import log
+from uwtools.utils.file import OptionalPath, readable, writable
 
 
 def convert(
-    input_file: Optional[str] = None, output_file: Optional[str] = None, dry_run: bool = False
+    input_file: OptionalPath = None, output_file: OptionalPath = None, dry_run: bool = False
 ) -> None:
     """
     Replaces atparse @[] tokens with Jinja2 {{}} equivalents.
@@ -25,7 +25,7 @@ def convert(
 
     def lines() -> Generator[str, Any, Any]:
         with readable(input_file) as f_in:
-            for line in f_in:
+            for line in f_in.read().strip().split("\n"):
                 yield _replace(line.strip())
 
     def write(f_out: IO) -> None:
@@ -34,7 +34,7 @@ def convert(
 
     if dry_run:
         for line in lines():
-            logging.info(line)
+            log.info(line)
     else:
         with writable(output_file) as f:
             write(f)

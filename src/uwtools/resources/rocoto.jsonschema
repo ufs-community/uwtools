@@ -1,68 +1,182 @@
 {
   "$defs": {
-    "datePattern": {
-      "type": "integer",
-      "format": "string",
-      "pattern": "^(\\d{12}) (\\d{12})$"
-    },
-    "dateTimePattern": {
-      "type": "string",
-      "pattern": "^(\\d{12}) (\\d{12}) (\\d{2}):(\\d{2}):(\\d{2})$"
+    "compoundTimeString": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "cyclestr": {
+              "additionalProperties": false,
+              "properties": {
+                "attrs": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "offset": {
+                      "$ref": "#/$defs/time"
+                    }
+                  },
+                  "type": "object"
+                },
+                "value": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "cyclestr"
+          ],
+          "type": "object"
+        }
+      ]
     },
     "dependency": {
-      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
       "patternProperties": {
         "^(and|or|not|nand|nor|xor)(_.*)?$": {
           "$ref": "#/$defs/dependency"
         },
-        "^some(_.*)?$": {
-          "type": "array",
-          "patternProperties": {
-            "^threshold(_.*)?$": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 1
+        "^(streq|strneq)(_.*)?$": {
+          "additionalProperties": false,
+          "properties": {
+            "left": {
+              "$ref": "#/$defs/compoundTimeString"
+            },
+            "right": {
+              "$ref": "#/$defs/compoundTimeString"
             }
           },
+          "required": [
+            "left",
+            "right"
+          ],
+          "type": "object"
+        },
+        "^cycleexistdep(_.*)?$": {
+          "additionalProperties": false,
           "properties": {
-            "$ref": "#/$defs/dependency"
-          }
+            "cycle_offset": {
+              "$ref": "#/$defs/time"
+            }
+          },
+          "type": "object"
         },
         "^datadep(_.*)?$": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "attrs": {
-              "type": "object",
+              "additionalProperties": false,
               "properties": {
                 "age": {
-                  "$ref": "#/$defs/TimePattern"
+                  "$ref": "#/$defs/nonNegativeTime"
                 },
                 "minsize": {
                   "type": "string"
                 }
               },
-              "additionalProperties": false
+              "type": "object"
             },
-            "text": {
-              "type": "string"
+            "value": {
+              "$ref": "#/$defs/compoundTimeString"
             }
           },
-          "additionalProperties": false
+          "type": "object"
         },
-        "^taskdep(_.*)?$": {
-          "type": "object",
+        "^metataskdep(_.*)?$": {
+          "additionalProperties": false,
           "properties": {
             "attrs": {
-              "type": "object",
+              "additionalProperties": false,
               "properties": {
-                "task": {
+                "cycle_offset": {
+                  "$ref": "#/$defs/time"
+                },
+                "metatask": {
                   "type": "string"
                 },
+                "state": {
+                  "enum": [
+                    "SUCCEEDED",
+                    "DEAD",
+                    "Succeeded",
+                    "Dead",
+                    "succeeded",
+                    "dead"
+                  ],
+                  "type": "string"
+                },
+                "threshold": {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "metatask"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "^sh(_.*)?$": {
+          "additionalProperties": false,
+          "properties": {
+            "attrs": {
+              "additionalProperties": false,
+              "properties": {
+                "runopt": {
+                  "type": "string"
+                },
+                "shell": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "command": {
+              "$ref": "#/$defs/compoundTimeString"
+            }
+          },
+          "required": [
+            "command"
+          ],
+          "type": "object"
+        },
+        "^some(_.*)?$": {
+          "patternProperties": {
+            "^threshold(_.*)?$": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          "properties": {
+            "$ref": "#/$defs/dependency"
+          },
+          "type": "array"
+        },
+        "^taskdep(_.*)?$": {
+          "additionalProperties": false,
+          "properties": {
+            "attrs": {
+              "additionalProperties": false,
+              "properties": {
                 "cycle_offset": {
-                  "$ref": "#/$defs/TimePattern"
+                  "$ref": "#/$defs/time"
                 },
                 "state": {
-                  "type": "string",
                   "enum": [
                     "RUNNING",
                     "Running",
@@ -73,208 +187,135 @@
                     "Dead",
                     "succeeded",
                     "dead"
-                  ]
+                  ],
+                  "type": "string"
+                },
+                "task": {
+                  "type": "string"
                 }
               },
               "required": [
                 "task"
               ],
-              "additionalProperties": false
+              "type": "object"
             }
           },
-          "additionalProperties": false
-        },
-        "^(streq|strneq)(_.*)?$": {
-          "type": "object",
-          "properties": {
-            "left": {
-              "type": "string"
-            },
-            "right": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "left",
-            "right"
-          ],
-          "additionalProperties": false
-        },
-        "^cycleexistdep(_.*)?$": {
-          "type": "object",
-          "properties": {
-            "cycle_offset": {
-              "$ref": "#/$defs/TimePattern"
-            }
-          },
-          "additionalProperties": false
+          "type": "object"
         },
         "^taskvalid(_.*)?$": {
-          "type": "object",
-          "properties": {
-            "task": {
-              "type": "string"
-            }
-          },
-          "additionalProperties": false
-        },
-        "^metataskdep(_.*)?$": {
-          "type": "object",
+          "additionalProperties": false,
           "properties": {
             "attrs": {
-              "type": "object",
+              "additionalProperties": false,
               "properties": {
-                "metatask": {
+                "task": {
                   "type": "string"
-                },
-                "cycle_offset": {
-                  "$ref": "#/$defs/TimePattern"
-                },
-                "state": {
-                  "type": "string",
-                  "enum": [
-                    "SUCCEEDED",
-                    "DEAD",
-                    "Succeeded",
-                    "Dead",
-                    "succeeded",
-                    "dead"
-                  ]
-                },
-                "threshold": {
-                  "type": "number",
-                  "minimum": 0,
-                  "maximum": 1
                 }
               },
               "required": [
-                "metatask"
+                "task"
               ],
-              "additionalProperties": false
-            }
+              "type": "object"
+            },
+            "required": [
+              "attrs"
+            ],
+            "type": "object"
           },
-          "additionalProperties": false
+          "type": "object"
         },
         "^timedep(_.*)?$": {
-          "$ref": "#/$defs/TimePattern"
+          "$ref": "#/$defs/compoundTimeString"
         }
       },
-      "additionalProperties": false,
-      "minProperties": 1
+      "type": "object"
     },
     "metatask": {
-      "type": "object",
+      "additionalProperties": false,
+      "maxProperties": 4,
+      "minProperties": 2,
+      "patternProperties": {
+        "^metatask_.+$": {
+          "$ref": "#/$defs/metatask"
+        },
+        "^task_.+$": {
+          "$ref": "#/$defs/task"
+        }
+      },
       "properties": {
+        "attrs": {
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "enum": [
+                "parallel",
+                "serial"
+              ],
+              "type": "string"
+            },
+            "throttle": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          }
+        },
         "var": {
           "$ref": "#/$defs/var"
         }
       },
-      "patternProperties": {
-        "^task(_[a-z0-9_]+)?$": {
-          "$ref": "#/$defs/task"
-        },
-        "^metatask(_[a-z0-9_]+)?$": {
-          "$ref": "#/$defs/metatask"
-        }
-      },
-      "additionalProperties": false,
       "required": [
         "var"
       ],
-      "minProperties": 2,
-      "maxProperties": 3
+      "type": "object"
+    },
+    "nonNegativeTime": {
+      "oneOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "pattern": "^([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
+          "type": "string"
+        },
+        {
+          "pattern": "^([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
+          "type": "string"
+        },
+        {
+          "pattern": "^([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
+          "type": "string"
+        }
+      ]
     },
     "task": {
-      "type": "object",
-      "properties": {
-        "account": {
-          "type": "string"
-        },
-        "attrs": {
-          "cycledefs": {
-            "type": "string"
-          },
-          "final": {
-            "type": "boolean"
-          },
-          "maxtries": {
-            "type": "string",
-            "format": "number",
-            "minimum": 0
-          },
-          "throttle": {
-            "type": "integer",
-            "minimum": 0
+      "additionalProperties": false,
+      "dependentSchemas": {
+        "exclusive": {
+          "not": {
+            "required": [
+              "shared"
+            ]
           }
         },
-        "command": {
-          "type": "string"
-        },
-        "cores": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "deadline": {
-          "$ref": "#/$defs/datePattern"
-        },
-        "dependency": {
-          "$ref": "#/$defs/dependency"
-        },
-        "envar": {
-          "type": "object"
-        },
-        "exclusive": {
-          "type": "string"
-        },
-        "jobname": {
-          "type": "string"
-        },
-        "join": {
-          "type": "string"
-        },
-        "memory": {
-          "type": "string"
-        },
-        "native": {
-          "type": "string"
-        },
-        "nodes": {
-          "type": "string"
-        },
-        "partition": {
-          "type": "string"
-        },
-        "queue": {
-          "type": "string"
-        },
-        "rewind": {
-          "type": "string"
-        },
-        "shared": {
-          "type": "string"
-        },
-        "stderr": {
-          "type": "string"
-        },
-        "stdout": {
-          "type": "string"
-        },
-        "walltime": {
-          "$ref": "#/$defs/timestr"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "command",
-        "walltime"
-      ],
-      "dependentSchemas": {
         "join": {
           "not": {
             "required": [
               "stdout"
             ]
           }
+        },
+        "shared": {
+          "not": {
+            "required": [
+              "exclusive"
+            ]
+          }
+        },
+        "stderr": {
+          "required": [
+            "stdout"
+          ]
         },
         "stdout": {
           "not": {
@@ -285,25 +326,6 @@
           "required": [
             "stderr"
           ]
-        },
-        "stderr": {
-          "required": [
-            "stdout"
-          ]
-        },
-        "shared": {
-          "not": {
-            "required": [
-              "exclusive"
-            ]
-          }
-        },
-        "exclusive": {
-          "not": {
-            "required": [
-              "shared"
-            ]
-          }
         }
       },
       "oneOf": [
@@ -322,44 +344,134 @@
             "nodes"
           ]
         }
+      ],
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "attrs": {
+          "cycledefs": {
+            "type": "string"
+          },
+          "final": {
+            "type": "boolean"
+          },
+          "maxtries": {
+            "format": "number",
+            "minimum": 0,
+            "type": "string"
+          },
+          "throttle": {
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "command": {
+          "$ref": "#/$defs/compoundTimeString"
+        },
+        "cores": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "deadline": {
+          "$ref": "#/$defs/compoundTimeString"
+        },
+        "dependency": {
+          "$ref": "#/$defs/dependency"
+        },
+        "envars": {
+          "type": "object"
+        },
+        "exclusive": {
+          "type": "string"
+        },
+        "jobname": {
+          "$ref": "#/$defs/compoundTimeString"
+        },
+        "join": {
+          "$ref": "#/$defs/compoundTimeString"
+        },
+        "memory": {
+          "type": "string"
+        },
+        "native": {
+          "$ref": "#/$defs/compoundTimeString"
+        },
+        "nodes": {
+          "type": "string"
+        },
+        "partition": {
+          "type": "string"
+        },
+        "queue": {
+          "type": "string"
+        },
+        "rewind": {
+          "type": "string"
+        },
+        "shared": {
+          "type": "string"
+        },
+        "stderr": {
+          "$ref": "#/$defs/compoundTimeString"
+        },
+        "stdout": {
+          "$ref": "#/$defs/compoundTimeString"
+        },
+        "walltime": {
+          "$ref": "#/$defs/nonNegativeTime"
+        }
+      },
+      "required": [
+        "command",
+        "walltime"
+      ],
+      "type": "object"
+    },
+    "time": {
+      "oneOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "pattern": "^-?([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
+          "type": "string"
+        },
+        {
+          "pattern": "^-?([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
+          "type": "string"
+        },
+        {
+          "pattern": "^-?([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
+          "type": "string"
+        }
       ]
     },
-    "TimePattern": {
-      "type": "string",
-      "pattern": "^(\\d{2}:){3}\\d{2}$"
-    },
-    "timestr": {
-      "type": "string",
-      "pattern": "^[0-9]{2}:[0-9]{2}:[0-9]{2}$"
-    },
     "var": {
-      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
       "patternProperties": {
         "^.+$": {
           "type": "string"
         }
       },
-      "additionalProperties": false,
-      "minProperties": 1
+      "type": "object"
     }
   },
-  "type": "object",
   "properties": {
     "workflow": {
-      "type": "object",
+      "additionalProperties": false,
       "properties": {
         "attrs": {
-          "type": "object",
           "properties": {
             "cyclethrottle": {
-              "type": "integer",
-              "minimum": 0
+              "minimum": 0,
+              "type": "integer"
             },
             "realtime": {
               "type": "boolean"
             },
             "scheduler": {
-              "type": "string",
               "enum": [
                 "sge",
                 "lsf",
@@ -371,62 +483,94 @@
                 "pbspro",
                 "slurm",
                 "cobalt"
-              ]
+              ],
+              "type": "string"
             },
             "taskthrottle": {
-              "type": "integer",
-              "minimum": 0
+              "minimum": 0,
+              "type": "integer"
             }
           },
           "required": [
             "realtime",
             "scheduler"
-          ]
+          ],
+          "type": "object"
         },
-        "cycledefs": {
-          "type": "object",
-          "properties": {
-            "groupname": {
-              "type": "array",
-              "items": {
-                "$ref": "#/$defs/dateTimePattern"
+        "cycledef": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "attrs": {
+                "additionalProperties": false,
+                "properties": {
+                  "activation_offset": {
+                    "$ref": "#/$defs/time"
+                  },
+                  "group": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "spec": {
+                "oneOf": [
+                  {
+                    "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
+                    "type": "string"
+                  },
+                  {
+                    "pattern": "^[0-9]{12} [0-9]{12} ([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+:([0-9]+|(#[^# ]+#))+$",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
-              "items"
-            ]
-          }
+              "spec"
+            ],
+            "type": "object"
+          },
+          "type": "array"
         },
         "entities": {
           "type": "object"
         },
         "log": {
-          "type": "string",
-          "format": "uri"
+          "$ref": "#/$defs/compoundTimeString"
         },
         "tasks": {
-          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 1,
           "patternProperties": {
-            "^metatask(_[a-z0-9_]+)?$": {
+            "^metatask_.+$": {
               "$ref": "#/$defs/metatask"
             },
-            "^task(_[a-z0-9_]+)?$": {
+            "^task_.+$": {
               "$ref": "#/$defs/task"
             }
           },
-          "additionalProperties": false,
-          "minProperties": 1
+          "type": "object"
         }
       },
-      "additionalProperties": false,
       "required": [
-        "cycledefs",
+        "cycledef",
         "log",
         "tasks"
-      ]
+      ],
+      "type": "object"
     }
   },
   "required": [
     "workflow"
-  ]
+  ],
+  "type": "object"
 }
