@@ -252,7 +252,7 @@ This translates to Rocoto XML (whitespace added for readability):
 
 .. COMMENT: It might be good to explain further how the tasks will be named/how the substitution works. Will the task be named hello hola bonjour once rendered? Or will there be three tasks: hello, hola, and bonjour?
    Delete this comment once addressed. 
-
+This example of Rocoto XML will be expanded during the workflow's execution to generate three individual tasks: ``hello``, ``hola``, and ``bonjour``. 
 UW YAML Definitions
 -------------------
 
