@@ -409,7 +409,7 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
       [2024-01-10T21:46:00]    ERROR Cannot realize depth-2 config to type-'sh' config
       Cannot realize depth-2 config to type-'sh' config
 
-   Note that ``ini`` and ``nml`` configs are, by definition, depth-2 configs, while ``sh`` configs are depth-1 and ``yaml`` configs have arbitrary depth.
+   By definition, ``ini`` and ``nml`` configs are depth-2 configs, while ``sh`` configs are depth-1 and ``yaml`` configs have arbitrary depth.
 
 .. _cli_config_validate_examples:
 
