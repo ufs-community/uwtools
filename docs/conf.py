@@ -24,6 +24,7 @@ numfig_format = {"figure": "Figure %s"}
 project = "Unified Workflow Tools"
 release = _metadata["version"]
 version = _metadata["version"]
+user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36"
 
 extlinks = {
     "anaconda": ("https://www.anaconda.com/%s", "%s"),
@@ -44,6 +45,7 @@ extlinks = {
     "miniforge": ("https://github.com/conda-forge/miniforge/%s", "%s"),
     "miniforge3": ("https://github.com/conda-forge/miniforge/%s", "%s"),
     "mypy": ("https://mypy.readthedocs.io/en/stable/%s", "%s"),
+    "noaa": ("https://www.noaa.gov/%s", "%s"),
     "pylint": ("https://pylint.readthedocs.io/en/v3.0.3/%s", "%s"),
     "pytest": ("https://docs.pytest.org/en/7.4.x/%s", "%s"),
     "rocoto": ("https://christopherwharrop.github.io/rocoto/%s", "%s"),

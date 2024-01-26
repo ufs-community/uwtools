@@ -7,20 +7,20 @@
 Unified Workflow Tools
 ======================
 
-``uwtools`` is an open-source modern Python package that helps automate common tasks needed for many standard numerical weather prediction (NWP) workflows and provides drivers to automate the configuration and execution of :ufs:`Unified Forecast System (UFS)<>` components, providing flexibility, interoperability, and usability to various UFS Applications.
+``uwtools`` is a modern, open-source Python package that helps automate common tasks needed for many standard numerical weather prediction (NWP) workflows. It also provides drivers to automate the configuration and execution of :ufs:`Unified Forecast System (UFS)<>` components, providing flexibility, interoperability, and usability to various UFS Applications.
 
 If you're interested in contributing, check out the :doc:`Contributor Guide <sections/contributor_guide/index>`.
 
 For users who want to start using the toolbox and framework, take a peek at our :doc:`User Guide <sections/user_guide/index>`.
 
-.. contents:: On this page
+.. contents:: On This Page:
    :depth: 2
    :local:
 
 The Tools
 ---------
 
-The tools are accessible from both a command-line interface (CLI) and a Python API. The CLI automates many operations commonly needed in NWP workflows. The API supports all CLI operations, and additionally provides access to in-memory objects to facilitate more novel use cases. We hope these options will let you integrate the package into your pre-existing bash and Python scripts, and give you some handy tools to use in your day-to-day work with running NWP systems.
+The tools are accessible from both a command-line interface (CLI) and a Python API. The CLI automates many operations commonly needed in NWP workflows. The API supports all CLI operations and additionally provides access to in-memory objects to facilitate more novel use cases. We hope these options will let you integrate the package into your pre-existing bash and Python scripts, and give you some handy tools to use in your day-to-day work with running NWP systems.
 
 Configuration Management
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -28,12 +28,12 @@ Configuration Management
 | **CLI**: ``uw config -h``
 | **API**: ``import uwtools.api.config``
 
-The config tool suite helps you compare, transform, modify, and even validate your configuration. The package supports YAML, shell, Fortran namelist, and INI file formats. Configuration in any of these formats may express values using :jinja2:`Jinja2 syntax<templates>`. These values can reference others, or compute new values by evaluating mathematical expressions, building paths, manipulating strings, etc.
+The config tool suite helps you compare, transform, modify, and even validate your configuration. The package supports YAML, shell, Fortran namelist, and INI file formats. Configuration in any of these formats may use :jinja2:`Jinja2 syntax<templates>` to express values. These values can reference others, or compute new values by evaluating mathematical expressions, building paths, manipulating strings, etc.
 
 Compare Mode
 """"""""""""
 
-When the Linux diff tool just doesn't work for comparing unordered namelists with mixed-case keys, this is your go-to! It also works on the other configuration formats, but the Fortran namelists are the *real* catalyst behind this gem!
+When the Linux diff tool just doesn't work for comparing unordered namelists with mixed-case keys, this is your go-to! The Fortran namelists are the *real* catalyst behind this gem, but it also works on the other configuration formats.
 
 | :any:`CLI documentation with examples<cli_config_compare_examples>`
 
@@ -67,7 +67,7 @@ The ``render`` mode that gives you the full power of rendering a :jinja2:`Jinja2
 Translate Mode
 """"""""""""""
 
-This tool helps transform legacy configuration files templated with the atparse tool (common at NOAA) into :jinja2:`Jinja2 templates<templates>` for use with the ``uw config realize`` and ``uw template render`` tools, or their API equivalents.
+This tool helps transform legacy configuration files templated with the atparse tool (common at :noaa:`NOAA<>`) into :jinja2:`Jinja2 templates<templates>` for use with the ``uw config realize`` and ``uw template render`` tools, or their API equivalents.
 
 | :any:`CLI documentation with examples<cli_template_translate_examples>`
 
@@ -82,14 +82,14 @@ This tool is all about creating a configurable interface to the :rocoto:`Rocoto<
 Realize Mode
 """"""""""""
 
-This is where you put in your structured YAML that defines your workflow of choice and it pops out a verified Rocoto XML.
+This is where you put in your structured YAML that defines your workflow of choice, and it pops out a verified Rocoto XML.
 
 | :any:`CLI documentation with examples<cli_rocoto_realize_examples>`
 
 Validate Mode
 """""""""""""
 
-Do you already have a Rocoto XML, but don't want to run Rocoto to make sure it works? Use the validate mode to check to see if Rocoto will be happy.
+Do you already have a Rocoto XML but don't want to run Rocoto to make sure it works? Use the validate mode to check to see if Rocoto will be happy.
 
 | :any:`CLI documentation with examples<cli_rocoto_validate_examples>`
 
@@ -104,9 +104,9 @@ Forecast
 | **CLI**: ``uw forecast -h``
 | **API**: ``import uwtools.api.drivers.forecast``
 
-This driver is the first of its kind (with many others to come) and takes a few pieces of information from the user – the model, the time, and a structured YAML – and it runs a forecast via batch job or as an executable. That simple.
+This driver is the first of its kind (with many others to come) and takes a few pieces of information from the user --- the model, the time, and a structured YAML --- and runs a forecast via batch job or as an executable. That simple.
 
-We've helped by providing a JSON Schema that allows you to validate your YAML to ensure you’ve got it right!
+We've helped by providing a JSON Schema that allows you to validate your YAML to ensure you've got it right!
 
 Over time, we'll add many other drivers to support a variety of UFS components from pre-processing to post-processing, along with many data assimilation components.
 

@@ -23,7 +23,7 @@ If an existing conda (:miniforge:`Miniforge<>`, :miniconda:`Miniconda<>`, :anaco
 
 If the above is successful, you will be in a ``uwtools`` development shell. See below for usage information. You may exit the shell with ``exit`` or ``ctrl-d``.
 
-Future ``make devshell`` invocations will be almost instantaneous, as the underlying virtual environment will already exist. In general, all source code changes will be immediately live in the development shell, subject to execution, test, etc. But some changes – especially to the contents of the ``recipe/`` directory, or to the ``src/setup.py`` module – may require recreation of the development shell. If you know this is needed, or when in doubt:
+Future ``make devshell`` invocations will be almost instantaneous, as the underlying virtual environment will already exist. In general, all source code changes will be immediately live in the development shell, subject to execution, test, etc. But some changes --- especially to the contents of the ``recipe/`` directory or to the ``src/setup.py`` module --- may require recreation of the development shell. If you know this is needed, or when in doubt:
 
   #. Exit the development shell.
   #. Run ``make clean-devenv`` (or ``conda env remove -n DEV-uwtools``) to remove the old environment.
@@ -42,7 +42,7 @@ Using a ``bash`` Development Shell
 
 A development shell makes available several code-formatting and quality checkers, which should be periodically run during the development process. See :doc:`Code Quality <code_quality>` for full details.
 
-In addition to the ``make devshell`` command, other ``make`` targets are available for use *outside* a development shell, i.e. from the base conda environment (requires presence of the ``condev`` package):
+In addition to the ``make devshell`` command, other ``make`` targets are available for use *outside* a development shell, i.e., from the base conda environment (requires presence of the ``condev`` package):
 
 .. list-table::
    :widths: 15 85
@@ -62,7 +62,7 @@ These targets work from the code in its current state in the clone. ``make env``
 Building ``condev`` Locally
 ---------------------------
 
-As an alternative to installing :anaconda-condev:`pre-built package<>`, the ``condev`` package can be built locally, then installed into the local conda installation. Ensure that ``conda-build`` and ``conda-verify`` are installed in the base environment:
+As an alternative to installing the :anaconda-condev:`pre-built package<>`, the ``condev`` package can be built locally, then installed into the local conda installation. Ensure that ``conda-build`` and ``conda-verify`` are installed in the base environment:
 
 .. code-block:: text
 
@@ -74,7 +74,7 @@ As an alternative to installing :anaconda-condev:`pre-built package<>`, the ``co
 Files Derived from ``condev``
 -----------------------------
 
-The following files in this repo are derived from their counterparts in the :condev:`condev demo<tree/main/demo>` and are used by ``condev`` code when running certain make commands
+The following files in this repository are derived from their counterparts in the :condev:`condev demo<tree/main/demo>` and are used by ``condev`` code when running certain make commands
 
 .. code-block:: text
 

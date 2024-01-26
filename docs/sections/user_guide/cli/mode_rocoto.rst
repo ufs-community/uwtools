@@ -54,7 +54,7 @@ More information about the structured UW YAML file for Rocoto can be found :any:
 Examples
 ^^^^^^^^
 
-The examples that follow use a UW YAML file ``rocoto.yaml`` with content
+The examples in this section use a UW YAML file called ``rocoto.yaml`` with the following contents:
 
 .. code-block:: python
 
@@ -82,7 +82,7 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
          envars:
            person: siri
 
-* Realize a UW YAML input file to ``stdout`` in Rocoto XML format:
+* To realize a UW YAML input file to ``stdout`` in Rocoto XML format:
 
   .. code-block:: xml
 
@@ -110,7 +110,7 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
        </task>
      </workflow>
 
-* Realize a UW YAML input file to a file named ``rocoto.xml``:
+* To realize a UW YAML input file to a file named ``rocoto.xml``:
 
   .. code-block:: text
 
@@ -143,7 +143,7 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
        </task>
      </workflow>
 
-* Read the UW YAML from ``stdin`` and write the XML to ``stdout``:
+* To read the UW YAML from ``stdin`` and write the XML to ``stdout``:
 
   .. code-block:: xml
 
@@ -171,7 +171,7 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
        </task>
      </workflow>
 
-* Realize a UW YAML input file to a file named ``rocoto.xml`` in quiet mode:
+* To realize a UW YAML input file to a file named ``rocoto.xml`` in quiet mode:
 
   .. code-block:: text
 
@@ -180,7 +180,7 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
 
   The contents of ``rocoto.xml`` are unchanged from the previous example.
 
-* For increased verbosity realizing a UW YAML file to a file named ``rocoto.xml``:
+* To realize a UW YAML file to a file named ``rocoto.xml`` with verbose log output:
 
   .. note:: This output has been shortened for demonstration purposes.
 
@@ -228,7 +228,7 @@ The examples that follow use a UW YAML file ``rocoto.yaml`` with content
 Examples
 ^^^^^^^^
 
-The examples that follow use a Rocoto XML file ``rocoto.xml`` with the following content:
+The examples in this section use a Rocoto XML file called ``rocoto.xml`` with the following content:
 
 .. code-block:: xml
    :linenos:

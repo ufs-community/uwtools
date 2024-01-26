@@ -63,20 +63,20 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 Examples
 ^^^^^^^^
 
-The examples that follow use template file ``template`` with content
+The examples in this section use a template file named ``template`` with the following contents:
 
 .. code-block:: jinja
 
    {{ greeting }}, {{ recipient }}!
 
-and YAML file ``values.yaml`` with content
+and a YAML file called ``values.yaml`` with the following contents:
 
 .. code-block:: yaml
 
    greeting: Hello
    recipient: World
 
-* Show the values needed to render the template:
+* To show the values needed to render the template:
 
   .. code-block:: text
 
@@ -85,16 +85,16 @@ and YAML file ``values.yaml`` with content
      [2023-12-18T19:16:08]     INFO greeting
      [2023-12-18T19:16:08]     INFO recipient
 
-* Render the template to ``stdout``:
+* To render the template to ``stdout``:
 
   .. code-block:: text
 
      $ uw template render --input-file template --values-file values.yaml
      Hello, World!
 
-  Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
+  Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
 
-* Render the template to a file via command-line argument:
+* To render the template to a file via command-line argument:
 
   .. code-block:: text
 
@@ -113,14 +113,14 @@ and YAML file ``values.yaml`` with content
      $ uw template render --input-file template --values-file values.yaml --dry-run
      [2023-12-18T19:38:15]     INFO Hello, World!
 
-* Read the template from ``stdin`` and render to ``stdout``:
+* To read the template from ``stdin`` and render to ``stdout``:
 
   .. code-block:: text
 
      $ cat template | uw template render --values-file values.yaml
      Hello, World!
 
-* If the values file has an unrecognized (or no) extension, ``uw`` will not know how to parse its content:
+* If the values file has an unrecognized (or no) extension, ``uw`` will not know how to parse its contents:
 
   .. code-block:: text
 
@@ -142,21 +142,21 @@ and YAML file ``values.yaml`` with content
      [2023-12-18T19:30:05]    ERROR Required value(s) not provided:
      [2023-12-18T19:30:05]    ERROR recipient
 
-  But values may be supplemented by ``key=value`` command-line arguments, e.g.
+  But values may be supplemented by ``key=value`` command-line arguments. For example:
 
   .. code-block:: text
 
      $ uw template render --input-file template --values-file values.yaml recipient=Reader
      Hello, Reader!
 
-  Such ``key=value`` arguments may also be used to *override* file-based values
+  Such ``key=value`` arguments may also be used to *override* file-based values:
 
   .. code-block:: text
 
      $ uw template render --input-file template --values-file values.yaml recipient=Reader greeting="Good day"
      Good day, Reader!
 
-* Request verbose log output:
+* To request verbose log output:
 
   .. code-block:: text
 
@@ -206,7 +206,7 @@ and YAML file ``values.yaml`` with content
      [2023-12-18T23:27:04]    DEBUG ---------------------------------------------------------------------
      [2023-12-18T23:27:04]    DEBUG Read initial values from values.yaml
 
-* Non-YAML-formatted files may also be used as values sources. For example, ``template``
+* Non-YAML-formatted files may also be used as value sources. For example, ``template``
 
   .. code-block:: jinja
 
@@ -228,7 +228,7 @@ and YAML file ``values.yaml`` with content
      $ uw template render --input-file template --values-file values.nml
      Hello, World!
 
-  Note that ``ini`` and ``nml`` configs are, by definition, depth-2 configs, while ``sh`` configs are depth-1 and ``yaml`` configs have arbitrary depth.
+  Note that ``ini`` and ``nml`` configs are, by definition, depth-2 configs, while ``sh`` configs are depth-1, and ``yaml`` configs have arbitrary depth.
 
 .. _cli_template_translate_examples:
 
@@ -262,22 +262,22 @@ and YAML file ``values.yaml`` with content
 Examples
 ^^^^^^^^
 
-The examples that follow use atparse-formatted template file ``atparse.txt`` with content
+The examples in this section use atparse-formatted template file ``atparse.txt`` with the following contents:
 
 .. code-block:: text
 
    @[greeting], @[recipient]!
 
-* Convert an atparse-formatted template file to Jinja2 format:
+* To convert an atparse-formatted template file to Jinja2 format:
 
   .. code-block:: text
 
      $ uw template translate --input-file atparse.txt
      {{greeting}}, {{recipient}}!
 
-  Shell redirection via ``|``, ``>``, et al may also be used to stream output to a file, another process, etc.
+  Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
 
-* Convert the template to a file via command-line argument:
+* To convert the template to a file via command-line argument:
 
   .. code-block:: text
 
