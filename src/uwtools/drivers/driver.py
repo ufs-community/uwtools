@@ -52,18 +52,6 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def output(self) -> None:
-        """
-        ???
-        """
-
-    @abstractmethod
-    def requirements(self) -> None:
-        """
-        ???
-        """
-
-    @abstractmethod
     def resources(self) -> Mapping:
         """
         Parses the config and returns a formatted dictionary for the batch script.
