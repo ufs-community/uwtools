@@ -223,22 +223,28 @@
           "additionalProperties": false,
           "properties": {
             "interval_hours": {
-              "default": 3,
               "minimum": 1,
-              "type": "number"
+              "type": "integer"
             },
             "offset": {
-              "default": 0,
               "minimum": 0,
-              "type": "number"
+              "type": "integer"
             },
             "output_file_path": {
               "type": "string"
             }
           },
+          "required": [
+            "interval_hours",
+            "offset",
+            "output_file_path"
+          ],
           "type": "object"
         }
       },
+      "required": [
+        "lateral_boundary_conditions"
+      ],
       "type": "object"
     },
     "user": {
