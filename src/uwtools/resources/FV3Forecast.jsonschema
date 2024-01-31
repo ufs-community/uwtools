@@ -254,9 +254,11 @@
           "type": "string"
         }
       },
+      "required": [
+        "account"
+      ],
       "type": "object"
     }
   },
-  "title": "FV3 Forecast config",
   "type": "object"
 }
