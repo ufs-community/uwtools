@@ -1,38 +1,33 @@
 {
   "$defs": {
-    "updatable_config": {
-      "additionalProperties": false,
-      "properties": {
-        "properties": {
-          "base_file": {
-            "format": "uri",
-            "type": "string"
-          },
-          "update_values": {
-            "type": "object"
-          }
-        },
-        "required": [
-          "base_file"
-        ],
-        "type": "object"
-      }
+    "filesToStage": {
+      "minProperties": 1,
+      "patternProperties": {
+        "^.*$": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "type": "object"
     }
   },
-  "description": "This document is to validate user-defined FV3 forecast config files",
   "properties": {
     "forecast": {
       "additionalProperties": false,
-      "description": "parameters of the forecast",
       "properties": {
-        "cycle_dependent|static": {
-          "propertyNames": {
-            "type": "string"
-          },
-          "type": "object"
+        "cycle_dependent": {
+          "$ref": "#/$defs/filesToStage"
         },
         "diag_table": {
-          "format": "uri",
           "type": "string"
         },
         "domain": {
@@ -43,88 +38,237 @@
           "type": "string"
         },
         "executable": {
-          "format": "uri",
           "type": "string"
         },
-        "fd_ufs": {
-          "$ref": "#/$defs/updatable_config"
-        },
         "field_table": {
-          "$ref": "#/$defs/updatable_config"
+          "additionalProperties": false,
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "minProperties": 1,
+              "patternProperties": {
+                "^.*$": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "longname": {
+                      "type": "string"
+                    },
+                    "profile_type": {
+                      "oneOf": [
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "name": {
+                              "const": "fixed"
+                            },
+                            "surface_value": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "surface_value"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "additionalProperties": false,
+                          "properties": {
+                            "name": {
+                              "const": "profile"
+                            },
+                            "surface_value": {
+                              "type": "number"
+                            },
+                            "top_value": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "surface_value",
+                            "top_value"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "units": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "longname",
+                    "profile_type",
+                    "units"
+                  ],
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "base_file"
+          ],
+          "type": "object"
         },
         "length": {
           "minimum": 1,
           "type": "integer"
         },
         "model_configure": {
-          "$ref": "#/$defs/updatable_config"
-        },
-        "mpicmd": {
-          "type": "string"
+          "additionalProperties": false,
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "minProperties": 1,
+              "patternProperties": {
+                "^.*$": {
+                  "type": [
+                    "boolean",
+                    "number",
+                    "string"
+                  ]
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "base_file"
+          ],
+          "type": "object"
         },
         "namelist": {
-          "$ref": "#/$defs/updatable_config"
+          "additionalProperties": false,
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "minProperties": 1,
+              "patternProperties": {
+                "^.*$": {
+                  "minProperties": 1,
+                  "patternProperties": {
+                    "^.*$": {
+                      "minProperties": 1,
+                      "type": [
+                        "array",
+                        "boolean",
+                        "number",
+                        "string"
+                      ]
+                    },
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "required": [
+            "base_file"
+          ],
+          "type": "object"
         },
         "run_dir": {
-          "format": "uri",
           "type": "string"
         },
-        "ufs_configure": {
-          "format": "uri",
-          "type": "string"
+        "runtime_info": {
+          "additionalProperties": false,
+          "properties": {
+            "mpi_args": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "threads": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "static": {
+          "$ref": "#/$defs/filesToStage"
         }
       },
+      "required": [
+        "run_dir",
+        "runtime_info"
+      ],
       "type": "object"
     },
     "platform": {
+      "additionalProperties": false,
       "properties": {
-        "required": [
-          "mpicmd"
-        ],
+        "mpicmd": {
+          "type": "string"
+        },
         "scheduler": {
           "enum": [
-            "lsf",
+            "lfs",
             "pbs",
             "slurm"
           ],
           "type": "string"
         }
       },
+      "required": [
+        "scheduler"
+      ],
       "type": "object"
     },
     "preprocessing": {
+      "additionalProperties": false,
       "properties": {
         "lateral_boundary_conditions": {
+          "additionalProperties": false,
           "properties": {
             "interval_hours": {
-              "default": 3,
               "minimum": 1,
-              "type": "number"
+              "type": "integer"
             },
             "offset": {
-              "default": 0,
               "minimum": 0,
-              "type": "number"
+              "type": "integer"
             },
             "output_file_path": {
-              "format": "uri",
               "type": "string"
             }
           },
+          "required": [
+            "interval_hours",
+            "offset",
+            "output_file_path"
+          ],
           "type": "object"
         }
       },
+      "required": [
+        "lateral_boundary_conditions"
+      ],
       "type": "object"
     },
     "user": {
+      "additionalProperties": false,
       "properties": {
         "account": {
           "type": "string"
         }
       },
+      "required": [
+        "account"
+      ],
       "type": "object"
     }
   },
-  "title": "FV3 Forecast config",
   "type": "object"
 }

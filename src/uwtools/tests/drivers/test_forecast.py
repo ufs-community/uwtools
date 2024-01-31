@@ -17,7 +17,7 @@ from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.logging import log
-from uwtools.tests.support import compare_files, fixture_path, logged
+from uwtools.tests.support import compare_files, fixture_path, logged, validator
 from uwtools.types import ExistAct
 
 
@@ -404,3 +404,22 @@ def test_FV3Forecast__run_via_local_execution(fv3_run_assets):
             assert success is True
             assert lines[0] == "Command:"
             execute.assert_called_once_with(cmd=ANY, cwd=ANY, log_output=True)
+
+
+# Schema tests
+
+
+def test_FV3Forecast_schema_filesToStage():
+    errors = validator("FV3Forecast.jsonschema", "$defs", "filesToStage")
+    # The input must be an dict:
+    assert "is not of type 'object'" in errors([])
+    # A str -> str dict is ok:
+    assert not errors({"file1": "/path/to/file1", "file2": "/path/to/file2"})
+    # A str -> List[str] dict is ok:
+    assert not errors({"dir": ["/path/to/file1", "/path/to/file2"]})
+    # An empty dict is not allowed:
+    assert "does not have enough properties" in errors({})
+    # Non-string values are not allowed:
+    assert "not valid" in errors({"file1": True})
+    # Non-string list elements are not allowed:
+    assert "not valid" in errors({"dir": [88]})
