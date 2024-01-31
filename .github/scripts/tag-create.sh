@@ -1,7 +1,7 @@
 # Actions invokes script with: bash -e <script>
 
 set -ux
-f=recipe/meta.json
-tag=v$(jq -r .version $f)+$(jq -r .buildnum $f)
+source $(dirname ${BASH_SOURCE[0]})/common.sh
+tag=$(ci_tag)
 git tag $tag
 git push --tags

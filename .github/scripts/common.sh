@@ -7,3 +7,7 @@ ci_conda_activate() {
   source $CI_CONDA_SH
   conda activate
 }
+
+ci_tag() {
+  echo $(jq -r .version recipe/meta.json)
+}
