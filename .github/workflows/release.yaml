@@ -2,12 +2,6 @@ name: Release
 env:
   ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
 on:
-  pull_request:
-    branches:
-      - '[0-9]+.[0-9]+.[0-9]+'
-  push:
-    branches:
-      - '[0-9]+.[0-9]+.[0-9]+'
   workflow_dispatch:
     branches:
       - '[0-9]+.[0-9]+.[0-9]+'
@@ -17,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Check For Existing Tag
-        run:  .github/scripts/tag-check.sh
       - name: Install conda
         run:  .github/scripts/install-conda.sh
       - name: Documentation Link Check
@@ -29,5 +21,3 @@ jobs:
         run:  .github/scripts/make-package.sh
       - name: Publish
         run: .github/scripts/publish.sh
-      - name: Tag
-        run: .github/scripts/tag-create.sh
