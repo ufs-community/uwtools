@@ -46,10 +46,6 @@
             "base_file": {
               "type": "string"
             },
-            "required": [
-              "base_file"
-            ],
-            "type": "object",
             "update_values": {
               "minProperties": 1,
               "patternProperties": {
@@ -113,7 +109,11 @@
               },
               "type": "object"
             }
-          }
+          },
+          "required": [
+            "base_file"
+          ],
+          "type": "object"
         },
         "length": {
           "minimum": 1,
@@ -125,11 +125,8 @@
             "base_file": {
               "type": "string"
             },
-            "required": [
-              "base_file"
-            ],
-            "type": "object",
             "update_values": {
+              "minProperties": 1,
               "patternProperties": {
                 "^.*$": {
                   "type": [
@@ -141,7 +138,11 @@
               },
               "type": "object"
             }
-          }
+          },
+          "required": [
+            "base_file"
+          ],
+          "type": "object"
         },
         "namelist": {
           "additionalProperties": false,
@@ -149,23 +150,33 @@
             "base_file": {
               "type": "string"
             },
-            "required": [
-              "base_file"
-            ],
-            "type": "object",
             "update_values": {
+              "minProperties": 1,
               "patternProperties": {
                 "^.*$": {
-                  "type": [
-                    "boolean",
-                    "number",
-                    "string"
-                  ]
+                  "minProperties": 1,
+                  "patternProperties": {
+                    "^.*$": {
+                      "minProperties": 1,
+                      "type": [
+                        "array",
+                        "boolean",
+                        "number",
+                        "string"
+                      ]
+                    },
+                    "type": "object"
+                  },
+                  "type": "object"
                 }
               },
               "type": "object"
             }
-          }
+          },
+          "required": [
+            "base_file"
+          ],
+          "type": "object"
         },
         "run_dir": {
           "type": "string"
