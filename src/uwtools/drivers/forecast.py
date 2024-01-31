@@ -2,11 +2,12 @@
 Drivers for forecast models.
 """
 
-import sys
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
+
+from iotaa import task
 
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
@@ -14,8 +15,9 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.scheduler import BatchScript
-from uwtools.types import DefinitePath, ExistAct, OptionalPath
-from uwtools.utils.file import handle_existing, resource_pathobj, validate_existing_action
+from uwtools.types import DefinitePath, OptionalPath
+from uwtools.utils import dag
+from uwtools.utils.file import resource_pathobj
 from uwtools.utils.processing import execute
 
 
@@ -36,6 +38,7 @@ class FV3Forecast(Driver):
 
         super().__init__(config_file=config_file, dry_run=dry_run, batch_script=batch_script)
         self._config = self._experiment_config["forecast"]
+        self.run_directory = Path(self._config["run_dir"])
 
     # Public methods
 
@@ -50,48 +53,6 @@ class FV3Forecast(Driver):
         batch_script.append(pre_run)
         batch_script.append(self.run_cmd())
         return batch_script
-
-    @staticmethod
-    def create_directory_structure(
-        run_directory: DefinitePath, exist_act: str = ExistAct.delete, dry_run: bool = False
-    ) -> None:
-        """
-        Collects the name of the desired run directory, and has an optional flag for what to do if
-        the run directory specified already exists. Creates the run directory and adds
-        subdirectories INPUT and RESTART. Verifies creation of all directories.
-
-        :param run_directory: Path of desired run directory.
-        :param exist_act: Action when run directory exists: "delete" (default), "quit", or "rename"
-        """
-
-        validate_existing_action(
-            exist_act, valid_actions=[ExistAct.delete, ExistAct.quit, ExistAct.rename]
-        )
-
-        run_directory = Path(run_directory)
-
-        # Exit program with error if caller specified the "quit" action.
-
-        if exist_act == ExistAct.quit and run_directory.is_dir():
-            log.critical(f"Option {exist_act} specified, exiting")
-            sys.exit(1)
-
-        # Handle a potentially pre-existing directory appropriately.
-
-        if dry_run and run_directory.is_dir():
-            log.info(f"Would {exist_act} directory")
-        else:
-            handle_existing(run_directory, exist_act)
-
-        # Create new run directory with two required subdirectories.
-
-        for subdir in ("INPUT", "RESTART"):
-            path = run_directory / subdir
-            if dry_run:
-                log.info("Would create directory: %s", path)
-            else:
-                log.info("Creating directory: %s", path)
-                path.mkdir(parents=True)
 
     def create_field_table(self, output_path: OptionalPath) -> None:
         """
@@ -130,21 +91,30 @@ class FV3Forecast(Driver):
             output_path=output_path,
         )
 
+    # def create_directory_structure(self) -> None:
+    #     run_directory = Path(Path(self._config["run_dir"]))
+    #     for subdir in ("INPUT", "RESTART"):
+    #         path = run_directory / subdir
+    #         log.info("Creating directory: %s", path)
+    #         path.mkdir(parents=True)
+
     def prepare_directories(self) -> Path:
         """
         Prepares the run directory and stages static and cycle-dependent files.
 
         :return: Path to the run directory.
         """
-        run_directory = Path(self._config["run_dir"])
-        self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
-        self._prepare_config_files(run_directory)
+        # self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
+        self._prepare_config_files(self.run_directory)
         self._config["cycle_dependent"].update(self._define_boundary_files())
         for file_category in ["static", "cycle_dependent"]:
             self.stage_files(
-                run_directory, self._config[file_category], link_files=True, dry_run=self._dry_run
+                self.run_directory,
+                self._config[file_category],
+                link_files=True,
+                dry_run=self._dry_run,
             )
-        return run_directory
+        return self.run_directory
 
     def resources(self) -> Mapping:
         """
@@ -159,22 +129,29 @@ class FV3Forecast(Driver):
             **self._config["jobinfo"],
         }
 
-    def run(self, cycle: datetime) -> bool:
-        """
-        Runs FV3 either locally or via a batch-script submission.
+    # def run(self, cycle: datetime) -> bool:
+    #     """
+    #     Runs FV3 either locally or via a batch-script submission.
+    #     :param cycle: The forecast cycle to run.
+    #     :return: Did the batch submission or FV3 run exit with success status?
+    #     """
+    #     status, output = (
+    #         self._run_via_batch_submission()
+    #         if self._batch_script
+    #         else self._run_via_local_execution()
+    #     )
+    #     if self._dry_run:
+    #         for line in output:
+    #             log.info(line)
+    #     return status
 
-        :param cycle: The forecast cycle to run.
-        :return: Did the batch submission or FV3 run exit with success status?
-        """
-        status, output = (
-            self._run_via_batch_submission()
-            if self._batch_script
-            else self._run_via_local_execution()
-        )
-        if self._dry_run:
-            for line in output:
-                log.info(line)
-        return status
+    @task
+    def run(self, cycle: datetime):
+        sentinel = self.run_directory / "sentinel"
+        yield f"FV3 run for {cycle}"
+        yield dag.file(sentinel)
+        yield dag.directory(self.run_directory)
+        sentinel.touch()
 
     @property
     def schema_file(self) -> Path:

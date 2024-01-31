@@ -10,6 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from iotaa import task
 from pytest import fixture
 
 from uwtools.drivers.driver import Driver
@@ -34,8 +35,9 @@ class ConcreteDriver(Driver):
     def resources(self) -> Mapping:
         return {}
 
-    def run(self, cycle: datetime.date) -> bool:
-        return True
+    @task
+    def run(self, cycle: datetime.date):
+        yield True
 
     def run_cmd(self, *args):
         pass

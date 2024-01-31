@@ -10,6 +10,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Type, Union
 
+from iotaa import task
+
 from uwtools.config import validator
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
@@ -58,7 +60,8 @@ class Driver(ABC):
         """
 
     @abstractmethod
-    def run(self, cycle: datetime) -> bool:
+    @task
+    def run(self, cycle: datetime):
         """
         Run the NWP tool.
 

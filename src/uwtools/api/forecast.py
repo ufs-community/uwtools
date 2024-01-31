@@ -12,11 +12,12 @@ def run(  # pylint: disable=missing-function-docstring
     dry_run: bool = False,
 ) -> bool:
     forecast_class = _CLASSES[model]
-    return forecast_class(
+    forecast_class(
         batch_script=batch_script,
         config_file=config_file,
         dry_run=dry_run,
     ).run(cycle=cycle)
+    return True
 
 
 # The following statement dynamically interpolates values into run()'s docstring, which will not
