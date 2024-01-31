@@ -2,9 +2,9 @@ name: Release
 env:
   ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
 on:
-  push:
+  workflow_dispatch:
     branches:
-      - main
+      - '[0-9]+.[0-9]+.[0-9]+'
 jobs:
   release:
     name: Release
@@ -12,16 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install conda
-        run:  .github/scripts/install-conda.sh
-      - name: Docs Link Check
+        run: .github/scripts/install-conda.sh
+      - name: Documentation Link Check
         run: .github/scripts/link-check.sh
       - name: Format Check
-        run:  .github/scripts/format-check.sh
+        run: .github/scripts/format-check.sh
       - name: Make Package
-        run:  .github/scripts/make-package.sh
-      - name: Check For Existing Tag
-        run:  .github/scripts/tag-check.sh
-      - name: Tag
-        run: .github/scripts/tag-create.sh
+        run: .github/scripts/make-package.sh
       - name: Publish
         run: .github/scripts/publish.sh
