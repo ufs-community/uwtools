@@ -27,6 +27,9 @@
         "cycle_dependent": {
           "$ref": "#/$defs/files_to_stage"
         },
+        "diag_table": {
+          "type": "string"
+        },
         "domain": {
           "enum": [
             "global",
@@ -195,18 +198,22 @@
     "platform": {
       "additionalProperties": false,
       "properties": {
-        "required": [
-          "mpicmd"
-        ],
+        "mpicmd": {
+          "type": "string"
+        },
         "scheduler": {
           "enum": [
-            "lsf",
+            "lfs",
             "pbs",
             "slurm"
           ],
           "type": "string"
         }
       },
+      "required": [
+        "mpicmd",
+        "scheduler"
+      ],
       "type": "object"
     },
     "preprocessing": {
