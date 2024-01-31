@@ -2,16 +2,13 @@ name: Test
 on:
   pull_request:
     branches:
-      - develop
       - main
   push:
     branches:
-      - develop
       - main
   workflow_dispatch:
     branches:
-      - develop
-      - main
+      - '**'
 jobs:
   test:
     name: Test
@@ -19,10 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install conda
-        run:  .github/scripts/install-conda.sh
-      - name: Test
-        run:  .github/scripts/test.sh
-      - name: Format Check
-        run:  .github/scripts/format-check.sh
-      - name: Docs Link Check
+        run: .github/scripts/install-conda.sh
+      - name: Documentation Link Check
         run: .github/scripts/link-check.sh
+      - name: Format Check
+        run: .github/scripts/format-check.sh
+      - name: Test
+        run: .github/scripts/test.sh

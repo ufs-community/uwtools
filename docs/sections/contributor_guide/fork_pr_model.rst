@@ -19,7 +19,7 @@ Specifics for ``uwtools``
 
 When creating your PR, please follow these guidelines, specific to the ``uwtools`` project:
 
-* Ensure that your PR is targeting base repository ``ufs-community/uwtools`` and base branch ``develop``.
+* Ensure that your PR is targeting base repository ``ufs-community/uwtools`` and base branch ``main``.
 * Your PR's **Add a description** field will appear pre-populated with a template that you should complete. Provide an informative synopsis of your contribution, then mark appropriate checklist items by placing an "x" between their square brackets. You may tidy up the description by removing boilerplate text and non-selected checklist items.
 * Use the pull-down arrow on the green button below the description to initially create a :github-docs:`draft pull request<pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests#draft-pull-requests>`.
 * Once your draft PR is open, visit its **Files changed** tab and add comments on any lines of code that you think reviewers will benefit from. Try to save time by proactively answering questions you suspect reviewers will ask.
