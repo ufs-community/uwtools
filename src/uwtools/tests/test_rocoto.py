@@ -438,7 +438,7 @@ class Test__RocotoXML:
 # Schema tests
 
 
-def test_schema_compoundTimeString():
+def test_rocoto_schema_compoundTimeString():
     errors = validator("rocoto.jsonschema", "$defs", "compoundTimeString")
     # Just a string is ok:
     assert not errors("foo")
@@ -456,7 +456,7 @@ def test_schema_compoundTimeString():
     assert "is not valid" in errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "x"}}})
 
 
-def test_schema_dependency_sh():
+def test_rocoto_schema_dependency_sh():
     errors = validator("rocoto.jsonschema", "$defs", "dependency")
     # Basic spec:
     assert not errors({"sh": {"command": "foo"}})
@@ -476,7 +476,7 @@ def test_schema_dependency_sh():
     assert not errors({"sh": {"command": {"cyclestr": {"value": "foo-@Y@m@d@H"}}}})
 
 
-def test_schema_metatask_attrs():
+def test_rocoto_schema_metatask_attrs():
     errors = validator("rocoto.jsonschema", "$defs", "metatask", "properties", "attrs")
     # Valid modes are "parallel" and "serial":
     assert not errors({"mode": "parallel"})
@@ -489,7 +489,7 @@ def test_schema_metatask_attrs():
     assert "'foo' is not of type 'integer'" in errors({"throttle": "foo"})
 
 
-def test_schema_workflow_cycledef():
+def test_rocoto_schema_workflow_cycledef():
     errors = validator("rocoto.jsonschema", "properties", "workflow", "properties", "cycledef")
     # Basic spec:
     spec = "202311291200 202312011200 06:00:00"

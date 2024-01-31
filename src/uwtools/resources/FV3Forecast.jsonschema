@@ -1,6 +1,6 @@
 {
   "$defs": {
-    "files_to_stage": {
+    "filesToStage": {
       "minProperties": 1,
       "patternProperties": {
         "^.*$": {
@@ -25,7 +25,7 @@
       "additionalProperties": false,
       "properties": {
         "cycle_dependent": {
-          "$ref": "#/$defs/files_to_stage"
+          "$ref": "#/$defs/filesToStage"
         },
         "diag_table": {
           "type": "string"
@@ -197,7 +197,7 @@
           "type": "object"
         },
         "static": {
-          "$ref": "#/$defs/files_to_stage"
+          "$ref": "#/$defs/filesToStage"
         }
       },
       "required": [
