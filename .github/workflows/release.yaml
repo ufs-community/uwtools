@@ -12,12 +12,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Install conda
-        run:  .github/scripts/install-conda.sh
+        run: .github/scripts/install-conda.sh
       - name: Documentation Link Check
         run: .github/scripts/link-check.sh
       - name: Format Check
-        run:  .github/scripts/format-check.sh
+        run: .github/scripts/format-check.sh
       - name: Make Package
-        run:  .github/scripts/make-package.sh
+        run: .github/scripts/make-package.sh
       - name: Publish
         run: .github/scripts/publish.sh
