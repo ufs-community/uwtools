@@ -17,7 +17,7 @@ def run(  # pylint: disable=missing-function-docstring
         config_file=config_file,
         cycle=cycle,
         dry_run=dry_run,
-    ).run_via_batch_submission()
+    ).run()
     return True
 
 

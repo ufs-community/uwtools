@@ -100,7 +100,7 @@ class FV3Forecast(Driver):
         """
         path = self._run_directory / ("%s.submit" % self._batch_script_name)
         yield "%s FV3 run via batch submission" % self._cycle_name
-        yield asset(path, path.is_dir)
+        yield asset(path, path.is_file)
         batch_script = self.batch_script()
         yield batch_script
         self.scheduler.submit_job(batch_script=refs(batch_script), submit_file=path)
@@ -112,7 +112,7 @@ class FV3Forecast(Driver):
         """
         path = self._run_directory / "completed"
         yield "%s FV3 run via local execution" % self._cycle_name
-        yield asset(path, path.is_dir)
+        yield asset(path, path.is_file)
         yield self.run_directory()
         cmd = " ".join([self._mpi_env_variables(" "), self.run_cmd(), "&&", f"touch {path}"])
         execute(cmd=cmd, cwd=self._run_directory, log_output=True)
