@@ -15,8 +15,9 @@ def run(  # pylint: disable=missing-function-docstring
     forecast_class(
         batch_script=batch_script,
         config_file=config_file,
+        cycle=cycle,
         dry_run=dry_run,
-    ).run(cycle=cycle)
+    ).run_via_batch_submission()
     return True
 
 

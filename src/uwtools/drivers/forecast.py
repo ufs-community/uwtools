@@ -27,6 +27,7 @@ class FV3Forecast(Driver):
     def __init__(
         self,
         config_file: DefinitePath,
+        cycle: datetime,
         dry_run: bool = False,
         batch_script: OptionalPath = None,
     ):
@@ -35,6 +36,7 @@ class FV3Forecast(Driver):
         """
 
         super().__init__(config_file=config_file, dry_run=dry_run, batch_script=batch_script)
+        self._cycle = cycle
         self._config = self._experiment_config["forecast"]
         self._run_directory = Path(self._config["run_dir"])
 
@@ -43,21 +45,21 @@ class FV3Forecast(Driver):
     @property
     def _batch_script_name(self) -> str:
         """
-        ???
+        Returns the name of the script to submit to the batch system.
         """
         return "batch_script"
 
     @property
     def _cycle_name(self) -> str:
         """
-        ???
+        Returns a formatted-for-logging representation of the forecast cycle.
         """
         return self._cycle.strftime("%Y%m%d %HZ")
 
     @task
     def batch_script(self):
         """
-        ???
+        The script to submit to the batch system.
         """
         path = self._run_directory / self._batch_script_name
         yield "%s FV3 batch script" % self._cycle_name
@@ -69,11 +71,10 @@ class FV3Forecast(Driver):
         bs.dump(path)
 
     @tasks
-    def run(self, cycle: datetime):
+    def run(self):
         """
-        ???
+        Execution of the run.
         """
-        self._cycle = cycle  # pylint: disable=W0201
         yield "%s FV3 run" % self._cycle_name
         yield (
             self.run_via_batch_submission()
@@ -84,7 +85,7 @@ class FV3Forecast(Driver):
     @task
     def run_directory(self):
         """
-        ???
+        The run directory.
         """
         path = self._run_directory
         yield "%s FV3 run directory" % self._cycle_name
@@ -95,7 +96,7 @@ class FV3Forecast(Driver):
     @task
     def run_via_batch_submission(self):
         """
-        ???
+        Execution of the run via the batch system.
         """
         path = self._run_directory / ("%s.submit" % self._batch_script_name)
         yield "%s FV3 run via batch submission" % self._cycle_name
@@ -107,7 +108,7 @@ class FV3Forecast(Driver):
     @task
     def run_via_local_execution(self):
         """
-        ???
+        Execution of the run directly on the local system.
         """
         path = self._run_directory / "completed"
         yield "%s FV3 run via local execution" % self._cycle_name
