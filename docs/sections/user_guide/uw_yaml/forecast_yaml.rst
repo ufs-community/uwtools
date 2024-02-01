@@ -198,7 +198,7 @@ The MPI command used to run the model executable. Typical options are ``srun``, 
 
 ``scheduler:``
 ^^^^^^^^^^^^^^
-The name of the batch system. Supported options are ``lfs``, ``pbs``, and ``slurm``.
+The name of the batch system. Supported options are ``lsf``, ``pbs``, and ``slurm``.
 
 The ``preprocessing:`` block
 ----------------------------
