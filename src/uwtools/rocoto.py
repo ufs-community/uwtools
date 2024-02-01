@@ -344,6 +344,7 @@ class _RocotoXML:
         Validate the given YAML config.
 
         :param config: YAMLConfig object or path to YAML file (None => read stdin).
+        :raises: UWConfigError if config fails validation.
         """
         schema_file = resource_pathobj("rocoto.jsonschema")
         ok = validate_yaml(schema_file=schema_file, config=config)

@@ -11,9 +11,10 @@ from unittest.mock import patch
 
 import pytest
 from iotaa import task
-from pytest import fixture
+from pytest import fixture, raises
 
 from uwtools.drivers.driver import Driver
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import logged
 
@@ -97,8 +98,10 @@ def test_validation(caplog, configs, schema, tmp_path, valid):
         print(schema, file=f)
     with patch.object(ConcreteDriver, "schema_file", new=schema_file):
         log.setLevel(logging.INFO)
-        ConcreteDriver(config_file=config_file)
         if valid:
+            ConcreteDriver(config_file=config_file)
             assert logged(caplog, "0 UW schema-validation errors found")
         else:
+            with raises(UWConfigError):
+                ConcreteDriver(config_file=config_file)
             assert logged(caplog, "2 UW schema-validation errors found")

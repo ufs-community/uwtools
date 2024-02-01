@@ -15,6 +15,7 @@ from iotaa import task
 from uwtools.config import validator
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import BatchScript, JobScheduler
 from uwtools.types import DefinitePath, OptionalPath
@@ -163,10 +164,11 @@ class Driver(ABC):
         msg = f"Configure file {output_path} created"
         log.info(msg)
 
-    def _validate(self) -> bool:
+    def _validate(self) -> None:
         """
         Validate the user-supplied config file.
 
-        :return: Was the input configuration file valid against its schema?
+        :raises: UWConfigError if config fails validation.
         """
-        return validator.validate_yaml(config=self._config_file, schema_file=self.schema_file)
+        if not validator.validate_yaml(config=self._config_file, schema_file=self.schema_file):
+            raise UWConfigError("YAML validation errors")
