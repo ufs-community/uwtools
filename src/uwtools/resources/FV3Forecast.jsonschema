@@ -222,7 +222,7 @@
         }
       },
       "required": [
-        "scheduler"
+        "mpicmd"
       ],
       "type": "object"
     },

@@ -85,7 +85,7 @@ class Driver(ABC):
         :return: Collated string that contains MPI command, runtime arguments, and exec name.
         """
         components = [
-            self._platform_config.get("mpicmd"),  # MPI run program
+            self._platform_config["mpicmd"],  # MPI run program
             *[str(x) for x in self._config["runtime_info"].get("mpi_args", [])],  # MPI arguments
             self._config["executable"],  # NWP tool executable name
         ]
