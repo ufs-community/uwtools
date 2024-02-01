@@ -115,6 +115,30 @@
           ],
           "type": "object"
         },
+        "jobinfo": {
+          "minProperties": 1,
+          "patternProperties": {
+            "^.*$": {
+              "type": [
+                "number",
+                "string"
+              ]
+            }
+          },
+          "properties": {
+            "queue": {
+              "type": "string"
+            },
+            "walltime": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "queue",
+            "walltime"
+          ],
+          "type": "object"
+        },
         "length": {
           "minimum": 1,
           "type": "integer"
