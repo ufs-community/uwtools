@@ -218,7 +218,7 @@ class Slurm(JobScheduler):
         RequiredAttribs.QUEUE: "--qos",
         RequiredAttribs.WALLTIME: "--time",
         OptionalAttribs.CORES: "--ntasks",
-        OptionalAttribs.EXCLUSIVE: lambda x: "--exclusive",
+        OptionalAttribs.EXCLUSIVE: lambda _: "--exclusive",
         OptionalAttribs.EXPORT: "--export",
         OptionalAttribs.JOB_NAME: "--job-name",
         OptionalAttribs.MEMORY: "--mem",
