@@ -192,16 +192,18 @@ class JobScheduler(UserDict):
             ) from error
         return scheduler(props)
 
-    def submit_job(self, script_path: Path) -> bool:
+    def submit_job(self, batch_script: Path, submit_file: OptionalPath = None) -> bool:
         """
         Submits a job to the scheduler.
 
-        :param script_path: Path to the batch script.
+        :param batch_script: Path to the batch script.
+        :param submit_file: File to write output of submit command to.
         :return: Did the run exit with a success status?
         """
-        success, _ = execute(
-            cmd=f"{self.submit_command} {script_path}", cwd=f"{script_path.parent}"
-        )
+        cmd = f"{self.submit_command} {batch_script}"
+        if submit_file:
+            cmd += " | tee {submit_file}"
+        success, _ = execute(cmd=cmd, cwd=f"{batch_script.parent}")
         return success
 
 

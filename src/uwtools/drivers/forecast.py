@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from iotaa import asset, task
+from iotaa import asset, refs, task
 
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
@@ -38,7 +38,7 @@ class FV3Forecast(Driver):
 
         super().__init__(config_file=config_file, dry_run=dry_run, batch_script=batch_script)
         self._config = self._experiment_config["forecast"]
-        self.run_directory = Path(self._config["run_dir"])
+        self._run_directory = Path(self._config["run_dir"])
 
     # Workflow methods
 
@@ -58,27 +58,74 @@ class FV3Forecast(Driver):
     #             log.info(line)
     #     return status
 
+    # PM why isn't cycle an instance attribute?
+
+    @property
+    def _batch_script_name(self) -> str:
+        return "batch_script"
+
+    @property
+    def _cyclename(self) -> str:
+        return self._cycle.strftime("%Y%m%d %HZ")
+
+    @task
+    def batch_script(self):
+        path = self._run_directory / self._batch_script_name
+        yield "%s FV3 batch script" % self._cyclename
+        yield asset(path, path.is_file)
+        yield self.run_directory(self._cycle)
+        bs = self.scheduler.batch_script
+        bs.append(self._mpi_env_variables("\n"))
+        bs.append(self.run_cmd())
+        bs.dump(path)
+
     @task
     def run(self, cycle: datetime):
-        sentinel = self.run_directory / "sentinel"
-        yield f"FV3 run for {cycle}"
+        self._cycle = cycle
+        sentinel = self._run_directory / "sentinel"
+        yield "%s FV3 run" % self._cyclename
         yield asset(sentinel, sentinel.is_file)
-        yield dag.directory(self.run_directory)
+        yield dag.directory(self._run_directory)
         sentinel.touch()
+
+    @task
+    def run_directory(self):
+        path = self._run_directory
+        yield "%s FV3 run directory" % self._cyclename
+        yield asset(path, path.is_dir)
+        yield None
+        path.mkdir(parents=True)
+
+    @task
+    def run_via_batch_submission(self):
+        path = self._run_directory / ("%s.submit" % self._batch_script_name)
+        yield "%s FV3 run via batch submission" % self._cyclename
+        yield asset(path, path.is_dir)
+        batch_script = self.batch_script(self._cycle)
+        yield batch_script
+        self.scheduler.submit_job(batch_script=refs(batch_script), submit_file=path)
+
+    @task
+    def run_via_local_execution(self):
+        path = self._run_directory / "completed"
+        yield "%s FV3 run via local execution" % self._cyclename
+        yield asset(path, path.is_dir)
+        yield self.run_directory()
+        cmd = " ".join([self._mpi_env_variables(" "), self.run_cmd(), "&&", f"touch {path}"])
+        execute(cmd=cmd, cwd=self._run_directory, log_output=True)
 
     # Public methods
 
-    def batch_script(self) -> BatchScript:
-        """
-        Prepare batch script contents for interaction with system scheduler.
-
-        :return: The batch script object with all run commands needed for executing the program.
-        """
-        pre_run = self._mpi_env_variables("\n")
-        batch_script = self.scheduler.batch_script
-        batch_script.append(pre_run)
-        batch_script.append(self.run_cmd())
-        return batch_script
+    # def batch_script(self) -> BatchScript:
+    #     """
+    #     Prepare batch script contents for interaction with system scheduler.
+    #     :return: The batch script object with all run commands needed for executing the program.
+    #     """
+    #     pre_run = self._mpi_env_variables("\n")
+    #     batch_script = self.scheduler.batch_script
+    #     batch_script.append(pre_run)
+    #     batch_script.append(self.run_cmd())
+    #     return batch_script
 
     def create_field_table(self, output_path: OptionalPath) -> None:
         """
@@ -131,16 +178,16 @@ class FV3Forecast(Driver):
         :return: Path to the run directory.
         """
         # self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
-        self._prepare_config_files(self.run_directory)
+        self._prepare_config_files(self._run_directory)
         self._config["cycle_dependent"].update(self._define_boundary_files())
         for file_category in ["static", "cycle_dependent"]:
             self.stage_files(
-                self.run_directory,
+                self._run_directory,
                 self._config[file_category],
                 link_files=True,
                 dry_run=self._dry_run,
             )
-        return self.run_directory
+        return self._run_directory
 
     def resources(self) -> Mapping:
         """
@@ -226,22 +273,22 @@ class FV3Forecast(Driver):
             self.create_model_configure(run_directory / "model_configure")
             self.create_namelist(run_directory / "input.nml")
 
-    def _run_via_batch_submission(self) -> Tuple[bool, List[str]]:
-        """
-        Prepares and submits a batch script.
+    # def _run_via_batch_submission(self) -> Tuple[bool, List[str]]:
+    #     """
+    #     Prepares and submits a batch script.
 
-        :return: A tuple containing the success status of submitting the job to the batch system,
-            and a list of strings that make up the batch script.
-        """
-        run_directory = self.prepare_directories()
-        batch_script = self.batch_script()
-        batch_lines = ["Batch script:", *str(batch_script).split("\n")]
-        if self._dry_run:
-            return True, batch_lines
-        assert self._batch_script is not None
-        outpath = run_directory / self._batch_script
-        batch_script.dump(outpath)
-        return self.scheduler.submit_job(outpath), batch_lines
+    #     :return: A tuple containing the success status of submitting the job to the batch system,
+    #         and a list of strings that make up the batch script.
+    #     """
+    #     run_directory = self.prepare_directories()
+    #     batch_script = self.batch_script()
+    #     batch_lines = ["Batch script:", *str(batch_script).split("\n")]
+    #     if self._dry_run:
+    #         return True, batch_lines
+    #     assert self._batch_script is not None
+    #     outpath = run_directory / self._batch_script
+    #     batch_script.dump(outpath)
+    #     return self.scheduler.submit_job(outpath), batch_lines
 
     def _run_via_local_execution(self) -> Tuple[bool, List[str]]:
         """
