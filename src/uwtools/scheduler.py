@@ -202,7 +202,7 @@ class JobScheduler(UserDict):
         """
         cmd = f"{self.submit_command} {batch_script}"
         if submit_file:
-            cmd += " | tee %s" % submit_file
+            cmd += " 2>&1 | tee %s" % submit_file
         success, _ = execute(cmd=cmd, cwd=f"{batch_script.parent}")
         return success
 
