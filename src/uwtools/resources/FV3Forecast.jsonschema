@@ -214,7 +214,7 @@
         },
         "scheduler": {
           "enum": [
-            "lfs",
+            "lsf",
             "pbs",
             "slurm"
           ],
