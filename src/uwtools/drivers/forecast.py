@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from iotaa import task
+from iotaa import asset, task
 
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
@@ -39,6 +39,32 @@ class FV3Forecast(Driver):
         super().__init__(config_file=config_file, dry_run=dry_run, batch_script=batch_script)
         self._config = self._experiment_config["forecast"]
         self.run_directory = Path(self._config["run_dir"])
+
+    # Workflow methods
+
+    # def run(self, cycle: datetime) -> bool:
+    #     """
+    #     Runs FV3 either locally or via a batch-script submission.
+    #     :param cycle: The forecast cycle to run.
+    #     :return: Did the batch submission or FV3 run exit with success status?
+    #     """
+    #     status, output = (
+    #         self._run_via_batch_submission()
+    #         if self._batch_script
+    #         else self._run_via_local_execution()
+    #     )
+    #     if self._dry_run:
+    #         for line in output:
+    #             log.info(line)
+    #     return status
+
+    @task
+    def run(self, cycle: datetime):
+        sentinel = self.run_directory / "sentinel"
+        yield f"FV3 run for {cycle}"
+        yield asset(sentinel, sentinel.is_file)
+        yield dag.directory(self.run_directory)
+        sentinel.touch()
 
     # Public methods
 
@@ -128,30 +154,6 @@ class FV3Forecast(Driver):
             "scheduler": self._experiment_config["platform"]["scheduler"],
             **self._config["jobinfo"],
         }
-
-    # def run(self, cycle: datetime) -> bool:
-    #     """
-    #     Runs FV3 either locally or via a batch-script submission.
-    #     :param cycle: The forecast cycle to run.
-    #     :return: Did the batch submission or FV3 run exit with success status?
-    #     """
-    #     status, output = (
-    #         self._run_via_batch_submission()
-    #         if self._batch_script
-    #         else self._run_via_local_execution()
-    #     )
-    #     if self._dry_run:
-    #         for line in output:
-    #             log.info(line)
-    #     return status
-
-    @task
-    def run(self, cycle: datetime):
-        sentinel = self.run_directory / "sentinel"
-        yield f"FV3 run for {cycle}"
-        yield dag.file(sentinel)
-        yield dag.directory(self.run_directory)
-        sentinel.touch()
 
     @property
     def schema_file(self) -> Path:
