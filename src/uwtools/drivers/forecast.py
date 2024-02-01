@@ -42,14 +42,23 @@ class FV3Forecast(Driver):
 
     @property
     def _batch_script_name(self) -> str:
+        """
+        ???
+        """
         return "batch_script"
 
     @property
     def _cycle_name(self) -> str:
+        """
+        ???
+        """
         return self._cycle.strftime("%Y%m%d %HZ")
 
     @task
     def batch_script(self):
+        """
+        ???
+        """
         path = self._run_directory / self._batch_script_name
         yield "%s FV3 batch script" % self._cycle_name
         yield asset(path, path.is_file)
@@ -61,6 +70,9 @@ class FV3Forecast(Driver):
 
     @tasks
     def run(self, cycle: datetime):
+        """
+        ???
+        """
         self._cycle = cycle  # pylint: disable=W0201
         yield "%s FV3 run" % self._cycle_name
         yield (
@@ -105,17 +117,6 @@ class FV3Forecast(Driver):
         execute(cmd=cmd, cwd=self._run_directory, log_output=True)
 
     # Public methods
-
-    # def batch_script(self) -> BatchScript:
-    #     """
-    #     Prepare batch script contents for interaction with system scheduler.
-    #     :return: The batch script object with all run commands needed for executing the program.
-    #     """
-    #     pre_run = self._mpi_env_variables("\n")
-    #     batch_script = self.scheduler.batch_script
-    #     batch_script.append(pre_run)
-    #     batch_script.append(self.run_cmd())
-    #     return batch_script
 
     def create_field_table(self, output_path: OptionalPath) -> None:
         """
