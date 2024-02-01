@@ -7,16 +7,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-from iotaa import asset, refs, task
+from iotaa import asset, refs, task, tasks
 
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
-from uwtools.scheduler import BatchScript
 from uwtools.types import DefinitePath, OptionalPath
-from uwtools.utils import dag
 from uwtools.utils.file import resource_pathobj
 from uwtools.utils.processing import execute
 
@@ -42,73 +40,64 @@ class FV3Forecast(Driver):
 
     # Workflow methods
 
-    # def run(self, cycle: datetime) -> bool:
-    #     """
-    #     Runs FV3 either locally or via a batch-script submission.
-    #     :param cycle: The forecast cycle to run.
-    #     :return: Did the batch submission or FV3 run exit with success status?
-    #     """
-    #     status, output = (
-    #         self._run_via_batch_submission()
-    #         if self._batch_script
-    #         else self._run_via_local_execution()
-    #     )
-    #     if self._dry_run:
-    #         for line in output:
-    #             log.info(line)
-    #     return status
-
-    # PM why isn't cycle an instance attribute?
-
     @property
     def _batch_script_name(self) -> str:
         return "batch_script"
 
     @property
-    def _cyclename(self) -> str:
+    def _cycle_name(self) -> str:
         return self._cycle.strftime("%Y%m%d %HZ")
 
     @task
     def batch_script(self):
         path = self._run_directory / self._batch_script_name
-        yield "%s FV3 batch script" % self._cyclename
+        yield "%s FV3 batch script" % self._cycle_name
         yield asset(path, path.is_file)
-        yield self.run_directory(self._cycle)
+        yield self.run_directory()
         bs = self.scheduler.batch_script
         bs.append(self._mpi_env_variables("\n"))
         bs.append(self.run_cmd())
         bs.dump(path)
 
-    @task
+    @tasks
     def run(self, cycle: datetime):
-        self._cycle = cycle
-        sentinel = self._run_directory / "sentinel"
-        yield "%s FV3 run" % self._cyclename
-        yield asset(sentinel, sentinel.is_file)
-        yield dag.directory(self._run_directory)
-        sentinel.touch()
+        self._cycle = cycle  # pylint: disable=W0201
+        yield "%s FV3 run" % self._cycle_name
+        if self._batch_script:
+            yield self.run_via_batch_submission()
+        else:
+            yield self._run_via_local_execution()
 
     @task
     def run_directory(self):
+        """
+        ???
+        """
         path = self._run_directory
-        yield "%s FV3 run directory" % self._cyclename
+        yield "%s FV3 run directory" % self._cycle_name
         yield asset(path, path.is_dir)
         yield None
         path.mkdir(parents=True)
 
     @task
     def run_via_batch_submission(self):
+        """
+        ???
+        """
         path = self._run_directory / ("%s.submit" % self._batch_script_name)
-        yield "%s FV3 run via batch submission" % self._cyclename
+        yield "%s FV3 run via batch submission" % self._cycle_name
         yield asset(path, path.is_dir)
-        batch_script = self.batch_script(self._cycle)
+        batch_script = self.batch_script()
         yield batch_script
         self.scheduler.submit_job(batch_script=refs(batch_script), submit_file=path)
 
     @task
     def run_via_local_execution(self):
+        """
+        ???
+        """
         path = self._run_directory / "completed"
-        yield "%s FV3 run via local execution" % self._cyclename
+        yield "%s FV3 run via local execution" % self._cycle_name
         yield asset(path, path.is_dir)
         yield self.run_directory()
         cmd = " ".join([self._mpi_env_variables(" "), self.run_cmd(), "&&", f"touch {path}"])

@@ -5,7 +5,7 @@ Helpers for iotaa workflows.
 from pathlib import Path
 from typing import Generator
 
-from iotaa import asset, external, task  # refs, tasks
+from iotaa import asset, external, task
 
 
 @task

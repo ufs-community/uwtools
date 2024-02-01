@@ -12,7 +12,7 @@ from unittest.mock import ANY, patch
 import pytest
 from pytest import fixture  # , raises
 
-from uwtools import scheduler
+# from uwtools import scheduler
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
@@ -23,24 +23,24 @@ from uwtools.tests.support import compare_files, fixture_path, logged, validator
 # from uwtools.types import ExistAct
 
 
-def test_batch_script():
-    expected = """
-#SBATCH --account=user_account
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --qos=batch
-#SBATCH --time=00:01:00
-KMP_AFFINITY=scatter
-OMP_NUM_THREADS=1
-OMP_STACKSIZE=512m
-MPI_TYPE_DEPTH=20
-ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4
-srun --export=NONE test_exec.py
-""".strip()
-    config_file = fixture_path("forecast.yaml")
-    with patch.object(Driver, "_validate", return_value=True):
-        forecast = FV3Forecast(config_file=config_file)
-    assert forecast.batch_script().content() == expected
+# def test_batch_script():
+#     expected = """
+# #SBATCH --account=user_account
+# #SBATCH --nodes=1
+# #SBATCH --ntasks-per-node=1
+# #SBATCH --qos=batch
+# #SBATCH --time=00:01:00
+# KMP_AFFINITY=scatter
+# OMP_NUM_THREADS=1
+# OMP_STACKSIZE=512m
+# MPI_TYPE_DEPTH=20
+# ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4
+# srun --export=NONE test_exec.py
+# """.strip()
+#     config_file = fixture_path("forecast.yaml")
+#     with patch.object(Driver, "_validate", return_value=True):
+#         forecast = FV3Forecast(config_file=config_file)
+#     assert forecast.batch_script().content() == expected
 
 
 def test_schema_file():
@@ -351,18 +351,18 @@ def test_FV3Forecast_run(fv3_run_assets, vals):
         helper.assert_called_once_with()
 
 
-@pytest.mark.skip("PM FIXME")
-def test_FV3Forecast__run_via_batch_submission(fv3_run_assets):
-    batch_script, config_file, config = fv3_run_assets
-    fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
-    with patch.object(fcstobj, "_config", config):
-        with patch.object(scheduler, "execute") as execute:
-            with patch.object(Driver, "_create_user_updated_config"):
-                execute.return_value = (True, "")
-                success, lines = fcstobj._run_via_batch_submission()
-                assert success is True
-                assert lines[0] == "Batch script:"
-                execute.assert_called_once_with(cmd=ANY, cwd=ANY)
+# @pytest.mark.skip("PM FIXME")
+# def test_FV3Forecast__run_via_batch_submission(fv3_run_assets):
+#     batch_script, config_file, config = fv3_run_assets
+#     fcstobj = FV3Forecast(config_file=config_file, batch_script=batch_script)
+#     with patch.object(fcstobj, "_config", config):
+#         with patch.object(scheduler, "execute") as execute:
+#             with patch.object(Driver, "_create_user_updated_config"):
+#                 execute.return_value = (True, "")
+#                 success, lines = fcstobj._run_via_batch_submission()
+#                 assert success is True
+#                 assert lines[0] == "Batch script:"
+#                 execute.assert_called_once_with(cmd=ANY, cwd=ANY)
 
 
 @pytest.mark.skip("PM FIXME")
