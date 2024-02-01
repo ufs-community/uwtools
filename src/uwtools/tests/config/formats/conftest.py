@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=duplicate-code,missing-function-docstring
 """
 Pytest fixtures for package uwtools.config.formats tests.
 """
