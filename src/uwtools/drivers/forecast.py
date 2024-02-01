@@ -63,10 +63,11 @@ class FV3Forecast(Driver):
     def run(self, cycle: datetime):
         self._cycle = cycle  # pylint: disable=W0201
         yield "%s FV3 run" % self._cycle_name
-        if self._batch_script:
-            yield self.run_via_batch_submission()
-        else:
-            yield self._run_via_local_execution()
+        yield (
+            self.run_via_batch_submission()
+            if self._batch_script
+            else self._run_via_local_execution()
+        )
 
     @task
     def run_directory(self):
