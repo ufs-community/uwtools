@@ -66,7 +66,7 @@ class FV3Forecast(Driver):
         yield asset(path, path.is_file)
         yield self.run_directory()
         bs = self.scheduler.batch_script
-        bs.append(self._mpi_env_variables("\n"))
+        bs.append(self._mpi_env_variables("\n") + "\n")
         bs.append(self.run_cmd())
         bs.dump(path)
 
@@ -79,7 +79,7 @@ class FV3Forecast(Driver):
         yield (
             self.run_via_batch_submission()
             if self._batch_script
-            else self._run_via_local_execution()
+            else self.run_via_local_execution()
         )
 
     @task
@@ -190,6 +190,7 @@ class FV3Forecast(Driver):
 
         return {
             "account": self._experiment_config["user"]["account"],
+            "rundir": self._run_directory,
             "scheduler": self._experiment_config["platform"]["scheduler"],
             **self._config["jobinfo"],
         }
@@ -264,40 +265,6 @@ class FV3Forecast(Driver):
             self.create_field_table(run_directory / "field_table")
             self.create_model_configure(run_directory / "model_configure")
             self.create_namelist(run_directory / "input.nml")
-
-    # def _run_via_batch_submission(self) -> Tuple[bool, List[str]]:
-    #     """
-    #     Prepares and submits a batch script.
-
-    #     :return: A tuple containing the success status of submitting the job to the batch system,
-    #         and a list of strings that make up the batch script.
-    #     """
-    #     run_directory = self.prepare_directories()
-    #     batch_script = self.batch_script()
-    #     batch_lines = ["Batch script:", *str(batch_script).split("\n")]
-    #     if self._dry_run:
-    #         return True, batch_lines
-    #     assert self._batch_script is not None
-    #     outpath = run_directory / self._batch_script
-    #     batch_script.dump(outpath)
-    #     return self.scheduler.submit_job(outpath), batch_lines
-
-    def _run_via_local_execution(self) -> Tuple[bool, List[str]]:
-        """
-        Collects the necessary MPI environment variables in order to construct full run command,
-        then executes said command.
-
-        :return: A tuple containing a boolean of the success status of the FV3 run and a list of
-            strings that make up the full command line.
-        """
-        run_directory = self.prepare_directories()
-        pre_run = self._mpi_env_variables(" ")
-        full_cmd = f"{pre_run} {self.run_cmd()}"
-        command_lines = ["Command:", *full_cmd.split("\n")]
-        if self._dry_run:
-            return True, command_lines
-        success, _ = execute(cmd=full_cmd, cwd=run_directory, log_output=True)
-        return success, command_lines
 
 
 CLASSES = {"FV3": FV3Forecast}

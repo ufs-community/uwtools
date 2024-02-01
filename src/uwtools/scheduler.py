@@ -45,6 +45,7 @@ class OptionalAttribs:
     NODES = "nodes"
     PARTITION = "partition"
     PLACEMENT = "placement"
+    RUNDIR = "rundir"
     SHELL = "shell"
     STDERR = "stderr"
     STDOUT = "stdout"
@@ -57,12 +58,11 @@ class BatchScript(UserList):
     Represents a batch script to submit to a scheduler.
     """
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Returns string representation.
         """
-        shebang = "#!/bin/bash\n"
-        return str(shebang + self.content())
+        return "#!/bin/bash\n" + str(self.content())
 
     def content(self, line_separator: str = "\n") -> str:
         """
@@ -162,10 +162,10 @@ class JobScheduler(UserDict):
 
         processed = self.post_process(known + unknown + flags)
 
-        # Sort batch directives to normalize output w.r.t. potential differences
-        # in ordering of input dicts.
+        # Sort batch directives to normalize output w.r.t. potential differences in ordering of
+        # input dicts.
 
-        return BatchScript(sorted(processed))
+        return BatchScript(["", *sorted(processed), ""])
 
     @staticmethod
     def get_scheduler(props: Mapping) -> JobScheduler:
@@ -226,6 +226,7 @@ class Slurm(JobScheduler):
         OptionalAttribs.MEMORY: "--mem",
         OptionalAttribs.NODES: "--nodes",
         OptionalAttribs.PARTITION: "--partition",
+        OptionalAttribs.RUNDIR: "--chdir",
         OptionalAttribs.STDERR: "--error",
         OptionalAttribs.STDOUT: "--output",
         OptionalAttribs.TASKS_PER_NODE: "--ntasks-per-node",
