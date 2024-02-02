@@ -468,14 +468,11 @@ def _dispatch_template_translate(args: Args) -> bool:
 # pylint: disable=missing-function-docstring
 
 
-def _add_arg_batch(group: Group, required: bool = False) -> None:
+def _add_arg_batch(group: Group) -> None:
     group.add_argument(
         _switch(STR.batch),
+        action="store_true",
         help="Submit run to batch scheduler",
-        metavar="PATH",
-        required=required,
-        default=None,
-        type=str,
     )
 
 
@@ -501,7 +498,7 @@ def _add_arg_cycle(group: Group) -> None:
 
 def _add_arg_debug(group: Group) -> None:
     group.add_argument(
-        "--debug",
+        _switch(STR.debug),
         action="store_true",
         help="""
         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
