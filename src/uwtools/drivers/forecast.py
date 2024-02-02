@@ -260,7 +260,7 @@ class FV3Forecast(Driver):
         """
         Returns the name of the runscript.
         """
-        return "runscscript"
+        return "runscript"
 
 
 CLASSES = {"FV3": FV3Forecast}
