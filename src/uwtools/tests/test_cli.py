@@ -268,7 +268,7 @@ def test__dispatch_forecast(params):
 def test__dispatch_forecast_run():
     cyclestr = "2023-01-01T18"
     args = {
-        STR.batch: None,
+        STR.batch: False,
         STR.cfgfile: 1,
         STR.cycle: cyclestr,
         STR.dryrun: True,
@@ -278,9 +278,7 @@ def test__dispatch_forecast_run():
         CLASSES = {"foo": getattr(uwtools.drivers.forecast, "FooForecast")}
         with patch.object(uwtools.api.forecast, "_CLASSES", new=CLASSES):
             cli._dispatch_forecast_run(args)
-    FooForecast.assert_called_once_with(
-        batch_script=None, config_file=1, cycle=cyclestr, dry_run=True
-    )
+    FooForecast.assert_called_once_with(batch=False, config_file=1, cycle=cyclestr, dry_run=True)
     FooForecast().run.assert_called_once_with()
 
 

@@ -41,7 +41,7 @@ def lsf_props():
 def test_lsf_1(lsf_props):
     lsf_config, expected_items = lsf_props
     expected = "\n".join(expected_items)
-    assert JobScheduler.get_scheduler(lsf_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(lsf_config).runscript.content() == expected
 
 
 def test_lsf_2(lsf_props):
@@ -50,7 +50,7 @@ def test_lsf_2(lsf_props):
     expected_items[2] = "#BSUB -R span[ptile=12]"
     expected_items[4] = "#BSUB -n 12"
     expected = "\n".join(expected_items)
-    assert JobScheduler.get_scheduler(lsf_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(lsf_config).runscript.content() == expected
 
 
 def test_lsf_3(lsf_props):
@@ -59,7 +59,7 @@ def test_lsf_3(lsf_props):
     expected_items[2] = "#BSUB -R span[ptile=6]"
     expected_items[4] = "#BSUB -n 12"
     expected = "\n".join(expected_items)
-    assert JobScheduler.get_scheduler(lsf_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(lsf_config).runscript.content() == expected
 
 
 def test_lsf_4(lsf_props):
@@ -72,7 +72,7 @@ def test_lsf_4(lsf_props):
         "#BSUB -R rusage[mem=1000KB]",
     ]
     expected = "\n".join(sorted(expected_items + new_items))
-    assert JobScheduler.get_scheduler(lsf_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(lsf_config).runscript.content() == expected
 
 
 def test_lsf_5(lsf_props):
@@ -106,7 +106,7 @@ def pbs_props():
 def test_pbs_1(pbs_props):
     pbs_config, expected_items = pbs_props
     expected = "\n".join(expected_items)
-    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(pbs_config).runscript.content() == expected
 
 
 def test_pbs_2(pbs_props):
@@ -114,7 +114,7 @@ def test_pbs_2(pbs_props):
     pbs_config.update({"memory": "512M", "tasks_per_node": 4})
     expected_items[1] = "#PBS -l select=1:mpiprocs=4:ompthreads=1:ncpus=4:mem=512M"
     expected = "\n".join(expected_items)
-    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(pbs_config).runscript.content() == expected
 
 
 def test_pbs_3(pbs_props):
@@ -122,7 +122,7 @@ def test_pbs_3(pbs_props):
     pbs_config.update({"nodes": 3, "tasks_per_node": 4, "threads": 2})
     expected_items[1] = "#PBS -l select=3:mpiprocs=4:ompthreads=2:ncpus=8"
     expected = "\n".join(expected_items)
-    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(pbs_config).runscript.content() == expected
 
 
 def test_pbs_4(pbs_props):
@@ -130,7 +130,7 @@ def test_pbs_4(pbs_props):
     pbs_config.update({"memory": "512M", "nodes": 3, "tasks_per_node": 4, "threads": 2})
     expected_items[1] = "#PBS -l select=3:mpiprocs=4:ompthreads=2:ncpus=8:mem=512M"
     expected = "\n".join(expected_items)
-    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(pbs_config).runscript.content() == expected
 
 
 def test_pbs_5(pbs_props):
@@ -140,7 +140,7 @@ def test_pbs_5(pbs_props):
         "#PBS -l place=excl",
     ]
     expected = "\n".join(sorted(expected_items + new_items))
-    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(pbs_config).runscript.content() == expected
 
 
 def test_pbs_6(pbs_props):
@@ -150,7 +150,7 @@ def test_pbs_6(pbs_props):
         "#PBS -l place=vscatter",
     ]
     expected = "\n".join(sorted(expected_items + new_items))
-    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(pbs_config).runscript.content() == expected
 
 
 def test_pbs_7(pbs_props):
@@ -160,7 +160,7 @@ def test_pbs_7(pbs_props):
         "#PBS -l place=vscatter:excl",
     ]
     expected = "\n".join(sorted(expected_items + new_items))
-    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(pbs_config).runscript.content() == expected
 
 
 def test_pbs_8(pbs_props):
@@ -170,7 +170,7 @@ def test_pbs_8(pbs_props):
         "#PBS -l debug=true",
     ]
     expected = "\n".join(sorted(expected_items + new_items))
-    assert JobScheduler.get_scheduler(pbs_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(pbs_config).runscript.content() == expected
 
 
 def test_pbs_9(pbs_props):
@@ -205,7 +205,7 @@ def slurm_props():
 def test_slurm_1(slurm_props):
     slurm_config, expected_items = slurm_props
     expected = "\n".join(expected_items)
-    assert JobScheduler.get_scheduler(slurm_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(slurm_config).runscript.content() == expected
 
 
 def test_slurm_2(slurm_props):
@@ -215,7 +215,7 @@ def test_slurm_2(slurm_props):
         "#SBATCH --partition=debug",
     ]
     expected = "\n".join(sorted(expected_items + new_items))
-    assert JobScheduler.get_scheduler(slurm_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(slurm_config).runscript.content() == expected
 
 
 def test_slurm_3(slurm_props):
@@ -226,7 +226,7 @@ def test_slurm_3(slurm_props):
         "#SBATCH --cpus-per-task=4",
     ]
     expected = "\n".join(sorted(expected_items + new_items))
-    assert JobScheduler.get_scheduler(slurm_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(slurm_config).runscript.content() == expected
 
 
 def test_slurm_4(slurm_props):
@@ -237,7 +237,7 @@ def test_slurm_4(slurm_props):
         "#SBATCH --mem=4MB",
     ]
     expected = "\n".join(sorted(expected_items + new_items))
-    assert JobScheduler.get_scheduler(slurm_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(slurm_config).runscript.content() == expected
 
 
 def test_slurm_5(slurm_props):
@@ -247,7 +247,7 @@ def test_slurm_5(slurm_props):
         "#SBATCH --exclusive",
     ]
     expected = "\n".join(sorted(expected_items + new_items))
-    assert JobScheduler.get_scheduler(slurm_config).batch_script.content() == expected
+    assert JobScheduler.get_scheduler(slurm_config).runscript.content() == expected
 
 
 def test_slurm_6(slurm_props):
@@ -262,7 +262,7 @@ def test_slurm_6(slurm_props):
 def test_batchscript_dump(pbs_props, tmpdir):
     outfile = tmpdir / "outfile.sh"
     pbs_config, expected_items = pbs_props
-    bs = JobScheduler.get_scheduler(pbs_config).batch_script
+    bs = JobScheduler.get_scheduler(pbs_config).runscript
     bs.dump(outfile)
     reference = tmpdir / "reference.sh"
     with open(reference, "w", encoding="utf-8") as f:

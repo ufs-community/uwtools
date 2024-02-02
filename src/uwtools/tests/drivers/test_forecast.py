@@ -330,9 +330,7 @@ def test_FV3Forecast_run_dry_run(batch, caplog, cycle, fv3_mpi_assets, fv3_run_a
     else:
         expected_lines = [" ".join(fv3_mpi_assets)]
     with patch.object(FV3Forecast, "_validate", return_value=True):
-        fcstobj = FV3Forecast(
-            config_file=config_file, cycle=cycle, dry_run=True, batch=batch
-        )
+        fcstobj = FV3Forecast(config_file=config_file, cycle=cycle, dry_run=True, batch=batch)
         with patch.object(fcstobj, "_config", config):
             fcstobj.run()
     for line in expected_lines:
