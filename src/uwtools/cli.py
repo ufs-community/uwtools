@@ -244,7 +244,9 @@ def _add_subparser_forecast_tasknames(subparsers: Subparsers) -> ActionChecks:
     parser = _add_subparser(subparsers, STR.tasknames, "Get names of forecast tasks")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_model(required, choices=list(FORECAST_CLASSES.keys()))
-    return []
+    optional = _basic_setup(parser)
+    checks = _add_args_verbosity(optional)
+    return checks
 
 
 def _dispatch_forecast(args: Args) -> bool:
