@@ -229,7 +229,7 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> ActionChecks:
     _add_arg_cycle(required)
     _add_arg_model(required, choices=list(FORECAST_CLASSES.keys()))
     optional = _basic_setup(parser)
-    _add_arg_batch_script(optional)
+    _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_task(optional)
     checks = _add_args_verbosity(optional)
@@ -274,7 +274,7 @@ def _dispatch_forecast_run(args: Args) -> bool:
         model=args[STR.model],
         cycle=args[STR.cycle],
         config_file=args[STR.cfgfile],
-        batch_script=args[STR.batch_script],
+        batch=args[STR.batch],
         dry_run=args[STR.dryrun],
     )
 
@@ -468,10 +468,10 @@ def _dispatch_template_translate(args: Args) -> bool:
 # pylint: disable=missing-function-docstring
 
 
-def _add_arg_batch_script(group: Group, required: bool = False) -> None:
+def _add_arg_batch(group: Group, required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.batch_script),
-        help="Path to output batch file (defaults to stdout)",
+        _switch(STR.batch),
+        help="Submit run to batch scheduler",
         metavar="PATH",
         required=required,
         default=None,
@@ -825,7 +825,7 @@ class STR:
     """
 
     action: str = "action"
-    batch_script: str = "batch_script"
+    batch: str = "batch"
     cfgfile: str = "config_file"
     compare: str = "compare"
     config: str = "config"

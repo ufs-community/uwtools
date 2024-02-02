@@ -268,7 +268,7 @@ def test__dispatch_forecast(params):
 def test__dispatch_forecast_run():
     cyclestr = "2023-01-01T18"
     args = {
-        STR.batch_script: None,
+        STR.batch: None,
         STR.cfgfile: 1,
         STR.cycle: cyclestr,
         STR.dryrun: True,

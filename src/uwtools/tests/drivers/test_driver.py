@@ -23,9 +23,6 @@ class ConcreteDriver(Driver):
     Driver subclass for testing purposes.
     """
 
-    def batch_script(self):
-        pass
-
     def output(self):
         pass
 
@@ -40,6 +37,9 @@ class ConcreteDriver(Driver):
         yield None
 
     def run_cmd(self, *args):
+        pass
+
+    def runscript(self):
         pass
 
     @property

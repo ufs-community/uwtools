@@ -14,11 +14,11 @@ def test_run():
             model="foo",
             cycle=cycle,
             config_file="bar",
-            batch_script="baz",
+            batch=True,
             dry_run=False,
         )
     SomeModel.assert_called_once_with(
-        batch_script="baz",
+        batch=True,
         config_file="bar",
         cycle=cycle,
         dry_run=False,

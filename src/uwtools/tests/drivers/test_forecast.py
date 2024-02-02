@@ -279,13 +279,12 @@ def test_forecast_run_cmd(cycle):
 
 @fixture
 def fv3_run_assets(tmp_path):
-    batch_script = tmp_path / "batch.sh"
     config_file = fixture_path("forecast.yaml")
     config = YAMLConfig(config_file)
     config["forecast"]["run_dir"] = tmp_path.as_posix()
     config["forecast"]["cycle_dependent"] = {"foo-file": str(tmp_path / "foo")}
     config["forecast"]["static"] = {"static-foo-file": str(tmp_path / "foo")}
-    return batch_script, config_file, config.data["forecast"]
+    return config_file, config.data["forecast"]
 
 
 @fixture
@@ -314,11 +313,11 @@ def test_run_direct(cycle, fv3_mpi_assets, fv3_run_assets):
 
 
 @pytest.mark.skip("PM FIXME")
-@pytest.mark.parametrize("with_batch_script", [True, False])
-def test_FV3Forecast_run_dry_run(caplog, cycle, fv3_mpi_assets, fv3_run_assets, with_batch_script):
+@pytest.mark.parametrize("batch", [True, False])
+def test_FV3Forecast_run_dry_run(batch, caplog, cycle, fv3_mpi_assets, fv3_run_assets):
     log.setLevel(logging.INFO)
-    batch_script, config_file, config = fv3_run_assets
-    if with_batch_script:
+    config_file, config = fv3_run_assets
+    if batch:
         batch_components = [
             "#!/bin/bash",
             "#SBATCH --account=user_account",
@@ -329,11 +328,10 @@ def test_FV3Forecast_run_dry_run(caplog, cycle, fv3_mpi_assets, fv3_run_assets, 
         ] + fv3_mpi_assets
         expected_lines = batch_components
     else:
-        batch_script = None
         expected_lines = [" ".join(fv3_mpi_assets)]
     with patch.object(FV3Forecast, "_validate", return_value=True):
         fcstobj = FV3Forecast(
-            config_file=config_file, cycle=cycle, dry_run=True, batch_script=batch_script
+            config_file=config_file, cycle=cycle, dry_run=True, batch=batch
         )
         with patch.object(fcstobj, "_config", config):
             fcstobj.run()
@@ -343,15 +341,12 @@ def test_FV3Forecast_run_dry_run(caplog, cycle, fv3_mpi_assets, fv3_run_assets, 
 
 @pytest.mark.skip("PM FIXME")
 @pytest.mark.parametrize(
-    "vals", [(True, "_run_via_batch_submission"), (False, "_run_via_local_execution")]
+    "batch,method", [(True, "_run_via_batch_submission"), (False, "_run_via_local_execution")]
 )
-def test_FV3Forecast_run(cycle, fv3_run_assets, vals):
-    batch_script, config_file, _ = fv3_run_assets
-    use_batch, helper_method = vals
-    fcstobj = FV3Forecast(
-        config_file=config_file, cycle=cycle, batch_script=batch_script if use_batch else None
-    )
-    with patch.object(fcstobj, helper_method) as helper:
+def test_FV3Forecast_run(batch, cycle, fv3_run_assets, method):
+    config_file, _ = fv3_run_assets
+    fcstobj = FV3Forecast(config_file=config_file, cycle=cycle, batch=batch)
+    with patch.object(fcstobj, method) as helper:
         helper.return_value = (True, None)
         assert fcstobj.run() is True
         helper.assert_called_once_with()
