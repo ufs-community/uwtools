@@ -54,7 +54,7 @@ def test__add_subparser_config_validate(subparsers):
 
 def test__add_subparser_forecast(subparsers):
     cli._add_subparser_forecast(subparsers)
-    assert actions(subparsers.choices[STR.forecast]) == [STR.run]
+    assert actions(subparsers.choices[STR.forecast]) == [STR.run, STR.tasknames]
 
 
 def test__add_subparser_forecast_run(subparsers):

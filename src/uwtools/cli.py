@@ -213,6 +213,7 @@ def _add_subparser_forecast(subparsers: Subparsers) -> ModeChecks:
     subparsers = _add_subparsers(parser, STR.action)
     return {
         STR.run: _add_subparser_forecast_run(subparsers),
+        STR.tasknames: _add_subparser_forecast_tasknames(subparsers),
     }
 
 
@@ -234,13 +235,30 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> ActionChecks:
     return checks
 
 
+def _add_subparser_forecast_tasknames(subparsers: Subparsers) -> ActionChecks:
+    """
+    Subparser for mode: forecast tasknames
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.tasknames, "Get names of forecast tasks")
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_model(required, choices=list(FORECAST_CLASSES.keys()))
+    return []
+
+
 def _dispatch_forecast(args: Args) -> bool:
     """
     Dispatch logic for forecast mode.
 
     :param args: Parsed command-line args.
     """
-    return {STR.run: _dispatch_forecast_run}[args[STR.action]](args)
+    return {
+        STR.run: _dispatch_forecast_run,
+        STR.tasknames: _dispatch_forecast_tasknames,
+    }[
+        args[STR.action]
+    ](args)
 
 
 def _dispatch_forecast_run(args: Args) -> bool:
@@ -256,6 +274,18 @@ def _dispatch_forecast_run(args: Args) -> bool:
         batch_script=args[STR.batch_script],
         dry_run=args[STR.dryrun],
     )
+
+
+def _dispatch_forecast_tasknames(args: Args) -> bool:
+    """
+    Dispatch logic for forecast tasknames action.
+
+    :param args: Parsed command-line args.
+    """
+    model = args[STR.model]
+    tasknames = uwtools.api.forecast.tasknames(model=model)
+    log.info("%s tasknames: %s", model, ", ".join(tasknames))
+    return True
 
 
 # Mode rocoto
@@ -810,6 +840,7 @@ class STR:
     run: str = "run"
     schemafile: str = "schema_file"
     suppfiles: str = "supplemental_files"
+    tasknames: str = "tasknames"
     template: str = "template"
     translate: str = "translate"
     validate: str = "validate"
