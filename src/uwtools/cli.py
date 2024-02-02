@@ -213,7 +213,7 @@ def _add_subparser_forecast(subparsers: Subparsers) -> ModeChecks:
     subparsers = _add_subparsers(parser, STR.action)
     return {
         STR.run: _add_subparser_forecast_run(subparsers),
-        STR.tasknames: _add_subparser_forecast_tasknames(subparsers),
+        STR.tasks: _add_subparser_forecast_tasks(subparsers),
     }
 
 
@@ -231,17 +231,18 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> ActionChecks:
     optional = _basic_setup(parser)
     _add_arg_batch_script(optional)
     _add_arg_dry_run(optional)
+    _add_arg_task(optional)
     checks = _add_args_verbosity(optional)
     return checks
 
 
-def _add_subparser_forecast_tasknames(subparsers: Subparsers) -> ActionChecks:
+def _add_subparser_forecast_tasks(subparsers: Subparsers) -> ActionChecks:
     """
-    Subparser for mode: forecast tasknames
+    Subparser for mode: forecast tasks
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.tasknames, "Get names of forecast tasks")
+    parser = _add_subparser(subparsers, STR.tasks, "Get names of forecast tasks")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_model(required, choices=list(FORECAST_CLASSES.keys()))
     optional = _basic_setup(parser)
@@ -257,7 +258,7 @@ def _dispatch_forecast(args: Args) -> bool:
     """
     return {
         STR.run: _dispatch_forecast_run,
-        STR.tasknames: _dispatch_forecast_tasknames,
+        STR.tasks: _dispatch_forecast_tasks,
     }[
         args[STR.action]
     ](args)
@@ -278,15 +279,15 @@ def _dispatch_forecast_run(args: Args) -> bool:
     )
 
 
-def _dispatch_forecast_tasknames(args: Args) -> bool:
+def _dispatch_forecast_tasks(args: Args) -> bool:
     """
-    Dispatch logic for forecast tasknames action.
+    Dispatch logic for forecast tasks action.
 
     :param args: Parsed command-line args.
     """
     model = args[STR.model]
-    tasknames = uwtools.api.forecast.tasknames(model=model)
-    log.info("%s tasknames: %s", model, ", ".join(tasknames))
+    tasks = uwtools.api.forecast.tasks(model=model)
+    log.info("%s tasks: %s", model, ", ".join(tasks))
     return True
 
 
@@ -627,6 +628,15 @@ def _add_arg_supplemental_files(group: Group) -> None:
     )
 
 
+def _add_arg_task(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.task),
+        help="Task to execute",
+        metavar="NAME",
+        type=str,
+    )
+
+
 def _add_arg_values_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.valsfile),
@@ -842,7 +852,8 @@ class STR:
     run: str = "run"
     schemafile: str = "schema_file"
     suppfiles: str = "supplemental_files"
-    tasknames: str = "tasknames"
+    task: str = "task"
+    tasks: str = "tasks"
     template: str = "template"
     translate: str = "translate"
     validate: str = "validate"

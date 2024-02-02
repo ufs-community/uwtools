@@ -23,7 +23,7 @@ def run(  # pylint: disable=missing-function-docstring
     return True
 
 
-def tasknames(model: str) -> List[str]:  # pylint: disable=missing-function-docstring
+def tasks(model: str) -> List[str]:  # pylint: disable=missing-function-docstring
     return iotaa.tasknames(_CLASSES[model])
 
 
@@ -49,11 +49,11 @@ immediately on the current system, without creation of a batch script.
 ).strip()
 
 
-# The following statement dynamically interpolates values into tasknames()'s docstring, which will
-# not work if the docstring is inlined in the function. It must remain a separate statement to avoid
+# The following statement dynamically interpolates values into tasks()'s docstring, which will not
+# work if the docstring is inlined in the function. It must remain a separate statement to avoid
 # hardcoding values into it.
 
-tasknames.__doc__ = """
+tasks.__doc__ = """
 Returns the names of iotaa tasks in the given object.
 
 :param model: One of: {models}
