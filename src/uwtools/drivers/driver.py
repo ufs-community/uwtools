@@ -1,12 +1,11 @@
 """
-Provides an abstract class representing drivers for various NWP tools.
+Provides an abstract class representing drivers for various components.
 """
 
 import os
 import shutil
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Type, Union
 
@@ -23,7 +22,7 @@ from uwtools.types import DefinitePath, OptionalPath
 
 class Driver(ABC):
     """
-    An abstract class representing drivers for various NWP tools.
+    An abstract class representing drivers for various components.
     """
 
     def __init__(
@@ -62,24 +61,21 @@ class Driver(ABC):
 
     @abstractmethod
     @task
-    def run(self, cycle: datetime):
+    def run(self):
         """
-        Run the NWP tool.
-
-        :param cycle: The time stamp of the cycle to run.
-        :return: Did the driver exit with success status?
+        Run the component.
         """
 
     def run_cmd(self) -> str:
         """
-        The command-line command to run the NWP tool.
+        The command-line command to run the component.
 
         :return: Collated string that contains MPI command, runtime arguments, and exec name.
         """
         components = [
             self._platform_config.get("mpicmd"),  # MPI run program
             *[str(x) for x in self._config["runtime_info"].get("mpi_args", [])],  # MPI arguments
-            self._config["executable"],  # NWP tool executable name
+            self._config["executable"],  # component executable name
         ]
         return " ".join(filter(None, components))
 

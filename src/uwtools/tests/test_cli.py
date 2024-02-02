@@ -266,10 +266,11 @@ def test__dispatch_forecast(params):
 
 
 def test__dispatch_forecast_run():
+    cyclestr = "2023-01-01T18"
     args = {
         STR.batch_script: None,
         STR.cfgfile: 1,
-        STR.cycle: "2023-01-01T00:00:00",
+        STR.cycle: cyclestr,
         STR.dryrun: True,
         STR.model: "foo",
     }
@@ -277,8 +278,10 @@ def test__dispatch_forecast_run():
         CLASSES = {"foo": getattr(uwtools.drivers.forecast, "FooForecast")}
         with patch.object(uwtools.api.forecast, "_CLASSES", new=CLASSES):
             cli._dispatch_forecast_run(args)
-    FooForecast.assert_called_once_with(batch_script=None, config_file=1, dry_run=True)
-    FooForecast().run.assert_called_once_with(cycle="2023-01-01T00:00:00")
+    FooForecast.assert_called_once_with(
+        batch_script=None, config_file=1, cycle=cyclestr, dry_run=True
+    )
+    FooForecast().run.assert_called_once_with()
 
 
 @pytest.mark.parametrize(

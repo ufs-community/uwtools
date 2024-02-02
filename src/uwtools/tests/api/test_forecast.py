@@ -20,6 +20,7 @@ def test_run():
     SomeModel.assert_called_once_with(
         batch_script="baz",
         config_file="bar",
+        cycle=cycle,
         dry_run=False,
     )
-    SomeModel().run.assert_called_once_with(cycle=cycle)
+    SomeModel().run.assert_called_once_with()

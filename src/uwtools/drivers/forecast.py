@@ -5,7 +5,7 @@ Drivers for forecast models.
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from iotaa import asset, refs, task, tasks
 

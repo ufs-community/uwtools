@@ -3,7 +3,6 @@
 Tests for uwtools.drivers.driver module.
 """
 
-import datetime
 import logging
 from collections.abc import Mapping
 from pathlib import Path
@@ -37,8 +36,8 @@ class ConcreteDriver(Driver):
         return {}
 
     @task
-    def run(self, cycle: datetime.date):
-        yield True
+    def run(self):
+        yield None
 
     def run_cmd(self, *args):
         pass

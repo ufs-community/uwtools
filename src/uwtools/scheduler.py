@@ -165,7 +165,7 @@ class JobScheduler(UserDict):
         # Sort batch directives to normalize output w.r.t. potential differences in ordering of
         # input dicts.
 
-        return BatchScript(["", *sorted(processed), ""])
+        return BatchScript(sorted(processed))
 
     @staticmethod
     def get_scheduler(props: Mapping) -> JobScheduler:
