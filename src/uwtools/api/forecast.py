@@ -12,14 +12,16 @@ def run(  # pylint: disable=missing-function-docstring
     cycle: dt.datetime,
     config_file: DefinitePath,
     batch_script: OptionalPath = None,
+    task: str = "run",
     dry_run: bool = False,
 ) -> bool:
-    _CLASSES[model](
+    obj = _CLASSES[model](
         batch_script=batch_script,
         config_file=config_file,
         cycle=cycle,
         dry_run=dry_run,
-    ).run()
+    )
+    getattr(obj, task)()
     return True
 
 
