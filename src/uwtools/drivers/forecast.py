@@ -42,20 +42,6 @@ class FV3Forecast(Driver):
 
     # Workflow methods
 
-    @property
-    def _runscript_name(self) -> str:
-        """
-        Returns the name of the runscript.
-        """
-        return "runscscript"
-
-    @property
-    def _cycle_name(self) -> str:
-        """
-        Returns a formatted-for-logging representation of the forecast cycle.
-        """
-        return self._cycle.strftime("%Y%m%d %HZ")
-
     @tasks
     def run(self):
         """
@@ -212,6 +198,13 @@ class FV3Forecast(Driver):
         end_hour = self._config["length"] + offset + 1
         return offset, lbcs_config["interval_hours"], end_hour
 
+    @property
+    def _cycle_name(self) -> str:
+        """
+        Returns a formatted-for-logging representation of the forecast cycle.
+        """
+        return self._cycle.strftime("%Y%m%d %HZ")
+
     def _define_boundary_files(self) -> Dict[str, str]:
         """
         Maps the prepared boundary conditions to the appropriate hours for the forecast.
@@ -261,6 +254,13 @@ class FV3Forecast(Driver):
             self.create_field_table(run_directory / "field_table")
             self.create_model_configure(run_directory / "model_configure")
             self.create_namelist(run_directory / "input.nml")
+
+    @property
+    def _runscript_name(self) -> str:
+        """
+        Returns the name of the runscript.
+        """
+        return "runscscript"
 
 
 CLASSES = {"FV3": FV3Forecast}
