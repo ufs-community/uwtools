@@ -16,7 +16,7 @@ from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.scheduler import BatchScript, JobScheduler
+from uwtools.scheduler import JobScheduler
 from uwtools.types import DefinitePath, OptionalPath
 
 
@@ -29,7 +29,7 @@ class Driver(ABC):
         self,
         config_file: DefinitePath,
         dry_run: bool = False,
-        batch_script: OptionalPath = None,
+        batch: bool = False,
     ):
         """
         Initialize the driver.
@@ -37,33 +37,34 @@ class Driver(ABC):
 
         self._config_file = config_file
         self._dry_run = dry_run
-        self._batch_script = batch_script
+        self._batch = batch
         self._validate()
         self._experiment_config = YAMLConfig(config=config_file)
         self._platform_config = self._experiment_config.get("platform", {})
         self._config: Dict[str, Any] = {}
 
-    # Public methods
-
-    @abstractmethod
-    def batch_script(self) -> BatchScript:
-        """
-        Create a script for submission to the batch scheduler.
-
-        :return: The batch script object with all run commands needed for executing the program.
-        """
-
-    @abstractmethod
-    def resources(self) -> Mapping:
-        """
-        Parses the config and returns a formatted dictionary for the batch script.
-        """
+    # Workflow methods
 
     @abstractmethod
     @task
     def run(self):
         """
         Run the component.
+        """
+
+    @abstractmethod
+    @task
+    def runscript(self):
+        """
+        A runscript suitable for submission to the scheduler.
+        """
+
+    # Public methods
+
+    @abstractmethod
+    def resources(self) -> Mapping:
+        """
+        Parses the config and returns a formatted dictionary for the runscript.
         """
 
     def run_cmd(self) -> str:

@@ -29,13 +29,13 @@ class FV3Forecast(Driver):
         config_file: DefinitePath,
         cycle: datetime,
         dry_run: bool = False,
-        batch_script: OptionalPath = None,
+        batch: bool = False,
     ):
         """
         Initialize the Forecast Driver.
         """
 
-        super().__init__(config_file=config_file, dry_run=dry_run, batch_script=batch_script)
+        super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
         self._cycle = cycle
         self._config = self._experiment_config["forecast"]
         self._run_directory = Path(self._config["run_dir"])
@@ -43,11 +43,11 @@ class FV3Forecast(Driver):
     # Workflow methods
 
     @property
-    def _batch_script_name(self) -> str:
+    def _runscript_name(self) -> str:
         """
-        Returns the name of the script to submit to the batch system.
+        Returns the name of the runscript.
         """
-        return "batch_script"
+        return "runscscript"
 
     @property
     def _cycle_name(self) -> str:
@@ -56,31 +56,13 @@ class FV3Forecast(Driver):
         """
         return self._cycle.strftime("%Y%m%d %HZ")
 
-    @task
-    def batch_script(self):
-        """
-        The script to submit to the batch system.
-        """
-        path = self._run_directory / self._batch_script_name
-        yield "%s FV3 batch script" % self._cycle_name
-        yield asset(path, path.is_file)
-        yield self.run_directory()
-        bs = self.scheduler.batch_script
-        bs.append(self._mpi_env_variables("\n") + "\n")
-        bs.append(self.run_cmd())
-        bs.dump(path)
-
     @tasks
     def run(self):
         """
         Execution of the run.
         """
         yield "%s FV3 run" % self._cycle_name
-        yield (
-            self.run_via_batch_submission()
-            if self._batch_script
-            else self.run_via_local_execution()
-        )
+        yield (self.run_via_batch_submission() if self._batch else self.run_via_local_execution())
 
     @task
     def run_directory(self):
@@ -98,12 +80,12 @@ class FV3Forecast(Driver):
         """
         Execution of the run via the batch system.
         """
-        path = self._run_directory / ("%s.submit" % self._batch_script_name)
+        path = self._run_directory / ("%s.submit" % self._runscript_name)
         yield "%s FV3 run via batch submission" % self._cycle_name
         yield asset(path, path.is_file)
-        batch_script = self.batch_script()
-        yield batch_script
-        self.scheduler.submit_job(batch_script=refs(batch_script), submit_file=path)
+        runscript = self.runscript()
+        yield runscript
+        self.scheduler.submit_job(runscript=refs(runscript), submit_file=path)
 
     @task
     def run_via_local_execution(self):
@@ -116,6 +98,20 @@ class FV3Forecast(Driver):
         yield self.run_directory()
         cmd = " ".join([self._mpi_env_variables(" "), self.run_cmd(), "&&", f"touch {path}"])
         execute(cmd=cmd, cwd=self._run_directory, log_output=True)
+
+    @task
+    def runscript(self):
+        """
+        A runscript suitable for submission to the scheduler.
+        """
+        path = self._run_directory / self._runscript_name
+        yield "%s FV3 runscript" % self._cycle_name
+        yield asset(path, path.is_file)
+        yield self.run_directory()
+        bs = self.scheduler.runscript
+        bs.append(self._mpi_env_variables("\n") + "\n")
+        bs.append(self.run_cmd())
+        bs.dump(path)
 
     # Public methods
 
@@ -183,9 +179,9 @@ class FV3Forecast(Driver):
 
     def resources(self) -> Mapping:
         """
-        Parses the experiment configuration to provide the information needed for the batch script.
+        Parses the experiment configuration to provide the information needed for the runscript.
 
-        :return: A formatted dictionary needed to create a batch script
+        :return: A formatted dictionary needed to create a runscript
         """
 
         return {

@@ -53,9 +53,9 @@ class OptionalAttribs:
     THREADS = "threads"
 
 
-class BatchScript(UserList):
+class Runscript(UserList):
     """
-    Represents a batch script to submit to a scheduler.
+    A runscript suitable for submission to a scheduler.
     """
 
     def __str__(self) -> str:
@@ -66,7 +66,7 @@ class BatchScript(UserList):
 
     def content(self, line_separator: str = "\n") -> str:
         """
-        Returns the formatted content of the batch script.
+        Returns the formatted content of the runscript.
 
         Parameters
         ----------
@@ -77,9 +77,9 @@ class BatchScript(UserList):
 
     def dump(self, output_file: OptionalPath) -> None:
         """
-        Write a batch script to an output location.
+        Write a runscript to an output location.
 
-        :param output_file: Path to the file to write the batch script to
+        :param output_file: Path to the file to write the runscript to
         """
         with writable(output_file) as f:
             print(str(self).strip(), file=f)
@@ -87,7 +87,7 @@ class BatchScript(UserList):
 
 class JobScheduler(UserDict):
     """
-    A class for interacting with HPC batch schedulers.
+    A class for interacting with HPC schedulers.
     """
 
     _map: dict = {}
@@ -104,35 +104,47 @@ class JobScheduler(UserDict):
         raise AttributeError(name)
 
     @staticmethod
-    def validate_props(props) -> None:
+    def get_scheduler(props: Mapping) -> JobScheduler:
         """
-        Raises ValueError if invalid.
-        """
-        members = [
-            getattr(RequiredAttribs, attr)
-            for attr in dir(RequiredAttribs)
-            if not callable(getattr(RequiredAttribs, attr)) and not attr.startswith("__")
-        ]
-        if diff := [x for x in members if x not in props]:
-            raise ValueError(f"Missing required attributes: [{', '.join(diff)}]")
+        Returns the appropriate scheduler.
 
-    def pre_process(self) -> Dict[str, Any]:
+        Parameters
+        ----------
+        props
+            Must contain a 'scheduler' key or a KeyError will be raised
         """
-        Pre-process attributes before converting to batch script.
-        """
-        return self.data
+        if "scheduler" not in props:
+            raise KeyError(f"No scheduler defined in props: [{', '.join(props.keys())}]")
+        name = props["scheduler"]
+        log.debug("Getting '%s' scheduler", name)
+        schedulers = {"slurm": Slurm, "pbs": PBS, "lsf": LSF}
+        try:
+            scheduler = schedulers[name]
+        except KeyError as error:
+            raise KeyError(
+                f"{name} is not a supported scheduler"
+                + "Currently supported schedulers are:\n"
+                + f'{" | ".join(schedulers.keys())}"'
+            ) from error
+        return scheduler(props)
 
     @staticmethod
     def post_process(items: List[str]) -> List[str]:
         """
-        Post process attributes before converting to batch script.
+        Post process attributes before converting to runscript.
         """
         return [re.sub(r"\s{0,}\=\s{0,}", "=", x, count=0, flags=0) for x in items]
 
-    @property
-    def batch_script(self) -> BatchScript:
+    def pre_process(self) -> Dict[str, Any]:
         """
-        Returns the batch script to be fed to external scheduler.
+        Pre-process attributes before converting to runscript.
+        """
+        return self.data
+
+    @property
+    def runscript(self) -> Runscript:
+        """
+        Returns the runscript suitable for submission to the scheduler.
         """
 
         sanitized_attribs = self.pre_process()
@@ -162,49 +174,37 @@ class JobScheduler(UserDict):
 
         processed = self.post_process(known + unknown + flags)
 
-        # Sort batch directives to normalize output w.r.t. potential differences in ordering of
+        # Sort scheduler directives to normalize output w.r.t. potential differences in ordering of
         # input dicts.
 
-        return BatchScript(sorted(processed))
+        return Runscript(sorted(processed))
 
-    @staticmethod
-    def get_scheduler(props: Mapping) -> JobScheduler:
-        """
-        Returns the appropriate scheduler.
-
-        Parameters
-        ----------
-        props
-            Must contain a 'scheduler' key or a KeyError will be raised
-        """
-        if "scheduler" not in props:
-            raise KeyError(f"No scheduler defined in props: [{', '.join(props.keys())}]")
-        name = props["scheduler"]
-        log.debug("Getting '%s' scheduler", name)
-        schedulers = {"slurm": Slurm, "pbs": PBS, "lsf": LSF}
-        try:
-            scheduler = schedulers[name]
-        except KeyError as error:
-            raise KeyError(
-                f"{name} is not a supported scheduler"
-                + "Currently supported schedulers are:\n"
-                + f'{" | ".join(schedulers.keys())}"'
-            ) from error
-        return scheduler(props)
-
-    def submit_job(self, batch_script: Path, submit_file: OptionalPath = None) -> bool:
+    def submit_job(self, runscript: Path, submit_file: OptionalPath = None) -> bool:
         """
         Submits a job to the scheduler.
 
-        :param batch_script: Path to the batch script.
+        :param runscript: Path to the runscript.
         :param submit_file: File to write output of submit command to.
         :return: Did the run exit with a success status?
         """
-        cmd = f"{self.submit_command} {batch_script}"
+        cmd = f"{self.submit_command} {runscript}"
         if submit_file:
             cmd += " 2>&1 | tee %s" % submit_file
-        success, _ = execute(cmd=cmd, cwd=f"{batch_script.parent}")
+        success, _ = execute(cmd=cmd, cwd=f"{runscript.parent}")
         return success
+
+    @staticmethod
+    def validate_props(props) -> None:
+        """
+        Raises ValueError if invalid.
+        """
+        members = [
+            getattr(RequiredAttribs, attr)
+            for attr in dir(RequiredAttribs)
+            if not callable(getattr(RequiredAttribs, attr)) and not attr.startswith("__")
+        ]
+        if diff := [x for x in members if x not in props]:
+            raise ValueError(f"Missing required attributes: [{', '.join(diff)}]")
 
 
 class Slurm(JobScheduler):
