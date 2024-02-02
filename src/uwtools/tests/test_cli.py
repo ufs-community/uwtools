@@ -273,6 +273,7 @@ def test__dispatch_forecast_run():
         STR.cycle: cyclestr,
         STR.dryrun: True,
         STR.model: "foo",
+        STR.task: "run",
     }
     with patch.object(uwtools.drivers.forecast, "FooForecast", create=True) as FooForecast:
         CLASSES = {"foo": getattr(uwtools.drivers.forecast, "FooForecast")}

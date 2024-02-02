@@ -275,6 +275,7 @@ def _dispatch_forecast_run(args: Args) -> bool:
         cycle=args[STR.cycle],
         config_file=args[STR.cfgfile],
         batch=args[STR.batch],
+        task=args[STR.task],
         dry_run=args[STR.dryrun],
     )
 
