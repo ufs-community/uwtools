@@ -66,8 +66,8 @@ class FV3Forecast(Driver):
         """
         yield "%s FV3 provisioned run directory" % self._cyclestr
         yield {
-            "field_table": self.field_table,
-            "runscript": self.runscript,
+            "field_table": self.field_table(),
+            "runscript": self.runscript(),
             # ... more ...
         }
 
