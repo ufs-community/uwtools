@@ -633,6 +633,7 @@ def _add_arg_task(group: Group, default: str) -> None:
         help="Task to execute (default: %s)" % default,
         metavar="NAME",
         type=str,
+        default=default,
     )
 
 

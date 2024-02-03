@@ -62,14 +62,10 @@ class FV3Forecast(Driver):
     @tasks
     def provisioned_run_directory(self):
         """
-        A run directory provisioned with all necessary content.
+        A run directory provisioned with all required content.
         """
         yield "%s FV3 provisioned run directory" % self._cyclestr
-        yield {
-            "field_table": self.field_table(),
-            "runscript": self.runscript(),
-            # ... more ...
-        }
+        yield [self.runscript(), self.field_table()]
 
     @tasks
     def run(self):
@@ -100,7 +96,7 @@ class FV3Forecast(Driver):
         yield asset(path, path.is_file)
         deps = self.provisioned_run_directory()
         yield deps
-        self.scheduler.submit_job(runscript=refs(deps)["runscript"], submit_file=path)
+        self.scheduler.submit_job(runscript=refs(deps)[0], submit_file=path)
 
     @task
     def run_via_local_execution(self):
@@ -112,7 +108,8 @@ class FV3Forecast(Driver):
         yield asset(path, path.is_file)
         deps = self.provisioned_run_directory()
         yield deps
-        cmd = " ".join([self._mpi_env_variables(" "), self.run_cmd(), "&&", f"touch {path}"])
+        runscript = refs(deps)[0].name
+        cmd = f"./{runscript} >{runscript}.out 2>&1"
         execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
     @task
