@@ -277,7 +277,7 @@ def test__dispatch_forecast_run():
     }
     with patch.object(uwtools.drivers.forecast, "FooForecast", create=True) as FooForecast:
         CLASSES = {"foo": getattr(uwtools.drivers.forecast, "FooForecast")}
-        with patch.object(uwtools.api.forecast, "_CLASSES", new=CLASSES):
+        with patch.object(uwtools.api.forecast, "CLASSES", new=CLASSES):
             cli._dispatch_forecast_run(args)
     FooForecast.assert_called_once_with(batch=False, config_file=1, cycle=cyclestr, dry_run=True)
     FooForecast().run.assert_called_once_with()

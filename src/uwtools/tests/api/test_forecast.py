@@ -9,7 +9,7 @@ from uwtools.api import forecast
 def test_run():
     SomeModel = Mock()
     cycle = dt.datetime(2023, 11, 22, 12)
-    with patch.dict(forecast._CLASSES, {"foo": SomeModel}):
+    with patch.dict(forecast.CLASSES, {"foo": SomeModel}):
         forecast.run(
             model="foo",
             cycle=cycle,

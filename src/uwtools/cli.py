@@ -19,7 +19,6 @@ import uwtools.api.rocoto
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
-from uwtools.drivers.forecast import CLASSES as FORECAST_CLASSES
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
@@ -223,15 +222,16 @@ def _add_subparser_forecast_run(subparsers: Subparsers) -> ActionChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
+    choices = list(uwtools.api.forecast.CLASSES.keys())
     parser = _add_subparser(subparsers, STR.run, "Run a forecast")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_config_file(required)
     _add_arg_cycle(required)
-    _add_arg_model(required, choices=list(FORECAST_CLASSES.keys()))
+    _add_arg_model(required, choices=choices)
     optional = _basic_setup(parser)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
-    _add_arg_task(optional)
+    _add_arg_task(optional, default=uwtools.api.forecast.DEFAULT_TASK)
     checks = _add_args_verbosity(optional)
     return checks
 
@@ -242,9 +242,10 @@ def _add_subparser_forecast_tasks(subparsers: Subparsers) -> ActionChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
+    choices = list(uwtools.api.forecast.CLASSES.keys())
     parser = _add_subparser(subparsers, STR.tasks, "Get names of forecast tasks")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_model(required, choices=list(FORECAST_CLASSES.keys()))
+    _add_arg_model(required, choices=choices)
     optional = _basic_setup(parser)
     checks = _add_args_verbosity(optional)
     return checks
@@ -626,10 +627,10 @@ def _add_arg_supplemental_files(group: Group) -> None:
     )
 
 
-def _add_arg_task(group: Group) -> None:
+def _add_arg_task(group: Group, default: str) -> None:
     group.add_argument(
         _switch(STR.task),
-        help="Task to execute",
+        help="Task to execute (default: %s)" % default,
         metavar="NAME",
         type=str,
     )
