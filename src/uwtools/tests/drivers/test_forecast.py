@@ -18,7 +18,7 @@ from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.logging import log
-from uwtools.tests.support import compare_files, fixture_path, logged, validator
+from uwtools.tests.support import fixture_path, logged, validator  # compare_files
 
 # from uwtools.types import ExistAct
 
@@ -59,30 +59,26 @@ def test_schema_file(cycle):
     assert path.is_file()
 
 
-@pytest.mark.skip("PM FIXME")
-def test_create_model_configure(cycle, tmp_path):
-    """
-    Test that providing a YAML base input file and a config file will create and update YAML config
-    file.
-    """
-
-    config_file = fixture_path("fruit_config_similar_for_fcst.yaml")
-    base_file = fixture_path("fruit_config.yaml")
-    fcst_config_file = tmp_path / "fcst.yml"
-
-    fcst_config = YAMLConfig(config_file)
-    fcst_config["forecast"]["model_configure"]["base_file"] = base_file
-    fcst_config.dump(fcst_config_file)
-
-    output_file = (tmp_path / "test_config_from_yaml.yaml").as_posix()
-    with patch.object(FV3Forecast, "_validate", return_value=True):
-        forecast_obj = FV3Forecast(config_file=fcst_config_file, cycle=cycle)
-    forecast_obj.create_model_configure(output_file)
-    expected = YAMLConfig(base_file)
-    expected.update_values(YAMLConfig(config_file)["forecast"]["model_configure"]["update_values"])
-    expected_file = tmp_path / "expected_yaml.yaml"
-    expected.dump(expected_file)
-    assert compare_files(expected_file, output_file)
+# def test_create_model_configure(cycle, tmp_path):
+#     """
+#     Test that providing a YAML base input file and a config file will create and update YAML
+#     config file.
+#     """
+#     config_file = fixture_path("fruit_config_similar_for_fcst.yaml")
+#     base_file = fixture_path("fruit_config.yaml")
+#     fcst_config_file = tmp_path / "fcst.yml"
+#     fcst_config = YAMLConfig(config_file)
+#     fcst_config["forecast"]["model_configure"]["base_file"] = base_file
+#     fcst_config.dump(fcst_config_file)
+#     output_file = (tmp_path / "test_config_from_yaml.yaml").as_posix()
+#     with patch.object(FV3Forecast, "_validate", return_value=True):
+#         forecast_obj = FV3Forecast(config_file=fcst_config_file, cycle=cycle)
+#     forecast_obj.create_model_configure(output_file)
+#     expected = YAMLConfig(base_file)
+# expected.update_values(YAMLConfig(config_file)["forecast"]["model_configure"]["update_values"])
+#     expected_file = tmp_path / "expected_yaml.yaml"
+#     expected.dump(expected_file)
+#     assert compare_files(expected_file, output_file)
 
 
 @fixture
@@ -116,18 +112,18 @@ def create_field_table_update_obj():
 #     assert compare_files(expected, outfldtbl_file)
 
 
-def test_create_model_configure_call_private(cycle, tmp_path):
-    basefile = str(tmp_path / "base.yaml")
-    infile = fixture_path("forecast.yaml")
-    outfile = str(tmp_path / "out.yaml")
-    for path in infile, basefile:
-        Path(path).touch()
-    with patch.object(Driver, "_create_user_updated_config") as _create_user_updated_config:
-        with patch.object(FV3Forecast, "_validate", return_value=True):
-            FV3Forecast(config_file=infile, cycle=cycle).create_model_configure(outfile)
-    _create_user_updated_config.assert_called_with(
-        config_class=YAMLConfig, config_values={}, output_path=outfile
-    )
+# def test_create_model_configure_call_private(cycle, tmp_path):
+#     basefile = str(tmp_path / "base.yaml")
+#     infile = fixture_path("forecast.yaml")
+#     outfile = str(tmp_path / "out.yaml")
+#     for path in infile, basefile:
+#         Path(path).touch()
+#     with patch.object(Driver, "_create_user_updated_config") as _create_user_updated_config:
+#         with patch.object(FV3Forecast, "_validate", return_value=True):
+#             FV3Forecast(config_file=infile, cycle=cycle).create_model_configure(outfile)
+#     _create_user_updated_config.assert_called_with(
+#         config_class=YAMLConfig, config_values={}, output_path=outfile
+#     )
 
 
 @fixture

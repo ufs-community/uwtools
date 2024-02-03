@@ -47,15 +47,32 @@ class FV3Forecast(Driver):
     @task
     def field_table(self):
         """
-        An FV3 field table file.
+        An FV3 field_table file.
         """
-        yield "%s FV3 field table" % self._cyclestr
-        path = self._rundir / "field_table"
+        fn = "field_table"
+        yield "%s FV3 %s" % (self._cyclestr, fn)
+        path = self._rundir / fn
         yield asset(path, path.is_file)
         yield self.run_directory()
         self._create_user_updated_config(
             config_class=FieldTableConfig,
             config_values=self._config["field_table"],
+            output_path=path,
+        )
+
+    @task
+    def model_configure(self):
+        """
+        An FV3 model_configure file.
+        """
+        fn = "model_configure"
+        yield "%s FV3 %s" % (self._cyclestr, fn)
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        yield self.run_directory()
+        self._create_user_updated_config(
+            config_class=YAMLConfig,
+            config_values=self._config["model_configure"],
             output_path=path,
         )
 
@@ -65,7 +82,7 @@ class FV3Forecast(Driver):
         A run directory provisioned with all required content.
         """
         yield "%s FV3 provisioned run directory" % self._cyclestr
-        yield [self.runscript(), self.field_table()]
+        yield [self.runscript(), self.field_table(), self.model_configure()]
 
     @tasks
     def run(self):
@@ -129,18 +146,6 @@ class FV3Forecast(Driver):
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
     # Public methods
-
-    def create_model_configure(self, output_path: OptionalPath) -> None:
-        """
-        Uses the forecast config object to create a model_configure.
-
-        :param output_path: Optional location of the output model_configure file.
-        """
-        self._create_user_updated_config(
-            config_class=YAMLConfig,
-            config_values=self._config.get("model_configure", {}),
-            output_path=output_path,
-        )
 
     def create_namelist(self, output_path: OptionalPath) -> None:
         """
@@ -269,7 +274,7 @@ class FV3Forecast(Driver):
                 log.info(f"Would prepare: {run_directory}/{call}")
         else:
             # self.create_field_table(run_directory / "field_table")
-            self.create_model_configure(run_directory / "model_configure")
+            # self.create_model_configure(run_directory / "model_configure")
             self.create_namelist(run_directory / "input.nml")
 
     @property
