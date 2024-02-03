@@ -2,6 +2,8 @@
 Drivers for forecast models.
 """
 
+import os
+import stat
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
@@ -38,16 +40,43 @@ class FV3Forecast(Driver):
         super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
         self._cycle = cycle
         self._config = self._experiment_config["forecast"]
-        self._run_directory = Path(self._config["run_dir"])
+        self._rundir = Path(self._config["run_dir"])
 
     # Workflow methods
+
+    @task
+    def field_table(self):
+        """
+        An FV3 field table file.
+        """
+        yield "%s FV3 field table" % self._cyclestr
+        path = self._rundir / "field_table"
+        yield asset(path, path.is_file)
+        yield self.run_directory()
+        self._create_user_updated_config(
+            config_class=FieldTableConfig,
+            config_values=self._config["field_table"],
+            output_path=path,
+        )
+
+    @tasks
+    def provisioned_run_directory(self):
+        """
+        A run directory provisioned with all necessary content.
+        """
+        yield "%s FV3 provisioned run directory" % self._cyclestr
+        yield {
+            "field_table": self.field_table,
+            "runscript": self.runscript,
+            # ... more ...
+        }
 
     @tasks
     def run(self):
         """
         Execution of the run.
         """
-        yield "%s FV3 run" % self._cycle_name
+        yield "%s FV3 run" % self._cyclestr
         yield (self.run_via_batch_submission() if self._batch else self.run_via_local_execution())
 
     @task
@@ -55,8 +84,8 @@ class FV3Forecast(Driver):
         """
         The run directory.
         """
-        path = self._run_directory
-        yield "%s FV3 run directory" % self._cycle_name
+        yield "%s FV3 run directory" % self._cyclestr
+        path = self._rundir
         yield asset(path, path.is_dir)
         yield None
         path.mkdir(parents=True)
@@ -66,52 +95,43 @@ class FV3Forecast(Driver):
         """
         Execution of the run via the batch system.
         """
-        path = self._run_directory / ("%s.submit" % self._runscript_name)
-        yield "%s FV3 run via batch submission" % self._cycle_name
+        yield "%s FV3 run via batch submission" % self._cyclestr
+        path = self._rundir / ("%s.submit" % self._runscript_name)
         yield asset(path, path.is_file)
-        runscript = self.runscript()
-        yield runscript
-        self.scheduler.submit_job(runscript=refs(runscript), submit_file=path)
+        deps = self.provisioned_run_directory()
+        yield deps
+        self.scheduler.submit_job(runscript=refs(deps)["runscript"], submit_file=path)
 
     @task
     def run_via_local_execution(self):
         """
         Execution of the run directly on the local system.
         """
-        path = self._run_directory / "completed"
-        yield "%s FV3 run via local execution" % self._cycle_name
+        yield "%s FV3 run via local execution" % self._cyclestr
+        path = self._rundir / "done"
         yield asset(path, path.is_file)
-        yield self.run_directory()
+        deps = self.provisioned_run_directory()
+        yield deps
         cmd = " ".join([self._mpi_env_variables(" "), self.run_cmd(), "&&", f"touch {path}"])
-        execute(cmd=cmd, cwd=self._run_directory, log_output=True)
+        execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
     @task
     def runscript(self):
         """
         A runscript suitable for submission to the scheduler.
         """
-        path = self._run_directory / self._runscript_name
-        yield "%s FV3 runscript" % self._cycle_name
+        yield "%s FV3 runscript" % self._cyclestr
+        path = self._rundir / self._runscript_name
         yield asset(path, path.is_file)
         yield self.run_directory()
         bs = self.scheduler.runscript
-        bs.append(self._mpi_env_variables("\n") + "\n")
+        bs.append(self._mpi_env_variables("\n"))
         bs.append(self.run_cmd())
+        bs.append("touch %s/done" % self._rundir)
         bs.dump(path)
+        os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
     # Public methods
-
-    def create_field_table(self, output_path: OptionalPath) -> None:
-        """
-        Uses the forecast config object to create a Field Table.
-
-        :param output_path: Optional location of output field table.
-        """
-        self._create_user_updated_config(
-            config_class=FieldTableConfig,
-            config_values=self._config.get("field_table", {}),
-            output_path=output_path,
-        )
 
     def create_model_configure(self, output_path: OptionalPath) -> None:
         """
@@ -152,16 +172,16 @@ class FV3Forecast(Driver):
         :return: Path to the run directory.
         """
         # self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
-        self._prepare_config_files(self._run_directory)
+        self._prepare_config_files(self._rundir)
         self._config["cycle_dependent"].update(self._define_boundary_files())
         for file_category in ["static", "cycle_dependent"]:
             self.stage_files(
-                self._run_directory,
+                self._rundir,
                 self._config[file_category],
                 link_files=True,
                 dry_run=self._dry_run,
             )
-        return self._run_directory
+        return self._rundir
 
     def resources(self) -> Mapping:
         """
@@ -172,7 +192,7 @@ class FV3Forecast(Driver):
 
         return {
             "account": self._experiment_config["user"]["account"],
-            "rundir": self._run_directory,
+            "rundir": self._rundir,
             "scheduler": self._experiment_config["platform"]["scheduler"],
             **self._config["jobinfo"],
         }
@@ -199,7 +219,7 @@ class FV3Forecast(Driver):
         return offset, lbcs_config["interval_hours"], end_hour
 
     @property
-    def _cycle_name(self) -> str:
+    def _cyclestr(self) -> str:
         """
         Returns a formatted-for-logging representation of the forecast cycle.
         """
@@ -251,7 +271,7 @@ class FV3Forecast(Driver):
             for call in ("field_table", "model_configure", "input.nml"):
                 log.info(f"Would prepare: {run_directory}/{call}")
         else:
-            self.create_field_table(run_directory / "field_table")
+            # self.create_field_table(run_directory / "field_table")
             self.create_model_configure(run_directory / "model_configure")
             self.create_namelist(run_directory / "input.nml")
 

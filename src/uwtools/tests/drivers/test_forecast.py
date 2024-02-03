@@ -90,32 +90,30 @@ def create_field_table_update_obj():
     return YAMLConfig(fixture_path("FV3_GFS_v16_update.yaml"))
 
 
-@pytest.mark.skip("PM FIXME")
-def test_create_field_table_with_base_file(create_field_table_update_obj, cycle, tmp_path):
-    """
-    Tests create_field_table method with optional base file.
-    """
-    base_file = fixture_path("FV3_GFS_v16.yaml")
-    outfldtbl_file = tmp_path / "field_table_two.FV3_GFS"
-    expected = fixture_path("field_table_from_base.FV3_GFS")
-    config_file = tmp_path / "fcst.yaml"
-    forecast_config = create_field_table_update_obj
-    forecast_config["forecast"]["field_table"]["base_file"] = base_file
-    forecast_config.dump(config_file)
-    FV3Forecast(config_file=config_file, cycle=cycle).create_field_table(outfldtbl_file)
-    assert compare_files(expected, outfldtbl_file)
+# def test_create_field_table_with_base_file(create_field_table_update_obj, cycle, tmp_path):
+#     """
+#     Tests create_field_table method with optional base file.
+#     """
+#     base_file = fixture_path("FV3_GFS_v16.yaml")
+#     outfldtbl_file = tmp_path / "field_table_two.FV3_GFS"
+#     expected = fixture_path("field_table_from_base.FV3_GFS")
+#     config_file = tmp_path / "fcst.yaml"
+#     forecast_config = create_field_table_update_obj
+#     forecast_config["forecast"]["field_table"]["base_file"] = base_file
+#     forecast_config.dump(config_file)
+#     FV3Forecast(config_file=config_file, cycle=cycle).create_field_table(outfldtbl_file)
+#     assert compare_files(expected, outfldtbl_file)
 
 
-@pytest.mark.skip("PM FIXME")
-def test_create_field_table_without_base_file(cycle, tmp_path):
-    """
-    Tests create_field_table without optional base file.
-    """
-    outfldtbl_file = tmp_path / "field_table_one.FV3_GFS"
-    expected = fixture_path("field_table_from_input.FV3_GFS")
-    config_file = fixture_path("FV3_GFS_v16_update.yaml")
-    FV3Forecast(config_file=config_file, cycle=cycle).create_field_table(outfldtbl_file)
-    assert compare_files(expected, outfldtbl_file)
+# def test_create_field_table_without_base_file(cycle, tmp_path):
+#     """
+#     Tests create_field_table without optional base file.
+#     """
+#     outfldtbl_file = tmp_path / "field_table_one.FV3_GFS"
+#     expected = fixture_path("field_table_from_input.FV3_GFS")
+#     config_file = fixture_path("FV3_GFS_v16_update.yaml")
+#     FV3Forecast(config_file=config_file, cycle=cycle).create_field_table(outfldtbl_file)
+#     assert compare_files(expected, outfldtbl_file)
 
 
 def test_create_model_configure_call_private(cycle, tmp_path):
