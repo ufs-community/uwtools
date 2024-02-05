@@ -210,17 +210,21 @@ def _add_subparser_fv3(subparsers: Subparsers) -> ModeChecks:
     parser = _add_subparser(subparsers, STR.fv3, "Execute FV3 tasks")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {task: _add_subparser_fv3_task(subparsers, task) for task in uwtools.api.fv3.tasks}
+    return {
+        task: _add_subparser_fv3_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.fv3.tasks().items()
+    }
 
 
-def _add_subparser_fv3_task(subparsers: Subparsers, task: str) -> ActionChecks:
+def _add_subparser_fv3_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
     """
     Subparser for mode: fv3 <task>
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
     """
-    parser = _add_subparser(subparsers, task, f"Execute FV3 task {task}")
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_config_file(required)
     _add_arg_cycle(required)

@@ -1,11 +1,10 @@
 import datetime as dt
+from typing import Dict
 
 import iotaa
 
 from uwtools.drivers.fv3 import FV3
 from uwtools.types import DefinitePath
-
-tasks = iotaa.tasknames(FV3)
 
 
 def execute(
@@ -36,3 +35,10 @@ def execute(
     )
     getattr(obj, task)()
     return True
+
+
+def tasks() -> Dict[str, str]:
+    """
+    ???
+    """
+    return {task: getattr(FV3, task).__doc__.strip() for task in iotaa.tasknames(FV3)}
