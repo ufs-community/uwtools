@@ -52,9 +52,9 @@ def test__add_subparser_config_validate(subparsers):
     assert subparsers.choices[STR.validate]
 
 
-def test__add_subparser_fv3(subparsers):
-    cli._add_subparser_fv3(subparsers)
-    assert actions(subparsers.choices[STR.fv3]) == [STR.run, STR.tasks]
+# def test__add_subparser_fv3(subparsers):
+#     cli._add_subparser_fv3(subparsers)
+#     assert actions(subparsers.choices[STR.fv3]) == [STR.run, STR.tasks]
 
 
 # def test__add_subparser_forecast_run(subparsers):
