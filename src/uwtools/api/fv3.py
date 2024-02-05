@@ -39,6 +39,8 @@ def execute(
 
 def tasks() -> Dict[str, str]:
     """
-    ???
+    Returns a mapping from task names to their one-line descriptions.
     """
-    return {task: getattr(FV3, task).__doc__.strip() for task in iotaa.tasknames(FV3)}
+    return {
+        task: getattr(FV3, task).__doc__.strip().split("\n")[0] for task in iotaa.tasknames(FV3)
+    }
