@@ -71,7 +71,7 @@ def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.config, "Handle configs")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action)
+    subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         STR.compare: _add_subparser_config_compare(subparsers),
         STR.realize: _add_subparser_config_realize(subparsers),
@@ -209,7 +209,7 @@ def _add_subparser_fv3(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.fv3, "Execute FV3 tasks")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {task: _add_subparser_fv3_task(subparsers, task) for task in uwtools.api.fv3.tasks}
 
 
@@ -220,7 +220,7 @@ def _add_subparser_fv3_task(subparsers: Subparsers, task: str) -> ActionChecks:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     :param task: The task to add a subparser for.
     """
-    parser = _add_subparser(subparsers, task, f"Run FV3 task {task}")
+    parser = _add_subparser(subparsers, task, f"Execute FV3 task {task}")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_config_file(required)
     _add_arg_cycle(required)
@@ -257,7 +257,7 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.rocoto, "Realize and validate Rocoto XML Documents")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action)
+    subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         STR.realize: _add_subparser_rocoto_realize(subparsers),
         STR.validate: _add_subparser_rocoto_validate(subparsers),
@@ -334,7 +334,7 @@ def _add_subparser_template(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.template, "Handle templates")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action)
+    subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         STR.render: _add_subparser_template_render(subparsers),
         STR.translate: _add_subparser_template_translate(subparsers),
@@ -671,15 +671,17 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     return parser
 
 
-def _add_subparsers(parser: Parser, dest: str) -> Subparsers:
+def _add_subparsers(parser: Parser, dest: str, metavar: str) -> Subparsers:
     """
     Add subparsers to a parser.
 
-    :parm parser: The parser to add subparsers to.
+    :param parser: The parser to add subparsers to.
+    :param dest: Name of parser attribute to store subparser under.
+    :param metavar: Name for hierarchy of subparsers as shown by --help.
     :return: The new subparsers object.
     """
     return parser.add_subparsers(
-        dest=dest, metavar="MODE", required=True, title="Positional arguments"
+        dest=dest, metavar=metavar, required=True, title="Positional arguments"
     )
 
 
@@ -751,7 +753,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         description="Unified Workflow Tools", add_help=False, formatter_class=_formatter
     )
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.mode)
+    subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     checks = {
         STR.config: _add_subparser_config(subparsers),
         STR.fv3: _add_subparser_fv3(subparsers),
