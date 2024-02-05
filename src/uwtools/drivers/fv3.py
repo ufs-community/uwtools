@@ -1,5 +1,5 @@
 """
-Drivers for forecast models.
+FV3 driver.
 """
 
 import os
@@ -21,9 +21,9 @@ from uwtools.utils.file import resource_pathobj
 from uwtools.utils.processing import execute
 
 
-class FV3Forecast(Driver):
+class FV3(Driver):
     """
-    A driver for the FV3 forecast model.
+    A driver for the FV3 model.
     """
 
     def __init__(
@@ -34,7 +34,7 @@ class FV3Forecast(Driver):
         batch: bool = False,
     ):
         """
-        Initialize the Forecast Driver.
+        Initialize the driver.
         """
 
         super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
@@ -204,7 +204,7 @@ class FV3Forecast(Driver):
         """
         The path to the file containing the schema to validate the config file against.
         """
-        return resource_pathobj("FV3Forecast.jsonschema")
+        return resource_pathobj("fv3.jsonschema")
 
     # Private methods
 
@@ -283,6 +283,3 @@ class FV3Forecast(Driver):
         Returns the name of the runscript.
         """
         return "runscript"
-
-
-CLASSES = {"FV3": FV3Forecast}

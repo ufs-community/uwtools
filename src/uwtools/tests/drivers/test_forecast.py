@@ -375,7 +375,7 @@ def test_FV3Forecast_run(batch, cycle, fv3_run_assets, method):
 
 
 def test_FV3Forecast_schema_filesToStage():
-    errors = validator("FV3Forecast.jsonschema", "$defs", "filesToStage")
+    errors = validator("fv3.jsonschema", "$defs", "filesToStage")
     # The input must be an dict:
     assert "is not of type 'object'" in errors([])
     # A str -> str dict is ok:

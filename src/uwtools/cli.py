@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple
 
 import uwtools.api.config
-import uwtools.api.forecast
+import uwtools.api.fv3
 import uwtools.api.rocoto
 import uwtools.api.template
 import uwtools.config.jinja2
@@ -49,7 +49,7 @@ def main() -> None:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
             STR.config: _dispatch_config,
-            STR.forecast: _dispatch_forecast,
+            STR.fv3: _dispatch_fv3,
             STR.rocoto: _dispatch_rocoto,
             STR.template: _dispatch_template,
         }
@@ -198,99 +198,52 @@ def _dispatch_config_validate(args: Args) -> bool:
     return uwtools.api.config.validate(schema_file=args[STR.schemafile], config=args[STR.infile])
 
 
-# Mode forecast
+# Mode fv3
 
 
-def _add_subparser_forecast(subparsers: Subparsers) -> ModeChecks:
+def _add_subparser_fv3(subparsers: Subparsers) -> ModeChecks:
     """
-    Subparser for mode: forecast
+    Subparser for mode: fv3
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.forecast, "Configure and run forecasts")
+    parser = _add_subparser(subparsers, STR.fv3, "Execute FV3 tasks")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action)
-    return {
-        STR.run: _add_subparser_forecast_run(subparsers),
-        STR.tasks: _add_subparser_forecast_tasks(subparsers),
-    }
+    return {task: _add_subparser_fv3_task(subparsers, task) for task in uwtools.api.fv3.tasks}
 
 
-def _add_subparser_forecast_run(subparsers: Subparsers) -> ActionChecks:
+def _add_subparser_fv3_task(subparsers: Subparsers, task: str) -> ActionChecks:
     """
-    Subparser for mode: forecast run
+    Subparser for mode: fv3 <task>
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
     """
-    choices = list(uwtools.api.forecast.CLASSES.keys())
-    parser = _add_subparser(subparsers, STR.run, "Run a forecast")
+    parser = _add_subparser(subparsers, task, f"Run FV3 task {task}")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_config_file(required)
     _add_arg_cycle(required)
-    _add_arg_model(required, choices=choices)
     optional = _basic_setup(parser)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
-    _add_arg_task(optional, default=uwtools.api.forecast.DEFAULT_TASK)
     checks = _add_args_verbosity(optional)
     return checks
 
 
-def _add_subparser_forecast_tasks(subparsers: Subparsers) -> ActionChecks:
+def _dispatch_fv3(args: Args) -> bool:
     """
-    Subparser for mode: forecast tasks
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    choices = list(uwtools.api.forecast.CLASSES.keys())
-    parser = _add_subparser(subparsers, STR.tasks, "Get names of forecast tasks")
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_model(required, choices=choices)
-    optional = _basic_setup(parser)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_forecast(args: Args) -> bool:
-    """
-    Dispatch logic for forecast mode.
+    Dispatch logic for fv3 mode.
 
     :param args: Parsed command-line args.
     """
-    return {
-        STR.run: _dispatch_forecast_run,
-        STR.tasks: _dispatch_forecast_tasks,
-    }[
-        args[STR.action]
-    ](args)
-
-
-def _dispatch_forecast_run(args: Args) -> bool:
-    """
-    Dispatch logic for forecast run action.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.forecast.run(
-        model=args[STR.model],
-        cycle=args[STR.cycle],
+    return uwtools.api.fv3.exec(
+        task=args[STR.action],
         config_file=args[STR.cfgfile],
+        cycle=args[STR.cycle],
         batch=args[STR.batch],
-        task=args[STR.task],
         dry_run=args[STR.dryrun],
     )
-
-
-def _dispatch_forecast_tasks(args: Args) -> bool:
-    """
-    Dispatch logic for forecast tasks action.
-
-    :param args: Parsed command-line args.
-    """
-    model = args[STR.model]
-    tasks = uwtools.api.forecast.tasks(model=model)
-    log.info("%s tasks: %s", model, ", ".join(tasks))
-    return True
 
 
 # Mode rocoto
@@ -801,7 +754,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     subparsers = _add_subparsers(parser, STR.mode)
     checks = {
         STR.config: _add_subparser_config(subparsers),
-        STR.forecast: _add_subparser_forecast(subparsers),
+        STR.fv3: _add_subparser_fv3(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),
         STR.template: _add_subparser_template(subparsers),
     }
@@ -836,7 +789,7 @@ class STR:
     file1path: str = "file_1_path"
     file2fmt: str = "file_2_format"
     file2path: str = "file_2_path"
-    forecast: str = "forecast"
+    fv3: str = "fv3"
     help: str = "help"
     infile: str = "input_file"
     infmt: str = "input_format"

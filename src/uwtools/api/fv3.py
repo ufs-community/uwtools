@@ -3,63 +3,37 @@ from typing import List
 
 import iotaa
 
-from uwtools.drivers.forecast import CLASSES
+from uwtools.drivers.fv3 import FV3
 from uwtools.types import DefinitePath
 
-DEFAULT_TASK = "run"
+tasks = iotaa.tasknames(FV3)
 
 
-def run(  # pylint: disable=missing-function-docstring
-    model: str,
-    cycle: dt.datetime,
+def exec(
+    task: str,
     config_file: DefinitePath,
+    cycle: dt.datetime,
     batch: bool = False,
-    task: str = DEFAULT_TASK,
     dry_run: bool = False,
 ) -> bool:
-    obj = CLASSES[model](
-        batch=batch,
+    """
+    Execute an FV3 task.
+
+    If ``batch`` is specified, a runscript will be written and submitted to the batch system.
+    Otherwise, the forecast will be run directly on the current system without a runscript.
+
+    :param task: The task to execute
+    :param config_file: Path to UW YAML config file
+    :param cycle: The cycle to run
+    :param batch: Submit run to the batch system
+    :param dry_run: Do not run forecast, just report what would have been done
+    :return: True if task completes without raising an exception
+    """
+    obj = FV3(
         config_file=config_file,
         cycle=cycle,
+        batch=batch,
         dry_run=dry_run,
     )
     getattr(obj, task)()
     return True
-
-
-def tasks(model: str) -> List[str]:  # pylint: disable=missing-function-docstring
-    return iotaa.tasknames(CLASSES[model])
-
-
-# The following statement dynamically interpolates values into run()'s docstring, which will not
-# work if the docstring is inlined in the function. It must remain a separate statement to avoid
-# hardcoding values into it.
-
-run.__doc__ = """
-Run a forecast model.
-
-If ``batch`` is specified, a runscript will be written and submitted to the batch system. Otherwise,
-the forecast will be run directly on the current system without a runscript.
-
-:param model: One of: {models}
-:param cycle: The cycle to run
-:param config_file: Path to config file for the forecast run
-:param batch: Submit run to the batch system
-:param dry_run: Do not run forecast, just report what would have been done
-:return: Success status of requested operation
-""".format(
-    models=", ".join(list(CLASSES.keys()))
-).strip()
-
-
-# The following statement dynamically interpolates values into tasks()'s docstring, which will not
-# work if the docstring is inlined in the function. It must remain a separate statement to avoid
-# hardcoding values into it.
-
-tasks.__doc__ = """
-Returns the names of iotaa tasks in the given object.
-
-:param model: One of: {models}
-""".format(
-    models=", ".join(list(CLASSES.keys()))
-).strip()
