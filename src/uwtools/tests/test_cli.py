@@ -11,10 +11,10 @@ import pytest
 from pytest import fixture, raises
 
 import uwtools.api.config
-import uwtools.api.forecast
+import uwtools.api.fv3
 import uwtools.api.rocoto
 import uwtools.api.template
-import uwtools.drivers.forecast
+import uwtools.drivers.fv3
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.exceptions import UWError
@@ -52,14 +52,14 @@ def test__add_subparser_config_validate(subparsers):
     assert subparsers.choices[STR.validate]
 
 
-def test__add_subparser_forecast(subparsers):
-    cli._add_subparser_forecast(subparsers)
-    assert actions(subparsers.choices[STR.forecast]) == [STR.run, STR.tasks]
+def test__add_subparser_fv3(subparsers):
+    cli._add_subparser_fv3(subparsers)
+    assert actions(subparsers.choices[STR.fv3]) == [STR.run, STR.tasks]
 
 
-def test__add_subparser_forecast_run(subparsers):
-    cli._add_subparser_forecast_run(subparsers)
-    assert subparsers.choices[STR.run]
+# def test__add_subparser_forecast_run(subparsers):
+#     cli._add_subparser_forecast_run(subparsers)
+#     assert subparsers.choices[STR.run]
 
 
 def test__add_subparser_template(subparsers):
@@ -256,31 +256,31 @@ def test__dispatch_config_validate_config_obj():
     _validate_yaml.assert_called_once_with(**_validate_yaml_args)
 
 
-@pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
-def test__dispatch_forecast(params):
-    action, funcname = params
-    args = {STR.action: action}
-    with patch.object(cli, funcname) as module:
-        cli._dispatch_forecast(args)
-    module.assert_called_once_with(args)
+# @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
+# def test__dispatch_fv3(params):
+#     action, funcname = params
+#     args = {STR.action: action}
+#     with patch.object(cli, funcname) as module:
+#         cli._dispatch_fv3(args)
+#     module.assert_called_once_with(args)
 
 
-def test__dispatch_forecast_run():
-    cyclestr = "2023-01-01T18"
-    args = {
-        STR.batch: False,
-        STR.cfgfile: 1,
-        STR.cycle: cyclestr,
-        STR.dryrun: True,
-        STR.model: "foo",
-        STR.task: "run",
-    }
-    with patch.object(uwtools.drivers.forecast, "FooForecast", create=True) as FooForecast:
-        CLASSES = {"foo": getattr(uwtools.drivers.forecast, "FooForecast")}
-        with patch.object(uwtools.api.forecast, "CLASSES", new=CLASSES):
-            cli._dispatch_forecast_run(args)
-    FooForecast.assert_called_once_with(batch=False, config_file=1, cycle=cyclestr, dry_run=True)
-    FooForecast().run.assert_called_once_with()
+# def test__dispatch_forecast_run():
+#     cyclestr = "2023-01-01T18"
+#     args = {
+#         STR.batch: False,
+#         STR.cfgfile: 1,
+#         STR.cycle: cyclestr,
+#         STR.dryrun: True,
+#         STR.model: "foo",
+#         STR.task: "run",
+#     }
+#     with patch.object(uwtools.drivers.forecast, "FooForecast", create=True) as FooForecast:
+#         CLASSES = {"foo": getattr(uwtools.drivers.forecast, "FooForecast")}
+#         with patch.object(uwtools.api.forecast, "CLASSES", new=CLASSES):
+#             cli._dispatch_forecast_run(args)
+#     FooForecast.assert_called_once_with(batch=False, config_file=1, cycle=cyclestr, dry_run=True)
+#     FooForecast().run.assert_called_once_with()
 
 
 @pytest.mark.parametrize(

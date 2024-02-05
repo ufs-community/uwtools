@@ -237,7 +237,7 @@ def _dispatch_fv3(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.fv3.exec(
+    return uwtools.api.fv3.execute(
         task=args[STR.action],
         config_file=args[STR.cfgfile],
         cycle=args[STR.cycle],

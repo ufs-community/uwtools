@@ -1,22 +1,23 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
-Tests for forecast driver.
+Tests for FV3 driver.
 """
 import datetime as dt
 import logging
 
 # import os
 from pathlib import Path
-from unittest.mock import ANY, patch
+from unittest.mock import patch  # ANY
 
 import pytest
 from pytest import fixture  # , raises
 
 # from uwtools import scheduler
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.drivers import forecast
+
+# from uwtools.drivers import fv3
 from uwtools.drivers.driver import Driver
-from uwtools.drivers.forecast import FV3Forecast
+from uwtools.drivers.fv3 import FV3
 from uwtools.logging import log
 from uwtools.tests.support import fixture_path, logged, validator  # compare_files
 
@@ -54,7 +55,7 @@ def test_schema_file(cycle):
     """
     config_file = fixture_path("forecast.yaml")
     with patch.object(Driver, "_validate", return_value=True):
-        forecast = FV3Forecast(config_file=config_file, cycle=cycle)
+        forecast = FV3(config_file=config_file, cycle=cycle)
     path = Path(forecast.schema_file)
     assert path.is_file()
 
@@ -157,7 +158,7 @@ def test_create_namelist_with_base_file(create_namelist_assets, cycle, tmp_path)
     }
     fcst_config_file = tmp_path / "fcst.yml"
     YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
-    FV3Forecast(config_file=fcst_config_file, cycle=cycle).create_namelist(outnml_file)
+    FV3(config_file=fcst_config_file, cycle=cycle).create_namelist(outnml_file)
     expected = """
 &salad
     base = 'kale'
@@ -190,7 +191,7 @@ def test_create_namelist_without_base_file(create_namelist_assets, cycle, tmp_pa
     }
     fcst_config_file = tmp_path / "fcst.yml"
     YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
-    FV3Forecast(config_file=fcst_config_file, cycle=cycle).create_namelist(outnml_file)
+    FV3(config_file=fcst_config_file, cycle=cycle).create_namelist(outnml_file)
     expected = """
 &salad
     base = 'kale'
@@ -209,8 +210,8 @@ def test_forecast_run_cmd(cycle):
     Tests that the command to be used to run the forecast executable was built successfully.
     """
     config_file = fixture_path("forecast.yaml")
-    with patch.object(FV3Forecast, "_validate", return_value=True):
-        fcstobj = FV3Forecast(config_file=config_file, cycle=cycle)
+    with patch.object(FV3, "_validate", return_value=True):
+        fcstobj = FV3(config_file=config_file, cycle=cycle)
         srun_expected = "srun --export=NONE test_exec.py"
         fcstobj._config["runtime_info"]["mpi_args"] = ["--export=NONE"]
         assert srun_expected == fcstobj.run_cmd()
@@ -257,8 +258,8 @@ def test_forecast_run_cmd(cycle):
 #     for dst_fn in files_to_stage.keys():
 #         assert not (run_directory / dst_fn).is_file()
 #     # Ask a forecast object to stage the files to the run directory:
-#     FV3Forecast.create_directory_structure(run_directory)
-#     FV3Forecast.stage_files(run_directory, files_to_stage, link_files=link_files)
+#     FV3.create_directory_structure(run_directory)
+#     FV3.stage_files(run_directory, files_to_stage, link_files=link_files)
 #     # Test that all of the destination files now exist:
 #     link_or_file = Path.is_symlink if link_files else Path.is_file
 #     for dst_rel_path, src_paths in files_to_stage.items():
@@ -293,22 +294,21 @@ def fv3_mpi_assets():
     ]
 
 
-@pytest.mark.skip("PM FIXME")
-def test_run_direct(cycle, fv3_mpi_assets, fv3_run_assets):
-    _, config_file, config = fv3_run_assets
-    expected_command = " ".join(fv3_mpi_assets)
-    with patch.object(FV3Forecast, "_validate", return_value=True):
-        with patch.object(forecast, "execute") as execute:
-            execute.return_value = (True, "")
-            fcstobj = FV3Forecast(config_file=config_file, cycle=cycle)
-            with patch.object(fcstobj, "_config", config):
-                fcstobj.run()
-            execute.assert_called_once_with(cmd=expected_command, cwd=ANY, log_output=True)
+# def test_run_direct(cycle, fv3_mpi_assets, fv3_run_assets):
+#     _, config_file, config = fv3_run_assets
+#     expected_command = " ".join(fv3_mpi_assets)
+#     with patch.object(FV3, "_validate", return_value=True):
+#         with patch.object(forecast, "execute") as execute:
+#             execute.return_value = (True, "")
+#             fcstobj = FV3(config_file=config_file, cycle=cycle)
+#             with patch.object(fcstobj, "_config", config):
+#                 fcstobj.run()
+#             execute.assert_called_once_with(cmd=expected_command, cwd=ANY, log_output=True)
 
 
 @pytest.mark.skip("PM FIXME")
 @pytest.mark.parametrize("batch", [True, False])
-def test_FV3Forecast_run_dry_run(batch, caplog, cycle, fv3_mpi_assets, fv3_run_assets):
+def test_FV3_run_dry_run(batch, caplog, cycle, fv3_mpi_assets, fv3_run_assets):
     log.setLevel(logging.INFO)
     config_file, config = fv3_run_assets
     if batch:
@@ -323,8 +323,8 @@ def test_FV3Forecast_run_dry_run(batch, caplog, cycle, fv3_mpi_assets, fv3_run_a
         expected_lines = batch_components
     else:
         expected_lines = [" ".join(fv3_mpi_assets)]
-    with patch.object(FV3Forecast, "_validate", return_value=True):
-        fcstobj = FV3Forecast(config_file=config_file, cycle=cycle, dry_run=True, batch=batch)
+    with patch.object(FV3, "_validate", return_value=True):
+        fcstobj = FV3(config_file=config_file, cycle=cycle, dry_run=True, batch=batch)
         with patch.object(fcstobj, "_config", config):
             fcstobj.run()
     for line in expected_lines:
@@ -335,9 +335,9 @@ def test_FV3Forecast_run_dry_run(batch, caplog, cycle, fv3_mpi_assets, fv3_run_a
 @pytest.mark.parametrize(
     "batch,method", [(True, "_run_via_batch_submission"), (False, "_run_via_local_execution")]
 )
-def test_FV3Forecast_run(batch, cycle, fv3_run_assets, method):
+def test_FV3_run(batch, cycle, fv3_run_assets, method):
     config_file, _ = fv3_run_assets
-    fcstobj = FV3Forecast(config_file=config_file, cycle=cycle, batch=batch)
+    fcstobj = FV3(config_file=config_file, cycle=cycle, batch=batch)
     with patch.object(fcstobj, method) as helper:
         helper.return_value = (True, None)
         assert fcstobj.run() is True
@@ -345,9 +345,9 @@ def test_FV3Forecast_run(batch, cycle, fv3_run_assets, method):
 
 
 # @pytest.mark.skip("PM FIXME")
-# def test_FV3Forecast__run_via_batch_submission(cycle, fv3_run_assets):
+# def test_FV3__run_via_batch_submission(cycle, fv3_run_assets):
 #     batch_script, config_file, config = fv3_run_assets
-#     fcstobj = FV3Forecast(config_file=config_file, cycle=cycle, batch_script=batch_script)
+#     fcstobj = FV3(config_file=config_file, cycle=cycle, batch_script=batch_script)
 #     with patch.object(fcstobj, "_config", config):
 #         with patch.object(scheduler, "execute") as execute:
 #             with patch.object(Driver, "_create_user_updated_config"):
@@ -359,9 +359,9 @@ def test_FV3Forecast_run(batch, cycle, fv3_run_assets, method):
 
 
 # @pytest.mark.skip("PM FIXME")
-# def test_FV3Forecast__run_via_local_execution(cycle, fv3_run_assets):
+# def test_FV3__run_via_local_execution(cycle, fv3_run_assets):
 #     _, config_file, config = fv3_run_assets
-#     fcstobj = FV3Forecast(config_file=config_file, cycle=cycle)
+#     fcstobj = FV3(config_file=config_file, cycle=cycle)
 #     with patch.object(fcstobj, "_config", config):
 #         with patch.object(forecast, "execute") as execute:
 #             execute.return_value = (True, "")
@@ -374,7 +374,7 @@ def test_FV3Forecast_run(batch, cycle, fv3_run_assets, method):
 # Schema tests
 
 
-def test_FV3Forecast_schema_filesToStage():
+def test_FV3_schema_filesToStage():
     errors = validator("fv3.jsonschema", "$defs", "filesToStage")
     # The input must be an dict:
     assert "is not of type 'object'" in errors([])

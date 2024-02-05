@@ -1,5 +1,4 @@
 import datetime as dt
-from typing import List
 
 import iotaa
 
@@ -9,7 +8,7 @@ from uwtools.types import DefinitePath
 tasks = iotaa.tasknames(FV3)
 
 
-def exec(
+def execute(
     task: str,
     config_file: DefinitePath,
     cycle: dt.datetime,
