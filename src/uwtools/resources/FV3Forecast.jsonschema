@@ -209,6 +209,7 @@
               "type": "array"
             },
             "threads": {
+              "minimum": 0,
               "type": "integer"
             }
           },

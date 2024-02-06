@@ -579,7 +579,7 @@ def test_FV3Forecast_schema_forecast_namelist(fcstprop):
     errors = fcstprop("namelist")
     # Just base_file is ok:
     assert not errors(base_file)
-    # But base_file must be a string:
+    # base_file must be a string:
     assert "88 is not of type 'string'" in errors({"base_file": 88})
     # Just update_values is ok:
     assert not errors(update_values)
@@ -603,6 +603,34 @@ def test_FV3Forecast_schema_forecast_namelist_update_values(fcstprop):
     assert "does not have enough properties" in errors({})
     # At least one val/var pair ir required:
     assert "does not have enough properties" in errors({"nml": {}})
+
+
+def test_FV3Forecast_schema_forecast_run_dir(fcstprop):
+    errors = fcstprop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+def test_FV3Forecast_schema_forecast_runtime_info(fcstprop):
+    mpi_args = {"mpi_args": ["--flag1", "--flag2"]}
+    threads = {"threads": 32}
+    errors = fcstprop("runtime_info")
+    # mpi_args is a list of strings:
+    assert not errors(mpi_args)
+    # mpi_args may be empty:
+    assert not errors({"mpi_args": []})
+    # String values are expected:
+    assert "88 is not of type 'string'" in errors({"mpi_args": [88]})
+    # threads must be non-negative, and an integer:
+    assert not errors(threads)
+    assert not errors({"threads": 0})
+    assert "-1 is less than the minimum of 0" in errors({"threads": -1})
+    assert "3.14 is not of type 'integer'" in errors({"threads": 3.14})
+    # Both properties are ok:
+    assert not errors({**mpi_args, **threads})
+    # Additional properties are not allowed:
+    assert "Additional properties are not allowed" in errors({**mpi_args, **threads, "foo": "bar"})
 
 
 def test_FV3Forecast_schema_platform():
