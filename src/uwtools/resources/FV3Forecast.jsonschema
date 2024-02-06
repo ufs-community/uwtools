@@ -42,6 +42,18 @@
         },
         "field_table": {
           "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
           "properties": {
             "base_file": {
               "type": "string"
@@ -110,9 +122,6 @@
               "type": "object"
             }
           },
-          "required": [
-            "base_file"
-          ],
           "type": "object"
         },
         "length": {
