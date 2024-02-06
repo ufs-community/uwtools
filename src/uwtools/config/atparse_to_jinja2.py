@@ -32,7 +32,7 @@ def convert(
         f_out.write("\n".join(lines()))
 
     if dry_run:
-        for line in lines():
+        for line in "\n".join(lines()).strip().split("\n"):
             log.info(line)
     else:
         with writable(output_file) as f:
