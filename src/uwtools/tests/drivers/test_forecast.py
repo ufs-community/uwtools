@@ -502,10 +502,14 @@ def test_FV3Forecast_schema_forecast_field_table_update_values(field_table_vals)
         with_remove(val1, "foo", "profile_type", "surface_value")
     )
     # surface_value is numeric:
-    assert "None is not of type 'number'" in errors(
-        with_replace(val1, None, "foo", "profile_type", "surface_value")
+    assert "'a string' is not of type 'number'" in errors(
+        with_replace(val1, "a string", "foo", "profile_type", "surface_value")
     )
     # top_value is required if name is "profile":
     assert "'top_value' is a required property" in errors(
         with_remove(val2, "bar", "profile_type", "top_value")
+    )
+    # top_value is numeric:
+    assert "'a string' is not of type 'number'" in errors(
+        with_replace(val2, "a string", "bar", "profile_type", "top_value")
     )
