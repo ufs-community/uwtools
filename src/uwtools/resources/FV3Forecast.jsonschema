@@ -69,13 +69,22 @@
                     },
                     "profile_type": {
                       "additionalProperties": false,
-                      "if": {
-                        "properties": {
-                          "name": {
-                            "const": "profile"
+                      "allOf": [
+                        {
+                          "if": {
+                            "properties": {
+                              "name": {
+                                "const": "profile"
+                              }
+                            }
+                          },
+                          "then": {
+                            "required": [
+                              "top_value"
+                            ]
                           }
                         }
-                      },
+                      ],
                       "properties": {
                         "name": {
                           "enum": [
@@ -94,11 +103,6 @@
                         "name",
                         "surface_value"
                       ],
-                      "then": {
-                        "required": [
-                          "top_value"
-                        ]
-                      },
                       "type": "object"
                     },
                     "units": {
