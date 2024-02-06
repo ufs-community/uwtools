@@ -164,7 +164,7 @@ class FV3Forecast(Driver):
         """
 
         return {
-            "account": self._experiment_config["user"]["account"],
+            "account": self._experiment_config["platform"]["account"],
             "scheduler": self._experiment_config["platform"]["scheduler"],
             **self._config["jobinfo"],
         }
