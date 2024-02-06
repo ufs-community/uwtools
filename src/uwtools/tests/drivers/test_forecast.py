@@ -17,7 +17,14 @@ from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.logging import log
-from uwtools.tests.support import compare_files, fixture_path, logged, validator
+from uwtools.tests.support import (
+    compare_files,
+    fixture_path,
+    logged,
+    validator,
+    with_remove,
+    with_replace,
+)
 from uwtools.types import ExistAct
 
 
@@ -423,3 +430,82 @@ def test_FV3Forecast_schema_filesToStage():
     assert "not valid" in errors({"file1": True})
     # Non-string list elements are not allowed:
     assert "not valid" in errors({"dir": [88]})
+
+
+@fixture
+def field_table_vals():
+    return (
+        {
+            "foo": {
+                "longname": "foofoo",
+                "profile_type": {"name": "fixed", "surface_value": 1},
+                "units": "cubits",
+            }
+        },
+        {
+            "bar": {
+                "longname": "barbar",
+                "profile_type": {"name": "profile", "surface_value": 2, "top_value": 3},
+                "units": "rods",
+            }
+        },
+    )
+
+
+# def test_FV3Forecast_schema_forecast_field_table(field_table_vals):
+#     val1, val2 = field_table_vals
+#     base_file = {"base_file": "/some/path"}
+#     errors = validator(
+#         "FV3Forecast.jsonschema", "properties", "forecast", "properties", "field_table"
+#     )
+#     # Just a base file is ok:
+#     assert not errors(base_file)
+
+
+def test_FV3Forecast_schema_forecast_field_table_update_values(field_table_vals):
+    val1, val2 = field_table_vals
+    errors = validator(
+        "FV3Forecast.jsonschema",
+        "properties",
+        "forecast",
+        "properties",
+        "field_table",
+        "properties",
+        "update_values",
+    )
+    # A "fixed" profile-type entry is ok:
+    assert not errors(val1)
+    # A "profile" profile-type entry is ok:
+    assert not errors(val2)
+    # A combination of two valid entries is ok:
+    assert not errors({**val1, **val2})
+    # At least one entry is required:
+    assert "does not have enough properties" in errors({})
+    # longname is required:
+    assert "'longname' is a required property" in errors(with_remove(val1, "foo", "longname"))
+    # longname must be a string:
+    assert "88 is not of type 'string'" in errors(with_replace(val1, 88, "foo", "longname"))
+    # units is required:
+    assert "'units' is a required property" in errors(with_remove(val1, "foo", "units"))
+    # units must be a string:
+    assert "88 is not of type 'string'" in errors(with_replace(val1, 88, "foo", "units"))
+    # profile_type is required:
+    assert "'profile_type' is a required property" in errors(
+        with_remove(val1, "foo", "profile_type")
+    )
+    # profile_type name has to be "fixed" or "profile":
+    assert "'bogus' is not one of ['fixed', 'profile']" in errors(
+        with_replace(val1, "bogus", "foo", "profile_type", "name")
+    )
+    # surface_value is required:
+    assert "'surface_value' is a required property" in errors(
+        with_remove(val1, "foo", "profile_type", "surface_value")
+    )
+    # surface_value is numeric:
+    assert "None is not of type 'number'" in errors(
+        with_replace(val1, None, "foo", "profile_type", "surface_value")
+    )
+    # top_value is required if name is "profile":
+    assert "'top_value' is a required property" in errors(
+        with_remove(val2, "bar", "profile_type", "top_value")
+    )

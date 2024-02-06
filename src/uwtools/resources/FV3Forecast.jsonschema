@@ -68,44 +68,38 @@
                       "type": "string"
                     },
                     "profile_type": {
-                      "oneOf": [
-                        {
-                          "additionalProperties": false,
-                          "properties": {
-                            "name": {
-                              "const": "fixed"
-                            },
-                            "surface_value": {
-                              "type": "number"
-                            }
-                          },
-                          "required": [
-                            "name",
-                            "surface_value"
-                          ],
-                          "type": "object"
-                        },
-                        {
-                          "additionalProperties": false,
-                          "properties": {
-                            "name": {
-                              "const": "profile"
-                            },
-                            "surface_value": {
-                              "type": "number"
-                            },
-                            "top_value": {
-                              "type": "number"
-                            }
-                          },
-                          "required": [
-                            "name",
-                            "surface_value",
-                            "top_value"
-                          ],
-                          "type": "object"
+                      "additionalProperties": false,
+                      "if": {
+                        "properties": {
+                          "name": {
+                            "const": "profile"
+                          }
                         }
-                      ]
+                      },
+                      "properties": {
+                        "name": {
+                          "enum": [
+                            "fixed",
+                            "profile"
+                          ]
+                        },
+                        "surface_value": {
+                          "type": "number"
+                        },
+                        "top_value": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "surface_value"
+                      ],
+                      "then": {
+                        "required": [
+                          "top_value"
+                        ]
+                      },
+                      "type": "object"
                     },
                     "units": {
                       "type": "string"
