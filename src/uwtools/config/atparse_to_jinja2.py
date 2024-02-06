@@ -25,12 +25,12 @@ def convert(
 
     def lines() -> Generator[str, Any, Any]:
         with readable(input_file) as f_in:
-            for line in f_in.read().strip().split("\n"):
-                yield _replace(line.strip())
+            for line in f_in.read().split("\n"):
+                yield _replace(line)
 
     def write(f_out: IO) -> None:
         for line in lines():
-            print(_replace(line.strip()), file=f_out)
+            print(_replace(line), file=f_out)
 
     if dry_run:
         for line in lines():
@@ -54,5 +54,5 @@ def _replace(atline: str) -> str:
         # Set maxsplits to 1 so only first ] is captured, which should be the
         # bracket closing @[.
         after_atparse = atline.split("@[", 1)[1].split("]", 1)[1]
-        atline = "".join([before_atparse, "{{", within_atparse, "}}", after_atparse])
+        atline = "".join([before_atparse, "{{ ", within_atparse, " }}", after_atparse])
     return atline

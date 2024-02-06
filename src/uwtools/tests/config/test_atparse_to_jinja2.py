@@ -18,83 +18,114 @@ from uwtools.utils.file import _stdinproxy
 
 
 @fixture
-def atparselines():
-    return ["@[greeting] to the @[subject]", "@[flowers] are @[color]"]
+def txt_atparse():
+    return """
+@[greeting] to the @[subject]
+@[flowers] are @[color]
+""".strip()
 
 
 @fixture
-def atparsefile(atparselines, tmp_path):
+def txt_jinja2():
+    return """
+{{ greeting }} to the {{ subject }}
+{{ flowers }} are {{ color }}
+""".strip()
+
+
+@fixture
+def atparsefile(txt_atparse, tmp_path):
     path = tmp_path / "atparse.txt"
     with open(path, "w", encoding="utf-8") as f:
-        for line in atparselines:
-            print(line, file=f)
+        print(txt_atparse, file=f)
     return path
-
-
-@fixture
-def jinja2txt():
-    return "{{greeting}} to the {{subject}}\n{{flowers}} are {{color}}\n"
 
 
 # Test functions
 
 
-def test_convert_input_file_to_output_file(atparsefile, capsys, jinja2txt, tmp_path):
+def test_convert_input_file_to_output_file(atparsefile, capsys, txt_jinja2, tmp_path):
     outfile = tmp_path / "outfile"
     atparse_to_jinja2.convert(input_file=atparsefile, output_file=outfile)
     with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read() == jinja2txt
+        assert f.read().strip() == txt_jinja2
     streams = capsys.readouterr()
     assert not streams.err
     assert not streams.out
 
 
-def test_convert_input_file_to_logging(atparsefile, caplog, capsys, jinja2txt, tmp_path):
+def test_convert_input_file_to_logging(atparsefile, caplog, capsys, txt_jinja2, tmp_path):
     log.setLevel(logging.INFO)
     outfile = tmp_path / "outfile"
     atparse_to_jinja2.convert(input_file=atparsefile, dry_run=True)
     streams = capsys.readouterr()
-    assert "\n".join(record.message for record in caplog.records) == jinja2txt.strip()
+    assert "\n".join(record.message for record in caplog.records).strip() == txt_jinja2
     assert not streams.out
     assert not outfile.is_file()
 
 
-def test_convert_input_file_to_stdout(atparsefile, capsys, jinja2txt):
+def test_convert_input_file_to_stdout(atparsefile, capsys, txt_jinja2):
     atparse_to_jinja2.convert(input_file=atparsefile)
     streams = capsys.readouterr()
     assert not streams.err
-    assert streams.out == jinja2txt
+    assert streams.out.strip() == txt_jinja2
 
 
-def test_convert_stdin_to_file(atparselines, capsys, jinja2txt, tmp_path):
+def test_convert_preserve_whitespace(tmp_path):
+    atparse = """
+@[first_entry]
+  @[second_entry]
+  @[third_entry]
+    @[fourth_entry]
+
+        @[fifth_entry]
+""".strip()
+    infile = tmp_path / "atparse"
+    with open(infile, "w", encoding="utf-8") as f:
+        f.write(atparse)
+    outfile = tmp_path / "jinja2"
+    atparse_to_jinja2.convert(input_file=infile, output_file=outfile)
+    expected = """
+{{ first_entry }}
+  {{ second_entry }}
+  {{ third_entry }}
+    {{ fourth_entry }}
+
+        {{ fifth_entry }}
+""".strip()
+    with open(outfile, "r", encoding="utf-8") as f:
+        assert f.read().strip() == expected
+
+
+def test_convert_stdin_to_file(txt_atparse, capsys, txt_jinja2, tmp_path):
     outfile = tmp_path / "outfile"
     _stdinproxy.cache_clear()
-    with patch.object(sys, "stdin", new=StringIO("\n".join(atparselines))):
+    with patch.object(sys, "stdin", new=StringIO(txt_atparse)):
         atparse_to_jinja2.convert(output_file=outfile)
     with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read() == jinja2txt
+        assert f.read().strip() == txt_jinja2
     streams = capsys.readouterr()
     assert not streams.err
     assert not streams.out
 
 
-def test_convert_stdin_to_logging(atparselines, caplog, jinja2txt, tmp_path):
+def test_convert_stdin_to_logging(txt_atparse, caplog, txt_jinja2, tmp_path):
     log.setLevel(logging.INFO)
     outfile = tmp_path / "outfile"
     _stdinproxy.cache_clear()
-    with patch.object(sys, "stdin", new=StringIO("\n".join(atparselines))):
+    with patch.object(sys, "stdin", new=StringIO(txt_atparse)):
         atparse_to_jinja2.convert(output_file=outfile, dry_run=True)
-    assert "\n".join(record.message for record in caplog.records) == jinja2txt.strip()
+    assert "\n".join(record.message for record in caplog.records) == txt_jinja2.strip()
     assert not outfile.is_file()
 
 
-def test_convert_stdin_to_stdout(atparselines, capsys, jinja2txt):
+def test_convert_stdin_to_stdout(txt_atparse, capsys, txt_jinja2):
     _stdinproxy.cache_clear()
-    with patch.object(sys, "stdin", new=StringIO("\n".join(atparselines))):
+    with patch.object(sys, "stdin", new=StringIO(txt_atparse)):
         atparse_to_jinja2.convert()
     streams = capsys.readouterr()
     assert not streams.err
-    assert streams.out == jinja2txt
+    assert streams.out.strip() == txt_jinja2
 
 
 def test__replace():
@@ -103,4 +134,4 @@ def test__replace():
     assert atparse_to_jinja2._replace(line_without) == line_without
     # A line with atparse syntax should be returned updated to Jinja2 syntax:
     line_with = "@[greeting] to the @[subject]"
-    assert atparse_to_jinja2._replace(line_with) == "{{greeting}} to the {{subject}}"
+    assert atparse_to_jinja2._replace(line_with) == "{{ greeting }} to the {{ subject }}"
