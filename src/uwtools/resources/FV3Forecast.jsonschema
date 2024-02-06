@@ -4,17 +4,7 @@
       "minProperties": 1,
       "patternProperties": {
         "^.*$": {
-          "oneOf": [
-            {
-              "type": "string"
-            },
-            {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            }
-          ]
+          "type": "string"
         }
       },
       "type": "object"
