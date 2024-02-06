@@ -29,8 +29,7 @@ def convert(
                 yield _replace(line)
 
     def write(f_out: IO) -> None:
-        for line in lines():
-            print(_replace(line), file=f_out)
+        f_out.write("\n".join(lines()))
 
     if dry_run:
         for line in lines():
