@@ -24,7 +24,7 @@ def convert(
 
     with readable(input_file) as f:
         lines = f.read().split("\n")
-    jinja2 = "\n".join(_replace(line) for line in lines).rstrip()
+    jinja2 = re.sub(r"\n$", "", "\n".join(_replace(line) for line in lines), count=1)
     if dry_run:
         for line in jinja2.split("\n"):
             log.info(line)

@@ -73,28 +73,32 @@ def test_convert_input_file_to_stdout(atparsefile, capsys, txt_jinja2):
 
 def test_convert_preserve_whitespace(tmp_path):
     atparse = """
+
 @[first_entry]
   @[second_entry]
   @[third_entry]
     @[fourth_entry]
 
         @[fifth_entry]
-""".strip()
+
+"""
     infile = tmp_path / "atparse"
     with open(infile, "w", encoding="utf-8") as f:
         f.write(atparse)
     outfile = tmp_path / "jinja2"
     atparse_to_jinja2.convert(input_file=infile, output_file=outfile)
     expected = """
+
 {{ first_entry }}
   {{ second_entry }}
   {{ third_entry }}
     {{ fourth_entry }}
 
         {{ fifth_entry }}
-""".strip()
+
+"""
     with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read().strip() == expected
+        assert f.read() == expected
 
 
 def test_convert_stdin_to_file(txt_atparse, capsys, txt_jinja2, tmp_path):
