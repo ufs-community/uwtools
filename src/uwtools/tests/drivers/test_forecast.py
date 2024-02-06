@@ -547,6 +547,64 @@ def test_FV3Forecast_schema_forecast_length(fcstprop):
     assert "'a string' is not of type 'integer'" in errors("a string")
 
 
+def test_FV3Forecast_schema_forecast_model_configure(fcstprop):
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": {"foo": 88}}
+    errors = fcstprop("model_configure")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # But base_file must be a string:
+    assert "88 is not of type 'string'" in errors({"base_file": 88})
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_FV3Forecast_schema_forecast_model_configure_update_values(fcstprop):
+    errors = fcstprop("model_configure", "properties", "update_values")
+    # boolean, number, and string values are ok:
+    assert not errors({"bool": True, "int": 88, "float": 3.14, "string": "foo"})
+    # Other types are not, e.g.:
+    assert "None is not of type 'boolean', 'number', 'string'" in errors({"null": None})
+    # At least one entry is required:
+    assert "does not have enough properties" in errors({})
+
+
+def test_FV3Forecast_schema_forecast_namelist(fcstprop):
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": {"nml": {"var": "val"}}}
+    errors = fcstprop("namelist")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # But base_file must be a string:
+    assert "88 is not of type 'string'" in errors({"base_file": 88})
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_FV3Forecast_schema_forecast_namelist_update_values(fcstprop):
+    errors = fcstprop("namelist", "properties", "update_values")
+    # array, boolean, number, and string values are ok:
+    assert not errors(
+        {"nml": {"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"}}
+    )
+    # Other types are not, e.g.:
+    assert "None is not of type 'array', 'boolean', 'number', 'string'" in errors(
+        {"nml": {"null": None}}
+    )
+    # At least one namelist entry is required:
+    assert "does not have enough properties" in errors({})
+    # At least one val/var pair ir required:
+    assert "does not have enough properties" in errors({"nml": {}})
+
+
 def test_FV3Forecast_schema_platform():
     d = {"account": "me", "mpicmd": "cmd", "scheduler": "slurm"}
     errors = validator("FV3Forecast.jsonschema", "properties", "platform")
