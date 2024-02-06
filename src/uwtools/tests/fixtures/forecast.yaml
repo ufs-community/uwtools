@@ -1,6 +1,5 @@
-user:
-  account: user_account
 platform:
+  account: user_account
   mpicmd: srun
   scheduler: slurm
 preprocessing:
