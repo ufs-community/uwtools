@@ -3,7 +3,6 @@ Convert atparse templates to Jinja2 templates.
 """
 
 import re
-from typing import IO, Any, Generator
 
 from uwtools.logging import log
 from uwtools.utils.file import OptionalPath, readable, writable
@@ -23,20 +22,15 @@ def convert(
     :param dry_run: Run in dry-run mode?
     """
 
-    def lines() -> Generator[str, Any, Any]:
-        with readable(input_file) as f_in:
-            for line in f_in.read().split("\n"):
-                yield _replace(line)
-
-    def write(f_out: IO) -> None:
-        f_out.write("\n".join(lines()))
-
+    with readable(input_file) as f:
+        lines = f.read().split("\n")
+    jinja2 = "\n".join(_replace(line) for line in lines).rstrip()
     if dry_run:
-        for line in "\n".join(lines()).strip().split("\n"):
+        for line in jinja2.split("\n"):
             log.info(line)
     else:
         with writable(output_file) as f:
-            write(f)
+            print(jinja2, file=f)
 
 
 def _replace(atline: str) -> str:
