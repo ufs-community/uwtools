@@ -452,14 +452,21 @@ def field_table_vals():
     )
 
 
-# def test_FV3Forecast_schema_forecast_field_table(field_table_vals):
-#     val1, val2 = field_table_vals
-#     base_file = {"base_file": "/some/path"}
-#     errors = validator(
-#         "FV3Forecast.jsonschema", "properties", "forecast", "properties", "field_table"
-#     )
-#     # Just a base file is ok:
-#     assert not errors(base_file)
+def test_FV3Forecast_schema_forecast_field_table(field_table_vals):
+    val, _ = field_table_vals
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": val}
+    errors = validator(
+        "FV3Forecast.jsonschema", "properties", "forecast", "properties", "field_table"
+    )
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
 
 
 def test_FV3Forecast_schema_forecast_field_table_update_values(field_table_vals):
