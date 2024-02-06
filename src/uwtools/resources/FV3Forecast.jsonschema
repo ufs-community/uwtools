@@ -216,7 +216,15 @@
     },
     "platform": {
       "additionalProperties": false,
+      "dependentRequired": {
+        "scheduler": [
+          "account"
+        ]
+      },
       "properties": {
+        "account": {
+          "type": "string"
+        },
         "mpicmd": {
           "type": "string"
         },
@@ -266,15 +274,6 @@
       "type": "object"
     },
     "user": {
-      "additionalProperties": false,
-      "properties": {
-        "account": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "account"
-      ],
       "type": "object"
     }
   },

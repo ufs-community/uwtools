@@ -110,32 +110,32 @@ def validator(schema_fn: str, *args: Any) -> Callable:
     return lambda config: "\n".join(str(x) for x in _validation_errors(config, schema))
 
 
-def with_replace(d: dict, val: Any, *args: Any) -> dict:
+def with_del(d: dict, *args: Any) -> dict:
     """
-    Replace a value at a given chain of keys in a dict.
+    Delete a value at a given chain of keys in a dict.
 
     :param d: The dict to update.
-    :param val: The replacement value.
-    :param args: One or more keys leading to the value to replace.
-    """
-    new = deepcopy(d)
-    p = new
-    for key in args[:-1]:
-        p = p[key]
-    p[args[-1]] = val
-    return new
-
-
-def with_remove(d: dict, *args: Any) -> dict:
-    """
-    Remove a value at a given chain of keys in a dict.
-
-    :param d: The dict to update.
-    :param args: One or more keys leading to the value to remove.
+    :param args: One or more keys navigating to the value to delete.
     """
     new = deepcopy(d)
     p = new
     for key in args[:-1]:
         p = p[key]
     del p[args[-1]]
+    return new
+
+
+def with_set(d: dict, val: Any, *args: Any) -> dict:
+    """
+    Set a value at a given chain of keys in a dict.
+
+    :param d: The dict to update.
+    :param val: The value to set.
+    :param args: One or more keys navigating to the value to set.
+    """
+    new = deepcopy(d)
+    p = new
+    for key in args[:-1]:
+        p = p[key]
+    p[args[-1]] = val
     return new

@@ -17,14 +17,7 @@ from uwtools.drivers import forecast
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.forecast import FV3Forecast
 from uwtools.logging import log
-from uwtools.tests.support import (
-    compare_files,
-    fixture_path,
-    logged,
-    validator,
-    with_remove,
-    with_replace,
-)
+from uwtools.tests.support import compare_files, fixture_path, logged, validator, with_del, with_set
 from uwtools.types import ExistAct
 
 
@@ -489,34 +482,49 @@ def test_FV3Forecast_schema_forecast_field_table_update_values(field_table_vals)
     # At least one entry is required:
     assert "does not have enough properties" in errors({})
     # longname is required:
-    assert "'longname' is a required property" in errors(with_remove(val1, "foo", "longname"))
+    assert "'longname' is a required property" in errors(with_del(val1, "foo", "longname"))
     # longname must be a string:
-    assert "88 is not of type 'string'" in errors(with_replace(val1, 88, "foo", "longname"))
+    assert "88 is not of type 'string'" in errors(with_set(val1, 88, "foo", "longname"))
     # units is required:
-    assert "'units' is a required property" in errors(with_remove(val1, "foo", "units"))
+    assert "'units' is a required property" in errors(with_del(val1, "foo", "units"))
     # units must be a string:
-    assert "88 is not of type 'string'" in errors(with_replace(val1, 88, "foo", "units"))
+    assert "88 is not of type 'string'" in errors(with_set(val1, 88, "foo", "units"))
     # profile_type is required:
-    assert "'profile_type' is a required property" in errors(
-        with_remove(val1, "foo", "profile_type")
-    )
+    assert "'profile_type' is a required property" in errors(with_del(val1, "foo", "profile_type"))
     # profile_type name has to be "fixed" or "profile":
     assert "'bogus' is not one of ['fixed', 'profile']" in errors(
-        with_replace(val1, "bogus", "foo", "profile_type", "name")
+        with_set(val1, "bogus", "foo", "profile_type", "name")
     )
     # surface_value is required:
     assert "'surface_value' is a required property" in errors(
-        with_remove(val1, "foo", "profile_type", "surface_value")
+        with_del(val1, "foo", "profile_type", "surface_value")
     )
     # surface_value is numeric:
     assert "'a string' is not of type 'number'" in errors(
-        with_replace(val1, "a string", "foo", "profile_type", "surface_value")
+        with_set(val1, "a string", "foo", "profile_type", "surface_value")
     )
     # top_value is required if name is "profile":
     assert "'top_value' is a required property" in errors(
-        with_remove(val2, "bar", "profile_type", "top_value")
+        with_del(val2, "bar", "profile_type", "top_value")
     )
     # top_value is numeric:
     assert "'a string' is not of type 'number'" in errors(
-        with_replace(val2, "a string", "bar", "profile_type", "top_value")
+        with_set(val2, "a string", "bar", "profile_type", "top_value")
     )
+
+
+def test_FV3Forecast_schema_platform():
+    d = {"account": "me", "mpicmd": "cmd", "scheduler": "slurm"}
+    errors = validator("FV3Forecast.jsonschema", "properties", "platform")
+    # Basic correctness:
+    assert not errors(d)
+    # At least mpicmd is required:
+    assert "'mpicmd' is a required property" in errors({})
+    # Extra top-level keys are forbidden:
+    assert "Additional properties are not allowed" in errors(with_set(d, "bar", "foo"))
+    # There are a fixed set of supported schedulers:
+    assert "'foo' is not one of ['lsf', 'pbs', 'slurm']" in errors(with_set(d, "foo", "scheduler"))
+    # account and scheduler are optional:
+    assert not errors({"mpicmd": "cmd"})
+    # account is required if scheduler is specified:
+    assert "'account' is a dependency of 'scheduler'" in errors(with_del(d, "account"))
