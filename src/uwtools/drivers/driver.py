@@ -149,18 +149,13 @@ class Driver(ABC):
         config_class: Type[Config], config_values: dict, output_path: OptionalPath
     ) -> None:
         """
-        The standard procedure for updating a file of a configuration class type with user-provided
-        values.
+        Create a config from a base file, user-provided values, of a combination of the two.
 
-        :param config_class: The Config subclass matching the configure file type.
-        :param config_values: The in-memory configuration object to update base values with.
+        :param config_class: The Config subclass matching the config type.
+        :param config_values: The configuration object to update base values with.
         :param output_path: Optional path to dump file to.
         """
-
-        # User-supplied values that override any settings in the base
-        # file.
         user_values = config_values.get("update_values", {})
-
         if base_file := config_values.get("base_file"):
             config_obj = config_class(base_file)
             config_obj.update_values(user_values)
@@ -168,9 +163,8 @@ class Driver(ABC):
             config_obj.dump(output_path)
         else:
             config_class.dump_dict(cfg=user_values, path=output_path)
-
-        msg = f"Configure file {output_path} created"
-        log.info(msg)
+        if output_path:
+            log.info(f"Wrote config to {output_path}")
 
     def _validate(self) -> bool:
         """

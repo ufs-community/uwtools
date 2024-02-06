@@ -416,22 +416,6 @@ def test_FV3Forecast__run_via_local_execution(fv3_run_assets):
 # Schema tests
 
 
-def test_FV3Forecast_schema_filesToStage():
-    errors = validator("FV3Forecast.jsonschema", "$defs", "filesToStage")
-    # The input must be an dict:
-    assert "is not of type 'object'" in errors([])
-    # A str -> str dict is ok:
-    assert not errors({"file1": "/path/to/file1", "file2": "/path/to/file2"})
-    # A str -> List[str] dict is ok:
-    assert not errors({"dir": ["/path/to/file1", "/path/to/file2"]})
-    # An empty dict is not allowed:
-    assert "does not have enough properties" in errors({})
-    # Non-string values are not allowed:
-    assert "not valid" in errors({"file1": True})
-    # Non-string list elements are not allowed:
-    assert "not valid" in errors({"dir": [88]})
-
-
 @fixture
 def field_table_vals():
     return (
@@ -450,6 +434,22 @@ def field_table_vals():
             }
         },
     )
+
+
+def test_FV3Forecast_schema_filesToStage():
+    errors = validator("FV3Forecast.jsonschema", "$defs", "filesToStage")
+    # The input must be an dict:
+    assert "is not of type 'object'" in errors([])
+    # A str -> str dict is ok:
+    assert not errors({"file1": "/path/to/file1", "file2": "/path/to/file2"})
+    # A str -> List[str] dict is ok:
+    assert not errors({"dir": ["/path/to/file1", "/path/to/file2"]})
+    # An empty dict is not allowed:
+    assert "does not have enough properties" in errors({})
+    # Non-string values are not allowed:
+    assert "not valid" in errors({"file1": True})
+    # Non-string list elements are not allowed:
+    assert "not valid" in errors({"dir": [88]})
 
 
 def test_FV3Forecast_schema_forecast_field_table(field_table_vals):
