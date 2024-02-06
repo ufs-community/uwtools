@@ -24,9 +24,6 @@
     "forecast": {
       "additionalProperties": false,
       "properties": {
-        "cycle_dependent": {
-          "$ref": "#/$defs/filesToStage"
-        },
         "diag_table": {
           "type": "string"
         },
@@ -122,6 +119,12 @@
           },
           "type": "object"
         },
+        "files_to_copy": {
+          "$ref": "#/$defs/filesToStage"
+        },
+        "files_to_link": {
+          "$ref": "#/$defs/filesToStage"
+        },
         "length": {
           "minimum": 1,
           "type": "integer"
@@ -202,9 +205,6 @@
             }
           },
           "type": "object"
-        },
-        "static": {
-          "$ref": "#/$defs/filesToStage"
         }
       },
       "required": [
