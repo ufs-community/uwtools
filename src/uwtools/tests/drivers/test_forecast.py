@@ -5,6 +5,7 @@ Tests for forecast driver.
 import datetime as dt
 import logging
 import os
+from functools import partial
 from pathlib import Path
 from unittest.mock import ANY, patch
 
@@ -429,6 +430,11 @@ def field_table_vals():
     )
 
 
+@fixture
+def fcstprop():
+    return partial(validator, "FV3Forecast.jsonschema", "properties", "forecast", "properties")
+
+
 def test_FV3Forecast_schema_filesToStage():
     errors = validator("FV3Forecast.jsonschema", "$defs", "filesToStage")
     # The input must be an dict:
@@ -441,13 +447,33 @@ def test_FV3Forecast_schema_filesToStage():
     assert "True is not of type 'string'" in errors({"file1": True})
 
 
-def test_FV3Forecast_schema_forecast_field_table(field_table_vals):
+def test_FV3Forecast_schema_forecast_diag_table(fcstprop):
+    errors = fcstprop("diag_table")
+    # String value is ok:
+    assert not errors("/path/to/file")
+    # Anything else is not:
+    assert "88 is not of type 'string'" in errors(88)
+
+
+def test_FV3Forecast_schema_forecast_domain(fcstprop):
+    errors = fcstprop("domain")
+    # There is a fixed set of domain values:
+    assert "'foo' is not one of ['global', 'regional']" in errors("foo")
+
+
+def test_FV3Forecast_schema_forecast_executable(fcstprop):
+    errors = fcstprop("executable")
+    # String value is ok:
+    assert not errors("fv3.exe")
+    # Anything else is not:
+    assert "88 is not of type 'string'" in errors(88)
+
+
+def test_FV3Forecast_schema_forecast_field_table(fcstprop, field_table_vals):
     val, _ = field_table_vals
     base_file = {"base_file": "/some/path"}
     update_values = {"update_values": val}
-    errors = validator(
-        "FV3Forecast.jsonschema", "properties", "forecast", "properties", "field_table"
-    )
+    errors = fcstprop("field_table")
     # Just base_file is ok:
     assert not errors(base_file)
     # Just update_values is ok:
@@ -458,17 +484,9 @@ def test_FV3Forecast_schema_forecast_field_table(field_table_vals):
     assert "is not valid" in errors({})
 
 
-def test_FV3Forecast_schema_forecast_field_table_update_values(field_table_vals):
+def test_FV3Forecast_schema_forecast_field_table_update_values(fcstprop, field_table_vals):
     val1, val2 = field_table_vals
-    errors = validator(
-        "FV3Forecast.jsonschema",
-        "properties",
-        "forecast",
-        "properties",
-        "field_table",
-        "properties",
-        "update_values",
-    )
+    errors = fcstprop("field_table", "properties", "update_values")
     # A "fixed" profile-type entry is ok:
     assert not errors(val1)
     # A "profile" profile-type entry is ok:
@@ -509,6 +527,26 @@ def test_FV3Forecast_schema_forecast_field_table_update_values(field_table_vals)
     )
 
 
+def test_FV3Forecast_schema_forecast_files_to_copy():
+    test_FV3Forecast_schema_filesToStage()
+
+
+def test_FV3Forecast_schema_forecast_files_to_link():
+    test_FV3Forecast_schema_filesToStage()
+
+
+def test_FV3Forecast_schema_forecast_length(fcstprop):
+    errors = fcstprop("length")
+    # Positive int is ok:
+    assert not errors(6)
+    # Zero is not ok:
+    assert "0 is less than the minimum of 1" in errors(0)
+    # A negative number is not ok:
+    assert "-1 is less than the minimum of 1" in errors(-1)
+    # Something other than an int is not ok:
+    assert "'a string' is not of type 'integer'" in errors("a string")
+
+
 def test_FV3Forecast_schema_platform():
     d = {"account": "me", "mpicmd": "cmd", "scheduler": "slurm"}
     errors = validator("FV3Forecast.jsonschema", "properties", "platform")
@@ -518,7 +556,7 @@ def test_FV3Forecast_schema_platform():
     assert "'mpicmd' is a required property" in errors({})
     # Extra top-level keys are forbidden:
     assert "Additional properties are not allowed" in errors(with_set(d, "bar", "foo"))
-    # There are a fixed set of supported schedulers:
+    # There is a fixed set of supported schedulers:
     assert "'foo' is not one of ['lsf', 'pbs', 'slurm']" in errors(with_set(d, "foo", "scheduler"))
     # account and scheduler are optional:
     assert not errors({"mpicmd": "cmd"})
