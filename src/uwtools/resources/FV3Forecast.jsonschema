@@ -208,6 +208,7 @@
         }
       },
       "required": [
+        "field_table",
         "run_dir",
         "runtime_info"
       ],
