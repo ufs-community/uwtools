@@ -37,7 +37,7 @@ def cycle():
 # ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4
 # srun --export=NONE test_exec.py
 # """.strip()
-#     config_file = fixture_path("forecast.yaml")
+#     config_file = fixture_path("fv3.yaml")
 #     with patch.object(Driver, "_validate", return_value=True):
 #         forecast = FV3(config_file=config_file)
 #     assert forecast.batch_script().content() == expected
@@ -47,7 +47,7 @@ def test_schema_file(cycle):
     """
     Tests that the schema is properly defined with a file value.
     """
-    config_file = fixture_path("forecast.yaml")
+    config_file = fixture_path("fv3.yaml")
     with patch.object(Driver, "_validate", return_value=True):
         forecast = FV3(config_file=config_file, cycle=cycle)
     path = Path(forecast.schema_file)
@@ -63,14 +63,14 @@ def test_schema_file(cycle):
 #     base_file = fixture_path("fruit_config.yaml")
 #     fcst_config_file = tmp_path / "fcst.yml"
 #     fcst_config = YAMLConfig(config_file)
-#     fcst_config["forecast"]["model_configure"]["base_file"] = base_file
+#     fcst_config["fv3"]["model_configure"]["base_file"] = base_file
 #     fcst_config.dump(fcst_config_file)
 #     output_file = (tmp_path / "test_config_from_yaml.yaml").as_posix()
 #     with patch.object(FV3, "_validate", return_value=True):
 #         forecast_obj = FV3(config_file=fcst_config_file, cycle=cycle)
 #     forecast_obj.create_model_configure(output_file)
 #     expected = YAMLConfig(base_file)
-# expected.update_values(YAMLConfig(config_file)["forecast"]["model_configure"]["update_values"])
+# expected.update_values(YAMLConfig(config_file)["fv3"]["model_configure"]["update_values"])
 #     expected_file = tmp_path / "expected_yaml.yaml"
 #     expected.dump(expected_file)
 #     assert compare_files(expected_file, output_file)
@@ -90,7 +90,7 @@ def create_field_table_update_obj():
 #     expected = fixture_path("field_table_from_base.FV3_GFS")
 #     config_file = tmp_path / "fcst.yaml"
 #     forecast_config = create_field_table_update_obj
-#     forecast_config["forecast"]["field_table"]["base_file"] = base_file
+#     forecast_config["fv3"]["field_table"]["base_file"] = base_file
 #     forecast_config.dump(config_file)
 #     Fv3(config_file=config_file, cycle=cycle).create_field_table(outfldtbl_file)
 #     assert compare_files(expected, outfldtbl_file)
@@ -109,7 +109,7 @@ def create_field_table_update_obj():
 
 # def test_create_model_configure_call_private(cycle, tmp_path):
 #     basefile = str(tmp_path / "base.yaml")
-#     infile = fixture_path("forecast.yaml")
+#     infile = fixture_path("fv3.yaml")
 #     outfile = str(tmp_path / "out.yaml")
 #     for path in infile, basefile:
 #         Path(path).touch()
@@ -143,7 +143,7 @@ def test_create_namelist_with_base_file(create_namelist_assets, cycle, tmp_path)
     update_values, outnml_file = create_namelist_assets
     base_file = fixture_path("simple3.nml")
     fcst_config = {
-        "forecast": {
+        "fv3": {
             "namelist": {
                 "base_file": base_file,
                 "update_values": update_values,
@@ -177,7 +177,7 @@ def test_create_namelist_without_base_file(create_namelist_assets, cycle, tmp_pa
     """
     update_values, outnml_file = create_namelist_assets
     fcst_config = {
-        "forecast": {
+        "fv3": {
             "namelist": {
                 "update_values": update_values,
             },
@@ -203,7 +203,7 @@ def test_forecast_run_cmd(cycle):
     """
     Tests that the command to be used to run the forecast executable was built successfully.
     """
-    config_file = fixture_path("forecast.yaml")
+    config_file = fixture_path("fv3.yaml")
     with patch.object(FV3, "_validate", return_value=True):
         fcstobj = FV3(config_file=config_file, cycle=cycle)
         srun_expected = "srun --export=NONE test_exec.py"
@@ -268,12 +268,12 @@ def test_forecast_run_cmd(cycle):
 
 @fixture
 def fv3_run_assets(tmp_path):
-    config_file = fixture_path("forecast.yaml")
+    config_file = fixture_path("fv3.yaml")
     config = YAMLConfig(config_file)
-    config["forecast"]["run_dir"] = tmp_path.as_posix()
-    config["forecast"]["cycle_dependent"] = {"foo-file": str(tmp_path / "foo")}
-    config["forecast"]["static"] = {"static-foo-file": str(tmp_path / "foo")}
-    return config_file, config.data["forecast"]
+    config["fv3"]["run_dir"] = tmp_path.as_posix()
+    config["fv3"]["cycle_dependent"] = {"foo-file": str(tmp_path / "foo")}
+    config["fv3"]["static"] = {"static-foo-file": str(tmp_path / "foo")}
+    return config_file, config.data["fv3"]
 
 
 @fixture
@@ -390,7 +390,7 @@ def field_table_vals():
 
 @fixture
 def fcstprop():
-    return partial(validator, "fv3.jsonschema", "properties", "forecast", "properties")
+    return partial(validator, "fv3.jsonschema", "properties", "fv3", "properties")
 
 
 def test_fv3_schema_filesToStage():
@@ -407,7 +407,7 @@ def test_fv3_schema_filesToStage():
 
 def test_fv3_schema_forecast():
     d = {"domain": "regional", "executable": "fv3", "length": 3, "run_dir": "/tmp"}
-    errors = validator("fv3.jsonschema", "properties", "forecast")
+    errors = validator("fv3.jsonschema", "properties", "fv3")
     # Basic correctness:
     assert not errors(d)
     # Some top-level keys are required:

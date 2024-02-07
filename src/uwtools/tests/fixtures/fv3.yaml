@@ -1,4 +1,4 @@
-forecast:
+fv3:
   domain: regional
   executable: test_exec.py
   files_to_copy:

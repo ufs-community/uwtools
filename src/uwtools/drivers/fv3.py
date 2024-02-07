@@ -39,7 +39,7 @@ class FV3(Driver):
 
         super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
         self._cycle = cycle
-        self._config = self._experiment_config["forecast"]
+        self._config = self._experiment_config["fv3"]
         self._rundir = Path(self._config["run_dir"])
 
     # Workflow methods

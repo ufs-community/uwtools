@@ -11,7 +11,7 @@
     }
   },
   "properties": {
-    "forecast": {
+    "fv3": {
       "additionalProperties": false,
       "properties": {
         "diag_table": {
