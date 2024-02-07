@@ -79,7 +79,7 @@ def test_convert_preserve_whitespace(tmp_path):
   @[third_entry]
     @[fourth_entry]
 
-        @[fifth_entry]
+        @[fifth_entry] @[sixth_entry]
 
 """
     infile = tmp_path / "atparse"
@@ -94,7 +94,7 @@ def test_convert_preserve_whitespace(tmp_path):
   {{ third_entry }}
     {{ fourth_entry }}
 
-        {{ fifth_entry }}
+        {{ fifth_entry }} {{ sixth_entry }}
 
 """
     with open(outfile, "r", encoding="utf-8") as f:
