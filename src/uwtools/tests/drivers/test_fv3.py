@@ -4,24 +4,18 @@ Tests for FV3 driver.
 """
 import datetime as dt
 import logging
-
-# import os
+from functools import partial
 from pathlib import Path
-from unittest.mock import patch  # ANY
+from unittest.mock import patch
 
 import pytest
-from pytest import fixture  # , raises
+from pytest import fixture
 
-# from uwtools import scheduler
 from uwtools.config.formats.yaml import YAMLConfig
-
-# from uwtools.drivers import fv3
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.fv3 import FV3
 from uwtools.logging import log
-from uwtools.tests.support import fixture_path, logged, validator  # compare_files
-
-# from uwtools.types import ExistAct
+from uwtools.tests.support import fixture_path, logged, validator, with_del, with_set
 
 
 @fixture
@@ -45,7 +39,7 @@ def cycle():
 # """.strip()
 #     config_file = fixture_path("forecast.yaml")
 #     with patch.object(Driver, "_validate", return_value=True):
-#         forecast = FV3Forecast(config_file=config_file)
+#         forecast = FV3(config_file=config_file)
 #     assert forecast.batch_script().content() == expected
 
 
@@ -72,8 +66,8 @@ def test_schema_file(cycle):
 #     fcst_config["forecast"]["model_configure"]["base_file"] = base_file
 #     fcst_config.dump(fcst_config_file)
 #     output_file = (tmp_path / "test_config_from_yaml.yaml").as_posix()
-#     with patch.object(FV3Forecast, "_validate", return_value=True):
-#         forecast_obj = FV3Forecast(config_file=fcst_config_file, cycle=cycle)
+#     with patch.object(FV3, "_validate", return_value=True):
+#         forecast_obj = FV3(config_file=fcst_config_file, cycle=cycle)
 #     forecast_obj.create_model_configure(output_file)
 #     expected = YAMLConfig(base_file)
 # expected.update_values(YAMLConfig(config_file)["forecast"]["model_configure"]["update_values"])
@@ -98,7 +92,7 @@ def create_field_table_update_obj():
 #     forecast_config = create_field_table_update_obj
 #     forecast_config["forecast"]["field_table"]["base_file"] = base_file
 #     forecast_config.dump(config_file)
-#     FV3Forecast(config_file=config_file, cycle=cycle).create_field_table(outfldtbl_file)
+#     Fv3(config_file=config_file, cycle=cycle).create_field_table(outfldtbl_file)
 #     assert compare_files(expected, outfldtbl_file)
 
 
@@ -109,7 +103,7 @@ def create_field_table_update_obj():
 #     outfldtbl_file = tmp_path / "field_table_one.FV3_GFS"
 #     expected = fixture_path("field_table_from_input.FV3_GFS")
 #     config_file = fixture_path("FV3_GFS_v16_update.yaml")
-#     FV3Forecast(config_file=config_file, cycle=cycle).create_field_table(outfldtbl_file)
+#     Fv3(config_file=config_file, cycle=cycle).create_field_table(outfldtbl_file)
 #     assert compare_files(expected, outfldtbl_file)
 
 
@@ -120,8 +114,8 @@ def create_field_table_update_obj():
 #     for path in infile, basefile:
 #         Path(path).touch()
 #     with patch.object(Driver, "_create_user_updated_config") as _create_user_updated_config:
-#         with patch.object(FV3Forecast, "_validate", return_value=True):
-#             FV3Forecast(config_file=infile, cycle=cycle).create_model_configure(outfile)
+#         with patch.object(Fv3, "_validate", return_value=True):
+#             Fv3(config_file=infile, cycle=cycle).create_model_configure(outfile)
 #     _create_user_updated_config.assert_called_with(
 #         config_class=YAMLConfig, config_values={}, output_path=outfile
 #     )
@@ -374,17 +368,310 @@ def test_FV3_run(batch, cycle, fv3_run_assets, method):
 # Schema tests
 
 
-def test_FV3_schema_filesToStage():
+@fixture
+def field_table_vals():
+    return (
+        {
+            "foo": {
+                "longname": "foofoo",
+                "profile_type": {"name": "fixed", "surface_value": 1},
+                "units": "cubits",
+            }
+        },
+        {
+            "bar": {
+                "longname": "barbar",
+                "profile_type": {"name": "profile", "surface_value": 2, "top_value": 3},
+                "units": "rods",
+            }
+        },
+    )
+
+
+@fixture
+def fcstprop():
+    return partial(validator, "fv3.jsonschema", "properties", "forecast", "properties")
+
+
+def test_fv3_schema_filesToStage():
     errors = validator("fv3.jsonschema", "$defs", "filesToStage")
     # The input must be an dict:
     assert "is not of type 'object'" in errors([])
     # A str -> str dict is ok:
     assert not errors({"file1": "/path/to/file1", "file2": "/path/to/file2"})
-    # A str -> List[str] dict is ok:
-    assert not errors({"dir": ["/path/to/file1", "/path/to/file2"]})
     # An empty dict is not allowed:
     assert "does not have enough properties" in errors({})
     # Non-string values are not allowed:
-    assert "not valid" in errors({"file1": True})
-    # Non-string list elements are not allowed:
-    assert "not valid" in errors({"dir": [88]})
+    assert "True is not of type 'string'" in errors({"file1": True})
+
+
+def test_fv3_schema_forecast():
+    d = {"domain": "regional", "executable": "fv3", "length": 3, "run_dir": "/tmp"}
+    errors = validator("fv3.jsonschema", "properties", "forecast")
+    # Basic correctness:
+    assert not errors(d)
+    # Some top-level keys are required:
+    assert "'domain' is a required property" in errors(with_del(d, "domain"))
+    assert "'executable' is a required property" in errors(with_del(d, "executable"))
+    assert "'length' is a required property" in errors(with_del(d, "length"))
+    assert "'run_dir' is a required property" in errors(with_del(d, "run_dir"))
+    # Some top-level keys are optional:
+    assert not errors(
+        {
+            **d,
+            "diag_table": "/path",
+            "field_table": {"base_file": "/path"},
+            "files_to_copy": {"fn": "/path"},
+            "files_to_link": {"fn": "/path"},
+            "model_configure": {"base_file": "/path"},
+            "namelist": {"base_file": "/path"},
+            "runtime_info": {},
+        }
+    )
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
+
+
+def test_fv3_schema_forecast_diag_table(fcstprop):
+    errors = fcstprop("diag_table")
+    # String value is ok:
+    assert not errors("/path/to/file")
+    # Anything else is not:
+    assert "88 is not of type 'string'" in errors(88)
+
+
+def test_fv3_schema_forecast_domain(fcstprop):
+    errors = fcstprop("domain")
+    # There is a fixed set of domain values:
+    assert "'foo' is not one of ['global', 'regional']" in errors("foo")
+
+
+def test_fv3_schema_forecast_executable(fcstprop):
+    errors = fcstprop("executable")
+    # String value is ok:
+    assert not errors("fv3.exe")
+    # Anything else is not:
+    assert "88 is not of type 'string'" in errors(88)
+
+
+def test_fv3_schema_forecast_field_table(fcstprop, field_table_vals):
+    val, _ = field_table_vals
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": val}
+    errors = fcstprop("field_table")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_fv3_schema_forecast_field_table_update_values(fcstprop, field_table_vals):
+    val1, val2 = field_table_vals
+    errors = fcstprop("field_table", "properties", "update_values")
+    # A "fixed" profile-type entry is ok:
+    assert not errors(val1)
+    # A "profile" profile-type entry is ok:
+    assert not errors(val2)
+    # A combination of two valid entries is ok:
+    assert not errors({**val1, **val2})
+    # At least one entry is required:
+    assert "does not have enough properties" in errors({})
+    # longname is required:
+    assert "'longname' is a required property" in errors(with_del(val1, "foo", "longname"))
+    # longname must be a string:
+    assert "88 is not of type 'string'" in errors(with_set(val1, 88, "foo", "longname"))
+    # units is required:
+    assert "'units' is a required property" in errors(with_del(val1, "foo", "units"))
+    # units must be a string:
+    assert "88 is not of type 'string'" in errors(with_set(val1, 88, "foo", "units"))
+    # profile_type is required:
+    assert "'profile_type' is a required property" in errors(with_del(val1, "foo", "profile_type"))
+    # profile_type name has to be "fixed" or "profile":
+    assert "'bogus' is not one of ['fixed', 'profile']" in errors(
+        with_set(val1, "bogus", "foo", "profile_type", "name")
+    )
+    # surface_value is required:
+    assert "'surface_value' is a required property" in errors(
+        with_del(val1, "foo", "profile_type", "surface_value")
+    )
+    # surface_value is numeric:
+    assert "'a string' is not of type 'number'" in errors(
+        with_set(val1, "a string", "foo", "profile_type", "surface_value")
+    )
+    # top_value is required if name is "profile":
+    assert "'top_value' is a required property" in errors(
+        with_del(val2, "bar", "profile_type", "top_value")
+    )
+    # top_value is numeric:
+    assert "'a string' is not of type 'number'" in errors(
+        with_set(val2, "a string", "bar", "profile_type", "top_value")
+    )
+
+
+def test_fv3_schema_forecast_files_to_copy():
+    test_fv3_schema_filesToStage()
+
+
+def test_fv3_schema_forecast_files_to_link():
+    test_fv3_schema_filesToStage()
+
+
+def test_fv3_schema_forecast_length(fcstprop):
+    errors = fcstprop("length")
+    # Positive int is ok:
+    assert not errors(6)
+    # Zero is not ok:
+    assert "0 is less than the minimum of 1" in errors(0)
+    # A negative number is not ok:
+    assert "-1 is less than the minimum of 1" in errors(-1)
+    # Something other than an int is not ok:
+    assert "'a string' is not of type 'integer'" in errors("a string")
+
+
+def test_fv3_schema_forecast_model_configure(fcstprop):
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": {"foo": 88}}
+    errors = fcstprop("model_configure")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # But base_file must be a string:
+    assert "88 is not of type 'string'" in errors({"base_file": 88})
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_fv3_schema_forecast_model_configure_update_values(fcstprop):
+    errors = fcstprop("model_configure", "properties", "update_values")
+    # boolean, number, and string values are ok:
+    assert not errors({"bool": True, "int": 88, "float": 3.14, "string": "foo"})
+    # Other types are not, e.g.:
+    assert "None is not of type 'boolean', 'number', 'string'" in errors({"null": None})
+    # At least one entry is required:
+    assert "does not have enough properties" in errors({})
+
+
+def test_fv3_schema_forecast_namelist(fcstprop):
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": {"nml": {"var": "val"}}}
+    errors = fcstprop("namelist")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # base_file must be a string:
+    assert "88 is not of type 'string'" in errors({"base_file": 88})
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_fv3_schema_forecast_namelist_update_values(fcstprop):
+    errors = fcstprop("namelist", "properties", "update_values")
+    # array, boolean, number, and string values are ok:
+    assert not errors(
+        {"nml": {"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"}}
+    )
+    # Other types are not, e.g.:
+    assert "None is not of type 'array', 'boolean', 'number', 'string'" in errors(
+        {"nml": {"null": None}}
+    )
+    # At least one namelist entry is required:
+    assert "does not have enough properties" in errors({})
+    # At least one val/var pair ir required:
+    assert "does not have enough properties" in errors({"nml": {}})
+
+
+def test_fv3_schema_forecast_run_dir(fcstprop):
+    errors = fcstprop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+def test_fv3_schema_forecast_runtime_info(fcstprop):
+    mpi_args = {"mpi_args": ["--flag1", "--flag2"]}
+    threads = {"threads": 32}
+    errors = fcstprop("runtime_info")
+    # mpi_args is a list of strings:
+    assert not errors(mpi_args)
+    # mpi_args may be empty:
+    assert not errors({"mpi_args": []})
+    # String values are expected:
+    assert "88 is not of type 'string'" in errors({"mpi_args": [88]})
+    # threads must be non-negative, and an integer:
+    assert not errors(threads)
+    assert not errors({"threads": 0})
+    assert "-1 is less than the minimum of 0" in errors({"threads": -1})
+    assert "3.14 is not of type 'integer'" in errors({"threads": 3.14})
+    # Both properties are ok:
+    assert not errors({**mpi_args, **threads})
+    # Additional properties are not allowed:
+    assert "Additional properties are not allowed" in errors({**mpi_args, **threads, "foo": "bar"})
+
+
+def test_fv3_schema_platform():
+    d = {"account": "me", "mpicmd": "cmd", "scheduler": "slurm"}
+    errors = validator("fv3.jsonschema", "properties", "platform")
+    # Basic correctness:
+    assert not errors(d)
+    # At least mpicmd is required:
+    assert "'mpicmd' is a required property" in errors({})
+    # Extra top-level keys are forbidden:
+    assert "Additional properties are not allowed" in errors(with_set(d, "bar", "foo"))
+    # There is a fixed set of supported schedulers:
+    assert "'foo' is not one of ['lsf', 'pbs', 'slurm']" in errors(with_set(d, "foo", "scheduler"))
+    # account and scheduler are optional:
+    assert not errors({"mpicmd": "cmd"})
+    # account is required if scheduler is specified:
+    assert "'account' is a dependency of 'scheduler'" in errors(with_del(d, "account"))
+
+
+def test_fv3_schema_preprocessing():
+    d = {
+        "lateral_boundary_conditions": {
+            "interval_hours": 1,
+            "offset": 0,
+            "output_file_path": "/some/path",
+        }
+    }
+    errors = validator("fv3.jsonschema", "properties", "preprocessing")
+    # Basic correctness:
+    assert not errors(d)
+    assert "'lateral_boundary_conditions' is a required property" in errors({})
+    # All lateral_boundary_conditions items are required:
+    assert "'interval_hours' is a required property" in errors(
+        with_del(d, "lateral_boundary_conditions", "interval_hours")
+    )
+    assert "'offset' is a required property" in errors(
+        with_del(d, "lateral_boundary_conditions", "offset")
+    )
+    assert "'output_file_path' is a required property" in errors(
+        with_del(d, "lateral_boundary_conditions", "output_file_path")
+    )
+    # interval_hours must be an integer of at least 1:
+    assert "0 is less than the minimum of 1" in errors(
+        with_set(d, 0, "lateral_boundary_conditions", "interval_hours")
+    )
+    assert "'a string' is not of type 'integer'" in errors(
+        with_set(d, "a string", "lateral_boundary_conditions", "interval_hours")
+    )
+    # offset must be an integer of at least 0:
+    assert "-1 is less than the minimum of 0" in errors(
+        with_set(d, -1, "lateral_boundary_conditions", "offset")
+    )
+    assert "'a string' is not of type 'integer'" in errors(
+        with_set(d, "a string", "lateral_boundary_conditions", "offset")
+    )
+    # output_file_path must be a string:
+    assert "88 is not of type 'string'" in errors(
+        with_set(d, 88, "lateral_boundary_conditions", "output_file_path")
+    )
