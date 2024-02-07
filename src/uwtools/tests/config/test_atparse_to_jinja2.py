@@ -119,7 +119,7 @@ def test_convert_stdin_to_logging(txt_atparse, caplog, txt_jinja2, tmp_path):
     _stdinproxy.cache_clear()
     with patch.object(sys, "stdin", new=StringIO(txt_atparse)):
         atparse_to_jinja2.convert(output_file=outfile, dry_run=True)
-    assert "\n".join(record.message for record in caplog.records) == txt_jinja2.strip()
+    assert "\n".join(record.message for record in caplog.records) == txt_jinja2
     assert not outfile.is_file()
 
 

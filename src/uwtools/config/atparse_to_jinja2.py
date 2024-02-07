@@ -23,14 +23,14 @@ def convert(
     """
 
     with readable(input_file) as f:
-        lines = f.read().split("\n")
-    jinja2 = re.sub(r"\n$", "", "\n".join(_replace(line) for line in lines), count=1)
+        lines = f.readlines()
+    jinja2 = "".join(_replace(line) for line in lines)
     if dry_run:
-        for line in jinja2.split("\n"):
+        for line in jinja2.removesuffix("\n").split("\n"):
             log.info(line)
     else:
         with writable(output_file) as f:
-            print(jinja2, file=f)
+            f.write(jinja2)
 
 
 def _replace(atline: str) -> str:
