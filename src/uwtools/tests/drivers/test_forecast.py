@@ -648,3 +648,45 @@ def test_FV3Forecast_schema_platform():
     assert not errors({"mpicmd": "cmd"})
     # account is required if scheduler is specified:
     assert "'account' is a dependency of 'scheduler'" in errors(with_del(d, "account"))
+
+
+def test_FV3Forecast_schema_preprocessing():
+    d = {
+        "lateral_boundary_conditions": {
+            "interval_hours": 1,
+            "offset": 0,
+            "output_file_path": "/some/path",
+        }
+    }
+    errors = validator("FV3Forecast.jsonschema", "properties", "preprocessing")
+    # Basic correctness:
+    assert not errors(d)
+    assert "'lateral_boundary_conditions' is a required property" in errors({})
+    # All lateral_boundary_conditions items are required:
+    assert "'interval_hours' is a required property" in errors(
+        with_del(d, "lateral_boundary_conditions", "interval_hours")
+    )
+    assert "'offset' is a required property" in errors(
+        with_del(d, "lateral_boundary_conditions", "offset")
+    )
+    assert "'output_file_path' is a required property" in errors(
+        with_del(d, "lateral_boundary_conditions", "output_file_path")
+    )
+    # interval_hours must be an integer of at least 1:
+    assert "0 is less than the minimum of 1" in errors(
+        with_set(d, 0, "lateral_boundary_conditions", "interval_hours")
+    )
+    assert "'a string' is not of type 'integer'" in errors(
+        with_set(d, "a string", "lateral_boundary_conditions", "interval_hours")
+    )
+    # offset must be an integer of at least 0:
+    assert "-1 is less than the minimum of 0" in errors(
+        with_set(d, -1, "lateral_boundary_conditions", "offset")
+    )
+    assert "'a string' is not of type 'integer'" in errors(
+        with_set(d, "a string", "lateral_boundary_conditions", "offset")
+    )
+    # output_file_path must be a string:
+    assert "88 is not of type 'string'" in errors(
+        with_set(d, 88, "lateral_boundary_conditions", "output_file_path")
+    )
