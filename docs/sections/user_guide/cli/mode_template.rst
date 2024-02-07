@@ -273,7 +273,7 @@ The examples in this section use atparse-formatted template file ``atparse.txt``
   .. code-block:: text
 
      $ uw template translate --input-file atparse.txt
-     {{greeting}}, {{recipient}}!
+     {{ greeting }}, {{ recipient }}!
 
   Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
 
@@ -287,11 +287,11 @@ The examples in this section use atparse-formatted template file ``atparse.txt``
 
   .. code-block:: jinja
 
-     {{greeting}}, {{recipient}}!
+     {{ greeting }}, {{ recipient }}!
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
   .. code-block:: text
 
      $ uw template translate --input-file atparse.txt --dry-run
-     [2024-01-03T16:41:13]     INFO {{greeting}}, {{recipient}}!
+     [2024-02-06T21:53:43]     INFO {{ greeting }}, {{ recipient }}!

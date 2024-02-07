@@ -1,0 +1,291 @@
+{
+  "$defs": {
+    "filesToStage": {
+      "minProperties": 1,
+      "patternProperties": {
+        "^.*$": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "properties": {
+    "forecast": {
+      "additionalProperties": false,
+      "properties": {
+        "diag_table": {
+          "type": "string"
+        },
+        "domain": {
+          "enum": [
+            "global",
+            "regional"
+          ],
+          "type": "string"
+        },
+        "executable": {
+          "type": "string"
+        },
+        "field_table": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "minProperties": 1,
+              "patternProperties": {
+                "^.*$": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "longname": {
+                      "type": "string"
+                    },
+                    "profile_type": {
+                      "additionalProperties": false,
+                      "allOf": [
+                        {
+                          "if": {
+                            "properties": {
+                              "name": {
+                                "const": "profile"
+                              }
+                            }
+                          },
+                          "then": {
+                            "required": [
+                              "top_value"
+                            ]
+                          }
+                        }
+                      ],
+                      "properties": {
+                        "name": {
+                          "enum": [
+                            "fixed",
+                            "profile"
+                          ]
+                        },
+                        "surface_value": {
+                          "type": "number"
+                        },
+                        "top_value": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "surface_value"
+                      ],
+                      "type": "object"
+                    },
+                    "units": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "longname",
+                    "profile_type",
+                    "units"
+                  ],
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "files_to_copy": {
+          "$ref": "#/$defs/filesToStage"
+        },
+        "files_to_link": {
+          "$ref": "#/$defs/filesToStage"
+        },
+        "length": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "model_configure": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "minProperties": 1,
+              "patternProperties": {
+                "^.*$": {
+                  "type": [
+                    "boolean",
+                    "number",
+                    "string"
+                  ]
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "namelist": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "minProperties": 1,
+              "patternProperties": {
+                "^.*$": {
+                  "minProperties": 1,
+                  "patternProperties": {
+                    "^.*$": {
+                      "minProperties": 1,
+                      "type": [
+                        "array",
+                        "boolean",
+                        "number",
+                        "string"
+                      ]
+                    },
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "run_dir": {
+          "type": "string"
+        },
+        "runtime_info": {
+          "additionalProperties": false,
+          "properties": {
+            "mpi_args": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "threads": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "domain",
+        "executable",
+        "length",
+        "run_dir"
+      ],
+      "type": "object"
+    },
+    "platform": {
+      "additionalProperties": false,
+      "dependentRequired": {
+        "scheduler": [
+          "account"
+        ]
+      },
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "mpicmd": {
+          "type": "string"
+        },
+        "scheduler": {
+          "enum": [
+            "lsf",
+            "pbs",
+            "slurm"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "mpicmd"
+      ],
+      "type": "object"
+    },
+    "preprocessing": {
+      "additionalProperties": false,
+      "properties": {
+        "lateral_boundary_conditions": {
+          "additionalProperties": false,
+          "properties": {
+            "interval_hours": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "offset": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "output_file_path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "interval_hours",
+            "offset",
+            "output_file_path"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "lateral_boundary_conditions"
+      ],
+      "type": "object"
+    },
+    "user": {
+      "type": "object"
+    }
+  },
+  "type": "object"
+}
