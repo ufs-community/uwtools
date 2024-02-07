@@ -164,7 +164,7 @@ class FV3Forecast(Driver):
         """
 
         return {
-            "account": self._experiment_config["user"]["account"],
+            "account": self._experiment_config["platform"]["account"],
             "scheduler": self._experiment_config["platform"]["scheduler"],
             **self._config["jobinfo"],
         }
@@ -238,7 +238,7 @@ class FV3Forecast(Driver):
         """
         envvars = {
             "KMP_AFFINITY": "scatter",
-            "OMP_NUM_THREADS": self._config["runtime_info"].get("threads", 1),
+            "OMP_NUM_THREADS": self._config.get("runtime_info", {}).get("threads", 1),
             "OMP_STACKSIZE": "512m",
             "MPI_TYPE_DEPTH": 20,
             "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",

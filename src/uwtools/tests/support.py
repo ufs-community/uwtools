@@ -1,10 +1,16 @@
 # pylint: disable=missing-function-docstring
 
 import re
+from copy import deepcopy
 from importlib import resources
 from pathlib import Path
+from typing import Any, Callable
 
+import yaml
 from _pytest.logging import LogCaptureFixture
+
+from uwtools.config.validator import _validation_errors
+from uwtools.utils.file import resource_pathobj
 
 
 def compare_files(path1: str, path2: str) -> bool:
@@ -86,3 +92,50 @@ def regex_logged(caplog: LogCaptureFixture, msg: str) -> bool:
     """
     pattern = re.compile(re.escape(msg))
     return any(pattern.search(record.message) for record in caplog.records)
+
+
+def validator(schema_fn: str, *args: Any) -> Callable:
+    """
+    Create a lambda that returns errors from validating a config input.
+
+    :param schema_fn: The schema filename, relative to package resources.
+    :param args: Keys leading to sub-schema to be used to validate eventual input.
+    :returns: A lambda that, when called with an input to test, returns a string (possibly empty)
+        containing the validation errors.
+    """
+    with open(resource_pathobj(schema_fn), "r", encoding="utf-8") as f:
+        schema = yaml.safe_load(f)
+    for arg in args:
+        schema = {"$defs": schema["$defs"], **schema[arg]}
+    return lambda config: "\n".join(str(x) for x in _validation_errors(config, schema))
+
+
+def with_del(d: dict, *args: Any) -> dict:
+    """
+    Delete a value at a given chain of keys in a dict.
+
+    :param d: The dict to update.
+    :param args: One or more keys navigating to the value to delete.
+    """
+    new = deepcopy(d)
+    p = new
+    for key in args[:-1]:
+        p = p[key]
+    del p[args[-1]]
+    return new
+
+
+def with_set(d: dict, val: Any, *args: Any) -> dict:
+    """
+    Set a value at a given chain of keys in a dict.
+
+    :param d: The dict to update.
+    :param val: The value to set.
+    :param args: One or more keys navigating to the value to set.
+    """
+    new = deepcopy(d)
+    p = new
+    for key in args[:-1]:
+        p = p[key]
+    p[args[-1]] = val
+    return new

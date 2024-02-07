@@ -3,20 +3,17 @@
 Tests for uwtools.rocoto module.
 """
 
-from typing import Callable, List
+from typing import List
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
 import pytest
-import yaml
 from pytest import fixture, raises
 
 from uwtools import rocoto
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.validator import _validation_errors
 from uwtools.exceptions import UWConfigError, UWError
-from uwtools.tests.support import fixture_path
-from uwtools.utils.file import resource_pathobj
+from uwtools.tests.support import fixture_path, validator
 
 # Fixtures
 
@@ -36,20 +33,6 @@ def validation_assets(tmp_path):
     with open(xml_file_bad, "w", encoding="utf-8") as f:
         print(xml_string_bad, file=f)
     return xml_file_bad, xml_file_good, xml_string_bad, xml_string_good
-
-
-# Helpers
-
-
-def validator(*args) -> Callable:
-    # Supply, as args, zero or more keys leading through the schema dict to the sub-schema to be
-    # used to validate some input. This function returns a lambda that, when called with the input
-    # to test, returns a string (possibly empty) containing the validation errors.
-    with open(resource_pathobj("rocoto.jsonschema"), "r", encoding="utf-8") as f:
-        schema = yaml.safe_load(f)
-    for arg in args:
-        schema = {"$defs": schema["$defs"], **schema[arg]}
-    return lambda config: "\n".join(str(x) for x in _validation_errors(config, schema))
 
 
 # Tests
@@ -455,8 +438,8 @@ class Test__RocotoXML:
 # Schema tests
 
 
-def test_schema_compoundTimeString():
-    errors = validator("$defs", "compoundTimeString")
+def test_rocoto_schema_compoundTimeString():
+    errors = validator("rocoto.jsonschema", "$defs", "compoundTimeString")
     # Just a string is ok:
     assert not errors("foo")
     # An int value is ok:
@@ -473,8 +456,8 @@ def test_schema_compoundTimeString():
     assert "is not valid" in errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "x"}}})
 
 
-def test_schema_dependency_sh():
-    errors = validator("$defs", "dependency")
+def test_rocoto_schema_dependency_sh():
+    errors = validator("rocoto.jsonschema", "$defs", "dependency")
     # Basic spec:
     assert not errors({"sh": {"command": "foo"}})
     # The "command" property is mandatory:
@@ -493,8 +476,8 @@ def test_schema_dependency_sh():
     assert not errors({"sh": {"command": {"cyclestr": {"value": "foo-@Y@m@d@H"}}}})
 
 
-def test_schema_metatask_attrs():
-    errors = validator("$defs", "metatask", "properties", "attrs")
+def test_rocoto_schema_metatask_attrs():
+    errors = validator("rocoto.jsonschema", "$defs", "metatask", "properties", "attrs")
     # Valid modes are "parallel" and "serial":
     assert not errors({"mode": "parallel"})
     assert not errors({"mode": "serial"})
@@ -506,8 +489,8 @@ def test_schema_metatask_attrs():
     assert "'foo' is not of type 'integer'" in errors({"throttle": "foo"})
 
 
-def test_schema_workflow_cycledef():
-    errors = validator("properties", "workflow", "properties", "cycledef")
+def test_rocoto_schema_workflow_cycledef():
+    errors = validator("rocoto.jsonschema", "properties", "workflow", "properties", "cycledef")
     # Basic spec:
     spec = "202311291200 202312011200 06:00:00"
     assert not errors([{"spec": spec}])

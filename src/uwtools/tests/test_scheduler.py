@@ -13,7 +13,7 @@ from uwtools import scheduler
 from uwtools.scheduler import JobScheduler
 from uwtools.tests.support import compare_files
 
-# LFS tests
+# LSF tests
 
 
 @fixture
