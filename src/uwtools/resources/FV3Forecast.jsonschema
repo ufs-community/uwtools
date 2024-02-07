@@ -217,7 +217,9 @@
         }
       },
       "required": [
-        "field_table",
+        "domain",
+        "executable",
+        "length",
         "run_dir",
         "runtime_info"
       ],
