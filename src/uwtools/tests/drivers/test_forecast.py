@@ -447,6 +447,33 @@ def test_FV3Forecast_schema_filesToStage():
     assert "True is not of type 'string'" in errors({"file1": True})
 
 
+def test_FV3Forecast_schema_forecast():
+    d = {"domain": "regional", "executable": "fv3", "length": 3, "run_dir": "/tmp"}
+    errors = validator("FV3Forecast.jsonschema", "properties", "forecast")
+    # Basic correctness:
+    assert not errors(d)
+    # Some top-level keys are required:
+    assert "'domain' is a required property" in errors(with_del(d, "domain"))
+    assert "'executable' is a required property" in errors(with_del(d, "executable"))
+    assert "'length' is a required property" in errors(with_del(d, "length"))
+    assert "'run_dir' is a required property" in errors(with_del(d, "run_dir"))
+    # Some top-level keys are optional:
+    assert not errors(
+        {
+            **d,
+            "diag_table": "/path",
+            "field_table": {"base_file": "/path"},
+            "files_to_copy": {"fn": "/path"},
+            "files_to_link": {"fn": "/path"},
+            "model_configure": {"base_file": "/path"},
+            "namelist": {"base_file": "/path"},
+            "runtime_info": {},
+        }
+    )
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
+
+
 def test_FV3Forecast_schema_forecast_diag_table(fcstprop):
     errors = fcstprop("diag_table")
     # String value is ok:

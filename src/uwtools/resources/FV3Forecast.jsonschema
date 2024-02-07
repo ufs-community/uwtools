@@ -220,8 +220,7 @@
         "domain",
         "executable",
         "length",
-        "run_dir",
-        "runtime_info"
+        "run_dir"
       ],
       "type": "object"
     },
