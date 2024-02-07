@@ -3,7 +3,6 @@ Convert atparse templates to Jinja2 templates.
 """
 
 import re
-from typing import IO, Any, Generator
 
 from uwtools.logging import log
 from uwtools.utils.file import OptionalPath, readable, writable
@@ -23,21 +22,15 @@ def convert(
     :param dry_run: Run in dry-run mode?
     """
 
-    def lines() -> Generator[str, Any, Any]:
-        with readable(input_file) as f_in:
-            for line in f_in.read().strip().split("\n"):
-                yield _replace(line.strip())
-
-    def write(f_out: IO) -> None:
-        for line in lines():
-            print(_replace(line.strip()), file=f_out)
-
+    with readable(input_file) as f:
+        lines = f.readlines()
+    jinja2 = "".join(_replace(line) for line in lines)
     if dry_run:
-        for line in lines():
+        for line in jinja2.removesuffix("\n").split("\n"):
             log.info(line)
     else:
         with writable(output_file) as f:
-            write(f)
+            f.write(jinja2)
 
 
 def _replace(atline: str) -> str:
@@ -54,5 +47,5 @@ def _replace(atline: str) -> str:
         # Set maxsplits to 1 so only first ] is captured, which should be the
         # bracket closing @[.
         after_atparse = atline.split("@[", 1)[1].split("]", 1)[1]
-        atline = "".join([before_atparse, "{{", within_atparse, "}}", after_atparse])
+        atline = "".join([before_atparse, "{{ ", within_atparse, " }}", after_atparse])
     return atline
