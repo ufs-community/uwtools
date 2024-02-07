@@ -4,17 +4,7 @@
       "minProperties": 1,
       "patternProperties": {
         "^.*$": {
-          "oneOf": [
-            {
-              "type": "string"
-            },
-            {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            }
-          ]
+          "type": "string"
         }
       },
       "type": "object"
@@ -24,9 +14,6 @@
     "forecast": {
       "additionalProperties": false,
       "properties": {
-        "cycle_dependent": {
-          "$ref": "#/$defs/filesToStage"
-        },
         "diag_table": {
           "type": "string"
         },
@@ -42,6 +29,18 @@
         },
         "field_table": {
           "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
           "properties": {
             "base_file": {
               "type": "string"
@@ -56,44 +55,42 @@
                       "type": "string"
                     },
                     "profile_type": {
-                      "oneOf": [
+                      "additionalProperties": false,
+                      "allOf": [
                         {
-                          "additionalProperties": false,
-                          "properties": {
-                            "name": {
-                              "const": "fixed"
-                            },
-                            "surface_value": {
-                              "type": "number"
+                          "if": {
+                            "properties": {
+                              "name": {
+                                "const": "profile"
+                              }
                             }
                           },
-                          "required": [
-                            "name",
-                            "surface_value"
-                          ],
-                          "type": "object"
-                        },
-                        {
-                          "additionalProperties": false,
-                          "properties": {
-                            "name": {
-                              "const": "profile"
-                            },
-                            "surface_value": {
-                              "type": "number"
-                            },
-                            "top_value": {
-                              "type": "number"
-                            }
-                          },
-                          "required": [
-                            "name",
-                            "surface_value",
-                            "top_value"
-                          ],
-                          "type": "object"
+                          "then": {
+                            "required": [
+                              "top_value"
+                            ]
+                          }
                         }
-                      ]
+                      ],
+                      "properties": {
+                        "name": {
+                          "enum": [
+                            "fixed",
+                            "profile"
+                          ]
+                        },
+                        "surface_value": {
+                          "type": "number"
+                        },
+                        "top_value": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "surface_value"
+                      ],
+                      "type": "object"
                     },
                     "units": {
                       "type": "string"
@@ -110,34 +107,13 @@
               "type": "object"
             }
           },
-          "required": [
-            "base_file"
-          ],
           "type": "object"
         },
-        "jobinfo": {
-          "minProperties": 1,
-          "patternProperties": {
-            "^.*$": {
-              "type": [
-                "number",
-                "string"
-              ]
-            }
-          },
-          "properties": {
-            "queue": {
-              "type": "string"
-            },
-            "walltime": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "queue",
-            "walltime"
-          ],
-          "type": "object"
+        "files_to_copy": {
+          "$ref": "#/$defs/filesToStage"
+        },
+        "files_to_link": {
+          "$ref": "#/$defs/filesToStage"
         },
         "length": {
           "minimum": 1,
@@ -145,6 +121,18 @@
         },
         "model_configure": {
           "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
           "properties": {
             "base_file": {
               "type": "string"
@@ -163,13 +151,22 @@
               "type": "object"
             }
           },
-          "required": [
-            "base_file"
-          ],
           "type": "object"
         },
         "namelist": {
           "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
           "properties": {
             "base_file": {
               "type": "string"
@@ -197,9 +194,6 @@
               "type": "object"
             }
           },
-          "required": [
-            "base_file"
-          ],
           "type": "object"
         },
         "run_dir": {
@@ -215,24 +209,32 @@
               "type": "array"
             },
             "threads": {
+              "minimum": 0,
               "type": "integer"
             }
           },
           "type": "object"
-        },
-        "static": {
-          "$ref": "#/$defs/filesToStage"
         }
       },
       "required": [
-        "run_dir",
-        "runtime_info"
+        "domain",
+        "executable",
+        "length",
+        "run_dir"
       ],
       "type": "object"
     },
     "platform": {
       "additionalProperties": false,
+      "dependentRequired": {
+        "scheduler": [
+          "account"
+        ]
+      },
       "properties": {
+        "account": {
+          "type": "string"
+        },
         "mpicmd": {
           "type": "string"
         },
@@ -282,15 +284,6 @@
       "type": "object"
     },
     "user": {
-      "additionalProperties": false,
-      "properties": {
-        "account": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "account"
-      ],
       "type": "object"
     }
   },
