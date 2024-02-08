@@ -1,6 +1,9 @@
 fv3:
   domain: regional
   execution:
+    batch_args:
+      queue: some-queue
+      walltime: "00:10:00"
     executable: test_exec.py
     mpi_args:
       - "--export=NONE"

@@ -27,6 +27,64 @@
         "execution": {
           "additionalProperties": false,
           "properties": {
+            "batch_args": {
+              "additionalProperties": false,
+              "properties": {
+                "cores": {
+                  "type": "integer"
+                },
+                "debug": {
+                  "type": "boolean"
+                },
+                "exclusive": {
+                  "type": "boolean"
+                },
+                "export": {
+                  "type": "string"
+                },
+                "jobname": {
+                  "type": "string"
+                },
+                "memory": {
+                  "type": "string"
+                },
+                "nodes": {
+                  "type": "integer"
+                },
+                "partition": {
+                  "type": "string"
+                },
+                "placement": {
+                  "type": "string"
+                },
+                "queue": {
+                  "type": "string"
+                },
+                "rundir": {
+                  "type": "string"
+                },
+                "shell": {
+                  "type": "string"
+                },
+                "stdout": {
+                  "type": "string"
+                },
+                "tasks_per_node": {
+                  "type": "integer"
+                },
+                "threads": {
+                  "type": "integer"
+                },
+                "walltime": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "queue",
+                "walltime"
+              ],
+              "type": "object"
+            },
             "executable": {
               "type": "string"
             },

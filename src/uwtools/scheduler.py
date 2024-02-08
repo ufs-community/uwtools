@@ -41,7 +41,6 @@ class OptionalAttribs:
     EXCLUSIVE = "exclusive"
     EXPORT = "export"
     JOB_NAME = "jobname"
-    JOIN = "join"
     MEMORY = "memory"
     NODES = "nodes"
     PARTITION = "partition"
