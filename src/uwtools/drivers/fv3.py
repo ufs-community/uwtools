@@ -222,13 +222,6 @@ class FV3(Driver):
             **self._config.get("execution", {}).get("batch_args", {}),
         }
 
-    @property
-    def schema_file(self) -> Path:
-        """
-        The path to the file containing the schema to validate the config file against.
-        """
-        return resource_pathobj("fv3.jsonschema")
-
     # Private methods
 
     def _boundary_hours(self, lbcs_config: Dict) -> tuple[int, int, int]:
@@ -306,6 +299,13 @@ class FV3(Driver):
         Returns the path to the runscript.
         """
         return self._rundir / "runscript"
+
+    @property
+    def _schema_file(self) -> Path:
+        """
+        The path to the file containing the schema to validate the config file against.
+        """
+        return resource_pathobj("fv3.jsonschema")
 
     def _taskname(self, suffix: str) -> str:
         """

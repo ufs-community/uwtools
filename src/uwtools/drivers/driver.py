@@ -76,13 +76,6 @@ class Driver(ABC):
         """
         return JobScheduler.get_scheduler(self.resources())
 
-    @property
-    @abstractmethod
-    def schema_file(self) -> Path:
-        """
-        The path to the file containing the schema to validate the config file against.
-        """
-
     @staticmethod
     def stage_files(
         run_directory: Path,
@@ -157,11 +150,18 @@ class Driver(ABC):
         ]
         return " ".join(filter(None, components))
 
+    @property
+    @abstractmethod
+    def _schema_file(self) -> Path:
+        """
+        The path to the file containing the schema to validate the config file against.
+        """
+
     def _validate(self) -> None:
         """
         Validate the user-supplied config file.
 
         :raises: UWConfigError if config fails validation.
         """
-        if not validator.validate_yaml(config=self._config_file, schema_file=self.schema_file):
+        if not validator.validate_yaml(config=self._config_file, schema_file=self._schema_file):
             raise UWConfigError("YAML validation errors")

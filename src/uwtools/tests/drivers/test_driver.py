@@ -43,7 +43,7 @@ class ConcreteDriver(Driver):
         pass
 
     @property
-    def schema_file(self) -> Path:
+    def _schema_file(self) -> Path:
         return Path()
 
 
@@ -95,7 +95,7 @@ def test_validation(caplog, configs, schema, tmp_path, valid):
     schema_file = str(tmp_path / "test.jsonschema")
     with open(schema_file, "w", encoding="utf-8") as f:
         print(schema, file=f)
-    with patch.object(ConcreteDriver, "schema_file", new=schema_file):
+    with patch.object(ConcreteDriver, "_schema_file", new=schema_file):
         log.setLevel(logging.INFO)
         if valid:
             ConcreteDriver(config_file=config_file)
