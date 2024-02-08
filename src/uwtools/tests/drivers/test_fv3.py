@@ -632,6 +632,11 @@ def test_fv3_schema_forecast_execution_batch_args(fcstprop):
     }
     # Basic correctness:
     assert not errors({"queue": "string", "walltime": "string"})
+    # Full suite of accepted entries:
+    assert not errors(batch_args)
+    # Additional entries are not allowed:
+    assert "Additional properties are not allowed" in errors({**batch_args, "foo": "bar"})
+
 
 def test_fv3_schema_forecast_execution_executable(fcstprop):
     errors = fcstprop("execution", "properties", "executable")
