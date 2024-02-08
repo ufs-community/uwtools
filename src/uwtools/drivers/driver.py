@@ -9,8 +9,6 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, Dict, Type, Union
 
-from iotaa import task
-
 from uwtools.config import validator
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
@@ -43,38 +41,7 @@ class Driver(ABC):
         self._platform_config = self._experiment_config.get("platform", {})
         self._config: Dict[str, Any] = {}
 
-    # Workflow methods
-
-    @abstractmethod
-    @task
-    def run(self):
-        """
-        Run the component.
-        """
-
-    @abstractmethod
-    @task
-    def runscript(self):
-        """
-        A runscript suitable for submission to the scheduler.
-        """
-
     # Public methods
-
-    @abstractmethod
-    def resources(self) -> Mapping:
-        """
-        Parses the config and returns a formatted dictionary for the runscript.
-        """
-
-    @property
-    def scheduler(self) -> JobScheduler:
-        """
-        The job scheduler specified by the platform information.
-
-        :return: The scheduler object
-        """
-        return JobScheduler.get_scheduler(self.resources())
 
     @staticmethod
     def stage_files(
@@ -135,6 +102,14 @@ class Driver(ABC):
         if output_path:
             log.info(f"Wrote config to {output_path}")
 
+    @abstractmethod
+    def _resources(self) -> Mapping:
+        """
+        Configuration data for FV3 runscript.
+
+        :return: A formatted dictionary needed to create a runscript
+        """
+
     def _run_cmd(self) -> str:
         """
         The full command-line component invocation.
@@ -149,6 +124,15 @@ class Driver(ABC):
             execution["executable"],  # component executable name
         ]
         return " ".join(filter(None, components))
+
+    @property
+    def _scheduler(self) -> JobScheduler:
+        """
+        The job scheduler specified by the platform information.
+
+        :return: The scheduler object
+        """
+        return JobScheduler.get_scheduler(self._resources())
 
     @property
     @abstractmethod

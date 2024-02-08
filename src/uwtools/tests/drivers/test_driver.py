@@ -29,9 +29,6 @@ class ConcreteDriver(Driver):
     def requirements(self):
         pass
 
-    def resources(self) -> Mapping:
-        return {}
-
     @task
     def run(self):
         yield None
@@ -41,6 +38,9 @@ class ConcreteDriver(Driver):
 
     def runscript(self):
         pass
+
+    def _resources(self) -> Mapping:
+        return {}
 
     @property
     def _schema_file(self) -> Path:

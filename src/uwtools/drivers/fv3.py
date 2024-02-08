@@ -139,7 +139,7 @@ class FV3(Driver):
         path = self._runscript_path
         yield asset(path, path.is_file)
         yield self._run_directory()
-        bs = self.scheduler.runscript
+        bs = self._scheduler.runscript
         bs.append(self._mpi_env_variables("\n"))
         bs.append(self._run_cmd())
         bs.append("touch %s/done" % self._rundir)
@@ -168,7 +168,7 @@ class FV3(Driver):
         path = Path("%s.submit" % self._runscript_path)
         yield asset(path, path.is_file)
         yield self.provisioned_run_directory()
-        self.scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
+        self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
 
     @task
     def _run_via_local_execution(self):
@@ -208,19 +208,6 @@ class FV3(Driver):
                 dry_run=self._dry_run,
             )
         return self._rundir
-
-    def resources(self) -> Mapping:
-        """
-        Configuration data for FV3 runscript.
-
-        :return: A formatted dictionary needed to create a runscript
-        """
-        return {
-            "account": self._experiment_config["platform"]["account"],
-            "rundir": self._rundir,
-            "scheduler": self._experiment_config["platform"]["scheduler"],
-            **self._config.get("execution", {}).get("batch_args", {}),
-        }
 
     # Private methods
 
@@ -292,6 +279,19 @@ class FV3(Driver):
     #         # self.create_field_table(run_directory / "field_table")
     #         # self.create_model_configure(run_directory / "model_configure")
     #         self.create_namelist(run_directory / "input.nml")
+
+    def _resources(self) -> Mapping:
+        """
+        Configuration data for FV3 runscript.
+
+        :return: A formatted dictionary needed to create a runscript
+        """
+        return {
+            "account": self._experiment_config["platform"]["account"],
+            "rundir": self._rundir,
+            "scheduler": self._experiment_config["platform"]["scheduler"],
+            **self._config.get("execution", {}).get("batch_args", {}),
+        }
 
     @property
     def _runscript_path(self) -> Path:
