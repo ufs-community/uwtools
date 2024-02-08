@@ -103,7 +103,7 @@ class FV3(Driver):
         yield self._run_directory()
         bs = self.scheduler.runscript
         bs.append(self._mpi_env_variables("\n"))
-        bs.append(self.run_cmd())
+        bs.append(self._run_cmd())
         bs.append("touch %s/done" % self._rundir)
         bs.dump(path)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
@@ -186,11 +186,10 @@ class FV3(Driver):
 
     def resources(self) -> Mapping:
         """
-        Parses the experiment configuration to provide the information needed for the runscript.
+        Configuration data for FV3 runscript.
 
         :return: A formatted dictionary needed to create a runscript
         """
-
         return {
             "account": self._experiment_config["platform"]["account"],
             "rundir": self._rundir,

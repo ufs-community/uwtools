@@ -67,21 +67,6 @@ class Driver(ABC):
         Parses the config and returns a formatted dictionary for the runscript.
         """
 
-    def run_cmd(self) -> str:
-        """
-        The command-line command to run the component.
-
-        :return: Collated string that contains MPI command, runtime arguments, and exec name.
-        """
-        components = [
-            self._platform_config["mpicmd"],  # MPI run program
-            *[
-                str(x) for x in self._config.get("runtime_info", {}).get("mpi_args", [])
-            ],  # MPI arguments
-            self._config["executable"],  # component executable name
-        ]
-        return " ".join(filter(None, components))
-
     @property
     def scheduler(self) -> JobScheduler:
         """
@@ -156,6 +141,20 @@ class Driver(ABC):
             config_class.dump_dict(cfg=user_values, path=output_path)
         if output_path:
             log.info(f"Wrote config to {output_path}")
+
+    def _run_cmd(self) -> str:
+        """
+        The full command-line component invocation.
+
+        :return: String containing MPI command, MPI arguments, and exec name.
+        """
+        mpi_args = self._config.get("runtime_info", {}).get("mpi_args", [])
+        components = [
+            self._platform_config["mpicmd"],  # MPI run program
+            *[str(x) for x in mpi_args],  # MPI arguments
+            self._config["executable"],  # component executable name
+        ]
+        return " ".join(filter(None, components))
 
     def _validate(self) -> None:
         """

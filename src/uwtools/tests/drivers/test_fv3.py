@@ -199,35 +199,6 @@ def test_create_namelist_without_base_file(create_namelist_assets, cycle, tmp_pa
         assert out_file.read() == expected
 
 
-def test_forecast_run_cmd(cycle):
-    """
-    Tests that the command to be used to run the forecast executable was built successfully.
-    """
-    config_file = fixture_path("fv3.yaml")
-    with patch.object(FV3, "_validate", return_value=True):
-        fcstobj = FV3(config_file=config_file, cycle=cycle)
-        srun_expected = "srun --export=NONE test_exec.py"
-        fcstobj._config["runtime_info"]["mpi_args"] = ["--export=NONE"]
-        assert srun_expected == fcstobj.run_cmd()
-        mpirun_expected = "mpirun -np 4 test_exec.py"
-        fcstobj._experiment_config["platform"]["mpicmd"] = "mpirun"
-        fcstobj._config["runtime_info"]["mpi_args"] = ["-np", 4]
-        assert mpirun_expected == fcstobj.run_cmd()
-        fcstobj._experiment_config["platform"]["mpicmd"] = "mpiexec"
-        fcstobj._config["runtime_info"]["mpi_args"] = [
-            "-n",
-            4,
-            "-ppn",
-            8,
-            "--cpu-bind",
-            "core",
-            "-depth",
-            2,
-        ]
-        mpiexec_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
-        assert mpiexec_expected == fcstobj.run_cmd()
-
-
 # @pytest.mark.parametrize("section", ["static", "cycle_dependent"])
 # @pytest.mark.parametrize("link_files", [True, False])
 # def test_stage_files(tmp_path, section, link_files):
@@ -363,6 +334,35 @@ def test_FV3_run(batch, cycle, fv3_run_assets, method):
 #             assert success is True
 #             assert lines[0] == "Command:"
 #             execute.assert_called_once_with(cmd=ANY, cwd=ANY, log_output=True)
+
+
+def test_forecast__run_cmd(cycle):
+    """
+    Tests that the command to be used to run the forecast executable was built successfully.
+    """
+    config_file = fixture_path("fv3.yaml")
+    with patch.object(FV3, "_validate", return_value=True):
+        fcstobj = FV3(config_file=config_file, cycle=cycle)
+        srun_expected = "srun --export=NONE test_exec.py"
+        fcstobj._config["runtime_info"]["mpi_args"] = ["--export=NONE"]
+        assert srun_expected == fcstobj._run_cmd()
+        mpirun_expected = "mpirun -np 4 test_exec.py"
+        fcstobj._experiment_config["platform"]["mpicmd"] = "mpirun"
+        fcstobj._config["runtime_info"]["mpi_args"] = ["-np", 4]
+        assert mpirun_expected == fcstobj._run_cmd()
+        fcstobj._experiment_config["platform"]["mpicmd"] = "mpiexec"
+        fcstobj._config["runtime_info"]["mpi_args"] = [
+            "-n",
+            4,
+            "-ppn",
+            8,
+            "--cpu-bind",
+            "core",
+            "-depth",
+            2,
+        ]
+        mpiexec_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
+        assert mpiexec_expected == fcstobj._run_cmd()
 
 
 # Schema tests
