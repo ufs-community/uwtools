@@ -47,7 +47,7 @@ class FV3(Driver):
     @task
     def field_table(self):
         """
-        An FV3 field_table file.
+        The FV3 field_table file.
         """
         fn = "field_table"
         yield "%s FV3 %s" % (self._cyclestr, fn)
@@ -63,7 +63,7 @@ class FV3(Driver):
     @task
     def model_configure(self):
         """
-        An FV3 model_configure file.
+        The FV3 model_configure file.
         """
         fn = "model_configure"
         yield "%s FV3 %s" % (self._cyclestr, fn)
@@ -79,7 +79,7 @@ class FV3(Driver):
     @tasks
     def provisioned_run_directory(self):
         """
-        A run directory provisioned with all required content.
+        The run directory provisioned with all required content.
         """
         yield "%s FV3 provisioned run directory" % self._cyclestr
         yield [self.runscript(), self.field_table(), self.model_configure()]
@@ -87,33 +87,10 @@ class FV3(Driver):
     @tasks
     def run(self):
         """
-        Execution of the run.
+        FV3 run execution.
         """
         yield "%s FV3 run" % self._cyclestr
-        yield (self.run_via_batch_submission() if self._batch else self.run_via_local_execution())
-
-    @task
-    def run_via_batch_submission(self):
-        """
-        Execution of the run via the batch system.
-        """
-        yield "%s FV3 run via batch submission" % self._cyclestr
-        path = Path("%s.submit" % self._runscript_path)
-        yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
-        self.scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
-
-    @task
-    def run_via_local_execution(self):
-        """
-        Execution of the run directly on the local system.
-        """
-        yield "%s FV3 run via local execution" % self._cyclestr
-        path = self._rundir / "done"
-        yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
-        cmd = "./{x} >{x}.out 2>&1".format(x=self._runscript_path)
-        execute(cmd=cmd, cwd=self._rundir, log_output=True)
+        yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
 
     @task
     def runscript(self):
@@ -143,6 +120,29 @@ class FV3(Driver):
         yield asset(path, path.is_dir)
         yield None
         path.mkdir(parents=True)
+
+    @task
+    def _run_via_batch_submission(self):
+        """
+        FV3 run Execution via the batch system.
+        """
+        yield "%s FV3 run via batch submission" % self._cyclestr
+        path = Path("%s.submit" % self._runscript_path)
+        yield asset(path, path.is_file)
+        yield self.provisioned_run_directory()
+        self.scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
+
+    @task
+    def _run_via_local_execution(self):
+        """
+        FV3 run execution directly on the local system.
+        """
+        yield "%s FV3 run via local execution" % self._cyclestr
+        path = self._rundir / "done"
+        yield asset(path, path.is_file)
+        yield self.provisioned_run_directory()
+        cmd = "./{x} >{x}.out 2>&1".format(x=self._runscript_path)
+        execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
     # Public methods
 
