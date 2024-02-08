@@ -10,6 +10,7 @@ from unittest.mock import patch
 from pytest import fixture, raises
 
 from uwtools import scheduler
+from uwtools.exceptions import UWConfigError
 from uwtools.scheduler import JobScheduler
 from uwtools.tests.support import compare_files
 
@@ -278,9 +279,9 @@ def test_scheduler_bad_attr(pbs_props):
 
 
 def test_scheduler_bad_scheduler():
-    with raises(KeyError) as e:
+    with raises(UWConfigError) as e:
         JobScheduler.get_scheduler({"scheduler": "FOO"})
-    assert "FOO is not a supported scheduler" in str(e.value)
+    assert str(e.value).startswith("Scheduler 'FOO' should be one of: ")
 
 
 def test_scheduler_dot_notation(pbs_props):
@@ -292,9 +293,9 @@ def test_scheduler_dot_notation(pbs_props):
 def test_scheduler_prop_not_defined_raises_key_error(pbs_props):
     pbs_config, _ = pbs_props
     del pbs_config["scheduler"]
-    with raises(KeyError) as e:
+    with raises(UWConfigError) as e:
         JobScheduler.get_scheduler(pbs_config)
-    assert "No scheduler defined in props" in str(e.value)
+    assert str(e.value).startswith("No 'scheduler' defined in")
 
 
 def test_scheduler_raises_exception_when_missing_required_attrs(pbs_props):

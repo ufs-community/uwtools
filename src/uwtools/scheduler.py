@@ -10,6 +10,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, Dict, List
 
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.types import OptionalPath
 from uwtools.utils.file import writable
@@ -108,24 +109,20 @@ class JobScheduler(UserDict):
         """
         Returns the appropriate scheduler.
 
-        Parameters
-        ----------
-        props
-            Must contain a 'scheduler' key or a KeyError will be raised
+        :param props: Configuration settings for batch scheduling.
+        :raises: UWConfigError if 'scheduler' is un- or mis-defined.
         """
         if "scheduler" not in props:
-            raise KeyError(f"No scheduler defined in props: [{', '.join(props.keys())}]")
+            raise UWConfigError(f"No 'scheduler' defined in {props}")
         name = props["scheduler"]
         log.debug("Getting '%s' scheduler", name)
         schedulers = {"slurm": Slurm, "pbs": PBS, "lsf": LSF}
         try:
             scheduler = schedulers[name]
-        except KeyError as error:
-            raise KeyError(
-                f"{name} is not a supported scheduler"
-                + "Currently supported schedulers are:\n"
-                + f'{" | ".join(schedulers.keys())}"'
-            ) from error
+        except KeyError as e:
+            raise UWConfigError(
+                "Scheduler '%s' should be one of: %s" % (name, ", ".join(schedulers.keys()))
+            ) from e
         return scheduler(props)
 
     @staticmethod

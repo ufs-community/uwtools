@@ -194,7 +194,7 @@ class FV3(Driver):
             "account": self._experiment_config["platform"]["account"],
             "rundir": self._rundir,
             "scheduler": self._experiment_config["platform"]["scheduler"],
-            **self._config["jobinfo"],
+            # **self._config["jobinfo"],
         }
 
     @property
