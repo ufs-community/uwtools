@@ -445,14 +445,6 @@ def test_fv3_schema_forecast_domain(fcstprop):
     assert "'foo' is not one of ['global', 'regional']" in errors("foo")
 
 
-def test_fv3_schema_forecast_executable(fcstprop):
-    errors = fcstprop("execution", "properties", "executable")
-    # String value is ok:
-    assert not errors("fv3.exe")
-    # Anything else is not:
-    assert "88 is not of type 'string'" in errors(88)
-
-
 def test_fv3_schema_forecast_field_table(fcstprop, field_table_vals):
     val, _ = field_table_vals
     base_file = {"base_file": "/some/path"}
@@ -598,28 +590,73 @@ def test_fv3_schema_forecast_run_dir(fcstprop):
 
 def test_fv3_schema_forecast_execution(fcstprop):
     d = {"executable": "fv3"}
+    batch_args = {"batch_args": {"queue": "string", "walltime": "string"}}
     mpi_args = {"mpi_args": ["--flag1", "--flag2"]}
     threads = {"threads": 32}
     errors = fcstprop("execution")
     # Basic correctness:
     assert not errors(d)
-    # mpi_args is a list of strings:
+    # batch_args may optionally be specified:
+    assert not errors({**d, **batch_args})
+    # mpi_args may be optionally specified:
     assert not errors({**d, **mpi_args})
-    # mpi_args may be empty:
-    assert not errors({**d, **{"mpi_args": []}})
-    # String values are expected:
-    assert "88 is not of type 'string'" in errors({**d, **{"mpi_args": [88]}})
-    # threads must be non-negative, and an integer:
+    # threads may optionally be specified:
     assert not errors({**d, **threads})
-    assert not errors({**d, **{"threads": 0}})
-    assert "-1 is less than the minimum of 0" in errors({**d, **{"threads": -1}})
-    assert "3.14 is not of type 'integer'" in errors({**d, **{"threads": 3.14}})
-    # Both properties are ok:
-    assert not errors({**d, **mpi_args, **threads})
+    # All properties are ok:
+    assert not errors({**d, **batch_args, **mpi_args, **threads})
     # Additional properties are not allowed:
     assert "Additional properties are not allowed" in errors(
         {**d, **mpi_args, **threads, "foo": "bar"}
     )
+
+
+# def test_fv3_schema_forecast_execution_batch_args(fcstprop):
+#     errors = fcstprop("execution", "properties", "batch_args")
+#     batch_args = {
+#         "cores": 1,
+#         "debug": True,
+#         "exclusive": True,
+#         "export": "string",
+#         "jobname": "string",
+#         "memory": "string",
+#         "nodes": 1,
+#         "partition": "string",
+#         "placement": "string",
+#         "queue": "string",
+#         "rundir": "string",
+#         "shell": "string",
+#         "stdout": "string",
+#         "tasks_per_node": 1,
+#         "threads": 1,
+#         "walltime": "string",
+#     }
+
+
+def test_fv3_schema_forecast_execution_executable(fcstprop):
+    errors = fcstprop("execution", "properties", "executable")
+    # String value is ok:
+    assert not errors("fv3.exe")
+    # Anything else is not:
+    assert "88 is not of type 'string'" in errors(88)
+
+
+def test_fv3_schema_forecast_execution_mpi_args(fcstprop):
+    errors = fcstprop("execution", "properties", "mpi_args")
+    # Basic correctness:
+    assert not errors(["string1", "string2"])
+    # mpi_args may be empty:
+    assert not errors([])
+    # String values are expected:
+    assert "88 is not of type 'string'" in errors(["string1", 88])
+
+
+def test_fv3_schema_forecast_execution_threads(fcstprop):
+    errors = fcstprop("execution", "properties", "threads")
+    # threads must be non-negative, and an integer:
+    assert not errors(0)
+    assert not errors(4)
+    assert "-1 is less than the minimum of 0" in errors(-1)
+    assert "3.14 is not of type 'integer'" in errors(3.14)
 
 
 def test_fv3_schema_platform():
