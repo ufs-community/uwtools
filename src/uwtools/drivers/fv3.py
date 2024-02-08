@@ -9,7 +9,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict
 
-from iotaa import asset, refs, task, tasks
+from iotaa import asset, task, tasks
 
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
@@ -98,7 +98,7 @@ class FV3(Driver):
         Execution of the run via the batch system.
         """
         yield "%s FV3 run via batch submission" % self._cyclestr
-        path = Path(f"%s.submit" % self._runscript_path)
+        path = Path("%s.submit" % self._runscript_path)
         yield asset(path, path.is_file)
         yield self.provisioned_run_directory()
         self.scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
