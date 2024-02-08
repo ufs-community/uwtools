@@ -42,7 +42,7 @@ class FV3(Driver):
         self._config = self._experiment_config["fv3"]
         self._rundir = Path(self._config["run_dir"])
 
-    # Workflow methods
+    # Public workflow tasks
 
     @task
     def field_table(self):
@@ -53,7 +53,7 @@ class FV3(Driver):
         yield "%s FV3 %s" % (self._cyclestr, fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield self.run_directory()
+        yield self._run_directory()
         self._create_user_updated_config(
             config_class=FieldTableConfig,
             config_values=self._config["field_table"],
@@ -69,7 +69,7 @@ class FV3(Driver):
         yield "%s FV3 %s" % (self._cyclestr, fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield self.run_directory()
+        yield self._run_directory()
         self._create_user_updated_config(
             config_class=YAMLConfig,
             config_values=self._config["model_configure"],
@@ -91,17 +91,6 @@ class FV3(Driver):
         """
         yield "%s FV3 run" % self._cyclestr
         yield (self.run_via_batch_submission() if self._batch else self.run_via_local_execution())
-
-    @task
-    def run_directory(self):
-        """
-        The run directory.
-        """
-        yield "%s FV3 run directory" % self._cyclestr
-        path = self._rundir
-        yield asset(path, path.is_dir)
-        yield None
-        path.mkdir(parents=True)
 
     @task
     def run_via_batch_submission(self):
@@ -137,13 +126,26 @@ class FV3(Driver):
         yield "%s FV3 runscript" % self._cyclestr
         path = self._rundir / self._runscript_name
         yield asset(path, path.is_file)
-        yield self.run_directory()
+        yield self._run_directory()
         bs = self.scheduler.runscript
         bs.append(self._mpi_env_variables("\n"))
         bs.append(self.run_cmd())
         bs.append("touch %s/done" % self._rundir)
         bs.dump(path)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
+
+    # Private workflow tasks
+
+    @task
+    def _run_directory(self):
+        """
+        The run directory.
+        """
+        yield "%s FV3 run directory" % self._cyclestr
+        path = self._rundir
+        yield asset(path, path.is_dir)
+        yield None
+        path.mkdir(parents=True)
 
     # Public methods
 
