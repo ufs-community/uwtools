@@ -107,23 +107,21 @@ class JobScheduler(UserDict):
     @staticmethod
     def get_scheduler(props: Mapping) -> JobScheduler:
         """
-        Returns the appropriate scheduler.
+        Returns a configured job scheduler.
 
-        :param props: Configuration settings for batch scheduling.
+        :param props: Configuration settings for job scheduling.
+        :return: A configured job scheduler.
         :raises: UWConfigError if 'scheduler' is un- or mis-defined.
         """
-        if "scheduler" not in props:
-            raise UWConfigError(f"No 'scheduler' defined in {props}")
-        name = props["scheduler"]
-        log.debug("Getting '%s' scheduler", name)
         schedulers = {"slurm": Slurm, "pbs": PBS, "lsf": LSF}
-        try:
-            scheduler = schedulers[name]
-        except KeyError as e:
+        if name := props.get("scheduler"):
+            log.debug("Getting '%s' scheduler", name)
+            if scheduler_class := schedulers.get(name):
+                return scheduler_class(props)
             raise UWConfigError(
                 "Scheduler '%s' should be one of: %s" % (name, ", ".join(schedulers.keys()))
-            ) from e
-        return scheduler(props)
+            )
+        raise UWConfigError(f"No 'scheduler' defined in {props}")
 
     @staticmethod
     def post_process(items: List[str]) -> List[str]:
