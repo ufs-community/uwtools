@@ -98,11 +98,10 @@ class FV3(Driver):
         Execution of the run via the batch system.
         """
         yield "%s FV3 run via batch submission" % self._cyclestr
-        path = self._rundir / ("%s.submit" % self._runscript_name)
+        path = Path(f"%s.submit" % self._runscript_path)
         yield asset(path, path.is_file)
-        deps = self.provisioned_run_directory()
-        yield deps
-        self.scheduler.submit_job(runscript=refs(deps)[0], submit_file=path)
+        yield self.provisioned_run_directory()
+        self.scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
 
     @task
     def run_via_local_execution(self):
@@ -112,10 +111,8 @@ class FV3(Driver):
         yield "%s FV3 run via local execution" % self._cyclestr
         path = self._rundir / "done"
         yield asset(path, path.is_file)
-        deps = self.provisioned_run_directory()
-        yield deps
-        runscript = refs(deps)[0].name
-        cmd = f"./{runscript} >{runscript}.out 2>&1"
+        yield self.provisioned_run_directory()
+        cmd = "./{x} >{x}.out 2>&1".format(x=self._runscript_path)
         execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
     @task
@@ -124,7 +121,7 @@ class FV3(Driver):
         A runscript suitable for submission to the scheduler.
         """
         yield "%s FV3 runscript" % self._cyclestr
-        path = self._rundir / self._runscript_name
+        path = self._runscript_path
         yield asset(path, path.is_file)
         yield self._run_directory()
         bs = self.scheduler.runscript
@@ -139,7 +136,7 @@ class FV3(Driver):
     @task
     def _run_directory(self):
         """
-        The run directory.
+        The run directory, initially empty.
         """
         yield "%s FV3 run directory" % self._cyclestr
         path = self._rundir
@@ -280,8 +277,8 @@ class FV3(Driver):
             self.create_namelist(run_directory / "input.nml")
 
     @property
-    def _runscript_name(self) -> str:
+    def _runscript_path(self) -> Path:
         """
-        Returns the name of the runscript.
+        Returns the path to the runscript.
         """
-        return "runscript"
+        return self._rundir / "runscript"
