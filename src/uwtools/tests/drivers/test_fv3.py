@@ -344,14 +344,14 @@ def test_forecast__run_cmd(cycle):
     with patch.object(FV3, "_validate", return_value=True):
         fcstobj = FV3(config_file=config_file, cycle=cycle)
         srun_expected = "srun --export=NONE test_exec.py"
-        fcstobj._config["runtime_info"]["mpi_args"] = ["--export=NONE"]
+        fcstobj._config["execution"]["mpi_args"] = ["--export=NONE"]
         assert srun_expected == fcstobj._run_cmd()
         mpirun_expected = "mpirun -np 4 test_exec.py"
         fcstobj._experiment_config["platform"]["mpicmd"] = "mpirun"
-        fcstobj._config["runtime_info"]["mpi_args"] = ["-np", 4]
+        fcstobj._config["execution"]["mpi_args"] = ["-np", 4]
         assert mpirun_expected == fcstobj._run_cmd()
         fcstobj._experiment_config["platform"]["mpicmd"] = "mpiexec"
-        fcstobj._config["runtime_info"]["mpi_args"] = [
+        fcstobj._config["execution"]["mpi_args"] = [
             "-n",
             4,
             "-ppn",
@@ -406,13 +406,13 @@ def test_fv3_schema_filesToStage():
 
 
 def test_fv3_schema_forecast():
-    d = {"domain": "regional", "executable": "fv3", "length": 3, "run_dir": "/tmp"}
+    d = {"domain": "regional", "execution": {"executable": "fv3"}, "length": 3, "run_dir": "/tmp"}
     errors = validator("fv3.jsonschema", "properties", "fv3")
     # Basic correctness:
     assert not errors(d)
     # Some top-level keys are required:
     assert "'domain' is a required property" in errors(with_del(d, "domain"))
-    assert "'executable' is a required property" in errors(with_del(d, "executable"))
+    assert "'execution' is a required property" in errors(with_del(d, "execution"))
     assert "'length' is a required property" in errors(with_del(d, "length"))
     assert "'run_dir' is a required property" in errors(with_del(d, "run_dir"))
     # Some top-level keys are optional:
@@ -425,7 +425,6 @@ def test_fv3_schema_forecast():
             "files_to_link": {"fn": "/path"},
             "model_configure": {"base_file": "/path"},
             "namelist": {"base_file": "/path"},
-            "runtime_info": {},
         }
     )
     # Additional top-level keys are not allowed:
@@ -447,7 +446,7 @@ def test_fv3_schema_forecast_domain(fcstprop):
 
 
 def test_fv3_schema_forecast_executable(fcstprop):
-    errors = fcstprop("executable")
+    errors = fcstprop("execution", "properties", "executable")
     # String value is ok:
     assert not errors("fv3.exe")
     # Anything else is not:
@@ -597,25 +596,30 @@ def test_fv3_schema_forecast_run_dir(fcstprop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-def test_fv3_schema_forecast_runtime_info(fcstprop):
+def test_fv3_schema_forecast_execution(fcstprop):
+    d = {"executable": "fv3"}
     mpi_args = {"mpi_args": ["--flag1", "--flag2"]}
     threads = {"threads": 32}
-    errors = fcstprop("runtime_info")
+    errors = fcstprop("execution")
+    # Basic correctness:
+    assert not errors(d)
     # mpi_args is a list of strings:
-    assert not errors(mpi_args)
+    assert not errors({**d, **mpi_args})
     # mpi_args may be empty:
-    assert not errors({"mpi_args": []})
+    assert not errors({**d, **{"mpi_args": []}})
     # String values are expected:
-    assert "88 is not of type 'string'" in errors({"mpi_args": [88]})
+    assert "88 is not of type 'string'" in errors({**d, **{"mpi_args": [88]}})
     # threads must be non-negative, and an integer:
-    assert not errors(threads)
-    assert not errors({"threads": 0})
-    assert "-1 is less than the minimum of 0" in errors({"threads": -1})
-    assert "3.14 is not of type 'integer'" in errors({"threads": 3.14})
+    assert not errors({**d, **threads})
+    assert not errors({**d, **{"threads": 0}})
+    assert "-1 is less than the minimum of 0" in errors({**d, **{"threads": -1}})
+    assert "3.14 is not of type 'integer'" in errors({**d, **{"threads": 3.14}})
     # Both properties are ok:
-    assert not errors({**mpi_args, **threads})
+    assert not errors({**d, **mpi_args, **threads})
     # Additional properties are not allowed:
-    assert "Additional properties are not allowed" in errors({**mpi_args, **threads, "foo": "bar"})
+    assert "Additional properties are not allowed" in errors(
+        {**d, **mpi_args, **threads, "foo": "bar"}
+    )
 
 
 def test_fv3_schema_platform():

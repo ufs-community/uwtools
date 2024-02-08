@@ -24,8 +24,27 @@
           ],
           "type": "string"
         },
-        "executable": {
-          "type": "string"
+        "execution": {
+          "additionalProperties": false,
+          "properties": {
+            "executable": {
+              "type": "string"
+            },
+            "mpi_args": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "threads": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "executable"
+          ],
+          "type": "object"
         },
         "field_table": {
           "additionalProperties": false,
@@ -198,27 +217,11 @@
         },
         "run_dir": {
           "type": "string"
-        },
-        "runtime_info": {
-          "additionalProperties": false,
-          "properties": {
-            "mpi_args": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "threads": {
-              "minimum": 0,
-              "type": "integer"
-            }
-          },
-          "type": "object"
         }
       },
       "required": [
         "domain",
-        "executable",
+        "execution",
         "length",
         "run_dir"
       ],

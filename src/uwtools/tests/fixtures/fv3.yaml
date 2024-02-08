@@ -1,6 +1,11 @@
 fv3:
   domain: regional
-  executable: test_exec.py
+  execution:
+    executable: test_exec.py
+    mpi_args:
+      - "--export=NONE"
+    stacksize: 512m
+    threads: 1
   files_to_copy:
     INPUT/gfs_bndy.tile7.000.nc: path/to/gfs_bndy.tile7.000.nc
     INPUT/gfs_bndy.tile7.006.nc: path/to/gfs_bndy.tile7.006.nc
@@ -25,11 +30,6 @@ fv3:
   length: 12
   model: FV3
   run_dir: some/path
-  runtime_info:
-    mpi_args:
-      - "--export=NONE"
-    stacksize: 512m
-    threads: 1
 platform:
   account: user_account
   mpicmd: srun

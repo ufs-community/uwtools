@@ -148,11 +148,12 @@ class Driver(ABC):
 
         :return: String containing MPI command, MPI arguments, and exec name.
         """
-        mpi_args = self._config.get("runtime_info", {}).get("mpi_args", [])
+        execution = self._config.get("execution", {})
+        mpi_args = execution.get("mpi_args", [])
         components = [
             self._platform_config["mpicmd"],  # MPI run program
             *[str(x) for x in mpi_args],  # MPI arguments
-            self._config["executable"],  # component executable name
+            execution["executable"],  # component executable name
         ]
         return " ".join(filter(None, components))
 
