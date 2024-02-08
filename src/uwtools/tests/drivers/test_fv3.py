@@ -121,82 +121,80 @@ def create_field_table_update_obj():
 #     )
 
 
-@fixture
-def create_namelist_assets(tmp_path):
-    update_values = {
-        "salad": {
-            "base": "kale",
-            "fruit": "banana",
-            "vegetable": "tomato",
-            "how_many": 12,
-            "dressing": "balsamic",
-        }
-    }
-    return update_values, tmp_path / "create_out.nml"
+# @fixture
+# def create_namelist_assets(tmp_path):
+#     update_values = {
+#         "salad": {
+#             "base": "kale",
+#             "fruit": "banana",
+#             "vegetable": "tomato",
+#             "how_many": 12,
+#             "dressing": "balsamic",
+#         }
+#     }
+#     return update_values, tmp_path / "create_out.nml"
 
 
-@pytest.mark.skip("PM FIXME")
-def test_create_namelist_with_base_file(create_namelist_assets, cycle, tmp_path):
-    """
-    Tests create_namelist method with optional base file.
-    """
-    update_values, outnml_file = create_namelist_assets
-    base_file = fixture_path("simple3.nml")
-    fcst_config = {
-        "fv3": {
-            "namelist": {
-                "base_file": base_file,
-                "update_values": update_values,
-            },
-        },
-    }
-    fcst_config_file = tmp_path / "fcst.yml"
-    YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
-    FV3(config_file=fcst_config_file, cycle=cycle).create_namelist(outnml_file)
-    expected = """
-&salad
-    base = 'kale'
-    fruit = 'banana'
-    vegetable = 'tomato'
-    how_many = 12
-    dressing = 'balsamic'
-    toppings = ,
-    extras = 0
-    dessert = .false.
-    appetizer = ,
-/
-""".lstrip()
-    with open(outnml_file, "r", encoding="utf-8") as out_file:
-        assert out_file.read() == expected
+# def test_create_namelist_with_base_file(create_namelist_assets, cycle, tmp_path):
+#     """
+#     Tests create_namelist method with optional base file.
+#     """
+#     update_values, outnml_file = create_namelist_assets
+#     base_file = fixture_path("simple3.nml")
+#     fcst_config = {
+#         "fv3": {
+#             "namelist": {
+#                 "base_file": base_file,
+#                 "update_values": update_values,
+#             },
+#         },
+#     }
+#     fcst_config_file = tmp_path / "fcst.yml"
+#     YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
+#     FV3(config_file=fcst_config_file, cycle=cycle).create_namelist(outnml_file)
+#     expected = """
+# &salad
+#     base = 'kale'
+#     fruit = 'banana'
+#     vegetable = 'tomato'
+#     how_many = 12
+#     dressing = 'balsamic'
+#     toppings = ,
+#     extras = 0
+#     dessert = .false.
+#     appetizer = ,
+# /
+# """.lstrip()
+#     with open(outnml_file, "r", encoding="utf-8") as out_file:
+#         assert out_file.read() == expected
 
 
-@pytest.mark.skip("PM FIXME")
-def test_create_namelist_without_base_file(create_namelist_assets, cycle, tmp_path):
-    """
-    Tests create_namelist method without optional base file.
-    """
-    update_values, outnml_file = create_namelist_assets
-    fcst_config = {
-        "fv3": {
-            "namelist": {
-                "update_values": update_values,
-            },
-        },
-    }
-    fcst_config_file = tmp_path / "fcst.yml"
-    YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
-    FV3(config_file=fcst_config_file, cycle=cycle).create_namelist(outnml_file)
-    expected = """
-&salad
-    base = 'kale'
-    fruit = 'banana'
-    vegetable = 'tomato'
-    how_many = 12
-    dressing = 'balsamic'
-/
-""".lstrip()
-    with open(outnml_file, "r", encoding="utf-8") as out_file:
-        assert out_file.read() == expected
+# def test_create_namelist_without_base_file(create_namelist_assets, cycle, tmp_path):
+#     """
+#     Tests create_namelist method without optional base file.
+#     """
+#     update_values, outnml_file = create_namelist_assets
+#     fcst_config = {
+#         "fv3": {
+#             "namelist": {
+#                 "update_values": update_values,
+#             },
+#         },
+#     }
+#     fcst_config_file = tmp_path / "fcst.yml"
+#     YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
+#     FV3(config_file=fcst_config_file, cycle=cycle).create_namelist(outnml_file)
+#     expected = """
+# &salad
+#     base = 'kale'
+#     fruit = 'banana'
+#     vegetable = 'tomato'
+#     how_many = 12
+#     dressing = 'balsamic'
+# /
+# """.lstrip()
+#     with open(outnml_file, "r", encoding="utf-8") as out_file:
+#         assert out_file.read() == expected
 
 
 # @pytest.mark.parametrize("section", ["static", "cycle_dependent"])

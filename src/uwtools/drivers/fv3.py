@@ -17,7 +17,7 @@ from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.types import DefinitePath
 from uwtools.utils.file import resource_pathobj
 from uwtools.utils.processing import execute
 
@@ -92,13 +92,35 @@ class FV3(Driver):
             output_path=path,
         )
 
+    @task
+    def namelist_file(self):
+        """
+        The FV3 namelist file.
+        """
+        fn = "input.nml"
+        yield self._taskname(fn)
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        yield self._run_directory()
+        self._create_user_updated_config(
+            config_class=NMLConfig,
+            config_values=self._config.get("namelist", {}),
+            output_path=path,
+        )
+
     @tasks
     def provisioned_run_directory(self):
         """
         The run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
-        yield [self.diag_table(), self.field_table(), self.model_configure(), self.runscript()]
+        yield [
+            self.diag_table(),
+            self.field_table(),
+            self.model_configure(),
+            self.namelist_file(),
+            self.runscript(),
+        ]
 
     @tasks
     def run(self):
@@ -162,19 +184,6 @@ class FV3(Driver):
 
     # Public methods
 
-    def create_namelist(self, output_path: OptionalPath) -> None:
-        """
-        Uses an object with user supplied values and an optional namelist base file to create an
-        output namelist file. Will "dereference" the base file.
-
-        :param output_path: Optional location of output namelist.
-        """
-        self._create_user_updated_config(
-            config_class=NMLConfig,
-            config_values=self._config.get("namelist", {}),
-            output_path=output_path,
-        )
-
     # def create_directory_structure(self) -> None:
     #     run_directory = Path(Path(self._config["run_dir"]))
     #     for subdir in ("INPUT", "RESTART"):
@@ -189,7 +198,7 @@ class FV3(Driver):
         :return: Path to the run directory.
         """
         # self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
-        self._prepare_config_files(self._rundir)
+        # self._prepare_config_files(self._rundir)
         self._config["cycle_dependent"].update(self._define_boundary_files())
         for file_category in ["static", "cycle_dependent"]:
             self.stage_files(
@@ -279,17 +288,17 @@ class FV3(Driver):
         }
         return delimiter.join([f"{k}={v}" for k, v in envvars.items()])
 
-    def _prepare_config_files(self, run_directory: Path) -> None:
-        """
-        Collect all the configuration files needed for FV3.
-        """
-        if self._dry_run:
-            for call in ("field_table", "model_configure", "input.nml"):
-                log.info(f"Would prepare: {run_directory}/{call}")
-        else:
-            # self.create_field_table(run_directory / "field_table")
-            # self.create_model_configure(run_directory / "model_configure")
-            self.create_namelist(run_directory / "input.nml")
+    # def _prepare_config_files(self, run_directory: Path) -> None:
+    #     """
+    #     Collect all the configuration files needed for FV3.
+    #     """
+    #     if self._dry_run:
+    #         for call in ("field_table", "model_configure", "input.nml"):
+    #             log.info(f"Would prepare: {run_directory}/{call}")
+    #     else:
+    #         # self.create_field_table(run_directory / "field_table")
+    #         # self.create_model_configure(run_directory / "model_configure")
+    #         self.create_namelist(run_directory / "input.nml")
 
     @property
     def _runscript_path(self) -> Path:
