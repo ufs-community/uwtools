@@ -7,6 +7,7 @@ import stat
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
+from shutil import copyfile
 from typing import Dict
 
 from iotaa import asset, task, tasks
@@ -45,12 +46,27 @@ class FV3(Driver):
     # Public workflow tasks
 
     @task
+    def diag_table(self):
+        """
+        The FV3 diag_table file.
+        """
+        fn = "diag_table"
+        yield self._taskname(fn)
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        yield self._run_directory()
+        if src := self._config.get(fn):
+            copyfile(src=src, dst=path)
+        else:
+            log.warn("No %s defined in config", fn)
+
+    @task
     def field_table(self):
         """
         The FV3 field_table file.
         """
         fn = "field_table"
-        yield "%s FV3 %s" % (self._cyclestr, fn)
+        yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
         yield self._run_directory()
@@ -66,7 +82,7 @@ class FV3(Driver):
         The FV3 model_configure file.
         """
         fn = "model_configure"
-        yield "%s FV3 %s" % (self._cyclestr, fn)
+        yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
         yield self._run_directory()
@@ -81,15 +97,15 @@ class FV3(Driver):
         """
         The run directory provisioned with all required content.
         """
-        yield "%s FV3 provisioned run directory" % self._cyclestr
-        yield [self.runscript(), self.field_table(), self.model_configure()]
+        yield self._taskname("provisioned run directory")
+        yield [self.diag_table(), self.field_table(), self.model_configure(), self.runscript()]
 
     @tasks
     def run(self):
         """
         FV3 run execution.
         """
-        yield "%s FV3 run" % self._cyclestr
+        yield self._taskname("run")
         yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
 
     @task
@@ -97,7 +113,7 @@ class FV3(Driver):
         """
         A runscript suitable for submission to the scheduler.
         """
-        yield "%s FV3 runscript" % self._cyclestr
+        yield self._taskname("runscript")
         path = self._runscript_path
         yield asset(path, path.is_file)
         yield self._run_directory()
@@ -115,7 +131,7 @@ class FV3(Driver):
         """
         The run directory, initially empty.
         """
-        yield "%s FV3 run directory" % self._cyclestr
+        yield self._taskname("run directory")
         path = self._rundir
         yield asset(path, path.is_dir)
         yield None
@@ -126,7 +142,7 @@ class FV3(Driver):
         """
         FV3 run Execution via the batch system.
         """
-        yield "%s FV3 run via batch submission" % self._cyclestr
+        yield self._taskname("run via batch submission")
         path = Path("%s.submit" % self._runscript_path)
         yield asset(path, path.is_file)
         yield self.provisioned_run_directory()
@@ -137,7 +153,7 @@ class FV3(Driver):
         """
         FV3 run execution directly on the local system.
         """
-        yield "%s FV3 run via local execution" % self._cyclestr
+        yield self._taskname("run via local execution")
         path = self._rundir / "done"
         yield asset(path, path.is_file)
         yield self.provisioned_run_directory()
@@ -281,3 +297,11 @@ class FV3(Driver):
         Returns the path to the runscript.
         """
         return self._rundir / "runscript"
+
+    def _taskname(self, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s FV3 %s" % (self._cyclestr, suffix)

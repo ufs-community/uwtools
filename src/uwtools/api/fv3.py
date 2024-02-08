@@ -27,12 +27,7 @@ def execute(
     :param dry_run: Do not run forecast, just report what would have been done
     :return: True if task completes without raising an exception
     """
-    obj = FV3(
-        config_file=config_file,
-        cycle=cycle,
-        batch=batch,
-        dry_run=dry_run,
-    )
+    obj = FV3(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
     getattr(obj, task)()
     return True
 
