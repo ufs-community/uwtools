@@ -610,27 +610,28 @@ def test_fv3_schema_forecast_execution(fcstprop):
     )
 
 
-# def test_fv3_schema_forecast_execution_batch_args(fcstprop):
-#     errors = fcstprop("execution", "properties", "batch_args")
-#     batch_args = {
-#         "cores": 1,
-#         "debug": True,
-#         "exclusive": True,
-#         "export": "string",
-#         "jobname": "string",
-#         "memory": "string",
-#         "nodes": 1,
-#         "partition": "string",
-#         "placement": "string",
-#         "queue": "string",
-#         "rundir": "string",
-#         "shell": "string",
-#         "stdout": "string",
-#         "tasks_per_node": 1,
-#         "threads": 1,
-#         "walltime": "string",
-#     }
-
+def test_fv3_schema_forecast_execution_batch_args(fcstprop):
+    errors = fcstprop("execution", "properties", "batch_args")
+    batch_args = {
+        "cores": 1,
+        "debug": True,
+        "exclusive": True,
+        "export": "string",
+        "jobname": "string",
+        "memory": "string",
+        "nodes": 1,
+        "partition": "string",
+        "placement": "string",
+        "queue": "string",
+        "rundir": "string",
+        "shell": "string",
+        "stdout": "string",
+        "tasks_per_node": 1,
+        "threads": 1,
+        "walltime": "string",
+    }
+    # Basic correctness:
+    assert not errors({"queue": "string", "walltime": "string"})
 
 def test_fv3_schema_forecast_execution_executable(fcstprop):
     errors = fcstprop("execution", "properties", "executable")
