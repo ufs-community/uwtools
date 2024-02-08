@@ -184,24 +184,15 @@ class FV3(Driver):
 
     # Public methods
 
-    # def create_directory_structure(self) -> None:
-    #     run_directory = Path(Path(self._config["run_dir"]))
-    #     for subdir in ("INPUT", "RESTART"):
-    #         path = run_directory / subdir
-    #         log.info("Creating directory: %s", path)
-    #         path.mkdir(parents=True)
-
     def prepare_directories(self) -> Path:
         """
         Prepares the run directory and stages static and cycle-dependent files.
 
         :return: Path to the run directory.
         """
-        # self.create_directory_structure(run_directory, ExistAct.delete, dry_run=self._dry_run)
-        # self._prepare_config_files(self._rundir)
         self._config["cycle_dependent"].update(self._define_boundary_files())
         for file_category in ["static", "cycle_dependent"]:
-            self.stage_files(
+            self._stage_files(
                 self._rundir,
                 self._config[file_category],
                 link_files=True,
@@ -210,18 +201,6 @@ class FV3(Driver):
         return self._rundir
 
     # Private methods
-
-    def _boundary_hours(self, lbcs_config: Dict) -> tuple[int, int, int]:
-        """
-        Prepares parameters to generate the lateral boundary condition (LBCS) forecast hours from an
-        external input data source, e.g. GFS, RAP, etc.
-
-        :return: The offset hours between the cycle and the external input data, the hours between
-            LBC ingest, and the last hour of the external input data forecast
-        """
-        offset = abs(lbcs_config["offset"])
-        end_hour = self._config["length"] + offset + 1
-        return offset, lbcs_config["interval_hours"], end_hour
 
     @property
     def _cyclestr(self) -> str:
@@ -239,7 +218,9 @@ class FV3(Driver):
         boundary_files = {}
         lbcs_config = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
         boundary_file_path = lbcs_config["output_file_path"]
-        offset, interval, endhour = self._boundary_hours(lbcs_config)
+        offset = abs(lbcs_config["offset"])
+        interval = lbcs_config["interval_hours"]
+        endhour = self._config["length"] + offset + 1
         tiles = [7] if self._config["domain"] == "global" else range(1, 7)
         for tile in tiles:
             for boundary_hour in range(offset, endhour, interval):
@@ -250,7 +231,6 @@ class FV3(Driver):
                     forecast_hour=boundary_hour,
                 )
                 boundary_files[link_name] = boundary_file_path
-
         return boundary_files
 
     def _mpi_env_variables(self, delimiter: str = " ") -> str:
@@ -260,25 +240,13 @@ class FV3(Driver):
         :return: A bash string of environment variables
         """
         envvars = {
+            "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
             "KMP_AFFINITY": "scatter",
+            "MPI_TYPE_DEPTH": 20,
             "OMP_NUM_THREADS": self._config.get("execution", {}).get("threads", 1),
             "OMP_STACKSIZE": "512m",
-            "MPI_TYPE_DEPTH": 20,
-            "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
         }
         return delimiter.join([f"{k}={v}" for k, v in envvars.items()])
-
-    # def _prepare_config_files(self, run_directory: Path) -> None:
-    #     """
-    #     Collect all the configuration files needed for FV3.
-    #     """
-    #     if self._dry_run:
-    #         for call in ("field_table", "model_configure", "input.nml"):
-    #             log.info(f"Would prepare: {run_directory}/{call}")
-    #     else:
-    #         # self.create_field_table(run_directory / "field_table")
-    #         # self.create_model_configure(run_directory / "model_configure")
-    #         self.create_namelist(run_directory / "input.nml")
 
     def _resources(self) -> Mapping:
         """

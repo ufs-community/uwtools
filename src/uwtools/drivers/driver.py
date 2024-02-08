@@ -41,43 +41,6 @@ class Driver(ABC):
         self._platform_config = self._experiment_config.get("platform", {})
         self._config: Dict[str, Any] = {}
 
-    # Public methods
-
-    @staticmethod
-    def stage_files(
-        run_directory: Path,
-        files_to_stage: Dict[str, Union[list, str]],
-        link_files: bool = False,
-        dry_run: bool = False,
-    ) -> None:
-        """
-        Creates destination files in run directory and copies or links contents from the source path
-        provided. Source paths could be provided as a single path or a list of paths to be staged in
-        a common directory.
-
-        :param run_directory: Path of desired run directory.
-        :param files_to_stage: File names in the run directory (keys) and their source paths
-            (values).
-        :param link_files: Whether to link or copy the files.
-        """
-        link_or_copy = os.symlink if link_files else shutil.copyfile
-        for dst_rel_path, src_path_or_paths in files_to_stage.items():
-            dst_path = run_directory / dst_rel_path
-            if isinstance(src_path_or_paths, list):
-                Driver.stage_files(
-                    dst_path,
-                    {os.path.basename(src): src for src in src_path_or_paths},
-                    link_files,
-                )
-            else:
-                if dry_run:
-                    msg = f"File {src_path_or_paths} would be staged as {dst_path}"
-                    log.info(msg)
-                else:
-                    msg = f"File {src_path_or_paths} staged as {dst_path}"
-                    log.info(msg)
-                    link_or_copy(src_path_or_paths, dst_path)  # type: ignore
-
     # Private methods
 
     @staticmethod
@@ -140,6 +103,41 @@ class Driver(ABC):
         """
         The path to the file containing the schema to validate the config file against.
         """
+
+    @staticmethod
+    def _stage_files(
+        run_directory: Path,
+        files_to_stage: Dict[str, Union[list, str]],
+        link_files: bool = False,
+        dry_run: bool = False,
+    ) -> None:
+        """
+        Creates destination files in run directory and copies or links contents from the source path
+        provided. Source paths could be provided as a single path or a list of paths to be staged in
+        a common directory.
+
+        :param run_directory: Path of desired run directory.
+        :param files_to_stage: File names in the run directory (keys) and their source paths
+            (values).
+        :param link_files: Whether to link or copy the files.
+        """
+        link_or_copy = os.symlink if link_files else shutil.copyfile
+        for dst_rel_path, src_path_or_paths in files_to_stage.items():
+            dst_path = run_directory / dst_rel_path
+            if isinstance(src_path_or_paths, list):
+                Driver._stage_files(
+                    dst_path,
+                    {os.path.basename(src): src for src in src_path_or_paths},
+                    link_files,
+                )
+            else:
+                if dry_run:
+                    msg = f"File {src_path_or_paths} would be staged as {dst_path}"
+                    log.info(msg)
+                else:
+                    msg = f"File {src_path_or_paths} staged as {dst_path}"
+                    log.info(msg)
+                    link_or_copy(src_path_or_paths, dst_path)  # type: ignore
 
     def _validate(self) -> None:
         """
