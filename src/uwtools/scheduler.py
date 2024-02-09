@@ -60,10 +60,6 @@ class JobScheduler(ABC):
         self._props = props
         self._validate()
 
-    # # PM do we even need this?
-    # def __getattr__(self, name) -> Any:
-    #     return self._props[name]
-
     # Public methods
 
     @property
@@ -73,14 +69,14 @@ class JobScheduler(ABC):
         """
         directives_ = []
         for key, value in self._pre_process().items():
-            if key in self._attrib_map:
+            if key in self._attribs:
                 scheduler_flag = (
-                    self._attrib_map[key](value)
-                    if callable(self._attrib_map[key])
-                    else self._attrib_map[key]
+                    self._attribs[key](value)
+                    if callable(self._attribs[key])
+                    else self._attribs[key]
                 )
-                scheduler_value = "" if callable(self._attrib_map[key]) else value
-                key_value_separator = "" if callable(self._attrib_map[key]) else " "  # PM ???
+                scheduler_value = "" if callable(self._attribs[key]) else value
+                key_value_separator = "" if callable(self._attribs[key]) else " "  # PM ???
                 directive = f"{self._prefix} {scheduler_flag}{key_value_separator}{scheduler_value}"
                 directives_.append(directive)
         return directives_
@@ -122,7 +118,7 @@ class JobScheduler(ABC):
 
     @property
     @abstractmethod
-    def _attrib_map(self) -> Dict[str, Any]:
+    def _attribs(self) -> Dict[str, Any]:
         """
         ???
         """
@@ -167,7 +163,7 @@ class Slurm(JobScheduler):
     """
 
     @property
-    def _attrib_map(self) -> Dict[str, Any]:
+    def _attribs(self) -> Dict[str, Any]:
         return {
             OptionalAttribs.CORES: "--ntasks",
             OptionalAttribs.EXCLUSIVE: lambda _: "--exclusive",
@@ -201,7 +197,7 @@ class PBS(JobScheduler):
     """
 
     @property
-    def _attrib_map(self) -> Dict[str, Any]:
+    def _attribs(self) -> Dict[str, Any]:
         return {
             OptionalAttribs.DEBUG: lambda x: f"-l debug={str(x).lower()}",
             OptionalAttribs.JOB_NAME: "-N",
@@ -261,12 +257,12 @@ class PBS(JobScheduler):
         memory = items.get(OptionalAttribs.MEMORY, "")
         select = [
             f"{total_nodes}",
-            f"{self._attrib_map[OptionalAttribs.TASKS_PER_NODE]}={tasks_per_node}",
-            f"{self._attrib_map[OptionalAttribs.THREADS]}={threads}",
+            f"{self._attribs[OptionalAttribs.TASKS_PER_NODE]}={tasks_per_node}",
+            f"{self._attribs[OptionalAttribs.THREADS]}={threads}",
             f"ncpus={int(tasks_per_node) * int(threads)}",
         ]
         if memory:
-            select.append(f"{self._attrib_map[OptionalAttribs.MEMORY]}={memory}")
+            select.append(f"{self._attribs[OptionalAttribs.MEMORY]}={memory}")
         items["-l select="] = ":".join(select)
         return items
 
@@ -281,7 +277,7 @@ class LSF(JobScheduler):
     """
 
     @property
-    def _attrib_map(self) -> Dict[str, Any]:
+    def _attribs(self) -> Dict[str, Any]:
         return {
             OptionalAttribs.JOB_NAME: "-J",
             OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
@@ -308,7 +304,7 @@ class LSF(JobScheduler):
         memory = props.get(OptionalAttribs.MEMORY, None)
         if memory is not None:
             mem_value = Memory(memory).convert("KB")
-            props[self._attrib_map[OptionalAttribs.MEMORY](mem_value)] = ""
+            props[self._attribs[OptionalAttribs.MEMORY](mem_value)] = ""
         props[OptionalAttribs.NODES] = int(tasks_per_node) * int(nodes)
         props.pop(OptionalAttribs.MEMORY, None)
         return props
