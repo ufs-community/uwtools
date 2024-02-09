@@ -70,15 +70,11 @@ class JobScheduler(ABC):
         directives_ = []
         for key, value in self._pre_process().items():
             if key in self._attribs:
-                scheduler_flag = (
-                    self._attribs[key](value)
-                    if callable(self._attribs[key])
-                    else self._attribs[key]
-                )
-                scheduler_value = "" if callable(self._attribs[key]) else value
-                key_value_separator = "" if callable(self._attribs[key]) else " "  # PM ???
-                directive = f"{self._prefix} {scheduler_flag}{key_value_separator}{scheduler_value}"
-                directives_.append(directive)
+                switch = self._attribs[key]
+                if callable(switch):
+                    directives_.append("%s %s" % (self._prefix, switch(value)))
+                else:
+                    directives_.append("%s %s %s" % (self._prefix, switch, value))
         return directives_
 
     @staticmethod
