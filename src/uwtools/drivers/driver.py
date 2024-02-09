@@ -1,8 +1,8 @@
 """
 An abstract class for component drivers.
 """
-
 import os
+import re
 import shutil
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
@@ -106,15 +106,12 @@ class Driver(ABC):
 
         {execution}
         """
-        return (
-            dedent(template)
-            .format(
-                directives="\n".join(sorted(scheduler.directives) if scheduler else ""),
-                envvars="\n".join([f"{k}={v}" for k, v in envvars.items()]),
-                execution="\n".join(execution),
-            )
-            .strip()
+        rs = dedent(template).format(
+            directives="\n".join(sorted(scheduler.directives) if scheduler else ""),
+            envvars="\n".join([f"{k}={v}" for k, v in envvars.items()]),
+            execution="\n".join(execution),
         )
+        return re.sub(r"\n\n\n+", "\n\n", rs.strip())
 
     @property
     def _scheduler(self) -> JobScheduler:
