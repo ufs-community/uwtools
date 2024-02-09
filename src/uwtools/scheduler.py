@@ -157,38 +157,47 @@ class JobScheduler(ABC):
             raise UWConfigError("Missing required attributes: %s" % ", ".join(missing))
 
 
-class Slurm(JobScheduler):
+class LSF(JobScheduler):
     """
-    Represents the Slurm scheduler.
+    Represents a LSF based scheduler.
     """
 
     @property
     def _attribs(self) -> Dict[str, Any]:
         return {
-            OptionalAttribs.CORES: "--ntasks",
-            OptionalAttribs.EXCLUSIVE: lambda _: "--exclusive",
-            OptionalAttribs.EXPORT: "--export",
-            OptionalAttribs.JOB_NAME: "--job-name",
-            OptionalAttribs.MEMORY: "--mem",
-            OptionalAttribs.NODES: "--nodes",
-            OptionalAttribs.PARTITION: "--partition",
-            OptionalAttribs.RUNDIR: "--chdir",
-            OptionalAttribs.STDERR: "--error",
-            OptionalAttribs.STDOUT: "--output",
-            OptionalAttribs.TASKS_PER_NODE: "--ntasks-per-node",
-            OptionalAttribs.THREADS: "--cpus-per-task",
-            RequiredAttribs.ACCOUNT: "--account",
-            RequiredAttribs.QUEUE: "--qos",
-            RequiredAttribs.WALLTIME: "--time",
+            OptionalAttribs.JOB_NAME: "-J",
+            OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
+            OptionalAttribs.NODES: lambda x: f"-n {x}",
+            OptionalAttribs.SHELL: "-L",
+            OptionalAttribs.STDOUT: "-o",
+            OptionalAttribs.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
+            OptionalAttribs.THREADS: lambda x: f"-R affinity[core({x})]",
+            RequiredAttribs.ACCOUNT: "-P",
+            RequiredAttribs.QUEUE: "-q",
+            RequiredAttribs.WALLTIME: "-W",
         }
 
     @property
     def _prefix(self) -> str:
-        return "#SBATCH"
+        return "#BSUB"
+
+    def _pre_process(self) -> Dict[str, Any]:
+        props = self._props
+        # LSF requires threads to be set (if None is provided, default to 1)
+        props[OptionalAttribs.THREADS] = props.get(OptionalAttribs.THREADS, 1)
+        nodes = props.get(OptionalAttribs.NODES, "")
+        tasks_per_node = props.get(OptionalAttribs.TASKS_PER_NODE, "")
+        memory = props.get(OptionalAttribs.MEMORY, None)
+        if memory is not None:
+            mem_value = Memory(memory).convert("KB")
+            props[self._attribs[OptionalAttribs.MEMORY](mem_value)] = ""
+        props[OptionalAttribs.NODES] = int(tasks_per_node) * int(nodes)
+        props.pop(OptionalAttribs.MEMORY, None)
+        return props
 
     @property
     def _submit_cmd(self) -> str:
-        return "sbatch"
+        return "bsub"
 
 
 class PBS(JobScheduler):
@@ -271,44 +280,35 @@ class PBS(JobScheduler):
         return "qsub"
 
 
-class LSF(JobScheduler):
+class Slurm(JobScheduler):
     """
-    Represents a LSF based scheduler.
+    Represents the Slurm scheduler.
     """
 
     @property
     def _attribs(self) -> Dict[str, Any]:
         return {
-            OptionalAttribs.JOB_NAME: "-J",
-            OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
-            OptionalAttribs.NODES: lambda x: f"-n {x}",
-            OptionalAttribs.SHELL: "-L",
-            OptionalAttribs.STDOUT: "-o",
-            OptionalAttribs.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
-            OptionalAttribs.THREADS: lambda x: f"-R affinity[core({x})]",
-            RequiredAttribs.ACCOUNT: "-P",
-            RequiredAttribs.QUEUE: "-q",
-            RequiredAttribs.WALLTIME: "-W",
+            OptionalAttribs.CORES: "--ntasks",
+            OptionalAttribs.EXCLUSIVE: lambda _: "--exclusive",
+            OptionalAttribs.EXPORT: "--export",
+            OptionalAttribs.JOB_NAME: "--job-name",
+            OptionalAttribs.MEMORY: "--mem",
+            OptionalAttribs.NODES: "--nodes",
+            OptionalAttribs.PARTITION: "--partition",
+            OptionalAttribs.RUNDIR: "--chdir",
+            OptionalAttribs.STDERR: "--error",
+            OptionalAttribs.STDOUT: "--output",
+            OptionalAttribs.TASKS_PER_NODE: "--ntasks-per-node",
+            OptionalAttribs.THREADS: "--cpus-per-task",
+            RequiredAttribs.ACCOUNT: "--account",
+            RequiredAttribs.QUEUE: "--qos",
+            RequiredAttribs.WALLTIME: "--time",
         }
 
     @property
     def _prefix(self) -> str:
-        return "#BSUB"
-
-    def _pre_process(self) -> Dict[str, Any]:
-        props = self._props
-        # LSF requires threads to be set (if None is provided, default to 1)
-        props[OptionalAttribs.THREADS] = props.get(OptionalAttribs.THREADS, 1)
-        nodes = props.get(OptionalAttribs.NODES, "")
-        tasks_per_node = props.get(OptionalAttribs.TASKS_PER_NODE, "")
-        memory = props.get(OptionalAttribs.MEMORY, None)
-        if memory is not None:
-            mem_value = Memory(memory).convert("KB")
-            props[self._attribs[OptionalAttribs.MEMORY](mem_value)] = ""
-        props[OptionalAttribs.NODES] = int(tasks_per_node) * int(nodes)
-        props.pop(OptionalAttribs.MEMORY, None)
-        return props
+        return "#SBATCH"
 
     @property
     def _submit_cmd(self) -> str:
-        return "bsub"
+        return "sbatch"

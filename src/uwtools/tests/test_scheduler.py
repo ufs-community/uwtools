@@ -15,6 +15,8 @@ from uwtools.scheduler import JobScheduler
 
 # LSF tests
 
+# PM sort all this to match scheduler module.
+
 
 @fixture
 def lsf_props():
