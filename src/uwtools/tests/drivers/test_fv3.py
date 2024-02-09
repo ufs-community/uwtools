@@ -35,16 +35,16 @@ def test_forecast__run_cmd(cycle):
         fcstobj = FV3(config_file=config_file, cycle=cycle)
         srun_expected = "srun --export=NONE test_exec.py"
         fcstobj._config["execution"]["mpi_args"] = ["--export=NONE"]
-        assert srun_expected == fcstobj._run_cmd()
+        assert srun_expected == fcstobj._run_cmd
         mpirun_expected = "mpirun -np 4 test_exec.py"
         fcstobj._experiment_config["platform"]["mpicmd"] = "mpirun"
         fcstobj._config["execution"]["mpi_args"] = ["-np", 4]
-        assert mpirun_expected == fcstobj._run_cmd()
+        assert mpirun_expected == fcstobj._run_cmd
         fcstobj._experiment_config["platform"]["mpicmd"] = "mpiexec"
         mpi_args = ["-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2]
         fcstobj._config["execution"]["mpi_args"] = mpi_args
         mpiexec_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
-        assert mpiexec_expected == fcstobj._run_cmd()
+        assert mpiexec_expected == fcstobj._run_cmd
 
 
 # Schema tests

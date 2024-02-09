@@ -7,7 +7,8 @@ import shutil
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Dict, Type, Union
+from textwrap import dedent
+from typing import Any, Dict, List, Optional, Type, Union
 
 from uwtools.config import validator
 from uwtools.config.formats.base import Config
@@ -20,7 +21,7 @@ from uwtools.types import DefinitePath
 
 class Driver(ABC):
     """
-    An abstract class representing drivers for various components.
+    An abstract class for component drivers.
     """
 
     def __init__(
@@ -36,8 +37,6 @@ class Driver(ABC):
         self._experiment_config = YAMLConfig(config=config_file)
         self._platform_config = self._experiment_config.get("platform", {})
         self._config: Dict[str, Any] = {}
-
-    # Private methods
 
     @staticmethod
     def _create_user_updated_config(
@@ -70,6 +69,7 @@ class Driver(ABC):
         :return: A formatted dictionary needed to create a runscript
         """
 
+    @property
     def _run_cmd(self) -> str:
         """
         The full command-line component invocation.
@@ -84,6 +84,34 @@ class Driver(ABC):
             execution["executable"],  # component executable name
         ]
         return " ".join(filter(None, components))
+
+    def _runscript(
+        self,
+        envvars: Dict[str, str],
+        execution: List[str],
+        scheduler: Optional[JobScheduler] = None,
+    ) -> str:
+        """
+        Returns a driver runscript.
+
+        :param scheduler: ??? PM ????
+        """
+        template = """
+        #!/bin/bash
+
+        {directives}
+
+        {envvars}
+
+        {execution}
+        """
+        return dedent(
+            template.format(
+                directives=sorted(scheduler.directives) if scheduler else "",
+                envvars="\n".join([f"{k}={v}" for k, v in envvars.items()]),
+                execution="\n".join(execution),
+            )
+        ).strip()
 
     @property
     def _scheduler(self) -> JobScheduler:

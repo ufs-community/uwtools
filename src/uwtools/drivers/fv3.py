@@ -173,12 +173,11 @@ class FV3(Driver):
             "OMP_NUM_THREADS": self._config.get("execution", {}).get("threads", 1),
             "OMP_STACKSIZE": "512m",
         }
-        bs = self._scheduler.runscript
-        bs.append("\n".join([f"{k}={v}" for k, v in envvars.items()]))
-        bs.append(self._run_cmd())
-        bs.append("touch %s/done" % self._rundir)
+        execution = [self._run_cmd, "touch %s/done" % self._rundir]
+        scheduler = self._scheduler if self._batch else None
         path.parent.mkdir(parents=True, exist_ok=True)
-        bs.dump(path)
+        with open(path, "w", encoding="utf-8") as f:
+            print(self._runscript(envvars, execution, scheduler), file=f)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
     # Private workflow tasks
