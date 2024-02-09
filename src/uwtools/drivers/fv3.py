@@ -8,7 +8,6 @@ from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
 from shutil import copyfile
-from typing import Dict
 
 from iotaa import asset, external, task, tasks
 
@@ -57,10 +56,9 @@ class FV3(Driver):
         interval = lbcs["interval_hours"]
         symlinks = {}
         for n in [7] if self._config["domain"] == "global" else range(1, 7):
-            for boundary_hour in range(offset, endhour, interval):
-                forecast_hour = boundary_hour - offset
-                target = lbcs["output_file_path"].format(tile=n, forecast_hour=boundary_hour)
-                linkname = "INPUT/gfs_bndy.tile%s.%03d.nc" % (n, forecast_hour)
+            for bndyhour in range(offset, endhour, interval):
+                target = Path(lbcs["output_file_path"].format(tile=n, forecast_hour=bndyhour))
+                linkname = self._rundir / "INPUT" / f"gfs_bndy.tile{n}.{(bndyhour - offset):03d}.nc"
                 symlinks[target] = linkname
         yield [self._symlink(target, linkname) for target, linkname in symlinks.items()]
 
@@ -75,7 +73,7 @@ class FV3(Driver):
         yield asset(path, path.is_file)
         yield None
         if src := self._config.get(fn):
-            path.parent.mkdir(parents=True)
+            path.parent.mkdir(parents=True, exist_ok=True)
             copyfile(src=src, dst=path)
         else:
             log.warn("No %s defined in config", fn)
@@ -158,7 +156,8 @@ class FV3(Driver):
         yield self._taskname("runscript")
         path = self._runscript_path
         yield asset(path, path.is_file)
-        yield self._run_directory()
+        yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
         bs = self._scheduler.runscript
         bs.append(self._mpi_env_variables("\n"))
         bs.append(self._run_cmd())
@@ -177,17 +176,6 @@ class FV3(Driver):
         """
         yield "File %s" % path
         yield asset(path, path.is_file)
-
-    @task
-    def _run_directory(self):
-        """
-        The FV3 run directory, initially empty.
-        """
-        yield self._taskname("run directory")
-        path = self._rundir
-        yield asset(path, path.is_dir)
-        yield None
-        path.mkdir(parents=True)
 
     @task
     def _run_via_batch_submission(self):
@@ -223,48 +211,28 @@ class FV3(Driver):
         yield "Link %s -> %s" % (linkname, target)
         yield asset(linkname, linkname.exists)
         yield self._file(target)
-        linkname.parent.mkdir(parents=True)
+        linkname.parent.mkdir(parents=True, exist_ok=True)
         os.symlink(src=target, dst=linkname)
 
     # Public methods
 
-    def prepare_directories(self) -> Path:
-        """
-        Prepares the run directory and stages static and cycle-dependent files.
+    # def prepare_directories(self) -> Path:
+    #     """
+    #     Prepares the run directory and stages static and cycle-dependent files.
 
-        :return: Path to the run directory.
-        """
-        self._config["cycle_dependent"].update(self._define_boundary_files())
-        for file_category in ["static", "cycle_dependent"]:
-            self._stage_files(
-                self._rundir,
-                self._config[file_category],
-                link_files=True,
-                dry_run=self._dry_run,
-            )
-        return self._rundir
+    #     :return: Path to the run directory.
+    #     """
+    #     self._config["cycle_dependent"].update(self._define_boundary_files())
+    #     for file_category in ["static", "cycle_dependent"]:
+    #         self._stage_files(
+    #             self._rundir,
+    #             self._config[file_category],
+    #             link_files=True,
+    #             dry_run=self._dry_run,
+    #         )
+    #     return self._rundir
 
     # Private methods
-
-    def _define_boundary_files(self) -> Dict[str, str]:
-        """
-        Maps the prepared boundary conditions to the appropriate hours for the forecast.
-
-        :return: A dict of boundary file names mapped to source input file paths
-        """
-        lbcs = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
-        offset = abs(lbcs["offset"])
-        endhour = self._config["length"] + offset + 1
-        interval = lbcs["interval_hours"]
-        boundary_files = {}
-        for n in [7] if self._config["domain"] == "global" else range(1, 7):
-            for boundary_hour in range(offset, endhour, interval):
-                forecast_hour = boundary_hour - offset
-                linkname = "INPUT/gfs_bndy.tile%s.%03d.nc" % (n, forecast_hour)
-                boundary_files[linkname] = lbcs["output_file_path"].format(
-                    tile=n, forecast_hour=boundary_hour
-                )
-        return boundary_files
 
     def _mpi_env_variables(self, delimiter: str = " ") -> str:
         """

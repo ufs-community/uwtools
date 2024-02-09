@@ -54,7 +54,7 @@ class Driver(ABC):
         :param config_values: The configuration object to update base values with.
         :param path: Path to dump file to.
         """
-        path.parent.mkdir(parents=True)
+        path.parent.mkdir(parents=True, exist_ok=True)
         user_values = config_values.get("update_values", {})
         if base_file := config_values.get("base_file"):
             config_obj = config_class(base_file)
