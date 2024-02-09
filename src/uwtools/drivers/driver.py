@@ -65,6 +65,7 @@ class Driver(ABC):
             config_class.dump_dict(cfg=user_values, path=path)
         log.debug(f"Wrote config to {path}")
 
+    @property
     @abstractmethod
     def _resources(self) -> Mapping:
         """
@@ -95,7 +96,7 @@ class Driver(ABC):
 
         :return: The scheduler object
         """
-        return JobScheduler.get_scheduler(self._resources())
+        return JobScheduler.get_scheduler(self._resources)
 
     @property
     @abstractmethod

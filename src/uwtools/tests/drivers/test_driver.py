@@ -9,7 +9,6 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from iotaa import task
 from pytest import fixture, raises
 
 from uwtools.drivers.driver import Driver
@@ -23,22 +22,7 @@ class ConcreteDriver(Driver):
     Driver subclass for testing purposes.
     """
 
-    def output(self):
-        pass
-
-    def requirements(self):
-        pass
-
-    @task
-    def run(self):
-        yield None
-
-    def run_cmd(self, *args):
-        pass
-
-    def runscript(self):
-        pass
-
+    @property
     def _resources(self) -> Mapping:
         return {}
 

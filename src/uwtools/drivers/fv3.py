@@ -237,6 +237,7 @@ class FV3(Driver):
 
     # Private methods
 
+    @property
     def _resources(self) -> Mapping:
         """
         Configuration data for FV3 runscript.
