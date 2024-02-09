@@ -269,13 +269,6 @@ class FV3(Driver):
         """
         return self._rundir / "runscript"
 
-    @property
-    def _schema_file(self) -> Path:
-        """
-        The path to the file containing the schema to validate the config file against.
-        """
-        return resource_pathobj("fv3.jsonschema")
-
     def _taskname(self, suffix: str) -> str:
         """
         Returns a common tag for graph-task log messages.
@@ -283,3 +276,10 @@ class FV3(Driver):
         :param suffix: Log-string suffix.
         """
         return "%s FV3 %s" % (self._cycle.strftime("%Y%m%d %HZ"), suffix)
+
+    def _validate(self) -> None:
+        """
+        Perform all necessary schema validation.
+        """
+        for schema_file in ("fv3.jsonschema", "platform.jsonschema"):
+            self._validate_one(resource_pathobj(schema_file))

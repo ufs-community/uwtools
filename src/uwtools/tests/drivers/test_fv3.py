@@ -4,12 +4,10 @@ FV3 driver tests.
 """
 import datetime as dt
 from functools import partial
-from pathlib import Path
 from unittest.mock import patch
 
 from pytest import fixture
 
-from uwtools.drivers.driver import Driver
 from uwtools.drivers.fv3 import FV3
 from uwtools.tests.support import fixture_path, validator, with_del, with_set
 
@@ -21,12 +19,12 @@ def cycle():
     return dt.datetime(2024, 2, 1, 18)
 
 
-def test_FV3__schema_file(cycle):
-    config_file = fixture_path("fv3.yaml")
-    with patch.object(Driver, "_validate", return_value=True):
-        forecast = FV3(config_file=config_file, cycle=cycle)
-    path = Path(forecast._schema_file)
-    assert path.is_file()
+# def test_FV3__schema_file(cycle):
+#     config_file = fixture_path("fv3.yaml")
+#     with patch.object(Driver, "_validate", return_value=True):
+#         forecast = FV3(config_file=config_file, cycle=cycle)
+#     path = Path(forecast._schema_file)
+#     assert path.is_file()
 
 
 def test_forecast__run_cmd(cycle):
