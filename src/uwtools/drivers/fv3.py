@@ -95,6 +95,30 @@ class FV3(Driver):
             path=path,
         )
 
+    @tasks
+    def files_copied(self):
+        """
+        Files copied for FV3 run.
+        """
+        yield self._taskname("files copied")
+        cycle = lambda fn: fn.format(cycle=self._cycle)
+        yield [
+            self._filecopy(cycle(src), cycle(dst))
+            for src, dst in self._driver_config.get("files_to_copy", {}).items()
+        ]
+
+    @tasks
+    def files_linked(self):
+        """
+        Files linked for FV3 run.
+        """
+        yield self._taskname("files linked")
+        cycle = lambda fn: fn.format(cycle=self._cycle)
+        yield [
+            self._symlink(cycle(target), cycle(linkname))
+            for linkname, target in self._driver_config.get("files_to_link", {}).items()
+        ]
+
     @task
     def model_configure(self):
         """
@@ -137,6 +161,8 @@ class FV3(Driver):
             self.boundary_files(),
             self.diag_table(),
             self.field_table(),
+            self.files_copied(),
+            self.files_linked(),
             self.model_configure(),
             self.namelist_file(),
             self.restart_directory(),
@@ -196,6 +222,19 @@ class FV3(Driver):
         """
         yield "File %s" % path
         yield asset(path, path.is_file)
+
+    @task
+    def _filecopy(self, src: Path, dst: Path):
+        """
+        A copy of an existing file.
+
+        :param src: Path to the soruce file.
+        :param dst: Path to the destination file to create.
+        """
+        yield "Copy %s -> %s" % (src, dst)
+        yield asset(dst, dst.is_file)
+        yield self._file(src)
+        copyfile(src, dst)
 
     @task
     def _run_via_batch_submission(self):
