@@ -6,6 +6,7 @@ Tests for uwtools.drivers.driver module.
 import logging
 from collections.abc import Mapping
 from pathlib import Path
+from typing import Any, Dict
 from unittest.mock import patch
 
 import pytest
@@ -21,6 +22,10 @@ class ConcreteDriver(Driver):
     """
     Driver subclass for testing purposes.
     """
+
+    @property
+    def _drivercfg(self) -> Dict[str, Any]:
+        return {}
 
     @property
     def _resources(self) -> Mapping:

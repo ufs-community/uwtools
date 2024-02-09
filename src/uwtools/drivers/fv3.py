@@ -8,8 +8,9 @@ from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
 from shutil import copyfile
+from typing import Any, Dict
 
-from iotaa import asset, external, task, tasks
+from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
@@ -33,10 +34,18 @@ class FV3(Driver):
         dry_run: bool = False,
         batch: bool = False,
     ):
+        """
+        The FV3 driver.
+
+        :param config_file: Path to config file.
+        :param dry_run: Run in dry-run mode?
+        :param batch: Run component via the batch system?
+        """
         super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
+        if self._dry_run:
+            dryrun()
         self._cycle = cycle
-        self._config = self._experiment_config["fv3"]
-        self._rundir = Path(self._config["run_dir"])
+        self._rundir = Path(self._drivercfg["run_dir"])
 
     # Public workflow tasks
 
@@ -46,12 +55,12 @@ class FV3(Driver):
         The FV3 lateral boundary-condition files.
         """
         yield self._taskname("lateral boundary condition files")
-        lbcs = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
+        lbcs = self._config["preprocessing"]["lateral_boundary_conditions"]
         offset = abs(lbcs["offset"])
-        endhour = self._config["length"] + offset + 1
+        endhour = self._drivercfg["length"] + offset + 1
         interval = lbcs["interval_hours"]
         symlinks = {}
-        for n in [7] if self._config["domain"] == "global" else range(1, 7):
+        for n in [7] if self._drivercfg["domain"] == "global" else range(1, 7):
             for bndyhour in range(offset, endhour, interval):
                 target = Path(lbcs["output_file_path"].format(tile=n, forecast_hour=bndyhour))
                 linkname = self._rundir / "INPUT" / f"gfs_bndy.tile{n}.{(bndyhour - offset):03d}.nc"
@@ -68,7 +77,7 @@ class FV3(Driver):
         path = self._rundir / fn
         yield asset(path, path.is_file)
         yield None
-        if src := self._config.get(fn):
+        if src := self._drivercfg.get(fn):
             path.parent.mkdir(parents=True, exist_ok=True)
             copyfile(src=src, dst=path)
         else:
@@ -86,7 +95,7 @@ class FV3(Driver):
         yield None
         self._create_user_updated_config(
             config_class=FieldTableConfig,
-            config_values=self._config["field_table"],
+            config_values=self._drivercfg["field_table"],
             path=path,
         )
 
@@ -102,7 +111,7 @@ class FV3(Driver):
         yield None
         self._create_user_updated_config(
             config_class=YAMLConfig,
-            config_values=self._config["model_configure"],
+            config_values=self._drivercfg["model_configure"],
             path=path,
         )
 
@@ -118,7 +127,7 @@ class FV3(Driver):
         yield None
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=self._config.get("namelist", {}),
+            config_values=self._drivercfg.get("namelist", {}),
             path=path,
         )
 
@@ -170,7 +179,7 @@ class FV3(Driver):
             "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
             "KMP_AFFINITY": "scatter",
             "MPI_TYPE_DEPTH": 20,
-            "OMP_NUM_THREADS": self._config.get("execution", {}).get("threads", 1),
+            "OMP_NUM_THREADS": self._drivercfg.get("execution", {}).get("threads", 1),
             "OMP_STACKSIZE": "512m",
         }
         execution = [self._run_cmd, "touch %s/done" % self._rundir]
@@ -232,6 +241,14 @@ class FV3(Driver):
     # Private methods
 
     @property
+    def _drivercfg(self) -> Dict[str, Any]:
+        """
+        Returns the config block specific to this driver.
+        """
+        drivercfg: Dict[str, Any] = self._config["fv3"]
+        return drivercfg
+
+    @property
     def _resources(self) -> Mapping:
         """
         Configuration data for FV3 runscript.
@@ -239,10 +256,10 @@ class FV3(Driver):
         :return: A formatted dictionary needed to create a runscript
         """
         return {
-            "account": self._experiment_config["platform"]["account"],
+            "account": self._config["platform"]["account"],
             "rundir": self._rundir,
-            "scheduler": self._experiment_config["platform"]["scheduler"],
-            **self._config.get("execution", {}).get("batch_args", {}),
+            "scheduler": self._config["platform"]["scheduler"],
+            **self._drivercfg.get("execution", {}).get("batch_args", {}),
         }
 
     @property

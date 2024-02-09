@@ -30,13 +30,24 @@ class Driver(ABC):
         dry_run: bool = False,
         batch: bool = False,
     ):
-        self._config_file = config_file
+        """
+        A component driver.
+
+        :param config_file: Path to config file.
+        :param dry_run: Run in dry-run mode?
+        :param batch: Run component via the batch system?
+        """
+        self._validate(config_file)
+        self._config = YAMLConfig(config=config_file)
         self._dry_run = dry_run
         self._batch = batch
-        self._validate()
-        self._experiment_config = YAMLConfig(config=config_file)
-        self._platform_config = self._experiment_config.get("platform", {})
-        self._config: Dict[str, Any] = {}
+
+    @property
+    @abstractmethod
+    def _drivercfg(self) -> Dict[str, Any]:
+        """
+        Returns the config block specific to this driver.
+        """
 
     @staticmethod
     def _create_user_updated_config(
@@ -76,10 +87,10 @@ class Driver(ABC):
 
         :return: String containing MPI command, MPI arguments, and exec name.
         """
-        execution = self._config.get("execution", {})
+        execution = self._drivercfg.get("execution", {})
         mpi_args = execution.get("mpi_args", [])
         components = [
-            self._platform_config["mpicmd"],  # MPI run program
+            self._config["platform"]["mpicmd"],  # MPI run program
             *[str(x) for x in mpi_args],  # MPI arguments
             execution["executable"],  # component executable name
         ]
@@ -164,11 +175,12 @@ class Driver(ABC):
                     log.info(msg)
                     link_or_copy(src_path_or_paths, dst_path)  # type: ignore
 
-    def _validate(self) -> None:
+    def _validate(self, config_file: DefinitePath) -> None:
         """
-        Validate the user-supplied config file.
+        Validate a config.
 
+        :param config_file: Path to config file.
         :raises: UWConfigError if config fails validation.
         """
-        if not validator.validate_yaml(config=self._config_file, schema_file=self._schema_file):
+        if not validator.validate_yaml(config=config_file, schema_file=self._schema_file):
             raise UWConfigError("YAML validation errors")

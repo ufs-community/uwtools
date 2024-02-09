@@ -56,7 +56,7 @@ class JobScheduler(ABC):
     An abstract class for interacting with HPC schedulers.
     """
 
-    def __init__(self, props: dict):
+    def __init__(self, props: Dict[str, Any]):
         self._props = props
         self._validate()
 
@@ -185,8 +185,8 @@ class LSF(JobScheduler):
         return "#BSUB"
 
     def _pre_process(self) -> Dict[str, Any]:
+        # LSF requires threads to be set (if None is provided, default to 1).
         props = self._props
-        # LSF requires threads to be set (if None is provided, default to 1)
         props[OptionalAttribs.THREADS] = props.get(OptionalAttribs.THREADS, 1)
         nodes = props.get(OptionalAttribs.NODES, "")
         tasks_per_node = props.get(OptionalAttribs.TASKS_PER_NODE, "")
