@@ -55,15 +55,14 @@ class FV3(Driver):
         offset = abs(lbcs["offset"])
         endhour = self._config["length"] + offset + 1
         interval = lbcs["interval_hours"]
-        boundary_files = {}
+        symlinks = {}
         for n in [7] if self._config["domain"] == "global" else range(1, 7):
             for boundary_hour in range(offset, endhour, interval):
                 forecast_hour = boundary_hour - offset
+                target = lbcs["output_file_path"].format(tile=n, forecast_hour=boundary_hour)
                 linkname = "INPUT/gfs_bndy.tile%s.%03d.nc" % (n, forecast_hour)
-                boundary_files[linkname] = lbcs["output_file_path"].format(
-                    tile=n, forecast_hour=boundary_hour
-                )
-        return boundary_files
+                symlinks[target] = linkname
+        yield [self._symlink(target, linkname) for target, linkname in symlinks.items()]
 
     @task
     def diag_table(self):
