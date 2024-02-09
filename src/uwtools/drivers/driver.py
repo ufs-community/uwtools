@@ -1,5 +1,5 @@
 """
-Provides an abstract class representing drivers for various components.
+An abstract class for component drivers.
 """
 
 import os
@@ -29,10 +29,6 @@ class Driver(ABC):
         dry_run: bool = False,
         batch: bool = False,
     ):
-        """
-        Initialize the driver.
-        """
-
         self._config_file = config_file
         self._dry_run = dry_run
         self._batch = batch

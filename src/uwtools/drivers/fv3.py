@@ -1,5 +1,5 @@
 """
-FV3 driver.
+A driver for the FV3 model.
 """
 
 import os
