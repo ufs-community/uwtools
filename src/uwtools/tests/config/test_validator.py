@@ -113,25 +113,25 @@ def write_as_json(data: Dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
-def test_validate_yaml_file(assets):
+def test_validate_yaml(assets):
     schema_file, _, cfgobj = assets
-    assert validator.validate_yaml_file(schema_file=schema_file, config=cfgobj)
+    assert validator.validate_yaml(schema_file=schema_file, config=cfgobj)
 
 
-def test_validate_yaml_file_fail_bad_enum_val(assets, caplog):
+def test_validate_yaml_fail_bad_enum_val(assets, caplog):
     log.setLevel(logging.INFO)
     schema_file, _, cfgobj = assets
     cfgobj["color"] = "yellow"  # invalid enum value
-    assert not validator.validate_yaml_file(schema_file=schema_file, config=cfgobj)
+    assert not validator.validate_yaml(schema_file=schema_file, config=cfgobj)
     assert any(x for x in caplog.records if "1 UW schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
 
 
-def test_validate_yaml_file_fail_bad_number_val(assets, caplog):
+def test_validate_yaml_fail_bad_number_val(assets, caplog):
     log.setLevel(logging.INFO)
     schema_file, _, cfgobj = assets
     cfgobj["number"] = "string"  # invalid number value
-    assert not validator.validate_yaml_file(schema_file=schema_file, config=cfgobj)
+    assert not validator.validate_yaml(schema_file=schema_file, config=cfgobj)
     assert any(x for x in caplog.records if "1 UW schema-validation error found" in x.message)
     assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
 
