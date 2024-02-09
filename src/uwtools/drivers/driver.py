@@ -24,12 +24,7 @@ class Driver(ABC):
     An abstract class for component drivers.
     """
 
-    def __init__(
-        self,
-        config_file: DefinitePath,
-        dry_run: bool = False,
-        batch: bool = False,
-    ):
+    def __init__(self, config_file: DefinitePath, dry_run: bool = False, batch: bool = False):
         """
         A component driver.
 

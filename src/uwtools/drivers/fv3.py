@@ -28,11 +28,7 @@ class FV3(Driver):
     """
 
     def __init__(
-        self,
-        config_file: DefinitePath,
-        cycle: datetime,
-        dry_run: bool = False,
-        batch: bool = False,
+        self, config_file: DefinitePath, cycle: datetime, dry_run: bool = False, batch: bool = False
     ):
         """
         The FV3 driver.
