@@ -10,7 +10,7 @@ from pathlib import Path
 from shutil import copyfile
 from typing import Dict
 
-from iotaa import asset, task, tasks
+from iotaa import asset, external, task, tasks
 
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
@@ -45,6 +45,26 @@ class FV3(Driver):
 
     # Public workflow tasks
 
+    @tasks
+    def boundary_files(self):
+        """
+        The FV3 lateral boundary-condition files.
+        """
+        yield self._taskname("lateral boundary condition files")
+        lbcs = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
+        offset = abs(lbcs["offset"])
+        endhour = self._config["length"] + offset + 1
+        interval = lbcs["interval_hours"]
+        boundary_files = {}
+        for n in [7] if self._config["domain"] == "global" else range(1, 7):
+            for boundary_hour in range(offset, endhour, interval):
+                forecast_hour = boundary_hour - offset
+                linkname = "INPUT/gfs_bndy.tile%s.%03d.nc" % (n, forecast_hour)
+                boundary_files[linkname] = lbcs["output_file_path"].format(
+                    tile=n, forecast_hour=boundary_hour
+                )
+        return boundary_files
+
     @task
     def diag_table(self):
         """
@@ -54,8 +74,9 @@ class FV3(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield self._run_directory()
+        yield None
         if src := self._config.get(fn):
+            path.parent.mkdir(parents=True)
             copyfile(src=src, dst=path)
         else:
             log.warn("No %s defined in config", fn)
@@ -69,11 +90,11 @@ class FV3(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield self._run_directory()
+        yield None
         self._create_user_updated_config(
             config_class=FieldTableConfig,
             config_values=self._config["field_table"],
-            output_path=path,
+            path=path,
         )
 
     @task
@@ -85,11 +106,11 @@ class FV3(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield self._run_directory()
+        yield None
         self._create_user_updated_config(
             config_class=YAMLConfig,
             config_values=self._config["model_configure"],
-            output_path=path,
+            path=path,
         )
 
     @task
@@ -101,11 +122,11 @@ class FV3(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield self._run_directory()
+        yield None
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=self._config.get("namelist", {}),
-            output_path=path,
+            path=path,
         )
 
     @tasks
@@ -148,10 +169,20 @@ class FV3(Driver):
 
     # Private workflow tasks
 
+    @external
+    def _file(self, path: Path):
+        """
+        An existing file.
+
+        :param path: Path to the file.
+        """
+        yield "File %s" % path
+        yield asset(path, path.is_file)
+
     @task
     def _run_directory(self):
         """
-        The run directory, initially empty.
+        The FV3 run directory, initially empty.
         """
         yield self._taskname("run directory")
         path = self._rundir
@@ -182,6 +213,20 @@ class FV3(Driver):
         cmd = "./{x} >{x}.out 2>&1".format(x=self._runscript_path)
         execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
+    @task
+    def _symlink(self, target: Path, linkname: Path):
+        """
+        A symbolic link.
+
+        :param target: The existing file or directory.
+        :param linkname: The symlink to create.
+        """
+        yield "Link %s -> %s" % (linkname, target)
+        yield asset(linkname, linkname.exists)
+        yield self._file(target)
+        linkname.parent.mkdir(parents=True)
+        os.symlink(src=target, dst=linkname)
+
     # Public methods
 
     def prepare_directories(self) -> Path:
@@ -202,35 +247,24 @@ class FV3(Driver):
 
     # Private methods
 
-    @property
-    def _cyclestr(self) -> str:
-        """
-        Returns a formatted-for-logging representation of the forecast cycle.
-        """
-        return self._cycle.strftime("%Y%m%d %HZ")
-
     def _define_boundary_files(self) -> Dict[str, str]:
         """
         Maps the prepared boundary conditions to the appropriate hours for the forecast.
 
         :return: A dict of boundary file names mapped to source input file paths
         """
-        boundary_files = {}
-        lbcs_config = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
-        boundary_file_path = lbcs_config["output_file_path"]
-        offset = abs(lbcs_config["offset"])
-        interval = lbcs_config["interval_hours"]
+        lbcs = self._experiment_config["preprocessing"]["lateral_boundary_conditions"]
+        offset = abs(lbcs["offset"])
         endhour = self._config["length"] + offset + 1
-        tiles = [7] if self._config["domain"] == "global" else range(1, 7)
-        for tile in tiles:
+        interval = lbcs["interval_hours"]
+        boundary_files = {}
+        for n in [7] if self._config["domain"] == "global" else range(1, 7):
             for boundary_hour in range(offset, endhour, interval):
                 forecast_hour = boundary_hour - offset
-                link_name = f"INPUT/gfs_bndy.tile{tile}.{forecast_hour:03d}.nc"
-                boundary_file_path = boundary_file_path.format(
-                    tile=tile,
-                    forecast_hour=boundary_hour,
+                linkname = "INPUT/gfs_bndy.tile%s.%03d.nc" % (n, forecast_hour)
+                boundary_files[linkname] = lbcs["output_file_path"].format(
+                    tile=n, forecast_hour=boundary_hour
                 )
-                boundary_files[link_name] = boundary_file_path
         return boundary_files
 
     def _mpi_env_variables(self, delimiter: str = " ") -> str:
@@ -281,4 +315,4 @@ class FV3(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return "%s FV3 %s" % (self._cyclestr, suffix)
+        return "%s FV3 %s" % (self._cycle.strftime("%Y%m%d %HZ"), suffix)

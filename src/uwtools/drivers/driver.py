@@ -15,7 +15,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.types import DefinitePath
 
 
 class Driver(ABC):
@@ -45,25 +45,25 @@ class Driver(ABC):
 
     @staticmethod
     def _create_user_updated_config(
-        config_class: Type[Config], config_values: dict, output_path: OptionalPath
+        config_class: Type[Config], config_values: dict, path: Path
     ) -> None:
         """
         Create a config from a base file, user-provided values, of a combination of the two.
 
         :param config_class: The Config subclass matching the config type.
         :param config_values: The configuration object to update base values with.
-        :param output_path: Optional path to dump file to.
+        :param path: Path to dump file to.
         """
+        path.parent.mkdir(parents=True)
         user_values = config_values.get("update_values", {})
         if base_file := config_values.get("base_file"):
             config_obj = config_class(base_file)
             config_obj.update_values(user_values)
             config_obj.dereference()
-            config_obj.dump(output_path)
+            config_obj.dump(path)
         else:
-            config_class.dump_dict(cfg=user_values, path=output_path)
-        if output_path:
-            log.info(f"Wrote config to {output_path}")
+            config_class.dump_dict(cfg=user_values, path=path)
+        log.debug(f"Wrote config to {path}")
 
     @abstractmethod
     def _resources(self) -> Mapping:
