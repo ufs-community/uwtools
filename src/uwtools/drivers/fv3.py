@@ -129,12 +129,26 @@ class FV3(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
+            self.boundary_files(),
             self.diag_table(),
             self.field_table(),
             self.model_configure(),
             self.namelist_file(),
+            self.restart_directory(),
             self.runscript(),
         ]
+
+    @task
+    def restart_directory(self):
+        """
+        The FV3 RESTART directory.
+        """
+        yield self._taskname("RESTART directory")
+        path = self._rundir / "RESTART"
+        yield asset(path, path.is_dir)
+        yield None
+        path.mkdir(parents=True)
+
 
     @tasks
     def run(self):
@@ -216,24 +230,6 @@ class FV3(Driver):
         yield self._file(target)
         linkname.parent.mkdir(parents=True, exist_ok=True)
         os.symlink(src=target, dst=linkname)
-
-    # Public methods
-
-    # def prepare_directories(self) -> Path:
-    #     """
-    #     Prepares the run directory and stages static and cycle-dependent files.
-
-    #     :return: Path to the run directory.
-    #     """
-    #     self._config["cycle_dependent"].update(self._define_boundary_files())
-    #     for file_category in ["static", "cycle_dependent"]:
-    #         self._stage_files(
-    #             self._rundir,
-    #             self._config[file_category],
-    #             link_files=True,
-    #             dry_run=self._dry_run,
-    #         )
-    #     return self._rundir
 
     # Private methods
 
