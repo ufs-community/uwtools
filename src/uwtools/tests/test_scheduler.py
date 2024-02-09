@@ -286,7 +286,7 @@ def test_scheduler_bad_scheduler():
 def test_scheduler_dot_notation(pbs_props):
     pbs_config, _ = pbs_props
     js = JobScheduler.get_scheduler(pbs_config)
-    assert js.account == "account_name"
+    assert js._props["account"] == "account_name"
 
 
 def test_scheduler_prop_not_defined_raises_key_error(pbs_props):

@@ -60,9 +60,9 @@ class JobScheduler(ABC):
         self._props = props
         self._validate()
 
-    # PM do we even need this?
-    def __getattr__(self, name) -> Any:
-        return self._props[name]
+    # # PM do we even need this?
+    # def __getattr__(self, name) -> Any:
+    #     return self._props[name]
 
     # Public methods
 
@@ -73,17 +73,15 @@ class JobScheduler(ABC):
         """
         directives_ = []
         for key, value in self._pre_process().items():
-            if key in self.attrib_map:
+            if key in self._attrib_map:
                 scheduler_flag = (
-                    self.attrib_map[key](value)
-                    if callable(self.attrib_map[key])
-                    else self.attrib_map[key]
+                    self._attrib_map[key](value)
+                    if callable(self._attrib_map[key])
+                    else self._attrib_map[key]
                 )
-                scheduler_value = "" if callable(self.attrib_map[key]) else value
-                key_value_separator = (  # PM ???
-                    "" if callable(self.attrib_map[key]) else self.key_value_separator
-                )
-                directive = f"{self.prefix} {scheduler_flag}{key_value_separator}{scheduler_value}"
+                scheduler_value = "" if callable(self._attrib_map[key]) else value
+                key_value_separator = "" if callable(self._attrib_map[key]) else " "  # PM ???
+                directive = f"{self._prefix} {scheduler_flag}{key_value_separator}{scheduler_value}"
                 directives_.append(directive)
         return directives_
 
@@ -263,12 +261,12 @@ class PBS(JobScheduler):
         memory = items.get(OptionalAttribs.MEMORY, "")
         select = [
             f"{total_nodes}",
-            f"{self.attrib_map[OptionalAttribs.TASKS_PER_NODE]}={tasks_per_node}",
-            f"{self.attrib_map[OptionalAttribs.THREADS]}={threads}",
+            f"{self._attrib_map[OptionalAttribs.TASKS_PER_NODE]}={tasks_per_node}",
+            f"{self._attrib_map[OptionalAttribs.THREADS]}={threads}",
             f"ncpus={int(tasks_per_node) * int(threads)}",
         ]
         if memory:
-            select.append(f"{self.attrib_map[OptionalAttribs.MEMORY]}={memory}")
+            select.append(f"{self._attrib_map[OptionalAttribs.MEMORY]}={memory}")
         items["-l select="] = ":".join(select)
         return items
 
@@ -310,7 +308,7 @@ class LSF(JobScheduler):
         memory = props.get(OptionalAttribs.MEMORY, None)
         if memory is not None:
             mem_value = Memory(memory).convert("KB")
-            props[self.attrib_map[OptionalAttribs.MEMORY](mem_value)] = ""
+            props[self._attrib_map[OptionalAttribs.MEMORY](mem_value)] = ""
         props[OptionalAttribs.NODES] = int(tasks_per_node) * int(nodes)
         props.pop(OptionalAttribs.MEMORY, None)
         return props
