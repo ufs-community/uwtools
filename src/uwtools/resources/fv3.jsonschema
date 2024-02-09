@@ -288,6 +288,9 @@
     "platform": {
       "additionalProperties": false,
       "dependentRequired": {
+        "account": [
+          "scheduler"
+        ],
         "scheduler": [
           "account"
         ]

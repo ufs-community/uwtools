@@ -362,6 +362,8 @@ def test_fv3_schema_platform():
     assert not errors({"mpicmd": "cmd"})
     # account is required if scheduler is specified:
     assert "'account' is a dependency of 'scheduler'" in errors(with_del(d, "account"))
+    # scheduler is required if account is specified:
+    assert "'scheduler' is a dependency of 'account'" in errors(with_del(d, "scheduler"))
 
 
 def test_fv3_schema_preprocessing():
