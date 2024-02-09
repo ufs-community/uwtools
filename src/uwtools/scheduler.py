@@ -68,10 +68,7 @@ class Runscript(UserList):
         """
         Returns the formatted content of the runscript.
 
-        Parameters
-        ----------
-        line_separator
-            The character or characters to join the content lines with
+        :param line_separator: The character or characters to join the content lines with.
         """
         return line_separator.join(self)
 
@@ -79,7 +76,7 @@ class Runscript(UserList):
         """
         Write a runscript to an output location.
 
-        :param output_file: Path to the file to write the runscript to
+        :param output_file: Path to the file to write the runscript to.
         """
         with writable(output_file) as f:
             print(str(self).strip(), file=f)

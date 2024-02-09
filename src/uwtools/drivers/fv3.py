@@ -149,7 +149,6 @@ class FV3(Driver):
         yield None
         path.mkdir(parents=True)
 
-
     @tasks
     def run(self):
         """
@@ -167,7 +166,6 @@ class FV3(Driver):
         path = self._runscript_path
         yield asset(path, path.is_file)
         yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
         envvars = {
             "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
             "KMP_AFFINITY": "scatter",
@@ -179,6 +177,7 @@ class FV3(Driver):
         bs.append("\n".join([f"{k}={v}" for k, v in envvars.items()]))
         bs.append(self._run_cmd())
         bs.append("touch %s/done" % self._rundir)
+        path.parent.mkdir(parents=True, exist_ok=True)
         bs.dump(path)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
