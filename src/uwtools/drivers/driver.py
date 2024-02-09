@@ -94,7 +94,8 @@ class Driver(ABC):
         """
         Returns a driver runscript.
 
-        :param scheduler: ??? PM ????
+        :param envvars: Environment variables to set before execution.
+        :param execution: Statements to execute. :scheduler: A job-scheduler instance.
         """
         template = """
         #!/bin/bash
@@ -105,13 +106,15 @@ class Driver(ABC):
 
         {execution}
         """
-        return dedent(
-            template.format(
-                directives=sorted(scheduler.directives) if scheduler else "",
+        return (
+            dedent(template)
+            .format(
+                directives="\n".join(sorted(scheduler.directives) if scheduler else ""),
                 envvars="\n".join([f"{k}={v}" for k, v in envvars.items()]),
                 execution="\n".join(execution),
             )
-        ).strip()
+            .strip()
+        )
 
     @property
     def _scheduler(self) -> JobScheduler:

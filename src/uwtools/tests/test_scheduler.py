@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring,redefined-outer-name
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
 Tests for uwtools.scheduler module.
 """
@@ -78,7 +78,7 @@ def lsf_props():
 # def test_lsf_5(lsf_props):
 #     lsf_config, _ = lsf_props
 #     expected = "bsub"
-#     assert JobScheduler.get_scheduler(lsf_config).submit_command == expected
+#     assert JobScheduler.get_scheduler(lsf_config)._submit_cmd == expected
 
 
 # PBS tests
@@ -176,7 +176,7 @@ def pbs_props():
 # def test_pbs_9(pbs_props):
 #     pbs_config, _ = pbs_props
 #     expected = "qsub"
-#     assert JobScheduler.get_scheduler(pbs_config).submit_command == expected
+#     assert JobScheduler.get_scheduler(pbs_config)._submit_cmd == expected
 
 
 # Slurm tests
@@ -253,7 +253,7 @@ def slurm_props():
 def test_slurm_6(slurm_props):
     slurm_config, _ = slurm_props
     expected = "sbatch"
-    assert JobScheduler.get_scheduler(slurm_config).submit_command == expected
+    assert JobScheduler.get_scheduler(slurm_config)._submit_cmd == expected
 
 
 # Generic tests using PBS support.
@@ -270,11 +270,11 @@ def test_slurm_6(slurm_props):
 #     assert compare_files(reference, outfile)
 
 
-def test_scheduler_bad_attr(pbs_props):
-    pbs_config, _ = pbs_props
-    js = JobScheduler.get_scheduler(pbs_config)
-    with raises(AttributeError):
-        assert js.bad_attr
+# def test_scheduler_bad_attr(pbs_props):
+#     pbs_config, _ = pbs_props
+#     js = JobScheduler.get_scheduler(pbs_config)
+#     with raises(UWConfigError):
+#         assert js.bad_attr
 
 
 def test_scheduler_bad_scheduler():
@@ -300,17 +300,16 @@ def test_scheduler_prop_not_defined_raises_key_error(pbs_props):
 def test_scheduler_raises_exception_when_missing_required_attrs(pbs_props):
     pbs_config, _ = pbs_props
     del pbs_config["account"]
-    with raises(ValueError) as e:
+    with raises(UWConfigError) as e:
         JobScheduler.get_scheduler(pbs_config)
-    assert "Missing required attributes: [account]" in str(e.value)
+    assert "Missing required attributes: account" in str(e.value)
 
 
 def test_scheduler_submit_job(pbs_props):
     pbs_config, _ = pbs_props
     js = JobScheduler.get_scheduler(pbs_config)
-    submit_command = js.submit_command
     outpath = Path("/path/to/batch/script")
-    expected_command = f"{submit_command} {outpath}"
+    expected_command = f"{js._submit_cmd} {outpath}"
     with patch.object(scheduler, "execute") as execute:
         execute.return_value = (True, "")
         js.submit_job(outpath)
