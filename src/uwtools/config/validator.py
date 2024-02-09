@@ -36,11 +36,7 @@ def validate_yaml(
     for error in errors:
         for line in str(error).split("\n"):
             log.error(line)
-    # It's pointless to evaluate an invalid config, so return now if that's the case.
-    if errors:
-        return False
-    # If no issues were detected, report success.
-    return True
+    return not bool(errors)
 
 
 # Private functions
