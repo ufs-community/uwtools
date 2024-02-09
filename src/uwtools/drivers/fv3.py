@@ -33,10 +33,6 @@ class FV3(Driver):
         dry_run: bool = False,
         batch: bool = False,
     ):
-        """
-        Initialize the driver.
-        """
-
         super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
         self._cycle = cycle
         self._config = self._experiment_config["fv3"]
@@ -158,8 +154,15 @@ class FV3(Driver):
         yield asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
+        envvars = {
+            "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
+            "KMP_AFFINITY": "scatter",
+            "MPI_TYPE_DEPTH": 20,
+            "OMP_NUM_THREADS": self._config.get("execution", {}).get("threads", 1),
+            "OMP_STACKSIZE": "512m",
+        }
         bs = self._scheduler.runscript
-        bs.append(self._mpi_env_variables("\n"))
+        bs.append("\n".join([f"{k}={v}" for k, v in envvars.items()]))
         bs.append(self._run_cmd())
         bs.append("touch %s/done" % self._rundir)
         bs.dump(path)
@@ -233,21 +236,6 @@ class FV3(Driver):
     #     return self._rundir
 
     # Private methods
-
-    def _mpi_env_variables(self, delimiter: str = " ") -> str:
-        """
-        Set the environment variables needed for the MPI job.
-
-        :return: A bash string of environment variables
-        """
-        envvars = {
-            "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
-            "KMP_AFFINITY": "scatter",
-            "MPI_TYPE_DEPTH": 20,
-            "OMP_NUM_THREADS": self._config.get("execution", {}).get("threads", 1),
-            "OMP_STACKSIZE": "512m",
-        }
-        return delimiter.join([f"{k}={v}" for k, v in envvars.items()])
 
     def _resources(self) -> Mapping:
         """
