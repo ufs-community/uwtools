@@ -62,7 +62,7 @@ class FV3(Driver):
         symlinks = {}
         for n in [7] if self._driver_config["domain"] == "global" else range(1, 7):
             for bndyhour in range(offset, endhour, interval):
-                target = Path(lbcs["output_file_path"].format(tile=n, forecast_hour=bndyhour))
+                target = Path(lbcs["path"].format(tile=n, forecast_hour=bndyhour))
                 linkname = self._rundir / "INPUT" / f"gfs_bndy.tile{n}.{(bndyhour - offset):03d}.nc"
                 symlinks[target] = linkname
         yield [self._symlink(target, linkname) for target, linkname in symlinks.items()]

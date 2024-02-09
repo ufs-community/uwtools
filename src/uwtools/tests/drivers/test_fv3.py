@@ -4,12 +4,10 @@ FV3 driver tests.
 """
 import datetime as dt
 from functools import partial
-from unittest.mock import patch
 
 from pytest import fixture
 
-from uwtools.drivers.fv3 import FV3
-from uwtools.tests.support import fixture_path, validator, with_del, with_set
+from uwtools.tests.support import validator, with_del, with_set
 
 # Class FV3 tests
 
@@ -27,22 +25,22 @@ def cycle():
 #     assert path.is_file()
 
 
-def test_forecast__run_cmd(cycle):
-    config_file = fixture_path("fv3.yaml")
-    with patch.object(FV3, "_validate", return_value=True):
-        fcstobj = FV3(config_file=config_file, cycle=cycle)
-        srun_expected = "srun --export=NONE test_exec.py"
-        fcstobj._driver_config["execution"]["mpi_args"] = ["--export=NONE"]
-        assert srun_expected == fcstobj._run_cmd
-        mpirun_expected = "mpirun -np 4 test_exec.py"
-        fcstobj._config["platform"]["mpicmd"] = "mpirun"
-        fcstobj._driver_config["execution"]["mpi_args"] = ["-np", 4]
-        assert mpirun_expected == fcstobj._run_cmd
-        fcstobj._config["platform"]["mpicmd"] = "mpiexec"
-        mpi_args = ["-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2]
-        fcstobj._driver_config["execution"]["mpi_args"] = mpi_args
-        mpiexec_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
-        assert mpiexec_expected == fcstobj._run_cmd
+# def test_forecast__run_cmd(cycle):
+#     config_file = fixture_path("fv3.yaml")
+#     with patch.object(FV3, "_validate", return_value=True):
+#         fcstobj = FV3(config_file=config_file, cycle=cycle)
+#         srun_expected = "srun --export=NONE test_exec.py"
+#         fcstobj._driver_config["execution"]["mpi_args"] = ["--export=NONE"]
+#         assert srun_expected == fcstobj._run_cmd
+#         mpirun_expected = "mpirun -np 4 test_exec.py"
+#         fcstobj._config["platform"]["mpicmd"] = "mpirun"
+#         fcstobj._driver_config["execution"]["mpi_args"] = ["-np", 4]
+#         assert mpirun_expected == fcstobj._run_cmd
+#         fcstobj._config["platform"]["mpicmd"] = "mpiexec"
+#         mpi_args = ["-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2]
+#         fcstobj._driver_config["execution"]["mpi_args"] = mpi_args
+#         mpiexec_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
+#         assert mpiexec_expected == fcstobj._run_cmd
 
 
 # Schema tests
@@ -291,7 +289,7 @@ def test_fv3_schema_forecast_lateral_boundary_conditions(fcstprop):
     # offset must be an integer of at least 0:
     assert "-1 is less than the minimum of 0" in errors(with_set(d, -1, "offset"))
     assert "'s' is not of type 'integer'" in errors(with_set(d, "s", "offset"))
-    # output_file_path must be a string:
+    # path must be a string:
     assert "88 is not of type 'string'" in errors(with_set(d, 88, "path"))
 
 

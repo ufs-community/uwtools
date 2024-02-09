@@ -1,14 +1,16 @@
 fv3:
+  diag_table: /some/path
   domain: regional
   execution:
     batch_args:
       queue: some-queue
       walltime: "00:10:00"
-    executable: test_exec.py
+    executable: ufs_model
     mpi_args:
       - "--export=NONE"
-    stacksize: 512m
     threads: 1
+  field_table:
+    base_file: /some/path
   files_to_copy:
     INPUT/gfs_bndy.tile7.000.nc: path/to/gfs_bndy.tile7.000.nc
     INPUT/gfs_bndy.tile7.006.nc: path/to/gfs_bndy.tile7.006.nc
@@ -25,20 +27,17 @@ fv3:
     co2historicaldata_2016.txt: src/uwtools/drivers/global_co2historicaldata_2016.txt
     co2historicaldata_2017.txt: src/uwtools/drivers/global_co2historicaldata_2017.txt
     co2historicaldata_2018.txt: src/uwtools/drivers/global_co2historicaldata_2018.txt
-  jobinfo:
-    nodes: 1
-    queue: batch
-    tasks_per_node: 1
-    walltime: "00:01:00"
+  lateral_boundary_conditions:
+    interval_hours: 3
+    offset: 0
+    path: gfs_bndy.tile{tile}.f{forecast_hour}.nc
   length: 12
-  model: FV3
+  model_configure:
+    base_file: /some/path
+  namelist:
+    base_file: /some/path
   run_dir: some/path
 platform:
   account: user_account
   mpicmd: srun
   scheduler: slurm
-preprocessing:
-  lateral_boundary_conditions:
-    interval_hours: 3
-    offset: 0
-    output_file_path: gfs_bndy.tile{tile}.f{forecast_hour}.nc
