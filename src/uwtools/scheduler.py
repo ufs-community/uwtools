@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from dataclasses import dataclass, fields
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -63,9 +63,9 @@ class JobScheduler(ABC):
     # Public methods
 
     @property
-    def directives(self):
+    def directives(self) -> List[str]:
         """
-        ???
+        Returns resource-request scheduler directives.
         """
         ds = []
         for key, value in self._pre_process().items():
@@ -117,14 +117,14 @@ class JobScheduler(ABC):
     @abstractmethod
     def _attribs(self) -> Dict[str, Any]:
         """
-        ???
+        Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
 
     @property
     @abstractmethod
     def _prefix(self) -> str:
         """
-        ???
+        Returns the scheduler's resource-request prefix.
         """
 
     def _pre_process(self) -> Dict[str, Any]:
@@ -137,7 +137,7 @@ class JobScheduler(ABC):
     @abstractmethod
     def _submit_cmd(self) -> str:
         """
-        ???
+        Returns the scheduler's job-submit executable name.
         """
 
     def _validate(self) -> None:
@@ -161,6 +161,9 @@ class LSF(JobScheduler):
 
     @property
     def _attribs(self) -> Dict[str, Any]:
+        """
+        Returns a mapping from canonical names to scheduler-specific CLI switches.
+        """
         return {
             OptionalAttribs.JOB_NAME: "-J",
             OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
@@ -176,6 +179,9 @@ class LSF(JobScheduler):
 
     @property
     def _prefix(self) -> str:
+        """
+        Returns the scheduler's resource-request prefix.
+        """
         return "#BSUB"
 
     def _pre_process(self) -> Dict[str, Any]:
@@ -194,6 +200,9 @@ class LSF(JobScheduler):
 
     @property
     def _submit_cmd(self) -> str:
+        """
+        Returns the scheduler's job-submit executable name.
+        """
         return "bsub"
 
 
@@ -204,6 +213,9 @@ class PBS(JobScheduler):
 
     @property
     def _attribs(self) -> Dict[str, Any]:
+        """
+        Returns a mapping from canonical names to scheduler-specific CLI switches.
+        """
         return {
             OptionalAttribs.DEBUG: lambda x: f"-l debug={str(x).lower()}",
             OptionalAttribs.JOB_NAME: "-N",
@@ -238,6 +250,9 @@ class PBS(JobScheduler):
 
     @property
     def _prefix(self) -> str:
+        """
+        Returns the scheduler's resource-request prefix.
+        """
         return "#PBS"
 
     def _pre_process(self) -> Dict[str, Any]:
@@ -274,6 +289,9 @@ class PBS(JobScheduler):
 
     @property
     def _submit_cmd(self) -> str:
+        """
+        Returns the scheduler's job-submit executable name.
+        """
         return "qsub"
 
 
@@ -284,6 +302,9 @@ class Slurm(JobScheduler):
 
     @property
     def _attribs(self) -> Dict[str, Any]:
+        """
+        Returns a mapping from canonical names to scheduler-specific CLI switches.
+        """
         return {
             OptionalAttribs.CORES: "--ntasks",
             OptionalAttribs.EXCLUSIVE: lambda _: "--exclusive",
@@ -304,8 +325,14 @@ class Slurm(JobScheduler):
 
     @property
     def _prefix(self) -> str:
+        """
+        Returns the scheduler's resource-request prefix.
+        """
         return "#SBATCH"
 
     @property
     def _submit_cmd(self) -> str:
+        """
+        Returns the scheduler's job-submit executable name.
+        """
         return "sbatch"
