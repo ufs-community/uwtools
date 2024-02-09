@@ -42,6 +42,7 @@ class FV3(Driver):
         :param batch: Run component via the batch system?
         """
         super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
+        self._validate()
         if self._dry_run:
             dryrun()
         self._cycle = cycle

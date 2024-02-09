@@ -37,7 +37,6 @@ class Driver(ABC):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        self._validate(config_file)
         self._config = YAMLConfig(config=config_file)
         self._dry_run = dry_run
         self._batch = batch
@@ -175,12 +174,11 @@ class Driver(ABC):
                     log.info(msg)
                     link_or_copy(src_path_or_paths, dst_path)  # type: ignore
 
-    def _validate(self, config_file: DefinitePath) -> None:
+    def _validate(self) -> None:
         """
-        Validate a config.
+        Validate the driver config.
 
-        :param config_file: Path to config file.
         :raises: UWConfigError if config fails validation.
         """
-        if not validator.validate_yaml(config=config_file, schema_file=self._schema_file):
+        if not validator.validate_yaml(config=self._driver_config, schema_file=self._schema_file):
             raise UWConfigError("YAML validation errors")
