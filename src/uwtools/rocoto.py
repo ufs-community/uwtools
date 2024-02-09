@@ -11,7 +11,7 @@ from lxml import etree
 from lxml.etree import Element, SubElement, _Element
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.validator import validate_yaml
+from uwtools.config.validator import validate_yaml_file
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.types import OptionalPath
@@ -347,7 +347,7 @@ class _RocotoXML:
         :raises: UWConfigError if config fails validation.
         """
         schema_file = resource_pathobj("rocoto.jsonschema")
-        ok = validate_yaml(schema_file=schema_file, config=config)
+        ok = validate_yaml_file(schema_file=schema_file, config=config)
         if not ok:
             raise UWConfigError("YAML validation errors")
 

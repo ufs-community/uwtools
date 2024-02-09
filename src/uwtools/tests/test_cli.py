@@ -250,10 +250,10 @@ def test__dispatch_config_realize_no_optional():
 def test__dispatch_config_validate_config_obj():
     config = uwtools.api.config._YAMLConfig(config={})
     _dispatch_config_validate_args = {STR.schemafile: 1, STR.infile: config}
-    with patch.object(uwtools.api.config, "_validate_yaml") as _validate_yaml:
+    with patch.object(uwtools.api.config, "_validate_yaml_file") as _validate_yaml_file:
         cli._dispatch_config_validate(_dispatch_config_validate_args)
-    _validate_yaml_args = {STR.schemafile: 1, STR.config: config}
-    _validate_yaml.assert_called_once_with(**_validate_yaml_args)
+    _validate_yaml_file_args = {STR.schemafile: 1, STR.config: config}
+    _validate_yaml_file.assert_called_once_with(**_validate_yaml_file_args)
 
 
 # @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])

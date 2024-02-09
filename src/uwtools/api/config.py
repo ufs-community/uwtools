@@ -9,7 +9,7 @@ from uwtools.config.formats.yaml import Config as _Config
 from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
-from uwtools.config.validator import validate_yaml as _validate_yaml
+from uwtools.config.validator import validate_yaml_file as _validate_yaml_file
 from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import FORMAT as _FORMAT
 
@@ -145,7 +145,7 @@ def validate(
     :param config: The config to validate
     :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise
     """
-    return _validate_yaml(schema_file=schema_file, config=config)
+    return _validate_yaml_file(schema_file=schema_file, config=config)
 
 
 # Private

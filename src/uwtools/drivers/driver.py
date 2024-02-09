@@ -182,5 +182,5 @@ class Driver(ABC):
         :param config_file: Path to config file.
         :raises: UWConfigError if config fails validation.
         """
-        if not validator.validate_yaml(config=config_file, schema_file=self._schema_file):
+        if not validator.validate_yaml_file(config=config_file, schema_file=self._schema_file):
             raise UWConfigError("YAML validation errors")

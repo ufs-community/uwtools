@@ -14,7 +14,7 @@ from uwtools.types import DefinitePath, OptionalPath
 # Public functions
 
 
-def validate_yaml(
+def validate_yaml_file(
     schema_file: DefinitePath, config: Union[dict, YAMLConfig, OptionalPath] = None
 ) -> bool:
     """
