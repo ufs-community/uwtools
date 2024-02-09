@@ -67,16 +67,16 @@ class JobScheduler(ABC):
         """
         ???
         """
-        directives_ = []
+        ds = []
         for key, value in self._pre_process().items():
             if key in self._attribs:
                 switch = self._attribs[key]
-                directives_.append(
+                ds.append(
                     "%s %s" % (self._prefix, switch(value))
                     if callable(switch)
                     else "%s %s %s" % (self._prefix, switch, value)
                 )
-        return directives_
+        return ds
 
     @staticmethod
     def get_scheduler(props: Mapping) -> JobScheduler:
