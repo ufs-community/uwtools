@@ -44,7 +44,7 @@ class Driver(ABC):
 
     @property
     @abstractmethod
-    def _drivercfg(self) -> Dict[str, Any]:
+    def _driver_config(self) -> Dict[str, Any]:
         """
         Returns the config block specific to this driver.
         """
@@ -87,7 +87,7 @@ class Driver(ABC):
 
         :return: String containing MPI command, MPI arguments, and exec name.
         """
-        execution = self._drivercfg.get("execution", {})
+        execution = self._driver_config.get("execution", {})
         mpi_args = execution.get("mpi_args", [])
         components = [
             self._config["platform"]["mpicmd"],  # MPI run program

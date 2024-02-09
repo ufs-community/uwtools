@@ -45,7 +45,7 @@ class FV3(Driver):
         if self._dry_run:
             dryrun()
         self._cycle = cycle
-        self._rundir = Path(self._drivercfg["run_dir"])
+        self._rundir = Path(self._driver_config["run_dir"])
 
     # Public workflow tasks
 
@@ -57,10 +57,10 @@ class FV3(Driver):
         yield self._taskname("lateral boundary condition files")
         lbcs = self._config["preprocessing"]["lateral_boundary_conditions"]
         offset = abs(lbcs["offset"])
-        endhour = self._drivercfg["length"] + offset + 1
+        endhour = self._driver_config["length"] + offset + 1
         interval = lbcs["interval_hours"]
         symlinks = {}
-        for n in [7] if self._drivercfg["domain"] == "global" else range(1, 7):
+        for n in [7] if self._driver_config["domain"] == "global" else range(1, 7):
             for bndyhour in range(offset, endhour, interval):
                 target = Path(lbcs["output_file_path"].format(tile=n, forecast_hour=bndyhour))
                 linkname = self._rundir / "INPUT" / f"gfs_bndy.tile{n}.{(bndyhour - offset):03d}.nc"
@@ -77,7 +77,7 @@ class FV3(Driver):
         path = self._rundir / fn
         yield asset(path, path.is_file)
         yield None
-        if src := self._drivercfg.get(fn):
+        if src := self._driver_config.get(fn):
             path.parent.mkdir(parents=True, exist_ok=True)
             copyfile(src=src, dst=path)
         else:
@@ -95,7 +95,7 @@ class FV3(Driver):
         yield None
         self._create_user_updated_config(
             config_class=FieldTableConfig,
-            config_values=self._drivercfg["field_table"],
+            config_values=self._driver_config["field_table"],
             path=path,
         )
 
@@ -111,7 +111,7 @@ class FV3(Driver):
         yield None
         self._create_user_updated_config(
             config_class=YAMLConfig,
-            config_values=self._drivercfg["model_configure"],
+            config_values=self._driver_config["model_configure"],
             path=path,
         )
 
@@ -127,7 +127,7 @@ class FV3(Driver):
         yield None
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=self._drivercfg.get("namelist", {}),
+            config_values=self._driver_config.get("namelist", {}),
             path=path,
         )
 
@@ -179,7 +179,7 @@ class FV3(Driver):
             "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
             "KMP_AFFINITY": "scatter",
             "MPI_TYPE_DEPTH": 20,
-            "OMP_NUM_THREADS": self._drivercfg.get("execution", {}).get("threads", 1),
+            "OMP_NUM_THREADS": self._driver_config.get("execution", {}).get("threads", 1),
             "OMP_STACKSIZE": "512m",
         }
         execution = [self._run_cmd, "touch %s/done" % self._rundir]
@@ -241,12 +241,12 @@ class FV3(Driver):
     # Private methods
 
     @property
-    def _drivercfg(self) -> Dict[str, Any]:
+    def _driver_config(self) -> Dict[str, Any]:
         """
         Returns the config block specific to this driver.
         """
-        drivercfg: Dict[str, Any] = self._config["fv3"]
-        return drivercfg
+        driver_config: Dict[str, Any] = self._config["fv3"]
+        return driver_config
 
     @property
     def _resources(self) -> Mapping:
@@ -259,7 +259,7 @@ class FV3(Driver):
             "account": self._config["platform"]["account"],
             "rundir": self._rundir,
             "scheduler": self._config["platform"]["scheduler"],
-            **self._drivercfg.get("execution", {}).get("batch_args", {}),
+            **self._driver_config.get("execution", {}).get("batch_args", {}),
         }
 
     @property

@@ -24,7 +24,7 @@ class ConcreteDriver(Driver):
     """
 
     @property
-    def _drivercfg(self) -> Dict[str, Any]:
+    def _driver_config(self) -> Dict[str, Any]:
         return {}
 
     @property
