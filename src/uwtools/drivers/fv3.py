@@ -103,8 +103,8 @@ class FV3(Driver):
         yield self._taskname("files copied")
         cycle = lambda fn: fn.format(cycle=self._cycle)
         yield [
-            self._filecopy(cycle(src), cycle(dst))
-            for src, dst in self._driver_config.get("files_to_copy", {}).items()
+            self._filecopy(Path(cycle(src)), self._rundir /cycle(dst))
+            for dst, src in self._driver_config.get("files_to_copy", {}).items()
         ]
 
     @tasks
@@ -115,7 +115,7 @@ class FV3(Driver):
         yield self._taskname("files linked")
         cycle = lambda fn: fn.format(cycle=self._cycle)
         yield [
-            self._symlink(cycle(target), cycle(linkname))
+            self._symlink(Path(cycle(target)), self._rundir / cycle(linkname))
             for linkname, target in self._driver_config.get("files_to_link", {}).items()
         ]
 
