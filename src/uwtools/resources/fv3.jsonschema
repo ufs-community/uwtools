@@ -192,6 +192,28 @@
         "files_to_link": {
           "$ref": "#/$defs/filesToStage"
         },
+        "lateral_boundary_conditions": {
+          "additionalProperties": false,
+          "properties": {
+            "interval_hours": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "offset": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "interval_hours",
+            "offset",
+            "path"
+          ],
+          "type": "object"
+        },
         "length": {
           "minimum": 1,
           "type": "integer"
@@ -280,39 +302,9 @@
       "required": [
         "domain",
         "execution",
+        "lateral_boundary_conditions",
         "length",
         "run_dir"
-      ],
-      "type": "object"
-    },
-    "preprocessing": {
-      "additionalProperties": false,
-      "properties": {
-        "lateral_boundary_conditions": {
-          "additionalProperties": false,
-          "properties": {
-            "interval_hours": {
-              "minimum": 1,
-              "type": "integer"
-            },
-            "offset": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "output_file_path": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "interval_hours",
-            "offset",
-            "output_file_path"
-          ],
-          "type": "object"
-        }
-      },
-      "required": [
-        "lateral_boundary_conditions"
       ],
       "type": "object"
     },

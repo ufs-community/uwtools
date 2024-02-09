@@ -86,15 +86,19 @@ def test_fv3_schema_filesToStage():
 
 
 def test_fv3_schema_forecast():
-    d = {"domain": "regional", "execution": {"executable": "fv3"}, "length": 3, "run_dir": "/tmp"}
+    d = {
+        "domain": "regional",
+        "execution": {"executable": "fv3"},
+        "lateral_boundary_conditions": {"interval_hours": 1, "offset": 0, "path": "/tmp/file"},
+        "length": 3,
+        "run_dir": "/tmp",
+    }
     errors = validator("fv3.jsonschema", "properties", "fv3")
     # Basic correctness:
     assert not errors(d)
     # Some top-level keys are required:
-    assert "'domain' is a required property" in errors(with_del(d, "domain"))
-    assert "'execution' is a required property" in errors(with_del(d, "execution"))
-    assert "'length' is a required property" in errors(with_del(d, "length"))
-    assert "'run_dir' is a required property" in errors(with_del(d, "run_dir"))
+    for key in ("domain", "execution", "lateral_boundary_conditions", "length", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(d, key))
     # Some top-level keys are optional:
     assert not errors(
         {
@@ -123,149 +127,6 @@ def test_fv3_schema_forecast_domain(fcstprop):
     errors = fcstprop("domain")
     # There is a fixed set of domain values:
     assert "'foo' is not one of ['global', 'regional']" in errors("foo")
-
-
-def test_fv3_schema_forecast_field_table(fcstprop, field_table_vals):
-    val, _ = field_table_vals
-    base_file = {"base_file": "/some/path"}
-    update_values = {"update_values": val}
-    errors = fcstprop("field_table")
-    # Just base_file is ok:
-    assert not errors(base_file)
-    # Just update_values is ok:
-    assert not errors(update_values)
-    # A combination of base_file and update_values is ok:
-    assert not errors({**base_file, **update_values})
-    # At least one is required:
-    assert "is not valid" in errors({})
-
-
-def test_fv3_schema_forecast_field_table_update_values(fcstprop, field_table_vals):
-    val1, val2 = field_table_vals
-    errors = fcstprop("field_table", "properties", "update_values")
-    # A "fixed" profile-type entry is ok:
-    assert not errors(val1)
-    # A "profile" profile-type entry is ok:
-    assert not errors(val2)
-    # A combination of two valid entries is ok:
-    assert not errors({**val1, **val2})
-    # At least one entry is required:
-    assert "does not have enough properties" in errors({})
-    # longname is required:
-    assert "'longname' is a required property" in errors(with_del(val1, "foo", "longname"))
-    # longname must be a string:
-    assert "88 is not of type 'string'" in errors(with_set(val1, 88, "foo", "longname"))
-    # units is required:
-    assert "'units' is a required property" in errors(with_del(val1, "foo", "units"))
-    # units must be a string:
-    assert "88 is not of type 'string'" in errors(with_set(val1, 88, "foo", "units"))
-    # profile_type is required:
-    assert "'profile_type' is a required property" in errors(with_del(val1, "foo", "profile_type"))
-    # profile_type name has to be "fixed" or "profile":
-    assert "'bogus' is not one of ['fixed', 'profile']" in errors(
-        with_set(val1, "bogus", "foo", "profile_type", "name")
-    )
-    # surface_value is required:
-    assert "'surface_value' is a required property" in errors(
-        with_del(val1, "foo", "profile_type", "surface_value")
-    )
-    # surface_value is numeric:
-    assert "'a string' is not of type 'number'" in errors(
-        with_set(val1, "a string", "foo", "profile_type", "surface_value")
-    )
-    # top_value is required if name is "profile":
-    assert "'top_value' is a required property" in errors(
-        with_del(val2, "bar", "profile_type", "top_value")
-    )
-    # top_value is numeric:
-    assert "'a string' is not of type 'number'" in errors(
-        with_set(val2, "a string", "bar", "profile_type", "top_value")
-    )
-
-
-def test_fv3_schema_forecast_files_to_copy():
-    test_fv3_schema_filesToStage()
-
-
-def test_fv3_schema_forecast_files_to_link():
-    test_fv3_schema_filesToStage()
-
-
-def test_fv3_schema_forecast_length(fcstprop):
-    errors = fcstprop("length")
-    # Positive int is ok:
-    assert not errors(6)
-    # Zero is not ok:
-    assert "0 is less than the minimum of 1" in errors(0)
-    # A negative number is not ok:
-    assert "-1 is less than the minimum of 1" in errors(-1)
-    # Something other than an int is not ok:
-    assert "'a string' is not of type 'integer'" in errors("a string")
-
-
-def test_fv3_schema_forecast_model_configure(fcstprop):
-    base_file = {"base_file": "/some/path"}
-    update_values = {"update_values": {"foo": 88}}
-    errors = fcstprop("model_configure")
-    # Just base_file is ok:
-    assert not errors(base_file)
-    # But base_file must be a string:
-    assert "88 is not of type 'string'" in errors({"base_file": 88})
-    # Just update_values is ok:
-    assert not errors(update_values)
-    # A combination of base_file and update_values is ok:
-    assert not errors({**base_file, **update_values})
-    # At least one is required:
-    assert "is not valid" in errors({})
-
-
-def test_fv3_schema_forecast_model_configure_update_values(fcstprop):
-    errors = fcstprop("model_configure", "properties", "update_values")
-    # boolean, number, and string values are ok:
-    assert not errors({"bool": True, "int": 88, "float": 3.14, "string": "foo"})
-    # Other types are not, e.g.:
-    assert "None is not of type 'boolean', 'number', 'string'" in errors({"null": None})
-    # At least one entry is required:
-    assert "does not have enough properties" in errors({})
-
-
-def test_fv3_schema_forecast_namelist(fcstprop):
-    base_file = {"base_file": "/some/path"}
-    update_values = {"update_values": {"nml": {"var": "val"}}}
-    errors = fcstprop("namelist")
-    # Just base_file is ok:
-    assert not errors(base_file)
-    # base_file must be a string:
-    assert "88 is not of type 'string'" in errors({"base_file": 88})
-    # Just update_values is ok:
-    assert not errors(update_values)
-    # A combination of base_file and update_values is ok:
-    assert not errors({**base_file, **update_values})
-    # At least one is required:
-    assert "is not valid" in errors({})
-
-
-def test_fv3_schema_forecast_namelist_update_values(fcstprop):
-    errors = fcstprop("namelist", "properties", "update_values")
-    # array, boolean, number, and string values are ok:
-    assert not errors(
-        {"nml": {"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"}}
-    )
-    # Other types are not, e.g.:
-    assert "None is not of type 'array', 'boolean', 'number', 'string'" in errors(
-        {"nml": {"null": None}}
-    )
-    # At least one namelist entry is required:
-    assert "does not have enough properties" in errors({})
-    # At least one val/var pair ir required:
-    assert "does not have enough properties" in errors({"nml": {}})
-
-
-def test_fv3_schema_forecast_run_dir(fcstprop):
-    errors = fcstprop("run_dir")
-    # Must be a string:
-    assert not errors("/some/path")
-    assert "88 is not of type 'string'" in errors(88)
 
 
 def test_fv3_schema_forecast_execution(fcstprop):
@@ -345,46 +206,170 @@ def test_fv3_schema_forecast_execution_threads(fcstprop):
     assert "3.14 is not of type 'integer'" in errors(3.14)
 
 
-def test_fv3_schema_preprocessing():
+def test_fv3_schema_forecast_field_table(fcstprop, field_table_vals):
+    val, _ = field_table_vals
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": val}
+    errors = fcstprop("field_table")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_fv3_schema_forecast_field_table_update_values(fcstprop, field_table_vals):
+    val1, val2 = field_table_vals
+    errors = fcstprop("field_table", "properties", "update_values")
+    # A "fixed" profile-type entry is ok:
+    assert not errors(val1)
+    # A "profile" profile-type entry is ok:
+    assert not errors(val2)
+    # A combination of two valid entries is ok:
+    assert not errors({**val1, **val2})
+    # At least one entry is required:
+    assert "does not have enough properties" in errors({})
+    # longname is required:
+    assert "'longname' is a required property" in errors(with_del(val1, "foo", "longname"))
+    # longname must be a string:
+    assert "88 is not of type 'string'" in errors(with_set(val1, 88, "foo", "longname"))
+    # units is required:
+    assert "'units' is a required property" in errors(with_del(val1, "foo", "units"))
+    # units must be a string:
+    assert "88 is not of type 'string'" in errors(with_set(val1, 88, "foo", "units"))
+    # profile_type is required:
+    assert "'profile_type' is a required property" in errors(with_del(val1, "foo", "profile_type"))
+    # profile_type name has to be "fixed" or "profile":
+    assert "'bogus' is not one of ['fixed', 'profile']" in errors(
+        with_set(val1, "bogus", "foo", "profile_type", "name")
+    )
+    # surface_value is required:
+    assert "'surface_value' is a required property" in errors(
+        with_del(val1, "foo", "profile_type", "surface_value")
+    )
+    # surface_value is numeric:
+    assert "'a string' is not of type 'number'" in errors(
+        with_set(val1, "a string", "foo", "profile_type", "surface_value")
+    )
+    # top_value is required if name is "profile":
+    assert "'top_value' is a required property" in errors(
+        with_del(val2, "bar", "profile_type", "top_value")
+    )
+    # top_value is numeric:
+    assert "'a string' is not of type 'number'" in errors(
+        with_set(val2, "a string", "bar", "profile_type", "top_value")
+    )
+
+
+def test_fv3_schema_forecast_files_to_copy():
+    test_fv3_schema_filesToStage()
+
+
+def test_fv3_schema_forecast_files_to_link():
+    test_fv3_schema_filesToStage()
+
+
+def test_fv3_schema_forecast_lateral_boundary_conditions(fcstprop):
     d = {
-        "lateral_boundary_conditions": {
-            "interval_hours": 1,
-            "offset": 0,
-            "output_file_path": "/some/path",
-        }
+        "interval_hours": 1,
+        "offset": 0,
+        "path": "/some/path",
     }
-    errors = validator("fv3.jsonschema", "properties", "preprocessing")
+    errors = fcstprop("lateral_boundary_conditions")
     # Basic correctness:
     assert not errors(d)
-    assert "'lateral_boundary_conditions' is a required property" in errors({})
     # All lateral_boundary_conditions items are required:
-    assert "'interval_hours' is a required property" in errors(
-        with_del(d, "lateral_boundary_conditions", "interval_hours")
-    )
-    assert "'offset' is a required property" in errors(
-        with_del(d, "lateral_boundary_conditions", "offset")
-    )
-    assert "'output_file_path' is a required property" in errors(
-        with_del(d, "lateral_boundary_conditions", "output_file_path")
-    )
+    assert "'interval_hours' is a required property" in errors(with_del(d, "interval_hours"))
+    assert "'offset' is a required property" in errors(with_del(d, "offset"))
+    assert "'path' is a required property" in errors(with_del(d, "path"))
     # interval_hours must be an integer of at least 1:
-    assert "0 is less than the minimum of 1" in errors(
-        with_set(d, 0, "lateral_boundary_conditions", "interval_hours")
-    )
-    assert "'a string' is not of type 'integer'" in errors(
-        with_set(d, "a string", "lateral_boundary_conditions", "interval_hours")
-    )
+    assert "0 is less than the minimum of 1" in errors(with_set(d, 0, "interval_hours"))
+    assert "'s' is not of type 'integer'" in errors(with_set(d, "s", "interval_hours"))
     # offset must be an integer of at least 0:
-    assert "-1 is less than the minimum of 0" in errors(
-        with_set(d, -1, "lateral_boundary_conditions", "offset")
-    )
-    assert "'a string' is not of type 'integer'" in errors(
-        with_set(d, "a string", "lateral_boundary_conditions", "offset")
-    )
+    assert "-1 is less than the minimum of 0" in errors(with_set(d, -1, "offset"))
+    assert "'s' is not of type 'integer'" in errors(with_set(d, "s", "offset"))
     # output_file_path must be a string:
-    assert "88 is not of type 'string'" in errors(
-        with_set(d, 88, "lateral_boundary_conditions", "output_file_path")
+    assert "88 is not of type 'string'" in errors(with_set(d, 88, "path"))
+
+
+def test_fv3_schema_forecast_length(fcstprop):
+    errors = fcstprop("length")
+    # Positive int is ok:
+    assert not errors(6)
+    # Zero is not ok:
+    assert "0 is less than the minimum of 1" in errors(0)
+    # A negative number is not ok:
+    assert "-1 is less than the minimum of 1" in errors(-1)
+    # Something other than an int is not ok:
+    assert "'a string' is not of type 'integer'" in errors("a string")
+
+
+def test_fv3_schema_forecast_model_configure(fcstprop):
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": {"foo": 88}}
+    errors = fcstprop("model_configure")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # But base_file must be a string:
+    assert "88 is not of type 'string'" in errors({"base_file": 88})
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_fv3_schema_forecast_model_configure_update_values(fcstprop):
+    errors = fcstprop("model_configure", "properties", "update_values")
+    # boolean, number, and string values are ok:
+    assert not errors({"bool": True, "int": 88, "float": 3.14, "string": "foo"})
+    # Other types are not, e.g.:
+    assert "None is not of type 'boolean', 'number', 'string'" in errors({"null": None})
+    # At least one entry is required:
+    assert "does not have enough properties" in errors({})
+
+
+def test_fv3_schema_forecast_namelist(fcstprop):
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": {"nml": {"var": "val"}}}
+    errors = fcstprop("namelist")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # base_file must be a string:
+    assert "88 is not of type 'string'" in errors({"base_file": 88})
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_fv3_schema_forecast_namelist_update_values(fcstprop):
+    errors = fcstprop("namelist", "properties", "update_values")
+    # array, boolean, number, and string values are ok:
+    assert not errors(
+        {"nml": {"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"}}
     )
+    # Other types are not, e.g.:
+    assert "None is not of type 'array', 'boolean', 'number', 'string'" in errors(
+        {"nml": {"null": None}}
+    )
+    # At least one namelist entry is required:
+    assert "does not have enough properties" in errors({})
+    # At least one val/var pair ir required:
+    assert "does not have enough properties" in errors({"nml": {}})
+
+
+def test_fv3_schema_forecast_run_dir(fcstprop):
+    errors = fcstprop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
 
 
 # @fixture

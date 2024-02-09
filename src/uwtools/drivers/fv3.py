@@ -55,7 +55,7 @@ class FV3(Driver):
         The FV3 lateral boundary-condition files.
         """
         yield self._taskname("lateral boundary condition files")
-        lbcs = self._config["preprocessing"]["lateral_boundary_conditions"]
+        lbcs = self._driver_config["lateral_boundary_conditions"]
         offset = abs(lbcs["offset"])
         endhour = self._driver_config["length"] + offset + 1
         interval = lbcs["interval_hours"]
