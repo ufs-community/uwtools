@@ -124,12 +124,19 @@ def test_dereference(tmp_path):
     #   - Initially-unrenderable values do not cause errors.
     #   - Initially-unrenderable values may be rendered via iteration.
     #   - Finally-unrenderable values do not cause errors and are returned unmodified.
+    #   - Tagged scalars in collections are handled correctly.
     log.setLevel(logging.DEBUG)
     yaml = """
 a: !int '{{ b.c + 11 }}'
 b:
   c: !int '{{ N | int + 11 }}'
 d: '{{ X }}'
+e:
+  - !int '88'
+  - !float '3.14'
+f:
+  f1: !int '88'
+  f2: !float '3.14'
 """.strip()
     path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
@@ -137,7 +144,13 @@ d: '{{ X }}'
     config = YAMLConfig(path)
     with patch.dict(os.environ, {"N": "55"}, clear=True):
         config.dereference()
-    assert config == {"a": 77, "b": {"c": 66}, "d": "{{ X }}"}
+    assert config == {
+        "a": 77,
+        "b": {"c": 66},
+        "d": "{{ X }}",
+        "e": [88, 3.14],
+        "f": {"f1": 88, "f2": 3.14},
+    }
 
 
 @pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
