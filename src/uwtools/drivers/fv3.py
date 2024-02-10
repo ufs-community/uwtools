@@ -61,7 +61,7 @@ class FV3(Driver):
                 target = Path(lbcs["path"].format(tile=n, forecast_hour=bndyhour))
                 linkname = self._rundir / "INPUT" / f"gfs_bndy.tile{n}.{(bndyhour - offset):03d}.nc"
                 symlinks[target] = linkname
-        yield [self._symlink(target, linkname) for target, linkname in symlinks.items()]
+        yield [self._symlink(target=t, linkname=l) for t, l in symlinks.items()]
 
     @task
     def diag_table(self):
@@ -103,7 +103,7 @@ class FV3(Driver):
         yield self._taskname("files copied")
         cycle = lambda fn: fn.format(cycle=self._cycle)
         yield [
-            self._filecopy(Path(cycle(src)), self._rundir /cycle(dst))
+            self._filecopy(src=Path(cycle(src)), dst=self._rundir / cycle(dst))
             for dst, src in self._driver_config.get("files_to_copy", {}).items()
         ]
 
@@ -115,7 +115,7 @@ class FV3(Driver):
         yield self._taskname("files linked")
         cycle = lambda fn: fn.format(cycle=self._cycle)
         yield [
-            self._symlink(Path(cycle(target)), self._rundir / cycle(linkname))
+            self._symlink(target=Path(cycle(target)), linkname=self._rundir / cycle(linkname))
             for linkname, target in self._driver_config.get("files_to_link", {}).items()
         ]
 
