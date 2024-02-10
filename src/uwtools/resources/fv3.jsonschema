@@ -27,7 +27,7 @@
         "execution": {
           "additionalProperties": false,
           "properties": {
-            "batch_args": {
+            "batchargs": {
               "additionalProperties": false,
               "properties": {
                 "cores": {
@@ -85,10 +85,16 @@
               ],
               "type": "object"
             },
+            "envcmds": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
             "executable": {
               "type": "string"
             },
-            "mpi_args": {
+            "mpiargs": {
               "items": {
                 "type": "string"
               },

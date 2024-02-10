@@ -2,11 +2,11 @@ fv3:
   diag_table: /some/path
   domain: regional
   execution:
-    batch_args:
+    batchargs:
       queue: some-queue
       walltime: "00:10:00"
     executable: ufs_model
-    mpi_args:
+    mpiargs:
       - "--export=NONE"
     threads: 1
   field_table:

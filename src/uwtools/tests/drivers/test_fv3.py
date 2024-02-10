@@ -30,15 +30,15 @@ def cycle():
 #     with patch.object(FV3, "_validate", return_value=True):
 #         fcstobj = FV3(config_file=config_file, cycle=cycle)
 #         srun_expected = "srun --export=NONE test_exec.py"
-#         fcstobj._driver_config["execution"]["mpi_args"] = ["--export=NONE"]
+#         fcstobj._driver_config["execution"]["mpiargs"] = ["--export=NONE"]
 #         assert srun_expected == fcstobj._run_cmd
 #         mpirun_expected = "mpirun -np 4 test_exec.py"
 #         fcstobj._config["platform"]["mpicmd"] = "mpirun"
-#         fcstobj._driver_config["execution"]["mpi_args"] = ["-np", 4]
+#         fcstobj._driver_config["execution"]["mpiargs"] = ["-np", 4]
 #         assert mpirun_expected == fcstobj._run_cmd
 #         fcstobj._config["platform"]["mpicmd"] = "mpiexec"
-#         mpi_args = ["-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2]
-#         fcstobj._driver_config["execution"]["mpi_args"] = mpi_args
+#         mpiargs = ["-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2]
+#         fcstobj._driver_config["execution"]["mpiargs"] = mpiargs
 #         mpiexec_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
 #         assert mpiexec_expected == fcstobj._run_cmd
 
@@ -129,29 +129,29 @@ def test_fv3_schema_forecast_domain(fcstprop):
 
 def test_fv3_schema_forecast_execution(fcstprop):
     d = {"executable": "fv3"}
-    batch_args = {"batch_args": {"queue": "string", "walltime": "string"}}
-    mpi_args = {"mpi_args": ["--flag1", "--flag2"]}
+    batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
+    mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
     threads = {"threads": 32}
     errors = fcstprop("execution")
     # Basic correctness:
     assert not errors(d)
-    # batch_args may optionally be specified:
-    assert not errors({**d, **batch_args})
-    # mpi_args may be optionally specified:
-    assert not errors({**d, **mpi_args})
+    # batchargs may optionally be specified:
+    assert not errors({**d, **batchargs})
+    # mpiargs may be optionally specified:
+    assert not errors({**d, **mpiargs})
     # threads may optionally be specified:
     assert not errors({**d, **threads})
     # All properties are ok:
-    assert not errors({**d, **batch_args, **mpi_args, **threads})
+    assert not errors({**d, **batchargs, **mpiargs, **threads})
     # Additional properties are not allowed:
     assert "Additional properties are not allowed" in errors(
-        {**d, **mpi_args, **threads, "foo": "bar"}
+        {**d, **mpiargs, **threads, "foo": "bar"}
     )
 
 
-def test_fv3_schema_forecast_execution_batch_args(fcstprop):
-    errors = fcstprop("execution", "properties", "batch_args")
-    batch_args = {
+def test_fv3_schema_forecast_execution_batchargs(fcstprop):
+    errors = fcstprop("execution", "properties", "batchargs")
+    batchargs = {
         "cores": 1,
         "debug": True,
         "exclusive": True,
@@ -172,9 +172,9 @@ def test_fv3_schema_forecast_execution_batch_args(fcstprop):
     # Basic correctness:
     assert not errors({"queue": "string", "walltime": "string"})
     # Full suite of accepted entries:
-    assert not errors(batch_args)
+    assert not errors(batchargs)
     # Additional entries are not allowed:
-    assert "Additional properties are not allowed" in errors({**batch_args, "foo": "bar"})
+    assert "Additional properties are not allowed" in errors({**batchargs, "foo": "bar"})
 
 
 def test_fv3_schema_forecast_execution_executable(fcstprop):
@@ -185,11 +185,11 @@ def test_fv3_schema_forecast_execution_executable(fcstprop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-def test_fv3_schema_forecast_execution_mpi_args(fcstprop):
-    errors = fcstprop("execution", "properties", "mpi_args")
+def test_fv3_schema_forecast_execution_mpiargs(fcstprop):
+    errors = fcstprop("execution", "properties", "mpiargs")
     # Basic correctness:
     assert not errors(["string1", "string2"])
-    # mpi_args may be empty:
+    # mpiargs may be empty:
     assert not errors([])
     # String values are expected:
     assert "88 is not of type 'string'" in errors(["string1", 88])

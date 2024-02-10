@@ -204,11 +204,17 @@ class FV3(Driver):
             "OMP_NUM_THREADS": self._driver_config.get("execution", {}).get("threads", 1),
             "OMP_STACKSIZE": "512m",
         }
-        execution = ["set -eux", self._run_cmd, "touch %s/done" % self._rundir]
+        envcmds = self._driver_config.get("execution", {}).get("envcmds", [])
+        execution = [self._run_cmd, "test $? -eq 0 && touch %s/done" % self._rundir]
         scheduler = self._scheduler if self._batch else None
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
-            print(self._runscript(envvars, execution, scheduler), file=f)
+            print(
+                self._runscript(
+                    envcmds=envcmds, envvars=envvars, execution=execution, scheduler=scheduler
+                ),
+                file=f,
+            )
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
     # Private workflow tasks
@@ -294,7 +300,7 @@ class FV3(Driver):
             "account": self._config["platform"]["account"],
             "rundir": self._rundir,
             "scheduler": self._config["platform"]["scheduler"],
-            **self._driver_config.get("execution", {}).get("batch_args", {}),
+            **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
 
     @property

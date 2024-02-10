@@ -83,16 +83,17 @@ class Driver(ABC):
         :return: String containing MPI command, MPI arguments, and exec name.
         """
         execution = self._driver_config.get("execution", {})
-        mpi_args = execution.get("mpi_args", [])
+        mpiargs = execution.get("mpiargs", [])
         components = [
             self._config["platform"]["mpicmd"],  # MPI run program
-            *[str(x) for x in mpi_args],  # MPI arguments
+            *[str(x) for x in mpiargs],  # MPI arguments
             execution["executable"],  # component executable name
         ]
         return " ".join(filter(None, components))
 
     def _runscript(
         self,
+        envcmds: List[str],
         envvars: Dict[str, str],
         execution: List[str],
         scheduler: Optional[JobScheduler] = None,
@@ -100,13 +101,17 @@ class Driver(ABC):
         """
         Returns a driver runscript.
 
-        :param envvars: Environment variables to set before execution.
+        :param envcmds: Shell commands to set up runtime environment.
+        :param envvars: Environment variables to set in runtime environment.
         :param execution: Statements to execute. :scheduler: A job-scheduler instance.
+        :param scheduler: A job-scheduler object.
         """
         template = """
         #!/bin/bash
 
         {directives}
+
+        {envcmds}
 
         {envvars}
 
@@ -114,6 +119,7 @@ class Driver(ABC):
         """
         rs = dedent(template).format(
             directives="\n".join(scheduler.directives if scheduler else ""),
+            envcmds="\n".join(envcmds),
             envvars="\n".join([f"{k}={v}" for k, v in envvars.items()]),
             execution="\n".join(execution),
         )
