@@ -204,7 +204,7 @@ class FV3(Driver):
             "OMP_NUM_THREADS": self._driver_config.get("execution", {}).get("threads", 1),
             "OMP_STACKSIZE": "512m",
         }
-        execution = [self._run_cmd, "touch %s/done" % self._rundir]
+        execution = ["set -eux", self._run_cmd, "touch %s/done" % self._rundir]
         scheduler = self._scheduler if self._batch else None
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
@@ -256,7 +256,7 @@ class FV3(Driver):
         path = self._rundir / "done"
         yield asset(path, path.is_file)
         yield self.provisioned_run_directory()
-        cmd = "./{x} >{x}.out 2>&1".format(x=self._runscript_path)
+        cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
         execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
     @task
