@@ -34,10 +34,10 @@ def cycle():
 #         fcstobj._driver_config["execution"]["mpiargs"] = ["--export=NONE"]
 #         assert srun_expected == fcstobj._run_cmd
 #         mpirun_expected = "mpirun -np 4 test_exec.py"
-#         fcstobj._config["platform"]["mpicmd"] = "mpirun"
+#         fcstobj._driver_config["execution"]["mpicmd"] = "mpirun"
 #         fcstobj._driver_config["execution"]["mpiargs"] = ["-np", 4]
 #         assert mpirun_expected == fcstobj._run_cmd
-#         fcstobj._config["platform"]["mpicmd"] = "mpiexec"
+#         fcstobj._driver_config["execution"]["mpicmd"] = "mpiexec"
 #         mpiargs = ["-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2]
 #         fcstobj._driver_config["execution"]["mpiargs"] = mpiargs
 #         mpiexec_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"

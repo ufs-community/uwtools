@@ -14,9 +14,6 @@
         "account": {
           "type": "string"
         },
-        "mpicmd": {
-          "type": "string"
-        },
         "scheduler": {
           "enum": [
             "lsf",
@@ -26,9 +23,6 @@
           "type": "string"
         }
       },
-      "required": [
-        "mpicmd"
-      ],
       "type": "object"
     }
   }

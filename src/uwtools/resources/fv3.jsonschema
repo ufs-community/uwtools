@@ -45,6 +45,9 @@
               },
               "type": "array"
             },
+            "mpicmd": {
+              "type": "string"
+            },
             "threads": {
               "minimum": 0,
               "type": "integer"

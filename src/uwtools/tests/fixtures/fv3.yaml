@@ -8,6 +8,7 @@ fv3:
     executable: ufs_model
     mpiargs:
       - "--export=NONE"
+    mpicmd: srun
     threads: 1
   field_table:
     base_file: /some/path
@@ -39,5 +40,4 @@ fv3:
   run_dir: some/path
 platform:
   account: user_account
-  mpicmd: srun
   scheduler: slurm

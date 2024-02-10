@@ -86,7 +86,7 @@ class Driver(ABC):
         execution = self._driver_config.get("execution", {})
         mpiargs = execution.get("mpiargs", [])
         components = [
-            self._config["platform"]["mpicmd"],  # MPI run program
+            execution["mpicmd"],  # MPI run program
             *[str(x) for x in mpiargs],  # MPI arguments
             execution["executable"],  # component executable name
         ]
