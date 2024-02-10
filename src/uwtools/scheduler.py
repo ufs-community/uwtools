@@ -20,7 +20,7 @@ from uwtools.utils.processing import execute
 @dataclass(frozen=True)
 class _DirectivesOptional:
     """
-    Keys for optional attributes.
+    Keys for optional directives.
     """
 
     CORES: str = "cores"
@@ -44,7 +44,7 @@ class _DirectivesOptional:
 @dataclass(frozen=True)
 class _DirectivesRequired:
     """
-    Keys for required attributes.
+    Keys for required directives.
     """
 
     ACCOUNT: str = "account"
@@ -57,7 +57,7 @@ class JobScheduler(ABC):
     """
 
     def __init__(self, props: Dict[str, Any]):
-        self._props = props
+        self._props = {k: v for k, v in props.items() if k != "scheduler"}
         self._validate()
 
     # Public methods
@@ -69,14 +69,16 @@ class JobScheduler(ABC):
         """
         pre, sep = self._prefix, self._directive_separator
         ds = []
-        for key, value in self._pre_process().items():
-            if key in self._directives:
-                switch = self._directives[key]
+        for key, value in self._processed_props.items():
+            if key in self._managed_directives:
+                switch = self._managed_directives[key]
                 ds.append(
                     "%s%s%s" % (pre, sep, switch(value))
                     if callable(switch)
                     else "%s %s%s%s" % (pre, switch, sep, value)
                 )
+            else:
+                ds.append("%s --%s%s%s" % (pre, key, sep, value))
         return sorted(ds)
 
     @staticmethod
@@ -116,16 +118,16 @@ class JobScheduler(ABC):
 
     @property
     @abstractmethod
-    def _directives(self) -> Dict[str, Any]:
+    def _directive_separator(self) -> str:
         """
-        Returns a mapping from canonical names to scheduler-specific CLI switches.
+        Returns the character used to separate directive keys and values.
         """
 
     @property
     @abstractmethod
-    def _directive_separator(self) -> str:
+    def _managed_directives(self) -> Dict[str, Any]:
         """
-        Returns the character used to separate directive keys and values.
+        Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
 
     @property
@@ -135,9 +137,10 @@ class JobScheduler(ABC):
         Returns the scheduler's resource-request prefix.
         """
 
-    def _pre_process(self) -> Dict[str, Any]:
+    @property
+    def _processed_props(self) -> Dict[str, Any]:
         """
-        Pre-process attributes before converting to runscript.
+        Pre-process directives before converting to runscript.
         """
         return self._props
 
@@ -159,7 +162,7 @@ class JobScheduler(ABC):
             for x in fields(_DirectivesRequired)
             if getattr(_DirectivesRequired, x.name) not in self._props
         ]:
-            raise UWConfigError("Missing required attributes: %s" % ", ".join(missing))
+            raise UWConfigError("Missing required directives: %s" % ", ".join(missing))
 
 
 class LSF(JobScheduler):
@@ -168,7 +171,14 @@ class LSF(JobScheduler):
     """
 
     @property
-    def _directives(self) -> Dict[str, Any]:
+    def _directive_separator(self) -> str:
+        """
+        Returns the character used to separate directive keys and values.
+        """
+        return " "
+
+    @property
+    def _managed_directives(self) -> Dict[str, Any]:
         """
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
@@ -186,20 +196,14 @@ class LSF(JobScheduler):
         }
 
     @property
-    def _directive_separator(self) -> str:
-        """
-        Returns the character used to separate directive keys and values.
-        """
-        return " "
-
-    @property
     def _prefix(self) -> str:
         """
         Returns the scheduler's resource-request prefix.
         """
         return "#BSUB"
 
-    def _pre_process(self) -> Dict[str, Any]:
+    @property
+    def _processed_props(self) -> Dict[str, Any]:
         # LSF requires threads to be set (if None is provided, default to 1).
         props = self._props
         props[_DirectivesOptional.THREADS] = props.get(_DirectivesOptional.THREADS, 1)
@@ -208,7 +212,7 @@ class LSF(JobScheduler):
         memory = props.get(_DirectivesOptional.MEMORY, None)
         if memory is not None:
             mem_value = Memory(memory).convert("KB")
-            props[self._directives[_DirectivesOptional.MEMORY](mem_value)] = ""
+            props[self._managed_directives[_DirectivesOptional.MEMORY](mem_value)] = ""
         props[_DirectivesOptional.NODES] = int(tasks_per_node) * int(nodes)
         props.pop(_DirectivesOptional.MEMORY, None)
         return props
@@ -227,7 +231,14 @@ class PBS(JobScheduler):
     """
 
     @property
-    def _directives(self) -> Dict[str, Any]:
+    def _directive_separator(self) -> str:
+        """
+        Returns the character used to separate directive keys and values.
+        """
+        return " "
+
+    @property
+    def _managed_directives(self) -> Dict[str, Any]:
         """
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
@@ -244,13 +255,6 @@ class PBS(JobScheduler):
             _DirectivesRequired.ACCOUNT: "-A",
             _DirectivesRequired.WALLTIME: "-l walltime=",
         }
-
-    @property
-    def _directive_separator(self) -> str:
-        """
-        Returns the character used to separate directive keys and values.
-        """
-        return " "
 
     @staticmethod
     def _placement(items: Dict[str, Any]) -> Dict[str, Any]:
@@ -277,7 +281,8 @@ class PBS(JobScheduler):
         """
         return "#PBS"
 
-    def _pre_process(self) -> Dict[str, Any]:
+    @property
+    def _processed_props(self) -> Dict[str, Any]:
         props = self._props
         props.update(self._select(props))
         props.update(self._placement(props))
@@ -300,12 +305,12 @@ class PBS(JobScheduler):
         memory = items.get(_DirectivesOptional.MEMORY, "")
         select = [
             f"{total_nodes}",
-            f"{self._directives[_DirectivesOptional.TASKS_PER_NODE]}={tasks_per_node}",
-            f"{self._directives[_DirectivesOptional.THREADS]}={threads}",
+            f"{self._managed_directives[_DirectivesOptional.TASKS_PER_NODE]}={tasks_per_node}",
+            f"{self._managed_directives[_DirectivesOptional.THREADS]}={threads}",
             f"ncpus={int(tasks_per_node) * int(threads)}",
         ]
         if memory:
-            select.append(f"{self._directives[_DirectivesOptional.MEMORY]}={memory}")
+            select.append(f"{self._managed_directives[_DirectivesOptional.MEMORY]}={memory}")
         items["-l select="] = ":".join(select)
         return items
 
@@ -323,7 +328,7 @@ class Slurm(JobScheduler):
     """
 
     @property
-    def _directives(self) -> Dict[str, Any]:
+    def _managed_directives(self) -> Dict[str, Any]:
         """
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """

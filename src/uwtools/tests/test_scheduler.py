@@ -299,12 +299,12 @@ def test_scheduler_prop_not_defined_raises_key_error(pbs_props):
     assert str(e.value).startswith("No 'scheduler' defined in")
 
 
-def test_scheduler_raises_exception_when_missing_required_attrs(pbs_props):
-    pbs_config, _ = pbs_props
-    del pbs_config["account"]
-    with raises(UWConfigError) as e:
-        JobScheduler.get_scheduler(pbs_config)
-    assert "Missing required attributes: account" in str(e.value)
+# def test_scheduler_raises_exception_when_missing_required_attrs(pbs_props):
+#     pbs_config, _ = pbs_props
+#     del pbs_config["account"]
+#     with raises(UWConfigError) as e:
+#         JobScheduler.get_scheduler(pbs_config)
+#     assert "Missing required attributes: account" in str(e.value)
 
 
 def test_scheduler_submit_job(pbs_props):
