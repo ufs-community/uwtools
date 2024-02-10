@@ -7,7 +7,7 @@ import stat
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from shutil import copyfile
+from shutil import copy
 from typing import Any, Dict
 
 from iotaa import asset, dryrun, external, task, tasks
@@ -75,7 +75,7 @@ class FV3(Driver):
         yield None
         if src := self._driver_config.get(fn):
             path.parent.mkdir(parents=True, exist_ok=True)
-            copyfile(src=src, dst=path)
+            copy(src=src, dst=path)
         else:
             log.warn("No %s defined in config", fn)
 
@@ -240,7 +240,7 @@ class FV3(Driver):
         yield "Copy %s -> %s" % (src, dst)
         yield asset(dst, dst.is_file)
         yield self._file(src)
-        copyfile(src, dst)
+        copy(src, dst)
 
     @task
     def _run_via_batch_submission(self):
