@@ -76,7 +76,7 @@ class JobScheduler(ABC):
                     if callable(switch)
                     else "%s %s %s" % (self._prefix, switch, value)
                 )
-        return ds
+        return sorted(ds)
 
     @staticmethod
     def get_scheduler(props: Mapping) -> JobScheduler:

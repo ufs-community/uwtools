@@ -113,7 +113,7 @@ class Driver(ABC):
         {execution}
         """
         rs = dedent(template).format(
-            directives="\n".join(sorted(scheduler.directives) if scheduler else ""),
+            directives="\n".join(scheduler.directives if scheduler else ""),
             envvars="\n".join([f"{k}={v}" for k, v in envvars.items()]),
             execution="\n".join(execution),
         )
