@@ -18,7 +18,7 @@ from uwtools.utils.processing import execute
 
 
 @dataclass(frozen=True)
-class _AttrsOptional:
+class _DirectivesOptional:
     """
     Keys for optional attributes.
     """
@@ -42,7 +42,7 @@ class _AttrsOptional:
 
 
 @dataclass(frozen=True)
-class _AttrsRequired:
+class _DirectivesRequired:
     """
     Keys for required attributes.
     """
@@ -70,8 +70,8 @@ class JobScheduler(ABC):
         pre, sep = self._prefix, self._directive_separator
         ds = []
         for key, value in self._pre_process().items():
-            if key in self._attribs:
-                switch = self._attribs[key]
+            if key in self._directives:
+                switch = self._directives[key]
                 ds.append(
                     "%s%s%s" % (pre, sep, switch(value))
                     if callable(switch)
@@ -116,7 +116,7 @@ class JobScheduler(ABC):
 
     @property
     @abstractmethod
-    def _attribs(self) -> Dict[str, Any]:
+    def _directives(self) -> Dict[str, Any]:
         """
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
@@ -155,9 +155,9 @@ class JobScheduler(ABC):
         :raises: UWConfigError if required props are missing.
         """
         if missing := [
-            getattr(_AttrsRequired, x.name)
-            for x in fields(_AttrsRequired)
-            if getattr(_AttrsRequired, x.name) not in self._props
+            getattr(_DirectivesRequired, x.name)
+            for x in fields(_DirectivesRequired)
+            if getattr(_DirectivesRequired, x.name) not in self._props
         ]:
             raise UWConfigError("Missing required attributes: %s" % ", ".join(missing))
 
@@ -168,21 +168,21 @@ class LSF(JobScheduler):
     """
 
     @property
-    def _attribs(self) -> Dict[str, Any]:
+    def _directives(self) -> Dict[str, Any]:
         """
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
         return {
-            _AttrsOptional.JOB_NAME: "-J",
-            _AttrsOptional.MEMORY: lambda x: f"-R rusage[mem={x}]",
-            _AttrsOptional.NODES: lambda x: f"-n {x}",
-            _AttrsOptional.QUEUE: "-q",
-            _AttrsOptional.SHELL: "-L",
-            _AttrsOptional.STDOUT: "-o",
-            _AttrsOptional.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
-            _AttrsOptional.THREADS: lambda x: f"-R affinity[core({x})]",
-            _AttrsRequired.ACCOUNT: "-P",
-            _AttrsRequired.WALLTIME: "-W",
+            _DirectivesOptional.JOB_NAME: "-J",
+            _DirectivesOptional.MEMORY: lambda x: f"-R rusage[mem={x}]",
+            _DirectivesOptional.NODES: lambda x: f"-n {x}",
+            _DirectivesOptional.QUEUE: "-q",
+            _DirectivesOptional.SHELL: "-L",
+            _DirectivesOptional.STDOUT: "-o",
+            _DirectivesOptional.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
+            _DirectivesOptional.THREADS: lambda x: f"-R affinity[core({x})]",
+            _DirectivesRequired.ACCOUNT: "-P",
+            _DirectivesRequired.WALLTIME: "-W",
         }
 
     @property
@@ -202,15 +202,15 @@ class LSF(JobScheduler):
     def _pre_process(self) -> Dict[str, Any]:
         # LSF requires threads to be set (if None is provided, default to 1).
         props = self._props
-        props[_AttrsOptional.THREADS] = props.get(_AttrsOptional.THREADS, 1)
-        nodes = props.get(_AttrsOptional.NODES, "")
-        tasks_per_node = props.get(_AttrsOptional.TASKS_PER_NODE, "")
-        memory = props.get(_AttrsOptional.MEMORY, None)
+        props[_DirectivesOptional.THREADS] = props.get(_DirectivesOptional.THREADS, 1)
+        nodes = props.get(_DirectivesOptional.NODES, "")
+        tasks_per_node = props.get(_DirectivesOptional.TASKS_PER_NODE, "")
+        memory = props.get(_DirectivesOptional.MEMORY, None)
         if memory is not None:
             mem_value = Memory(memory).convert("KB")
-            props[self._attribs[_AttrsOptional.MEMORY](mem_value)] = ""
-        props[_AttrsOptional.NODES] = int(tasks_per_node) * int(nodes)
-        props.pop(_AttrsOptional.MEMORY, None)
+            props[self._directives[_DirectivesOptional.MEMORY](mem_value)] = ""
+        props[_DirectivesOptional.NODES] = int(tasks_per_node) * int(nodes)
+        props.pop(_DirectivesOptional.MEMORY, None)
         return props
 
     @property
@@ -227,22 +227,22 @@ class PBS(JobScheduler):
     """
 
     @property
-    def _attribs(self) -> Dict[str, Any]:
+    def _directives(self) -> Dict[str, Any]:
         """
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
         return {
-            _AttrsOptional.DEBUG: lambda x: f"-l debug={str(x).lower()}",
-            _AttrsOptional.JOB_NAME: "-N",
-            _AttrsOptional.MEMORY: "mem",
-            _AttrsOptional.NODES: lambda x: f"-l select={x}",
-            _AttrsOptional.QUEUE: "-q",
-            _AttrsOptional.SHELL: "-S",
-            _AttrsOptional.STDOUT: "-o",
-            _AttrsOptional.TASKS_PER_NODE: "mpiprocs",
-            _AttrsOptional.THREADS: "ompthreads",
-            _AttrsRequired.ACCOUNT: "-A",
-            _AttrsRequired.WALLTIME: "-l walltime=",
+            _DirectivesOptional.DEBUG: lambda x: f"-l debug={str(x).lower()}",
+            _DirectivesOptional.JOB_NAME: "-N",
+            _DirectivesOptional.MEMORY: "mem",
+            _DirectivesOptional.NODES: lambda x: f"-l select={x}",
+            _DirectivesOptional.QUEUE: "-q",
+            _DirectivesOptional.SHELL: "-S",
+            _DirectivesOptional.STDOUT: "-o",
+            _DirectivesOptional.TASKS_PER_NODE: "mpiprocs",
+            _DirectivesOptional.THREADS: "ompthreads",
+            _DirectivesRequired.ACCOUNT: "-A",
+            _DirectivesRequired.WALLTIME: "-l walltime=",
         }
 
     @property
@@ -257,8 +257,8 @@ class PBS(JobScheduler):
         """
         Placement logic.
         """
-        exclusive = items.get(_AttrsOptional.EXCLUSIVE)
-        placement = items.get(_AttrsOptional.PLACEMENT)
+        exclusive = items.get(_DirectivesOptional.EXCLUSIVE)
+        placement = items.get(_DirectivesOptional.PLACEMENT)
         if not exclusive and not placement:
             return items
         output = []
@@ -281,10 +281,10 @@ class PBS(JobScheduler):
         props = self._props
         props.update(self._select(props))
         props.update(self._placement(props))
-        props.pop(_AttrsOptional.TASKS_PER_NODE, None)
-        props.pop(_AttrsOptional.NODES, None)
-        props.pop(_AttrsOptional.THREADS, None)
-        props.pop(_AttrsOptional.MEMORY, None)
+        props.pop(_DirectivesOptional.TASKS_PER_NODE, None)
+        props.pop(_DirectivesOptional.NODES, None)
+        props.pop(_DirectivesOptional.THREADS, None)
+        props.pop(_DirectivesOptional.MEMORY, None)
         props.pop("exclusive", None)
         props.pop("placement", None)
         props.pop("select", None)
@@ -294,18 +294,18 @@ class PBS(JobScheduler):
         """
         Select logic.
         """
-        total_nodes = items.get(_AttrsOptional.NODES, "")
-        tasks_per_node = items.get(_AttrsOptional.TASKS_PER_NODE, "")
-        threads = items.get(_AttrsOptional.THREADS, 1)
-        memory = items.get(_AttrsOptional.MEMORY, "")
+        total_nodes = items.get(_DirectivesOptional.NODES, "")
+        tasks_per_node = items.get(_DirectivesOptional.TASKS_PER_NODE, "")
+        threads = items.get(_DirectivesOptional.THREADS, 1)
+        memory = items.get(_DirectivesOptional.MEMORY, "")
         select = [
             f"{total_nodes}",
-            f"{self._attribs[_AttrsOptional.TASKS_PER_NODE]}={tasks_per_node}",
-            f"{self._attribs[_AttrsOptional.THREADS]}={threads}",
+            f"{self._directives[_DirectivesOptional.TASKS_PER_NODE]}={tasks_per_node}",
+            f"{self._directives[_DirectivesOptional.THREADS]}={threads}",
             f"ncpus={int(tasks_per_node) * int(threads)}",
         ]
         if memory:
-            select.append(f"{self._attribs[_AttrsOptional.MEMORY]}={memory}")
+            select.append(f"{self._directives[_DirectivesOptional.MEMORY]}={memory}")
         items["-l select="] = ":".join(select)
         return items
 
@@ -323,26 +323,26 @@ class Slurm(JobScheduler):
     """
 
     @property
-    def _attribs(self) -> Dict[str, Any]:
+    def _directives(self) -> Dict[str, Any]:
         """
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
         return {
-            _AttrsOptional.CORES: "--ntasks",
-            _AttrsOptional.EXCLUSIVE: lambda _: "--exclusive",
-            _AttrsOptional.EXPORT: "--export",
-            _AttrsOptional.JOB_NAME: "--job-name",
-            _AttrsOptional.MEMORY: "--mem",
-            _AttrsOptional.NODES: "--nodes",
-            _AttrsOptional.PARTITION: "--partition",
-            _AttrsOptional.QUEUE: "--qos",
-            _AttrsOptional.RUNDIR: "--chdir",
-            _AttrsOptional.STDERR: "--error",
-            _AttrsOptional.STDOUT: "--output",
-            _AttrsOptional.TASKS_PER_NODE: "--ntasks-per-node",
-            _AttrsOptional.THREADS: "--cpus-per-task",
-            _AttrsRequired.ACCOUNT: "--account",
-            _AttrsRequired.WALLTIME: "--time",
+            _DirectivesOptional.CORES: "--ntasks",
+            _DirectivesOptional.EXCLUSIVE: lambda _: "--exclusive",
+            _DirectivesOptional.EXPORT: "--export",
+            _DirectivesOptional.JOB_NAME: "--job-name",
+            _DirectivesOptional.MEMORY: "--mem",
+            _DirectivesOptional.NODES: "--nodes",
+            _DirectivesOptional.PARTITION: "--partition",
+            _DirectivesOptional.QUEUE: "--qos",
+            _DirectivesOptional.RUNDIR: "--chdir",
+            _DirectivesOptional.STDERR: "--error",
+            _DirectivesOptional.STDOUT: "--output",
+            _DirectivesOptional.TASKS_PER_NODE: "--ntasks-per-node",
+            _DirectivesOptional.THREADS: "--cpus-per-task",
+            _DirectivesRequired.ACCOUNT: "--account",
+            _DirectivesRequired.WALLTIME: "--time",
         }
 
     @property
