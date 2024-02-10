@@ -120,7 +120,7 @@ class Driver(ABC):
         rs = dedent(template).format(
             directives="\n".join(scheduler.directives if scheduler else ""),
             envcmds="\n".join(envcmds),
-            envvars="\n".join([f"{k}={v}" for k, v in envvars.items()]),
+            envvars="\n".join([f"export {k}={v}" for k, v in envvars.items()]),
             execution="\n".join(execution),
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())
