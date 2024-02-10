@@ -32,6 +32,7 @@ class OptionalAttribs:
     NODES: str = "nodes"
     PARTITION: str = "partition"
     PLACEMENT: str = "placement"
+    QUEUE: str = "queue"
     RUNDIR: str = "rundir"
     SHELL: str = "shell"
     STDERR: str = "stderr"
@@ -47,7 +48,6 @@ class RequiredAttribs:
     """
 
     ACCOUNT: str = "account"
-    QUEUE: str = "queue"
     WALLTIME: str = "walltime"
 
 
@@ -176,12 +176,12 @@ class LSF(JobScheduler):
             OptionalAttribs.JOB_NAME: "-J",
             OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
             OptionalAttribs.NODES: lambda x: f"-n {x}",
+            OptionalAttribs.QUEUE: "-q",
             OptionalAttribs.SHELL: "-L",
             OptionalAttribs.STDOUT: "-o",
             OptionalAttribs.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
             OptionalAttribs.THREADS: lambda x: f"-R affinity[core({x})]",
             RequiredAttribs.ACCOUNT: "-P",
-            RequiredAttribs.QUEUE: "-q",
             RequiredAttribs.WALLTIME: "-W",
         }
 
@@ -236,12 +236,12 @@ class PBS(JobScheduler):
             OptionalAttribs.JOB_NAME: "-N",
             OptionalAttribs.MEMORY: "mem",
             OptionalAttribs.NODES: lambda x: f"-l select={x}",
+            OptionalAttribs.QUEUE: "-q",
             OptionalAttribs.SHELL: "-S",
             OptionalAttribs.STDOUT: "-o",
             OptionalAttribs.TASKS_PER_NODE: "mpiprocs",
             OptionalAttribs.THREADS: "ompthreads",
             RequiredAttribs.ACCOUNT: "-A",
-            RequiredAttribs.QUEUE: "-q",
             RequiredAttribs.WALLTIME: "-l walltime=",
         }
 
@@ -335,13 +335,13 @@ class Slurm(JobScheduler):
             OptionalAttribs.MEMORY: "--mem",
             OptionalAttribs.NODES: "--nodes",
             OptionalAttribs.PARTITION: "--partition",
+            OptionalAttribs.QUEUE: "--qos",
             OptionalAttribs.RUNDIR: "--chdir",
             OptionalAttribs.STDERR: "--error",
             OptionalAttribs.STDOUT: "--output",
             OptionalAttribs.TASKS_PER_NODE: "--ntasks-per-node",
             OptionalAttribs.THREADS: "--cpus-per-task",
             RequiredAttribs.ACCOUNT: "--account",
-            RequiredAttribs.QUEUE: "--qos",
             RequiredAttribs.WALLTIME: "--time",
         }
 
