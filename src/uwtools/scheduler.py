@@ -18,7 +18,7 @@ from uwtools.utils.processing import execute
 
 
 @dataclass(frozen=True)
-class OptionalAttribs:
+class _AttrsOptional:
     """
     Keys for optional attributes.
     """
@@ -42,7 +42,7 @@ class OptionalAttribs:
 
 
 @dataclass(frozen=True)
-class RequiredAttribs:
+class _AttrsRequired:
     """
     Keys for required attributes.
     """
@@ -155,9 +155,9 @@ class JobScheduler(ABC):
         :raises: UWConfigError if required props are missing.
         """
         if missing := [
-            getattr(RequiredAttribs, x.name)
-            for x in fields(RequiredAttribs)
-            if getattr(RequiredAttribs, x.name) not in self._props
+            getattr(_AttrsRequired, x.name)
+            for x in fields(_AttrsRequired)
+            if getattr(_AttrsRequired, x.name) not in self._props
         ]:
             raise UWConfigError("Missing required attributes: %s" % ", ".join(missing))
 
@@ -173,16 +173,16 @@ class LSF(JobScheduler):
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
         return {
-            OptionalAttribs.JOB_NAME: "-J",
-            OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
-            OptionalAttribs.NODES: lambda x: f"-n {x}",
-            OptionalAttribs.QUEUE: "-q",
-            OptionalAttribs.SHELL: "-L",
-            OptionalAttribs.STDOUT: "-o",
-            OptionalAttribs.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
-            OptionalAttribs.THREADS: lambda x: f"-R affinity[core({x})]",
-            RequiredAttribs.ACCOUNT: "-P",
-            RequiredAttribs.WALLTIME: "-W",
+            _AttrsOptional.JOB_NAME: "-J",
+            _AttrsOptional.MEMORY: lambda x: f"-R rusage[mem={x}]",
+            _AttrsOptional.NODES: lambda x: f"-n {x}",
+            _AttrsOptional.QUEUE: "-q",
+            _AttrsOptional.SHELL: "-L",
+            _AttrsOptional.STDOUT: "-o",
+            _AttrsOptional.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
+            _AttrsOptional.THREADS: lambda x: f"-R affinity[core({x})]",
+            _AttrsRequired.ACCOUNT: "-P",
+            _AttrsRequired.WALLTIME: "-W",
         }
 
     @property
@@ -202,15 +202,15 @@ class LSF(JobScheduler):
     def _pre_process(self) -> Dict[str, Any]:
         # LSF requires threads to be set (if None is provided, default to 1).
         props = self._props
-        props[OptionalAttribs.THREADS] = props.get(OptionalAttribs.THREADS, 1)
-        nodes = props.get(OptionalAttribs.NODES, "")
-        tasks_per_node = props.get(OptionalAttribs.TASKS_PER_NODE, "")
-        memory = props.get(OptionalAttribs.MEMORY, None)
+        props[_AttrsOptional.THREADS] = props.get(_AttrsOptional.THREADS, 1)
+        nodes = props.get(_AttrsOptional.NODES, "")
+        tasks_per_node = props.get(_AttrsOptional.TASKS_PER_NODE, "")
+        memory = props.get(_AttrsOptional.MEMORY, None)
         if memory is not None:
             mem_value = Memory(memory).convert("KB")
-            props[self._attribs[OptionalAttribs.MEMORY](mem_value)] = ""
-        props[OptionalAttribs.NODES] = int(tasks_per_node) * int(nodes)
-        props.pop(OptionalAttribs.MEMORY, None)
+            props[self._attribs[_AttrsOptional.MEMORY](mem_value)] = ""
+        props[_AttrsOptional.NODES] = int(tasks_per_node) * int(nodes)
+        props.pop(_AttrsOptional.MEMORY, None)
         return props
 
     @property
@@ -232,17 +232,17 @@ class PBS(JobScheduler):
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
         return {
-            OptionalAttribs.DEBUG: lambda x: f"-l debug={str(x).lower()}",
-            OptionalAttribs.JOB_NAME: "-N",
-            OptionalAttribs.MEMORY: "mem",
-            OptionalAttribs.NODES: lambda x: f"-l select={x}",
-            OptionalAttribs.QUEUE: "-q",
-            OptionalAttribs.SHELL: "-S",
-            OptionalAttribs.STDOUT: "-o",
-            OptionalAttribs.TASKS_PER_NODE: "mpiprocs",
-            OptionalAttribs.THREADS: "ompthreads",
-            RequiredAttribs.ACCOUNT: "-A",
-            RequiredAttribs.WALLTIME: "-l walltime=",
+            _AttrsOptional.DEBUG: lambda x: f"-l debug={str(x).lower()}",
+            _AttrsOptional.JOB_NAME: "-N",
+            _AttrsOptional.MEMORY: "mem",
+            _AttrsOptional.NODES: lambda x: f"-l select={x}",
+            _AttrsOptional.QUEUE: "-q",
+            _AttrsOptional.SHELL: "-S",
+            _AttrsOptional.STDOUT: "-o",
+            _AttrsOptional.TASKS_PER_NODE: "mpiprocs",
+            _AttrsOptional.THREADS: "ompthreads",
+            _AttrsRequired.ACCOUNT: "-A",
+            _AttrsRequired.WALLTIME: "-l walltime=",
         }
 
     @property
@@ -257,8 +257,8 @@ class PBS(JobScheduler):
         """
         Placement logic.
         """
-        exclusive = items.get(OptionalAttribs.EXCLUSIVE)
-        placement = items.get(OptionalAttribs.PLACEMENT)
+        exclusive = items.get(_AttrsOptional.EXCLUSIVE)
+        placement = items.get(_AttrsOptional.PLACEMENT)
         if not exclusive and not placement:
             return items
         output = []
@@ -281,10 +281,10 @@ class PBS(JobScheduler):
         props = self._props
         props.update(self._select(props))
         props.update(self._placement(props))
-        props.pop(OptionalAttribs.TASKS_PER_NODE, None)
-        props.pop(OptionalAttribs.NODES, None)
-        props.pop(OptionalAttribs.THREADS, None)
-        props.pop(OptionalAttribs.MEMORY, None)
+        props.pop(_AttrsOptional.TASKS_PER_NODE, None)
+        props.pop(_AttrsOptional.NODES, None)
+        props.pop(_AttrsOptional.THREADS, None)
+        props.pop(_AttrsOptional.MEMORY, None)
         props.pop("exclusive", None)
         props.pop("placement", None)
         props.pop("select", None)
@@ -294,18 +294,18 @@ class PBS(JobScheduler):
         """
         Select logic.
         """
-        total_nodes = items.get(OptionalAttribs.NODES, "")
-        tasks_per_node = items.get(OptionalAttribs.TASKS_PER_NODE, "")
-        threads = items.get(OptionalAttribs.THREADS, 1)
-        memory = items.get(OptionalAttribs.MEMORY, "")
+        total_nodes = items.get(_AttrsOptional.NODES, "")
+        tasks_per_node = items.get(_AttrsOptional.TASKS_PER_NODE, "")
+        threads = items.get(_AttrsOptional.THREADS, 1)
+        memory = items.get(_AttrsOptional.MEMORY, "")
         select = [
             f"{total_nodes}",
-            f"{self._attribs[OptionalAttribs.TASKS_PER_NODE]}={tasks_per_node}",
-            f"{self._attribs[OptionalAttribs.THREADS]}={threads}",
+            f"{self._attribs[_AttrsOptional.TASKS_PER_NODE]}={tasks_per_node}",
+            f"{self._attribs[_AttrsOptional.THREADS]}={threads}",
             f"ncpus={int(tasks_per_node) * int(threads)}",
         ]
         if memory:
-            select.append(f"{self._attribs[OptionalAttribs.MEMORY]}={memory}")
+            select.append(f"{self._attribs[_AttrsOptional.MEMORY]}={memory}")
         items["-l select="] = ":".join(select)
         return items
 
@@ -328,21 +328,21 @@ class Slurm(JobScheduler):
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
         return {
-            OptionalAttribs.CORES: "--ntasks",
-            OptionalAttribs.EXCLUSIVE: lambda _: "--exclusive",
-            OptionalAttribs.EXPORT: "--export",
-            OptionalAttribs.JOB_NAME: "--job-name",
-            OptionalAttribs.MEMORY: "--mem",
-            OptionalAttribs.NODES: "--nodes",
-            OptionalAttribs.PARTITION: "--partition",
-            OptionalAttribs.QUEUE: "--qos",
-            OptionalAttribs.RUNDIR: "--chdir",
-            OptionalAttribs.STDERR: "--error",
-            OptionalAttribs.STDOUT: "--output",
-            OptionalAttribs.TASKS_PER_NODE: "--ntasks-per-node",
-            OptionalAttribs.THREADS: "--cpus-per-task",
-            RequiredAttribs.ACCOUNT: "--account",
-            RequiredAttribs.WALLTIME: "--time",
+            _AttrsOptional.CORES: "--ntasks",
+            _AttrsOptional.EXCLUSIVE: lambda _: "--exclusive",
+            _AttrsOptional.EXPORT: "--export",
+            _AttrsOptional.JOB_NAME: "--job-name",
+            _AttrsOptional.MEMORY: "--mem",
+            _AttrsOptional.NODES: "--nodes",
+            _AttrsOptional.PARTITION: "--partition",
+            _AttrsOptional.QUEUE: "--qos",
+            _AttrsOptional.RUNDIR: "--chdir",
+            _AttrsOptional.STDERR: "--error",
+            _AttrsOptional.STDOUT: "--output",
+            _AttrsOptional.TASKS_PER_NODE: "--ntasks-per-node",
+            _AttrsOptional.THREADS: "--cpus-per-task",
+            _AttrsRequired.ACCOUNT: "--account",
+            _AttrsRequired.WALLTIME: "--time",
         }
 
     @property
