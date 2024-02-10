@@ -183,5 +183,6 @@ class Driver(ABC):
         :param schema_file: The schema file to validate the config against.
         :raises: UWConfigError if config fails validation.
         """
+        log.info("Validating config per %s", schema_file)
         if not validator.validate_yaml(config=self._config, schema_file=schema_file):
             raise UWConfigError("YAML validation errors")
