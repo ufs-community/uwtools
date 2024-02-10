@@ -67,14 +67,15 @@ class JobScheduler(ABC):
         """
         Returns resource-request scheduler directives.
         """
+        pre, sep = self._prefix, self._directive_separator
         ds = []
         for key, value in self._pre_process().items():
             if key in self._attribs:
                 switch = self._attribs[key]
                 ds.append(
-                    "%s %s" % (self._prefix, switch(value))
+                    "%s%s%s" % (pre, sep, switch(value))
                     if callable(switch)
-                    else "%s %s %s" % (self._prefix, switch, value)
+                    else "%s %s%s%s" % (pre, switch, sep, value)
                 )
         return sorted(ds)
 
@@ -118,6 +119,13 @@ class JobScheduler(ABC):
     def _attribs(self) -> Dict[str, Any]:
         """
         Returns a mapping from canonical names to scheduler-specific CLI switches.
+        """
+
+    @property
+    @abstractmethod
+    def _directive_separator(self) -> str:
+        """
+        Returns the character used to separate directive keys and values.
         """
 
     @property
@@ -178,6 +186,13 @@ class LSF(JobScheduler):
         }
 
     @property
+    def _directive_separator(self) -> str:
+        """
+        Returns the character used to separate directive keys and values.
+        """
+        return " "
+
+    @property
     def _prefix(self) -> str:
         """
         Returns the scheduler's resource-request prefix.
@@ -229,6 +244,13 @@ class PBS(JobScheduler):
             RequiredAttribs.QUEUE: "-q",
             RequiredAttribs.WALLTIME: "-l walltime=",
         }
+
+    @property
+    def _directive_separator(self) -> str:
+        """
+        Returns the character used to separate directive keys and values.
+        """
+        return " "
 
     @staticmethod
     def _placement(items: Dict[str, Any]) -> Dict[str, Any]:
@@ -322,6 +344,13 @@ class Slurm(JobScheduler):
             RequiredAttribs.QUEUE: "--qos",
             RequiredAttribs.WALLTIME: "--time",
         }
+
+    @property
+    def _directive_separator(self) -> str:
+        """
+        Returns the character used to separate directive keys and values.
+        """
+        return "="
 
     @property
     def _prefix(self) -> str:
