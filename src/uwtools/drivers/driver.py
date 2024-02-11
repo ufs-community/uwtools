@@ -36,13 +36,6 @@ class Driver(ABC):
         self._dry_run = dry_run
         self._batch = batch
 
-    @property
-    @abstractmethod
-    def _driver_config(self) -> Dict[str, Any]:
-        """
-        Returns the config block specific to this driver.
-        """
-
     @staticmethod
     def _create_user_updated_config(
         config_class: Type[Config], config_values: dict, path: Path
@@ -64,6 +57,13 @@ class Driver(ABC):
         else:
             config_class.dump_dict(cfg=user_values, path=path)
         log.debug(f"Wrote config to {path}")
+
+    @property
+    @abstractmethod
+    def _driver_config(self) -> Dict[str, Any]:
+        """
+        Returns the config block specific to this driver.
+        """
 
     @property
     @abstractmethod
