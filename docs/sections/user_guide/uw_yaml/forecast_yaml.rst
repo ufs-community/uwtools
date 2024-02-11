@@ -5,7 +5,7 @@ Forecast YAML
 
 The structured YAML to run a forecast is described below. It is enforced via JSON Schema.
 
-In this block, there are entries that define where the forecast will run (``run_dir:``), what will run (``executable:``), the data files that should be staged (``cycle_dependent:`` and ``static:``), and blocks that correspond to the configuration files required by the forecast model (``fd_ufs:``, ``field_table:``, ``namelist:``, etc.). Each of the configuration file blocks will allow the user to set a template file as input, or to define a configuration file in its native key/value pair format with an option to update the values (``update_values:``) contained in the original input file (``base_file:``).
+In this block, there are entries that define where the forecast will run (``run_directory:``), what will run (``executable:``), the data files that should be staged (``cycle_dependent:`` and ``static:``), and blocks that correspond to the configuration files required by the forecast model (``fd_ufs:``, ``field_table:``, ``namelist:``, etc.). Each of the configuration file blocks will allow the user to set a template file as input, or to define a configuration file in its native key/value pair format with an option to update the values (``update_values:``) contained in the original input file (``base_file:``).
 
 The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
 
