@@ -2,7 +2,6 @@
 """
 Tests for uwtools.drivers.driver module.
 """
-from collections.abc import Mapping
 from typing import Any, Dict
 
 from pytest import fixture
@@ -20,7 +19,7 @@ class ConcreteDriver(Driver):
         return {}
 
     @property
-    def _resources(self) -> Mapping:
+    def _resources(self) -> Dict[str, Any]:
         return {}
 
     def _validate(self) -> None:

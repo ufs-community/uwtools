@@ -3,7 +3,6 @@ An abstract class for component drivers.
 """
 import re
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Type
@@ -67,19 +66,15 @@ class Driver(ABC):
 
     @property
     @abstractmethod
-    def _resources(self) -> Mapping:
+    def _resources(self) -> Dict[str, Any]:
         """
-        Configuration data for FV3 runscript.
-
-        :return: A formatted dictionary needed to create a runscript
+        Returns configuration data for the FV3 runscript.
         """
 
     @property
     def _run_cmd(self) -> str:
         """
-        The full command-line component invocation.
-
-        :return: String containing MPI command, MPI arguments, and exec name.
+        Returns the full command-line component invocation.
         """
         execution = self._driver_config.get("execution", {})
         mpiargs = execution.get("mpiargs", [])
@@ -102,9 +97,11 @@ class Driver(ABC):
 
         :param envcmds: Shell commands to set up runtime environment.
         :param envvars: Environment variables to set in runtime environment.
-        :param execution: Statements to execute. :scheduler: A job-scheduler instance.
+        :param execution: Statements to execute.
         :param scheduler: A job-scheduler object.
         """
+        # Render script sections into a template, remove any extraneous newlines related to elided
+        # sections, then return the resulting string.
         template = """
         #!/bin/bash
 
@@ -127,9 +124,7 @@ class Driver(ABC):
     @property
     def _scheduler(self) -> JobScheduler:
         """
-        The job scheduler specified by the platform information.
-
-        :return: The scheduler object
+        Returns the job scheduler specified by the platform information.
         """
         return JobScheduler.get_scheduler(self._resources)
 

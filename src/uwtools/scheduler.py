@@ -58,7 +58,7 @@ class JobScheduler(ABC):
 
     def __init__(self, props: Dict[str, Any]):
         self._props = {k: v for k, v in props.items() if k != "scheduler"}
-        self._validate()
+        self._validate_props()
 
     # Public methods
 
@@ -86,7 +86,7 @@ class JobScheduler(ABC):
         """
         Returns a configured job scheduler.
 
-        :param props: Configuration settings for job scheduling.
+        :param props: Configuration settings for job scheduler.
         :return: A configured job scheduler.
         :raises: UWConfigError if 'scheduler' is un- or mis-defined.
         """
@@ -105,7 +105,7 @@ class JobScheduler(ABC):
         Submits a job to the scheduler.
 
         :param runscript: Path to the runscript.
-        :param submit_file: File to write output of submit command to.
+        :param submit_file: Path to file to write output of submit command to.
         :return: Did the run exit with a success status?
         """
         cmd = f"{self._submit_cmd} {runscript}"
@@ -151,9 +151,9 @@ class JobScheduler(ABC):
         Returns the scheduler's job-submit executable name.
         """
 
-    def _validate(self) -> None:
+    def _validate_props(self) -> None:
         """
-        Validate configuration.
+        Validate scheduler-configuration properties.
 
         :raises: UWConfigError if required props are missing.
         """

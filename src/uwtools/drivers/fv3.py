@@ -4,7 +4,6 @@ A driver for the FV3 model.
 
 import os
 import stat
-from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
 from shutil import copy
@@ -34,6 +33,7 @@ class FV3(Driver):
         The FV3 driver.
 
         :param config_file: Path to config file.
+        :param cycle: The forecast cycle.
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
@@ -43,7 +43,7 @@ class FV3(Driver):
         self._cycle = cycle
         self._rundir = Path(self._driver_config["run_dir"])
 
-    # Public workflow tasks
+    # Workflow tasks
 
     @tasks
     def boundary_files(self):
@@ -279,7 +279,7 @@ class FV3(Driver):
         linkname.parent.mkdir(parents=True, exist_ok=True)
         os.symlink(src=target, dst=linkname)
 
-    # Private methods
+    # Private helper methods
 
     @property
     def _driver_config(self) -> Dict[str, Any]:
@@ -290,11 +290,9 @@ class FV3(Driver):
         return driver_config
 
     @property
-    def _resources(self) -> Mapping:
+    def _resources(self) -> Dict[str, Any]:
         """
-        Configuration data for FV3 runscript.
-
-        :return: A formatted dictionary needed to create a runscript
+        Returns configuration data for the FV3 runscript.
         """
         return {
             "account": self._config["platform"]["account"],
