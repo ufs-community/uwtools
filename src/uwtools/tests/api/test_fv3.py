@@ -1,25 +1,44 @@
 # pylint: disable=missing-function-docstring,protected-access
 
-# import datetime as dt
-# from unittest.mock import Mock, patch
+import datetime as dt
+from unittest.mock import patch
 
-# from uwtools.api import fv3
+from iotaa import external, task, tasks
 
-# def test_run():
-#     SomeModel = Mock()
-#     cycle = dt.datetime(2023, 11, 22, 12)
-#     with patch.dict(forecast.CLASSES, {"foo": SomeModel}):
-#         forecast.run(
-#             model="foo",
-#             cycle=cycle,
-#             config_file="bar",
-#             batch=True,
-#             dry_run=False,
-#         )
-#     SomeModel.assert_called_once_with(
-#         batch=True,
-#         config_file="bar",
-#         cycle=cycle,
-#         dry_run=False,
-#     )
-#     SomeModel().run.assert_called_once_with()
+from uwtools.api import fv3
+
+
+@external
+def t1():
+    "@external t1"
+
+
+@task
+def t2():
+    "@task t2"
+
+
+@tasks
+def t3():
+    "@tasks t3"
+
+
+def test_execute():
+    args: dict = {
+        "config_file": "config.yaml",
+        "cycle": dt.datetime.utcnow(),
+        "batch": False,
+        "dry_run": True,
+    }
+    with patch.object(fv3, "FV3") as FV3:
+        assert fv3.execute(**args, task="foo") is True
+    FV3.assert_called_once_with(**args)
+    FV3().foo.assert_called_once_with()
+
+
+def test_tasks():
+    with patch.object(fv3, "FV3") as FV3:
+        FV3.t1 = t1
+        FV3.t2 = t2
+        FV3.t3 = t3
+        assert fv3.tasks() == {"t2": "@task t2", "t3": "@tasks t3", "t1": "@external t1"}

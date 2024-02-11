@@ -242,7 +242,7 @@ def _dispatch_fv3(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.fv3.execute(
-        task=args[STR.action],
+        task=args[STR.task],
         config_file=args[STR.cfgfile],
         cycle=args[STR.cycle],
         batch=args[STR.batch],
@@ -525,16 +525,6 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
     )
 
 
-def _add_arg_model(group: Group, choices: List[str]) -> None:
-    group.add_argument(
-        _switch(STR.model),
-        choices=choices,
-        help="Model name",
-        required=True,
-        type=str,
-    )
-
-
 def _add_arg_output_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.outfile),
@@ -581,16 +571,6 @@ def _add_arg_supplemental_files(group: Group) -> None:
         help="Additional files to supplement primary input",
         metavar="PATH",
         nargs="*",
-    )
-
-
-def _add_arg_task(group: Group, default: str) -> None:
-    group.add_argument(
-        _switch(STR.task),
-        help="Task to execute (default: %s)" % default,
-        metavar="NAME",
-        type=str,
-        default=default,
     )
 
 

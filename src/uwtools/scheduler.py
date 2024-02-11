@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
+from copy import deepcopy
 from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import Any, Dict, List
@@ -13,42 +14,7 @@ from typing import Any, Dict, List
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.types import OptionalPath
-from uwtools.utils.memory import Memory
 from uwtools.utils.processing import execute
-
-
-@dataclass(frozen=True)
-class _DirectivesOptional:
-    """
-    Keys for optional directives.
-    """
-
-    CORES: str = "cores"
-    DEBUG: str = "debug"
-    EXCLUSIVE: str = "exclusive"
-    EXPORT: str = "export"
-    JOB_NAME: str = "jobname"
-    MEMORY: str = "memory"
-    NODES: str = "nodes"
-    PARTITION: str = "partition"
-    PLACEMENT: str = "placement"
-    QUEUE: str = "queue"
-    RUNDIR: str = "rundir"
-    SHELL: str = "shell"
-    STDERR: str = "stderr"
-    STDOUT: str = "stdout"
-    TASKS_PER_NODE: str = "tasks_per_node"
-    THREADS: str = "threads"
-
-
-@dataclass(frozen=True)
-class _DirectivesRequired:
-    """
-    Keys for required directives.
-    """
-
-    ACCOUNT: str = "account"
-    WALLTIME: str = "walltime"
 
 
 class JobScheduler(ABC):
@@ -73,12 +39,12 @@ class JobScheduler(ABC):
             if key in self._managed_directives:
                 switch = self._managed_directives[key]
                 ds.append(
-                    "%s%s%s" % (pre, sep, switch(value))
+                    "%s %s" % (pre, switch(value))
                     if callable(switch)
                     else "%s %s%s%s" % (pre, switch, sep, value)
                 )
             else:
-                ds.append("%s --%s%s%s" % (pre, key, sep, value))
+                ds.append("%s %s%s%s" % (pre, key, sep, value))
         return sorted(ds)
 
     @staticmethod
@@ -204,17 +170,8 @@ class LSF(JobScheduler):
 
     @property
     def _processed_props(self) -> Dict[str, Any]:
-        # LSF requires threads to be set (if None is provided, default to 1).
-        props = self._props
+        props = deepcopy(self._props)
         props[_DirectivesOptional.THREADS] = props.get(_DirectivesOptional.THREADS, 1)
-        nodes = props.get(_DirectivesOptional.NODES, "")
-        tasks_per_node = props.get(_DirectivesOptional.TASKS_PER_NODE, "")
-        memory = props.get(_DirectivesOptional.MEMORY, None)
-        if memory is not None:
-            mem_value = Memory(memory).convert("KB")
-            props[self._managed_directives[_DirectivesOptional.MEMORY](mem_value)] = ""
-        props[_DirectivesOptional.NODES] = int(tasks_per_node) * int(nodes)
-        props.pop(_DirectivesOptional.MEMORY, None)
         return props
 
     @property
@@ -299,17 +256,18 @@ class PBS(JobScheduler):
         """
         Select logic.
         """
-        total_nodes = items.get(_DirectivesOptional.NODES, "")
-        tasks_per_node = items.get(_DirectivesOptional.TASKS_PER_NODE, "")
+        select = []
+        if nodes := items.get(_DirectivesOptional.NODES):
+            select.append(str(nodes))
+        if tasks_per_node := items.get(_DirectivesOptional.TASKS_PER_NODE):
+            select.append(
+                f"{self._managed_directives[_DirectivesOptional.TASKS_PER_NODE]}={tasks_per_node}"
+            )
         threads = items.get(_DirectivesOptional.THREADS, 1)
-        memory = items.get(_DirectivesOptional.MEMORY, "")
-        select = [
-            f"{total_nodes}",
-            f"{self._managed_directives[_DirectivesOptional.TASKS_PER_NODE]}={tasks_per_node}",
-            f"{self._managed_directives[_DirectivesOptional.THREADS]}={threads}",
-            f"ncpus={int(tasks_per_node) * int(threads)}",
-        ]
-        if memory:
+        select.append(f"{self._managed_directives[_DirectivesOptional.THREADS]}={threads}")
+        if tasks_per_node:
+            select.append(f"ncpus={int(tasks_per_node) * int(threads)}")
+        if memory := items.get(_DirectivesOptional.MEMORY):
             select.append(f"{self._managed_directives[_DirectivesOptional.MEMORY]}={memory}")
         items["-l select="] = ":".join(select)
         return items
@@ -370,3 +328,37 @@ class Slurm(JobScheduler):
         Returns the scheduler's job-submit executable name.
         """
         return "sbatch"
+
+
+@dataclass(frozen=True)
+class _DirectivesOptional:
+    """
+    Keys for optional directives.
+    """
+
+    CORES: str = "cores"
+    DEBUG: str = "debug"
+    EXCLUSIVE: str = "exclusive"
+    EXPORT: str = "export"
+    JOB_NAME: str = "jobname"
+    MEMORY: str = "memory"
+    NODES: str = "nodes"
+    PARTITION: str = "partition"
+    PLACEMENT: str = "placement"
+    QUEUE: str = "queue"
+    RUNDIR: str = "rundir"
+    SHELL: str = "shell"
+    STDERR: str = "stderr"
+    STDOUT: str = "stdout"
+    TASKS_PER_NODE: str = "tasks_per_node"
+    THREADS: str = "threads"
+
+
+@dataclass(frozen=True)
+class _DirectivesRequired:
+    """
+    Keys for required directives.
+    """
+
+    ACCOUNT: str = "account"
+    WALLTIME: str = "walltime"

@@ -4,13 +4,17 @@ FV3 driver tests.
 """
 import datetime as dt
 from functools import partial
+from pathlib import Path
+from unittest.mock import DEFAULT as D
+from unittest.mock import PropertyMock, patch
 
-import pytest
+import yaml
 from pytest import fixture
 
-from uwtools.tests.support import validator, with_del, with_set
+from uwtools.drivers import fv3
+from uwtools.tests.support import logged, validator, with_del, with_set
 
-# Class FV3 tests
+# Fixtures
 
 
 @fixture
@@ -18,33 +22,259 @@ def cycle():
     return dt.datetime(2024, 2, 1, 18)
 
 
-# def test_FV3__schema_file(cycle):
-#     config_file = fixture_path("fv3.yaml")
-#     with patch.object(Driver, "_validate", return_value=True):
-#         forecast = FV3(config_file=config_file, cycle=cycle)
-#     path = Path(forecast._schema_file)
-#     assert path.is_file()
+# Driver fixtures
 
 
-# def test_forecast__run_cmd(cycle):
-#     config_file = fixture_path("fv3.yaml")
-#     with patch.object(FV3, "_validate", return_value=True):
-#         fcstobj = FV3(config_file=config_file, cycle=cycle)
-#         srun_expected = "srun --export=NONE test_exec.py"
-#         fcstobj._driver_config["execution"]["mpiargs"] = ["--export=NONE"]
-#         assert srun_expected == fcstobj._run_cmd
-#         mpirun_expected = "mpirun -np 4 test_exec.py"
-#         fcstobj._driver_config["execution"]["mpicmd"] = "mpirun"
-#         fcstobj._driver_config["execution"]["mpiargs"] = ["-np", 4]
-#         assert mpirun_expected == fcstobj._run_cmd
-#         fcstobj._driver_config["execution"]["mpicmd"] = "mpiexec"
-#         mpiargs = ["-n", 4, "-ppn", 8, "--cpu-bind", "core", "-depth", 2]
-#         fcstobj._driver_config["execution"]["mpiargs"] = mpiargs
-#         mpiexec_expected = "mpiexec -n 4 -ppn 8 --cpu-bind core -depth 2 test_exec.py"
-#         assert mpiexec_expected == fcstobj._run_cmd
+@fixture
+def config(tmp_path):
+    return {
+        "fv3": {
+            "domain": "global",
+            "execution": {"executable": "fv3"},
+            "lateral_boundary_conditions": {
+                "interval_hours": 1,
+                "offset": 0,
+                "path": str(tmp_path / "f{forecast_hour}"),
+            },
+            "length": 1,
+            "run_dir": str(tmp_path),
+        }
+    }
 
 
-# Schema tests
+@fixture
+def config_file(config, tmp_path):
+    path = tmp_path / "fv3.yaml"
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.dump(config, f)
+    return path
+
+
+@fixture
+def fv3obj(config_file, cycle):
+    return fv3.FV3(config_file=config_file, cycle=cycle, batch=True)
+
+
+# Driver tests
+
+
+def test_FV3(fv3obj):
+    assert isinstance(fv3obj, fv3.FV3)
+
+
+def test_FV3_dry_run(config_file, cycle):
+    with patch.object(fv3, "dryrun") as dryrun:
+        fv3obj = fv3.FV3(config_file=config_file, cycle=cycle, batch=True, dry_run=True)
+    assert fv3obj._dry_run is True
+    dryrun.assert_called_once_with()
+
+
+def test_FV3_boundary_files(fv3obj):
+    ns = (0, 1)
+    links = [fv3obj._rundir / "INPUT" / f"gfs_bndy.tile7.{n:03d}.nc" for n in ns]
+    assert not any(link.is_file() for link in links)
+    for n in ns:
+        (fv3obj._rundir / f"f{n}").touch()
+    fv3obj.boundary_files()
+    assert all(link.is_symlink() for link in links)
+
+
+def test_FV3_diag_table(fv3obj):
+    src = fv3obj._rundir / "diag_table.in"
+    src.touch()
+    fv3obj._driver_config["diag_table"] = src
+    dst = fv3obj._rundir / "diag_table"
+    assert not dst.is_file()
+    fv3obj.diag_table()
+    assert dst.is_file()
+
+
+def test_FV3_diag_table_warn(caplog, fv3obj):
+    fv3obj.diag_table()
+    assert logged(caplog, "No 'diag_table' defined in config")
+
+
+def test_FV3_field_table(fv3obj):
+    src = fv3obj._rundir / "field_table.in"
+    with open(src, "w", encoding="utf-8") as f:
+        yaml.dump({}, f)
+    dst = fv3obj._rundir / "field_table"
+    assert not dst.is_file()
+    fv3obj._driver_config["field_table"] = {"base_file": src}
+    fv3obj.field_table()
+    assert dst.is_file()
+
+
+def test_FV3_files_copied(fv3obj):
+    ns = (0, 1)
+    srcs = [fv3obj._rundir / f"src{n}" for n in ns]
+    for src in srcs:
+        src.touch()
+    dsts = [fv3obj._rundir / f"dst{n}" for n in ns]
+    assert not any(dst.is_file() for dst in dsts)
+    fv3obj._driver_config["files_to_copy"] = {dst.name: str(src) for dst, src in zip(dsts, srcs)}
+    fv3obj.files_copied()
+    assert all(dst.is_file() for dst in dsts)
+
+
+def test_FV3_files_linked(fv3obj):
+    ns = (0, 1)
+    tgts = [fv3obj._rundir / f"tgt{n}" for n in ns]
+    for tgt in tgts:
+        tgt.touch()
+    lnks = [fv3obj._rundir / f"lnk{n}" for n in ns]
+    assert not any(lnk.is_file() for lnk in lnks)
+    fv3obj._driver_config["files_to_link"] = {lnk.name: str(tgt) for lnk, tgt in zip(lnks, tgts)}
+    fv3obj.files_linked()
+    assert all(lnk.is_symlink() for lnk in lnks)
+
+
+def test_FV3_model_configure(fv3obj):
+    src = fv3obj._rundir / "model_configure.in"
+    with open(src, "w", encoding="utf-8") as f:
+        yaml.dump({}, f)
+    dst = fv3obj._rundir / "model_configure"
+    assert not dst.is_file()
+    fv3obj._driver_config["model_configure"] = {"base_file": src}
+    fv3obj.model_configure()
+    assert dst.is_file()
+
+
+def test_FV3_namelist_file(fv3obj):
+    src = fv3obj._rundir / "input.nml.in"
+    with open(src, "w", encoding="utf-8") as f:
+        yaml.dump({}, f)
+    dst = fv3obj._rundir / "input.nml"
+    assert not dst.is_file()
+    fv3obj._driver_config["namelist_file"] = {"base_file": src}
+    fv3obj.namelist_file()
+    assert dst.is_file()
+
+
+def test_FV3_provisioned_run_directory(fv3obj):
+    with patch.multiple(
+        fv3obj,
+        boundary_files=D,
+        diag_table=D,
+        field_table=D,
+        files_copied=D,
+        files_linked=D,
+        model_configure=D,
+        namelist_file=D,
+        restart_directory=D,
+        runscript=D,
+    ) as mocks:
+        fv3obj.provisioned_run_directory()
+    for m in mocks:
+        mocks[m].assert_called_once_with()
+
+
+def test_FV3_restart_directory(fv3obj):
+    path = fv3obj._rundir / "RESTART"
+    assert not path.is_dir()
+    fv3obj.restart_directory()
+    assert path.is_dir()
+
+
+def test_FV3_run_batch(fv3obj):
+    with patch.object(fv3obj, "_run_via_batch_submission") as func:
+        fv3obj.run()
+    func.assert_called_once_with()
+
+
+def test_FV3_run_local(fv3obj):
+    fv3obj._batch = False
+    with patch.object(fv3obj, "_run_via_local_execution") as func:
+        fv3obj.run()
+    func.assert_called_once_with()
+
+
+def test_FV3_runscript(fv3obj):
+    dst = fv3obj._rundir / "runscript"
+    assert not dst.is_file()
+    fv3obj._driver_config["execution"].update(
+        {
+            "batchargs": {"walltime": "01:10:00"},
+            "envcmds": ["cmd1", "cmd2"],
+            "mpicmd": "runit",
+            "threads": 8,
+        }
+    )
+    fv3obj._config["platform"] = {"account": "me", "scheduler": "slurm"}
+    fv3obj.runscript()
+    with open(dst, "r", encoding="utf-8") as f:
+        lines = f.read().split("\n")
+    # Check directives:
+    assert "#SBATCH --account=me" in lines
+    assert "#SBATCH --time=01:10:00" in lines
+    # Check environment variables:
+    assert "export ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4" in lines
+    assert "export KMP_AFFINITY=scatter" in lines
+    assert "export MPI_TYPE_DEPTH=20" in lines
+    assert "export OMP_NUM_THREADS=8" in lines
+    assert "export OMP_STACKSIZE=512m" in lines
+    # Check environment commands:
+    assert "cmd1" in lines
+    assert "cmd2" in lines
+    # Check execution:
+    assert "runit fv3" in lines
+    assert "test $? -eq 0 && touch %s/done" % fv3obj._rundir
+
+
+def test_FV3__run_via_batch_submission(fv3obj):
+    runscript = fv3obj._runscript_path
+    with patch.object(fv3obj, "provisioned_run_directory") as prd:
+        with patch.object(fv3.FV3, "_scheduler", new_callable=PropertyMock) as scheduler:
+            fv3obj._run_via_batch_submission()
+            scheduler().submit_job.assert_called_once_with(
+                runscript=runscript, submit_file=Path(f"{runscript}.submit")
+            )
+        prd.assert_called_once_with()
+
+
+def test_FV3__run_via_local_execution(fv3obj):
+    with patch.object(fv3obj, "provisioned_run_directory") as prd:
+        with patch.object(fv3, "execute") as execute:
+            fv3obj._run_via_local_execution()
+            execute.assert_called_once_with(
+                cmd="{x} >{x}.out 2>&1".format(x=fv3obj._runscript_path),
+                cwd=fv3obj._rundir,
+                log_output=True,
+            )
+        prd.assert_called_once_with()
+
+
+def test_FV3__driver_config(fv3obj):
+    assert fv3obj._driver_config == fv3obj._config["fv3"]
+
+
+def test_FV3__resources(fv3obj):
+    account = "me"
+    scheduler = "slurm"
+    walltime = "01:10:00"
+    fv3obj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
+    fv3obj._config["platform"] = {"account": account, "scheduler": scheduler}
+    assert fv3obj._resources == {
+        "account": account,
+        "rundir": fv3obj._rundir,
+        "scheduler": scheduler,
+        "walltime": walltime,
+    }
+
+
+def test_FV3__runscript_path(fv3obj):
+    assert fv3obj._runscript_path == fv3obj._rundir / "runscript"
+
+
+def test_FV3__taskanme(fv3obj):
+    assert fv3obj._taskname("foo") == "20240201 18Z FV3 foo"
+
+
+def test_FV3__validate(fv3obj):
+    fv3obj._validate()
+
+
+# Schema fixtures
 
 
 @fixture
@@ -70,6 +300,9 @@ def field_table_vals():
 @fixture
 def fcstprop():
     return partial(validator, "fv3.jsonschema", "properties", "fv3", "properties")
+
+
+# Schema tests
 
 
 def test_fv3_schema_filesToStage():
@@ -150,33 +383,16 @@ def test_fv3_schema_forecast_execution(fcstprop):
     )
 
 
-@pytest.mark.skip("PM FIXTHIS")
 def test_fv3_schema_forecast_execution_batchargs(fcstprop):
     errors = fcstprop("execution", "properties", "batchargs")
-    batchargs = {
-        "cores": 1,
-        "debug": True,
-        "exclusive": True,
-        "export": "string",
-        "jobname": "string",
-        "memory": "string",
-        "nodes": 1,
-        "partition": "string",
-        "placement": "string",
-        "queue": "string",
-        "rundir": "string",
-        "shell": "string",
-        "stdout": "string",
-        "tasks_per_node": 1,
-        "threads": 1,
-        "walltime": "string",
-    }
-    # Basic correctness:
+    # Basic correctness, empty map is ok:
+    assert not errors({})
+    # Managed properties are fine:
     assert not errors({"queue": "string", "walltime": "string"})
-    # Full suite of accepted entries:
-    assert not errors(batchargs)
-    # Additional entries are not allowed:
-    assert "Additional properties are not allowed" in errors({**batchargs, "foo": "bar"})
+    # But so are unknown ones:
+    assert not errors({"--foo": 88})
+    # It just has to be a map:
+    assert "[] is not of type 'object'" in errors([])
 
 
 def test_fv3_schema_forecast_execution_executable(fcstprop):
@@ -370,260 +586,3 @@ def test_fv3_schema_forecast_run_dir(fcstprop):
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
-
-
-# @fixture
-# def create_field_table_update_obj():
-#     return YAMLConfig(fixture_path("FV3_GFS_v16_update.yaml"))
-
-# def test_batch_script():
-#     expected = """
-# #SBATCH --account=user_account
-# #SBATCH --nodes=1
-# #SBATCH --ntasks-per-node=1
-# #SBATCH --qos=batch
-# #SBATCH --time=00:01:00
-# KMP_AFFINITY=scatter
-# OMP_NUM_THREADS=1
-# OMP_STACKSIZE=512m
-# MPI_TYPE_DEPTH=20
-# ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4
-# srun --export=NONE test_exec.py
-# """.strip()
-#     config_file = fixture_path("fv3.yaml")
-#     with patch.object(Driver, "_validate", return_value=True):
-#         forecast = FV3(config_file=config_file)
-#     assert forecast.batch_script().content() == expected
-
-
-# def test_create_model_configure(cycle, tmp_path):
-#     """
-#     Test that providing a YAML base input file and a config file will create and update YAML
-#     config file.
-#     """
-#     config_file = fixture_path("fruit_config_similar_for_fcst.yaml")
-#     base_file = fixture_path("fruit_config.yaml")
-#     fcst_config_file = tmp_path / "fcst.yml"
-#     fcst_config = YAMLConfig(config_file)
-#     fcst_config["fv3"]["model_configure"]["base_file"] = base_file
-#     fcst_config.dump(fcst_config_file)
-#     output_file = (tmp_path / "test_config_from_yaml.yaml").as_posix()
-#     with patch.object(FV3, "_validate", return_value=True):
-#         forecast_obj = FV3(config_file=fcst_config_file, cycle=cycle)
-#     forecast_obj.create_model_configure(output_file)
-#     expected = YAMLConfig(base_file)
-# expected.update_values(YAMLConfig(config_file)["fv3"]["model_configure"]["update_values"])
-#     expected_file = tmp_path / "expected_yaml.yaml"
-#     expected.dump(expected_file)
-#     assert compare_files(expected_file, output_file)
-
-
-# def test_create_field_table_with_base_file(create_field_table_update_obj, cycle, tmp_path):
-#     """
-#     Tests create_field_table method with optional base file.
-#     """
-#     base_file = fixture_path("FV3_GFS_v16.yaml")
-#     outfldtbl_file = tmp_path / "field_table_two.FV3_GFS"
-#     expected = fixture_path("field_table_from_base.FV3_GFS")
-#     config_file = tmp_path / "fcst.yaml"
-#     forecast_config = create_field_table_update_obj
-#     forecast_config["fv3"]["field_table"]["base_file"] = base_file
-#     forecast_config.dump(config_file)
-#     Fv3(config_file=config_file, cycle=cycle).create_field_table(outfldtbl_file)
-#     assert compare_files(expected, outfldtbl_file)
-
-
-# def test_create_field_table_without_base_file(cycle, tmp_path):
-#     """
-#     Tests create_field_table without optional base file.
-#     """
-#     outfldtbl_file = tmp_path / "field_table_one.FV3_GFS"
-#     expected = fixture_path("field_table_from_input.FV3_GFS")
-#     config_file = fixture_path("FV3_GFS_v16_update.yaml")
-#     Fv3(config_file=config_file, cycle=cycle).create_field_table(outfldtbl_file)
-#     assert compare_files(expected, outfldtbl_file)
-
-
-# def test_create_model_configure_call_private(cycle, tmp_path):
-#     basefile = str(tmp_path / "base.yaml")
-#     infile = fixture_path("fv3.yaml")
-#     outfile = str(tmp_path / "out.yaml")
-#     for path in infile, basefile:
-#         Path(path).touch()
-#     with patch.object(Driver, "_create_user_updated_config") as _create_user_updated_config:
-#         with patch.object(Fv3, "_validate", return_value=True):
-#             Fv3(config_file=infile, cycle=cycle).create_model_configure(outfile)
-#     _create_user_updated_config.assert_called_with(
-#         config_class=YAMLConfig, config_values={}, output_path=outfile
-#     )
-
-
-# @fixture
-# def create_namelist_assets(tmp_path):
-#     update_values = {
-#         "salad": {
-#             "base": "kale",
-#             "fruit": "banana",
-#             "vegetable": "tomato",
-#             "how_many": 12,
-#             "dressing": "balsamic",
-#         }
-#     }
-#     return update_values, tmp_path / "create_out.nml"
-
-
-# def test_create_namelist_with_base_file(create_namelist_assets, cycle, tmp_path):
-#     """
-#     Tests create_namelist method with optional base file.
-#     """
-#     update_values, outnml_file = create_namelist_assets
-#     base_file = fixture_path("simple3.nml")
-#     fcst_config = {
-#         "fv3": {
-#             "namelist": {
-#                 "base_file": base_file,
-#                 "update_values": update_values,
-#             },
-#         },
-#     }
-#     fcst_config_file = tmp_path / "fcst.yml"
-#     YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
-#     FV3(config_file=fcst_config_file, cycle=cycle).create_namelist(outnml_file)
-#     expected = """
-# &salad
-#     base = 'kale'
-#     fruit = 'banana'
-#     vegetable = 'tomato'
-#     how_many = 12
-#     dressing = 'balsamic'
-#     toppings = ,
-#     extras = 0
-#     dessert = .false.
-#     appetizer = ,
-# /
-# """.lstrip()
-#     with open(outnml_file, "r", encoding="utf-8") as out_file:
-#         assert out_file.read() == expected
-
-
-# def test_create_namelist_without_base_file(create_namelist_assets, cycle, tmp_path):
-#     """
-#     Tests create_namelist method without optional base file.
-#     """
-#     update_values, outnml_file = create_namelist_assets
-#     fcst_config = {
-#         "fv3": {
-#             "namelist": {
-#                 "update_values": update_values,
-#             },
-#         },
-#     }
-#     fcst_config_file = tmp_path / "fcst.yml"
-#     YAMLConfig.dump_dict(cfg=fcst_config, path=fcst_config_file)
-#     FV3(config_file=fcst_config_file, cycle=cycle).create_namelist(outnml_file)
-#     expected = """
-# &salad
-#     base = 'kale'
-#     fruit = 'banana'
-#     vegetable = 'tomato'
-#     how_many = 12
-#     dressing = 'balsamic'
-# /
-# """.lstrip()
-#     with open(outnml_file, "r", encoding="utf-8") as out_file:
-#         assert out_file.read() == expected
-
-
-# def test_run_direct(cycle, fv3_mpi_assets, fv3_run_assets):
-#     _, config_file, config = fv3_run_assets
-#     expected_command = " ".join(fv3_mpi_assets)
-#     with patch.object(FV3, "_validate", return_value=True):
-#         with patch.object(forecast, "execute") as execute:
-#             execute.return_value = (True, "")
-#             fcstobj = FV3(config_file=config_file, cycle=cycle)
-#             with patch.object(fcstobj, "_config", config):
-#                 fcstobj.run()
-#             execute.assert_called_once_with(cmd=expected_command, cwd=ANY, log_output=True)
-
-
-# @pytest.mark.parametrize("batch", [True, False])
-# def test_FV3_run_dry_run(batch, caplog, cycle, fv3_mpi_assets, fv3_run_assets):
-#     log.setLevel(logging.INFO)
-#     config_file, config = fv3_run_assets
-#     if batch:
-#         batch_components = [
-#             "#!/bin/bash",
-#             "#SBATCH --account=user_account",
-#             "#SBATCH --nodes=1",
-#             "#SBATCH --ntasks-per-node=1",
-#             "#SBATCH --qos=batch",
-#             "#SBATCH --time=00:01:00",
-#         ] + fv3_mpi_assets
-#         expected_lines = batch_components
-#     else:
-#         expected_lines = [" ".join(fv3_mpi_assets)]
-#     with patch.object(FV3, "_validate", return_value=True):
-#         fcstobj = FV3(config_file=config_file, cycle=cycle, dry_run=True, batch=batch)
-#         with patch.object(fcstobj, "_config", config):
-#             fcstobj.run()
-#     for line in expected_lines:
-#         assert logged(caplog, line)
-
-
-# @pytest.mark.parametrize(
-#     "batch,method", [(True, "_run_via_batch_submission"), (False, "_run_via_local_execution")]
-# )
-# def test_FV3_run(batch, cycle, fv3_run_assets, method):
-#     config_file, _ = fv3_run_assets
-#     fcstobj = FV3(config_file=config_file, cycle=cycle, batch=batch)
-#     with patch.object(fcstobj, method) as helper:
-#         helper.return_value = (True, None)
-#         assert fcstobj.run() is True
-#         helper.assert_called_once_with()
-
-
-# def test_FV3__run_via_batch_submission(cycle, fv3_run_assets):
-#     batch_script, config_file, config = fv3_run_assets
-#     fcstobj = FV3(config_file=config_file, cycle=cycle, batch_script=batch_script)
-#     with patch.object(fcstobj, "_config", config):
-#         with patch.object(scheduler, "execute") as execute:
-#             with patch.object(Driver, "_create_user_updated_config"):
-#                 execute.return_value = (True, "")
-#                 success, lines = fcstobj._run_via_batch_submission()
-#                 assert success is True
-#                 assert lines[0] == "Batch script:"
-#                 execute.assert_called_once_with(cmd=ANY, cwd=ANY)
-
-
-# def test_FV3__run_via_local_execution(cycle, fv3_run_assets):
-#     _, config_file, config = fv3_run_assets
-#     fcstobj = FV3(config_file=config_file, cycle=cycle)
-#     with patch.object(fcstobj, "_config", config):
-#         with patch.object(forecast, "execute") as execute:
-#             execute.return_value = (True, "")
-#             success, lines = fcstobj._run_via_local_execution()
-#             assert success is True
-#             assert lines[0] == "Command:"
-#             execute.assert_called_once_with(cmd=ANY, cwd=ANY, log_output=True)
-
-
-# @fixture
-# def fv3_run_assets(tmp_path):
-#     config_file = fixture_path("fv3.yaml")
-#     config = YAMLConfig(config_file)
-#     config["fv3"]["run_dir"] = tmp_path.as_posix()
-#     config["fv3"]["cycle_dependent"] = {"foo-file": str(tmp_path / "foo")}
-#     config["fv3"]["static"] = {"static-foo-file": str(tmp_path / "foo")}
-#     return config_file, config.data["fv3"]
-
-
-# @fixture
-# def fv3_mpi_assets():
-#     return [
-#         "KMP_AFFINITY=scatter",
-#         "OMP_NUM_THREADS=1",
-#         "OMP_STACKSIZE=512m",
-#         "MPI_TYPE_DEPTH=20",
-#         "ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4",
-#         "srun --export=NONE test_exec.py",
-#     ]

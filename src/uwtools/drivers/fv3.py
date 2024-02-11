@@ -77,7 +77,7 @@ class FV3(Driver):
             path.parent.mkdir(parents=True, exist_ok=True)
             copy(src=src, dst=path)
         else:
-            log.warn("No %s defined in config", fn)
+            log.warning("No '%s' defined in config", fn)
 
     @task
     def field_table(self):
@@ -205,16 +205,14 @@ class FV3(Driver):
             "OMP_STACKSIZE": "512m",
         }
         envcmds = self._driver_config.get("execution", {}).get("envcmds", [])
-        execution = [self._run_cmd, "test $? -eq 0 && touch %s/done" % self._rundir]
+        execution = [self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir]
         scheduler = self._scheduler if self._batch else None
         path.parent.mkdir(parents=True, exist_ok=True)
+        rs = self._runscript(
+            envcmds=envcmds, envvars=envvars, execution=execution, scheduler=scheduler
+        )
         with open(path, "w", encoding="utf-8") as f:
-            print(
-                self._runscript(
-                    envcmds=envcmds, envvars=envvars, execution=execution, scheduler=scheduler
-                ),
-                file=f,
-            )
+            print(rs, file=f)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
     # Private workflow tasks

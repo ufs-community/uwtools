@@ -72,7 +72,7 @@ class Driver(ABC):
         """
 
     @property
-    def _run_cmd(self) -> str:
+    def _runcmd(self) -> str:
         """
         Returns the full command-line component invocation.
         """
@@ -87,17 +87,17 @@ class Driver(ABC):
 
     def _runscript(
         self,
-        envcmds: List[str],
-        envvars: Dict[str, str],
         execution: List[str],
+        envcmds: Optional[List[str]] = None,
+        envvars: Optional[Dict[str, str]] = None,
         scheduler: Optional[JobScheduler] = None,
     ) -> str:
         """
         Returns a driver runscript.
 
+        :param execution: Statements to execute.
         :param envcmds: Shell commands to set up runtime environment.
         :param envvars: Environment variables to set in runtime environment.
-        :param execution: Statements to execute.
         :param scheduler: A job-scheduler object.
         """
         # Render script sections into a template, remove any extraneous newlines related to elided
@@ -115,8 +115,8 @@ class Driver(ABC):
         """
         rs = dedent(template).format(
             directives="\n".join(scheduler.directives if scheduler else ""),
-            envcmds="\n".join(envcmds),
-            envvars="\n".join([f"export {k}={v}" for k, v in envvars.items()]),
+            envcmds="\n".join(envcmds or []),
+            envvars="\n".join([f"export {k}={v}" for k, v in (envvars or {}).items()]),
             execution="\n".join(execution),
         )
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())

@@ -1,18 +1,41 @@
-# pylint: disable=duplicate-code,missing-function-docstring
+# pylint: disable=duplicate-code,missing-function-docstring,redefined-outer-name
 """
 Tests for uwtools.config.formats.nml module.
 """
 
 import filecmp
 
-from pytest import raises
+import f90nml  # type: ignore
+from pytest import fixture, raises
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT
 
+# Fixtures
+
+
+@fixture
+def data():
+    return {"nml": {"key": "val"}}
+
+
 # Tests
+
+
+def test_dump_dict_dict(data, tmp_path):
+    path = tmp_path / "a.nml"
+    NMLConfig.dump_dict(cfg=data, path=path)
+    nml = f90nml.read(path)
+    assert nml == data
+
+
+def test_dump_dict_Namelist(data, tmp_path):
+    path = tmp_path / "a.nml"
+    NMLConfig.dump_dict(cfg=f90nml.Namelist(data), path=path)
+    nml = f90nml.read(path)
+    assert nml == data
 
 
 def test_get_format():

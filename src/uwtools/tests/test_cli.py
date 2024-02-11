@@ -1,5 +1,5 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
-
+import datetime as dt
 import logging
 import sys
 from argparse import ArgumentParser as Parser
@@ -52,14 +52,21 @@ def test__add_subparser_config_validate(subparsers):
     assert subparsers.choices[STR.validate]
 
 
-# def test__add_subparser_fv3(subparsers):
-#     cli._add_subparser_fv3(subparsers)
-#     assert actions(subparsers.choices[STR.fv3]) == [STR.run, STR.tasks]
-
-
-# def test__add_subparser_forecast_run(subparsers):
-#     cli._add_subparser_forecast_run(subparsers)
-#     assert subparsers.choices[STR.run]
+def test__add_subparser_fv3(subparsers):
+    cli._add_subparser_fv3(subparsers)
+    assert actions(subparsers.choices[STR.fv3]) == [
+        "boundary_files",
+        "diag_table",
+        "field_table",
+        "files_copied",
+        "files_linked",
+        "model_configure",
+        "namelist_file",
+        "provisioned_run_directory",
+        "restart_directory",
+        "run",
+        "runscript",
+    ]
 
 
 def test__add_subparser_template(subparsers):
@@ -256,31 +263,17 @@ def test__dispatch_config_validate_config_obj():
     _validate_yaml.assert_called_once_with(**_validate_yaml_args)
 
 
-# @pytest.mark.parametrize("params", [(STR.run, "_dispatch_forecast_run")])
-# def test__dispatch_fv3(params):
-#     action, funcname = params
-#     args = {STR.action: action}
-#     with patch.object(cli, funcname) as module:
-#         cli._dispatch_fv3(args)
-#     module.assert_called_once_with(args)
-
-
-# def test__dispatch_forecast_run():
-#     cyclestr = "2023-01-01T18"
-#     args = {
-#         STR.batch: False,
-#         STR.cfgfile: 1,
-#         STR.cycle: cyclestr,
-#         STR.dryrun: True,
-#         STR.model: "foo",
-#         STR.task: "run",
-#     }
-#     with patch.object(uwtools.drivers.forecast, "FooForecast", create=True) as FooForecast:
-#         CLASSES = {"foo": getattr(uwtools.drivers.forecast, "FooForecast")}
-#         with patch.object(uwtools.api.forecast, "CLASSES", new=CLASSES):
-#             cli._dispatch_forecast_run(args)
-#     FooForecast.assert_called_once_with(batch=False, config_file=1, cycle=cyclestr, dry_run=True)
-#     FooForecast().run.assert_called_once_with()
+def test__dispatch_fv3():
+    args: dict = {
+        "config_file": "config.yaml",
+        "cycle": dt.datetime.now(),
+        "batch": True,
+        "dry_run": False,
+        "task": "foo",
+    }
+    with patch.object(uwtools.api.fv3, "execute") as execute:
+        cli._dispatch_fv3(args)
+    execute.assert_called_once_with(**args)
 
 
 @pytest.mark.parametrize(
@@ -293,9 +286,9 @@ def test__dispatch_config_validate_config_obj():
 def test__dispatch_rocoto(params):
     action, funcname = params
     args = {STR.action: action}
-    with patch.object(cli, funcname) as module:
+    with patch.object(cli, funcname) as func:
         cli._dispatch_rocoto(args)
-    module.assert_called_once_with(args)
+    func.assert_called_once_with(args)
 
 
 def test__dispatch_rocoto_realize():
@@ -307,9 +300,9 @@ def test__dispatch_rocoto_realize():
 
 def test__dispatch_rocoto_realize_no_optional():
     args = {STR.infile: None, STR.outfile: None}
-    with patch.object(uwtools.api.rocoto, "_realize") as module:
+    with patch.object(uwtools.api.rocoto, "_realize") as func:
         cli._dispatch_rocoto_realize(args)
-    module.assert_called_once_with(config=None, output_file=None)
+    func.assert_called_once_with(config=None, output_file=None)
 
 
 def test__dispatch_rocoto_validate_xml():
