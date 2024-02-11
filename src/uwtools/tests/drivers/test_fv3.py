@@ -534,44 +534,6 @@ def test_fv3_schema_forecast_run_dir(fcstprop):
 #         assert out_file.read() == expected
 
 
-# @pytest.mark.parametrize("section", ["static", "cycle_dependent"])
-# @pytest.mark.parametrize("link_files", [True, False])
-# def test_stage_files(tmp_path, section, link_files):
-#     """
-#     Tests that files from static or cycle_dependent sections of the config obj are being staged
-#     (copied or linked) to the run directory.
-#     """
-#     run_directory = tmp_path / "run"
-#     src_directory = tmp_path / "src"
-#     files_to_stage = YAMLConfig(fixture_path("expt_dir.yaml"))[section]
-#     # Fix source paths so that they are relative to our test temp directory and
-#     # create the test files.
-#     src_directory.mkdir()
-#     for dst_fn, src_path in files_to_stage.items():
-#         if isinstance(src_path, list):
-#             files_to_stage[dst_fn] = [str(src_directory / Path(sp).name) for sp in src_path]
-#         else:
-#             fixed_src_path = src_directory / Path(src_path).name
-#             files_to_stage[dst_fn] = str(fixed_src_path)
-#             fixed_src_path.touch()
-#     # Test that none of the destination files exist yet:
-#     for dst_fn in files_to_stage.keys():
-#         assert not (run_directory / dst_fn).is_file()
-#     # Ask a forecast object to stage the files to the run directory:
-#     FV3.create_directory_structure(run_directory)
-#     FV3.stage_files(run_directory, files_to_stage, link_files=link_files)
-#     # Test that all of the destination files now exist:
-#     link_or_file = Path.is_symlink if link_files else Path.is_file
-#     for dst_rel_path, src_paths in files_to_stage.items():
-#         if isinstance(src_paths, list):
-#             dst_paths = [run_directory / dst_rel_path / os.path.basename(sp) for sp in src_paths]
-#             assert all(link_or_file(d_fn) for d_fn in dst_paths)
-#         else:
-#             assert link_or_file(run_directory / dst_rel_path)
-#     if section == "cycle_dependent":
-#         assert link_or_file(run_directory / "INPUT" / "gfs_bndy.tile7.006.nc")
-
-
 # def test_run_direct(cycle, fv3_mpi_assets, fv3_run_assets):
 #     _, config_file, config = fv3_run_assets
 #     expected_command = " ".join(fv3_mpi_assets)
