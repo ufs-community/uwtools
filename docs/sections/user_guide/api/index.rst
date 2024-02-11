@@ -3,7 +3,7 @@ API
 
 .. toctree::
    config
-   forecast
+   fv3
    logging
    rocoto
    template
