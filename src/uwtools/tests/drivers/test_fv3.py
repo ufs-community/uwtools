@@ -8,6 +8,7 @@ from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
+import pytest
 import yaml
 from pytest import fixture
 
@@ -105,11 +106,15 @@ def test_FV3_field_table(fv3obj):
     assert dst.is_file()
 
 
-def test_FV3_files_copied(config, cycle, tmp_path):
+@pytest.mark.parametrize(
+    "key,task,test",
+    [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
+)
+def test_FV3_files_copied(config, cycle, key, task, test, tmp_path):
     atm, sfc = "gfs.t%sz.atmanl.nc", "gfs.t%sz.sfcanl.nc"
     atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
-    config["fv3"].update({"files_to_copy": {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
+    config["fv3"].update({key: {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
     path = tmp_path / "fv3.yaml"
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
@@ -119,26 +124,8 @@ def test_FV3_files_copied(config, cycle, tmp_path):
     atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
     for src in (atm_src, sfc_src):
         src.touch()
-    fv3obj.files_copied()
-    assert all(dst.is_file() for dst in [atm_dst, sfc_dst])
-
-
-def test_FV3_files_linked(config, cycle, tmp_path):
-    atm, sfc = "gfs.t%sz.atmanl.nc", "gfs.t%sz.sfcanl.nc"
-    atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
-    atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
-    config["fv3"].update({"files_to_link": {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
-    path = tmp_path / "fv3.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    fv3obj = fv3.FV3(config_file=path, cycle=cycle, batch=True)
-    atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
-    assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
-    atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
-    for src in (atm_src, sfc_src):
-        src.touch()
-    fv3obj.files_linked()
-    assert all(dst.is_symlink() for dst in [atm_dst, sfc_dst])
+    getattr(fv3obj, task)()
+    assert all(getattr(dst, test)() for dst in [atm_dst, sfc_dst])
 
 
 def test_FV3_model_configure(fv3obj):
