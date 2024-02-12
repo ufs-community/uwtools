@@ -127,7 +127,7 @@ def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) ->
     """
     rendered: _ConfigVal = val  # fall-back value
     if isinstance(val, dict):
-        return {k: dereference(v, context, local=val) for k, v in val.items()}
+        return {dereference(k, context): dereference(v, context, local=val) for k, v in val.items()}
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):

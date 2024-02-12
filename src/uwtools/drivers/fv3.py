@@ -38,6 +38,7 @@ class FV3(Driver):
         :param batch: Run component via the batch system?
         """
         super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
+        self._config.dereference(context={"cycle": cycle})
         if self._dry_run:
             dryrun()
         self._cycle = cycle
@@ -101,9 +102,8 @@ class FV3(Driver):
         Files copied for FV3 run.
         """
         yield self._taskname("files copied")
-        cycle = lambda fn: fn.format(cycle=self._cycle)
         yield [
-            self._filecopy(src=Path(cycle(src)), dst=self._rundir / cycle(dst))
+            self._filecopy(src=Path(src), dst=self._rundir / dst)
             for dst, src in self._driver_config.get("files_to_copy", {}).items()
         ]
 
@@ -113,9 +113,8 @@ class FV3(Driver):
         Files linked for FV3 run.
         """
         yield self._taskname("files linked")
-        cycle = lambda fn: fn.format(cycle=self._cycle)
         yield [
-            self._symlink(target=Path(cycle(target)), linkname=self._rundir / cycle(linkname))
+            self._symlink(target=Path(target), linkname=self._rundir / linkname)
             for linkname, target in self._driver_config.get("files_to_link", {}).items()
         ]
 

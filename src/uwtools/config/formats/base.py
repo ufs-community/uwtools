@@ -10,7 +10,7 @@ from typing import List, Optional, Tuple, Union
 
 import yaml
 
-from uwtools.config.jinja2 import dereference
+from uwtools.config import jinja2
 from uwtools.config.support import INCLUDE_TAG, depth, log_and_error
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -159,7 +159,7 @@ class Config(ABC, UserDict):
         """
         return depth(self.data)
 
-    def dereference(self) -> None:
+    def dereference(self, context: Optional[dict] = None) -> None:
         """
         Render as much Jinja2 syntax as possible.
         """
@@ -171,7 +171,7 @@ class Config(ABC, UserDict):
 
         while True:
             logstate("current")
-            new = dereference(val=self.data, context={**os.environ, **self.data})
+            new = jinja2.dereference(val=self.data, context=context or {**os.environ, **self.data})
             assert isinstance(new, dict)
             if new == self.data:
                 break

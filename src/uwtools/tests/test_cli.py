@@ -265,15 +265,14 @@ def test__dispatch_config_validate_config_obj():
 
 def test__dispatch_fv3():
     args: dict = {
+        "batch": True,
         "config_file": "config.yaml",
         "cycle": dt.datetime.now(),
-        "batch": True,
         "dry_run": False,
-        "task": "foo",
     }
     with patch.object(uwtools.api.fv3, "execute") as execute:
-        cli._dispatch_fv3(args)
-    execute.assert_called_once_with(**args)
+        cli._dispatch_fv3({**args, "action": "foo"})
+    execute.assert_called_once_with(**{**args, "task": "foo"})
 
 
 @pytest.mark.parametrize(

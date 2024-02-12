@@ -105,28 +105,40 @@ def test_FV3_field_table(fv3obj):
     assert dst.is_file()
 
 
-def test_FV3_files_copied(fv3obj):
-    ns = (0, 1)
-    srcs = [fv3obj._rundir / f"src{n}" for n in ns]
-    for src in srcs:
+def test_FV3_files_copied(config, cycle, tmp_path):
+    atm, sfc = "gfs.t%sz.atmanl.nc", "gfs.t%sz.sfcanl.nc"
+    atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
+    atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
+    config["fv3"].update({"files_to_copy": {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
+    path = tmp_path / "fv3.yaml"
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.dump(config, f)
+    fv3obj = fv3.FV3(config_file=path, cycle=cycle, batch=True)
+    atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
+    assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
+    atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
+    for src in (atm_src, sfc_src):
         src.touch()
-    dsts = [fv3obj._rundir / f"dst{n}" for n in ns]
-    assert not any(dst.is_file() for dst in dsts)
-    fv3obj._driver_config["files_to_copy"] = {dst.name: str(src) for dst, src in zip(dsts, srcs)}
     fv3obj.files_copied()
-    assert all(dst.is_file() for dst in dsts)
+    assert all(dst.is_file() for dst in [atm_dst, sfc_dst])
 
 
-def test_FV3_files_linked(fv3obj):
-    ns = (0, 1)
-    tgts = [fv3obj._rundir / f"tgt{n}" for n in ns]
-    for tgt in tgts:
-        tgt.touch()
-    lnks = [fv3obj._rundir / f"lnk{n}" for n in ns]
-    assert not any(lnk.is_file() for lnk in lnks)
-    fv3obj._driver_config["files_to_link"] = {lnk.name: str(tgt) for lnk, tgt in zip(lnks, tgts)}
+def test_FV3_files_linked(config, cycle, tmp_path):
+    atm, sfc = "gfs.t%sz.atmanl.nc", "gfs.t%sz.sfcanl.nc"
+    atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
+    atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
+    config["fv3"].update({"files_to_link": {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
+    path = tmp_path / "fv3.yaml"
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.dump(config, f)
+    fv3obj = fv3.FV3(config_file=path, cycle=cycle, batch=True)
+    atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
+    assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
+    atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
+    for src in (atm_src, sfc_src):
+        src.touch()
     fv3obj.files_linked()
-    assert all(lnk.is_symlink() for lnk in lnks)
+    assert all(dst.is_symlink() for dst in [atm_dst, sfc_dst])
 
 
 def test_FV3_model_configure(fv3obj):

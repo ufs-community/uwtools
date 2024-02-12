@@ -2,7 +2,7 @@
 """
 Tests for the uwtools.config.base module.
 """
-
+import datetime as dt
 import logging
 import os
 from unittest.mock import patch
@@ -151,6 +151,17 @@ f:
         "e": [88, 3.14],
         "f": {"f1": 88, "f2": 3.14},
     }
+
+
+def test_derefernce_context_override(tmp_path):
+    log.setLevel(logging.DEBUG)
+    yaml = "file: gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc"
+    path = tmp_path / "config.yaml"
+    with open(path, "w", encoding="utf-8") as f:
+        print(yaml, file=f)
+    config = YAMLConfig(path)
+    config.dereference(context={"cycle": dt.datetime(2024, 2, 12, 6)})
+    assert config["file"] == "gfs.t06z.atmanl.nc"
 
 
 @pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
