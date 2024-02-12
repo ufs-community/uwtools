@@ -18,7 +18,7 @@ def execute(
     Execute an FV3 task.
 
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
-    Otherwise, the forecast will be run directly on the current system without a runscript.
+    Otherwise, the forecast will be run directly on the current system.
 
     :param task: The task to execute
     :param config_file: Path to UW YAML config file
