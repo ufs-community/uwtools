@@ -96,17 +96,15 @@ Do you already have a Rocoto XML but don't want to run Rocoto to make sure it wo
 The Drivers
 -----------
 
-The uwtools driver(s) live right there beside the rest of the tools in the CLI and API. These tools will be under development for the foreseeable future, but we do have a forecast driver currently available in beta testing mode.
+Drivers for NWP components are available as top-level CLI modes and API modules.
 
-Forecast
-^^^^^^^^
+FV3
+^^^
 
-| **CLI**: ``uw forecast -h``
-| **API**: ``import uwtools.api.drivers.forecast``
+| **CLI**: ``uw fv3 -h``
+| **API**: ``import uwtools.api.drivers.fv3``
 
-This driver is the first of its kind (with many others to come) and takes a few pieces of information from the user --- the model, the time, and a structured YAML --- and runs a forecast via batch job or as an executable. That simple.
-
-We've helped by providing a JSON Schema that allows you to validate your YAML to ensure you've got it right!
+Provided with a valid UW YAML configuration file and a forecast-cycle value, ``uw fv3`` can prepare a fully provisioned FV3 run directory, execute FV3 directly, or can submit an FV3 batch job to an HPC scheduler.
 
 Over time, we'll add many other drivers to support a variety of UFS components from pre-processing to post-processing, along with many data assimilation components.
 

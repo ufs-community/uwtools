@@ -1,8 +1,8 @@
 Installation
 ============
 
-.. note:: 
-   
+.. note::
+
    Developers should visit the :doc:`Developer Setup <../contributor_guide/developer_setup>` section located in the :doc:`Contributor Guide <../contributor_guide/index>`.
 
 The recommended installation mechanism uses the Python package and virtual-environment manager :conda:`conda<>`. Specifically, these instructions assume use of the :miniforge:`Miniforge<>` variant of :miniconda:`Miniconda<>`, built to use, by default, packages from the :conda-forge:`conda-forge<>` project. Users of the original :miniconda:`Miniconda<>` or the :anaconda:`Anaconda distribution<>` should add the flags ``-c conda-forge --override-channels`` to ``conda`` commands to specify the required package channels.

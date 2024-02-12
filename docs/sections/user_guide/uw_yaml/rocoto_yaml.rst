@@ -250,7 +250,7 @@ This translates to Rocoto XML (whitespace added for readability):
      </task>
    </metatask>
 
-This example of Rocoto XML will be expanded during the workflow's execution to generate three individual tasks: ``hello``, ``hola``, and ``bonjour``. 
+This example of Rocoto XML will be expanded during the workflow's execution to generate three individual tasks: ``hello``, ``hola``, and ``bonjour``.
 
 UW YAML Definitions
 -------------------
