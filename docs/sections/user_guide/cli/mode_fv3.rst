@@ -44,7 +44,8 @@ All tasks take the same arguments. For example:
 .. code-block:: text
 
    $ uw fv3 run --help
-   usage: uw fv3 run --config-file PATH --cycle CYCLE [-h] [--batch] [--dry-run] [--debug] [--quiet] [--verbose]
+   usage: uw fv3 run --config-file PATH --cycle CYCLE [-h] [--batch] [--dry-run] [--debug] [--quiet]
+                     [--verbose]
 
    FV3 run execution
 
