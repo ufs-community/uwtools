@@ -6,6 +6,7 @@ import re
 from abc import ABC, abstractmethod
 from collections import UserDict
 from copy import deepcopy
+from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
 import yaml
@@ -14,7 +15,6 @@ from uwtools.config import jinja2
 from uwtools.config.support import INCLUDE_TAG, depth, log_and_error
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.types import Optional[Path]
 
 
 class Config(ABC, UserDict):

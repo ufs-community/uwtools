@@ -3,9 +3,11 @@ Convert atparse templates to Jinja2 templates.
 """
 
 import re
+from pathlib import Path
+from typing import Optional
 
 from uwtools.logging import log
-from uwtools.utils.file import Optional[Path], readable, writable
+from uwtools.utils.file import readable, writable
 
 
 def convert(

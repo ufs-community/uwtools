@@ -2,7 +2,6 @@
 Helpers for working with files and directories.
 """
 
-import shutil
 import sys
 from contextlib import contextmanager
 from dataclasses import dataclass, fields
@@ -15,7 +14,6 @@ from typing import IO, Any, Dict, Generator, List, Union
 
 from uwtools.exceptions import UWError
 from uwtools.logging import log
-from uwtools.types import Path, ExistAct, Optional[Path]
 
 
 @dataclass(frozen=True)

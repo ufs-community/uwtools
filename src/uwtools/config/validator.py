@@ -3,13 +3,13 @@ Support for validating a config using JSON Schema.
 """
 
 import json
-from typing import List, Union
+from pathlib import Path
+from typing import List, Optional, Union
 
 import jsonschema
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.logging import log
-from uwtools.types import Path, Optional[Path]
 
 # Public functions
 

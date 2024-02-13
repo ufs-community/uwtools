@@ -1,10 +1,10 @@
 import datetime as dt
-from typing import Dict
+from pathlib import Path
+from typing import Dict, Optional
 
 import iotaa
 
 from uwtools.drivers.fv3 import FV3
-from uwtools.types import Path
 
 
 def execute(

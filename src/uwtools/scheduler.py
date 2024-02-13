@@ -9,11 +9,10 @@ from collections.abc import Mapping
 from copy import deepcopy
 from dataclasses import dataclass, fields
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.types import Optional[Path]
 from uwtools.utils.processing import execute
 
 

@@ -13,7 +13,6 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
-from uwtools.types import Path
 
 
 class Driver(ABC):

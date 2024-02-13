@@ -2,6 +2,7 @@
 Tools for working with configs.
 """
 
+from pathlib import Path
 from typing import Callable, List, Optional, Union
 
 from uwtools.config.formats.base import Config
@@ -9,7 +10,6 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import depth, format_to_config, log_and_error
 from uwtools.exceptions import UWError
 from uwtools.logging import MSGWIDTH, log
-from uwtools.types import Path, Optional[Path]
 from uwtools.utils.file import FORMAT, get_file_format
 
 # Public functions

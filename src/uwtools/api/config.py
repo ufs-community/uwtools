@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import List, Optional, Union
 
 from uwtools.config.formats.fieldtable import FieldTableConfig as _FieldTableConfig
@@ -10,7 +11,6 @@ from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import validate_yaml as _validate_yaml
-from uwtools.types import Path, Optional[Path]
 from uwtools.utils.file import FORMAT as _FORMAT
 
 # Public

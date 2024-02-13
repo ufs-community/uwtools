@@ -1,8 +1,8 @@
+from pathlib import Path
 from typing import Dict, Optional, Union
 
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.jinja2 import render as _render
-from uwtools.types import Path, Optional[Path]
 
 
 def render(

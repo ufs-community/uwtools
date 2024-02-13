@@ -5,6 +5,7 @@ Support for creating Rocoto XML workflow documents.
 import re
 from dataclasses import dataclass
 from math import log10
+from pathlib import Path
 from typing import Any, List, Optional, Tuple, Union
 
 from lxml import etree
@@ -14,7 +15,6 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_yaml
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
-from uwtools.types import Optional[Path]
 from uwtools.utils.file import readable, resource_pathobj, writable
 
 

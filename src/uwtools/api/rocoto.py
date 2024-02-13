@@ -1,9 +1,9 @@
-from typing import Union
+from pathlib import Path
+from typing import Optional, Union
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.rocoto import realize_rocoto_xml as _realize
 from uwtools.rocoto import validate_rocoto_xml_file as _validate
-from uwtools.types import Optional[Path]
 
 
 def realize(config: Union[YAMLConfig, Optional[Path]], output_file: Optional[Path] = None) -> bool:

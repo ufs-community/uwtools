@@ -7,7 +7,7 @@ import stat
 from datetime import datetime
 from pathlib import Path
 from shutil import copy
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from iotaa import asset, dryrun, external, task, tasks
 
@@ -16,7 +16,6 @@ from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
-from uwtools.types import Path
 from uwtools.utils.file import resource_pathobj
 from uwtools.utils.processing import execute
 

@@ -6,13 +6,14 @@ Tests for uwtools.utils.file module.
 import sys
 from datetime import datetime as dt
 from io import StringIO
+from pathlib import Path
+from typing import Optional
 from unittest.mock import patch
 
 import pytest
 from pytest import fixture, raises
 
 from uwtools.exceptions import UWError
-from uwtools.types import ExistAct
 from uwtools.utils import file
 
 

@@ -1,7 +1,8 @@
+from pathlib import Path
 from typing import Optional
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.utils.file import FORMAT, Optional[Path], writable
+from uwtools.utils.file import FORMAT, writable
 
 
 class FieldTableConfig(YAMLConfig):

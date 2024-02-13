@@ -3,6 +3,7 @@ Support for rendering Jinja2 templates.
 """
 
 import os
+from pathlib import Path
 from typing import Dict, List, Optional, Set, Union
 
 from jinja2 import (
@@ -18,7 +19,6 @@ from jinja2.exceptions import UndefinedError
 
 from uwtools.config.support import TaggedString, format_to_config
 from uwtools.logging import MSGWIDTH, log
-from uwtools.types import Path, Optional[Path]
 from uwtools.utils.file import get_file_format, readable, writable
 
 _ConfigVal = Union[bool, dict, float, int, list, str, TaggedString]
