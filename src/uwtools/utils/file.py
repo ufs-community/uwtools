@@ -152,21 +152,6 @@ def resource_pathobj(suffix: str = "") -> Path:
         return prefix / suffix
 
 
-def validate_existing_action(exist_act: str, valid_actions: List[str]) -> None:
-    """
-    Ensure that action specified for an existing directory is valid.
-
-    :param exist_act: Action to check.
-    :param valid_actions: Actions valid for the caller's context.
-    :raises: ValueError if specified action is invalid.
-    """
-    if exist_act not in valid_actions:
-        raise ValueError(
-            'Specify one of %s as exist_act, not "%s"'
-            % (", ".join(f'"{x}"' for x in valid_actions), exist_act)
-        )
-
-
 @contextmanager
 def writable(filepath: Optional[Path] = None, mode: str = "w") -> Generator[IO, None, None]:
     """
