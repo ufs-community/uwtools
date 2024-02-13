@@ -40,7 +40,7 @@ class Driver(ABC):
         config_class: Type[Config], config_values: dict, path: Path
     ) -> None:
         """
-        Create a config from a base file, user-provided values, of a combination of the two.
+        Create a config from a base file, user-provided values, or a combination of the two.
 
         :param config_class: The Config subclass matching the config type.
         :param config_values: The configuration object to update base values with.
