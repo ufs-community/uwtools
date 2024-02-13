@@ -1,5 +1,3 @@
-# pylint: disable=duplicate-code
-
 import configparser
 from io import StringIO
 from typing import Optional, Union

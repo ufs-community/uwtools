@@ -166,8 +166,6 @@ def _ensure_config_arg_type(
 
 # Import-time code
 
-# pylint: disable=duplicate-code
-
 # The following statements dynamically interpolate values into functions' docstrings, which will not
 # work if the docstrings are inlined in the functions. They must remain separate statements to avoid
 # hardcoding values into them.
