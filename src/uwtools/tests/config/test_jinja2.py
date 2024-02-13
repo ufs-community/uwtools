@@ -329,7 +329,7 @@ def test__values_needed(caplog):
 
 
 def test__write_template_to_file(tmp_path):
-    outfile = str(tmp_path / "out.txt")
+    outfile = tmp_path / "out.txt"
     jinja2._write_template(outfile, "roses are red, violets are blue")
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read().strip() == "roses are red, violets are blue"

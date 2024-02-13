@@ -124,7 +124,7 @@ def realize_to_dict(
     return _realize(
         input_config=_ensure_config_arg_type(input_config),
         input_format=input_format,
-        output_file=os.devnull,
+        output_file=Path(os.devnull),
         output_format=None,
         supplemental_configs=supplemental_configs,
         values_needed=values_needed,

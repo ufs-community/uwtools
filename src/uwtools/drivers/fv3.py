@@ -7,7 +7,7 @@ import stat
 from datetime import datetime
 from pathlib import Path
 from shutil import copy
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from iotaa import asset, dryrun, external, task, tasks
 

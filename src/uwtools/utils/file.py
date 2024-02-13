@@ -5,12 +5,11 @@ Helpers for working with files and directories.
 import sys
 from contextlib import contextmanager
 from dataclasses import dataclass, fields
-from datetime import datetime as dt
 from functools import cache
 from importlib import resources
 from io import StringIO
 from pathlib import Path
-from typing import IO, Any, Dict, Generator, List, Union
+from typing import IO, Any, Dict, Generator, List, Optional, Union
 
 from uwtools.exceptions import UWError
 from uwtools.logging import log

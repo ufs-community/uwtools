@@ -7,10 +7,8 @@ import sys
 from datetime import datetime as dt
 from io import StringIO
 from pathlib import Path
-from typing import Optional
 from unittest.mock import patch
 
-import pytest
 from pytest import fixture, raises
 
 from uwtools.exceptions import UWError
@@ -73,12 +71,12 @@ def test_get_file_format():
         "yaml": "yaml",
         "yml": "yaml",
     }.items():
-        assert file.get_file_format(f"a.{ext}") == file_type
+        assert file.get_file_format(Path(f"a.{ext}")) == file_type
 
 
 def test_get_file_format_unrecognized():
     with raises(UWError):
-        file.get_file_format("a.jpg")
+        file.get_file_format(Path("a.jpg"))
 
 
 def test_path_if_it_exists(tmp_path):
@@ -108,15 +106,6 @@ def test_readable_nofile():
 
 def test_resource_pathobj():
     assert file.resource_pathobj().is_dir()
-
-
-def test_validate_existing_action_fail():
-    with raises(ValueError):
-        file.validate_existing_action(ExistAct.quit, [ExistAct.delete])
-
-
-def test_validate_existing_action_pass():
-    file.validate_existing_action(ExistAct.quit, [ExistAct.delete, ExistAct.quit])
 
 
 def test_writable_file(tmp_path):

@@ -23,7 +23,7 @@ class Config(ABC, UserDict):
     several configuration-file formats.
     """
 
-    def __init__(self, config: Union[dict, Optional[Path]] = None) -> None:
+    def __init__(self, config: Optional[Union[dict, Path]] = None) -> None:
         """
         Construct a Config object.
 
@@ -34,7 +34,7 @@ class Config(ABC, UserDict):
             self._config_file = None
             self.update(config)
         else:
-            self._config_file = str(config) if config else None
+            self._config_file = config if config else None
             self.data = self._load(self._config_file)
         if self.get_depth_threshold() and self.depth != self.get_depth_threshold():
             raise UWConfigError(
@@ -61,7 +61,7 @@ class Config(ABC, UserDict):
         :param config_file: Path to config file to load.
         """
 
-    def _load_paths(self, config_files: List[str]) -> dict:
+    def _load_paths(self, config_files: List[Path]) -> dict:
         """
         Merge and return the contents of a collection of config files.
 
@@ -71,7 +71,7 @@ class Config(ABC, UserDict):
         for config_file in config_files:
             if not os.path.isabs(config_file):
                 if self._config_file:
-                    config_file = os.path.join(os.path.dirname(self._config_file), config_file)
+                    config_file = self._config_file.parent / config_file
                 else:
                     raise log_and_error(
                         "Reading from stdin, a relative path was encountered: %s" % config_file

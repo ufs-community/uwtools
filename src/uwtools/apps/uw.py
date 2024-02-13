@@ -2,6 +2,8 @@
 This file contains the specific drivers for a particular app, using the facade pattern base class.
 """
 
+from pathlib import Path
+
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.facade import Facade
 
@@ -16,12 +18,12 @@ class UWforSRW(Facade):
         Initialize the facade driver.
         """
 
-    def load_config(self, config_file: str) -> None:
+    def load_config(self, config_file: Path) -> None:
         """
         Load the configuration file.
         """
         config_obj = YAMLConfig(config_file)
-        config_obj.dump("config.yaml")
+        config_obj.dump(Path("config.yaml"))
 
     def validate_config(self, config_file: str) -> None:
         """

@@ -1,6 +1,7 @@
 # pylint: disable=missing-function-docstring,protected-access
 
 import os
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -102,7 +103,7 @@ def test__ensure_config_arg_type_dict():
 
 
 def test__ensure_config_arg_type_path():
-    config_path = "/path/to/config.yaml"
+    config_path = Path("/path/to/config.yaml")
     config_obj = config._ensure_config_arg_type(config=config_path)
     assert isinstance(config_obj, str)
     assert config_obj is config_path
