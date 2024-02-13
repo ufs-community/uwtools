@@ -231,7 +231,7 @@ class FV3(Driver):
         """
         A copy of an existing file.
 
-        :param src: Path to the soruce file.
+        :param src: Path to the source file.
         :param dst: Path to the destination file to create.
         """
         yield "Copy %s -> %s" % (src, dst)
