@@ -4,12 +4,12 @@ from typing import Dict
 import iotaa
 
 from uwtools.drivers.fv3 import FV3
-from uwtools.types import DefinitePath
+from uwtools.types import Path
 
 
 def execute(
     task: str,
-    config_file: DefinitePath,
+    config_file: Path,
     cycle: dt.datetime,
     batch: bool = False,
     dry_run: bool = False,

@@ -9,13 +9,13 @@ import jsonschema
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.logging import log
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.types import Path, Optional[Path]
 
 # Public functions
 
 
 def validate_yaml(
-    schema_file: DefinitePath, config: Union[dict, YAMLConfig, OptionalPath] = None
+    schema_file: Path, config: Union[dict, YAMLConfig, Optional[Path]] = None
 ) -> bool:
     """
     Check whether the given config conforms to the given JSON Schema spec.
@@ -42,7 +42,7 @@ def validate_yaml(
 # Private functions
 
 
-def _prep_config(config: Union[dict, YAMLConfig, OptionalPath]) -> YAMLConfig:
+def _prep_config(config: Union[dict, YAMLConfig, Optional[Path]]) -> YAMLConfig:
     """
     Ensure a dereferenced YAMLConfig object for various input types.
 

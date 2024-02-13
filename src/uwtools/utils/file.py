@@ -15,7 +15,7 @@ from typing import IO, Any, Dict, Generator, List, Union
 
 from uwtools.exceptions import UWError
 from uwtools.logging import log
-from uwtools.types import DefinitePath, ExistAct, OptionalPath
+from uwtools.types import Path, ExistAct, Optional[Path]
 
 
 @dataclass(frozen=True)
@@ -94,7 +94,7 @@ def _stdinproxy():
     return StdinProxy()
 
 
-def get_file_format(path: DefinitePath) -> str:
+def get_file_format(path: Path) -> str:
     """
     Returns a standardized file format name given a path/filename.
 
@@ -109,28 +109,6 @@ def get_file_format(path: DefinitePath) -> str:
         msg = f"Cannot deduce format of '{path}' from unknown extension '{suffix}'"
         log.critical(msg)
         raise UWError(msg) from e
-
-
-def handle_existing(directory: DefinitePath, exist_act: str) -> None:
-    """
-    Take specified action on a directory.
-
-    :param directory: The directory to handle.
-    :param exist_act: Action ("delete" or "rename") to take when directory exists.
-    """
-
-    validate_existing_action(exist_act, valid_actions=[ExistAct.delete, ExistAct.rename])
-    if Path(directory).is_dir():
-        try:
-            if exist_act == ExistAct.delete:
-                shutil.rmtree(directory)
-            elif exist_act == ExistAct.rename:
-                save_dir = "%s%s" % (directory, dt.now().strftime("_%Y%m%d_%H%M%S"))
-                shutil.move(directory, save_dir)
-        except (FileExistsError, RuntimeError) as e:
-            msg = f"Could not {exist_act} directory {directory}"
-            log.critical(msg)
-            raise RuntimeError(msg) from e
 
 
 def path_if_it_exists(path: str) -> str:
@@ -151,7 +129,7 @@ def path_if_it_exists(path: str) -> str:
 
 @contextmanager
 def readable(
-    filepath: OptionalPath = None, mode: str = "r"
+    filepath: Optional[Path] = None, mode: str = "r"
 ) -> Generator[Union[IO, StdinProxy], None, None]:
     """
     If a path to a file is specified, open it and return a readable handle; if not, return readable
@@ -193,7 +171,7 @@ def validate_existing_action(exist_act: str, valid_actions: List[str]) -> None:
 
 
 @contextmanager
-def writable(filepath: OptionalPath = None, mode: str = "w") -> Generator[IO, None, None]:
+def writable(filepath: Optional[Path] = None, mode: str = "w") -> Generator[IO, None, None]:
     """
     If a path to a file is specified, open it and return a writable handle; if not, return writeable
     stdout.

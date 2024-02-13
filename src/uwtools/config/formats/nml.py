@@ -6,7 +6,7 @@ from f90nml import Namelist
 
 from uwtools.config.formats.base import Config
 from uwtools.config.tools import config_check_depths_dump
-from uwtools.utils.file import FORMAT, OptionalPath, readable, writable
+from uwtools.utils.file import FORMAT, Optional[Path], readable, writable
 
 
 class NMLConfig(Config):
@@ -14,7 +14,7 @@ class NMLConfig(Config):
     Concrete class to handle Fortran namelist files.
     """
 
-    def __init__(self, config: Union[dict, OptionalPath] = None) -> None:
+    def __init__(self, config: Union[dict, Optional[Path]] = None) -> None:
         """
         Construct an NMLConfig object.
 
@@ -25,7 +25,7 @@ class NMLConfig(Config):
 
     # Private methods
 
-    def _load(self, config_file: OptionalPath) -> dict:
+    def _load(self, config_file: Optional[Path]) -> dict:
         """
         Reads and parses a Fortran namelist file.
 
@@ -39,7 +39,7 @@ class NMLConfig(Config):
 
     # Public methods
 
-    def dump(self, path: OptionalPath) -> None:
+    def dump(self, path: Optional[Path]) -> None:
         """
         Dumps the config in Fortran namelist format.
 
@@ -48,7 +48,7 @@ class NMLConfig(Config):
         self.dump_dict(cfg=self.data, path=path)
 
     @staticmethod
-    def dump_dict(cfg: Union[dict, Namelist], path: OptionalPath = None) -> None:
+    def dump_dict(cfg: Union[dict, Namelist], path: Optional[Path] = None) -> None:
         """
         Dumps a provided config dictionary in Fortran namelist format.
 

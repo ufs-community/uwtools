@@ -18,7 +18,7 @@ from jinja2.exceptions import UndefinedError
 
 from uwtools.config.support import TaggedString, format_to_config
 from uwtools.logging import MSGWIDTH, log
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.types import Path, Optional[Path]
 from uwtools.utils.file import get_file_format, readable, writable
 
 _ConfigVal = Union[bool, dict, float, int, list, str, TaggedString]
@@ -29,7 +29,7 @@ class J2Template:
     Reads Jinja2 templates from files or strings, and renders them using the user-provided values.
     """
 
-    def __init__(self, values: dict, template_source: Union[str, DefinitePath]) -> None:
+    def __init__(self, values: dict, template_source: Union[str, Path]) -> None:
         """
         :param values: Values needed to render the provided template.
         :param template_source: Jinja2 string or template file path (None => read stdin).
@@ -45,7 +45,7 @@ class J2Template:
 
     # Public methods
 
-    def dump(self, output_path: OptionalPath) -> None:
+    def dump(self, output_path: Optional[Path]) -> None:
         """
         Write rendered template to the path provided.
 
@@ -80,7 +80,7 @@ class J2Template:
 
     # Private methods
 
-    def _load_file(self, template_path: DefinitePath) -> Template:
+    def _load_file(self, template_path: Path) -> Template:
         """
         Load the Jinja2 template from the file provided.
 
@@ -143,10 +143,10 @@ def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) ->
 
 
 def render(
-    values: Union[dict, DefinitePath],
+    values: Union[dict, Path],
     values_format: Optional[str] = None,
-    input_file: OptionalPath = None,
-    output_file: OptionalPath = None,
+    input_file: Optional[Path] = None,
+    output_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
@@ -320,7 +320,7 @@ def _report(args: dict) -> None:
 
 
 def _set_up_values_obj(
-    values_file: OptionalPath = None,
+    values_file: Optional[Path] = None,
     values_format: Optional[str] = None,
     overrides: Optional[Dict[str, str]] = None,
 ) -> dict:
@@ -364,7 +364,7 @@ def _values_needed(undeclared_variables: Set[str]) -> bool:
     return True
 
 
-def _write_template(output_file: OptionalPath, rendered_template: str) -> bool:
+def _write_template(output_file: Optional[Path], rendered_template: str) -> bool:
     """
     Write the rendered template.
 

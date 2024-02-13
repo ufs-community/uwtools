@@ -5,7 +5,7 @@ import yaml
 
 from uwtools.config.formats.base import Config
 from uwtools.config.support import INCLUDE_TAG, TaggedString, log_and_error
-from uwtools.utils.file import FORMAT, OptionalPath, readable, writable
+from uwtools.utils.file import FORMAT, Optional[Path], readable, writable
 
 _MSGS = ns(
     unhashable="""
@@ -48,7 +48,7 @@ class YAMLConfig(Config):
 
     # Private methods
 
-    def _load(self, config_file: OptionalPath) -> dict:
+    def _load(self, config_file: Optional[Path]) -> dict:
         """
         Reads and parses a YAML file.
 
@@ -98,7 +98,7 @@ class YAMLConfig(Config):
 
     # Public methods
 
-    def dump(self, path: OptionalPath = None) -> None:
+    def dump(self, path: Optional[Path] = None) -> None:
         """
         Dumps the config in YAML format.
 
@@ -107,7 +107,7 @@ class YAMLConfig(Config):
         self.dump_dict(self.data, path)
 
     @staticmethod
-    def dump_dict(cfg: dict, path: OptionalPath = None) -> None:
+    def dump_dict(cfg: dict, path: Optional[Path] = None) -> None:
         """
         Dumps a provided config dictionary in YAML format.
 

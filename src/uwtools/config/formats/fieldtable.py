@@ -1,7 +1,7 @@
 from typing import Optional
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.utils.file import FORMAT, OptionalPath, writable
+from uwtools.utils.file import FORMAT, Optional[Path], writable
 
 
 class FieldTableConfig(YAMLConfig):
@@ -12,7 +12,7 @@ class FieldTableConfig(YAMLConfig):
 
     # Public methods
 
-    def dump(self, path: OptionalPath = None) -> None:
+    def dump(self, path: Optional[Path] = None) -> None:
         """
         Dumps the config in Field Table format.
 
@@ -21,7 +21,7 @@ class FieldTableConfig(YAMLConfig):
         self.dump_dict(self.data, path)
 
     @staticmethod
-    def dump_dict(cfg: dict, path: OptionalPath = None) -> None:
+    def dump_dict(cfg: dict, path: Optional[Path] = None) -> None:
         """
         Dumps a provided config dictionary in Field Table format.
 

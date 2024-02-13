@@ -6,7 +6,7 @@ from typing import Optional, Union
 from uwtools.config.formats.base import Config
 from uwtools.config.tools import config_check_depths_dump
 from uwtools.logging import log
-from uwtools.utils.file import FORMAT, OptionalPath, readable, writable
+from uwtools.utils.file import FORMAT, Optional[Path], readable, writable
 
 
 class SHConfig(Config):
@@ -14,7 +14,7 @@ class SHConfig(Config):
     Concrete class to handle bash config files.
     """
 
-    def __init__(self, config: Union[dict, OptionalPath] = None):
+    def __init__(self, config: Union[dict, Optional[Path]] = None):
         """
         Construct a SHConfig object.
 
@@ -25,7 +25,7 @@ class SHConfig(Config):
 
     # Private methods
 
-    def _load(self, config_file: OptionalPath) -> dict:
+    def _load(self, config_file: Optional[Path]) -> dict:
         """
         Reads and parses key=value lines from shell code.
 
@@ -47,7 +47,7 @@ class SHConfig(Config):
 
     # Public methods
 
-    def dump(self, path: OptionalPath) -> None:
+    def dump(self, path: Optional[Path]) -> None:
         """
         Dumps the config as key=value lines.
 
@@ -57,7 +57,7 @@ class SHConfig(Config):
         self.dump_dict(self.data, path)
 
     @staticmethod
-    def dump_dict(cfg: dict, path: OptionalPath = None) -> None:
+    def dump_dict(cfg: dict, path: Optional[Path] = None) -> None:
         """
         Dumps a provided config dictionary in bash format.
 

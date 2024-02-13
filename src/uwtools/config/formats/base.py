@@ -14,7 +14,7 @@ from uwtools.config import jinja2
 from uwtools.config.support import INCLUDE_TAG, depth, log_and_error
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.types import OptionalPath
+from uwtools.types import Optional[Path]
 
 
 class Config(ABC, UserDict):
@@ -23,7 +23,7 @@ class Config(ABC, UserDict):
     several configuration-file formats.
     """
 
-    def __init__(self, config: Union[dict, OptionalPath] = None) -> None:
+    def __init__(self, config: Union[dict, Optional[Path]] = None) -> None:
         """
         Construct a Config object.
 
@@ -51,7 +51,7 @@ class Config(ABC, UserDict):
     # Private methods
 
     @abstractmethod
-    def _load(self, config_file: OptionalPath) -> dict:
+    def _load(self, config_file: Optional[Path]) -> dict:
         """
         Reads and parses a config file.
 
@@ -179,7 +179,7 @@ class Config(ABC, UserDict):
         logstate("final")
 
     @abstractmethod
-    def dump(self, path: OptionalPath) -> None:
+    def dump(self, path: Optional[Path]) -> None:
         """
         Dumps the config to stdout or a file.
 
@@ -195,7 +195,7 @@ class Config(ABC, UserDict):
 
     @staticmethod
     @abstractmethod
-    def dump_dict(cfg: dict, path: OptionalPath = None) -> None:
+    def dump_dict(cfg: dict, path: Optional[Path] = None) -> None:
         """
         Dumps a provided config dictionary to stdout or a file.
 

@@ -4,7 +4,7 @@ from typing import Optional, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.config.tools import config_check_depths_dump
-from uwtools.utils.file import FORMAT, OptionalPath, readable, writable
+from uwtools.utils.file import FORMAT, Optional[Path], readable, writable
 
 
 class INIConfig(Config):
@@ -12,7 +12,7 @@ class INIConfig(Config):
     Concrete class to handle INI config files.
     """
 
-    def __init__(self, config: Union[dict, OptionalPath] = None):
+    def __init__(self, config: Union[dict, Optional[Path]] = None):
         """
         Construct an INIConfig object.
 
@@ -23,7 +23,7 @@ class INIConfig(Config):
 
     # Private methods
 
-    def _load(self, config_file: OptionalPath) -> dict:
+    def _load(self, config_file: Optional[Path]) -> dict:
         """
         Reads and parses an INI file.
 
@@ -38,7 +38,7 @@ class INIConfig(Config):
 
     # Public methods
 
-    def dump(self, path: OptionalPath = None) -> None:
+    def dump(self, path: Optional[Path] = None) -> None:
         """
         Dumps the config in INI format.
 
@@ -49,7 +49,7 @@ class INIConfig(Config):
         self.dump_dict(self.data, path)
 
     @staticmethod
-    def dump_dict(cfg: dict, path: OptionalPath = None) -> None:
+    def dump_dict(cfg: dict, path: Optional[Path] = None) -> None:
         """
         Dumps a provided config dictionary in INI format.
 

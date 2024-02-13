@@ -13,7 +13,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
-from uwtools.types import DefinitePath
+from uwtools.types import Path
 
 
 class Driver(ABC):
@@ -21,7 +21,7 @@ class Driver(ABC):
     An abstract class for component drivers.
     """
 
-    def __init__(self, config_file: DefinitePath, dry_run: bool = False, batch: bool = False):
+    def __init__(self, config_file: Path, dry_run: bool = False, batch: bool = False):
         """
         A component driver.
 
