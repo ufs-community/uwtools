@@ -268,6 +268,7 @@ def test__dispatch_fv3():
         "batch": True,
         "config_file": "config.yaml",
         "cycle": dt.datetime.now(),
+        "graph_file": None,
         "dry_run": False,
     }
     with patch.object(uwtools.api.fv3, "execute") as execute:
