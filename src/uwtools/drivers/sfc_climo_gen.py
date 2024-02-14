@@ -1,5 +1,3 @@
-# pylint: disable=duplicate-code
-# PM TRY TO FIX THIS ^^^
 """
 A driver for sfc_climo_gen.
 """

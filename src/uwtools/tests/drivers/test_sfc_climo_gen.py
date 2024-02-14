@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code,missing-function-docstring,redefined-outer-name
+# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 sfc_climo_gen driver tests.
 """
