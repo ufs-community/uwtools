@@ -71,6 +71,12 @@ def validate(template):
 # Tests
 
 
+def test_dereference_key_expression():
+    assert jinja2.dereference(val={"{{ fruit }}": "red"}, context={"fruit": "apple"}) == {
+        "apple": "red"
+    }
+
+
 def test_dereference_local_values():
     # Rendering can use values from the local contents of the enclosing dict, but are shadowed by
     # values from the top-level context object.

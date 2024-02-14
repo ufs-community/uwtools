@@ -1,177 +1,146 @@
 """
-Provides an abstract class representing drivers for various NWP tools.
+An abstract class for component drivers.
 """
-
-import os
-import shutil
+import re
 from abc import ABC, abstractmethod
-from collections.abc import Mapping
-from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Type, Union
+from textwrap import dedent
+from typing import Any, Dict, List, Optional, Type
 
 from uwtools.config import validator
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.scheduler import BatchScript, JobScheduler
-from uwtools.types import DefinitePath, OptionalPath
+from uwtools.scheduler import JobScheduler
+from uwtools.types import DefinitePath
 
 
 class Driver(ABC):
     """
-    An abstract class representing drivers for various NWP tools.
+    An abstract class for component drivers.
     """
 
-    def __init__(
-        self,
-        config_file: DefinitePath,
-        dry_run: bool = False,
-        batch_script: OptionalPath = None,
-    ):
+    def __init__(self, config_file: DefinitePath, dry_run: bool = False, batch: bool = False):
         """
-        Initialize the driver.
-        """
+        A component driver.
 
-        self._config_file = config_file
-        self._dry_run = dry_run
-        self._batch_script = batch_script
+        :param config_file: Path to config file.
+        :param dry_run: Run in dry-run mode?
+        :param batch: Run component via the batch system?
+        """
+        self._config = YAMLConfig(config=config_file)
+        self._config.dereference()
         self._validate()
-        self._experiment_config = YAMLConfig(config=config_file)
-        self._platform_config = self._experiment_config.get("platform", {})
-        self._config: Dict[str, Any] = {}
-
-    # Public methods
-
-    @abstractmethod
-    def batch_script(self) -> BatchScript:
-        """
-        Create a script for submission to the batch scheduler.
-
-        :return: The batch script object with all run commands needed for executing the program.
-        """
-
-    @abstractmethod
-    def output(self) -> None:
-        """
-        ???
-        """
-
-    @abstractmethod
-    def requirements(self) -> None:
-        """
-        ???
-        """
-
-    @abstractmethod
-    def resources(self) -> Mapping:
-        """
-        Parses the config and returns a formatted dictionary for the batch script.
-        """
-
-    @abstractmethod
-    def run(self, cycle: datetime) -> bool:
-        """
-        Run the NWP tool.
-
-        :param cycle: The time stamp of the cycle to run.
-        :return: Did the driver exit with success status?
-        """
-
-    def run_cmd(self) -> str:
-        """
-        The command-line command to run the NWP tool.
-
-        :return: Collated string that contains MPI command, runtime arguments, and exec name.
-        """
-        components = [
-            self._platform_config["mpicmd"],  # MPI run program
-            *[
-                str(x) for x in self._config.get("runtime_info", {}).get("mpi_args", [])
-            ],  # MPI arguments
-            self._config["executable"],  # NWP tool executable name
-        ]
-        return " ".join(filter(None, components))
-
-    @property
-    def scheduler(self) -> JobScheduler:
-        """
-        The job scheduler specified by the platform information.
-
-        :return: The scheduler object
-        """
-        return JobScheduler.get_scheduler(self.resources())
-
-    @property
-    @abstractmethod
-    def schema_file(self) -> Path:
-        """
-        The path to the file containing the schema to validate the config file against.
-        """
-
-    @staticmethod
-    def stage_files(
-        run_directory: Path,
-        files_to_stage: Dict[str, Union[list, str]],
-        link_files: bool = False,
-        dry_run: bool = False,
-    ) -> None:
-        """
-        Creates destination files in run directory and copies or links contents from the source path
-        provided. Source paths could be provided as a single path or a list of paths to be staged in
-        a common directory.
-
-        :param run_directory: Path of desired run directory.
-        :param files_to_stage: File names in the run directory (keys) and their source paths
-            (values).
-        :param link_files: Whether to link or copy the files.
-        """
-        link_or_copy = os.symlink if link_files else shutil.copyfile
-        for dst_rel_path, src_path_or_paths in files_to_stage.items():
-            dst_path = run_directory / dst_rel_path
-            if isinstance(src_path_or_paths, list):
-                Driver.stage_files(
-                    dst_path,
-                    {os.path.basename(src): src for src in src_path_or_paths},
-                    link_files,
-                )
-            else:
-                if dry_run:
-                    msg = f"File {src_path_or_paths} would be staged as {dst_path}"
-                    log.info(msg)
-                else:
-                    msg = f"File {src_path_or_paths} staged as {dst_path}"
-                    log.info(msg)
-                    link_or_copy(src_path_or_paths, dst_path)  # type: ignore
-
-    # Private methods
+        self._dry_run = dry_run
+        self._batch = batch
 
     @staticmethod
     def _create_user_updated_config(
-        config_class: Type[Config], config_values: dict, output_path: OptionalPath
+        config_class: Type[Config], config_values: dict, path: Path
     ) -> None:
         """
-        Create a config from a base file, user-provided values, of a combination of the two.
+        Create a config from a base file, user-provided values, or a combination of the two.
 
         :param config_class: The Config subclass matching the config type.
         :param config_values: The configuration object to update base values with.
-        :param output_path: Optional path to dump file to.
+        :param path: Path to dump file to.
         """
+        path.parent.mkdir(parents=True, exist_ok=True)
         user_values = config_values.get("update_values", {})
         if base_file := config_values.get("base_file"):
             config_obj = config_class(base_file)
             config_obj.update_values(user_values)
             config_obj.dereference()
-            config_obj.dump(output_path)
+            config_obj.dump(path)
         else:
-            config_class.dump_dict(cfg=user_values, path=output_path)
-        if output_path:
-            log.info(f"Wrote config to {output_path}")
+            config_class.dump_dict(cfg=user_values, path=path)
+        log.debug(f"Wrote config to {path}")
 
-    def _validate(self) -> bool:
+    @property
+    @abstractmethod
+    def _driver_config(self) -> Dict[str, Any]:
         """
-        Validate the user-supplied config file.
+        Returns the config block specific to this driver.
+        """
 
-        :return: Was the input configuration file valid against its schema?
+    @property
+    @abstractmethod
+    def _resources(self) -> Dict[str, Any]:
         """
-        return validator.validate_yaml(config=self._config_file, schema_file=self.schema_file)
+        Returns configuration data for the FV3 runscript.
+        """
+
+    @property
+    def _runcmd(self) -> str:
+        """
+        Returns the full command-line component invocation.
+        """
+        execution = self._driver_config.get("execution", {})
+        mpiargs = execution.get("mpiargs", [])
+        components = [
+            execution["mpicmd"],  # MPI run program
+            *[str(x) for x in mpiargs],  # MPI arguments
+            execution["executable"],  # component executable name
+        ]
+        return " ".join(filter(None, components))
+
+    def _runscript(
+        self,
+        execution: List[str],
+        envcmds: Optional[List[str]] = None,
+        envvars: Optional[Dict[str, str]] = None,
+        scheduler: Optional[JobScheduler] = None,
+    ) -> str:
+        """
+        Returns a driver runscript.
+
+        :param execution: Statements to execute.
+        :param envcmds: Shell commands to set up runtime environment.
+        :param envvars: Environment variables to set in runtime environment.
+        :param scheduler: A job-scheduler object.
+        """
+        # Render script sections into a template, remove any extraneous newlines related to elided
+        # sections, then return the resulting string.
+        template = """
+        #!/bin/bash
+
+        {directives}
+
+        {envcmds}
+
+        {envvars}
+
+        {execution}
+        """
+        rs = dedent(template).format(
+            directives="\n".join(scheduler.directives if scheduler else ""),
+            envcmds="\n".join(envcmds or []),
+            envvars="\n".join([f"export {k}={v}" for k, v in (envvars or {}).items()]),
+            execution="\n".join(execution),
+        )
+        return re.sub(r"\n\n\n+", "\n\n", rs.strip())
+
+    @property
+    def _scheduler(self) -> JobScheduler:
+        """
+        Returns the job scheduler specified by the platform information.
+        """
+        return JobScheduler.get_scheduler(self._resources)
+
+    @abstractmethod
+    def _validate(self) -> None:
+        """
+        Perform all necessary schema validation.
+        """
+
+    def _validate_one(self, schema_file: Path) -> None:
+        """
+        Validate the config.
+
+        :param schema_file: The schema file to validate the config against.
+        :raises: UWConfigError if config fails validation.
+        """
+        log.info("Validating config per %s", schema_file)
+        if not validator.validate_yaml(config=self._config, schema_file=schema_file):
+            raise UWConfigError("YAML validation errors")

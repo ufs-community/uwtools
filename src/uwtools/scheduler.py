@@ -1,310 +1,134 @@
 """
-Job Scheduling.
+Support for HPC schedulers.
 """
 
 from __future__ import annotations
 
-import re
-from collections import UserDict, UserList
+from abc import ABC, abstractmethod
 from collections.abc import Mapping
+from copy import deepcopy
+from dataclasses import dataclass, fields
 from pathlib import Path
 from typing import Any, Dict, List
 
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.types import OptionalPath
-from uwtools.utils.file import writable
-from uwtools.utils.memory import Memory
 from uwtools.utils.processing import execute
 
-NONEISH = [None, "", " ", "None", "none", False]
-IGNORED_ATTRIBS = ["scheduler"]
 
-
-class RequiredAttribs:
+class JobScheduler(ABC):
     """
-    Key for required attributes.
+    An abstract class for interacting with HPC schedulers.
     """
 
-    ACCOUNT = "account"
-    QUEUE = "queue"
-    WALLTIME = "walltime"
+    def __init__(self, props: Dict[str, Any]):
+        self._props = {k: v for k, v in props.items() if k != "scheduler"}
+        self._validate_props()
 
-
-class OptionalAttribs:
-    """
-    Key for optional attributes.
-    """
-
-    CORES = "cores"
-    DEBUG = "debug"
-    EXCLUSIVE = "exclusive"
-    EXPORT = "export"
-    JOB_NAME = "jobname"
-    JOIN = "join"
-    MEMORY = "memory"
-    NODES = "nodes"
-    PARTITION = "partition"
-    PLACEMENT = "placement"
-    SHELL = "shell"
-    STDERR = "stderr"
-    STDOUT = "stdout"
-    TASKS_PER_NODE = "tasks_per_node"
-    THREADS = "threads"
-
-
-class BatchScript(UserList):
-    """
-    Represents a batch script to submit to a scheduler.
-    """
-
-    def __str__(self):
-        """
-        Returns string representation.
-        """
-        shebang = "#!/bin/bash\n"
-        return str(shebang + self.content())
-
-    def content(self, line_separator: str = "\n") -> str:
-        """
-        Returns the formatted content of the batch script.
-
-        Parameters
-        ----------
-        line_separator
-            The character or characters to join the content lines with
-        """
-        return line_separator.join(self)
-
-    def dump(self, output_file: OptionalPath) -> None:
-        """
-        Write a batch script to an output location.
-
-        :param output_file: Path to the file to write the batch script to
-        """
-        with writable(output_file) as f:
-            print(str(self).strip(), file=f)
-
-
-class JobScheduler(UserDict):
-    """
-    A class for interacting with HPC batch schedulers.
-    """
-
-    _map: dict = {}
-    prefix = ""
-    key_value_separator = "="
-
-    def __init__(self, props):
-        super().__init__(props)
-        self.validate_props(props)
-
-    def __getattr__(self, name) -> Any:
-        if name in self:
-            return self[name]
-        raise AttributeError(name)
-
-    @staticmethod
-    def validate_props(props) -> None:
-        """
-        Raises ValueError if invalid.
-        """
-        members = [
-            getattr(RequiredAttribs, attr)
-            for attr in dir(RequiredAttribs)
-            if not callable(getattr(RequiredAttribs, attr)) and not attr.startswith("__")
-        ]
-        if diff := [x for x in members if x not in props]:
-            raise ValueError(f"Missing required attributes: [{', '.join(diff)}]")
-
-    def pre_process(self) -> Dict[str, Any]:
-        """
-        Pre-process attributes before converting to batch script.
-        """
-        return self.data
-
-    @staticmethod
-    def post_process(items: List[str]) -> List[str]:
-        """
-        Post process attributes before converting to batch script.
-        """
-        return [re.sub(r"\s{0,}\=\s{0,}", "=", x, count=0, flags=0) for x in items]
+    # Public methods
 
     @property
-    def batch_script(self) -> BatchScript:
+    def directives(self) -> List[str]:
         """
-        Returns the batch script to be fed to external scheduler.
+        Returns resource-request scheduler directives.
         """
-
-        sanitized_attribs = self.pre_process()
-
-        known = []
-        for key, value in sanitized_attribs.items():
-            if key in self._map and key not in IGNORED_ATTRIBS:
-                scheduler_flag = (
-                    self._map[key](value) if callable(self._map[key]) else self._map[key]
+        pre, sep = self._prefix, self._directive_separator
+        ds = []
+        for key, value in self._processed_props.items():
+            if key in self._managed_directives:
+                switch = self._managed_directives[key]
+                ds.append(
+                    "%s %s" % (pre, switch(value))
+                    if callable(switch)
+                    else "%s %s%s%s" % (pre, switch, sep, value)
                 )
-                scheduler_value = "" if callable(self._map[key]) else value
-                key_value_separator = "" if callable(self._map[key]) else self.key_value_separator
-                directive = f"{self.prefix} {scheduler_flag}{key_value_separator}{scheduler_value}"
-                known.append(directive.strip())
-
-        unknown = [
-            f"{self.prefix} {key}{self.key_value_separator}{value}".strip()
-            for (key, value) in sanitized_attribs.items()
-            if key not in self._map and value not in NONEISH and key not in IGNORED_ATTRIBS
-        ]
-
-        flags = [
-            f"{self.prefix} {key}".strip()
-            for (key, value) in sanitized_attribs.items()
-            if value in NONEISH
-        ]
-
-        processed = self.post_process(known + unknown + flags)
-
-        # Sort batch directives to normalize output w.r.t. potential differences
-        # in ordering of input dicts.
-
-        return BatchScript(sorted(processed))
+            else:
+                ds.append("%s %s%s%s" % (pre, key, sep, value))
+        return sorted(ds)
 
     @staticmethod
     def get_scheduler(props: Mapping) -> JobScheduler:
         """
-        Returns the appropriate scheduler.
+        Returns a configured job scheduler.
 
-        Parameters
-        ----------
-        props
-            Must contain a 'scheduler' key or a KeyError will be raised
+        :param props: Configuration settings for job scheduler.
+        :return: A configured job scheduler.
+        :raises: UWConfigError if 'scheduler' is un- or mis-defined.
         """
-        if "scheduler" not in props:
-            raise KeyError(f"No scheduler defined in props: [{', '.join(props.keys())}]")
-        name = props["scheduler"]
-        log.debug("Getting '%s' scheduler", name)
         schedulers = {"slurm": Slurm, "pbs": PBS, "lsf": LSF}
-        try:
-            scheduler = schedulers[name]
-        except KeyError as error:
-            raise KeyError(
-                f"{name} is not a supported scheduler"
-                + "Currently supported schedulers are:\n"
-                + f'{" | ".join(schedulers.keys())}"'
-            ) from error
-        return scheduler(props)
+        if name := props.get("scheduler"):
+            log.debug("Getting '%s' scheduler", name)
+            if scheduler_class := schedulers.get(name):
+                return scheduler_class(props)  # type: ignore
+            raise UWConfigError(
+                "Scheduler '%s' should be one of: %s" % (name, ", ".join(schedulers.keys()))
+            )
+        raise UWConfigError(f"No 'scheduler' defined in {props}")
 
-    def submit_job(self, script_path: Path) -> bool:
+    def submit_job(self, runscript: Path, submit_file: OptionalPath = None) -> bool:
         """
         Submits a job to the scheduler.
 
-        :param script_path: Path to the batch script.
+        :param runscript: Path to the runscript.
+        :param submit_file: Path to file to write output of submit command to.
         :return: Did the run exit with a success status?
         """
-        success, _ = execute(
-            cmd=f"{self.submit_command} {script_path}", cwd=f"{script_path.parent}"
-        )
+        cmd = f"{self._submit_cmd} {runscript}"
+        if submit_file:
+            cmd += " 2>&1 | tee %s" % submit_file
+        success, _ = execute(cmd=cmd, cwd=f"{runscript.parent}")
         return success
 
+    # Private methods
 
-class Slurm(JobScheduler):
-    """
-    Represents a Slurm based scheduler.
-    """
-
-    prefix = "#SBATCH"
-    submit_command = "sbatch"
-
-    _map = {
-        RequiredAttribs.ACCOUNT: "--account",
-        RequiredAttribs.QUEUE: "--qos",
-        RequiredAttribs.WALLTIME: "--time",
-        OptionalAttribs.CORES: "--ntasks",
-        OptionalAttribs.EXCLUSIVE: lambda x: "--exclusive",
-        OptionalAttribs.EXPORT: "--export",
-        OptionalAttribs.JOB_NAME: "--job-name",
-        OptionalAttribs.MEMORY: "--mem",
-        OptionalAttribs.NODES: "--nodes",
-        OptionalAttribs.PARTITION: "--partition",
-        OptionalAttribs.STDERR: "--error",
-        OptionalAttribs.STDOUT: "--output",
-        OptionalAttribs.TASKS_PER_NODE: "--ntasks-per-node",
-        OptionalAttribs.THREADS: "--cpus-per-task",
-    }
-
-
-class PBS(JobScheduler):
-    """
-    Represents a PBS based scheduler.
-    """
-
-    prefix = "#PBS"
-    key_value_separator = " "
-    submit_command = "qsub"
-
-    _map = {
-        RequiredAttribs.ACCOUNT: "-A",
-        OptionalAttribs.NODES: lambda x: f"-l select={x}",
-        RequiredAttribs.QUEUE: "-q",
-        OptionalAttribs.TASKS_PER_NODE: "mpiprocs",
-        RequiredAttribs.WALLTIME: "-l walltime=",
-        OptionalAttribs.DEBUG: lambda x: f"-l debug={str(x).lower()}",
-        OptionalAttribs.JOB_NAME: "-N",
-        OptionalAttribs.MEMORY: "mem",
-        OptionalAttribs.SHELL: "-S",
-        OptionalAttribs.STDOUT: "-o",
-        OptionalAttribs.THREADS: "ompthreads",
-    }
-
-    def pre_process(self) -> Dict[str, Any]:
-        output = self.data
-        output.update(self._select(output))
-        output.update(self._placement(output))
-
-        output.pop(OptionalAttribs.TASKS_PER_NODE, None)
-        output.pop(OptionalAttribs.NODES, None)
-        output.pop(OptionalAttribs.THREADS, None)
-        output.pop(OptionalAttribs.MEMORY, None)
-        output.pop("exclusive", None)
-        output.pop("placement", None)
-        output.pop("select", None)
-        return dict(output)
-
-    def _select(self, items: Dict[str, Any]) -> Dict[str, Any]:
+    @property
+    @abstractmethod
+    def _directive_separator(self) -> str:
         """
-        Select logic.
+        Returns the character used to separate directive keys and values.
         """
-        total_nodes = items.get(OptionalAttribs.NODES, "")
-        tasks_per_node = items.get(OptionalAttribs.TASKS_PER_NODE, "")
-        # Set default threads=1 to address job variability with PBS
-        threads = items.get(OptionalAttribs.THREADS, 1)
-        memory = items.get(OptionalAttribs.MEMORY, "")
-        select = [
-            f"{total_nodes}",
-            f"{self._map[OptionalAttribs.TASKS_PER_NODE]}={tasks_per_node}",
-            f"{self._map[OptionalAttribs.THREADS]}={threads}",
-            f"ncpus={int(tasks_per_node) * int(threads)}",
-        ]
-        if memory not in NONEISH:
-            select.append(f"{self._map[OptionalAttribs.MEMORY]}={memory}")
-        items["-l select="] = ":".join(select)
-        return items
 
-    @staticmethod
-    def _placement(items: Dict[str, Any]) -> Dict[str, Any]:
+    @property
+    @abstractmethod
+    def _managed_directives(self) -> Dict[str, Any]:
         """
-        Placement logic.
+        Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
-        exclusive = items.get(OptionalAttribs.EXCLUSIVE, "")
-        placement = items.get(OptionalAttribs.PLACEMENT, "")
-        if all([exclusive in NONEISH, placement in NONEISH]):
-            return items
-        output = []
-        if placement not in NONEISH:
-            output.append(str(placement))
-        if exclusive not in NONEISH:
-            output.append("excl")
-        if len(output) > 0:
-            items["-l place="] = ":".join(output)
-        return items
+
+    @property
+    @abstractmethod
+    def _prefix(self) -> str:
+        """
+        Returns the scheduler's resource-request prefix.
+        """
+
+    @property
+    def _processed_props(self) -> Dict[str, Any]:
+        """
+        Pre-process directives before converting to runscript.
+        """
+        return self._props
+
+    @property
+    @abstractmethod
+    def _submit_cmd(self) -> str:
+        """
+        Returns the scheduler's job-submit executable name.
+        """
+
+    def _validate_props(self) -> None:
+        """
+        Validate scheduler-configuration properties.
+
+        :raises: UWConfigError if required props are missing.
+        """
+        if missing := [
+            getattr(_DirectivesRequired, x.name)
+            for x in fields(_DirectivesRequired)
+            if getattr(_DirectivesRequired, x.name) not in self._props
+        ]:
+            raise UWConfigError("Missing required directives: %s" % ", ".join(missing))
 
 
 class LSF(JobScheduler):
@@ -312,35 +136,229 @@ class LSF(JobScheduler):
     Represents a LSF based scheduler.
     """
 
-    prefix = "#BSUB"
-    key_value_separator = " "
-    submit_command = "bsub"
+    @property
+    def _directive_separator(self) -> str:
+        """
+        Returns the character used to separate directive keys and values.
+        """
+        return " "
 
-    _map = {
-        RequiredAttribs.ACCOUNT: "-P",
-        OptionalAttribs.NODES: lambda x: f"-n {x}",
-        RequiredAttribs.QUEUE: "-q",
-        OptionalAttribs.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
-        RequiredAttribs.WALLTIME: "-W",
-        OptionalAttribs.JOB_NAME: "-J",
-        OptionalAttribs.MEMORY: lambda x: f"-R rusage[mem={x}]",
-        OptionalAttribs.SHELL: "-L",
-        OptionalAttribs.STDOUT: "-o",
-        OptionalAttribs.THREADS: lambda x: f"-R affinity[core({x})]",
-    }
+    @property
+    def _managed_directives(self) -> Dict[str, Any]:
+        """
+        Returns a mapping from canonical names to scheduler-specific CLI switches.
+        """
+        return {
+            _DirectivesOptional.JOB_NAME: "-J",
+            _DirectivesOptional.MEMORY: lambda x: f"-R rusage[mem={x}]",
+            _DirectivesOptional.NODES: lambda x: f"-n {x}",
+            _DirectivesOptional.QUEUE: "-q",
+            _DirectivesOptional.SHELL: "-L",
+            _DirectivesOptional.STDOUT: "-o",
+            _DirectivesOptional.TASKS_PER_NODE: lambda x: f"-R span[ptile={x}]",
+            _DirectivesOptional.THREADS: lambda x: f"-R affinity[core({x})]",
+            _DirectivesRequired.ACCOUNT: "-P",
+            _DirectivesRequired.WALLTIME: "-W",
+        }
 
-    def pre_process(self) -> Dict[str, Any]:
-        items = self.data
-        # LSF requires threads to be set (if None is provided, default to 1)
-        items[OptionalAttribs.THREADS] = items.get(OptionalAttribs.THREADS, 1)
-        nodes = items.get(OptionalAttribs.NODES, "")
-        tasks_per_node = items.get(OptionalAttribs.TASKS_PER_NODE, "")
+    @property
+    def _prefix(self) -> str:
+        """
+        Returns the scheduler's resource-request prefix.
+        """
+        return "#BSUB"
 
-        memory = items.get(OptionalAttribs.MEMORY, None)
-        if memory is not None:
-            mem_value = Memory(memory).convert("KB")
-            items[self._map[OptionalAttribs.MEMORY](mem_value)] = ""
+    @property
+    def _processed_props(self) -> Dict[str, Any]:
+        props = deepcopy(self._props)
+        props[_DirectivesOptional.THREADS] = props.get(_DirectivesOptional.THREADS, 1)
+        return props
 
-        items[OptionalAttribs.NODES] = int(tasks_per_node) * int(nodes)
-        items.pop(OptionalAttribs.MEMORY, None)
+    @property
+    def _submit_cmd(self) -> str:
+        """
+        Returns the scheduler's job-submit executable name.
+        """
+        return "bsub"
+
+
+class PBS(JobScheduler):
+    """
+    Represents the PBS scheduler.
+    """
+
+    @property
+    def _directive_separator(self) -> str:
+        """
+        Returns the character used to separate directive keys and values.
+        """
+        return " "
+
+    @property
+    def _managed_directives(self) -> Dict[str, Any]:
+        """
+        Returns a mapping from canonical names to scheduler-specific CLI switches.
+        """
+        return {
+            _DirectivesOptional.DEBUG: lambda x: f"-l debug={str(x).lower()}",
+            _DirectivesOptional.JOB_NAME: "-N",
+            _DirectivesOptional.MEMORY: "mem",
+            _DirectivesOptional.NODES: lambda x: f"-l select={x}",
+            _DirectivesOptional.QUEUE: "-q",
+            _DirectivesOptional.SHELL: "-S",
+            _DirectivesOptional.STDOUT: "-o",
+            _DirectivesOptional.TASKS_PER_NODE: "mpiprocs",
+            _DirectivesOptional.THREADS: "ompthreads",
+            _DirectivesRequired.ACCOUNT: "-A",
+            _DirectivesRequired.WALLTIME: "-l walltime=",
+        }
+
+    @staticmethod
+    def _placement(items: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Placement logic.
+        """
+        exclusive = items.get(_DirectivesOptional.EXCLUSIVE)
+        placement = items.get(_DirectivesOptional.PLACEMENT)
+        if not exclusive and not placement:
+            return items
+        output = []
+        if placement:
+            output.append(str(placement))
+        if exclusive:
+            output.append("excl")
+        if len(output) > 0:
+            items["-l place="] = ":".join(output)
         return items
+
+    @property
+    def _prefix(self) -> str:
+        """
+        Returns the scheduler's resource-request prefix.
+        """
+        return "#PBS"
+
+    @property
+    def _processed_props(self) -> Dict[str, Any]:
+        props = self._props
+        props.update(self._select(props))
+        props.update(self._placement(props))
+        props.pop(_DirectivesOptional.TASKS_PER_NODE, None)
+        props.pop(_DirectivesOptional.NODES, None)
+        props.pop(_DirectivesOptional.THREADS, None)
+        props.pop(_DirectivesOptional.MEMORY, None)
+        props.pop("exclusive", None)
+        props.pop("placement", None)
+        props.pop("select", None)
+        return dict(props)
+
+    def _select(self, items: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Select logic.
+        """
+        select = []
+        if nodes := items.get(_DirectivesOptional.NODES):
+            select.append(str(nodes))
+        if tasks_per_node := items.get(_DirectivesOptional.TASKS_PER_NODE):
+            select.append(
+                f"{self._managed_directives[_DirectivesOptional.TASKS_PER_NODE]}={tasks_per_node}"
+            )
+        threads = items.get(_DirectivesOptional.THREADS, 1)
+        select.append(f"{self._managed_directives[_DirectivesOptional.THREADS]}={threads}")
+        if tasks_per_node:
+            select.append(f"ncpus={int(tasks_per_node) * int(threads)}")
+        if memory := items.get(_DirectivesOptional.MEMORY):
+            select.append(f"{self._managed_directives[_DirectivesOptional.MEMORY]}={memory}")
+        items["-l select="] = ":".join(select)
+        return items
+
+    @property
+    def _submit_cmd(self) -> str:
+        """
+        Returns the scheduler's job-submit executable name.
+        """
+        return "qsub"
+
+
+class Slurm(JobScheduler):
+    """
+    Represents the Slurm scheduler.
+    """
+
+    @property
+    def _managed_directives(self) -> Dict[str, Any]:
+        """
+        Returns a mapping from canonical names to scheduler-specific CLI switches.
+        """
+        return {
+            _DirectivesOptional.CORES: "--ntasks",
+            _DirectivesOptional.EXCLUSIVE: lambda _: "--exclusive",
+            _DirectivesOptional.EXPORT: "--export",
+            _DirectivesOptional.JOB_NAME: "--job-name",
+            _DirectivesOptional.MEMORY: "--mem",
+            _DirectivesOptional.NODES: "--nodes",
+            _DirectivesOptional.PARTITION: "--partition",
+            _DirectivesOptional.QUEUE: "--qos",
+            _DirectivesOptional.RUNDIR: "--chdir",
+            _DirectivesOptional.STDERR: "--error",
+            _DirectivesOptional.STDOUT: "--output",
+            _DirectivesOptional.TASKS_PER_NODE: "--ntasks-per-node",
+            _DirectivesOptional.THREADS: "--cpus-per-task",
+            _DirectivesRequired.ACCOUNT: "--account",
+            _DirectivesRequired.WALLTIME: "--time",
+        }
+
+    @property
+    def _directive_separator(self) -> str:
+        """
+        Returns the character used to separate directive keys and values.
+        """
+        return "="
+
+    @property
+    def _prefix(self) -> str:
+        """
+        Returns the scheduler's resource-request prefix.
+        """
+        return "#SBATCH"
+
+    @property
+    def _submit_cmd(self) -> str:
+        """
+        Returns the scheduler's job-submit executable name.
+        """
+        return "sbatch"
+
+
+@dataclass(frozen=True)
+class _DirectivesOptional:
+    """
+    Keys for optional directives.
+    """
+
+    CORES: str = "cores"
+    DEBUG: str = "debug"
+    EXCLUSIVE: str = "exclusive"
+    EXPORT: str = "export"
+    JOB_NAME: str = "jobname"
+    MEMORY: str = "memory"
+    NODES: str = "nodes"
+    PARTITION: str = "partition"
+    PLACEMENT: str = "placement"
+    QUEUE: str = "queue"
+    RUNDIR: str = "rundir"
+    SHELL: str = "shell"
+    STDERR: str = "stderr"
+    STDOUT: str = "stdout"
+    TASKS_PER_NODE: str = "tasks_per_node"
+    THREADS: str = "threads"
+
+
+@dataclass(frozen=True)
+class _DirectivesRequired:
+    """
+    Keys for required directives.
+    """
+
+    ACCOUNT: str = "account"
+    WALLTIME: str = "walltime"

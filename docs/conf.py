@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath("../src"))
 with open("../recipe/meta.json", "r", encoding="utf-8") as f:
     _metadata = json.loads(f.read())
 
-autodoc_mock_imports = ["f90nml", "jsonschema", "lxml"]
+autodoc_mock_imports = ["f90nml", "iotaa", "jsonschema", "lxml"]
 copyright = str(dt.datetime.now().year)
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.extlinks", "sphinx.ext.intersphinx"]
 extlinks_detect_hardcoded_links = True

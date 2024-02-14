@@ -105,8 +105,10 @@ def validator(schema_fn: str, *args: Any) -> Callable:
     """
     with open(resource_pathobj(schema_fn), "r", encoding="utf-8") as f:
         schema = yaml.safe_load(f)
+    defs = schema.get("$defs", {})
     for arg in args:
-        schema = {"$defs": schema["$defs"], **schema[arg]}
+        schema = schema[arg]
+    schema.update({"$defs": defs})
     return lambda config: "\n".join(str(x) for x in _validation_errors(config, schema))
 
 

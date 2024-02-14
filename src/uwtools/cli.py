@@ -14,12 +14,11 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple
 
 import uwtools.api.config
-import uwtools.api.forecast
+import uwtools.api.fv3
 import uwtools.api.rocoto
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
-from uwtools.drivers.forecast import CLASSES as FORECAST_CLASSES
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
@@ -50,7 +49,7 @@ def main() -> None:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
             STR.config: _dispatch_config,
-            STR.forecast: _dispatch_forecast,
+            STR.fv3: _dispatch_fv3,
             STR.rocoto: _dispatch_rocoto,
             STR.template: _dispatch_template,
         }
@@ -72,7 +71,7 @@ def _add_subparser_config(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.config, "Handle configs")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action)
+    subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         STR.compare: _add_subparser_config_compare(subparsers),
         STR.realize: _add_subparser_config_realize(subparsers),
@@ -199,61 +198,54 @@ def _dispatch_config_validate(args: Args) -> bool:
     return uwtools.api.config.validate(schema_file=args[STR.schemafile], config=args[STR.infile])
 
 
-# Mode forecast
+# Mode fv3
 
 
-def _add_subparser_forecast(subparsers: Subparsers) -> ModeChecks:
+def _add_subparser_fv3(subparsers: Subparsers) -> ModeChecks:
     """
-    Subparser for mode: forecast
+    Subparser for mode: fv3
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.forecast, "Configure and run forecasts")
+    parser = _add_subparser(subparsers, STR.fv3, "Execute FV3 tasks")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
-        STR.run: _add_subparser_forecast_run(subparsers),
+        task: _add_subparser_fv3_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.fv3.tasks().items()
     }
 
 
-def _add_subparser_forecast_run(subparsers: Subparsers) -> ActionChecks:
+def _add_subparser_fv3_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
     """
-    Subparser for mode: forecast run
+    Subparser for mode: fv3 <task>
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
     """
-    parser = _add_subparser(subparsers, STR.run, "Run a forecast")
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_config_file(required)
     _add_arg_cycle(required)
-    _add_arg_model(required, choices=list(FORECAST_CLASSES.keys()))
     optional = _basic_setup(parser)
-    _add_arg_batch_script(optional)
+    _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     return checks
 
 
-def _dispatch_forecast(args: Args) -> bool:
+def _dispatch_fv3(args: Args) -> bool:
     """
-    Dispatch logic for forecast mode.
+    Dispatch logic for fv3 mode.
 
     :param args: Parsed command-line args.
     """
-    return {STR.run: _dispatch_forecast_run}[args[STR.action]](args)
-
-
-def _dispatch_forecast_run(args: Args) -> bool:
-    """
-    Dispatch logic for forecast run action.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.forecast.run(
-        model=args[STR.model],
-        cycle=args[STR.cycle],
+    return uwtools.api.fv3.execute(
+        task=args[STR.action],
         config_file=args[STR.cfgfile],
-        batch_script=args[STR.batch_script],
+        cycle=args[STR.cycle],
+        batch=args[STR.batch],
         dry_run=args[STR.dryrun],
     )
 
@@ -269,7 +261,7 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.rocoto, "Realize and validate Rocoto XML Documents")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action)
+    subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         STR.realize: _add_subparser_rocoto_realize(subparsers),
         STR.validate: _add_subparser_rocoto_validate(subparsers),
@@ -346,7 +338,7 @@ def _add_subparser_template(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.template, "Handle templates")
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action)
+    subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         STR.render: _add_subparser_template_render(subparsers),
         STR.translate: _add_subparser_template_translate(subparsers),
@@ -435,14 +427,11 @@ def _dispatch_template_translate(args: Args) -> bool:
 # pylint: disable=missing-function-docstring
 
 
-def _add_arg_batch_script(group: Group, required: bool = False) -> None:
+def _add_arg_batch(group: Group) -> None:
     group.add_argument(
-        _switch(STR.batch_script),
-        help="Path to output batch file (defaults to stdout)",
-        metavar="PATH",
-        required=required,
-        default=None,
-        type=str,
+        _switch(STR.batch),
+        action="store_true",
+        help="Submit run to batch scheduler",
     )
 
 
@@ -468,7 +457,7 @@ def _add_arg_cycle(group: Group) -> None:
 
 def _add_arg_debug(group: Group) -> None:
     group.add_argument(
-        "--debug",
+        _switch(STR.debug),
         action="store_true",
         help="""
         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
@@ -533,16 +522,6 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
         help="A key=value pair to override/supplement config",
         metavar="KEY=VALUE",
         nargs="*",
-    )
-
-
-def _add_arg_model(group: Group, choices: List[str]) -> None:
-    group.add_argument(
-        _switch(STR.model),
-        choices=choices,
-        help="Model name",
-        required=True,
-        type=str,
     )
 
 
@@ -676,15 +655,17 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     return parser
 
 
-def _add_subparsers(parser: Parser, dest: str) -> Subparsers:
+def _add_subparsers(parser: Parser, dest: str, metavar: str) -> Subparsers:
     """
     Add subparsers to a parser.
 
-    :parm parser: The parser to add subparsers to.
+    :param parser: The parser to add subparsers to.
+    :param dest: Name of parser attribute to store subparser under.
+    :param metavar: Name for hierarchy of subparsers as shown by --help.
     :return: The new subparsers object.
     """
     return parser.add_subparsers(
-        dest=dest, metavar="MODE", required=True, title="Positional arguments"
+        dest=dest, metavar=metavar, required=True, title="Positional arguments"
     )
 
 
@@ -756,10 +737,10 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         description="Unified Workflow Tools", add_help=False, formatter_class=_formatter
     )
     _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.mode)
+    subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     checks = {
         STR.config: _add_subparser_config(subparsers),
-        STR.forecast: _add_subparser_forecast(subparsers),
+        STR.fv3: _add_subparser_fv3(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),
         STR.template: _add_subparser_template(subparsers),
     }
@@ -783,7 +764,7 @@ class STR:
     """
 
     action: str = "action"
-    batch_script: str = "batch_script"
+    batch: str = "batch"
     cfgfile: str = "config_file"
     compare: str = "compare"
     config: str = "config"
@@ -794,7 +775,7 @@ class STR:
     file1path: str = "file_1_path"
     file2fmt: str = "file_2_format"
     file2path: str = "file_2_path"
-    forecast: str = "forecast"
+    fv3: str = "fv3"
     help: str = "help"
     infile: str = "input_file"
     infmt: str = "input_format"
@@ -810,6 +791,8 @@ class STR:
     run: str = "run"
     schemafile: str = "schema_file"
     suppfiles: str = "supplemental_files"
+    task: str = "task"
+    tasks: str = "tasks"
     template: str = "template"
     translate: str = "translate"
     validate: str = "validate"

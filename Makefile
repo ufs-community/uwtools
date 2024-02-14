@@ -6,7 +6,7 @@ TARGETS     = clean-devenv devshell docs env format lint meta package test typec
 
 export RECIPE_DIR := $(shell cd ./recipe && pwd)
 
-clean = $(shell $(CONDA_EXE) env remove -n DEV-$(call val,name))
+clean = $(info $(shell $(CONDA_EXE) env remove -n DEV-$(call val,name)))
 spec  = $(call val,name)$(2)$(call val,version)$(2)$(call val,$(1))
 val   = $(shell jq -r .$(1) $(METAJSON))
 

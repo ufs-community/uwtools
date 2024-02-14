@@ -11,7 +11,7 @@
     }
   },
   "properties": {
-    "forecast": {
+    "fv3": {
       "additionalProperties": false,
       "properties": {
         "diag_table": {
@@ -24,8 +24,39 @@
           ],
           "type": "string"
         },
-        "executable": {
-          "type": "string"
+        "execution": {
+          "additionalProperties": false,
+          "properties": {
+            "batchargs": {
+              "type": "object"
+            },
+            "envcmds": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "executable": {
+              "type": "string"
+            },
+            "mpiargs": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "mpicmd": {
+              "type": "string"
+            },
+            "threads": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "executable"
+          ],
+          "type": "object"
         },
         "field_table": {
           "additionalProperties": false,
@@ -115,6 +146,28 @@
         "files_to_link": {
           "$ref": "#/$defs/filesToStage"
         },
+        "lateral_boundary_conditions": {
+          "additionalProperties": false,
+          "properties": {
+            "interval_hours": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "offset": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "interval_hours",
+            "offset",
+            "path"
+          ],
+          "type": "object"
+        },
         "length": {
           "minimum": 1,
           "type": "integer"
@@ -198,88 +251,14 @@
         },
         "run_dir": {
           "type": "string"
-        },
-        "runtime_info": {
-          "additionalProperties": false,
-          "properties": {
-            "mpi_args": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "threads": {
-              "minimum": 0,
-              "type": "integer"
-            }
-          },
-          "type": "object"
         }
       },
       "required": [
         "domain",
-        "executable",
+        "execution",
+        "lateral_boundary_conditions",
         "length",
         "run_dir"
-      ],
-      "type": "object"
-    },
-    "platform": {
-      "additionalProperties": false,
-      "dependentRequired": {
-        "scheduler": [
-          "account"
-        ]
-      },
-      "properties": {
-        "account": {
-          "type": "string"
-        },
-        "mpicmd": {
-          "type": "string"
-        },
-        "scheduler": {
-          "enum": [
-            "lsf",
-            "pbs",
-            "slurm"
-          ],
-          "type": "string"
-        }
-      },
-      "required": [
-        "mpicmd"
-      ],
-      "type": "object"
-    },
-    "preprocessing": {
-      "additionalProperties": false,
-      "properties": {
-        "lateral_boundary_conditions": {
-          "additionalProperties": false,
-          "properties": {
-            "interval_hours": {
-              "minimum": 1,
-              "type": "integer"
-            },
-            "offset": {
-              "minimum": 0,
-              "type": "integer"
-            },
-            "output_file_path": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "interval_hours",
-            "offset",
-            "output_file_path"
-          ],
-          "type": "object"
-        }
-      },
-      "required": [
-        "lateral_boundary_conditions"
       ],
       "type": "object"
     },

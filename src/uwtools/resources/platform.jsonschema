@@ -1,0 +1,29 @@
+{
+  "properties": {
+    "platform": {
+      "additionalProperties": false,
+      "dependentRequired": {
+        "account": [
+          "scheduler"
+        ],
+        "scheduler": [
+          "account"
+        ]
+      },
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "scheduler": {
+          "enum": [
+            "lsf",
+            "pbs",
+            "slurm"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  }
+}
