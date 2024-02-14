@@ -84,18 +84,11 @@ class SfcClimoGen(Driver):
         yield self._taskname(path.name)
         yield asset(path, path.is_file)
         yield None
-        envvars = {
-            "KMP_AFFINITY": "scatter",
-            "OMP_NUM_THREADS": "1",
-            "OMP_STACKSIZE": "1024m",
-        }
         envcmds = self._driver_config.get("execution", {}).get("envcmds", [])
         execution = [self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir]
         scheduler = self._scheduler if self._batch else None
         path.parent.mkdir(parents=True, exist_ok=True)
-        rs = self._runscript(
-            envcmds=envcmds, envvars=envvars, execution=execution, scheduler=scheduler
-        )
+        rs = self._runscript(envcmds=envcmds, execution=execution, scheduler=scheduler)
         with open(path, "w", encoding="utf-8") as f:
             print(rs, file=f)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
