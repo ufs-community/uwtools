@@ -32,7 +32,7 @@ class FV3(Driver):
         self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
     ):
         """
-        The FV3 driver.
+        The driver.
 
         :param config_file: Path to config file.
         :param cycle: The forecast cycle.
@@ -51,9 +51,9 @@ class FV3(Driver):
     @tasks
     def boundary_files(self):
         """
-        The FV3 lateral boundary-condition files.
+        Lateral boundary-condition files.
         """
-        yield self._taskname("lateral boundary condition files")
+        yield self._taskname("lateral boundary-condition files")
         lbcs = self._driver_config["lateral_boundary_conditions"]
         offset = abs(lbcs["offset"])
         endhour = self._driver_config["length"] + offset + 1
@@ -71,7 +71,7 @@ class FV3(Driver):
     @task
     def diag_table(self):
         """
-        The FV3 diag_table file.
+        The diag_table file.
         """
         fn = "diag_table"
         yield self._taskname(fn)
@@ -87,7 +87,7 @@ class FV3(Driver):
     @task
     def field_table(self):
         """
-        The FV3 field_table file.
+        The field_table file.
         """
         fn = "field_table"
         yield self._taskname(fn)
@@ -103,7 +103,7 @@ class FV3(Driver):
     @tasks
     def files_copied(self):
         """
-        Files copied for FV3 run.
+        Files copied for run.
         """
         yield self._taskname("files copied")
         yield [
@@ -114,7 +114,7 @@ class FV3(Driver):
     @tasks
     def files_linked(self):
         """
-        Files linked for FV3 run.
+        Files linked for run.
         """
         yield self._taskname("files linked")
         yield [
@@ -125,7 +125,7 @@ class FV3(Driver):
     @task
     def model_configure(self):
         """
-        The FV3 model_configure file.
+        The model_configure file.
         """
         fn = "model_configure"
         yield self._taskname(fn)
@@ -141,7 +141,7 @@ class FV3(Driver):
     @task
     def namelist_file(self):
         """
-        The FV3 namelist file.
+        The namelist file.
         """
         fn = "input.nml"
         yield self._taskname(fn)
@@ -157,7 +157,7 @@ class FV3(Driver):
     @tasks
     def provisioned_run_directory(self):
         """
-        The run directory provisioned with all required content.
+        Run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
         yield [
@@ -175,7 +175,7 @@ class FV3(Driver):
     @task
     def restart_directory(self):
         """
-        The FV3 RESTART directory.
+        The RESTART directory.
         """
         yield self._taskname("RESTART directory")
         path = self._rundir / "RESTART"
@@ -186,7 +186,7 @@ class FV3(Driver):
     @tasks
     def run(self):
         """
-        FV3 run execution.
+        Run execution.
         """
         yield self._taskname("run")
         yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
@@ -194,10 +194,10 @@ class FV3(Driver):
     @task
     def runscript(self):
         """
-        A runscript suitable for submission to the scheduler.
+        The runscript.
         """
-        yield self._taskname("runscript")
         path = self._runscript_path
+        yield self._taskname(path.name)
         yield asset(path, path.is_file)
         yield None
         envvars = {
@@ -223,7 +223,7 @@ class FV3(Driver):
     @task
     def _run_via_batch_submission(self):
         """
-        FV3 run Execution via the batch system.
+        Run execution via the batch system.
         """
         yield self._taskname("run via batch submission")
         path = Path("%s.submit" % self._runscript_path)
@@ -234,7 +234,7 @@ class FV3(Driver):
     @task
     def _run_via_local_execution(self):
         """
-        FV3 run execution directly on the local system.
+        Run execution directly on the local system.
         """
         yield self._taskname("run via local execution")
         path = self._rundir / "done"
@@ -256,7 +256,7 @@ class FV3(Driver):
     @property
     def _resources(self) -> Dict[str, Any]:
         """
-        Returns configuration data for the FV3 runscript.
+        Returns configuration data for the runscript.
         """
         return {
             "account": self._config["platform"]["account"],

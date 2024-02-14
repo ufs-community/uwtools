@@ -6,26 +6,16 @@ A driver for sfc_climo_gen.
 
 import os
 import stat
-
-# from datetime import datetime
 from pathlib import Path
-
-# from shutil import copy
 from typing import Any, Dict
 
 from iotaa import asset, dryrun, task, tasks
 
-# from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
-
-# from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
-
-# from uwtools.logging import log
 from uwtools.utils.file import resource_pathobj
+from uwtools.utils.processing import execute
 from uwtools.utils.tasks import file
-
-# from uwtools.utils.processing import execute
 
 
 class SfcClimoGen(Driver):
@@ -35,7 +25,7 @@ class SfcClimoGen(Driver):
 
     def __init__(self, config_file: Path, dry_run: bool = False, batch: bool = False):
         """
-        The sfc_climo_gen driver.
+        The driver.
 
         :param config_file: Path to config file.
         :param dry_run: Run in dry-run mode?
@@ -51,7 +41,7 @@ class SfcClimoGen(Driver):
     @task
     def namelist_file(self):
         """
-        The sfc_climo_gen namelist file.
+        The namelist file.
         """
         fn = "fort.41"
         yield self._taskname(f"namelist file {fn}")
@@ -71,7 +61,7 @@ class SfcClimoGen(Driver):
     @tasks
     def provisioned_run_directory(self):
         """
-        The run directory provisioned with all required content.
+        Run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
         yield [
@@ -79,19 +69,26 @@ class SfcClimoGen(Driver):
             self.runscript(),
         ]
 
+    @tasks
+    def run(self):
+        """
+        Run execution.
+        """
+        yield self._taskname("run")
+        yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
+
     @task
     def runscript(self):
         """
-        A runscript suitable for submission to the scheduler.
+        The runscript.
         """
-        fn = "runscript"
-        yield self._taskname(fn)
-        path = self._rundir / fn
+        path = self._runscript_path
+        yield self._taskname(path.name)
         yield asset(path, path.is_file)
         yield None
         envvars = {
             "KMP_AFFINITY": "scatter",
-            "OMP_NUM_THREADS": 1,
+            "OMP_NUM_THREADS": "1",
             "OMP_STACKSIZE": "1024m",
         }
         envcmds = self._driver_config.get("execution", {}).get("envcmds", [])
@@ -104,6 +101,31 @@ class SfcClimoGen(Driver):
         with open(path, "w", encoding="utf-8") as f:
             print(rs, file=f)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
+
+    # Private workflow tasks
+
+    @task
+    def _run_via_batch_submission(self):
+        """
+        Run execution via the batch system.
+        """
+        yield self._taskname("run via batch submission")
+        path = Path("%s.submit" % self._runscript_path)
+        yield asset(path, path.is_file)
+        yield self.provisioned_run_directory()
+        self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
+
+    @task
+    def _run_via_local_execution(self):
+        """
+        Run execution directly on the local system.
+        """
+        yield self._taskname("run via local execution")
+        path = self._rundir / "done"
+        yield asset(path, path.is_file)
+        yield self.provisioned_run_directory()
+        cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
+        execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
     # Private helper methods
 
@@ -126,6 +148,13 @@ class SfcClimoGen(Driver):
             "scheduler": self._config["platform"]["scheduler"],
             **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
+
+    @property
+    def _runscript_path(self) -> Path:
+        """
+        Returns the path to the runscript.
+        """
+        return self._rundir / "runscript"
 
     def _taskname(self, suffix: str) -> str:
         """
