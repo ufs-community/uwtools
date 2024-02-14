@@ -1,3 +1,4 @@
+# pylint: disable=duplicate-code
 """
 A driver for the FV3 model.
 """

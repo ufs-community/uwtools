@@ -1,22 +1,27 @@
+# pylint: disable=duplicate-code
 """
 A driver for sfc_climo_gen.
 """
 
 # import os
 # import stat
-from datetime import datetime
+# from datetime import datetime
 from pathlib import Path
+
 # from shutil import copy
 from typing import Any, Dict
 
 # from iotaa import asset, dryrun, external, task, tasks
 from iotaa import dryrun
+
 # from uwtools.config.formats.fieldtable import FieldTableConfig
 # from uwtools.config.formats.nml import NMLConfig
 # from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
+
 # from uwtools.logging import log
 from uwtools.utils.file import resource_pathobj
+
 # from uwtools.utils.processing import execute
 
 
@@ -25,9 +30,7 @@ class SfcClimoGen(Driver):
     A driver for sfc_climo_gen.
     """
 
-    def __init__(
-        self, config_file: Path, dry_run: bool = False, batch: bool = False
-    ):
+    def __init__(self, config_file: Path, dry_run: bool = False, batch: bool = False):
         """
         The sfc_climo_gen driver.
 

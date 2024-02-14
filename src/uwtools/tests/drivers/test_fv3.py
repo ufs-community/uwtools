@@ -52,57 +52,57 @@ def config_file(config, tmp_path):
 
 
 @fixture
-def fv3obj(config_file, cycle):
+def driverobj(config_file, cycle):
     return fv3.FV3(config_file=config_file, cycle=cycle, batch=True)
 
 
 # Driver tests
 
 
-def test_FV3(fv3obj):
-    assert isinstance(fv3obj, fv3.FV3)
+def test_FV3(driverobj):
+    assert isinstance(driverobj, fv3.FV3)
 
 
 def test_FV3_dry_run(config_file, cycle):
     with patch.object(fv3, "dryrun") as dryrun:
-        fv3obj = fv3.FV3(config_file=config_file, cycle=cycle, batch=True, dry_run=True)
-    assert fv3obj._dry_run is True
+        driverobj = fv3.FV3(config_file=config_file, cycle=cycle, batch=True, dry_run=True)
+    assert driverobj._dry_run is True
     dryrun.assert_called_once_with()
 
 
-def test_FV3_boundary_files(fv3obj):
+def test_FV3_boundary_files(driverobj):
     ns = (0, 1)
-    links = [fv3obj._rundir / "INPUT" / f"gfs_bndy.tile7.{n:03d}.nc" for n in ns]
+    links = [driverobj._rundir / "INPUT" / f"gfs_bndy.tile7.{n:03d}.nc" for n in ns]
     assert not any(link.is_file() for link in links)
     for n in ns:
-        (fv3obj._rundir / f"f{n}").touch()
-    fv3obj.boundary_files()
+        (driverobj._rundir / f"f{n}").touch()
+    driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
 
 
-def test_FV3_diag_table(fv3obj):
-    src = fv3obj._rundir / "diag_table.in"
+def test_FV3_diag_table(driverobj):
+    src = driverobj._rundir / "diag_table.in"
     src.touch()
-    fv3obj._driver_config["diag_table"] = src
-    dst = fv3obj._rundir / "diag_table"
+    driverobj._driver_config["diag_table"] = src
+    dst = driverobj._rundir / "diag_table"
     assert not dst.is_file()
-    fv3obj.diag_table()
+    driverobj.diag_table()
     assert dst.is_file()
 
 
-def test_FV3_diag_table_warn(caplog, fv3obj):
-    fv3obj.diag_table()
+def test_FV3_diag_table_warn(caplog, driverobj):
+    driverobj.diag_table()
     assert logged(caplog, "No 'diag_table' defined in config")
 
 
-def test_FV3_field_table(fv3obj):
-    src = fv3obj._rundir / "field_table.in"
+def test_FV3_field_table(driverobj):
+    src = driverobj._rundir / "field_table.in"
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
-    dst = fv3obj._rundir / "field_table"
+    dst = driverobj._rundir / "field_table"
     assert not dst.is_file()
-    fv3obj._driver_config["field_table"] = {"base_file": src}
-    fv3obj.field_table()
+    driverobj._driver_config["field_table"] = {"base_file": src}
+    driverobj.field_table()
     assert dst.is_file()
 
 
@@ -118,41 +118,41 @@ def test_FV3_files_copied(config, cycle, key, task, test, tmp_path):
     path = tmp_path / "fv3.yaml"
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
-    fv3obj = fv3.FV3(config_file=path, cycle=cycle, batch=True)
+    driverobj = fv3.FV3(config_file=path, cycle=cycle, batch=True)
     atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
     assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
     atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
     for src in (atm_src, sfc_src):
         src.touch()
-    getattr(fv3obj, task)()
+    getattr(driverobj, task)()
     assert all(getattr(dst, test)() for dst in [atm_dst, sfc_dst])
 
 
-def test_FV3_model_configure(fv3obj):
-    src = fv3obj._rundir / "model_configure.in"
+def test_FV3_model_configure(driverobj):
+    src = driverobj._rundir / "model_configure.in"
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
-    dst = fv3obj._rundir / "model_configure"
+    dst = driverobj._rundir / "model_configure"
     assert not dst.is_file()
-    fv3obj._driver_config["model_configure"] = {"base_file": src}
-    fv3obj.model_configure()
+    driverobj._driver_config["model_configure"] = {"base_file": src}
+    driverobj.model_configure()
     assert dst.is_file()
 
 
-def test_FV3_namelist_file(fv3obj):
-    src = fv3obj._rundir / "input.nml.in"
+def test_FV3_namelist_file(driverobj):
+    src = driverobj._rundir / "input.nml.in"
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
-    dst = fv3obj._rundir / "input.nml"
+    dst = driverobj._rundir / "input.nml"
     assert not dst.is_file()
-    fv3obj._driver_config["namelist_file"] = {"base_file": src}
-    fv3obj.namelist_file()
+    driverobj._driver_config["namelist_file"] = {"base_file": src}
+    driverobj.namelist_file()
     assert dst.is_file()
 
 
-def test_FV3_provisioned_run_directory(fv3obj):
+def test_FV3_provisioned_run_directory(driverobj):
     with patch.multiple(
-        fv3obj,
+        driverobj,
         boundary_files=D,
         diag_table=D,
         field_table=D,
@@ -163,35 +163,35 @@ def test_FV3_provisioned_run_directory(fv3obj):
         restart_directory=D,
         runscript=D,
     ) as mocks:
-        fv3obj.provisioned_run_directory()
+        driverobj.provisioned_run_directory()
     for m in mocks:
         mocks[m].assert_called_once_with()
 
 
-def test_FV3_restart_directory(fv3obj):
-    path = fv3obj._rundir / "RESTART"
+def test_FV3_restart_directory(driverobj):
+    path = driverobj._rundir / "RESTART"
     assert not path.is_dir()
-    fv3obj.restart_directory()
+    driverobj.restart_directory()
     assert path.is_dir()
 
 
-def test_FV3_run_batch(fv3obj):
-    with patch.object(fv3obj, "_run_via_batch_submission") as func:
-        fv3obj.run()
+def test_FV3_run_batch(driverobj):
+    with patch.object(driverobj, "_run_via_batch_submission") as func:
+        driverobj.run()
     func.assert_called_once_with()
 
 
-def test_FV3_run_local(fv3obj):
-    fv3obj._batch = False
-    with patch.object(fv3obj, "_run_via_local_execution") as func:
-        fv3obj.run()
+def test_FV3_run_local(driverobj):
+    driverobj._batch = False
+    with patch.object(driverobj, "_run_via_local_execution") as func:
+        driverobj.run()
     func.assert_called_once_with()
 
 
-def test_FV3_runscript(fv3obj):
-    dst = fv3obj._rundir / "runscript"
+def test_FV3_runscript(driverobj):
+    dst = driverobj._rundir / "runscript"
     assert not dst.is_file()
-    fv3obj._driver_config["execution"].update(
+    driverobj._driver_config["execution"].update(
         {
             "batchargs": {"walltime": "01:10:00"},
             "envcmds": ["cmd1", "cmd2"],
@@ -199,8 +199,8 @@ def test_FV3_runscript(fv3obj):
             "threads": 8,
         }
     )
-    fv3obj._config["platform"] = {"account": "me", "scheduler": "slurm"}
-    fv3obj.runscript()
+    driverobj._config["platform"] = {"account": "me", "scheduler": "slurm"}
+    driverobj.runscript()
     with open(dst, "r", encoding="utf-8") as f:
         lines = f.read().split("\n")
     # Check directives:
@@ -217,60 +217,60 @@ def test_FV3_runscript(fv3obj):
     assert "cmd2" in lines
     # Check execution:
     assert "runit fv3" in lines
-    assert "test $? -eq 0 && touch %s/done" % fv3obj._rundir
+    assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
 
 
-def test_FV3__run_via_batch_submission(fv3obj):
-    runscript = fv3obj._runscript_path
-    with patch.object(fv3obj, "provisioned_run_directory") as prd:
+def test_FV3__run_via_batch_submission(driverobj):
+    runscript = driverobj._runscript_path
+    with patch.object(driverobj, "provisioned_run_directory") as prd:
         with patch.object(fv3.FV3, "_scheduler", new_callable=PropertyMock) as scheduler:
-            fv3obj._run_via_batch_submission()
+            driverobj._run_via_batch_submission()
             scheduler().submit_job.assert_called_once_with(
                 runscript=runscript, submit_file=Path(f"{runscript}.submit")
             )
         prd.assert_called_once_with()
 
 
-def test_FV3__run_via_local_execution(fv3obj):
-    with patch.object(fv3obj, "provisioned_run_directory") as prd:
+def test_FV3__run_via_local_execution(driverobj):
+    with patch.object(driverobj, "provisioned_run_directory") as prd:
         with patch.object(fv3, "execute") as execute:
-            fv3obj._run_via_local_execution()
+            driverobj._run_via_local_execution()
             execute.assert_called_once_with(
-                cmd="{x} >{x}.out 2>&1".format(x=fv3obj._runscript_path),
-                cwd=fv3obj._rundir,
+                cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
+                cwd=driverobj._rundir,
                 log_output=True,
             )
         prd.assert_called_once_with()
 
 
-def test_FV3__driver_config(fv3obj):
-    assert fv3obj._driver_config == fv3obj._config["fv3"]
+def test_FV3__driver_config(driverobj):
+    assert driverobj._driver_config == driverobj._config["fv3"]
 
 
-def test_FV3__resources(fv3obj):
+def test_FV3__resources(driverobj):
     account = "me"
     scheduler = "slurm"
     walltime = "01:10:00"
-    fv3obj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
-    fv3obj._config["platform"] = {"account": account, "scheduler": scheduler}
-    assert fv3obj._resources == {
+    driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
+    driverobj._config["platform"] = {"account": account, "scheduler": scheduler}
+    assert driverobj._resources == {
         "account": account,
-        "rundir": fv3obj._rundir,
+        "rundir": driverobj._rundir,
         "scheduler": scheduler,
         "walltime": walltime,
     }
 
 
-def test_FV3__runscript_path(fv3obj):
-    assert fv3obj._runscript_path == fv3obj._rundir / "runscript"
+def test_FV3__runscript_path(driverobj):
+    assert driverobj._runscript_path == driverobj._rundir / "runscript"
 
 
-def test_FV3__taskanme(fv3obj):
-    assert fv3obj._taskname("foo") == "20240201 18Z FV3 foo"
+def test_FV3__taskanme(driverobj):
+    assert driverobj._taskname("foo") == "20240201 18Z FV3 foo"
 
 
-def test_FV3__validate(fv3obj):
-    fv3obj._validate()
+def test_FV3__validate(driverobj):
+    driverobj._validate()
 
 
 # Schema fixtures

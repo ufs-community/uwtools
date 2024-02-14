@@ -59,26 +59,58 @@
               "properties": {
                 "config": {
                   "properties": {
-                    "halo": {"type": "integer"},
-                    "input_facsf_file": {"type": "string"},
-                    "input_maximum_snow_albedo_file": {"type": "string"},
-                    "input_slope_type_file": {"type": "string"},
-                    "input_snowfree_albedo_file": {"type": "string"},
-                    "input_soil_type_file": {"type": "string"},
-                    "input_substrate_temperature_file": {"type": "string"},
-                    "input_vegetation_greenness_file": {"type": "string"},
-                    "input_vegetation_type_file": {"type": "string"},
-                    "maximum_snow_albedo_method": {"type": "string"},
-                    "mosaic_file_mdl": {"type": "string"},
-                    "orog_dir_mdl": {"type": "string"},
-                    "orog_files_mdl": {"type": "string"},
-                    "snowfree_albedo_method": {"type": "string"},
-                    "vegetation_greenness_method": {"type": "string"}
+                    "halo": {
+                      "type": "integer"
+                    },
+                    "input_facsf_file": {
+                      "type": "string"
+                    },
+                    "input_maximum_snow_albedo_file": {
+                      "type": "string"
+                    },
+                    "input_slope_type_file": {
+                      "type": "string"
+                    },
+                    "input_snowfree_albedo_file": {
+                      "type": "string"
+                    },
+                    "input_soil_type_file": {
+                      "type": "string"
+                    },
+                    "input_substrate_temperature_file": {
+                      "type": "string"
+                    },
+                    "input_vegetation_greenness_file": {
+                      "type": "string"
+                    },
+                    "input_vegetation_type_file": {
+                      "type": "string"
+                    },
+                    "maximum_snow_albedo_method": {
+                      "type": "string"
+                    },
+                    "mosaic_file_mdl": {
+                      "type": "string"
+                    },
+                    "orog_dir_mdl": {
+                      "type": "string"
+                    },
+                    "orog_files_mdl": {
+                      "type": "string"
+                    },
+                    "snowfree_albedo_method": {
+                      "type": "string"
+                    },
+                    "vegetation_greenness_method": {
+                      "type": "string"
+                    }
                   },
                   "type": "object"
                 }
               },
-              "required": ["config"],
+              "required": [
+                "config"
+              ],
               "type": "object"
             }
           },
