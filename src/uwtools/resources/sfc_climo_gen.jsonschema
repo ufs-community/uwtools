@@ -1,0 +1,94 @@
+{
+  "properties": {
+    "sfc_climo_gen": {
+      "additionalProperties": false,
+        "execution": {
+          "additionalProperties": false,
+          "properties": {
+            "batchargs": {
+              "type": "object"
+            },
+            "envcmds": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "executable": {
+              "type": "string"
+            },
+            "mpiargs": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "mpicmd": {
+              "type": "string"
+            },
+            "threads": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "executable"
+          ],
+          "type": "object"
+        },
+        "namelist": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "minProperties": 1,
+              "patternProperties": {
+                "^.*$": {
+                  "minProperties": 1,
+                  "patternProperties": {
+                    "^.*$": {
+                      "minProperties": 1,
+                      "type": [
+                        "array",
+                        "boolean",
+                        "number",
+                        "string"
+                      ]
+                    },
+                    "type": "object"
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "run_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "run_dir"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}
