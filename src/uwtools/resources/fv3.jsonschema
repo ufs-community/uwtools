@@ -8,6 +8,25 @@
         }
       },
       "type": "object"
+    },
+    "namelist": {
+      "additionalProperties": {
+        "$ref": "#/$defs/namelist_names_values"
+      },
+      "minProperties": 1,
+      "type": "object"
+    },
+    "namelist_names_values": {
+      "additionalProperties": {
+        "type": [
+          "array",
+          "boolean",
+          "number",
+          "string"
+        ]
+      },
+      "minProperties": 1,
+      "type": "object"
     }
   },
   "properties": {
@@ -225,26 +244,7 @@
               "type": "string"
             },
             "update_values": {
-              "minProperties": 1,
-              "patternProperties": {
-                "^.*$": {
-                  "minProperties": 1,
-                  "patternProperties": {
-                    "^.*$": {
-                      "minProperties": 1,
-                      "type": [
-                        "array",
-                        "boolean",
-                        "number",
-                        "string"
-                      ]
-                    },
-                    "type": "object"
-                  },
-                  "type": "object"
-                }
-              },
-              "type": "object"
+              "$ref": "#/$defs/namelist"
             }
           },
           "type": "object"
