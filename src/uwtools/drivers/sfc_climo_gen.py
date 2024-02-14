@@ -90,12 +90,9 @@ class SfcClimoGen(Driver):
         yield asset(path, path.is_file)
         yield None
         envvars = {
-            "FOO": "bar",
-            # "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
-            # "KMP_AFFINITY": "scatter",
-            # "MPI_TYPE_DEPTH": 20,
-            # "OMP_NUM_THREADS": self._driver_config.get("execution", {}).get("threads", 1),
-            # "OMP_STACKSIZE": "512m",
+            "KMP_AFFINITY": "scatter",
+            "OMP_NUM_THREADS": 1,
+            "OMP_STACKSIZE": "1024m",
         }
         envcmds = self._driver_config.get("execution", {}).get("envcmds", [])
         execution = [self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir]
