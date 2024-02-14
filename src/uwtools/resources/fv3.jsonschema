@@ -1,12 +1,10 @@
 {
   "$defs": {
     "filesToStage": {
-      "minProperties": 1,
-      "patternProperties": {
-        "^.*$": {
-          "type": "string"
-        }
+      "additionalProperties": {
+        "type": "string"
       },
+      "minProperties": 1,
       "type": "object"
     },
     "namelist": {
