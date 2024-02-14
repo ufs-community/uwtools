@@ -1,15 +1,15 @@
 import datetime as dt
+from pathlib import Path
 from typing import Dict
 
 import iotaa
 
 from uwtools.drivers.fv3 import FV3
-from uwtools.types import DefinitePath
 
 
 def execute(
     task: str,
-    config_file: DefinitePath,
+    config_file: Path,
     cycle: dt.datetime,
     batch: bool = False,
     dry_run: bool = False,

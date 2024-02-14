@@ -3,6 +3,7 @@ This file contains the specific drivers for a particular app, using the facade p
 """
 
 import shutil
+from pathlib import Path
 
 from uwtools.drivers.facade import Facade
 from uwtools.exceptions import UWError
@@ -24,7 +25,7 @@ class SRW210(Facade):
         Initialize the facade driver.
         """
 
-    def load_config(self, config_file: str) -> None:
+    def load_config(self, config_file: Path) -> None:
         """
         Load the configuration file.
         """

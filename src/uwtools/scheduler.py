@@ -9,11 +9,10 @@ from collections.abc import Mapping
 from copy import deepcopy
 from dataclasses import dataclass, fields
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.types import OptionalPath
 from uwtools.utils.processing import execute
 
 
@@ -66,7 +65,7 @@ class JobScheduler(ABC):
             )
         raise UWConfigError(f"No 'scheduler' defined in {props}")
 
-    def submit_job(self, runscript: Path, submit_file: OptionalPath = None) -> bool:
+    def submit_job(self, runscript: Path, submit_file: Optional[Path] = None) -> bool:
         """
         Submits a job to the scheduler.
 

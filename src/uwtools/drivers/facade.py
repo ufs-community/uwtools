@@ -10,6 +10,7 @@ https://github.com/ufs-community/uwtools/wiki/
 """
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 
 class Facade(ABC):
@@ -47,7 +48,7 @@ class Facade(ABC):
         """
 
     @abstractmethod
-    def load_config(self, config_file: str) -> None:
+    def load_config(self, config_file: Path) -> None:
         """
         Load the configuration file.
 

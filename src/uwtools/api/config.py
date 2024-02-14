@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import List, Optional, Union
 
 from uwtools.config.formats.fieldtable import FieldTableConfig as _FieldTableConfig
@@ -10,15 +11,14 @@ from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import validate_yaml as _validate_yaml
-from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import FORMAT as _FORMAT
 
 # Public
 
 
 def compare(
-    config_1_path: DefinitePath,
-    config_2_path: DefinitePath,
+    config_1_path: Path,
+    config_2_path: Path,
     config_1_format: Optional[str] = None,
     config_2_format: Optional[str] = None,
 ) -> bool:
@@ -33,7 +33,7 @@ def compare(
     )
 
 
-def get_fieldtable_config(config: Union[dict, OptionalPath] = None) -> _FieldTableConfig:
+def get_fieldtable_config(config: Union[dict, Optional[Path]] = None) -> _FieldTableConfig:
     """
     Get a ``FieldTableConfig`` object.
 
@@ -44,7 +44,7 @@ def get_fieldtable_config(config: Union[dict, OptionalPath] = None) -> _FieldTab
     return _FieldTableConfig(config=config)
 
 
-def get_ini_config(config: Union[dict, OptionalPath] = None) -> _INIConfig:
+def get_ini_config(config: Union[dict, Optional[Path]] = None) -> _INIConfig:
     """
     Get an ``INIConfig`` object.
 
@@ -54,7 +54,7 @@ def get_ini_config(config: Union[dict, OptionalPath] = None) -> _INIConfig:
     return _INIConfig(config=config)
 
 
-def get_nml_config(config: Union[dict, OptionalPath] = None) -> _NMLConfig:
+def get_nml_config(config: Union[dict, Optional[Path]] = None) -> _NMLConfig:
     """
     Get an ``NMLConfig`` object.
 
@@ -65,7 +65,7 @@ def get_nml_config(config: Union[dict, OptionalPath] = None) -> _NMLConfig:
     return _NMLConfig(config=config)
 
 
-def get_sh_config(config: Union[dict, OptionalPath] = None) -> _SHConfig:
+def get_sh_config(config: Union[dict, Optional[Path]] = None) -> _SHConfig:
     """
     Get an ``SHConfig`` object.
 
@@ -76,7 +76,7 @@ def get_sh_config(config: Union[dict, OptionalPath] = None) -> _SHConfig:
     return _SHConfig(config=config)
 
 
-def get_yaml_config(config: Union[dict, OptionalPath] = None) -> _YAMLConfig:
+def get_yaml_config(config: Union[dict, Optional[Path]] = None) -> _YAMLConfig:
     """
     Get a ``YAMLConfig`` object.
 
@@ -88,11 +88,11 @@ def get_yaml_config(config: Union[dict, OptionalPath] = None) -> _YAMLConfig:
 
 
 def realize(
-    input_config: Union[dict, _Config, OptionalPath] = None,
+    input_config: Union[dict, _Config, Optional[Path]] = None,
     input_format: Optional[str] = None,
-    output_file: OptionalPath = None,
+    output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
-    supplemental_configs: Optional[List[Union[dict, _Config, DefinitePath]]] = None,
+    supplemental_configs: Optional[List[Union[dict, _Config, Path]]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> bool:
@@ -112,9 +112,9 @@ def realize(
 
 
 def realize_to_dict(
-    input_config: Union[dict, _Config, OptionalPath] = None,
+    input_config: Union[dict, _Config, Optional[Path]] = None,
     input_format: Optional[str] = None,
-    supplemental_configs: Optional[List[Union[dict, _Config, DefinitePath]]] = None,
+    supplemental_configs: Optional[List[Union[dict, _Config, Path]]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> dict:
@@ -124,7 +124,7 @@ def realize_to_dict(
     return _realize(
         input_config=_ensure_config_arg_type(input_config),
         input_format=input_format,
-        output_file=os.devnull,
+        output_file=Path(os.devnull),
         output_format=None,
         supplemental_configs=supplemental_configs,
         values_needed=values_needed,
@@ -133,7 +133,7 @@ def realize_to_dict(
 
 
 def validate(
-    schema_file: DefinitePath, config: Optional[Union[dict, _YAMLConfig, OptionalPath]] = None
+    schema_file: Path, config: Optional[Union[dict, _YAMLConfig, Optional[Path]]] = None
 ) -> bool:
     """
     Check whether the specified config conforms to the specified JSON Schema spec.
@@ -152,8 +152,8 @@ def validate(
 
 
 def _ensure_config_arg_type(
-    config: Union[dict, _Config, OptionalPath]
-) -> Union[_Config, OptionalPath]:
+    config: Union[dict, _Config, Optional[Path]]
+) -> Union[_Config, Optional[Path]]:
     """
     Encapsulate a dict in a Config; return a Config or path argument as-is.
 

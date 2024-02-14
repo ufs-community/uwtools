@@ -49,7 +49,7 @@ def fixture_pathobj(suffix: str = "") -> Path:
     return path
 
 
-def fixture_path(suffix: str = "") -> str:
+def fixture_path(suffix: str = "") -> Path:
     """
     Returns a POSIX path to a test-fixture resource file.
 
@@ -57,7 +57,7 @@ def fixture_path(suffix: str = "") -> str:
         prefix path to the resources files is known to Python and varies based on installation
         location.
     """
-    return fixture_pathobj(suffix).as_posix()
+    return fixture_pathobj(suffix)
 
 
 def fixture_uri(suffix: str = "") -> str:

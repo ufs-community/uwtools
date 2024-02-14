@@ -56,7 +56,7 @@ def help_realize_config_fmt2fmt(infn, infmt, cfgfn, tmpdir):
     infile = fixture_path(infn)
     cfgfile = fixture_path(cfgfn)
     ext = Path(infile).suffix
-    outfile = str(tmpdir / f"outfile{ext}")
+    outfile = tmpdir / f"outfile{ext}"
     tools.realize_config(
         input_config=infile,
         input_format=infmt,
@@ -75,7 +75,7 @@ def help_realize_config_fmt2fmt(infn, infmt, cfgfn, tmpdir):
 def help_realize_config_simple(infn, infmt, tmpdir):
     infile = fixture_path(infn)
     ext = Path(infile).suffix
-    outfile = str(tmpdir / f"outfile{ext}")
+    outfile = tmpdir / f"outfile{ext}"
     tools.realize_config(
         input_config=infile,
         input_format=infmt,
@@ -128,9 +128,9 @@ def test_compare_configs_missing_key(compare_configs_assets, caplog):
 def test_compare_configs_bad_format(caplog):
     log.setLevel(logging.INFO)
     assert not tools.compare_configs(
-        config_1_path="/not/used",
+        config_1_path=Path("/not/used"),
         config_1_format="jpg",
-        config_2_path="/not/used",
+        config_2_path=Path("/not/used"),
         config_2_format=FORMAT.yaml,
     )
     msg = "Formats do not match: jpg vs yaml"
@@ -164,7 +164,7 @@ def test_realize_config_conversion_cfg_to_yaml(tmp_path):
     Test that a .cfg file can be used to create a YAML object.
     """
     infile = fixture_path("srw_example_yaml.cfg")
-    outfile = str(tmp_path / "test_ouput.yaml")
+    outfile = tmp_path / "test_ouput.yaml"
     tools.realize_config(
         input_config=infile,
         input_format=FORMAT.yaml,
@@ -222,7 +222,7 @@ def test_realize_config_field_table(tmp_path):
     Test reading a YAML config object and generating a field file table.
     """
     infile = fixture_path("FV3_GFS_v16.yaml")
-    outfile = str(tmp_path / "field_table_from_yaml.FV3_GFS")
+    outfile = tmp_path / "field_table_from_yaml.FV3_GFS"
     tools.realize_config(
         input_config=infile,
         input_format=FORMAT.yaml,
@@ -281,7 +281,7 @@ def test_realize_config_output_file_conversion(tmp_path):
     Test that --output-input-type converts config object to desired object type.
     """
     infile = fixture_path("simple.nml")
-    outfile = str(tmp_path / "test_ouput.cfg")
+    outfile = tmp_path / "test_ouput.cfg"
     tools.realize_config(
         input_config=infile,
         input_format=FORMAT.nml,
@@ -495,7 +495,7 @@ def test__ensure_format_config_obj():
 
 
 def test__ensure_format_deduced():
-    assert tools._ensure_format(desc="foo", config="/tmp/config.yaml") == FORMAT.yaml
+    assert tools._ensure_format(desc="foo", config=Path("/tmp/config.yaml")) == FORMAT.yaml
 
 
 def test__ensure_format_explicitly_specified_no_path():
@@ -503,7 +503,10 @@ def test__ensure_format_explicitly_specified_no_path():
 
 
 def test__ensure_format_explicitly_specified_with_path():
-    assert tools._ensure_format(desc="foo", fmt=FORMAT.ini, config="/tmp/config.yaml") == FORMAT.ini
+    assert (
+        tools._ensure_format(desc="foo", fmt=FORMAT.ini, config=Path("/tmp/config.yaml"))
+        == FORMAT.ini
+    )
 
 
 def test__print_config_section_ini(capsys):
@@ -663,7 +666,7 @@ def test__validate_format_supplemental_fail_obj():
 
 def test__validate_format_supplemental_fail_path():
     config_fmt = FORMAT.yaml
-    sc = "/path/to/config.nml"
+    sc = Path("/path/to/config.nml")
     with raises(UWError) as e:
         tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
     assert str(e.value) == "Supplemental config #%s format %s must match input format %s" % (
@@ -690,5 +693,5 @@ def test__validate_format_supplemental_pass_match_obj():
 
 def test__validate_format_supplemental_pass_match_path():
     config_fmt = FORMAT.yaml
-    sc = "/path/to/config.yaml"
+    sc = Path("/path/to/config.yaml")
     tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)

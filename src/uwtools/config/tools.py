@@ -2,6 +2,7 @@
 Tools for working with configs.
 """
 
+from pathlib import Path
 from typing import Callable, List, Optional, Union
 
 from uwtools.config.formats.base import Config
@@ -9,15 +10,14 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import depth, format_to_config, log_and_error
 from uwtools.exceptions import UWError
 from uwtools.logging import MSGWIDTH, log
-from uwtools.types import DefinitePath, OptionalPath
 from uwtools.utils.file import FORMAT, get_file_format
 
 # Public functions
 
 
 def compare_configs(
-    config_1_path: DefinitePath,
-    config_2_path: DefinitePath,
+    config_1_path: Path,
+    config_2_path: Path,
     config_1_format: Optional[str] = None,
     config_2_format: Optional[str] = None,
 ) -> bool:
@@ -75,11 +75,11 @@ def config_check_depths_update(config_obj: Union[Config, dict], target_format: s
 
 
 def realize_config(
-    input_config: Union[Config, OptionalPath] = None,
+    input_config: Union[Config, Optional[Path]] = None,
     input_format: Optional[str] = None,
-    output_file: OptionalPath = None,
+    output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
-    supplemental_configs: Optional[List[Union[dict, Config, DefinitePath]]] = None,
+    supplemental_configs: Optional[List[Union[dict, Config, Path]]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> dict:
@@ -114,7 +114,7 @@ def realize_config(
 
 
 def _ensure_format(
-    desc: str, fmt: Optional[str] = None, config: Union[Config, OptionalPath] = None
+    desc: str, fmt: Optional[str] = None, config: Union[Config, Optional[Path]] = None
 ) -> str:
     """
     Return the given format, or the appropriate format as deduced from the config.
@@ -163,7 +163,7 @@ def _print_config_section(config: dict, key_path: List[str]) -> None:
 def _realize_config_update(
     config_obj: Config,
     config_fmt: str,
-    supplemental_configs: Optional[List[Union[dict, Config, DefinitePath]]] = None,
+    supplemental_configs: Optional[List[Union[dict, Config, Path]]] = None,
 ) -> Config:
     """
     Update config with values from other configs, if given.
@@ -256,7 +256,7 @@ def _validate_format_output(input_fmt: str, output_fmt: str) -> None:
 
 
 def _validate_format_supplemental(
-    config_fmt: str, supplemental_cfg: Union[dict, Config, DefinitePath], idx: int
+    config_fmt: str, supplemental_cfg: Union[dict, Config, Path], idx: int
 ) -> None:
     """
     Ensure supplemental config format agrees with base config format.

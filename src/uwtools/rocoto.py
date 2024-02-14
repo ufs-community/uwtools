@@ -5,6 +5,7 @@ Support for creating Rocoto XML workflow documents.
 import re
 from dataclasses import dataclass
 from math import log10
+from pathlib import Path
 from typing import Any, List, Optional, Tuple, Union
 
 from lxml import etree
@@ -14,12 +15,11 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_yaml
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
-from uwtools.types import OptionalPath
 from uwtools.utils.file import readable, resource_pathobj, writable
 
 
 def realize_rocoto_xml(
-    config: Union[YAMLConfig, OptionalPath], output_file: OptionalPath = None
+    config: Union[YAMLConfig, Optional[Path]], output_file: Optional[Path] = None
 ) -> str:
     """
     Realize the Rocoto workflow defined in the given YAML as XML, validating both the YAML input and
@@ -38,7 +38,7 @@ def realize_rocoto_xml(
     return xml
 
 
-def validate_rocoto_xml_file(xml_file: OptionalPath) -> bool:
+def validate_rocoto_xml_file(xml_file: Optional[Path]) -> bool:
     """
     Validate purported Rocoto XML file against its schema.
 
@@ -79,7 +79,7 @@ class _RocotoXML:
     Generate a Rocoto XML document from a UW YAML config.
     """
 
-    def __init__(self, config: Union[dict, YAMLConfig, OptionalPath] = None) -> None:
+    def __init__(self, config: Union[dict, YAMLConfig, Optional[Path]] = None) -> None:
         self._config_validate(config)
         cfgobj = config if isinstance(config, YAMLConfig) else YAMLConfig(config)
         self._config = cfgobj.data
@@ -95,7 +95,7 @@ class _RocotoXML:
         xml = self._insert_doctype(xml)
         return xml
 
-    def dump(self, path: OptionalPath = None) -> None:
+    def dump(self, path: Optional[Path] = None) -> None:
         """
         Emit Rocoto XML document to file or stdout.
 
@@ -339,7 +339,7 @@ class _RocotoXML:
             tag, name = self._tag_name(key)
             {STR.metatask: self._add_metatask, STR.task: self._add_task}[tag](e, subconfig, name)
 
-    def _config_validate(self, config: Union[dict, YAMLConfig, OptionalPath]) -> None:
+    def _config_validate(self, config: Union[dict, YAMLConfig, Optional[Path]]) -> None:
         """
         Validate the given YAML config.
 

@@ -1,15 +1,15 @@
+from pathlib import Path
 from typing import Dict, Optional, Union
 
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.jinja2 import render as _render
-from uwtools.types import DefinitePath, OptionalPath
 
 
 def render(
-    values: Union[dict, DefinitePath],
+    values: Union[dict, Path],
     values_format: Optional[str] = None,
-    input_file: OptionalPath = None,
-    output_file: OptionalPath = None,
+    input_file: Optional[Path] = None,
+    output_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
@@ -46,8 +46,8 @@ def render(
 
 
 def translate(
-    input_file: OptionalPath = None,
-    output_file: OptionalPath = None,
+    input_file: Optional[Path] = None,
+    output_file: Optional[Path] = None,
     dry_run: bool = False,
 ) -> bool:
     """

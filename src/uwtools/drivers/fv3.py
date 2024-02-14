@@ -16,7 +16,6 @@ from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
-from uwtools.types import DefinitePath
 from uwtools.utils.file import resource_pathobj
 from uwtools.utils.processing import execute
 
@@ -27,7 +26,7 @@ class FV3(Driver):
     """
 
     def __init__(
-        self, config_file: DefinitePath, cycle: datetime, dry_run: bool = False, batch: bool = False
+        self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
     ):
         """
         The FV3 driver.
