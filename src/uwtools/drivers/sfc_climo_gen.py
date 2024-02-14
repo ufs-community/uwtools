@@ -57,11 +57,11 @@ class SfcClimoGen(Driver):
         yield self._taskname(f"namelist file {fn}")
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield [
-            file(path=Path(val))
-            for key, val in self._driver_config["namelist"]["update_values"]["config"].items()
-            if key.startswith("input_")
-        ]
+        vals = self._driver_config["namelist"]["update_values"]["config"]
+        input_paths = [Path(v) for k, v in vals.items() if k.startswith("input_")]
+        input_paths += [Path(vals["mosaic_file_mdl"])]
+        input_paths += [Path(vals["orog_dir_mdl"]) / fn for fn in vals["orog_files_mdl"]]
+        yield [file(input_path) for input_path in input_paths]
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=self._driver_config.get("namelist", {}),

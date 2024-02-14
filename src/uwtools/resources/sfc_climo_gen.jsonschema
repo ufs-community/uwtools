@@ -104,7 +104,10 @@
                       "type": "string"
                     },
                     "orog_files_mdl": {
-                      "type": "string"
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
                     },
                     "snowfree_albedo_method": {
                       "type": "string"
