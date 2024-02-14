@@ -12,16 +12,17 @@ from pathlib import Path
 # from shutil import copy
 from typing import Any, Dict
 
-# from iotaa import asset, dryrun, external, task, tasks
-from iotaa import dryrun
+from iotaa import asset, dryrun, task
 
 # from uwtools.config.formats.fieldtable import FieldTableConfig
-# from uwtools.config.formats.nml import NMLConfig
+from uwtools.config.formats.nml import NMLConfig
+
 # from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 
 # from uwtools.logging import log
 from uwtools.utils.file import resource_pathobj
+from uwtools.utils.tasks import file
 
 # from uwtools.utils.processing import execute
 
@@ -44,6 +45,28 @@ class SfcClimoGen(Driver):
             dryrun()
         self._rundir = Path(self._driver_config["run_dir"])
 
+    # Workflow tasks
+
+    @task
+    def namelist_file(self):
+        """
+        The sfc_climo_gen namelist file.
+        """
+        fn = "fort.41"
+        yield self._taskname(f"namelist file {fn}")
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        yield [
+            file(path=Path(val))
+            for key, val in self._driver_config["namelist"]["update_values"]["config"].items()
+            if key.startswith("input_")
+        ]
+        self._create_user_updated_config(
+            config_class=NMLConfig,
+            config_values=self._driver_config.get("namelist", {}),
+            path=path,
+        )
+
     # Private helper methods
 
     @property
@@ -65,6 +88,14 @@ class SfcClimoGen(Driver):
             "scheduler": self._config["platform"]["scheduler"],
             **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
+
+    def _taskname(self, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "sfc_climo_gen %s" % suffix
 
     def _validate(self) -> None:
         """

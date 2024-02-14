@@ -1,4 +1,3 @@
-import datetime as dt
 from pathlib import Path
 from typing import Dict
 
@@ -35,5 +34,6 @@ def tasks() -> Dict[str, str]:
     Returns a mapping from task names to their one-line descriptions.
     """
     return {
-        task: getattr(SfcClimoGen, task).__doc__.strip().split("\n")[0] for task in iotaa.tasknames(SfcClimoGen)
+        task: getattr(SfcClimoGen, task).__doc__.strip().split("\n")[0]
+        for task in iotaa.tasknames(SfcClimoGen)
     }

@@ -15,8 +15,8 @@ from typing import Any, Callable, Dict, List, Tuple
 
 import uwtools.api.config
 import uwtools.api.fv3
-import uwtools.api.sfc_climo_gen
 import uwtools.api.rocoto
+import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
@@ -347,7 +347,9 @@ def _add_subparser_sfc_climo_gen(subparsers: Subparsers) -> ModeChecks:
     }
 
 
-def _add_subparser_sfc_climo_gen_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+def _add_subparser_sfc_climo_gen_task(
+    subparsers: Subparsers, task: str, helpmsg: str
+) -> ActionChecks:
     """
     Subparser for mode: sfc_climo_gen <task>
 

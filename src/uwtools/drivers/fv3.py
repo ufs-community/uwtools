@@ -11,7 +11,7 @@ from pathlib import Path
 from shutil import copy
 from typing import Any, Dict
 
-from iotaa import asset, dryrun, external, task, tasks
+from iotaa import asset, dryrun, task, tasks
 
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
@@ -20,6 +20,7 @@ from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.utils.file import resource_pathobj
 from uwtools.utils.processing import execute
+from uwtools.utils.tasks import filecopy, symlink
 
 
 class FV3(Driver):
@@ -65,7 +66,7 @@ class FV3(Driver):
                     self._rundir / "INPUT" / f"gfs_bndy.tile{n}.{(boundary_hour - offset):03d}.nc"
                 )
                 symlinks[target] = linkname
-        yield [self._symlink(target=t, linkname=l) for t, l in symlinks.items()]
+        yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
 
     @task
     def diag_table(self):
@@ -106,7 +107,7 @@ class FV3(Driver):
         """
         yield self._taskname("files copied")
         yield [
-            self._filecopy(src=Path(src), dst=self._rundir / dst)
+            filecopy(src=Path(src), dst=self._rundir / dst)
             for dst, src in self._driver_config.get("files_to_copy", {}).items()
         ]
 
@@ -117,7 +118,7 @@ class FV3(Driver):
         """
         yield self._taskname("files linked")
         yield [
-            self._symlink(target=Path(target), linkname=self._rundir / linkname)
+            symlink(target=Path(target), linkname=self._rundir / linkname)
             for linkname, target in self._driver_config.get("files_to_link", {}).items()
         ]
 
@@ -219,29 +220,6 @@ class FV3(Driver):
 
     # Private workflow tasks
 
-    @external
-    def _file(self, path: Path):
-        """
-        An existing file.
-
-        :param path: Path to the file.
-        """
-        yield "File %s" % path
-        yield asset(path, path.is_file)
-
-    @task
-    def _filecopy(self, src: Path, dst: Path):
-        """
-        A copy of an existing file.
-
-        :param src: Path to the source file.
-        :param dst: Path to the destination file to create.
-        """
-        yield "Copy %s -> %s" % (src, dst)
-        yield asset(dst, dst.is_file)
-        yield self._file(src)
-        copy(src, dst)
-
     @task
     def _run_via_batch_submission(self):
         """
@@ -264,20 +242,6 @@ class FV3(Driver):
         yield self.provisioned_run_directory()
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
         execute(cmd=cmd, cwd=self._rundir, log_output=True)
-
-    @task
-    def _symlink(self, target: Path, linkname: Path):
-        """
-        A symbolic link.
-
-        :param target: The existing file or directory.
-        :param linkname: The symlink to create.
-        """
-        yield "Link %s -> %s" % (linkname, target)
-        yield asset(linkname, linkname.exists)
-        yield self._file(target)
-        linkname.parent.mkdir(parents=True, exist_ok=True)
-        os.symlink(src=target, dst=linkname)
 
     # Private helper methods
 
