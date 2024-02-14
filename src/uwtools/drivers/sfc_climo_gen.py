@@ -4,15 +4,16 @@
 A driver for sfc_climo_gen.
 """
 
-# import os
-# import stat
+import os
+import stat
+
 # from datetime import datetime
 from pathlib import Path
 
 # from shutil import copy
 from typing import Any, Dict
 
-from iotaa import asset, dryrun, task
+from iotaa import asset, dryrun, task, tasks
 
 # from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
@@ -66,6 +67,46 @@ class SfcClimoGen(Driver):
             config_values=self._driver_config.get("namelist", {}),
             path=path,
         )
+
+    @tasks
+    def provisioned_run_directory(self):
+        """
+        The run directory provisioned with all required content.
+        """
+        yield self._taskname("provisioned run directory")
+        yield [
+            self.namelist_file(),
+            self.runscript(),
+        ]
+
+    @task
+    def runscript(self):
+        """
+        A runscript suitable for submission to the scheduler.
+        """
+        fn = "runscript"
+        yield self._taskname(fn)
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        yield None
+        envvars = {
+            "FOO": "bar",
+            # "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
+            # "KMP_AFFINITY": "scatter",
+            # "MPI_TYPE_DEPTH": 20,
+            # "OMP_NUM_THREADS": self._driver_config.get("execution", {}).get("threads", 1),
+            # "OMP_STACKSIZE": "512m",
+        }
+        envcmds = self._driver_config.get("execution", {}).get("envcmds", [])
+        execution = [self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir]
+        scheduler = self._scheduler if self._batch else None
+        path.parent.mkdir(parents=True, exist_ok=True)
+        rs = self._runscript(
+            envcmds=envcmds, envvars=envvars, execution=execution, scheduler=scheduler
+        )
+        with open(path, "w", encoding="utf-8") as f:
+            print(rs, file=f)
+        os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
     # Private helper methods
 
