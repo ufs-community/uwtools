@@ -34,7 +34,7 @@ def fv3_fcstprop():
     return partial(schema_validator, "fv3", "properties", "fv3", "properties")
 
 
-def test_fv3_schema_defs_filesToStage():
+def test_schema_fv3_defs_filesToStage():
     errors = schema_validator("fv3", "$defs", "filesToStage")
     # The input must be an dict:
     assert "is not of type 'object'" in errors([])
@@ -46,7 +46,7 @@ def test_fv3_schema_defs_filesToStage():
     assert "True is not of type 'string'" in errors({"file1": True})
 
 
-def test_fv3_schema_defs_namelist():
+def test_schema_fv3_defs_namelist():
     errors = schema_validator("fv3", "$defs", "namelist")
     # Basic correctness (see also namelist_names_values test):
     assert not errors({"namelist": {"string": "foo"}})
@@ -56,7 +56,7 @@ def test_fv3_schema_defs_namelist():
     assert "[] is not of type 'object'" in errors([])
 
 
-def test_fv3_schema_defs_namelist_names_values():
+def test_schema_fv3_defs_namelist_names_values():
     errors = schema_validator("fv3", "$defs", "namelist_names_values")
     # Basic correctness:
     assert not errors(
@@ -72,7 +72,7 @@ def test_fv3_schema_defs_namelist_names_values():
     assert "[] is not of type 'object'" in errors([])
 
 
-def test_fv3_schema():
+def test_schema_fv3():
     d = {
         "domain": "regional",
         "execution": {"executable": "fv3"},
@@ -102,7 +102,7 @@ def test_fv3_schema():
     assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
 
 
-def test_fv3_schema_diag_table(fv3_fcstprop):
+def test_schema_fv3_diag_table(fv3_fcstprop):
     errors = fv3_fcstprop("diag_table")
     # String value is ok:
     assert not errors("/path/to/file")
@@ -110,13 +110,13 @@ def test_fv3_schema_diag_table(fv3_fcstprop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-def test_fv3_schema_domain(fv3_fcstprop):
+def test_schema_fv3_domain(fv3_fcstprop):
     errors = fv3_fcstprop("domain")
     # There is a fixed set of domain values:
     assert "'foo' is not one of ['global', 'regional']" in errors("foo")
 
 
-def test_fv3_schema_execution(fv3_fcstprop):
+def test_schema_fv3_execution(fv3_fcstprop):
     d = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
@@ -138,7 +138,7 @@ def test_fv3_schema_execution(fv3_fcstprop):
     )
 
 
-def test_fv3_schema_execution_batchargs(fv3_fcstprop):
+def test_schema_fv3_execution_batchargs(fv3_fcstprop):
     errors = fv3_fcstprop("execution", "properties", "batchargs")
     # Basic correctness, empty map is ok:
     assert not errors({})
@@ -150,7 +150,7 @@ def test_fv3_schema_execution_batchargs(fv3_fcstprop):
     assert "[] is not of type 'object'" in errors([])
 
 
-def test_fv3_schema_execution_executable(fv3_fcstprop):
+def test_schema_fv3_execution_executable(fv3_fcstprop):
     errors = fv3_fcstprop("execution", "properties", "executable")
     # String value is ok:
     assert not errors("fv3.exe")
@@ -158,7 +158,7 @@ def test_fv3_schema_execution_executable(fv3_fcstprop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-def test_fv3_schema_execution_mpiargs(fv3_fcstprop):
+def test_schema_fv3_execution_mpiargs(fv3_fcstprop):
     errors = fv3_fcstprop("execution", "properties", "mpiargs")
     # Basic correctness:
     assert not errors(["string1", "string2"])
@@ -168,7 +168,7 @@ def test_fv3_schema_execution_mpiargs(fv3_fcstprop):
     assert "88 is not of type 'string'" in errors(["string1", 88])
 
 
-def test_fv3_schema_execution_threads(fv3_fcstprop):
+def test_schema_fv3_execution_threads(fv3_fcstprop):
     errors = fv3_fcstprop("execution", "properties", "threads")
     # threads must be non-negative, and an integer:
     assert not errors(0)
@@ -177,7 +177,7 @@ def test_fv3_schema_execution_threads(fv3_fcstprop):
     assert "3.14 is not of type 'integer'" in errors(3.14)
 
 
-def test_fv3_schema_field_table(fv3_fcstprop, fv3_field_table_vals):
+def test_schema_fv3_field_table(fv3_fcstprop, fv3_field_table_vals):
     val, _ = fv3_field_table_vals
     base_file = {"base_file": "/some/path"}
     update_values = {"update_values": val}
@@ -192,7 +192,7 @@ def test_fv3_schema_field_table(fv3_fcstprop, fv3_field_table_vals):
     assert "is not valid" in errors({})
 
 
-def test_fv3_schema_field_table_update_values(fv3_fcstprop, fv3_field_table_vals):
+def test_schema_fv3_field_table_update_values(fv3_fcstprop, fv3_field_table_vals):
     val1, val2 = fv3_field_table_vals
     errors = fv3_fcstprop("field_table", "properties", "update_values")
     # A "fixed" profile-type entry is ok:
@@ -235,15 +235,15 @@ def test_fv3_schema_field_table_update_values(fv3_fcstprop, fv3_field_table_vals
     )
 
 
-def test_fv3_schema_files_to_copy():
-    test_fv3_schema_defs_filesToStage()
+def test_schema_fv3_files_to_copy():
+    test_schema_fv3_defs_filesToStage()
 
 
-def test_fv3_schema_files_to_link():
-    test_fv3_schema_defs_filesToStage()
+def test_schema_fv3_files_to_link():
+    test_schema_fv3_defs_filesToStage()
 
 
-def test_fv3_schema_lateral_boundary_conditions(fv3_fcstprop):
+def test_schema_fv3_lateral_boundary_conditions(fv3_fcstprop):
     d = {
         "interval_hours": 1,
         "offset": 0,
@@ -266,7 +266,7 @@ def test_fv3_schema_lateral_boundary_conditions(fv3_fcstprop):
     assert "88 is not of type 'string'" in errors(with_set(d, 88, "path"))
 
 
-def test_fv3_schema_length(fv3_fcstprop):
+def test_schema_fv3_length(fv3_fcstprop):
     errors = fv3_fcstprop("length")
     # Positive int is ok:
     assert not errors(6)
@@ -278,7 +278,7 @@ def test_fv3_schema_length(fv3_fcstprop):
     assert "'a string' is not of type 'integer'" in errors("a string")
 
 
-def test_fv3_schema_model_configure(fv3_fcstprop):
+def test_schema_fv3_model_configure(fv3_fcstprop):
     base_file = {"base_file": "/some/path"}
     update_values = {"update_values": {"foo": 88}}
     errors = fv3_fcstprop("model_configure")
@@ -294,7 +294,7 @@ def test_fv3_schema_model_configure(fv3_fcstprop):
     assert "is not valid" in errors({})
 
 
-def test_fv3_schema_model_configure_update_values(fv3_fcstprop):
+def test_schema_fv3_model_configure_update_values(fv3_fcstprop):
     errors = fv3_fcstprop("model_configure", "properties", "update_values")
     # boolean, number, and string values are ok:
     assert not errors({"bool": True, "int": 88, "float": 3.14, "string": "foo"})
@@ -304,7 +304,7 @@ def test_fv3_schema_model_configure_update_values(fv3_fcstprop):
     assert "does not have enough properties" in errors({})
 
 
-def test_fv3_schema_namelist(fv3_fcstprop):
+def test_schema_fv3_namelist(fv3_fcstprop):
     base_file = {"base_file": "/some/path"}
     update_values = {"update_values": {"nml": {"var": "val"}}}
     errors = fv3_fcstprop("namelist")
@@ -320,7 +320,7 @@ def test_fv3_schema_namelist(fv3_fcstprop):
     assert "is not valid" in errors({})
 
 
-def test_fv3_schema_namelist_update_values(fv3_fcstprop):
+def test_schema_fv3_namelist_update_values(fv3_fcstprop):
     errors = fv3_fcstprop("namelist", "properties", "update_values")
     # array, boolean, number, and string values are ok:
     assert not errors(
@@ -336,7 +336,7 @@ def test_fv3_schema_namelist_update_values(fv3_fcstprop):
     assert "does not have enough properties" in errors({"nml": {}})
 
 
-def test_fv3_schema_run_dir(fv3_fcstprop):
+def test_schema_fv3_run_dir(fv3_fcstprop):
     errors = fv3_fcstprop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
@@ -346,7 +346,7 @@ def test_fv3_schema_run_dir(fv3_fcstprop):
 # platform
 
 
-def test_fv3_schema_platform():
+def test_schema_platform():
     d = {"account": "me", "scheduler": "slurm"}
     errors = schema_validator("platform", "properties", "platform")
     # Basic correctness:
@@ -366,7 +366,7 @@ def test_fv3_schema_platform():
 # rocoto
 
 
-def test_rocoto_schema_compoundTimeString():
+def test_schema_rocoto_compoundTimeString():
     errors = schema_validator("rocoto", "$defs", "compoundTimeString")
     # Just a string is ok:
     assert not errors("foo")
@@ -384,7 +384,7 @@ def test_rocoto_schema_compoundTimeString():
     assert "is not valid" in errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "x"}}})
 
 
-def test_rocoto_schema_dependency_sh():
+def test_schema_rocoto_dependency_sh():
     errors = schema_validator("rocoto", "$defs", "dependency")
     # Basic spec:
     assert not errors({"sh": {"command": "foo"}})
@@ -404,7 +404,7 @@ def test_rocoto_schema_dependency_sh():
     assert not errors({"sh": {"command": {"cyclestr": {"value": "foo-@Y@m@d@H"}}}})
 
 
-def test_rocoto_schema_metatask_attrs():
+def test_schema_rocoto_metatask_attrs():
     errors = schema_validator("rocoto", "$defs", "metatask", "properties", "attrs")
     # Valid modes are "parallel" and "serial":
     assert not errors({"mode": "parallel"})
@@ -417,7 +417,7 @@ def test_rocoto_schema_metatask_attrs():
     assert "'foo' is not of type 'integer'" in errors({"throttle": "foo"})
 
 
-def test_rocoto_schema_workflow_cycledef():
+def test_schema_rocoto_workflow_cycledef():
     errors = schema_validator("rocoto", "properties", "workflow", "properties", "cycledef")
     # Basic spec:
     spec = "202311291200 202312011200 06:00:00"
@@ -449,7 +449,7 @@ def test_rocoto_schema_workflow_cycledef():
 # sfc-climo-gen
 
 
-def test_sfc_climo_gen_schema(config):
+def test_schema_sfc_climo_gen(config):
     errors = schema_validator("sfc-climo-gen", "properties", "sfc_climo_gen")
     d = config["sfc_climo_gen"]
     # Basic correctness:
@@ -458,6 +458,6 @@ def test_sfc_climo_gen_schema(config):
     assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
 
 
-# def test_sfc_climo_gen_schema_namelist(config):
+# def test_schema_sfc_climo_gen_namelist(config):
 #     errors = schema_validator("sfc-climo-gen", "properties", "sfc_climo_gen", "properties", )
 #     assert not errors(config["sfc_climo_gen"])
