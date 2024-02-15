@@ -304,7 +304,7 @@ def fcstprop():
 # Schema tests
 
 
-def test_fv3_schema_filesToStage():
+def test_fv3_schema_defs_filesToStage():
     errors = validator("fv3.jsonschema", "$defs", "filesToStage")
     # The input must be an dict:
     assert "is not of type 'object'" in errors([])
@@ -316,7 +316,7 @@ def test_fv3_schema_filesToStage():
     assert "True is not of type 'string'" in errors({"file1": True})
 
 
-def test_fv3_schema_namelist():
+def test_fv3_schema_defs_namelist():
     errors = validator("fv3.jsonschema", "$defs", "namelist")
     # Basic correctness (see also namelist_names_values test):
     assert not errors({"namelist": {"string": "foo"}})
@@ -326,7 +326,7 @@ def test_fv3_schema_namelist():
     assert "[] is not of type 'object'" in errors([])
 
 
-def test_fv3_schema_namelist_names_values():
+def test_fv3_schema_defs_namelist_names_values():
     errors = validator("fv3.jsonschema", "$defs", "namelist_names_values")
     # Basic correctness:
     assert not errors(
@@ -342,7 +342,7 @@ def test_fv3_schema_namelist_names_values():
     assert "[] is not of type 'object'" in errors([])
 
 
-def test_fv3_schema_forecast():
+def test_fv3_schema():
     d = {
         "domain": "regional",
         "execution": {"executable": "fv3"},
@@ -372,7 +372,7 @@ def test_fv3_schema_forecast():
     assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
 
 
-def test_fv3_schema_forecast_diag_table(fcstprop):
+def test_fv3_schema_diag_table(fcstprop):
     errors = fcstprop("diag_table")
     # String value is ok:
     assert not errors("/path/to/file")
@@ -380,13 +380,13 @@ def test_fv3_schema_forecast_diag_table(fcstprop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-def test_fv3_schema_forecast_domain(fcstprop):
+def test_fv3_schema_domain(fcstprop):
     errors = fcstprop("domain")
     # There is a fixed set of domain values:
     assert "'foo' is not one of ['global', 'regional']" in errors("foo")
 
 
-def test_fv3_schema_forecast_execution(fcstprop):
+def test_fv3_schema_execution(fcstprop):
     d = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
@@ -408,7 +408,7 @@ def test_fv3_schema_forecast_execution(fcstprop):
     )
 
 
-def test_fv3_schema_forecast_execution_batchargs(fcstprop):
+def test_fv3_schema_execution_batchargs(fcstprop):
     errors = fcstprop("execution", "properties", "batchargs")
     # Basic correctness, empty map is ok:
     assert not errors({})
@@ -420,7 +420,7 @@ def test_fv3_schema_forecast_execution_batchargs(fcstprop):
     assert "[] is not of type 'object'" in errors([])
 
 
-def test_fv3_schema_forecast_execution_executable(fcstprop):
+def test_fv3_schema_execution_executable(fcstprop):
     errors = fcstprop("execution", "properties", "executable")
     # String value is ok:
     assert not errors("fv3.exe")
@@ -428,7 +428,7 @@ def test_fv3_schema_forecast_execution_executable(fcstprop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-def test_fv3_schema_forecast_execution_mpiargs(fcstprop):
+def test_fv3_schema_execution_mpiargs(fcstprop):
     errors = fcstprop("execution", "properties", "mpiargs")
     # Basic correctness:
     assert not errors(["string1", "string2"])
@@ -438,7 +438,7 @@ def test_fv3_schema_forecast_execution_mpiargs(fcstprop):
     assert "88 is not of type 'string'" in errors(["string1", 88])
 
 
-def test_fv3_schema_forecast_execution_threads(fcstprop):
+def test_fv3_schema_execution_threads(fcstprop):
     errors = fcstprop("execution", "properties", "threads")
     # threads must be non-negative, and an integer:
     assert not errors(0)
@@ -447,7 +447,7 @@ def test_fv3_schema_forecast_execution_threads(fcstprop):
     assert "3.14 is not of type 'integer'" in errors(3.14)
 
 
-def test_fv3_schema_forecast_field_table(fcstprop, field_table_vals):
+def test_fv3_schema_field_table(fcstprop, field_table_vals):
     val, _ = field_table_vals
     base_file = {"base_file": "/some/path"}
     update_values = {"update_values": val}
@@ -462,7 +462,7 @@ def test_fv3_schema_forecast_field_table(fcstprop, field_table_vals):
     assert "is not valid" in errors({})
 
 
-def test_fv3_schema_forecast_field_table_update_values(fcstprop, field_table_vals):
+def test_fv3_schema_field_table_update_values(fcstprop, field_table_vals):
     val1, val2 = field_table_vals
     errors = fcstprop("field_table", "properties", "update_values")
     # A "fixed" profile-type entry is ok:
@@ -505,15 +505,15 @@ def test_fv3_schema_forecast_field_table_update_values(fcstprop, field_table_val
     )
 
 
-def test_fv3_schema_forecast_files_to_copy():
-    test_fv3_schema_filesToStage()
+def test_fv3_schema_files_to_copy():
+    test_fv3_schema_defs_filesToStage()
 
 
-def test_fv3_schema_forecast_files_to_link():
-    test_fv3_schema_filesToStage()
+def test_fv3_schema_files_to_link():
+    test_fv3_schema_defs_filesToStage()
 
 
-def test_fv3_schema_forecast_lateral_boundary_conditions(fcstprop):
+def test_fv3_schema_lateral_boundary_conditions(fcstprop):
     d = {
         "interval_hours": 1,
         "offset": 0,
@@ -536,7 +536,7 @@ def test_fv3_schema_forecast_lateral_boundary_conditions(fcstprop):
     assert "88 is not of type 'string'" in errors(with_set(d, 88, "path"))
 
 
-def test_fv3_schema_forecast_length(fcstprop):
+def test_fv3_schema_length(fcstprop):
     errors = fcstprop("length")
     # Positive int is ok:
     assert not errors(6)
@@ -548,7 +548,7 @@ def test_fv3_schema_forecast_length(fcstprop):
     assert "'a string' is not of type 'integer'" in errors("a string")
 
 
-def test_fv3_schema_forecast_model_configure(fcstprop):
+def test_fv3_schema_model_configure(fcstprop):
     base_file = {"base_file": "/some/path"}
     update_values = {"update_values": {"foo": 88}}
     errors = fcstprop("model_configure")
@@ -564,7 +564,7 @@ def test_fv3_schema_forecast_model_configure(fcstprop):
     assert "is not valid" in errors({})
 
 
-def test_fv3_schema_forecast_model_configure_update_values(fcstprop):
+def test_fv3_schema_model_configure_update_values(fcstprop):
     errors = fcstprop("model_configure", "properties", "update_values")
     # boolean, number, and string values are ok:
     assert not errors({"bool": True, "int": 88, "float": 3.14, "string": "foo"})
@@ -574,7 +574,7 @@ def test_fv3_schema_forecast_model_configure_update_values(fcstprop):
     assert "does not have enough properties" in errors({})
 
 
-def test_fv3_schema_forecast_namelist(fcstprop):
+def test_fv3_schema_namelist(fcstprop):
     base_file = {"base_file": "/some/path"}
     update_values = {"update_values": {"nml": {"var": "val"}}}
     errors = fcstprop("namelist")
@@ -590,7 +590,7 @@ def test_fv3_schema_forecast_namelist(fcstprop):
     assert "is not valid" in errors({})
 
 
-def test_fv3_schema_forecast_namelist_update_values(fcstprop):
+def test_fv3_schema_namelist_update_values(fcstprop):
     errors = fcstprop("namelist", "properties", "update_values")
     # array, boolean, number, and string values are ok:
     assert not errors(
@@ -606,7 +606,7 @@ def test_fv3_schema_forecast_namelist_update_values(fcstprop):
     assert "does not have enough properties" in errors({"nml": {}})
 
 
-def test_fv3_schema_forecast_run_dir(fcstprop):
+def test_fv3_schema_run_dir(fcstprop):
     errors = fcstprop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
