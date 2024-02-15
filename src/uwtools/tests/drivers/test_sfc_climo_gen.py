@@ -13,55 +13,52 @@ from pytest import fixture
 
 from uwtools.drivers import sfc_climo_gen
 
-
-@fixture
-def config():
-    return {
-        "sfc_climo_gen": {
-            "execution": {
-                "batchargs": {
-                    "export": "NONE",
-                    "nodes": 1,
-                    "stdout": "/path/to/file",
-                    "walltime": "00:02:00",
-                },
-                "envcmds": ["cmd1", "cmd2"],
-                "executable": "/path/to/sfc_climo_gen",
-                "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
-                "mpicmd": "srun",
+config: dict = {
+    "sfc_climo_gen": {
+        "execution": {
+            "batchargs": {
+                "export": "NONE",
+                "nodes": 1,
+                "stdout": "/path/to/file",
+                "walltime": "00:02:00",
             },
-            "namelist": {
-                "update_values": {
-                    "config": {
-                        "halo": 4,
-                        "input_facsf_file": "/path/to/file",
-                        "input_maximum_snow_albedo_file": "/path/to/file",
-                        "input_slope_type_file": "/path/to/file",
-                        "input_snowfree_albedo_file": "/path/to/file",
-                        "input_soil_type_file": "/path/to/file",
-                        "input_substrate_temperature_file": "/path/to/file",
-                        "input_vegetation_greenness_file": "/path/to/file",
-                        "input_vegetation_type_file": "/path/to/file",
-                        "maximum_snow_albedo_method": "bilinear",
-                        "mosaic_file_mdl": "/path/to/file",
-                        "orog_dir_mdl": "/path/to/dir",
-                        "orog_files_mdl": ["C403_oro_data.tile7.halo4.nc"],
-                        "snowfree_albedo_method": "bilinear",
-                        "vegetation_greenness_method": "bilinear",
-                    }
+            "envcmds": ["cmd1", "cmd2"],
+            "executable": "/path/to/sfc_climo_gen",
+            "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
+            "mpicmd": "srun",
+        },
+        "namelist": {
+            "update_values": {
+                "config": {
+                    "halo": 4,
+                    "input_facsf_file": "/path/to/file",
+                    "input_maximum_snow_albedo_file": "/path/to/file",
+                    "input_slope_type_file": "/path/to/file",
+                    "input_snowfree_albedo_file": "/path/to/file",
+                    "input_soil_type_file": "/path/to/file",
+                    "input_substrate_temperature_file": "/path/to/file",
+                    "input_vegetation_greenness_file": "/path/to/file",
+                    "input_vegetation_type_file": "/path/to/file",
+                    "maximum_snow_albedo_method": "bilinear",
+                    "mosaic_file_mdl": "/path/to/file",
+                    "orog_dir_mdl": "/path/to/dir",
+                    "orog_files_mdl": ["C403_oro_data.tile7.halo4.nc"],
+                    "snowfree_albedo_method": "bilinear",
+                    "vegetation_greenness_method": "bilinear",
                 }
-            },
-            "run_dir": "/path/to/dir",
+            }
         },
-        "platform": {
-            "account": "me",
-            "scheduler": "slurm",
-        },
-    }
+        "run_dir": "/path/to/dir",
+    },
+    "platform": {
+        "account": "me",
+        "scheduler": "slurm",
+    },
+}
 
 
 @fixture
-def config_file(config, tmp_path):
+def config_file(tmp_path):
     path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(config, f)

@@ -4,7 +4,87 @@ from functools import partial
 
 from pytest import fixture
 
+from uwtools.tests.drivers import test_sfc_climo_gen
 from uwtools.tests.support import schema_validator, with_del, with_set
+
+# execution
+
+
+def test_execution():
+    d = {"executable": "fv3"}
+    batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
+    mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
+    threads = {"threads": 32}
+    errors = schema_validator("execution")
+    # Basic correctness:
+    assert not errors(d)
+    # batchargs may optionally be specified:
+    assert not errors({**d, **batchargs})
+    # mpiargs may be optionally specified:
+    assert not errors({**d, **mpiargs})
+    # threads may optionally be specified:
+    assert not errors({**d, **threads})
+    # All properties are ok:
+    assert not errors({**d, **batchargs, **mpiargs, **threads})
+    # Additional properties are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        {**d, **mpiargs, **threads, "foo": "bar"}
+    )
+
+
+def test_execution_batchargs():
+    errors = schema_validator("execution", "properties", "batchargs")
+    # Basic correctness, empty map is ok:
+    assert not errors({})
+    # Managed properties are fine:
+    assert not errors({"queue": "string", "walltime": "string"})
+    # But so are unknown ones:
+    assert not errors({"--foo": 88})
+    # It just has to be a map:
+    assert "[] is not of type 'object'" in errors([])
+
+
+def test_execution_executable():
+    errors = schema_validator("execution", "properties", "executable")
+    # String value is ok:
+    assert not errors("fv3.exe")
+    # Anything else is not:
+    assert "88 is not of type 'string'" in errors(88)
+
+
+def test_execution_mpiargs():
+    errors = schema_validator("execution", "properties", "mpiargs")
+    # Basic correctness:
+    assert not errors(["string1", "string2"])
+    # mpiargs may be empty:
+    assert not errors([])
+    # String values are expected:
+    assert "88 is not of type 'string'" in errors(["string1", 88])
+
+
+def test_execution_threads():
+    errors = schema_validator("execution", "properties", "threads")
+    # threads must be non-negative, and an integer:
+    assert not errors(0)
+    assert not errors(4)
+    assert "-1 is less than the minimum of 0" in errors(-1)
+    assert "3.14 is not of type 'integer'" in errors(3.14)
+
+
+# files-to-stage
+
+
+def test_schema_files_to_stage():
+    errors = schema_validator("files-to-stage")
+    # The input must be an dict:
+    assert "is not of type 'object'" in errors([])
+    # A str -> str dict is ok:
+    assert not errors({"file1": "/path/to/file1", "file2": "/path/to/file2"})
+    # An empty dict is not allowed:
+    assert "does not have enough properties" in errors({})
+    # Non-string values are not allowed:
+    assert "True is not of type 'string'" in errors({"file1": True})
+
 
 # fv3
 
@@ -32,44 +112,6 @@ def fv3_field_table_vals():
 @fixture
 def fv3_fcstprop():
     return partial(schema_validator, "fv3", "properties", "fv3", "properties")
-
-
-def test_schema_fv3_defs_filesToStage():
-    errors = schema_validator("fv3", "$defs", "filesToStage")
-    # The input must be an dict:
-    assert "is not of type 'object'" in errors([])
-    # A str -> str dict is ok:
-    assert not errors({"file1": "/path/to/file1", "file2": "/path/to/file2"})
-    # An empty dict is not allowed:
-    assert "does not have enough properties" in errors({})
-    # Non-string values are not allowed:
-    assert "True is not of type 'string'" in errors({"file1": True})
-
-
-def test_schema_fv3_defs_namelist():
-    errors = schema_validator("fv3", "$defs", "namelist")
-    # Basic correctness (see also namelist_names_values test):
-    assert not errors({"namelist": {"string": "foo"}})
-    # Needs at least one value:
-    assert "does not have enough properties" in errors({})
-    # Must be a mapping:
-    assert "[] is not of type 'object'" in errors([])
-
-
-def test_schema_fv3_defs_namelist_names_values():
-    errors = schema_validator("fv3", "$defs", "namelist_names_values")
-    # Basic correctness:
-    assert not errors(
-        {"array": [1, 2, 3], "boolean": True, "float": 3.14, "integer": 88, "string": "foo"}
-    )
-    # Other types are not allowed:
-    errormsg = "%s is not of type 'array', 'boolean', 'number', 'string'"
-    assert errormsg % "None" in errors({"nonetype": None})
-    assert errormsg % "{}" in errors({"dict": {}})
-    # Needs at least one value:
-    assert "does not have enough properties" in errors({})
-    # Must be a mapping:
-    assert "[] is not of type 'object'" in errors([])
 
 
 def test_schema_fv3():
@@ -114,67 +156,6 @@ def test_schema_fv3_domain(fv3_fcstprop):
     errors = fv3_fcstprop("domain")
     # There is a fixed set of domain values:
     assert "'foo' is not one of ['global', 'regional']" in errors("foo")
-
-
-def test_schema_fv3_execution(fv3_fcstprop):
-    d = {"executable": "fv3"}
-    batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
-    mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
-    threads = {"threads": 32}
-    errors = fv3_fcstprop("execution")
-    # Basic correctness:
-    assert not errors(d)
-    # batchargs may optionally be specified:
-    assert not errors({**d, **batchargs})
-    # mpiargs may be optionally specified:
-    assert not errors({**d, **mpiargs})
-    # threads may optionally be specified:
-    assert not errors({**d, **threads})
-    # All properties are ok:
-    assert not errors({**d, **batchargs, **mpiargs, **threads})
-    # Additional properties are not allowed:
-    assert "Additional properties are not allowed" in errors(
-        {**d, **mpiargs, **threads, "foo": "bar"}
-    )
-
-
-def test_schema_fv3_execution_batchargs(fv3_fcstprop):
-    errors = fv3_fcstprop("execution", "properties", "batchargs")
-    # Basic correctness, empty map is ok:
-    assert not errors({})
-    # Managed properties are fine:
-    assert not errors({"queue": "string", "walltime": "string"})
-    # But so are unknown ones:
-    assert not errors({"--foo": 88})
-    # It just has to be a map:
-    assert "[] is not of type 'object'" in errors([])
-
-
-def test_schema_fv3_execution_executable(fv3_fcstprop):
-    errors = fv3_fcstprop("execution", "properties", "executable")
-    # String value is ok:
-    assert not errors("fv3.exe")
-    # Anything else is not:
-    assert "88 is not of type 'string'" in errors(88)
-
-
-def test_schema_fv3_execution_mpiargs(fv3_fcstprop):
-    errors = fv3_fcstprop("execution", "properties", "mpiargs")
-    # Basic correctness:
-    assert not errors(["string1", "string2"])
-    # mpiargs may be empty:
-    assert not errors([])
-    # String values are expected:
-    assert "88 is not of type 'string'" in errors(["string1", 88])
-
-
-def test_schema_fv3_execution_threads(fv3_fcstprop):
-    errors = fv3_fcstprop("execution", "properties", "threads")
-    # threads must be non-negative, and an integer:
-    assert not errors(0)
-    assert not errors(4)
-    assert "-1 is less than the minimum of 0" in errors(-1)
-    assert "3.14 is not of type 'integer'" in errors(3.14)
 
 
 def test_schema_fv3_field_table(fv3_fcstprop, fv3_field_table_vals):
@@ -233,14 +214,6 @@ def test_schema_fv3_field_table_update_values(fv3_fcstprop, fv3_field_table_vals
     assert "'a string' is not of type 'number'" in errors(
         with_set(val2, "a string", "bar", "profile_type", "top_value")
     )
-
-
-def test_schema_fv3_files_to_copy():
-    test_schema_fv3_defs_filesToStage()
-
-
-def test_schema_fv3_files_to_link():
-    test_schema_fv3_defs_filesToStage()
 
 
 def test_schema_fv3_lateral_boundary_conditions(fv3_fcstprop):
@@ -341,6 +314,37 @@ def test_schema_fv3_run_dir(fv3_fcstprop):
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
+
+
+# namelist
+
+
+def test_schema_namelist():
+    errors = schema_validator("namelist")
+    # Basic correctness (see also namelist_names_values test):
+    assert not errors(
+        {
+            "namelist": {
+                "array": [1, 2, 3],
+                "boolean": True,
+                "float": 3.14,
+                "integer": 88,
+                "string": "foo",
+            }
+        }
+    )
+    # Other types at the name-value level are not allowed:
+    errormsg = "%s is not of type 'array', 'boolean', 'number', 'string'"
+    assert errormsg % "None" in errors({"namelist": {"nonetype": None}})
+    assert errormsg % "{}" in errors({"namelist": {"dict": {}}})
+    # Needs at least one namelist value:
+    assert "does not have enough properties" in errors({})
+    # Needs at least one name-value value:
+    assert "does not have enough properties" in errors({"namelist": {}})
+    # Namelist level must be a mapping:
+    assert "[] is not of type 'object'" in errors([])
+    # Name-value level level must be a mapping:
+    assert "[] is not of type 'object'" in errors({"namelist": []})
 
 
 # platform
@@ -449,15 +453,10 @@ def test_schema_rocoto_workflow_cycledef():
 # sfc-climo-gen
 
 
-def test_schema_sfc_climo_gen(config):
+def test_schema_sfc_climo_gen():
     errors = schema_validator("sfc-climo-gen", "properties", "sfc_climo_gen")
-    d = config["sfc_climo_gen"]
+    d = test_sfc_climo_gen.config["sfc_climo_gen"]
     # Basic correctness:
     assert not errors(d)
     # Additional properties are not allowed:
     assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
-
-
-# def test_schema_sfc_climo_gen_namelist(config):
-#     errors = schema_validator("sfc-climo-gen", "properties", "sfc_climo_gen", "properties", )
-#     assert not errors(config["sfc_climo_gen"])
