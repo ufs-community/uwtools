@@ -316,6 +316,32 @@ def test_fv3_schema_filesToStage():
     assert "True is not of type 'string'" in errors({"file1": True})
 
 
+def test_fv3_schema_namelist():
+    errors = validator("fv3.jsonschema", "$defs", "namelist")
+    # Basic correctness (see also namelist_names_values test):
+    assert not errors({"namelist": {"string": "foo"}})
+    # Needs at least one value:
+    assert "does not have enough properties" in errors({})
+    # Must be a mapping:
+    assert "[] is not of type 'object'" in errors([])
+
+
+def test_fv3_schema_namelist_names_values():
+    errors = validator("fv3.jsonschema", "$defs", "namelist_names_values")
+    # Basic correctness:
+    assert not errors(
+        {"array": [1, 2, 3], "boolean": True, "float": 3.14, "integer": 88, "string": "foo"}
+    )
+    # Other types are not allowed:
+    errormsg = "%s is not of type 'array', 'boolean', 'number', 'string'"
+    assert errormsg % "None" in errors({"nonetype": None})
+    assert errormsg % "{}" in errors({"dict": {}})
+    # Needs at least one value:
+    assert "does not have enough properties" in errors({})
+    # Must be a mapping:
+    assert "[] is not of type 'object'" in errors([])
+
+
 def test_fv3_schema_forecast():
     d = {
         "domain": "regional",
