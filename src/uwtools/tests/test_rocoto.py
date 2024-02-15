@@ -439,7 +439,7 @@ class Test__RocotoXML:
 
 
 def test_rocoto_schema_compoundTimeString():
-    errors = validator("rocoto.jsonschema", "$defs", "compoundTimeString")
+    errors = validator("rocoto", "$defs", "compoundTimeString")
     # Just a string is ok:
     assert not errors("foo")
     # An int value is ok:
@@ -457,7 +457,7 @@ def test_rocoto_schema_compoundTimeString():
 
 
 def test_rocoto_schema_dependency_sh():
-    errors = validator("rocoto.jsonschema", "$defs", "dependency")
+    errors = validator("rocoto", "$defs", "dependency")
     # Basic spec:
     assert not errors({"sh": {"command": "foo"}})
     # The "command" property is mandatory:
@@ -477,7 +477,7 @@ def test_rocoto_schema_dependency_sh():
 
 
 def test_rocoto_schema_metatask_attrs():
-    errors = validator("rocoto.jsonschema", "$defs", "metatask", "properties", "attrs")
+    errors = validator("rocoto", "$defs", "metatask", "properties", "attrs")
     # Valid modes are "parallel" and "serial":
     assert not errors({"mode": "parallel"})
     assert not errors({"mode": "serial"})
@@ -490,7 +490,7 @@ def test_rocoto_schema_metatask_attrs():
 
 
 def test_rocoto_schema_workflow_cycledef():
-    errors = validator("rocoto.jsonschema", "properties", "workflow", "properties", "cycledef")
+    errors = validator("rocoto", "properties", "workflow", "properties", "cycledef")
     # Basic spec:
     spec = "202311291200 202312011200 06:00:00"
     assert not errors([{"spec": spec}])

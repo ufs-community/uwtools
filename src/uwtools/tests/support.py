@@ -10,7 +10,7 @@ import yaml
 from _pytest.logging import LogCaptureFixture
 
 from uwtools.config.validator import _validation_errors
-from uwtools.utils.file import resource_pathobj
+from uwtools.utils.file import resource_path
 
 
 def compare_files(path1: str, path2: str) -> bool:
@@ -94,16 +94,18 @@ def regex_logged(caplog: LogCaptureFixture, msg: str) -> bool:
     return any(pattern.search(record.message) for record in caplog.records)
 
 
-def validator(schema_fn: str, *args: Any) -> Callable:
+def validator(schema_name: str, *args: Any) -> Callable:
     """
     Create a lambda that returns errors from validating a config input.
 
-    :param schema_fn: The schema filename, relative to package resources.
+    :param schema_name: The uwtools schema name.
     :param args: Keys leading to sub-schema to be used to validate eventual input.
     :returns: A lambda that, when called with an input to test, returns a string (possibly empty)
         containing the validation errors.
     """
-    with open(resource_pathobj(schema_fn), "r", encoding="utf-8") as f:
+    with open(
+        resource_path("jsonschema") / f"{schema_name}.jsonschema", "r", encoding="utf-8"
+    ) as f:
         schema = yaml.safe_load(f)
     defs = schema.get("$defs", {})
     for arg in args:

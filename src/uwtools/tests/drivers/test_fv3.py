@@ -298,14 +298,14 @@ def field_table_vals():
 
 @fixture
 def fcstprop():
-    return partial(validator, "fv3.jsonschema", "properties", "fv3", "properties")
+    return partial(validator, "fv3", "properties", "fv3", "properties")
 
 
 # Schema tests
 
 
 def test_fv3_schema_defs_filesToStage():
-    errors = validator("fv3.jsonschema", "$defs", "filesToStage")
+    errors = validator("fv3", "$defs", "filesToStage")
     # The input must be an dict:
     assert "is not of type 'object'" in errors([])
     # A str -> str dict is ok:
@@ -317,7 +317,7 @@ def test_fv3_schema_defs_filesToStage():
 
 
 def test_fv3_schema_defs_namelist():
-    errors = validator("fv3.jsonschema", "$defs", "namelist")
+    errors = validator("fv3", "$defs", "namelist")
     # Basic correctness (see also namelist_names_values test):
     assert not errors({"namelist": {"string": "foo"}})
     # Needs at least one value:
@@ -327,7 +327,7 @@ def test_fv3_schema_defs_namelist():
 
 
 def test_fv3_schema_defs_namelist_names_values():
-    errors = validator("fv3.jsonschema", "$defs", "namelist_names_values")
+    errors = validator("fv3", "$defs", "namelist_names_values")
     # Basic correctness:
     assert not errors(
         {"array": [1, 2, 3], "boolean": True, "float": 3.14, "integer": 88, "string": "foo"}
@@ -350,7 +350,7 @@ def test_fv3_schema():
         "length": 3,
         "run_dir": "/tmp",
     }
-    errors = validator("fv3.jsonschema", "properties", "fv3")
+    errors = validator("fv3", "properties", "fv3")
     # Basic correctness:
     assert not errors(d)
     # Some top-level keys are required:

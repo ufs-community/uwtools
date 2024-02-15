@@ -8,7 +8,7 @@ from uwtools.tests.support import validator, with_del, with_set
 
 def test_fv3_schema_platform():
     d = {"account": "me", "scheduler": "slurm"}
-    errors = validator("platform.jsonschema", "properties", "platform")
+    errors = validator("platform", "properties", "platform")
     # Basic correctness:
     assert not errors(d)
     # Extra top-level keys are forbidden:

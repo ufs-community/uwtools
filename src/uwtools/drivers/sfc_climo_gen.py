@@ -11,7 +11,6 @@ from iotaa import asset, dryrun, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
-from uwtools.utils.file import resource_pathobj
 from uwtools.utils.processing import execute
 from uwtools.utils.tasks import file
 
@@ -159,5 +158,5 @@ class SfcClimoGen(Driver):
         """
         Perform all necessary schema validation.
         """
-        for schema_file in ("sfc_climo_gen.jsonschema", "platform.jsonschema"):
-            self._validate_one(resource_pathobj(schema_file))
+        for schema_name in ("sfc_climo_gen", "platform"):
+            self._validate_one(schema_name=schema_name)

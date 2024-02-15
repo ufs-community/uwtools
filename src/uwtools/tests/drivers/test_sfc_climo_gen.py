@@ -204,7 +204,7 @@ def test_SfcClimoGen__validate(driverobj):
 
 
 def test_sfc_climo_gen_schema(config):
-    errors = validator("sfc_climo_gen.jsonschema", "properties", "sfc_climo_gen")
+    errors = validator("sfc_climo_gen", "properties", "sfc_climo_gen")
     d = config["sfc_climo_gen"]
     # Basic correctness:
     assert not errors(d)
@@ -213,5 +213,5 @@ def test_sfc_climo_gen_schema(config):
 
 
 # def test_sfc_climo_gen_schema_namelist(config):
-#     errors = validator("sfc_climo_gen.jsonschema", "properties", "sfc_climo_gen", "properties", )
+#     errors = validator("sfc_climo_gen", "properties", "sfc_climo_gen", "properties", )
 #     assert not errors(config["sfc_climo_gen"])

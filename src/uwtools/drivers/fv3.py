@@ -16,7 +16,6 @@ from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
-from uwtools.utils.file import resource_pathobj
 from uwtools.utils.processing import execute
 from uwtools.utils.tasks import filecopy, symlink
 
@@ -282,5 +281,5 @@ class FV3(Driver):
         """
         Perform all necessary schema validation.
         """
-        for schema_file in ("fv3.jsonschema", "platform.jsonschema"):
-            self._validate_one(resource_pathobj(schema_file))
+        for schema_name in ("fv3", "platform"):
+            self._validate_one(schema_name=schema_name)

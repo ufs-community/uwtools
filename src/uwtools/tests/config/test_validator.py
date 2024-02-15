@@ -13,7 +13,7 @@ from pytest import fixture
 from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.logging import log
-from uwtools.utils.file import resource_pathobj
+from uwtools.utils.file import resource_path
 
 # Fixtures
 
@@ -46,7 +46,7 @@ def prep_config_dict():
 
 @fixture
 def rocoto_assets():
-    schema_file = resource_pathobj("rocoto.jsonschema")
+    schema_file = resource_path("jsonschema/rocoto.jsonschema")
     kwargs = {"schema_file": schema_file, "config_file": "/not/used"}
     config = {
         "workflow": {
