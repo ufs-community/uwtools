@@ -25,7 +25,7 @@ def config():
                     "walltime": "00:02:00",
                 },
                 "envcmds": ["cmd1", "cmd2"],
-                "executable": "/path/to/exe",
+                "executable": "/path/to/sfc_climo_gen",
                 "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
                 "mpicmd": "srun",
             },
@@ -53,7 +53,7 @@ def config():
             "run_dir": "/path/to/dir",
         },
         "platform": {
-            "account": "zrtrr",
+            "account": "me",
             "scheduler": "slurm",
         },
     }
@@ -110,3 +110,34 @@ def test_SfcClimoGen_provisioned_run_directory(driverobj):
         driverobj.provisioned_run_directory()
     for m in mocks:
         mocks[m].assert_called_once_with()
+
+
+def test_SfcClimoGen_run_batch(driverobj):
+    with patch.object(driverobj, "_run_via_batch_submission") as func:
+        driverobj.run()
+    func.assert_called_once_with()
+
+
+def test_SfcClimoGen_run_local(driverobj):
+    driverobj._batch = False
+    with patch.object(driverobj, "_run_via_local_execution") as func:
+        driverobj.run()
+    func.assert_called_once_with()
+
+
+def test_SfcClimoGen_runscript(driverobj, tmp_path):
+    driverobj._rundir = tmp_path
+    dst = driverobj._rundir / "runscript"
+    assert not dst.is_file()
+    driverobj.runscript()
+    with open(dst, "r", encoding="utf-8") as f:
+        lines = f.read().split("\n")
+    # Check directives:
+    assert "#SBATCH --account=me" in lines
+    assert "#SBATCH --time=00:02:00" in lines
+    # Check environment commands:
+    assert "cmd1" in lines
+    assert "cmd2" in lines
+    # Check execution:
+    assert "srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE /path/to/sfc_climo_gen" in lines
+    assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
