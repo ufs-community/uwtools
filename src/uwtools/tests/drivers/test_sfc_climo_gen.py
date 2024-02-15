@@ -167,3 +167,33 @@ def test_SfcClimoGen__run_via_local_execution(driverobj):
                 log_output=True,
             )
         prd.assert_called_once_with()
+
+
+def test_SfcClimoGen__driver_config(driverobj):
+    assert driverobj._driver_config == driverobj._config["sfc_climo_gen"]
+
+
+def test_SfcClimoGen__resources(driverobj):
+    account = "me"
+    scheduler = "slurm"
+    walltime = "01:10:00"
+    driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
+    driverobj._config["platform"] = {"account": account, "scheduler": scheduler}
+    assert driverobj._resources == {
+        "account": account,
+        "rundir": driverobj._rundir,
+        "scheduler": scheduler,
+        "walltime": walltime,
+    }
+
+
+def test_SfcClimoGen__runscript_path(driverobj):
+    assert driverobj._runscript_path == driverobj._rundir / "runscript"
+
+
+def test_SfcClimoGen__taskanme(driverobj):
+    assert driverobj._taskname("foo") == "sfc_climo_gen foo"
+
+
+def test_SfcClimoGen__validate(driverobj):
+    driverobj._validate()
