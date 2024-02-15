@@ -94,7 +94,7 @@ def regex_logged(caplog: LogCaptureFixture, msg: str) -> bool:
     return any(pattern.search(record.message) for record in caplog.records)
 
 
-def validator(schema_name: str, *args: Any) -> Callable:
+def schema_validator(schema_name: str, *args: Any) -> Callable:
     """
     Create a lambda that returns errors from validating a config input.
 

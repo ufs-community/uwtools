@@ -12,7 +12,6 @@ from iotaa import asset, external
 from pytest import fixture
 
 from uwtools.drivers import sfc_climo_gen
-from uwtools.tests.support import validator
 
 
 @fixture
@@ -198,20 +197,3 @@ def test_SfcClimoGen__taskanme(driverobj):
 
 def test_SfcClimoGen__validate(driverobj):
     driverobj._validate()
-
-
-# Schema tests
-
-
-def test_sfc_climo_gen_schema(config):
-    errors = validator("sfc-climo-gen", "properties", "sfc_climo_gen")
-    d = config["sfc_climo_gen"]
-    # Basic correctness:
-    assert not errors(d)
-    # Additional properties are not allowed:
-    assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
-
-
-# def test_sfc_climo_gen_schema_namelist(config):
-#     errors = validator("sfc-climo-gen", "properties", "sfc_climo_gen", "properties", )
-#     assert not errors(config["sfc_climo_gen"])

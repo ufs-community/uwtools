@@ -13,7 +13,7 @@ from pytest import fixture, raises
 from uwtools import rocoto
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError, UWError
-from uwtools.tests.support import fixture_path, validator
+from uwtools.tests.support import fixture_path
 
 # Fixtures
 
@@ -433,86 +433,3 @@ class Test__RocotoXML:
         path = tmp_path / "out.xml"
         instance.dump(path=path)
         assert rocoto.validate_rocoto_xml_file(path)
-
-
-# Schema tests
-
-
-def test_rocoto_schema_compoundTimeString():
-    errors = validator("rocoto", "$defs", "compoundTimeString")
-    # Just a string is ok:
-    assert not errors("foo")
-    # An int value is ok:
-    assert not errors(20240103120000)
-    # A simple cycle string is ok:
-    assert not errors({"cyclestr": {"value": "@Y@m@d@H"}})
-    # The "value" entry is required:
-    assert "is not valid" in errors({"cyclestr": {}})
-    # Unknown properties are not allowed:
-    assert "is not valid" in errors({"cyclestr": {"foo": "bar"}})
-    # An "offset" attribute may be provided:
-    assert not errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "06:00:00"}}})
-    # The "offset" value must be a valid time string:
-    assert "is not valid" in errors({"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "x"}}})
-
-
-def test_rocoto_schema_dependency_sh():
-    errors = validator("rocoto", "$defs", "dependency")
-    # Basic spec:
-    assert not errors({"sh": {"command": "foo"}})
-    # The "command" property is mandatory:
-    assert "command' is a required property" in errors({"sh": {}})
-    # A _<name> suffix is allowed:
-    assert not errors({"sh_foo": {"command": "foo"}})
-    # Optional attributes "runopt" and "shell" are supported:
-    assert not errors(
-        {"sh_foo": {"attrs": {"runopt": "-c", "shell": "/bin/bash"}, "command": "foo"}}
-    )
-    # Other attributes are not allowed:
-    assert "Additional properties are not allowed ('color' was unexpected)" in errors(
-        {"sh_foo": {"attrs": {"color": "blue"}, "command": "foo"}}
-    )
-    # The command is a compoundTimeString:
-    assert not errors({"sh": {"command": {"cyclestr": {"value": "foo-@Y@m@d@H"}}}})
-
-
-def test_rocoto_schema_metatask_attrs():
-    errors = validator("rocoto", "$defs", "metatask", "properties", "attrs")
-    # Valid modes are "parallel" and "serial":
-    assert not errors({"mode": "parallel"})
-    assert not errors({"mode": "serial"})
-    assert "'foo' is not one of ['parallel', 'serial']" in errors({"mode": "foo"})
-    # Positive int is ok for throttle:
-    assert not errors({"throttle": 88})
-    assert not errors({"throttle": 0})
-    assert "-1 is less than the minimum of 0" in errors({"throttle": -1})
-    assert "'foo' is not of type 'integer'" in errors({"throttle": "foo"})
-
-
-def test_rocoto_schema_workflow_cycledef():
-    errors = validator("rocoto", "properties", "workflow", "properties", "cycledef")
-    # Basic spec:
-    spec = "202311291200 202312011200 06:00:00"
-    assert not errors([{"spec": spec}])
-    # Spec with step specified as seconds:
-    assert not errors([{"spec": "202311291200 202312011200 3600"}])
-    # Basic spec with group attribute:
-    assert not errors([{"attrs": {"group": "g"}, "spec": spec}])
-    # Spec with positive activation offset attribute:
-    assert not errors([{"attrs": {"activation_offset": "12:00:00"}, "spec": spec}])
-    # Spec with negative activation offset attribute:
-    assert not errors([{"attrs": {"activation_offset": "-12:00:00"}, "spec": spec}])
-    # Spec with activation offset specified as positive seconds:
-    assert not errors([{"attrs": {"activation_offset": 3600}, "spec": spec}])
-    # Spec with activation offset specified as negative seconds:
-    assert not errors([{"attrs": {"activation_offset": -3600}, "spec": spec}])
-    # Property spec is required:
-    assert "'spec' is a required property" in errors([{}])
-    # Additional properties are not allowed:
-    assert "'foo' was unexpected" in errors([{"spec": spec, "foo": "bar"}])
-    # Additional attributes are not allowed:
-    assert "'foo' was unexpected" in errors([{"attrs": {"foo": "bar"}, "spec": spec}])
-    # Bad spec:
-    assert "'x 202312011200 06:00:00' is not valid" in errors([{"spec": "x 202312011200 06:00:00"}])
-    # Spec with bad activation offset attribute:
-    assert "'foo' is not valid" in errors([{"attrs": {"activation_offset": "foo"}, "spec": spec}])
