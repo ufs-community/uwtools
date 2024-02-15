@@ -4,38 +4,7 @@
       "additionalProperties": false,
       "properties": {
         "execution": {
-          "additionalProperties": false,
-          "properties": {
-            "batchargs": {
-              "type": "object"
-            },
-            "envcmds": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "executable": {
-              "type": "string"
-            },
-            "mpiargs": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "mpicmd": {
-              "type": "string"
-            },
-            "threads": {
-              "minimum": 0,
-              "type": "integer"
-            }
-          },
-          "required": [
-            "executable"
-          ],
-          "type": "object"
+          "$ref": "urn:uwtools:execution"
         },
         "namelist": {
           "additionalProperties": false,
