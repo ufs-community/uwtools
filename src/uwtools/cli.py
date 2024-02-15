@@ -496,7 +496,7 @@ def _add_arg_config_file(group: Group) -> None:
         help="Path to config file",
         metavar="PATH",
         required=True,
-        type=str,
+        type=Path,
     )
 
 
@@ -545,7 +545,7 @@ def _add_arg_file_path(group: Group, switch: str, helpmsg: str, required: bool =
         help=helpmsg,
         metavar="PATH",
         required=required,
-        type=str,
+        type=Path,
     )
 
 
@@ -556,7 +556,7 @@ def _add_arg_input_file(group: Group, required: bool = False) -> None:
         help="Path to input file (defaults to stdin)",
         metavar="PATH",
         required=required,
-        type=str,
+        type=Path,
     )
 
 
@@ -586,7 +586,7 @@ def _add_arg_output_file(group: Group, required: bool = False) -> None:
         help="Path to output file (defaults to stdout)",
         metavar="PATH",
         required=required,
-        type=str,
+        type=Path,
     )
 
 
@@ -615,7 +615,7 @@ def _add_arg_schema_file(group: Group) -> None:
         help="Path to schema file to use for validation",
         metavar="PATH",
         required=True,
-        type=str,
+        type=Path,
     )
 
 
@@ -625,6 +625,7 @@ def _add_arg_supplemental_files(group: Group) -> None:
         help="Additional files to supplement primary input",
         metavar="PATH",
         nargs="*",
+        type=Path,
     )
 
 
@@ -634,7 +635,7 @@ def _add_arg_values_file(group: Group, required: bool = False) -> None:
         help="Path to file providing override or interpolation values",
         metavar="PATH",
         required=required,
-        type=str,
+        type=Path,
     )
 
 
