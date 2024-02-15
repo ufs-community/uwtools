@@ -24,7 +24,7 @@ def execute(
     Otherwise, the forecast will be run directly on the current system.
 
     :param task: The task to execute
-    :param config_file: Path to UW YAML config file
+    :param config_file: Path to YAML config file
     :param cycle: The cycle to run
     :param batch: Submit run to the batch system
     :param dry_run: Do not run forecast, just report what would have been done

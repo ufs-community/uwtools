@@ -76,7 +76,7 @@ def validate_rocoto_xml_string(xml: str) -> bool:
 
 class _RocotoXML:
     """
-    Generate a Rocoto XML document from a UW YAML config.
+    Generate a Rocoto XML document from a YAML config.
     """
 
     def __init__(self, config: Union[dict, YAMLConfig, Optional[Path]] = None) -> None:
