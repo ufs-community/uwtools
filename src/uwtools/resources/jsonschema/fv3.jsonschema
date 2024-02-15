@@ -1,12 +1,5 @@
 {
   "$defs": {
-    "filesToStage": {
-      "additionalProperties": {
-        "type": "string"
-      },
-      "minProperties": 1,
-      "type": "object"
-    },
     "namelist": {
       "additionalProperties": {
         "$ref": "#/$defs/namelist_names_values"
@@ -42,39 +35,8 @@
           "type": "string"
         },
         "execution": {
-          "additionalProperties": false,
-          "properties": {
-            "batchargs": {
-              "type": "object"
-            },
-            "envcmds": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "executable": {
-              "type": "string"
-            },
-            "mpiargs": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "mpicmd": {
-              "type": "string"
-            },
-            "threads": {
-              "minimum": 0,
-              "type": "integer"
-            }
-          },
-          "required": [
-            "executable"
-          ],
-          "type": "object"
-        },
+          "$ref": "urn:uwtools:execution" 
+       },
         "field_table": {
           "additionalProperties": false,
           "anyOf": [
@@ -158,10 +120,10 @@
           "type": "object"
         },
         "files_to_copy": {
-          "$ref": "#/$defs/filesToStage"
+          "$ref": "urn:uwtools:files-to-stage"
         },
         "files_to_link": {
-          "$ref": "#/$defs/filesToStage"
+          "$ref": "urn:uwtools:files-to-stage"
         },
         "lateral_boundary_conditions": {
           "additionalProperties": false,

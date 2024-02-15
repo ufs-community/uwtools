@@ -158,5 +158,5 @@ class SfcClimoGen(Driver):
         """
         Perform all necessary schema validation.
         """
-        for schema_name in ("sfc_climo_gen", "platform"):
+        for schema_name in ("sfc-climo-gen", "platform"):
             self._validate_one(schema_name=schema_name)
