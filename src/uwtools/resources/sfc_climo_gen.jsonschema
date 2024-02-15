@@ -67,10 +67,16 @@
                     ]
                   },
                   "properties": {
+                    "fract_vegsoil_type": {
+                      "type": "boolean"
+                    },
                     "halo": {
                       "type": "integer"
                     },
                     "input_facsf_file": {
+                      "type": "string"
+                    },
+                    "input_leaf_area_index_file": {
                       "type": "string"
                     },
                     "input_maximum_snow_albedo_file": {
@@ -80,6 +86,9 @@
                       "type": "string"
                     },
                     "input_snowfree_albedo_file": {
+                      "type": "string"
+                    },
+                    "input_soil_color_file": {
                       "type": "string"
                     },
                     "input_soil_type_file": {
@@ -94,8 +103,17 @@
                     "input_vegetation_type_file": {
                       "type": "string"
                     },
+                    "leaf_area_index_method": {
+                      "enum": [
+                        "bilinear",
+                        "conservative"
+                      ]
+                    },
                     "maximum_snow_albedo_method": {
-                      "type": "string"
+                      "enum": [
+                        "bilinear",
+                        "conservative"
+                      ]
                     },
                     "mosaic_file_mdl": {
                       "type": "string"
@@ -107,13 +125,21 @@
                       "items": {
                         "type": "string"
                       },
+                      "maxContains": 6,
+                      "minContains": 1,
                       "type": "array"
                     },
                     "snowfree_albedo_method": {
-                      "type": "string"
+                      "enum": [
+                        "bilinear",
+                        "conservative"
+                      ]
                     },
                     "vegetation_greenness_method": {
-                      "type": "string"
+                      "enum": [
+                        "bilinear",
+                        "conservative"
+                      ]
                     }
                   },
                   "type": "object"

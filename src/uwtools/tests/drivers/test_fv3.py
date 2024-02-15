@@ -45,7 +45,7 @@ def config(tmp_path):
 
 @fixture
 def config_file(config, tmp_path):
-    path = tmp_path / "fv3.yaml"
+    path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
     return path
@@ -115,7 +115,7 @@ def test_FV3_files_copied(config, cycle, key, task, test, tmp_path):
     atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
     config["fv3"].update({key: {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
-    path = tmp_path / "fv3.yaml"
+    path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
     driverobj = fv3.FV3(config_file=path, cycle=cycle, batch=True)
