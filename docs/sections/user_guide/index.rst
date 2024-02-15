@@ -7,4 +7,4 @@ User Guide
    installation
    cli/index
    api/index
-   uw_yaml/index
+   yaml/index
