@@ -1,25 +1,4 @@
 {
-  "$defs": {
-    "namelist": {
-      "additionalProperties": {
-        "$ref": "#/$defs/namelist_names_values"
-      },
-      "minProperties": 1,
-      "type": "object"
-    },
-    "namelist_names_values": {
-      "additionalProperties": {
-        "type": [
-          "array",
-          "boolean",
-          "number",
-          "string"
-        ]
-      },
-      "minProperties": 1,
-      "type": "object"
-    }
-  },
   "properties": {
     "fv3": {
       "additionalProperties": false,
@@ -35,8 +14,8 @@
           "type": "string"
         },
         "execution": {
-          "$ref": "urn:uwtools:execution" 
-       },
+          "$ref": "urn:uwtools:execution"
+        },
         "field_table": {
           "additionalProperties": false,
           "anyOf": [
@@ -204,7 +183,7 @@
               "type": "string"
             },
             "update_values": {
-              "$ref": "#/$defs/namelist"
+              "$ref": "urn:uwtools:namelist"
             }
           },
           "type": "object"
