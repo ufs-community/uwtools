@@ -1,3 +1,6 @@
+"""
+API access to the uwtools sfc_climo_gen driver.
+"""
 from pathlib import Path
 from typing import Dict
 
