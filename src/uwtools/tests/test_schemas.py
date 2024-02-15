@@ -1,4 +1,7 @@
 # pylint: disable=missing-function-docstring,redefined-outer-name
+"""
+Granular tests of JSON Schema schemas.
+"""
 
 from functools import partial
 
