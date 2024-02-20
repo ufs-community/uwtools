@@ -1,14 +1,14 @@
 .. _fv3_yaml:
 
-FV3 YAML
-========
+fv3
+===
 
-Structured YAML to run FV3 is described below. It is validated by JSON Schema. The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
+Structured YAML to run FV3 is validated by JSON Schema and requires the ``fv3:`` (described below) and ``platform:`` (described :ref:`here <platform_yaml>`) blocks. The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
 
-The ``fv3:`` and ``platform:`` Blocks
--------------------------------------
+The ``fv3:`` Block
+------------------
 
-Here are prototype UW YAML ``fv3:`` and ``platform:`` blocks, explained in detail below:
+Here is a prototype UW YAML ``fv3:`` block, explained in detail below:
 
 .. code-block:: yaml
 
@@ -57,51 +57,6 @@ Here are prototype UW YAML ``fv3:`` and ``platform:`` blocks, explained in detai
            k_split: 2
            n_split: 6
      run_dir: /path/to/runs/{{ cycle.strftime('%Y%m%d%H') }}
-   platform:
-     account: user_account
-     scheduler: slurm
-
-.. _updating_values:
-
-Updating Values
----------------
-
-Some blocks support ``base_file:`` and ``update_values:`` entries. A ``base_file:`` entry specifies the path to a file to use as a basis for a particular runtime file. An ``update_values:`` entry specifies changes/additions to the base file. At least one of ``base_file:`` or ``update_values:`` must be provided. If only ``base_file:`` is provided, the file will be used as-is. If only ``update_values:`` is provided, it will completely define the runtime file in question. If both are provided, ``update_values:`` is used to modify the contents of ``base_file:``. The hierarchy of entries in the ``update_values:`` block must mirror that in the ``base_file:``. For example, a ``base_file:`` named ``people.yaml`` might contain:
-
-.. code-block:: yaml
-
-   person:
-     age: 19
-     address:
-       city: Boston
-       number: 12
-       state: MA
-       street: Acorn St
-     name: Jane
-
-A compatible YAML block updating the person's street address might then contain:
-
-.. code-block:: yaml
-
-   base_file: people.yaml
-   update_values:
-     person:
-       address:
-         street: Main St
-         number: 99
-
-The result would be:
-
-.. code-block:: yaml
-
-   person:
-     age: 19
-     address:
-       city: Boston
-       number: 99
-       state: MA
-       street: Main St
-     name: Jane
 
 UW YAML for the ``fv3:`` Block
 ------------------------------
@@ -231,16 +186,3 @@ run_dir:
 """"""""
 
 The path to the directory where FV3 will find its inputs, configuration files, etc., and where it will write its output.
-
-UW YAML for the ``platform:`` Block
------------------------------------
-
-account:
-^^^^^^^^
-
-The account name to use when requesting resources from the batch job scheduler.
-
-scheduler:
-^^^^^^^^^^
-
-One of ``lsf``, ``pbs``, or ``slurm``.

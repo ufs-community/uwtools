@@ -33,6 +33,3 @@ sfc_climo_gen:
        snowfree_albedo_method: bilinear
        vegetation_greenness_method: bilinear
  run_dir: /path/to/run
-platform:
- account: acctnname
- scheduler: slurm
