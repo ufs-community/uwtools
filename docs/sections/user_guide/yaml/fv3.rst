@@ -3,7 +3,7 @@
 FV3 YAML
 ========
 
-The structured YAML to run FV3 is described below. It is validated by JSON Schema. The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
+Structured YAML to run FV3 is described below. It is validated by JSON Schema. The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
 
 The ``fv3:`` and ``platform:`` Blocks
 -------------------------------------
