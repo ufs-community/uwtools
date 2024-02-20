@@ -3,7 +3,7 @@
 The ``platform:`` Block:
 ========================
 
-The UW YAML ``platform:`` block, referenced by multiple component drivers, is described below. It is validated by JSON Schema.
+The top-level UW YAML ``platform:`` block, referenced by multiple component drivers, is described below. It is validated by JSON Schema.
 
 Example block:
 

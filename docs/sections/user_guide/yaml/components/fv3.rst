@@ -74,50 +74,7 @@ Accepted values are ``global`` and ``regional``.
 execution:
 ^^^^^^^^^^
 
-batchargs:
-""""""""""
-
-These entries map to job-scheduler directives sent to e.g. Slurm when a batch job is submitted via the ``--batch`` CLI switch or the ``batch=True`` API argument. The only **required** entry is ``walltime``.
-
-Shorthand names are provided for certain directives for each scheduler, and can be specified as-so along with appropriate values. Recognized names for each scheduler are:
-
-* LSF: ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``threads``, ``walltime``
-* PBS: ``debug``, ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``threads``, ``walltime``
-* Slurm: ``cores``, ``exclusive``, ``export``, ``jobname``, ``memory``, ``nodes``, ``partition``, ``queue``, ``rundir``, ``stderr``, ``stdout``, ``tasks_per_node``, ``threads``, ``walltime``
-
-Other, arbitrary directive key-value pairs can be provided exactly as they should appear in the batch runscript. For example
-
-.. code-block:: yaml
-
-   --nice: 100
-
-could be specified to have the Slurm directive
-
-.. code-block: text
-
-   #SBATCH --nice=100
-
-included in the batch runscript.
-
-executable:
-"""""""""""
-
-The name of or path to the FV3 executable binary.
-
-mpiargs:
-""""""""
-
-An **array** of string arguments that should follow the MPI launch program (``mpiexec``, ``srun``, et al.) on the command line.
-
-mpicmd:
-"""""""
-
-The MPI launch program (``mpiexec``, ``srun``, et al.)
-
-threads:
-""""""""
-
-The number of OpenMP threads to use when running FV3.
+See :ref:`here <execution_yaml>` for details.
 
 field_table:
 ^^^^^^^^^^^^
@@ -168,21 +125,21 @@ path:
 An absolute-path template to the lateral boundary condition files prepared for the forecast. The Python ``int`` variable ``forecast_hour`` will be interpolated into, e.g., ``/path/to/srw.t00z.gfs_bndy.tile7.f{forecast_hour:03d}.nc``. Note that this is a Python string template rather than a Jinja2 template.
 
 length:
-"""""""
+^^^^^^^
 
 The length of the forecast in integer hours.
 
 model_configure:
-""""""""""""""""
+^^^^^^^^^^^^^^^^
 
 Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<model-configure-file>`.
 
 namelist:
-"""""""""
+^^^^^^^^^
 
 Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<namelist-file-input-nml>`.
 
 run_dir:
-""""""""
+^^^^^^^^
 
 The path to the directory where FV3 will find its inputs, configuration files, etc., and where it will write its output.
