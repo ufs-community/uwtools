@@ -3,7 +3,7 @@
 sfc_climo_gen
 =============
 
-Structured YAML to run :sfc-climo-gen:`sfc_climo_gen<>` is validated by JSON Schema and requires the ``sfc_climo_gen:`` (described below) and ``platform:`` (described :ref:`here <platform_yaml>`) blocks.
+Structured YAML to run :sfc-climo-gen:`sfc_climo_gen<>` is validated by JSON Schema and requires the ``sfc_climo_gen:`` block, described below. If ``sfc_climo_gen`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
 Here is a prototype UW YAML ``sfc_climo_gen:`` block, explained in detail below:
 
