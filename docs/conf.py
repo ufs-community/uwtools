@@ -51,6 +51,7 @@ extlinks = {
     "rocoto": ("https://christopherwharrop.github.io/rocoto/%s", "%s"),
     "rst": ("https://www.sphinx-doc.org/en/master/usage/restructuredtext/%s", "%s"),
     "rtd": ("https://readthedocs.org/projects/uwtools/%s", "%s"),
+    "sfc-climo-gen": ("https://ufs-community.github.io/UFS_UTILS/sfc_climo_gen/%s", "%s"),
     "ufs": ("https://ufscommunity.org/%s", "%s"),
     "ufs-weather-model": ("https://github.com/ufs-community/ufs-weather-model/%s", "%s"),
     "uwtools": ("https://github.com/ufs-community/uwtools/%s", "%s"),
