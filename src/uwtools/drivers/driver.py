@@ -13,6 +13,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
+from uwtools.utils.file import resource_path
 
 
 class Driver(ABC):
@@ -133,13 +134,16 @@ class Driver(ABC):
         Perform all necessary schema validation.
         """
 
-    def _validate_one(self, schema_file: Path) -> None:
+    def _validate_one(self, schema_name: str) -> None:
         """
         Validate the config.
 
-        :param schema_file: The schema file to validate the config against.
+        :param schema_name: Name of uwtools schema to validate the config against.
         :raises: UWConfigError if config fails validation.
         """
-        log.info("Validating config per %s", schema_file)
+
+        log.info("Validating config per schema %s", schema_name)
+        schema_file = resource_path("jsonschema") / f"{schema_name}.jsonschema"
+        log.debug("Using schema file: %s", schema_file)
         if not validator.validate_yaml(config=self._config, schema_file=schema_file):
             raise UWConfigError("YAML validation errors")

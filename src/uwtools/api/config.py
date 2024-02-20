@@ -1,3 +1,6 @@
+"""
+API access to uwtools configuration management tools.
+"""
 import os
 from pathlib import Path
 from typing import List, Optional, Union

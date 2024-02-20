@@ -9,15 +9,15 @@ from pathlib import Path
 from shutil import copy
 from typing import Any, Dict
 
-from iotaa import asset, dryrun, external, task, tasks
+from iotaa import asset, dryrun, task, tasks
 
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
-from uwtools.utils.file import resource_pathobj
 from uwtools.utils.processing import execute
+from uwtools.utils.tasks import filecopy, symlink
 
 
 class FV3(Driver):
@@ -29,7 +29,7 @@ class FV3(Driver):
         self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
     ):
         """
-        The FV3 driver.
+        The driver.
 
         :param config_file: Path to config file.
         :param cycle: The forecast cycle.
@@ -48,9 +48,9 @@ class FV3(Driver):
     @tasks
     def boundary_files(self):
         """
-        The FV3 lateral boundary-condition files.
+        Lateral boundary-condition files.
         """
-        yield self._taskname("lateral boundary condition files")
+        yield self._taskname("lateral boundary-condition files")
         lbcs = self._driver_config["lateral_boundary_conditions"]
         offset = abs(lbcs["offset"])
         endhour = self._driver_config["length"] + offset + 1
@@ -63,12 +63,12 @@ class FV3(Driver):
                     self._rundir / "INPUT" / f"gfs_bndy.tile{n}.{(boundary_hour - offset):03d}.nc"
                 )
                 symlinks[target] = linkname
-        yield [self._symlink(target=t, linkname=l) for t, l in symlinks.items()]
+        yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
 
     @task
     def diag_table(self):
         """
-        The FV3 diag_table file.
+        The diag_table file.
         """
         fn = "diag_table"
         yield self._taskname(fn)
@@ -84,7 +84,7 @@ class FV3(Driver):
     @task
     def field_table(self):
         """
-        The FV3 field_table file.
+        The field_table file.
         """
         fn = "field_table"
         yield self._taskname(fn)
@@ -100,29 +100,29 @@ class FV3(Driver):
     @tasks
     def files_copied(self):
         """
-        Files copied for FV3 run.
+        Files copied for run.
         """
         yield self._taskname("files copied")
         yield [
-            self._filecopy(src=Path(src), dst=self._rundir / dst)
+            filecopy(src=Path(src), dst=self._rundir / dst)
             for dst, src in self._driver_config.get("files_to_copy", {}).items()
         ]
 
     @tasks
     def files_linked(self):
         """
-        Files linked for FV3 run.
+        Files linked for run.
         """
         yield self._taskname("files linked")
         yield [
-            self._symlink(target=Path(target), linkname=self._rundir / linkname)
+            symlink(target=Path(target), linkname=self._rundir / linkname)
             for linkname, target in self._driver_config.get("files_to_link", {}).items()
         ]
 
     @task
     def model_configure(self):
         """
-        The FV3 model_configure file.
+        The model_configure file.
         """
         fn = "model_configure"
         yield self._taskname(fn)
@@ -138,7 +138,7 @@ class FV3(Driver):
     @task
     def namelist_file(self):
         """
-        The FV3 namelist file.
+        The namelist file.
         """
         fn = "input.nml"
         yield self._taskname(fn)
@@ -154,7 +154,7 @@ class FV3(Driver):
     @tasks
     def provisioned_run_directory(self):
         """
-        The run directory provisioned with all required content.
+        Run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
         yield [
@@ -172,7 +172,7 @@ class FV3(Driver):
     @task
     def restart_directory(self):
         """
-        The FV3 RESTART directory.
+        The RESTART directory.
         """
         yield self._taskname("RESTART directory")
         path = self._rundir / "RESTART"
@@ -183,7 +183,7 @@ class FV3(Driver):
     @tasks
     def run(self):
         """
-        FV3 run execution.
+        Run execution.
         """
         yield self._taskname("run")
         yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
@@ -191,10 +191,10 @@ class FV3(Driver):
     @task
     def runscript(self):
         """
-        A runscript suitable for submission to the scheduler.
+        The runscript.
         """
-        yield self._taskname("runscript")
         path = self._runscript_path
+        yield self._taskname(path.name)
         yield asset(path, path.is_file)
         yield None
         envvars = {
@@ -217,33 +217,10 @@ class FV3(Driver):
 
     # Private workflow tasks
 
-    @external
-    def _file(self, path: Path):
-        """
-        An existing file.
-
-        :param path: Path to the file.
-        """
-        yield "File %s" % path
-        yield asset(path, path.is_file)
-
-    @task
-    def _filecopy(self, src: Path, dst: Path):
-        """
-        A copy of an existing file.
-
-        :param src: Path to the source file.
-        :param dst: Path to the destination file to create.
-        """
-        yield "Copy %s -> %s" % (src, dst)
-        yield asset(dst, dst.is_file)
-        yield self._file(src)
-        copy(src, dst)
-
     @task
     def _run_via_batch_submission(self):
         """
-        FV3 run Execution via the batch system.
+        Run execution via the batch system.
         """
         yield self._taskname("run via batch submission")
         path = Path("%s.submit" % self._runscript_path)
@@ -254,7 +231,7 @@ class FV3(Driver):
     @task
     def _run_via_local_execution(self):
         """
-        FV3 run execution directly on the local system.
+        Run execution directly on the local system.
         """
         yield self._taskname("run via local execution")
         path = self._rundir / "done"
@@ -262,20 +239,6 @@ class FV3(Driver):
         yield self.provisioned_run_directory()
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
         execute(cmd=cmd, cwd=self._rundir, log_output=True)
-
-    @task
-    def _symlink(self, target: Path, linkname: Path):
-        """
-        A symbolic link.
-
-        :param target: The existing file or directory.
-        :param linkname: The symlink to create.
-        """
-        yield "Link %s -> %s" % (linkname, target)
-        yield asset(linkname, linkname.exists)
-        yield self._file(target)
-        linkname.parent.mkdir(parents=True, exist_ok=True)
-        os.symlink(src=target, dst=linkname)
 
     # Private helper methods
 
@@ -290,7 +253,7 @@ class FV3(Driver):
     @property
     def _resources(self) -> Dict[str, Any]:
         """
-        Returns configuration data for the FV3 runscript.
+        Returns configuration data for the runscript.
         """
         return {
             "account": self._config["platform"]["account"],
@@ -318,5 +281,5 @@ class FV3(Driver):
         """
         Perform all necessary schema validation.
         """
-        for schema_file in ("fv3.jsonschema", "platform.jsonschema"):
-            self._validate_one(resource_pathobj(schema_file))
+        for schema_name in ("fv3", "platform"):
+            self._validate_one(schema_name=schema_name)
