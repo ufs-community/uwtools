@@ -69,7 +69,7 @@ class SfcClimoGen(Driver):
     @tasks
     def run(self):
         """
-        Run execution.
+        A run.
         """
         yield self._taskname("run")
         yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
@@ -97,7 +97,7 @@ class SfcClimoGen(Driver):
     @task
     def _run_via_batch_submission(self):
         """
-        Run execution via the batch system.
+        A run executed via the batch system.
         """
         yield self._taskname("run via batch submission")
         path = Path("%s.submit" % self._runscript_path)
@@ -108,7 +108,7 @@ class SfcClimoGen(Driver):
     @task
     def _run_via_local_execution(self):
         """
-        Run execution directly on the local system.
+        A run executed directly on the local system.
         """
         yield self._taskname("run via local execution")
         path = self._rundir / "done"
