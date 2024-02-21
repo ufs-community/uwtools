@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code,missing-function-docstring,redefined-outer-name
+# pylint: disable=missing-function-docstring,redefined-outer-name
 """
 Tests for uwtools.config.formats.nml module.
 """

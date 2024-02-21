@@ -1,3 +1,6 @@
+"""
+API access to uwtools templating logic.
+"""
 from pathlib import Path
 from typing import Dict, Optional, Union
 

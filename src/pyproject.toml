@@ -28,6 +28,7 @@ warn_return_any = true
 [tool.pylint.messages_control]
 disable = [
   "consider-using-f-string",
+  "duplicate-code",
   "invalid-name",
   "missing-module-docstring",
   "too-few-public-methods",

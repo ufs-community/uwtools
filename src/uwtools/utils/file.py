@@ -141,7 +141,7 @@ def readable(
         yield _stdinproxy()
 
 
-def resource_pathobj(suffix: str = "") -> Path:
+def resource_path(suffix: str = "") -> Path:
     """
     Returns a pathlib Path object to a uwtools resource file.
 
