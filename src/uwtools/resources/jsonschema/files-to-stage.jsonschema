@@ -1,0 +1,7 @@
+{
+  "additionalProperties": {
+    "type": "string"
+  },
+  "minProperties": 1,
+  "type": "object"
+}

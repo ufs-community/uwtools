@@ -15,7 +15,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_yaml
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
-from uwtools.utils.file import readable, resource_pathobj, writable
+from uwtools.utils.file import readable, resource_path, writable
 
 
 def realize_rocoto_xml(
@@ -57,7 +57,7 @@ def validate_rocoto_xml_string(xml: str) -> bool:
     :return: Did the XML conform to the schema?
     """
     tree = etree.fromstring(xml.encode("utf-8"))
-    with open(resource_pathobj("schema_with_metatasks.rng"), "r", encoding="utf-8") as f:
+    with open(resource_path("rocoto/schema_with_metatasks.rng"), "r", encoding="utf-8") as f:
         schema = etree.RelaxNG(etree.parse(f))
     valid: bool = schema.validate(tree)
     nerr = len(schema.error_log)
@@ -76,7 +76,7 @@ def validate_rocoto_xml_string(xml: str) -> bool:
 
 class _RocotoXML:
     """
-    Generate a Rocoto XML document from a UW YAML config.
+    Generate a Rocoto XML document from a YAML config.
     """
 
     def __init__(self, config: Union[dict, YAMLConfig, Optional[Path]] = None) -> None:
@@ -346,7 +346,7 @@ class _RocotoXML:
         :param config: YAMLConfig object or path to YAML file (None => read stdin).
         :raises: UWConfigError if config fails validation.
         """
-        schema_file = resource_pathobj("rocoto.jsonschema")
+        schema_file = resource_path("jsonschema/rocoto.jsonschema")
         ok = validate_yaml(schema_file=schema_file, config=config)
         if not ok:
             raise UWConfigError("YAML validation errors")
