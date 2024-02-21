@@ -1,0 +1,15 @@
+#!/bin/bash -eu
+
+echo "=> Running black"
+black src
+
+echo "=> Running isort"
+isort -q src
+
+echo "=> Running docformatter"
+(cd src && docformatter . || test $$? -eq 3)
+
+echo "=> Running jq"
+for a in $(find src -type f -name "*.jsonschema"); do
+  b=$(jq -S . $a) && echo "$b" >$a || (echo "    in $a"; false)
+done

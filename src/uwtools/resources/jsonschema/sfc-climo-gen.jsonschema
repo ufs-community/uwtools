@@ -1,0 +1,137 @@
+{
+  "properties": {
+    "sfc_climo_gen": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "$ref": "urn:uwtools:execution"
+        },
+        "namelist": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "properties": {
+                "config": {
+                  "additionalProperties": {
+                    "type": [
+                      "array",
+                      "boolean",
+                      "number",
+                      "string"
+                    ]
+                  },
+                  "properties": {
+                    "fract_vegsoil_type": {
+                      "type": "boolean"
+                    },
+                    "halo": {
+                      "type": "integer"
+                    },
+                    "input_facsf_file": {
+                      "type": "string"
+                    },
+                    "input_leaf_area_index_file": {
+                      "type": "string"
+                    },
+                    "input_maximum_snow_albedo_file": {
+                      "type": "string"
+                    },
+                    "input_slope_type_file": {
+                      "type": "string"
+                    },
+                    "input_snowfree_albedo_file": {
+                      "type": "string"
+                    },
+                    "input_soil_color_file": {
+                      "type": "string"
+                    },
+                    "input_soil_type_file": {
+                      "type": "string"
+                    },
+                    "input_substrate_temperature_file": {
+                      "type": "string"
+                    },
+                    "input_vegetation_greenness_file": {
+                      "type": "string"
+                    },
+                    "input_vegetation_type_file": {
+                      "type": "string"
+                    },
+                    "leaf_area_index_method": {
+                      "enum": [
+                        "bilinear",
+                        "conservative"
+                      ]
+                    },
+                    "maximum_snow_albedo_method": {
+                      "enum": [
+                        "bilinear",
+                        "conservative"
+                      ]
+                    },
+                    "mosaic_file_mdl": {
+                      "type": "string"
+                    },
+                    "orog_dir_mdl": {
+                      "type": "string"
+                    },
+                    "orog_files_mdl": {
+                      "items": {
+                        "type": "string"
+                      },
+                      "maxContains": 6,
+                      "minContains": 1,
+                      "type": "array"
+                    },
+                    "snowfree_albedo_method": {
+                      "enum": [
+                        "bilinear",
+                        "conservative"
+                      ]
+                    },
+                    "vegetation_greenness_method": {
+                      "enum": [
+                        "bilinear",
+                        "conservative"
+                      ]
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "required": [
+                "config"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "run_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "run_dir"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

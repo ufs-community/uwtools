@@ -1,3 +1,6 @@
+"""
+API access to uwtools logging logic.
+"""
 import logging
 
 from uwtools.logging import setup_logging as _setup_logging

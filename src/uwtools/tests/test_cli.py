@@ -13,8 +13,10 @@ from pytest import fixture, raises
 import uwtools.api.config
 import uwtools.api.fv3
 import uwtools.api.rocoto
+import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.drivers.fv3
+import uwtools.drivers.sfc_climo_gen
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.exceptions import UWError
@@ -64,6 +66,31 @@ def test__add_subparser_fv3(subparsers):
         "namelist_file",
         "provisioned_run_directory",
         "restart_directory",
+        "run",
+        "runscript",
+    ]
+
+
+def test__add_subparser_rocoto(subparsers):
+    cli._add_subparser_rocoto(subparsers)
+    assert subparsers.choices[STR.rocoto]
+
+
+def test__add_subparser_rocoto_realize(subparsers):
+    cli._add_subparser_rocoto_realize(subparsers)
+    assert subparsers.choices[STR.realize]
+
+
+def test__add_subparser_rocoto_validate(subparsers):
+    cli._add_subparser_rocoto_validate(subparsers)
+    assert subparsers.choices[STR.validate]
+
+
+def test__add_subparser_sfc_climo_gen(subparsers):
+    cli._add_subparser_sfc_climo_gen(subparsers)
+    assert actions(subparsers.choices[STR.sfcclimogen]) == [
+        "namelist_file",
+        "provisioned_run_directory",
         "run",
         "runscript",
     ]
@@ -322,6 +349,17 @@ def test__dispatch_rocoto_validate_xml_no_optional():
     with patch.object(uwtools.api.rocoto, "_validate") as validate:
         cli._dispatch_rocoto_validate(args)
     validate.assert_called_once_with(xml_file=None)
+
+
+def test__dispatch_sfc_climo_gen():
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "dry_run": False,
+    }
+    with patch.object(uwtools.api.sfc_climo_gen, "execute") as execute:
+        cli._dispatch_sfc_climo_gen({**args, "action": "foo"})
+    execute.assert_called_once_with(**{**args, "task": "foo"})
 
 
 @pytest.mark.parametrize(

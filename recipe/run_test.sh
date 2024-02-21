@@ -56,7 +56,6 @@ unittest() {
 }
 
 test "${CONDA_BUILD:-}" = 1 && cd ../test_files || cd $(dirname $0)/../src
-msg Running in $PWD
 if [[ -n "${1:-}" ]]; then
   # Run single specified code-quality tool.
   $1
