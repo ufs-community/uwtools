@@ -154,11 +154,13 @@ def test_Driver__scheduler(driver_good):
         JobScheduler.get_scheduler.assert_called_with(driver_good._resources)
 
 
-def test_driver__validate_one_no(driver_bad, schema):
-    with raises(UWConfigError) as e:
-        driver_bad._validate_one(schema)
+def test_Driver__validate_one_no(driver_bad, schema):
+    with patch.object(driver, "resource_path", return_value=schema.parent):
+        with raises(UWConfigError) as e:
+            driver_bad._validate_one(schema.stem)
     assert str(e.value) == "YAML validation errors"
 
 
 def test_Driver__validate_one_ok(driver_good, schema):
-    driver_good._validate_one(schema)
+    with patch.object(driver, "resource_path", return_value=schema.parent):
+        driver_good._validate_one(schema.stem)

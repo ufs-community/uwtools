@@ -28,11 +28,7 @@ env: package
 	conda create -y -n $(call spec,buildnum,-) $(CHANNELS) $(call spec,build,=)
 
 format:
-	@echo "=> Running formatters"
-	black src
-	isort src
-	cd src && docformatter . || test $$? -eq 3
-	for a in $$(find src -type f -name "*.jsonschema"); do b=$$(jq -S . $$a) && echo "$$b" >$$a || exit 1; done
+	@./format
 
 lint:
 	recipe/run_test.sh lint

@@ -1,15 +1,4 @@
 {
-  "$defs": {
-    "filesToStage": {
-      "minProperties": 1,
-      "patternProperties": {
-        "^.*$": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    }
-  },
   "properties": {
     "fv3": {
       "additionalProperties": false,
@@ -25,38 +14,7 @@
           "type": "string"
         },
         "execution": {
-          "additionalProperties": false,
-          "properties": {
-            "batchargs": {
-              "type": "object"
-            },
-            "envcmds": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "executable": {
-              "type": "string"
-            },
-            "mpiargs": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "mpicmd": {
-              "type": "string"
-            },
-            "threads": {
-              "minimum": 0,
-              "type": "integer"
-            }
-          },
-          "required": [
-            "executable"
-          ],
-          "type": "object"
+          "$ref": "urn:uwtools:execution"
         },
         "field_table": {
           "additionalProperties": false,
@@ -141,10 +99,10 @@
           "type": "object"
         },
         "files_to_copy": {
-          "$ref": "#/$defs/filesToStage"
+          "$ref": "urn:uwtools:files-to-stage"
         },
         "files_to_link": {
-          "$ref": "#/$defs/filesToStage"
+          "$ref": "urn:uwtools:files-to-stage"
         },
         "lateral_boundary_conditions": {
           "additionalProperties": false,
@@ -225,26 +183,7 @@
               "type": "string"
             },
             "update_values": {
-              "minProperties": 1,
-              "patternProperties": {
-                "^.*$": {
-                  "minProperties": 1,
-                  "patternProperties": {
-                    "^.*$": {
-                      "minProperties": 1,
-                      "type": [
-                        "array",
-                        "boolean",
-                        "number",
-                        "string"
-                      ]
-                    },
-                    "type": "object"
-                  },
-                  "type": "object"
-                }
-              },
-              "type": "object"
+              "$ref": "urn:uwtools:namelist"
             }
           },
           "type": "object"
@@ -260,9 +199,6 @@
         "length",
         "run_dir"
       ],
-      "type": "object"
-    },
-    "user": {
       "type": "object"
     }
   },

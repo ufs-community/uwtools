@@ -1,0 +1,16 @@
+{
+  "additionalProperties": {
+    "additionalProperties": {
+      "type": [
+        "array",
+        "boolean",
+        "number",
+        "string"
+      ]
+    },
+    "minProperties": 1,
+    "type": "object"
+  },
+  "minProperties": 1,
+  "type": "object"
+}

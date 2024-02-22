@@ -16,6 +16,7 @@ from typing import Any, Callable, Dict, List, Tuple
 import uwtools.api.config
 import uwtools.api.fv3
 import uwtools.api.rocoto
+import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
@@ -51,6 +52,7 @@ def main() -> None:
             STR.config: _dispatch_config,
             STR.fv3: _dispatch_fv3,
             STR.rocoto: _dispatch_rocoto,
+            STR.sfcclimogen: _dispatch_sfc_climo_gen,
             STR.template: _dispatch_template,
         }
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
@@ -327,6 +329,58 @@ def _dispatch_rocoto_validate(args: Args) -> bool:
     return uwtools.api.rocoto.validate(xml_file=args[STR.infile])
 
 
+# Mode sfc_climo_gen
+
+
+def _add_subparser_sfc_climo_gen(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: sfc_climo_gen
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.sfcclimogen, "Execute sfc_climo_gen tasks")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_sfc_climo_gen_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.sfc_climo_gen.tasks().items()
+    }
+
+
+def _add_subparser_sfc_climo_gen_task(
+    subparsers: Subparsers, task: str, helpmsg: str
+) -> ActionChecks:
+    """
+    Subparser for mode: sfc_climo_gen <task>
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_config_file(required)
+    optional = _basic_setup(parser)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
+def _dispatch_sfc_climo_gen(args: Args) -> bool:
+    """
+    Dispatch logic for sfc_climo_gen mode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.sfc_climo_gen.execute(
+        task=args[STR.action],
+        config_file=args[STR.cfgfile],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+    )
+
+
 # Mode template
 
 
@@ -442,7 +496,7 @@ def _add_arg_config_file(group: Group) -> None:
         help="Path to config file",
         metavar="PATH",
         required=True,
-        type=str,
+        type=Path,
     )
 
 
@@ -491,7 +545,7 @@ def _add_arg_file_path(group: Group, switch: str, helpmsg: str, required: bool =
         help=helpmsg,
         metavar="PATH",
         required=required,
-        type=str,
+        type=Path,
     )
 
 
@@ -502,7 +556,7 @@ def _add_arg_input_file(group: Group, required: bool = False) -> None:
         help="Path to input file (defaults to stdin)",
         metavar="PATH",
         required=required,
-        type=str,
+        type=Path,
     )
 
 
@@ -532,7 +586,7 @@ def _add_arg_output_file(group: Group, required: bool = False) -> None:
         help="Path to output file (defaults to stdout)",
         metavar="PATH",
         required=required,
-        type=str,
+        type=Path,
     )
 
 
@@ -561,7 +615,7 @@ def _add_arg_schema_file(group: Group) -> None:
         help="Path to schema file to use for validation",
         metavar="PATH",
         required=True,
-        type=str,
+        type=Path,
     )
 
 
@@ -571,6 +625,7 @@ def _add_arg_supplemental_files(group: Group) -> None:
         help="Additional files to supplement primary input",
         metavar="PATH",
         nargs="*",
+        type=Path,
     )
 
 
@@ -580,7 +635,7 @@ def _add_arg_values_file(group: Group, required: bool = False) -> None:
         help="Path to file providing override or interpolation values",
         metavar="PATH",
         required=required,
-        type=str,
+        type=Path,
     )
 
 
@@ -742,6 +797,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         STR.config: _add_subparser_config(subparsers),
         STR.fv3: _add_subparser_fv3(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),
+        STR.sfcclimogen: _add_subparser_sfc_climo_gen(subparsers),
         STR.template: _add_subparser_template(subparsers),
     }
     return vars(parser.parse_args(raw_args)), checks
@@ -790,6 +846,7 @@ class STR:
     rocoto: str = "rocoto"
     run: str = "run"
     schemafile: str = "schema_file"
+    sfcclimogen: str = "sfc_climo_gen"
     suppfiles: str = "supplemental_files"
     task: str = "task"
     tasks: str = "tasks"

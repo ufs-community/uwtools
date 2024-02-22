@@ -104,8 +104,8 @@ def test_readable_nofile():
         assert hasattr(f, "read")
 
 
-def test_resource_pathobj():
-    assert file.resource_pathobj().is_dir()
+def test_resource_path():
+    assert file.resource_path().is_dir()
 
 
 def test_writable_file(tmp_path):
