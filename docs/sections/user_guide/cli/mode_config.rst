@@ -443,7 +443,7 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
    .. code-block:: text
 
       $ uw config realize --input-file b.nml --output-file a.yaml
-      Output format yaml must match input format nml
+      Output format yaml must match input format nml unless input is YAML
 
    .. code-block:: text
 
