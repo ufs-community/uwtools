@@ -650,7 +650,7 @@ def test__validate_format_output(input_fmt, output_fmt):
     else:
         with raises(UWError) as e:
             call()
-        assert str(e.value) == f"Output format {output_fmt} must match input format {input_fmt}"
+        assert str(e.value) == f"Output format {output_fmt} must be YAML or input format {input_fmt}"
 
 
 def test__validate_format_supplemental_fail_obj():

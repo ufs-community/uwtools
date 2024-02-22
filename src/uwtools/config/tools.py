@@ -252,7 +252,7 @@ def _validate_format_output(input_fmt: str, output_fmt: str) -> None:
     :raises: UWError if output format is incompatible.
     """
     if not input_fmt in (FORMAT.yaml, output_fmt):
-        raise UWError("Output format %s must match input format %s" % (output_fmt, input_fmt))
+        raise UWError("Output format %s must be YAML or input format %s" % (output_fmt, input_fmt))
 
 
 def _validate_format_supplemental(
