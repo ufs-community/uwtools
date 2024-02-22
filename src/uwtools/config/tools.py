@@ -275,8 +275,8 @@ def _validate_format_supplemental(
         if isinstance(supplemental_cfg, Config)
         else _ensure_format(desc=pre, config=supplemental_cfg)
     )
-    if sc_fmt != config_fmt:
-        raise UWError("%s format %s must match input format %s" % (pre, sc_fmt, config_fmt))
+    if sc_fmt not in (FORMAT.yaml, config_fmt):
+        raise UWError("%s format %s must be YAML or input format %s" % (pre, sc_fmt, config_fmt))
 
 
 # Import-time code
