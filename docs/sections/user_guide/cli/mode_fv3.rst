@@ -17,27 +17,27 @@ The ``uw`` mode for configuring and running FV3.
    Positional arguments:
      TASK
        boundary_files
-         The FV3 lateral boundary-condition files
+         Lateral boundary-condition files
        diag_table
-         The FV3 diag_table file
+         The diag_table file
        field_table
-         The FV3 field_table file
+         The field_table file
        files_copied
-         Files copied for FV3 run
+         Files copied for run
        files_linked
-         Files linked for FV3 run
+         Files linked for run
        model_configure
-         The FV3 model_configure file
+         The model_configure file
        namelist_file
-         The FV3 namelist file
+         The namelist file
        provisioned_run_directory
-         The run directory provisioned with all required content
+         Run directory provisioned with all required content
        restart_directory
-         The FV3 RESTART directory
+         The RESTART directory
        run
-         FV3 run execution
+         A run
        runscript
-         A runscript suitable for submission to the scheduler
+         The runscript
 
 All tasks take the same arguments. For example:
 
@@ -47,7 +47,7 @@ All tasks take the same arguments. For example:
    usage: uw fv3 run --config-file PATH --cycle CYCLE [-h] [--batch] [--dry-run] [--debug] [--quiet]
                      [--verbose]
 
-   FV3 run execution
+   A run
 
    Required arguments:
      --config-file PATH, -c PATH
@@ -88,7 +88,7 @@ The examples use a configuration file named ``config.yaml``. Its contents are de
 
      $ uw fv3 run --config-file config.yaml --cycle 2024-02-11T12 --batch
 
-  The driver creates a ``runscript`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config,yaml``, as well as appropriate settings in the ``execution:`` block under ``fv3:``.
+  The driver creates a ``runscript`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``fv3:``.
 
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 
