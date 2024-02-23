@@ -7,6 +7,8 @@ import os
 import sys
 from typing import Any
 
+import iotaa
+
 # The logging prefix
 #
 # [YYYY-MM-DDTHH:MM:HH]_CRITICAL_
@@ -67,3 +69,4 @@ def use_logger(logger: logging.Logger) -> None:
     :param logger: The logger to log to.
     """
     log.logger = logger
+    iotaa.logset(logger)
