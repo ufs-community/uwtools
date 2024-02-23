@@ -35,6 +35,7 @@ Example block:
        - "--export=ALL"
        - "--ntasks $SLURM_CPUS_ON_NODE"
      mpicmd: srun
+     threads: 8
 
 batchargs:
 """"""""""
@@ -84,4 +85,4 @@ The MPI launch program (``mpiexec``, ``srun``, et al.)
 threads:
 """"""""
 
-The number of OpenMP threads to use when running the component.
+Used to set the ``OMP_NUM_THREADS` environment variable in the execution environment, to control the number of OpenMP threads to use when running the component.
