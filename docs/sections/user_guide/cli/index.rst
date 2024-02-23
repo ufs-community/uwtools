@@ -2,10 +2,7 @@ CLI
 ===
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   mode_config
-   mode_fv3
-   mode_rocoto
-   mode_sfc_climo_gen
-   mode_template
+   drivers/index
+   tools/index

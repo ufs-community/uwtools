@@ -60,7 +60,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with content similar to:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../shared/sfc_climo_gen.yaml
+.. literalinclude:: ../../../../shared/sfc_climo_gen.yaml
 
 Its contents are described in depth in section :ref:`sfc_climo_gen_yaml`.
 
