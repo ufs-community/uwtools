@@ -249,8 +249,8 @@ def _dispatch_fv3(args: Args) -> bool:
         config_file=args[STR.cfgfile],
         cycle=args[STR.cycle],
         batch=args[STR.batch],
-        graph_file=args[STR.graphfile],
         dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
     )
 
 
@@ -365,6 +365,7 @@ def _add_subparser_sfc_climo_gen_task(
     optional = _basic_setup(parser)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
     checks = _add_args_verbosity(optional)
     return checks
 
@@ -380,6 +381,7 @@ def _dispatch_sfc_climo_gen(args: Args) -> bool:
         config_file=args[STR.cfgfile],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
     )
 
 

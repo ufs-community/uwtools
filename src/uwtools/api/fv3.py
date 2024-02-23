@@ -15,8 +15,8 @@ def execute(
     config_file: Path,
     cycle: dt.datetime,
     batch: bool = False,
-    graph_file: Optional[Path] = None,
     dry_run: bool = False,
+    graph_file: Optional[Path] = None,
 ) -> bool:
     """
     Execute an FV3 task.
@@ -28,8 +28,8 @@ def execute(
     :param config_file: Path to YAML config file
     :param cycle: The cycle to run
     :param batch: Submit run to the batch system
-    :param graph_file: Write Graphviz DOT output here
     :param dry_run: Do not run forecast, just report what would have been done
+    :param graph_file: Write Graphviz DOT output here
     :return: True if task completes without raising an exception
     """
     obj = FV3(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)

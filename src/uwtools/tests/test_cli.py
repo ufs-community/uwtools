@@ -295,8 +295,8 @@ def test__dispatch_fv3():
         "batch": True,
         "config_file": "config.yaml",
         "cycle": dt.datetime.now(),
-        "graph_file": None,
         "dry_run": False,
+        "graph_file": None,
     }
     with patch.object(uwtools.api.fv3, "execute") as execute:
         cli._dispatch_fv3({**args, "action": "foo"})
@@ -357,6 +357,7 @@ def test__dispatch_sfc_climo_gen():
         "batch": True,
         "config_file": "config.yaml",
         "dry_run": False,
+        "graph_file": None,
     }
     with patch.object(uwtools.api.sfc_climo_gen, "execute") as execute:
         cli._dispatch_sfc_climo_gen({**args, "action": "foo"})

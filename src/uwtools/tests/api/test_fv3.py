@@ -14,8 +14,8 @@ def test_execute(tmp_path):
         "config_file": "config.yaml",
         "cycle": dt.datetime.utcnow(),
         "batch": False,
-        "graph_file": dot,
         "dry_run": True,
+        "graph_file": dot,
     }
     with patch.object(fv3, "FV3") as FV3:
         assert fv3.execute(**args, task="foo") is True
