@@ -104,7 +104,13 @@ FV3
 | **CLI**: ``uw fv3 -h``
 | **API**: ``import uwtools.api.drivers.fv3``
 
-Provided with a valid UW YAML configuration file and a forecast-cycle value, ``uw fv3`` can prepare a fully provisioned FV3 run directory, execute FV3 directly, or can submit an FV3 batch job to an HPC scheduler.
+sfc_climo_gen
+^^^^^^^^^^^^^
+
+| **CLI**: ``uw sfc_climo_gen -h``
+| **API**: ``import uwtools.api.drivers.sfc_climo_gen``
+
+Provided with a valid UW YAML configuration file, and CLI arguments when required, ``uw`` can prepare a fully provisioned run directory and execute a component either directly on the current system, or via a batch job submitted to an HPC scheduler.
 
 Over time, we'll add many other drivers to support a variety of UFS components from pre-processing to post-processing, along with many data assimilation components.
 
