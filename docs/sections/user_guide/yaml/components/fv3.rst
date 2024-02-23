@@ -86,13 +86,13 @@ files_to_copy:
 
 Defines files to be copied to the run directory. Keys in the ``files_to_copy:`` YAML map specify destination paths relative to the run directory, and values specify source paths. Both keys and values may contain Jinja2 expressions using a ``cycle`` variable, which is a Python ``datetime`` object corresponding to the FV3 cycle being run. This supports specification of cycle-specific filenames/paths. For example, a key-value pair
 
-.. code-block: yaml
+.. code-block:: yaml
 
    gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc: /some/path/{{ cycle.strftime('%Y%m%d')}}/{{ cycle.strftime('%H') }}/gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc
 
 would be rendered as
 
-.. code-block: yaml
+.. code-block:: yaml
 
    gfs.t18z.atmanl.nc: /some/path/20240212/18/gfs.t18z.atmanl.nc
 
