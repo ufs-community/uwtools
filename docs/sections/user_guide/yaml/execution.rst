@@ -44,7 +44,7 @@ Other, arbitrary directive key-value pairs can be provided exactly as they shoul
 
 could be specified to have the Slurm directive
 
-.. code-block: text
+.. code-block:: text
 
    #SBATCH --nice=100
 
