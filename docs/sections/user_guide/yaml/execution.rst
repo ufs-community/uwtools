@@ -11,9 +11,21 @@ Example block:
 
    execution:
      batchargs:
+       cores: 40
+       debug: True
+       exclusive: True
        export: NONE
+       jobname: my-job
+       memory: 4GB
        nodes: 1
+       partition: p1
+       queue: q1
+       rundir: /path/to/rundir
+       shell: /bin/bash
+       stderr: /path/to/runscript.err
        stdout: /path/to/runscript.out
+       tasks_per_node: 40
+       threads: 8
        walltime: 00:02:00
      envcmds:
        - module use /path/to/modulefiles
@@ -23,7 +35,6 @@ Example block:
        - "--export=ALL"
        - "--ntasks $SLURM_CPUS_ON_NODE"
      mpicmd: srun
-
 
 batchargs:
 """"""""""
