@@ -1,4 +1,4 @@
-[![docs](https://readthedocs.org/projects/uwtools/badge/?version=main)](https://uwtools.readthedocs.io/en/main/?badge=main)
+[![docs](https://readthedocs.org/projects/uwtools/badge/?version=main)](https://uwtools.readthedocs.io/en/main/?badge=main) [![pkgpage](https://anaconda.org/ufs-community/uwtools/badges/version.svg)](https://anaconda.org/ufs-community/uwtools) [![pkgfiles](https://anaconda.org/ufs-community/uwtools/badges/latest_release_date.svg)](https://anaconda.org/ufs-community/uwtools/files)
 
 # uwtools
 
