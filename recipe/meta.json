@@ -17,7 +17,7 @@
       "make >=3.8",
       "mypy =1.8.*",
       "pip",
-      "pylint =3.0.*",
+      "pylint =3.1.*",
       "pytest =7.4.*",
       "python >=3.9,<3.12",
       "pyyaml =6.0.*"
