@@ -2,10 +2,11 @@ from pathlib import Path
 from types import SimpleNamespace as ns
 from typing import Optional
 
+import f90nml  # type: ignore
 import yaml
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import INCLUDE_TAG, TaggedString, log_and_error
+from uwtools.config.support import INCLUDE_TAG, TaggedString, log_and_error, represent_namelist
 from uwtools.utils.file import FORMAT, readable, writable
 
 _MSGS = ns(
@@ -116,6 +117,7 @@ class YAMLConfig(Config):
         :param path: Path to dump config to.
         """
         yaml.add_representer(TaggedString, TaggedString.represent)
+        yaml.add_representer(f90nml.namelist.Namelist, represent_namelist)
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import OrderedDict
 from importlib import import_module
 from typing import Dict, Type, Union
 
@@ -88,3 +89,17 @@ class TaggedString:
         documentation for details.
         """
         return dumper.represent_scalar(data.tag, data.value)
+
+
+def represent_namelist(dumper: yaml.Dumper, data) -> yaml.nodes.MappingNode:
+    """
+    Serialize f90nml tags.
+    """
+    # Convert the f90nml Namelist object to a dictionary
+    namelist_dict = data.todict()
+    for key, value in namelist_dict.items():
+        if isinstance(value, OrderedDict):
+            namelist_dict[key] = dict(value)
+
+    # Represent the dictionary as a YAML mapping
+    return dumper.represent_mapping("tag:yaml.org,2002:map", namelist_dict)

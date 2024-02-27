@@ -5,6 +5,7 @@ Tests for uwtools.config.jinja2 module.
 
 import logging
 
+import f90nml  # type: ignore
 import pytest
 import yaml
 from pytest import fixture, raises
@@ -54,6 +55,12 @@ def test_log_and_error(caplog):
         raise support.log_and_error(msg)
     assert msg in str(e.value)
     assert logged(caplog, msg)
+
+
+def test_represent_namelist():
+    yaml.add_representer(f90nml.namelist.Namelist, support.represent_namelist)
+    namelist = f90nml.reads("&namelist\n key = value\n/\n")
+    assert yaml.dump(namelist, default_flow_style=True).strip() == "{namelist: {key: value}}"
 
 
 class Test_TaggedString:
