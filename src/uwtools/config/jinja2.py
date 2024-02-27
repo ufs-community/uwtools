@@ -182,8 +182,8 @@ def render(
     if values_needed:
         return _values_needed(undeclared_variables)
 
-    # If partial rendering has not been requested, check for missing values required to render the
-    # template, report any found, then return False.
+    # If partial rendering has been requested, do a best-effort render. Otherwise, report any
+    # missing values and return an error to the caller.
 
     if partial:
         rendered = Environment(undefined=DebugUndefined).from_string(template_str).render(values)
@@ -193,7 +193,7 @@ def render(
             return _log_missing_values(missing)
         rendered = template.render()
 
-    # In dry-run mode, log the rendered template. Otherwise, write the rendered template.
+    # Log (dry-run mode) or write the rendered template.
 
     return _dry_run_template(rendered) if dry_run else _write_template(output_file, rendered)
 
