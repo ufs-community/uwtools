@@ -15,6 +15,7 @@ def render(
     output_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
     values_needed: bool = False,
+    partial: bool = False,
     dry_run: bool = False,
 ) -> bool:
     """
@@ -34,6 +35,7 @@ def render(
         to ``stdout``)
     :param overrides: Supplemental override values
     :param values_needed: Just report variables needed to render the template?
+    :param partial: OK to leave unrendered expressions in template?
     :param dry_run: Run in dry-run mode?
     :return: ``True`` if Jinja2 template was successfully rendered, ``False`` otherwise
     """
@@ -44,6 +46,7 @@ def render(
         output_file=output_file,
         overrides=overrides,
         values_needed=values_needed,
+        partial=partial,
         dry_run=dry_run,
     )
 
