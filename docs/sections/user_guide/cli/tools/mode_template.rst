@@ -30,9 +30,8 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 
    $ uw template render --help
    usage: uw template render [-h] [--input-file PATH] [--output-file PATH] [--values-file PATH]
-                             [--values-format {atparse,bash,cfg,fieldtable,ini,jinja2,nml,sh,yaml,yml}]
-                             [--values-needed] [--partial] [--dry-run] [--debug] [--quiet]
-                             [--verbose]
+                             [--values-format {ini,nml,sh,yaml}] [--values-needed] [--partial]
+                             [--dry-run] [--debug] [--quiet] [--verbose]
                              [KEY=VALUE ...]
 
    Render a template
@@ -46,7 +45,7 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
          Path to output file (defaults to stdout)
      --values-file PATH
          Path to file providing override or interpolation values
-     --values-format {atparse,bash,cfg,fieldtable,ini,jinja2,nml,sh,yaml,yml}
+     --values-format {ini,nml,sh,yaml}
          Values format
      --values-needed
          Print report of values needed to render template
