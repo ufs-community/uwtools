@@ -1,14 +1,14 @@
 .. _fv3_yaml:
 
-FV3 YAML
-========
+fv3
+===
 
-The structured YAML to run FV3 is described below. It is validated by JSON Schema. The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
+Structured YAML to run FV3 is validated by JSON Schema and requires the ``fv3:`` block, described below. If FV3 is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required. The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
 
-The ``fv3:`` and ``platform:`` Blocks
--------------------------------------
+The ``fv3:`` Block
+------------------
 
-Here are prototype UW YAML ``fv3:`` and ``platform:`` blocks, explained in detail below:
+Here is a prototype UW YAML ``fv3:`` block, explained in detail below:
 
 .. code-block:: yaml
 
@@ -57,51 +57,6 @@ Here are prototype UW YAML ``fv3:`` and ``platform:`` blocks, explained in detai
            k_split: 2
            n_split: 6
      run_dir: /path/to/runs/{{ cycle.strftime('%Y%m%d%H') }}
-   platform:
-     account: user_account
-     scheduler: slurm
-
-.. _updating_values:
-
-Updating Values
----------------
-
-Some blocks support ``base_file:`` and ``update_values:`` entries. A ``base_file:`` entry specifies the path to a file to use as a basis for a particular runtime file. An ``update_values:`` entry specifies changes/additions to the base file. At least one of ``base_file:`` or ``update_values:`` must be provided. If only ``base_file:`` is provided, the file will be used as-is. If only ``update_values:`` is provided, it will completely define the runtime file in question. If both are provided, ``update_values:`` is used to modify the contents of ``base_file:``. The hierarchy of entries in the ``update_values:`` block must mirror that in the ``base_file:``. For example, a ``base_file:`` named ``people.yaml`` might contain:
-
-.. code-block:: yaml
-
-   person:
-     age: 19
-     address:
-       city: Boston
-       number: 12
-       state: MA
-       street: Acorn St
-     name: Jane
-
-A compatible YAML block updating the person's street address might then contain:
-
-.. code-block:: yaml
-
-   base_file: people.yaml
-   update_values:
-     person:
-       address:
-         street: Main St
-         number: 99
-
-The result would be:
-
-.. code-block:: yaml
-
-   person:
-     age: 19
-     address:
-       city: Boston
-       number: 99
-       state: MA
-       street: Main St
-     name: Jane
 
 UW YAML for the ``fv3:`` Block
 ------------------------------
@@ -119,50 +74,7 @@ Accepted values are ``global`` and ``regional``.
 execution:
 ^^^^^^^^^^
 
-batchargs:
-""""""""""
-
-These entries map to job-scheduler directives sent to e.g. Slurm when a batch job is submitted via the ``--batch`` CLI switch or the ``batch=True`` API argument. The only **required** entry is ``walltime``.
-
-Shorthand names are provided for certain directives for each scheduler, and can be specified as-so along with appropriate values. Recognized names for each scheduler are:
-
-* LSF: ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``threads``, ``walltime``
-* PBS: ``debug``, ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``threads``, ``walltime``
-* Slurm: ``cores``, ``exclusive``, ``export``, ``jobname``, ``memory``, ``nodes``, ``partition``, ``queue``, ``rundir``, ``stderr``, ``stdout``, ``tasks_per_node``, ``threads``, ``walltime``
-
-Other, arbitrary directive key-value pairs can be provided exactly as they should appear in the batch runscript. For example
-
-.. code-block:: yaml
-
-   --nice: 100
-
-could be specified to have the Slurm directive
-
-.. code-block: text
-
-   #SBATCH --nice=100
-
-included in the batch runscript.
-
-executable:
-"""""""""""
-
-The name of or path to the FV3 executable binary.
-
-mpiargs:
-""""""""
-
-An **array** of string arguments that should follow the MPI launch program (``mpiexec``, ``srun``, et al.) on the command line.
-
-mpicmd:
-"""""""
-
-The MPI launch program (``mpiexec``, ``srun``, et al.)
-
-threads:
-""""""""
-
-The number of OpenMP threads to use when running FV3.
+See :ref:`here <execution_yaml>` for details.
 
 field_table:
 ^^^^^^^^^^^^
@@ -174,13 +86,13 @@ files_to_copy:
 
 Defines files to be copied to the run directory. Keys in the ``files_to_copy:`` YAML map specify destination paths relative to the run directory, and values specify source paths. Both keys and values may contain Jinja2 expressions using a ``cycle`` variable, which is a Python ``datetime`` object corresponding to the FV3 cycle being run. This supports specification of cycle-specific filenames/paths. For example, a key-value pair
 
-.. code-block: yaml
+.. code-block:: yaml
 
    gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc: /some/path/{{ cycle.strftime('%Y%m%d')}}/{{ cycle.strftime('%H') }}/gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc
 
 would be rendered as
 
-.. code-block: yaml
+.. code-block:: yaml
 
    gfs.t18z.atmanl.nc: /some/path/20240212/18/gfs.t18z.atmanl.nc
 
@@ -213,34 +125,21 @@ path:
 An absolute-path template to the lateral boundary condition files prepared for the forecast. The Python ``int`` variable ``forecast_hour`` will be interpolated into, e.g., ``/path/to/srw.t00z.gfs_bndy.tile7.f{forecast_hour:03d}.nc``. Note that this is a Python string template rather than a Jinja2 template.
 
 length:
-"""""""
+^^^^^^^
 
 The length of the forecast in integer hours.
 
 model_configure:
-""""""""""""""""
+^^^^^^^^^^^^^^^^
 
 Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<model-configure-file>`.
 
 namelist:
-"""""""""
+^^^^^^^^^
 
 Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<namelist-file-input-nml>`.
 
 run_dir:
-""""""""
-
-The path to the directory where FV3 will find its inputs, configuration files, etc., and where it will write its output.
-
-UW YAML for the ``platform:`` Block
------------------------------------
-
-account:
 ^^^^^^^^
 
-The account name to use when requesting resources from the batch job scheduler.
-
-scheduler:
-^^^^^^^^^^
-
-One of ``lsf``, ``pbs``, or ``slurm``.
+The path to the directory where FV3 will find its inputs, configuration files, etc., and where it will write its output.

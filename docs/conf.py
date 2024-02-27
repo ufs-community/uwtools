@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath("../src"))
 with open("../recipe/meta.json", "r", encoding="utf-8") as f:
     _metadata = json.loads(f.read())
 
-autodoc_mock_imports = ["f90nml", "iotaa", "jsonschema", "lxml"]
+autodoc_mock_imports = ["f90nml", "iotaa", "jsonschema", "lxml", "referencing"]
 copyright = str(dt.datetime.now().year)
 extensions = ["sphinx.ext.autodoc", "sphinx.ext.extlinks", "sphinx.ext.intersphinx"]
 extlinks_detect_hardcoded_links = True
@@ -46,11 +46,12 @@ extlinks = {
     "miniforge3": ("https://github.com/conda-forge/miniforge/%s", "%s"),
     "mypy": ("https://mypy.readthedocs.io/en/stable/%s", "%s"),
     "noaa": ("https://www.noaa.gov/%s", "%s"),
-    "pylint": ("https://pylint.readthedocs.io/en/v3.0.3/%s", "%s"),
+    "pylint": ("https://pylint.readthedocs.io/en/stable/%s", "%s"),
     "pytest": ("https://docs.pytest.org/en/7.4.x/%s", "%s"),
     "rocoto": ("https://christopherwharrop.github.io/rocoto/%s", "%s"),
     "rst": ("https://www.sphinx-doc.org/en/master/usage/restructuredtext/%s", "%s"),
     "rtd": ("https://readthedocs.org/projects/uwtools/%s", "%s"),
+    "sfc-climo-gen": ("https://ufs-community.github.io/UFS_UTILS/sfc_climo_gen/%s", "%s"),
     "ufs": ("https://ufscommunity.org/%s", "%s"),
     "ufs-weather-model": ("https://github.com/ufs-community/ufs-weather-model/%s", "%s"),
     "uwtools": ("https://github.com/ufs-community/uwtools/%s", "%s"),
