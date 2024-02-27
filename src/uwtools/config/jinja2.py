@@ -149,6 +149,7 @@ def render(
     output_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
     values_needed: bool = False,
+    partial: bool = False,
     dry_run: bool = False,
 ) -> bool:
     """
@@ -160,6 +161,7 @@ def render(
     :param output_file: Path to write rendered Jinja2 template to (None => write to stdout).
     :param overrides: Supplemental override values.
     :param values_needed: Just report variables needed to render the template?
+    :param partial: OK to leave unrendered expressions in template?
     :param dry_run: Run in dry-run mode?
     :return: Jinja2 template was successfully rendered.
     """
@@ -191,11 +193,12 @@ def render(
 
     # In dry-run mode, log the rendered template. Otherwise, write the rendered template.
 
-    return (
-        _dry_run_template(template.render())
-        if dry_run
-        else _write_template(output_file, template.render())
+    rendered = (
+        Environment(undefined=StrictUndefined).from_string(template_str).render(values)
+        if partial
+        else template.render()
     )
+    return _dry_run_template(rendered) if dry_run else _write_template(output_file, rendered)
 
 
 # Private functions
