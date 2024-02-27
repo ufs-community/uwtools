@@ -589,4 +589,4 @@ and the YAML file ``values.yaml`` with the following contents:
      [2024-01-03T17:30:49]    DEBUG Rendering: Hello
      [2024-01-03T17:30:49]    DEBUG Rendering: World
      [2024-01-03T17:30:49]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-     [2024-01-03T17:30:49]     INFO 0 UW schema-validation errors found 
+     [2024-01-03T17:30:49]     INFO 0 UW schema-validation errors found
