@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Set, Union
 
 from jinja2 import (
     BaseLoader,
+    DebugUndefined,
     Environment,
     FileSystemLoader,
     StrictUndefined,
@@ -163,7 +164,7 @@ def render(
     :param values_needed: Just report variables needed to render the template?
     :param partial: OK to leave unrendered expressions in template?
     :param dry_run: Run in dry-run mode?
-    :return: Jinja2 template was successfully rendered.
+    :return: True if Jinja2 template was successfully rendered, False otherwise.
     """
 
     # Render template.
@@ -184,20 +185,19 @@ def render(
     if values_needed:
         return _values_needed(undeclared_variables)
 
-    # Check for missing values required to render the template. If found, report them and raise an
-    # exception.
+    # If partial rendering has not been requested, check for missing values required to render the
+    # template, report any found, then return False.
 
-    missing = [var for var in undeclared_variables if var not in values.keys()]
-    if missing:
-        return _log_missing_values(missing)
+    if partial:
+        rendered = Environment(undefined=DebugUndefined).from_string(template_str).render(values)
+    else:
+        missing = [var for var in undeclared_variables if var not in values.keys()]
+        if missing:
+            return _log_missing_values(missing)
+        rendered = template.render()
 
     # In dry-run mode, log the rendered template. Otherwise, write the rendered template.
 
-    rendered = (
-        Environment(undefined=StrictUndefined).from_string(template_str).render(values)
-        if partial
-        else template.render()
-    )
     return _dry_run_template(rendered) if dry_run else _write_template(output_file, rendered)
 
 
