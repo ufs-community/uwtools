@@ -23,7 +23,7 @@ import uwtools.rocoto
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
-FORMATS = list(FORMAT.formats().keys())
+FORMATS = FORMAT.extensions()
 TITLE_REQ_ARG = "Required arguments"
 
 Args = Dict[str, Any]
