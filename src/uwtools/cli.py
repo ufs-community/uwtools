@@ -556,7 +556,7 @@ def _add_arg_file_path(group: Group, switch: str, helpmsg: str, required: bool =
 def _add_arg_graph_file(group: Group) -> None:
     group.add_argument(
         _switch(STR.graphfile),
-        help="Path to Graphviz DOT output",
+        help="Path to Graphviz DOT output [experimental]",
         metavar="PATH",
         type=str,
     )
