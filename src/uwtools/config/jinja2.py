@@ -166,9 +166,6 @@ def render(
     :param dry_run: Run in dry-run mode?
     :return: True if Jinja2 template was successfully rendered, False otherwise.
     """
-
-    # Render template.
-
     _report(locals())
     if not isinstance(values, dict):
         values = _set_up_values_obj(
