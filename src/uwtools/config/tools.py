@@ -253,8 +253,7 @@ def _validate_format_output(input_fmt: str, output_fmt: str) -> None:
     """
     if FORMAT.yaml not in (input_fmt, output_fmt) and input_fmt != output_fmt:
         raise UWError(
-            "Output format %s must match input format %s unless either is YAML"
-            % (output_fmt, input_fmt)
+            "Accepted output formats for input format %s are %s or yaml" % (input_fmt, input_fmt)
         )
 
 
