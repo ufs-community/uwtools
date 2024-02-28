@@ -65,7 +65,7 @@ def represent_namelist(dumper: yaml.Dumper, data: f90nml.Namelist) -> yaml.nodes
     # Convert the f90nml Namelist to an ordered dictionary
     namelist_dict = data.todict()
 
-    # Represent the dictionary as a YAML mapping
+    # Represent the OrderedDict as a YAML mapping.
     return dumper.represent_mapping("tag:yaml.org,2002:map", namelist_dict)
 
 
