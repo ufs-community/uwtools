@@ -18,10 +18,6 @@ INCLUDE_TAG = "!INCLUDE"
 def add_representers() -> None:
     """
     Add representers to the YAML dumper for custom types.
-
-    This function is called by the YAMLConfig class to add representers for the TaggedString,
-    Namelist, and OrderedDict types to the YAML dumper. The representers are used to serialize these
-    types to YAML.
     """
     yaml.add_representer(TaggedString, TaggedString.represent)
     yaml.add_representer(Namelist, _represent_namelist)
@@ -69,6 +65,7 @@ def log_and_error(msg: str) -> Exception:
     return UWConfigError(msg)
 
 
+# Private functions
 def _represent_namelist(dumper: yaml.Dumper, data: Namelist) -> yaml.nodes.MappingNode:
     """
     Convert f90nml Namelist to OrderedDict and serialize.
@@ -97,7 +94,6 @@ def _represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes
 
     # Represent the dict as a YAML mapping.
     return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
-
 
 class TaggedString:
     """
