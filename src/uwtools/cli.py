@@ -20,6 +20,7 @@ import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
@@ -181,16 +182,20 @@ def _dispatch_config_realize(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.config.realize(
-        input_config=args[STR.infile],
-        input_format=args[STR.infmt],
-        output_file=args[STR.outfile],
-        output_format=args[STR.outfmt],
-        supplemental_configs=args[STR.suppfiles],
-        values_needed=args[STR.valsneeded],
-        total=args[STR.total],
-        dry_run=args[STR.dryrun],
-    )
+    try:
+        return uwtools.api.config.realize(
+            input_config=args[STR.infile],
+            input_format=args[STR.infmt],
+            output_file=args[STR.outfile],
+            output_format=args[STR.outfmt],
+            supplemental_configs=args[STR.suppfiles],
+            values_needed=args[STR.valsneeded],
+            total=args[STR.total],
+            dry_run=args[STR.dryrun],
+        )
+    except UWConfigError:
+        log.error("Config could not be realized. Try again with %s" % _switch(STR.valsneeded))
+        sys.exit(1)
 
 
 def _dispatch_config_validate(args: Args) -> bool:

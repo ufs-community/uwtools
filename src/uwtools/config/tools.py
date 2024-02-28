@@ -109,7 +109,7 @@ def realize_config(
         return {}
     output_obj = format_to_config(output_format)
     if total and unrendered(str(output_obj)):
-        raise UWConfigError("Config was not totally realized")
+        raise UWConfigError("Config could not be totally realized")
     output_obj.dump_dict(cfg=input_obj.data, path=output_file)
     return input_obj.data
 
@@ -317,7 +317,7 @@ Recognized file extensions are: {extensions}
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all template expressions.
 :param dry_run: Log output instead of writing to output.
-:raises: UWConfigError if ``total`` is ``True`` and any template expression was not rendered.
+:raises: UWConfigError if ``total`` is ``True`` and config could not be totally realized.
 :return: The realized config (or an empty-dict for no-op modes).
 """.format(
     extensions=", ".join(FORMAT.extensions())
