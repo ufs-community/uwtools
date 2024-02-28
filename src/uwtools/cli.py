@@ -124,6 +124,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=FORMATS)
     _add_arg_values_needed(optional)
+    _add_arg_total(optional)
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_supplemental_files(optional)
@@ -187,6 +188,7 @@ def _dispatch_config_realize(args: Args) -> bool:
         output_format=args[STR.outfmt],
         supplemental_configs=args[STR.suppfiles],
         values_needed=args[STR.valsneeded],
+        total=args[STR.total],
         dry_run=args[STR.dryrun],
     )
 
@@ -652,6 +654,14 @@ def _add_arg_supplemental_files(group: Group) -> None:
     )
 
 
+def _add_arg_total(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.total),
+        action="store_true",
+        help="Require rendering of all template expressions",
+    )
+
+
 def _add_arg_values_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.valsfile),
@@ -876,6 +886,7 @@ class STR:
     task: str = "task"
     tasks: str = "tasks"
     template: str = "template"
+    total: str = "total"
     translate: str = "translate"
     validate: str = "validate"
     valsfile: str = "values_file"

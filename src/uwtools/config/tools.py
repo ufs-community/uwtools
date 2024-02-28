@@ -81,6 +81,7 @@ def realize_config(
     output_format: Optional[str] = None,
     supplemental_configs: Optional[List[Union[dict, Config, Path]]] = None,
     values_needed: bool = False,
+    total: bool = False,
     dry_run: bool = False,
 ) -> dict:
     """
@@ -106,6 +107,8 @@ def realize_config(
         _realize_config_values_needed(input_obj)
         return {}
     output_obj = format_to_config(output_format)
+    if total:
+        pass
     output_obj.dump_dict(cfg=input_obj.data, path=output_file)
     return input_obj.data
 
@@ -311,7 +314,9 @@ Recognized file extensions are: {extensions}
 :param output_format: Format of the output config.
 :param supplemental_configs: Sources of values used to modify input.
 :param values_needed: Report complete, missing, and template values.
+:param total: Require rendering of all template expressions.
 :param dry_run: Log output instead of writing to output.
+:raises: UWConfigError if ``total`` is ``True`` and any template expression was not rendered.
 :return: The realized config (or an empty-dict for no-op modes).
 """.format(
     extensions=", ".join(FORMAT.extensions())

@@ -198,6 +198,20 @@ def render(
     return _dry_run_template(rendered) if dry_run else _write_template(output_file, rendered)
 
 
+def unrendered(s: str) -> bool:
+    """
+    Does the supplied string contain unrendered Jinja2 variables/expressions?
+
+    :param s: The string to check for unrendered content.
+    :return: ``True`` if unrendered content was found, ``False`` otherwise.
+    """
+    try:
+        Environment(undefined=StrictUndefined).from_string(s).render({})
+        return False
+    except UndefinedError:
+        return True
+
+
 # Private functions
 
 
