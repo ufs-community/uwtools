@@ -107,10 +107,10 @@ def realize_config(
     if values_needed:
         _realize_config_values_needed(input_obj)
         return {}
-    output_obj = format_to_config(output_format)
-    if total and unrendered(str(output_obj)):
+    if total and unrendered(str(input_obj)):
         raise UWConfigError("Config could not be totally realized")
-    output_obj.dump_dict(cfg=input_obj.data, path=output_file)
+    output_class = format_to_config(output_format)
+    output_class.dump_dict(cfg=input_obj.data, path=output_file)
     return input_obj.data
 
 
