@@ -155,7 +155,7 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
    $ uw config realize --help
    usage: uw config realize [-h] [--input-file PATH] [--input-format {ini,nml,sh,yaml}]
                             [--output-file PATH] [--output-format {ini,nml,sh,yaml}]
-                            [--values-needed] [--dry-run] [--quiet] [--verbose]
+                            [--values-needed] [--total] [--dry-run] [--debug] [--quiet] [--verbose]
                             [PATH ...]
 
    Realize config
@@ -173,6 +173,8 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
          Output format
      --values-needed
          Print report of values needed to render template
+     --total
+         Require rendering of all template expressions
      --dry-run
          Only log info, making no changes
      --debug
