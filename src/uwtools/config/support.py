@@ -74,7 +74,7 @@ def represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes.
     Convert OrderedDict to dict and serialize.
 
     :param dumper: The YAML dumper.
-    :param data: The ordereddict to serialize.
+    :param data: The OrderedDict to serialize.
     """
     # Convert the OrderedDict to a dict.
     def from_od(d: Union[OrderedDict, Dict]) -> dict:
