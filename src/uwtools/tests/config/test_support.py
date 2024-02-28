@@ -6,9 +6,9 @@ Tests for uwtools.config.jinja2 module.
 import logging
 from collections import OrderedDict
 
-import f90nml  # type: ignore
 import pytest
 import yaml
+from f90nml import reads  # type: ignore
 from pytest import fixture, raises
 
 from uwtools.config import support
@@ -59,7 +59,7 @@ def test_log_and_error(caplog):
 
 
 def test_represent_namelist():
-    namelist = f90nml.reads("&namelist\n key = value\n/\n")
+    namelist = reads("&namelist\n key = value\n/\n")
     assert yaml.dump(namelist, default_flow_style=True).strip() == "{namelist: {key: value}}"
 
 

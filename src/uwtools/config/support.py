@@ -4,8 +4,8 @@ from collections import OrderedDict
 from importlib import import_module
 from typing import Dict, Type, Union
 
-import f90nml  # type: ignore
 import yaml
+from f90nml import Namelist  # type: ignore
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -55,7 +55,7 @@ def log_and_error(msg: str) -> Exception:
     return UWConfigError(msg)
 
 
-def represent_namelist(dumper: yaml.Dumper, data: f90nml.Namelist) -> yaml.nodes.MappingNode:
+def represent_namelist(dumper: yaml.Dumper, data: Namelist) -> yaml.nodes.MappingNode:
     """
     Convert f90nml Namelist to OrderedDict and serialize.
 
@@ -76,6 +76,7 @@ def represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes.
     :param dumper: The YAML dumper.
     :param data: The OrderedDict to serialize.
     """
+
     # Convert the OrderedDict to a dict.
     def from_od(d: Union[OrderedDict, Dict]) -> dict:
         return {key: from_od(val) if isinstance(val, dict) else val for key, val in d.items()}

@@ -3,8 +3,8 @@ from pathlib import Path
 from types import SimpleNamespace as ns
 from typing import Optional
 
-import f90nml  # type: ignore
 import yaml
+from f90nml import Namelist  # type: ignore
 
 from uwtools.config.formats.base import Config
 from uwtools.config.support import (
@@ -53,7 +53,7 @@ class YAMLConfig(Config):
         The string representation of a YAMLConfig object.
         """
         yaml.add_representer(TaggedString, TaggedString.represent)
-        yaml.add_representer(f90nml.namelist.Namelist, represent_namelist)
+        yaml.add_representer(Namelist, represent_namelist)
         yaml.add_representer(OrderedDict, represent_ordereddict)
         return yaml.dump(self.data, default_flow_style=False).strip()
 
@@ -126,7 +126,7 @@ class YAMLConfig(Config):
         :param path: Path to dump config to.
         """
         yaml.add_representer(TaggedString, TaggedString.represent)
-        yaml.add_representer(f90nml.namelist.Namelist, represent_namelist)
+        yaml.add_representer(Namelist, represent_namelist)
         yaml.add_representer(OrderedDict, represent_ordereddict)
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
