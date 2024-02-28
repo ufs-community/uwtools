@@ -194,7 +194,7 @@ def _dispatch_config_realize(args: Args) -> bool:
             dry_run=args[STR.dryrun],
         )
     except UWConfigError:
-        log.error("Config could not be realized. Try again with %s." % _switch(STR.valsneeded))
+        log.error("Config could not be realized. Try again with %s for details." % _switch(STR.valsneeded))
         sys.exit(1)
 
 

@@ -283,31 +283,31 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
        recipient: Moon
        repeat: 2
 
-* By default, variables/expressions that could not be rendered are passed through unchanged in the output. For example, config file ``config.yaml`` with contents
+* By default, variables/expressions that cannot be rendered are passed through unchanged in the output. For example, config file ``config.yaml`` with contents
 
   .. code-block:: yaml
 
      roses: "{{ color1 }}"
      violets: "{{ color2 }}"
 
-  would normally be partially realized, with ``uw`` exiting with success status:
+  could normally be partially realized, with ``uw`` exiting with success status, by providing one of the two needed template values:
 
   .. code-block:: text
 
-   $ color1=red uw config realize --input-file config.yaml --output-format yaml
-   roses: red
-   violets: '{{ color2 }}'
-   $ echo $?
-   0
+     $ color1=red uw config realize --input-file config.yaml --output-format yaml
+     roses: red
+     violets: '{{ color2 }}'
+     $ echo $?
+     0
 
-   Adding the ``--total`` flag, however, requires ``uw`` to totally realize the config, and to exit with error status if it cannot:
+  Adding the ``--total`` flag, however, requires ``uw`` to totally realize the config, and to exit with error status if it cannot:
 
   .. code-block:: text
 
-   $ color1=red uw config realize --input-file config.yaml --output-format yaml --total
-   [2024-02-28T23:21:16]    ERROR Config could not be realized. Try again with --values-needed.
-   $ echo $?
-   1
+     $ color1=red uw config realize --input-file config.yaml --output-format yaml --total
+     [2024-02-28T23:21:16]    ERROR Config could not be realized. Try again with --values-needed for details.
+     $ echo $?
+     1
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
