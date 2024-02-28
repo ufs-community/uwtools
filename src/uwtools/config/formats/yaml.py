@@ -1,19 +1,11 @@
-from collections import OrderedDict
 from pathlib import Path
 from types import SimpleNamespace as ns
 from typing import Optional
 
 import yaml
-from f90nml import Namelist  # type: ignore
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import (
-    INCLUDE_TAG,
-    TaggedString,
-    log_and_error,
-    represent_namelist,
-    represent_ordereddict,
-)
+from uwtools.config.support import INCLUDE_TAG, TaggedString, add_representers, log_and_error
 from uwtools.utils.file import FORMAT, readable, writable
 
 _MSGS = ns(
@@ -52,9 +44,7 @@ class YAMLConfig(Config):
         """
         The string representation of a YAMLConfig object.
         """
-        yaml.add_representer(TaggedString, TaggedString.represent)
-        yaml.add_representer(Namelist, represent_namelist)
-        yaml.add_representer(OrderedDict, represent_ordereddict)
+        add_representers()
         return yaml.dump(self.data, default_flow_style=False).strip()
 
     # Private methods
@@ -125,9 +115,7 @@ class YAMLConfig(Config):
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to.
         """
-        yaml.add_representer(TaggedString, TaggedString.represent)
-        yaml.add_representer(Namelist, represent_namelist)
-        yaml.add_representer(OrderedDict, represent_ordereddict)
+        add_representers()
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
 

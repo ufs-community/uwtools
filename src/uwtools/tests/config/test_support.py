@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 import pytest
 import yaml
-from f90nml import reads  # type: ignore
+from f90nml import Namelist, reads  # type: ignore
 from pytest import fixture, raises
 
 from uwtools.config import support
@@ -21,6 +21,14 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
+
+
+def test_add_representers():
+    support.add_representers()
+    representers = yaml.Dumper.yaml_representers
+    assert support.TaggedString in representers
+    assert OrderedDict in representers
+    assert Namelist in representers
 
 
 @pytest.mark.parametrize(

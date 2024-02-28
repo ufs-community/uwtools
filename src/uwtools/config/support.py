@@ -14,6 +14,20 @@ from uwtools.utils.file import FORMAT
 INCLUDE_TAG = "!INCLUDE"
 
 
+# Public functions
+def add_representers():
+    """
+    Add representers to the YAML dumper for custom types.
+
+    This function is called by the YAMLConfig class to add representers for the TaggedString,
+    Namelist, and OrderedDict types to the YAML dumper. The representers are used to serialize these
+    types to YAML.
+    """
+    yaml.add_representer(TaggedString, TaggedString.represent)
+    yaml.add_representer(Namelist, _represent_namelist)
+    yaml.add_representer(OrderedDict, _represent_ordereddict)
+
+
 def depth(d: dict) -> int:
     """
     The depth of a dictionary.
@@ -55,7 +69,7 @@ def log_and_error(msg: str) -> Exception:
     return UWConfigError(msg)
 
 
-def represent_namelist(dumper: yaml.Dumper, data: Namelist) -> yaml.nodes.MappingNode:
+def _represent_namelist(dumper: yaml.Dumper, data: Namelist) -> yaml.nodes.MappingNode:
     """
     Convert f90nml Namelist to OrderedDict and serialize.
 
@@ -69,7 +83,7 @@ def represent_namelist(dumper: yaml.Dumper, data: Namelist) -> yaml.nodes.Mappin
     return dumper.represent_mapping("tag:yaml.org,2002:map", namelist_dict)
 
 
-def represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes.MappingNode:
+def _represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes.MappingNode:
     """
     Convert OrderedDict to dict and serialize.
 
