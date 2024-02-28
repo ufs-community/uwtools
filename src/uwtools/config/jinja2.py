@@ -249,9 +249,8 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
     """
     Render a Jinja2 variable/expression as part of dereferencing.
 
-    If this function cannot render the value, either because it contains no Jinja2 syntax or because
-    insufficient context is currently available, a debug message will be logged and the original
-    value will be returned unchanged.
+    If the value cannot be rendered, perhaps due to missing values or syntax errors, a debug message
+    will be logged and the original value will be returned unchanged.
 
     :param val: The value potentially containing Jinja2 syntax to render.
     :param context: Values to use when rendering Jinja2 syntax.
@@ -263,13 +262,9 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
         env = Environment(undefined=StrictUndefined)
         rendered = _register_filters(env).from_string(val).render(context)
         _deref_debug("Rendered", rendered)
-    except Exception:  # pylint: disable=broad-exception-caught
-        try:
-            rendered = _partial_render(s=val, context=context)
-            _deref_debug("Partially rendered", rendered)
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            rendered = val
-            _deref_debug("Rendering failed", str(e))
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        rendered = val
+        _deref_debug("Rendering failed", str(e))
     return rendered
 
 

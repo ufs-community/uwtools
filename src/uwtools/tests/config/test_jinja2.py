@@ -122,7 +122,7 @@ def test_dereference_no_op_due_to_error(caplog, logmsg, val):
     #   - A division-by-zero error.
     # The unrenderable expression is returned unmodified.
     log.setLevel(logging.DEBUG)
-    assert jinja2.dereference(val=val, context={})
+    assert jinja2.dereference(val=val, context={}) == val
     assert regex_logged(caplog, logmsg)
 
 
