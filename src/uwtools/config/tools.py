@@ -315,7 +315,7 @@ Recognized file extensions are: {extensions}
 :param output_format: Format of the output config.
 :param supplemental_configs: Sources of values used to modify input.
 :param values_needed: Report complete, missing, and template values.
-:param total: Require rendering of all template expressions.
+:param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.
 :raises: UWConfigError if ``total`` is ``True`` and config could not be totally realized.
 :return: The realized config (or an empty-dict for no-op modes).

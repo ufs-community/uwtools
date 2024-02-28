@@ -663,7 +663,7 @@ def _add_arg_total(group: Group) -> None:
     group.add_argument(
         _switch(STR.total),
         action="store_true",
-        help="Require rendering of all template expressions",
+        help="Require rendering of all Jinja2 variables/expressions",
     )
 
 

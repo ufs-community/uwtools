@@ -209,7 +209,7 @@ input formats, the output format must match the input.
 If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
 ``dry_run`` mode, output is written to ``stderr``.
 
-If ``total`` is ``True``, an exception will be raised if any template expressions could not be
+If ``total`` is ``True``, an exception will be raised if any Jinja2 variables/expressions could not be
 rendered. Otherwise, such expressions will be passed through unchanged in the output.
 
 Recognized file extensions are: {extensions}
@@ -220,9 +220,9 @@ Recognized file extensions are: {extensions}
 :param output_format: Format of the output config (optional if file's extension is recognized)
 :param supplemental_configs: Configs to merge, in order, onto the input
 :param values_needed: Report complete, missing, and template values
-:param total: Require rendering of all template expressions
+:param total: Require rendering of all Jinja2 variables/expressions
 :param dry_run: Log output instead of writing to output
-:raises: UWConfigError if ``total`` is ``True`` and any template expression was not rendered
+:raises: UWConfigError if ``total`` is ``True`` and any Jinja2 variable/expression was not rendered
 :return: ``True``
 """.format(
     extensions=", ".join(_FORMAT.extensions())
