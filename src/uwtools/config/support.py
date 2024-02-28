@@ -4,6 +4,7 @@ from collections import OrderedDict
 from importlib import import_module
 from typing import Dict, Type, Union
 
+import f90nml  # type: ignore
 import yaml
 
 from uwtools.exceptions import UWConfigError
@@ -54,6 +55,36 @@ def log_and_error(msg: str) -> Exception:
     return UWConfigError(msg)
 
 
+def represent_namelist(dumper: yaml.Dumper, data: f90nml.Namelist) -> yaml.nodes.MappingNode:
+    """
+    Convert f90 Namelist objects to ordered dicts and serialize.
+
+    :param dumper: The YAML dumper.
+    :param data: The f90nml Namelist to serialize.
+    """
+    # Convert the f90nml Namelist to an ordered dictionary
+    namelist_dict = data.todict()
+
+    # Represent the dictionary as a YAML mapping
+    return dumper.represent_mapping("tag:yaml.org,2002:map", namelist_dict)
+
+
+def represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes.MappingNode:
+    """
+    Convert ordered dict objects to dictionaries and serialize.
+
+    :param dumper: The YAML dumper.
+    :param data: The ordereddict to serialize.
+    """
+    # Convert the Ordered Dict to a dictionary
+    for key, value in data.items():
+        if isinstance(value, OrderedDict):
+            data[key] = dict(value)
+
+    # Represent the dictionary as a YAML mapping
+    return dumper.represent_mapping("tag:yaml.org,2002:map", data)
+
+
 class TaggedString:
     """
     A class supporting custom YAML tags specifying type conversions.
@@ -89,17 +120,3 @@ class TaggedString:
         documentation for details.
         """
         return dumper.represent_scalar(data.tag, data.value)
-
-
-def represent_namelist(dumper: yaml.Dumper, data) -> yaml.nodes.MappingNode:
-    """
-    Serialize f90nml tags.
-    """
-    # Convert the f90nml Namelist object to a dictionary
-    namelist_dict = data.todict()
-    for key, value in namelist_dict.items():
-        if isinstance(value, OrderedDict):
-            namelist_dict[key] = dict(value)
-
-    # Represent the dictionary as a YAML mapping
-    return dumper.represent_mapping("tag:yaml.org,2002:map", namelist_dict)
