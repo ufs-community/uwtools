@@ -186,7 +186,7 @@ def render(
     # missing values and return an error to the caller.
 
     if partial:
-        rendered = Environment(undefined=DebugUndefined).from_string(template_str).render(values)
+        rendered = _partial_render(s=template_str, context=values)
     else:
         missing = [var for var in undeclared_variables if var not in values.keys()]
         if missing:
@@ -258,16 +258,18 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
     :param local: Local sibling values to use if a match is not found in context.
     :return: The rendered value (potentially unchanged).
     """
+    context = {**(local or {}), **context}
     try:
-        rendered = (
-            _register_filters(Environment(undefined=StrictUndefined))
-            .from_string(val)
-            .render({**(local or {}), **context})
-        )
+        env = Environment(undefined=StrictUndefined)
+        rendered = _register_filters(env).from_string(val).render(context)
         _deref_debug("Rendered", rendered)
-    except Exception as e:  # pylint: disable=broad-exception-caught
-        _deref_debug("Rendering failed", str(e))
-        rendered = val
+    except Exception:  # pylint: disable=broad-exception-caught
+        try:
+            rendered = _partial_render(s=val, context=context)
+            _deref_debug("Partially rendered", rendered)
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            rendered = val
+            _deref_debug("Rendering failed", str(e))
     return rendered
 
 
@@ -297,6 +299,17 @@ def _log_missing_values(missing: List[str]) -> bool:
     for key in missing:
         log.error(key)
     return False
+
+
+def _partial_render(s: str, context: dict) -> str:
+    """
+    Render as much of a template as possible.
+
+    :param s: The template string to render.
+    :param context: Values to use when rendering Jinja2 syntax.
+    :return: The template rendered as fully as possible.
+    """
+    return Environment(undefined=DebugUndefined).from_string(s).render(context)
 
 
 def _register_filters(env: Environment) -> Environment:
