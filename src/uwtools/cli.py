@@ -233,6 +233,7 @@ def _add_subparser_fv3_task(subparsers: Subparsers, task: str, helpmsg: str) -> 
     optional = _basic_setup(parser)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
     checks = _add_args_verbosity(optional)
     return checks
 
@@ -249,6 +250,7 @@ def _dispatch_fv3(args: Args) -> bool:
         cycle=args[STR.cycle],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
     )
 
 
@@ -363,6 +365,7 @@ def _add_subparser_sfc_climo_gen_task(
     optional = _basic_setup(parser)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
     checks = _add_args_verbosity(optional)
     return checks
 
@@ -378,6 +381,7 @@ def _dispatch_sfc_climo_gen(args: Args) -> bool:
         config_file=args[STR.cfgfile],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
     )
 
 
@@ -547,6 +551,15 @@ def _add_arg_file_path(group: Group, switch: str, helpmsg: str, required: bool =
         help=helpmsg,
         metavar="PATH",
         required=required,
+        type=Path,
+    )
+
+
+def _add_arg_graph_file(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.graphfile),
+        help="Path to Graphviz DOT output [experimental]",
+        metavar="PATH",
         type=Path,
     )
 
@@ -842,6 +855,7 @@ class STR:
     file2fmt: str = "file_2_format"
     file2path: str = "file_2_path"
     fv3: str = "fv3"
+    graphfile: str = "graph_file"
     help: str = "help"
     infile: str = "input_file"
     infmt: str = "input_format"
