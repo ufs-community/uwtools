@@ -62,7 +62,7 @@ def represent_namelist(dumper: yaml.Dumper, data: f90nml.Namelist) -> yaml.nodes
     :param dumper: The YAML dumper.
     :param data: The f90nml Namelist to serialize.
     """
-    # Convert the f90nml Namelist to an ordered dictionary
+    # Convert the f90nml Namelist to an OrderedDict.
     namelist_dict = data.todict()
 
     # Represent the OrderedDict as a YAML mapping.
