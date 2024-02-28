@@ -77,12 +77,11 @@ def represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes.
     :param data: The ordereddict to serialize.
     """
     # Convert the Ordered Dict to a dictionary
-    for key, value in data.items():
-        if isinstance(value, OrderedDict):
-            data[key] = dict(value)
+    def from_od(d: Union[OrderedDict, Dict]) -> dict:
+        return {key: from_od(val) if isinstance(val, dict) else val for key, val in d.items()}
 
     # Represent the dictionary as a YAML mapping
-    return dumper.represent_mapping("tag:yaml.org,2002:map", data)
+    return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
 
 
 class TaggedString:
