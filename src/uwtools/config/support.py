@@ -80,7 +80,7 @@ def represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes.
     def from_od(d: Union[OrderedDict, Dict]) -> dict:
         return {key: from_od(val) if isinstance(val, dict) else val for key, val in d.items()}
 
-    # Represent the dictionary as a YAML mapping
+    # Represent the dict as a YAML mapping.
     return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
 
 
