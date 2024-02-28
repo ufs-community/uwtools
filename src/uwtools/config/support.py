@@ -57,7 +57,7 @@ def log_and_error(msg: str) -> Exception:
 
 def represent_namelist(dumper: yaml.Dumper, data: f90nml.Namelist) -> yaml.nodes.MappingNode:
     """
-    Convert f90 Namelist objects to ordered dicts and serialize.
+    Convert f90nml Namelist to OrderedDict and serialize.
 
     :param dumper: The YAML dumper.
     :param data: The f90nml Namelist to serialize.
