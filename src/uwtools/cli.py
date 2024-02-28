@@ -558,7 +558,7 @@ def _add_arg_graph_file(group: Group) -> None:
         _switch(STR.graphfile),
         help="Path to Graphviz DOT output [experimental]",
         metavar="PATH",
-        type=str,
+        type=Path,
     )
 
 
