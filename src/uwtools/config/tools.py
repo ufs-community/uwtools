@@ -7,8 +7,9 @@ from typing import Callable, List, Optional, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.jinja2 import unrendered
 from uwtools.config.support import depth, format_to_config, log_and_error
-from uwtools.exceptions import UWError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import MSGWIDTH, log
 from uwtools.utils.file import FORMAT, get_file_format
 
@@ -107,8 +108,8 @@ def realize_config(
         _realize_config_values_needed(input_obj)
         return {}
     output_obj = format_to_config(output_format)
-    if total:
-        pass
+    if total and unrendered(str(output_obj)):
+        raise UWConfigError("Config was not totally realized")
     output_obj.dump_dict(cfg=input_obj.data, path=output_file)
     return input_obj.data
 
