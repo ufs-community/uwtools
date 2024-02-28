@@ -12,6 +12,7 @@ def test_render():
         "values": "valsfile",
         "values_format": "format",
         "overrides": {"key": "val"},
+        "partial": True,
         "values_needed": True,
         "dry_run": True,
     }
