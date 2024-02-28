@@ -186,7 +186,7 @@ def render(
     # missing values and return an error to the caller.
 
     if partial:
-        rendered = _partial_render(s=template_str, context=values)
+        rendered = Environment(undefined=DebugUndefined).from_string(template_str).render(values)
     else:
         missing = [var for var in undeclared_variables if var not in values.keys()]
         if missing:
@@ -294,17 +294,6 @@ def _log_missing_values(missing: List[str]) -> bool:
     for key in missing:
         log.error(key)
     return False
-
-
-def _partial_render(s: str, context: dict) -> str:
-    """
-    Render as much of a template as possible.
-
-    :param s: The template string to render.
-    :param context: Values to use when rendering Jinja2 syntax.
-    :return: The template rendered as fully as possible.
-    """
-    return Environment(undefined=DebugUndefined).from_string(s).render(context)
 
 
 def _register_filters(env: Environment) -> Environment:
