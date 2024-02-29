@@ -21,7 +21,7 @@ from uwtools import cli
 from uwtools.cli import STR
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.logging import log
-from uwtools.tests.support import logged, regex_logged
+from uwtools.tests.support import regex_logged
 from uwtools.utils.file import FORMAT
 
 # Test functions
@@ -185,18 +185,15 @@ def test__check_template_render_vals_args_noop_explicit_valsfmt():
     assert cli._check_template_render_vals_args(args) == args
 
 
-@pytest.mark.parametrize("flag", (STR.debug, STR.verbose))
-def test__check_verbosity_fail(capsys, flag):
+def test__check_verbosity_fail(capsys):
     log.setLevel(logging.INFO)
-    args = {STR.quiet: True, flag: True}
+    args = {STR.quiet: True, STR.verbose: True}
     with raises(SystemExit):
         cli._check_verbosity(args)
-    assert "--quiet may not be used with --debug or --verbose" in capsys.readouterr().err
+    assert "--quiet may not be used with --verbose" in capsys.readouterr().err
 
 
-@pytest.mark.parametrize(
-    "flags", ([STR.debug], [STR.quiet], [STR.verbose], [STR.debug, STR.verbose])
-)
+@pytest.mark.parametrize("flags", ([STR.quiet], [STR.verbose]))
 def test__check_verbosity_ok(flags):
     args = {flag: True for flag in flags}
     assert cli._check_verbosity(args) == args
@@ -493,24 +490,11 @@ def test__dispatch_template_translate_no_optional():
     )
 
 
-def test_main_debug_logs_stacktrace(caplog):
-    log.setLevel(logging.DEBUG)
-    msg = "Test failed intentionally"
-    with patch.object(cli, "_parse_args", side_effect=Exception(msg)):
-        with patch.object(sys, "argv", cli._switch(STR.debug)):
-            with raises(SystemExit):
-                cli.main()
-                assert logged(caplog, "Traceback (most recent call last):")
-
-
-@pytest.mark.parametrize("debug", [False, True])
 @pytest.mark.parametrize("quiet", [False, True])
 @pytest.mark.parametrize("verbose", [False, True])
-def test_main_fail_checks(capsys, debug, quiet, verbose):
+def test_main_fail_checks(capsys, quiet, verbose):
     # Using mode 'template render' for testing.
     raw_args = ["testing", STR.template, STR.render]
-    if debug:
-        raw_args.append(cli._switch(STR.debug))
     if quiet:
         raw_args.append(cli._switch(STR.quiet))
     if verbose:
@@ -519,11 +503,9 @@ def test_main_fail_checks(capsys, debug, quiet, verbose):
         with patch.object(cli, "_dispatch_template", return_value=True):
             with raises(SystemExit) as e:
                 cli.main()
-            if quiet and (debug or verbose):
+            if quiet and verbose:
                 assert e.value.code == 1
-                assert (
-                    "--quiet may not be used with --debug or --verbose" in capsys.readouterr().err
-                )
+                assert "--quiet may not be used with --verbose" in capsys.readouterr().err
             else:
                 assert e.value.code == 0
 
@@ -538,14 +520,6 @@ def test_main_fail_dispatch(vals):
             with raises(SystemExit) as e:
                 cli.main()
             assert e.value.code == exit_status
-
-
-def test_main_raises_exception(capsys):
-    msg = "Test failed intentionally"
-    with patch.object(cli, "_parse_args", side_effect=Exception(msg)):
-        with raises(SystemExit):
-            cli.main()
-    assert msg in capsys.readouterr().err
 
 
 def test__parse_args():
