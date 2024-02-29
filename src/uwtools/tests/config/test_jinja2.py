@@ -55,7 +55,7 @@ cannot:
 
 
 def render_helper(input_file, values_file, **kwargs):
-    jinja2.render(
+    return jinja2.render(
         input_file=input_file,
         values=values_file,
         **kwargs,
@@ -163,9 +163,11 @@ def test_register_filters_path_join(key):
 
 def test_render(values_file, template, tmp_path):
     outfile = str(tmp_path / "out.txt")
-    render_helper(input_file=template, values_file=values_file, output_file=outfile)
+    expected = "roses are red, violets are blue"
+    result = render_helper(input_file=template, values_file=values_file, output_file=outfile)
+    assert result == expected
     with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read().strip() == "roses are red, violets are blue"
+        assert f.read().strip() == expected
 
 
 def test_render_calls__dry_run(template, tmp_path, values_file):
@@ -210,10 +212,12 @@ def test_render_calls__write(template, tmp_path, values_file):
 
 def test_render_dry_run(caplog, template, values_file):
     log.setLevel(logging.INFO)
-    render_helper(
+    expected = "roses are red, violets are blue"
+    result = render_helper(
         input_file=template, values_file=values_file, output_file="/dev/null", dry_run=True
     )
-    assert logged(caplog, "roses are red, violets are blue")
+    assert result == expected
+    assert logged(caplog, expected)
 
 
 @pytest.mark.parametrize("partial", [False, True])
