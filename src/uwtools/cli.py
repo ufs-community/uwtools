@@ -23,7 +23,7 @@ import uwtools.rocoto
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
-FORMATS = list(FORMAT.formats().keys())
+FORMATS = FORMAT.extensions()
 TITLE_REQ_ARG = "Required arguments"
 
 Args = Dict[str, Any]
@@ -430,6 +430,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_values_file(optional)
     _add_arg_values_format(optional, choices=FORMATS)
     _add_arg_values_needed(optional)
+    _add_arg_partial(optional)
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_key_eq_val_pairs(optional)
@@ -463,6 +464,7 @@ def _dispatch_template_render(args: Args) -> bool:
         output_file=args[STR.outfile],
         overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
         values_needed=args[STR.valsneeded],
+        partial=args[STR.partial],
         dry_run=args[STR.dryrun],
     )
 
@@ -610,6 +612,14 @@ def _add_arg_output_format(group: Group, choices: List[str], required: bool = Fa
         help="Output format",
         required=required,
         type=str,
+    )
+
+
+def _add_arg_partial(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.partial),
+        action="store_true",
+        help="Permit partial template rendering",
     )
 
 
@@ -854,6 +864,7 @@ class STR:
     model: str = "model"
     outfile: str = "output_file"
     outfmt: str = "output_format"
+    partial: str = "partial"
     quiet: str = "quiet"
     realize: str = "realize"
     render: str = "render"
