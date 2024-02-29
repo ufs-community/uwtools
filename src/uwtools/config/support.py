@@ -95,6 +95,7 @@ def _represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes
     # Represent the dict as a YAML mapping.
     return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
 
+
 class TaggedString:
     """
     A class supporting custom YAML tags specifying type conversions.
