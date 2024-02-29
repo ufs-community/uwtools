@@ -152,7 +152,7 @@ def render(
     values_needed: bool = False,
     partial: bool = False,
     dry_run: bool = False,
-) -> bool:
+) -> Optional[str]:
     """
     Check and render a Jinja2 template.
 
@@ -164,7 +164,7 @@ def render(
     :param values_needed: Just report variables needed to render the template?
     :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
-    :return: True if Jinja2 template was successfully rendered, False otherwise.
+    :return: The rendered template, or None.
     """
     _report(locals())
     if not isinstance(values, dict):
@@ -180,7 +180,8 @@ def render(
     # then return.
 
     if values_needed:
-        return _values_needed(undeclared_variables)
+        _values_needed(undeclared_variables)
+        return None
 
     # If partial rendering has been requested, do a best-effort render. Otherwise, report any
     # missing values and return an error to the caller.
@@ -190,7 +191,8 @@ def render(
     else:
         missing = [var for var in undeclared_variables if var not in values.keys()]
         if missing:
-            return _log_missing_values(missing)
+            _log_missing_values(missing)
+            return None
         rendered = template.render()
 
     # Log (dry-run mode) or write the rendered template.
@@ -268,32 +270,27 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
     return rendered
 
 
-def _dry_run_template(rendered_template: str) -> bool:
+def _dry_run_template(rendered_template: str) -> str:
     """
     Log the rendered template and then return as successful.
 
     :param rendered_template: A string containing a rendered Jinja2 template.
-    :return: The successful logging of the template.
+    :return: The passed-in rendered-template string.
     """
-
     for line in rendered_template.split("\n"):
         log.info(line)
-    return True
+    return rendered_template
 
 
-def _log_missing_values(missing: List[str]) -> bool:
+def _log_missing_values(missing: List[str]) -> None:
     """
     Log values missing from template and raise an exception.
 
-    :param missing: A list containing the undeclared variables that do not have a corresponding
-        match in values.
-    :return: Unable to successfully render template.
+    :param missing: Variables with no corresponding values.
     """
-
     log.error("Required value(s) not provided:")
     for key in missing:
         log.error(key)
-    return False
 
 
 def _register_filters(env: Environment) -> Environment:
@@ -359,30 +356,25 @@ def _set_up_values_obj(
     return values
 
 
-def _values_needed(undeclared_variables: Set[str]) -> bool:
+def _values_needed(undeclared_variables: Set[str]) -> None:
     """
     Log variables needed to render the template.
 
     :param undeclared_variables: A set containing the variables needed to render the template.
-    :return: Successfully logged values needed.
     """
-
-    # If a report of variables required to render the template was requested, make that report and
-    # then return.
     log.info("Value(s) needed to render this template are:")
     for var in sorted(undeclared_variables):
         log.info(var)
-    return True
 
 
-def _write_template(output_file: Optional[Path], rendered_template: str) -> bool:
+def _write_template(output_file: Optional[Path], rendered_template: str) -> str:
     """
     Write the rendered template.
 
     :param output_file: Path to the file to write the rendered Jinja2 template to.
     :param rendered_template: A string containing a rendered Jinja2 template.
-    :return: The successful writing of the rendered template.
+    :return: The passed-in rendered-template string.
     """
     with writable(output_file) as f:
         print(rendered_template, file=f)
-    return True
+    return rendered_template

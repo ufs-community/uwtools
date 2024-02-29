@@ -20,7 +20,7 @@ import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
-from uwtools.exceptions import UWConfigRealizeError
+from uwtools.exceptions import UWConfigRealizeError, UWTemplateRenderError
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
@@ -183,7 +183,7 @@ def _dispatch_config_realize(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     try:
-        return uwtools.api.config.realize(
+        uwtools.api.config.realize(
             input_config=args[STR.infile],
             input_format=args[STR.infmt],
             output_file=args[STR.outfile],
@@ -195,9 +195,10 @@ def _dispatch_config_realize(args: Args) -> bool:
         )
     except UWConfigRealizeError:
         log.error(
-            "Config could not be realized. Try again with %s for details." % _switch(STR.valsneeded)
+            "Config could not be realized. Try with %s for details." % _switch(STR.valsneeded)
         )
-        sys.exit(1)
+        return False
+    return True
 
 
 def _dispatch_config_validate(args: Args) -> bool:
@@ -466,16 +467,22 @@ def _dispatch_template_render(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.template.render(
-        values=args[STR.valsfile],
-        values_format=args[STR.valsfmt],
-        input_file=args[STR.infile],
-        output_file=args[STR.outfile],
-        overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
-        values_needed=args[STR.valsneeded],
-        partial=args[STR.partial],
-        dry_run=args[STR.dryrun],
-    )
+    try:
+        uwtools.api.template.render(
+            values=args[STR.valsfile],
+            values_format=args[STR.valsfmt],
+            input_file=args[STR.infile],
+            output_file=args[STR.outfile],
+            overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
+            values_needed=args[STR.valsneeded],
+            partial=args[STR.partial],
+            dry_run=args[STR.dryrun],
+        )
+    except UWTemplateRenderError:
+        msg = "Template could not be rendered. Try with %s for details." % _switch(STR.valsneeded)
+        log.error(msg)
+        return False
+    return True
 
 
 def _dispatch_template_translate(args: Args) -> bool:

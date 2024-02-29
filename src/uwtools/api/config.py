@@ -99,7 +99,7 @@ def realize(
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
-) -> bool:
+) -> None:
     """
     NB: This docstring is dynamically replaced: See realize.__doc__ definition below.
     """
@@ -113,7 +113,6 @@ def realize(
         total=total,
         dry_run=dry_run,
     )
-    return True
 
 
 def realize_to_dict(
@@ -223,7 +222,6 @@ Recognized file extensions are: {extensions}
 :param total: Require rendering of all Jinja2 variables/expressions
 :param dry_run: Log output instead of writing to output
 :raises: UWConfigRealizeError if ``total`` is ``True`` and any Jinja2 variable/expression was not rendered
-:return: ``True``
 """.format(
     extensions=", ".join(_FORMAT.extensions())
 ).strip()

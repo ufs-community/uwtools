@@ -301,8 +301,7 @@ def test__dispatch_config_realize_fail(caplog):
         )
     }
     with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
-        with raises(SystemExit):
-            cli._dispatch_config_realize(args)
+        assert cli._dispatch_config_realize(args) is False
     assert regex_logged(caplog, "Config could not be realized")
 
 

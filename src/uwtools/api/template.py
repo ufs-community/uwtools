@@ -6,6 +6,7 @@ from typing import Dict, Optional, Union
 
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.jinja2 import render as _render
+from uwtools.exceptions import UWTemplateRenderError
 
 
 def render(
@@ -17,7 +18,7 @@ def render(
     values_needed: bool = False,
     partial: bool = False,
     dry_run: bool = False,
-) -> bool:
+) -> None:
     """
     Render a Jinja2 template based on specified values.
 
@@ -37,18 +38,22 @@ def render(
     :param values_needed: Just report variables needed to render the template?
     :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
-    :return: ``True`` if Jinja2 template was successfully rendered, ``False`` otherwise
+    :raises: UWTemplateRenderError if template could not be rendered
     """
-    return _render(
-        values=values,
-        values_format=values_format,
-        input_file=input_file,
-        output_file=output_file,
-        overrides=overrides,
-        values_needed=values_needed,
-        partial=partial,
-        dry_run=dry_run,
-    )
+    if (
+        _render(
+            values=values,
+            values_format=values_format,
+            input_file=input_file,
+            output_file=output_file,
+            overrides=overrides,
+            values_needed=values_needed,
+            partial=partial,
+            dry_run=dry_run,
+        )
+        is None
+    ):
+        raise UWTemplateRenderError("Could not render template")
 
 
 # def render_to_str(

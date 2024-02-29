@@ -222,7 +222,7 @@ def test_render_partial(caplog, capsys, partial):
     content = StringIO(initial_value="{{ greeting }} {{ recipient }}")
     with patch.object(jinja2, "readable") as readable:
         readable.return_value.__enter__.return_value = content
-        assert jinja2.render(values={"greeting": "Hello"}, partial=partial) is partial
+        jinja2.render(values={"greeting": "Hello"}, partial=partial)
     if partial:
         assert "Hello {{ recipient }}" in capsys.readouterr().out
     else:
@@ -305,8 +305,7 @@ def test__dry_run_template(caplog):
 
 def test__log_missing_values(caplog):
     missing = ["roses_color", "violets_color"]
-    result = jinja2._log_missing_values(missing)
-    assert result is False
+    jinja2._log_missing_values(missing)
     assert logged(caplog, "Required value(s) not provided:")
     assert logged(caplog, "roses_color")
     assert logged(caplog, "violets_color")
@@ -341,8 +340,7 @@ def test__set_up_config_obj_file(values_file):
 
 def test__values_needed(caplog):
     undeclared_variables = {"roses_color", "lavender_smell"}
-    result = jinja2._values_needed(undeclared_variables)
-    assert result is True
+    jinja2._values_needed(undeclared_variables)
     assert logged(caplog, "Value(s) needed to render this template are:")
     assert logged(caplog, "roses_color")
     assert logged(caplog, "lavender_smell")
