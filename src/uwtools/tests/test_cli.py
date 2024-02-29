@@ -19,9 +19,9 @@ import uwtools.drivers.fv3
 import uwtools.drivers.sfc_climo_gen
 from uwtools import cli
 from uwtools.cli import STR
-from uwtools.exceptions import UWError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
-from uwtools.tests.support import logged
+from uwtools.tests.support import logged, regex_logged
 from uwtools.utils.file import FORMAT
 
 # Test functions
@@ -243,7 +243,8 @@ def test__dispatch_config_realize():
         STR.outfmt: 4,
         STR.suppfiles: 5,
         STR.valsneeded: 6,
-        STR.dryrun: 7,
+        STR.total: 7,
+        STR.dryrun: 8,
     }
     with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
@@ -254,7 +255,8 @@ def test__dispatch_config_realize():
         output_format=4,
         supplemental_configs=5,
         values_needed=6,
-        dry_run=7,
+        total=7,
+        dry_run=8,
     )
 
 
@@ -266,6 +268,7 @@ def test__dispatch_config_realize_no_optional():
         STR.outfmt: None,
         STR.suppfiles: ["/foo.vals"],
         STR.valsneeded: False,
+        STR.total: False,
         STR.dryrun: False,
     }
     with patch.object(cli.uwtools.api.config, "realize") as realize:
@@ -277,8 +280,30 @@ def test__dispatch_config_realize_no_optional():
         output_format=None,
         supplemental_configs=["/foo.vals"],
         values_needed=False,
+        total=False,
         dry_run=False,
     )
+
+
+def test__dispatch_config_realize_fail(caplog):
+    log.setLevel(logging.ERROR)
+    args = {
+        x: None
+        for x in (
+            STR.infile,
+            STR.infmt,
+            STR.outfile,
+            STR.outfmt,
+            STR.suppfiles,
+            STR.valsneeded,
+            STR.total,
+            STR.dryrun,
+        )
+    }
+    with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigError):
+        with raises(SystemExit):
+            cli._dispatch_config_realize(args)
+    assert regex_logged(caplog, "Config could not be realized")
 
 
 def test__dispatch_config_validate_config_obj():

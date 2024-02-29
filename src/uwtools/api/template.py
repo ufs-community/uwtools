@@ -35,7 +35,7 @@ def render(
         to ``stdout``)
     :param overrides: Supplemental override values
     :param values_needed: Just report variables needed to render the template?
-    :param partial: Permit unrendered expressions in output?
+    :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
     :return: ``True`` if Jinja2 template was successfully rendered, ``False`` otherwise
     """

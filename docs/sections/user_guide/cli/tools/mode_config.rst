@@ -155,7 +155,7 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
    $ uw config realize --help
    usage: uw config realize [-h] [--input-file PATH] [--input-format {ini,nml,sh,yaml}]
                             [--output-file PATH] [--output-format {ini,nml,sh,yaml}]
-                            [--values-needed] [--dry-run] [--quiet] [--verbose]
+                            [--values-needed] [--total] [--dry-run] [--debug] [--quiet] [--verbose]
                             [PATH ...]
 
    Realize config
@@ -173,6 +173,8 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
          Output format
      --values-needed
          Print report of values needed to render template
+     --total
+         Require rendering of all Jinja2 variables/expressions
      --dry-run
          Only log info, making no changes
      --debug
@@ -280,6 +282,32 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
        message: 'Good Night Moon Good Night Moon '
        recipient: Moon
        repeat: 2
+
+* By default, variables/expressions that cannot be rendered are passed through unchanged in the output. For example, config file ``config.yaml`` with contents
+
+  .. code-block:: yaml
+
+     roses: "{{ color1 }}"
+     violets: "{{ color2 }}"
+
+  could normally be partially realized, with ``uw`` exiting with success status, by providing one of the two needed template values:
+
+  .. code-block:: text
+
+     $ color1=red uw config realize --input-file config.yaml --output-format yaml
+     roses: red
+     violets: '{{ color2 }}'
+     $ echo $?
+     0
+
+  Adding the ``--total`` flag, however, requires ``uw`` to totally realize the config, and to exit with error status if it cannot:
+
+  .. code-block:: text
+
+     $ color1=red uw config realize --input-file config.yaml --output-format yaml --total
+     [2024-02-28T23:21:16]    ERROR Config could not be realized. Try again with --values-needed for details.
+     $ echo $?
+     1
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 

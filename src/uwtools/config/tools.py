@@ -7,8 +7,9 @@ from typing import Callable, List, Optional, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.jinja2 import unrendered
 from uwtools.config.support import depth, format_to_config, log_and_error
-from uwtools.exceptions import UWError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import MSGWIDTH, log
 from uwtools.utils.file import FORMAT, get_file_format
 
@@ -81,6 +82,7 @@ def realize_config(
     output_format: Optional[str] = None,
     supplemental_configs: Optional[List[Union[dict, Config, Path]]] = None,
     values_needed: bool = False,
+    total: bool = False,
     dry_run: bool = False,
 ) -> dict:
     """
@@ -105,8 +107,10 @@ def realize_config(
     if values_needed:
         _realize_config_values_needed(input_obj)
         return {}
-    output_obj = format_to_config(output_format)
-    output_obj.dump_dict(cfg=input_obj.data, path=output_file)
+    if total and unrendered(str(input_obj)):
+        raise UWConfigError("Config could not be totally realized")
+    output_class = format_to_config(output_format)
+    output_class.dump_dict(cfg=input_obj.data, path=output_file)
     return input_obj.data
 
 
@@ -315,7 +319,9 @@ Recognized file extensions are: {extensions}
 :param output_format: Format of the output config.
 :param supplemental_configs: Sources of values used to modify input.
 :param values_needed: Report complete, missing, and template values.
+:param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.
+:raises: UWConfigError if ``total`` is ``True`` and config cannot be totally realized.
 :return: The realized config (or an empty-dict for no-op modes).
 """.format(
     extensions=", ".join(FORMAT.extensions())

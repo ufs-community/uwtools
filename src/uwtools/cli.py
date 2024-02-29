@@ -20,6 +20,7 @@ import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
@@ -124,6 +125,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=FORMATS)
     _add_arg_values_needed(optional)
+    _add_arg_total(optional)
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_supplemental_files(optional)
@@ -180,15 +182,22 @@ def _dispatch_config_realize(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.config.realize(
-        input_config=args[STR.infile],
-        input_format=args[STR.infmt],
-        output_file=args[STR.outfile],
-        output_format=args[STR.outfmt],
-        supplemental_configs=args[STR.suppfiles],
-        values_needed=args[STR.valsneeded],
-        dry_run=args[STR.dryrun],
-    )
+    try:
+        return uwtools.api.config.realize(
+            input_config=args[STR.infile],
+            input_format=args[STR.infmt],
+            output_file=args[STR.outfile],
+            output_format=args[STR.outfmt],
+            supplemental_configs=args[STR.suppfiles],
+            values_needed=args[STR.valsneeded],
+            total=args[STR.total],
+            dry_run=args[STR.dryrun],
+        )
+    except UWConfigError:
+        log.error(
+            "Config could not be realized. Try again with %s for details." % _switch(STR.valsneeded)
+        )
+        sys.exit(1)
 
 
 def _dispatch_config_validate(args: Args) -> bool:
@@ -652,6 +661,14 @@ def _add_arg_supplemental_files(group: Group) -> None:
     )
 
 
+def _add_arg_total(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.total),
+        action="store_true",
+        help="Require rendering of all Jinja2 variables/expressions",
+    )
+
+
 def _add_arg_values_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.valsfile),
@@ -876,6 +893,7 @@ class STR:
     task: str = "task"
     tasks: str = "tasks"
     template: str = "template"
+    total: str = "total"
     translate: str = "translate"
     validate: str = "validate"
     valsfile: str = "values_file"

@@ -413,6 +413,14 @@ deref: b
     assert actual == expected
 
 
+def test_realize_config_total_fail():
+    with raises(UWConfigError) as e:
+        tools.realize_config(
+            input_config=YAMLConfig({"foo": "{{ bar }}"}), output_format="yaml", total=True
+        )
+    assert str(e.value) == "Config could not be totally realized"
+
+
 def test_realize_config_values_needed_ini(caplog):
     """
     Test that the values_needed flag logs keys completed, keys containing unrendered Jinja2
