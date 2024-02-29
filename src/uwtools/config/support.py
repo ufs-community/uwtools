@@ -15,6 +15,8 @@ INCLUDE_TAG = "!INCLUDE"
 
 
 # Public functions
+
+
 def add_representers() -> None:
     """
     Add representers to the YAML dumper for custom types.
@@ -66,6 +68,8 @@ def log_and_error(msg: str) -> Exception:
 
 
 # Private functions
+
+
 def _represent_namelist(dumper: yaml.Dumper, data: Namelist) -> yaml.nodes.MappingNode:
     """
     Convert f90nml Namelist to OrderedDict and serialize.
@@ -73,10 +77,10 @@ def _represent_namelist(dumper: yaml.Dumper, data: Namelist) -> yaml.nodes.Mappi
     :param dumper: The YAML dumper.
     :param data: The f90nml Namelist to serialize.
     """
-    # Convert the f90nml Namelist to an OrderedDict.
-    namelist_dict = data.todict()
 
-    # Represent the OrderedDict as a YAML mapping.
+    # Convert the f90nml Namelist to an OrderedDict, then represent as a YAML mapping.
+
+    namelist_dict = data.todict()
     return dumper.represent_mapping("tag:yaml.org,2002:map", namelist_dict)
 
 
@@ -88,11 +92,11 @@ def _represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes
     :param data: The OrderedDict to serialize.
     """
 
-    # Convert the OrderedDict to a dict.
+    # Recursrively convert an OrderedDict to a dict, then represent as a YAML mapping.
+
     def from_od(d: Union[OrderedDict, Dict]) -> dict:
         return {key: from_od(val) if isinstance(val, dict) else val for key, val in d.items()}
 
-    # Represent the dict as a YAML mapping.
     return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
 
 
