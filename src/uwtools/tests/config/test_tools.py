@@ -665,22 +665,22 @@ def test__validate_format_output(input_fmt, output_fmt):
 
 
 def test__validate_format_supplemental_fail_obj():
-    config_fmt = FORMAT.yaml
+    config_fmt = FORMAT.ini
     sc = NMLConfig(config={"n": {"k": "v"}})
     with raises(UWError) as e:
         tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
-    assert str(e.value) == "Supplemental config #88 format %s must match input format %s" % (
+    assert str(e.value) == "Supplemental config #88 format %s must be yaml or input format %s" % (
         FORMAT.nml,
         config_fmt,
     )
 
 
 def test__validate_format_supplemental_fail_path():
-    config_fmt = FORMAT.yaml
+    config_fmt = FORMAT.ini
     sc = Path("/path/to/config.nml")
     with raises(UWError) as e:
         tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
-    assert str(e.value) == "Supplemental config #%s format %s must match input format %s" % (
+    assert str(e.value) == "Supplemental config #%s format %s must be yaml or input format %s" % (
         88,
         FORMAT.nml,
         config_fmt,
