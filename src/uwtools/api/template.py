@@ -1,6 +1,7 @@
 """
 API access to uwtools templating logic.
 """
+import os
 from pathlib import Path
 from typing import Dict, Optional, Union
 
@@ -18,7 +19,7 @@ def render(
     values_needed: bool = False,
     partial: bool = False,
     dry_run: bool = False,
-) -> None:
+) -> str:
     """
     Render a Jinja2 template based on specified values.
 
@@ -38,37 +39,37 @@ def render(
     :param values_needed: Just report variables needed to render the template?
     :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
+    :return: The rendered template string
     :raises: UWTemplateRenderError if template could not be rendered
     """
-    if (
-        _render(
-            values=values,
-            values_format=values_format,
-            input_file=input_file,
-            output_file=output_file,
-            overrides=overrides,
-            values_needed=values_needed,
-            partial=partial,
-            dry_run=dry_run,
-        )
-        is None
-    ):
+    result = _render(
+        values=values,
+        values_format=values_format,
+        input_file=input_file,
+        output_file=output_file,
+        overrides=overrides,
+        values_needed=values_needed,
+        partial=partial,
+        dry_run=dry_run,
+    )
+    if result is None:
         raise UWTemplateRenderError("Could not render template")
+    return result
 
 
-# def render_to_str(
-#     values: Union[dict, Path],
-#     values_format: Optional[str] = None,
-#     input_file: Optional[Path] = None,
-#     overrides: Optional[Dict[str, str]] = None,
-#     values_needed: bool = False,
-#     partial: bool = False,
-#     dry_run: bool = False,
-# ) -> str:
-#     """
-#     ???
-#     """
-#     pass
+def render_to_str(  # pylint: disable=unused-argument
+    values: Union[dict, Path],
+    values_format: Optional[str] = None,
+    input_file: Optional[Path] = None,
+    overrides: Optional[Dict[str, str]] = None,
+    values_needed: bool = False,
+    partial: bool = False,
+    dry_run: bool = False,
+) -> str:
+    """
+    ???
+    """
+    return render({**locals(), "output_file": Path(os.devnull)})
 
 
 def translate(
