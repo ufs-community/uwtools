@@ -55,7 +55,7 @@ cannot:
 
 
 def render_helper(input_file, values_file, **kwargs):
-    jinja2.render(
+    return jinja2.render(
         input_file=input_file,
         values=values_file,
         **kwargs,
@@ -163,9 +163,11 @@ def test_register_filters_path_join(key):
 
 def test_render(values_file, template, tmp_path):
     outfile = str(tmp_path / "out.txt")
-    render_helper(input_file=template, values_file=values_file, output_file=outfile)
+    expected = "roses are red, violets are blue"
+    result = render_helper(input_file=template, values_file=values_file, output_file=outfile)
+    assert result == expected
     with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read().strip() == "roses are red, violets are blue"
+        assert f.read().strip() == expected
 
 
 def test_render_calls__dry_run(template, tmp_path, values_file):
@@ -210,10 +212,12 @@ def test_render_calls__write(template, tmp_path, values_file):
 
 def test_render_dry_run(caplog, template, values_file):
     log.setLevel(logging.INFO)
-    render_helper(
+    expected = "roses are red, violets are blue"
+    result = render_helper(
         input_file=template, values_file=values_file, output_file="/dev/null", dry_run=True
     )
-    assert logged(caplog, "roses are red, violets are blue")
+    assert result == expected
+    assert logged(caplog, expected)
 
 
 @pytest.mark.parametrize("partial", [False, True])
@@ -222,7 +226,7 @@ def test_render_partial(caplog, capsys, partial):
     content = StringIO(initial_value="{{ greeting }} {{ recipient }}")
     with patch.object(jinja2, "readable") as readable:
         readable.return_value.__enter__.return_value = content
-        assert jinja2.render(values={"greeting": "Hello"}, partial=partial) is partial
+        jinja2.render(values={"greeting": "Hello"}, partial=partial)
     if partial:
         assert "Hello {{ recipient }}" in capsys.readouterr().out
     else:
@@ -305,8 +309,7 @@ def test__dry_run_template(caplog):
 
 def test__log_missing_values(caplog):
     missing = ["roses_color", "violets_color"]
-    result = jinja2._log_missing_values(missing)
-    assert result is False
+    jinja2._log_missing_values(missing)
     assert logged(caplog, "Required value(s) not provided:")
     assert logged(caplog, "roses_color")
     assert logged(caplog, "violets_color")
@@ -341,8 +344,7 @@ def test__set_up_config_obj_file(values_file):
 
 def test__values_needed(caplog):
     undeclared_variables = {"roses_color", "lavender_smell"}
-    result = jinja2._values_needed(undeclared_variables)
-    assert result is True
+    jinja2._values_needed(undeclared_variables)
     assert logged(caplog, "Value(s) needed to render this template are:")
     assert logged(caplog, "roses_color")
     assert logged(caplog, "lavender_smell")

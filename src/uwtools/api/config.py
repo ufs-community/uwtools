@@ -99,7 +99,7 @@ def realize(
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
-) -> bool:
+) -> None:
     """
     NB: This docstring is dynamically replaced: See realize.__doc__ definition below.
     """
@@ -113,10 +113,9 @@ def realize(
         total=total,
         dry_run=dry_run,
     )
-    return True
 
 
-def realize_to_dict(
+def realize_to_dict(  # pylint: disable=unused-argument
     input_config: Union[dict, _Config, Optional[Path]] = None,
     input_format: Optional[str] = None,
     supplemental_configs: Optional[List[Union[dict, _Config, Path]]] = None,
@@ -124,17 +123,11 @@ def realize_to_dict(
     dry_run: bool = False,
 ) -> dict:
     """
-    NB: This docstring is dynamically replaced: See realize_to_dict.__doc__ definition below.
+    Realize an output config to a dict, based on an input config and optional supplemental configs.
+
+    See ``realize()`` for details on arguments, etc.
     """
-    return _realize(
-        input_config=_ensure_config_arg_type(input_config),
-        input_format=input_format,
-        output_file=Path(os.devnull),
-        output_format=None,
-        supplemental_configs=supplemental_configs,
-        values_needed=values_needed,
-        dry_run=dry_run,
-    )
+    return _realize(**{**locals(), "output_file": Path(os.devnull), "output_format": None})
 
 
 def validate(
@@ -222,36 +215,7 @@ Recognized file extensions are: {extensions}
 :param values_needed: Report complete, missing, and template values
 :param total: Require rendering of all Jinja2 variables/expressions
 :param dry_run: Log output instead of writing to output
-:raises: UWConfigError if ``total`` is ``True`` and any Jinja2 variable/expression was not rendered
-:return: ``True``
-""".format(
-    extensions=", ".join(_FORMAT.extensions())
-).strip()
-
-
-realize_to_dict.__doc__ = """
-Realize an output config based on an input config and optional supplemental configs.
-
-If no input is specified, ``stdin`` is read. A ``dict`` or ``Config`` object may also be provided as
-input. When an input filename is specified, its format will be deduced from its extension, if
-possible. This can be overridden by specifying the format explicitly, and it is required to do so for
-reads from ``stdin``, as no attempt is made to deduce the format of streamed data.
-
-If optional supplemental configs (which may likewise be file paths or ``Config`` / ``dict`` objects)
-are provided, they will be merged, in the order specified, onto the input config. The format of all
-input configs must match.
-
-If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
-``dry_run`` mode, output is written to ``stderr``.
-
-Recognized file extensions are: {extensions}
-
-:param input_config: Input config file (``None`` or unspecified => read ``stdin``)
-:param input_format: Format of the input config (optional if file's extension is recognized)
-:param supplemental_configs: Configs to merge, in order, onto the input
-:param values_needed: Report complete, missing, and template values
-:param dry_run: Log output instead of writing to output
-:return: A ``dict`` representing the realized config
+:raises: UWConfigRealizeError if ``total`` is ``True`` and any Jinja2 variable/expression was not rendered
 """.format(
     extensions=", ".join(_FORMAT.extensions())
 ).strip()
