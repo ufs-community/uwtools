@@ -21,7 +21,7 @@ def render(
     dry_run: bool = False,
 ) -> str:
     """
-    Render a Jinja2 template based on specified values.
+    Render a Jinja2 template to a file, based on specified values.
 
     Primary values used to render the template are taken from the specified file. The format of the
     values source will be deduced from the filename extension, if possible. This can be overridden
@@ -67,7 +67,9 @@ def render_to_str(  # pylint: disable=unused-argument
     dry_run: bool = False,
 ) -> str:
     """
-    ???
+    Render a Jinja2 template to a string, based on specified values.
+
+    See ``render()`` for details on arguments, etc.
     """
     return render({**locals(), "output_file": Path(os.devnull)})
 
