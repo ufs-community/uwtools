@@ -19,7 +19,7 @@ import uwtools.drivers.fv3
 import uwtools.drivers.sfc_climo_gen
 from uwtools import cli
 from uwtools.cli import STR
-from uwtools.exceptions import UWConfigError, UWError
+from uwtools.exceptions import UWConfigRealizeError, UWError
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 from uwtools.utils.file import FORMAT
@@ -300,7 +300,7 @@ def test__dispatch_config_realize_fail(caplog):
             STR.dryrun,
         )
     }
-    with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigError):
+    with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
         with raises(SystemExit):
             cli._dispatch_config_realize(args)
     assert regex_logged(caplog, "Config could not be realized")

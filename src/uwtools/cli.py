@@ -20,7 +20,7 @@ import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigRealizeError
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
@@ -193,7 +193,7 @@ def _dispatch_config_realize(args: Args) -> bool:
             total=args[STR.total],
             dry_run=args[STR.dryrun],
         )
-    except UWConfigError:
+    except UWConfigRealizeError:
         log.error(
             "Config could not be realized. Try again with %s for details." % _switch(STR.valsneeded)
         )

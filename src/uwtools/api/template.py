@@ -51,6 +51,21 @@ def render(
     )
 
 
+# def render_to_str(
+#     values: Union[dict, Path],
+#     values_format: Optional[str] = None,
+#     input_file: Optional[Path] = None,
+#     overrides: Optional[Dict[str, str]] = None,
+#     values_needed: bool = False,
+#     partial: bool = False,
+#     dry_run: bool = False,
+# ) -> str:
+#     """
+#     ???
+#     """
+#     pass
+
+
 def translate(
     input_file: Optional[Path] = None,
     output_file: Optional[Path] = None,

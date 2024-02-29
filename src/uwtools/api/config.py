@@ -222,7 +222,7 @@ Recognized file extensions are: {extensions}
 :param values_needed: Report complete, missing, and template values
 :param total: Require rendering of all Jinja2 variables/expressions
 :param dry_run: Log output instead of writing to output
-:raises: UWConfigError if ``total`` is ``True`` and any Jinja2 variable/expression was not rendered
+:raises: UWConfigRealizeError if ``total`` is ``True`` and any Jinja2 variable/expression was not rendered
 :return: ``True``
 """.format(
     extensions=", ".join(_FORMAT.extensions())

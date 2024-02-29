@@ -11,5 +11,11 @@ class UWError(Exception):
 
 class UWConfigError(UWError):
     """
-    UWTools exception for Config Object error handling.
+    UWTools exception for general Config object error handling.
+    """
+
+
+class UWConfigRealizeError(UWConfigError):
+    """
+    UWTools exception arising from issues realizing configs.
     """
