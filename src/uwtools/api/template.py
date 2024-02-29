@@ -71,7 +71,7 @@ def render_to_str(  # pylint: disable=unused-argument
 
     See ``render()`` for details on arguments, etc.
     """
-    return render({**locals(), "output_file": Path(os.devnull)})
+    return render(**{**locals(), "output_file": Path(os.devnull)})
 
 
 def translate(
