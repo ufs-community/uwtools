@@ -257,9 +257,9 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
     :param local: Local sibling values to use if a match is not found in context.
     :return: The rendered value (potentially unchanged).
     """
+    env = Environment(undefined=StrictUndefined)
     context = {**(local or {}), **context}
     try:
-        env = Environment(undefined=StrictUndefined)
         rendered = _register_filters(env).from_string(val).render(context)
         _deref_debug("Rendered", rendered)
     except Exception as e:  # pylint: disable=broad-exception-caught

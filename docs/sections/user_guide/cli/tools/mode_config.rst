@@ -174,7 +174,7 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
      --values-needed
          Print report of values needed to render template
      --total
-         Require rendering of all template expressions
+         Require rendering of all Jinja2 variables/expressions
      --dry-run
          Only log info, making no changes
      --debug

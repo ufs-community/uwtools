@@ -319,7 +319,7 @@ Recognized file extensions are: {extensions}
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.
-:raises: UWConfigError if ``total`` is ``True`` and config could not be totally realized.
+:raises: UWConfigError if ``total`` is ``True`` and config cannot be totally realized.
 :return: The realized config (or an empty-dict for no-op modes).
 """.format(
     extensions=", ".join(FORMAT.extensions())

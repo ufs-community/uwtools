@@ -209,8 +209,8 @@ input formats, the output format must match the input.
 If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
 ``dry_run`` mode, output is written to ``stderr``.
 
-If ``total`` is ``True``, an exception will be raised if any Jinja2 variables/expressions could not be
-rendered. Otherwise, such expressions will be passed through unchanged in the output.
+If ``total`` is ``True``, an exception will be raised if any Jinja2 variables/expressions cannot be
+rendered. Otherwise, such variables/expressions will be passed through unchanged in the output.
 
 Recognized file extensions are: {extensions}
 
