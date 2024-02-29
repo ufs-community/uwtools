@@ -1,15 +1,27 @@
 from __future__ import annotations
 
+from collections import OrderedDict
 from importlib import import_module
 from typing import Dict, Type, Union
 
 import yaml
+from f90nml import Namelist  # type: ignore
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.utils.file import FORMAT
 
 INCLUDE_TAG = "!INCLUDE"
+
+
+# Public functions
+def add_representers() -> None:
+    """
+    Add representers to the YAML dumper for custom types.
+    """
+    yaml.add_representer(TaggedString, TaggedString.represent)
+    yaml.add_representer(Namelist, _represent_namelist)
+    yaml.add_representer(OrderedDict, _represent_ordereddict)
 
 
 def depth(d: dict) -> int:
@@ -51,6 +63,37 @@ def log_and_error(msg: str) -> Exception:
     """
     log.error(msg)
     return UWConfigError(msg)
+
+
+# Private functions
+def _represent_namelist(dumper: yaml.Dumper, data: Namelist) -> yaml.nodes.MappingNode:
+    """
+    Convert f90nml Namelist to OrderedDict and serialize.
+
+    :param dumper: The YAML dumper.
+    :param data: The f90nml Namelist to serialize.
+    """
+    # Convert the f90nml Namelist to an OrderedDict.
+    namelist_dict = data.todict()
+
+    # Represent the OrderedDict as a YAML mapping.
+    return dumper.represent_mapping("tag:yaml.org,2002:map", namelist_dict)
+
+
+def _represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes.MappingNode:
+    """
+    Convert OrderedDict to dict and serialize.
+
+    :param dumper: The YAML dumper.
+    :param data: The OrderedDict to serialize.
+    """
+
+    # Convert the OrderedDict to a dict.
+    def from_od(d: Union[OrderedDict, Dict]) -> dict:
+        return {key: from_od(val) if isinstance(val, dict) else val for key, val in d.items()}
+
+    # Represent the dict as a YAML mapping.
+    return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
 
 
 class TaggedString:
