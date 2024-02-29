@@ -13,6 +13,7 @@ from functools import partial
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple
 
+import uwtools.api.chgres_cube
 import uwtools.api.config
 import uwtools.api.fv3
 import uwtools.api.rocoto
@@ -49,6 +50,7 @@ def main() -> None:
         setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
+            STR.chgrescube: _dispatch_chgrescube,
             STR.config: _dispatch_config,
             STR.fv3: _dispatch_fv3,
             STR.rocoto: _dispatch_rocoto,
@@ -60,6 +62,59 @@ def main() -> None:
         if _switch(STR.debug) in sys.argv:
             log.exception(str(e))
         _abort(str(e))
+
+
+# Mode chgrescube
+
+def _add_subparser_chgres_cube(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: chgres_cube
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.chgrescube, "Execute chgres_cube tasks")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_chgres_cube_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.chgres_cube.tasks().items()
+    }
+
+
+def _add_subparser_chgres_cube_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+    """
+    Subparser for mode: chgres_cube <task>
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_config_file(required)
+    _add_arg_cycle(required)
+    optional = _basic_setup(parser)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
+def _dispatch_chgres_cube(args: Args) -> bool:
+    """
+    Dispatch logic for chgres_cube mode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.chgres_cube.execute(
+        task=args[STR.action],
+        config_file=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
+    )
 
 
 # Mode config
@@ -807,6 +862,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     checks = {
+        STR.config: _add_subparser_chgres_cube(subparsers),
         STR.config: _add_subparser_config(subparsers),
         STR.fv3: _add_subparser_fv3(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),
@@ -835,6 +891,7 @@ class STR:
     action: str = "action"
     batch: str = "batch"
     cfgfile: str = "config_file"
+    chgrescube: str = "chgres_cube"
     compare: str = "compare"
     config: str = "config"
     cycle: str = "cycle"
