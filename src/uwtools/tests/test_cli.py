@@ -19,7 +19,7 @@ import uwtools.drivers.fv3
 import uwtools.drivers.sfc_climo_gen
 from uwtools import cli
 from uwtools.cli import STR
-from uwtools.exceptions import UWConfigRealizeError, UWError
+from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 from uwtools.utils.file import FORMAT
@@ -260,6 +260,26 @@ def test__dispatch_config_realize():
     )
 
 
+def test__dispatch_config_realize_fail(caplog):
+    log.setLevel(logging.ERROR)
+    args = {
+        x: None
+        for x in (
+            STR.infile,
+            STR.infmt,
+            STR.outfile,
+            STR.outfmt,
+            STR.suppfiles,
+            STR.valsneeded,
+            STR.total,
+            STR.dryrun,
+        )
+    }
+    with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
+        assert cli._dispatch_config_realize(args) is False
+    assert regex_logged(caplog, "Config could not be realized")
+
+
 def test__dispatch_config_realize_no_optional():
     args = {
         STR.infile: None,
@@ -283,26 +303,6 @@ def test__dispatch_config_realize_no_optional():
         total=False,
         dry_run=False,
     )
-
-
-def test__dispatch_config_realize_fail(caplog):
-    log.setLevel(logging.ERROR)
-    args = {
-        x: None
-        for x in (
-            STR.infile,
-            STR.infmt,
-            STR.outfile,
-            STR.outfmt,
-            STR.suppfiles,
-            STR.valsneeded,
-            STR.total,
-            STR.dryrun,
-        )
-    }
-    with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
-        assert cli._dispatch_config_realize(args) is False
-    assert regex_logged(caplog, "Config could not be realized")
 
 
 def test__dispatch_config_validate_config_obj():
@@ -398,6 +398,21 @@ def test__dispatch_template(params):
     with patch.object(cli, funcname) as func:
         cli._dispatch_template(args)
     func.assert_called_once_with(args)
+
+
+def test__dispatch_template_render_fail():
+    args = {
+        STR.infile: 1,
+        STR.outfile: 2,
+        STR.valsfile: 3,
+        STR.valsfmt: 4,
+        STR.keyvalpairs: ["foo=88", "bar=99"],
+        STR.valsneeded: 6,
+        STR.partial: 7,
+        STR.dryrun: 8,
+    }
+    with patch.object(uwtools.api.template, "render", side_effect=UWTemplateRenderError):
+        assert cli._dispatch_template_render(args) is False
 
 
 def test__dispatch_template_render_no_optional():
