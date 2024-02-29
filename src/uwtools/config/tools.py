@@ -279,7 +279,7 @@ def _validate_format_supplemental(
     )
     if sc_fmt not in (FORMAT.yaml, config_fmt):
         raise UWError(
-            "%s format %s must be input format %s or %s" % (pre, sc_fmt, config_fmt, FORMAT.yaml)
+            "%s format %s must be %s or input format %s" % (pre, sc_fmt, FORMAT.yaml, config_fmt)
         )
 
 
