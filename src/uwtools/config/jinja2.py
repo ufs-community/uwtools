@@ -162,7 +162,7 @@ def render(
     :param output_file: Path to write rendered Jinja2 template to (None => write to stdout).
     :param overrides: Supplemental override values.
     :param values_needed: Just report variables needed to render the template?
-    :param partial: Permit unrendered expressions in output?
+    :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
     :return: True if Jinja2 template was successfully rendered, False otherwise.
     """
@@ -196,6 +196,20 @@ def render(
     # Log (dry-run mode) or write the rendered template.
 
     return _dry_run_template(rendered) if dry_run else _write_template(output_file, rendered)
+
+
+def unrendered(s: str) -> bool:
+    """
+    Does the supplied string contain unrendered Jinja2 variables/expressions?
+
+    :param s: The string to check for unrendered content.
+    :return: ``True`` if unrendered content was found, ``False`` otherwise.
+    """
+    try:
+        Environment(undefined=StrictUndefined).from_string(s).render({})
+        return False
+    except UndefinedError:
+        return True
 
 
 # Private functions
@@ -235,25 +249,22 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
     """
     Render a Jinja2 variable/expression as part of dereferencing.
 
-    If this function cannot render the value, either because it contains no Jinja2 syntax or because
-    insufficient context is currently available, a debug message will be logged and the original
-    value will be returned unchanged.
+    If the value cannot be rendered, perhaps due to missing values or syntax errors, a debug message
+    will be logged and the original value will be returned unchanged.
 
     :param val: The value potentially containing Jinja2 syntax to render.
     :param context: Values to use when rendering Jinja2 syntax.
     :param local: Local sibling values to use if a match is not found in context.
     :return: The rendered value (potentially unchanged).
     """
+    env = Environment(undefined=StrictUndefined)
+    context = {**(local or {}), **context}
     try:
-        rendered = (
-            _register_filters(Environment(undefined=StrictUndefined))
-            .from_string(val)
-            .render({**(local or {}), **context})
-        )
+        rendered = _register_filters(env).from_string(val).render(context)
         _deref_debug("Rendered", rendered)
     except Exception as e:  # pylint: disable=broad-exception-caught
-        _deref_debug("Rendering failed", str(e))
         rendered = val
+        _deref_debug("Rendering failed", str(e))
     return rendered
 
 

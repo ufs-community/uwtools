@@ -122,12 +122,12 @@ def test_dereference_no_op_due_to_error(caplog, logmsg, val):
     #   - A division-by-zero error.
     # The unrenderable expression is returned unmodified.
     log.setLevel(logging.DEBUG)
-    assert jinja2.dereference(val=val, context={})
+    assert jinja2.dereference(val=val, context={}) == val
     assert regex_logged(caplog, logmsg)
 
 
 def test_dereference_str_expression_rendered():
-    # Context permitting, Jinja2 expressions are rendered:
+    # Context permitting, Jinja2 variables/expressions are rendered:
     val = "{% for a in as %}{{ a }}{% endfor %}"
     assert jinja2.dereference(val=val, context={"as": ["a", "b", "c"]}) == "abc"
 
@@ -250,6 +250,11 @@ def test_render_values_needed(caplog, template, values_file):
     )
     for var in ("roses_color", "violets_color"):
         assert logged(caplog, var)
+
+
+@pytest.mark.parametrize("s,status", [("foo: bar", False), ("foo: '{{ bar }} {{ baz }}'", True)])
+def test_unrendered(s, status):
+    assert jinja2.unrendered(s) is status
 
 
 @pytest.mark.parametrize("tag", ["!float", "!int"])
