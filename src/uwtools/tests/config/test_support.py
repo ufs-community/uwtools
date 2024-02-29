@@ -4,9 +4,11 @@ Tests for uwtools.config.jinja2 module.
 """
 
 import logging
+from collections import OrderedDict
 
 import pytest
 import yaml
+from f90nml import Namelist, reads  # type: ignore
 from pytest import fixture, raises
 
 from uwtools.config import support
@@ -19,6 +21,14 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
+
+
+def test_add_representers():
+    support.add_representers()
+    representers = yaml.Dumper.yaml_representers
+    assert support.TaggedString in representers
+    assert OrderedDict in representers
+    assert Namelist in representers
 
 
 @pytest.mark.parametrize(
@@ -54,6 +64,18 @@ def test_log_and_error(caplog):
         raise support.log_and_error(msg)
     assert msg in str(e.value)
     assert logged(caplog, msg)
+
+
+def test_represent_namelist():
+    namelist = reads("&namelist\n key = value\n/\n")
+    assert yaml.dump(namelist, default_flow_style=True).strip() == "{namelist: {key: value}}"
+
+
+def test_represent_ordereddict():
+    ordereddict_values = OrderedDict([("example", OrderedDict([("key", "value")]))])
+    assert (
+        yaml.dump(ordereddict_values, default_flow_style=True).strip() == "{example: {key: value}}"
+    )
 
 
 class Test_TaggedString:

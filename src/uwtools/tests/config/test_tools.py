@@ -653,12 +653,15 @@ def test__realize_config_values_needed_negative_results(caplog, tmp_path):
 @pytest.mark.parametrize("output_fmt", FORMAT.extensions())
 def test__validate_format_output(input_fmt, output_fmt):
     call = lambda: tools._validate_format_output(input_fmt=input_fmt, output_fmt=output_fmt)
-    if input_fmt in (FORMAT.yaml, output_fmt):
+    if FORMAT.yaml in (input_fmt, output_fmt) or input_fmt == output_fmt:
         call()  # no exception raised
     else:
         with raises(UWError) as e:
             call()
-        assert str(e.value) == f"Output format {output_fmt} must match input format {input_fmt}"
+        assert (
+            str(e.value) == "Accepted output formats for input format "
+            f"{input_fmt} are {input_fmt} or yaml"
+        )
 
 
 def test__validate_format_supplemental_fail_obj():
