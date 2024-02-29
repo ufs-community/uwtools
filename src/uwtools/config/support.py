@@ -17,7 +17,7 @@ INCLUDE_TAG = "!INCLUDE"
 # Public functions
 
 
-def add_representers() -> None:
+def add_yaml_representers() -> None:
     """
     Add representers to the YAML dumper for custom types.
     """

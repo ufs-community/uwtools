@@ -24,8 +24,8 @@ from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
 
 
-def test_add_representers():
-    support.add_representers()
+def test_add_yaml_representers():
+    support.add_yaml_representers()
     representers = yaml.Dumper.yaml_representers
     assert support.TaggedString in representers
     assert OrderedDict in representers
