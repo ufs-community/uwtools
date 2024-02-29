@@ -5,6 +5,7 @@ Tests for uwtools.config.jinja2 module.
 
 import logging
 import os
+from io import StringIO
 from types import SimpleNamespace as ns
 from unittest.mock import patch
 
@@ -215,9 +216,23 @@ def test_render_dry_run(caplog, template, values_file):
     assert logged(caplog, "roses are red, violets are blue")
 
 
-def test_render_values_missing(caplog, template, values_file):
-    # Read in the config, remove the "roses" key, then re-write it.
+@pytest.mark.parametrize("partial", [False, True])
+def test_render_partial(caplog, capsys, partial):
     log.setLevel(logging.INFO)
+    content = StringIO(initial_value="{{ greeting }} {{ recipient }}")
+    with patch.object(jinja2, "readable") as readable:
+        readable.return_value.__enter__.return_value = content
+        assert jinja2.render(values={"greeting": "Hello"}, partial=partial) is partial
+    if partial:
+        assert "Hello {{ recipient }}" in capsys.readouterr().out
+    else:
+        assert logged(caplog, "Required value(s) not provided:")
+        assert logged(caplog, "recipient")
+
+
+def test_render_values_missing(caplog, template, values_file):
+    log.setLevel(logging.INFO)
+    # Read in the config, remove the "roses" key, then re-write it.
     with open(values_file, "r", encoding="utf-8") as f:
         cfgobj = yaml.safe_load(f.read())
     del cfgobj["roses_color"]
