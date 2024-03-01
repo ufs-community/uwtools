@@ -11,11 +11,12 @@ from uwtools.exceptions import UWTemplateRenderError
 
 
 def render(
-    values: Union[dict, Path],
+    values_src: Union[dict, Path],
     values_format: Optional[str] = None,
     input_file: Optional[Path] = None,
     output_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
+    env: bool = False,
     values_needed: bool = False,
     partial: bool = False,
     dry_run: bool = False,
@@ -29,13 +30,14 @@ def render(
     primary values source. If no input file is specified, ``stdin`` is read. If no output file is
     specified, ``stdout`` is written to.
 
-    :param values: Source of values to render the template
+    :param values_src: Source of values to render the template
     :param values_format: Format of values when sourced from file
     :param input_file: Path to read raw Jinja2 template from (``None`` or unspecified => read
         ``stdin``)
     :param output_file: Path to write rendered Jinja2 template to (``None`` or unspecified => write
         to ``stdout``)
     :param overrides: Supplemental override values
+    :param env: Supplement values with environment variables?
     :param values_needed: Just report variables needed to render the template?
     :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
@@ -43,11 +45,12 @@ def render(
     :raises: UWTemplateRenderError if template could not be rendered
     """
     result = _render(
-        values=values,
+        values_src=values_src,
         values_format=values_format,
         input_file=input_file,
         output_file=output_file,
         overrides=overrides,
+        env=env,
         values_needed=values_needed,
         partial=partial,
         dry_run=dry_run,

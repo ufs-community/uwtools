@@ -434,6 +434,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_file(optional)
     _add_arg_values_file(optional)
     _add_arg_values_format(optional, choices=FORMATS)
+    _add_arg_env(optional)
     _add_arg_values_needed(optional)
     _add_arg_partial(optional)
     _add_arg_dry_run(optional)
@@ -464,11 +465,12 @@ def _dispatch_template_render(args: Args) -> bool:
     """
     try:
         uwtools.api.template.render(
-            values=args[STR.valsfile],
+            values_src=args[STR.valsfile],
             values_format=args[STR.valsfmt],
             input_file=args[STR.infile],
             output_file=args[STR.outfile],
             overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
+            env=args[STR.env],
             values_needed=args[STR.valsneeded],
             partial=args[STR.partial],
             dry_run=args[STR.dryrun],
@@ -531,6 +533,14 @@ def _add_arg_dry_run(group: Group) -> None:
         _switch(STR.dryrun),
         action="store_true",
         help="Only log info, making no changes",
+    )
+
+
+def _add_arg_env(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.env),
+        action="store_true",
+        help="Use environment variables",
     )
 
 
@@ -854,6 +864,7 @@ class STR:
     config: str = "config"
     cycle: str = "cycle"
     dryrun: str = "dry_run"
+    env: str = "env"
     file1fmt: str = "file_1_format"
     file1path: str = "file_1_path"
     file2fmt: str = "file_2_format"
