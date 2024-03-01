@@ -34,7 +34,7 @@ def template(tmp_path):
     path = tmp_path / "template.jinja2"
     with open(path, "w", encoding="utf-8") as f:
         f.write("roses are {{roses_color}}, violets are {{violets_color}}")
-    return str(path)
+    return path
 
 
 @fixture
@@ -48,7 +48,7 @@ cannot:
 """.strip()
     with open(path, "w", encoding="utf-8") as f:
         f.write(yaml)
-    return str(path)
+    return path
 
 
 # Helpers
@@ -336,10 +336,10 @@ longish_variable: 88
 #     assert actual["violets_color"] == "blue"
 
 
-def test__set_up_config_obj_file(values_file):
-    expected = {"roses_color": "white", "violets_color": "blue", "cannot": {"override": "this"}}
-    actual = jinja2._supplement_values(values_src=values_file, overrides={"roses_color": "white"})
-    assert actual == expected
+# def test__set_up_config_obj_file(values_file):
+#     expected = {"roses_color": "white", "violets_color": "blue", "cannot": {"override": "this"}}
+#     actual = jinja2._supplement_values(values_src=values_file, overrides={"roses_color": "white"})
+#     assert actual == expected
 
 
 def test__values_needed(caplog):

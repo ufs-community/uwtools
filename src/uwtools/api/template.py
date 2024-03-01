@@ -61,10 +61,11 @@ def render(
 
 
 def render_to_str(  # pylint: disable=unused-argument
-    values: Union[dict, Path],
+    values_src: Union[dict, Path],
     values_format: Optional[str] = None,
     input_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
+    env: bool = False,
     values_needed: bool = False,
     partial: bool = False,
     dry_run: bool = False,
