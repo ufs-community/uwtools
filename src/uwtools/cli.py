@@ -43,24 +43,19 @@ def main() -> None:
     # are known, then dispatch to the [sub]mode handler.
 
     setup_logging(quiet=True)
-    try:
-        args, checks = _parse_args(sys.argv[1:])
-        for check in checks[args[STR.mode]][args[STR.action]]:
-            check(args)
-        setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
-        log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
-        modes = {
-            STR.config: _dispatch_config,
-            STR.fv3: _dispatch_fv3,
-            STR.rocoto: _dispatch_rocoto,
-            STR.sfcclimogen: _dispatch_sfc_climo_gen,
-            STR.template: _dispatch_template,
-        }
-        sys.exit(0 if modes[args[STR.mode]](args) else 1)
-    except Exception as e:  # pylint: disable=broad-exception-caught
-        if _switch(STR.debug) in sys.argv:
-            log.exception(str(e))
-        _abort(str(e))
+    args, checks = _parse_args(sys.argv[1:])
+    for check in checks[args[STR.mode]][args[STR.action]]:
+        check(args)
+    setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
+    log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
+    modes = {
+        STR.config: _dispatch_config,
+        STR.fv3: _dispatch_fv3,
+        STR.rocoto: _dispatch_rocoto,
+        STR.sfcclimogen: _dispatch_sfc_climo_gen,
+        STR.template: _dispatch_template,
+    }
+    sys.exit(0 if modes[args[STR.mode]](args) else 1)
 
 
 # Mode config
@@ -531,16 +526,6 @@ def _add_arg_cycle(group: Group) -> None:
     )
 
 
-def _add_arg_debug(group: Group) -> None:
-    group.add_argument(
-        _switch(STR.debug),
-        action="store_true",
-        help="""
-        Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
-        """,
-    )
-
-
 def _add_arg_dry_run(group: Group) -> None:
     group.add_argument(
         _switch(STR.dryrun),
@@ -731,12 +716,11 @@ def _abort(msg: str) -> None:
 
 def _add_args_verbosity(group: Group) -> ActionChecks:
     """
-    Add debug, quiet, and verbose arguments.
+    Add quiet and verbose arguments.
 
     :param group: The group to add the arguments to.
     :return: Check for mutual exclusivity of quiet/verbose arguments.
     """
-    _add_arg_debug(group)
     _add_arg_quiet(group)
     _add_arg_verbose(group)
     return [_check_verbosity]
@@ -802,11 +786,8 @@ def _check_template_render_vals_args(args: Args) -> Args:
 
 
 def _check_verbosity(args: Args) -> Args:
-    if args.get(STR.quiet) and (args.get(STR.debug) or args.get(STR.verbose)):
-        _abort(
-            "%s may not be used with %s or %s"
-            % (_switch(STR.quiet), _switch(STR.debug), _switch(STR.verbose))
-        )
+    if args.get(STR.quiet) and args.get(STR.verbose):
+        _abort("%s may not be used with %s" % (_switch(STR.quiet), _switch(STR.verbose)))
     return args
 
 
@@ -872,7 +853,6 @@ class STR:
     compare: str = "compare"
     config: str = "config"
     cycle: str = "cycle"
-    debug: str = "debug"
     dryrun: str = "dry_run"
     file1fmt: str = "file_1_format"
     file1path: str = "file_1_path"
