@@ -328,18 +328,30 @@ longish_variable: 88
     assert "\n".join(record.message for record in caplog.records) == expected
 
 
-# def test__set_up_config_obj_env():
-#     expected = {"roses_color": "white", "violets_color": "blue"}
-#     with patch.dict(os.environ, expected, clear=True):
-#         actual = jinja2._supplement_values()
-#     assert actual["roses_color"] == "white"
-#     assert actual["violets_color"] == "blue"
+@fixture
+def supplemental_values():
+    return {"foo": "bar"}, {"CYCLE": "2024030112"}, {"baz": "qux"}
+
+def test__supplement_values_basic_dict(supplemental_values):
+    d, _, _ = supplemental_values
+    assert jinja2._supplement_values(values_src=d) == d
 
 
-# def test__set_up_config_obj_file(values_file):
-#     expected = {"roses_color": "white", "violets_color": "blue", "cannot": {"override": "this"}}
-#     actual = jinja2._supplement_values(values_src=values_file, overrides={"roses_color": "white"})
-#     assert actual == expected
+def test__supplement_values_basic_dict_plus_env(supplemental_values):
+    d, e, _ = supplemental_values
+    with patch.dict(os.environ, e, clear=True):
+        assert jinja2._supplement_values(values_src=d, env=True) == {**d, **e}
+
+
+def test__supplement_values_basic_dict_plus_env_plus_overrides(supplemental_values):
+    d, e, o = supplemental_values
+    with patch.dict(os.environ, e, clear=True):
+        assert jinja2._supplement_values(values_src=d, env=True, overrides=o) == {**d, **e, **o}
+
+
+def test__supplement_values_basic_dict_plus_overrides(supplemental_values):
+    d, _, o = supplemental_values
+    assert jinja2._supplement_values(values_src=d, overrides=o) == {**d, **o}
 
 
 def test__values_needed(caplog):
