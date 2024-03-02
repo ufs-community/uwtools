@@ -31,7 +31,7 @@ def deref_render_assets():
 
 @fixture
 def supplemental_values(tmp_path):
-    d = {"foo": "bar"}
+    d = {"foo": "bar", "another": "value"}
     valsfile = tmp_path / "values.yaml"
     with open(valsfile, "w", encoding="utf-8") as f:
         yaml.dump(d, f)
@@ -387,6 +387,17 @@ def test__supplement_values_file_plus_env_plus_overrides(supplemental_values):
 def test__supplement_values_file_plus_overrides(supplemental_values):
     sv = supplemental_values
     assert jinja2._supplement_values(values_src=sv.d, overrides=sv.o) == {**sv.d, **sv.o}
+
+
+def test__supplement_values_priority(supplemental_values):
+    # Test environment variable > CLI key=value overrides > file value priority.
+    sv = supplemental_values
+    assert jinja2._supplement_values(values_src=sv.f)["foo"] == "bar"
+    o = {"foo": "bar-cli"}
+    assert jinja2._supplement_values(values_src=sv.f, overrides=o)["foo"] == o["foo"]
+    e = {"foo": "bar-env"}
+    with patch.dict(os.environ, e, clear=True):
+        assert jinja2._supplement_values(values_src=sv.f, env=True, overrides=o)["foo"] == e["foo"]
 
 
 def test__values_needed(caplog):
