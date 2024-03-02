@@ -30,6 +30,15 @@ def deref_render_assets():
 
 
 @fixture
+def supplemental_values(tmp_path):
+    d = {"foo": "bar"}
+    valsfile = tmp_path / "values.yaml"
+    with open(valsfile, "w", encoding="utf-8") as f:
+        yaml.dump(d, f)
+    return ns(d=d, e={"CYCLE": "2024030112"}, f=valsfile, o={"baz": "qux"})
+
+
+@fixture
 def template(tmp_path):
     path = tmp_path / "template.jinja2"
     with open(path, "w", encoding="utf-8") as f:
@@ -328,30 +337,56 @@ longish_variable: 88
     assert "\n".join(record.message for record in caplog.records) == expected
 
 
-@fixture
-def supplemental_values():
-    return {"foo": "bar"}, {"CYCLE": "2024030112"}, {"baz": "qux"}
-
-def test__supplement_values_basic_dict(supplemental_values):
-    d, _, _ = supplemental_values
-    assert jinja2._supplement_values(values_src=d) == d
+def test__supplement_values_dict(supplemental_values):
+    sv = supplemental_values
+    assert jinja2._supplement_values(values_src=sv.d) == sv.d
 
 
-def test__supplement_values_basic_dict_plus_env(supplemental_values):
-    d, e, _ = supplemental_values
-    with patch.dict(os.environ, e, clear=True):
-        assert jinja2._supplement_values(values_src=d, env=True) == {**d, **e}
+def test__supplement_values_dict_plus_env(supplemental_values):
+    sv = supplemental_values
+    with patch.dict(os.environ, sv.e, clear=True):
+        assert jinja2._supplement_values(values_src=sv.d, env=True) == {**sv.d, **sv.e}
 
 
-def test__supplement_values_basic_dict_plus_env_plus_overrides(supplemental_values):
-    d, e, o = supplemental_values
-    with patch.dict(os.environ, e, clear=True):
-        assert jinja2._supplement_values(values_src=d, env=True, overrides=o) == {**d, **e, **o}
+def test__supplement_values_dict_plus_env_plus_overrides(supplemental_values):
+    sv = supplemental_values
+    with patch.dict(os.environ, sv.e, clear=True):
+        assert jinja2._supplement_values(values_src=sv.d, env=True, overrides=sv.o) == {
+            **sv.d,
+            **sv.e,
+            **sv.o,
+        }
 
 
-def test__supplement_values_basic_dict_plus_overrides(supplemental_values):
-    d, _, o = supplemental_values
-    assert jinja2._supplement_values(values_src=d, overrides=o) == {**d, **o}
+def test__supplement_values_dict_plus_overrides(supplemental_values):
+    sv = supplemental_values
+    assert jinja2._supplement_values(values_src=sv.d, overrides=sv.o) == {**sv.d, **sv.o}
+
+
+def test__supplement_values_file(supplemental_values):
+    sv = supplemental_values
+    assert jinja2._supplement_values(values_src=sv.f) == sv.d
+
+
+def test__supplement_values_file_plus_env(supplemental_values):
+    sv = supplemental_values
+    with patch.dict(os.environ, sv.e, clear=True):
+        assert jinja2._supplement_values(values_src=sv.f, env=True) == {**sv.d, **sv.e}
+
+
+def test__supplement_values_file_plus_env_plus_overrides(supplemental_values):
+    sv = supplemental_values
+    with patch.dict(os.environ, sv.e, clear=True):
+        assert jinja2._supplement_values(values_src=sv.f, env=True, overrides=sv.o) == {
+            **sv.d,
+            **sv.e,
+            **sv.o,
+        }
+
+
+def test__supplement_values_file_plus_overrides(supplemental_values):
+    sv = supplemental_values
+    assert jinja2._supplement_values(values_src=sv.d, overrides=sv.o) == {**sv.d, **sv.o}
 
 
 def test__values_needed(caplog):
