@@ -62,6 +62,7 @@ def main() -> None:
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except UWError as e:
         log.error(str(e))
+        sys.exit(1)
 
 
 # Mode config

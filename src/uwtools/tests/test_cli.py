@@ -29,8 +29,9 @@ from uwtools.utils.file import FORMAT
 
 def test__abort(capsys):
     msg = "Aborting..."
-    with raises(SystemExit):
+    with raises(SystemExit) as e:
         cli._abort(msg)
+    assert e.value.code == 1
     assert msg in capsys.readouterr().err
 
 
@@ -397,7 +398,8 @@ def test__dispatch_template(params):
     func.assert_called_once_with(args)
 
 
-def test__dispatch_template_render_fail():
+@pytest.mark.parametrize("valsneeded", [False, True])
+def test__dispatch_template_render_fail(valsneeded):
     args = {
         STR.infile: 1,
         STR.outfile: 2,
@@ -405,12 +407,12 @@ def test__dispatch_template_render_fail():
         STR.valsfmt: 4,
         STR.keyvalpairs: ["foo=88", "bar=99"],
         STR.env: 5,
-        STR.valsneeded: False,
+        STR.valsneeded: valsneeded,
         STR.partial: 7,
         STR.dryrun: 8,
     }
     with patch.object(uwtools.api.template, "render", side_effect=UWTemplateRenderError):
-        assert cli._dispatch_template_render(args) is False
+        assert cli._dispatch_template_render(args) is valsneeded
 
 
 def test__dispatch_template_render_no_optional():
@@ -525,6 +527,28 @@ def test_main_fail_dispatch(vals):
             with raises(SystemExit) as e:
                 cli.main()
             assert e.value.code == exit_status
+
+
+def test_main_fail_exception_abort():
+    # Mock setup_logging() to raise a UWError in main() before logging is configured, which triggers
+    # a call to _abort().
+    msg = "Catastrophe"
+    with patch.object(cli, "setup_logging", side_effect=UWError(msg)):
+        with patch.object(cli, "_abort", side_effect=SystemExit) as _abort:
+            with raises(SystemExit):
+                cli.main()
+        _abort.assert_called_once_with(msg)
+
+
+def test_main_fail_exception_log():
+    msg = "Catastrophe"
+    with patch.object(cli, "_dispatch_template", side_effect=UWError(msg)):
+        with patch.object(cli, "log") as log:
+            with patch.object(sys, "argv", ["uw", "template", "render"]):
+                with raises(SystemExit) as e:
+                    cli.main()
+                assert e.value.code == 1
+            assert log.called_once_with(msg)
 
 
 def test__parse_args():
