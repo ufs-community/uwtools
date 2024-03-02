@@ -337,6 +337,10 @@ longish_variable: 88
     assert "\n".join(record.message for record in caplog.records) == expected
 
 
+def test__supplement_values():
+    assert jinja2._supplement_values() == {}
+
+
 def test__supplement_values_dict(supplemental_values):
     sv = supplemental_values
     assert jinja2._supplement_values(values_src=sv.d) == sv.d
@@ -361,6 +365,23 @@ def test__supplement_values_dict_plus_env_plus_overrides(supplemental_values):
 def test__supplement_values_dict_plus_overrides(supplemental_values):
     sv = supplemental_values
     assert jinja2._supplement_values(values_src=sv.d, overrides=sv.o) == {**sv.d, **sv.o}
+
+
+def test__supplement_values_env(supplemental_values):
+    sv = supplemental_values
+    with patch.dict(os.environ, sv.e, clear=True):
+        assert jinja2._supplement_values(env=True) == sv.e
+
+
+def test__supplement_values_env_plus_overrides(supplemental_values):
+    sv = supplemental_values
+    with patch.dict(os.environ, sv.e, clear=True):
+        assert jinja2._supplement_values(env=True, overrides=sv.o) == {**sv.o, **sv.e}
+
+
+def test__supplement_values_overrides(supplemental_values):
+    sv = supplemental_values
+    assert jinja2._supplement_values(overrides=sv.o) == sv.o
 
 
 def test__supplement_values_file(supplemental_values):

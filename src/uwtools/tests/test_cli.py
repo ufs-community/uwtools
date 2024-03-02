@@ -541,6 +541,8 @@ def test_main_fail_exception_abort():
 
 
 def test_main_fail_exception_log():
+    # Mock _dispatch_template() to raise a UWError in main() after logging is configured, which logs
+    # an error message and exists with exit status.
     msg = "Catastrophe"
     with patch.object(cli, "_dispatch_template", side_effect=UWError(msg)):
         with patch.object(cli, "log") as log:
