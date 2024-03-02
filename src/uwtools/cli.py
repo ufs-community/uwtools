@@ -11,7 +11,7 @@ from argparse import _SubParsersAction as Subparsers
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, NoReturn, Tuple
 
 import uwtools.api.config
 import uwtools.api.fv3
@@ -20,7 +20,7 @@ import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
-from uwtools.exceptions import UWConfigRealizeError, UWTemplateRenderError
+from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
@@ -42,20 +42,26 @@ def main() -> None:
     # defined checks for the appropriate [sub]mode. Reconfigure logging after quiet/verbose choices
     # are known, then dispatch to the [sub]mode handler.
 
-    setup_logging(quiet=True)
-    args, checks = _parse_args(sys.argv[1:])
-    for check in checks[args[STR.mode]][args[STR.action]]:
-        check(args)
-    setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
-    log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
-    modes = {
-        STR.config: _dispatch_config,
-        STR.fv3: _dispatch_fv3,
-        STR.rocoto: _dispatch_rocoto,
-        STR.sfcclimogen: _dispatch_sfc_climo_gen,
-        STR.template: _dispatch_template,
-    }
-    sys.exit(0 if modes[args[STR.mode]](args) else 1)
+    try:
+        setup_logging(quiet=True)
+        args, checks = _parse_args(sys.argv[1:])
+        for check in checks[args[STR.mode]][args[STR.action]]:
+            check(args)
+        setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
+    except UWError as e:
+        _abort(str(e))
+    try:
+        log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
+        modes = {
+            STR.config: _dispatch_config,
+            STR.fv3: _dispatch_fv3,
+            STR.rocoto: _dispatch_rocoto,
+            STR.sfcclimogen: _dispatch_sfc_climo_gen,
+            STR.template: _dispatch_template,
+        }
+        sys.exit(0 if modes[args[STR.mode]](args) else 1)
+    except UWError as e:
+        log.error(str(e))
 
 
 # Mode config
@@ -715,7 +721,7 @@ def _add_arg_verbose(group: Group) -> None:
 # Support
 
 
-def _abort(msg: str) -> None:
+def _abort(msg: str) -> NoReturn:
     """
     Exit with an informative message and error status.
 

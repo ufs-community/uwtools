@@ -405,7 +405,7 @@ def test__dispatch_template_render_fail():
         STR.valsfmt: 4,
         STR.keyvalpairs: ["foo=88", "bar=99"],
         STR.env: 5,
-        STR.valsneeded: 6,
+        STR.valsneeded: False,
         STR.partial: 7,
         STR.dryrun: 8,
     }
