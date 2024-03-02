@@ -368,7 +368,7 @@ def _values_needed(undeclared_variables: Set[str]) -> None:
     """
     log.info("Value(s) needed to render this template are:")
     for var in sorted(undeclared_variables):
-        log.info(var)
+        log.info(f"  {var}")
 
 
 def _write_template(output_file: Optional[Path], rendered_template: str) -> str:

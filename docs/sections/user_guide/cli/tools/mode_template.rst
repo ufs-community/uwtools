@@ -84,8 +84,8 @@ and a YAML file called ``values.yaml`` with the following contents:
 
      $ uw template render --input-file template --values-needed
      [2023-12-18T19:16:08]     INFO Value(s) needed to render this template are:
-     [2023-12-18T19:16:08]     INFO greeting
-     [2023-12-18T19:16:08]     INFO recipient
+     [2023-12-18T19:16:08]     INFO   greeting
+     [2023-12-18T19:16:08]     INFO   recipient
 
 * To render the template to ``stdout``:
 

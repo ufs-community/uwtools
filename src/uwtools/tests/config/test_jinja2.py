@@ -262,7 +262,7 @@ def test_render_values_needed(caplog, template, values_file):
         input_file=template, values_file=values_file, output_file="/dev/null", values_needed=True
     )
     for var in ("roses_color", "violets_color"):
-        assert logged(caplog, var)
+        assert logged(caplog, f"  {var}")
 
 
 @pytest.mark.parametrize("s,status", [("foo: bar", False), ("foo: '{{ bar }} {{ baz }}'", True)])
@@ -425,8 +425,8 @@ def test__values_needed(caplog):
     undeclared_variables = {"roses_color", "lavender_smell"}
     jinja2._values_needed(undeclared_variables)
     assert logged(caplog, "Value(s) needed to render this template are:")
-    assert logged(caplog, "roses_color")
-    assert logged(caplog, "lavender_smell")
+    assert logged(caplog, "  roses_color")
+    assert logged(caplog, "  lavender_smell")
 
 
 def test__write_template_to_file(tmp_path):
