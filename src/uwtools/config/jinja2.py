@@ -291,7 +291,7 @@ def _log_missing_values(missing: List[str]) -> None:
     """
     log.error("Required value(s) not provided:")
     for key in missing:
-        log.error(key)
+        log.error(f"  {key}")
 
 
 def _register_filters(env: Environment) -> Environment:

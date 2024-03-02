@@ -136,35 +136,6 @@ and a YAML file called ``values.yaml`` with the following contents:
      $ uw template render --input-file template --values-file values.txt --values-format yaml
      Hello, World!
 
-* It is an error to render a template without providing all needed values. For example, with ``recipient: World`` removed from ``values.yaml``:
-
-  .. code-block:: text
-
-     $ uw template render --input-file template --values-file values.yaml
-     [2023-12-18T19:30:05]    ERROR Required value(s) not provided:
-     [2023-12-18T19:30:05]    ERROR recipient
-
-  But the ``--partial`` switch may be used to render as much as possible while passing expressions containing missing values through unchanged:
-
-  .. code-block:: text
-
-     $ uw template render --input-file template --values-file values.yaml --partial
-     Hello, {{ recipient }}!
-
-  Values may also be supplemented by ``key=value`` command-line arguments. For example:
-
-  .. code-block:: text
-
-     $ uw template render --input-file template --values-file values.yaml recipient=Reader
-     Hello, Reader!
-
-  Such ``key=value`` arguments may also be used to *override* file-based values:
-
-  .. code-block:: text
-
-     $ uw template render --input-file template --values-file values.yaml recipient=Reader greeting="Good day"
-     Good day, Reader!
-
 * To request verbose log output:
 
   .. code-block:: text
@@ -215,6 +186,46 @@ and a YAML file called ``values.yaml`` with the following contents:
      [2023-12-18T23:27:04]    DEBUG ---------------------------------------------------------------------
      [2023-12-18T23:27:04]    DEBUG Read initial values from values.yaml
 
+**NB**: The following examples are based on a ``values.yaml`` file with ``recipient: World`` removed.
+
+* It is an error to render a template without providing all needed values.
+
+  .. code-block:: text
+
+   $ uw template render --input-file template --values-file values.yaml
+   [2024-03-02T16:42:48]    ERROR Required value(s) not provided:
+   [2024-03-02T16:42:48]    ERROR   recipient
+   [2024-03-02T16:42:48]    ERROR Template could not be rendered.
+
+  But the ``--partial`` switch may be used to render as much as possible while passing expressions containing missing values through unchanged:
+
+  .. code-block:: text
+
+     $ uw template render --input-file template --values-file values.yaml --partial
+     Hello, {{ recipient }}!
+
+  Values may also be supplemented by ``key=value`` command-line arguments:
+
+  .. code-block:: text
+
+     $ uw template render --input-file template --values-file values.yaml recipient=Reader
+     Hello, Reader!
+
+  The optional ``-env`` switch allows environment variables to be used to supply values:
+
+  .. code-block:: text
+
+     $ export recipient=You
+     $ uw template render --input-file template --values-file values.yaml --env
+     Hello, You!
+
+  Values from ``key=value`` arguments override values from file, and environment variables override both:
+
+  .. code-block:: text
+
+     $ recipient=Sunshine uw template render --input-file template --values-file values.yaml recipient=Reader greeting="Good day" --env
+     Good day, Sunshine!
+
 * Non-YAML-formatted files may also be used as value sources. For example, ``template``
 
   .. code-block:: jinja
@@ -236,8 +247,6 @@ and a YAML file called ``values.yaml`` with the following contents:
 
      $ uw template render --input-file template --values-file values.nml
      Hello, World!
-
-  Note that ``ini`` and ``nml`` configs are, by definition, depth-2 configs, while ``sh`` configs are depth-1, and ``yaml`` configs have arbitrary depth.
 
 .. _cli_template_translate_examples:
 

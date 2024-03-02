@@ -240,7 +240,7 @@ def test_render_partial(caplog, capsys, partial):
         assert "Hello {{ recipient }}" in capsys.readouterr().out
     else:
         assert logged(caplog, "Required value(s) not provided:")
-        assert logged(caplog, "recipient")
+        assert logged(caplog, "  recipient")
 
 
 def test_render_values_missing(caplog, template, values_file):
@@ -253,7 +253,7 @@ def test_render_values_missing(caplog, template, values_file):
         f.write(yaml.dump(cfgobj))
     render_helper(input_file=template, values_file=values_file, output_file="/dev/null")
     assert logged(caplog, "Required value(s) not provided:")
-    assert logged(caplog, "roses_color")
+    assert logged(caplog, "  roses_color")
 
 
 def test_render_values_needed(caplog, template, values_file):
@@ -320,8 +320,8 @@ def test__log_missing_values(caplog):
     missing = ["roses_color", "violets_color"]
     jinja2._log_missing_values(missing)
     assert logged(caplog, "Required value(s) not provided:")
-    assert logged(caplog, "roses_color")
-    assert logged(caplog, "violets_color")
+    assert logged(caplog, "  roses_color")
+    assert logged(caplog, "  violets_color")
 
 
 def test__report(caplog):
