@@ -226,6 +226,8 @@ and a YAML file called ``values.yaml`` with the following contents:
      $ recipient=Sunshine uw template render --input-file template --values-file values.yaml recipient=Reader greeting="Good day" --env
      Good day, Sunshine!
 
+  Note that ``recipient=Sunshine`` is shell syntax for exporting environment variable ``recipient`` only for the duration of the command that follows. It should not be confused with the two ``key=value`` pairs later on the command line, which are arguments to ``uw``.
+
 * Non-YAML-formatted files may also be used as value sources. For example, ``template``
 
   .. code-block:: jinja
