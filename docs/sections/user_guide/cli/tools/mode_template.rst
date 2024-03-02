@@ -30,8 +30,8 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 
    $ uw template render --help
    usage: uw template render [-h] [--input-file PATH] [--output-file PATH] [--values-file PATH]
-                             [--values-format {ini,nml,sh,yaml}] [--values-needed] [--partial]
-                             [--dry-run] [--debug] [--quiet] [--verbose]
+                             [--values-format {ini,nml,sh,yaml}] [--env] [--values-needed]
+                             [--partial] [--dry-run] [--quiet] [--verbose]
                              [KEY=VALUE ...]
 
    Render a template
@@ -47,14 +47,14 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
          Path to file providing override or interpolation values
      --values-format {ini,nml,sh,yaml}
          Values format
+     --env
+         Use environment variables
      --values-needed
          Print report of values needed to render template
      --partial
          Permit partial template rendering
      --dry-run
          Only log info, making no changes
-     --debug
-         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v

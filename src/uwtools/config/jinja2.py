@@ -144,7 +144,7 @@ def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) ->
 
 
 def render(
-    values_src: Union[dict, Path],
+    values_src: Optional[Union[dict, Path]] = None,
     values_format: Optional[str] = None,
     input_file: Optional[Path] = None,
     output_file: Optional[Path] = None,
@@ -329,7 +329,7 @@ def _report(args: dict) -> None:
 
 
 def _supplement_values(
-    values_src: Union[dict, Path],
+    values_src: Optional[Union[dict, Path]] = None,
     values_format: Optional[str] = None,
     overrides: Optional[Dict[str, str]] = None,
     env: bool = False,
@@ -350,7 +350,7 @@ def _supplement_values(
         values = values_src_class(values_src).data
         log.debug("Read initial values from %s", values_src)
     else:
-        values = values_src
+        values = values_src or {}
     if overrides:
         values.update(overrides)
         log.debug("Supplemented values with overrides: %s", " ".join(overrides))

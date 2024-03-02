@@ -11,7 +11,7 @@ from uwtools.exceptions import UWTemplateRenderError
 
 
 def render(
-    values_src: Union[dict, Path],
+    values_src: Optional[Union[dict, Path]] = None,
     values_format: Optional[str] = None,
     input_file: Optional[Path] = None,
     output_file: Optional[Path] = None,
@@ -61,7 +61,7 @@ def render(
 
 
 def render_to_str(  # pylint: disable=unused-argument
-    values_src: Union[dict, Path],
+    values_src: Optional[Union[dict, Path]] = None,
     values_format: Optional[str] = None,
     input_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
