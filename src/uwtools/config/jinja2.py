@@ -30,16 +30,24 @@ class J2Template:
     Reads Jinja2 templates from files or strings, and renders them using the user-provided values.
     """
 
-    def __init__(self, values: dict, template_source: Optional[Union[str, Path]]) -> None:
+    def __init__(
+        self,
+        values: dict,
+        template_source: Optional[Union[str, Path]],
+        searchpath: Optional[str] = None,
+    ) -> None:
         """
         :param values: Values needed to render the provided template.
         :param template_source: Jinja2 string or template file path (None => read stdin).
+        :param searchpath: Colon-separated paths to search for extra templates.
         :raises: RuntimeError: If neither a template file or path is provided.
         """
         self._values = values
         self._template_source = template_source
         self._j2env = Environment(
-            loader=FileSystemLoader(searchpath=[self._template_source.parent])
+            loader=FileSystemLoader(
+                searchpath=searchpath.split(":") if searchpath else self._template_source.parent
+            )
             if isinstance(self._template_source, Path)
             else BaseLoader()
         )
@@ -137,6 +145,7 @@ def render(
     output_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
     env: bool = False,
+    searchpath: Optional[str] = None,
     values_needed: bool = False,
     partial: bool = False,
     dry_run: bool = False,
@@ -150,6 +159,7 @@ def render(
     :param output_file: Path to write rendered Jinja2 template to (None => write to stdout).
     :param overrides: Supplemental override values.
     :param env: Supplement values with environment variables?
+    :param searchpath: Colon-separated paths to search for extra templates.
     :param values_needed: Just report variables needed to render the template?
     :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
@@ -159,7 +169,7 @@ def render(
     values = _supplement_values(
         values_src=values_src, values_format=values_format, overrides=overrides, env=env
     )
-    template = J2Template(values=values, template_source=input_file)
+    template = J2Template(values=values, template_source=input_file, searchpath=searchpath)
     undeclared_variables = template.undeclared_variables
 
     # If a report of variables required to render the template was requested, make that report and
