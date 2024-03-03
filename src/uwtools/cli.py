@@ -442,6 +442,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_values_file(optional)
     _add_arg_values_format(optional, choices=FORMATS)
     _add_arg_env(optional)
+    _add_arg_search_path(optional)
     _add_arg_values_needed(optional)
     _add_arg_partial(optional)
     _add_arg_dry_run(optional)
@@ -658,6 +659,15 @@ def _add_arg_schema_file(group: Group) -> None:
         metavar="PATH",
         required=True,
         type=Path,
+    )
+
+
+def _add_arg_search_path(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.searchpath),
+        help="Colon-separated paths to search for extra templates",
+        required=False,
+        type=str,
     )
 
 
@@ -894,6 +904,7 @@ class STR:
     rocoto: str = "rocoto"
     run: str = "run"
     schemafile: str = "schema_file"
+    searchpath: str = "search_path"
     sfcclimogen: str = "sfc_climo_gen"
     suppfiles: str = "supplemental_files"
     task: str = "task"
