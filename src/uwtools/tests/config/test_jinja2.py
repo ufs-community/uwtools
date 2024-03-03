@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 import pytest
 import yaml
-from jinja2 import DebugUndefined, Environment, UndefinedError
+from jinja2 import DebugUndefined, Environment, TemplateNotFound, UndefinedError
 from pytest import fixture, raises
 
 from uwtools.config import jinja2
@@ -518,4 +518,14 @@ class Test_Jinja2Template:
     def test_searchpath_stdin_default(self, searchpath_assets):
         # There is no default search path for reads from stdin:
         a = searchpath_assets
-        assert J2Template(values={}, template_source=a.t1).render() == "11"
+        with patch.object(jinja2, "readable") as readable:
+            readable.return_value.__enter__.return_value = StringIO(a.s1)
+            with raises(TemplateNotFound):
+                J2Template(values={}).render()
+
+    def test_searchpath_stdin_explicit(self, searchpath_assets):
+        # An explicit search path is honored when reading from stdin:
+        a = searchpath_assets
+        with patch.object(jinja2, "readable") as readable:
+            readable.return_value.__enter__.return_value = StringIO(a.s1)
+            assert J2Template(values={}, searchpath=f"{a.d1}").render() == "2"

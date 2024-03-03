@@ -25,7 +25,7 @@ class J2Template:
     def __init__(
         self,
         values: dict,
-        template_source: Optional[Union[str, Path]],
+        template_source: Optional[Union[str, Path]] = None,
         searchpath: Optional[str] = None,
     ) -> None:
         """
