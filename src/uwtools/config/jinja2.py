@@ -3,6 +3,7 @@ Support for rendering Jinja2 templates.
 """
 
 import os
+from functools import cached_property
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Union
 
@@ -12,7 +13,6 @@ from jinja2 import (
     Environment,
     FileSystemLoader,
     StrictUndefined,
-    Template,
     Undefined,
     meta,
 )
@@ -30,19 +30,34 @@ class J2Template:
     Reads Jinja2 templates from files or strings, and renders them using the user-provided values.
     """
 
-    def __init__(self, values: dict, template_source: Union[str, Path]) -> None:
+    def __init__(self, values: dict, template_source: Optional[Union[str, Path]]) -> None:
         """
         :param values: Values needed to render the provided template.
         :param template_source: Jinja2 string or template file path (None => read stdin).
         :raises: RuntimeError: If neither a template file or path is provided.
         """
         self._values = values
-        self._template = (
-            self._load_string(template_source)
-            if isinstance(template_source, str)
-            else self._load_file(template_source)
-        )
         self._template_source = template_source
+        self._j2env = Environment(
+            loader=FileSystemLoader(searchpath="/FIXME")
+            if isinstance(self._template_source, Path)
+            else BaseLoader()
+        )
+        _register_filters(self._j2env)
+        self._template = self._j2env.from_string(self._template_str)
+
+    def __repr__(self):
+        return self._template_str
+
+    @cached_property
+    def _template_str(self):
+        """
+        A string containing the template.
+        """
+        if isinstance(self._template_source, str):
+            return self._template_source
+        with readable(self._template_source) as f:
+            return f.read()
 
     # Public methods
 
@@ -72,36 +87,8 @@ class J2Template:
 
         :return: Names of variables needed to render the template.
         """
-        if isinstance(self._template_source, str):
-            j2_parsed = self._j2env.parse(self._template_source)
-        else:
-            with open(self._template_source, "r", encoding="utf-8") as f:
-                j2_parsed = self._j2env.parse(f.read())
+        j2_parsed = self._j2env.parse(self._template_str)
         return meta.find_undeclared_variables(j2_parsed)
-
-    # Private methods
-
-    def _load_file(self, template_path: Path) -> Template:
-        """
-        Load the Jinja2 template from the file provided.
-
-        :param template_path: Filesystem path to the Jinja2 template file.
-        :return: The Jinja2 template object.
-        """
-        self._j2env = Environment(loader=FileSystemLoader(searchpath="/"))
-        _register_filters(self._j2env)
-        return self._j2env.get_template(str(template_path))
-
-    def _load_string(self, template: str) -> Template:
-        """
-        Load the Jinja2 template from the string provided.
-
-        :param template: An in-memory Jinja2 template.
-        :return: The Jinja2 template object.
-        """
-        self._j2env = Environment(loader=BaseLoader())
-        _register_filters(self._j2env)
-        return self._j2env.from_string(template)
 
 
 # Public functions
@@ -172,9 +159,7 @@ def render(
     values = _supplement_values(
         values_src=values_src, values_format=values_format, overrides=overrides, env=env
     )
-    with readable(input_file) as f:
-        template_str = f.read()
-    template = J2Template(values=values, template_source=template_str)
+    template = J2Template(values=values, template_source=input_file)
     undeclared_variables = template.undeclared_variables
 
     # If a report of variables required to render the template was requested, make that report and
@@ -188,7 +173,7 @@ def render(
     # missing values and return an error to the caller.
 
     if partial:
-        rendered = Environment(undefined=DebugUndefined).from_string(template_str).render(values)
+        rendered = Environment(undefined=DebugUndefined).from_string(str(template)).render(values)
     else:
         missing = [var for var in undeclared_variables if var not in values.keys()]
         if missing:
