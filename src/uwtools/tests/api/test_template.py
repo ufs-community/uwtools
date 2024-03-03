@@ -15,9 +15,10 @@ def kwargs():
     return {
         "input_file": "infile",
         "output_file": "outfile",
-        "values": "valsfile",
+        "values_src": "valsfile",
         "values_format": "format",
         "overrides": {"key": "val"},
+        "env": True,
         "partial": True,
         "values_needed": True,
         "dry_run": True,

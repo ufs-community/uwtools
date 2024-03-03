@@ -29,8 +29,9 @@ from uwtools.utils.file import FORMAT
 
 def test__abort(capsys):
     msg = "Aborting..."
-    with raises(SystemExit):
+    with raises(SystemExit) as e:
         cli._abort(msg)
+    assert e.value.code == 1
     assert msg in capsys.readouterr().err
 
 
@@ -397,19 +398,21 @@ def test__dispatch_template(params):
     func.assert_called_once_with(args)
 
 
-def test__dispatch_template_render_fail():
+@pytest.mark.parametrize("valsneeded", [False, True])
+def test__dispatch_template_render_fail(valsneeded):
     args = {
         STR.infile: 1,
         STR.outfile: 2,
         STR.valsfile: 3,
         STR.valsfmt: 4,
         STR.keyvalpairs: ["foo=88", "bar=99"],
-        STR.valsneeded: 6,
+        STR.env: 5,
+        STR.valsneeded: valsneeded,
         STR.partial: 7,
         STR.dryrun: 8,
     }
     with patch.object(uwtools.api.template, "render", side_effect=UWTemplateRenderError):
-        assert cli._dispatch_template_render(args) is False
+        assert cli._dispatch_template_render(args) is valsneeded
 
 
 def test__dispatch_template_render_no_optional():
@@ -419,6 +422,7 @@ def test__dispatch_template_render_no_optional():
         STR.valsfile: None,
         STR.valsfmt: None,
         STR.keyvalpairs: [],
+        STR.env: False,
         STR.valsneeded: False,
         STR.partial: False,
         STR.dryrun: False,
@@ -428,9 +432,10 @@ def test__dispatch_template_render_no_optional():
     render.assert_called_once_with(
         input_file=None,
         output_file=None,
-        values=None,
+        values_src=None,
         values_format=None,
         overrides={},
+        env=False,
         values_needed=False,
         partial=False,
         dry_run=False,
@@ -444,6 +449,7 @@ def test__dispatch_template_render_yaml():
         STR.valsfile: 3,
         STR.valsfmt: 4,
         STR.keyvalpairs: ["foo=88", "bar=99"],
+        STR.env: 5,
         STR.valsneeded: 6,
         STR.partial: 7,
         STR.dryrun: 8,
@@ -453,9 +459,10 @@ def test__dispatch_template_render_yaml():
     render.assert_called_once_with(
         input_file=1,
         output_file=2,
-        values=3,
+        values_src=3,
         values_format=4,
         overrides={"foo": "88", "bar": "99"},
+        env=5,
         values_needed=6,
         partial=7,
         dry_run=8,
@@ -520,6 +527,30 @@ def test_main_fail_dispatch(vals):
             with raises(SystemExit) as e:
                 cli.main()
             assert e.value.code == exit_status
+
+
+def test_main_fail_exception_abort():
+    # Mock setup_logging() to raise a UWError in main() before logging is configured, which triggers
+    # a call to _abort().
+    msg = "Catastrophe"
+    with patch.object(cli, "setup_logging", side_effect=UWError(msg)):
+        with patch.object(cli, "_abort", side_effect=SystemExit) as _abort:
+            with raises(SystemExit):
+                cli.main()
+        _abort.assert_called_once_with(msg)
+
+
+def test_main_fail_exception_log():
+    # Mock _dispatch_template() to raise a UWError in main() after logging is configured, which logs
+    # an error message and exists with exit status.
+    msg = "Catastrophe"
+    with patch.object(cli, "_dispatch_template", side_effect=UWError(msg)):
+        with patch.object(cli, "log") as log:
+            with patch.object(sys, "argv", ["uw", "template", "render"]):
+                with raises(SystemExit) as e:
+                    cli.main()
+                assert e.value.code == 1
+            assert log.called_once_with(msg)
 
 
 def test__parse_args():

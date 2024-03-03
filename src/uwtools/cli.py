@@ -11,7 +11,7 @@ from argparse import _SubParsersAction as Subparsers
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, NoReturn, Tuple
 
 import uwtools.api.config
 import uwtools.api.fv3
@@ -20,7 +20,7 @@ import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
-from uwtools.exceptions import UWConfigRealizeError, UWTemplateRenderError
+from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
@@ -42,20 +42,27 @@ def main() -> None:
     # defined checks for the appropriate [sub]mode. Reconfigure logging after quiet/verbose choices
     # are known, then dispatch to the [sub]mode handler.
 
-    setup_logging(quiet=True)
-    args, checks = _parse_args(sys.argv[1:])
-    for check in checks[args[STR.mode]][args[STR.action]]:
-        check(args)
-    setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
-    log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
-    modes = {
-        STR.config: _dispatch_config,
-        STR.fv3: _dispatch_fv3,
-        STR.rocoto: _dispatch_rocoto,
-        STR.sfcclimogen: _dispatch_sfc_climo_gen,
-        STR.template: _dispatch_template,
-    }
-    sys.exit(0 if modes[args[STR.mode]](args) else 1)
+    try:
+        setup_logging(quiet=True)
+        args, checks = _parse_args(sys.argv[1:])
+        for check in checks[args[STR.mode]][args[STR.action]]:
+            check(args)
+        setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
+    except UWError as e:
+        _abort(str(e))
+    try:
+        log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
+        modes = {
+            STR.config: _dispatch_config,
+            STR.fv3: _dispatch_fv3,
+            STR.rocoto: _dispatch_rocoto,
+            STR.sfcclimogen: _dispatch_sfc_climo_gen,
+            STR.template: _dispatch_template,
+        }
+        sys.exit(0 if modes[args[STR.mode]](args) else 1)
+    except UWError as e:
+        log.error(str(e))
+        sys.exit(1)
 
 
 # Mode config
@@ -434,6 +441,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_file(optional)
     _add_arg_values_file(optional)
     _add_arg_values_format(optional, choices=FORMATS)
+    _add_arg_env(optional)
     _add_arg_values_needed(optional)
     _add_arg_partial(optional)
     _add_arg_dry_run(optional)
@@ -464,18 +472,20 @@ def _dispatch_template_render(args: Args) -> bool:
     """
     try:
         uwtools.api.template.render(
-            values=args[STR.valsfile],
+            values_src=args[STR.valsfile],
             values_format=args[STR.valsfmt],
             input_file=args[STR.infile],
             output_file=args[STR.outfile],
             overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
+            env=args[STR.env],
             values_needed=args[STR.valsneeded],
             partial=args[STR.partial],
             dry_run=args[STR.dryrun],
         )
     except UWTemplateRenderError:
-        msg = "Template could not be rendered. Try with %s for details." % _switch(STR.valsneeded)
-        log.error(msg)
+        if args[STR.valsneeded]:
+            return True
+        log.error("Template could not be rendered.")
         return False
     return True
 
@@ -531,6 +541,14 @@ def _add_arg_dry_run(group: Group) -> None:
         _switch(STR.dryrun),
         action="store_true",
         help="Only log info, making no changes",
+    )
+
+
+def _add_arg_env(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.env),
+        action="store_true",
+        help="Use environment variables",
     )
 
 
@@ -704,7 +722,7 @@ def _add_arg_verbose(group: Group) -> None:
 # Support
 
 
-def _abort(msg: str) -> None:
+def _abort(msg: str) -> NoReturn:
     """
     Exit with an informative message and error status.
 
@@ -854,6 +872,7 @@ class STR:
     config: str = "config"
     cycle: str = "cycle"
     dryrun: str = "dry_run"
+    env: str = "env"
     file1fmt: str = "file_1_format"
     file1path: str = "file_1_path"
     file2fmt: str = "file_2_format"

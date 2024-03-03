@@ -30,11 +30,20 @@ def deref_render_assets():
 
 
 @fixture
+def supplemental_values(tmp_path):
+    d = {"foo": "bar", "another": "value"}
+    valsfile = tmp_path / "values.yaml"
+    with open(valsfile, "w", encoding="utf-8") as f:
+        yaml.dump(d, f)
+    return ns(d=d, e={"CYCLE": "2024030112"}, f=valsfile, o={"baz": "qux"})
+
+
+@fixture
 def template(tmp_path):
     path = tmp_path / "template.jinja2"
     with open(path, "w", encoding="utf-8") as f:
         f.write("roses are {{roses_color}}, violets are {{violets_color}}")
-    return str(path)
+    return path
 
 
 @fixture
@@ -48,7 +57,7 @@ cannot:
 """.strip()
     with open(path, "w", encoding="utf-8") as f:
         f.write(yaml)
-    return str(path)
+    return path
 
 
 # Helpers
@@ -57,7 +66,7 @@ cannot:
 def render_helper(input_file, values_file, **kwargs):
     return jinja2.render(
         input_file=input_file,
-        values=values_file,
+        values_src=values_file,
         **kwargs,
     )
 
@@ -226,12 +235,12 @@ def test_render_partial(caplog, capsys, partial):
     content = StringIO(initial_value="{{ greeting }} {{ recipient }}")
     with patch.object(jinja2, "readable") as readable:
         readable.return_value.__enter__.return_value = content
-        jinja2.render(values={"greeting": "Hello"}, partial=partial)
+        jinja2.render(values_src={"greeting": "Hello"}, partial=partial)
     if partial:
         assert "Hello {{ recipient }}" in capsys.readouterr().out
     else:
         assert logged(caplog, "Required value(s) not provided:")
-        assert logged(caplog, "recipient")
+        assert logged(caplog, "  recipient")
 
 
 def test_render_values_missing(caplog, template, values_file):
@@ -244,7 +253,7 @@ def test_render_values_missing(caplog, template, values_file):
         f.write(yaml.dump(cfgobj))
     render_helper(input_file=template, values_file=values_file, output_file="/dev/null")
     assert logged(caplog, "Required value(s) not provided:")
-    assert logged(caplog, "roses_color")
+    assert logged(caplog, "  roses_color")
 
 
 def test_render_values_needed(caplog, template, values_file):
@@ -253,7 +262,7 @@ def test_render_values_needed(caplog, template, values_file):
         input_file=template, values_file=values_file, output_file="/dev/null", values_needed=True
     )
     for var in ("roses_color", "violets_color"):
-        assert logged(caplog, var)
+        assert logged(caplog, f"  {var}")
 
 
 @pytest.mark.parametrize("s,status", [("foo: bar", False), ("foo: '{{ bar }} {{ baz }}'", True)])
@@ -311,8 +320,8 @@ def test__log_missing_values(caplog):
     missing = ["roses_color", "violets_color"]
     jinja2._log_missing_values(missing)
     assert logged(caplog, "Required value(s) not provided:")
-    assert logged(caplog, "roses_color")
-    assert logged(caplog, "violets_color")
+    assert logged(caplog, "  roses_color")
+    assert logged(caplog, "  violets_color")
 
 
 def test__report(caplog):
@@ -328,26 +337,96 @@ longish_variable: 88
     assert "\n".join(record.message for record in caplog.records) == expected
 
 
-def test__set_up_config_obj_env():
-    expected = {"roses_color": "white", "violets_color": "blue"}
-    with patch.dict(os.environ, expected, clear=True):
-        actual = jinja2._set_up_values_obj()
-    assert actual["roses_color"] == "white"
-    assert actual["violets_color"] == "blue"
+def test__supplement_values():
+    assert jinja2._supplement_values() == {}
 
 
-def test__set_up_config_obj_file(values_file):
-    expected = {"roses_color": "white", "violets_color": "blue", "cannot": {"override": "this"}}
-    actual = jinja2._set_up_values_obj(values_file=values_file, overrides={"roses_color": "white"})
-    assert actual == expected
+def test__supplement_values_dict(supplemental_values):
+    sv = supplemental_values
+    assert jinja2._supplement_values(values_src=sv.d) == sv.d
+
+
+def test__supplement_values_dict_plus_env(supplemental_values):
+    sv = supplemental_values
+    with patch.dict(os.environ, sv.e, clear=True):
+        assert jinja2._supplement_values(values_src=sv.d, env=True) == {**sv.d, **sv.e}
+
+
+def test__supplement_values_dict_plus_env_plus_overrides(supplemental_values):
+    sv = supplemental_values
+    with patch.dict(os.environ, sv.e, clear=True):
+        assert jinja2._supplement_values(values_src=sv.d, env=True, overrides=sv.o) == {
+            **sv.d,
+            **sv.e,
+            **sv.o,
+        }
+
+
+def test__supplement_values_dict_plus_overrides(supplemental_values):
+    sv = supplemental_values
+    assert jinja2._supplement_values(values_src=sv.d, overrides=sv.o) == {**sv.d, **sv.o}
+
+
+def test__supplement_values_env(supplemental_values):
+    sv = supplemental_values
+    with patch.dict(os.environ, sv.e, clear=True):
+        assert jinja2._supplement_values(env=True) == sv.e
+
+
+def test__supplement_values_env_plus_overrides(supplemental_values):
+    sv = supplemental_values
+    with patch.dict(os.environ, sv.e, clear=True):
+        assert jinja2._supplement_values(env=True, overrides=sv.o) == {**sv.o, **sv.e}
+
+
+def test__supplement_values_overrides(supplemental_values):
+    sv = supplemental_values
+    assert jinja2._supplement_values(overrides=sv.o) == sv.o
+
+
+def test__supplement_values_file(supplemental_values):
+    sv = supplemental_values
+    assert jinja2._supplement_values(values_src=sv.f) == sv.d
+
+
+def test__supplement_values_file_plus_env(supplemental_values):
+    sv = supplemental_values
+    with patch.dict(os.environ, sv.e, clear=True):
+        assert jinja2._supplement_values(values_src=sv.f, env=True) == {**sv.d, **sv.e}
+
+
+def test__supplement_values_file_plus_env_plus_overrides(supplemental_values):
+    sv = supplemental_values
+    with patch.dict(os.environ, sv.e, clear=True):
+        assert jinja2._supplement_values(values_src=sv.f, env=True, overrides=sv.o) == {
+            **sv.d,
+            **sv.e,
+            **sv.o,
+        }
+
+
+def test__supplement_values_file_plus_overrides(supplemental_values):
+    sv = supplemental_values
+    assert jinja2._supplement_values(values_src=sv.d, overrides=sv.o) == {**sv.d, **sv.o}
+
+
+def test__supplement_values_priority(supplemental_values):
+    # Test environment variable > CLI key=value overrides > file value priority.
+    sv = supplemental_values
+    assert jinja2._supplement_values(values_src=sv.f)["foo"] == "bar"
+    o = {"foo": "bar-cli"}
+    assert jinja2._supplement_values(values_src=sv.f, overrides=o)["foo"] == o["foo"]
+    e = {"foo": "bar-env"}
+    with patch.dict(os.environ, e, clear=True):
+        assert jinja2._supplement_values(values_src=sv.f, env=True, overrides=o)["foo"] == e["foo"]
 
 
 def test__values_needed(caplog):
     undeclared_variables = {"roses_color", "lavender_smell"}
     jinja2._values_needed(undeclared_variables)
     assert logged(caplog, "Value(s) needed to render this template are:")
-    assert logged(caplog, "roses_color")
-    assert logged(caplog, "lavender_smell")
+    assert logged(caplog, "  roses_color")
+    assert logged(caplog, "  lavender_smell")
 
 
 def test__write_template_to_file(tmp_path):
