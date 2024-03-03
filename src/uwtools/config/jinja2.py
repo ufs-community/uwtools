@@ -39,7 +39,7 @@ class J2Template:
         self._values = values
         self._template_source = template_source
         self._j2env = Environment(
-            loader=FileSystemLoader(searchpath="/FIXME")
+            loader=FileSystemLoader(searchpath=[self._template_source.parent])
             if isinstance(self._template_source, Path)
             else BaseLoader()
         )
