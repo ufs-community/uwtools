@@ -17,6 +17,7 @@ def render(
     output_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
     env: bool = False,
+    searchpath: Optional[str] = None,
     values_needed: bool = False,
     partial: bool = False,
     dry_run: bool = False,
@@ -38,6 +39,7 @@ def render(
         to ``stdout``)
     :param overrides: Supplemental override values
     :param env: Supplement values with environment variables?
+    :param searchpath: Colon-separated paths to search for extra templates
     :param values_needed: Just report variables needed to render the template?
     :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
@@ -51,6 +53,7 @@ def render(
         output_file=output_file,
         overrides=overrides,
         env=env,
+        searchpath=searchpath,
         values_needed=values_needed,
         partial=partial,
         dry_run=dry_run,
@@ -66,6 +69,7 @@ def render_to_str(  # pylint: disable=unused-argument
     input_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
     env: bool = False,
+    searchpath: Optional[str] = None,
     values_needed: bool = False,
     partial: bool = False,
     dry_run: bool = False,
