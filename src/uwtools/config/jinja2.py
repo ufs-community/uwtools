@@ -49,7 +49,7 @@ class J2Template:
                 searchpath=searchpath.split(":") if searchpath else self._template_source.parent
             )
             if isinstance(self._template_source, Path)
-            else BaseLoader()
+            else BaseLoader()  # PM FIX THIS
         )
         _register_filters(self._j2env)
         self._template = self._j2env.from_string(self._template_str)

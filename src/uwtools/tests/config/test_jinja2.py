@@ -449,6 +449,27 @@ class Test_Jinja2Template:
     """
 
     @fixture
+    def searchpath_assets(self, tmp_path):
+        def write(s, *args):
+            path = tmp_path.joinpath(*list(args))
+            path.parent.mkdir(exist_ok=True)
+            with open(path, "w", encoding="utf-8") as f:
+                print(s, file=f)
+            return path
+
+        write("{% macro double(x) %}{{ x }}{{ x }}{% endmacro %}", "m1.jinja")
+        d1 = write("{% macro double(x) %}{{ x * 2 }}{% endmacro %}", "d1", "m1.jinja").parent
+        d2 = write("{% macro triple(x) %}{{ x * 3 }}{% endmacro %}", "d2", "m2.jinja").parent
+        t1 = write("{% import 'm1.jinja' as m1 %}{{ m1.double(1) }}", "t1.jinja")
+        t2s = (
+            "{% import 'm1.jinja' as m1 %}"
+            "{% import 'm2.jinja' as m2 %}"
+            "{{ m1.double(1) }}{{ m2.triple(1) }}"
+        )
+        t2 = write(t2s, "t2.jinja")
+        return d1, d2, t1, t2
+
+    @fixture
     def testdata(self):
         return ns(
             config={"greeting": "Hello", "recipient": "the world"},
@@ -457,8 +478,8 @@ class Test_Jinja2Template:
 
     def test_dump(self, testdata, tmp_path):
         path = tmp_path / "rendered.txt"
-        j2template = J2Template(values=testdata.config, template_source=testdata.template)
-        j2template.dump(output_path=path)
+        obj = J2Template(values=testdata.config, template_source=testdata.template)
+        obj.dump(output_path=path)
         with open(path, "r", encoding="utf-8") as f:
             assert f.read().strip() == "Hello to the world"
 
@@ -470,3 +491,18 @@ class Test_Jinja2Template:
 
     def test_render_string(self, testdata):
         validate(J2Template(values=testdata.config, template_source=testdata.template))
+
+    def test_searchpath_file_default(self, searchpath_assets):
+        # By default, the template search path will be the directory containing the main template:
+        _, _, t1, _ = searchpath_assets
+        assert J2Template(values={}, template_source=t1).render() == "11"
+
+    def test_searchpath_file_one_path(self, searchpath_assets):
+        # If a search path is specified, it will suppress use of the default path:
+        d1, _, t1, _ = searchpath_assets
+        assert J2Template(values={}, template_source=t1, searchpath=f"{d1}").render() == "2"
+
+    def test_searchpath_file_two_paths(self, searchpath_assets):
+        # Multiple search paths can be specified:
+        d1, d2, _, t2 = searchpath_assets
+        assert J2Template(values={}, template_source=t2, searchpath=f"{d1}:{d2}").render() == "23"
