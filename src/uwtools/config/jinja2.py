@@ -7,15 +7,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Union
 
-from jinja2 import (
-    BaseLoader,
-    DebugUndefined,
-    Environment,
-    FileSystemLoader,
-    StrictUndefined,
-    Undefined,
-    meta,
-)
+from jinja2 import DebugUndefined, Environment, FileSystemLoader, StrictUndefined, Undefined, meta
 from jinja2.exceptions import UndefinedError
 
 from uwtools.config.support import TaggedString, format_to_config
@@ -46,10 +38,12 @@ class J2Template:
         self._template_source = template_source
         self._j2env = Environment(
             loader=FileSystemLoader(
-                searchpath=searchpath.split(":") if searchpath else self._template_source.parent
+                searchpath=searchpath.split(":")
+                if searchpath
+                else self._template_source.parent
+                if isinstance(self._template_source, Path)
+                else []
             )
-            if isinstance(self._template_source, Path)
-            else BaseLoader()  # PM FIX THIS
         )
         _register_filters(self._j2env)
         self._template = self._j2env.from_string(self._template_str)
