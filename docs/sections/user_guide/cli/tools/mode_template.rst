@@ -188,9 +188,9 @@ and a YAML file called ``values.yaml`` with the following contents:
      [2023-12-18T23:27:04]    DEBUG ---------------------------------------------------------------------
      [2023-12-18T23:27:04]    DEBUG Read initial values from values.yaml
 
-**NB**: The following examples are based on a ``values.yaml`` file with ``recipient: World`` removed.
+* **NB**: This set of examples is based on a ``values.yaml`` file with ``recipient: World`` removed.
 
-* It is an error to render a template without providing all needed values.
+  It is an error to render a template without providing all needed values.
 
   .. code-block:: text
 
