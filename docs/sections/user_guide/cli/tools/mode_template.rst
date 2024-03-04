@@ -30,8 +30,9 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 
    $ uw template render --help
    usage: uw template render [-h] [--input-file PATH] [--output-file PATH] [--values-file PATH]
-                             [--values-format {ini,nml,sh,yaml}] [--env] [--search-path SEARCH_PATH]
-                             [--values-needed] [--partial] [--dry-run] [--quiet] [--verbose]
+                             [--values-format {ini,nml,sh,yaml}] [--env]
+                             [--search-path PATH[:PATH:...]] [--values-needed] [--partial]
+                             [--dry-run] [--quiet] [--verbose]
                              [KEY=VALUE ...]
 
    Render a template
