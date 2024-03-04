@@ -144,11 +144,12 @@ def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) ->
 
 
 def render(
-    values: Union[dict, Path],
+    values_src: Optional[Union[dict, Path]] = None,
     values_format: Optional[str] = None,
     input_file: Optional[Path] = None,
     output_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
+    env: bool = False,
     values_needed: bool = False,
     partial: bool = False,
     dry_run: bool = False,
@@ -156,21 +157,21 @@ def render(
     """
     Check and render a Jinja2 template.
 
-    :param values: Source of values to render the template.
+    :param values_src: Source of values to render the template.
     :param values_format: Format of values when sourced from file.
     :param input_file: Path to read raw Jinja2 template from (None => read stdin).
     :param output_file: Path to write rendered Jinja2 template to (None => write to stdout).
     :param overrides: Supplemental override values.
+    :param env: Supplement values with environment variables?
     :param values_needed: Just report variables needed to render the template?
     :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
     :return: The rendered template, or None.
     """
     _report(locals())
-    if not isinstance(values, dict):
-        values = _set_up_values_obj(
-            values_file=values, values_format=values_format, overrides=overrides
-        )
+    values = _supplement_values(
+        values_src=values_src, values_format=values_format, overrides=overrides, env=env
+    )
     with readable(input_file) as f:
         template_str = f.read()
     template = J2Template(values=values, template_source=template_str)
@@ -290,7 +291,7 @@ def _log_missing_values(missing: List[str]) -> None:
     """
     log.error("Required value(s) not provided:")
     for key in missing:
-        log.error(key)
+        log.error(f"  {key}")
 
 
 def _register_filters(env: Environment) -> Environment:
@@ -327,32 +328,35 @@ def _report(args: dict) -> None:
     dashes()
 
 
-def _set_up_values_obj(
-    values_file: Optional[Path] = None,
+def _supplement_values(
+    values_src: Optional[Union[dict, Path]] = None,
     values_format: Optional[str] = None,
     overrides: Optional[Dict[str, str]] = None,
+    env: bool = False,
 ) -> dict:
     """
-    Collect template-rendering values based on an input file, if given, or otherwise on the shell
-    environment. Apply override values.
+    Optionally supplement values from given source with overrides and/or environment vairables.
 
-    :param values_file: Path to the file supplying values to render the template.
+    :param values_src: Source of values to render the template.
     :param values_format: Format of values when sourced from file.
-    :param overrides: Supplemental override values.
-    :returns: The collected values.
+    :param overrides: Override values.
+    :param env: Supplement values with environment variables?
+    :returns: The final set of template-rendering values.
     """
-    if values_file:
-        if values_format is None:
-            values_format = get_file_format(values_file)
-        values_class = format_to_config(values_format)
-        values: dict = values_class(values_file).data
-        log.debug("Read initial values from %s", values_file)
+    values: dict
+    if isinstance(values_src, Path):
+        values_format = values_format or get_file_format(values_src)
+        values_src_class = format_to_config(values_format)
+        values = values_src_class(values_src).data
+        log.debug("Read initial values from %s", values_src)
     else:
-        values = dict(os.environ)  # Do not modify os.environ: Make a copy.
-        log.debug("Initial values taken from environment")
+        values = values_src or {}
     if overrides:
         values.update(overrides)
-        log.debug("Updated values with overrides: %s", " ".join(overrides))
+        log.debug("Supplemented values with overrides: %s", " ".join(overrides))
+    if env:
+        values.update(os.environ)
+        log.debug("Supplemented values with environment variables")
     return values
 
 
@@ -364,7 +368,7 @@ def _values_needed(undeclared_variables: Set[str]) -> None:
     """
     log.info("Value(s) needed to render this template are:")
     for var in sorted(undeclared_variables):
-        log.info(var)
+        log.info(f"  {var}")
 
 
 def _write_template(output_file: Optional[Path], rendered_template: str) -> str:
