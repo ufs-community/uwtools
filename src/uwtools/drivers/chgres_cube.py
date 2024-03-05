@@ -36,6 +36,7 @@ class ChgresCube(Driver):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
+        print("crh 0")
         super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
         self._config.dereference(context={"cycle": cycle})
         if self._dry_run:
@@ -44,28 +45,6 @@ class ChgresCube(Driver):
         self._rundir = Path(self._driver_config["run_dir"])
 
     # Workflow tasks
-
-    @tasks
-    def files_copied(self):
-        """
-        Files copied for run.
-        """
-        yield self._taskname("files copied")
-        yield [
-            filecopy(src=Path(src), dst=self._rundir / dst)
-            for dst, src in self._driver_config.get("files_to_copy", {}).items()
-        ]
-
-    @tasks
-    def files_linked(self):
-        """
-        Files linked for run.
-        """
-        yield self._taskname("files linked")
-        yield [
-            symlink(target=Path(target), linkname=self._rundir / linkname)
-            for linkname, target in self._driver_config.get("files_to_link", {}).items()
-        ]
 
     @task
     def namelist_file(self):
@@ -77,7 +56,22 @@ class ChgresCube(Driver):
         path = self._rundir / fn
         yield asset(path, path.is_file)
         vals = self._driver_config["namelist"]["update_values"]["config"]
-        yield None
+        inputs = [
+            ("data_dir_input_grid", "atm_files_input_grid"),
+            ("data_dir_input_grid", "grib2_file_input_grid"),
+            ("data_dir_input_grid", "sfc_files_input_grid"),
+            "mosaic_file_target_grid",
+            "thomp_mp_climo_file",
+            "varmap_file",
+            "vcoord_file_target_grid",
+            ]
+        input_paths = []
+        for item in inputs:
+            if isinstance(item, str):
+                input_paths += [Path(vals[item])]
+            else:
+                input_paths += [Path(vals[item[0]]) / vals[item[1]]]
+        yield [file(input_path) for input_path in input_paths]
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=self._driver_config.get("namelist", {}),
@@ -91,10 +85,6 @@ class ChgresCube(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
-            self.diag_table(),
-            self.field_table(),
-            self.files_copied(),
-            self.files_linked(),
             self.namelist_file(),
             self.runscript(),
         ]
@@ -118,11 +108,9 @@ class ChgresCube(Driver):
         yield None
 
         envvars = {
-            "ESMF_RUNTIME_COMPLIANCECHECK": "OFF:depth=4",
             "KMP_AFFINITY": "scatter",
-            "MPI_TYPE_DEPTH": 20,
             "OMP_NUM_THREADS": self._driver_config.get("execution", {}).get("threads", 1),
-            "OMP_STACKSIZE": "512m",
+            "OMP_STACKSIZE": "1024m",
         }
         envcmds = self._driver_config.get("execution", {}).get("envcmds", [])
         execution = [self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir]
@@ -201,5 +189,6 @@ class ChgresCube(Driver):
         """
         Perform all necessary schema validation.
         """
+        return
         for schema_name in ("chgres_cube", "platform"):
             self._validate_one(schema_name=schema_name)

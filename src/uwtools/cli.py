@@ -1,7 +1,7 @@
 """
 Modal CLI.
 """
-
+import logging
 import datetime as dt
 import sys
 from argparse import ArgumentParser as Parser
@@ -50,7 +50,7 @@ def main() -> None:
         setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
-            STR.chgrescube: _dispatch_chgrescube,
+            STR.chgrescube: _dispatch_chgres_cube,
             STR.config: _dispatch_config,
             STR.fv3: _dispatch_fv3,
             STR.rocoto: _dispatch_rocoto,
@@ -747,6 +747,7 @@ def _abort(msg: str) -> None:
     :param msg: The message to print.
     """
     print(msg, file=sys.stderr)
+    log.exception(msg)
     sys.exit(1)
 
 
@@ -862,7 +863,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     checks = {
-        STR.config: _add_subparser_chgres_cube(subparsers),
+        STR.chgrescube: _add_subparser_chgres_cube(subparsers),
         STR.config: _add_subparser_config(subparsers),
         STR.fv3: _add_subparser_fv3(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),
