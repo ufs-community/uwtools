@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Set, Union
 
 from jinja2 import (
     BaseLoader,
+    DebugUndefined,
     Environment,
     FileSystemLoader,
     StrictUndefined,
@@ -143,34 +144,34 @@ def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) ->
 
 
 def render(
-    values: Union[dict, Path],
+    values_src: Optional[Union[dict, Path]] = None,
     values_format: Optional[str] = None,
     input_file: Optional[Path] = None,
     output_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
+    env: bool = False,
     values_needed: bool = False,
+    partial: bool = False,
     dry_run: bool = False,
-) -> bool:
+) -> Optional[str]:
     """
     Check and render a Jinja2 template.
 
-    :param values: Source of values to render the template.
+    :param values_src: Source of values to render the template.
     :param values_format: Format of values when sourced from file.
     :param input_file: Path to read raw Jinja2 template from (None => read stdin).
     :param output_file: Path to write rendered Jinja2 template to (None => write to stdout).
     :param overrides: Supplemental override values.
+    :param env: Supplement values with environment variables?
     :param values_needed: Just report variables needed to render the template?
+    :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
-    :return: Jinja2 template was successfully rendered.
+    :return: The rendered template, or None.
     """
-
-    # Render template.
-
     _report(locals())
-    if not isinstance(values, dict):
-        values = _set_up_values_obj(
-            values_file=values, values_format=values_format, overrides=overrides
-        )
+    values = _supplement_values(
+        values_src=values_src, values_format=values_format, overrides=overrides, env=env
+    )
     with readable(input_file) as f:
         template_str = f.read()
     template = J2Template(values=values, template_source=template_str)
@@ -180,22 +181,38 @@ def render(
     # then return.
 
     if values_needed:
-        return _values_needed(undeclared_variables)
+        _values_needed(undeclared_variables)
+        return None
 
-    # Check for missing values required to render the template. If found, report them and raise an
-    # exception.
+    # If partial rendering has been requested, do a best-effort render. Otherwise, report any
+    # missing values and return an error to the caller.
 
-    missing = [var for var in undeclared_variables if var not in values.keys()]
-    if missing:
-        return _log_missing_values(missing)
+    if partial:
+        rendered = Environment(undefined=DebugUndefined).from_string(template_str).render(values)
+    else:
+        missing = [var for var in undeclared_variables if var not in values.keys()]
+        if missing:
+            _log_missing_values(missing)
+            return None
+        rendered = template.render()
 
-    # In dry-run mode, log the rendered template. Otherwise, write the rendered template.
+    # Log (dry-run mode) or write the rendered template.
 
-    return (
-        _dry_run_template(template.render())
-        if dry_run
-        else _write_template(output_file, template.render())
-    )
+    return _dry_run_template(rendered) if dry_run else _write_template(output_file, rendered)
+
+
+def unrendered(s: str) -> bool:
+    """
+    Does the supplied string contain unrendered Jinja2 variables/expressions?
+
+    :param s: The string to check for unrendered content.
+    :return: ``True`` if unrendered content was found, ``False`` otherwise.
+    """
+    try:
+        Environment(undefined=StrictUndefined).from_string(s).render({})
+        return False
+    except UndefinedError:
+        return True
 
 
 # Private functions
@@ -235,54 +252,46 @@ def _deref_render(val: str, context: dict, local: Optional[dict] = None) -> str:
     """
     Render a Jinja2 variable/expression as part of dereferencing.
 
-    If this function cannot render the value, either because it contains no Jinja2 syntax or because
-    insufficient context is currently available, a debug message will be logged and the original
-    value will be returned unchanged.
+    If the value cannot be rendered, perhaps due to missing values or syntax errors, a debug message
+    will be logged and the original value will be returned unchanged.
 
     :param val: The value potentially containing Jinja2 syntax to render.
     :param context: Values to use when rendering Jinja2 syntax.
     :param local: Local sibling values to use if a match is not found in context.
     :return: The rendered value (potentially unchanged).
     """
+    env = Environment(undefined=StrictUndefined)
+    context = {**(local or {}), **context}
     try:
-        rendered = (
-            _register_filters(Environment(undefined=StrictUndefined))
-            .from_string(val)
-            .render({**(local or {}), **context})
-        )
+        rendered = _register_filters(env).from_string(val).render(context)
         _deref_debug("Rendered", rendered)
     except Exception as e:  # pylint: disable=broad-exception-caught
-        _deref_debug("Rendering failed", str(e))
         rendered = val
+        _deref_debug("Rendering failed", str(e))
     return rendered
 
 
-def _dry_run_template(rendered_template: str) -> bool:
+def _dry_run_template(rendered_template: str) -> str:
     """
     Log the rendered template and then return as successful.
 
     :param rendered_template: A string containing a rendered Jinja2 template.
-    :return: The successful logging of the template.
+    :return: The passed-in rendered-template string.
     """
-
     for line in rendered_template.split("\n"):
         log.info(line)
-    return True
+    return rendered_template
 
 
-def _log_missing_values(missing: List[str]) -> bool:
+def _log_missing_values(missing: List[str]) -> None:
     """
     Log values missing from template and raise an exception.
 
-    :param missing: A list containing the undeclared variables that do not have a corresponding
-        match in values.
-    :return: Unable to successfully render template.
+    :param missing: Variables with no corresponding values.
     """
-
     log.error("Required value(s) not provided:")
     for key in missing:
-        log.error(key)
-    return False
+        log.error(f"  {key}")
 
 
 def _register_filters(env: Environment) -> Environment:
@@ -319,59 +328,57 @@ def _report(args: dict) -> None:
     dashes()
 
 
-def _set_up_values_obj(
-    values_file: Optional[Path] = None,
+def _supplement_values(
+    values_src: Optional[Union[dict, Path]] = None,
     values_format: Optional[str] = None,
     overrides: Optional[Dict[str, str]] = None,
+    env: bool = False,
 ) -> dict:
     """
-    Collect template-rendering values based on an input file, if given, or otherwise on the shell
-    environment. Apply override values.
+    Optionally supplement values from given source with overrides and/or environment vairables.
 
-    :param values_file: Path to the file supplying values to render the template.
+    :param values_src: Source of values to render the template.
     :param values_format: Format of values when sourced from file.
-    :param overrides: Supplemental override values.
-    :returns: The collected values.
+    :param overrides: Override values.
+    :param env: Supplement values with environment variables?
+    :returns: The final set of template-rendering values.
     """
-    if values_file:
-        if values_format is None:
-            values_format = get_file_format(values_file)
-        values_class = format_to_config(values_format)
-        values: dict = values_class(values_file).data
-        log.debug("Read initial values from %s", values_file)
+    values: dict
+    if isinstance(values_src, Path):
+        values_format = values_format or get_file_format(values_src)
+        values_src_class = format_to_config(values_format)
+        values = values_src_class(values_src).data
+        log.debug("Read initial values from %s", values_src)
     else:
-        values = dict(os.environ)  # Do not modify os.environ: Make a copy.
-        log.debug("Initial values taken from environment")
+        values = values_src or {}
     if overrides:
         values.update(overrides)
-        log.debug("Updated values with overrides: %s", " ".join(overrides))
+        log.debug("Supplemented values with overrides: %s", " ".join(overrides))
+    if env:
+        values.update(os.environ)
+        log.debug("Supplemented values with environment variables")
     return values
 
 
-def _values_needed(undeclared_variables: Set[str]) -> bool:
+def _values_needed(undeclared_variables: Set[str]) -> None:
     """
     Log variables needed to render the template.
 
     :param undeclared_variables: A set containing the variables needed to render the template.
-    :return: Successfully logged values needed.
     """
-
-    # If a report of variables required to render the template was requested, make that report and
-    # then return.
     log.info("Value(s) needed to render this template are:")
     for var in sorted(undeclared_variables):
-        log.info(var)
-    return True
+        log.info(f"  {var}")
 
 
-def _write_template(output_file: Optional[Path], rendered_template: str) -> bool:
+def _write_template(output_file: Optional[Path], rendered_template: str) -> str:
     """
     Write the rendered template.
 
     :param output_file: Path to the file to write the rendered Jinja2 template to.
     :param rendered_template: A string containing a rendered Jinja2 template.
-    :return: The successful writing of the rendered template.
+    :return: The passed-in rendered-template string.
     """
     with writable(output_file) as f:
         print(rendered_template, file=f)
-    return True
+    return rendered_template

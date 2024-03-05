@@ -48,6 +48,7 @@ def test_realize():
         "output_format": "fmt2",
         "supplemental_configs": ["path3"],
         "values_needed": True,
+        "total": True,
         "dry_run": True,
     }
     with patch.object(config, "_realize") as _realize:

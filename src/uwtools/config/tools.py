@@ -7,8 +7,9 @@ from typing import Callable, List, Optional, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.jinja2 import unrendered
 from uwtools.config.support import depth, format_to_config, log_and_error
-from uwtools.exceptions import UWError
+from uwtools.exceptions import UWConfigRealizeError, UWError
 from uwtools.logging import MSGWIDTH, log
 from uwtools.utils.file import FORMAT, get_file_format
 
@@ -81,6 +82,7 @@ def realize_config(
     output_format: Optional[str] = None,
     supplemental_configs: Optional[List[Union[dict, Config, Path]]] = None,
     values_needed: bool = False,
+    total: bool = False,
     dry_run: bool = False,
 ) -> dict:
     """
@@ -105,8 +107,10 @@ def realize_config(
     if values_needed:
         _realize_config_values_needed(input_obj)
         return {}
-    output_obj = format_to_config(output_format)
-    output_obj.dump_dict(cfg=input_obj.data, path=output_file)
+    if total and unrendered(str(input_obj)):
+        raise UWConfigRealizeError("Config could not be totally realized")
+    output_class = format_to_config(output_format)
+    output_class.dump_dict(cfg=input_obj.data, path=output_file)
     return input_obj.data
 
 
@@ -251,8 +255,10 @@ def _validate_format_output(input_fmt: str, output_fmt: str) -> None:
     :param output_fmt: Output format.
     :raises: UWError if output format is incompatible.
     """
-    if not input_fmt in (FORMAT.yaml, output_fmt):
-        raise UWError("Output format %s must match input format %s" % (output_fmt, input_fmt))
+    if FORMAT.yaml not in (input_fmt, output_fmt) and input_fmt != output_fmt:
+        raise UWError(
+            "Accepted output formats for input format %s are %s or yaml" % (input_fmt, input_fmt)
+        )
 
 
 def _validate_format_supplemental(
@@ -275,8 +281,10 @@ def _validate_format_supplemental(
         if isinstance(supplemental_cfg, Config)
         else _ensure_format(desc=pre, config=supplemental_cfg)
     )
-    if sc_fmt != config_fmt:
-        raise UWError("%s format %s must match input format %s" % (pre, sc_fmt, config_fmt))
+    if sc_fmt not in (FORMAT.yaml, config_fmt):
+        raise UWError(
+            "%s format %s must be %s or input format %s" % (pre, sc_fmt, FORMAT.yaml, config_fmt)
+        )
 
 
 # Import-time code
@@ -311,7 +319,9 @@ Recognized file extensions are: {extensions}
 :param output_format: Format of the output config.
 :param supplemental_configs: Sources of values used to modify input.
 :param values_needed: Report complete, missing, and template values.
+:param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.
+:raises: UWConfigRealizeError if ``total`` is ``True`` and config cannot be totally realized.
 :return: The realized config (or an empty-dict for no-op modes).
 """.format(
     extensions=", ".join(FORMAT.extensions())

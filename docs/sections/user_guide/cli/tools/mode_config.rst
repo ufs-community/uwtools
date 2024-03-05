@@ -155,7 +155,7 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
    $ uw config realize --help
    usage: uw config realize [-h] [--input-file PATH] [--input-format {ini,nml,sh,yaml}]
                             [--output-file PATH] [--output-format {ini,nml,sh,yaml}]
-                            [--values-needed] [--dry-run] [--quiet] [--verbose]
+                            [--values-needed] [--total] [--dry-run] [--debug] [--quiet] [--verbose]
                             [PATH ...]
 
    Realize config
@@ -173,6 +173,8 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
          Output format
      --values-needed
          Print report of values needed to render template
+     --total
+         Require rendering of all Jinja2 variables/expressions
      --dry-run
          Only log info, making no changes
      --debug
@@ -280,6 +282,32 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
        message: 'Good Night Moon Good Night Moon '
        recipient: Moon
        repeat: 2
+
+* By default, variables/expressions that cannot be rendered are passed through unchanged in the output. For example, config file ``config.yaml`` with contents
+
+  .. code-block:: yaml
+
+     roses: "{{ color1 }}"
+     violets: "{{ color2 }}"
+
+  could normally be partially realized, with ``uw`` exiting with success status, by providing one of the two needed template values:
+
+  .. code-block:: text
+
+     $ color1=red uw config realize --input-file config.yaml --output-format yaml
+     roses: red
+     violets: '{{ color2 }}'
+     $ echo $?
+     0
+
+  Adding the ``--total`` flag, however, requires ``uw`` to totally realize the config, and to exit with error status if it cannot:
+
+  .. code-block:: text
+
+     $ color1=red uw config realize --input-file config.yaml --output-format yaml --total
+     [2024-02-28T23:21:16]    ERROR Config could not be realized. Try again with --values-needed for details.
+     $ echo $?
+     1
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
@@ -434,7 +462,7 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
 .. note:: In recognition of the different sets of value types representable in each config format, ``uw`` supports two format-combination schemes:
 
    1. **Output matches input:** The format of the output config matches that of the input config.
-   2. **Input is YAML:** If the input config is YAML, any output format may be requested. In the worst case, values always have a string representation, but note that, for example, the string representation of a YAML sequence (Python ``list``) in an INI output config may not be useful.
+   2. **YAML:** YAML is accepted as either input or output with any other format. In the worst case, values always have a string representation, but note that, for example, the string representation of a YAML sequence (Python ``list``) in an INI output config may not be useful.
 
    In all cases, any supplemental configs must be in the same format as the input config and must have recognized extensions.
 
@@ -442,8 +470,8 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
 
    .. code-block:: text
 
-      $ uw config realize --input-file b.nml --output-file a.yaml
-      Output format yaml must match input format nml
+      $ uw config realize --input-file b.nml --output-file a.ini
+      Accepted output formats for input format nml are nml or yaml
 
    .. code-block:: text
 

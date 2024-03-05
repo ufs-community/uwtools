@@ -413,6 +413,14 @@ deref: b
     assert actual == expected
 
 
+def test_realize_config_total_fail():
+    with raises(UWConfigError) as e:
+        tools.realize_config(
+            input_config=YAMLConfig({"foo": "{{ bar }}"}), output_format="yaml", total=True
+        )
+    assert str(e.value) == "Config could not be totally realized"
+
+
 def test_realize_config_values_needed_ini(caplog):
     """
     Test that the values_needed flag logs keys completed, keys containing unrendered Jinja2
@@ -645,31 +653,34 @@ def test__realize_config_values_needed_negative_results(caplog, tmp_path):
 @pytest.mark.parametrize("output_fmt", FORMAT.extensions())
 def test__validate_format_output(input_fmt, output_fmt):
     call = lambda: tools._validate_format_output(input_fmt=input_fmt, output_fmt=output_fmt)
-    if input_fmt in (FORMAT.yaml, output_fmt):
+    if FORMAT.yaml in (input_fmt, output_fmt) or input_fmt == output_fmt:
         call()  # no exception raised
     else:
         with raises(UWError) as e:
             call()
-        assert str(e.value) == f"Output format {output_fmt} must match input format {input_fmt}"
+        assert (
+            str(e.value) == "Accepted output formats for input format "
+            f"{input_fmt} are {input_fmt} or yaml"
+        )
 
 
 def test__validate_format_supplemental_fail_obj():
-    config_fmt = FORMAT.yaml
+    config_fmt = FORMAT.ini
     sc = NMLConfig(config={"n": {"k": "v"}})
     with raises(UWError) as e:
         tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
-    assert str(e.value) == "Supplemental config #88 format %s must match input format %s" % (
+    assert str(e.value) == "Supplemental config #88 format %s must be yaml or input format %s" % (
         FORMAT.nml,
         config_fmt,
     )
 
 
 def test__validate_format_supplemental_fail_path():
-    config_fmt = FORMAT.yaml
+    config_fmt = FORMAT.ini
     sc = Path("/path/to/config.nml")
     with raises(UWError) as e:
         tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
-    assert str(e.value) == "Supplemental config #%s format %s must match input format %s" % (
+    assert str(e.value) == "Supplemental config #%s format %s must be yaml or input format %s" % (
         88,
         FORMAT.nml,
         config_fmt,

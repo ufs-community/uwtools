@@ -1,24 +1,28 @@
 """
 API access to uwtools templating logic.
 """
+import os
 from pathlib import Path
 from typing import Dict, Optional, Union
 
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.jinja2 import render as _render
+from uwtools.exceptions import UWTemplateRenderError
 
 
 def render(
-    values: Union[dict, Path],
+    values_src: Optional[Union[dict, Path]] = None,
     values_format: Optional[str] = None,
     input_file: Optional[Path] = None,
     output_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
+    env: bool = False,
     values_needed: bool = False,
+    partial: bool = False,
     dry_run: bool = False,
-) -> bool:
+) -> str:
     """
-    Render a Jinja2 template based on specified values.
+    Render a Jinja2 template to a file, based on specified values.
 
     Primary values used to render the template are taken from the specified file. The format of the
     values source will be deduced from the filename extension, if possible. This can be overridden
@@ -26,26 +30,52 @@ def render(
     primary values source. If no input file is specified, ``stdin`` is read. If no output file is
     specified, ``stdout`` is written to.
 
-    :param values: Source of values to render the template
+    :param values_src: Source of values to render the template
     :param values_format: Format of values when sourced from file
     :param input_file: Path to read raw Jinja2 template from (``None`` or unspecified => read
         ``stdin``)
     :param output_file: Path to write rendered Jinja2 template to (``None`` or unspecified => write
         to ``stdout``)
     :param overrides: Supplemental override values
+    :param env: Supplement values with environment variables?
     :param values_needed: Just report variables needed to render the template?
+    :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
-    :return: ``True`` if Jinja2 template was successfully rendered, ``False`` otherwise
+    :return: The rendered template string
+    :raises: UWTemplateRenderError if template could not be rendered
     """
-    return _render(
-        values=values,
+    result = _render(
+        values_src=values_src,
         values_format=values_format,
         input_file=input_file,
         output_file=output_file,
         overrides=overrides,
+        env=env,
         values_needed=values_needed,
+        partial=partial,
         dry_run=dry_run,
     )
+    if result is None:
+        raise UWTemplateRenderError("Could not render template")
+    return result
+
+
+def render_to_str(  # pylint: disable=unused-argument
+    values_src: Optional[Union[dict, Path]] = None,
+    values_format: Optional[str] = None,
+    input_file: Optional[Path] = None,
+    overrides: Optional[Dict[str, str]] = None,
+    env: bool = False,
+    values_needed: bool = False,
+    partial: bool = False,
+    dry_run: bool = False,
+) -> str:
+    """
+    Render a Jinja2 template to a string, based on specified values.
+
+    See ``render()`` for details on arguments, etc.
+    """
+    return render(**{**locals(), "output_file": Path(os.devnull)})
 
 
 def translate(

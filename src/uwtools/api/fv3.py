@@ -5,8 +5,7 @@ import datetime as dt
 from pathlib import Path
 from typing import Dict, Optional
 
-import iotaa as _iotaa
-
+from uwtools.drivers import support
 from uwtools.drivers.fv3 import FV3
 
 
@@ -30,7 +29,7 @@ def execute(
     :param batch: Submit run to the batch system
     :param dry_run: Do not run forecast, just report what would have been done
     :param graph_file: Write Graphviz DOT output here
-    :return: True if task completes without raising an exception
+    :return: ``True`` if task completes without raising an exception
     """
     obj = FV3(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
     getattr(obj, task)()
@@ -44,13 +43,11 @@ def graph() -> str:
     """
     Returns Graphviz DOT code for the most recently executed task.
     """
-    return _iotaa.graph()
+    return support.graph()
 
 
 def tasks() -> Dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
     """
-    return {
-        task: getattr(FV3, task).__doc__.strip().split("\n")[0] for task in _iotaa.tasknames(FV3)
-    }
+    return support.tasks(FV3)

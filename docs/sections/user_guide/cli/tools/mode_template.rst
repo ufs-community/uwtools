@@ -30,8 +30,8 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 
    $ uw template render --help
    usage: uw template render [-h] [--input-file PATH] [--output-file PATH] [--values-file PATH]
-                             [--values-format {ini,nml,sh,yaml}] [--values-needed] [--dry-run]
-                             [--quiet] [--verbose]
+                             [--values-format {ini,nml,sh,yaml}] [--env] [--values-needed]
+                             [--partial] [--dry-run] [--quiet] [--verbose]
                              [KEY=VALUE ...]
 
    Render a template
@@ -47,12 +47,14 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
          Path to file providing override or interpolation values
      --values-format {ini,nml,sh,yaml}
          Values format
+     --env
+         Use environment variables
      --values-needed
          Print report of values needed to render template
+     --partial
+         Permit partial template rendering
      --dry-run
          Only log info, making no changes
-     --debug
-         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v
@@ -82,8 +84,8 @@ and a YAML file called ``values.yaml`` with the following contents:
 
      $ uw template render --input-file template --values-needed
      [2023-12-18T19:16:08]     INFO Value(s) needed to render this template are:
-     [2023-12-18T19:16:08]     INFO greeting
-     [2023-12-18T19:16:08]     INFO recipient
+     [2023-12-18T19:16:08]     INFO   greeting
+     [2023-12-18T19:16:08]     INFO   recipient
 
 * To render the template to ``stdout``:
 
@@ -133,28 +135,6 @@ and a YAML file called ``values.yaml`` with the following contents:
 
      $ uw template render --input-file template --values-file values.txt --values-format yaml
      Hello, World!
-
-* It is an error to render a template without providing all needed values. For example, with ``recipient: World`` removed from ``values.yaml``:
-
-  .. code-block:: text
-
-     $ uw template render --input-file template --values-file values.yaml
-     [2023-12-18T19:30:05]    ERROR Required value(s) not provided:
-     [2023-12-18T19:30:05]    ERROR recipient
-
-  But values may be supplemented by ``key=value`` command-line arguments. For example:
-
-  .. code-block:: text
-
-     $ uw template render --input-file template --values-file values.yaml recipient=Reader
-     Hello, Reader!
-
-  Such ``key=value`` arguments may also be used to *override* file-based values:
-
-  .. code-block:: text
-
-     $ uw template render --input-file template --values-file values.yaml recipient=Reader greeting="Good day"
-     Good day, Reader!
 
 * To request verbose log output:
 
@@ -206,6 +186,48 @@ and a YAML file called ``values.yaml`` with the following contents:
      [2023-12-18T23:27:04]    DEBUG ---------------------------------------------------------------------
      [2023-12-18T23:27:04]    DEBUG Read initial values from values.yaml
 
+**NB**: The following examples are based on a ``values.yaml`` file with ``recipient: World`` removed.
+
+* It is an error to render a template without providing all needed values.
+
+  .. code-block:: text
+
+   $ uw template render --input-file template --values-file values.yaml
+   [2024-03-02T16:42:48]    ERROR Required value(s) not provided:
+   [2024-03-02T16:42:48]    ERROR   recipient
+   [2024-03-02T16:42:48]    ERROR Template could not be rendered.
+
+  But the ``--partial`` switch may be used to render as much as possible while passing expressions containing missing values through unchanged:
+
+  .. code-block:: text
+
+     $ uw template render --input-file template --values-file values.yaml --partial
+     Hello, {{ recipient }}!
+
+  Values may also be supplemented by ``key=value`` command-line arguments:
+
+  .. code-block:: text
+
+     $ uw template render --input-file template --values-file values.yaml recipient=Reader
+     Hello, Reader!
+
+  The optional ``-env`` switch allows environment variables to be used to supply values:
+
+  .. code-block:: text
+
+     $ export recipient=You
+     $ uw template render --input-file template --values-file values.yaml --env
+     Hello, You!
+
+  Values from ``key=value`` arguments override values from file, and environment variables override both:
+
+  .. code-block:: text
+
+     $ recipient=Sunshine uw template render --input-file template --values-file values.yaml recipient=Reader greeting="Good day" --env
+     Good day, Sunshine!
+
+  Note that ``recipient=Sunshine`` is shell syntax for exporting environment variable ``recipient`` only for the duration of the command that follows. It should not be confused with the two ``key=value`` pairs later on the command line, which are arguments to ``uw``.
+
 * Non-YAML-formatted files may also be used as value sources. For example, ``template``
 
   .. code-block:: jinja
@@ -227,8 +249,6 @@ and a YAML file called ``values.yaml`` with the following contents:
 
      $ uw template render --input-file template --values-file values.nml
      Hello, World!
-
-  Note that ``ini`` and ``nml`` configs are, by definition, depth-2 configs, while ``sh`` configs are depth-1, and ``yaml`` configs have arbitrary depth.
 
 .. _cli_template_translate_examples:
 

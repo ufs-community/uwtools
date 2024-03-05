@@ -19,9 +19,9 @@ import uwtools.drivers.fv3
 import uwtools.drivers.sfc_climo_gen
 from uwtools import cli
 from uwtools.cli import STR
-from uwtools.exceptions import UWError
+from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.logging import log
-from uwtools.tests.support import logged
+from uwtools.tests.support import regex_logged
 from uwtools.utils.file import FORMAT
 
 # Test functions
@@ -29,8 +29,9 @@ from uwtools.utils.file import FORMAT
 
 def test__abort(capsys):
     msg = "Aborting..."
-    with raises(SystemExit):
+    with raises(SystemExit) as e:
         cli._abort(msg)
+    assert e.value.code == 1
     assert msg in capsys.readouterr().err
 
 
@@ -185,18 +186,15 @@ def test__check_template_render_vals_args_noop_explicit_valsfmt():
     assert cli._check_template_render_vals_args(args) == args
 
 
-@pytest.mark.parametrize("flag", (STR.debug, STR.verbose))
-def test__check_verbosity_fail(capsys, flag):
+def test__check_verbosity_fail(capsys):
     log.setLevel(logging.INFO)
-    args = {STR.quiet: True, flag: True}
+    args = {STR.quiet: True, STR.verbose: True}
     with raises(SystemExit):
         cli._check_verbosity(args)
-    assert "--quiet may not be used with --debug or --verbose" in capsys.readouterr().err
+    assert "--quiet may not be used with --verbose" in capsys.readouterr().err
 
 
-@pytest.mark.parametrize(
-    "flags", ([STR.debug], [STR.quiet], [STR.verbose], [STR.debug, STR.verbose])
-)
+@pytest.mark.parametrize("flags", ([STR.quiet], [STR.verbose]))
 def test__check_verbosity_ok(flags):
     args = {flag: True for flag in flags}
     assert cli._check_verbosity(args) == args
@@ -243,7 +241,8 @@ def test__dispatch_config_realize():
         STR.outfmt: 4,
         STR.suppfiles: 5,
         STR.valsneeded: 6,
-        STR.dryrun: 7,
+        STR.total: 7,
+        STR.dryrun: 8,
     }
     with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
@@ -254,8 +253,29 @@ def test__dispatch_config_realize():
         output_format=4,
         supplemental_configs=5,
         values_needed=6,
-        dry_run=7,
+        total=7,
+        dry_run=8,
     )
+
+
+def test__dispatch_config_realize_fail(caplog):
+    log.setLevel(logging.ERROR)
+    args = {
+        x: None
+        for x in (
+            STR.infile,
+            STR.infmt,
+            STR.outfile,
+            STR.outfmt,
+            STR.suppfiles,
+            STR.valsneeded,
+            STR.total,
+            STR.dryrun,
+        )
+    }
+    with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
+        assert cli._dispatch_config_realize(args) is False
+    assert regex_logged(caplog, "Config could not be realized")
 
 
 def test__dispatch_config_realize_no_optional():
@@ -266,6 +286,7 @@ def test__dispatch_config_realize_no_optional():
         STR.outfmt: None,
         STR.suppfiles: ["/foo.vals"],
         STR.valsneeded: False,
+        STR.total: False,
         STR.dryrun: False,
     }
     with patch.object(cli.uwtools.api.config, "realize") as realize:
@@ -277,6 +298,7 @@ def test__dispatch_config_realize_no_optional():
         output_format=None,
         supplemental_configs=["/foo.vals"],
         values_needed=False,
+        total=False,
         dry_run=False,
     )
 
@@ -376,6 +398,23 @@ def test__dispatch_template(params):
     func.assert_called_once_with(args)
 
 
+@pytest.mark.parametrize("valsneeded", [False, True])
+def test__dispatch_template_render_fail(valsneeded):
+    args = {
+        STR.infile: 1,
+        STR.outfile: 2,
+        STR.valsfile: 3,
+        STR.valsfmt: 4,
+        STR.keyvalpairs: ["foo=88", "bar=99"],
+        STR.env: 5,
+        STR.valsneeded: valsneeded,
+        STR.partial: 7,
+        STR.dryrun: 8,
+    }
+    with patch.object(uwtools.api.template, "render", side_effect=UWTemplateRenderError):
+        assert cli._dispatch_template_render(args) is valsneeded
+
+
 def test__dispatch_template_render_no_optional():
     args: dict = {
         STR.infile: None,
@@ -383,7 +422,9 @@ def test__dispatch_template_render_no_optional():
         STR.valsfile: None,
         STR.valsfmt: None,
         STR.keyvalpairs: [],
+        STR.env: False,
         STR.valsneeded: False,
+        STR.partial: False,
         STR.dryrun: False,
     }
     with patch.object(uwtools.api.template, "render") as render:
@@ -391,10 +432,12 @@ def test__dispatch_template_render_no_optional():
     render.assert_called_once_with(
         input_file=None,
         output_file=None,
-        values=None,
+        values_src=None,
         values_format=None,
         overrides={},
+        env=False,
         values_needed=False,
+        partial=False,
         dry_run=False,
     )
 
@@ -406,19 +449,23 @@ def test__dispatch_template_render_yaml():
         STR.valsfile: 3,
         STR.valsfmt: 4,
         STR.keyvalpairs: ["foo=88", "bar=99"],
+        STR.env: 5,
         STR.valsneeded: 6,
-        STR.dryrun: 7,
+        STR.partial: 7,
+        STR.dryrun: 8,
     }
     with patch.object(uwtools.api.template, "render") as render:
         cli._dispatch_template_render(args)
     render.assert_called_once_with(
         input_file=1,
         output_file=2,
-        values=3,
+        values_src=3,
         values_format=4,
         overrides={"foo": "88", "bar": "99"},
+        env=5,
         values_needed=6,
-        dry_run=7,
+        partial=7,
+        dry_run=8,
     )
 
 
@@ -450,24 +497,11 @@ def test__dispatch_template_translate_no_optional():
     )
 
 
-def test_main_debug_logs_stacktrace(caplog):
-    log.setLevel(logging.DEBUG)
-    msg = "Test failed intentionally"
-    with patch.object(cli, "_parse_args", side_effect=Exception(msg)):
-        with patch.object(sys, "argv", cli._switch(STR.debug)):
-            with raises(SystemExit):
-                cli.main()
-                assert logged(caplog, "Traceback (most recent call last):")
-
-
-@pytest.mark.parametrize("debug", [False, True])
 @pytest.mark.parametrize("quiet", [False, True])
 @pytest.mark.parametrize("verbose", [False, True])
-def test_main_fail_checks(capsys, debug, quiet, verbose):
+def test_main_fail_checks(capsys, quiet, verbose):
     # Using mode 'template render' for testing.
     raw_args = ["testing", STR.template, STR.render]
-    if debug:
-        raw_args.append(cli._switch(STR.debug))
     if quiet:
         raw_args.append(cli._switch(STR.quiet))
     if verbose:
@@ -476,11 +510,9 @@ def test_main_fail_checks(capsys, debug, quiet, verbose):
         with patch.object(cli, "_dispatch_template", return_value=True):
             with raises(SystemExit) as e:
                 cli.main()
-            if quiet and (debug or verbose):
+            if quiet and verbose:
                 assert e.value.code == 1
-                assert (
-                    "--quiet may not be used with --debug or --verbose" in capsys.readouterr().err
-                )
+                assert "--quiet may not be used with --verbose" in capsys.readouterr().err
             else:
                 assert e.value.code == 0
 
@@ -497,12 +529,28 @@ def test_main_fail_dispatch(vals):
             assert e.value.code == exit_status
 
 
-def test_main_raises_exception(capsys):
-    msg = "Test failed intentionally"
-    with patch.object(cli, "_parse_args", side_effect=Exception(msg)):
-        with raises(SystemExit):
-            cli.main()
-    assert msg in capsys.readouterr().err
+def test_main_fail_exception_abort():
+    # Mock setup_logging() to raise a UWError in main() before logging is configured, which triggers
+    # a call to _abort().
+    msg = "Catastrophe"
+    with patch.object(cli, "setup_logging", side_effect=UWError(msg)):
+        with patch.object(cli, "_abort", side_effect=SystemExit) as _abort:
+            with raises(SystemExit):
+                cli.main()
+        _abort.assert_called_once_with(msg)
+
+
+def test_main_fail_exception_log():
+    # Mock _dispatch_template() to raise a UWError in main() after logging is configured, which logs
+    # an error message and exists with exit status.
+    msg = "Catastrophe"
+    with patch.object(cli, "_dispatch_template", side_effect=UWError(msg)):
+        with patch.object(cli, "log") as log:
+            with patch.object(sys, "argv", ["uw", "template", "render"]):
+                with raises(SystemExit) as e:
+                    cli.main()
+                assert e.value.code == 1
+            assert log.called_once_with(msg)
 
 
 def test__parse_args():

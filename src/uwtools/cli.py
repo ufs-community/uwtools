@@ -11,7 +11,7 @@ from argparse import _SubParsersAction as Subparsers
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, NoReturn, Tuple
 
 import uwtools.api.chgres_cube
 import uwtools.api.config
@@ -21,10 +21,11 @@ import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.config.jinja2
 import uwtools.rocoto
+from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.logging import log, setup_logging
 from uwtools.utils.file import FORMAT, get_file_format
 
-FORMATS = list(FORMAT.formats().keys())
+FORMATS = FORMAT.extensions()
 TITLE_REQ_ARG = "Required arguments"
 
 Args = Dict[str, Any]
@@ -42,12 +43,15 @@ def main() -> None:
     # defined checks for the appropriate [sub]mode. Reconfigure logging after quiet/verbose choices
     # are known, then dispatch to the [sub]mode handler.
 
-    setup_logging(quiet=True)
     try:
+        setup_logging(quiet=True)
         args, checks = _parse_args(sys.argv[1:])
         for check in checks[args[STR.mode]][args[STR.action]]:
             check(args)
         setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
+    except UWError as e:
+        _abort(str(e))
+    try:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
             STR.chgrescube: _dispatch_chgres_cube,
@@ -58,10 +62,9 @@ def main() -> None:
             STR.template: _dispatch_template,
         }
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
-    except Exception as e:  # pylint: disable=broad-exception-caught
-        if _switch(STR.debug) in sys.argv:
-            log.exception(str(e))
-        _abort(str(e))
+    except UWError as e:
+        log.error(str(e))
+        sys.exit(1)
 
 
 # Mode chgrescube
@@ -179,6 +182,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=FORMATS)
     _add_arg_values_needed(optional)
+    _add_arg_total(optional)
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_supplemental_files(optional)
@@ -235,15 +239,23 @@ def _dispatch_config_realize(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.config.realize(
-        input_config=args[STR.infile],
-        input_format=args[STR.infmt],
-        output_file=args[STR.outfile],
-        output_format=args[STR.outfmt],
-        supplemental_configs=args[STR.suppfiles],
-        values_needed=args[STR.valsneeded],
-        dry_run=args[STR.dryrun],
-    )
+    try:
+        uwtools.api.config.realize(
+            input_config=args[STR.infile],
+            input_format=args[STR.infmt],
+            output_file=args[STR.outfile],
+            output_format=args[STR.outfmt],
+            supplemental_configs=args[STR.suppfiles],
+            values_needed=args[STR.valsneeded],
+            total=args[STR.total],
+            dry_run=args[STR.dryrun],
+        )
+    except UWConfigRealizeError:
+        log.error(
+            "Config could not be realized. Try with %s for details." % _switch(STR.valsneeded)
+        )
+        return False
+    return True
 
 
 def _dispatch_config_validate(args: Args) -> bool:
@@ -484,7 +496,9 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_file(optional)
     _add_arg_values_file(optional)
     _add_arg_values_format(optional, choices=FORMATS)
+    _add_arg_env(optional)
     _add_arg_values_needed(optional)
+    _add_arg_partial(optional)
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_key_eq_val_pairs(optional)
@@ -511,15 +525,24 @@ def _dispatch_template_render(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.template.render(
-        values=args[STR.valsfile],
-        values_format=args[STR.valsfmt],
-        input_file=args[STR.infile],
-        output_file=args[STR.outfile],
-        overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
-        values_needed=args[STR.valsneeded],
-        dry_run=args[STR.dryrun],
-    )
+    try:
+        uwtools.api.template.render(
+            values_src=args[STR.valsfile],
+            values_format=args[STR.valsfmt],
+            input_file=args[STR.infile],
+            output_file=args[STR.outfile],
+            overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
+            env=args[STR.env],
+            values_needed=args[STR.valsneeded],
+            partial=args[STR.partial],
+            dry_run=args[STR.dryrun],
+        )
+    except UWTemplateRenderError:
+        if args[STR.valsneeded]:
+            return True
+        log.error("Template could not be rendered.")
+        return False
+    return True
 
 
 def _dispatch_template_translate(args: Args) -> bool:
@@ -568,21 +591,19 @@ def _add_arg_cycle(group: Group) -> None:
     )
 
 
-def _add_arg_debug(group: Group) -> None:
-    group.add_argument(
-        _switch(STR.debug),
-        action="store_true",
-        help="""
-        Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
-        """,
-    )
-
-
 def _add_arg_dry_run(group: Group) -> None:
     group.add_argument(
         _switch(STR.dryrun),
         action="store_true",
         help="Only log info, making no changes",
+    )
+
+
+def _add_arg_env(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.env),
+        action="store_true",
+        help="Use environment variables",
     )
 
 
@@ -668,6 +689,14 @@ def _add_arg_output_format(group: Group, choices: List[str], required: bool = Fa
     )
 
 
+def _add_arg_partial(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.partial),
+        action="store_true",
+        help="Permit partial template rendering",
+    )
+
+
 def _add_arg_quiet(group: Group) -> None:
     group.add_argument(
         _switch(STR.quiet),
@@ -694,6 +723,14 @@ def _add_arg_supplemental_files(group: Group) -> None:
         metavar="PATH",
         nargs="*",
         type=Path,
+    )
+
+
+def _add_arg_total(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.total),
+        action="store_true",
+        help="Require rendering of all Jinja2 variables/expressions",
     )
 
 
@@ -740,7 +777,7 @@ def _add_arg_verbose(group: Group) -> None:
 # Support
 
 
-def _abort(msg: str) -> None:
+def _abort(msg: str) -> NoReturn:
     """
     Exit with an informative message and error status.
 
@@ -753,12 +790,11 @@ def _abort(msg: str) -> None:
 
 def _add_args_verbosity(group: Group) -> ActionChecks:
     """
-    Add debug, quiet, and verbose arguments.
+    Add quiet and verbose arguments.
 
     :param group: The group to add the arguments to.
     :return: Check for mutual exclusivity of quiet/verbose arguments.
     """
-    _add_arg_debug(group)
     _add_arg_quiet(group)
     _add_arg_verbose(group)
     return [_check_verbosity]
@@ -824,11 +860,8 @@ def _check_template_render_vals_args(args: Args) -> Args:
 
 
 def _check_verbosity(args: Args) -> Args:
-    if args.get(STR.quiet) and (args.get(STR.debug) or args.get(STR.verbose)):
-        _abort(
-            "%s may not be used with %s or %s"
-            % (_switch(STR.quiet), _switch(STR.debug), _switch(STR.verbose))
-        )
+    if args.get(STR.quiet) and args.get(STR.verbose):
+        _abort("%s may not be used with %s" % (_switch(STR.quiet), _switch(STR.verbose)))
     return args
 
 
@@ -896,8 +929,8 @@ class STR:
     compare: str = "compare"
     config: str = "config"
     cycle: str = "cycle"
-    debug: str = "debug"
     dryrun: str = "dry_run"
+    env: str = "env"
     file1fmt: str = "file_1_format"
     file1path: str = "file_1_path"
     file2fmt: str = "file_2_format"
@@ -912,6 +945,7 @@ class STR:
     model: str = "model"
     outfile: str = "output_file"
     outfmt: str = "output_format"
+    partial: str = "partial"
     quiet: str = "quiet"
     realize: str = "realize"
     render: str = "render"
@@ -923,6 +957,7 @@ class STR:
     task: str = "task"
     tasks: str = "tasks"
     template: str = "template"
+    total: str = "total"
     translate: str = "translate"
     validate: str = "validate"
     valsfile: str = "values_file"
