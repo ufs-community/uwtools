@@ -33,7 +33,6 @@ def execute(
     :return: True if task completes without raising an exception
     """
     obj = ChgresCube(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
-    print("crh")
     getattr(obj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:

@@ -17,7 +17,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.utils.processing import execute
-from uwtools.utils.tasks import filecopy, symlink
+from uwtools.utils.tasks import file, filecopy, symlink
 
 
 class ChgresCube(Driver):
@@ -36,7 +36,6 @@ class ChgresCube(Driver):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        print("crh 0")
         super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
         self._config.dereference(context={"cycle": cycle})
         if self._dry_run:
@@ -61,7 +60,6 @@ class ChgresCube(Driver):
             ("data_dir_input_grid", "grib2_file_input_grid"),
             ("data_dir_input_grid", "sfc_files_input_grid"),
             "mosaic_file_target_grid",
-            "thomp_mp_climo_file",
             "varmap_file",
             "vcoord_file_target_grid",
             ]
@@ -71,7 +69,8 @@ class ChgresCube(Driver):
                 input_paths += [Path(vals[item])]
             else:
                 input_paths += [Path(vals[item[0]]) / vals[item[1]]]
-        yield [file(input_path) for input_path in input_paths]
+        #yield [file(input_path) for input_path in input_paths]
+        yield None
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=self._driver_config.get("namelist", {}),
