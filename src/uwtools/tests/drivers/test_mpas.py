@@ -79,21 +79,6 @@ def test_MPAS_boundary_files(driverobj):
     assert all(link.is_symlink() for link in links)
 
 
-def test_MPAS_diag_table(driverobj):
-    src = driverobj._rundir / "diag_table.in"
-    src.touch()
-    driverobj._driver_config["diag_table"] = src
-    dst = driverobj._rundir / "diag_table"
-    assert not dst.is_file()
-    driverobj.diag_table()
-    assert dst.is_file()
-
-
-def test_MPAS_diag_table_warn(caplog, driverobj):
-    driverobj.diag_table()
-    assert logged(caplog, "No 'diag_table' defined in config")
-
-
 def test_MPAS_field_table(driverobj):
     src = driverobj._rundir / "field_table.in"
     with open(src, "w", encoding="utf-8") as f:
@@ -153,7 +138,6 @@ def test_MPAS_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
         boundary_files=D,
-        diag_table=D,
         field_table=D,
         files_copied=D,
         files_linked=D,

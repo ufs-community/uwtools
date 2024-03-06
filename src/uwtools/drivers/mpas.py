@@ -159,7 +159,6 @@ class MPAS(Driver):
         yield self._taskname("provisioned run directory")
         yield [
             self.boundary_files(),
-            self.diag_table(),
             self.field_table(),
             self.files_copied(),
             self.files_linked(),
