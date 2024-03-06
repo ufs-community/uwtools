@@ -6,18 +6,14 @@ import os
 import stat
 from datetime import datetime
 from pathlib import Path
-from shutil import copy
 from typing import Any, Dict
 
 from iotaa import asset, dryrun, task, tasks
 
-from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
-from uwtools.logging import log
 from uwtools.utils.processing import execute
-from uwtools.utils.tasks import file, filecopy, symlink
+from uwtools.utils.tasks import file
 
 
 class ChgresCube(Driver):
@@ -62,7 +58,7 @@ class ChgresCube(Driver):
             "mosaic_file_target_grid",
             "varmap_file",
             "vcoord_file_target_grid",
-            ]
+        ]
         input_paths = []
         for item in inputs:
             if isinstance(item, str):
@@ -187,6 +183,5 @@ class ChgresCube(Driver):
         """
         Perform all necessary schema validation.
         """
-        return
         for schema_name in ("chgres_cube", "platform"):
             self._validate_one(schema_name=schema_name)

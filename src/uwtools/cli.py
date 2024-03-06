@@ -1,7 +1,6 @@
 """
 Modal CLI.
 """
-import logging
 import datetime as dt
 import sys
 from argparse import ArgumentParser as Parser
@@ -69,6 +68,7 @@ def main() -> None:
 
 # Mode chgrescube
 
+
 def _add_subparser_chgres_cube(subparsers: Subparsers) -> ModeChecks:
     """
     Subparser for mode: chgres_cube
@@ -84,7 +84,9 @@ def _add_subparser_chgres_cube(subparsers: Subparsers) -> ModeChecks:
     }
 
 
-def _add_subparser_chgres_cube_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+def _add_subparser_chgres_cube_task(
+    subparsers: Subparsers, task: str, helpmsg: str
+) -> ActionChecks:
     """
     Subparser for mode: chgres_cube <task>
 

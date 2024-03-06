@@ -52,5 +52,6 @@ def tasks() -> Dict[str, str]:
     Returns a mapping from task names to their one-line descriptions.
     """
     return {
-        task: getattr(ChgresCube, task).__doc__.strip().split("\n")[0] for task in _iotaa.tasknames(ChgresCube)
+        task: getattr(ChgresCube, task).__doc__.strip().split("\n")[0]
+        for task in _iotaa.tasknames(ChgresCube)
     }

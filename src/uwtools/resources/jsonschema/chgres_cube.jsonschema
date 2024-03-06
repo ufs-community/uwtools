@@ -36,7 +36,16 @@
                     ]
                   },
                   "properties": {
+                    "atm_core_files_input_grid": {
+                      "type": "string"
+                    },
                     "atm_files_input_grid": {
+                      "type": "string"
+                    },
+                    "atm_tracer_files_input_grid": {
+                      "type": "string"
+                    },
+                    "atm_weight_file": {
                       "type": "string"
                     },
                     "convert_atm": {
@@ -57,18 +66,21 @@
                     "cycle_mon": {
                       "type": "integer"
                     },
+                    "cycle_year": {
+                      "type": "integer"
+                    },
                     "data_dir_input_grid": {
                       "type": "string"
                     },
                     "external_model": {
                       "enum": [
-                        "GSMGFS",
-                        "FV3GFS",
                         "GFS",
-                        "NAM",
                         "HRRR",
-                        "RAP"
-                      ]
+                        "NAM",
+                        "RAP",
+                        "UKMET"
+                      ],
+                      "type": "string"
                     },
                     "fix_dir_target_grid": {
                       "type": "string"
@@ -87,11 +99,15 @@
                     },
                     "input_type": {
                       "enum": [
-                        "gfs_gaussian_nemsio",
-                        "grib2",
+                        "history",
+                        "gaussian_nemsio",
                         "gaussian_netcdf",
-                        "gaussian_nemsio"
-                      ]
+                        "gfs_gaussian_nemsio",
+                        "gfs_sigio",
+                        "grib2",
+                        "restart"
+                      ],
+                      "type": "string"
                     },
                     "lai_from_climo": {
                       "type": "boolean"
@@ -99,13 +115,25 @@
                     "minmax_vgfrc_from_climo": {
                       "type": "boolean"
                     },
+                    "mosaic_file_input_grid": {
+                      "type": "string"
+                    },
                     "mosaic_file_target_grid": {
-                      "type": ""string"
+                      "type": "string"
                     },
                     "nsoill_out": {
                       "type": "integer"
                     },
+                    "nst_files_input_grid": {
+                      "type": "string"
+                    },
+                    "orog_dir_input_grid": {
+                      "type": "string"
+                    },
                     "orog_dir_target_grid": {
+                      "type": "string"
+                    },
+                    "orog_files_input_grid": {
                       "type": "string"
                     },
                     "orog_files_target_grid": {
@@ -143,6 +171,12 @@
                     },
                     "vgtyp_from_climo": {
                       "type": "boolean"
+                    },
+                    "wam_cold_start": {
+                      "type": "boolean"
+                    },
+                    "wam_parm_file": {
+                      "type": "string"
                     }
                   },
                   "type": "object"
