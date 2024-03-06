@@ -12,7 +12,6 @@ import yaml
 from pytest import fixture
 
 from uwtools.drivers import mpas
-from uwtools.tests.support import logged
 
 # Fixtures
 

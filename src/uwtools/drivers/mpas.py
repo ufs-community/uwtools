@@ -6,7 +6,6 @@ import os
 import stat
 from datetime import datetime
 from pathlib import Path
-from shutil import copy
 from typing import Any, Dict
 
 from iotaa import asset, dryrun, task, tasks
@@ -15,7 +14,6 @@ from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
-from uwtools.logging import log
 from uwtools.utils.processing import execute
 from uwtools.utils.tasks import filecopy, symlink
 
@@ -64,22 +62,6 @@ class MPAS(Driver):
                 )
                 symlinks[target] = linkname
         yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
-
-    @task
-    def diag_table(self):
-        """
-        The diag_table file.
-        """
-        fn = "diag_table"
-        yield self._taskname(fn)
-        path = self._rundir / fn
-        yield asset(path, path.is_file)
-        yield None
-        if src := self._driver_config.get(fn):
-            path.parent.mkdir(parents=True, exist_ok=True)
-            copy(src=src, dst=path)
-        else:
-            log.warning("No '%s' defined in config", fn)
 
     @task
     def field_table(self):
