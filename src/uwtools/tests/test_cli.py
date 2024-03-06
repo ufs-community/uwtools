@@ -12,10 +12,12 @@ from pytest import fixture, raises
 
 import uwtools.api.config
 import uwtools.api.fv3
+import uwtools.api.mpas
 import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.drivers.fv3
+import uwtools.drivers.mpas
 import uwtools.drivers.sfc_climo_gen
 from uwtools import cli
 from uwtools.cli import STR
@@ -58,6 +60,23 @@ def test__add_subparser_config_validate(subparsers):
 def test__add_subparser_fv3(subparsers):
     cli._add_subparser_fv3(subparsers)
     assert actions(subparsers.choices[STR.fv3]) == [
+        "boundary_files",
+        "diag_table",
+        "field_table",
+        "files_copied",
+        "files_linked",
+        "model_configure",
+        "namelist_file",
+        "provisioned_run_directory",
+        "restart_directory",
+        "run",
+        "runscript",
+    ]
+
+
+def test__add_subparser_mpas(subparsers):
+    cli._add_subparser_mpas(subparsers)
+    assert actions(subparsers.choices[STR.mpas]) == [
         "boundary_files",
         "diag_table",
         "field_table",
@@ -322,6 +341,19 @@ def test__dispatch_fv3():
     }
     with patch.object(uwtools.api.fv3, "execute") as execute:
         cli._dispatch_fv3({**args, "action": "foo"})
+    execute.assert_called_once_with(**{**args, "task": "foo"})
+
+
+def test__dispatch_mpas():
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "cycle": dt.datetime.now(),
+        "dry_run": False,
+        "graph_file": None,
+    }
+    with patch.object(uwtools.api.mpas, "execute") as execute:
+        cli._dispatch_mpas({**args, "action": "foo"})
     execute.assert_called_once_with(**{**args, "task": "foo"})
 
 
