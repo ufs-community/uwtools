@@ -78,6 +78,7 @@ def test__add_subparser_mpas(subparsers):
     cli._add_subparser_mpas(subparsers)
     assert actions(subparsers.choices[STR.mpas]) == [
         "boundary_files",
+        "field_table",
         "files_copied",
         "files_linked",
         "model_configure",

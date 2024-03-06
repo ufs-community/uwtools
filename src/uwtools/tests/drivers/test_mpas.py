@@ -77,6 +77,16 @@ def test_MPAS_boundary_files(driverobj):
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
 
+def test_MPAS_field_table(driverobj):
+    src = driverobj._rundir / "field_table.in"
+    with open(src, "w", encoding="utf-8") as f:
+        yaml.dump({}, f)
+    dst = driverobj._rundir / "field_table"
+    assert not dst.is_file()
+    driverobj._driver_config["field_table"] = {"base_file": src}
+    driverobj.field_table()
+    assert dst.is_file()
+
 
 @pytest.mark.parametrize(
     "key,task,test",
@@ -126,6 +136,7 @@ def test_MPAS_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
         boundary_files=D,
+        field_table=D,
         files_copied=D,
         files_linked=D,
         model_configure=D,
