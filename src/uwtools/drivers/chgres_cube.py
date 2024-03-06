@@ -69,8 +69,7 @@ class ChgresCube(Driver):
                 input_paths += [Path(vals[item])]
             else:
                 input_paths += [Path(vals[item[0]]) / vals[item[1]]]
-        #yield [file(input_path) for input_path in input_paths]
-        yield None
+        yield [file(input_path) for input_path in input_paths]
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=self._driver_config.get("namelist", {}),
