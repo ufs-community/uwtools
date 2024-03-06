@@ -3,7 +3,7 @@ API access to uwtools templating logic.
 """
 import os
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.jinja2 import render as _render
@@ -17,7 +17,7 @@ def render(
     output_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
     env: bool = False,
-    searchpath: Optional[str] = None,
+    searchpath: Optional[List[str]] = None,
     values_needed: bool = False,
     partial: bool = False,
     dry_run: bool = False,
@@ -39,7 +39,7 @@ def render(
         to ``stdout``)
     :param overrides: Supplemental override values
     :param env: Supplement values with environment variables?
-    :param searchpath: Colon-separated paths to search for extra templates
+    :param searchpath: Paths to search for extra templates
     :param values_needed: Just report variables needed to render the template?
     :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
@@ -69,7 +69,7 @@ def render_to_str(  # pylint: disable=unused-argument
     input_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
     env: bool = False,
-    searchpath: Optional[str] = None,
+    searchpath: Optional[List[str]] = None,
     values_needed: bool = False,
     partial: bool = False,
     dry_run: bool = False,

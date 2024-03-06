@@ -507,12 +507,12 @@ class Test_Jinja2Template:
     def test_searchpath_file_one_path(self, searchpath_assets):
         # If a search path is specified, it will suppress use of the default path:
         a = searchpath_assets
-        assert J2Template(values={}, template_source=a.t1, searchpath=f"{a.d1}").render() == "2"
+        assert J2Template(values={}, template_source=a.t1, searchpath=[a.d1]).render() == "2"
 
     def test_searchpath_file_two_paths(self, searchpath_assets):
         # Multiple search paths can be specified:
         a = searchpath_assets
-        result = J2Template(values={}, template_source=a.t2, searchpath=f"{a.d1}:{a.d2}").render()
+        result = J2Template(values={}, template_source=a.t2, searchpath=[a.d1, a.d2]).render()
         assert result == "23"
 
     def test_searchpath_stdin_default(self, searchpath_assets):
@@ -528,4 +528,4 @@ class Test_Jinja2Template:
         a = searchpath_assets
         with patch.object(jinja2, "readable") as readable:
             readable.return_value.__enter__.return_value = StringIO(a.s1)
-            assert J2Template(values={}, searchpath=f"{a.d1}").render() == "2"
+            assert J2Template(values={}, searchpath=[a.d1]).render() == "2"

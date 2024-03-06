@@ -26,7 +26,7 @@ class J2Template:
         self,
         values: dict,
         template_source: Optional[Union[str, Path]] = None,
-        searchpath: Optional[str] = None,
+        searchpath: Optional[List[str]] = None,
     ) -> None:
         """
         :param values: Values needed to render the provided template.
@@ -38,7 +38,7 @@ class J2Template:
         self._template_source = template_source
         self._j2env = Environment(
             loader=FileSystemLoader(
-                searchpath=searchpath.split(":")
+                searchpath=searchpath
                 if searchpath
                 else self._template_source.parent
                 if isinstance(self._template_source, Path)
@@ -139,7 +139,7 @@ def render(
     output_file: Optional[Path] = None,
     overrides: Optional[Dict[str, str]] = None,
     env: bool = False,
-    searchpath: Optional[str] = None,
+    searchpath: Optional[List[str]] = None,
     values_needed: bool = False,
     partial: bool = False,
     dry_run: bool = False,
@@ -153,7 +153,7 @@ def render(
     :param output_file: Path to write rendered Jinja2 template to (None => write to stdout).
     :param overrides: Supplemental override values.
     :param env: Supplement values with environment variables?
-    :param searchpath: Colon-separated paths to search for extra templates.
+    :param searchpath: Paths to search for extra templates.
     :param values_needed: Just report variables needed to render the template?
     :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?

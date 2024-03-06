@@ -669,7 +669,7 @@ def _add_arg_search_path(group: Group) -> None:
         help="Colon-separated paths to search for extra templates",
         metavar="PATH[:PATH:...]",
         required=False,
-        type=str,
+        type=lambda s: s.split(":"),
     )
 
 
