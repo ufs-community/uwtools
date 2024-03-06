@@ -10,7 +10,6 @@ from typing import Any, Dict
 
 from iotaa import asset, dryrun, task, tasks
 
-from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
@@ -62,22 +61,6 @@ class MPAS(Driver):
                 )
                 symlinks[target] = linkname
         yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
-
-    @task
-    def field_table(self):
-        """
-        The field_table file.
-        """
-        fn = "field_table"
-        yield self._taskname(fn)
-        path = self._rundir / fn
-        yield asset(path, path.is_file)
-        yield None
-        self._create_user_updated_config(
-            config_class=FieldTableConfig,
-            config_values=self._driver_config["field_table"],
-            path=path,
-        )
 
     @tasks
     def files_copied(self):
@@ -141,7 +124,6 @@ class MPAS(Driver):
         yield self._taskname("provisioned run directory")
         yield [
             self.boundary_files(),
-            self.field_table(),
             self.files_copied(),
             self.files_linked(),
             self.model_configure(),
