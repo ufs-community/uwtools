@@ -35,6 +35,44 @@ class Driver(ABC):
         self._dry_run = dry_run
         self._batch = batch
 
+    # Workflow tasks
+
+    @tasks
+    def run(self):
+        """
+        A run.
+        """
+        yield self._taskname("run")
+        yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
+
+
+    @task
+    def _run_via_batch_submission(self):
+        """
+        A run executed via the batch system.
+        """
+        yield self._taskname("run via batch submission")
+        path = Path("%s.submit" % self._runscript_path)
+        yield asset(path, path.is_file)
+        yield self.provisioned_run_directory()
+        self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
+
+    @task
+    def _run_via_local_execution(self):
+        """
+        A run executed directly on the local system.
+        """
+        yield self._taskname("run via local execution")
+        path = self._rundir / "done"
+        yield asset(path, path.is_file)
+        yield self.provisioned_run_directory()
+        cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
+        execute(cmd=cmd, cwd=self._rundir, log_output=True)
+
+
+    # Private helper methods
+
+
     @staticmethod
     def _create_user_updated_config(
         config_class: Type[Config], config_values: dict, path: Path
