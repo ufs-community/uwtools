@@ -11,6 +11,7 @@ from iotaa import asset, dryrun, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
+from uwtools.strings import STR
 from uwtools.utils.processing import execute
 from uwtools.utils.tasks import file
 
@@ -19,6 +20,8 @@ class SfcClimoGen(Driver):
     """
     A driver for sfc_climo_gen.
     """
+
+    _driver_name = STR.sfcclimogen
 
     def __init__(self, config_file: Path, dry_run: bool = False, batch: bool = False):
         """

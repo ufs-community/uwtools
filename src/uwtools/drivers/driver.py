@@ -45,7 +45,6 @@ class Driver(ABC):
         yield self._taskname("run")
         yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
 
-
     @task
     def _run_via_batch_submission(self):
         """
@@ -69,9 +68,7 @@ class Driver(ABC):
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
         execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
-
     # Private helper methods
-
 
     @staticmethod
     def _create_user_updated_config(
@@ -96,10 +93,18 @@ class Driver(ABC):
         log.debug(f"Wrote config to {path}")
 
     @property
-    @abstractmethod
     def _driver_config(self) -> Dict[str, Any]:
         """
         Returns the config block specific to this driver.
+        """
+        driver_config: Dict[str, Any] = self._config[self._driver_name]
+        return driver_config
+
+    @property
+    @abstractmethod
+    def _driver_name(self) -> Dict[str, Any]:
+        """
+        Returns the name of this driver.
         """
 
     @property
@@ -160,17 +165,33 @@ class Driver(ABC):
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())
 
     @property
+    def _runscript_path(self) -> Path:
+        """
+        Returns the path to the runscript.
+        """
+        return self._rundir / f"runscript.{self._driver_name}"
+
+    def _taskname(self, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s %s" % (self._driver_name, self._cycle.strftime("%Y%m%d %HZ"), suffix)
+
+    @property
     def _scheduler(self) -> JobScheduler:
         """
         Returns the job scheduler specified by the platform information.
         """
         return JobScheduler.get_scheduler(self._resources)
 
-    @abstractmethod
     def _validate(self) -> None:
         """
         Perform all necessary schema validation.
         """
+        for schema_name in (self._driver_name, "platform"):
+            self._validate_one(schema_name=schema_name)
 
     def _validate_one(self, schema_name: str) -> None:
         """

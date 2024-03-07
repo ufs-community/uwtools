@@ -16,6 +16,7 @@ from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
+from uwtools.strings import STR
 from uwtools.utils.processing import execute
 from uwtools.utils.tasks import filecopy, symlink
 
@@ -24,6 +25,8 @@ class FV3(Driver):
     """
     A driver for the FV3 model.
     """
+
+    _driver_name = STR.fv3
 
     def __init__(
         self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
@@ -210,14 +213,6 @@ class FV3(Driver):
     # Private helper methods
 
     @property
-    def _driver_config(self) -> Dict[str, Any]:
-        """
-        Returns the config block specific to this driver.
-        """
-        driver_config: Dict[str, Any] = self._config["fv3"]
-        return driver_config
-
-    @property
     def _resources(self) -> Dict[str, Any]:
         """
         Returns configuration data for the runscript.
@@ -228,25 +223,3 @@ class FV3(Driver):
             "scheduler": self._config["platform"]["scheduler"],
             **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
-
-    @property
-    def _runscript_path(self) -> Path:
-        """
-        Returns the path to the runscript.
-        """
-        return self._rundir / "runscript"
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s FV3 %s" % (self._cycle.strftime("%Y%m%d %HZ"), suffix)
-
-    def _validate(self) -> None:
-        """
-        Perform all necessary schema validation.
-        """
-        for schema_name in ("fv3", "platform"):
-            self._validate_one(schema_name=schema_name)
