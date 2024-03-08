@@ -407,6 +407,7 @@ def test__dispatch_template_render_fail(valsneeded):
         STR.valsfmt: 4,
         STR.keyvalpairs: ["foo=88", "bar=99"],
         STR.env: 5,
+        STR.searchpath: 6,
         STR.valsneeded: valsneeded,
         STR.partial: 7,
         STR.dryrun: 8,
@@ -423,6 +424,7 @@ def test__dispatch_template_render_no_optional():
         STR.valsfmt: None,
         STR.keyvalpairs: [],
         STR.env: False,
+        STR.searchpath: None,
         STR.valsneeded: False,
         STR.partial: False,
         STR.dryrun: False,
@@ -436,6 +438,7 @@ def test__dispatch_template_render_no_optional():
         values_format=None,
         overrides={},
         env=False,
+        searchpath=None,
         values_needed=False,
         partial=False,
         dry_run=False,
@@ -450,9 +453,10 @@ def test__dispatch_template_render_yaml():
         STR.valsfmt: 4,
         STR.keyvalpairs: ["foo=88", "bar=99"],
         STR.env: 5,
-        STR.valsneeded: 6,
-        STR.partial: 7,
-        STR.dryrun: 8,
+        STR.searchpath: 6,
+        STR.valsneeded: 7,
+        STR.partial: 8,
+        STR.dryrun: 9,
     }
     with patch.object(uwtools.api.template, "render") as render:
         cli._dispatch_template_render(args)
@@ -463,9 +467,10 @@ def test__dispatch_template_render_yaml():
         values_format=4,
         overrides={"foo": "88", "bar": "99"},
         env=5,
-        values_needed=6,
-        partial=7,
-        dry_run=8,
+        searchpath=6,
+        values_needed=7,
+        partial=8,
+        dry_run=9,
     )
 
 
