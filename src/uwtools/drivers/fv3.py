@@ -17,7 +17,6 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.strings import STR
-from uwtools.utils.processing import execute
 from uwtools.utils.tasks import filecopy, symlink
 
 
@@ -44,7 +43,6 @@ class FV3(Driver):
         if self._dry_run:
             dryrun()
         self._cycle = cycle
-        self._rundir = Path(self._driver_config["run_dir"])
 
     # Workflow tasks
 
@@ -211,6 +209,14 @@ class FV3(Driver):
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
     # Private helper methods
+
+    def _taskname(self, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
 
     @property
     def _resources(self) -> Dict[str, Any]:

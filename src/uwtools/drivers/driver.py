@@ -7,6 +7,8 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Type
 
+from iotaa import asset, task, tasks
+
 from uwtools.config import validator
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
@@ -14,6 +16,7 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.utils.file import resource_path
+from uwtools.utils.processing import execute
 
 
 class Driver(ABC):
@@ -36,6 +39,13 @@ class Driver(ABC):
         self._batch = batch
 
     # Workflow tasks
+
+    @tasks
+    @abstractmethod
+    def provisioned_run_directory(self):
+        """
+        Run directory provisioned with all required content.
+        """
 
     @tasks
     def run(self):
@@ -102,9 +112,17 @@ class Driver(ABC):
 
     @property
     @abstractmethod
-    def _driver_name(self) -> Dict[str, Any]:
+    def _driver_name(self) -> str:
         """
         Returns the name of this driver.
+        """
+
+    @abstractmethod
+    def _taskname(self, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
         """
 
     @property
@@ -165,19 +183,18 @@ class Driver(ABC):
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())
 
     @property
+    def _rundir(self) -> Path:
+        """
+        The path to the component's run directory.
+        """
+        return Path(self._driver_config["run_dir"])
+
+    @property
     def _runscript_path(self) -> Path:
         """
         Returns the path to the runscript.
         """
         return self._rundir / f"runscript.{self._driver_name}"
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s %s" % (self._driver_name, self._cycle.strftime("%Y%m%d %HZ"), suffix)
 
     @property
     def _scheduler(self) -> JobScheduler:
@@ -190,7 +207,7 @@ class Driver(ABC):
         """
         Perform all necessary schema validation.
         """
-        for schema_name in (self._driver_name, "platform"):
+        for schema_name in (self._driver_name.replace("_","-"), "platform"):
             self._validate_one(schema_name=schema_name)
 
     def _validate_one(self, schema_name: str) -> None:

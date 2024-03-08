@@ -9,7 +9,7 @@ from f90nml import Namelist  # type: ignore
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.utils.file import FORMAT
+from uwtools.strings import FORMAT
 
 INCLUDE_TAG = "!INCLUDE"
 

@@ -20,6 +20,9 @@ def test_graph():
 
 def test_tasks():
     class SomeDriver(Driver):
+        def provisioned_run_directory(self):
+            pass
+
         @external
         def t1(self):
             "@external t1"
@@ -37,10 +40,22 @@ def test_tasks():
             pass
 
         @property
+        def _driver_name(self):
+            pass
+
+        @property
         def _resources(self):
+            pass
+
+        def _taskname(self, suffix):
             pass
 
         def _validate(self):
             pass
 
-    assert support.tasks(SomeDriver) == {"t2": "@task t2", "t3": "@tasks t3", "t1": "@external t1"}
+    assert support.tasks(SomeDriver) == {
+        "run": "A run.",
+        "t2": "@task t2",
+        "t3": "@tasks t3",
+        "t1": "@external t1",
+    }

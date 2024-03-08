@@ -12,7 +12,6 @@ from iotaa import asset, dryrun, task, tasks
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.processing import execute
 from uwtools.utils.tasks import file
 
 
@@ -34,7 +33,6 @@ class SfcClimoGen(Driver):
         super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
         if self._dry_run:
             dryrun()
-        self._rundir = Path(self._driver_config["run_dir"])
 
     # Workflow tasks
 
@@ -90,14 +88,6 @@ class SfcClimoGen(Driver):
     # Private helper methods
 
     @property
-    def _driver_config(self) -> Dict[str, Any]:
-        """
-        Returns the config block specific to this driver.
-        """
-        driver_config: Dict[str, Any] = self._config["sfc_climo_gen"]
-        return driver_config
-
-    @property
     def _resources(self) -> Dict[str, Any]:
         """
         Returns configuration data for the runscript.
@@ -109,24 +99,10 @@ class SfcClimoGen(Driver):
             **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
 
-    @property
-    def _runscript_path(self) -> Path:
-        """
-        Returns the path to the runscript.
-        """
-        return self._rundir / "runscript"
-
     def _taskname(self, suffix: str) -> str:
         """
         Returns a common tag for graph-task log messages.
 
         :param suffix: Log-string suffix.
         """
-        return "sfc_climo_gen %s" % suffix
-
-    def _validate(self) -> None:
-        """
-        Perform all necessary schema validation.
-        """
-        for schema_name in ("sfc-climo-gen", "platform"):
-            self._validate_one(schema_name=schema_name)
+        return "%s %s" % (self._driver_name, suffix)

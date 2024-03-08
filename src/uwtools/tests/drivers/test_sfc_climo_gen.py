@@ -11,7 +11,7 @@ import yaml
 from iotaa import asset, external
 from pytest import fixture
 
-from uwtools.drivers import sfc_climo_gen
+from uwtools.drivers import driver, sfc_climo_gen
 
 config: dict = {
     "sfc_climo_gen": {
@@ -60,6 +60,7 @@ config: dict = {
 @fixture
 def config_file(tmp_path):
     path = tmp_path / "config.yaml"
+    config["sfc_climo_gen"]["run_dir"] = tmp_path.as_posix()
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
     return path
@@ -84,13 +85,12 @@ def test_SfcClimoGen_dry_run(config_file):
     dryrun.assert_called_once_with()
 
 
-def test_SfcClimoGen_namelist_file(driverobj, tmp_path):
+def test_SfcClimoGen_namelist_file(driverobj):
     @external
     def ready(x):
         yield x
         yield asset(x, lambda: True)
 
-    driverobj._rundir = tmp_path
     dst = driverobj._rundir / "fort.41"
     assert not dst.is_file()
     with patch.object(sfc_climo_gen, "file", new=ready):
@@ -123,9 +123,8 @@ def test_SfcClimoGen_run_local(driverobj):
     func.assert_called_once_with()
 
 
-def test_SfcClimoGen_runscript(driverobj, tmp_path):
-    driverobj._rundir = tmp_path
-    dst = driverobj._rundir / "runscript"
+def test_SfcClimoGen_runscript(driverobj):
+    dst = driverobj._rundir / "runscript.sfc_climo_gen"
     assert not dst.is_file()
     driverobj.runscript()
     with open(dst, "r", encoding="utf-8") as f:
@@ -156,7 +155,7 @@ def test_SfcClimoGen__run_via_batch_submission(driverobj):
 
 def test_SfcClimoGen__run_via_local_execution(driverobj):
     with patch.object(driverobj, "provisioned_run_directory") as prd:
-        with patch.object(sfc_climo_gen, "execute") as execute:
+        with patch.object(driver, "execute") as execute:
             driverobj._run_via_local_execution()
             execute.assert_called_once_with(
                 cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
@@ -185,7 +184,7 @@ def test_SfcClimoGen__resources(driverobj):
 
 
 def test_SfcClimoGen__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript"
+    assert driverobj._runscript_path == driverobj._rundir / "runscript.sfc_climo_gen"
 
 
 def test_SfcClimoGen__taskanme(driverobj):

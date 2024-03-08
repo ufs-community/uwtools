@@ -3,6 +3,7 @@ Canonical strings used throughout uwtools.
 """
 
 from dataclasses import dataclass, fields
+from typing import Dict, List
 
 
 @dataclass(frozen=True)

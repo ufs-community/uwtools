@@ -8,11 +8,11 @@ from functools import cache
 from importlib import resources
 from io import StringIO
 from pathlib import Path
-from typing import IO, Any, Dict, Generator, List, Optional, Union
+from typing import IO, Any, Generator, Optional, Union
 
 from uwtools.exceptions import UWError
 from uwtools.logging import log
-from uwtools.strings import FORTMAT
+from uwtools.strings import FORMAT
 
 
 class StdinProxy:

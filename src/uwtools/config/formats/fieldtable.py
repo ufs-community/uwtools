@@ -2,7 +2,8 @@ from pathlib import Path
 from typing import Optional
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.utils.file import FORMAT, writable
+from uwtools.strings import FORMAT
+from uwtools.utils.file import writable
 
 
 class FieldTableConfig(YAMLConfig):

@@ -24,13 +24,23 @@ class ConcreteDriver(driver.Driver):
     Driver subclass for testing purposes.
     """
 
+    def provisioned_run_directory(self):
+        pass
+
     @property
     def _driver_config(self) -> Dict[str, Any]:
         return self._config.data
 
     @property
+    def _driver_name(self) -> str:
+        return "concrete"
+
+    @property
     def _resources(self) -> Dict[str, Any]:
         return {"some": "resource"}
+
+    def _taskname(self, suffix: str) -> str:
+        return "concrete"
 
     def _validate(self) -> None:
         pass
