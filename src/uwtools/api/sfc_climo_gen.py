@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from uwtools.drivers import support
-from uwtools.drivers.sfc_climo_gen import SfcClimoGen
+from uwtools.drivers.sfc_climo_gen import SfcClimoGen as _SfcClimoGen
 
 
 def execute(
@@ -28,7 +28,7 @@ def execute(
     :param graph_file: Write Graphviz DOT output here
     :return: ``True`` if task completes without raising an exception
     """
-    obj = SfcClimoGen(config_file=config_file, batch=batch, dry_run=dry_run)
+    obj = _SfcClimoGen(config_file=config_file, batch=batch, dry_run=dry_run)
     getattr(obj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
@@ -47,4 +47,4 @@ def tasks() -> Dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
     """
-    return support.tasks(SfcClimoGen)
+    return support.tasks(_SfcClimoGen)

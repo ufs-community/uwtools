@@ -30,7 +30,7 @@ class ChgresCube(Driver):
         The driver.
 
         :param config_file: Path to config file.
-        :param cycle: The forecast cycle.
+        :param cycle: The date cycle.
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
@@ -51,21 +51,14 @@ class ChgresCube(Driver):
         yield self._taskname(f"namelist file {fn}")
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        vals = self._driver_config["namelist"]["update_values"]["config"]
-        inputs = [
-            ("data_dir_input_grid", "atm_files_input_grid"),
-            ("data_dir_input_grid", "grib2_file_input_grid"),
-            ("data_dir_input_grid", "sfc_files_input_grid"),
-            "mosaic_file_target_grid",
-            "varmap_file",
-            "vcoord_file_target_grid",
+        config_files = self._driver_config["namelist"]["update_values"]["config"]
+        input_paths = [
+            Path(config_files[k])
+            for k in ("mosaic_file_target_grid", "varmap_file", "vcoord_file_target_grid")
+        ] + [
+            Path(config_files["data_dir_input_grid"]) / config_files[k]
+            for k in ("atm_files_input_grid", "grib2_file_input_grid", "sfc_files_input_grid")
         ]
-        input_paths = []
-        for item in inputs:
-            if isinstance(item, str):
-                input_paths += [Path(vals[item])]
-            else:
-                input_paths += [Path(vals[item[0]]) / vals[item[1]]]
         yield [file(input_path) for input_path in input_paths]
         self._create_user_updated_config(
             config_class=NMLConfig,

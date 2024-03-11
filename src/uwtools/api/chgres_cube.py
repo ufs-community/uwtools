@@ -7,7 +7,8 @@ from typing import Dict, Optional
 
 import iotaa as _iotaa
 
-from uwtools.drivers.chgres_cube import ChgresCube
+from uwtools.drivers import support
+from uwtools.drivers.chgres_cube import ChgresCube as _ChgresCube
 
 
 def execute(
@@ -32,7 +33,7 @@ def execute(
     :param graph_file: Write Graphviz DOT output here
     :return: True if task completes without raising an exception
     """
-    obj = ChgresCube(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
+    obj = _ChgresCube(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
     getattr(obj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
@@ -51,7 +52,4 @@ def tasks() -> Dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
     """
-    return {
-        task: getattr(ChgresCube, task).__doc__.strip().split("\n")[0]
-        for task in _iotaa.tasknames(ChgresCube)
-    }
+    return support.tasks(_ChgresCube)

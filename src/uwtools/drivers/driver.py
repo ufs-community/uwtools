@@ -207,7 +207,7 @@ class Driver(ABC):
         """
         Perform all necessary schema validation.
         """
-        for schema_name in (self._driver_name.replace("_","-"), "platform"):
+        for schema_name in (self._driver_name.replace("_", "-"), "platform"):
             self._validate_one(schema_name=schema_name)
 
     def _validate_one(self, schema_name: str) -> None:

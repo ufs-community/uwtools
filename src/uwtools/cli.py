@@ -66,7 +66,7 @@ def main() -> None:
         sys.exit(1)
 
 
-# Mode chgrescube
+# Mode chgres_cube
 
 
 def _add_subparser_chgres_cube(subparsers: Subparsers) -> ModeChecks:
