@@ -499,6 +499,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_values_file(optional)
     _add_arg_values_format(optional, choices=FORMATS)
     _add_arg_env(optional)
+    _add_arg_search_path(optional)
     _add_arg_values_needed(optional)
     _add_arg_partial(optional)
     _add_arg_dry_run(optional)
@@ -535,6 +536,7 @@ def _dispatch_template_render(args: Args) -> bool:
             output_file=args[STR.outfile],
             overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
             env=args[STR.env],
+            searchpath=args[STR.searchpath],
             values_needed=args[STR.valsneeded],
             partial=args[STR.partial],
             dry_run=args[STR.dryrun],
@@ -715,6 +717,16 @@ def _add_arg_schema_file(group: Group) -> None:
         metavar="PATH",
         required=True,
         type=Path,
+    )
+
+
+def _add_arg_search_path(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.searchpath),
+        help="Colon-separated paths to search for extra templates",
+        metavar="PATH[:PATH:...]",
+        required=False,
+        type=lambda s: s.split(":"),
     )
 
 
