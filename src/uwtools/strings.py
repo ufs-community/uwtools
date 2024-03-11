@@ -91,6 +91,7 @@ class STR:
     rocoto: str = "rocoto"
     run: str = "run"
     schemafile: str = "schema_file"
+    searchpath: str = "search_path"
     sfcclimogen: str = "sfc_climo_gen"
     suppfiles: str = "supplemental_files"
     task: str = "task"
