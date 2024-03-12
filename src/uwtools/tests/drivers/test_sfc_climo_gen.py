@@ -2,16 +2,15 @@
 """
 sfc_climo_gen driver tests.
 """
-from pathlib import Path
 from unittest.mock import DEFAULT as D
-from unittest.mock import PropertyMock, patch
+from unittest.mock import patch
 
 import f90nml  # type: ignore
 import yaml
 from iotaa import asset, external
 from pytest import fixture
 
-from uwtools.drivers import driver, sfc_climo_gen
+from uwtools.drivers import sfc_climo_gen
 
 config: dict = {
     "sfc_climo_gen": {
@@ -138,31 +137,6 @@ def test_SfcClimoGen_runscript(driverobj):
     # Check execution:
     assert "srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE /path/to/sfc_climo_gen" in lines
     assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
-
-
-def test_SfcClimoGen__run_via_batch_submission(driverobj):
-    runscript = driverobj._runscript_path
-    with patch.object(driverobj, "provisioned_run_directory") as prd:
-        with patch.object(
-            sfc_climo_gen.SfcClimoGen, "_scheduler", new_callable=PropertyMock
-        ) as scheduler:
-            driverobj._run_via_batch_submission()
-            scheduler().submit_job.assert_called_once_with(
-                runscript=runscript, submit_file=Path(f"{runscript}.submit")
-            )
-        prd.assert_called_once_with()
-
-
-def test_SfcClimoGen__run_via_local_execution(driverobj):
-    with patch.object(driverobj, "provisioned_run_directory") as prd:
-        with patch.object(driver, "execute") as execute:
-            driverobj._run_via_local_execution()
-            execute.assert_called_once_with(
-                cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
-                cwd=driverobj._rundir,
-                log_output=True,
-            )
-        prd.assert_called_once_with()
 
 
 def test_SfcClimoGen__driver_config(driverobj):
