@@ -10,6 +10,7 @@ from typing import Any, Dict
 from iotaa import asset, dryrun, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
+from uwtools.config.validator import validate_internal
 from uwtools.drivers.driver import Driver
 from uwtools.utils.processing import execute
 from uwtools.utils.tasks import file
@@ -159,4 +160,4 @@ class SfcClimoGen(Driver):
         Perform all necessary schema validation.
         """
         for schema_name in ("sfc-climo-gen", "platform"):
-            self._validate_one(schema_name=schema_name)
+            validate_internal(schema_name=schema_name, config=self._config)

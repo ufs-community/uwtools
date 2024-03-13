@@ -1,5 +1,5 @@
 """
-The uwtools file-management tools.
+File handling.
 """
 from pathlib import Path
 from typing import List, Optional
@@ -9,7 +9,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 
 class FileHandler:
     """
-    PM WRITEME.
+    The base class for file handlers.
     """
 
     def __init__(
@@ -34,9 +34,9 @@ class FileHandler:
         self._config.dereference()
         self._validate()
 
-    def _validate(self):
+    def _validate(self) -> None:
         """
-        PM WRITEME.
+        Validate config against its schema.
         """
 
 

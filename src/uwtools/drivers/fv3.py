@@ -14,6 +14,7 @@ from iotaa import asset, dryrun, task, tasks
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.validator import validate_internal
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.utils.processing import execute
@@ -282,4 +283,4 @@ class FV3(Driver):
         Perform all necessary schema validation.
         """
         for schema_name in ("fv3", "platform"):
-            self._validate_one(schema_name=schema_name)
+            validate_internal(schema_name=schema_name, config=self._config)

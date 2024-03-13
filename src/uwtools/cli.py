@@ -228,7 +228,6 @@ def _add_subparser_file(subparsers: Subparsers) -> ModeChecks:
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         "copy": _add_subparser_file_copy(subparsers),  # PM use STR.copy
-        # "file": _add_subparser_file_copy(subparsers), # PM use STR.file
     }
 
 
@@ -254,10 +253,7 @@ def _dispatch_file(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {
-        "copy": _dispatch_file_copy,  # PM use STR.copy
-        # "link": _dispatch_file_copy, # PM use STR.link
-    }[args[STR.action]](args)
+    return {"copy": _dispatch_file_copy}[args[STR.action]](args)  # PM use STR.copy
 
 
 def _dispatch_file_copy(args: Args) -> bool:

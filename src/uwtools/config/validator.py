@@ -11,10 +11,29 @@ from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.utils.file import resource_path
 
 # Public functions
+
+
+def validate_internal(
+    schema_name: str, config: Union[dict, YAMLConfig, Optional[Path]] = None
+) -> None:
+    """
+    Validate a config against a uwtools-internal schema.
+
+    :param config: The config to validate.
+    :param schema_name: Name of uwtools schema to validate the config against.
+    :raises: UWConfigError if config fails validation.
+    """
+
+    log.info("Validating config per schema %s", schema_name)
+    schema_file = resource_path("jsonschema") / f"{schema_name}.jsonschema"
+    log.debug("Using schema file: %s", schema_file)
+    if not validate_yaml(config=config, schema_file=schema_file):
+        raise UWConfigError("YAML validation errors")
 
 
 def validate_yaml(
