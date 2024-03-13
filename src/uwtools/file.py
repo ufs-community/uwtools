@@ -41,9 +41,9 @@ class FileHandler:
     @cached_property
     def _file_block(self) -> dict:
         """
-        Navigate keys to file dst: src config block.
+        Navigate keys to file dst/src config block.
 
-        :return: The dst: src file block from a potentially larger config.
+        :return: The dst/src file block from a potentially larger config.
         """
         cfg = self._config.data
         nav = []

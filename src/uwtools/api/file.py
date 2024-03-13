@@ -4,12 +4,14 @@ API access to uwtools file-management tools.
 from pathlib import Path
 from typing import List, Optional
 
+from uwtools.file import FileCopier as _FileCopier
+
 
 def copy(
     target_dir: Path,
     config_file: Optional[Path] = None,
     keys: Optional[List[str]] = None,
-    dry_run: Optional[bool] = False,
+    dry_run: bool = False,
 ) -> bool:
     """
     Copy files.
@@ -20,5 +22,6 @@ def copy(
     :param dry_run: Do not copy files
     :return: True if no exception is raised
     """
-    print(target_dir, config_file, keys, dry_run)
+    copier = _FileCopier(target_dir=target_dir, config_file=config_file, keys=keys, dry_run=dry_run)
+    assert copier
     return True

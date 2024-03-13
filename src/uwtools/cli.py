@@ -239,12 +239,13 @@ def _add_subparser_file_copy(subparsers: Subparsers) -> ActionChecks:
     """
     parser = _add_subparser(subparsers, "copy", "Copy files")  # PM use STR.copy
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_target_dir(required)
+    _add_arg_target_dir(required, required=True)
     optional = _basic_setup(parser)
-    _add_arg_config_file(optional)
-    _add_arg_keys(optional)
+    _add_arg_config_file(group=optional, required=False)
     _add_arg_dry_run(optional)
-    return _add_args_verbosity(optional)
+    checks = _add_args_verbosity(optional)
+    _add_arg_keys(optional)
+    return checks
 
 
 def _dispatch_file(args: Args) -> bool:
@@ -298,7 +299,7 @@ def _add_subparser_fv3_task(subparsers: Subparsers, task: str, helpmsg: str) -> 
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_config_file(required)
+    _add_arg_config_file(group=required, required=True)
     _add_arg_cycle(required)
     optional = _basic_setup(parser)
     _add_arg_batch(optional)
@@ -431,7 +432,7 @@ def _add_subparser_sfc_climo_gen_task(
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_config_file(required)
+    _add_arg_config_file(group=required, required=True)
     optional = _basic_setup(parser)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
@@ -576,13 +577,13 @@ def _add_arg_batch(group: Group) -> None:
     )
 
 
-def _add_arg_config_file(group: Group) -> None:
+def _add_arg_config_file(group: Group, required: bool) -> None:
     group.add_argument(
         _switch(STR.cfgfile),
         "-c",
         help="Path to config file",
         metavar="PATH",
-        required=True,
+        required=required,
         type=Path,
     )
 
@@ -676,7 +677,7 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
 def _add_arg_keys(group: Group) -> None:
     group.add_argument(
         "keys",  # PM use STR.keys
-        help="YAML keys leading to file dst/src block",
+        help="YAML key leading to file dst/src block",
         metavar="KEY",
         nargs="*",
     )
@@ -750,11 +751,12 @@ def _add_arg_supplemental_files(group: Group) -> None:
     )
 
 
-def _add_arg_target_dir(group: Group) -> None:
+def _add_arg_target_dir(group: Group, required: bool) -> None:
     group.add_argument(
         _switch("target_dir"),  # PM use STR.targetdir
         help="Path to target directory",
         metavar="PATH",
+        required=required,
         type=Path,
     )
 
