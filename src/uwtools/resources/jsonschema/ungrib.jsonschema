@@ -1,5 +1,5 @@
 {
-  "description": "This document is to validate user-defined MPAS forecast config files",
+  "description": "This document is to validate user-defined Ungrib files",
   "properties": {
     "forecast": {
       "description": "parameters of the forecast",
@@ -97,6 +97,6 @@
       "type": "object"
     }
   },
-  "title": "MPAS Forecast config",
+  "title": "Ungrib config",
   "type": "object"
 }

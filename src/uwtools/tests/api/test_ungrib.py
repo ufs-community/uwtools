@@ -3,7 +3,7 @@
 import datetime as dt
 from unittest.mock import patch
 
-from uwtools.api import mpas
+from uwtools.api import ungrib
 
 
 def test_execute(tmp_path):
@@ -15,20 +15,20 @@ def test_execute(tmp_path):
         "dry_run": True,
         "graph_file": dot,
     }
-    with patch.object(mpas, "MPAS") as MPAS:
-        assert mpas.execute(**args, task="foo") is True
+    with patch.object(ungrib, "Ungrib") as Ungrib:
+        assert ungrib.execute(**args, task="foo") is True
     del args["graph_file"]
-    MPAS.assert_called_once_with(**args)
-    MPAS().foo.assert_called_once_with()
+    Ungrib.assert_called_once_with(**args)
+    Ungrib().foo.assert_called_once_with()
 
 
 def test_graph():
-    with patch.object(mpas.support, "graph") as graph:
-        mpas.graph()
+    with patch.object(ungrib.support, "graph") as graph:
+        ungrib.graph()
     graph.assert_called_once_with()
 
 
 def test_tasks():
-    with patch.object(mpas.support, "tasks") as _tasks:
-        mpas.tasks()
-    _tasks.assert_called_once_with(mpas.MPAS)
+    with patch.object(ungrib.support, "tasks") as _tasks:
+        ungrib.tasks()
+    _tasks.assert_called_once_with(ungrib.Ungrib)

@@ -12,13 +12,15 @@ from pytest import fixture, raises
 
 import uwtools.api.config
 import uwtools.api.fv3
-import uwtools.api.mpas
+import uwtools.api.mpas_init
 import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
 import uwtools.api.template
+import uwtools.api.ungrib
 import uwtools.drivers.fv3
-import uwtools.drivers.mpas
+import uwtools.drivers.mpas_init
 import uwtools.drivers.sfc_climo_gen
+import uwtools.drivers.ungrib
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
@@ -74,17 +76,11 @@ def test__add_subparser_fv3(subparsers):
     ]
 
 
-def test__add_subparser_mpas(subparsers):
-    cli._add_subparser_mpas(subparsers)
-    assert actions(subparsers.choices[STR.mpas]) == [
-        "boundary_files",
-        "field_table",
-        "files_copied",
-        "files_linked",
-        "model_configure",
+def test__add_subparser_mpas_init(subparsers):
+    cli._add_subparser_mpas_init(subparsers)
+    assert actions(subparsers.choices[STR.mpasinit]) == [
         "namelist_file",
         "provisioned_run_directory",
-        "restart_directory",
         "run",
         "runscript",
     ]
@@ -128,6 +124,16 @@ def test__add_subparser_template_render(subparsers):
 def test__add_subparser_template_translate(subparsers):
     cli._add_subparser_template_translate(subparsers)
     assert subparsers.choices[STR.translate]
+
+
+def test__add_subparser_ungrib(subparsers):
+    cli._add_subparser_ungrib(subparsers)
+    assert actions(subparsers.choices[STR.ungrib]) == [
+        "namelist_file",
+        "provisioned_run_directory",
+        "run",
+        "runscript",
+    ]
 
 
 @pytest.mark.parametrize(
@@ -343,7 +349,7 @@ def test__dispatch_fv3():
     execute.assert_called_once_with(**{**args, "task": "foo"})
 
 
-def test__dispatch_mpas():
+def test__dispatch__init():
     args: dict = {
         "batch": True,
         "config_file": "config.yaml",
@@ -351,8 +357,8 @@ def test__dispatch_mpas():
         "dry_run": False,
         "graph_file": None,
     }
-    with patch.object(uwtools.api.mpas, "execute") as execute:
-        cli._dispatch_mpas({**args, "action": "foo"})
+    with patch.object(uwtools.api.mpas_init, "execute") as execute:
+        cli._dispatch_mpas_init({**args, "action": "foo"})
     execute.assert_called_once_with(**{**args, "task": "foo"})
 
 
@@ -526,6 +532,19 @@ def test__dispatch_template_translate_no_optional():
     _convert_atparse_to_jinja2.assert_called_once_with(
         input_file=None, output_file=None, dry_run=False
     )
+
+
+def test__dispatch_ungrib():
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "cycle": dt.datetime.now(),
+        "dry_run": False,
+        "graph_file": None,
+    }
+    with patch.object(uwtools.api.ungrib, "execute") as execute:
+        cli._dispatch_ungrib({**args, "action": "foo"})
+    execute.assert_called_once_with(**{**args, "task": "foo"})
 
 
 @pytest.mark.parametrize("quiet", [False, True])

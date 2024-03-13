@@ -15,10 +15,11 @@ from typing import Any, Callable, Dict, List, NoReturn, Tuple
 
 import uwtools.api.config
 import uwtools.api.fv3
-import uwtools.api.mpas
+import uwtools.api.mpas_init
 import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
 import uwtools.api.template
+import uwtools.api.ungrib
 import uwtools.config.jinja2
 import uwtools.rocoto
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
@@ -56,10 +57,11 @@ def main() -> None:
         modes = {
             STR.config: _dispatch_config,
             STR.fv3: _dispatch_fv3,
-            STR.mpas: _dispatch_mpas,
+            STR.mpasinit: _dispatch_mpas_init,
             STR.rocoto: _dispatch_rocoto,
             STR.sfcclimogen: _dispatch_sfc_climo_gen,
             STR.template: _dispatch_template,
+            STR.ungrib: _dispatch_ungrib,
         }
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except UWError as e:
@@ -268,27 +270,27 @@ def _dispatch_fv3(args: Args) -> bool:
     )
 
 
-# Mode mpas
+# Mode mpas_init
 
 
-def _add_subparser_mpas(subparsers: Subparsers) -> ModeChecks:
+def _add_subparser_mpas_init(subparsers: Subparsers) -> ModeChecks:
     """
-    Subparser for mode: mpas
+    Subparser for mode: mpas_init
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.mpas, "Execute MPAS tasks")
+    parser = _add_subparser(subparsers, STR.mpasinit, "Execute MPAS Init tasks")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
-        task: _add_subparser_mpas_task(subparsers, task, helpmsg)
-        for task, helpmsg in uwtools.api.mpas.tasks().items()
+        task: _add_subparser_mpas_init_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.mpas_init.tasks().items()
     }
 
 
-def _add_subparser_mpas_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+def _add_subparser_mpas_init_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
     """
-    Subparser for mode: mpas <task>
+    Subparser for mode: mpas_init <task>
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     :param task: The task to add a subparser for.
@@ -306,13 +308,13 @@ def _add_subparser_mpas_task(subparsers: Subparsers, task: str, helpmsg: str) ->
     return checks
 
 
-def _dispatch_mpas(args: Args) -> bool:
+def _dispatch_mpas_init(args: Args) -> bool:
     """
-    Dispatch logic for mpas mode.
+    Dispatch logic for mpas_init mode.
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.mpas.execute(
+    return uwtools.api.mpas_init.execute(
         task=args[STR.action],
         config_file=args[STR.cfgfile],
         cycle=args[STR.cycle],
@@ -556,6 +558,60 @@ def _dispatch_template_translate(args: Args) -> bool:
         input_file=args[STR.infile],
         output_file=args[STR.outfile],
         dry_run=args[STR.dryrun],
+    )
+
+
+# Mode ungrib
+
+
+def _add_subparser_ungrib(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: ungrib
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.ungrib, "Execute Ungrib tasks")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_ungrib_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.ungrib.tasks().items()
+    }
+
+
+def _add_subparser_ungrib_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+    """
+    Subparser for mode: ungrib <task>
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_config_file(required)
+    _add_arg_cycle(required)
+    optional = _basic_setup(parser)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
+def _dispatch_ungrib(args: Args) -> bool:
+    """
+    Dispatch logic for ungrib mode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.ungrib.execute(
+        task=args[STR.action],
+        config_file=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
     )
 
 
@@ -898,10 +954,11 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     checks = {
         STR.config: _add_subparser_config(subparsers),
         STR.fv3: _add_subparser_fv3(subparsers),
-        STR.mpas: _add_subparser_mpas(subparsers),
+        STR.mpasinit: _add_subparser_mpas_init(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),
         STR.sfcclimogen: _add_subparser_sfc_climo_gen(subparsers),
         STR.template: _add_subparser_template(subparsers),
+        STR.ungrib: _add_subparser_ungrib(subparsers),
     }
     return vars(parser.parse_args(raw_args)), checks
 
@@ -942,7 +999,7 @@ class STR:
     keyvalpairs: str = "key_eq_val_pairs"
     mode: str = "mode"
     model: str = "model"
-    mpas: str = "mpas"
+    mpasinit: str = "mpas_init"
     outfile: str = "output_file"
     outfmt: str = "output_format"
     partial: str = "partial"
@@ -959,6 +1016,7 @@ class STR:
     template: str = "template"
     total: str = "total"
     translate: str = "translate"
+    ungrib: str = "ungrib"
     validate: str = "validate"
     valsfile: str = "values_file"
     valsfmt: str = "values_format"
