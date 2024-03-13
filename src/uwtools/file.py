@@ -5,6 +5,9 @@ from pathlib import Path
 from typing import List, Optional
 
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.validator import validate_internal
+from uwtools.exceptions import UWConfigError
+from uwtools.logging import log
 
 
 class FileHandler:
@@ -29,15 +32,31 @@ class FileHandler:
         """
         self._target_dir = target_dir
         self._config = YAMLConfig(config=config_file)
-        self._keys = keys
+        self._keys = keys or []
         self._dry_run = dry_run
         self._config.dereference()
         self._validate()
+
+    @property
+    def _file_block(self) -> dict:
+        """
+        Navigate keys to file dst: src config block.
+        """
+        cfg = self._config.data
+        nav = []
+        for key in self._keys:
+            nav.append(key)
+            if key not in cfg:
+                raise UWConfigError("Config navigation %s failed" % " -> ".join(nav))
+            log.debug("Following config key '%s'", key)
+            cfg = cfg[key]
+        return cfg
 
     def _validate(self) -> None:
         """
         Validate config against its schema.
         """
+        validate_internal(schema_name="dst-src-files", config=self._file_block)
 
 
 class FileCopier(FileHandler):
