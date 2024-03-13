@@ -1,6 +1,7 @@
 """
 File handling.
 """
+from functools import cached_property
 from pathlib import Path
 from typing import List, Optional
 
@@ -37,10 +38,12 @@ class FileHandler:
         self._config.dereference()
         self._validate()
 
-    @property
+    @cached_property
     def _file_block(self) -> dict:
         """
         Navigate keys to file dst: src config block.
+
+        :return: The dst: src file block from a potentially larger config.
         """
         cfg = self._config.data
         nav = []
@@ -55,8 +58,10 @@ class FileHandler:
     def _validate(self) -> None:
         """
         Validate config against its schema.
+
+        :raises: UWConfigError if validation fails.
         """
-        validate_internal(schema_name="dst-src-files", config=self._file_block)
+        validate_internal(schema_name="files-to-stage", config=self._file_block)
 
 
 class FileCopier(FileHandler):
