@@ -42,6 +42,9 @@ config: dict = {
                     "grib2_file_input_grid": "/path/to/file",
                     "mosaic_file_input_grid": "/path/to/file",
                     "mosaic_file_target_grid": "/path/to/file",
+                    "sfc_files_input_grid": "/path/to/file",
+                    "varmap_file": "/path/to/file",
+                    "vcoord_file_target_grid": "/path/to/file",
                 }
             }
         },
@@ -101,15 +104,6 @@ def test_ChgresCube_namelist_file(driverobj):
     dst = driverobj._rundir / "fort.41"
     assert not dst.is_file()
     with patch.object(chgres_cube, "file", new=ready):
-        driverobj._driver_config["namelist"]["update_values"]["config"] = {
-            "data_dir_input_grid": "/path/to/file",
-            "atm_files_input_grid": "/path/to/file",
-            "grib2_file_input_grid": "/path/to/file",
-            "sfc_files_input_grid": "/path/to/file",
-            "mosaic_file_target_grid": "/path/to/file",
-            "varmap_file": "/path/to/file",
-            "vcoord_file_target_grid": "/path/to/file",
-        }
         driverobj.namelist_file()
     assert dst.is_file()
     assert isinstance(f90nml.read(dst), f90nml.Namelist)

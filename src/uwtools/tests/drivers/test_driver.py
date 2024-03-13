@@ -72,7 +72,8 @@ def driver_good(tmp_path):
         {
             "base_file": str(write(tmp_path / "base.yaml", {"a": 11, "b": 22})),
             "execution": {"executable": "qux", "mpiargs": ["bar", "baz"], "mpicmd": "foo"},
-            "update_values": {"a": 33}, "run_dir": "/path/to/dir",
+            "update_values": {"a": 33},
+            "run_dir": "/path/to/dir",
         },
     )
     return ConcreteDriver(config_file=cf, dry_run=True, batch=True)
