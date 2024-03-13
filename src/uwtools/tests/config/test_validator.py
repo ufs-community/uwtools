@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, Tuple
 from unittest.mock import patch
 
+import json
 import yaml
 from pytest import fixture, raises
 
@@ -16,7 +17,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.utils.file import resource_path
-
+from uwtools.tests.support import logged
 # Fixtures
 
 
@@ -107,7 +108,7 @@ def schema() -> Dict[str, Any]:
 def schema_file(schema, tmp_path) -> Path:
     path: Path = tmp_path / "a.jsonschema"
     with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(schema, f)
+        json.dump(schema, f)
     return path
 
 
@@ -123,18 +124,17 @@ def write_as_json(data: Dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
-def test_validate_internal_no(schema_file):
+def test_validate_internal_no(caplog, schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
         with raises(UWConfigError) as e:
-            raise UWConfigError("test")
-            # validator.validate_internal()
-    assert str(e.value) == "test"  # "YAML validation errors"
+            validator.validate_internal(schema_name="a", config={"color": "orange"})
+    assert logged(caplog, "'orange' is not one of ['blue', 'red']")
+    assert str(e.value) == "YAML validation errors"
 
 
 def test_validate_internal_ok(schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
-        # validator.validate_internal()
-        pass
+        validator.validate_internal(schema_name="a", config={"color": "blue"})
 
 
 def test_validate_yaml(assets):
