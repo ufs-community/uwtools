@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
 
-from iotaa import asset, dryrun, task, tasks
+from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
@@ -17,7 +17,7 @@ from uwtools.utils.processing import execute
 
 class Ungrib(Driver):
     """
-    A driver for the Ungrib model.
+    A driver for the Ungrib program.
     """
 
     def __init__(
@@ -41,11 +41,48 @@ class Ungrib(Driver):
     # Workflow tasks
 
     @task
-    def namelist_file(self):
+    def initial_conditions(self):
+        """
+        Initial conditions.
+        """
+        fn = str(self._cycle)
+        yield self._taskname(fn)
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        yield [self.gribfile_aaa, self.namelist_wps, self.vtable]
+        self.run()
+
+    @task
+    def gfs_local(self):
+        """
+        Doc string.
+        """
+
+    @external
+    def gfs_upstream(self):
+        """
+        Doc string.
+        """
+
+    @task
+    def gribfile_aaa(self):
+        """
+        The gribfile.
+        """
+        fn = "GRIBFILE.AAA"
+        yield self._taskname(fn)
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        g = self.gfs_local
+        yield g
+        # path.symlink_to(Path(refs(g).name))
+
+    @task
+    def namelist_wps(self):
         """
         The namelist file.
         """
-        fn = "namelist.atmosphere"
+        fn = "namelist.wps"
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
@@ -63,8 +100,10 @@ class Ungrib(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
-            self.namelist_file(),
+            self.gribfile_aaa(),
+            self.namelist_wps(),
             self.runscript(),
+            self.vtable(),
         ]
 
     @tasks
@@ -93,6 +132,17 @@ class Ungrib(Driver):
         with open(path, "w", encoding="utf-8") as f:
             print(rs, file=f)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
+
+    @task
+    def vtable(self):
+        """
+        The Vtable.
+        """
+        fn = "Vtable"
+        yield self._taskname("Vtable")
+        path = self._rundir / fn
+        yield asset(path, path.exists)
+        # path.symlink_to(Path(self._wpsfile))
 
     # Private workflow tasks
 
@@ -162,3 +212,6 @@ class Ungrib(Driver):
         """
         for schema_name in ("ungrib", "platform"):
             self._validate_one(schema_name=schema_name)
+
+    def _wpsfile(self, fn: str) -> Path:
+        return Path(os.environ["WPSFILES"]) / fn

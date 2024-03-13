@@ -7,7 +7,6 @@ from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
-# import pytest
 import yaml
 from pytest import fixture
 
@@ -68,22 +67,24 @@ def test_Ungrib_dry_run(config_file, cycle):
     dryrun.assert_called_once_with()
 
 
-def test_Ungrib_namelist_file(driverobj):
-    src = driverobj._rundir / "namelist.atmosphere.in"
+def test_Ungrib_namelist_wps(driverobj):
+    src = driverobj._rundir / "namelist.wps.in"
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
-    dst = driverobj._rundir / "namelist.atmosphere"
+    dst = driverobj._rundir / "namelist.wps"
     assert not dst.is_file()
     driverobj._driver_config["namelist_file"] = {"base_file": src}
-    driverobj.namelist_file()
+    driverobj.namelist_wps()
     assert dst.is_file()
 
 
 def test_Ungrib_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
-        namelist_file=D,
+        gribfile_aaa=D,
+        namelist_wps=D,
         runscript=D,
+        vtable=D,
     ) as mocks:
         driverobj.provisioned_run_directory()
     for m in mocks:
