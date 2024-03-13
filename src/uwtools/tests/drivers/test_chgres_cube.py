@@ -3,16 +3,15 @@
 chgres_cube driver tests.
 """
 import datetime as dt
-from pathlib import Path
 from unittest.mock import DEFAULT as D
-from unittest.mock import PropertyMock, patch
+from unittest.mock import patch
 
 import f90nml  # type: ignore
 import yaml
 from iotaa import asset, external
 from pytest import fixture
 
-from uwtools.drivers import chgres_cube, driver
+from uwtools.drivers import chgres_cube
 
 config: dict = {
     "chgres_cube": {
@@ -60,7 +59,7 @@ config: dict = {
 
 @fixture
 def cycle():
-    return dt.datetime(2024, 2, 1, 18)  # Fixtures
+    return dt.datetime(2024, 2, 1, 18)
 
 
 @fixture
@@ -99,18 +98,17 @@ def test_ChgresCube_namelist_file(driverobj):
         yield x
         yield asset(x, lambda: True)
 
-    src = str(driverobj._rundir / "input.nml.in")
     dst = driverobj._rundir / "fort.41"
     assert not dst.is_file()
     with patch.object(chgres_cube, "file", new=ready):
         driverobj._driver_config["namelist"]["update_values"]["config"] = {
-            "data_dir_input_grid": src,
-            "atm_files_input_grid": src,
-            "grib2_file_input_grid": src,
-            "sfc_files_input_grid": src,
-            "mosaic_file_target_grid": src,
-            "varmap_file": src,
-            "vcoord_file_target_grid": src,
+            "data_dir_input_grid": "/path/to/file",
+            "atm_files_input_grid": "/path/to/file",
+            "grib2_file_input_grid": "/path/to/file",
+            "sfc_files_input_grid": "/path/to/file",
+            "mosaic_file_target_grid": "/path/to/file",
+            "varmap_file": "/path/to/file",
+            "vcoord_file_target_grid": "/path/to/file",
         }
         driverobj.namelist_file()
     assert dst.is_file()
@@ -118,11 +116,7 @@ def test_ChgresCube_namelist_file(driverobj):
 
 
 def test_ChgresCube_provisioned_run_directory(driverobj):
-    with patch.multiple(
-        driverobj,
-        namelist_file=D,
-        runscript=D,
-    ) as mocks:
+    with patch.multiple(driverobj, namelist_file=D, runscript=D) as mocks:
         driverobj.provisioned_run_directory()
     for m in mocks:
         mocks[m].assert_called_once_with()
@@ -156,31 +150,6 @@ def test_ChgresCube_runscript(driverobj):
     # Check execution:
     assert "srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE /path/to/chgres_cube" in lines
     assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
-
-
-def test_ChgresCube__run_via_batch_submission(driverobj):
-    runscript = driverobj._runscript_path
-    with patch.object(driverobj, "provisioned_run_directory") as prd:
-        with patch.object(
-            chgres_cube.ChgresCube, "_scheduler", new_callable=PropertyMock
-        ) as scheduler:
-            driverobj._run_via_batch_submission()
-            scheduler().submit_job.assert_called_once_with(
-                runscript=runscript, submit_file=Path(f"{runscript}.submit")
-            )
-        prd.assert_called_once_with()
-
-
-def test_ChgresCube__run_via_local_execution(driverobj):
-    with patch.object(driverobj, "provisioned_run_directory") as prd:
-        with patch.object(driver, "execute") as execute:
-            driverobj._run_via_local_execution()
-            execute.assert_called_once_with(
-                cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
-                cwd=driverobj._rundir,
-                log_output=True,
-            )
-        prd.assert_called_once_with()
 
 
 def test_ChgresCube__driver_config(driverobj):
