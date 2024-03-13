@@ -228,6 +228,7 @@ def _add_subparser_file(subparsers: Subparsers) -> ModeChecks:
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
         "copy": _add_subparser_file_copy(subparsers),  # PM use STR.copy
+        "link": _add_subparser_file_link(subparsers),  # PM use STR.link
     }
 
 
@@ -248,13 +249,33 @@ def _add_subparser_file_copy(subparsers: Subparsers) -> ActionChecks:
     return checks
 
 
+def _add_subparser_file_link(subparsers: Subparsers) -> ActionChecks:
+    """
+    Subparser for mode: file link
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, "link", "Link files")  # PM use STR.link
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_target_dir(required, required=True)
+    optional = _basic_setup(parser)
+    _add_arg_config_file(group=optional, required=False)
+    _add_arg_dry_run(optional)
+    checks = _add_args_verbosity(optional)
+    _add_arg_keys(optional)
+    return checks
+
+
 def _dispatch_file(args: Args) -> bool:
     """
     Dispatch logic for file mode.
 
     :param args: Parsed command-line args.
     """
-    return {"copy": _dispatch_file_copy}[args[STR.action]](args)  # PM use STR.copy
+    return {
+        "copy": _dispatch_file_copy,  # PM use STR.copy
+        "link": _dispatch_file_link,  # PM use STR.link
+    }[args[STR.action]](args)
 
 
 def _dispatch_file_copy(args: Args) -> bool:
@@ -264,6 +285,20 @@ def _dispatch_file_copy(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.file.copy(
+        target_dir=args["target_dir"],  # PM use STR.targetdir
+        config_file=args[STR.cfgfile],
+        keys=args["keys"],  # PM use STR.keys
+        dry_run=args[STR.dryrun],
+    )
+
+
+def _dispatch_file_link(args: Args) -> bool:
+    """
+    Dispatch logic for file link action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.file.link(
         target_dir=args["target_dir"],  # PM use STR.targetdir
         config_file=args[STR.cfgfile],
         keys=args["keys"],  # PM use STR.keys

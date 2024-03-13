@@ -11,12 +11,12 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.utils.tasks import filecopy
+from uwtools.utils.tasks import filecopy, symlink
 
 
-class FileHandler:
+class FileStager:
     """
-    The base class for file handlers.
+    The base class for staging files.
     """
 
     def __init__(
@@ -42,7 +42,7 @@ class FileHandler:
         self._validate()
 
     @cached_property
-    def _file_block(self) -> dict:
+    def _file_map(self) -> dict:
         """
         Navigate keys to file dst/src config block.
 
@@ -64,24 +64,35 @@ class FileHandler:
 
         :raises: UWConfigError if validation fails.
         """
-        validate_internal(schema_name="files-to-stage", config=self._file_block)
+        validate_internal(schema_name="files-to-stage", config=self._file_map)
 
 
-class FileCopier(FileHandler):
+class FileCopier(FileStager):
     """
-    PM WRIRTEME.
+    Stage files by copying.
     """
 
     @tasks
-    def copy_files(self):
+    def go(self):
         """
-        PM WRITEME.
+        Copy files.
         """
         yield "File copies"
-        yield [filecopy(src=Path(v), dst=self._target_dir / k) for k, v in self._file_block.items()]
+        yield [filecopy(src=Path(v), dst=self._target_dir / k) for k, v in self._file_map.items()]
 
 
-class FileLinker(FileHandler):
+class FileLinker(FileStager):
     """
-    PM WRITEME.
+    Stage files by linking.
     """
+
+    @tasks
+    def go(self):
+        """
+        Link files.
+        """
+        yield "File links"
+        yield [
+            symlink(target=Path(v), linkname=self._target_dir / k)
+            for k, v in self._file_map.items()
+        ]
