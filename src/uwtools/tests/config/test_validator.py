@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any, Dict, Tuple
 from unittest.mock import patch
 
-import json
 import yaml
 from pytest import fixture, raises
 
@@ -16,8 +15,9 @@ from uwtools.config import validator
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
-from uwtools.utils.file import resource_path
 from uwtools.tests.support import logged
+from uwtools.utils.file import resource_path
+
 # Fixtures
 
 

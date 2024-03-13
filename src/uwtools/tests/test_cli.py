@@ -24,6 +24,35 @@ from uwtools.logging import log
 from uwtools.tests.support import regex_logged
 from uwtools.utils.file import FORMAT
 
+# Helpers
+
+
+def actions(parser: Parser) -> List[str]:
+    # Return actions (named subparsers) belonging to the given parser.
+    if actions := [x for x in parser._actions if isinstance(x, _SubParsersAction)]:
+        return list(actions[0].choices.keys())
+    return []
+
+
+# Fixtures
+
+
+@fixture
+def args_dispatch_file():
+    return {
+        "target_dir": "/target/dir",
+        "config_file": "/config/file",
+        "keys": ["a", "b"],
+        "dry_run": False,
+    }
+
+
+@fixture
+def subparsers():
+    # Create and return a subparsers test object.
+    return Parser().add_subparsers()
+
+
 # Test functions
 
 
@@ -312,6 +341,44 @@ def test__dispatch_config_validate_config_obj():
     _validate_yaml.assert_called_once_with(**_validate_yaml_args)
 
 
+@pytest.mark.parametrize(
+    "action, funcname",
+    [
+        ("copy", "_dispatch_file_copy"),  # PM use STR.copy
+        ("link", "_dispatch_file_link"),  # PM use STR.link
+    ],
+)
+def test__dispatch_file(action, funcname):
+    args = {STR.action: action}
+    with patch.object(cli, funcname) as func:
+        cli._dispatch_file(args)
+    func.assert_called_once_with(args)
+
+
+def test__dispatch_file_copy(args_dispatch_file):
+    a = args_dispatch_file
+    with patch.object(cli.uwtools.api.file, "copy") as copy:
+        cli._dispatch_file_copy(a)
+    copy.assert_called_once_with(
+        target_dir=a["target_dir"],
+        config_file=a["config_file"],
+        keys=a["keys"],
+        dry_run=a["dry_run"],
+    )
+
+
+def test__dispatch_file_link(args_dispatch_file):
+    a = args_dispatch_file
+    with patch.object(cli.uwtools.api.file, "link") as link:
+        cli._dispatch_file_link(a)
+    link.assert_called_once_with(
+        target_dir=a["target_dir"],
+        config_file=a["config_file"],
+        keys=a["keys"],
+        dry_run=a["dry_run"],
+    )
+
+
 def test__dispatch_fv3():
     args: dict = {
         "batch": True,
@@ -565,19 +632,3 @@ def test__parse_args():
         Parser.assert_called_once()
         parser = Parser()
         parser.parse_args.assert_called_with(raw_args)
-
-
-# Helper functions
-
-
-def actions(parser: Parser) -> List[str]:
-    # Return actions (named subparsers) belonging to the given parser.
-    if actions := [x for x in parser._actions if isinstance(x, _SubParsersAction)]:
-        return list(actions[0].choices.keys())
-    return []
-
-
-@fixture
-def subparsers():
-    # Create and return a subparsers test object.
-    return Parser().add_subparsers()
