@@ -5,10 +5,13 @@ from functools import cached_property
 from pathlib import Path
 from typing import List, Optional
 
+from iotaa import tasks
+
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
+from uwtools.utils.tasks import filecopy
 
 
 class FileHandler:
@@ -68,6 +71,14 @@ class FileCopier(FileHandler):
     """
     PM WRIRTEME.
     """
+
+    @tasks
+    def copy_files(self):
+        """
+        PM WRITEME.
+        """
+        yield "File copies"
+        yield [filecopy(src=Path(v), dst=self._target_dir / k) for k, v in self._file_block.items()]
 
 
 class FileLinker(FileHandler):

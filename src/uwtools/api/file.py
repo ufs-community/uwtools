@@ -22,6 +22,7 @@ def copy(
     :param dry_run: Do not copy files
     :return: True if no exception is raised
     """
-    copier = _FileCopier(target_dir=target_dir, config_file=config_file, keys=keys, dry_run=dry_run)
-    assert copier
+    _FileCopier(
+        target_dir=target_dir, config_file=config_file, keys=keys, dry_run=dry_run
+    ).copy_files()
     return True
