@@ -1,0 +1,102 @@
+{
+  "description": "This document is to validate user-defined MPAS Init forecast config files",
+  "properties": {
+    "forecast": {
+      "description": "parameters of the forecast",
+      "properties": {
+        "cycle-dependent": {
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "exec_name": {
+          "type": "string"
+        },
+        "length": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "model": {
+          "type": "string"
+        },
+        "model_configure": {
+          "properties": {
+            "base_file": {
+              "format": "uri",
+              "type": "string"
+            },
+            "update_values": {
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "mpicmd": {
+          "type": "string"
+        },
+        "namelist": {
+          "properties": {
+            "base_file": {
+              "format": "uri",
+              "type": "string"
+            },
+            "update_values": {
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "run_dir": {
+          "format": "uri",
+          "type": "string"
+        },
+        "static": {
+          "propertyNames": {
+            "type": "string"
+          },
+          "type": "object"
+        },
+        "streams": {
+          "properties": {
+            "template": {
+              "format": "uri",
+              "type": "string"
+            },
+            "variables": {
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "platform": {
+      "properties": {
+        "required": [
+          "mpicmd"
+        ],
+        "scheduler": {
+          "enum": [
+            "lsf",
+            "pbs",
+            "slurm"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "user": {
+      "properties": {
+        "account": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "title": "MPAS Forecast config",
+  "type": "object"
+}
