@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, NoReturn, Tuple
 
 import uwtools.api.config
+import uwtools.api.file
 import uwtools.api.fv3
 import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
@@ -243,6 +244,7 @@ def _add_subparser_file_copy(subparsers: Subparsers) -> ActionChecks:
     optional = _basic_setup(parser)
     _add_arg_config_file(optional)
     _add_arg_keys(optional)
+    _add_arg_dry_run(optional)
     return _add_args_verbosity(optional)
 
 
@@ -265,9 +267,10 @@ def _dispatch_file_copy(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.file.copy(
-        config_file=args[STR.cfgfile],
         target_dir=args["target_dir"],  # PM use STR.targetdir
+        config_file=args[STR.cfgfile],
         keys=args["keys"],  # PM use STR.keys
+        dry_run=args[STR.dryrun],
     )
 
 

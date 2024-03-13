@@ -21,7 +21,7 @@ class Driver(ABC):
     An abstract class for component drivers.
     """
 
-    def __init__(self, config_file: Path, dry_run: bool = False, batch: bool = False):
+    def __init__(self, config_file: Path, dry_run: bool = False, batch: bool = False) -> None:
         """
         A component driver.
 
@@ -30,10 +30,10 @@ class Driver(ABC):
         :param batch: Run component via the batch system?
         """
         self._config = YAMLConfig(config=config_file)
-        self._config.dereference()
-        self._validate()
         self._dry_run = dry_run
         self._batch = batch
+        self._config.dereference()
+        self._validate()
 
     @staticmethod
     def _create_user_updated_config(
