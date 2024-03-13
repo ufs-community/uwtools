@@ -54,6 +54,7 @@ def main() -> None:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
             STR.config: _dispatch_config,
+            "file": _dispatch_file,  # PM use STR.file
             STR.fv3: _dispatch_fv3,
             STR.rocoto: _dispatch_rocoto,
             STR.sfcclimogen: _dispatch_sfc_climo_gen,
@@ -210,6 +211,64 @@ def _dispatch_config_validate(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.config.validate(schema_file=args[STR.schemafile], config=args[STR.infile])
+
+
+# Mode file
+
+
+def _add_subparser_file(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: file
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, "file", "Handle files")  # PM use STR.file
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
+    return {
+        "copy": _add_subparser_file_copy(subparsers),  # PM use STR.copy
+        # "file": _add_subparser_file_copy(subparsers), # PM use STR.file
+    }
+
+
+def _add_subparser_file_copy(subparsers: Subparsers) -> ActionChecks:
+    """
+    Subparser for mode: file copy
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, "copy", "Copy files")  # PM use STR.copy
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_target_dir(required)
+    optional = _basic_setup(parser)
+    _add_arg_config_file(optional)
+    _add_arg_keys(optional)
+    return _add_args_verbosity(optional)
+
+
+def _dispatch_file(args: Args) -> bool:
+    """
+    Dispatch logic for file mode.
+
+    :param args: Parsed command-line args.
+    """
+    return {
+        "copy": _dispatch_file_copy,  # PM use STR.copy
+        # "link": _dispatch_file_copy, # PM use STR.link
+    }[args[STR.action]](args)
+
+
+def _dispatch_file_copy(args: Args) -> bool:
+    """
+    Dispatch logic for file copy action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.file.copy(
+        config_file=args[STR.cfgfile],
+        target_dir=args["target_dir"],  # PM use STR.targetdir
+        keys=args["keys"],  # PM use STR.keys
+    )
 
 
 # Mode fv3
@@ -615,6 +674,15 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
     )
 
 
+def _add_arg_keys(group: Group) -> None:
+    group.add_argument(
+        "keys",  # PM use STR.keys
+        help="YAML keys leading to file dst/src block",
+        metavar="KEY",
+        nargs="*",
+    )
+
+
 def _add_arg_output_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.outfile),
@@ -679,6 +747,15 @@ def _add_arg_supplemental_files(group: Group) -> None:
         help="Additional files to supplement primary input",
         metavar="PATH",
         nargs="*",
+        type=Path,
+    )
+
+
+def _add_arg_target_dir(group: Group) -> None:
+    group.add_argument(
+        _switch("target_dir"),  # PM use STR.targetdir
+        help="Path to target directory",
+        metavar="PATH",
         type=Path,
     )
 
@@ -853,6 +930,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     checks = {
         STR.config: _add_subparser_config(subparsers),
+        "file": _add_subparser_file(subparsers),  # PM Use STR.file
         STR.fv3: _add_subparser_fv3(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),
         STR.sfcclimogen: _add_subparser_sfc_climo_gen(subparsers),
