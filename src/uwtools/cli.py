@@ -329,12 +329,7 @@ def _dispatch_file(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {
-        STR.copy: _dispatch_file_copy,
-        STR.link: _dispatch_file_link,
-    }[
-        args[STR.action]
-    ](args)
+    return {STR.copy: _dispatch_file_copy, STR.link: _dispatch_file_link}[args[STR.action]](args)
 
 
 def _dispatch_file_copy(args: Args) -> bool:
