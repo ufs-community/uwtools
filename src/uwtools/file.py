@@ -33,6 +33,7 @@ class FileStager:
         :param config_file: Path to YAML config file (defaults to stdin)
         :param keys: YAML keys leading to file dst/src block
         :param dry_run: Do not copy files
+        :raises: UWConfigError if config fails validation.
         """
         self._target_dir = target_dir
         self._config = YAMLConfig(config=config_file)
