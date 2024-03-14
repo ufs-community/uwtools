@@ -216,11 +216,12 @@ def _dispatch_config(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {
+    actions = {
         STR.compare: _dispatch_config_compare,
         STR.realize: _dispatch_config_realize,
         STR.validate: _dispatch_config_validate,
-    }[args[STR.action]](args)
+    }
+    return actions[args[STR.action]](args)
 
 
 def _dispatch_config_compare(args: Args) -> bool:
@@ -329,7 +330,11 @@ def _dispatch_file(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {STR.copy: _dispatch_file_copy, STR.link: _dispatch_file_link}[args[STR.action]](args)
+    actions = {
+        STR.copy: _dispatch_file_copy,
+        STR.link: _dispatch_file_link,
+    }
+    return actions[args[STR.action]](args)
 
 
 def _dispatch_file_copy(args: Args) -> bool:
@@ -465,12 +470,11 @@ def _dispatch_rocoto(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {
+    actions = {
         STR.realize: _dispatch_rocoto_realize,
         STR.validate: _dispatch_rocoto_validate,
-    }[
-        args[STR.action]
-    ](args)
+    }
+    return actions[args[STR.action]](args)
 
 
 def _dispatch_rocoto_realize(args: Args) -> bool:
@@ -605,12 +609,11 @@ def _dispatch_template(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {
+    actions = {
         STR.render: _dispatch_template_render,
         STR.translate: _dispatch_template_translate,
-    }[
-        args[STR.action]
-    ](args)
+    }
+    return actions[args[STR.action]](args)
 
 
 def _dispatch_template_render(args: Args) -> bool:
