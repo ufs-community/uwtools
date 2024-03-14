@@ -62,7 +62,6 @@ class FileStager:
         """
         Validate config against its schema.
 
-        :raises: UWConfigError if validation fails.
         :return: True if config passes validation.
         :raises: UWConfigError if config fails validation.
         """
