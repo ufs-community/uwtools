@@ -38,20 +38,20 @@
                   "properties": {
                     "atm_core_files_input_grid": {
                       "type": [
-                          "string",
-                          "array"
+                        "string",
+                        "array"
                       ]
                     },
                     "atm_files_input_grid": {
                       "type": [
-                          "string",
-                          "array"
+                        "string",
+                        "array"
                       ]
                     },
                     "atm_tracer_files_input_grid": {
                       "type": [
-                          "string",
-                          "array"
+                        "string",
+                        "array"
                       ]
                     },
                     "atm_weight_file": {
@@ -144,14 +144,14 @@
                     },
                     "orog_files_input_grid": {
                       "type": [
-                          "string",
-                          "array"
+                        "string",
+                        "array"
                       ]
                     },
                     "orog_files_target_grid": {
                       "type": [
-                          "string",
-                          "array"
+                        "string",
+                        "array"
                       ]
                     },
                     "regional": {
@@ -159,8 +159,8 @@
                     },
                     "sfc_files_input_grid": {
                       "type": [
-                          "string",
-                          "array"
+                        "string",
+                        "array"
                       ]
                     },
                     "sotyp_from_climo": {
