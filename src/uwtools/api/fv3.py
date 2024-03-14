@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict, Optional
 
 from uwtools.drivers import support
-from uwtools.drivers.fv3 import FV3
+from uwtools.drivers.fv3 import FV3 as _FV3
 
 
 def execute(
@@ -31,7 +31,7 @@ def execute(
     :param graph_file: Write Graphviz DOT output here
     :return: ``True`` if task completes without raising an exception
     """
-    obj = FV3(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
+    obj = _FV3(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
     getattr(obj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
@@ -50,4 +50,4 @@ def tasks() -> Dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
     """
-    return support.tasks(FV3)
+    return support.tasks(_FV3)

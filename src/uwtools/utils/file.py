@@ -4,64 +4,15 @@ Helpers for working with files and directories.
 
 import sys
 from contextlib import contextmanager
-from dataclasses import dataclass, fields
 from functools import cache
 from importlib import resources
 from io import StringIO
 from pathlib import Path
-from typing import IO, Any, Dict, Generator, List, Optional, Union
+from typing import IO, Any, Generator, Optional, Union
 
 from uwtools.exceptions import UWError
 from uwtools.logging import log
-
-
-@dataclass(frozen=True)
-class FORMAT:
-    """
-    A mapping from config format names to literal strings.
-    """
-
-    # Canonical strings:
-
-    _atparse: str = "atparse"
-    _fieldtable: str = "fieldtable"
-    _ini: str = "ini"
-    _jinja2: str = "jinja2"
-    _nml: str = "nml"
-    _sh: str = "sh"
-    _xml: str = "xml"
-    _yaml: str = "yaml"
-
-    # Variants:
-
-    atparse: str = _atparse
-    bash: str = _sh
-    cfg: str = _ini
-    fieldtable: str = _fieldtable
-    ini: str = _ini
-    jinja2: str = _jinja2
-    nml: str = _nml
-    sh: str = _sh
-    yaml: str = _yaml
-    yml: str = _yaml
-
-    @staticmethod
-    def extensions() -> List[str]:
-        """
-        Returns recognized filename extensions.
-        """
-        return [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
-
-    @staticmethod
-    def formats() -> Dict[str, str]:
-        """
-        Returns the recognized format names.
-        """
-        return {
-            field.name: str(getattr(FORMAT, field.name))
-            for field in fields(FORMAT)
-            if not field.name.startswith("_")
-        }
+from uwtools.strings import FORMAT
 
 
 class StdinProxy:

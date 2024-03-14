@@ -17,7 +17,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
-from uwtools.utils.processing import execute
+from uwtools.strings import STR
 from uwtools.utils.tasks import filecopy, symlink
 
 
@@ -25,6 +25,8 @@ class FV3(Driver):
     """
     A driver for the FV3 model.
     """
+
+    _driver_name = STR.fv3
 
     def __init__(
         self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
@@ -42,7 +44,6 @@ class FV3(Driver):
         if self._dry_run:
             dryrun()
         self._cycle = cycle
-        self._rundir = Path(self._driver_config["run_dir"])
 
     # Workflow tasks
 
@@ -181,14 +182,6 @@ class FV3(Driver):
         yield None
         path.mkdir(parents=True)
 
-    @tasks
-    def run(self):
-        """
-        A run.
-        """
-        yield self._taskname("run")
-        yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
-
     @task
     def runscript(self):
         """
@@ -216,40 +209,15 @@ class FV3(Driver):
             print(rs, file=f)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
-    # Private workflow tasks
-
-    @task
-    def _run_via_batch_submission(self):
-        """
-        A run executed via the batch system.
-        """
-        yield self._taskname("run via batch submission")
-        path = Path("%s.submit" % self._runscript_path)
-        yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
-        self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
-
-    @task
-    def _run_via_local_execution(self):
-        """
-        A run executed directly on the local system.
-        """
-        yield self._taskname("run via local execution")
-        path = self._rundir / "done"
-        yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
-        cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
-        execute(cmd=cmd, cwd=self._rundir, log_output=True)
-
     # Private helper methods
 
-    @property
-    def _driver_config(self) -> Dict[str, Any]:
+    def _taskname(self, suffix: str) -> str:
         """
-        Returns the config block specific to this driver.
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
         """
-        driver_config: Dict[str, Any] = self._config["fv3"]
-        return driver_config
+        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
 
     @property
     def _resources(self) -> Dict[str, Any]:
@@ -262,25 +230,3 @@ class FV3(Driver):
             "scheduler": self._config["platform"]["scheduler"],
             **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
-
-    @property
-    def _runscript_path(self) -> Path:
-        """
-        Returns the path to the runscript.
-        """
-        return self._rundir / "runscript"
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s FV3 %s" % (self._cycle.strftime("%Y%m%d %HZ"), suffix)
-
-    def _validate(self) -> None:
-        """
-        Perform all necessary schema validation.
-        """
-        for schema_name in ("fv3", "platform"):
-            validate_internal(schema_name=schema_name, config=self._config)

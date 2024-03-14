@@ -5,7 +5,8 @@ from typing import Optional, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.config.tools import config_check_depths_dump
-from uwtools.utils.file import FORMAT, readable, writable
+from uwtools.strings import FORMAT
+from uwtools.utils.file import readable, writable
 
 
 class INIConfig(Config):

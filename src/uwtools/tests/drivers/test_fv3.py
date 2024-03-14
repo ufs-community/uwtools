@@ -11,7 +11,7 @@ import pytest
 import yaml
 from pytest import fixture
 
-from uwtools.drivers import fv3
+from uwtools.drivers import driver, fv3
 from uwtools.tests.support import logged
 
 # Fixtures
@@ -188,7 +188,7 @@ def test_FV3_run_local(driverobj):
 
 
 def test_FV3_runscript(driverobj):
-    dst = driverobj._rundir / "runscript"
+    dst = driverobj._rundir / "runscript.fv3"
     assert not dst.is_file()
     driverobj._driver_config["execution"].update(
         {
@@ -232,7 +232,7 @@ def test_FV3__run_via_batch_submission(driverobj):
 
 def test_FV3__run_via_local_execution(driverobj):
     with patch.object(driverobj, "provisioned_run_directory") as prd:
-        with patch.object(fv3, "execute") as execute:
+        with patch.object(driver, "execute") as execute:
             driverobj._run_via_local_execution()
             execute.assert_called_once_with(
                 cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
@@ -261,11 +261,11 @@ def test_FV3__resources(driverobj):
 
 
 def test_FV3__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript"
+    assert driverobj._runscript_path == driverobj._rundir / "runscript.fv3"
 
 
 def test_FV3__taskanme(driverobj):
-    assert driverobj._taskname("foo") == "20240201 18Z FV3 foo"
+    assert driverobj._taskname("foo") == "20240201 18Z fv3 foo"
 
 
 def test_FV3__validate(driverobj):

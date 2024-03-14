@@ -11,7 +11,8 @@ from uwtools.config.jinja2 import unrendered
 from uwtools.config.support import depth, format_to_config, log_and_error
 from uwtools.exceptions import UWConfigRealizeError, UWError
 from uwtools.logging import MSGWIDTH, log
-from uwtools.utils.file import FORMAT, get_file_format
+from uwtools.strings import FORMAT
+from uwtools.utils.file import get_file_format
 
 # Public functions
 
