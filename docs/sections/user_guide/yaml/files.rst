@@ -1,7 +1,7 @@
 .. _files_yaml:
 
-File Blocks:
-============
+File Blocks
+===========
 
 File blocks define files to be staged in a target directory as copies or symbolic links. Keys in such blocks specify destination paths relative to the target directory, and values specify source paths.
 
@@ -12,7 +12,7 @@ Example block:
    foo: /path/to/foo
    subdir/bar: /path/to/bar
 
-* For a copy action, this block would lead to
+* Result when copying:
 
 .. code-block:: text
 
@@ -23,7 +23,7 @@ Example block:
 
 where ``foo`` and ``bar`` are copies of their respective source files.
 
-* For a link action, this block would lead to
+* Result when linking:
 
 .. code-block:: text
 

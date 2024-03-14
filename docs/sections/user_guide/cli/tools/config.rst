@@ -1,5 +1,5 @@
-Mode ``config``
-===============
+``config``
+==========
 
 The ``uw`` mode for handling configuration files (configs).
 

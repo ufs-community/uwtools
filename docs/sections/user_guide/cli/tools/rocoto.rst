@@ -1,5 +1,5 @@
-Mode ``rocoto``
-===============
+``rocoto``
+==========
 
 The ``uw`` mode for realizing and validating Rocoto XML documents.
 

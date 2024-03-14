@@ -1,5 +1,5 @@
-Mode ``file``
-=============
+``file``
+========
 
 The ``uw`` mode for handling filesystem files.
 
@@ -26,7 +26,7 @@ The ``uw`` mode for handling filesystem files.
 ``copy``
 --------
 
-The ``copy`` action stages files in a target directory by copying files.
+The ``copy`` action stages files in a target directory by copying files. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`file block <files_yaml>`.
 
 .. code-block:: text
 
@@ -102,7 +102,7 @@ Here, ``foo`` and ``bar`` are copies of their respective source files.
 ``link``
 --------
 
-The ``link`` action stages files in a target directory by linking files.
+The ``link`` action stages files in a target directory by linking files. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`file block <files_yaml>`.
 
 .. code-block:: text
 
