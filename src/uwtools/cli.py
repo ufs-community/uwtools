@@ -98,7 +98,7 @@ def _add_subparser_chgres_cube_task(
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_config_file(required, required=True)
+    _add_arg_config_file(group=required, required=True)
     _add_arg_cycle(required)
     optional = _basic_setup(parser)
     _add_arg_batch(optional)
