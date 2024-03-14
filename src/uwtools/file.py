@@ -58,13 +58,16 @@ class FileStager:
             cfg = cfg[key]
         return cfg
 
-    def _validate(self) -> None:
+    def _validate(self) -> bool:
         """
         Validate config against its schema.
 
         :raises: UWConfigError if validation fails.
+        :return: True if config passes validation.
+        :raises: UWConfigError if config fails validation.
         """
         validate_internal(schema_name="files-to-stage", config=self._file_map)
+        return True
 
 
 class FileCopier(FileStager):
