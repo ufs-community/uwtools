@@ -56,7 +56,7 @@ def main() -> None:
         modes = {
             STR.chgrescube: _dispatch_chgres_cube,
             STR.config: _dispatch_config,
-            "file": _dispatch_file,  # PM use STR.file
+            STR.file: _dispatch_file,
             STR.fv3: _dispatch_fv3,
             STR.rocoto: _dispatch_rocoto,
             STR.sfcclimogen: _dispatch_sfc_climo_gen,
@@ -280,12 +280,12 @@ def _add_subparser_file(subparsers: Subparsers) -> ModeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, "file", "Handle files")  # PM use STR.file
+    parser = _add_subparser(subparsers, STR.file, "Handle files")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
-        "copy": _add_subparser_file_copy(subparsers),  # PM use STR.copy
-        "link": _add_subparser_file_link(subparsers),  # PM use STR.link
+        STR.copy: _add_subparser_file_copy(subparsers),
+        STR.link: _add_subparser_file_link(subparsers),
     }
 
 
@@ -295,7 +295,7 @@ def _add_subparser_file_copy(subparsers: Subparsers) -> ActionChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, "copy", "Copy files")  # PM use STR.copy
+    parser = _add_subparser(subparsers, STR.copy, "Copy files")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_target_dir(required, required=True)
     optional = _basic_setup(parser)
@@ -312,7 +312,7 @@ def _add_subparser_file_link(subparsers: Subparsers) -> ActionChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, "link", "Link files")  # PM use STR.link
+    parser = _add_subparser(subparsers, STR.link, "Link files")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_target_dir(required, required=True)
     optional = _basic_setup(parser)
@@ -330,9 +330,11 @@ def _dispatch_file(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return {
-        "copy": _dispatch_file_copy,  # PM use STR.copy
-        "link": _dispatch_file_link,  # PM use STR.link
-    }[args[STR.action]](args)
+        STR.copy: _dispatch_file_copy,
+        STR.link: _dispatch_file_link,
+    }[
+        args[STR.action]
+    ](args)
 
 
 def _dispatch_file_copy(args: Args) -> bool:
@@ -342,9 +344,9 @@ def _dispatch_file_copy(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.file.copy(
-        target_dir=args["target_dir"],  # PM use STR.targetdir
+        target_dir=args[STR.targetdir],
         config_file=args[STR.cfgfile],
-        keys=args["keys"],  # PM use STR.keys
+        keys=args[STR.keys],
         dry_run=args[STR.dryrun],
     )
 
@@ -356,9 +358,9 @@ def _dispatch_file_link(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.file.link(
-        target_dir=args["target_dir"],  # PM use STR.targetdir
+        target_dir=args[STR.targetdir],
         config_file=args[STR.cfgfile],
-        keys=args["keys"],  # PM use STR.keys
+        keys=args[STR.keys],
         dry_run=args[STR.dryrun],
     )
 
@@ -768,7 +770,7 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
 
 def _add_arg_keys(group: Group) -> None:
     group.add_argument(
-        "keys",  # PM use STR.keys
+        STR.keys,
         help="YAML key leading to file dst/src block",
         metavar="KEY",
         nargs="*",
@@ -845,7 +847,7 @@ def _add_arg_supplemental_files(group: Group) -> None:
 
 def _add_arg_target_dir(group: Group, required: bool) -> None:
     group.add_argument(
-        _switch("target_dir"),  # PM use STR.targetdir
+        _switch(STR.targetdir),
         help="Path to target directory",
         metavar="PATH",
         required=required,
@@ -1024,7 +1026,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     checks = {
         STR.chgrescube: _add_subparser_chgres_cube(subparsers),
         STR.config: _add_subparser_config(subparsers),
-        "file": _add_subparser_file(subparsers),  # PM Use STR.file
+        STR.file: _add_subparser_file(subparsers),
         STR.fv3: _add_subparser_fv3(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),
         STR.sfcclimogen: _add_subparser_sfc_climo_gen(subparsers),

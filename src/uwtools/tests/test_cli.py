@@ -366,11 +366,7 @@ def test__dispatch_config_validate_config_obj():
 
 
 @pytest.mark.parametrize(
-    "action, funcname",
-    [
-        ("copy", "_dispatch_file_copy"),  # PM use STR.copy
-        ("link", "_dispatch_file_link"),  # PM use STR.link
-    ],
+    "action, funcname", [(STR.copy, "_dispatch_file_copy"), (STR.link, "_dispatch_file_link")]
 )
 def test__dispatch_file(action, funcname):
     args = {STR.action: action}
