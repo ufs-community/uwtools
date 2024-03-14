@@ -35,6 +35,16 @@ def test__abort(capsys):
     assert msg in capsys.readouterr().err
 
 
+def test__add_subparser_chgres_cube(subparsers):
+    cli._add_subparser_chgres_cube(subparsers)
+    assert actions(subparsers.choices[STR.chgrescube]) == [
+        "namelist_file",
+        "provisioned_run_directory",
+        "run",
+        "runscript",
+    ]
+
+
 def test__add_subparser_config(subparsers):
     cli._add_subparser_config(subparsers)
     assert actions(subparsers.choices[STR.config]) == [STR.compare, STR.realize, STR.validate]
@@ -203,6 +213,19 @@ def test__check_verbosity_ok(flags):
 def test__dict_from_key_eq_val_strings():
     assert not cli._dict_from_key_eq_val_strings([])
     assert cli._dict_from_key_eq_val_strings(["a=1", "b=2"]) == {"a": "1", "b": "2"}
+
+
+def test__dispatch_chgres_cube():
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "cycle": dt.datetime.now(),
+        "dry_run": False,
+        "graph_file": None,
+    }
+    with patch.object(uwtools.api.chgres_cube, "execute") as execute:
+        cli._dispatch_chgres_cube({**args, "action": "foo"})
+    execute.assert_called_once_with(**{**args, "task": "foo"})
 
 
 @pytest.mark.parametrize(

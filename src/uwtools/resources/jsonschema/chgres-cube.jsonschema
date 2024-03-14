@@ -1,0 +1,223 @@
+{
+  "properties": {
+    "chgres_cube": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "$ref": "urn:uwtools:execution"
+        },
+        "namelist": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "properties": {
+                "config": {
+                  "additionalProperties": {
+                    "type": [
+                      "array",
+                      "boolean",
+                      "number",
+                      "string"
+                    ]
+                  },
+                  "properties": {
+                    "atm_core_files_input_grid": {
+                      "type": [
+                        "string",
+                        "array"
+                      ]
+                    },
+                    "atm_files_input_grid": {
+                      "type": [
+                        "string",
+                        "array"
+                      ]
+                    },
+                    "atm_tracer_files_input_grid": {
+                      "type": [
+                        "string",
+                        "array"
+                      ]
+                    },
+                    "atm_weight_file": {
+                      "type": "string"
+                    },
+                    "convert_atm": {
+                      "type": "boolean"
+                    },
+                    "convert_nst": {
+                      "type": "boolean"
+                    },
+                    "convert_sfc": {
+                      "type": "boolean"
+                    },
+                    "cycle_day": {
+                      "type": "integer"
+                    },
+                    "cycle_hour": {
+                      "type": "integer"
+                    },
+                    "cycle_mon": {
+                      "type": "integer"
+                    },
+                    "cycle_year": {
+                      "type": "integer"
+                    },
+                    "data_dir_input_grid": {
+                      "type": "string"
+                    },
+                    "external_model": {
+                      "enum": [
+                        "GFS",
+                        "HRRR",
+                        "NAM",
+                        "RAP",
+                        "UKMET"
+                      ],
+                      "type": "string"
+                    },
+                    "fix_dir_target_grid": {
+                      "type": "string"
+                    },
+                    "geogrid_file_input_grid": {
+                      "type": "string"
+                    },
+                    "grib2_file_input_grid": {
+                      "type": "string"
+                    },
+                    "halo_blend": {
+                      "type": "integer"
+                    },
+                    "halo_bndy": {
+                      "type": "integer"
+                    },
+                    "input_type": {
+                      "enum": [
+                        "history",
+                        "gaussian_nemsio",
+                        "gaussian_netcdf",
+                        "gfs_gaussian_nemsio",
+                        "gfs_sigio",
+                        "grib2",
+                        "restart"
+                      ],
+                      "type": "string"
+                    },
+                    "lai_from_climo": {
+                      "type": "boolean"
+                    },
+                    "minmax_vgfrc_from_climo": {
+                      "type": "boolean"
+                    },
+                    "mosaic_file_input_grid": {
+                      "type": "string"
+                    },
+                    "mosaic_file_target_grid": {
+                      "type": "string"
+                    },
+                    "nsoill_out": {
+                      "type": "integer"
+                    },
+                    "nst_files_input_grid": {
+                      "type": "string"
+                    },
+                    "orog_dir_input_grid": {
+                      "type": "string"
+                    },
+                    "orog_dir_target_grid": {
+                      "type": "string"
+                    },
+                    "orog_files_input_grid": {
+                      "type": [
+                        "string",
+                        "array"
+                      ]
+                    },
+                    "orog_files_target_grid": {
+                      "type": [
+                        "string",
+                        "array"
+                      ]
+                    },
+                    "regional": {
+                      "type": "integer"
+                    },
+                    "sfc_files_input_grid": {
+                      "type": [
+                        "string",
+                        "array"
+                      ]
+                    },
+                    "sotyp_from_climo": {
+                      "type": "boolean"
+                    },
+                    "tg3_from_soil": {
+                      "type": "boolean"
+                    },
+                    "thomp_mp_climo_file": {
+                      "type": "string"
+                    },
+                    "tracers": {
+                      "type": "array"
+                    },
+                    "tracers_input": {
+                      "type": "array"
+                    },
+                    "varmap_file": {
+                      "type": "string"
+                    },
+                    "vcoord_file_target_grid": {
+                      "type": "string"
+                    },
+                    "vgfrc_from_climo": {
+                      "type": "boolean"
+                    },
+                    "vgtyp_from_climo": {
+                      "type": "boolean"
+                    },
+                    "wam_cold_start": {
+                      "type": "boolean"
+                    },
+                    "wam_parm_file": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "required": [
+                "config"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "run_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "run_dir"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}
