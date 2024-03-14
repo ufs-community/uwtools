@@ -14,7 +14,6 @@ from iotaa import asset, dryrun, task, tasks
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.validator import validate_internal
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.strings import STR

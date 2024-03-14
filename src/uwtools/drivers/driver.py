@@ -7,12 +7,11 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Type
 
-
 from iotaa import asset, task, tasks
 
-from uwtools.config.validator import validate_internal
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.validator import validate_internal
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute

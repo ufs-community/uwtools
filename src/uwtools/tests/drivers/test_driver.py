@@ -147,24 +147,24 @@ def test_Driver__runscript_execution_only(a_driver):
     assert a_driver._runscript(execution=["foo", "bar"]) == dedent(expected).strip()
 
 
-def test_Driver__run_via_batch_submission(driver_good):
-    runscript = driver_good._runscript_path
-    with patch.object(driver_good, "provisioned_run_directory") as prd:
+def test_Driver__run_via_batch_submission(a_driver):
+    runscript = a_driver._runscript_path
+    with patch.object(a_driver, "provisioned_run_directory") as prd:
         with patch.object(ConcreteDriver, "_scheduler", new_callable=PropertyMock) as scheduler:
-            driver_good._run_via_batch_submission()
+            a_driver._run_via_batch_submission()
             scheduler().submit_job.assert_called_once_with(
                 runscript=runscript, submit_file=Path(f"{runscript}.submit")
             )
         prd.assert_called_once_with()
 
 
-def test_Driver__run_via_local_execution(driver_good):
-    with patch.object(driver_good, "provisioned_run_directory") as prd:
+def test_Driver__run_via_local_execution(a_driver):
+    with patch.object(a_driver, "provisioned_run_directory") as prd:
         with patch.object(driver, "execute") as execute:
-            driver_good._run_via_local_execution()
+            a_driver._run_via_local_execution()
             execute.assert_called_once_with(
-                cmd="{x} >{x}.out 2>&1".format(x=driver_good._runscript_path),
-                cwd=driver_good._rundir,
+                cmd="{x} >{x}.out 2>&1".format(x=a_driver._runscript_path),
+                cwd=a_driver._rundir,
                 log_output=True,
             )
         prd.assert_called_once_with()
