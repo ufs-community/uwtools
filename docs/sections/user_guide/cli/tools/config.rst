@@ -28,7 +28,7 @@ The ``uw`` mode for handling configuration files (configs).
 ``compare``
 -----------
 
-The ``compare`` mode lets users compare two config files.
+The ``compare`` action lets users compare two config files.
 
 .. code-block:: text
 
@@ -148,7 +148,7 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
 ``realize``
 -----------
 
-In ``uw`` terminology, to realize a configuration file is to transform it from its raw form into its final, usable state. The ``realize`` mode can build a complete config file from two or more separate files.
+In ``uw`` terminology, to realize a configuration file is to transform it from its raw form into its final, usable state. The ``realize`` action can build a complete config file from two or more separate files.
 
 .. code-block:: text
 
@@ -483,7 +483,7 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
 ``validate``
 ------------
 
-The ``validate`` mode ensures that a given config file is structured properly.
+The ``validate`` action ensures that a given config file is structured properly.
 
 .. code-block:: text
 
