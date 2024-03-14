@@ -12,7 +12,7 @@ Example block:
    foo: /path/to/foo
    subdir/bar: /path/to/bar
 
-For a copy action, this block would lead to
+* For a copy action, this block would lead to
 
 .. code-block:: text
 
@@ -21,7 +21,9 @@ For a copy action, this block would lead to
    └── subdir
        └── bar
 
-For a link action, this block would lead to
+where ``foo`` and ``bar`` are copies of their respective source files.
+
+* For a link action, this block would lead to
 
 .. code-block:: text
 
@@ -29,3 +31,5 @@ For a link action, this block would lead to
    ├── foo -> /path/to/foo
    └── subdir
        └── bar -> /path/to/bar
+
+where ``foo`` and ``bar`` are symbolic links.
