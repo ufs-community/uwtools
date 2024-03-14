@@ -7,6 +7,7 @@ UW YAML
    components/index
    platform
    execution
+   files
    updating_values
    field_table
    rocoto
