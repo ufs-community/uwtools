@@ -7,7 +7,7 @@ from functools import partial
 
 from pytest import fixture
 
-from uwtools.tests.drivers import test_sfc_climo_gen
+from uwtools.tests.drivers import test_chgres_cube, test_sfc_climo_gen
 from uwtools.tests.support import schema_validator, with_del, with_set
 
 # execution
@@ -459,6 +459,18 @@ def test_schema_rocoto_workflow_cycledef():
 def test_schema_sfc_climo_gen():
     errors = schema_validator("sfc-climo-gen", "properties", "sfc_climo_gen")
     d = test_sfc_climo_gen.config["sfc_climo_gen"]
+    # Basic correctness:
+    assert not errors(d)
+    # Additional properties are not allowed:
+    assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
+
+
+# chgres-cube
+
+
+def test_schema_chgres_cube():
+    errors = schema_validator("chgres-cube", "properties", "chgres_cube")
+    d = test_chgres_cube.config["chgres_cube"]
     # Basic correctness:
     assert not errors(d)
     # Additional properties are not allowed:
