@@ -290,13 +290,12 @@ def _add_subparser_file(subparsers: Subparsers) -> ModeChecks:
     }
 
 
-def _add_subparser_file_copy(subparsers: Subparsers) -> ActionChecks:
+def _add_subparser_file_common(parser: Parser) -> ActionChecks:
     """
-    Subparser for mode: file copy
+    Common subparser code for mode: file {copy link}
 
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param parser: The parser to configure.
     """
-    parser = _add_subparser(subparsers, STR.copy, "Copy files")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_target_dir(required, required=True)
     optional = _basic_setup(parser)
@@ -305,6 +304,16 @@ def _add_subparser_file_copy(subparsers: Subparsers) -> ActionChecks:
     checks = _add_args_verbosity(optional)
     _add_arg_keys(optional)
     return checks
+
+
+def _add_subparser_file_copy(subparsers: Subparsers) -> ActionChecks:
+    """
+    Subparser for mode: file copy
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.copy, "Copy files")
+    return _add_subparser_file_common(parser)
 
 
 def _add_subparser_file_link(subparsers: Subparsers) -> ActionChecks:
@@ -314,14 +323,7 @@ def _add_subparser_file_link(subparsers: Subparsers) -> ActionChecks:
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
     parser = _add_subparser(subparsers, STR.link, "Link files")
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_target_dir(required, required=True)
-    optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional, required=False)
-    _add_arg_dry_run(optional)
-    checks = _add_args_verbosity(optional)
-    _add_arg_keys(optional)
-    return checks
+    return _add_subparser_file_common(parser)
 
 
 def _dispatch_file(args: Args) -> bool:

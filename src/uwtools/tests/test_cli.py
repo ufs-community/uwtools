@@ -95,6 +95,21 @@ def test__add_subparser_config_validate(subparsers):
     assert subparsers.choices[STR.validate]
 
 
+def test__add_subparser_file(subparsers):
+    cli._add_subparser_file(subparsers)
+    assert actions(subparsers.choices[STR.file]) == [STR.copy, STR.link]
+
+
+def test__add_subparser_file_copy(subparsers):
+    cli._add_subparser_file_copy(subparsers)
+    assert subparsers.choices[STR.copy]
+
+
+def test__add_subparser_file_link(subparsers):
+    cli._add_subparser_file_link(subparsers)
+    assert subparsers.choices[STR.link]
+
+
 def test__add_subparser_fv3(subparsers):
     cli._add_subparser_fv3(subparsers)
     assert actions(subparsers.choices[STR.fv3]) == [
