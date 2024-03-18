@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
 
-from iotaa import asset, dryrun, external, task, tasks
+from iotaa import asset, dryrun, external, run, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
@@ -50,9 +50,10 @@ class Ungrib(Driver):
         fn = str(self._cycle)
         yield self._taskname(fn)
         path = self._rundir / fn
+        taskname = "Initial conditions in %s" % self._rundir
         yield asset(path, path.is_file)
         yield [self.gribfile_aaa, self.namelist_wps, self.vtable]
-        self.run()
+        run(taskname, "ungrib 2>&1 | tee ungrib.out", cwd=path.parent)
 
     @task
     def gfs_local(self):
@@ -102,8 +103,8 @@ class Ungrib(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
-            self.gribfile_aaa(),
-            self.namelist_wps(),
+            # self.gribfile_aaa(),
+            # self.namelist_wps(),
             self.runscript(),
             self.vtable(),
         ]
@@ -125,7 +126,6 @@ class Ungrib(Driver):
         yield self._taskname(path.name)
         yield asset(path, path.is_file)
         yield None
-        # envvars ???
         envcmds = self._driver_config.get("execution", {}).get("envcmds", [])
         execution = [self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir]
         scheduler = self._scheduler if self._batch else None
@@ -140,10 +140,12 @@ class Ungrib(Driver):
         """
         The Vtable.
         """
-        fn = "Vtable"
-        yield self._taskname("Vtable")
-        path = self._rundir / fn
+        path = self._rundir / "Vtable"
+        yield self._taskname(path)
         yield asset(path, path.exists)
+        yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.touch()
         # path.symlink_to(Path(self._wpsfile))
 
     # Private workflow tasks
