@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access
 
 import datetime as dt
 from unittest.mock import patch
@@ -15,7 +15,7 @@ def test_execute(tmp_path):
         "dry_run": True,
         "graph_file": dot,
     }
-    with patch.object(fv3, "FV3") as FV3:
+    with patch.object(fv3, "_FV3") as FV3:
         assert fv3.execute(**args, task="foo") is True
     del args["graph_file"]
     FV3.assert_called_once_with(**args)
@@ -31,4 +31,4 @@ def test_graph():
 def test_tasks():
     with patch.object(fv3.support, "tasks") as _tasks:
         fv3.tasks()
-    _tasks.assert_called_once_with(fv3.FV3)
+    _tasks.assert_called_once_with(fv3._FV3)

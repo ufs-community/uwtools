@@ -30,8 +30,9 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 
    $ uw template render --help
    usage: uw template render [-h] [--input-file PATH] [--output-file PATH] [--values-file PATH]
-                             [--values-format {ini,nml,sh,yaml}] [--env] [--values-needed]
-                             [--partial] [--dry-run] [--quiet] [--verbose]
+                             [--values-format {ini,nml,sh,yaml}] [--env]
+                             [--search-path PATH[:PATH:...]] [--values-needed] [--partial]
+                             [--dry-run] [--quiet] [--verbose]
                              [KEY=VALUE ...]
 
    Render a template
@@ -49,6 +50,8 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
          Values format
      --env
          Use environment variables
+     --search-path PATH[:PATH:...]
+         Colon-separated paths to search for extra templates
      --values-needed
          Print report of values needed to render template
      --partial
@@ -186,9 +189,9 @@ and a YAML file called ``values.yaml`` with the following contents:
      [2023-12-18T23:27:04]    DEBUG ---------------------------------------------------------------------
      [2023-12-18T23:27:04]    DEBUG Read initial values from values.yaml
 
-**NB**: The following examples are based on a ``values.yaml`` file with ``recipient: World`` removed.
+* **NB**: This set of examples is based on a ``values.yaml`` file with ``recipient: World`` removed.
 
-* It is an error to render a template without providing all needed values.
+  It is an error to render a template without providing all needed values.
 
   .. code-block:: text
 
@@ -227,6 +230,42 @@ and a YAML file called ``values.yaml`` with the following contents:
      Good day, Sunshine!
 
   Note that ``recipient=Sunshine`` is shell syntax for exporting environment variable ``recipient`` only for the duration of the command that follows. It should not be confused with the two ``key=value`` pairs later on the command line, which are arguments to ``uw``.
+
+* Jinja2 supports references to additional templates via, for example, `import <https://jinja.palletsprojects.com/en/latest/templates/#import>`_ expressions, and ``uw`` provides support as follows:
+
+  #. By default, the directory containing the primary template file is used as the search path for additional templates.
+  #. The optional ``--search-path`` flag overrides the default search path with any number of explicitly specified, colon-separated paths.
+
+  For example, given file ``template``
+
+  .. code-block:: text
+
+     {% import "macros" as m -%}
+     {{ m.double(11) }}
+
+  and file ``macros`` (in the same directory as ``template``)
+
+  .. code-block:: text
+
+     {% macro double(n) -%}
+     {{ n * 2 }}
+     {%- endmacro %}
+
+  the template is rendered as
+
+  .. code-block:: text
+
+     $ uw template render --input-file template
+     22
+
+  The invocation ``uw template render --input-file template --search-path $PWD`` would behave identically. Alternatively, ``--search-path`` could be specified with a colon-separated set of directories to be searched for templates.
+
+  **NB**: Reading the primary template from ``stdin`` requires use of ``--search-path``, as there is no implicit directory related to the input. For example, given the existence of ``/path/to/macros``:
+
+  .. code-block:: text
+
+     $ cat template | uw template render --search-path /path/to
+     22
 
 * Non-YAML-formatted files may also be used as value sources. For example, ``template``
 

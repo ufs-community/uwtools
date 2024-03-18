@@ -39,6 +39,16 @@ def test__abort(capsys):
     assert msg in capsys.readouterr().err
 
 
+def test__add_subparser_chgres_cube(subparsers):
+    cli._add_subparser_chgres_cube(subparsers)
+    assert actions(subparsers.choices[STR.chgrescube]) == [
+        "namelist_file",
+        "provisioned_run_directory",
+        "run",
+        "runscript",
+    ]
+
+
 def test__add_subparser_config(subparsers):
     cli._add_subparser_config(subparsers)
     assert actions(subparsers.choices[STR.config]) == [STR.compare, STR.realize, STR.validate]
@@ -232,6 +242,19 @@ def test__check_verbosity_ok(flags):
 def test__dict_from_key_eq_val_strings():
     assert not cli._dict_from_key_eq_val_strings([])
     assert cli._dict_from_key_eq_val_strings(["a=1", "b=2"]) == {"a": "1", "b": "2"}
+
+
+def test__dispatch_chgres_cube():
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "cycle": dt.datetime.now(),
+        "dry_run": False,
+        "graph_file": None,
+    }
+    with patch.object(uwtools.api.chgres_cube, "execute") as execute:
+        cli._dispatch_chgres_cube({**args, "action": "foo"})
+    execute.assert_called_once_with(**{**args, "task": "foo"})
 
 
 @pytest.mark.parametrize(
@@ -449,6 +472,7 @@ def test__dispatch_template_render_fail(valsneeded):
         STR.valsfmt: 4,
         STR.keyvalpairs: ["foo=88", "bar=99"],
         STR.env: 5,
+        STR.searchpath: 6,
         STR.valsneeded: valsneeded,
         STR.partial: 7,
         STR.dryrun: 8,
@@ -465,6 +489,7 @@ def test__dispatch_template_render_no_optional():
         STR.valsfmt: None,
         STR.keyvalpairs: [],
         STR.env: False,
+        STR.searchpath: None,
         STR.valsneeded: False,
         STR.partial: False,
         STR.dryrun: False,
@@ -478,6 +503,7 @@ def test__dispatch_template_render_no_optional():
         values_format=None,
         overrides={},
         env=False,
+        searchpath=None,
         values_needed=False,
         partial=False,
         dry_run=False,
@@ -492,9 +518,10 @@ def test__dispatch_template_render_yaml():
         STR.valsfmt: 4,
         STR.keyvalpairs: ["foo=88", "bar=99"],
         STR.env: 5,
-        STR.valsneeded: 6,
-        STR.partial: 7,
-        STR.dryrun: 8,
+        STR.searchpath: 6,
+        STR.valsneeded: 7,
+        STR.partial: 8,
+        STR.dryrun: 9,
     }
     with patch.object(uwtools.api.template, "render") as render:
         cli._dispatch_template_render(args)
@@ -505,9 +532,10 @@ def test__dispatch_template_render_yaml():
         values_format=4,
         overrides={"foo": "88", "bar": "99"},
         env=5,
-        values_needed=6,
-        partial=7,
-        dry_run=8,
+        searchpath=6,
+        values_needed=7,
+        partial=8,
+        dry_run=9,
     )
 
 

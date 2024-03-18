@@ -1,18 +1,17 @@
 """
 Modal CLI.
 """
-
 import datetime as dt
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import HelpFormatter
 from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
-from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 from typing import Any, Callable, Dict, List, NoReturn, Tuple
 
+import uwtools.api.chgres_cube
 import uwtools.api.config
 import uwtools.api.fv3
 import uwtools.api.mpas_init
@@ -24,7 +23,8 @@ import uwtools.config.jinja2
 import uwtools.rocoto
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.logging import log, setup_logging
-from uwtools.utils.file import FORMAT, get_file_format
+from uwtools.strings import FORMAT, STR
+from uwtools.utils.file import get_file_format
 
 FORMATS = FORMAT.extensions()
 TITLE_REQ_ARG = "Required arguments"
@@ -55,6 +55,7 @@ def main() -> None:
     try:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes = {
+            STR.chgrescube: _dispatch_chgres_cube,
             STR.config: _dispatch_config,
             STR.fv3: _dispatch_fv3,
             STR.mpasinit: _dispatch_mpas_init,
@@ -67,6 +68,62 @@ def main() -> None:
     except UWError as e:
         log.error(str(e))
         sys.exit(1)
+
+
+# Mode chgres_cube
+
+
+def _add_subparser_chgres_cube(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: chgres_cube
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.chgrescube, "Execute chgres_cube tasks")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_chgres_cube_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.chgres_cube.tasks().items()
+    }
+
+
+def _add_subparser_chgres_cube_task(
+    subparsers: Subparsers, task: str, helpmsg: str
+) -> ActionChecks:
+    """
+    Subparser for mode: chgres_cube <task>
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_config_file(required)
+    _add_arg_cycle(required)
+    optional = _basic_setup(parser)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
+def _dispatch_chgres_cube(args: Args) -> bool:
+    """
+    Dispatch logic for chgres_cube mode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.chgres_cube.execute(
+        task=args[STR.action],
+        config_file=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
+    )
 
 
 # Mode config
@@ -500,6 +557,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_values_file(optional)
     _add_arg_values_format(optional, choices=FORMATS)
     _add_arg_env(optional)
+    _add_arg_search_path(optional)
     _add_arg_values_needed(optional)
     _add_arg_partial(optional)
     _add_arg_dry_run(optional)
@@ -536,6 +594,7 @@ def _dispatch_template_render(args: Args) -> bool:
             output_file=args[STR.outfile],
             overrides=_dict_from_key_eq_val_strings(args[STR.keyvalpairs]),
             env=args[STR.env],
+            searchpath=args[STR.searchpath],
             values_needed=args[STR.valsneeded],
             partial=args[STR.partial],
             dry_run=args[STR.dryrun],
@@ -773,6 +832,16 @@ def _add_arg_schema_file(group: Group) -> None:
     )
 
 
+def _add_arg_search_path(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.searchpath),
+        help="Colon-separated paths to search for extra templates",
+        metavar="PATH[:PATH:...]",
+        required=False,
+        type=lambda s: s.split(":"),
+    )
+
+
 def _add_arg_supplemental_files(group: Group) -> None:
     group.add_argument(
         STR.suppfiles,
@@ -952,6 +1021,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     checks = {
+        STR.chgrescube: _add_subparser_chgres_cube(subparsers),
         STR.config: _add_subparser_config(subparsers),
         STR.fv3: _add_subparser_fv3(subparsers),
         STR.mpasinit: _add_subparser_mpas_init(subparsers),
@@ -971,54 +1041,3 @@ def _switch(arg: str) -> str:
     :return: The long-form switch.
     """
     return "--%s" % arg.replace("_", "-")
-
-
-@dataclass(frozen=True)
-class STR:
-    """
-    A lookup map for CLI-related strings.
-    """
-
-    action: str = "action"
-    batch: str = "batch"
-    cfgfile: str = "config_file"
-    compare: str = "compare"
-    config: str = "config"
-    cycle: str = "cycle"
-    dryrun: str = "dry_run"
-    env: str = "env"
-    file1fmt: str = "file_1_format"
-    file1path: str = "file_1_path"
-    file2fmt: str = "file_2_format"
-    file2path: str = "file_2_path"
-    fv3: str = "fv3"
-    graphfile: str = "graph_file"
-    help: str = "help"
-    infile: str = "input_file"
-    infmt: str = "input_format"
-    keyvalpairs: str = "key_eq_val_pairs"
-    mode: str = "mode"
-    model: str = "model"
-    mpasinit: str = "mpas_init"
-    outfile: str = "output_file"
-    outfmt: str = "output_format"
-    partial: str = "partial"
-    quiet: str = "quiet"
-    realize: str = "realize"
-    render: str = "render"
-    rocoto: str = "rocoto"
-    run: str = "run"
-    schemafile: str = "schema_file"
-    sfcclimogen: str = "sfc_climo_gen"
-    suppfiles: str = "supplemental_files"
-    task: str = "task"
-    tasks: str = "tasks"
-    template: str = "template"
-    total: str = "total"
-    translate: str = "translate"
-    ungrib: str = "ungrib"
-    validate: str = "validate"
-    valsfile: str = "values_file"
-    valsfmt: str = "values_format"
-    valsneeded: str = "values_needed"
-    verbose: str = "verbose"

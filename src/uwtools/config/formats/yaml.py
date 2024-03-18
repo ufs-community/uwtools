@@ -6,7 +6,8 @@ import yaml
 
 from uwtools.config.formats.base import Config
 from uwtools.config.support import INCLUDE_TAG, TaggedString, add_yaml_representers, log_and_error
-from uwtools.utils.file import FORMAT, readable, writable
+from uwtools.strings import FORMAT
+from uwtools.utils.file import readable, writable
 
 _MSGS = ns(
     unhashable="""

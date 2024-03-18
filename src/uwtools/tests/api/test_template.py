@@ -18,6 +18,7 @@ def kwargs():
         "values_src": "valsfile",
         "values_format": "format",
         "overrides": {"key": "val"},
+        "searchpath": None,
         "env": True,
         "partial": True,
         "values_needed": True,
