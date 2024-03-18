@@ -12,6 +12,7 @@ from iotaa import asset, dryrun, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
+from uwtools.strings import STR
 from uwtools.utils.processing import execute
 
 
@@ -19,6 +20,8 @@ class MPASInit(Driver):
     """
     A driver for the MPAS model.
     """
+
+    _driver_name = STR.mpasinit
 
     def __init__(
         self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
@@ -36,7 +39,6 @@ class MPASInit(Driver):
         if self._dry_run:
             dryrun()
         self._cycle = cycle
-        self._rundir = Path(self._driver_config["run_dir"])
 
     # Workflow tasks
 
