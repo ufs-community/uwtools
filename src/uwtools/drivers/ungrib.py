@@ -85,14 +85,28 @@ class Ungrib(Driver):
         """
         The namelist file.
         """
-        fn = "namelist.wps"
-        yield self._taskname(fn)
-        path = self._rundir / fn
+        d = {
+            "update_values": {
+                "share": {
+                    "end_date": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
+                    "interval_seconds": 1,
+                    "max_dom": 1,
+                    "start_date": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
+                    "wrf_core": 'ARW',
+                },
+                "ungrib": {
+                    "out_format": 'WPS',
+                    "prefix": 'FILE',
+                }
+            }
+        }
+        path = self._rundir / "namelist.wps"
+        yield self._taskname(path)
         yield asset(path, path.is_file)
         yield None
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=self._driver_config.get("namelist", {}),
+            config_values=d,
             path=path,
         )
 
