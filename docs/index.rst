@@ -98,6 +98,13 @@ The Drivers
 
 Drivers for NWP components are available as top-level CLI modes and API modules.
 
+chgres_cube
+^^^^^^^^^^^
+
+| **CLI**: ``uw chgres_cube -h``
+| **API**: ``import uwtools.api.drivers.chgres_cube``
+
+
 FV3
 ^^^
 

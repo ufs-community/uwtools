@@ -3,6 +3,7 @@ API
 
 .. toctree::
    config
+   chgres_cube
    fv3
    logging
    rocoto
