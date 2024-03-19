@@ -23,12 +23,12 @@ def test_execute(tmp_path):
 
 
 def test_graph():
-    with patch.object(fv3.support, "graph") as graph:
+    with patch.object(fv3._support, "graph") as graph:
         fv3.graph()
     graph.assert_called_once_with()
 
 
 def test_tasks():
-    with patch.object(fv3.support, "tasks") as _tasks:
+    with patch.object(fv3._support, "tasks") as _tasks:
         fv3.tasks()
     _tasks.assert_called_once_with(fv3._FV3)
