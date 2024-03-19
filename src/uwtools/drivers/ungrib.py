@@ -219,6 +219,3 @@ class Ungrib(Driver):
         """
         for schema_name in ("ungrib", "platform"):
             self._validate_one(schema_name=schema_name)
-
-    def _wpsfile(self, fn: str) -> Path:
-        return Path(os.environ["WPSFILES"]) / fn
