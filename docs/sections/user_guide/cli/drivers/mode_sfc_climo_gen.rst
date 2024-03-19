@@ -21,7 +21,7 @@ The ``uw`` mode for configuring and running the :sfc-climo-gen:`sfc_climo_gen<>`
        provisioned_run_directory
          Run directory provisioned with all required content
        run
-         Run execution
+         A run
        runscript
          The runscript
 
@@ -33,7 +33,7 @@ All tasks take the same arguments. For example:
    usage: uw sfc_climo_gen run --config-file PATH [-h] [--batch] [--dry-run] [--debug] [--quiet]
                                [--verbose]
 
-   Run execution
+   A run
 
    Required arguments:
      --config-file PATH, -c PATH
