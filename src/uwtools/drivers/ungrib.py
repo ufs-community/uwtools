@@ -44,19 +44,6 @@ class Ungrib(Driver):
     # Workflow tasks
 
     @task
-    def initial_conditions(self):
-        """
-        Initial conditions.
-        """
-        fn = str(self._cycle)
-        yield self._taskname(fn)
-        path = self._rundir / fn
-        taskname = "Initial conditions in %s" % self._rundir
-        yield asset(path, path.is_file)
-        yield [self.gribfile_aaa, self.namelist_wps, self.vtable]
-        run(taskname, "ungrib 2>&1 | tee ungrib.out", cwd=path.parent)
-
-    @task
     def gribfile_aaa(self):
         """
         The gribfile.
@@ -146,35 +133,10 @@ class Ungrib(Driver):
         """
         path = self._rundir / "Vtable"
         yield self._taskname(path)
-        yield asset(path, path.exists)
+        yield asset(path, path.is_symlink)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
         path.symlink_to(Path(self._driver_config["vtable"]))
-
-    # Private workflow tasks
-
-    @task
-    def _run_via_batch_submission(self):
-        """
-        A run executed via the batch system.
-        """
-        yield self._taskname("run via batch submission")
-        path = Path("%s.submit" % self._runscript_path)
-        yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
-        self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
-
-    @task
-    def _run_via_local_execution(self):
-        """
-        A run executed directly on the local system.
-        """
-        yield self._taskname("run via local execution")
-        path = self._rundir / "done"
-        yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
-        cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
-        execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
     # Private helper methods
 
