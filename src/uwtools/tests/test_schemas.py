@@ -7,7 +7,6 @@ from functools import partial
 
 from pytest import fixture
 
-from uwtools.tests.drivers import test_chgres_cube, test_sfc_climo_gen
 from uwtools.tests.support import schema_validator, with_del, with_set
 
 # execution
@@ -308,7 +307,7 @@ def test_schema_fv3_namelist_update_values(fv3_fcstprop):
     )
     # At least one namelist entry is required:
     assert "does not have enough properties" in errors({})
-    # At least one val/var pair ir required:
+    # At least one val/var pair are required:
     assert "does not have enough properties" in errors({"nml": {}})
 
 
@@ -456,22 +455,116 @@ def test_schema_rocoto_workflow_cycledef():
 # sfc-climo-gen
 
 
+@fixture
+def sfc_climo_gen_fcstprop():
+    return partial(schema_validator, "sfc-climo-gen", "properties", "sfc_climo_gen", "properties")
+
+
 def test_schema_sfc_climo_gen():
+    d = {
+        "execution": {"executable": "sfc_climo_gen"},
+        "run_dir": "/tmp",
+    }
     errors = schema_validator("sfc-climo-gen", "properties", "sfc_climo_gen")
-    d = test_sfc_climo_gen.config["sfc_climo_gen"]
     # Basic correctness:
     assert not errors(d)
-    # Additional properties are not allowed:
+    # Some top-level keys are required:
+    for key in ("execution", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(d, key))
+    # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
+
+
+def test_schema_sfc_climo_gen_namelist(sfc_climo_gen_fcstprop):
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": {"config": {"var": "val"}}}
+    errors = sfc_climo_gen_fcstprop("namelist")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # base_file must be a string:
+    assert "88 is not of type 'string'" in errors({"base_file": 88})
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # config is required with update_values:
+    assert "'config' is a required property" in errors({"update_values": {}})
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_schema_sfc_climo_gen_namelist_update_values(sfc_climo_gen_fcstprop):
+    errors = sfc_climo_gen_fcstprop(
+        "namelist", "properties", "update_values", "properties", "config"
+    )
+    # array, boolean, number, and string values are ok:
+    assert not errors({"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"})
+    # Other types are not, e.g.:
+    assert "None is not of type 'array', 'boolean', 'number', 'string'" in errors({"null": None})
+    # No minimum number of entries is required:
+    assert not errors({})
+
+
+def test_schema_sfc_climo_gen_run_dir(sfc_climo_gen_fcstprop):
+    errors = sfc_climo_gen_fcstprop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
 
 
 # chgres-cube
 
 
+@fixture
+def chgres_cube_fcstprop():
+    return partial(schema_validator, "chgres-cube", "properties", "chgres_cube", "properties")
+
+
 def test_schema_chgres_cube():
+    d = {
+        "execution": {"executable": "chgres_cube"},
+        "run_dir": "/tmp",
+    }
     errors = schema_validator("chgres-cube", "properties", "chgres_cube")
-    d = test_chgres_cube.config["chgres_cube"]
     # Basic correctness:
     assert not errors(d)
-    # Additional properties are not allowed:
+    # Some top-level keys are required:
+    for key in ("execution", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(d, key))
+    # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
+
+
+def test_schema_chgres_cube_namelist(chgres_cube_fcstprop):
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": {"config": {"var": "val"}}}
+    errors = chgres_cube_fcstprop("namelist")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # base_file must be a string:
+    assert "88 is not of type 'string'" in errors({"base_file": 88})
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # config is required with update_values:
+    assert "'config' is a required property" in errors({"update_values": {}})
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_schema_chgres_cube_namelist_update_values(chgres_cube_fcstprop):
+    errors = chgres_cube_fcstprop("namelist", "properties", "update_values", "properties", "config")
+    # array, boolean, number, and string values are ok:
+    assert not errors({"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"})
+    # Other types are not, e.g.:
+    assert "None is not of type 'array', 'boolean', 'number', 'string'" in errors({"null": None})
+    # No minimum number of entries is required:
+    assert not errors({})
+
+
+def test_schema_chgres_cube_run_dir(chgres_cube_fcstprop):
+    errors = chgres_cube_fcstprop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
