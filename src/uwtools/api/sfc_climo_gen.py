@@ -4,7 +4,7 @@ API access to the uwtools sfc_climo_gen driver.
 from pathlib import Path
 from typing import Dict, Optional
 
-from uwtools.drivers import support
+import uwtools.drivers.support as _support
 from uwtools.drivers.sfc_climo_gen import SfcClimoGen as _SfcClimoGen
 
 
@@ -40,11 +40,11 @@ def graph() -> str:
     """
     Returns Graphviz DOT code for the most recently executed task.
     """
-    return support.graph()
+    return _support.graph()
 
 
 def tasks() -> Dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
     """
-    return support.tasks(_SfcClimoGen)
+    return _support.tasks(_SfcClimoGen)

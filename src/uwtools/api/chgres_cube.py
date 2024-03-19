@@ -7,7 +7,7 @@ from typing import Dict, Optional
 
 import iotaa as _iotaa
 
-from uwtools.drivers import support
+import uwtools.drivers.support as _support
 from uwtools.drivers.chgres_cube import ChgresCube as _ChgresCube
 
 
@@ -52,4 +52,4 @@ def tasks() -> Dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
     """
-    return support.tasks(_ChgresCube)
+    return _support.tasks(_ChgresCube)
