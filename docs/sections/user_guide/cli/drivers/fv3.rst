@@ -72,7 +72,7 @@ All tasks take the same arguments. For example:
 Examples
 ^^^^^^^^
 
-The examples use a configuration file named ``config.yaml``. Its contents are described in depth in section :ref:`fv3_yaml`.
+The examples use a configuration file named ``config.yaml``. Its contents are described in depth in section :ref:`fv3_yaml`. Each of the values in the ``fv3`` YAML may contain Jinja2 variables/expressions using a ``cycle`` variable, which is a Python ``datetime`` object corresponding to the FV3 cycle being run.
 
 * Run FV3 on an interactive node
 
@@ -80,7 +80,7 @@ The examples use a configuration file named ``config.yaml``. Its contents are de
 
      $ uw fv3 run --config-file config.yaml --cycle 2024-02-11T12
 
-  The driver creates a ``runscript`` file in the directory specified by ``run_dir:`` in the config and runs it, executing FV3.
+  The driver creates a ``runscript.fv3`` file in the directory specified by ``run_dir:`` in the config and runs it, executing FV3.
 
 * Run FV3 via a batch job
 
@@ -88,7 +88,7 @@ The examples use a configuration file named ``config.yaml``. Its contents are de
 
      $ uw fv3 run --config-file config.yaml --cycle 2024-02-11T12 --batch
 
-  The driver creates a ``runscript`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``fv3:``.
+  The driver creates a ``runscript.fv3`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``fv3:``.
 
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 
