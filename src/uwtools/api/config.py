@@ -1,5 +1,5 @@
 """
-API access to uwtools configuration management tools.
+API access to ``uwtools`` configuration management tools.
 """
 import os
 from pathlib import Path
@@ -123,7 +123,7 @@ def realize_to_dict(  # pylint: disable=unused-argument
     dry_run: bool = False,
 ) -> dict:
     """
-    Realize an output config to a dict, based on an input config and optional supplemental configs.
+    Realize a config to a ``dict``, based on an input config and optional supplemental configs.
 
     See ``realize()`` for details on arguments, etc.
     """
@@ -153,9 +153,9 @@ def _ensure_config_arg_type(
     config: Union[dict, _Config, Optional[Path]]
 ) -> Union[_Config, Optional[Path]]:
     """
-    Encapsulate a dict in a Config; return a Config or path argument as-is.
+    Encapsulate a ``dict`` in a ``Config``; return a ``Config`` or path argument as-is.
 
-    :param config: A config as a dict, Config, or path
+    :param config: A config as a ``dict``, ``Config``, or ``Path``
     """
     if isinstance(config, dict):
         return _YAMLConfig(config=config)
@@ -184,7 +184,7 @@ Recognized file extensions are: {extensions}
 
 
 realize.__doc__ = """
-Realize an output config based on an input config and optional supplemental configs.
+Realize a config based on an input config and optional supplemental configs.
 
 If no input is specified, ``stdin`` is read. A ``dict`` or ``Config`` object may also be provided as
 input.  If no output is specified, ``stdout`` is written to. When an input or output filename is

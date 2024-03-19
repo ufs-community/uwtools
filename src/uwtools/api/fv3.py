@@ -1,11 +1,11 @@
 """
-API access to the uwtools FV3 driver.
+API access to the ``uwtools`` FV3 driver.
 """
 import datetime as dt
 from pathlib import Path
 from typing import Dict, Optional
 
-from uwtools.drivers import support
+import uwtools.drivers.support as _support
 from uwtools.drivers.fv3 import FV3 as _FV3
 
 
@@ -43,11 +43,11 @@ def graph() -> str:
     """
     Returns Graphviz DOT code for the most recently executed task.
     """
-    return support.graph()
+    return _support.graph()
 
 
 def tasks() -> Dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
     """
-    return support.tasks(_FV3)
+    return _support.tasks(_FV3)

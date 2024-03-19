@@ -2,8 +2,6 @@
 A driver for sfc_climo_gen.
 """
 
-import os
-import stat
 from pathlib import Path
 from typing import Any, Dict
 
@@ -19,8 +17,6 @@ class SfcClimoGen(Driver):
     """
     A driver for sfc_climo_gen.
     """
-
-    _driver_name = STR.sfcclimogen
 
     def __init__(self, config_file: Path, dry_run: bool = False, batch: bool = False):
         """
@@ -76,16 +72,16 @@ class SfcClimoGen(Driver):
         yield self._taskname(path.name)
         yield asset(path, path.is_file)
         yield None
-        envcmds = self._driver_config.get("execution", {}).get("envcmds", [])
-        execution = [self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir]
-        scheduler = self._scheduler if self._batch else None
-        path.parent.mkdir(parents=True, exist_ok=True)
-        rs = self._runscript(envcmds=envcmds, execution=execution, scheduler=scheduler)
-        with open(path, "w", encoding="utf-8") as f:
-            print(rs, file=f)
-        os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
+        self._write_runscript(path=path, envvars={})
 
     # Private helper methods
+
+    @property
+    def _driver_name(self) -> str:
+        """
+        Returns the name of this driver.
+        """
+        return STR.sfcclimogen
 
     @property
     def _resources(self) -> Dict[str, Any]:

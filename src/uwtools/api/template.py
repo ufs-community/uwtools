@@ -1,5 +1,5 @@
 """
-API access to uwtools templating logic.
+API access to ``uwtools`` templating logic.
 """
 import os
 from pathlib import Path
