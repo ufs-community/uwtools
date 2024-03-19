@@ -307,7 +307,7 @@ def test_schema_fv3_namelist_update_values(fv3_fcstprop):
     )
     # At least one namelist entry is required:
     assert "does not have enough properties" in errors({})
-    # At least one val/var pair are required:
+    # At least one val/var pair is required:
     assert "does not have enough properties" in errors({"nml": {}})
 
 
