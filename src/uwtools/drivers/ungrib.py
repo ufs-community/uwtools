@@ -8,12 +8,13 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
 
-from iotaa import asset, dryrun, external, run, task, tasks
+from iotaa import asset, dryrun, run, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
 from uwtools.utils.processing import execute
+from uwtools.utils.tasks import file
 
 
 class Ungrib(Driver):
@@ -56,29 +57,17 @@ class Ungrib(Driver):
         run(taskname, "ungrib 2>&1 | tee ungrib.out", cwd=path.parent)
 
     @task
-    def gfs_local(self):
-        """
-        Doc string.
-        """
-
-    @external
-    def gfs_upstream(self):
-        """
-        Doc string.
-        """
-
-    @task
     def gribfile_aaa(self):
         """
         The gribfile.
         """
-        fn = "GRIBFILE.AAA"
-        yield self._taskname(fn)
-        path = self._rundir / fn
-        yield asset(path, path.is_file)
-        g = self.gfs_local
-        yield g
-        # path.symlink_to(Path(refs(g).name))
+        path = self._rundir / "GRIBFILE.AAA"
+        yield self._taskname(path)
+        yield asset(path, path.is_symlink)
+        infile = Path(self._driver_config["gfs_file"])
+        yield file(path=infile)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.symlink_to(infile)
 
     @task
     def namelist_wps(self):
@@ -104,6 +93,7 @@ class Ungrib(Driver):
         yield self._taskname(path)
         yield asset(path, path.is_file)
         yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=d,
@@ -117,8 +107,8 @@ class Ungrib(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
-            # self.gribfile_aaa(),
-            # self.namelist_wps(),
+            self.gribfile_aaa(),
+            self.namelist_wps(),
             self.runscript(),
             self.vtable(),
         ]
@@ -159,8 +149,7 @@ class Ungrib(Driver):
         yield asset(path, path.exists)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.touch()
-        # path.symlink_to(Path(self._wpsfile))
+        path.symlink_to(Path(self._driver_config["vtable"]))
 
     # Private workflow tasks
 
