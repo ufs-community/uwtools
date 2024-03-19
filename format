@@ -7,7 +7,7 @@ echo "=> Running isort"
 isort -q src
 
 echo "=> Running docformatter"
-(cd src && docformatter . || test $$? -eq 3)
+(cd src && docformatter . || test $? -eq 3)
 
 echo "=> Running jq"
 for a in $(find src -type f -name "*.jsonschema"); do

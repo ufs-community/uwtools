@@ -1,5 +1,5 @@
-Mode ``sfc_climo_gen``
-======================
+``sfc_climo_gen``
+=================
 
 The ``uw`` mode for configuring and running the :sfc-climo-gen:`sfc_climo_gen<>` component.
 

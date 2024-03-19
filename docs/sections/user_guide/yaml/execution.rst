@@ -1,7 +1,7 @@
 .. _execution_yaml:
 
-The ``execution:`` Block:
-=========================
+The ``execution:`` Block
+========================
 
 Component drivers require an ``execution:`` block to provide details about how to configure a component's run-time environment, and how to run it.
 
