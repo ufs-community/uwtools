@@ -13,6 +13,7 @@ from typing import Any, Callable, Dict, List, NoReturn, Tuple
 
 import uwtools.api.chgres_cube
 import uwtools.api.config
+import uwtools.api.file
 import uwtools.api.fv3
 import uwtools.api.mpas_init
 import uwtools.api.rocoto
@@ -57,6 +58,7 @@ def main() -> None:
         modes = {
             STR.chgrescube: _dispatch_chgres_cube,
             STR.config: _dispatch_config,
+            STR.file: _dispatch_file,
             STR.fv3: _dispatch_fv3,
             STR.mpasinit: _dispatch_mpas_init,
             STR.rocoto: _dispatch_rocoto,
@@ -100,7 +102,7 @@ def _add_subparser_chgres_cube_task(
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_config_file(required)
+    _add_arg_config_file(group=required, required=True)
     _add_arg_cycle(required)
     optional = _basic_setup(parser)
     _add_arg_batch(optional)
@@ -218,11 +220,12 @@ def _dispatch_config(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {
+    actions = {
         STR.compare: _dispatch_config_compare,
         STR.realize: _dispatch_config_realize,
         STR.validate: _dispatch_config_validate,
-    }[args[STR.action]](args)
+    }
+    return actions[args[STR.action]](args)
 
 
 def _dispatch_config_compare(args: Args) -> bool:
@@ -273,6 +276,101 @@ def _dispatch_config_validate(args: Args) -> bool:
     return uwtools.api.config.validate(schema_file=args[STR.schemafile], config=args[STR.infile])
 
 
+# Mode file
+
+
+def _add_subparser_file(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: file
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.file, "Handle files")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
+    return {
+        STR.copy: _add_subparser_file_copy(subparsers),
+        STR.link: _add_subparser_file_link(subparsers),
+    }
+
+
+def _add_subparser_file_common(parser: Parser) -> ActionChecks:
+    """
+    Common subparser code for mode: file {copy link}
+
+    :param parser: The parser to configure.
+    """
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_target_dir(required, required=True)
+    optional = _basic_setup(parser)
+    _add_arg_config_file(group=optional, required=False)
+    _add_arg_dry_run(optional)
+    checks = _add_args_verbosity(optional)
+    _add_arg_keys(optional)
+    return checks
+
+
+def _add_subparser_file_copy(subparsers: Subparsers) -> ActionChecks:
+    """
+    Subparser for mode: file copy
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.copy, "Copy files")
+    return _add_subparser_file_common(parser)
+
+
+def _add_subparser_file_link(subparsers: Subparsers) -> ActionChecks:
+    """
+    Subparser for mode: file link
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.link, "Link files")
+    return _add_subparser_file_common(parser)
+
+
+def _dispatch_file(args: Args) -> bool:
+    """
+    Dispatch logic for file mode.
+
+    :param args: Parsed command-line args.
+    """
+    actions = {
+        STR.copy: _dispatch_file_copy,
+        STR.link: _dispatch_file_link,
+    }
+    return actions[args[STR.action]](args)
+
+
+def _dispatch_file_copy(args: Args) -> bool:
+    """
+    Dispatch logic for file copy action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.file.copy(
+        target_dir=args[STR.targetdir],
+        config=args[STR.cfgfile],
+        keys=args[STR.keys],
+        dry_run=args[STR.dryrun],
+    )
+
+
+def _dispatch_file_link(args: Args) -> bool:
+    """
+    Dispatch logic for file link action.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.file.link(
+        target_dir=args[STR.targetdir],
+        config=args[STR.cfgfile],
+        keys=args[STR.keys],
+        dry_run=args[STR.dryrun],
+    )
+
+
 # Mode fv3
 
 
@@ -301,7 +399,7 @@ def _add_subparser_fv3_task(subparsers: Subparsers, task: str, helpmsg: str) -> 
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_config_file(required)
+    _add_arg_config_file(group=required, required=True)
     _add_arg_cycle(required)
     optional = _basic_setup(parser)
     _add_arg_batch(optional)
@@ -432,12 +530,11 @@ def _dispatch_rocoto(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {
+    actions = {
         STR.realize: _dispatch_rocoto_realize,
         STR.validate: _dispatch_rocoto_validate,
-    }[
-        args[STR.action]
-    ](args)
+    }
+    return actions[args[STR.action]](args)
 
 
 def _dispatch_rocoto_realize(args: Args) -> bool:
@@ -488,7 +585,7 @@ def _add_subparser_sfc_climo_gen_task(
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_config_file(required)
+    _add_arg_config_file(group=required, required=True)
     optional = _basic_setup(parser)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
@@ -572,12 +669,11 @@ def _dispatch_template(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return {
+    actions = {
         STR.render: _dispatch_template_render,
         STR.translate: _dispatch_template_translate,
-    }[
-        args[STR.action]
-    ](args)
+    }
+    return actions[args[STR.action]](args)
 
 
 def _dispatch_template_render(args: Args) -> bool:
@@ -687,13 +783,13 @@ def _add_arg_batch(group: Group) -> None:
     )
 
 
-def _add_arg_config_file(group: Group) -> None:
+def _add_arg_config_file(group: Group, required: bool) -> None:
     group.add_argument(
         _switch(STR.cfgfile),
         "-c",
         help="Path to config file",
         metavar="PATH",
-        required=True,
+        required=required,
         type=Path,
     )
 
@@ -784,6 +880,15 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
     )
 
 
+def _add_arg_keys(group: Group) -> None:
+    group.add_argument(
+        STR.keys,
+        help="YAML key leading to file dst/src block",
+        metavar="KEY",
+        nargs="*",
+    )
+
+
 def _add_arg_output_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.outfile),
@@ -848,6 +953,16 @@ def _add_arg_supplemental_files(group: Group) -> None:
         help="Additional files to supplement primary input",
         metavar="PATH",
         nargs="*",
+        type=Path,
+    )
+
+
+def _add_arg_target_dir(group: Group, required: bool) -> None:
+    group.add_argument(
+        _switch(STR.targetdir),
+        help="Path to target directory",
+        metavar="PATH",
+        required=required,
         type=Path,
     )
 
@@ -1023,6 +1138,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     checks = {
         STR.chgrescube: _add_subparser_chgres_cube(subparsers),
         STR.config: _add_subparser_config(subparsers),
+        STR.file: _add_subparser_file(subparsers),
         STR.fv3: _add_subparser_fv3(subparsers),
         STR.mpasinit: _add_subparser_mpas_init(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),

@@ -1,4 +1,5 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+
 import datetime as dt
 import logging
 import sys
@@ -27,6 +28,35 @@ from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderEr
 from uwtools.logging import log
 from uwtools.tests.support import regex_logged
 from uwtools.utils.file import FORMAT
+
+# Helpers
+
+
+def actions(parser: Parser) -> List[str]:
+    # Return actions (named subparsers) belonging to the given parser.
+    if actions := [x for x in parser._actions if isinstance(x, _SubParsersAction)]:
+        return list(actions[0].choices.keys())
+    return []
+
+
+# Fixtures
+
+
+@fixture
+def args_dispatch_file():
+    return {
+        "target_dir": "/target/dir",
+        "config_file": "/config/file",
+        "keys": ["a", "b"],
+        "dry_run": False,
+    }
+
+
+@fixture
+def subparsers():
+    # Create and return a subparsers test object.
+    return Parser().add_subparsers()
+
 
 # Test functions
 
@@ -67,6 +97,21 @@ def test__add_subparser_config_realize(subparsers):
 def test__add_subparser_config_validate(subparsers):
     cli._add_subparser_config_validate(subparsers)
     assert subparsers.choices[STR.validate]
+
+
+def test__add_subparser_file(subparsers):
+    cli._add_subparser_file(subparsers)
+    assert actions(subparsers.choices[STR.file]) == [STR.copy, STR.link]
+
+
+def test__add_subparser_file_copy(subparsers):
+    cli._add_subparser_file_copy(subparsers)
+    assert subparsers.choices[STR.copy]
+
+
+def test__add_subparser_file_link(subparsers):
+    cli._add_subparser_file_link(subparsers)
+    assert subparsers.choices[STR.link]
 
 
 def test__add_subparser_fv3(subparsers):
@@ -361,6 +406,40 @@ def test__dispatch_config_validate_config_obj():
     _validate_yaml.assert_called_once_with(**_validate_yaml_args)
 
 
+@pytest.mark.parametrize(
+    "action, funcname", [(STR.copy, "_dispatch_file_copy"), (STR.link, "_dispatch_file_link")]
+)
+def test__dispatch_file(action, funcname):
+    args = {STR.action: action}
+    with patch.object(cli, funcname) as func:
+        cli._dispatch_file(args)
+    func.assert_called_once_with(args)
+
+
+def test__dispatch_file_copy(args_dispatch_file):
+    a = args_dispatch_file
+    with patch.object(cli.uwtools.api.file, "copy") as copy:
+        cli._dispatch_file_copy(a)
+    copy.assert_called_once_with(
+        target_dir=a["target_dir"],
+        config=a["config_file"],
+        keys=a["keys"],
+        dry_run=a["dry_run"],
+    )
+
+
+def test__dispatch_file_link(args_dispatch_file):
+    a = args_dispatch_file
+    with patch.object(cli.uwtools.api.file, "link") as link:
+        cli._dispatch_file_link(a)
+    link.assert_called_once_with(
+        target_dir=a["target_dir"],
+        config=a["config_file"],
+        keys=a["keys"],
+        dry_run=a["dry_run"],
+    )
+
+
 def test__dispatch_fv3():
     args: dict = {
         "batch": True,
@@ -640,19 +719,3 @@ def test__parse_args():
         Parser.assert_called_once()
         parser = Parser()
         parser.parse_args.assert_called_with(raw_args)
-
-
-# Helper functions
-
-
-def actions(parser: Parser) -> List[str]:
-    # Return actions (named subparsers) belonging to the given parser.
-    if actions := [x for x in parser._actions if isinstance(x, _SubParsersAction)]:
-        return list(actions[0].choices.keys())
-    return []
-
-
-@fixture
-def subparsers():
-    # Create and return a subparsers test object.
-    return Parser().add_subparsers()

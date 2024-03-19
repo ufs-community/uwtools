@@ -58,7 +58,7 @@ class FORMAT:
 @dataclass(frozen=True)
 class STR:
     """
-    A lookup map for CLI-related strings.
+    String lookup map.
     """
 
     action: str = "action"
@@ -67,6 +67,7 @@ class STR:
     chgrescube: str = "chgres_cube"
     compare: str = "compare"
     config: str = "config"
+    copy: str = "copy"
     cycle: str = "cycle"
     dryrun: str = "dry_run"
     env: str = "env"
@@ -74,12 +75,15 @@ class STR:
     file1path: str = "file_1_path"
     file2fmt: str = "file_2_format"
     file2path: str = "file_2_path"
+    file: str = "file"
     fv3: str = "fv3"
     graphfile: str = "graph_file"
     help: str = "help"
     infile: str = "input_file"
     infmt: str = "input_format"
+    keys: str = "keys"
     keyvalpairs: str = "key_eq_val_pairs"
+    link: str = "link"
     mode: str = "mode"
     model: str = "model"
     mpasinit: str = "mpas_init"
@@ -95,6 +99,7 @@ class STR:
     searchpath: str = "search_path"
     sfcclimogen: str = "sfc_climo_gen"
     suppfiles: str = "supplemental_files"
+    targetdir: str = "target_dir"
     task: str = "task"
     tasks: str = "tasks"
     template: str = "template"
