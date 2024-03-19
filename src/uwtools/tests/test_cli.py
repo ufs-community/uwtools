@@ -261,16 +261,19 @@ def test__dict_from_key_eq_val_strings():
 
 
 def test__dispatch_chgres_cube():
+    cycle = (dt.datetime.now(),)
     args: dict = {
         "batch": True,
         "config_file": "config.yaml",
-        "cycle": dt.datetime.now(),
+        "cycle": cycle,
         "dry_run": False,
         "graph_file": None,
     }
     with patch.object(uwtools.api.chgres_cube, "execute") as execute:
         cli._dispatch_chgres_cube({**args, "action": "foo"})
-    execute.assert_called_once_with(**{**args, "task": "foo"})
+    execute.assert_called_once_with(
+        batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None, task="foo"
+    )
 
 
 @pytest.mark.parametrize(
@@ -415,16 +418,19 @@ def test__dispatch_file_link(args_dispatch_file):
 
 
 def test__dispatch_fv3():
+    cycle = (dt.datetime.now(),)
     args: dict = {
         "batch": True,
         "config_file": "config.yaml",
-        "cycle": dt.datetime.now(),
+        "cycle": cycle,
         "dry_run": False,
         "graph_file": None,
     }
     with patch.object(uwtools.api.fv3, "execute") as execute:
         cli._dispatch_fv3({**args, "action": "foo"})
-    execute.assert_called_once_with(**{**args, "task": "foo"})
+    execute.assert_called_once_with(
+        batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None, task="foo"
+    )
 
 
 @pytest.mark.parametrize(
@@ -485,7 +491,9 @@ def test__dispatch_sfc_climo_gen():
     }
     with patch.object(uwtools.api.sfc_climo_gen, "execute") as execute:
         cli._dispatch_sfc_climo_gen({**args, "action": "foo"})
-    execute.assert_called_once_with(**{**args, "task": "foo"})
+    execute.assert_called_once_with(
+        batch=True, config="config.yaml", dry_run=False, graph_file=None, task="foo"
+    )
 
 
 @pytest.mark.parametrize(

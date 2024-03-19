@@ -22,15 +22,17 @@ class Driver(ABC):
     An abstract class for component drivers.
     """
 
-    def __init__(self, config_file: Path, dry_run: bool = False, batch: bool = False) -> None:
+    def __init__(
+        self, config: Optional[Path] = None, dry_run: bool = False, batch: bool = False
+    ) -> None:
         """
         A component driver.
 
-        :param config_file: Path to config file.
+        :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        self._config = YAMLConfig(config=config_file)
+        self._config = YAMLConfig(config=config)
         self._dry_run = dry_run
         self._batch = batch
         self._config.dereference()

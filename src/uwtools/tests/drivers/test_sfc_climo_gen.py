@@ -67,7 +67,7 @@ def config_file(tmp_path):
 
 @fixture
 def driverobj(config_file):
-    return sfc_climo_gen.SfcClimoGen(config_file=config_file, batch=True)
+    return sfc_climo_gen.SfcClimoGen(config=config_file, batch=True)
 
 
 # Driver tests
@@ -79,7 +79,7 @@ def test_SfcClimoGen(driverobj):
 
 def test_SfcClimoGen_dry_run(config_file):
     with patch.object(sfc_climo_gen, "dryrun") as dryrun:
-        driverobj = sfc_climo_gen.SfcClimoGen(config_file=config_file, batch=True, dry_run=True)
+        driverobj = sfc_climo_gen.SfcClimoGen(config=config_file, batch=True, dry_run=True)
     assert driverobj._dry_run is True
     dryrun.assert_called_once_with()
 

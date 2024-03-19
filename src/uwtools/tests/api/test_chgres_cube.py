@@ -11,7 +11,7 @@ from uwtools.api import chgres_cube
 def test_execute(tmp_path):
     dot = tmp_path / "graph.dot"
     args: dict = {
-        "config_file": "config.yaml",
+        "config": "config.yaml",
         "cycle": dt.datetime.utcnow(),
         "batch": False,
         "dry_run": True,

@@ -8,7 +8,7 @@ from uwtools.api import sfc_climo_gen
 def test_execute(tmp_path):
     dot = tmp_path / "graph.dot"
     args: dict = {
-        "config_file": "config.yaml",
+        "config": "config.yaml",
         "batch": False,
         "dry_run": True,
         "graph_file": dot,

@@ -69,7 +69,7 @@ def a_driver(tmp_path):
             "run_dir": "/path/to/dir",
         },
     )
-    return ConcreteDriver(config_file=cf, dry_run=True, batch=True)
+    return ConcreteDriver(config=cf, dry_run=True, batch=True)
 
 
 # Tests

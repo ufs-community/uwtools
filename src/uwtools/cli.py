@@ -116,7 +116,7 @@ def _dispatch_chgres_cube(args: Args) -> bool:
     """
     return uwtools.api.chgres_cube.execute(
         task=args[STR.action],
-        config_file=args[STR.cfgfile],
+        config=args[STR.cfgfile],
         cycle=args[STR.cycle],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
@@ -413,7 +413,7 @@ def _dispatch_fv3(args: Args) -> bool:
     """
     return uwtools.api.fv3.execute(
         task=args[STR.action],
-        config_file=args[STR.cfgfile],
+        config=args[STR.cfgfile],
         cycle=args[STR.cycle],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
@@ -544,7 +544,7 @@ def _dispatch_sfc_climo_gen(args: Args) -> bool:
     """
     return uwtools.api.sfc_climo_gen.execute(
         task=args[STR.action],
-        config_file=args[STR.cfgfile],
+        config=args[STR.cfgfile],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],

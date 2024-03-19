@@ -23,18 +23,16 @@ class ChgresCube(Driver):
 
     _driver_name = STR.chgrescube
 
-    def __init__(
-        self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
-    ):
+    def __init__(self, config: Path, cycle: datetime, dry_run: bool = False, batch: bool = False):
         """
         The driver.
 
-        :param config_file: Path to config file.
+        :param config: Path to config file (read stdin if missing or None).
         :param cycle: The date cycle.
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
+        super().__init__(config=config, dry_run=dry_run, batch=batch)
         self._config.dereference(context={"cycle": cycle})
         if self._dry_run:
             dryrun()

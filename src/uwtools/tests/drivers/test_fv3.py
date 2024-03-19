@@ -52,7 +52,7 @@ def config_file(config, tmp_path):
 
 @fixture
 def driverobj(config_file, cycle):
-    return fv3.FV3(config_file=config_file, cycle=cycle, batch=True)
+    return fv3.FV3(config=config_file, cycle=cycle, batch=True)
 
 
 # Driver tests
@@ -64,7 +64,7 @@ def test_FV3(driverobj):
 
 def test_FV3_dry_run(config_file, cycle):
     with patch.object(fv3, "dryrun") as dryrun:
-        driverobj = fv3.FV3(config_file=config_file, cycle=cycle, batch=True, dry_run=True)
+        driverobj = fv3.FV3(config=config_file, cycle=cycle, batch=True, dry_run=True)
     assert driverobj._dry_run is True
     dryrun.assert_called_once_with()
 
@@ -117,7 +117,7 @@ def test_FV3_files_copied(config, cycle, key, task, test, tmp_path):
     path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
-    driverobj = fv3.FV3(config_file=path, cycle=cycle, batch=True)
+    driverobj = fv3.FV3(config=path, cycle=cycle, batch=True)
     atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
     assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
     atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]

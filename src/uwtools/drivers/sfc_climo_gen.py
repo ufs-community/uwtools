@@ -22,15 +22,15 @@ class SfcClimoGen(Driver):
 
     _driver_name = STR.sfcclimogen
 
-    def __init__(self, config_file: Path, dry_run: bool = False, batch: bool = False):
+    def __init__(self, config: Path, dry_run: bool = False, batch: bool = False):
         """
         The driver.
 
-        :param config_file: Path to config file.
+        :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
+        super().__init__(config=config, dry_run=dry_run, batch=batch)
         if self._dry_run:
             dryrun()
 
