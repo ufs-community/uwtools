@@ -21,12 +21,12 @@ def test_execute(tmp_path):
 
 
 def test_graph():
-    with patch.object(sfc_climo_gen.support, "graph") as graph:
+    with patch.object(sfc_climo_gen._support, "graph") as graph:
         sfc_climo_gen.graph()
     graph.assert_called_once_with()
 
 
 def test_tasks():
-    with patch.object(sfc_climo_gen.support, "tasks") as _tasks:
+    with patch.object(sfc_climo_gen._support, "tasks") as _tasks:
         sfc_climo_gen.tasks()
     _tasks.assert_called_once_with(sfc_climo_gen._SfcClimoGen)

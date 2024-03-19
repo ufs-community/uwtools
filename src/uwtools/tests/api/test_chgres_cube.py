@@ -31,6 +31,6 @@ def test_graph():
 
 
 def test_tasks():
-    with patch.object(chgres_cube.support, "tasks") as _tasks:
+    with patch.object(chgres_cube._support, "tasks") as _tasks:
         chgres_cube.tasks()
     _tasks.assert_called_once_with(chgres_cube._ChgresCube)

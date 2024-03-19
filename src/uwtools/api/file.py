@@ -1,5 +1,5 @@
 """
-API access to uwtools file-management tools.
+API access to ``uwtools`` file-management tools.
 """
 from pathlib import Path
 from typing import List, Optional, Union
@@ -18,10 +18,10 @@ def copy(
     Copy files.
 
     :param target_dir: Path to target directory
-    :param config: YAML-file path, or dict (read stdin if missing or None).
+    :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
     :param keys: YAML keys leading to file dst/src block
     :param dry_run: Do not copy files
-    :return: True if no exception is raised
+    :return: ``True`` if no exception is raised
     """
     _FileCopier(target_dir=target_dir, config=config, keys=keys, dry_run=dry_run).go()
     return True
@@ -37,10 +37,10 @@ def link(
     Link files.
 
     :param target_dir: Path to target directory
-    :param config: YAML-file path, or dict (read stdin if missing or None).
+    :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
     :param keys: YAML keys leading to file dst/src block
     :param dry_run: Do not link files
-    :return: True if no exception is raised
+    :return: ``True`` if no exception is raised
     """
     _FileLinker(target_dir=target_dir, config=config, keys=keys, dry_run=dry_run).go()
     return True
