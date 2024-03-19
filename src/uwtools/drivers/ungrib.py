@@ -8,12 +8,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
 
-from iotaa import asset, dryrun, run, task, tasks
+from iotaa import asset, dryrun, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.processing import execute
 from uwtools.utils.tasks import file
 
 
@@ -68,12 +67,12 @@ class Ungrib(Driver):
                     "interval_seconds": 1,
                     "max_dom": 1,
                     "start_date": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
-                    "wrf_core": 'ARW',
+                    "wrf_core": "ARW",
                 },
                 "ungrib": {
-                    "out_format": 'WPS',
-                    "prefix": 'FILE',
-                }
+                    "out_format": "WPS",
+                    "prefix": "FILE",
+                },
             }
         }
         path = self._rundir / "namelist.wps"

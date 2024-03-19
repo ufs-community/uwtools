@@ -34,7 +34,7 @@ class Driver(ABC):
         """
         self._config = YAMLConfig(config=config_file)
         self._config.dereference()
-        # self._validate()
+        self._validate()
         self._dry_run = dry_run
         self._batch = batch
 

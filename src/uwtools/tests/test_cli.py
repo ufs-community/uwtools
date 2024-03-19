@@ -140,7 +140,6 @@ def test__add_subparser_ungrib(subparsers):
     cli._add_subparser_ungrib(subparsers)
     assert actions(subparsers.choices[STR.ungrib]) == [
         "gribfile_aaa",
-        "initial_conditions",
         "namelist_wps",
         "provisioned_run_directory",
         "run",

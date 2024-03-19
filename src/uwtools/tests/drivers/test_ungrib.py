@@ -141,18 +141,6 @@ def test_Ungrib__run_via_batch_submission(driverobj):
         prd.assert_called_once_with()
 
 
-def test_Ungrib__run_via_local_execution(driverobj):
-    with patch.object(driverobj, "provisioned_run_directory") as prd:
-        with patch.object(ungrib, "execute") as execute:
-            driverobj._run_via_local_execution()
-            execute.assert_called_once_with(
-                cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
-                cwd=driverobj._rundir,
-                log_output=True,
-            )
-        prd.assert_called_once_with()
-
-
 def test_Ungrib__driver_config(driverobj):
     assert driverobj._driver_config == driverobj._config["ungrib"]
 
