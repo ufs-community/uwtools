@@ -3,7 +3,7 @@ File handling.
 """
 from functools import cached_property
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from iotaa import tasks
 
@@ -22,7 +22,7 @@ class FileStager:
     def __init__(
         self,
         target_dir: Path,
-        config_file: Optional[Path],
+        config: Optional[Union[dict, Path]] = None,
         keys: Optional[List[str]] = None,
         dry_run: bool = False,
     ) -> None:
@@ -30,13 +30,13 @@ class FileStager:
         Handle files.
 
         :param target_dir: Path to target directory
-        :param config_file: Path to YAML config file (defaults to stdin)
+        :param config: YAML-file path, or dict (read stdin if missing or None).
         :param keys: YAML keys leading to file dst/src block
         :param dry_run: Do not copy files
         :raises: UWConfigError if config fails validation.
         """
         self._target_dir = target_dir
-        self._config = YAMLConfig(config=config_file)
+        self._config = YAMLConfig(config=config)
         self._keys = keys or []
         self._dry_run = dry_run
         self._config.dereference()

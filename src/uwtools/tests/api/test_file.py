@@ -11,7 +11,7 @@ from uwtools.api import file
 def args():
     return {
         "target_dir": "/target/dir",
-        "config_file": "/config/file",
+        "config": "/config/file",
         "keys": ["a", "b"],
         "dry_run": True,
     }

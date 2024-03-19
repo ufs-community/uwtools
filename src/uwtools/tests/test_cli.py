@@ -396,7 +396,7 @@ def test__dispatch_file_copy(args_dispatch_file):
         cli._dispatch_file_copy(a)
     copy.assert_called_once_with(
         target_dir=a["target_dir"],
-        config_file=a["config_file"],
+        config=a["config_file"],
         keys=a["keys"],
         dry_run=a["dry_run"],
     )
@@ -408,7 +408,7 @@ def test__dispatch_file_link(args_dispatch_file):
         cli._dispatch_file_link(a)
     link.assert_called_once_with(
         target_dir=a["target_dir"],
-        config_file=a["config_file"],
+        config=a["config_file"],
         keys=a["keys"],
         dry_run=a["dry_run"],
     )

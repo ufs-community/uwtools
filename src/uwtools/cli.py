@@ -347,7 +347,7 @@ def _dispatch_file_copy(args: Args) -> bool:
     """
     return uwtools.api.file.copy(
         target_dir=args[STR.targetdir],
-        config_file=args[STR.cfgfile],
+        config=args[STR.cfgfile],
         keys=args[STR.keys],
         dry_run=args[STR.dryrun],
     )
@@ -361,7 +361,7 @@ def _dispatch_file_link(args: Args) -> bool:
     """
     return uwtools.api.file.link(
         target_dir=args[STR.targetdir],
-        config_file=args[STR.cfgfile],
+        config=args[STR.cfgfile],
         keys=args[STR.keys],
         dry_run=args[STR.dryrun],
     )
