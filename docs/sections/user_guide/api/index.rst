@@ -2,8 +2,8 @@ API
 ===
 
 .. toctree::
-   config
    chgres_cube
+   config
    file
    fv3
    logging
