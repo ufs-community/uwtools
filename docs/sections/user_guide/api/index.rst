@@ -3,6 +3,7 @@ API
 
 .. toctree::
    config
+   file
    fv3
    logging
    rocoto

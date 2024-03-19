@@ -1,5 +1,5 @@
-Mode ``fv3``
-============
+``fv3``
+=======
 
 The ``uw`` mode for configuring and running FV3.
 

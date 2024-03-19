@@ -1,7 +1,7 @@
 .. _platform_yaml:
 
-The ``platform:`` Block:
-========================
+The ``platform:`` Block
+=======================
 
 The top-level UW YAML ``platform:`` block, referenced by multiple component drivers, is described below. It is validated by JSON Schema.
 

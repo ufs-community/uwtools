@@ -9,13 +9,11 @@ from typing import Any, Dict, List, Optional, Type
 
 from iotaa import asset, task, tasks
 
-from uwtools.config import validator
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.exceptions import UWConfigError
+from uwtools.config.validator import validate_internal
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
-from uwtools.utils.file import resource_path
 from uwtools.utils.processing import execute
 
 
@@ -24,7 +22,7 @@ class Driver(ABC):
     An abstract class for component drivers.
     """
 
-    def __init__(self, config_file: Path, dry_run: bool = False, batch: bool = False):
+    def __init__(self, config_file: Path, dry_run: bool = False, batch: bool = False) -> None:
         """
         A component driver.
 
@@ -33,10 +31,10 @@ class Driver(ABC):
         :param batch: Run component via the batch system?
         """
         self._config = YAMLConfig(config=config_file)
-        self._config.dereference()
-        self._validate()
         self._dry_run = dry_run
         self._batch = batch
+        self._config.dereference()
+        self._validate()
 
     # Workflow tasks
 
@@ -208,18 +206,4 @@ class Driver(ABC):
         Perform all necessary schema validation.
         """
         for schema_name in (self._driver_name.replace("_", "-"), "platform"):
-            self._validate_one(schema_name=schema_name)
-
-    def _validate_one(self, schema_name: str) -> None:
-        """
-        Validate the config.
-
-        :param schema_name: Name of uwtools schema to validate the config against.
-        :raises: UWConfigError if config fails validation.
-        """
-
-        log.info("Validating config per schema %s", schema_name)
-        schema_file = resource_path("jsonschema") / f"{schema_name}.jsonschema"
-        log.debug("Using schema file: %s", schema_file)
-        if not validator.validate_yaml(config=self._config, schema_file=schema_file):
-            raise UWConfigError("YAML validation errors")
+            validate_internal(schema_name=schema_name, config=self._config)
