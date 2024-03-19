@@ -1,5 +1,5 @@
 """
-API access to the uwtools sfc_climo_gen driver.
+API access to the ``uwtools`` ``sfc_climo_gen`` driver.
 """
 from pathlib import Path
 from typing import Dict, Optional
@@ -16,7 +16,7 @@ def execute(
     graph_file: Optional[Path] = None,
 ) -> bool:
     """
-    Execute an sfc_climo_gen task.
+    Execute an ``sfc_climo_gen`` task.
 
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the forecast will be run directly on the current system.

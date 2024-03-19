@@ -1,5 +1,5 @@
 """
-API access to the uwtools chgres_cube driver.
+API access to the uwtools ``chgres_cube`` driver.
 """
 import datetime as dt
 from pathlib import Path
@@ -20,7 +20,7 @@ def execute(
     graph_file: Optional[Path] = None,
 ) -> bool:
     """
-    Execute a chgres_cube task.
+    Execute a ``chgres_cube`` task.
 
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
@@ -31,7 +31,7 @@ def execute(
     :param batch: Submit run to the batch system
     :param dry_run: Do not run the executable, just report what would have been done
     :param graph_file: Write Graphviz DOT output here
-    :return: True if task completes without raising an exception
+    :return: ``True`` if task completes without raising an exception
     """
     obj = _ChgresCube(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
     getattr(obj, task)()

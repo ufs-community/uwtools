@@ -1,5 +1,5 @@
 """
-API access to uwtools logging logic.
+API access to ``uwtools`` logging logic.
 """
 import logging
 
