@@ -53,6 +53,7 @@ extlinks = {
     "rtd": ("https://readthedocs.org/projects/uwtools/%s", "%s"),
     "sfc-climo-gen": ("https://ufs-community.github.io/UFS_UTILS/sfc_climo_gen/%s", "%s"),
     "ufs": ("https://ufscommunity.org/%s", "%s"),
+    "ufs-utils": ("https://noaa-emcufs-utils.readthedocs.io/en/latest/ufs_utils.html#%s", "%s"),
     "ufs-weather-model": ("https://github.com/ufs-community/ufs-weather-model/%s", "%s"),
     "uwtools": ("https://github.com/ufs-community/uwtools/%s", "%s"),
     "weather-model-io": ("https://ufs-weather-model.readthedocs.io/en/latest/InputsOutputs.html#%s", "%s"),

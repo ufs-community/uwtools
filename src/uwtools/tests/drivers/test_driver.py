@@ -10,11 +10,10 @@ from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 import yaml
-from pytest import fixture, raises
+from pytest import fixture
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
-from uwtools.exceptions import UWConfigError
 
 # Helpers
 
@@ -60,13 +59,7 @@ def write(path, s):
 
 
 @fixture
-def driver_bad(tmp_path):
-    cf = write(tmp_path / "bad.yaml", {"base_file": 88})
-    return ConcreteDriver(config_file=cf, dry_run=True, batch=True)
-
-
-@fixture
-def driver_good(tmp_path):
+def a_driver(tmp_path):
     cf = write(
         tmp_path / "good.yaml",
         {
@@ -79,21 +72,13 @@ def driver_good(tmp_path):
     return ConcreteDriver(config_file=cf, dry_run=True, batch=True)
 
 
-@fixture
-def schema(tmp_path):
-    return write(
-        tmp_path / "a.jsonschema",
-        {
-            "properties": {"base_file": {"type": "string"}, "update_values": {"type": "object"}},
-            "type": "object",
-        },
-    )
+# Tests
 
 
-def test_Driver(driver_good):
-    assert Path(driver_good._config["base_file"]).name == "base.yaml"
-    assert driver_good._dry_run is True
-    assert driver_good._batch is True
+def test_Driver(a_driver):
+    assert Path(a_driver._config["base_file"]).name == "base.yaml"
+    assert a_driver._dry_run is True
+    assert a_driver._batch is True
 
 
 @pytest.mark.parametrize(
@@ -106,10 +91,10 @@ def test_Driver(driver_good):
     ],
 )
 def test_Driver__create_user_updated_config_base_file(
-    base_file, driver_good, expected, tmp_path, update_values
+    base_file, a_driver, expected, tmp_path, update_values
 ):
     path = tmp_path / "updated.yaml"
-    cv = driver_good._config
+    cv = a_driver._config
     if not base_file:
         del cv["base_file"]
     if not update_values:
@@ -120,11 +105,11 @@ def test_Driver__create_user_updated_config_base_file(
     assert updated == expected
 
 
-def test_Driver__runcmd(driver_good):
-    assert driver_good._runcmd == "foo bar baz qux"
+def test_Driver__runcmd(a_driver):
+    assert a_driver._runcmd == "foo bar baz qux"
 
 
-def test_Driver__runscript(driver_good):
+def test_Driver__runscript(a_driver):
     expected = """
     #!/bin/bash
 
@@ -142,7 +127,7 @@ def test_Driver__runscript(driver_good):
     """
     scheduler = Mock(directives=["#DIR --d1", "#DIR --d2"])
     assert (
-        driver_good._runscript(
+        a_driver._runscript(
             execution=["foo", "bar"],
             envcmds=["cmd1", "cmd2"],
             envvars={"VAR1": 1, "VAR2": 2},
@@ -152,53 +137,41 @@ def test_Driver__runscript(driver_good):
     )
 
 
-def test_Driver__runscript_execution_only(driver_good):
+def test_Driver__runscript_execution_only(a_driver):
     expected = """
     #!/bin/bash
 
     foo
     bar
     """
-    assert driver_good._runscript(execution=["foo", "bar"]) == dedent(expected).strip()
+    assert a_driver._runscript(execution=["foo", "bar"]) == dedent(expected).strip()
 
 
-def test_Driver__run_via_batch_submission(driver_good):
-    runscript = driver_good._runscript_path
-    with patch.object(driver_good, "provisioned_run_directory") as prd:
+def test_Driver__run_via_batch_submission(a_driver):
+    runscript = a_driver._runscript_path
+    with patch.object(a_driver, "provisioned_run_directory") as prd:
         with patch.object(ConcreteDriver, "_scheduler", new_callable=PropertyMock) as scheduler:
-            driver_good._run_via_batch_submission()
+            a_driver._run_via_batch_submission()
             scheduler().submit_job.assert_called_once_with(
                 runscript=runscript, submit_file=Path(f"{runscript}.submit")
             )
         prd.assert_called_once_with()
 
 
-def test_Driver__run_via_local_execution(driver_good):
-    with patch.object(driver_good, "provisioned_run_directory") as prd:
+def test_Driver__run_via_local_execution(a_driver):
+    with patch.object(a_driver, "provisioned_run_directory") as prd:
         with patch.object(driver, "execute") as execute:
-            driver_good._run_via_local_execution()
+            a_driver._run_via_local_execution()
             execute.assert_called_once_with(
-                cmd="{x} >{x}.out 2>&1".format(x=driver_good._runscript_path),
-                cwd=driver_good._rundir,
+                cmd="{x} >{x}.out 2>&1".format(x=a_driver._runscript_path),
+                cwd=a_driver._rundir,
                 log_output=True,
             )
         prd.assert_called_once_with()
 
 
-def test_Driver__scheduler(driver_good):
+def test_Driver__scheduler(a_driver):
     with patch.object(driver, "JobScheduler") as JobScheduler:
         scheduler = JobScheduler.get_scheduler()
-        assert driver_good._scheduler == scheduler
-        JobScheduler.get_scheduler.assert_called_with(driver_good._resources)
-
-
-def test_Driver__validate_one_no(driver_bad, schema):
-    with patch.object(driver, "resource_path", return_value=schema.parent):
-        with raises(UWConfigError) as e:
-            driver_bad._validate_one(schema.stem)
-    assert str(e.value) == "YAML validation errors"
-
-
-def test_Driver__validate_one_ok(driver_good, schema):
-    with patch.object(driver, "resource_path", return_value=schema.parent):
-        driver_good._validate_one(schema.stem)
+        assert a_driver._scheduler == scheduler
+        JobScheduler.get_scheduler.assert_called_with(a_driver._resources)

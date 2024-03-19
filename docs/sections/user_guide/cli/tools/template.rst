@@ -1,5 +1,5 @@
-Mode ``template``
-=================
+``template``
+============
 
 The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 

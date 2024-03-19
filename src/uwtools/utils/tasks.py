@@ -31,6 +31,7 @@ def filecopy(src: Path, dst: Path):
     yield "Copy %s -> %s" % (src, dst)
     yield asset(dst, dst.is_file)
     yield file(src)
+    dst.parent.mkdir(exist_ok=True)
     copy(src, dst)
 
 
