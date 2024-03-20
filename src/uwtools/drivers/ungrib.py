@@ -172,4 +172,4 @@ class Ungrib(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return "%s Ungrib %s" % (self._cycle.strftime("%Y%m%d %HZ"), suffix)
+        return "%s ungrib %s" % (self._cycle.strftime("%Y%m%d %HZ"), suffix)
