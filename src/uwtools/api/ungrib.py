@@ -21,7 +21,7 @@ def execute(
     Execute an Ungrib task.
 
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
-    Otherwise, the forecast will be run directly on the current system.
+    Otherwise, the executable will be run directly on the current system.
 
     :param task: The task to execute
     :param config_file: Path to YAML config file
