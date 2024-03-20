@@ -48,7 +48,7 @@ class Ungrib(Driver):
         The gribfile.
         """
         path = self._rundir / "GRIBFILE.AAA"
-        yield self._taskname(path)
+        yield self._taskname(str(path))
         yield asset(path, path.is_symlink)
         infile = Path(self._driver_config["gfs_file"])
         yield file(path=infile)
@@ -76,7 +76,7 @@ class Ungrib(Driver):
             }
         }
         path = self._rundir / "namelist.wps"
-        yield self._taskname(path)
+        yield self._taskname(str(path))
         yield asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -130,8 +130,8 @@ class Ungrib(Driver):
         """
         The Vtable.
         """
-        path = self._rundir / "Vtable"
-        yield self._taskname(path)
+        path = self._rundir / "Vtable.GFS"
+        yield self._taskname(str(path))
         yield asset(path, path.is_symlink)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)

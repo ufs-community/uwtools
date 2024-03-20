@@ -74,9 +74,10 @@ def test_Ungrib_dry_run(config_file, cycle):
 
 def test_Ungrib_gribfile_aaa(driverobj):
     src = driverobj._rundir / "GRIBFILE.AAA.in"
+    src.touch()
+    driverobj._driver_config["gfs_file"] = src
     dst = driverobj._rundir / "GRIBFILE.AAA"
     assert not dst.is_symlink()
-    driverobj._driver_config["gfs_file"] = src
     driverobj.gribfile_aaa()
     assert dst.is_symlink()
 
@@ -142,6 +143,16 @@ def test_Ungrib_runscript(driverobj):
     # Check execution:
     # assert "runit mpas" in lines
     assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
+
+
+def test_Ungrib_vtable(driverobj):
+    src = driverobj._rundir / "Vtable.GFS.in"
+    src.touch()
+    driverobj._driver_config["vtable"] = src
+    dst = driverobj._rundir / "Vtable.GFS"
+    assert not dst.is_symlink()
+    driverobj.vtable()
+    assert dst.is_symlink()
 
 
 def test_Ungrib__driver_config(driverobj):
