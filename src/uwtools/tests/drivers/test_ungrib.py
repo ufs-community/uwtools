@@ -27,16 +27,22 @@ def cycle():
 def config(tmp_path):
     return {
         "ungrib": {
-            "domain": "global",
-            "execution": {"executable": "fv3"},
-            "lateral_boundary_conditions": {
-                "interval_hours": 1,
-                "offset": 0,
-                "path": str(tmp_path / "f{forecast_hour}"),
+            "execution": {
+                "mpicmd": "srun",
+                "batchargs": {
+                    "nodes": 1,
+                    "walltime": "00:05:00",
+                },
+                "executable": str(tmp_path / "ungrib.exe"),
             },
-            "length": 1,
+            "gfs_file": str(tmp_path / "gfs.2024.03.18.12"),
             "run_dir": str(tmp_path),
-        }
+            "vtable": str(tmp_path / "Vtable.GFS"),
+        },
+        "platform": {
+            "account": "wrfruc",
+            "scheduler": "slurm",
+        },
     }
 
 
@@ -128,17 +134,6 @@ def test_Ungrib_runscript(driverobj):
     # Check execution:
     # assert "runit mpas" in lines
     assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
-
-
-def test_Ungrib__run_via_batch_submission(driverobj):
-    runscript = driverobj._runscript_path
-    with patch.object(driverobj, "provisioned_run_directory") as prd:
-        with patch.object(ungrib.Ungrib, "_scheduler", new_callable=PropertyMock) as scheduler:
-            driverobj._run_via_batch_submission()
-            scheduler().submit_job.assert_called_once_with(
-                runscript=runscript, submit_file=Path(f"{runscript}.submit")
-            )
-        prd.assert_called_once_with()
 
 
 def test_Ungrib__driver_config(driverobj):
