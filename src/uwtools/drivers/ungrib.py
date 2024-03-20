@@ -130,7 +130,7 @@ class Ungrib(Driver):
         """
         The Vtable.
         """
-        path = self._rundir / "Vtable.GFS"
+        path = self._rundir / "Vtable"
         yield self._taskname(str(path))
         yield asset(path, path.is_symlink)
         yield None
