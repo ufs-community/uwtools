@@ -3,9 +3,8 @@
 Ungrib driver tests.
 """
 import datetime as dt
-from pathlib import Path
 from unittest.mock import DEFAULT as D
-from unittest.mock import PropertyMock, patch
+from unittest.mock import patch
 
 import yaml
 from pytest import fixture
@@ -71,6 +70,15 @@ def test_Ungrib_dry_run(config_file, cycle):
         driverobj = ungrib.Ungrib(config_file=config_file, cycle=cycle, batch=True, dry_run=True)
     assert driverobj._dry_run is True
     dryrun.assert_called_once_with()
+
+
+def test_Ungrib_gribfile_aaa(driverobj):
+    src = driverobj._rundir / "GRIBFILE.AAA.in"
+    dst = driverobj._rundir / "GRIBFILE.AAA"
+    assert not dst.is_symlink()
+    driverobj._driver_config["gfs_file"] = src
+    driverobj.gribfile_aaa()
+    assert dst.is_symlink()
 
 
 def test_Ungrib_namelist_wps(driverobj):

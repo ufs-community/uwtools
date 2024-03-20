@@ -173,10 +173,3 @@ class Ungrib(Driver):
         :param suffix: Log-string suffix.
         """
         return "%s Ungrib %s" % (self._cycle.strftime("%Y%m%d %HZ"), suffix)
-
-    def _validate(self) -> None:
-        """
-        Perform all necessary schema validation.
-        """
-        for schema_name in ("ungrib", "platform"):
-            self._validate_one(schema_name=schema_name)

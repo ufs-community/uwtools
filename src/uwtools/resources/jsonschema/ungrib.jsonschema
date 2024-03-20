@@ -12,13 +12,15 @@
         "run_dir": {
           "type": "string"
         },
-        "vtbale": {
+        "vtable": {
           "type": "string"
         }
       },
       "required": [
         "execution",
-        "run_dir"
+        "gfs_file",
+        "run_dir",
+        "vtable"
       ],
       "type": "object"
     }
