@@ -1,7 +1,9 @@
 """
 An abstract class for component drivers.
 """
+import os
 import re
+import stat
 from abc import ABC, abstractmethod
 from pathlib import Path
 from textwrap import dedent
@@ -207,3 +209,18 @@ class Driver(ABC):
         """
         for schema_name in (self._driver_name.replace("_", "-"), "platform"):
             validate_internal(schema_name=schema_name, config=self._config)
+
+    def _write_runscript(self, path: Path, envvars: Dict[str, str]) -> None:
+        """
+        Write the runscript.
+        """
+        path.parent.mkdir(parents=True, exist_ok=True)
+        rs = self._runscript(
+            envcmds=self._driver_config.get("execution", {}).get("envcmds", []),
+            envvars=envvars,
+            execution=[self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir],
+            scheduler=self._scheduler if self._batch else None,
+        )
+        with open(path, "w", encoding="utf-8") as f:
+            print(rs, file=f)
+        os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
