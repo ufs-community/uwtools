@@ -1,0 +1,13 @@
+ungrib:
+  execution:
+    mpicmd: srun
+    batchargs:
+      nodes: 1
+      walltime: 00:05:00
+    executable: "/lfs4/BMC/wrfruc/jderrico/mpas/exec/ungrib.exe"
+  gfs_file: "/path/to/dir/gfs.2024.03.18.12"
+  run_dir: "/path/to/dir/run"
+  vtable: "/lfs4/BMC/wrfruc/jderrico/mpas/fix/WRFV4.0/Vtable.GFS"
+platform:
+  account: wrfruc
+  scheduler: slurm
