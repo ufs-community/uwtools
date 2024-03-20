@@ -8,8 +8,9 @@ build:
   noarch: python
   number: 0 # <= always reset to 0 when version changes
 requirements:
-  host:
+  build:
     - pip
+    - setuptools_scm
   run:
     - f90nml 1.4.*
     - iotaa 0.7.3.*
