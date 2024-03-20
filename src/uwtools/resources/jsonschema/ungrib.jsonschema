@@ -7,31 +7,7 @@
           "$ref": "urn:uwtools:execution"
         },
         "gfs_file": {
-          "additionalProperties": false,
-            }
-          "properties": {
-            "base_file": {
-              "type": "string"
-            },
-            "update_values": {
-              "properties": {
-                "config": {
-                  "additionalProperties": {
-                    "type": [
-                      "array",
-                      "boolean",
-                      "number",
-                      "string"
-                    ]
-                  },
-              },
-              "required": [
-                "config"
-              ],
-              "type": "object"
-            }
-          },
-          "type": "object"
+          "type": "string"
         },
         "run_dir": {
           "type": "string"
