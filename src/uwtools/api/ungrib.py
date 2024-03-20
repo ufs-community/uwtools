@@ -1,12 +1,12 @@
 """
-API access to the uwtools ungrib driver.
+API access to the ``uwtools`` ``ungrib`` driver.
 """
 import datetime as dt
 from pathlib import Path
 from typing import Dict, Optional
 
-from uwtools.drivers import support
-from uwtools.drivers.ungrib import Ungrib
+import uwtools.drivers.support as _support
+from uwtools.drivers.ungrib import Ungrib as _Ungrib
 
 
 def execute(
@@ -18,7 +18,7 @@ def execute(
     graph_file: Optional[Path] = None,
 ) -> bool:
     """
-    Execute an Ungrib task.
+    Execute an ``ungrib`` task.
 
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
@@ -31,7 +31,7 @@ def execute(
     :param graph_file: Write Graphviz DOT output here
     :return: ``True`` if task completes without raising an exception
     """
-    obj = Ungrib(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
+    obj = _Ungrib(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
     getattr(obj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
@@ -43,11 +43,11 @@ def graph() -> str:
     """
     Returns Graphviz DOT code for the most recently executed task.
     """
-    return support.graph()
+    return _support.graph()
 
 
 def tasks() -> Dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
     """
-    return support.tasks(Ungrib)
+    return _support.tasks(_Ungrib)

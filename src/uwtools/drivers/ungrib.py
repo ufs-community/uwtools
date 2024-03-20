@@ -1,5 +1,5 @@
 """
-A driver for the Ungrib model.
+A driver for the ungrib component.
 """
 
 import os
@@ -164,7 +164,7 @@ class Ungrib(Driver):
         """
         Returns the path to the runscript.
         """
-        return self._rundir / "runscript"
+        return self._rundir / "runscript.ungrib"
 
     def _taskname(self, suffix: str) -> str:
         """

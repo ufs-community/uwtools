@@ -34,7 +34,7 @@ def config(tmp_path):
                 },
                 "executable": str(tmp_path / "ungrib.exe"),
             },
-            "gfs_file": str(tmp_path / "gfs.2024.03.18.12"),
+            "gfs_file": str(tmp_path / "gfs.t12z.pgrb2.0p25.f000"),
             "run_dir": str(tmp_path),
             "vtable": str(tmp_path / "Vtable.GFS"),
         },
@@ -120,11 +120,11 @@ def test_Ungrib_run_local(driverobj):
 
 
 def test_Ungrib_runscript(driverobj):
-    dst = driverobj._rundir / "runscript"
+    dst = driverobj._rundir / "runscript.ungrib"
     assert not dst.is_file()
     driverobj._driver_config["execution"].update(
         {
-            "batchargs": {"walltime": "01:10:00"},
+            "batchargs": {"walltime": "00:01:00"},
             "envcmds": ["cmd1", "cmd2"],
             "mpicmd": "runit",
             "threads": 8,
@@ -136,7 +136,7 @@ def test_Ungrib_runscript(driverobj):
         lines = f.read().split("\n")
     # Check directives:
     assert "#SBATCH --account=me" in lines
-    assert "#SBATCH --time=01:10:00" in lines
+    assert "#SBATCH --time=00:01:00" in lines
     # Check environment commands:
     assert "cmd1" in lines
     assert "cmd2" in lines
@@ -173,11 +173,11 @@ def test_Ungrib__resources(driverobj):
 
 
 def test_Ungrib__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript"
+    assert driverobj._runscript_path == driverobj._rundir / "runscript.ungrib"
 
 
 def test_Ungrib__taskanme(driverobj):
-    assert driverobj._taskname("foo") == "20240201 18Z Ungrib foo"
+    assert driverobj._taskname("foo") == "20240201 18Z ungrib foo"
 
 
 def test_Ungrib__validate(driverobj):
