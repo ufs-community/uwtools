@@ -1,15 +1,15 @@
 """
-API access to uwtools Rocoto support.
+API access to ``uwtools`` Rocoto support.
 """
 from pathlib import Path
 from typing import Optional, Union
 
-from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.rocoto import realize_rocoto_xml as _realize
 from uwtools.rocoto import validate_rocoto_xml_file as _validate
 
 
-def realize(config: Union[YAMLConfig, Optional[Path]], output_file: Optional[Path] = None) -> bool:
+def realize(config: Union[_YAMLConfig, Optional[Path]], output_file: Optional[Path] = None) -> bool:
     """
     Realize the Rocoto workflow defined in the given YAML as XML.
 

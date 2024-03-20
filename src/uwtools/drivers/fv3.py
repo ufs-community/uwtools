@@ -2,8 +2,6 @@
 A driver for the FV3 model.
 """
 
-import os
-import stat
 from datetime import datetime
 from pathlib import Path
 from shutil import copy
@@ -24,8 +22,6 @@ class FV3(Driver):
     """
     A driver for the FV3 model.
     """
-
-    _driver_name = STR.fv3
 
     def __init__(
         self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
@@ -197,18 +193,16 @@ class FV3(Driver):
             "OMP_NUM_THREADS": self._driver_config.get("execution", {}).get("threads", 1),
             "OMP_STACKSIZE": "512m",
         }
-        envcmds = self._driver_config.get("execution", {}).get("envcmds", [])
-        execution = [self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir]
-        scheduler = self._scheduler if self._batch else None
-        path.parent.mkdir(parents=True, exist_ok=True)
-        rs = self._runscript(
-            envcmds=envcmds, envvars=envvars, execution=execution, scheduler=scheduler
-        )
-        with open(path, "w", encoding="utf-8") as f:
-            print(rs, file=f)
-        os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
+        self._write_runscript(path=path, envvars=envvars)
 
     # Private helper methods
+
+    @property
+    def _driver_name(self) -> str:
+        """
+        Returns the name of this driver.
+        """
+        return STR.fv3
 
     def _taskname(self, suffix: str) -> str:
         """
