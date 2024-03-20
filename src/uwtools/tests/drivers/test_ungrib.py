@@ -141,7 +141,6 @@ def test_Ungrib_runscript(driverobj):
     assert "cmd1" in lines
     assert "cmd2" in lines
     # Check execution:
-    # assert "runit mpas" in lines
     assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
 
 
