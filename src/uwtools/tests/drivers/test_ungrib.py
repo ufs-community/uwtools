@@ -148,7 +148,7 @@ def test_Ungrib_vtable(driverobj):
     src = driverobj._rundir / "Vtable.GFS.in"
     src.touch()
     driverobj._driver_config["vtable"] = src
-    dst = driverobj._rundir / "Vtable.GFS"
+    dst = driverobj._rundir / "Vtable"
     assert not dst.is_symlink()
     driverobj.vtable()
     assert dst.is_symlink()
