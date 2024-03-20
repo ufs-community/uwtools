@@ -18,7 +18,7 @@ from uwtools.utils.tasks import file
 
 class Ungrib(Driver):
     """
-    A driver for Ungrib.
+    A driver for ungrib.
     """
 
     _driver_name = STR.ungrib
