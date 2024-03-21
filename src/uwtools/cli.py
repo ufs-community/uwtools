@@ -19,6 +19,7 @@ import uwtools.api.fv3
 import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
 import uwtools.api.template
+import uwtools.api.ungrib
 import uwtools.config.jinja2
 import uwtools.rocoto
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
@@ -62,6 +63,7 @@ def main() -> None:
             STR.rocoto: _dispatch_rocoto,
             STR.sfcclimogen: _dispatch_sfc_climo_gen,
             STR.template: _dispatch_template,
+            STR.ungrib: _dispatch_ungrib,
         }
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except UWError as e:
@@ -659,6 +661,60 @@ def _dispatch_template_translate(args: Args) -> bool:
     )
 
 
+# Mode ungrib
+
+
+def _add_subparser_ungrib(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: ungrib
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.ungrib, "Execute Ungrib tasks")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_ungrib_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.ungrib.tasks().items()
+    }
+
+
+def _add_subparser_ungrib_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+    """
+    Subparser for mode: ungrib <task>
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_config_file(group=required, required=True)
+    _add_arg_cycle(required)
+    optional = _basic_setup(parser)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
+def _dispatch_ungrib(args: Args) -> bool:
+    """
+    Dispatch logic for ungrib mode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.ungrib.execute(
+        task=args[STR.action],
+        config_file=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
+    )
+
+
 # Arguments
 
 # pylint: disable=missing-function-docstring
@@ -1038,6 +1094,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         STR.rocoto: _add_subparser_rocoto(subparsers),
         STR.sfcclimogen: _add_subparser_sfc_climo_gen(subparsers),
         STR.template: _add_subparser_template(subparsers),
+        STR.ungrib: _add_subparser_ungrib(subparsers),
     }
     return vars(parser.parse_args(raw_args)), checks
 
