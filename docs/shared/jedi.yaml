@@ -5,6 +5,7 @@ jedi:
       nodes: 1
       walltime: 08:00:00
     executable: "/path/to/jedi.exe"
-  gfs_file: "/path/to/dir/???"
   run_dir: "/path/to/dir/run"
-  vtable: "/path/to/Vtable.GFS"
+platform: 
+  account: me
+  scheduler: slurm

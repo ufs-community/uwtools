@@ -81,6 +81,7 @@ class STR:
     help: str = "help"
     infile: str = "input_file"
     infmt: str = "input_format"
+    jedi: str = "jedi"
     keys: str = "keys"
     keyvalpairs: str = "key_eq_val_pairs"
     link: str = "link"

@@ -96,6 +96,4 @@ class Jedi(Driver):
         Returns a common tag for graph-task log messages.
         :param suffix: Log-string suffix.
         """
-        pass
-#        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
-
+        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
