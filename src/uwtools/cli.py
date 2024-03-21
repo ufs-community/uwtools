@@ -47,8 +47,6 @@ def main() -> None:
     try:
         setup_logging(quiet=True)
         args, checks = _parse_args(sys.argv[1:])
-        if args[STR.version]:
-            _version()
         for check in checks[args[STR.mode]][args[STR.action]]:
             check(args)
         setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
@@ -968,7 +966,12 @@ def _basic_setup(parser: Parser) -> Group:
     """
     optional = parser.add_argument_group("Optional arguments")
     optional.add_argument("-h", _switch(STR.help), action=STR.help, help="Show help and exit")
-    optional.add_argument(_switch(STR.version), action="store_true", help="Show version info exit")
+    optional.add_argument(
+        _switch(STR.version),
+        action=STR.version,
+        help="Show version info exit",
+        version=f"%(prog)s {_version()}",
+    )
     return optional
 
 
@@ -1049,11 +1052,10 @@ def _switch(arg: str) -> str:
     return "--%s" % arg.replace("_", "-")
 
 
-def _version() -> NoReturn:
+def _version() -> str:
     """
-    Print version information and exit.
+    Return version information.
     """
     with open(resource_path("info.json"), "r", encoding="utf-8") as f:
         info = json.load(f)
-        print("%s version %s build %s" % (info["cli"], info["version"], info["build"]))
-    sys.exit(0)
+        return "version %s build %s" % (info["version"], info["buildnum"])
