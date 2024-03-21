@@ -29,8 +29,8 @@ def config(tmp_path):
             "execution": {
                 "mpicmd": "srun",
                 "batchargs": {
-                    "nodes": 1,
-                    "walltime": "00:05:00",
+                    "cores": 1,
+                    "walltime": "00:01:00",
                 },
                 "executable": str(tmp_path / "ungrib.exe"),
             },
@@ -83,12 +83,8 @@ def test_Ungrib_gribfile_aaa(driverobj):
 
 
 def test_Ungrib_namelist_wps(driverobj):
-    src = driverobj._rundir / "namelist.wps.in"
-    with open(src, "w", encoding="utf-8") as f:
-        yaml.dump({}, f)
     dst = driverobj._rundir / "namelist.wps"
     assert not dst.is_file()
-    driverobj._driver_config["namelist_file"] = {"base_file": src}
     driverobj.namelist_wps()
     assert dst.is_file()
 

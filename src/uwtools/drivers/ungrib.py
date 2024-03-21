@@ -2,8 +2,6 @@
 A driver for the ungrib component.
 """
 
-import os
-import stat
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
@@ -20,8 +18,6 @@ class Ungrib(Driver):
     """
     A driver for ungrib.
     """
-
-    _driver_name = STR.ungrib
 
     def __init__(
         self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
@@ -99,14 +95,6 @@ class Ungrib(Driver):
             self.vtable(),
         ]
 
-    @tasks
-    def run(self):
-        """
-        A run.
-        """
-        yield self._taskname("run")
-        yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
-
     @task
     def runscript(self):
         """
@@ -116,14 +104,7 @@ class Ungrib(Driver):
         yield self._taskname(path.name)
         yield asset(path, path.is_file)
         yield None
-        envcmds = self._driver_config.get("execution", {}).get("envcmds", [])
-        execution = [self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir]
-        scheduler = self._scheduler if self._batch else None
-        path.parent.mkdir(parents=True, exist_ok=True)
-        rs = self._runscript(envcmds=envcmds, execution=execution, scheduler=scheduler)
-        with open(path, "w", encoding="utf-8") as f:
-            print(rs, file=f)
-        os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
+        self._write_runscript(path=path, envvars={})
 
     @task
     def vtable(self):
@@ -140,12 +121,11 @@ class Ungrib(Driver):
     # Private helper methods
 
     @property
-    def _driver_config(self) -> Dict[str, Any]:
+    def _driver_name(self) -> str:
         """
-        Returns the config block specific to this driver.
+        Returns the name of this driver.
         """
-        driver_config: Dict[str, Any] = self._config["ungrib"]
-        return driver_config
+        return STR.ungrib
 
     @property
     def _resources(self) -> Dict[str, Any]:
@@ -158,13 +138,6 @@ class Ungrib(Driver):
             "scheduler": self._config["platform"]["scheduler"],
             **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
-
-    @property
-    def _runscript_path(self) -> Path:
-        """
-        Returns the path to the runscript.
-        """
-        return self._rundir / "runscript.ungrib"
 
     def _taskname(self, suffix: str) -> str:
         """
