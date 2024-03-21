@@ -1,12 +1,14 @@
+{% set info = load_file_data("uwtools/resources/info.json") %}
+
 package:
   name: uwtools
-  version: 2.1.1
+  version: {{ info["version"] }}
 source:
   path: ../src
 build:
   include_recipe: false
   noarch: python
-  number: 0 # <= always reset to 0 when version changes
+  number: {{ info["buildnum"] }}
 requirements:
   build:
     - pip
