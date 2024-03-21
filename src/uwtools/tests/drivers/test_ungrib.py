@@ -6,6 +6,7 @@ import datetime as dt
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
+import f90nml  # type: ignore
 import yaml
 from pytest import fixture
 
@@ -87,6 +88,7 @@ def test_Ungrib_namelist_file(driverobj):
     assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
+    assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
 def test_Ungrib_provisioned_run_directory(driverobj):
