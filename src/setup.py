@@ -14,7 +14,6 @@ the local package along with its dependencies from PyPI.
 import json
 import os
 import re
-import shutil
 
 from setuptools import find_packages, setup  # type: ignore
 
@@ -45,16 +44,6 @@ if not os.environ.get("CONDA_PREFIX"):
         for pkg in meta["packages"]["run"]
         if not re.match(r"^python .*$", pkg)
     ]
-
-# Link (development shells) or copy (other contexts) a metadata resource.
-
-metadst = os.path.join("uwtools", "resources", os.path.basename(metasrc))
-if os.environ.get("CONDEV_SHELL"):
-    tmpfile = "%s.tmp" % metadst
-    os.symlink(metasrc, tmpfile)
-    os.rename(tmpfile, metadst)
-else:
-    shutil.copyfile(metasrc, metadst)
 
 # Install.
 
