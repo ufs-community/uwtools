@@ -50,7 +50,9 @@ if not os.environ.get("CONDA_PREFIX"):
 
 metadst = os.path.join("uwtools", "resources", os.path.basename(metasrc))
 if os.environ.get("CONDEV_SHELL"):
-    os.symlink(metasrc, metadst)
+    tmpfile = "%s.tmp" % metadst
+    os.symlink(metasrc, tmpfile)
+    os.rename(tmpfile, metadst)
 else:
     shutil.copyfile(metasrc, metadst)
 
