@@ -26,6 +26,7 @@ name_py = name_conda.replace("-", "_")
 
 kwargs = {
     "entry_points": {"console_scripts": ["uw = %s.cli:main" % name_py]},
+    "include_package_data": True,
     "name": name_conda,
     "packages": find_packages(exclude=["%s.tests" % name_py], include=[name_py, "%s.*" % name_py]),
     "version": meta["version"],
