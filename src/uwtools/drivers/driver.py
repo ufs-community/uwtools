@@ -129,7 +129,7 @@ class Driver(ABC):
     @abstractmethod
     def _resources(self) -> Dict[str, Any]:
         """
-        Returns configuration data for the FV3 runscript.
+        Returns configuration data for the runscript.
         """
 
     @property
