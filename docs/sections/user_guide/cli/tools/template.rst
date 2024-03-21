@@ -6,16 +6,18 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 .. code-block:: text
 
    $ uw template --help
-   usage: uw template [-h] MODE ...
-
+   usage: uw template [-h] [--version] ACTION ...
+   
    Handle templates
-
+   
    Optional arguments:
      -h, --help
          Show help and exit
-
+     --version
+         Show version info exit
+   
    Positional arguments:
-     MODE
+     ACTION
        render
          Render a template
        translate
@@ -29,17 +31,19 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 .. code-block:: text
 
    $ uw template render --help
-   usage: uw template render [-h] [--input-file PATH] [--output-file PATH] [--values-file PATH]
-                             [--values-format {ini,nml,sh,yaml}] [--env]
+   usage: uw template render [-h] [--version] [--input-file PATH] [--output-file PATH]
+                             [--values-file PATH] [--values-format {ini,nml,sh,yaml}] [--env]
                              [--search-path PATH[:PATH:...]] [--values-needed] [--partial]
                              [--dry-run] [--quiet] [--verbose]
                              [KEY=VALUE ...]
-
+   
    Render a template
-
+   
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --output-file PATH, -o PATH
@@ -297,22 +301,22 @@ and a YAML file called ``values.yaml`` with the following contents:
 .. code-block:: text
 
    $ uw template translate --help
-   usage: uw template translate [-h] [--input-file PATH] [--output-file PATH] [--dry-run] [--quiet]
-                                [--verbose]
-
+   usage: uw template translate [-h] [--version] [--input-file PATH] [--output-file PATH] [--dry-run]
+                                [--quiet] [--verbose]
+   
    Translate atparse to Jinja2
-
+   
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --output-file PATH, -o PATH
          Path to output file (defaults to stdout)
      --dry-run
          Only log info, making no changes
-     --debug
-         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v

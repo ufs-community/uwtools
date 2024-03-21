@@ -6,14 +6,16 @@ The ``uw`` mode for configuring and running FV3.
 .. code-block:: text
 
    $ uw fv3 --help
-   usage: uw fv3 [-h] TASK ...
-
+   usage: uw fv3 [-h] [--version] TASK ...
+   
    Execute FV3 tasks
-
+   
    Optional arguments:
      -h, --help
          Show help and exit
-
+     --version
+         Show version info exit
+   
    Positional arguments:
      TASK
        boundary_files
@@ -44,26 +46,28 @@ All tasks take the same arguments. For example:
 .. code-block:: text
 
    $ uw fv3 run --help
-   usage: uw fv3 run --config-file PATH --cycle CYCLE [-h] [--batch] [--dry-run] [--debug] [--quiet]
-                     [--verbose]
-
+   usage: uw fv3 run --config-file PATH --cycle CYCLE [-h] [--version] [--batch] [--dry-run]
+                     [--graph-file PATH] [--quiet] [--verbose]
+   
    A run
-
+   
    Required arguments:
      --config-file PATH, -c PATH
          Path to config file
      --cycle CYCLE
          The cycle in ISO8601 format
-
+   
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info exit
      --batch
          Submit run to batch scheduler
      --dry-run
          Only log info, making no changes
-     --debug
-         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
+     --graph-file PATH
+         Path to Graphviz DOT output [experimental]
      --quiet, -q
          Print no logging messages
      --verbose, -v
