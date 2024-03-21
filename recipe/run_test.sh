@@ -13,12 +13,8 @@
 cli() {
   msg Testing CLI program
   (
-    set -eu
-    clis=( uw )
-    for x in ${clis[*]}; do
-      which $x
-      $x --help &>/dev/null
-    done
+    set -eux
+    uw --help >/dev/null
   )
   msg OK
 }
