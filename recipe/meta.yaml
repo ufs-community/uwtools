@@ -1,6 +1,6 @@
 package:
   name: uwtools
-  version: 2.0.1
+  version: 2.0.2
 source:
   path: ../src
 build:
@@ -8,7 +8,7 @@ build:
   noarch: python
   number: 0 # <= always reset to 0 when version changes
 requirements:
-  host:
+  build:
     - pip
   run:
     - f90nml 1.4.*

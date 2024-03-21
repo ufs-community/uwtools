@@ -82,8 +82,7 @@ class StdinProxy:
 
     def __iter__(self):
         self._reset()
-        for line in self._stringio.read().split("\n"):
-            yield line
+        yield from self._stringio.read().split("\n")
 
     def _reset(self) -> None:
         self._stringio = StringIO(self._stdin)
