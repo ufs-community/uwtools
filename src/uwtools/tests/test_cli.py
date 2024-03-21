@@ -16,8 +16,10 @@ import uwtools.api.fv3
 import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
 import uwtools.api.template
+import uwtools.api.ungrib
 import uwtools.drivers.fv3
 import uwtools.drivers.sfc_climo_gen
+import uwtools.drivers.ungrib
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
@@ -165,6 +167,18 @@ def test__add_subparser_template_render(subparsers):
 def test__add_subparser_template_translate(subparsers):
     cli._add_subparser_template_translate(subparsers)
     assert subparsers.choices[STR.translate]
+
+
+def test__add_subparser_ungrib(subparsers):
+    cli._add_subparser_ungrib(subparsers)
+    assert actions(subparsers.choices[STR.ungrib]) == [
+        "gribfile_aaa",
+        "namelist_file",
+        "provisioned_run_directory",
+        "run",
+        "runscript",
+        "vtable",
+    ]
 
 
 @pytest.mark.parametrize(
@@ -602,6 +616,19 @@ def test__dispatch_template_translate_no_optional():
     _convert_atparse_to_jinja2.assert_called_once_with(
         input_file=None, output_file=None, dry_run=False
     )
+
+
+def test__dispatch_ungrib():
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "cycle": dt.datetime.now(),
+        "dry_run": False,
+        "graph_file": None,
+    }
+    with patch.object(uwtools.api.ungrib, "execute") as execute:
+        cli._dispatch_ungrib({**args, "action": "foo"})
+    execute.assert_called_once_with(**{**args, "task": "foo"})
 
 
 @pytest.mark.parametrize("quiet", [False, True])
