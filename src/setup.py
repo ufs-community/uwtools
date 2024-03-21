@@ -17,6 +17,11 @@ import re
 
 from setuptools import find_packages, setup  # type: ignore
 
+# Get CLI name.
+
+with open(os.path.join("uwtools", "resources", "info.json"), "r", encoding="utf-8") as f:
+    cli = json.load(f)["cli"]
+
 # Collect package metadata.
 
 recipe = os.environ.get("RECIPE_DIR", "../recipe")
@@ -29,7 +34,7 @@ name_py = name_conda.replace("-", "_")
 # Define basic setup configuration.
 
 kwargs = {
-    "entry_points": {"console_scripts": ["uw = %s.cli:main" % name_py]},
+    "entry_points": {"console_scripts": ["%s = %s.cli:main" % (cli, name_py)]},
     "include_package_data": True,
     "name": name_conda,
     "packages": find_packages(exclude=["%s.tests" % name_py], include=[name_py, "%s.*" % name_py]),

@@ -109,3 +109,4 @@ class STR:
     valsfmt: str = "values_format"
     valsneeded: str = "values_needed"
     verbose: str = "verbose"
+    version: str = "version"
