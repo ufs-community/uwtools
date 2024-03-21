@@ -52,7 +52,7 @@ class Ungrib(Driver):
         path.symlink_to(infile)
 
     @task
-    def namelist_wps(self):
+    def namelist_file(self):
         """
         The namelist file.
         """
@@ -90,7 +90,7 @@ class Ungrib(Driver):
         yield self._taskname("provisioned run directory")
         yield [
             self.gribfile_aaa(),
-            self.namelist_wps(),
+            self.namelist_file(),
             self.runscript(),
             self.vtable(),
         ]

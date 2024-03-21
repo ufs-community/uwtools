@@ -82,10 +82,10 @@ def test_Ungrib_gribfile_aaa(driverobj):
     assert dst.is_symlink()
 
 
-def test_Ungrib_namelist_wps(driverobj):
+def test_Ungrib_namelist_file(driverobj):
     dst = driverobj._rundir / "namelist.wps"
     assert not dst.is_file()
-    driverobj.namelist_wps()
+    driverobj.namelist_file()
     assert dst.is_file()
 
 
@@ -93,7 +93,7 @@ def test_Ungrib_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
         gribfile_aaa=D,
-        namelist_wps=D,
+        namelist_file=D,
         runscript=D,
         vtable=D,
     ) as mocks:
