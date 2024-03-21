@@ -46,7 +46,7 @@ extlinks = {
     "miniforge3": ("https://github.com/conda-forge/miniforge/%s", "%s"),
     "mypy": ("https://mypy.readthedocs.io/en/stable/%s", "%s"),
     "noaa": ("https://www.noaa.gov/%s", "%s"),
-    "pylint": ("https://pylint.readthedocs.io/en/v3.0.3/%s", "%s"),
+    "pylint": ("https://pylint.readthedocs.io/en/stable/%s", "%s"),
     "pytest": ("https://docs.pytest.org/en/7.4.x/%s", "%s"),
     "rocoto": ("https://christopherwharrop.github.io/rocoto/%s", "%s"),
     "rst": ("https://www.sphinx-doc.org/en/master/usage/restructuredtext/%s", "%s"),
