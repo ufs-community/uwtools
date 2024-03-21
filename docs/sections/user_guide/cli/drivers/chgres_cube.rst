@@ -7,15 +7,15 @@ The ``uw`` mode for configuring and running the :ufs-utils:`chgres_cube<chgres-c
 
    $ uw chgres_cube --help
    usage: uw chgres_cube [-h] [--version] TASK ...
-   
+
    Execute chgres_cube tasks
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
      --version
          Show version info exit
-   
+
    Positional arguments:
      TASK
        namelist_file
@@ -34,15 +34,15 @@ All tasks take the same arguments. For example:
    $ uw chgres_cube run --help
    usage: uw chgres_cube run --config-file PATH --cycle CYCLE [-h] [--version] [--batch] [--dry-run]
                              [--graph-file PATH] [--quiet] [--verbose]
-   
+
    A run
-   
+
    Required arguments:
      --config-file PATH, -c PATH
          Path to config file
      --cycle CYCLE
          The cycle in ISO8601 format
-   
+
    Optional arguments:
      -h, --help
          Show help and exit

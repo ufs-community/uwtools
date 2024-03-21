@@ -7,15 +7,15 @@ The ``uw`` mode for configuring and running the :sfc-climo-gen:`sfc_climo_gen<>`
 
    $ uw sfc_climo_gen --help
    usage: uw sfc_climo_gen [-h] [--version] TASK ...
-   
+
    Execute sfc_climo_gen tasks
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
      --version
          Show version info exit
-   
+
    Positional arguments:
      TASK
        namelist_file
@@ -34,13 +34,13 @@ All tasks take the same arguments. For example:
    $ uw sfc_climo_gen run --help
    usage: uw sfc_climo_gen run --config-file PATH [-h] [--version] [--batch] [--dry-run]
                                [--graph-file PATH] [--quiet] [--verbose]
-   
+
    A run
-   
+
    Required arguments:
      --config-file PATH, -c PATH
          Path to config file
-   
+
    Optional arguments:
      -h, --help
          Show help and exit

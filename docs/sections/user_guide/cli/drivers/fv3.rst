@@ -7,15 +7,15 @@ The ``uw`` mode for configuring and running FV3.
 
    $ uw fv3 --help
    usage: uw fv3 [-h] [--version] TASK ...
-   
+
    Execute FV3 tasks
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
      --version
          Show version info exit
-   
+
    Positional arguments:
      TASK
        boundary_files
@@ -48,15 +48,15 @@ All tasks take the same arguments. For example:
    $ uw fv3 run --help
    usage: uw fv3 run --config-file PATH --cycle CYCLE [-h] [--version] [--batch] [--dry-run]
                      [--graph-file PATH] [--quiet] [--verbose]
-   
+
    A run
-   
+
    Required arguments:
      --config-file PATH, -c PATH
          Path to config file
      --cycle CYCLE
          The cycle in ISO8601 format
-   
+
    Optional arguments:
      -h, --help
          Show help and exit

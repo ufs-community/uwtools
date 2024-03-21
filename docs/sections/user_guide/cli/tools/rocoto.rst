@@ -7,15 +7,15 @@ The ``uw`` mode for realizing and validating Rocoto XML documents.
 
    $ uw rocoto --help
    usage: uw rocoto [-h] [--version] ACTION ...
-   
+
    Realize and validate Rocoto XML Documents
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
      --version
          Show version info exit
-   
+
    Positional arguments:
      ACTION
        realize
@@ -37,9 +37,9 @@ More information about the structured UW YAML file for Rocoto can be found :any:
    $ uw rocoto realize --help
    usage: uw rocoto realize [-h] [--version] [--input-file PATH] [--output-file PATH] [--quiet]
                             [--verbose]
-   
+
    Realize a Rocoto XML workflow document
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
@@ -213,9 +213,9 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
 
    $ uw rocoto validate --help
    usage: uw rocoto validate [-h] [--version] [--input-file PATH] [--quiet] [--verbose]
-   
+
    Validate Rocoto XML
-   
+
    Optional arguments:
      -h, --help
          Show help and exit

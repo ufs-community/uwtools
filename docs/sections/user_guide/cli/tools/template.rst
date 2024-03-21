@@ -7,15 +7,15 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 
    $ uw template --help
    usage: uw template [-h] [--version] ACTION ...
-   
+
    Handle templates
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
      --version
          Show version info exit
-   
+
    Positional arguments:
      ACTION
        render
@@ -36,9 +36,9 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
                              [--search-path PATH[:PATH:...]] [--values-needed] [--partial]
                              [--dry-run] [--quiet] [--verbose]
                              [KEY=VALUE ...]
-   
+
    Render a template
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
@@ -303,9 +303,9 @@ and a YAML file called ``values.yaml`` with the following contents:
    $ uw template translate --help
    usage: uw template translate [-h] [--version] [--input-file PATH] [--output-file PATH] [--dry-run]
                                 [--quiet] [--verbose]
-   
+
    Translate atparse to Jinja2
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
