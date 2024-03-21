@@ -1,11 +1,11 @@
 """
-API access to the ``uwtools`` ``sfc_climo_gen`` driver.
+API access to the ``uwtools`` ``jedi`` driver.
 """
 from pathlib import Path
 from typing import Dict, Optional
 
 import uwtools.drivers.support as _support
-from uwtools.drivers.sfc_climo_gen import SfcClimoGen as _SfcClimoGen
+from uwtools.drivers.jedi import Jedi as _Jedi
 
 
 def execute(
@@ -16,7 +16,7 @@ def execute(
     graph_file: Optional[Path] = None,
 ) -> bool:
     """
-    Execute an ``sfc_climo_gen`` task.
+    Execute an ``jedi`` task.
 
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the forecast will be run directly on the current system.
@@ -28,7 +28,7 @@ def execute(
     :param graph_file: Write Graphviz DOT output here
     :return: ``True`` if task completes without raising an exception
     """
-    obj = _SfcClimoGen(config_file=config_file, batch=batch, dry_run=dry_run)
+    obj = _Jedi(config_file=config_file, batch=batch, dry_run=dry_run)
     getattr(obj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
@@ -47,4 +47,4 @@ def tasks() -> Dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
     """
-    return _support.tasks(_SfcClimoGen)
+    return _support.tasks(_Jedi)

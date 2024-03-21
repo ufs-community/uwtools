@@ -44,6 +44,9 @@ class Jedi(Driver):
 
     @task
     def go(self):
+        """
+        pass
+        """
         yield "go"
         yield asset(None, lambda: True)
         yield None
