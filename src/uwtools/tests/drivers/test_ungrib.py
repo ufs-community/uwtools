@@ -157,7 +157,7 @@ def test_Ungrib__driver_config(driverobj):
 def test_Ungrib__resources(driverobj):
     account = "me"
     scheduler = "slurm"
-    walltime = "01:10:00"
+    walltime = "00:01:00"
     driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
     driverobj._config["platform"] = {"account": account, "scheduler": scheduler}
     assert driverobj._resources == {
