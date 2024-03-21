@@ -1,0 +1,29 @@
+{
+  "properties": {
+    "ungrib": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "$ref": "urn:uwtools:execution"
+        },
+        "gfs_file": {
+          "type": "string"
+        },
+        "run_dir": {
+          "type": "string"
+        },
+        "vtable": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "gfs_file",
+        "run_dir",
+        "vtable"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

@@ -105,6 +105,7 @@ class STR:
     template: str = "template"
     total: str = "total"
     translate: str = "translate"
+    ungrib: str = "ungrib"
     validate: str = "validate"
     valsfile: str = "values_file"
     valsfmt: str = "values_format"
