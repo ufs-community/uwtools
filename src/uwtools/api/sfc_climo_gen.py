@@ -10,7 +10,7 @@ from uwtools.drivers.sfc_climo_gen import SfcClimoGen as _SfcClimoGen
 
 def execute(
     task: str,
-    config: Path,
+    config: Optional[Path] = None,
     batch: bool = False,
     dry_run: bool = False,
     graph_file: Optional[Path] = None,

@@ -3,7 +3,7 @@ A driver for sfc_climo_gen.
 """
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from iotaa import asset, dryrun, task, tasks
 
@@ -18,7 +18,7 @@ class SfcClimoGen(Driver):
     A driver for sfc_climo_gen.
     """
 
-    def __init__(self, config: Path, dry_run: bool = False, batch: bool = False):
+    def __init__(self, config: Optional[Path] = None, dry_run: bool = False, batch: bool = False):
         """
         The driver.
 

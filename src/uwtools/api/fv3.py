@@ -11,8 +11,8 @@ from uwtools.drivers.fv3 import FV3 as _FV3
 
 def execute(
     task: str,
-    config: Path,
     cycle: dt.datetime,
+    config: Optional[Path] = None,
     batch: bool = False,
     dry_run: bool = False,
     graph_file: Optional[Path] = None,
@@ -24,8 +24,8 @@ def execute(
     Otherwise, the forecast will be run directly on the current system.
 
     :param task: The task to execute
-    :param config: Path to config file (read stdin if missing or None).
     :param cycle: The cycle to run
+    :param config: Path to config file (read stdin if missing or None).
     :param batch: Submit run to the batch system
     :param dry_run: Do not run forecast, just report what would have been done
     :param graph_file: Write Graphviz DOT output here

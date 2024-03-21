@@ -4,7 +4,7 @@ A driver for the ungrib component.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from iotaa import asset, dryrun, task, tasks
 
@@ -20,17 +20,21 @@ class Ungrib(Driver):
     """
 
     def __init__(
-        self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
+        self,
+        cycle: datetime,
+        config: Optional[Path] = None,
+        dry_run: bool = False,
+        batch: bool = False,
     ):
         """
         The driver.
 
-        :param config_file: Path to config file.
         :param cycle: The forecast cycle.
+        :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
+        super().__init__(config=config, dry_run=dry_run, batch=batch)
         self._config.dereference(context={"cycle": cycle})
         if self._dry_run:
             dryrun()

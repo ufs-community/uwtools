@@ -5,7 +5,7 @@ A driver for the FV3 model.
 from datetime import datetime
 from pathlib import Path
 from shutil import copy
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from iotaa import asset, dryrun, task, tasks
 
@@ -23,12 +23,18 @@ class FV3(Driver):
     A driver for the FV3 model.
     """
 
-    def __init__(self, config: Path, cycle: datetime, dry_run: bool = False, batch: bool = False):
+    def __init__(
+        self,
+        cycle: datetime,
+        config: Optional[Path] = None,
+        dry_run: bool = False,
+        batch: bool = False,
+    ):
         """
         The driver.
 
-        :param config: Path to config file (read stdin if missing or None).
         :param cycle: The forecast cycle.
+        :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """

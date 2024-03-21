@@ -4,7 +4,7 @@ A driver for chgres_cube.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from iotaa import asset, dryrun, task, tasks
 
@@ -19,12 +19,18 @@ class ChgresCube(Driver):
     A driver for chgres_cube.
     """
 
-    def __init__(self, config: Path, cycle: datetime, dry_run: bool = False, batch: bool = False):
+    def __init__(
+        self,
+        cycle: datetime,
+        config: Optional[Path] = None,
+        dry_run: bool = False,
+        batch: bool = False,
+    ):
         """
         The driver.
 
-        :param config: Path to config file (read stdin if missing or None).
         :param cycle: The date cycle.
+        :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """

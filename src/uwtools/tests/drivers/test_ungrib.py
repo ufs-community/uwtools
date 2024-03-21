@@ -56,7 +56,7 @@ def config_file(config, tmp_path):
 
 @fixture
 def driverobj(config_file, cycle):
-    return ungrib.Ungrib(config_file=config_file, cycle=cycle, batch=True)
+    return ungrib.Ungrib(config=config_file, cycle=cycle, batch=True)
 
 
 # Driver tests
@@ -68,7 +68,7 @@ def test_Ungrib(driverobj):
 
 def test_Ungrib_dry_run(config_file, cycle):
     with patch.object(ungrib, "dryrun") as dryrun:
-        driverobj = ungrib.Ungrib(config_file=config_file, cycle=cycle, batch=True, dry_run=True)
+        driverobj = ungrib.Ungrib(config=config_file, cycle=cycle, batch=True, dry_run=True)
     assert driverobj._dry_run is True
     dryrun.assert_called_once_with()
 
