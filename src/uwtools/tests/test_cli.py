@@ -276,7 +276,7 @@ def test__dict_from_key_eq_val_strings():
 
 
 def test__dispatch_chgres_cube():
-    cycle = (dt.datetime.now(),)
+    cycle = dt.datetime.now()
     args: dict = {
         "batch": True,
         "config_file": "config.yaml",
@@ -433,7 +433,7 @@ def test__dispatch_file_link(args_dispatch_file):
 
 
 def test__dispatch_fv3():
-    cycle = (dt.datetime.now(),)
+    cycle = dt.datetime.now()
     args: dict = {
         "batch": True,
         "config_file": "config.yaml",
