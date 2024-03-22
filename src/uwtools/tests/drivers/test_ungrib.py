@@ -29,7 +29,6 @@ def config(tmp_path):
     return {
         "ungrib": {
             "execution": {
-                "mpicmd": "srun",
                 "batchargs": {
                     "cores": 1,
                     "walltime": "00:01:00",
