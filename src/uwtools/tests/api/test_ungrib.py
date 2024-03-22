@@ -7,11 +7,12 @@ from uwtools.api import ungrib
 
 
 def test_execute(tmp_path):
+    cycle = dt.datetime.utcnow()
     dot = tmp_path / "graph.dot"
     args: dict = {
-        "config_file": "config.yaml",
-        "cycle": dt.datetime.utcnow(),
         "batch": False,
+        "config": "config.yaml",
+        "cycle": cycle,
         "dry_run": True,
         "graph_file": dot,
     }

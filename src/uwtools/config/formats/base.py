@@ -171,7 +171,7 @@ class Config(ABC, UserDict):
 
         while True:
             logstate("current")
-            new = jinja2.dereference(val=self.data, context=context or {**os.environ, **self.data})
+            new = jinja2.dereference(val=self.data, context=context or self.data)
             assert isinstance(new, dict)
             if new == self.data:
                 break

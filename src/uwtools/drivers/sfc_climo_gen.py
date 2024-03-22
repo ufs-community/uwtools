@@ -3,7 +3,7 @@ A driver for sfc_climo_gen.
 """
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Optional
 
 from iotaa import asset, dryrun, task, tasks
 
@@ -18,15 +18,15 @@ class SfcClimoGen(Driver):
     A driver for sfc_climo_gen.
     """
 
-    def __init__(self, config_file: Path, dry_run: bool = False, batch: bool = False):
+    def __init__(self, config: Optional[Path] = None, dry_run: bool = False, batch: bool = False):
         """
         The driver.
 
-        :param config_file: Path to config file.
+        :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
+        super().__init__(config=config, dry_run=dry_run, batch=batch)
         if self._dry_run:
             dryrun()
 
@@ -82,18 +82,6 @@ class SfcClimoGen(Driver):
         Returns the name of this driver.
         """
         return STR.sfcclimogen
-
-    @property
-    def _resources(self) -> Dict[str, Any]:
-        """
-        Returns configuration data for the runscript.
-        """
-        return {
-            "account": self._config["platform"]["account"],
-            "rundir": self._rundir,
-            "scheduler": self._config["platform"]["scheduler"],
-            **self._driver_config.get("execution", {}).get("batchargs", {}),
-        }
 
     def _taskname(self, suffix: str) -> str:
         """

@@ -7,7 +7,15 @@ from functools import cached_property
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Union
 
-from jinja2 import DebugUndefined, Environment, FileSystemLoader, StrictUndefined, Undefined, meta
+from jinja2 import (
+    DebugUndefined,
+    Environment,
+    FileSystemLoader,
+    StrictUndefined,
+    Template,
+    Undefined,
+    meta,
+)
 from jinja2.exceptions import UndefinedError
 
 from uwtools.config.support import TaggedString, format_to_config
@@ -177,7 +185,7 @@ def render(
     # missing values and return an error to the caller.
 
     if partial:
-        rendered = Environment(undefined=DebugUndefined).from_string(str(template)).render(values)
+        rendered = Template(str(template), undefined=DebugUndefined).render(values)
     else:
         missing = [var for var in undeclared_variables if var not in values.keys()]
         if missing:
