@@ -1025,7 +1025,7 @@ def _basic_setup(parser: Parser) -> Group:
     optional.add_argument(
         _switch(STR.version),
         action=STR.version,
-        help="Show version info exit",
+        help="Show version info and exit",
         version=f"%(prog)s {_version()}",
     )
     return optional
