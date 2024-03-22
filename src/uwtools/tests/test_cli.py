@@ -2,6 +2,7 @@
 
 import datetime as dt
 import logging
+import re
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import _SubParsersAction
@@ -694,3 +695,11 @@ def test__parse_args():
         Parser.assert_called_once()
         parser = Parser()
         parser.parse_args.assert_called_with(raw_args)
+
+
+def test__switch():
+    assert cli._switch("foo_bar") == "--foo-bar"
+
+
+def test__version():
+    assert re.match(r"version \d+\.\d+\.\d+ build \d+", cli._version())
