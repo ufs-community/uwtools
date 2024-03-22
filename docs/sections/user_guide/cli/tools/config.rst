@@ -14,7 +14,7 @@ The ``uw`` mode for handling configuration files (configs).
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
 
    Positional arguments:
      ACTION
@@ -51,7 +51,7 @@ The ``compare`` action lets users compare two config files.
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
      --file-1-format {ini,nml,sh,yaml}
          Format of file 1
      --file-2-format {ini,nml,sh,yaml}
@@ -166,7 +166,7 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --input-format {ini,nml,sh,yaml}
@@ -503,7 +503,7 @@ The ``validate`` action ensures that a given config file is structured properly.
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --quiet, -q

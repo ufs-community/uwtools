@@ -14,7 +14,7 @@ The ``uw`` mode for handling filesystem files.
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
 
    Positional arguments:
      ACTION
@@ -47,7 +47,7 @@ The ``copy`` action stages files in a target directory by copying files. Any ``K
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
      --config-file PATH, -c PATH
          Path to config file
      --dry-run
@@ -126,7 +126,7 @@ The ``link`` action stages files in a target directory by linking files. Any ``K
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
      --config-file PATH, -c PATH
          Path to config file
      --dry-run

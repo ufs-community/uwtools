@@ -14,7 +14,7 @@ The ``uw`` mode for configuring and running FV3.
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
 
    Positional arguments:
      TASK
@@ -61,7 +61,7 @@ All tasks take the same arguments. For example:
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
      --batch
          Submit run to batch scheduler
      --dry-run

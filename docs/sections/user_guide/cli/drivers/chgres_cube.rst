@@ -14,7 +14,7 @@ The ``uw`` mode for configuring and running the :ufs-utils:`chgres_cube<chgres-c
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
 
    Positional arguments:
      TASK
@@ -47,7 +47,7 @@ All tasks take the same arguments. For example:
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
      --batch
          Submit run to batch scheduler
      --dry-run

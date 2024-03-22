@@ -14,7 +14,7 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
 
    Positional arguments:
      ACTION
@@ -43,7 +43,7 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --output-file PATH, -o PATH
@@ -310,7 +310,7 @@ and a YAML file called ``values.yaml`` with the following contents:
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --output-file PATH, -o PATH

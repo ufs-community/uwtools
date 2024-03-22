@@ -14,7 +14,7 @@ The ``uw`` mode for realizing and validating Rocoto XML documents.
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
 
    Positional arguments:
      ACTION
@@ -44,7 +44,7 @@ More information about the structured UW YAML file for Rocoto can be found :any:
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --output-file PATH, -o PATH
@@ -220,7 +220,7 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
      -h, --help
          Show help and exit
      --version
-         Show version info exit
+         Show version info and exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --quiet, -q
