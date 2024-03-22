@@ -44,8 +44,9 @@ class Driver(ABC):
         self._dry_run = dry_run
         self._batch = batch
         self._config.dereference()
-        if cycle:
-            self._config.dereference(context={"cycle": cycle})
+        self._config.dereference(
+            context={**({"cycle": cycle} if cycle else {}), **self._config.data}
+        )
         self._validate()
 
     # Workflow tasks
