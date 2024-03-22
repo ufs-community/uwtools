@@ -5,6 +5,7 @@ import os
 import re
 import stat
 from abc import ABC, abstractmethod
+from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Type
@@ -25,7 +26,11 @@ class Driver(ABC):
     """
 
     def __init__(
-        self, config: Optional[Path] = None, dry_run: bool = False, batch: bool = False
+        self,
+        config: Optional[Path] = None,
+        dry_run: bool = False,
+        batch: bool = False,
+        cycle: Optional[datetime] = None,
     ) -> None:
         """
         A component driver.
@@ -33,11 +38,14 @@ class Driver(ABC):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
+        :param cycle: The synoptic time.
         """
         self._config = YAMLConfig(config=config)
         self._dry_run = dry_run
         self._batch = batch
         self._config.dereference()
+        if cycle:
+            self._config.dereference(context={"cycle": cycle})
         self._validate()
 
     # Workflow tasks

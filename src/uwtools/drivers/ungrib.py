@@ -29,13 +29,12 @@ class Ungrib(Driver):
         """
         The driver.
 
-        :param cycle: The forecast cycle.
+        :param cycle: The synoptic time.
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch)
-        self._config.dereference(context={"cycle": cycle})
+        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle)
         if self._dry_run:
             dryrun()
         self._cycle = cycle

@@ -25,13 +25,13 @@ def execute(
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
 
-    :param task: The task to execute
-    :param cycle: The cycle to run
+    :param task: The task to execute.
+    :param cycle: The synoptic time.
     :param config: Path to config file (read stdin if missing or None).
-    :param batch: Submit run to the batch system
-    :param dry_run: Do not run the executable, just report what would have been done
-    :param graph_file: Write Graphviz DOT output here
-    :return: ``True`` if task completes without raising an exception
+    :param batch: Submit run to the batch system.
+    :param dry_run: Do not run the executable, just report what would have been done.
+    :param graph_file: Write Graphviz DOT output here.
+    :return: ``True`` if task completes without raising an exception.
     """
     obj = _ChgresCube(config=config, cycle=cycle, batch=batch, dry_run=dry_run)
     getattr(obj, task)()
