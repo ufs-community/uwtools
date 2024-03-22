@@ -225,7 +225,7 @@ class Driver(ABC):
         rs = self._runscript(
             envcmds=self._driver_config.get("execution", {}).get("envcmds", []),
             envvars=envvars,
-            execution=[self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir],
+            execution=["time %s" % self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir],
             scheduler=self._scheduler if self._batch else None,
         )
         with open(path, "w", encoding="utf-8") as f:

@@ -215,7 +215,7 @@ def test_FV3_runscript(driverobj):
     assert "cmd1" in lines
     assert "cmd2" in lines
     # Check execution:
-    assert "runit fv3" in lines
+    assert "time runit fv3" in lines
     assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
 
 

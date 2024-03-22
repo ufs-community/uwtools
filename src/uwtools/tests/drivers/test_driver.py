@@ -261,7 +261,7 @@ def test_Driver__write_runscript(driverobj, tmp_path):
     export FOO=bar
     export BAZ=qux
 
-    foo bar baz qux
+    time foo bar baz qux
     test $? -eq 0 && touch /path/to/dir/done
     """
     with open(path, "r", encoding="utf-8") as f:

@@ -142,7 +142,7 @@ def test_ChgresCube_runscript(driverobj):
     assert "cmd1" in lines
     assert "cmd2" in lines
     # Check execution:
-    assert "srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE /path/to/chgres_cube" in lines
+    assert "time srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE /path/to/chgres_cube" in lines
     assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
 
 
