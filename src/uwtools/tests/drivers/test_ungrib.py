@@ -156,20 +156,6 @@ def test_Ungrib__driver_config(driverobj):
     assert driverobj._driver_config == driverobj._config["ungrib"]
 
 
-def test_Ungrib__resources(driverobj):
-    account = "me"
-    scheduler = "slurm"
-    walltime = "00:01:00"
-    driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
-    driverobj._config["platform"] = {"account": account, "scheduler": scheduler}
-    assert driverobj._resources == {
-        "account": account,
-        "rundir": driverobj._rundir,
-        "scheduler": scheduler,
-        "walltime": walltime,
-    }
-
-
 def test_Ungrib__runscript_path(driverobj):
     assert driverobj._runscript_path == driverobj._rundir / "runscript.ungrib"
 

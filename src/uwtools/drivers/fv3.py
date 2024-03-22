@@ -5,7 +5,7 @@ A driver for the FV3 model.
 from datetime import datetime
 from pathlib import Path
 from shutil import copy
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from iotaa import asset, dryrun, task, tasks
 
@@ -215,15 +215,3 @@ class FV3(Driver):
         :param suffix: Log-string suffix.
         """
         return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
-
-    @property
-    def _resources(self) -> Dict[str, Any]:
-        """
-        Returns configuration data for the runscript.
-        """
-        return {
-            "account": self._config["platform"]["account"],
-            "rundir": self._rundir,
-            "scheduler": self._config["platform"]["scheduler"],
-            **self._driver_config.get("execution", {}).get("batchargs", {}),
-        }

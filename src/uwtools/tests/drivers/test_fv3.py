@@ -246,20 +246,6 @@ def test_FV3__driver_config(driverobj):
     assert driverobj._driver_config == driverobj._config["fv3"]
 
 
-def test_FV3__resources(driverobj):
-    account = "me"
-    scheduler = "slurm"
-    walltime = "01:10:00"
-    driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
-    driverobj._config["platform"] = {"account": account, "scheduler": scheduler}
-    assert driverobj._resources == {
-        "account": account,
-        "rundir": driverobj._rundir,
-        "scheduler": scheduler,
-        "walltime": walltime,
-    }
-
-
 def test_FV3__runscript_path(driverobj):
     assert driverobj._runscript_path == driverobj._rundir / "runscript.fv3"
 
