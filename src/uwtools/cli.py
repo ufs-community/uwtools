@@ -2,6 +2,7 @@
 Modal CLI.
 """
 import datetime as dt
+import json
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import HelpFormatter
@@ -24,7 +25,7 @@ import uwtools.rocoto
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.logging import log, setup_logging
 from uwtools.strings import FORMAT, STR
-from uwtools.utils.file import get_file_format
+from uwtools.utils.file import get_file_format, resource_path
 
 FORMATS = FORMAT.extensions()
 TITLE_REQ_ARG = "Required arguments"
@@ -1021,6 +1022,12 @@ def _basic_setup(parser: Parser) -> Group:
     """
     optional = parser.add_argument_group("Optional arguments")
     optional.add_argument("-h", _switch(STR.help), action=STR.help, help="Show help and exit")
+    optional.add_argument(
+        _switch(STR.version),
+        action=STR.version,
+        help="Show version info and exit",
+        version=f"%(prog)s {_version()}",
+    )
     return optional
 
 
@@ -1100,3 +1107,12 @@ def _switch(arg: str) -> str:
     :return: The long-form switch.
     """
     return "--%s" % arg.replace("_", "-")
+
+
+def _version() -> str:
+    """
+    Return version information.
+    """
+    with open(resource_path("info.json"), "r", encoding="utf-8") as f:
+        info = json.load(f)
+        return "version %s build %s" % (info["version"], info["buildnum"])

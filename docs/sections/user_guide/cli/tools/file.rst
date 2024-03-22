@@ -6,13 +6,15 @@ The ``uw`` mode for handling filesystem files.
 .. code-block:: text
 
    $ uw file --help
-   usage: uw file [-h] ACTION ...
+   usage: uw file [-h] [--version] ACTION ...
 
    Handle files
 
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
 
    Positional arguments:
      ACTION
@@ -30,8 +32,9 @@ The ``copy`` action stages files in a target directory by copying files. Any ``K
 
 .. code-block:: text
 
-   % uw file copy --help
-   usage: uw file copy --target-dir PATH [-h] [--config-file PATH] [--dry-run] [--quiet] [--verbose]
+   $ uw file copy --help
+   usage: uw file copy --target-dir PATH [-h] [--version] [--config-file PATH] [--dry-run] [--quiet]
+                       [--verbose]
                        [KEY ...]
 
    Copy files
@@ -43,6 +46,8 @@ The ``copy`` action stages files in a target directory by copying files. Any ``K
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
      --config-file PATH, -c PATH
          Path to config file
      --dry-run
@@ -106,8 +111,9 @@ The ``link`` action stages files in a target directory by linking files. Any ``K
 
 .. code-block:: text
 
-   % uw file link --help
-   usage: uw file link --target-dir PATH [-h] [--config-file PATH] [--dry-run] [--quiet] [--verbose]
+   $ uw file link --help
+   usage: uw file link --target-dir PATH [-h] [--version] [--config-file PATH] [--dry-run] [--quiet]
+                       [--verbose]
                        [KEY ...]
 
    Link files
@@ -119,6 +125,8 @@ The ``link`` action stages files in a target directory by linking files. Any ``K
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
      --config-file PATH, -c PATH
          Path to config file
      --dry-run
