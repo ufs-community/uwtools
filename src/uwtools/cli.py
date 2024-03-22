@@ -727,10 +727,11 @@ def _add_arg_batch(group: Group) -> None:
 
 
 def _add_arg_config_file(group: Group, required: bool) -> None:
+    msg = "Path to config file" + ("" if required else " (default: read from stdin)")
     group.add_argument(
         _switch(STR.cfgfile),
         "-c",
-        help="Path to config file",
+        help=msg,
         metavar="PATH",
         required=required,
         type=Path,
