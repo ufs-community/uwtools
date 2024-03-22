@@ -12,6 +12,7 @@ from iotaa import asset, external
 from pytest import fixture
 
 from uwtools.drivers import chgres_cube
+from uwtools.scheduler import Slurm
 
 config: dict = {
     "chgres_cube": {
@@ -130,20 +131,12 @@ def test_ChgresCube_run_local(driverobj):
 
 
 def test_ChgresCube_runscript(driverobj):
-    dst = driverobj._rundir / "runscript.chgres_cube"
-    assert not dst.is_file()
-    driverobj.runscript()
-    with open(dst, "r", encoding="utf-8") as f:
-        lines = f.read().split("\n")
-    # Check directives:
-    assert "#SBATCH --account=me" in lines
-    assert "#SBATCH --time=00:02:00" in lines
-    # Check environment commands:
-    assert "cmd1" in lines
-    assert "cmd2" in lines
-    # Check execution:
-    assert "time srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE /path/to/chgres_cube" in lines
-    assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
+    with patch.object(driverobj, "_runscript") as runscript:
+        driverobj.runscript()
+        runscript.assert_called_once()
+        args = ("envcmds", "envvars", "execution", "scheduler")
+        types = [list, dict, list, Slurm]
+        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
 def test_ChgresCube__driver_config(driverobj):

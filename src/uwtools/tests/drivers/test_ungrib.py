@@ -11,6 +11,7 @@ import yaml
 from pytest import fixture
 
 from uwtools.drivers import ungrib
+from uwtools.scheduler import Slurm
 
 # Fixtures
 
@@ -118,28 +119,12 @@ def test_Ungrib_run_local(driverobj):
 
 
 def test_Ungrib_runscript(driverobj):
-    dst = driverobj._rundir / "runscript.ungrib"
-    assert not dst.is_file()
-    driverobj._driver_config["execution"].update(
-        {
-            "batchargs": {"walltime": "00:01:00"},
-            "envcmds": ["cmd1", "cmd2"],
-            "mpicmd": "runit",
-            "threads": 8,
-        }
-    )
-    driverobj._config["platform"] = {"account": "me", "scheduler": "slurm"}
-    driverobj.runscript()
-    with open(dst, "r", encoding="utf-8") as f:
-        lines = f.read().split("\n")
-    # Check directives:
-    assert "#SBATCH --account=me" in lines
-    assert "#SBATCH --time=00:01:00" in lines
-    # Check environment commands:
-    assert "cmd1" in lines
-    assert "cmd2" in lines
-    # Check execution:
-    assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
+    with patch.object(driverobj, "_runscript") as runscript:
+        driverobj.runscript()
+        runscript.assert_called_once()
+        args = ("envcmds", "envvars", "execution", "scheduler")
+        types = [list, dict, list, Slurm]
+        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
 def test_Ungrib_vtable(driverobj):

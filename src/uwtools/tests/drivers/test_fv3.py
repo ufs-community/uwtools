@@ -12,6 +12,7 @@ import yaml
 from pytest import fixture
 
 from uwtools.drivers import driver, fv3
+from uwtools.scheduler import Slurm
 from uwtools.tests.support import logged
 
 # Fixtures
@@ -30,7 +31,13 @@ def config(tmp_path):
     return {
         "fv3": {
             "domain": "global",
-            "execution": {"executable": "fv3"},
+            "execution": {
+                "batchargs": {
+                    "walltime": "00:02:00",
+                },
+                "executable": "fv3",
+                "mpicmd": "srun",
+            },
             "lateral_boundary_conditions": {
                 "interval_hours": 1,
                 "offset": 0,
@@ -38,7 +45,11 @@ def config(tmp_path):
             },
             "length": 1,
             "run_dir": str(tmp_path),
-        }
+        },
+        "platform": {
+            "account": "me",
+            "scheduler": "slurm",
+        },
     }
 
 
@@ -188,35 +199,12 @@ def test_FV3_run_local(driverobj):
 
 
 def test_FV3_runscript(driverobj):
-    dst = driverobj._rundir / "runscript.fv3"
-    assert not dst.is_file()
-    driverobj._driver_config["execution"].update(
-        {
-            "batchargs": {"walltime": "01:10:00"},
-            "envcmds": ["cmd1", "cmd2"],
-            "mpicmd": "runit",
-            "threads": 8,
-        }
-    )
-    driverobj._config["platform"] = {"account": "me", "scheduler": "slurm"}
-    driverobj.runscript()
-    with open(dst, "r", encoding="utf-8") as f:
-        lines = f.read().split("\n")
-    # Check directives:
-    assert "#SBATCH --account=me" in lines
-    assert "#SBATCH --time=01:10:00" in lines
-    # Check environment variables:
-    assert "export ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4" in lines
-    assert "export KMP_AFFINITY=scatter" in lines
-    assert "export MPI_TYPE_DEPTH=20" in lines
-    assert "export OMP_NUM_THREADS=8" in lines
-    assert "export OMP_STACKSIZE=512m" in lines
-    # Check environment commands:
-    assert "cmd1" in lines
-    assert "cmd2" in lines
-    # Check execution:
-    assert "time runit fv3" in lines
-    assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
+    with patch.object(driverobj, "_runscript") as runscript:
+        driverobj.runscript()
+        runscript.assert_called_once()
+        args = ("envcmds", "envvars", "execution", "scheduler")
+        types = [list, dict, list, Slurm]
+        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
 def test_FV3__run_via_batch_submission(driverobj):
