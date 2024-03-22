@@ -118,7 +118,8 @@ class Ungrib(Driver):
         path = self._rundir / "Vtable"
         yield self._taskname(str(path))
         yield asset(path, path.is_symlink)
-        yield None
+        infile = Path(self._driver_config["vtable"])
+        yield file(path=infile)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.symlink_to(Path(self._driver_config["vtable"]))
 
