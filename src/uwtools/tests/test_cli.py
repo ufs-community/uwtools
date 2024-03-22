@@ -173,7 +173,7 @@ def test__add_subparser_template_translate(subparsers):
 def test__add_subparser_ungrib(subparsers):
     cli._add_subparser_ungrib(subparsers)
     assert actions(subparsers.choices[STR.ungrib]) == [
-        "gribfile_aaa",
+        "gribfile",
         "namelist_file",
         "provisioned_run_directory",
         "run",

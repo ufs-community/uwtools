@@ -42,9 +42,9 @@ class Ungrib(Driver):
     # Workflow tasks
 
     @task
-    def gribfile_aaa(self):
+    def gribfile(self):
         """
-        The gribfile.
+        A symlink to the input GRIB file.
         """
         path = self._rundir / "GRIBFILE.AAA"
         yield self._taskname(str(path))
@@ -92,7 +92,7 @@ class Ungrib(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
-            self.gribfile_aaa(),
+            self.gribfile(),
             self.namelist_file(),
             self.runscript(),
             self.vtable(),
@@ -112,7 +112,7 @@ class Ungrib(Driver):
     @task
     def vtable(self):
         """
-        The Vtable.
+        A symlink to the Vtable file.
         """
         path = self._rundir / "Vtable"
         yield self._taskname(str(path))
