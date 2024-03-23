@@ -154,7 +154,14 @@ def test_Driver__create_user_updated_config_base_file(
     assert updated == expected
 
 
-def test_Driver__driver_config(driverobj):
+def test_Driver__driver_config_fail(driverobj):
+    del driverobj._config["concrete"]
+    with raises(UWConfigError) as e:
+        assert driverobj._driver_config
+    assert str(e.value) == "Required 'concrete' block missing in config"
+
+
+def test_Driver__driver_config_pass(driverobj):
     assert set(driverobj._driver_config.keys()) == {
         "base_file",
         "execution",

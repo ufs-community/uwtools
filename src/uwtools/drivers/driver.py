@@ -119,8 +119,12 @@ class Driver(ABC):
         """
         Returns the config block specific to this driver.
         """
-        driver_config: Dict[str, Any] = self._config[self._driver_name]
-        return driver_config
+        name = self._driver_name
+        try:
+            driver_config: Dict[str, Any] = self._config[name]
+            return driver_config
+        except KeyError as e:
+            raise UWConfigError("Required '%s' block missing in config" % name) from e
 
     @property
     @abstractmethod
