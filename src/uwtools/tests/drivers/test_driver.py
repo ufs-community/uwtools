@@ -10,10 +10,11 @@ from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 import yaml
-from pytest import fixture
+from pytest import fixture, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
+from uwtools.exceptions import UWConfigError
 
 # Helpers
 
@@ -162,12 +163,18 @@ def test_Driver__driver_config(driverobj):
     }
 
 
-def test_Driver__resources(driverobj):
+def test_Driver__resources_fail(driverobj):
+    del driverobj._config["platform"]
+    with raises(UWConfigError) as e:
+        assert driverobj._resources
+    assert str(e.value) == "Required 'platform' block missing in config"
+
+
+def test_Driver__resources_pass(driverobj):
     account = "me"
     scheduler = "slurm"
     walltime = "00:05:00"
     driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
-    driverobj._config["platform"] = {"account": account, "scheduler": scheduler}
     assert driverobj._resources == {
         "account": account,
         "rundir": driverobj._rundir,

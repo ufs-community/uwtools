@@ -15,6 +15,7 @@ from iotaa import asset, task, tasks
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute
@@ -141,10 +142,14 @@ class Driver(ABC):
         """
         Returns configuration data for the runscript.
         """
+        try:
+            platform = self._config["platform"]
+        except KeyError as e:
+            raise UWConfigError("Required 'platform' block missing in config") from e
         return {
-            "account": self._config["platform"]["account"],
+            "account": platform["account"],
             "rundir": self._rundir,
-            "scheduler": self._config["platform"]["scheduler"],
+            "scheduler": platform["scheduler"],
             **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
 
