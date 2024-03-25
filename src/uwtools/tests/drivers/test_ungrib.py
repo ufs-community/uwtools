@@ -78,12 +78,12 @@ def test_Ungrib_dry_run(config_file, cycle):
     dryrun.assert_called_once_with()
 
 
-def test_Ungrib_gribfile(driverobj):
+def test_Ungrib__gribfile(driverobj):
     src = driverobj._rundir / "GRIBFILE.AAA.in"
     src.touch()
     dst = driverobj._rundir / "GRIBFILE.AAA"
     assert not dst.is_symlink()
-    driverobj.gribfile(dst, src)
+    driverobj._gribfile(dst, src)
     assert dst.is_symlink()
 
 

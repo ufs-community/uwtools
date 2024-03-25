@@ -63,18 +63,7 @@ class Ungrib(Driver):
             link_name = self._rundir / f"GRIBFILE.{suffix}"
             links.append((link_name, infile))
             suffix = incr_str(suffix)
-        yield [self.gribfile(link, infile) for link, infile in links]
-
-    @task
-    def gribfile(self, link, infile):
-        """
-        The gribfile.
-        """
-        yield self._taskname(str(link))
-        yield asset(link, link.is_symlink)
-        yield file(path=infile)
-        link.parent.mkdir(parents=True, exist_ok=True)
-        link.symlink_to(infile)
+        yield [self._gribfile(link, infile) for link, infile in links]
 
     @task
     def namelist_file(self):
@@ -151,6 +140,17 @@ class Ungrib(Driver):
         Returns the name of this driver.
         """
         return STR.ungrib
+
+    @task
+    def _gribfile(self, link, infile):
+        """
+        The gribfile.
+        """
+        yield self._taskname(str(link))
+        yield asset(link, link.is_symlink)
+        yield file(path=infile)
+        link.parent.mkdir(parents=True, exist_ok=True)
+        link.symlink_to(infile)
 
     def _taskname(self, suffix: str) -> str:
         """
