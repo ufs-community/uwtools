@@ -145,6 +145,9 @@ class Ungrib(Driver):
     def _gribfile(self, link, infile):
         """
         A symlink to the input GRIB file.
+
+        :param link: Link name.
+        :param infile: File to link.
         """
         yield self._taskname(str(link))
         yield asset(link, link.is_symlink)
