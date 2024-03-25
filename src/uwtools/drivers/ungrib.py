@@ -2,7 +2,8 @@
 A driver for the ungrib component.
 """
 
-from datetime import datetime
+from string import ascii_uppercase
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -42,18 +43,36 @@ class Ungrib(Driver):
 
     # Workflow tasks
 
+    @tasks
+    def gribfiles(self):
+        """
+        The gribfiles.
+        """
+        yield self._taskname("gribfiles")
+        gfs_files = self._driver_config["gfs_files"]
+        offset = abs(gfs_files["offset"])
+        endhour = gfs_files["forecast_length"] + offset + 1
+        interval = gfs_files["interval_hours"]
+        cycle_hour = int((self._cycle - timedelta(hours=offset)).strftime("%H"))
+        suffix = "AAA"
+        links = []
+        for boundary_hour in range(offset, endhour, interval):
+            infile = Path(gfs_files["path"].format(cycle_hour=cycle_hour, forecast_hour=boundary_hour))
+            link_name = self._rundir / f"GRIBFILE.{suffix}"
+            links.append((link_name, infile))
+            suffix = incr_str(suffix)
+        yield [ self.gribfile(link, infile) for link, infile in links ]
+
     @task
-    def gribfile_aaa(self):
+    def gribfile(self, link, infile):
         """
         The gribfile.
         """
-        path = self._rundir / "GRIBFILE.AAA"
-        yield self._taskname(str(path))
-        yield asset(path, path.is_symlink)
-        infile = Path(self._driver_config["gfs_file"])
+        yield self._taskname(str(link))
+        yield asset(link, link.is_symlink)
         yield file(path=infile)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.symlink_to(infile)
+        link.parent.mkdir(parents=True, exist_ok=True)
+        link.symlink_to(infile)
 
     @task
     def namelist_file(self):
@@ -93,7 +112,7 @@ class Ungrib(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
-            self.gribfile_aaa(),
+            self.gribfiles(),
             self.namelist_file(),
             self.runscript(),
             self.vtable(),
@@ -138,3 +157,26 @@ class Ungrib(Driver):
         :param suffix: Log-string suffix.
         """
         return "%s ungrib %s" % (self._cycle.strftime("%Y%m%d %HZ"), suffix)
+
+def incr_str(s):
+
+    def incr_char(c):
+        letters = ascii_uppercase
+        assert c in letters
+        new_idx = letters.index(c) + 1
+        if c == "Z":
+            return 1, "A"
+        return 0, chr(ord(c) + 1)
+
+    chars = list(s)
+    res = []
+    while chars:
+        carry, next_ = incr_char(chars.pop())
+        res.append(next_)
+        if not carry:
+            break
+        if not chars:
+            res.append("A")
+    res += chars[::-1]
+    return ''.join(res[::-1])
+

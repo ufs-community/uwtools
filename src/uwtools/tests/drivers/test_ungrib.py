@@ -35,7 +35,12 @@ def config(tmp_path):
                 },
                 "executable": str(tmp_path / "ungrib.exe"),
             },
-            "gfs_file": str(tmp_path / "gfs.t12z.pgrb2.0p25.f000"),
+            "gfs_files": {
+                "forecast_length": 12,
+                "interval_hours": 6,
+                "offset": 6,
+                "path": str(tmp_path / "gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}"),
+            }, 
             "run_dir": str(tmp_path),
             "vtable": str(tmp_path / "Vtable.GFS"),
         },
@@ -73,14 +78,29 @@ def test_Ungrib_dry_run(config_file, cycle):
     dryrun.assert_called_once_with()
 
 
-def test_Ungrib_gribfile_aaa(driverobj):
+def test_Ungrib_gribfile(driverobj):
     src = driverobj._rundir / "GRIBFILE.AAA.in"
     src.touch()
-    driverobj._driver_config["gfs_file"] = src
     dst = driverobj._rundir / "GRIBFILE.AAA"
     assert not dst.is_symlink()
-    driverobj.gribfile_aaa()
+    driverobj.gribfile(dst, src)
     assert dst.is_symlink()
+
+def test_Ungrib_gribfiles(driverobj, tmp_path):
+    links = []
+    suffix = "AAA"
+    cycle_hr = 12
+
+    for forecast_hour in (6, 12, 18):
+        links = [ driverobj._rundir / f"GRIBFILE.{suffix}" ]
+        infile = tmp_path / "gfs.t{cycle_hr:02d}z.pgrb2.0p25.f{forecast_hour:03d}".format(cycle_hr=cycle_hr,
+                                                                      forecast_hour=forecast_hour)
+        infile.touch()
+        suffix = ungrib.incr_str(suffix)
+    assert not any(link.is_file() for link in links)
+    driverobj.gribfiles()
+    assert all(link.is_symlink() for link in links)
+
 
 
 def test_Ungrib_namelist_file(driverobj):
@@ -94,7 +114,7 @@ def test_Ungrib_namelist_file(driverobj):
 def test_Ungrib_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
-        gribfile_aaa=D,
+        gribfiles=D,
         namelist_file=D,
         runscript=D,
         vtable=D,
@@ -150,3 +170,9 @@ def test_Ungrib__taskanme(driverobj):
 
 def test_Ungrib__validate(driverobj):
     driverobj._validate()
+
+def test__incr_str():
+
+    assert ungrib.incr_str("AAA") == "AAB"
+    assert ungrib.incr_str("AAZ") == "ABA"
+    assert ungrib.incr_str("Z") == "AA"
