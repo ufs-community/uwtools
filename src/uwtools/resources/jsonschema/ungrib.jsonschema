@@ -26,6 +26,7 @@
             }
           },
           "required": [
+            "forecast_length",
             "interval_hours",
             "offset",
             "path"
