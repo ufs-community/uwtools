@@ -2,10 +2,10 @@
 A driver for the ungrib component.
 """
 
-from string import ascii_uppercase
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
+from string import ascii_uppercase
+from typing import Optional, Tuple
 
 from iotaa import asset, dryrun, task, tasks
 
@@ -57,11 +57,13 @@ class Ungrib(Driver):
         suffix = "AAA"
         links = []
         for boundary_hour in range(offset, endhour, interval):
-            infile = Path(gfs_files["path"].format(cycle_hour=cycle_hour, forecast_hour=boundary_hour))
+            infile = Path(
+                gfs_files["path"].format(cycle_hour=cycle_hour, forecast_hour=boundary_hour)
+            )
             link_name = self._rundir / f"GRIBFILE.{suffix}"
             links.append((link_name, infile))
             suffix = incr_str(suffix)
-        yield [ self.gribfile(link, infile) for link, infile in links ]
+        yield [self.gribfile(link, infile) for link, infile in links]
 
     @task
     def gribfile(self, link, infile):
@@ -158,12 +160,15 @@ class Ungrib(Driver):
         """
         return "%s ungrib %s" % (self._cycle.strftime("%Y%m%d %HZ"), suffix)
 
-def incr_str(s):
 
-    def incr_char(c):
+def incr_str(s: str) -> str:
+    """
+    Increment an uppercase string.
+    """
+
+    def incr_char(c: str) -> Tuple[int, str]:
         letters = ascii_uppercase
         assert c in letters
-        new_idx = letters.index(c) + 1
         if c == "Z":
             return 1, "A"
         return 0, chr(ord(c) + 1)
@@ -178,5 +183,4 @@ def incr_str(s):
         if not chars:
             res.append("A")
     res += chars[::-1]
-    return ''.join(res[::-1])
-
+    return "".join(res[::-1])

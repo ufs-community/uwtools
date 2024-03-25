@@ -40,7 +40,7 @@ def config(tmp_path):
                 "interval_hours": 6,
                 "offset": 6,
                 "path": str(tmp_path / "gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}"),
-            }, 
+            },
             "run_dir": str(tmp_path),
             "vtable": str(tmp_path / "Vtable.GFS"),
         },
@@ -86,21 +86,22 @@ def test_Ungrib_gribfile(driverobj):
     driverobj.gribfile(dst, src)
     assert dst.is_symlink()
 
+
 def test_Ungrib_gribfiles(driverobj, tmp_path):
     links = []
     suffix = "AAA"
     cycle_hr = 12
 
     for forecast_hour in (6, 12, 18):
-        links = [ driverobj._rundir / f"GRIBFILE.{suffix}" ]
-        infile = tmp_path / "gfs.t{cycle_hr:02d}z.pgrb2.0p25.f{forecast_hour:03d}".format(cycle_hr=cycle_hr,
-                                                                      forecast_hour=forecast_hour)
+        links = [driverobj._rundir / f"GRIBFILE.{suffix}"]
+        infile = tmp_path / "gfs.t{cycle_hr:02d}z.pgrb2.0p25.f{forecast_hour:03d}".format(
+            cycle_hr=cycle_hr, forecast_hour=forecast_hour
+        )
         infile.touch()
         suffix = ungrib.incr_str(suffix)
     assert not any(link.is_file() for link in links)
     driverobj.gribfiles()
     assert all(link.is_symlink() for link in links)
-
 
 
 def test_Ungrib_namelist_file(driverobj):
@@ -171,8 +172,8 @@ def test_Ungrib__taskanme(driverobj):
 def test_Ungrib__validate(driverobj):
     driverobj._validate()
 
-def test__incr_str():
 
+def test__incr_str():
     assert ungrib.incr_str("AAA") == "AAB"
     assert ungrib.incr_str("AAZ") == "ABA"
     assert ungrib.incr_str("Z") == "AA"
