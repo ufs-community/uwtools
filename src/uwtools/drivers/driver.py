@@ -39,7 +39,7 @@ class Driver(ABC):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
-        :param cycle: The synoptic time.
+        :param cycle: The cycle.
         """
         self._config = YAMLConfig(config=config)
         self._dry_run = dry_run

@@ -26,7 +26,7 @@ def execute(
     Otherwise, the executable will be run directly on the current system.
 
     :param task: The task to execute.
-    :param cycle: The synoptic time.
+    :param cycle: The cycle.
     :param config: Path to config file (read stdin if missing or None).
     :param batch: Submit run to the batch system.
     :param dry_run: Do not run the executable, just report what would have been done.
