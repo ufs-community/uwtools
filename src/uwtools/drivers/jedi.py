@@ -21,7 +21,6 @@ class Jedi(Driver):
     A driver for the jedi component.
     """
 
-
     def __init__(
         self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
     ):
@@ -45,7 +44,7 @@ class Jedi(Driver):
     @task
     def go(self):
         """
-        pass
+        pass.
         """
         yield "go"
         yield asset(None, lambda: True)
@@ -57,23 +56,23 @@ class Jedi(Driver):
         The yaml file.
         """
         pass
-#        fn = "jedi.yaml"
-#        yield self._taskname(f"yaml file {fn}")
-#        path = self._rundir / fn
-#        yield asset(path, path.is_file)
-#        vals = self._driver_config["yaml"]["update_values"]["config"]
-#        input_paths = [Path(v) for k, v in vals.items() if k.startswith("input_")]
-#        input_paths += [Path(vals["mosaic_file_mdl"])]
-#        input_paths += [Path(vals["orog_dir_mdl"]) / fn for fn in vals["orog_files_mdl"]]
-#        yield [file(input_path) for input_path in input_paths]
-#        self._create_user_updated_config(
-#            config_class=NMLConfig,
-#            config_values=self._driver_config.get("namelist", {}),
-#            path=path,
-#        )
 
+    #        fn = "jedi.yaml"
+    #        yield self._taskname(f"yaml file {fn}")
+    #        path = self._rundir / fn
+    #        yield asset(path, path.is_file)
+    #        vals = self._driver_config["yaml"]["update_values"]["config"]
+    #        input_paths = [Path(v) for k, v in vals.items() if k.startswith("input_")]
+    #        input_paths += [Path(vals["mosaic_file_mdl"])]
+    #        input_paths += [Path(vals["orog_dir_mdl"]) / fn for fn in vals["orog_files_mdl"]]
+    #        yield [file(input_path) for input_path in input_paths]
+    #        self._create_user_updated_config(
+    #            config_class=NMLConfig,
+    #            config_values=self._driver_config.get("namelist", {}),
+    #            path=path,
+    #        )
 
-   # Private helper methods
+    # Private helper methods
 
     @property
     def _driver_name(self) -> str:
@@ -97,6 +96,7 @@ class Jedi(Driver):
     def _taskname(self, suffix: str) -> str:
         """
         Returns a common tag for graph-task log messages.
+
         :param suffix: Log-string suffix.
         """
         return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
