@@ -10,8 +10,8 @@ sfc_climo_gen:
      - module load some_module
    executable: /path/to/sfc_climo_gen
    mpiargs:
-     - "--export=ALL"
-     - "--ntasks $SLURM_CPUS_ON_NODE"
+     - --export=ALL
+     - --ntasks $SLURM_CPUS_ON_NODE
    mpicmd: srun
  namelist:
    update_values:

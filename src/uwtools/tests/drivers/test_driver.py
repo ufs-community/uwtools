@@ -3,16 +3,18 @@
 Tests for uwtools.drivers.driver module.
 """
 import json
+from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 import yaml
-from pytest import fixture
+from pytest import fixture, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
+from uwtools.exceptions import UWConfigError
 
 # Helpers
 
@@ -56,23 +58,24 @@ def driverobj(tmp_path):
                     "batchargs": {
                         "export": "NONE",
                         "nodes": 1,
-                        "stdout": "/path/to/file",
+                        "stdout": "{{ concrete.run_dir }}/out",
                         "walltime": "00:05:00",
                     },
                     "executable": "qux",
                     "mpiargs": ["bar", "baz"],
                     "mpicmd": "foo",
                 },
-                "run_dir": "/path/to/dir",
+                "run_dir": "{{ rootdir }}/{{ cycle.strftime('%Y%m%d%H') }}/run",
                 "update_values": {"a": 33},
             },
             "platform": {
                 "account": "me",
                 "scheduler": "slurm",
             },
+            "rootdir": "/path/to",
         },
     )
-    return ConcreteDriver(config=cf, dry_run=True, batch=True)
+    return ConcreteDriver(config=cf, dry_run=True, batch=True, cycle=datetime(2024, 3, 22, 18))
 
 
 # Tests
@@ -151,7 +154,14 @@ def test_Driver__create_user_updated_config_base_file(
     assert updated == expected
 
 
-def test_Driver__driver_config(driverobj):
+def test_Driver__driver_config_fail(driverobj):
+    del driverobj._config["concrete"]
+    with raises(UWConfigError) as e:
+        assert driverobj._driver_config
+    assert str(e.value) == "Required 'concrete' block missing in config"
+
+
+def test_Driver__driver_config_pass(driverobj):
     assert set(driverobj._driver_config.keys()) == {
         "base_file",
         "execution",
@@ -160,12 +170,18 @@ def test_Driver__driver_config(driverobj):
     }
 
 
-def test_Driver__resources(driverobj):
+def test_Driver__resources_fail(driverobj):
+    del driverobj._config["platform"]
+    with raises(UWConfigError) as e:
+        assert driverobj._resources
+    assert str(e.value) == "Required 'platform' block missing in config"
+
+
+def test_Driver__resources_pass(driverobj):
     account = "me"
     scheduler = "slurm"
     walltime = "00:05:00"
     driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
-    driverobj._config["platform"] = {"account": account, "scheduler": scheduler}
     assert driverobj._resources == {
         "account": account,
         "rundir": driverobj._rundir,
@@ -217,11 +233,11 @@ def test_Driver__runscript_execution_only(driverobj):
 
 
 def test_Driver__rundir(driverobj):
-    assert driverobj._rundir == Path("/path/to/dir")
+    assert driverobj._rundir == Path("/path/to/2024032218/run")
 
 
 def test_Driver__runscript_path(driverobj):
-    assert driverobj._runscript_path == Path("/path/to/dir/runscript.concrete")
+    assert driverobj._runscript_path == Path("/path/to/2024032218/run/runscript.concrete")
 
 
 def test_Driver__scheduler(driverobj):
@@ -252,17 +268,17 @@ def test_Driver__write_runscript(driverobj, tmp_path):
     #!/bin/bash
 
     #SBATCH --account=me
-    #SBATCH --chdir=/path/to/dir
+    #SBATCH --chdir=/path/to/2024032218/run
     #SBATCH --export=NONE
     #SBATCH --nodes=1
-    #SBATCH --output=/path/to/file
+    #SBATCH --output=/path/to/2024032218/run/out
     #SBATCH --time=00:05:00
 
     export FOO=bar
     export BAZ=qux
 
     time foo bar baz qux
-    test $? -eq 0 && touch /path/to/dir/done
+    test $? -eq 0 && touch /path/to/2024032218/run/done
     """
     with open(path, "r", encoding="utf-8") as f:
         actual = f.read()
