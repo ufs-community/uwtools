@@ -73,13 +73,13 @@ def test_Ungrib_dry_run(config_file, cycle):
     dryrun.assert_called_once_with()
 
 
-def test_Ungrib_gribfile_aaa(driverobj):
+def test_Ungrib_gribfile(driverobj):
     src = driverobj._rundir / "GRIBFILE.AAA.in"
     src.touch()
     driverobj._driver_config["gfs_file"] = src
     dst = driverobj._rundir / "GRIBFILE.AAA"
     assert not dst.is_symlink()
-    driverobj.gribfile_aaa()
+    driverobj.gribfile()
     assert dst.is_symlink()
 
 
@@ -94,7 +94,7 @@ def test_Ungrib_namelist_file(driverobj):
 def test_Ungrib_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
-        gribfile_aaa=D,
+        gribfile=D,
         namelist_file=D,
         runscript=D,
         vtable=D,
