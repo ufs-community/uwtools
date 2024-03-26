@@ -1,5 +1,5 @@
 ``ungrib``
-===============
+==========
 
 The ``uw`` mode for configuring and running the WRF preprocessing component ``ungrib``.
 
