@@ -4,7 +4,7 @@ A driver for the ungrib component.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Optional
 
 from iotaa import asset, dryrun, task, tasks
 
@@ -20,18 +20,21 @@ class Ungrib(Driver):
     """
 
     def __init__(
-        self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
+        self,
+        cycle: datetime,
+        config: Optional[Path] = None,
+        dry_run: bool = False,
+        batch: bool = False,
     ):
         """
         The driver.
 
-        :param config_file: Path to config file.
-        :param cycle: The forecast cycle.
+        :param cycle: The cycle.
+        :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
-        self._config.dereference(context={"cycle": cycle})
+        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle)
         if self._dry_run:
             dryrun()
         self._cycle = cycle
@@ -39,9 +42,9 @@ class Ungrib(Driver):
     # Workflow tasks
 
     @task
-    def gribfile_aaa(self):
+    def gribfile(self):
         """
-        The gribfile.
+        A symlink to the input GRIB file.
         """
         path = self._rundir / "GRIBFILE.AAA"
         yield self._taskname(str(path))
@@ -89,7 +92,7 @@ class Ungrib(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
-            self.gribfile_aaa(),
+            self.gribfile(),
             self.namelist_file(),
             self.runscript(),
             self.vtable(),
@@ -109,12 +112,13 @@ class Ungrib(Driver):
     @task
     def vtable(self):
         """
-        The Vtable.
+        A symlink to the Vtable file.
         """
         path = self._rundir / "Vtable"
         yield self._taskname(str(path))
         yield asset(path, path.is_symlink)
-        yield None
+        infile = Path(self._driver_config["vtable"])
+        yield file(path=infile)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.symlink_to(Path(self._driver_config["vtable"]))
 
@@ -126,18 +130,6 @@ class Ungrib(Driver):
         Returns the name of this driver.
         """
         return STR.ungrib
-
-    @property
-    def _resources(self) -> Dict[str, Any]:
-        """
-        Returns configuration data for the runscript.
-        """
-        return {
-            "account": self._config["platform"]["account"],
-            "rundir": self._rundir,
-            "scheduler": self._config["platform"]["scheduler"],
-            **self._driver_config.get("execution", {}).get("batchargs", {}),
-        }
 
     def _taskname(self, suffix: str) -> str:
         """

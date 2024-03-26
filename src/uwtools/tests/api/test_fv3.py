@@ -9,9 +9,9 @@ from uwtools.api import fv3
 def test_execute(tmp_path):
     dot = tmp_path / "graph.dot"
     args: dict = {
-        "config_file": "config.yaml",
-        "cycle": dt.datetime.utcnow(),
         "batch": False,
+        "config": "config.yaml",
+        "cycle": dt.datetime.utcnow(),
         "dry_run": True,
         "graph_file": dot,
     }

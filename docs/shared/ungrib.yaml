@@ -1,10 +1,9 @@
 ungrib:
   execution:
-    mpicmd: srun
     batchargs:
       cores: 1
       walltime: 00:01:00
-    executable: "/path/to/ungrib.exe"
-  gfs_file: "/path/to/dir/gfs.t12z.pgrb2.0p25.f000"
-  run_dir: "/path/to/dir/run"
-  vtable: "/path/to/Vtable.GFS"
+    executable: /path/to/ungrib.exe
+  gfs_file: /path/to/dir/gfs.t12z.pgrb2.0p25.f000
+  run_dir: /path/to/dir/run
+  vtable: /path/to/Vtable.GFS

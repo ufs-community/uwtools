@@ -5,6 +5,7 @@ import os
 import re
 import stat
 from abc import ABC, abstractmethod
+from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Type
@@ -14,6 +15,7 @@ from iotaa import asset, task, tasks
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute
@@ -24,18 +26,28 @@ class Driver(ABC):
     An abstract class for component drivers.
     """
 
-    def __init__(self, config_file: Path, dry_run: bool = False, batch: bool = False) -> None:
+    def __init__(
+        self,
+        config: Optional[Path] = None,
+        dry_run: bool = False,
+        batch: bool = False,
+        cycle: Optional[datetime] = None,
+    ) -> None:
         """
         A component driver.
 
-        :param config_file: Path to config file.
+        :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
+        :param cycle: The cycle.
         """
-        self._config = YAMLConfig(config=config_file)
+        self._config = YAMLConfig(config=config)
         self._dry_run = dry_run
         self._batch = batch
         self._config.dereference()
+        self._config.dereference(
+            context={**({"cycle": cycle} if cycle else {}), **self._config.data}
+        )
         self._validate()
 
     # Workflow tasks
@@ -107,8 +119,12 @@ class Driver(ABC):
         """
         Returns the config block specific to this driver.
         """
-        driver_config: Dict[str, Any] = self._config[self._driver_name]
-        return driver_config
+        name = self._driver_name
+        try:
+            driver_config: Dict[str, Any] = self._config[name]
+            return driver_config
+        except KeyError as e:
+            raise UWConfigError("Required '%s' block missing in config" % name) from e
 
     @property
     @abstractmethod
@@ -126,11 +142,20 @@ class Driver(ABC):
         """
 
     @property
-    @abstractmethod
     def _resources(self) -> Dict[str, Any]:
         """
-        Returns configuration data for the FV3 runscript.
+        Returns configuration data for the runscript.
         """
+        try:
+            platform = self._config["platform"]
+        except KeyError as e:
+            raise UWConfigError("Required 'platform' block missing in config") from e
+        return {
+            "account": platform["account"],
+            "rundir": self._rundir,
+            "scheduler": platform["scheduler"],
+            **self._driver_config.get("execution", {}).get("batchargs", {}),
+        }
 
     @property
     def _runcmd(self) -> str:
@@ -140,7 +165,7 @@ class Driver(ABC):
         execution = self._driver_config.get("execution", {})
         mpiargs = execution.get("mpiargs", [])
         components = [
-            execution["mpicmd"],  # MPI run program
+            execution.get("mpicmd"),  # MPI run program
             *[str(x) for x in mpiargs],  # MPI arguments
             execution["executable"],  # component executable name
         ]
@@ -218,7 +243,7 @@ class Driver(ABC):
         rs = self._runscript(
             envcmds=self._driver_config.get("execution", {}).get("envcmds", []),
             envvars=envvars,
-            execution=[self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir],
+            execution=["time %s" % self._runcmd, "test $? -eq 0 && touch %s/done" % self._rundir],
             scheduler=self._scheduler if self._batch else None,
         )
         with open(path, "w", encoding="utf-8") as f:

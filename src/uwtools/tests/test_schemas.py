@@ -47,6 +47,11 @@ def sfc_climo_gen_prop():
     return partial(schema_validator, "sfc-climo-gen", "properties", "sfc_climo_gen", "properties")
 
 
+@fixture
+def ungrib_prop():
+    return partial(schema_validator, "ungrib", "properties", "ungrib", "properties")
+
+
 # chgres-cube
 
 
@@ -566,6 +571,33 @@ def test_schema_sfc_climo_gen_namelist_update_values(sfc_climo_gen_prop):
 
 def test_schema_sfc_climo_gen_run_dir(sfc_climo_gen_prop):
     errors = sfc_climo_gen_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# ungrib
+
+
+def test_schema_ungrib():
+    d = {
+        "execution": {"executable": "/tmp/ungrib.exe"},
+        "gfs_file": "/tmp/gfs.t12z.pgrb2.0p25.f000",
+        "run_dir": "/tmp",
+        "vtable": "/tmp/Vtable.GFS",
+    }
+    errors = schema_validator("ungrib", "properties", "ungrib")
+    # Basic correctness:
+    assert not errors(d)
+    # All top-level keys are required:
+    for key in ("execution", "gfs_file", "run_dir", "vtable"):
+        assert f"'{key}' is a required property" in errors(with_del(d, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
+
+
+def test_schema_ungrib_run_dir(ungrib_prop):
+    errors = ungrib_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)

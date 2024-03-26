@@ -6,22 +6,24 @@ The ``uw`` mode for handling configuration files (configs).
 .. code-block:: text
 
    $ uw config --help
-   usage: uw config [-h] MODE ...
+   usage: uw config [-h] [--version] ACTION ...
 
    Handle configs
 
    Optional arguments:
      -h, --help
-           Show help and exit
+         Show help and exit
+     --version
+         Show version info and exit
 
    Positional arguments:
-     MODE
+     ACTION
        compare
-           Compare configs
+         Compare configs
        realize
-           Realize config
+         Realize config
        validate
-           Validate config
+         Validate config
 
 .. _cli_config_compare_examples:
 
@@ -33,7 +35,7 @@ The ``compare`` action lets users compare two config files.
 .. code-block:: text
 
    $ uw config compare --help
-   usage: uw config compare --file-1-path PATH --file-2-path PATH [-h]
+   usage: uw config compare --file-1-path PATH --file-2-path PATH [-h] [--version]
                             [--file-1-format {ini,nml,sh,yaml}] [--file-2-format {ini,nml,sh,yaml}]
                             [--quiet] [--verbose]
 
@@ -48,12 +50,12 @@ The ``compare`` action lets users compare two config files.
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
      --file-1-format {ini,nml,sh,yaml}
          Format of file 1
      --file-2-format {ini,nml,sh,yaml}
          Format of file 2
-     --debug
-         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v
@@ -153,9 +155,9 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
 .. code-block:: text
 
    $ uw config realize --help
-   usage: uw config realize [-h] [--input-file PATH] [--input-format {ini,nml,sh,yaml}]
+   usage: uw config realize [-h] [--version] [--input-file PATH] [--input-format {ini,nml,sh,yaml}]
                             [--output-file PATH] [--output-format {ini,nml,sh,yaml}]
-                            [--values-needed] [--total] [--dry-run] [--debug] [--quiet] [--verbose]
+                            [--values-needed] [--total] [--dry-run] [--quiet] [--verbose]
                             [PATH ...]
 
    Realize config
@@ -163,6 +165,8 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --input-format {ini,nml,sh,yaml}
@@ -177,8 +181,6 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
          Require rendering of all Jinja2 variables/expressions
      --dry-run
          Only log info, making no changes
-     --debug
-         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v
@@ -488,7 +490,8 @@ The ``validate`` action ensures that a given config file is structured properly.
 .. code-block:: text
 
    $ uw config validate --help
-   usage: uw config validate --schema-file PATH [-h] [--input-file PATH] [--quiet] [--verbose]
+   usage: uw config validate --schema-file PATH [-h] [--version] [--input-file PATH] [--quiet]
+                             [--verbose]
 
    Validate config
 
@@ -499,10 +502,10 @@ The ``validate`` action ensures that a given config file is structured properly.
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
-     --debug
-         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v

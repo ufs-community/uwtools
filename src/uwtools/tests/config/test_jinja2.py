@@ -233,9 +233,9 @@ def test_render_dry_run(caplog, template, values_file):
 @pytest.mark.parametrize("partial", [False, True])
 def test_render_partial(caplog, capsys, partial):
     log.setLevel(logging.INFO)
-    content = StringIO(initial_value="{{ greeting }} {{ recipient }}")
+    template = StringIO(initial_value="{{ greeting }} {{ recipient }}")
     with patch.object(jinja2, "readable") as readable:
-        readable.return_value.__enter__.return_value = content
+        readable.return_value.__enter__.return_value = template
         jinja2.render(values_src={"greeting": "Hello"}, partial=partial)
     if partial:
         assert "Hello {{ recipient }}" in capsys.readouterr().out
