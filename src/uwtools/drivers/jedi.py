@@ -41,36 +41,69 @@ class Jedi(Driver):
 
     # Workflow tasks
 
+
+    @tasks
+    def files_copied(self):
+        """
+        Files copied for run.
+        """
+        yield self._taskname("files copied")
+        yield [
+            filecopy(src=Path(src), dst=self._rundir / dst)
+            for dst, src in self._driver_config.get("files_to_copy", {}).items()
+        ]
+
+    @tasks
+    def files_linked(self):
+        """
+        Files linked for run.
+        """
+        yield self._taskname("files linked")
+        yield [
+            symlink(target=Path(target), linkname=self._rundir / linkname)
+            for linkname, target in self._driver_config.get("files_to_link", {}).items()
+        ]
+
+    @tasks
+    def provisioned_run_directory(self):
+        """
+        Run directory provisioned with all required content.
+        """
+        yield self._taskname("provisioned run directory")
+        yield [
+            self.files_copied(),
+            self.files_linked(),
+            self.yaml_file(),
+            self.runscript(),
+        ]
+
     @task
-    def go(self):
+    def runscript(self):
         """
-        pass.
+        The runscript.
         """
-        yield "go"
-        yield asset(None, lambda: True)
+        path = self._runscript_path
+        yield self._taskname(path.name)
+        yield asset(path, path.is_file)
         yield None
+        self._write_runscript(path=path, envvars={})        
 
     @task
     def yaml_file(self):
         """
         The yaml file.
         """
-        pass
+        fn = "input.yaml"
+        yield self._taskname(fn)
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        yield None
+        self._create_user_updated_config(
+            config_class=YAMLConfig,
+            config_values=self._driver_config.get("yaml", {}),
+            path=path,
+        )
 
-    #        fn = "jedi.yaml"
-    #        yield self._taskname(f"yaml file {fn}")
-    #        path = self._rundir / fn
-    #        yield asset(path, path.is_file)
-    #        vals = self._driver_config["yaml"]["update_values"]["config"]
-    #        input_paths = [Path(v) for k, v in vals.items() if k.startswith("input_")]
-    #        input_paths += [Path(vals["mosaic_file_mdl"])]
-    #        input_paths += [Path(vals["orog_dir_mdl"]) / fn for fn in vals["orog_files_mdl"]]
-    #        yield [file(input_path) for input_path in input_paths]
-    #        self._create_user_updated_config(
-    #            config_class=NMLConfig,
-    #            config_values=self._driver_config.get("namelist", {}),
-    #            path=path,
-    #        )
 
     # Private helper methods
 
