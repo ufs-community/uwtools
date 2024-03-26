@@ -21,7 +21,7 @@ See :ref:`here <execution_yaml>` for details.
 
 
 gfs_files:
-^^^^^^^^^
+^^^^^^^^^^
 
 Describes the GRIB-formatted files to be processed by ``ungrib``.
 
