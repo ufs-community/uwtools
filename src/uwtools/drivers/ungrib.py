@@ -60,9 +60,9 @@ class Ungrib(Driver):
                 gfs_files["path"].format(cycle_hour=cycle_hour, forecast_hour=boundary_hour)
             )
             link_name = self._rundir / f"GRIBFILE.{suffix}"
-            links.append((link_name, infile))
+            links.append((infile, link_name))
             suffix = incr_str(suffix)
-        yield [self._gribfile(link, infile) for link, infile in links]
+        yield [self._gribfile(infile, link) for infile, link in links]
 
     @task
     def namelist_file(self):
@@ -142,7 +142,7 @@ class Ungrib(Driver):
         return STR.ungrib
 
     @task
-    def _gribfile(self, link, infile):
+    def _gribfile(self, infile, link):
         """
         A symlink to the input GRIB file.
 

@@ -83,7 +83,7 @@ def test_Ungrib__gribfile(driverobj):
     src.touch()
     dst = driverobj._rundir / "GRIBFILE.AAA"
     assert not dst.is_symlink()
-    driverobj._gribfile(dst, src)
+    driverobj._gribfile(src, dst)
     assert dst.is_symlink()
 
 
