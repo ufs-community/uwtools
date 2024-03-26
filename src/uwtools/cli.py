@@ -434,7 +434,7 @@ def _add_subparser_mpas_init(subparsers: Subparsers) -> ModeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.mpasinit, "Execute FV3 tasks")
+    parser = _add_subparser(subparsers, STR.mpasinit, "Execute MPASInit tasks")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
@@ -465,13 +465,14 @@ def _add_subparser_mpas_init_task(subparsers: Subparsers, task: str, helpmsg: st
 
 def _dispatch_mpas_init(args: Args) -> bool:
     """
-    Dispatch logic for mpas init mode.
+    Dispatch logic for mpas_init mode.
 
     :param args: Parsed command-line args.
     """
     return uwtools.api.mpas_init.execute(
         task=args[STR.action],
         config_file=args[STR.cfgfile],
+        cycle=args[STR.cycle],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
@@ -724,7 +725,7 @@ def _add_subparser_ungrib(subparsers: Subparsers) -> ModeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.ungrib, "Execute Ungrib tasks")
+    parser = _add_subparser(subparsers, STR.ungrib, "Execute ungrib tasks")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {

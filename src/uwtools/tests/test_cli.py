@@ -131,6 +131,18 @@ def test__add_subparser_fv3(subparsers):
     ]
 
 
+def test__add_subparser_mpas_init(subparsers):
+    cli._add_subparser_mpas_init(subparsers)
+    assert actions(subparsers.choices[STR.mpasinit]) == [
+        "files_copied",
+        "files_linked",
+        "namelist_file",
+        "provisioned_run_directory",
+        "run",
+        "runscript",
+    ]
+
+
 def test__add_subparser_rocoto(subparsers):
     cli._add_subparser_rocoto(subparsers)
     assert subparsers.choices[STR.rocoto]
