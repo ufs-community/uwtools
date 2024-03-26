@@ -5,6 +5,36 @@ The ``uw`` mode for configuring and running the WRF preprocessing component ``un
 
 .. code-block:: text
 
+   $ uw ungrib --help
+   usage: uw ungrib [-h] [--version] TASK ...
+
+   Execute Ungrib tasks
+
+   Optional arguments:
+     -h, --help
+         Show help and exit
+     --version
+         Show version info and exit
+
+   Positional arguments:
+     TASK
+       gribfile
+         A symlink to the input GRIB file
+       namelist_file
+         The namelist file
+       provisioned_run_directory
+         Run directory provisioned with all required content
+       run
+         A run
+       runscript
+         The runscript
+       vtable
+         A symlink to the Vtable file
+
+All tasks take the same arguments. For example:
+
+.. code-block:: text
+
    $ uw ungrib run --help
    usage: uw ungrib run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run] [--graph-file PATH]
                         [--quiet] [--verbose]
