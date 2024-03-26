@@ -10,3 +10,4 @@ API
    rocoto
    sfc_climo_gen
    template
+   ungrib

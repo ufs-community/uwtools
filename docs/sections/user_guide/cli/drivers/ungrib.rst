@@ -1,7 +1,7 @@
 ``ungrib``
 ===============
 
-The ``uw`` mode for configuring and running the :ufs-utils:`ungrib<ungrib>` component.
+The ``uw`` mode for configuring and running the WRF preprocessing component ``ungrib``.
 
 .. code-block:: text
 
