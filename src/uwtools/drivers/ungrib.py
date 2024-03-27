@@ -68,7 +68,7 @@ class Ungrib(Driver):
         """
         # Do not use offset here. It's relative to the MPAS fcst to run.
         gfs_files = self._driver_config["gfs_files"]
-        endhour = gfs_files["forecast_length"] + 1
+        endhour = gfs_files["forecast_length"]
         end_date = self._cycle + timedelta(hours=endhour)
         interval = int(gfs_files["interval_hours"]) * 3600  # hour to sec
         d = {

@@ -106,7 +106,10 @@ def test_Ungrib_namelist_file(driverobj):
     assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
-    assert isinstance(f90nml.read(dst), f90nml.Namelist)
+    nml = f90nml.read(dst)
+    assert isinstance(nml, f90nml.Namelist)
+    assert nml["share"]["interval_seconds"] == 21600
+    assert nml["share"]["end_date"] == "2024-02-02_06:00:00"
 
 
 def test_Ungrib_provisioned_run_directory(driverobj):
