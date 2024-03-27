@@ -89,16 +89,13 @@ def test_Ungrib__gribfile(driverobj):
 
 def test_Ungrib_gribfiles(driverobj, tmp_path):
     links = []
-    suffix = "AAA"
     cycle_hr = 12
-
-    for forecast_hour in (6, 12, 18):
-        links = [driverobj._rundir / f"GRIBFILE.{suffix}"]
+    for n, forecast_hour in enumerate((6, 12, 18)):
+        links = [driverobj._rundir / f"GRIBFILE.{ungrib._ext(n)}"]
         infile = tmp_path / "gfs.t{cycle_hr:02d}z.pgrb2.0p25.f{forecast_hour:03d}".format(
             cycle_hr=cycle_hr, forecast_hour=forecast_hour
         )
         infile.touch()
-        suffix = ungrib.incr_str(suffix)
     assert not any(link.is_file() for link in links)
     driverobj.gribfiles()
     assert all(link.is_symlink() for link in links)
@@ -173,7 +170,6 @@ def test_Ungrib__validate(driverobj):
     driverobj._validate()
 
 
-def test__incr_str():
-    assert ungrib.incr_str("AAA") == "AAB"
-    assert ungrib.incr_str("AAZ") == "ABA"
-    assert ungrib.incr_str("Z") == "AA"
+def test__ext():
+    assert ungrib._ext(0) == "AAA"
+    assert ungrib._ext(26) == "ABA"

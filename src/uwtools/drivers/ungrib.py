@@ -47,21 +47,20 @@ class Ungrib(Driver):
         """
         Symlinks to all the GRIB files.
         """
-        yield self._taskname("gribfiles")
+        yield self._taskname("GRIB files")
         gfs_files = self._driver_config["gfs_files"]
         offset = abs(gfs_files["offset"])
-        endhour = gfs_files["forecast_length"] + offset + 1
+        endhour = gfs_files["forecast_length"] + offset
         interval = gfs_files["interval_hours"]
         cycle_hour = int((self._cycle - timedelta(hours=offset)).strftime("%H"))
         suffix = "AAA"
         links = []
-        for boundary_hour in range(offset, endhour, interval):
+        for n, boundary_hour in enumerate(range(offset, endhour + 1, interval)):
             infile = Path(
                 gfs_files["path"].format(cycle_hour=cycle_hour, forecast_hour=boundary_hour)
             )
-            link_name = self._rundir / f"GRIBFILE.{suffix}"
+            link_name = self._rundir / f"GRIBFILE.{_ext(n)}"
             links.append((infile, link_name))
-            suffix = incr_str(suffix)
         yield [self._gribfile(infile, link) for infile, link in links]
 
     @task
@@ -69,11 +68,16 @@ class Ungrib(Driver):
         """
         The namelist file.
         """
+        # Do not use offset here. It's relative to the MPAS fcst to run.
+        gfs_files = self._driver_config["gfs_files"]
+        endhour = gfs_files["forecast_length"] + 1
+        end_date = self._cycle + timedelta(hours=endhour)
+        interval = int(gfs_files["interval_hours"]) * 3600 # hour to sec
         d = {
             "update_values": {
                 "share": {
-                    "end_date": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
-                    "interval_seconds": 1,
+                    "end_date": end_date.strftime("%Y-%m-%d_%H:00:00"),
+                    "interval_seconds": interval,
                     "max_dom": 1,
                     "start_date": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
                     "wrf_core": "ARW",
@@ -142,9 +146,9 @@ class Ungrib(Driver):
         return STR.ungrib
 
     @task
-    def _gribfile(self, infile, link):
+    def _gribfile(self, infile: Path, link: Path):
         """
-        A symlink to the input GRIB file.
+        A symlink to an input GRIB file.
 
         :param link: Link name.
         :param infile: File to link.
@@ -163,27 +167,9 @@ class Ungrib(Driver):
         """
         return "%s ungrib %s" % (self._cycle.strftime("%Y%m%d %HZ"), suffix)
 
-
-def incr_str(s: str) -> str:
+def _ext(n):
     """
-    Increment an uppercase string.
+    Maps integers to 3-letter string.
     """
-
-    def incr_char(c: str) -> Tuple[int, str]:
-        letters = ascii_uppercase
-        assert c in letters
-        if c == "Z":
-            return 1, "A"
-        return 0, chr(ord(c) + 1)
-
-    chars = list(s)
-    res = []
-    while chars:
-        carry, next_ = incr_char(chars.pop())
-        res.append(next_)
-        if not carry:
-            break
-        if not chars:
-            res.append("A")
-    res += chars[::-1]
-    return "".join(res[::-1])
+    b = 26
+    return "{:A>3}".format(("" if n < b else _ext(n // b)) + chr(65 + n % b))[-3:]
