@@ -104,6 +104,13 @@ class Jedi(Driver):
             path=path,
         )
 
+    @task
+    def validate(self):
+        """
+        Validate the YAML.
+        """
+        pass
+
 
     # Private helper methods
 
