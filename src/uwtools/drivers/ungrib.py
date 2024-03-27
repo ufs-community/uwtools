@@ -2,7 +2,7 @@
 A driver for the ungrib component.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -41,29 +41,41 @@ class Ungrib(Driver):
 
     # Workflow tasks
 
-    @task
-    def gribfile(self):
+    @tasks
+    def gribfiles(self):
         """
-        A symlink to the input GRIB file.
+        Symlinks to all the GRIB files.
         """
-        path = self._rundir / "GRIBFILE.AAA"
-        yield self._taskname(str(path))
-        yield asset(path, path.is_symlink)
-        infile = Path(self._driver_config["gfs_file"])
-        yield file(path=infile)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.symlink_to(infile)
+        yield self._taskname("GRIB files")
+        gfs_files = self._driver_config["gfs_files"]
+        offset = abs(gfs_files["offset"])
+        endhour = gfs_files["forecast_length"] + offset
+        interval = gfs_files["interval_hours"]
+        cycle_hour = int((self._cycle - timedelta(hours=offset)).strftime("%H"))
+        links = []
+        for n, boundary_hour in enumerate(range(offset, endhour + 1, interval)):
+            infile = Path(
+                gfs_files["path"].format(cycle_hour=cycle_hour, forecast_hour=boundary_hour)
+            )
+            link_name = self._rundir / f"GRIBFILE.{_ext(n)}"
+            links.append((infile, link_name))
+        yield [self._gribfile(infile, link) for infile, link in links]
 
     @task
     def namelist_file(self):
         """
         The namelist file.
         """
+        # Do not use offset here. It's relative to the MPAS fcst to run.
+        gfs_files = self._driver_config["gfs_files"]
+        endhour = gfs_files["forecast_length"]
+        end_date = self._cycle + timedelta(hours=endhour)
+        interval = int(gfs_files["interval_hours"]) * 3600  # hour to sec
         d = {
             "update_values": {
                 "share": {
-                    "end_date": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
-                    "interval_seconds": 1,
+                    "end_date": end_date.strftime("%Y-%m-%d_%H:00:00"),
+                    "interval_seconds": interval,
                     "max_dom": 1,
                     "start_date": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
                     "wrf_core": "ARW",
@@ -92,7 +104,7 @@ class Ungrib(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
-            self.gribfile(),
+            self.gribfiles(),
             self.namelist_file(),
             self.runscript(),
             self.vtable(),
@@ -131,6 +143,20 @@ class Ungrib(Driver):
         """
         return STR.ungrib
 
+    @task
+    def _gribfile(self, infile: Path, link: Path):
+        """
+        A symlink to an input GRIB file.
+
+        :param link: Link name.
+        :param infile: File to link.
+        """
+        yield self._taskname(str(link))
+        yield asset(link, link.is_symlink)
+        yield file(path=infile)
+        link.parent.mkdir(parents=True, exist_ok=True)
+        link.symlink_to(infile)
+
     def _taskname(self, suffix: str) -> str:
         """
         Returns a common tag for graph-task log messages.
@@ -138,3 +164,11 @@ class Ungrib(Driver):
         :param suffix: Log-string suffix.
         """
         return "%s ungrib %s" % (self._cycle.strftime("%Y%m%d %HZ"), suffix)
+
+
+def _ext(n):
+    """
+    Maps integers to 3-letter string.
+    """
+    b = 26
+    return "{:A>3}".format(("" if n < b else _ext(n // b)) + chr(65 + n % b))[-3:]
