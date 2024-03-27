@@ -31,10 +31,10 @@ def realize_rocoto_xml(
     """
     rxml = _RocotoXML(config)
     xml = str(rxml).strip()
-    with writable(output_file) as f:
-        print(xml, file=f)
     if not validate_rocoto_xml_string(xml):
         raise UWError("Internal error: Invalid Rocoto XML")
+    with writable(output_file) as f:
+        print(xml, file=f)
     return xml
 
 
@@ -381,6 +381,7 @@ class _RocotoXML:
 
         :param config: Configuration data for this element.
         :param taskname: The name of the task being defined.
+        :return: The updated dict with all jobname entries rendered.
         """
         if STR.jobname not in config:
             config[STR.jobname] = taskname
@@ -403,6 +404,7 @@ class _RocotoXML:
         Return the tag and metadata extracted from a metadata-bearing key.
 
         :param key: A string of the form "<tag>_<metadata>" (or simply STR.<tag>).
+        :return: Tag and name of key.
         """
         # For example, key "task_foo_bar" will be split into tag "task" and name "foo_bar".
         parts = key.split("_")
