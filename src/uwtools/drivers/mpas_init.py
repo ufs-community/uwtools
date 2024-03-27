@@ -2,7 +2,7 @@
 A driver for the mpas-init component.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict
 
@@ -11,7 +11,8 @@ from iotaa import asset, dryrun, task, tasks
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import filecopy, symlink
+from uwtools.template import render
+from uwtools.utils.tasks import file, filecopy, symlink
 
 
 class MPASInit(Driver):
@@ -19,9 +20,7 @@ class MPASInit(Driver):
     A driver for mpas-init.
     """
 
-    def __init__(
-        self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
-    ):
+    def __init__(self, config: Path, cycle: datetime, dry_run: bool = False, batch: bool = False):
         """
         The driver.
 
@@ -30,13 +29,37 @@ class MPASInit(Driver):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
+        super().__init__(config=config, dry_run=dry_run, batch=batch)
         self._config.dereference(context={"cycle": cycle})
         if self._dry_run:
             dryrun()
         self._cycle = cycle
 
     # Workflow tasks
+
+    # EC TASKS
+    # link ungrib files
+
+    @tasks
+    def boundary_files(self):
+        """
+        Boundary-condition files.
+        """
+        yield self._taskname("boundary files")
+        lbcs = self._driver_config["boundary_conditions"]
+        endhour = self._driver_config["length"] + 1
+        interval = lbcs["interval_hours"]
+        symlinks = {}
+        ungrib_files = Path(self._driver_config["ungrib_files"])
+        for boundary_hour in range(0, endhour, interval):
+            target = Path(ungrib_files["path"]/f"FILE:{file_date.strftime('%Y-%m-%d_%H')}")
+            file_date = self._cycle + boundary_hour
+            linkname = (
+                self._rundir
+                / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
+            )
+            symlinks[target] = linkname
+        yield [symlink(target=t, linkname=f"FILE:{file_date.strftime('%Y-%m-%d_%H')}") for t, l in symlinks.items()]
 
     @tasks
     def files_copied(self):
@@ -54,6 +77,21 @@ class MPASInit(Driver):
         """
         Files linked for run.
         """
+        files_to_link = {
+            "CAM_ABS_DATA.DBL": user_path / "/CAM_ABS_DATA.DBL",
+            "CAM_AEROPT_DATA.DBL": "src/MPAS-Model/CAM_AEROPT_DATA.DBL",
+            "GENPARM.TBL": "src/MPAS-Model/GENPARM.TBL",
+            "LANDUSE.TBL": "src/MPAS-Model/LANDUSE.TBL",
+            "OZONE_DAT.TBL": "src/MPAS-Model/OZONE_DAT.TBL",
+            "OZONE_LAT.TBL": "src/MPAS-Model/OZONE_LAT.TBL",
+            "OZONE_PLEV.TBL": "src/MPAS-Model/COZONE_PLEV.TBL",
+            "RRTMG_LW_DATA": "src/MPAS-Model/RRTMG_LW_DATA",
+            "RRTMG_LW_DATA.DBL": "src/MPAS-Model/RRTMG_LW_DATA.DBL",
+            "RRTMG_SW_DATA": "src/MPAS-Model/RRTMG_SW_DATA",
+            "RRTMG_SW_DATA.DBL": "src/MPAS-Model/RRTMG_SW_DATA.DBL",
+            "SOILPARM.TBL": "src/MPAS-Model/SOILPARM.TBL",
+            "VEGPARM.TBL": "src/MPAS-Model/VEGPARM.TBL",
+        }
         yield self._taskname("files linked")
         yield [
             symlink(target=Path(target), linkname=self._rundir / linkname)
@@ -61,35 +99,43 @@ class MPASInit(Driver):
         ]
 
     @task
-    def namelist_file(self):
+    def init_executable_linked(self):
+        """
+        A symlink to the input init_atmosphere_model file.
+        """
+        # symlinks from mpas_app/exec EC
+        path = self._rundir / "init_atmosphere_model"
+        yield self._taskname(str(path))
+        yield asset(path, path.is_symlink)
+        infile = Path(self._driver_config["init_atmosphere_model"])
+        yield file(path=infile)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.symlink_to(infile)
+
+    @task
+    def namelist_init(self):
         """
         The namelist file.
         """
-        d = {
-            "update_values": {
-                "share": {
-                    "end_date": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
-                    "interval_seconds": 1,
-                    "max_dom": 1,
-                    "start_date": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
-                    "wrf_core": "ARW",
-                },
-                "mpas-init": {
-                    "out_format": "WPS",
-                    "prefix": "FILE",
-                },
-            }
-        }
-        path = self._rundir / "namelist.wps"
-        yield self._taskname(str(path))
+        fn = "namelist.init_atmosphere"
+        yield self._taskname(fn)
+        path = self._rundir / fn
         yield asset(path, path.is_file)
         yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
+        stop_time = self._cycle + timedelta(hours=self._driver_config["length"])
+        d = {
+            "nhyd_model":
+                "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:%M:%S")
+                "config_stop_time": stop_time.strftime("%Y-%m-%d_%H:%M:%S")
+        }
+        namelist = self._driver_config.get("namelist", {})
+        namelist["update_values"].update_values(d)
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=d,
+            config_values=namelist,
             path=path,
         )
+
 
     @tasks
     def provisioned_run_directory(self):
@@ -98,9 +144,12 @@ class MPASInit(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
+            self.boundary_files(),
+            self.init_executable_linked(),
             self.files_copied(),
             self.files_linked(),
-            self.namelist_file(),
+            self.namelist_atmosphere(),
+            self.namelist_init(),
             self.runscript(),
         ]
 
@@ -114,6 +163,23 @@ class MPASInit(Driver):
         yield asset(path, path.is_file)
         yield None
         self._write_runscript(path=path, envvars={})
+    
+
+    @task
+    def streams_init(self):
+        """
+        The streams init atmosphere file.
+        """
+        fn = "streams.init_atmosphere"
+        yield self._taskname(fn)
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        yield self._driver_config["streams_init"]["path"]
+        render(
+            input_file = self._driver_config["streams_init"]["path"],
+            output_file = path,
+            values_src = self._driver_config["streams_init"]
+        )
 
     # Private helper methods
 

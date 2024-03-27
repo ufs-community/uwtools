@@ -135,9 +135,12 @@ def test__add_subparser_fv3(subparsers):
 def test__add_subparser_mpas_init(subparsers):
     cli._add_subparser_mpas_init(subparsers)
     assert actions(subparsers.choices[STR.mpasinit]) == [
+        "boundary_files",
         "files_copied",
         "files_linked",
-        "namelist_file",
+        "init_executable_linked",
+        "namelist_atmosphere",
+        "namelist_init",
         "provisioned_run_directory",
         "run",
         "runscript",
@@ -463,16 +466,19 @@ def test__dispatch_fv3():
 
 
 def test__dispatch_mpas_init():
+    cycle = dt.datetime.now()
     args: dict = {
         "batch": True,
         "config_file": "config.yaml",
-        "cycle": dt.datetime.now(),
+        "cycle": cycle,
         "dry_run": False,
         "graph_file": None,
     }
     with patch.object(uwtools.api.mpas_init, "execute") as execute:
         cli._dispatch_mpas_init({**args, "action": "foo"})
-    execute.assert_called_once_with(**{**args, "task": "foo"})
+    execute.assert_called_once_with(
+        batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None, task="foo"
+    )
 
 
 @pytest.mark.parametrize(

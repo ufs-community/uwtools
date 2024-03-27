@@ -52,7 +52,7 @@ def config_file(config, tmp_path):
 
 @fixture
 def driverobj(config_file, cycle):
-    return mpas_init.MPASInit(config_file=config_file, cycle=cycle, batch=True)
+    return mpas_init.MPASInit(config=config_file, cycle=cycle, batch=True)
 
 
 # Driver tests
@@ -62,11 +62,19 @@ def test_MPASInit(driverobj):
     assert isinstance(driverobj, mpas_init.MPASInit)
 
 
+def test_MPASInit_boundary_files(driverobj):
+    ns = (0, 1)
+    links = [driverobj._rundir / f"gfs_bndy.tile.nc" for n in ns]
+    assert not any(link.is_file() for link in links)
+    for n in ns:
+        (driverobj._rundir / f"gfs_bndy.tile.nc").touch()
+    driverobj.boundary_files()
+    assert all(link.is_symlink() for link in links)
+
+
 def test_MPASInit_dry_run(config_file, cycle):
     with patch.object(mpas_init, "dryrun") as dryrun:
-        driverobj = mpas_init.MPASInit(
-            config_file=config_file, cycle=cycle, batch=True, dry_run=True
-        )
+        driverobj = mpas_init.MPASInit(config=config_file, cycle=cycle, batch=True, dry_run=True)
     assert driverobj._dry_run is True
     dryrun.assert_called_once_with()
 
@@ -83,7 +91,7 @@ def test_MPASInit_files_copied(config, cycle, key, task, test, tmp_path):
     path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
-    driverobj = mpas_init.MPASInit(config_file=path, cycle=cycle, batch=True)
+    driverobj = mpas_init.MPASInit(config=path, cycle=cycle, batch=True)
     atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
     assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
     atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
@@ -93,10 +101,28 @@ def test_MPASInit_files_copied(config, cycle, key, task, test, tmp_path):
     assert all(getattr(dst, test)() for dst in [atm_dst, sfc_dst])
 
 
-def test_MPASInit_namelist_file(driverobj):
-    dst = driverobj._rundir / "namelist.wps"
+def test_MPASInit_init_executable(driverobj):
+    src = driverobj._rundir / "init_atmosphere_model.in"
+    src.touch()
+    driverobj._driver_config["init_atmosphere_model"] = src
+    dst = driverobj._rundir / "init_atmosphere_model"
+    assert not dst.is_symlink()
+    driverobj.init_executable_linked()
+    assert dst.is_symlink()
+
+
+def test_MPASInit_namelist_atmosphere(driverobj):
+    dst = driverobj._rundir / "namelist.atmosphere"
     assert not dst.is_file()
-    driverobj.namelist_file()
+    driverobj.namelist_atmosphere()
+    assert dst.is_file()
+    assert isinstance(f90nml.read(dst), f90nml.Namelist)
+
+
+def test_MPASInit_namelist_init(driverobj):
+    dst = driverobj._rundir / "namelist.init_atmosphere"
+    assert not dst.is_file()
+    driverobj.namelist_init()
     assert dst.is_file()
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
@@ -104,9 +130,12 @@ def test_MPASInit_namelist_file(driverobj):
 def test_MPASInit_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
+        boundary_files=D,
+        init_executable_linked=D,
         files_copied=D,
         files_linked=D,
-        namelist_file=D,
+        namelist_atmosphere=D,
+        namelist_init=D,
         runscript=D,
     ) as mocks:
         driverobj.provisioned_run_directory()

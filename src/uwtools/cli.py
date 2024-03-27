@@ -472,7 +472,7 @@ def _dispatch_mpas_init(args: Args) -> bool:
     """
     return uwtools.api.mpas_init.execute(
         task=args[STR.action],
-        config_file=args[STR.cfgfile],
+        config=args[STR.cfgfile],
         cycle=args[STR.cycle],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
