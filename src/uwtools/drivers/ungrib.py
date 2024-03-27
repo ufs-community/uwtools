@@ -4,8 +4,7 @@ A driver for the ungrib component.
 
 from datetime import datetime, timedelta
 from pathlib import Path
-from string import ascii_uppercase
-from typing import Optional, Tuple
+from typing import Optional
 
 from iotaa import asset, dryrun, task, tasks
 
@@ -53,7 +52,6 @@ class Ungrib(Driver):
         endhour = gfs_files["forecast_length"] + offset
         interval = gfs_files["interval_hours"]
         cycle_hour = int((self._cycle - timedelta(hours=offset)).strftime("%H"))
-        suffix = "AAA"
         links = []
         for n, boundary_hour in enumerate(range(offset, endhour + 1, interval)):
             infile = Path(
@@ -72,7 +70,7 @@ class Ungrib(Driver):
         gfs_files = self._driver_config["gfs_files"]
         endhour = gfs_files["forecast_length"] + 1
         end_date = self._cycle + timedelta(hours=endhour)
-        interval = int(gfs_files["interval_hours"]) * 3600 # hour to sec
+        interval = int(gfs_files["interval_hours"]) * 3600  # hour to sec
         d = {
             "update_values": {
                 "share": {
@@ -166,6 +164,7 @@ class Ungrib(Driver):
         :param suffix: Log-string suffix.
         """
         return "%s ungrib %s" % (self._cycle.strftime("%Y%m%d %HZ"), suffix)
+
 
 def _ext(n):
     """
