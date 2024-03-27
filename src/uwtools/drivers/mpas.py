@@ -1,5 +1,5 @@
 """
-A driver for the ungrib component.
+A driver for the MPAS component.
 """
 
 from datetime import datetime
@@ -14,9 +14,9 @@ from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
 
-class Ungrib(Driver):
+class MPAS(Driver):
     """
-    A driver for ungrib.
+    A driver for MPAS.
     """
 
     def __init__(
@@ -42,39 +42,11 @@ class Ungrib(Driver):
     # Workflow tasks
 
     @task
-    def gribfile(self):
-        """
-        A symlink to the input GRIB file.
-        """
-        path = self._rundir / "GRIBFILE.AAA"
-        yield self._taskname(str(path))
-        yield asset(path, path.is_symlink)
-        infile = Path(self._driver_config["gfs_file"])
-        yield file(path=infile)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.symlink_to(infile)
-
-    @task
     def namelist_file(self):
         """
         The namelist file.
         """
-        d = {
-            "update_values": {
-                "share": {
-                    "end_date": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
-                    "interval_seconds": 1,
-                    "max_dom": 1,
-                    "start_date": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
-                    "wrf_core": "ARW",
-                },
-                "ungrib": {
-                    "out_format": "WPS",
-                    "prefix": "FILE",
-                },
-            }
-        }
-        path = self._rundir / "namelist.wps"
+        path = self._rundir / "namelist.atmosphere"
         yield self._taskname(str(path))
         yield asset(path, path.is_file)
         yield None
@@ -92,11 +64,16 @@ class Ungrib(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
-            self.gribfile(),
             self.namelist_file(),
             self.runscript(),
-            self.vtable(),
         ]
+
+    @task
+    def streams_file(self):
+        """
+        The streams file.
+        """
+        pass
 
     @task
     def runscript(self):
@@ -109,18 +86,28 @@ class Ungrib(Driver):
         yield None
         self._write_runscript(path=path, envvars={})
 
-    @task
-    def vtable(self):
+    @tasks
+    def files_copied(self):
         """
-        A symlink to the Vtable file.
+        Files copied for run.
         """
-        path = self._rundir / "Vtable"
-        yield self._taskname(str(path))
-        yield asset(path, path.is_symlink)
-        infile = Path(self._driver_config["vtable"])
-        yield file(path=infile)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.symlink_to(Path(self._driver_config["vtable"]))
+        yield self._taskname("files copied")
+        yield [
+            filecopy(src=Path(src), dst=self._rundir / dst)
+            for dst, src in self._driver_config.get("files_to_copy", {}).items()
+        ]
+
+    @tasks
+    def files_linked(self):
+        """     
+        Files linked for run.
+        """
+        yield self._taskname("files linked")
+        yield [
+            symlink(target=Path(target), linkname=self._rundir / linkname)
+            for linkname, target in self._driver_config.get("files_to_link", {}).items()
+        ]
+
 
     # Private helper methods
 
@@ -129,7 +116,7 @@ class Ungrib(Driver):
         """
         Returns the name of this driver.
         """
-        return STR.ungrib
+        return STR.mpas
 
     def _taskname(self, suffix: str) -> str:
         """

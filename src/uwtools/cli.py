@@ -16,6 +16,7 @@ import uwtools.api.chgres_cube
 import uwtools.api.config
 import uwtools.api.file
 import uwtools.api.fv3
+import uwtools.api.mpas
 import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
 import uwtools.api.template
@@ -60,6 +61,7 @@ def main() -> None:
             STR.config: _dispatch_config,
             STR.file: _dispatch_file,
             STR.fv3: _dispatch_fv3,
+            STR.mpas: _dispatch_mpas,
             STR.rocoto: _dispatch_rocoto,
             STR.sfcclimogen: _dispatch_sfc_climo_gen,
             STR.template: _dispatch_template,
@@ -423,6 +425,58 @@ def _dispatch_fv3(args: Args) -> bool:
         graph_file=args[STR.graphfile],
     )
 
+# Mode mpas
+
+
+def _add_subparser_mpas(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: mpas
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.mpas, "Execute MPAS tasks")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_mpas_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.mpas.tasks().items()
+    }
+
+
+def _add_subparser_mpas_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+    """
+    Subparser for mode: mpas <task>
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_cycle(required)
+    optional = _basic_setup(parser)
+    _add_arg_config_file(group=optional, required=False)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
+def _dispatch_mpas(args: Args) -> bool:
+    """
+    Dispatch logic for mpas mode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.mpas.execute(
+        task=args[STR.action],
+        config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
+    )
 
 # Mode rocoto
 
@@ -1091,6 +1145,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         STR.config: _add_subparser_config(subparsers),
         STR.file: _add_subparser_file(subparsers),
         STR.fv3: _add_subparser_fv3(subparsers),
+        STR.mpas: _add_subparser_mpas(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),
         STR.sfcclimogen: _add_subparser_sfc_climo_gen(subparsers),
         STR.template: _add_subparser_template(subparsers),
