@@ -139,11 +139,11 @@ def test__add_subparser_mpas_init(subparsers):
         "files_copied",
         "files_linked",
         "init_executable_linked",
-        "namelist_atmosphere",
         "namelist_init",
         "provisioned_run_directory",
         "run",
         "runscript",
+        "streams_init",
     ]
 
 

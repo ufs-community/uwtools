@@ -8,10 +8,10 @@ from typing import Any, Dict
 
 from iotaa import asset, dryrun, task, tasks
 
+from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.template import render
 from uwtools.utils.tasks import file, filecopy, symlink
 
 
@@ -37,9 +37,6 @@ class MPASInit(Driver):
 
     # Workflow tasks
 
-    # EC TASKS
-    # link ungrib files
-
     @tasks
     def boundary_files(self):
         """
@@ -50,16 +47,17 @@ class MPASInit(Driver):
         endhour = self._driver_config["length"] + 1
         interval = lbcs["interval_hours"]
         symlinks = {}
-        ungrib_files = Path(self._driver_config["ungrib_files"])
+        ungrib_files = self._driver_config["ungrib_files"]
         for boundary_hour in range(0, endhour, interval):
-            target = Path(ungrib_files["path"]/f"FILE:{file_date.strftime('%Y-%m-%d_%H')}")
-            file_date = self._cycle + boundary_hour
-            linkname = (
-                self._rundir
-                / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
-            )
+            file_date = self._cycle + timedelta(hours=boundary_hour)
+            target = Path(ungrib_files["path"]) / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
+            linkname = self._rundir / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
             symlinks[target] = linkname
-        yield [symlink(target=t, linkname=f"FILE:{file_date.strftime('%Y-%m-%d_%H')}") for t, l in symlinks.items()]
+        yield [
+            # symlink(target=t, linkname=f"FILE:{file_date.strftime('%Y-%m-%d_%H')}")
+            symlink(target=t, linkname=l)
+            for t, l in symlinks.items()
+        ]
 
     @tasks
     def files_copied(self):
@@ -77,21 +75,21 @@ class MPASInit(Driver):
         """
         Files linked for run.
         """
-        files_to_link = {
-            "CAM_ABS_DATA.DBL": user_path / "/CAM_ABS_DATA.DBL",
-            "CAM_AEROPT_DATA.DBL": "src/MPAS-Model/CAM_AEROPT_DATA.DBL",
-            "GENPARM.TBL": "src/MPAS-Model/GENPARM.TBL",
-            "LANDUSE.TBL": "src/MPAS-Model/LANDUSE.TBL",
-            "OZONE_DAT.TBL": "src/MPAS-Model/OZONE_DAT.TBL",
-            "OZONE_LAT.TBL": "src/MPAS-Model/OZONE_LAT.TBL",
-            "OZONE_PLEV.TBL": "src/MPAS-Model/COZONE_PLEV.TBL",
-            "RRTMG_LW_DATA": "src/MPAS-Model/RRTMG_LW_DATA",
-            "RRTMG_LW_DATA.DBL": "src/MPAS-Model/RRTMG_LW_DATA.DBL",
-            "RRTMG_SW_DATA": "src/MPAS-Model/RRTMG_SW_DATA",
-            "RRTMG_SW_DATA.DBL": "src/MPAS-Model/RRTMG_SW_DATA.DBL",
-            "SOILPARM.TBL": "src/MPAS-Model/SOILPARM.TBL",
-            "VEGPARM.TBL": "src/MPAS-Model/VEGPARM.TBL",
-        }
+        # files_to_link = {
+        #     "CAM_ABS_DATA.DBL": user_path / "/CAM_ABS_DATA.DBL",
+        #     "CAM_AEROPT_DATA.DBL": "src/MPAS-Model/CAM_AEROPT_DATA.DBL",
+        #     "GENPARM.TBL": "src/MPAS-Model/GENPARM.TBL",
+        #     "LANDUSE.TBL": "src/MPAS-Model/LANDUSE.TBL",
+        #     "OZONE_DAT.TBL": "src/MPAS-Model/OZONE_DAT.TBL",
+        #     "OZONE_LAT.TBL": "src/MPAS-Model/OZONE_LAT.TBL",
+        #     "OZONE_PLEV.TBL": "src/MPAS-Model/COZONE_PLEV.TBL",
+        #     "RRTMG_LW_DATA": "src/MPAS-Model/RRTMG_LW_DATA",
+        #     "RRTMG_LW_DATA.DBL": "src/MPAS-Model/RRTMG_LW_DATA.DBL",
+        #     "RRTMG_SW_DATA": "src/MPAS-Model/RRTMG_SW_DATA",
+        #     "RRTMG_SW_DATA.DBL": "src/MPAS-Model/RRTMG_SW_DATA.DBL",
+        #     "SOILPARM.TBL": "src/MPAS-Model/SOILPARM.TBL",
+        #     "VEGPARM.TBL": "src/MPAS-Model/VEGPARM.TBL",
+        # }
         yield self._taskname("files linked")
         yield [
             symlink(target=Path(target), linkname=self._rundir / linkname)
@@ -103,7 +101,6 @@ class MPASInit(Driver):
         """
         A symlink to the input init_atmosphere_model file.
         """
-        # symlinks from mpas_app/exec EC
         path = self._rundir / "init_atmosphere_model"
         yield self._taskname(str(path))
         yield asset(path, path.is_symlink)
@@ -124,18 +121,18 @@ class MPASInit(Driver):
         yield None
         stop_time = self._cycle + timedelta(hours=self._driver_config["length"])
         d = {
-            "nhyd_model":
-                "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:%M:%S")
-                "config_stop_time": stop_time.strftime("%Y-%m-%d_%H:%M:%S")
+            "nhyd_model": {
+                "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
+                "config_stop_time": stop_time.strftime("%Y-%m-%d_%H:00:00"),
+            }
         }
         namelist = self._driver_config.get("namelist", {})
-        namelist["update_values"].update_values(d)
+        namelist["update_values"].update(d)
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=namelist,
             path=path,
         )
-
 
     @tasks
     def provisioned_run_directory(self):
@@ -148,9 +145,9 @@ class MPASInit(Driver):
             self.init_executable_linked(),
             self.files_copied(),
             self.files_linked(),
-            self.namelist_atmosphere(),
             self.namelist_init(),
             self.runscript(),
+            self.streams_init(),
         ]
 
     @task
@@ -163,7 +160,6 @@ class MPASInit(Driver):
         yield asset(path, path.is_file)
         yield None
         self._write_runscript(path=path, envvars={})
-    
 
     @task
     def streams_init(self):
@@ -176,9 +172,9 @@ class MPASInit(Driver):
         yield asset(path, path.is_file)
         yield self._driver_config["streams_init"]["path"]
         render(
-            input_file = self._driver_config["streams_init"]["path"],
-            output_file = path,
-            values_src = self._driver_config["streams_init"]
+            input_file=self._driver_config["streams_init"]["path"],
+            output_file=path,
+            values_src=self._driver_config["streams_init"],
         )
 
     # Private helper methods

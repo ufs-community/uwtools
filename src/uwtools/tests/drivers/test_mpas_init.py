@@ -31,13 +31,24 @@ def config(tmp_path):
         "mpas_init": {
             "domain": "global",
             "execution": {"executable": "mpas_init"},
-            "lateral_boundary_conditions": {
+            "boundary_conditions": {
                 "interval_hours": 1,
                 "offset": 0,
                 "path": str(tmp_path / "f{forecast_hour}"),
             },
             "length": 1,
+            "namelist": {
+                "update_values": {
+                    "nhyd_model": {"config_start_time": "12", "config_stop_time": "12"},
+                },
+            },
             "run_dir": str(tmp_path),
+            "streams_init": {
+                "path": str(tmp_path / "streams.init_namelist"),
+            },
+            "ungrib_files": {
+                "path": str(tmp_path),
+            },
         }
     }
 
@@ -62,12 +73,12 @@ def test_MPASInit(driverobj):
     assert isinstance(driverobj, mpas_init.MPASInit)
 
 
-def test_MPASInit_boundary_files(driverobj):
+def test_MPASInit_boundary_files(driverobj, cycle):
     ns = (0, 1)
-    links = [driverobj._rundir / f"gfs_bndy.tile.nc" for n in ns]
+    links = [driverobj._rundir / f"FILE:{cycle.strftime('%Y-%m-%d_%H')}" for n in ns]
     assert not any(link.is_file() for link in links)
     for n in ns:
-        (driverobj._rundir / f"gfs_bndy.tile.nc").touch()
+        (driverobj._rundir / f"FILE:{cycle.strftime('%Y-%m-%d_%H')}").touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
 
@@ -111,14 +122,6 @@ def test_MPASInit_init_executable(driverobj):
     assert dst.is_symlink()
 
 
-def test_MPASInit_namelist_atmosphere(driverobj):
-    dst = driverobj._rundir / "namelist.atmosphere"
-    assert not dst.is_file()
-    driverobj.namelist_atmosphere()
-    assert dst.is_file()
-    assert isinstance(f90nml.read(dst), f90nml.Namelist)
-
-
 def test_MPASInit_namelist_init(driverobj):
     dst = driverobj._rundir / "namelist.init_atmosphere"
     assert not dst.is_file()
@@ -134,9 +137,9 @@ def test_MPASInit_provisioned_run_directory(driverobj):
         init_executable_linked=D,
         files_copied=D,
         files_linked=D,
-        namelist_atmosphere=D,
         namelist_init=D,
         runscript=D,
+        streams_init=D,
     ) as mocks:
         driverobj.provisioned_run_directory()
     for m in mocks:
@@ -179,6 +182,16 @@ def test_MPASInit_runscript(driverobj):
     assert "cmd2" in lines
     # Check execution:
     assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
+
+
+def test_MPASInit_streams_init(driverobj):
+    src = driverobj._rundir / "streams.init_atmosphere.in"
+    src.touch()
+    driverobj._driver_config["streams_init"] = src
+    dst = driverobj._rundir / "streams.init_atmosphere"
+    assert not dst.is_symlink()
+    driverobj.streams_init()
+    assert dst.is_symlink()
 
 
 def test_MPASInit__driver_config(driverobj):
