@@ -154,7 +154,7 @@ class _RocotoXML:
         """
         e = SubElement(e, STR.task, name=name_attr)
         self._set_attrs(e, config)
-        self._set_and_render_jobname(config, name_attr)
+        config = self._set_and_render_jobname(config, name_attr)
         for tag in (
             STR.account,
             STR.cores,
@@ -291,7 +291,8 @@ class _RocotoXML:
         """
         e = SubElement(e, STR.envar)
         SubElement(e, STR.name).text = name
-        SubElement(e, STR.value).text = value
+
+        self._add_compound_time_string(e, value, STR.value)
 
     def _add_workflow(self, config: dict) -> None:
         """
@@ -374,15 +375,19 @@ class _RocotoXML:
             lines.insert(1, doctype)
         return "\n".join(lines)
 
-    def _set_and_render_jobname(self, config: dict, taskname: str) -> None:
+    def _set_and_render_jobname(self, config: dict, taskname: str) -> dict:
         """
         In the given config, ensure 'jobname' is set, then render {{ jobname }}.
 
         :param config: Configuration data for this element.
         :param taskname: The name of the task being defined.
+        :return: The updated dict with all jobname entries rendered.
         """
         if STR.jobname not in config:
             config[STR.jobname] = taskname
+        cfg = YAMLConfig(config=config)
+        cfg.dereference()
+        return cfg.data
 
     def _set_attrs(self, e: _Element, config: dict) -> None:
         """
@@ -399,6 +404,7 @@ class _RocotoXML:
         Return the tag and metadata extracted from a metadata-bearing key.
 
         :param key: A string of the form "<tag>_<metadata>" (or simply STR.<tag>).
+        :return: Tag and name of key.
         """
         # For example, key "task_foo_bar" will be split into tag "task" and name "foo_bar".
         parts = key.split("_")
