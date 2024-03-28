@@ -42,11 +42,11 @@ def config(tmp_path):
                     "nhyd_model": {"config_start_time": "12", "config_stop_time": "12"},
                 },
             },
-            "run_dir": str(tmp_path),
+            "run_dir": str(tmp_path / "init_atmosphere"),
             "streams": {
                 "path": str(tmp_path / "streams.init_atmosphere.in"),
                 "values": {
-                    "world": "Emily",
+                    "world": "user",
                 },
             },
             "ungrib_files": {
@@ -92,8 +92,12 @@ def test_MPASInit(driverobj):
 
 
 def test_MPASInit_boundary_files(driverobj, cycle, tmp_path):
+    # breakpoint()
     ns = (0, 1)
-    links = [driverobj._rundir / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}" for n in ns]
+    links = [
+        driverobj._rundir / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}"
+        for n in ns
+    ]
     assert not any(link.is_file() for link in links)
     for n in ns:
         (tmp_path / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}").touch()

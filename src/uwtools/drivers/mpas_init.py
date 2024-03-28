@@ -54,8 +54,7 @@ class MPASInit(Driver):
             linkname = self._rundir / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
             symlinks[target] = linkname
         yield [
-            symlink(target=t, linkname=Path(f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"))
-            # symlink(target=t, linkname=l)
+            symlink(target=t, linkname=l)
             for t, l in symlinks.items()
         ]
 
