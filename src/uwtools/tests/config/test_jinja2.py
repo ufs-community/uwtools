@@ -64,9 +64,10 @@ cannot:
 # Helpers
 
 
-def render_helper(input_file, **kwargs):
+def render_helper(input_file, values_file, **kwargs):
     return jinja2.render(
         input_file=input_file,
+        values_src=values_file,
         **kwargs,
     )
 
@@ -173,7 +174,7 @@ def test_register_filters_path_join(key):
 def test_render(values_file, template_file, tmp_path):
     outfile = str(tmp_path / "out.txt")
     expected = "roses are red, violets are blue"
-    result = render_helper(input_file=template_file, values_src=values_file, output_file=outfile)
+    result = render_helper(input_file=template_file, values_file=values_file, output_file=outfile)
     assert result == expected
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read().strip() == expected
@@ -183,7 +184,7 @@ def test_render_calls__dry_run(template_file, tmp_path, values_file):
     outfile = str(tmp_path / "out.txt")
     with patch.object(jinja2, "_dry_run_template") as dr:
         render_helper(
-            input_file=template_file, values_src=values_file, output_file=outfile, dry_run=True
+            input_file=template_file, values_file=values_file, output_file=outfile, dry_run=True
         )
         dr.assert_called_once_with("roses are red, violets are blue")
 
@@ -197,7 +198,7 @@ def test_render_calls__log_missing(template_file, tmp_path, values_file):
         f.write(yaml.dump(cfgobj))
 
     with patch.object(jinja2, "_log_missing_values") as lmv:
-        render_helper(input_file=template_file, values_src=values_file, output_file=outfile)
+        render_helper(input_file=template_file, values_file=values_file, output_file=outfile)
         lmv.assert_called_once_with(["roses_color"])
 
 
@@ -206,7 +207,7 @@ def test_render_calls__values_needed(template_file, tmp_path, values_file):
     with patch.object(jinja2, "_values_needed") as vn:
         render_helper(
             input_file=template_file,
-            values_src=values_file,
+            values_file=values_file,
             output_file=outfile,
             values_needed=True,
         )
@@ -216,14 +217,14 @@ def test_render_calls__values_needed(template_file, tmp_path, values_file):
 def test_render_calls__write(template_file, tmp_path, values_file):
     outfile = str(tmp_path / "out.txt")
     with patch.object(jinja2, "_write_template") as write:
-        render_helper(input_file=template_file, values_src=values_file, output_file=outfile)
+        render_helper(input_file=template_file, values_file=values_file, output_file=outfile)
         write.assert_called_once_with(outfile, "roses are red, violets are blue")
 
 
 def test_render_dry_run(caplog, template_file, values_file):
     log.setLevel(logging.INFO)
     expected = "roses are red, violets are blue"
-    result = render_helper(input_file=template_file, values_src=values_file, dry_run=True)
+    result = render_helper(input_file=template_file, values_file=values_file, dry_run=True)
     assert result == expected
     assert logged(caplog, expected)
 
@@ -236,7 +237,7 @@ def test_render_fails(caplog, tmp_path):
     values_file = tmp_path / "values.yaml"
     with open(values_file, "w", encoding="utf-8") as f:
         print("constants: {pi: 3.14}", file=f)
-    assert render_helper(input_file=input_file, values_src=values_file) is None
+    assert render_helper(input_file=input_file, values_file=values_file) is None
     assert logged(caplog, "Render failed with error: 'dict object' has no attribute 'e'")
 
 
@@ -262,14 +263,14 @@ def test_render_values_missing(caplog, template_file, values_file):
     del cfgobj["roses_color"]
     with open(values_file, "w", encoding="utf-8") as f:
         f.write(yaml.dump(cfgobj))
-    render_helper(input_file=template_file, values_src=values_file)
+    render_helper(input_file=template_file, values_file=values_file)
     assert logged(caplog, "Required value(s) not provided:")
     assert logged(caplog, "  roses_color")
 
 
 def test_render_values_needed(caplog, template_file, values_file):
     log.setLevel(logging.INFO)
-    render_helper(input_file=template_file, values_src=values_file, values_needed=True)
+    render_helper(input_file=template_file, values_file=values_file, values_needed=True)
     for var in ("roses_color", "violets_color"):
         assert logged(caplog, f"  {var}")
 
