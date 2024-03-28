@@ -42,7 +42,7 @@ def config(tmp_path):
                     "nhyd_model": {"config_start_time": "12", "config_stop_time": "12"},
                 },
             },
-            "run_dir": str(tmp_path / "init_atmosphere"),
+            "run_dir": str(tmp_path),
             "streams": {
                 "path": str(tmp_path / "streams.init_atmosphere.in"),
                 "values": {
@@ -92,7 +92,6 @@ def test_MPASInit(driverobj):
 
 
 def test_MPASInit_boundary_files(driverobj, cycle, tmp_path):
-    # breakpoint()
     ns = (0, 1)
     links = [
         driverobj._rundir / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}"
@@ -144,10 +143,10 @@ def test_MPASInit_init_executable(driverobj):
     assert dst.is_symlink()
 
 
-def test_MPASInit_namelist_init(driverobj):
+def test_MPASInit_namelist_file(driverobj):
     dst = driverobj._rundir / "namelist.init_atmosphere"
     assert not dst.is_file()
-    driverobj.namelist_init()
+    driverobj.namelist_file()
     assert dst.is_file()
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
@@ -159,7 +158,7 @@ def test_MPASInit_provisioned_run_directory(driverobj):
         init_executable_linked=D,
         files_copied=D,
         files_linked=D,
-        namelist_init=D,
+        namelist_file=D,
         runscript=D,
         streams_init=D,
     ) as mocks:

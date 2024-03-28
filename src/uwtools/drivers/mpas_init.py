@@ -94,7 +94,7 @@ class MPASInit(Driver):
         path.symlink_to(infile)
 
     @task
-    def namelist_init(self):
+    def namelist_file(self):
         """
         The namelist file.
         """
@@ -129,7 +129,7 @@ class MPASInit(Driver):
             self.init_executable_linked(),
             self.files_copied(),
             self.files_linked(),
-            self.namelist_init(),
+            self.namelist_file(),
             self.runscript(),
             self.streams_init(),
         ]
