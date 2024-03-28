@@ -539,6 +539,6 @@ class Test_J2Template:
             assert J2Template(values={}, searchpath=[a.d1]).render() == "2"
 
     def test_undeclared_variables(self):
-        uvs = {"a", "b", "d", "e", "f", "g", "h"}
-        s = "{{ a }} {{ b.c }} {{ d[e] }} {{ f[88] }} {{ g|default(h) }}"
+        s = "{{ a }} {{ b.c }} {{ d.e.f[g] }} {{ h[i] }} {{ j[88] }} {{ k|default(l) }}"
+        uvs = {"a", "b", "d", "g", "h", "i", "j", "k", "l"}
         assert J2Template(values={}, template_source=s).undeclared_variables == uvs
