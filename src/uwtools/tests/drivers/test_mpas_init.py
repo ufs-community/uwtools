@@ -44,11 +44,26 @@ def config(tmp_path):
             },
             "run_dir": str(tmp_path),
             "streams_init": {
-                "path": str(tmp_path / "streams.init_namelist"),
+                "path": str(tmp_path / "streams.init_atmosphere"),
             },
             "ungrib_files": {
                 "path": str(tmp_path),
             },
+            "files_to_link": {
+                "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
+                "CAM_AEROPT_DATA.DBL": "src/MPAS-Model/CAM_AEROPT_DATA.DBL",
+                "GENPARM.TBL": "src/MPAS-Model/GENPARM.TBL",
+                "LANDUSE.TBL": "src/MPAS-Model/LANDUSE.TBL",
+                "OZONE_DAT.TBL": "src/MPAS-Model/OZONE_DAT.TBL",
+                "OZONE_LAT.TBL": "src/MPAS-Model/OZONE_LAT.TBL",
+                "OZONE_PLEV.TBL": "src/MPAS-Model/COZONE_PLEV.TBL",
+                "RRTMG_LW_DATA": "src/MPAS-Model/RRTMG_LW_DATA",
+                "RRTMG_LW_DATA.DBL": "src/MPAS-Model/RRTMG_LW_DATA.DBL",
+                "RRTMG_SW_DATA": "src/MPAS-Model/RRTMG_SW_DATA",
+                "RRTMG_SW_DATA.DBL": "src/MPAS-Model/RRTMG_SW_DATA.DBL",
+                "SOILPARM.TBL": "src/MPAS-Model/SOILPARM.TBL",
+                "VEGPARM.TBL": "src/MPAS-Model/VEGPARM.TBL",
+            }
         }
     }
 
