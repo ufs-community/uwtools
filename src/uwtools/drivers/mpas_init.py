@@ -77,18 +77,18 @@ class MPASInit(Driver):
             for linkname, target in self._driver_config.get("files_to_link", {}).items()
         ]
 
-    @task
-    def init_executable_linked(self):
-        """
-        A symlink to the input init_atmosphere_model file.
-        """
-        path = self._rundir / "init_atmosphere_model"
-        yield self._taskname(str(path))
-        yield asset(path, path.is_symlink)
-        infile = Path(self._driver_config["init_atmosphere_model"])
-        yield file(path=infile)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.symlink_to(infile)
+    # @task
+    # def init_executable_linked(self):
+    #     """
+    #     A symlink to the input init_atmosphere_model file.
+    #     """
+    #     path = self._rundir / "init_atmosphere_model"
+    #     yield self._taskname(str(path))
+    #     yield asset(path, path.is_symlink)
+    #     infile = Path(self._driver_config["execution"]["executable"])
+    #     yield file(path=infile)
+    #     path.parent.mkdir(parents=True, exist_ok=True)
+    #     path.symlink_to(infile)
 
     @task
     def namelist_file(self):
@@ -123,7 +123,6 @@ class MPASInit(Driver):
         yield self._taskname("provisioned run directory")
         yield [
             self.boundary_files(),
-            self.init_executable_linked(),
             self.files_copied(),
             self.files_linked(),
             self.namelist_file(),

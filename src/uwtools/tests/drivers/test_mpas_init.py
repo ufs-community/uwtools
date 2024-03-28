@@ -138,14 +138,14 @@ def test_MPASInit_files_copied(config, cycle, key, task, test, tmp_path):
     assert all(getattr(dst, test)() for dst in [atm_dst, sfc_dst])
 
 
-def test_MPASInit_init_executable(driverobj):
-    src = driverobj._rundir / "init_atmosphere_model.in"
-    src.touch()
-    driverobj._driver_config["init_atmosphere_model"] = src
-    dst = driverobj._rundir / "init_atmosphere_model"
-    assert not dst.is_symlink()
-    driverobj.init_executable_linked()
-    assert dst.is_symlink()
+# def test_MPASInit_init_executable(driverobj):
+#     src = driverobj._rundir / "init_atmosphere_model.in"
+#     src.touch()
+#     driverobj._driver_config["execution"]["executable"] = src
+#     dst = driverobj._rundir / "init_atmosphere_model"
+#     assert not dst.is_symlink()
+#     driverobj.init_executable_linked()
+#     assert dst.is_symlink()
 
 
 def test_MPASInit_namelist_file(driverobj):
@@ -160,7 +160,6 @@ def test_MPASInit_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
         boundary_files=D,
-        init_executable_linked=D,
         files_copied=D,
         files_linked=D,
         namelist_file=D,

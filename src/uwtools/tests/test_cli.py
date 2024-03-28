@@ -138,7 +138,6 @@ def test__add_subparser_mpas_init(subparsers):
         "boundary_files",
         "files_copied",
         "files_linked",
-        "init_executable_linked",
         "namelist_file",
         "provisioned_run_directory",
         "run",
