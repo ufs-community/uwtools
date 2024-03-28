@@ -33,10 +33,10 @@ def config(tmp_path):
             "execution": {"executable": "mpas_init"},
             "boundary_conditions": {
                 "interval_hours": 1,
+                "length": 1,
                 "offset": 0,
                 "path": str(tmp_path / "f{forecast_hour}"),
             },
-            "length": 1,
             "namelist": {
                 "update_values": {
                     "nhyd_model": {"config_start_time": "12", "config_stop_time": "12"},

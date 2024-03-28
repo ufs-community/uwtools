@@ -44,7 +44,7 @@ class MPASInit(Driver):
         """
         yield self._taskname("boundary files")
         lbcs = self._driver_config["boundary_conditions"]
-        endhour = self._driver_config["length"]
+        endhour = self._driver_config["boundary_conditions"]["length"]
         interval = lbcs["interval_hours"]
         symlinks = {}
         ungrib_files = self._driver_config["ungrib_files"]
@@ -100,7 +100,7 @@ class MPASInit(Driver):
         path = self._rundir / fn
         yield asset(path, path.is_file)
         yield None
-        stop_time = self._cycle + timedelta(hours=self._driver_config["length"])
+        stop_time = self._cycle + timedelta(hours=self._driver_config["boundary_conditions"]["length"])
         d = {
             "nhyd_model": {
                 "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
