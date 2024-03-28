@@ -13,6 +13,7 @@ import yaml
 from pytest import fixture
 
 from uwtools.drivers import mpas_init
+from uwtools.tests.support import fixture_path
 
 # Fixtures
 
@@ -38,6 +39,7 @@ def config(tmp_path):
                 "path": str(tmp_path / "f{forecast_hour}"),
             },
             "namelist": {
+                "base_file": str(fixture_path("simple.nml")),
                 "update_values": {
                     "nhyd_model": {"config_start_time": "12", "config_stop_time": "12"},
                 },
@@ -59,7 +61,7 @@ def config(tmp_path):
                 "LANDUSE.TBL": "src/MPAS-Model/LANDUSE.TBL",
                 "OZONE_DAT.TBL": "src/MPAS-Model/OZONE_DAT.TBL",
                 "OZONE_LAT.TBL": "src/MPAS-Model/OZONE_LAT.TBL",
-                "OZONE_PLEV.TBL": "src/MPAS-Model/COZONE_PLEV.TBL",
+                "OZONE_PLEV.TBL": "src/MPAS-Model/OZONE_PLEV.TBL",
                 "RRTMG_LW_DATA": "src/MPAS-Model/RRTMG_LW_DATA",
                 "RRTMG_LW_DATA.DBL": "src/MPAS-Model/RRTMG_LW_DATA.DBL",
                 "RRTMG_SW_DATA": "src/MPAS-Model/RRTMG_SW_DATA",
@@ -150,6 +152,7 @@ def test_MPASInit_files_copied(config, cycle, key, task, test, tmp_path):
 
 def test_MPASInit_namelist_file(driverobj):
     dst = driverobj._rundir / "namelist.init_atmosphere"
+    # Path(driverobj._driver_config["namelist"]["base_file"]).touch()
     assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()

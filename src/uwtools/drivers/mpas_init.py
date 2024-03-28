@@ -108,11 +108,10 @@ class MPASInit(Driver):
             }
         }
         namelist = self._driver_config.get("namelist", {})
-        values = namelist.get("update_values", {})
-        values.update(d)
+        namelist["update_values"] = {**namelist.get("update_values", {}), **d}
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=values,
+            config_values=namelist,
             path=path,
         )
 
