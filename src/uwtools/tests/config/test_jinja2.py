@@ -197,9 +197,7 @@ def test_render_calls__log_missing(template_file, tmp_path, values_file):
         f.write(yaml.dump(cfgobj))
 
     with patch.object(jinja2, "_log_missing_values") as lmv:
-        render_helper(
-            input_file=template_file, values_src=values_file, output_file=outfile, dry_run=True
-        )
+        render_helper(input_file=template_file, values_src=values_file, output_file=outfile)
         lmv.assert_called_once_with(["roses_color"])
 
 
@@ -225,9 +223,7 @@ def test_render_calls__write(template_file, tmp_path, values_file):
 def test_render_dry_run(caplog, template_file, values_file):
     log.setLevel(logging.INFO)
     expected = "roses are red, violets are blue"
-    result = render_helper(
-        input_file=template_file, values_src=values_file, output_file="/dev/null", dry_run=True
-    )
+    result = render_helper(input_file=template_file, values_src=values_file, dry_run=True)
     assert result == expected
     assert logged(caplog, expected)
 
@@ -266,19 +262,14 @@ def test_render_values_missing(caplog, template_file, values_file):
     del cfgobj["roses_color"]
     with open(values_file, "w", encoding="utf-8") as f:
         f.write(yaml.dump(cfgobj))
-    render_helper(input_file=template_file, values_src=values_file, output_file="/dev/null")
+    render_helper(input_file=template_file, values_src=values_file)
     assert logged(caplog, "Required value(s) not provided:")
     assert logged(caplog, "  roses_color")
 
 
 def test_render_values_needed(caplog, template_file, values_file):
     log.setLevel(logging.INFO)
-    render_helper(
-        input_file=template_file,
-        values_src=values_file,
-        output_file="/dev/null",
-        values_needed=True,
-    )
+    render_helper(input_file=template_file, values_src=values_file, values_needed=True)
     for var in ("roses_color", "violets_color"):
         assert logged(caplog, f"  {var}")
 
