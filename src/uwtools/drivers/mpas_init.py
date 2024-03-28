@@ -10,6 +10,7 @@ from iotaa import asset, dryrun, task, tasks
 
 from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
@@ -97,7 +98,9 @@ class MPASInit(Driver):
             }
         }
         namelist = self._driver_config.get("namelist", {})
-        namelist["update_values"] = {**namelist.get("update_values", {}), **d}
+        values = YAMLConfig(d)
+        values.update_values(namelist.get("update_values", {}))
+        namelist["update_values"] = values.data
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=namelist,
@@ -141,7 +144,7 @@ class MPASInit(Driver):
         yield asset(path, path.is_file)
         yield file(path=Path(self._driver_config["streams"]["path"]))
         render(
-            input_file=self._driver_config["streams"]["path"],
+            input_file=Path(self._driver_config["streams"]["path"]),
             output_file=path,
             values_src=self._driver_config["streams"]["values"],
         )
