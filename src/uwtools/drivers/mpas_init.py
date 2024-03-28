@@ -53,10 +53,7 @@ class MPASInit(Driver):
             target = Path(ungrib_files["path"]) / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
             linkname = self._rundir / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
             symlinks[target] = linkname
-        yield [
-            symlink(target=t, linkname=l)
-            for t, l in symlinks.items()
-        ]
+        yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
 
     @tasks
     def files_copied(self):

@@ -50,7 +50,7 @@ def config(tmp_path):
                 },
             },
             "ungrib_files": {
-                "path": str(tmp_path),
+                "path": str(tmp_path / "input_files"),
             },
             "files_to_link": {
                 "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
@@ -98,8 +98,13 @@ def test_MPASInit_boundary_files(driverobj, cycle, tmp_path):
         for n in ns
     ]
     assert not any(link.is_file() for link in links)
+    (tmp_path / "input_files").mkdir()
     for n in ns:
-        (tmp_path / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}").touch()
+        (
+            tmp_path
+            / "input_files"
+            / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}"
+        ).touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
 

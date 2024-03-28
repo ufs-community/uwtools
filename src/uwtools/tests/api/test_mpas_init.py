@@ -10,7 +10,7 @@ def test_execute(tmp_path):
     dot = tmp_path / "graph.dot"
     args: dict = {
         "config": "config.yaml",
-        "cycle": dt.datetime.utcnow(),
+        "cycle": dt.datetime.now(),
         "batch": False,
         "dry_run": True,
         "graph_file": dot,
