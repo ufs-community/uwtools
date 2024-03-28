@@ -13,7 +13,7 @@ def test_execute(tmp_path):
     args: dict = {
         "batch": False,
         "config": "config.yaml",
-        "cycle": dt.datetime.utcnow(),
+        "cycle": dt.datetime.now(),
         "dry_run": True,
         "graph_file": dot,
     }
