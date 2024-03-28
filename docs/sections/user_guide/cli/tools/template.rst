@@ -218,7 +218,7 @@ and a YAML file called ``values.yaml`` with the following contents:
      $ uw template render --input-file template --values-file values.yaml recipient=Reader
      Hello, Reader!
 
-  The optional ``-env`` switch allows environment variables to be used to supply values:
+  The optional ``--env`` switch allows environment variables to be used to supply values:
 
   .. code-block:: text
 
