@@ -643,7 +643,7 @@ def _dispatch_template_render(args: Args) -> bool:
     except UWTemplateRenderError:
         if args[STR.valsneeded]:
             return True
-        log.error("Template could not be rendered.")
+        log.error("Template could not be rendered")
         return False
     return True
 

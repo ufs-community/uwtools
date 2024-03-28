@@ -196,7 +196,11 @@ def render(
         if missing:
             _log_missing_values(missing)
             return None
-        rendered = template.render()
+        try:
+            rendered = template.render()
+        except UndefinedError as e:
+            log.error("Render failed with error: %s", str(e))
+            return None
 
     # Log (dry-run mode) or write the rendered template.
 
