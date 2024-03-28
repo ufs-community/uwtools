@@ -1,3 +1,6 @@
+platform:
+  account: me
+  scheduler: slurm
 chgres_cube:
   execution:
     executable: chgres_cube
