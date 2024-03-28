@@ -14,22 +14,22 @@ requirements:
     - pip
   run:
     - f90nml 1.4.*
-    - iotaa 0.7.3.*
+    - iotaa 0.7.*
     - jinja2 3.1.*
-    - jsonschema 4.20.*
-    - lxml 4.9.*
-    - python >=3.9,<3.12
+    - jsonschema 4.21.*
+    - lxml 5.1.*
+    - python >=3.9,<3.13
     - pyyaml 6.0.*
 test:
   requires:
-    - black 23.11.*
-    - coverage 7.3.*
+    - black 24.3.*
+    - coverage 7.4.*
     - docformatter 1.7.*
     - isort 5.13.*
     - jq 1.7.*
     - make >=3.8
-    - mypy 1.8.*
+    - mypy 1.9.*
     - pylint 3.1.*
-    - pytest 7.4.*
+    - pytest 8.1.*
 about:
   license: LGPL

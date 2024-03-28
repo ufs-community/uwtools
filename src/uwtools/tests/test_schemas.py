@@ -179,7 +179,7 @@ def test_schema_files_to_stage():
     # A str -> str dict is ok:
     assert not errors({"file1": "/path/to/file1", "file2": "/path/to/file2"})
     # An empty dict is not allowed:
-    assert "does not have enough properties" in errors({})
+    assert "{} should be non-empty" in errors({})
     # Non-string values are not allowed:
     assert "True is not of type 'string'" in errors({"file1": True})
 
@@ -256,7 +256,7 @@ def test_schema_fv3_field_table_update_values(fv3_prop, fv3_field_table_vals):
     # A combination of two valid entries is ok:
     assert not errors({**val1, **val2})
     # At least one entry is required:
-    assert "does not have enough properties" in errors({})
+    assert "{} should be non-empty" in errors({})
     # longname is required:
     assert "'longname' is a required property" in errors(with_del(val1, "foo", "longname"))
     # longname must be a string:
@@ -347,7 +347,7 @@ def test_schema_fv3_model_configure_update_values(fv3_prop):
     # Other types are not, e.g.:
     assert "None is not of type 'boolean', 'number', 'string'" in errors({"null": None})
     # At least one entry is required:
-    assert "does not have enough properties" in errors({})
+    assert "{} should be non-empty" in errors({})
 
 
 def test_schema_fv3_namelist(fv3_prop):
@@ -377,9 +377,9 @@ def test_schema_fv3_namelist_update_values(fv3_prop):
         {"nml": {"null": None}}
     )
     # At least one namelist entry is required:
-    assert "does not have enough properties" in errors({})
+    assert "{} should be non-empty" in errors({})
     # At least one val/var pair is required:
-    assert "does not have enough properties" in errors({"nml": {}})
+    assert "{} should be non-empty" in errors({"nml": {}})
 
 
 def test_schema_fv3_run_dir(fv3_prop):
@@ -411,9 +411,9 @@ def test_schema_namelist():
     assert errormsg % "None" in errors({"namelist": {"nonetype": None}})
     assert errormsg % "{}" in errors({"namelist": {"dict": {}}})
     # Needs at least one namelist value:
-    assert "does not have enough properties" in errors({})
+    assert "{} should be non-empty" in errors({})
     # Needs at least one name-value value:
-    assert "does not have enough properties" in errors({"namelist": {}})
+    assert "{} should be non-empty" in errors({"namelist": {}})
     # Namelist level must be a mapping:
     assert "[] is not of type 'object'" in errors([])
     # Name-value level level must be a mapping:

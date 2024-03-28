@@ -729,7 +729,7 @@ def test_main_fail_exception_log():
                 with raises(SystemExit) as e:
                     cli.main()
                 assert e.value.code == 1
-            assert log.called_once_with(msg)
+            log.error.assert_called_once_with(msg)
 
 
 def test__parse_args():
