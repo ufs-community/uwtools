@@ -55,7 +55,8 @@ class J2Template:
                         else []
                     )
                 )
-            )
+            ),
+            undefined=StrictUndefined,
         )
         _register_filters(self._j2env)
         self._template = self._j2env.from_string(self._template_str)
