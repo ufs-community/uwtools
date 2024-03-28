@@ -63,7 +63,7 @@ def config(tmp_path):
                 "RRTMG_SW_DATA.DBL": "src/MPAS-Model/RRTMG_SW_DATA.DBL",
                 "SOILPARM.TBL": "src/MPAS-Model/SOILPARM.TBL",
                 "VEGPARM.TBL": "src/MPAS-Model/VEGPARM.TBL",
-            }
+            },
         }
     }
 
