@@ -44,18 +44,18 @@ class MPASInit(Driver):
         """
         yield self._taskname("boundary files")
         lbcs = self._driver_config["boundary_conditions"]
-        endhour = self._driver_config["length"] + 1
+        endhour = self._driver_config["length"]
         interval = lbcs["interval_hours"]
         symlinks = {}
         ungrib_files = self._driver_config["ungrib_files"]
-        for boundary_hour in range(0, endhour, interval):
+        for boundary_hour in range(0, endhour + 1, interval):
             file_date = self._cycle + timedelta(hours=boundary_hour)
             target = Path(ungrib_files["path"]) / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
             linkname = self._rundir / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
             symlinks[target] = linkname
         yield [
-            # symlink(target=t, linkname=f"FILE:{file_date.strftime('%Y-%m-%d_%H')}")
-            symlink(target=t, linkname=l)
+            symlink(target=t, linkname=Path(f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"))
+            # symlink(target=t, linkname=l)
             for t, l in symlinks.items()
         ]
 
@@ -155,11 +155,11 @@ class MPASInit(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield self._driver_config["streams_init"]["path"]
+        yield file(path=Path(self._driver_config["streams"]["path"]))
         render(
-            input_file=self._driver_config["streams_init"]["path"],
+            input_file=self._driver_config["streams"]["path"],
             output_file=path,
-            values_src=self._driver_config["streams_init"],
+            values_src=self._driver_config["streams"]["values"],
         )
 
     # Private helper methods

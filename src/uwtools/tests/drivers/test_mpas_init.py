@@ -43,8 +43,11 @@ def config(tmp_path):
                 },
             },
             "run_dir": str(tmp_path),
-            "streams_init": {
-                "path": str(tmp_path / "streams.init_atmosphere"),
+            "streams": {
+                "path": str(tmp_path / "streams.init_atmosphere.in"),
+                "values": {
+                    "world": "Emily",
+                },
             },
             "ungrib_files": {
                 "path": str(tmp_path),
@@ -88,12 +91,12 @@ def test_MPASInit(driverobj):
     assert isinstance(driverobj, mpas_init.MPASInit)
 
 
-def test_MPASInit_boundary_files(driverobj, cycle):
+def test_MPASInit_boundary_files(driverobj, cycle, tmp_path):
     ns = (0, 1)
-    links = [driverobj._rundir / f"FILE:{cycle.strftime('%Y-%m-%d_%H')}" for n in ns]
+    links = [driverobj._rundir / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}" for n in ns]
     assert not any(link.is_file() for link in links)
     for n in ns:
-        (driverobj._rundir / f"FILE:{cycle.strftime('%Y-%m-%d_%H')}").touch()
+        (tmp_path / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}").touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
 
@@ -200,13 +203,12 @@ def test_MPASInit_runscript(driverobj):
 
 
 def test_MPASInit_streams_init(driverobj):
-    src = driverobj._rundir / "streams.init_atmosphere.in"
-    src.touch()
-    driverobj._driver_config["streams_init"] = src
-    dst = driverobj._rundir / "streams.init_atmosphere"
-    assert not dst.is_symlink()
+    src = driverobj._driver_config["streams"]["path"]
+    with open(src, "w", encoding="utf-8") as f:
+        f.write("Hello, {{ world }}")
+    assert not (driverobj._rundir / "streams.init_atmosphere").is_file()
     driverobj.streams_init()
-    assert dst.is_symlink()
+    assert (driverobj._rundir / "streams.init_atmosphere").is_file()
 
 
 def test_MPASInit__driver_config(driverobj):
