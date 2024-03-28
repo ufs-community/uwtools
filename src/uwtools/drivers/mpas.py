@@ -77,7 +77,11 @@ class MPAS(Driver):
         """
         Files linked for run.
         """
-        pass
+        yield self._taskname("files linked")
+        yield [
+            symlink(target=Path(target), linkname=self._rundir / linkname)
+            for linkname, target in self._driver_config.get("files_to_link", {}).items()
+        ]
 
     @task
     def namelist_file(self):
