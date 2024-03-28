@@ -26,7 +26,7 @@ def execute(
     :param task: The task to execute.
     :param cycle: The cycle.
     :param config: Path to config file (read stdin if missing or None).
-    :param batch: Submit run to the batch system.
+    :param batch: Submit run to the batch system?
     :param dry_run: Do not run forecast, just report what would have been done.
     :param graph_file: Write Graphviz DOT output here.
     :return: ``True`` if task completes without raising an exception.
