@@ -77,19 +77,6 @@ class MPASInit(Driver):
             for linkname, target in self._driver_config.get("files_to_link", {}).items()
         ]
 
-    # @task
-    # def init_executable_linked(self):
-    #     """
-    #     A symlink to the input init_atmosphere_model file.
-    #     """
-    #     path = self._rundir / "init_atmosphere_model"
-    #     yield self._taskname(str(path))
-    #     yield asset(path, path.is_symlink)
-    #     infile = Path(self._driver_config["execution"]["executable"])
-    #     yield file(path=infile)
-    #     path.parent.mkdir(parents=True, exist_ok=True)
-    #     path.symlink_to(infile)
-
     @task
     def namelist_file(self):
         """
@@ -100,7 +87,9 @@ class MPASInit(Driver):
         path = self._rundir / fn
         yield asset(path, path.is_file)
         yield None
-        stop_time = self._cycle + timedelta(hours=self._driver_config["boundary_conditions"]["length"])
+        stop_time = self._cycle + timedelta(
+            hours=self._driver_config["boundary_conditions"]["length"]
+        )
         d = {
             "nhyd_model": {
                 "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
