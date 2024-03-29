@@ -726,7 +726,7 @@ def _add_subparser_ungrib(subparsers: Subparsers) -> ModeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.ungrib, "Execute ungrib tasks")
+    parser = _add_subparser(subparsers, STR.ungrib, "Execute Ungrib tasks")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
