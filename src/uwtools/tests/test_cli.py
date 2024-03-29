@@ -142,7 +142,7 @@ def test__add_subparser_mpas_init(subparsers):
         "provisioned_run_directory",
         "run",
         "runscript",
-        "streams_init",
+        "streams_file",
     ]
 
 

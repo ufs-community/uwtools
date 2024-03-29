@@ -156,7 +156,7 @@ def test_MPASInit_provisioned_run_directory(driverobj):
         files_linked=D,
         namelist_file=D,
         runscript=D,
-        streams_init=D,
+        streams_file=D,
     ) as mocks:
         driverobj.provisioned_run_directory()
     for m in mocks:
@@ -201,12 +201,12 @@ def test_MPASInit_runscript(driverobj):
     assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
 
 
-def test_MPASInit_streams_init(driverobj):
+def test_MPASInit_streams_file(driverobj):
     src = driverobj._driver_config["streams"]["path"]
     with open(src, "w", encoding="utf-8") as f:
         f.write("Hello, {{ world }}")
     assert not (driverobj._rundir / "streams.init_atmosphere").is_file()
-    driverobj.streams_init()
+    driverobj.streams_file()
     assert (driverobj._rundir / "streams.init_atmosphere").is_file()
 
 

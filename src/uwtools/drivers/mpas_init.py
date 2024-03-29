@@ -119,7 +119,7 @@ class MPASInit(Driver):
             self.files_linked(),
             self.namelist_file(),
             self.runscript(),
-            self.streams_init(),
+            self.streams_file(),
         ]
 
     @task
@@ -134,9 +134,9 @@ class MPASInit(Driver):
         self._write_runscript(path=path, envvars={})
 
     @task
-    def streams_init(self):
+    def streams_file(self):
         """
-        The streams init atmosphere file.
+        The streams file.
         """
         fn = "streams.init_atmosphere"
         yield self._taskname(fn)
