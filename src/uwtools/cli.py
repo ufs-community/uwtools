@@ -425,6 +425,7 @@ def _dispatch_fv3(args: Args) -> bool:
         graph_file=args[STR.graphfile],
     )
 
+
 # Mode mpas
 
 
@@ -477,6 +478,7 @@ def _dispatch_mpas(args: Args) -> bool:
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
     )
+
 
 # Mode rocoto
 

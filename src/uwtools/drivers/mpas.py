@@ -2,16 +2,17 @@
 A driver for the MPAS component.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
 from iotaa import asset, dryrun, task, tasks
 
+from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import file
+from uwtools.utils.tasks import filecopy, symlink
 
 
 class MPAS(Driver):
@@ -56,10 +57,7 @@ class MPAS(Driver):
             fn = file_date.strftime(lbcs["filename"])
             linkname = self._rundir / fn
             symlinks[linkname] = Path(lbcs["path"]) / fn
-        yield [
-            symlink(target=t, linkname=l)
-            for t, l in symlinks.items()
-        ]
+        yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
 
     @tasks
     def files_copied(self):
@@ -93,17 +91,20 @@ class MPAS(Driver):
         yield asset(path, path.is_file)
         yield None
         duration = timedelta(hours=self._driver_config["length"])
-        duration = str(duration).replace(" days, ", "")
+        str_duration = str(duration).replace(" days, ", "")
         d = {
             "nhyd_model": {
                 "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
-                "config_run_duration": duration,
+                "config_run_duration": str_duration,
             }
         }
-        path.parent.mkdir(parents=True, exist_ok=True)
+        namelist = self._driver_config.get("namelist", {})
+        values = YAMLConfig(d)
+        values.update_values(namelist.get("update_values", {}))
+        namelist["update_values"] = values.data
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=d,
+            config_values=namelist,
             path=path,
         )
 
@@ -117,10 +118,21 @@ class MPAS(Driver):
             self.boundary_files(),
             self.files_copied(),
             self.files_linked(),
-            self.namelist(),
+            self.namelist_file(),
             self.runscript(),
             self.streams(),
         ]
+
+    @task
+    def runscript(self):
+        """
+        The runscript.
+        """
+        path = self._runscript_path
+        yield self._taskname(path.name)
+        yield asset(path, path.is_file)
+        yield None
+        self._write_runscript(path=path, envvars={})
 
     @task
     def streams(self):
