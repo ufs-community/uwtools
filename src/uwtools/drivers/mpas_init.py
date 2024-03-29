@@ -176,4 +176,3 @@ class MPASInit(Driver):
         :param suffix: Log-string suffix.
         """
         return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
-        # return "%s mpas-init %s" % (self._cycle.strftime("%Y%m%d %HZ"), suffix)
