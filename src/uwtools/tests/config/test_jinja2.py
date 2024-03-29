@@ -40,7 +40,7 @@ def supplemental_values(tmp_path):
 
 
 @fixture
-def template(tmp_path):
+def template_file(tmp_path):
     path = tmp_path / "template.jinja2"
     with open(path, "w", encoding="utf-8") as f:
         f.write("roses are {{roses_color}}, violets are {{violets_color}}")
@@ -171,25 +171,25 @@ def test_register_filters_path_join(key):
             template.render(**context)  # path_join filter fails
 
 
-def test_render(values_file, template, tmp_path):
+def test_render(values_file, template_file, tmp_path):
     outfile = str(tmp_path / "out.txt")
     expected = "roses are red, violets are blue"
-    result = render_helper(input_file=template, values_file=values_file, output_file=outfile)
+    result = render_helper(input_file=template_file, values_file=values_file, output_file=outfile)
     assert result == expected
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read().strip() == expected
 
 
-def test_render_calls__dry_run(template, tmp_path, values_file):
+def test_render_calls__dry_run(template_file, tmp_path, values_file):
     outfile = str(tmp_path / "out.txt")
     with patch.object(jinja2, "_dry_run_template") as dr:
         render_helper(
-            input_file=template, values_file=values_file, output_file=outfile, dry_run=True
+            input_file=template_file, values_file=values_file, output_file=outfile, dry_run=True
         )
         dr.assert_called_once_with("roses are red, violets are blue")
 
 
-def test_render_calls__log_missing(template, tmp_path, values_file):
+def test_render_calls__log_missing(template_file, tmp_path, values_file):
     outfile = str(tmp_path / "out.txt")
     with open(values_file, "r", encoding="utf-8") as f:
         cfgobj = yaml.safe_load(f.read())
@@ -198,36 +198,47 @@ def test_render_calls__log_missing(template, tmp_path, values_file):
         f.write(yaml.dump(cfgobj))
 
     with patch.object(jinja2, "_log_missing_values") as lmv:
-        render_helper(
-            input_file=template, values_file=values_file, output_file=outfile, dry_run=True
-        )
+        render_helper(input_file=template_file, values_file=values_file, output_file=outfile)
         lmv.assert_called_once_with(["roses_color"])
 
 
-def test_render_calls__values_needed(template, tmp_path, values_file):
+def test_render_calls__values_needed(template_file, tmp_path, values_file):
     outfile = str(tmp_path / "out.txt")
     with patch.object(jinja2, "_values_needed") as vn:
         render_helper(
-            input_file=template, values_file=values_file, output_file=outfile, values_needed=True
+            input_file=template_file,
+            values_file=values_file,
+            output_file=outfile,
+            values_needed=True,
         )
         vn.assert_called_once_with({"roses_color", "violets_color"})
 
 
-def test_render_calls__write(template, tmp_path, values_file):
+def test_render_calls__write(template_file, tmp_path, values_file):
     outfile = str(tmp_path / "out.txt")
     with patch.object(jinja2, "_write_template") as write:
-        render_helper(input_file=template, values_file=values_file, output_file=outfile)
+        render_helper(input_file=template_file, values_file=values_file, output_file=outfile)
         write.assert_called_once_with(outfile, "roses are red, violets are blue")
 
 
-def test_render_dry_run(caplog, template, values_file):
+def test_render_dry_run(caplog, template_file, values_file):
     log.setLevel(logging.INFO)
     expected = "roses are red, violets are blue"
-    result = render_helper(
-        input_file=template, values_file=values_file, output_file="/dev/null", dry_run=True
-    )
+    result = render_helper(input_file=template_file, values_file=values_file, dry_run=True)
     assert result == expected
     assert logged(caplog, expected)
+
+
+def test_render_fails(caplog, tmp_path):
+    log.setLevel(logging.INFO)
+    input_file = tmp_path / "template.yaml"
+    with open(input_file, "w", encoding="utf-8") as f:
+        print("{{ constants.pi }} {{ constants.e }}", file=f)
+    values_file = tmp_path / "values.yaml"
+    with open(values_file, "w", encoding="utf-8") as f:
+        print("constants: {pi: 3.14}", file=f)
+    assert render_helper(input_file=input_file, values_file=values_file) is None
+    assert logged(caplog, "Render failed with error: 'dict object' has no attribute 'e'")
 
 
 @pytest.mark.parametrize("partial", [False, True])
@@ -244,7 +255,7 @@ def test_render_partial(caplog, capsys, partial):
         assert logged(caplog, "  recipient")
 
 
-def test_render_values_missing(caplog, template, values_file):
+def test_render_values_missing(caplog, template_file, values_file):
     log.setLevel(logging.INFO)
     # Read in the config, remove the "roses" key, then re-write it.
     with open(values_file, "r", encoding="utf-8") as f:
@@ -252,16 +263,14 @@ def test_render_values_missing(caplog, template, values_file):
     del cfgobj["roses_color"]
     with open(values_file, "w", encoding="utf-8") as f:
         f.write(yaml.dump(cfgobj))
-    render_helper(input_file=template, values_file=values_file, output_file="/dev/null")
+    render_helper(input_file=template_file, values_file=values_file)
     assert logged(caplog, "Required value(s) not provided:")
     assert logged(caplog, "  roses_color")
 
 
-def test_render_values_needed(caplog, template, values_file):
+def test_render_values_needed(caplog, template_file, values_file):
     log.setLevel(logging.INFO)
-    render_helper(
-        input_file=template, values_file=values_file, output_file="/dev/null", values_needed=True
-    )
+    render_helper(input_file=template_file, values_file=values_file, values_needed=True)
     for var in ("roses_color", "violets_color"):
         assert logged(caplog, f"  {var}")
 
@@ -444,9 +453,9 @@ def test__write_template_stdout(capsys):
     assert actual.strip() == expected
 
 
-class Test_Jinja2Template:
+class Test_J2Template:
     """
-    Tests for class uwtools.config.jinja2.Jinja2Template.
+    Tests for class uwtools.config.jinja2.J2Template.
     """
 
     @fixture
@@ -529,3 +538,8 @@ class Test_Jinja2Template:
         with patch.object(jinja2, "readable") as readable:
             readable.return_value.__enter__.return_value = StringIO(a.s1)
             assert J2Template(values={}, searchpath=[a.d1]).render() == "2"
+
+    def test_undeclared_variables(self):
+        s = "{{ a }} {{ b.c }} {{ d.e.f[g] }} {{ h[i] }} {{ j[88] }} {{ k|default(l) }}"
+        uvs = {"a", "b", "d", "g", "h", "i", "j", "k", "l"}
+        assert J2Template(values={}, template_source=s).undeclared_variables == uvs

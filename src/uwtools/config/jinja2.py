@@ -55,7 +55,8 @@ class J2Template:
                         else []
                     )
                 )
-            )
+            ),
+            undefined=StrictUndefined,
         )
         _register_filters(self._j2env)
         self._template = self._j2env.from_string(self._template_str)
@@ -195,7 +196,11 @@ def render(
         if missing:
             _log_missing_values(missing)
             return None
-        rendered = template.render()
+        try:
+            rendered = template.render()
+        except UndefinedError as e:
+            log.error("Render failed with error: %s", str(e))
+            return None
 
     # Log (dry-run mode) or write the rendered template.
 
@@ -308,9 +313,7 @@ def _register_filters(env: Environment) -> Environment:
             raise UndefinedError()
         return os.path.join(*path_components)
 
-    filters = dict(
-        path_join=path_join,
-    )
+    filters = dict(path_join=path_join)
     env.filters.update(filters)
     return env
 
