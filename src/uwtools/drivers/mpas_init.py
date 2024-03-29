@@ -36,7 +36,7 @@ class MPASInit(Driver):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle)
+        super().__init__(config=config, cycle=cycle, dry_run=dry_run, batch=batch)
         if self._dry_run:
             dryrun()
         self._cycle = cycle
