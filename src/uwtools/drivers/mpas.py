@@ -11,6 +11,7 @@ from iotaa import asset, dryrun, task, tasks
 from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
+from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
@@ -92,7 +93,12 @@ class MPAS(Driver):
         yield None
         duration = timedelta(hours=self._driver_config["length"])
         str_duration = str(duration).replace(" days, ", "")
-        namelist = self._driver_config.get("namelist", {})
+        try:
+            namelist = self._driver_config["namelist"]
+        except KeyError as e:
+            raise UWConfigError(
+                "Provide either a 'namelist' YAML block or the %s file" % path
+            ) from e
         update_values = namelist.get("update_values", {})
         update_values.setdefault("nhyd_model", {}).update(
             {

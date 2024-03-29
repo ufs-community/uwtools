@@ -10,9 +10,10 @@ from unittest.mock import patch
 import f90nml  # type: ignore
 import pytest
 import yaml
-from pytest import fixture
+from pytest import fixture, raises
 
 from uwtools.drivers import mpas
+from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
 
 # Fixtures
@@ -131,6 +132,14 @@ def test_MPAS_namelist_file(driverobj):
     driverobj.namelist_file()
     assert dst.is_file()
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
+
+
+def test_MPAS_namelist_missing(driverobj):
+    path = driverobj._rundir / "namelist.atmosphere"
+    del driverobj._driver_config["namelist"]
+    with raises(UWConfigError) as e:
+        assert driverobj.namelist_file()
+    assert str(e.value) == ("Provide either a 'namelist' YAML block or the %s file" % path)
 
 
 def test_MPAS_provisioned_run_directory(driverobj):
