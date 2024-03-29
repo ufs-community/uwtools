@@ -31,7 +31,8 @@
             "interval_hours",
             "offset",
             "path"
-          ]
+          ],
+          "type": "object"
         },
         "length": {
           "minimum": 1,
@@ -73,12 +74,17 @@
               "type": "object"
             }
           },
+          "required": [
+            "path",
+            "values"
+          ],
           "type": "object"
         }
       },
       "required": [
         "execution",
-        "run_dir"
+        "run_dir",
+        "streams"
       ],
       "type": "object"
     }

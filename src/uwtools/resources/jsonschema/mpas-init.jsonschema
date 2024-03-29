@@ -27,7 +27,8 @@
             "interval_hours",
             "offset",
             "path"
-          ]
+          ],
+          "type": "object"
         },
         "execution": {
           "$ref": "urn:uwtools:execution"
