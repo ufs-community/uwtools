@@ -12,7 +12,7 @@ from uwtools.drivers.mpas_init import MPASInit as _MPASInit
 
 def execute(
     task: str,
-    config: Optional[Path] = None,
+    config: Path,
     cycle: dt.datetime,
     batch: bool = False,
     dry_run: bool = False,

@@ -4,7 +4,6 @@ A driver for the mpas-init component.
 
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict
 
 from iotaa import asset, dryrun, task, tasks
 
@@ -156,18 +155,6 @@ class MPASInit(Driver):
         Returns the name of this driver.
         """
         return STR.mpasinit
-
-    @property
-    def _resources(self) -> Dict[str, Any]:
-        """
-        Returns configuration data for the runscript.
-        """
-        return {
-            "account": self._config["platform"]["account"],
-            "rundir": self._rundir,
-            "scheduler": self._config["platform"]["scheduler"],
-            **self._driver_config.get("execution", {}).get("batchargs", {}),
-        }
 
     def _taskname(self, suffix: str) -> str:
         """

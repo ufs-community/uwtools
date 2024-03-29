@@ -7,10 +7,11 @@ from uwtools.api import mpas_init
 
 
 def test_execute(tmp_path):
+    cycle = dt.datetime.now()
     dot = tmp_path / "graph.dot"
     args: dict = {
         "config": "config.yaml",
-        "cycle": dt.datetime.now(),
+        "cycle": cycle,
         "batch": False,
         "dry_run": True,
         "graph_file": dot,
