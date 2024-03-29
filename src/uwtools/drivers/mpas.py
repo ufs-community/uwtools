@@ -10,9 +10,10 @@ from iotaa import asset, dryrun, task, tasks
 
 from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import filecopy, symlink
+from uwtools.utils.tasks import file, filecopy, symlink
 
 
 class MPAS(Driver):
@@ -52,12 +53,12 @@ class MPAS(Driver):
         endhour = self._driver_config["length"]
         interval = lbcs["interval_hours"]
         symlinks = {}
-        for boundary_hour in range(0, endhour, interval):
+        for boundary_hour in range(0, endhour + 1, interval):
             file_date = self._cycle + timedelta(hours=boundary_hour)
-            fn = file_date.strftime(lbcs["filename"])
+            fn = f"lbc:{file_date.strftime('%Y-%m-%d_%H.%M.%S')}.nc"
             linkname = self._rundir / fn
             symlinks[linkname] = Path(lbcs["path"]) / fn
-        yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
+        yield [symlink(target=t, linkname=l) for l, t in symlinks.items()]
 
     @tasks
     def files_copied(self):
@@ -120,7 +121,7 @@ class MPAS(Driver):
             self.files_linked(),
             self.namelist_file(),
             self.runscript(),
-            self.streams(),
+            self.streams_file(),
         ]
 
     @task
@@ -135,7 +136,7 @@ class MPAS(Driver):
         self._write_runscript(path=path, envvars={})
 
     @task
-    def streams(self):
+    def streams_file(self):
         """
         The streams file.
         """
@@ -143,23 +144,12 @@ class MPAS(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield self._driver_config["streams"]["path"]
+        yield file(path=Path(self._driver_config["streams"]["path"]))
         render(
-            input_file=self._driver_config["streams"]["path"],
+            input_file=Path(self._driver_config["streams"]["path"]),
             output_file=path,
             values_src=self._driver_config["streams"]["values"],
         )
-
-    @task
-    def runscript(self):
-        """
-        The runscript.
-        """
-        path = self._runscript_path
-        yield self._taskname(path.name)
-        yield asset(path, path.is_file)
-        yield None
-        self._write_runscript(path=path, envvars={})
 
     # Private helper methods
 

@@ -1,0 +1,87 @@
+{
+  "properties": {
+    "mpas": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "$ref": "urn:uwtools:execution"
+        },
+        "files_to_copy": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "files_to_link": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "lateral_boundary_conditions": {
+          "additionalProperties": false,
+          "properties": {
+            "interval_hours": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "offset": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "interval_hours",
+            "offset",
+            "path"
+          ]
+        },
+        "length": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "namelist": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "$ref": "urn:uwtools:namelist"
+            }
+          },
+          "type": "object"
+        },
+        "run_dir": {
+          "type": "string"
+        },
+        "streams": {
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "values": {
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "execution",
+        "run_dir"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}
