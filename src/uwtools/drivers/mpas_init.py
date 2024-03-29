@@ -56,8 +56,9 @@ class MPASInit(Driver):
         boundary_filepath = lbcs["path"]
         for boundary_hour in range(0, endhour + 1, interval):
             file_date = self._cycle + timedelta(hours=boundary_hour)
-            target = Path(boundary_filepath) / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
-            linkname = self._rundir / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
+            fn = f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
+            target = Path(boundary_filepath) / fn
+            linkname = self._rundir / fn
             symlinks[target] = linkname
         yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
 
