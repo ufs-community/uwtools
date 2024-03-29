@@ -10,7 +10,6 @@ from iotaa import asset, dryrun, task, tasks
 
 from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
@@ -94,19 +93,17 @@ class MPASInit(Driver):
         path = self._rundir / fn
         yield asset(path, path.is_file)
         yield None
-        stop_time = self._cycle + timedelta(
-            hours=self._driver_config["boundary_conditions"]["length"]
-        )
-        d = {
-            "nhyd_model": {
-                "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
-                "config_stop_time": stop_time.strftime("%Y-%m-%d_%H:00:00"),
-            }
-        }
+        duration = timedelta(hours=self._driver_config["boundary_conditions"]["length"])
+        str_duration = str(duration).replace(" days, ", "")
         namelist = self._driver_config.get("namelist", {})
-        values = YAMLConfig(d)
-        values.update_values(namelist.get("update_values", {}))
-        namelist["update_values"] = values.data
+        update_values = namelist.get("update_values", {})
+        update_values.setdefault("nhyd_model", {}).update(
+            {
+                "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
+                "config_run_duration": str_duration,
+            }
+        )
+        namelist["update_values"] = update_values
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=namelist,
