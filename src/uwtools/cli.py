@@ -1,6 +1,7 @@
 """
 Modal CLI.
 """
+
 import datetime as dt
 import json
 import sys
