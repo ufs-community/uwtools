@@ -45,7 +45,7 @@ class MPAS(Driver):
     @task
     def boundary_files(self):
         """
-        Boundary condition files.
+        Boundary files.
         """
         yield self._taskname("boundary files")
         lbcs = self._driver_config["lateral_boundary_conditions"]
