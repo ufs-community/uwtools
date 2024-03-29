@@ -7,7 +7,7 @@ from uwtools.api import mpas
 
 
 def test_execute(tmp_path):
-    cycle = dt.datetime.utcnow()
+    cycle = dt.datetime.now()
     dot = tmp_path / "graph.dot"
     args: dict = {
         "batch": False,
