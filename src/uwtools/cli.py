@@ -466,6 +466,7 @@ def _add_subparser_mpas_task(subparsers: Subparsers, task: str, helpmsg: str) ->
     checks = _add_args_verbosity(optional)
     return checks
 
+
 def _dispatch_mpas(args: Args) -> bool:
     """
     Dispatch logic for mpas mode.
@@ -519,6 +520,7 @@ def _add_subparser_mpas_init_task(subparsers: Subparsers, task: str, helpmsg: st
     checks = _add_args_verbosity(optional)
     return checks
 
+
 def _dispatch_mpas_init(args: Args) -> bool:
     """
     Dispatch logic for mpas_init mode.
@@ -533,6 +535,7 @@ def _dispatch_mpas_init(args: Args) -> bool:
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
     )
+
 
 # Mode rocoto
 

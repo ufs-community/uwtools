@@ -134,7 +134,6 @@ def test__add_subparser_fv3(subparsers):
     ]
 
 
-
 def test__add_subparser_mpas_init(subparsers):
     cli._add_subparser_mpas_init(subparsers)
     assert actions(subparsers.choices[STR.mpasinit]) == [
@@ -495,6 +494,7 @@ def test__dispatch_mpas():
     execute.assert_called_once_with(
         batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None, task="foo"
     )
+
 
 def test__dispatch_mpas_init():
     cycle = dt.datetime.now()
