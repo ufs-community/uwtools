@@ -15,11 +15,11 @@ def test_execute(tmp_path):
         "dry_run": True,
         "graph_file": dot,
     }
-    with patch.object(mpas_init, "_MPASInit") as SfcClimoGen:
+    with patch.object(mpas_init, "_MPASInit") as MPASInit:
         assert mpas_init.execute(**args, task="foo") is True
     del args["graph_file"]
-    SfcClimoGen.assert_called_once_with(**args)
-    SfcClimoGen().foo.assert_called_once_with()
+    MPASInit.assert_called_once_with(**args)
+    MPASInit().foo.assert_called_once_with()
 
 
 def test_graph():

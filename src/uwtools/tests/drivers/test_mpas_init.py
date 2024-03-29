@@ -226,7 +226,7 @@ def test_MPASInit__runscript_path(driverobj):
 
 
 def test_MPASInit__taskanme(driverobj):
-    assert driverobj._taskname("foo") == "20240201 18Z mpas-init foo"
+    assert driverobj._taskname("foo") == "20240201 18Z mpas_init foo"
 
 
 def test_MPASInit__validate(driverobj):
