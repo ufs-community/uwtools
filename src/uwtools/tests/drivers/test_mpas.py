@@ -81,7 +81,7 @@ def test_MPAS(driverobj):
 def test_MPAS_boundary_files(driverobj, cycle):
     ns = (0, 1)
     links = [
-        driverobj._rundir / f"lbc:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
+        driverobj._rundir / f"lbc.{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
         for n in ns
     ]
     assert not any(link.is_file() for link in links)
@@ -89,7 +89,7 @@ def test_MPAS_boundary_files(driverobj, cycle):
     infile_path.mkdir()
     for n in ns:
         (
-            infile_path / f"lbc:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
+            infile_path / f"lbc.{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
         ).touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
