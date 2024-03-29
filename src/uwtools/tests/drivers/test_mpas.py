@@ -127,7 +127,6 @@ def test_MPAS_files_copied(config, cycle, key, task, test, tmp_path):
 
 def test_MPAS_namelist_file(driverobj):
     dst = driverobj._rundir / "namelist.atmosphere"
-    # Path(driverobj._driver_config["namelist"]["base_file"]).touch()
     assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
