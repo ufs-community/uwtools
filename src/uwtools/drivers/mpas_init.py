@@ -4,6 +4,7 @@ A driver for the mpas-init component.
 
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Optional
 
 from iotaa import asset, dryrun, task, tasks
 
@@ -20,7 +21,13 @@ class MPASInit(Driver):
     A driver for mpas-init.
     """
 
-    def __init__(self, config: Path, cycle: datetime, dry_run: bool = False, batch: bool = False):
+    def __init__(
+        self,
+        cycle: datetime,
+        config: Optional[Path] = None,
+        dry_run: bool = False,
+        batch: bool = False,
+    ):
         """
         The driver.
 

@@ -12,8 +12,8 @@ from uwtools.drivers.mpas_init import MPASInit as _MPASInit
 
 def execute(
     task: str,
-    config: Path,
     cycle: dt.datetime,
+    config: Optional[Path] = None,
     batch: bool = False,
     dry_run: bool = False,
     graph_file: Optional[Path] = None,
