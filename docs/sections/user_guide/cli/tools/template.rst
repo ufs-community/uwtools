@@ -202,7 +202,7 @@ and a YAML file called ``values.yaml`` with the following contents:
    $ uw template render --input-file template --values-file values.yaml
    [2024-03-02T16:42:48]    ERROR Required value(s) not provided:
    [2024-03-02T16:42:48]    ERROR   recipient
-   [2024-03-02T16:42:48]    ERROR Template could not be rendered.
+   [2024-03-02T16:42:48]    ERROR Template could not be rendered
 
   But the ``--partial`` switch may be used to render as much as possible while passing expressions containing missing values through unchanged:
 
@@ -218,7 +218,7 @@ and a YAML file called ``values.yaml`` with the following contents:
      $ uw template render --input-file template --values-file values.yaml recipient=Reader
      Hello, Reader!
 
-  The optional ``-env`` switch allows environment variables to be used to supply values:
+  The optional ``--env`` switch allows environment variables to be used to supply values:
 
   .. code-block:: text
 
