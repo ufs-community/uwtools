@@ -1,18 +1,90 @@
 {
   "properties": {
-    "ungrib": {
+    "mpas_init": {
       "additionalProperties": false,
       "properties": {
+        "boundary_conditions": {
+          "additionalProperties": false,
+          "properties": {
+            "interval_hours": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "length": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "offset": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "length",
+            "interval_hours",
+            "offset",
+            "path"
+          ]
+        },
         "execution": {
           "$ref": "urn:uwtools:execution"
         },
+        "files_to_copy": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "files_to_link": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "namelist": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "$ref": "urn:uwtools:namelist"
+            }
+          },
+          "type": "object"
+        },
         "run_dir": {
           "type": "string"
+        },
+        "streams": {
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "values": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "path",
+            "values"
+          ],
+          "type": "object"
         }
       },
       "required": [
         "execution",
-        "run_dir"
+        "run_dir",
+        "streams"
       ],
       "type": "object"
     }

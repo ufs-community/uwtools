@@ -30,13 +30,12 @@ def cycle():
 def config(tmp_path):
     return {
         "mpas_init": {
-            "domain": "global",
             "execution": {"executable": "mpas_init"},
             "boundary_conditions": {
                 "interval_hours": 1,
                 "length": 1,
                 "offset": 0,
-                "path": str(tmp_path / "f{forecast_hour}"),
+                "path": str(tmp_path / "input_path"),
             },
             "namelist": {
                 "base_file": str(fixture_path("simple.nml")),
@@ -50,9 +49,6 @@ def config(tmp_path):
                 "values": {
                     "world": "user",
                 },
-            },
-            "ungrib_files": {
-                "path": str(tmp_path / "input_files"),
             },
             "files_to_link": {
                 "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
@@ -93,20 +89,17 @@ def test_MPASInit(driverobj):
     assert isinstance(driverobj, mpas_init.MPASInit)
 
 
-def test_MPASInit_boundary_files(driverobj, cycle, tmp_path):
+def test_MPASInit_boundary_files(cycle, driverobj):
     ns = (0, 1)
     links = [
         driverobj._rundir / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}"
         for n in ns
     ]
     assert not any(link.is_file() for link in links)
-    (tmp_path / "input_files").mkdir()
+    input_path = Path(driverobj._driver_config["boundary_conditions"]["path"])
+    input_path.mkdir()
     for n in ns:
-        (
-            tmp_path
-            / "input_files"
-            / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}"
-        ).touch()
+        (input_path / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}").touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
 

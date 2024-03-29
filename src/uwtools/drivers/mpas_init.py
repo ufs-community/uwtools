@@ -45,13 +45,13 @@ class MPASInit(Driver):
         """
         yield self._taskname("boundary files")
         lbcs = self._driver_config["boundary_conditions"]
-        endhour = self._driver_config["boundary_conditions"]["length"]
+        endhour = lbcs["length"]
         interval = lbcs["interval_hours"]
         symlinks = {}
-        ungrib_files = self._driver_config["ungrib_files"]
+        boundary_filepath = lbcs["path"]
         for boundary_hour in range(0, endhour + 1, interval):
             file_date = self._cycle + timedelta(hours=boundary_hour)
-            target = Path(ungrib_files["path"]) / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
+            target = Path(boundary_filepath) / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
             linkname = self._rundir / f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
             symlinks[target] = linkname
         yield [symlink(target=t, linkname=l) for t, l in symlinks.items()]
