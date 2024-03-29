@@ -142,7 +142,6 @@ def test_MPASInit_files_copied(config, cycle, key, task, test, tmp_path):
 
 def test_MPASInit_namelist_file(driverobj):
     dst = driverobj._rundir / "namelist.init_atmosphere"
-    # Path(driverobj._driver_config["namelist"]["base_file"]).touch()
     assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
