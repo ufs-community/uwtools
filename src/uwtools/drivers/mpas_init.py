@@ -46,7 +46,7 @@ class MPASInit(Driver):
     @tasks
     def boundary_files(self):
         """
-        Boundary-condition files.
+        Boundary files.
         """
         yield self._taskname("boundary files")
         lbcs = self._driver_config["boundary_conditions"]
