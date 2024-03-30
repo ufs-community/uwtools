@@ -18,7 +18,7 @@ from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
@@ -119,3 +119,26 @@ class Test_UWYAMLConvert:
     def test___repr__(self, loader):
         ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="88"))
         assert str(ts) == "!int 88"
+
+
+class Test_UWYAMLRemove:
+    """
+    Tests for class uwtools.config.support.UWYAMLRemove.
+    """
+
+    @fixture
+    def loader(self):
+        yaml.add_representer(support.UWYAMLRemove, support.UWYAMLRemove.represent)
+        return YAMLConfig(config={})._yaml_loader
+
+    @fixture
+    def node(self, loader):
+        return support.UWYAMLRemove(loader, yaml.ScalarNode(tag="!remove", value=""))
+
+    def test_represent(self, node):
+        with raises(UWError) as e:
+            yaml.dump(node)
+        assert str(e.value) == "Value tagged !remove is unrepresentable"
+
+    def test___repr__(self, node):
+        assert str(node) == "!remove"

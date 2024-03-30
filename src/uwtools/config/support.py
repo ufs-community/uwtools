@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from importlib import import_module
-from typing import Dict, NoReturn, Type, Union
+from typing import Dict, Type, Union
 
 import yaml
 from f90nml import Namelist  # type: ignore
@@ -95,7 +95,20 @@ def _represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes
     return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
 
 
-class UWYAMLConvert:
+class UWYAMLTag:
+    """
+    A base class for custom UW YAML tags.
+    """
+
+    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
+        self.tag: str = node.tag
+        self.value: str = node.value
+
+    def __repr__(self) -> str:
+        return ("%s %s" % (self.tag, self.value)).strip()
+
+
+class UWYAMLConvert(UWYAMLTag):
     """
     A class supporting custom YAML tags specifying type conversions.
 
@@ -104,13 +117,6 @@ class UWYAMLConvert:
     """
 
     TAGS = ("!float", "!int")
-
-    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
-        self.tag: str = node.tag
-        self.value: str = node.value
-
-    def __repr__(self) -> str:
-        return "%s %s" % (self.tag, self.value)
 
     def convert(self) -> Union[float, int]:
         """
@@ -132,7 +138,7 @@ class UWYAMLConvert:
         return dumper.represent_scalar(data.tag, data.value)
 
 
-class UWYAMLRemove:
+class UWYAMLRemove(UWYAMLTag):
     """
     A class supporting a custom YAML tag to remove a YAML key/value pair.
 
@@ -142,18 +148,11 @@ class UWYAMLRemove:
 
     TAGS = ("!remove",)
 
-    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
-        self.tag: str = node.tag
-        self.value: str = node.value
-
-    def __repr__(self) -> str:
-        return "%s %s" % (self.tag, self.value)
-
     @staticmethod
-    def represent(dumper: yaml.Dumper, data: UWYAMLConvert) -> NoReturn:
+    def represent(dumper: yaml.Dumper, data: UWYAMLRemove) -> yaml.nodes.ScalarNode:
         """
         Removed items must not be represented in output.
 
         :raises: UWError
         """
-        raise UWError("Values tagged %s are unrepresentable" % ", ".join(UWYAMLRemove.TAGS))
+        raise UWError("Value tagged %s is unrepresentable" % data.tag)
