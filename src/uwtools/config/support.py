@@ -7,7 +7,7 @@ from typing import Dict, Type, Union
 import yaml
 from f90nml import Namelist  # type: ignore
 
-from uwtools.exceptions import UWConfigError, UWError
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
 
@@ -107,6 +107,16 @@ class UWYAMLTag:
     def __repr__(self) -> str:
         return ("%s %s" % (self.tag, self.value)).strip()
 
+    @staticmethod
+    def represent(dumper: yaml.Dumper, data: UWYAMLTag) -> yaml.nodes.ScalarNode:
+        """
+        Serialize a tagged scalar as "!type value".
+
+        Implements the interface required by pyyaml's add_representer() function. See the pyyaml
+        documentation for details.
+        """
+        return dumper.represent_scalar(data.tag, data.value)
+
 
 class UWYAMLConvert(UWYAMLTag):
     """
@@ -127,16 +137,6 @@ class UWYAMLConvert(UWYAMLTag):
         converters: Dict[str, Union[Type[float], Type[int]]] = dict(zip(self.TAGS, [float, int]))
         return converters[self.tag](self.value)
 
-    @staticmethod
-    def represent(dumper: yaml.Dumper, data: UWYAMLConvert) -> yaml.nodes.ScalarNode:
-        """
-        Serialize a tagged scalar as "!type value".
-
-        Implements the interface required by pyyaml's add_representer() function. See the pyyaml
-        documentation for details.
-        """
-        return dumper.represent_scalar(data.tag, data.value)
-
 
 class UWYAMLRemove(UWYAMLTag):
     """
@@ -147,12 +147,3 @@ class UWYAMLRemove(UWYAMLTag):
     """
 
     TAGS = ("!remove",)
-
-    @staticmethod
-    def represent(dumper: yaml.Dumper, data: UWYAMLRemove) -> yaml.nodes.ScalarNode:
-        """
-        Removed items must not be represented in output.
-
-        :raises: UWError
-        """
-        raise UWError("Value tagged %s is unrepresentable" % data.tag)

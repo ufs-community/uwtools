@@ -5,6 +5,7 @@ Tests for uwtools.config.tools module.
 
 import logging
 from pathlib import Path
+from textwrap import dedent
 
 import pytest
 import yaml
@@ -14,7 +15,7 @@ from uwtools.config import tools
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.support import depth
+from uwtools.config.support import UWYAMLRemove, depth
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path, logged
@@ -294,6 +295,37 @@ def test_realize_config_output_file_conversion(tmp_path):
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read()[-1] == "\n"
+
+
+def test_realize_config_remove_yaml_to_yaml_scalar():
+    base = YAMLConfig(yaml.safe_load("a: {b: {c: 11, d: 22, e: 33}}"))
+    s = """
+    a:
+      b:
+        d: !remove
+    """
+    loader = yaml.Loader(dedent(s).strip())
+    loader.add_constructor("!remove", UWYAMLRemove)
+    assert {"a": {"b": {"c": 11, "e": 33}}} == tools.realize_config(
+        input_config=base,
+        output_format="yaml",
+        supplemental_configs=[YAMLConfig(loader.get_data())],
+    )
+
+
+def test_realize_config_remove_yaml_to_yaml_subtree():
+    base = YAMLConfig(yaml.safe_load("a: {b: {c: 11, d: 22, e: 33}}"))
+    s = """
+    a:
+      b: !remove
+    """
+    loader = yaml.Loader(dedent(s).strip())
+    loader.add_constructor("!remove", UWYAMLRemove)
+    assert {"a": {}} == tools.realize_config(
+        input_config=base,
+        output_format="yaml",
+        supplemental_configs=[YAMLConfig(loader.get_data())],
+    )
 
 
 def test_realize_config_simple_ini(tmp_path):

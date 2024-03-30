@@ -89,7 +89,7 @@ class Test_UWYAMLConvert:
 
     @fixture
     def loader(self):
-        yaml.add_representer(support.UWYAMLConvert, support.UWYAMLConvert.represent)
+        yaml.add_representer(support.UWYAMLConvert, support.UWYAMLTag.represent)
         return YAMLConfig(config={})._yaml_loader
 
     # These tests bypass YAML parsing, constructing nodes with explicit string values. They then
@@ -128,17 +128,12 @@ class Test_UWYAMLRemove:
 
     @fixture
     def loader(self):
-        yaml.add_representer(support.UWYAMLRemove, support.UWYAMLRemove.represent)
+        yaml.add_representer(support.UWYAMLRemove, support.UWYAMLTag.represent)
         return YAMLConfig(config={})._yaml_loader
 
     @fixture
     def node(self, loader):
         return support.UWYAMLRemove(loader, yaml.ScalarNode(tag="!remove", value=""))
-
-    def test_represent(self, node):
-        with raises(UWError) as e:
-            yaml.dump(node)
-        assert str(e.value) == "Value tagged !remove is unrepresentable"
 
     def test___repr__(self, node):
         assert str(node) == "!remove"

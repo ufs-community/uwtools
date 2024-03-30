@@ -136,10 +136,12 @@ def test_dereference_no_op_due_to_error(caplog, logmsg, val):
     assert regex_logged(caplog, logmsg)
 
 
-def test_dereference_remove():
+def test_dereference_remove(caplog):
+    log.setLevel(logging.DEBUG)
     remove = UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
     val = {"a": {"b": {"c": "cherry", "d": remove}}}
     assert jinja2.dereference(val=val, context={}) == {"a": {"b": {"c": "cherry"}}}
+    assert regex_logged(caplog, "Removing value at: a > b > d")
 
 
 def test_dereference_str_expression_rendered():
