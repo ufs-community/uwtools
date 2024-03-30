@@ -18,7 +18,7 @@ from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.exceptions import UWConfigError, UWError
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
@@ -90,7 +90,7 @@ class Test_UWYAMLConvert:
     @fixture
     def loader(self):
         yaml.add_representer(support.UWYAMLConvert, support.UWYAMLTag.represent)
-        return YAMLConfig(config={})._yaml_loader
+        return yaml.SafeLoader("")
 
     # These tests bypass YAML parsing, constructing nodes with explicit string values. They then
     # demonstrate that those nodes' convert() methods return representations in type type specified
@@ -127,13 +127,9 @@ class Test_UWYAMLRemove:
     """
 
     @fixture
-    def loader(self):
+    def node(self):
         yaml.add_representer(support.UWYAMLRemove, support.UWYAMLTag.represent)
-        return YAMLConfig(config={})._yaml_loader
-
-    @fixture
-    def node(self, loader):
-        return support.UWYAMLRemove(loader, yaml.ScalarNode(tag="!remove", value=""))
+        return support.UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
 
     def test___repr__(self, node):
         assert str(node) == "!remove"
