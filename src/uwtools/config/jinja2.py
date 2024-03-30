@@ -133,10 +133,14 @@ def dereference(
     """
     rendered: _ConfigVal = val  # fall-back value
     if isinstance(val, dict):
-        return {
-            dereference(k, context): dereference(v, context, local=val, keys=[*(keys or []), k])
-            for k, v in val.items()
-        }
+        keys = keys or []
+        new = {}
+        for k, v in val.items():
+            if isinstance(v, UWYAMLRemove):
+                _deref_debug("Removing value at", " > ".join([*keys, k]))
+            else:
+                new[dereference(k, context)] = dereference(v, context, local=val, keys=[*keys, k])
+        return new
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
@@ -146,11 +150,6 @@ def dereference(
         _deref_debug("Rendering", val.value)
         val.value = _deref_render(val.value, context, local)
         rendered = _deref_convert(val)
-    elif isinstance(val, UWYAMLRemove):
-        assert keys
-        assert local
-        _deref_debug("Removing value at", ".".join(keys))
-        del local[keys[-1]]
     else:
         _deref_debug("Accepting", val)
     return rendered
