@@ -126,10 +126,7 @@ class Test_UWYAMLRemove:
     Tests for class uwtools.config.support.UWYAMLRemove.
     """
 
-    @fixture
-    def node(self):
+    def test___repr__(self):
         yaml.add_representer(support.UWYAMLRemove, support.UWYAMLTag.represent)
-        return support.UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
-
-    def test___repr__(self, node):
+        node = support.UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
         assert str(node) == "!remove"
