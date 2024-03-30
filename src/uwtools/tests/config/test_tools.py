@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 from textwrap import dedent
 
+import f90nml  # type: ignore
 import pytest
 import yaml
 from pytest import fixture, raises
@@ -297,8 +298,26 @@ def test_realize_config_output_file_conversion(tmp_path):
         assert f.read()[-1] == "\n"
 
 
+def test_realize_config_remove_nml_to_nml(tmp_path):
+    base = NMLConfig({"constants": {"pi": 3.141, "e": 2.718}})
+    s = """
+    constants:
+      e: !remove
+    """
+    loader = yaml.Loader(dedent(s).strip())
+    loader.add_constructor("!remove", UWYAMLRemove)
+    path = tmp_path / "config.nml"
+    assert not path.is_file()
+    tools.realize_config(
+        input_config=base,
+        output_file=path,
+        supplemental_configs=[YAMLConfig(loader.get_data())],
+    )
+    assert f90nml.read(path) == {"constants": {"pi": 3.141}}
+
+
 def test_realize_config_remove_yaml_to_yaml_scalar():
-    base = YAMLConfig(yaml.safe_load("a: {b: {c: 11, d: 22, e: 33}}"))
+    base = YAMLConfig({"a": {"b": {"c": 11, "d": 22, "e": 33}}})
     s = """
     a:
       b:
