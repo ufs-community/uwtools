@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from importlib import import_module
-from typing import Dict, Type, Union
+from typing import Dict, NoReturn, Type, Union
 
 import yaml
 from f90nml import Namelist  # type: ignore
 
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.strings import FORMAT
 
@@ -21,7 +21,7 @@ def add_yaml_representers() -> None:
     """
     Add representers to the YAML dumper for custom types.
     """
-    yaml.add_representer(TaggedString, TaggedString.represent)
+    yaml.add_representer(UWYAMLConvert, UWYAMLConvert.represent)
     yaml.add_representer(Namelist, _represent_namelist)
     yaml.add_representer(OrderedDict, _represent_ordereddict)
 
@@ -95,7 +95,7 @@ def _represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes
     return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
 
 
-class TaggedString:
+class UWYAMLConvert:
     """
     A class supporting custom YAML tags specifying type conversions.
 
@@ -103,7 +103,7 @@ class TaggedString:
     method. See the pyyaml documentation for details.
     """
 
-    TAGS: Dict[str, type] = {"!float": float, "!int": int}
+    TAGS = ("!float", "!int")
 
     def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
         self.tag: str = node.tag
@@ -122,7 +122,7 @@ class TaggedString:
         return converters[self.tag](self.value)
 
     @staticmethod
-    def represent(dumper: yaml.Dumper, data: TaggedString) -> yaml.nodes.ScalarNode:
+    def represent(dumper: yaml.Dumper, data: UWYAMLConvert) -> yaml.nodes.ScalarNode:
         """
         Serialize a tagged scalar as "!type value".
 
@@ -130,3 +130,30 @@ class TaggedString:
         documentation for details.
         """
         return dumper.represent_scalar(data.tag, data.value)
+
+
+class UWYAMLRemove:
+    """
+    A class supporting a custom YAML tag to remove a YAML key/value pair.
+
+    The constructor implements the interface required by a pyyaml Loader object's add_consructor()
+    method. See the pyyaml documentation for details.
+    """
+
+    TAGS = ("!remove",)
+
+    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
+        self.tag: str = node.tag
+        self.value: str = node.value
+
+    def __repr__(self) -> str:
+        return "%s %s" % (self.tag, self.value)
+
+    @staticmethod
+    def represent(dumper: yaml.Dumper, data: UWYAMLConvert) -> NoReturn:
+        """
+        Removed items must not be represented in output.
+
+        :raises: UWError
+        """
+        raise UWError("Values tagged %s are unrepresentable" % ", ".join(UWYAMLRemove.TAGS))

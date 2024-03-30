@@ -18,11 +18,11 @@ from jinja2 import (
 )
 from jinja2.exceptions import UndefinedError
 
-from uwtools.config.support import TaggedString, format_to_config
+from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, format_to_config
 from uwtools.logging import MSGWIDTH, log
 from uwtools.utils.file import get_file_format, readable, writable
 
-_ConfigVal = Union[bool, dict, float, int, list, str, TaggedString]
+_ConfigVal = Union[bool, dict, float, int, list, str, UWYAMLConvert, UWYAMLRemove]
 
 
 class J2Template:
@@ -109,7 +109,9 @@ class J2Template:
 # Public functions
 
 
-def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) -> _ConfigVal:
+def dereference(
+    val: _ConfigVal, context: dict, local: Optional[dict] = None, keys: Optional[List[str]] = None
+) -> _ConfigVal:
     """
     Render Jinja2 syntax, wherever possible.
 
@@ -126,20 +128,29 @@ def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) ->
     :param val: A value possibly containing Jinja2 syntax.
     :param context: Values to use when rendering Jinja2 syntax.
     :param local: Local sibling values to use if a match is not found in context.
+    :param keys: The dict keys leading to this value.
     :return: The input value, with Jinja2 syntax rendered.
     """
     rendered: _ConfigVal = val  # fall-back value
     if isinstance(val, dict):
-        return {dereference(k, context): dereference(v, context, local=val) for k, v in val.items()}
+        return {
+            dereference(k, context): dereference(v, context, local=val, keys=[*(keys or []), k])
+            for k, v in val.items()
+        }
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
         _deref_debug("Rendering", val)
         rendered = _deref_render(val, context, local)
-    elif isinstance(val, TaggedString):
+    elif isinstance(val, UWYAMLConvert):
         _deref_debug("Rendering", val.value)
         val.value = _deref_render(val.value, context, local)
         rendered = _deref_convert(val)
+    elif isinstance(val, UWYAMLRemove):
+        assert keys
+        assert local
+        _deref_debug("Removing value at", ".".join(keys))
+        del local[keys[-1]]
     else:
         _deref_debug("Accepting", val)
     return rendered
@@ -224,7 +235,7 @@ def unrendered(s: str) -> bool:
 # Private functions
 
 
-def _deref_convert(val: TaggedString) -> _ConfigVal:
+def _deref_convert(val: UWYAMLConvert) -> _ConfigVal:
     """
     Convert a string tagged with an explicit type.
 

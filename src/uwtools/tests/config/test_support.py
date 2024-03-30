@@ -27,7 +27,7 @@ from uwtools.utils.file import FORMAT
 def test_add_yaml_representers():
     support.add_yaml_representers()
     representers = yaml.Dumper.yaml_representers
-    assert support.TaggedString in representers
+    assert support.UWYAMLConvert in representers
     assert OrderedDict in representers
     assert Namelist in representers
 
@@ -79,17 +79,17 @@ def test_represent_ordereddict():
     )
 
 
-class Test_TaggedString:
+class Test_UWYAMLConvert:
     """
-    Tests for class uwtools.config.support.TaggedString.
+    Tests for class uwtools.config.support.UWYAMLConvert.
     """
 
-    def comp(self, ts: support.TaggedString, s: str):
+    def comp(self, ts: support.UWYAMLConvert, s: str):
         assert yaml.dump(ts, default_flow_style=True).strip() == s
 
     @fixture
     def loader(self):
-        yaml.add_representer(support.TaggedString, support.TaggedString.represent)
+        yaml.add_representer(support.UWYAMLConvert, support.UWYAMLConvert.represent)
         return YAMLConfig(config={})._yaml_loader
 
     # These tests bypass YAML parsing, constructing nodes with explicit string values. They then
@@ -97,25 +97,25 @@ class Test_TaggedString:
     # by the tag.
 
     def test_float_no(self, loader):
-        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!float", value="foo"))
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!float", value="foo"))
         with raises(ValueError):
             ts.convert()
 
     def test_float_ok(self, loader):
-        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!float", value="3.14"))
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!float", value="3.14"))
         assert ts.convert() == 3.14
         self.comp(ts, "!float '3.14'")
 
     def test_int_no(self, loader):
-        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!int", value="foo"))
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="foo"))
         with raises(ValueError):
             ts.convert()
 
     def test_int_ok(self, loader):
-        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!int", value="88"))
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="88"))
         assert ts.convert() == 88
         self.comp(ts, "!int '88'")
 
     def test___repr__(self, loader):
-        ts = support.TaggedString(loader, yaml.ScalarNode(tag="!int", value="88"))
+        ts = support.UWYAMLConvert(loader, yaml.ScalarNode(tag="!int", value="88"))
         assert str(ts) == "!int 88"
