@@ -17,7 +17,7 @@ from pytest import fixture, raises
 
 from uwtools.config import jinja2
 from uwtools.config.jinja2 import J2Template
-from uwtools.config.support import UWYAMLConvert
+from uwtools.config.support import UWYAMLConvert, UWYAMLRemove
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 
@@ -134,6 +134,12 @@ def test_dereference_no_op_due_to_error(caplog, logmsg, val):
     log.setLevel(logging.DEBUG)
     assert jinja2.dereference(val=val, context={}) == val
     assert regex_logged(caplog, logmsg)
+
+
+def test_dereference_remove():
+    remove = UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
+    val = {"a": {"b": {"c": "cherry", "d": remove}}}
+    assert jinja2.dereference(val=val, context={}) == {"a": {"b": {"c": "cherry"}}}
 
 
 def test_dereference_str_expression_rendered():
