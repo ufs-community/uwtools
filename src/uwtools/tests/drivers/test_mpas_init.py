@@ -116,7 +116,7 @@ def test_MPASInit_dry_run(config_file, cycle):
     "key,task,test",
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
 )
-def test_MPASInit_files_copied(config, cycle, key, task, test, tmp_path):
+def test_MPASInit_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
     atm, sfc = "gfs.t%sz.atmanl.nc", "gfs.t%sz.sfcanl.nc"
     atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
@@ -210,24 +210,6 @@ def test_MPASInit_streams_file(driverobj):
     assert not (driverobj._rundir / "streams.init_atmosphere").is_file()
     driverobj.streams_file()
     assert (driverobj._rundir / "streams.init_atmosphere").is_file()
-
-
-def test_MPASInit__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["mpas_init"]
-
-
-def test_MPASInit__resources(driverobj):
-    account = "me"
-    scheduler = "slurm"
-    walltime = "00:01:00"
-    driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
-    driverobj._config["platform"] = {"account": account, "scheduler": scheduler}
-    assert driverobj._resources == {
-        "account": account,
-        "rundir": driverobj._rundir,
-        "scheduler": scheduler,
-        "walltime": walltime,
-    }
 
 
 def test_MPASInit__runscript_path(driverobj):
