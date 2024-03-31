@@ -14,6 +14,7 @@ from pytest import fixture, raises
 
 from uwtools.drivers import mpas
 from uwtools.exceptions import UWConfigError
+from uwtools.scheduler import Slurm
 from uwtools.tests.support import fixture_path
 
 # Fixtures
@@ -31,7 +32,12 @@ def cycle():
 def config(tmp_path):
     return {
         "mpas": {
-            "execution": {"executable": "atmosphere_model"},
+            "execution": {
+                "executable": "atmosphere_model",
+                "batchargs": {
+                    "walltime": "01:30:00",
+                },
+            },
             "lateral_boundary_conditions": {
                 "interval_hours": 1,
                 "offset": 0,
@@ -55,7 +61,11 @@ def config(tmp_path):
                 "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
                 "CAM_AEROPT_DATA.DBL": "src/MPAS-Model/CAM_AEROPT_DATA.DBL",
             },
-        }
+        },
+        "platform": {
+            "account": "me",
+            "scheduler": "slurm",
+        },
     }
 
 
@@ -170,28 +180,12 @@ def test_MPAS_run_local(driverobj):
 
 
 def test_MPAS_runscript(driverobj):
-    dst = driverobj._rundir / "runscript.mpas"
-    assert not dst.is_file()
-    driverobj._driver_config["execution"].update(
-        {
-            "batchargs": {"walltime": "00:01:00"},
-            "envcmds": ["cmd1", "cmd2"],
-            "mpicmd": "runit",
-            "threads": 8,
-        }
-    )
-    driverobj._config["platform"] = {"account": "me", "scheduler": "slurm"}
-    driverobj.runscript()
-    with open(dst, "r", encoding="utf-8") as f:
-        lines = f.read().split("\n")
-    # Check directives:
-    assert "#SBATCH --account=me" in lines
-    assert "#SBATCH --time=00:01:00" in lines
-    # Check environment commands:
-    assert "cmd1" in lines
-    assert "cmd2" in lines
-    # Check execution:
-    assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
+    with patch.object(driverobj, "_runscript") as runscript:
+        driverobj.runscript()
+        runscript.assert_called_once()
+        args = ("envcmds", "envvars", "execution", "scheduler")
+        types = [list, dict, list, Slurm]
+        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
 def test_MPAS_streams(driverobj):
