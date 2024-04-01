@@ -3,17 +3,18 @@
 Tests for uwtools.drivers.driver module.
 """
 import json
+from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Dict
 from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 import yaml
-from pytest import fixture
+from pytest import fixture, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
+from uwtools.exceptions import UWConfigError
 
 # Helpers
 
@@ -29,14 +30,6 @@ class ConcreteDriver(driver.Driver):
     @property
     def _driver_name(self) -> str:
         return "concrete"
-
-    @property
-    def _resources(self) -> Dict[str, Any]:
-        return {
-            "account": "me",
-            "scheduler": "slurm",
-            "walltime": "01:10:00",
-        }
 
     def _taskname(self, suffix: str) -> str:
         return "concrete"
@@ -55,39 +48,54 @@ def write(path, s):
 
 
 @fixture
-def a_driver(tmp_path):
+def driverobj(tmp_path):
     cf = write(
         tmp_path / "good.yaml",
         {
             "concrete": {
                 "base_file": str(write(tmp_path / "base.yaml", {"a": 11, "b": 22})),
-                "execution": {"executable": "qux", "mpiargs": ["bar", "baz"], "mpicmd": "foo"},
-                "run_dir": "/path/to/dir",
+                "execution": {
+                    "batchargs": {
+                        "export": "NONE",
+                        "nodes": 1,
+                        "stdout": "{{ concrete.run_dir }}/out",
+                        "walltime": "00:05:00",
+                    },
+                    "executable": "qux",
+                    "mpiargs": ["bar", "baz"],
+                    "mpicmd": "foo",
+                },
+                "run_dir": "{{ rootdir }}/{{ cycle.strftime('%Y%m%d%H') }}/run",
                 "update_values": {"a": 33},
-            }
+            },
+            "platform": {
+                "account": "me",
+                "scheduler": "slurm",
+            },
+            "rootdir": "/path/to",
         },
     )
-    return ConcreteDriver(config_file=cf, dry_run=True, batch=True)
+    return ConcreteDriver(config=cf, dry_run=True, batch=True, cycle=datetime(2024, 3, 22, 18))
 
 
 # Tests
 
 
-def test_Driver(a_driver):
-    assert Path(a_driver._driver_config["base_file"]).name == "base.yaml"
-    assert a_driver._dry_run is True
-    assert a_driver._batch is True
+def test_Driver(driverobj):
+    assert Path(driverobj._driver_config["base_file"]).name == "base.yaml"
+    assert driverobj._dry_run is True
+    assert driverobj._batch is True
 
 
 # Tests for workflow methods
 
 
 @pytest.mark.parametrize("batch", [True, False])
-def test_Driver_run(a_driver, batch):
-    a_driver._batch = batch
-    with patch.object(a_driver, "_run_via_batch_submission") as rvbs:
-        with patch.object(a_driver, "_run_via_local_execution") as rvle:
-            a_driver.run()
+def test_Driver_run(driverobj, batch):
+    driverobj._batch = batch
+    with patch.object(driverobj, "_run_via_batch_submission") as rvbs:
+        with patch.object(driverobj, "_run_via_local_execution") as rvle:
+            driverobj.run()
         if batch:
             rvbs.assert_called_once_with()
             rvle.assert_not_called()
@@ -96,24 +104,24 @@ def test_Driver_run(a_driver, batch):
             rvle.assert_called_once_with()
 
 
-def test_Driver__run_via_batch_submission(a_driver):
-    runscript = a_driver._runscript_path
-    with patch.object(a_driver, "provisioned_run_directory") as prd:
+def test_Driver__run_via_batch_submission(driverobj):
+    runscript = driverobj._runscript_path
+    with patch.object(driverobj, "provisioned_run_directory") as prd:
         with patch.object(ConcreteDriver, "_scheduler", new_callable=PropertyMock) as scheduler:
-            a_driver._run_via_batch_submission()
+            driverobj._run_via_batch_submission()
             scheduler().submit_job.assert_called_once_with(
                 runscript=runscript, submit_file=Path(f"{runscript}.submit")
             )
         prd.assert_called_once_with()
 
 
-def test_Driver__run_via_local_execution(a_driver):
-    with patch.object(a_driver, "provisioned_run_directory") as prd:
+def test_Driver__run_via_local_execution(driverobj):
+    with patch.object(driverobj, "provisioned_run_directory") as prd:
         with patch.object(driver, "execute") as execute:
-            a_driver._run_via_local_execution()
+            driverobj._run_via_local_execution()
             execute.assert_called_once_with(
-                cmd="{x} >{x}.out 2>&1".format(x=a_driver._runscript_path),
-                cwd=a_driver._rundir,
+                cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
+                cwd=driverobj._rundir,
                 log_output=True,
             )
         prd.assert_called_once_with()
@@ -132,10 +140,10 @@ def test_Driver__run_via_local_execution(a_driver):
     ],
 )
 def test_Driver__create_user_updated_config_base_file(
-    base_file, a_driver, expected, tmp_path, update_values
+    base_file, driverobj, expected, tmp_path, update_values
 ):
     path = tmp_path / "updated.yaml"
-    dc = a_driver._driver_config
+    dc = driverobj._driver_config
     if not base_file:
         del dc["base_file"]
     if not update_values:
@@ -146,8 +154,15 @@ def test_Driver__create_user_updated_config_base_file(
     assert updated == expected
 
 
-def test_Driver__driver_config(a_driver):
-    assert set(a_driver._driver_config.keys()) == {
+def test_Driver__driver_config_fail(driverobj):
+    del driverobj._config["concrete"]
+    with raises(UWConfigError) as e:
+        assert driverobj._driver_config
+    assert str(e.value) == "Required 'concrete' block missing in config"
+
+
+def test_Driver__driver_config_pass(driverobj):
+    assert set(driverobj._driver_config.keys()) == {
         "base_file",
         "execution",
         "run_dir",
@@ -155,11 +170,31 @@ def test_Driver__driver_config(a_driver):
     }
 
 
-def test_Driver__runcmd(a_driver):
-    assert a_driver._runcmd == "foo bar baz qux"
+def test_Driver__resources_fail(driverobj):
+    del driverobj._config["platform"]
+    with raises(UWConfigError) as e:
+        assert driverobj._resources
+    assert str(e.value) == "Required 'platform' block missing in config"
 
 
-def test_Driver__runscript(a_driver):
+def test_Driver__resources_pass(driverobj):
+    account = "me"
+    scheduler = "slurm"
+    walltime = "00:05:00"
+    driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
+    assert driverobj._resources == {
+        "account": account,
+        "rundir": driverobj._rundir,
+        "scheduler": scheduler,
+        "walltime": walltime,
+    }
+
+
+def test_Driver__runcmd(driverobj):
+    assert driverobj._runcmd == "foo bar baz qux"
+
+
+def test_Driver__runscript(driverobj):
     expected = """
     #!/bin/bash
 
@@ -177,7 +212,7 @@ def test_Driver__runscript(a_driver):
     """
     scheduler = Mock(directives=["#DIR --d1", "#DIR --d2"])
     assert (
-        a_driver._runscript(
+        driverobj._runscript(
             execution=["foo", "bar"],
             envcmds=["cmd1", "cmd2"],
             envvars={"VAR1": 1, "VAR2": 2},
@@ -187,59 +222,63 @@ def test_Driver__runscript(a_driver):
     )
 
 
-def test_Driver__runscript_execution_only(a_driver):
+def test_Driver__runscript_execution_only(driverobj):
     expected = """
     #!/bin/bash
 
     foo
     bar
     """
-    assert a_driver._runscript(execution=["foo", "bar"]) == dedent(expected).strip()
+    assert driverobj._runscript(execution=["foo", "bar"]) == dedent(expected).strip()
 
 
-def test_Driver__rundir(a_driver):
-    assert a_driver._rundir == Path("/path/to/dir")
+def test_Driver__rundir(driverobj):
+    assert driverobj._rundir == Path("/path/to/2024032218/run")
 
 
-def test_Driver__runscript_path(a_driver):
-    assert a_driver._runscript_path == Path("/path/to/dir/runscript.concrete")
+def test_Driver__runscript_path(driverobj):
+    assert driverobj._runscript_path == Path("/path/to/2024032218/run/runscript.concrete")
 
 
-def test_Driver__scheduler(a_driver):
+def test_Driver__scheduler(driverobj):
     with patch.object(driver, "JobScheduler") as JobScheduler:
         scheduler = JobScheduler.get_scheduler()
-        assert a_driver._scheduler == scheduler
-        JobScheduler.get_scheduler.assert_called_with(a_driver._resources)
+        assert driverobj._scheduler == scheduler
+        JobScheduler.get_scheduler.assert_called_with(driverobj._resources)
 
 
-def test_Driver__validate(a_driver):
-    with patch.object(a_driver, "_validate", driver.Driver._validate):
+def test_Driver__validate(driverobj):
+    with patch.object(driverobj, "_validate", driver.Driver._validate):
         with patch.object(driver, "validate_internal") as validate_internal:
-            a_driver._validate(a_driver)
+            driverobj._validate(driverobj)
         assert validate_internal.call_args_list[0].kwargs == {
             "schema_name": "concrete",
-            "config": a_driver._config,
+            "config": driverobj._config,
         }
         assert validate_internal.call_args_list[1].kwargs == {
             "schema_name": "platform",
-            "config": a_driver._config,
+            "config": driverobj._config,
         }
 
 
-def test_Driver__write_runscript(a_driver, tmp_path):
+def test_Driver__write_runscript(driverobj, tmp_path):
     path = tmp_path / "runscript"
-    a_driver._write_runscript(path=path, envvars={"FOO": "bar", "BAZ": "qux"})
+    driverobj._write_runscript(path=path, envvars={"FOO": "bar", "BAZ": "qux"})
     expected = """
     #!/bin/bash
 
     #SBATCH --account=me
-    #SBATCH --time=01:10:00
+    #SBATCH --chdir=/path/to/2024032218/run
+    #SBATCH --export=NONE
+    #SBATCH --nodes=1
+    #SBATCH --output=/path/to/2024032218/run/out
+    #SBATCH --time=00:05:00
 
     export FOO=bar
     export BAZ=qux
 
-    foo bar baz qux
-    test $? -eq 0 && touch /path/to/dir/done
+    time foo bar baz qux
+    test $? -eq 0 && touch /path/to/2024032218/run/done
     """
     with open(path, "r", encoding="utf-8") as f:
         actual = f.read()

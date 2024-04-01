@@ -2,6 +2,7 @@
 
 import datetime as dt
 import logging
+import re
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import _SubParsersAction
@@ -16,8 +17,10 @@ import uwtools.api.fv3
 import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
 import uwtools.api.template
+import uwtools.api.ungrib
 import uwtools.drivers.fv3
 import uwtools.drivers.sfc_climo_gen
+import uwtools.drivers.ungrib
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
@@ -167,6 +170,18 @@ def test__add_subparser_template_translate(subparsers):
     assert subparsers.choices[STR.translate]
 
 
+def test__add_subparser_ungrib(subparsers):
+    cli._add_subparser_ungrib(subparsers)
+    assert actions(subparsers.choices[STR.ungrib]) == [
+        "gribfiles",
+        "namelist_file",
+        "provisioned_run_directory",
+        "run",
+        "runscript",
+        "vtable",
+    ]
+
+
 @pytest.mark.parametrize(
     "vals",
     [
@@ -261,16 +276,19 @@ def test__dict_from_key_eq_val_strings():
 
 
 def test__dispatch_chgres_cube():
+    cycle = dt.datetime.now()
     args: dict = {
         "batch": True,
         "config_file": "config.yaml",
-        "cycle": dt.datetime.now(),
+        "cycle": cycle,
         "dry_run": False,
         "graph_file": None,
     }
     with patch.object(uwtools.api.chgres_cube, "execute") as execute:
         cli._dispatch_chgres_cube({**args, "action": "foo"})
-    execute.assert_called_once_with(**{**args, "task": "foo"})
+    execute.assert_called_once_with(
+        batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None, task="foo"
+    )
 
 
 @pytest.mark.parametrize(
@@ -415,16 +433,19 @@ def test__dispatch_file_link(args_dispatch_file):
 
 
 def test__dispatch_fv3():
+    cycle = dt.datetime.now()
     args: dict = {
         "batch": True,
         "config_file": "config.yaml",
-        "cycle": dt.datetime.now(),
+        "cycle": cycle,
         "dry_run": False,
         "graph_file": None,
     }
     with patch.object(uwtools.api.fv3, "execute") as execute:
         cli._dispatch_fv3({**args, "action": "foo"})
-    execute.assert_called_once_with(**{**args, "task": "foo"})
+    execute.assert_called_once_with(
+        batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None, task="foo"
+    )
 
 
 @pytest.mark.parametrize(
@@ -485,7 +506,9 @@ def test__dispatch_sfc_climo_gen():
     }
     with patch.object(uwtools.api.sfc_climo_gen, "execute") as execute:
         cli._dispatch_sfc_climo_gen({**args, "action": "foo"})
-    execute.assert_called_once_with(**{**args, "task": "foo"})
+    execute.assert_called_once_with(
+        batch=True, config="config.yaml", dry_run=False, graph_file=None, task="foo"
+    )
 
 
 @pytest.mark.parametrize(
@@ -604,6 +627,22 @@ def test__dispatch_template_translate_no_optional():
     )
 
 
+def test__dispatch_ungrib():
+    cycle = dt.datetime.now()
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "cycle": cycle,
+        "dry_run": False,
+        "graph_file": None,
+    }
+    with patch.object(uwtools.api.ungrib, "execute") as execute:
+        cli._dispatch_ungrib({**args, "action": "foo"})
+    execute.assert_called_once_with(
+        task="foo", batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None
+    )
+
+
 @pytest.mark.parametrize("quiet", [False, True])
 @pytest.mark.parametrize("verbose", [False, True])
 def test_main_fail_checks(capsys, quiet, verbose):
@@ -657,7 +696,7 @@ def test_main_fail_exception_log():
                 with raises(SystemExit) as e:
                     cli.main()
                 assert e.value.code == 1
-            assert log.called_once_with(msg)
+            log.error.assert_called_once_with(msg)
 
 
 def test__parse_args():
@@ -667,3 +706,11 @@ def test__parse_args():
         Parser.assert_called_once()
         parser = Parser()
         parser.parse_args.assert_called_with(raw_args)
+
+
+def test__switch():
+    assert cli._switch("foo_bar") == "--foo-bar"
+
+
+def test__version():
+    assert re.match(r"version \d+\.\d+\.\d+ build \d+", cli._version())

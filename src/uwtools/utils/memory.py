@@ -2,7 +2,6 @@
 Encapsulates string based memory conversions.
 """
 
-
 MAP = {"KB": 1000, "MB": 1000 * 1000, "GB": 1000 * 1000 * 1000}
 
 

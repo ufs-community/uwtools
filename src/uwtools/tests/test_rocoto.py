@@ -347,6 +347,17 @@ class Test__RocotoXML:
         assert value.tag == "value"
         assert value.text == "bar"
 
+    def test__add_task_envar_compound(self, instance, root):
+        instance._add_task_envar(root, "foo", {"cyclestr": {"value": "bar_@Y"}})
+        envar = root[0]
+        name, value = envar
+        child = value[0]
+        assert name.tag == "name"
+        assert name.text == "foo"
+        assert value.tag == "value"
+        assert value.text is None
+        assert child.text == "bar_@Y"
+
     def test__add_workflow(self, instance):
         config = {
             "workflow": {
@@ -423,6 +434,12 @@ class Test__RocotoXML:
         instance._set_attrs(e=root, config=config)
         assert root.get("foo") == "1"
         assert root.get("bar") == "2"
+
+    def test__set_and_render_jobname(self, instance):
+        config = {"join": "{{jobname}}.log"}
+        cfg = instance._set_and_render_jobname(config, "foo")
+        assert cfg["join"] == "foo.log"
+        assert cfg["jobname"] == "foo"
 
     def test__tag_name(self, instance):
         assert instance._tag_name("foo") == ("foo", "")

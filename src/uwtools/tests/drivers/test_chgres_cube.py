@@ -12,6 +12,7 @@ from iotaa import asset, external
 from pytest import fixture
 
 from uwtools.drivers import chgres_cube
+from uwtools.scheduler import Slurm
 
 config: dict = {
     "chgres_cube": {
@@ -76,7 +77,7 @@ def config_file(tmp_path):
 
 @fixture
 def driverobj(config_file, cycle):
-    return chgres_cube.ChgresCube(config_file=config_file, cycle=cycle, batch=True)
+    return chgres_cube.ChgresCube(config=config_file, cycle=cycle, batch=True)
 
 
 # Driver tests
@@ -89,7 +90,7 @@ def test_ChgresCube(driverobj):
 def test_ChgresCube_dry_run(config_file, cycle):
     with patch.object(chgres_cube, "dryrun") as dryrun:
         driverobj = chgres_cube.ChgresCube(
-            config_file=config_file, cycle=cycle, batch=True, dry_run=True
+            config=config_file, cycle=cycle, batch=True, dry_run=True
         )
     assert driverobj._dry_run is True
     dryrun.assert_called_once_with()
@@ -130,38 +131,16 @@ def test_ChgresCube_run_local(driverobj):
 
 
 def test_ChgresCube_runscript(driverobj):
-    dst = driverobj._rundir / "runscript.chgres_cube"
-    assert not dst.is_file()
-    driverobj.runscript()
-    with open(dst, "r", encoding="utf-8") as f:
-        lines = f.read().split("\n")
-    # Check directives:
-    assert "#SBATCH --account=me" in lines
-    assert "#SBATCH --time=00:02:00" in lines
-    # Check environment commands:
-    assert "cmd1" in lines
-    assert "cmd2" in lines
-    # Check execution:
-    assert "srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE /path/to/chgres_cube" in lines
-    assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
+    with patch.object(driverobj, "_runscript") as runscript:
+        driverobj.runscript()
+        runscript.assert_called_once()
+        args = ("envcmds", "envvars", "execution", "scheduler")
+        types = [list, dict, list, Slurm]
+        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
 def test_ChgresCube__driver_config(driverobj):
     assert driverobj._driver_config == driverobj._config["chgres_cube"]
-
-
-def test_ChgresCube__resources(driverobj):
-    account = "me"
-    scheduler = "slurm"
-    walltime = "01:10:00"
-    driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
-    driverobj._config["platform"] = {"account": account, "scheduler": scheduler}
-    assert driverobj._resources == {
-        "account": account,
-        "rundir": driverobj._rundir,
-        "scheduler": scheduler,
-        "walltime": walltime,
-    }
 
 
 def test_ChgresCube__runscript_path(driverobj):

@@ -12,6 +12,7 @@ import yaml
 from pytest import fixture
 
 from uwtools.drivers import driver, fv3
+from uwtools.scheduler import Slurm
 from uwtools.tests.support import logged
 
 # Fixtures
@@ -30,7 +31,13 @@ def config(tmp_path):
     return {
         "fv3": {
             "domain": "global",
-            "execution": {"executable": "fv3"},
+            "execution": {
+                "batchargs": {
+                    "walltime": "00:02:00",
+                },
+                "executable": "fv3",
+                "mpicmd": "srun",
+            },
             "lateral_boundary_conditions": {
                 "interval_hours": 1,
                 "offset": 0,
@@ -38,7 +45,11 @@ def config(tmp_path):
             },
             "length": 1,
             "run_dir": str(tmp_path),
-        }
+        },
+        "platform": {
+            "account": "me",
+            "scheduler": "slurm",
+        },
     }
 
 
@@ -52,7 +63,7 @@ def config_file(config, tmp_path):
 
 @fixture
 def driverobj(config_file, cycle):
-    return fv3.FV3(config_file=config_file, cycle=cycle, batch=True)
+    return fv3.FV3(config=config_file, cycle=cycle, batch=True)
 
 
 # Driver tests
@@ -64,7 +75,7 @@ def test_FV3(driverobj):
 
 def test_FV3_dry_run(config_file, cycle):
     with patch.object(fv3, "dryrun") as dryrun:
-        driverobj = fv3.FV3(config_file=config_file, cycle=cycle, batch=True, dry_run=True)
+        driverobj = fv3.FV3(config=config_file, cycle=cycle, batch=True, dry_run=True)
     assert driverobj._dry_run is True
     dryrun.assert_called_once_with()
 
@@ -117,7 +128,7 @@ def test_FV3_files_copied(config, cycle, key, task, test, tmp_path):
     path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
-    driverobj = fv3.FV3(config_file=path, cycle=cycle, batch=True)
+    driverobj = fv3.FV3(config=path, cycle=cycle, batch=True)
     atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
     assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
     atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
@@ -188,35 +199,12 @@ def test_FV3_run_local(driverobj):
 
 
 def test_FV3_runscript(driverobj):
-    dst = driverobj._rundir / "runscript.fv3"
-    assert not dst.is_file()
-    driverobj._driver_config["execution"].update(
-        {
-            "batchargs": {"walltime": "01:10:00"},
-            "envcmds": ["cmd1", "cmd2"],
-            "mpicmd": "runit",
-            "threads": 8,
-        }
-    )
-    driverobj._config["platform"] = {"account": "me", "scheduler": "slurm"}
-    driverobj.runscript()
-    with open(dst, "r", encoding="utf-8") as f:
-        lines = f.read().split("\n")
-    # Check directives:
-    assert "#SBATCH --account=me" in lines
-    assert "#SBATCH --time=01:10:00" in lines
-    # Check environment variables:
-    assert "export ESMF_RUNTIME_COMPLIANCECHECK=OFF:depth=4" in lines
-    assert "export KMP_AFFINITY=scatter" in lines
-    assert "export MPI_TYPE_DEPTH=20" in lines
-    assert "export OMP_NUM_THREADS=8" in lines
-    assert "export OMP_STACKSIZE=512m" in lines
-    # Check environment commands:
-    assert "cmd1" in lines
-    assert "cmd2" in lines
-    # Check execution:
-    assert "runit fv3" in lines
-    assert "test $? -eq 0 && touch %s/done" % driverobj._rundir
+    with patch.object(driverobj, "_runscript") as runscript:
+        driverobj.runscript()
+        runscript.assert_called_once()
+        args = ("envcmds", "envvars", "execution", "scheduler")
+        types = [list, dict, list, Slurm]
+        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
 def test_FV3__run_via_batch_submission(driverobj):
@@ -244,20 +232,6 @@ def test_FV3__run_via_local_execution(driverobj):
 
 def test_FV3__driver_config(driverobj):
     assert driverobj._driver_config == driverobj._config["fv3"]
-
-
-def test_FV3__resources(driverobj):
-    account = "me"
-    scheduler = "slurm"
-    walltime = "01:10:00"
-    driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
-    driverobj._config["platform"] = {"account": account, "scheduler": scheduler}
-    assert driverobj._resources == {
-        "account": account,
-        "rundir": driverobj._rundir,
-        "scheduler": scheduler,
-        "walltime": walltime,
-    }
 
 
 def test_FV3__runscript_path(driverobj):

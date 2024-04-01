@@ -6,16 +6,18 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 .. code-block:: text
 
    $ uw template --help
-   usage: uw template [-h] MODE ...
+   usage: uw template [-h] [--version] ACTION ...
 
    Handle templates
 
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
 
    Positional arguments:
-     MODE
+     ACTION
        render
          Render a template
        translate
@@ -29,8 +31,8 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 .. code-block:: text
 
    $ uw template render --help
-   usage: uw template render [-h] [--input-file PATH] [--output-file PATH] [--values-file PATH]
-                             [--values-format {ini,nml,sh,yaml}] [--env]
+   usage: uw template render [-h] [--version] [--input-file PATH] [--output-file PATH]
+                             [--values-file PATH] [--values-format {ini,nml,sh,yaml}] [--env]
                              [--search-path PATH[:PATH:...]] [--values-needed] [--partial]
                              [--dry-run] [--quiet] [--verbose]
                              [KEY=VALUE ...]
@@ -40,6 +42,8 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --output-file PATH, -o PATH
@@ -198,7 +202,7 @@ and a YAML file called ``values.yaml`` with the following contents:
    $ uw template render --input-file template --values-file values.yaml
    [2024-03-02T16:42:48]    ERROR Required value(s) not provided:
    [2024-03-02T16:42:48]    ERROR   recipient
-   [2024-03-02T16:42:48]    ERROR Template could not be rendered.
+   [2024-03-02T16:42:48]    ERROR Template could not be rendered
 
   But the ``--partial`` switch may be used to render as much as possible while passing expressions containing missing values through unchanged:
 
@@ -214,7 +218,7 @@ and a YAML file called ``values.yaml`` with the following contents:
      $ uw template render --input-file template --values-file values.yaml recipient=Reader
      Hello, Reader!
 
-  The optional ``-env`` switch allows environment variables to be used to supply values:
+  The optional ``--env`` switch allows environment variables to be used to supply values:
 
   .. code-block:: text
 
@@ -297,22 +301,22 @@ and a YAML file called ``values.yaml`` with the following contents:
 .. code-block:: text
 
    $ uw template translate --help
-   usage: uw template translate [-h] [--input-file PATH] [--output-file PATH] [--dry-run] [--quiet]
-                                [--verbose]
+   usage: uw template translate [-h] [--version] [--input-file PATH] [--output-file PATH] [--dry-run]
+                                [--quiet] [--verbose]
 
    Translate atparse to Jinja2
 
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --output-file PATH, -o PATH
          Path to output file (defaults to stdout)
      --dry-run
          Only log info, making no changes
-     --debug
-         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v

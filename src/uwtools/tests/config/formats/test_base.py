@@ -120,7 +120,7 @@ def test_depth(config):
 
 def test_dereference(tmp_path):
     # Test demonstrates that:
-    #   - Config dereferencing uses environment variables.
+    #   - Config dereferencing ignores environment variables.
     #   - Initially-unrenderable values do not cause errors.
     #   - Initially-unrenderable values may be rendered via iteration.
     #   - Finally-unrenderable values do not cause errors and are returned unmodified.
@@ -137,19 +137,21 @@ e:
 f:
   f1: !int '88'
   f2: !float '3.14'
+N: "22"
 """.strip()
     path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
         print(yaml, file=f)
     config = YAMLConfig(path)
-    with patch.dict(os.environ, {"N": "55"}, clear=True):
+    with patch.dict(os.environ, {"N": "999"}, clear=True):
         config.dereference()
     assert config == {
-        "a": 77,
-        "b": {"c": 66},
+        "a": 44,
+        "b": {"c": 33},
         "d": "{{ X }}",
         "e": [88, 3.14],
         "f": {"f1": 88, "f2": 3.14},
+        "N": "22",
     }
 
 
