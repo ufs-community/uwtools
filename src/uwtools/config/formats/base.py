@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import json
 import os
 import re
 from abc import ABC, abstractmethod
 from collections import UserDict
 from copy import deepcopy
+from io import StringIO
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
 
@@ -46,7 +46,9 @@ class Config(ABC, UserDict):
         """
         Returns the string representation of a Config object.
         """
-        return json.dumps(self.data)
+        s = StringIO()
+        yaml.dump(self.data, s)
+        return s.getvalue()
 
     # Private methods
 

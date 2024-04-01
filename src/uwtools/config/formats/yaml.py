@@ -5,7 +5,13 @@ from typing import Optional
 import yaml
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import INCLUDE_TAG, TaggedString, add_yaml_representers, log_and_error
+from uwtools.config.support import (
+    INCLUDE_TAG,
+    UWYAMLConvert,
+    UWYAMLRemove,
+    add_yaml_representers,
+    log_and_error,
+)
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
 
@@ -94,8 +100,9 @@ class YAMLConfig(Config):
         """
         loader = yaml.SafeLoader
         loader.add_constructor(INCLUDE_TAG, self._yaml_include)
-        for tag in TaggedString.TAGS:
-            loader.add_constructor(tag, TaggedString)
+        for tag_class in (UWYAMLConvert, UWYAMLRemove):
+            for tag in getattr(tag_class, "TAGS"):
+                loader.add_constructor(tag, tag_class)
         return loader
 
     # Public methods

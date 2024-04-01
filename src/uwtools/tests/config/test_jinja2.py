@@ -17,7 +17,7 @@ from pytest import fixture, raises
 
 from uwtools.config import jinja2
 from uwtools.config.jinja2 import J2Template
-from uwtools.config.support import TaggedString
+from uwtools.config.support import UWYAMLConvert, UWYAMLRemove
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 
@@ -134,6 +134,14 @@ def test_dereference_no_op_due_to_error(caplog, logmsg, val):
     log.setLevel(logging.DEBUG)
     assert jinja2.dereference(val=val, context={}) == val
     assert regex_logged(caplog, logmsg)
+
+
+def test_dereference_remove(caplog):
+    log.setLevel(logging.DEBUG)
+    remove = UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
+    val = {"a": {"b": {"c": "cherry", "d": remove}}}
+    assert jinja2.dereference(val=val, context={}) == {"a": {"b": {"c": "cherry"}}}
+    assert regex_logged(caplog, "Removing value at: a > b > d")
 
 
 def test_dereference_str_expression_rendered():
@@ -284,7 +292,7 @@ def test_unrendered(s, status):
 def test__deref_convert_no(caplog, tag):
     log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
-    val = TaggedString(loader, yaml.ScalarNode(tag=tag, value="foo"))
+    val = UWYAMLConvert(loader, yaml.ScalarNode(tag=tag, value="foo"))
     assert jinja2._deref_convert(val=val) == val
     assert not regex_logged(caplog, "Converted")
     assert regex_logged(caplog, "Conversion failed")
@@ -294,7 +302,7 @@ def test__deref_convert_no(caplog, tag):
 def test__deref_convert_ok(caplog, converted, tag, value):
     log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
-    val = TaggedString(loader, yaml.ScalarNode(tag=tag, value=value))
+    val = UWYAMLConvert(loader, yaml.ScalarNode(tag=tag, value=value))
     assert jinja2._deref_convert(val=val) == converted
     assert regex_logged(caplog, "Converted")
     assert not regex_logged(caplog, "Conversion failed")

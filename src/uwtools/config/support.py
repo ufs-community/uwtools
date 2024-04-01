@@ -21,7 +21,7 @@ def add_yaml_representers() -> None:
     """
     Add representers to the YAML dumper for custom types.
     """
-    yaml.add_representer(TaggedString, TaggedString.represent)
+    yaml.add_representer(UWYAMLConvert, UWYAMLConvert.represent)
     yaml.add_representer(Namelist, _represent_namelist)
     yaml.add_representer(OrderedDict, _represent_ordereddict)
 
@@ -95,7 +95,30 @@ def _represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes
     return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
 
 
-class TaggedString:
+class UWYAMLTag:
+    """
+    A base class for custom UW YAML tags.
+    """
+
+    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
+        self.tag: str = node.tag
+        self.value: str = node.value
+
+    def __repr__(self) -> str:
+        return ("%s %s" % (self.tag, self.value)).strip()
+
+    @staticmethod
+    def represent(dumper: yaml.Dumper, data: UWYAMLTag) -> yaml.nodes.ScalarNode:
+        """
+        Serialize a tagged scalar as "!type value".
+
+        Implements the interface required by pyyaml's add_representer() function. See the pyyaml
+        documentation for details.
+        """
+        return dumper.represent_scalar(data.tag, data.value)
+
+
+class UWYAMLConvert(UWYAMLTag):
     """
     A class supporting custom YAML tags specifying type conversions.
 
@@ -103,14 +126,7 @@ class TaggedString:
     method. See the pyyaml documentation for details.
     """
 
-    TAGS: Dict[str, type] = {"!float": float, "!int": int}
-
-    def __init__(self, _: yaml.SafeLoader, node: yaml.nodes.ScalarNode) -> None:
-        self.tag: str = node.tag
-        self.value: str = node.value
-
-    def __repr__(self) -> str:
-        return "%s %s" % (self.tag, self.value)
+    TAGS = ("!float", "!int")
 
     def convert(self) -> Union[float, int]:
         """
@@ -121,12 +137,13 @@ class TaggedString:
         converters: Dict[str, Union[Type[float], Type[int]]] = dict(zip(self.TAGS, [float, int]))
         return converters[self.tag](self.value)
 
-    @staticmethod
-    def represent(dumper: yaml.Dumper, data: TaggedString) -> yaml.nodes.ScalarNode:
-        """
-        Serialize a tagged scalar as "!type value".
 
-        Implements the interface required by pyyaml's add_representer() function. See the pyyaml
-        documentation for details.
-        """
-        return dumper.represent_scalar(data.tag, data.value)
+class UWYAMLRemove(UWYAMLTag):
+    """
+    A class supporting a custom YAML tag to remove a YAML key/value pair.
+
+    The constructor implements the interface required by a pyyaml Loader object's add_consructor()
+    method. See the pyyaml documentation for details.
+    """
+
+    TAGS = ("!remove",)
