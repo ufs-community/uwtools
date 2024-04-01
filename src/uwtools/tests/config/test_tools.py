@@ -16,7 +16,7 @@ from uwtools.config import tools
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.support import UWYAMLRemove, depth
+from uwtools.config.support import depth
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.tests.support import compare_files, fixture_path, logged
@@ -299,51 +299,54 @@ def test_realize_config_output_file_conversion(tmp_path):
 
 
 def test_realize_config_remove_nml_to_nml(tmp_path):
-    base = NMLConfig({"constants": {"pi": 3.141, "e": 2.718}})
+    nml = NMLConfig({"constants": {"pi": 3.141, "e": 2.718}})
     s = """
     constants:
       e: !remove
     """
-    loader = yaml.Loader(dedent(s).strip())
-    loader.add_constructor("!remove", UWYAMLRemove)
-    path = tmp_path / "config.nml"
-    assert not path.is_file()
+    sup = tmp_path / "sup.yaml"
+    with open(sup, "w", encoding="utf-8") as f:
+        print(dedent(s).strip(), file=f)
+    cfg = tmp_path / "config.nml"
+    assert not cfg.is_file()
     tools.realize_config(
-        input_config=base,
-        output_file=path,
-        supplemental_configs=[YAMLConfig(loader.get_data())],
+        input_config=nml,
+        output_file=cfg,
+        supplemental_configs=[YAMLConfig(config=sup)],
     )
-    assert f90nml.read(path) == {"constants": {"pi": 3.141}}
+    assert f90nml.read(cfg) == {"constants": {"pi": 3.141}}
 
 
-def test_realize_config_remove_yaml_to_yaml_scalar():
-    base = YAMLConfig({"a": {"b": {"c": 11, "d": 22, "e": 33}}})
+def test_realize_config_remove_yaml_to_yaml_scalar(tmp_path):
+    yml = YAMLConfig({"a": {"b": {"c": 11, "d": 22, "e": 33}}})
     s = """
     a:
       b:
         d: !remove
     """
-    loader = yaml.Loader(dedent(s).strip())
-    loader.add_constructor("!remove", UWYAMLRemove)
+    sup = tmp_path / "sup.yaml"
+    with open(sup, "w", encoding="utf-8") as f:
+        print(dedent(s).strip(), file=f)
     assert {"a": {"b": {"c": 11, "e": 33}}} == tools.realize_config(
-        input_config=base,
+        input_config=yml,
         output_format="yaml",
-        supplemental_configs=[YAMLConfig(loader.get_data())],
+        supplemental_configs=[YAMLConfig(config=sup)],
     )
 
 
-def test_realize_config_remove_yaml_to_yaml_subtree():
-    base = YAMLConfig(yaml.safe_load("a: {b: {c: 11, d: 22, e: 33}}"))
+def test_realize_config_remove_yaml_to_yaml_subtree(tmp_path):
+    yml = YAMLConfig(yaml.safe_load("a: {b: {c: 11, d: 22, e: 33}}"))
     s = """
     a:
       b: !remove
     """
-    loader = yaml.Loader(dedent(s).strip())
-    loader.add_constructor("!remove", UWYAMLRemove)
+    sup = tmp_path / "sup.yaml"
+    with open(sup, "w", encoding="utf-8") as f:
+        print(dedent(s).strip(), file=f)
     assert {"a": {}} == tools.realize_config(
-        input_config=base,
+        input_config=yml,
         output_format="yaml",
-        supplemental_configs=[YAMLConfig(loader.get_data())],
+        supplemental_configs=[YAMLConfig(config=sup)],
     )
 
 
