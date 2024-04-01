@@ -1,0 +1,53 @@
+{
+  "properties": {
+    "ungrib": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "$ref": "urn:uwtools:execution"
+        },
+        "gfs_files": {
+          "additionalProperties": false,
+          "properties": {
+            "forecast_length": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "interval_hours": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "offset": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "forecast_length",
+            "interval_hours",
+            "offset",
+            "path"
+          ],
+          "type": "object"
+        },
+        "run_dir": {
+          "type": "string"
+        },
+        "vtable": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "gfs_files",
+        "run_dir",
+        "vtable"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

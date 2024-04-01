@@ -6,20 +6,22 @@ The ``uw`` mode for realizing and validating Rocoto XML documents.
 .. code-block:: text
 
    $ uw rocoto --help
-   usage: uw rocoto [-h] MODE ...
+   usage: uw rocoto [-h] [--version] ACTION ...
 
    Realize and validate Rocoto XML Documents
 
    Optional arguments:
      -h, --help
-           Show help and exit
+         Show help and exit
+     --version
+         Show version info and exit
 
    Positional arguments:
-     MODE
+     ACTION
        realize
-           Realize a Rocoto XML workflow document
+         Realize a Rocoto XML workflow document
        validate
-           Validate Rocoto XML
+         Validate Rocoto XML
 
 .. _cli_rocoto_realize_examples:
 
@@ -33,19 +35,20 @@ More information about the structured UW YAML file for Rocoto can be found :any:
 .. code-block:: text
 
    $ uw rocoto realize --help
-   usage: uw rocoto realize [-h] [--input-file PATH] [--output-file PATH] [--quiet] [--verbose]
+   usage: uw rocoto realize [-h] [--version] [--input-file PATH] [--output-file PATH] [--quiet]
+                            [--verbose]
 
    Realize a Rocoto XML workflow document
 
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
      --output-file PATH, -o PATH
          Path to output file (defaults to stdout)
-     --debug
-         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v
@@ -209,17 +212,17 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
 .. code-block:: text
 
    $ uw rocoto validate --help
-   usage: uw rocoto validate [-h] [--input-file PATH] [--quiet] [--verbose]
+   usage: uw rocoto validate [-h] [--version] [--input-file PATH] [--quiet] [--verbose]
 
    Validate Rocoto XML
 
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
      --input-file PATH, -i PATH
          Path to input file (defaults to stdin)
-     --debug
-         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
      --quiet, -q
          Print no logging messages
      --verbose, -v

@@ -28,8 +28,8 @@ INSTRUCTIONS
 
 <!-- Select one -->
 
-- [ ] This is a non-breaking change (existing functionality continues to work as expected)
 - [ ] This is a breaking change (changes existing functionality)
+- [ ] This is a non-breaking change (existing functionality continues to work as expected)
 
 **Checklist**
 

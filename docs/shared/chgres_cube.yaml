@@ -1,29 +1,32 @@
+platform:
+  account: me
+  scheduler: slurm
 chgres_cube:
   execution:
     executable: chgres_cube
     mpiargs:
-      - "--export=NONE"
+      - --export=NONE
     mpicmd: srun
     threads: 1
   namelist:
     update_values:
       config:
-        atm_files_input_grid: "gfs.t{{ cycle.strftime('%h') }}z.atmanl.nemsio"
+        atm_files_input_grid: gfs.t{{ cycle.strftime('%h') }}z.atmanl.nemsio
         convert_atm: true
         convert_nst: true
         convert_sfc: true
         cycle_day: !int "{{ cycle.strftime('%d') }}"
         cycle_hour: !int "{{ cycle.strftime('%H') }}"
         cycle_mon: !int "{{ cycle.strftime('%m') }}"
-        data_dir_input_grid: "/path/to/data/{{ cycle.strftime('%Y%M%d%H') }}"
+        data_dir_input_grid: /path/to/data/{{ cycle.strftime('%Y%M%d%H') }}
         fix_dir_target_grid: /path/to/fixdir
         mosaic_file_target_grid: /path/to/mosaic/C432.mosaic.halo4.nc
         orog_files_target_grid: /path/to/orog/C432.oro_data.tile7.halo4.nc
         vcoord_file_target_grid: /path/to/global_hyblev.l65.txt
         varmap_file: /path/to/varmap_table
-        grib2_file_input_grid: "a.file.gb2"
-        sfc_files_input_grid: "sfc.t{{cycle.strftime('%H') }}z.nc"
-        atm_files_input_grid: "atm.t{{cycle.strftime('%H') }}z.nc"
+        grib2_file_input_grid: a.file.gb2
+        sfc_files_input_grid: sfc.t{{cycle.strftime('%H') }}z.nc
+        atm_files_input_grid: atm.t{{cycle.strftime('%H') }}z.nc
   run_dir: /path/to/dir
 platform:
   account: foo

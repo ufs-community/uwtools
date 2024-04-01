@@ -17,12 +17,16 @@ import re
 
 from setuptools import find_packages, setup  # type: ignore
 
-recipe = os.environ.get("RECIPE_DIR", "../recipe")
-with open(os.path.join(recipe, "meta.json"), "r", encoding="utf-8") as f:
-    meta = json.load(f)
+# Collect package metadata.
 
+recipe = os.environ.get("RECIPE_DIR", "../recipe")
+metasrc = os.path.join(recipe, "meta.json")
+with open(metasrc, "r", encoding="utf-8") as f:
+    meta = json.load(f)
 name_conda = meta["name"]
 name_py = name_conda.replace("-", "_")
+
+# Define basic setup configuration.
 
 kwargs = {
     "entry_points": {"console_scripts": ["uw = %s.cli:main" % name_py]},
@@ -32,11 +36,15 @@ kwargs = {
     "version": meta["version"],
 }
 
+# Define dependency packages for non-conda installs.
+
 if not os.environ.get("CONDA_PREFIX"):
     kwargs["install_requires"] = [
         pkg.replace(" =", "==")
         for pkg in meta["packages"]["run"]
         if not re.match(r"^python .*$", pkg)
     ]
+
+# Install.
 
 setup(**kwargs)

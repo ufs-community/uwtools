@@ -1,7 +1,9 @@
 """
 Modal CLI.
 """
+
 import datetime as dt
+import json
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import HelpFormatter
@@ -19,12 +21,13 @@ import uwtools.api.jedi
 import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
 import uwtools.api.template
+import uwtools.api.ungrib
 import uwtools.config.jinja2
 import uwtools.rocoto
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.logging import log, setup_logging
 from uwtools.strings import FORMAT, STR
-from uwtools.utils.file import get_file_format
+from uwtools.utils.file import get_file_format, resource_path
 
 FORMATS = FORMAT.extensions()
 TITLE_REQ_ARG = "Required arguments"
@@ -63,6 +66,7 @@ def main() -> None:
             STR.rocoto: _dispatch_rocoto,
             STR.sfcclimogen: _dispatch_sfc_climo_gen,
             STR.template: _dispatch_template,
+            STR.ungrib: _dispatch_ungrib,
         }
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except UWError as e:
@@ -100,9 +104,9 @@ def _add_subparser_chgres_cube_task(
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_config_file(group=required, required=True)
     _add_arg_cycle(required)
     optional = _basic_setup(parser)
+    _add_arg_config_file(group=optional, required=False)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
@@ -118,7 +122,7 @@ def _dispatch_chgres_cube(args: Args) -> bool:
     """
     return uwtools.api.chgres_cube.execute(
         task=args[STR.action],
-        config_file=args[STR.cfgfile],
+        config=args[STR.cfgfile],
         cycle=args[STR.cycle],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
@@ -397,9 +401,9 @@ def _add_subparser_fv3_task(subparsers: Subparsers, task: str, helpmsg: str) -> 
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_config_file(group=required, required=True)
     _add_arg_cycle(required)
     optional = _basic_setup(parser)
+    _add_arg_config_file(group=optional, required=False)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
@@ -415,7 +419,7 @@ def _dispatch_fv3(args: Args) -> bool:
     """
     return uwtools.api.fv3.execute(
         task=args[STR.action],
-        config_file=args[STR.cfgfile],
+        config=args[STR.cfgfile],
         cycle=args[STR.cycle],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
@@ -580,9 +584,8 @@ def _add_subparser_sfc_climo_gen_task(
     :param helpmsg: Help message for task.
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_config_file(group=required, required=True)
     optional = _basic_setup(parser)
+    _add_arg_config_file(group=optional, required=False)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
@@ -598,7 +601,7 @@ def _dispatch_sfc_climo_gen(args: Args) -> bool:
     """
     return uwtools.api.sfc_climo_gen.execute(
         task=args[STR.action],
-        config_file=args[STR.cfgfile],
+        config=args[STR.cfgfile],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
@@ -694,7 +697,7 @@ def _dispatch_template_render(args: Args) -> bool:
     except UWTemplateRenderError:
         if args[STR.valsneeded]:
             return True
-        log.error("Template could not be rendered.")
+        log.error("Template could not be rendered")
         return False
     return True
 
@@ -712,6 +715,60 @@ def _dispatch_template_translate(args: Args) -> bool:
     )
 
 
+# Mode ungrib
+
+
+def _add_subparser_ungrib(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: ungrib
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.ungrib, "Execute Ungrib tasks")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_ungrib_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.ungrib.tasks().items()
+    }
+
+
+def _add_subparser_ungrib_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+    """
+    Subparser for mode: ungrib <task>
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_cycle(required)
+    optional = _basic_setup(parser)
+    _add_arg_config_file(group=optional, required=False)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
+def _dispatch_ungrib(args: Args) -> bool:
+    """
+    Dispatch logic for ungrib mode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.ungrib.execute(
+        task=args[STR.action],
+        config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
+    )
+
+
 # Arguments
 
 # pylint: disable=missing-function-docstring
@@ -726,10 +783,11 @@ def _add_arg_batch(group: Group) -> None:
 
 
 def _add_arg_config_file(group: Group, required: bool) -> None:
+    msg = "Path to config file" + ("" if required else " (default: read from stdin)")
     group.add_argument(
         _switch(STR.cfgfile),
         "-c",
-        help="Path to config file",
+        help=msg,
         metavar="PATH",
         required=required,
         type=Path,
@@ -1019,6 +1077,12 @@ def _basic_setup(parser: Parser) -> Group:
     """
     optional = parser.add_argument_group("Optional arguments")
     optional.add_argument("-h", _switch(STR.help), action=STR.help, help="Show help and exit")
+    optional.add_argument(
+        _switch(STR.version),
+        action=STR.version,
+        help="Show version info and exit",
+        version=f"%(prog)s {_version()}",
+    )
     return optional
 
 
@@ -1086,6 +1150,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         STR.rocoto: _add_subparser_rocoto(subparsers),
         STR.sfcclimogen: _add_subparser_sfc_climo_gen(subparsers),
         STR.template: _add_subparser_template(subparsers),
+        STR.ungrib: _add_subparser_ungrib(subparsers),
     }
     return vars(parser.parse_args(raw_args)), checks
 
@@ -1098,3 +1163,12 @@ def _switch(arg: str) -> str:
     :return: The long-form switch.
     """
     return "--%s" % arg.replace("_", "-")
+
+
+def _version() -> str:
+    """
+    Return version information.
+    """
+    with open(resource_path("info.json"), "r", encoding="utf-8") as f:
+        info = json.load(f)
+        return "version %s build %s" % (info["version"], info["buildnum"])

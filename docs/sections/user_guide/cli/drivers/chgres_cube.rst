@@ -6,13 +6,15 @@ The ``uw`` mode for configuring and running the :ufs-utils:`chgres_cube<chgres-c
 .. code-block:: text
 
    $ uw chgres_cube --help
-   usage: uw chgres_cube [-h] TASK ...
+   usage: uw chgres_cube [-h] [--version] TASK ...
 
    Execute chgres_cube tasks
 
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
 
    Positional arguments:
      TASK
@@ -25,13 +27,12 @@ The ``uw`` mode for configuring and running the :ufs-utils:`chgres_cube<chgres-c
        runscript
          The runscript
 
-
 All tasks take the same arguments. For example:
 
 .. code-block:: text
 
    $ uw chgres_cube run --help
-   usage: uw chgres_cube run --config-file PATH --cycle CYCLE [-h] [--batch] [--dry-run]
+   usage: uw chgres_cube run --config-file PATH --cycle CYCLE [-h] [--version] [--batch] [--dry-run]
                              [--graph-file PATH] [--quiet] [--verbose]
 
    A run
@@ -45,6 +46,8 @@ All tasks take the same arguments. For example:
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
      --batch
          Submit run to batch scheduler
      --dry-run
@@ -55,7 +58,6 @@ All tasks take the same arguments. For example:
          Print no logging messages
      --verbose, -v
          Print all logging messages
-
 
 Examples
 ^^^^^^^^

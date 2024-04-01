@@ -11,10 +11,10 @@
 # https://docs.conda.io/projects/conda-build/en/latest/resources/define-metadata.html#test-section
 
 cli() {
-  msg Testing CLI program
+  msg Testing CLI
   (
     set -eux
-    uw --help >/dev/null
+    uw --version
   )
   msg OK
 }

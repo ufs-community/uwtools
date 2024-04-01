@@ -7,7 +7,15 @@ from functools import cached_property
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Union
 
-from jinja2 import DebugUndefined, Environment, FileSystemLoader, StrictUndefined, Undefined, meta
+from jinja2 import (
+    DebugUndefined,
+    Environment,
+    FileSystemLoader,
+    StrictUndefined,
+    Template,
+    Undefined,
+    meta,
+)
 from jinja2.exceptions import UndefinedError
 
 from uwtools.config.support import TaggedString, format_to_config
@@ -38,12 +46,17 @@ class J2Template:
         self._template_source = template_source
         self._j2env = Environment(
             loader=FileSystemLoader(
-                searchpath=searchpath
-                if searchpath
-                else self._template_source.parent
-                if isinstance(self._template_source, Path)
-                else []
-            )
+                searchpath=(
+                    searchpath
+                    if searchpath
+                    else (
+                        self._template_source.parent
+                        if isinstance(self._template_source, Path)
+                        else []
+                    )
+                )
+            ),
+            undefined=StrictUndefined,
         )
         _register_filters(self._j2env)
         self._template = self._j2env.from_string(self._template_str)
@@ -177,13 +190,17 @@ def render(
     # missing values and return an error to the caller.
 
     if partial:
-        rendered = Environment(undefined=DebugUndefined).from_string(str(template)).render(values)
+        rendered = Template(str(template), undefined=DebugUndefined).render(values)
     else:
         missing = [var for var in undeclared_variables if var not in values.keys()]
         if missing:
             _log_missing_values(missing)
             return None
-        rendered = template.render()
+        try:
+            rendered = template.render()
+        except UndefinedError as e:
+            log.error("Render failed with error: %s", str(e))
+            return None
 
     # Log (dry-run mode) or write the rendered template.
 
@@ -296,9 +313,7 @@ def _register_filters(env: Environment) -> Environment:
             raise UndefinedError()
         return os.path.join(*path_components)
 
-    filters = dict(
-        path_join=path_join,
-    )
+    filters = dict(path_join=path_join)
     env.filters.update(filters)
     return env
 

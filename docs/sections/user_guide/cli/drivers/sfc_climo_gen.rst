@@ -6,13 +6,15 @@ The ``uw`` mode for configuring and running the :sfc-climo-gen:`sfc_climo_gen<>`
 .. code-block:: text
 
    $ uw sfc_climo_gen --help
-   usage: uw sfc_climo_gen [-h] TASK ...
+   usage: uw sfc_climo_gen [-h] [--version] TASK ...
 
    Execute sfc_climo_gen tasks
 
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
 
    Positional arguments:
      TASK
@@ -30,8 +32,8 @@ All tasks take the same arguments. For example:
 .. code-block:: text
 
    $ uw sfc_climo_gen run --help
-   usage: uw sfc_climo_gen run --config-file PATH [-h] [--batch] [--dry-run] [--debug] [--quiet]
-                               [--verbose]
+   usage: uw sfc_climo_gen run --config-file PATH [-h] [--version] [--batch] [--dry-run]
+                               [--graph-file PATH] [--quiet] [--verbose]
 
    A run
 
@@ -42,17 +44,18 @@ All tasks take the same arguments. For example:
    Optional arguments:
      -h, --help
          Show help and exit
+     --version
+         Show version info and exit
      --batch
          Submit run to batch scheduler
      --dry-run
          Only log info, making no changes
-     --debug
-         Print all log messages, plus any unhandled exception's stack trace (implies --verbose)
+     --graph-file PATH
+         Path to Graphviz DOT output [experimental]
      --quiet, -q
          Print no logging messages
      --verbose, -v
          Print all logging messages
-
 
 Examples
 ^^^^^^^^
