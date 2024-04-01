@@ -86,6 +86,8 @@ class STR:
     link: str = "link"
     mode: str = "mode"
     model: str = "model"
+    mpas: str = "mpas"
+    mpasinit: str = "mpas_init"
     outfile: str = "output_file"
     outfmt: str = "output_format"
     partial: str = "partial"

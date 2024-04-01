@@ -120,7 +120,7 @@ def test_FV3_field_table(driverobj):
     "key,task,test",
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
 )
-def test_FV3_files_copied(config, cycle, key, task, test, tmp_path):
+def test_FV3_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
     atm, sfc = "gfs.t%sz.atmanl.nc", "gfs.t%sz.sfcanl.nc"
     atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
