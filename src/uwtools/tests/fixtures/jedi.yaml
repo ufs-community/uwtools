@@ -1,0 +1,15 @@
+jedi:
+    geometry:
+      nx: 40
+      ny: 20
+      depths: [4500.0, 5500.0]  # a list of the depths used in model
+    initial condition:
+      date: 2010-01-01T00:00:00Z
+      filename: Data/truth.fc.2009-12-15T00:00:00Z.P17D.nc
+    model:
+      name: QG
+      tstep: PT1H
+    forecast length: PT12H
+    window begin: 2010-01-01T00:00:00Z
+    window length: PT12H
+

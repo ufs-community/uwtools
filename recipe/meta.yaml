@@ -14,11 +14,7 @@ requirements:
     - pip
   run:
     - f90nml 1.4.*
-<<<<<<< HEAD
-    - iotaa 0.7.5.*
-=======
     - iotaa 0.7.*
->>>>>>> main
     - jinja2 3.1.*
     - jsonschema 4.21.*
     - lxml 5.1.*
