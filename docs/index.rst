@@ -93,8 +93,8 @@ Do you already have a Rocoto XML but don't want to run Rocoto to make sure it wo
 
 | :any:`CLI documentation with examples<cli_rocoto_validate_examples>`
 
-Drivers
--------
+The Drivers
+-----------
 
 Drivers for NWP components are available as top-level CLI modes and API modules.
 
