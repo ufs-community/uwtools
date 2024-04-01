@@ -1,5 +1,5 @@
 user:
-  mpas_app: /path/to/mpas_app
+  mpas_app: /path/to/mpas/installation
 platform:
   account: me
   scheduler: slurm
@@ -7,8 +7,9 @@ mpas_init:
   boundary_conditions:
     interval_hours: 6
     length: 6
+    path: /path/to/boundary/condition/files
   execution:
-    executable: "{{ user.mpas_app }}/exec/init_atmosphere_model"
+    executable: "init_atmosphere"
     batchargs:
       walltime: 01:30:00
       cores: 4
@@ -22,25 +23,25 @@ mpas_init:
     conus.static.nc: /path/to/conus.static.nc
     conus.graph.info.part.{{mpas_init.execution["batchargs"]["cores"]}}: /path/to/conus.graph.info.part.{{mpas_init.execution["batchargs"]["cores"]}}
     conus.init.nc: /path/to/conus.init.nc
-    stream_list.atmosphere.diagnostics: "{{ user.mpas_app }}/src/MPAS-Model/stream_list.atmosphere.diagnostics"
-    stream_list.atmosphere.output: "{{ user.mpas_app }}/src/MPAS-Model/stream_list.atmosphere.output"
-    stream_list.atmosphere.surface: "{{ user.mpas_app }}/src/MPAS-Model/stream_list.atmosphere.surface"
+    stream_list.atmosphere.diagnostics: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.diagnostics"
+    stream_list.atmosphere.output: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.output"
+    stream_list.atmosphere.surface: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.surface"
   files_to_link:
-    CAM_ABS_DATA.DBL: "{{ user.mpas_app }}/src/MPAS-Model/CAM_ABS_DATA.DBL"
-    CAM_AEROPT_DATA.DBL: "{{ user.mpas_app }}/src/MPAS-Model/CAM_AEROPT_DATA.DBL"
-    GENPARM.TBL: "{{ user.mpas_app }}/src/MPAS-Model/GENPARM.TBL"
-    LANDUSE.TBL: "{{ user.mpas_app }}/src/MPAS-Model/LANDUSE.TBL"
-    OZONE_DAT.TBL: "{{ user.mpas_app }}/src/MPAS-Model/OZONE_DAT.TBL"
-    OZONE_LAT.TBL: "{{ user.mpas_app }}/src/MPAS-Model/OZONE_LAT.TBL"
-    OZONE_PLEV.TBL: "{{ user.mpas_app }}/src/MPAS-Model/OZONE_PLEV.TBL"
-    RRTMG_LW_DATA: "{{ user.mpas_app }}/src/MPAS-Model/RRTMG_LW_DATA"
-    RRTMG_LW_DATA.DBL: "{{ user.mpas_app }}/src/MPAS-Model/RRTMG_LW_DATA.DBL"
-    RRTMG_SW_DATA: "{{ user.mpas_app }}/src/MPAS-Model/RRTMG_SW_DATA"
-    RRTMG_SW_DATA.DBL: "{{ user.mpas_app }}/src/MPAS-Model/RRTMG_SW_DATA.DBL"
-    SOILPARM.TBL: "{{ user.mpas_app }}/src/MPAS-Model/SOILPARM.TBL"
-    VEGPARM.TBL: "{{ user.mpas_app }}/src/MPAS-Model/VEGPARM.TBL"
+    CAM_ABS_DATA.DBL: "{{ user.mpas_app }}/MPAS-Model/CAM_ABS_DATA.DBL"
+    CAM_AEROPT_DATA.DBL: "{{ user.mpas_app }}/MPAS-Model/CAM_AEROPT_DATA.DBL"
+    GENPARM.TBL: "{{ user.mpas_app }}/MPAS-Model/GENPARM.TBL"
+    LANDUSE.TBL: "{{ user.mpas_app }}/MPAS-Model/LANDUSE.TBL"
+    OZONE_DAT.TBL: "{{ user.mpas_app }}/MPAS-Model/OZONE_DAT.TBL"
+    OZONE_LAT.TBL: "{{ user.mpas_app }}/MPAS-Model/OZONE_LAT.TBL"
+    OZONE_PLEV.TBL: "{{ user.mpas_app }}/MPAS-Model/OZONE_PLEV.TBL"
+    RRTMG_LW_DATA: "{{ user.mpas_app }}/MPAS-Model/RRTMG_LW_DATA"
+    RRTMG_LW_DATA.DBL: "{{ user.mpas_app }}/MPAS-Model/RRTMG_LW_DATA.DBL"
+    RRTMG_SW_DATA: "{{ user.mpas_app }}/MPAS-Model/RRTMG_SW_DATA"
+    RRTMG_SW_DATA.DBL: "{{ user.mpas_app }}/MPAS-Model/RRTMG_SW_DATA.DBL"
+    SOILPARM.TBL: "{{ user.mpas_app }}/MPAS-Model/SOILPARM.TBL"
+    VEGPARM.TBL: "{{ user.mpas_app }}/MPAS-Model/VEGPARM.TBL"
   namelist:
-    base_file: "{{ user.mpas_app }}/src/MPAS-Model/namelist.init_atmosphere"
+    base_file: "{{ user.mpas_app }}/MPAS-Model/namelist.init_atmosphere"
     update_values:
       nhyd_model:
         config_init_case: 9
@@ -56,7 +57,7 @@ mpas_init:
         config_block_decomp_file_prefix: conus.graph.info.part.
   run_dir: /path/to/rundir
   streams:
-    path: /path/to/streams.init_atmosphere.IN
+    path: "{{ user.mpas_app }}/MPAS-Model/streams.init_atmosphere"
     values:
       input_filename: conus.init.nc
       output_filename: foo.nc
