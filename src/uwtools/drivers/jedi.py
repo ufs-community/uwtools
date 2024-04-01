@@ -22,7 +22,7 @@ class Jedi(Driver):
     """
 
     def __init__(
-        self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
+        self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False, validate_only: bool = False
     ):
         """
         The driver.
@@ -31,9 +31,10 @@ class Jedi(Driver):
         :param cycle: The forecast cycle.
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
+        :param validate_only: Run in validate-only mode?
         """
 
-        super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
+        super().__init__(config_file=config_file, dry_run=dry_run, batch=batch, validate_only=validate_only)
         self._config.dereference(context={"cycle": cycle})
         if self._dry_run:
             dryrun()
@@ -89,6 +90,14 @@ class Jedi(Driver):
         self._write_runscript(path=path, envvars={})        
 
     @task
+    def validate_only(self):
+        """
+        Valid config
+        """
+        yield self._taskname("validate-only")
+        yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
+
+    @task
     def yaml_file(self):
         """
         The yaml file.
@@ -104,13 +113,6 @@ class Jedi(Driver):
             path=path,
         )
 
-    @task
-    def validate(self):
-        """
-        Validate the YAML.
-        """
-        pass
-
 
     # Private helper methods
 
@@ -121,17 +123,6 @@ class Jedi(Driver):
         """
         return STR.jedi
 
-    @property
-    def _resources(self) -> Dict[str, Any]:
-        """
-        Returns configuration data for the runscript.
-        """
-        return {
-            "account": self._config["platform"]["account"],
-            "rundir": self._rundir,
-            "scheduler": self._config["platform"]["scheduler"],
-            **self._driver_config.get("execution", {}).get("batchargs", {}),
-        }
 
     def _taskname(self, suffix: str) -> str:
         """
