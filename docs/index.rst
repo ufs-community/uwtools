@@ -93,33 +93,70 @@ Do you already have a Rocoto XML but don't want to run Rocoto to make sure it wo
 
 | :any:`CLI documentation with examples<cli_rocoto_validate_examples>`
 
-The Drivers
------------
+Drivers
+-------
 
 Drivers for NWP components are available as top-level CLI modes and API modules.
 
+Provided with a valid UW YAML configuration file, and CLI arguments when required, ``uw`` can prepare a fully provisioned run directory and execute a component either directly on the current system, or via a batch job submitted to an HPC scheduler.
+
+Each driver produces a list of available ``TASK`` arguments from its CLI ``--help, -h`` flag (shown
+below). The ``provisioned_run_directory`` will do everything except ``run`` the executable, but any
+of the tasks may be requested and only the steps required to produce that task will be performed.
+
+Over time, we'll add many other drivers to support a variety of UFS components from pre-processing to post-processing, along with many data assimilation components.
+
+Drivers for UFS
+^^^^^^^^^^^^^^^
+
+Typically, these would be run in the sequence in which they are ordered here, although not all drivers are currently in place to produce all the steps needed to prepare a forecast.
+
+sfc_climo_gen
+"""""""""""""
+
+| **CLI**: ``uw sfc_climo_gen -h``
+| **API**: ``import uwtools.api.drivers.sfc_climo_gen``
+
 chgres_cube
-^^^^^^^^^^^
+"""""""""""
 
 | **CLI**: ``uw chgres_cube -h``
 | **API**: ``import uwtools.api.drivers.chgres_cube``
 
 
 FV3
-^^^
+"""
 
 | **CLI**: ``uw fv3 -h``
 | **API**: ``import uwtools.api.drivers.fv3``
 
-sfc_climo_gen
-^^^^^^^^^^^^^
 
-| **CLI**: ``uw sfc_climo_gen -h``
-| **API**: ``import uwtools.api.drivers.sfc_climo_gen``
 
-Provided with a valid UW YAML configuration file, and CLI arguments when required, ``uw`` can prepare a fully provisioned run directory and execute a component either directly on the current system, or via a batch job submitted to an HPC scheduler.
+Drivers for MPAS
+^^^^^^^^^^^^^^^^
 
-Over time, we'll add many other drivers to support a variety of UFS components from pre-processing to post-processing, along with many data assimilation components.
+Drivers for working with standalone :mpas:`Model for Prediction Across Scales (MPAS)<>`. Typically, these would be run in the sequence in which they are ordered here:
+
+ungrib
+""""""
+
+| **CLI**: ``uw ungrib -h``
+| **API**: ``import uwtools.api.drivers.ungrib``
+
+
+mpas_init
+"""""""""
+
+| **CLI**: ``uw mpas_init -h``
+| **API**: ``import uwtools.api.drivers.mpas_init``
+
+mpas
+""""
+
+| **CLI**: ``uw mpas -h``
+| **API**: ``import uwtools.api.drivers.mpas``
+
+
 
 ------------------
 

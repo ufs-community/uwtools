@@ -8,9 +8,9 @@ Structured YAML to run the WRF preprocessing component ``mpas_init`` is validate
 Here is a prototype UW YAML ``mpas_init:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/mpas.yaml
+.. literalinclude:: ../../../../shared/mpas_init.yaml
 
-When the ``init_atmosphere`` executable is built from the MPAS source code, static datainput files and default namelist and streams files are also created. Here we show an example of how an arbitrarily named ``user:`` section may be used to define helpful variables that are heavily reused through the rest of the configuration. In this example, the ``mpas_app`` entry is the path to where the MPAS model was installed.
+When the ``init_atmosphere`` executable is built from the MPAS source code, static data input files and default namelist and streams files are also created. Here we show an example of how an arbitrarily named ``user:`` section may be used to define helpful variables that are heavily reused through the rest of the configuration. In this example, the ``mpas_app:`` entry is the path to where the MPAS model was installed.
 
 
 UW YAML for the ``mpas:`` Block

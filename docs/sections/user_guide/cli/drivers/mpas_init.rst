@@ -1,7 +1,7 @@
 ``mpas_init``
-==========
+=============
 
-The ``uw`` mode for configuring and running the MPAS init_atmosphere component.
+The ``uw`` mode for configuring and running the MPAS init_atmosphere component. Any of the ``TASK`` arguments listed below may be called to generate that component required for a the ultimate ``run`` task. A ``provisioned_run_directory`` will perform all of the tasks except for running the executable.
 
 .. code-block:: text
 
