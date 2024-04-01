@@ -312,7 +312,7 @@ def test_realize_config_remove_nml_to_nml(tmp_path):
     tools.realize_config(
         input_config=nml,
         output_file=cfg,
-        supplemental_configs=[YAMLConfig(config=sup)],
+        supplemental_configs=[sup],
     )
     assert f90nml.read(cfg) == {"constants": {"pi": 3.141}}
 
@@ -330,7 +330,7 @@ def test_realize_config_remove_yaml_to_yaml_scalar(tmp_path):
     assert {"a": {"b": {"c": 11, "e": 33}}} == tools.realize_config(
         input_config=yml,
         output_format="yaml",
-        supplemental_configs=[YAMLConfig(config=sup)],
+        supplemental_configs=[sup],
     )
 
 
@@ -346,7 +346,7 @@ def test_realize_config_remove_yaml_to_yaml_subtree(tmp_path):
     assert {"a": {}} == tools.realize_config(
         input_config=yml,
         output_format="yaml",
-        supplemental_configs=[YAMLConfig(config=sup)],
+        supplemental_configs=[sup],
     )
 
 
