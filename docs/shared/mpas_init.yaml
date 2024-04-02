@@ -10,16 +10,16 @@ mpas_init:
     offset: 0
     path: /path/to/boundary/condition/files
   execution:
-    executable: "init_atmosphere"
+    executable: init_atmosphere
     batchargs:
       walltime: 01:30:00
       cores: 4
     mpiargs:
-      - "--ntasks=4"
+      - --ntasks=4
     mpicmd: srun
   files_to_copy:
     conus.static.nc: /path/to/conus.static.nc
-    conus.graph.info.part.{{mpas_init.execution["batchargs"]["cores"]}}: /path/to/conus.graph.info.part.{{mpas_init.execution["batchargs"]["cores"]}}
+    conus.graph.info.part.4: /path/to/conus.graph.info.part.4
     stream_list.atmosphere.diagnostics: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.diagnostics"
     stream_list.atmosphere.output: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.output"
     stream_list.atmosphere.surface: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.surface"

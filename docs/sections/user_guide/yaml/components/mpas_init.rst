@@ -53,6 +53,24 @@ files_to_copy:
 
 See :ref:`this page <files_yaml>` for details.
 
+To reduce duplication of information in this section, it may be helpful to template the file that depends on the number of cores being used to run the executable. For example, instead of:
+
+.. code-block:: text
+
+   mpas_init:
+     files_to_copy:
+       conus.graph.info.part.4: /path/to/conus.graph.info.part.4
+
+Jinja expressions can be used to reference the number of cores used in execution:
+
+.. code-block:: text
+
+   mpas_init:
+     files_to_copy:
+       conus.graph.info.part.{{mpas_init.execution["batchargs"]["cores"]}}: /path/to/conus.graph.info.part.{{mpas_init.execution["batchargs"]["cores"]}}
+
+Note that the ``files_to_copy:`` and the ``file_to_link:`` blocks are the only ones that accept Jinja expressions in their keys.
+
 files_to_link:
 ^^^^^^^^^^^^^^
 

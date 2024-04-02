@@ -12,11 +12,11 @@ mpas:
       walltime: 01:30:00
       cores: 32
     mpiargs:
-      - "--ntasks={{ mpas['execution']['batchargs']['cores'] }}"
+      - --ntasks={{ mpas['execution']['batchargs']['cores'] }}
     mpicmd: srun
   files_to_copy:
-    conus.init.nc: "/path/to/conus.init.nc"
-    conus.graph.info.part.{{mpas.execution["batchargs"]["cores"]}}: '/path/to/conus.graph.info.part.{{ mpas.execution["batchargs"]["cores"] }}'
+    conus.init.nc: /path/to/conus.init.nc
+    conus.graph.info.part.32: /path/to/conus.graph.info.part.32
     stream_list.atmosphere.diagnostics: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.diagnostics"
     stream_list.atmosphere.output: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.output"
     stream_list.atmosphere.surface: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.surface"
@@ -43,7 +43,7 @@ mpas:
         config_apply_lbcs: true
       decomposition:
         config_block_decomp_file_prefix: conus.graph.info.part.
-  run_dir: '/path/to/run/directory'
+  run_dir: /path/to/run/directory
   streams:
     path: "{{ user.mpas_app }}/MPAS-Model/streams.atmosphere"
     values:
