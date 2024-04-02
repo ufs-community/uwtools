@@ -7,15 +7,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Union
 
-from jinja2 import (
-    DebugUndefined,
-    Environment,
-    FileSystemLoader,
-    StrictUndefined,
-    Template,
-    Undefined,
-    meta,
-)
+from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined, meta
 from jinja2.exceptions import UndefinedError
 
 from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, format_to_config
@@ -164,7 +156,6 @@ def render(
     env: bool = False,
     searchpath: Optional[List[str]] = None,
     values_needed: bool = False,
-    partial: bool = False,
     dry_run: bool = False,
 ) -> Optional[str]:
     """
@@ -178,7 +169,6 @@ def render(
     :param env: Supplement values with environment variables?
     :param searchpath: Paths to search for extra templates.
     :param values_needed: Just report variables needed to render the template?
-    :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
     :return: The rendered template, or None.
     """
@@ -196,21 +186,18 @@ def render(
         _values_needed(undeclared_variables)
         return None
 
-    # If partial rendering has been requested, do a best-effort render. Otherwise, report any
-    # missing values and return an error to the caller.
+    # Render the template. If there are missing values, report them and return an error to the
+    # caller.
 
-    if partial:
-        rendered = Template(str(template), undefined=DebugUndefined).render(values)
-    else:
-        missing = [var for var in undeclared_variables if var not in values.keys()]
-        if missing:
-            _log_missing_values(missing)
-            return None
-        try:
-            rendered = template.render()
-        except UndefinedError as e:
-            log.error("Render failed with error: %s", str(e))
-            return None
+    missing = [var for var in undeclared_variables if var not in values.keys()]
+    if missing:
+        _log_missing_values(missing)
+        return None
+    try:
+        rendered = template.render()
+    except UndefinedError as e:
+        log.error("Render failed with error: %s", str(e))
+        return None
 
     # Log (dry-run mode) or write the rendered template.
 

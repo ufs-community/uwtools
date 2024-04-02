@@ -254,16 +254,16 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
 
   Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
 
-* Values in the primary input file can be overridden via one or more supplemental files specified as positional arguments, each overriding the last, or by environment variables, which have the highest precedence.
+* Values in the input file can be overridden via one or more supplemental files specified as positional arguments. Priority increases from left to right.
 
   .. code-block:: text
 
-     $ recipient=Sun uw config realize --input-file config.yaml --output-format yaml values1.yaml values2.yaml
+     $ uw config realize --input-file config.yaml --output-format yaml values1.yaml values2.yaml
      values:
        date: 20240105
        empty: false
        greeting: Good Night
-       message: 'Good Night Sun Good Night Sun Good Night Sun '
+       message: 'Good Night Moon Good Night Moon Good Night Moon '
        recipient: Moon
        repeat: 3
 
@@ -285,20 +285,20 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
        recipient: Moon
        repeat: 2
 
-* By default, variables/expressions that cannot be rendered are passed through unchanged in the output. For example, config file ``config.yaml`` with contents
+* By default, variables/expressions that cannot be rendered are passed through unchanged in the output. For example, given config file ``config.yaml`` with contents
 
   .. code-block:: yaml
 
      roses: "{{ color1 }}"
      violets: "{{ color2 }}"
-
-  could normally be partially realized, with ``uw`` exiting with success status, by providing one of the two needed template values:
+     color1: red
 
   .. code-block:: text
 
-     $ color1=red uw config realize --input-file config.yaml --output-format yaml
+     $ uw config realize --input-file config.yaml --output-format yaml values.yaml
      roses: red
      violets: '{{ color2 }}'
+     color1: red
      $ echo $?
      0
 
@@ -306,10 +306,23 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
 
   .. code-block:: text
 
-     $ color1=red uw config realize --input-file config.yaml --output-format yaml --total
-     [2024-02-28T23:21:16]    ERROR Config could not be realized. Try again with --values-needed for details.
+     $ uw config realize --input-file config.yaml --output-format yaml values.yaml --total
+     [2024-04-02T00:53:04]    ERROR Config could not be realized. Try with --values-needed for details.
      $ echo $?
      1
+
+* Realization of individual values is all-or-nothing. If a single value contains a mix of renderable and unrenderable variables/expressions, then the entire value remains unrealized. For example, given ``config.yaml`` with contents
+
+  .. code-block:: yaml
+
+     roses: "{{ color1 }} or {{ color2 }}"
+     color1: red
+
+  .. code-block:: text
+
+     $ uw config realize --input-file config.yaml --output-format yaml
+     roses: '{{ color1 }} or {{ color2 }}'
+     color1: red
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 

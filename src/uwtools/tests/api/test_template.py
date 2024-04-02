@@ -20,7 +20,6 @@ def kwargs():
         "overrides": {"key": "val"},
         "searchpath": None,
         "env": True,
-        "partial": True,
         "values_needed": True,
         "dry_run": True,
     }
