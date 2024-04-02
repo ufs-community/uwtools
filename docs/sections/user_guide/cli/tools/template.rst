@@ -33,8 +33,8 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
    $ uw template render --help
    usage: uw template render [-h] [--version] [--input-file PATH] [--output-file PATH]
                              [--values-file PATH] [--values-format {ini,nml,sh,yaml}] [--env]
-                             [--search-path PATH[:PATH:...]] [--values-needed] [--partial]
-                             [--dry-run] [--quiet] [--verbose]
+                             [--search-path PATH[:PATH:...]] [--values-needed] [--dry-run] [--quiet]
+                             [--verbose]
                              [KEY=VALUE ...]
 
    Render a template
@@ -58,8 +58,6 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
          Colon-separated paths to search for extra templates
      --values-needed
          Print report of values needed to render template
-     --partial
-         Permit partial template rendering
      --dry-run
          Only log info, making no changes
      --quiet, -q
@@ -203,13 +201,6 @@ and a YAML file called ``values.yaml`` with the following contents:
    [2024-03-02T16:42:48]    ERROR Required value(s) not provided:
    [2024-03-02T16:42:48]    ERROR   recipient
    [2024-03-02T16:42:48]    ERROR Template could not be rendered
-
-  But the ``--partial`` switch may be used to render as much as possible while passing expressions containing missing values through unchanged:
-
-  .. code-block:: text
-
-     $ uw template render --input-file template --values-file values.yaml --partial
-     Hello, {{ recipient }}!
 
   Values may also be supplemented by ``key=value`` command-line arguments:
 

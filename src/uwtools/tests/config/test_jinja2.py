@@ -249,20 +249,6 @@ def test_render_fails(caplog, tmp_path):
     assert logged(caplog, "Render failed with error: 'dict object' has no attribute 'e'")
 
 
-@pytest.mark.parametrize("partial", [False, True])
-def test_render_partial(caplog, capsys, partial):
-    log.setLevel(logging.INFO)
-    template = StringIO(initial_value="{{ greeting }} {{ recipient }}")
-    with patch.object(jinja2, "readable") as readable:
-        readable.return_value.__enter__.return_value = template
-        jinja2.render(values_src={"greeting": "Hello"}, partial=partial)
-    if partial:
-        assert "Hello {{ recipient }}" in capsys.readouterr().out
-    else:
-        assert logged(caplog, "Required value(s) not provided:")
-        assert logged(caplog, "  recipient")
-
-
 def test_render_values_missing(caplog, template_file, values_file):
     log.setLevel(logging.INFO)
     # Read in the config, remove the "roses" key, then re-write it.
@@ -551,3 +537,11 @@ class Test_J2Template:
         s = "{{ a }} {{ b.c }} {{ d.e.f[g] }} {{ h[i] }} {{ j[88] }} {{ k|default(l) }}"
         uvs = {"a", "b", "d", "g", "h", "i", "j", "k", "l"}
         assert J2Template(values={}, template_source=s).undeclared_variables == uvs
+
+    def test__template_str(self, testdata):
+        obj = J2Template(values=testdata.config, template_source=testdata.template)
+        assert obj._template_str == "{{greeting}} to {{recipient}}"
+
+    def test___repr__(self, testdata):
+        obj = J2Template(values=testdata.config, template_source=testdata.template)
+        assert str(obj) == "{{greeting}} to {{recipient}}"

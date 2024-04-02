@@ -90,7 +90,6 @@ class STR:
     mpasinit: str = "mpas_init"
     outfile: str = "output_file"
     outfmt: str = "output_format"
-    partial: str = "partial"
     quiet: str = "quiet"
     realize: str = "realize"
     render: str = "render"
