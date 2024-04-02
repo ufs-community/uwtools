@@ -713,7 +713,6 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_env(optional)
     _add_arg_search_path(optional)
     _add_arg_values_needed(optional)
-    _add_arg_partial(optional)
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_key_eq_val_pairs(optional)
@@ -749,7 +748,6 @@ def _dispatch_template_render(args: Args) -> bool:
             env=args[STR.env],
             searchpath=args[STR.searchpath],
             values_needed=args[STR.valsneeded],
-            partial=args[STR.partial],
             dry_run=args[STR.dryrun],
         )
     except UWTemplateRenderError:
@@ -965,14 +963,6 @@ def _add_arg_output_format(group: Group, choices: List[str], required: bool = Fa
         help="Output format",
         required=required,
         type=str,
-    )
-
-
-def _add_arg_partial(group: Group) -> None:
-    group.add_argument(
-        _switch(STR.partial),
-        action="store_true",
-        help="Permit partial template rendering",
     )
 
 

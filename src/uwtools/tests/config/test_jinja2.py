@@ -249,20 +249,6 @@ def test_render_fails(caplog, tmp_path):
     assert logged(caplog, "Render failed with error: 'dict object' has no attribute 'e'")
 
 
-@pytest.mark.parametrize("partial", [False, True])
-def test_render_partial(caplog, capsys, partial):
-    log.setLevel(logging.INFO)
-    template = StringIO(initial_value="{{ greeting }} {{ recipient }}")
-    with patch.object(jinja2, "readable") as readable:
-        readable.return_value.__enter__.return_value = template
-        jinja2.render(values_src={"greeting": "Hello"}, partial=partial)
-    if partial:
-        assert "Hello {{ recipient }}" in capsys.readouterr().out
-    else:
-        assert logged(caplog, "Required value(s) not provided:")
-        assert logged(caplog, "  recipient")
-
-
 def test_render_values_missing(caplog, template_file, values_file):
     log.setLevel(logging.INFO)
     # Read in the config, remove the "roses" key, then re-write it.

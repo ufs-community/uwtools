@@ -20,7 +20,6 @@ def render(
     env: bool = False,
     searchpath: Optional[List[str]] = None,
     values_needed: bool = False,
-    partial: bool = False,
     dry_run: bool = False,
 ) -> str:
     """
@@ -42,7 +41,6 @@ def render(
     :param env: Supplement values with environment variables?
     :param searchpath: Paths to search for extra templates
     :param values_needed: Just report variables needed to render the template?
-    :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
     :return: The rendered template string
     :raises: UWTemplateRenderError if template could not be rendered
@@ -56,7 +54,6 @@ def render(
         env=env,
         searchpath=searchpath,
         values_needed=values_needed,
-        partial=partial,
         dry_run=dry_run,
     )
     if result is None:
@@ -72,7 +69,6 @@ def render_to_str(  # pylint: disable=unused-argument
     env: bool = False,
     searchpath: Optional[List[str]] = None,
     values_needed: bool = False,
-    partial: bool = False,
     dry_run: bool = False,
 ) -> str:
     """
