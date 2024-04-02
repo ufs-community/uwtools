@@ -537,3 +537,11 @@ class Test_J2Template:
         s = "{{ a }} {{ b.c }} {{ d.e.f[g] }} {{ h[i] }} {{ j[88] }} {{ k|default(l) }}"
         uvs = {"a", "b", "d", "g", "h", "i", "j", "k", "l"}
         assert J2Template(values={}, template_source=s).undeclared_variables == uvs
+
+    def test__template_str(self, testdata):
+        obj = J2Template(values=testdata.config, template_source=testdata.template)
+        assert obj._template_str == "{{greeting}} to {{recipient}}"
+
+    def test___repr__(self, testdata):
+        obj = J2Template(values=testdata.config, template_source=testdata.template)
+        assert str(obj) == "{{greeting}} to {{recipient}}"
