@@ -36,9 +36,9 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
                              [--search-path PATH[:PATH:...]] [--values-needed] [--dry-run] [--quiet]
                              [--verbose]
                              [KEY=VALUE ...]
-   
+
    Render a template
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
