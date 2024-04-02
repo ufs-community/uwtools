@@ -355,24 +355,26 @@ def test__dispatch_config_realize():
     args = {
         STR.infile: 1,
         STR.infmt: 2,
-        STR.outfile: 3,
-        STR.outfmt: 4,
-        STR.suppfiles: 5,
-        STR.valsneeded: 6,
-        STR.total: 7,
-        STR.dryrun: 8,
+        STR.outblock: 3,
+        STR.outfile: 4,
+        STR.outfmt: 5,
+        STR.suppfiles: 6,
+        STR.valsneeded: 7,
+        STR.total: 8,
+        STR.dryrun: 9,
     }
     with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
     realize.assert_called_once_with(
         input_config=1,
         input_format=2,
-        output_file=3,
-        output_format=4,
-        supplemental_configs=5,
-        values_needed=6,
-        total=7,
-        dry_run=8,
+        output_block=3,
+        output_file=4,
+        output_format=5,
+        supplemental_configs=6,
+        values_needed=7,
+        total=8,
+        dry_run=9,
     )
 
 
@@ -383,6 +385,7 @@ def test__dispatch_config_realize_fail(caplog):
         for x in (
             STR.infile,
             STR.infmt,
+            STR.outblock,
             STR.outfile,
             STR.outfmt,
             STR.suppfiles,
@@ -400,6 +403,7 @@ def test__dispatch_config_realize_no_optional():
     args = {
         STR.infile: None,
         STR.infmt: None,
+        STR.outblock: None,
         STR.outfile: None,
         STR.outfmt: None,
         STR.suppfiles: ["/foo.vals"],
@@ -412,6 +416,7 @@ def test__dispatch_config_realize_no_optional():
     realize.assert_called_once_with(
         input_config=None,
         input_format=None,
+        output_block=None,
         output_file=None,
         output_format=None,
         supplemental_configs=["/foo.vals"],

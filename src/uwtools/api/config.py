@@ -94,6 +94,7 @@ def get_yaml_config(config: Union[dict, Optional[Path]] = None) -> _YAMLConfig:
 def realize(
     input_config: Union[dict, _Config, Optional[Path]] = None,
     input_format: Optional[str] = None,
+    output_block: Optional[List[Union[str, int]]] = None,
     output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
     supplemental_configs: Optional[List[Union[dict, _Config, Path]]] = None,
@@ -107,6 +108,7 @@ def realize(
     _realize(
         input_config=_ensure_config_arg_type(input_config),
         input_format=input_format,
+        output_block=output_block,
         output_file=output_file,
         output_format=output_format,
         supplemental_configs=supplemental_configs,

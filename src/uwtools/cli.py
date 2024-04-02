@@ -193,6 +193,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_input_format(optional, choices=FORMATS)
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=FORMATS)
+    _add_arg_output_block(optional)
     _add_arg_values_needed(optional)
     _add_arg_total(optional)
     _add_arg_dry_run(optional)
@@ -256,6 +257,7 @@ def _dispatch_config_realize(args: Args) -> bool:
         uwtools.api.config.realize(
             input_config=args[STR.infile],
             input_format=args[STR.infmt],
+            output_block=args[STR.outblock],
             output_file=args[STR.outfile],
             output_format=args[STR.outfmt],
             supplemental_configs=args[STR.suppfiles],
@@ -942,6 +944,16 @@ def _add_arg_keys(group: Group) -> None:
         help="YAML key leading to file dst/src block",
         metavar="KEY",
         nargs="*",
+    )
+
+
+def _add_arg_output_block(group: Group):
+    group.add_argument(
+        _switch(STR.outblock),
+        help="Colon-separated path of keys to the block to be output",
+        metavar="KEY[:KEY:...]",
+        required=False,
+        type=lambda s: s.split(":"),
     )
 
 

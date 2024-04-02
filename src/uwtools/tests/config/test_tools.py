@@ -278,6 +278,46 @@ def test_realize_config_incompatible_file_type():
         )
 
 
+def test_realize_config_output_block(tmp_path, realize_config_testobj):
+    """
+    Test that --output-block subsets the input as expected.
+    """
+    outfile = tmp_path / "test_output.yaml"
+    tools.realize_config(
+        input_config=realize_config_testobj,
+        output_block=[1],
+        output_file=outfile,
+    )
+    expected = """
+    2:
+      3: 88"""
+    expected_file = tmp_path / "expected.yaml"
+    with open(expected_file, "w", encoding="utf-8") as f:
+        f.write(dedent(expected).strip())
+    assert compare_files(expected_file, outfile)
+
+
+def test_realize_config_output_block_format_conversion(tmp_path):
+    """
+    Test that --output-block subsets the input as expected for output format.
+    """
+    outfile = tmp_path / "test_output.nml"
+    d = {"a": {"b": {"c": 88}}}
+    tools.realize_config(
+        input_config=YAMLConfig(d),
+        output_block=["a"],
+        output_file=outfile,
+    )
+    expected = """
+    &b
+        c = 88
+    /"""
+    expected_file = tmp_path / "expected.nml"
+    with open(expected_file, "w", encoding="utf-8") as f:
+        f.write(dedent(expected).strip())
+    assert compare_files(expected_file, outfile)
+
+
 def test_realize_config_output_file_conversion(tmp_path):
     """
     Test that --output-input-type converts config object to desired object type.

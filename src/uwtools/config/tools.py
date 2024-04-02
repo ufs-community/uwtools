@@ -79,6 +79,7 @@ def config_check_depths_update(config_obj: Union[Config, dict], target_format: s
 def realize_config(
     input_config: Union[Config, Optional[Path]] = None,
     input_format: Optional[str] = None,
+    output_block: Optional[List[Union[str, int]]] = None,
     output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
     supplemental_configs: Optional[List[Union[dict, Config, Path]]] = None,
@@ -100,7 +101,11 @@ def realize_config(
     if supplemental_configs:
         input_obj = _realize_config_update(input_obj, input_format, supplemental_configs)
     input_obj.dereference()
-    config_check_depths_realize(input_obj, output_format)
+    output_data = input_obj.data
+    if output_block is not None:
+        for key in output_block:
+            output_data = output_data.get(key, {})
+    config_check_depths_realize(output_data, output_format)
     if dry_run:
         for line in str(input_obj).strip().split("\n"):
             log.info(line)
@@ -111,7 +116,7 @@ def realize_config(
     if total and unrendered(str(input_obj)):
         raise UWConfigRealizeError("Config could not be totally realized")
     output_class = format_to_config(output_format)
-    output_class.dump_dict(cfg=input_obj.data, path=output_file)
+    output_class.dump_dict(cfg=output_data, path=output_file)
     return input_obj.data
 
 
