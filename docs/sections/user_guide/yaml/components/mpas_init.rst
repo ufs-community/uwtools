@@ -13,8 +13,8 @@ Here is a prototype UW YAML ``mpas_init:`` block, explained in detail below:
 When the ``init_atmosphere`` executable is built from the MPAS source code, static data input files and default namelist and streams files are also created. Here we show an example of how an arbitrarily named ``user:`` section may be used to define helpful variables that are heavily reused through the rest of the configuration. In this example, the ``mpas_app:`` entry is the path to where the MPAS model was installed.
 
 
-UW YAML for the ``mpas:`` Block
--------------------------------
+UW YAML for the ``mpas_init:`` Block
+------------------------------------
 
 execution:
 ^^^^^^^^^^

@@ -43,7 +43,7 @@ How many hours earlier the external model used for boundary conditions started c
 path:
 """""
 
-An absolute path to the MPAS-ready files to be used initial and lateral boundary condition input. The names of the files are specified in the MPAS streams.atmosphere XML file, and may be specified in the ``streams: values:`` block of the driver YAML.
+An absolute path to the MPAS-ready files to be used for initial and lateral boundary conditions input. The names of the files are specified in the MPAS ``streams.atmosphere`` XML file, and may be specified in the ``streams: values:`` block of the driver YAML.
 
 length:
 ^^^^^^^

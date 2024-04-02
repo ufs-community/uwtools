@@ -84,9 +84,9 @@ Its contents are described in depth in section :ref:`mpas_init_yaml`.
 
      $ uw mpas_init run --config-file config.yaml --cycle 2023-12-18T00
 
-  The driver creates a ``runscriptmpas_init`` file in the directory specified by ``run_dir:`` in the config and runs it, executing `mpas_init``.
+  The driver creates a ``runscript.mpas_init`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``mpas_init``.
 
-* Run `mpas_init`` via a batch job
+* Run ``mpas_init`` via a batch job
 
   .. code-block:: text
 
