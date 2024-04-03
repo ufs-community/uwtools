@@ -17,9 +17,9 @@ from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
 
-class Jedi(Driver):
+class JEDI(Driver):
     """
-    A driver for the jedi component.
+    A driver for the JEDI component.
     """
 
     def __init__(
@@ -86,13 +86,6 @@ class Jedi(Driver):
         yield None
         self._write_runscript(path=path, envvars={})
 
-    @task
-    def validate_only(self):
-        """
-        Valid config
-        """
-        yield self._taskname("validate-only")
-        yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
 
     @task
     def yaml_file(self):
@@ -121,11 +114,10 @@ class Jedi(Driver):
         a = asset(None, lambda: False)
         yield a
 
-        path = self._rundir / Path("tmp/n")
+        path = self._rundir / Path("tests/fixtures/jedi.yaml")
         # yield file(path=path)
-        yield [_exists(Path("/bin/test")), _exists(path=path)]
-
         executable = self._driver_config["execution"]["executable"]
+        yield [asset(executable, executable.is_file), asset(path.is_file)]
         cmd = "time {x} --validate-only {p} 2>&1".format(x=executable, p=path)
         if cmd.success:
             logging.info("%s: Config is valid", taskname)

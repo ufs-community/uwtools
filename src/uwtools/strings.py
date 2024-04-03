@@ -107,7 +107,6 @@ class STR:
     translate: str = "translate"
     ungrib: str = "ungrib"
     validate: str = "validate"
-    validateonly: str = "validateonly"
     valsfile: str = "values_file"
     valsfmt: str = "values_format"
     valsneeded: str = "values_needed"
