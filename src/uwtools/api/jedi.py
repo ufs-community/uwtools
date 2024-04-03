@@ -1,6 +1,8 @@
 """
 API access to the ``uwtools`` ``jedi`` driver.
 """
+
+import datetime as dt
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -11,6 +13,7 @@ from uwtools.drivers.jedi import Jedi as _Jedi
 def execute(
     task: str,
     config_file: Path,
+    cycle: dt.datetime,
     batch: bool = False,
     dry_run: bool = False,
     graph_file: Optional[Path] = None,
@@ -22,13 +25,14 @@ def execute(
     Otherwise, the forecast will be run directly on the current system.
 
     :param task: The task to execute
+    :param cycle: The cycle.
     :param config_file: Path to YAML config file
     :param batch: Submit run to the batch system
     :param dry_run: Do not run forecast, just report what would have been done
     :param graph_file: Write Graphviz DOT output here
     :return: ``True`` if task completes without raising an exception
     """
-    obj = _Jedi(config_file=config_file, batch=batch, dry_run=dry_run)
+    obj = _Jedi(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
     getattr(obj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:

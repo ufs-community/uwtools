@@ -2,13 +2,14 @@
 A driver for the jedi component.
 """
 
+import logging
 import os
 import stat
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
 
-from iotaa import asset, dryrun, task, tasks
+from iotaa import asset, dryrun, external, logcfg, run, task, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
@@ -32,15 +33,12 @@ class Jedi(Driver):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-
-        super().__init__(config_file=config_file, dry_run=dry_run, batch=batch)
-        self._config.dereference(context={"cycle": cycle})
+        super().__init__(config=config_file, dry_run=dry_run, batch=batch, cycle=cycle)
         if self._dry_run:
             dryrun()
         self._cycle = cycle
 
     # Workflow tasks
-
 
     @tasks
     def files_copied(self):
@@ -86,7 +84,7 @@ class Jedi(Driver):
         yield self._taskname(path.name)
         yield asset(path, path.is_file)
         yield None
-        self._write_runscript(path=path, envvars={})        
+        self._write_runscript(path=path, envvars={})
 
     @task
     def yaml_file(self):
@@ -105,12 +103,26 @@ class Jedi(Driver):
         )
 
     @task
-    def validate(self):
+    def validate_only(self):
         """
-        Validate the YAML.
+        Validate config.
         """
-        pass
+        taskname = self._taskname("validate_only")
+        yield taskname
 
+        a = asset(None, lambda: False)
+        yield a
+
+        path = self._rundir / Path("tmp/n")
+        # yield file(path=path)
+        yield [_exists(Path("/bin/test")), _exists(path=path)]
+
+        executable = self._driver_config["execution"]["executable"]
+        cmd = "time {x} --validate-only {p} 2>&1".format(x=executable, p=path)
+        if cmd.success:
+            logging.info("%s: Config is valid", taskname)
+            a.ready = lambda: True
+        # execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
     # Private helper methods
 
@@ -120,6 +132,11 @@ class Jedi(Driver):
         Returns the name of this driver.
         """
         return STR.jedi
+
+    @external
+    def _exists(path: Path):
+        yield path
+        yield asset(path, path.is_file)
 
     @property
     def _resources(self) -> Dict[str, Any]:
