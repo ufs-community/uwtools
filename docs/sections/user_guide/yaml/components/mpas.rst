@@ -3,14 +3,14 @@
 mpas
 ====
 
-Structured YAML to run the WRF preprocessing component ``mpas`` is validated by JSON Schema and requires the ``mpas:`` block, described below. If ``mpas`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
+Structured YAML to run MPAS is validated by JSON Schema and requires the ``mpas:`` block, described below. If ``mpas`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
 Here is a prototype UW YAML ``mpas:`` block, explained in detail below:
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/mpas.yaml
 
-When MPAS is built from source code, static data input files and default namelist and streams files are also created. Here we show an example of how an arbitrarily named ``user:`` section may be used to define helpful variables that are heavily reused through the rest of the configuration. In this example, the ``mpas_app:`` entry is the path to where the MPAS model was installed.
+An MPAS build provides prototype versions of certain required runtime files. Here, an arbitrarily named ``user:`` block defines an ``mpas_app`` variable, pointing to the directory where MPAS was installed, to reduce duplication in references to those files.
 
 
 
@@ -63,7 +63,7 @@ To reduce duplication of information in this section, it may be helpful to templ
      files_to_copy:
        conus.graph.info.part.32: /path/to/conus.graph.info.part.32
 
-Jinja expressions can be used to reference the number of cores used in execution:
+Jinja2 expressions can be used to reference the number of cores used in execution:
 
 .. code-block:: text
 

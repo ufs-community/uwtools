@@ -7,7 +7,7 @@ mpas:
     path: /path/to/boundary/conditions/directory
   length: 6
   execution:
-    executable: "atmosphere_model"
+    executable: atmosphere_model
     batchargs:
       walltime: 01:30:00
       cores: 32

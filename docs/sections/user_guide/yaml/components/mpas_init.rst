@@ -3,7 +3,7 @@
 mpas_init
 =========
 
-Structured YAML to run the WRF preprocessing component ``mpas_init`` is validated by JSON Schema and requires the ``mpas_init:`` block, described below. If ``mpas_init`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
+Structured YAML to run MPAS Init is validated by JSON Schema and requires the ``mpas_init:`` block, described below. If ``mpas_init`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
 Here is a prototype UW YAML ``mpas_init:`` block, explained in detail below:
 
@@ -61,7 +61,7 @@ To reduce duplication of information in this section, it may be helpful to templ
      files_to_copy:
        conus.graph.info.part.4: /path/to/conus.graph.info.part.4
 
-Jinja expressions can be used to reference the number of cores used in execution:
+Jinja2 expressions can be used to reference the number of cores used in execution:
 
 .. code-block:: text
 

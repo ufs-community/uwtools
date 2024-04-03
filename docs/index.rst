@@ -107,7 +107,7 @@ Over time, we'll add many other drivers to support a variety of UFS components f
 Drivers for UFS
 ^^^^^^^^^^^^^^^
 
-Typically, these would be run in the sequence in which they are ordered here, although not all drivers are currently in place to produce all the steps needed to prepare a forecast.
+To prepare a complete forecast, drivers would typically be run in the order shown here (along with additional drivers still in development).
 
 sfc_climo_gen
 """""""""""""
@@ -133,7 +133,7 @@ FV3
 Drivers for MPAS
 ^^^^^^^^^^^^^^^^
 
-Drivers for working with standalone :mpas:`Model for Prediction Across Scales (MPAS)<>`. Typically, these would be run in the sequence in which they are ordered here:
+Drivers for working with standalone :mpas:`Model for Prediction Across Scales (MPAS)<>`, typically run in the order shown here:
 
 ungrib
 """"""
