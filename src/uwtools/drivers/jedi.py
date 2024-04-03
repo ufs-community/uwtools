@@ -87,6 +87,14 @@ class Jedi(Driver):
         self._write_runscript(path=path, envvars={})
 
     @task
+    def validate_only(self):
+        """
+        Valid config
+        """
+        yield self._taskname("validate-only")
+        yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
+
+    @task
     def yaml_file(self):
         """
         The yaml file.
@@ -137,18 +145,6 @@ class Jedi(Driver):
     def _exists(path: Path):
         yield path
         yield asset(path, path.is_file)
-
-    @property
-    def _resources(self) -> Dict[str, Any]:
-        """
-        Returns configuration data for the runscript.
-        """
-        return {
-            "account": self._config["platform"]["account"],
-            "rundir": self._rundir,
-            "scheduler": self._config["platform"]["scheduler"],
-            **self._driver_config.get("execution", {}).get("batchargs", {}),
-        }
 
     def _taskname(self, suffix: str) -> str:
         """
