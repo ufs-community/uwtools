@@ -71,7 +71,6 @@ Jinja2 expressions can be used to reference the number of cores used in executio
      files_to_copy:
        conus.graph.info.part.{{mpas.execution["batchargs"]["cores"]}}: /path/to/conus.graph.info.part.{{mpas.execution["batchargs"]["cores"]}}
 
-Note that the ``files_to_copy:`` and the ``file_to_link:`` blocks are the only ones that accept Jinja expressions in their keys.
 
 files_to_link:
 ^^^^^^^^^^^^^^

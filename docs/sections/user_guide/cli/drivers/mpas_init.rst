@@ -1,7 +1,7 @@
 ``mpas_init``
 =============
 
-The ``uw`` mode for configuring and running the MPAS init_atmosphere component. Any of the ``TASK`` arguments listed below may be called to generate that component required for the ultimate ``run`` task. A ``provisioned_run_directory`` will perform all of the tasks except for running the executable.
+The ``uw`` mode for configuring and running the MPAS ``init_atmosphere`` tool. Each listed ``TASK`` may be called to generate the runtime asset(s) it is responsible for, and will call any task it depends on as needed. A ``provisioned_run_directory`` comprises everything needed for a run, and a ``run`` runs the ``init_atmosphere`` executable.
 
 .. code-block:: text
 
@@ -78,15 +78,15 @@ The examples use a configuration file named ``config.yaml`` with content similar
 
 Its contents are described in depth in section :ref:`mpas_init_yaml`.
 
-* Run ``mpas_init`` on an interactive node
+* Run ``init_atmosphere`` on an interactive node
 
   .. code-block:: text
 
      $ uw mpas_init run --config-file config.yaml --cycle 2023-12-18T00
 
-  The driver creates a ``runscript.mpas_init`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``mpas_init``.
+  The driver creates a ``runscript.mpas_init`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``init_atmosphere``.
 
-* Run ``mpas_init`` via a batch job
+* Run ``init_atmosphere`` via a batch job
 
   .. code-block:: text
 
