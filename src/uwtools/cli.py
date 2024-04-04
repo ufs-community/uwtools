@@ -463,7 +463,8 @@ def _add_subparser_jedi_task(subparsers: Subparsers, task: str, helpmsg: str) ->
     optional = _basic_setup(parser)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
-
+    checks = _add_args_verbosity(optional)
+    return checks
 
 def _dispatch_jedi(args: Args) -> bool:
     """
@@ -476,8 +477,6 @@ def _dispatch_jedi(args: Args) -> bool:
         cycle=args[STR.cycle],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
-        validate_only=args[STR.validateonly],
-        graph_file=args[STR.graphfile],
     )
 
 

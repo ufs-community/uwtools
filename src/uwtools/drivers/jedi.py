@@ -100,7 +100,8 @@ class JEDI(Driver):
         # yield file(path=path)
         executable = Path(self._driver_config["execution"]["executable"])
         yield [asset(executable, executable.is_file), asset(path, path.is_file)]
-        cmd = "time {x} --validate-only {p} 2>&1".format(x=executable, p=path)
+        env = "; ".join[self._driver_config["execution"]["envcmds"]]
+        cmd = "{env} time {x} --validate-only {p} 2>&1".format(env=env, x=executable, p=path)
         result = run(taskname, f'{cmd} -eq 0')
         if result.success:
             logging.info("%s: Config is valid", taskname)
