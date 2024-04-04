@@ -3,18 +3,14 @@ A driver for the jedi component.
 """
 
 import logging
-import os
-import stat
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
 
-from iotaa import asset, dryrun, external, logcfg, run, task, tasks
+from iotaa import asset, dryrun, run, task, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import file
 
 
 class JEDI(Driver):
@@ -100,7 +96,7 @@ class JEDI(Driver):
         # yield file(path=path)
         executable = Path(self._driver_config["execution"]["executable"])
         yield [asset(executable, executable.is_file), asset(path, path.is_file)]
-        env = "; ".join[self._driver_config["execution"]["envcmds"]]
+        env = "; ".join(self._driver_config["execution"]["envcmds"])
         cmd = "{env} time {x} --validate-only {p} 2>&1".format(env=env, x=executable, p=path)
         result = run(taskname, f"{cmd} -eq 0")
         if result.success:
@@ -133,10 +129,6 @@ class JEDI(Driver):
         """
         return STR.jedi
 
-    @external
-    def _exists(path: Path):
-        yield path
-        yield asset(path, path.is_file)
 
     def _taskname(self, suffix: str) -> str:
         """

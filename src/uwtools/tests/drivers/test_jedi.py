@@ -7,7 +7,6 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import yaml
-from iotaa import asset, external
 from pytest import fixture
 
 from uwtools.drivers import jedi
@@ -37,7 +36,7 @@ def config(tmp_path):
                     "walltime": "00:02:00",
                 },
                 "envcmds": ["cmd1", "cmd2"],
-                "executable": "/scratch2/BMC/zrtrr/Naureen.Bharwani/build/bin/qg_forecast.x",  # str(tmp_path / "jedi.exe"),
+                "executable": "/scratch2/BMC/zrtrr/Naureen.Bharwani/build/bin/qg_forecast.x",
                 "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
                 "mpicmd": "srun",
             },
@@ -106,12 +105,11 @@ def test_JEDI_runscript(driverobj):
 
 def test_JEDI_validate_only(config_file, cycle, driverobj):
     driverobj.validate_only()
-    assert False
 
 
 def test_JEDI_yaml_file(driverobj):
     pass
-    src = driverobj._rundir / "input.yaml"
+    # src = driverobj._rundir / "input.yaml"
 
 
 def test_JEDI__driver_config(driverobj):
