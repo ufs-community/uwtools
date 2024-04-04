@@ -1,12 +1,14 @@
 """
 API access to the ``uwtools`` ``jedi`` driver.
 """
+
 import datetime as dt
 from pathlib import Path
 from typing import Dict, Optional
 
 import uwtools.drivers.support as _support
 from uwtools.drivers.jedi import JEDI as _JEDI
+
 
 def execute(
     task: str,
@@ -18,6 +20,7 @@ def execute(
 ) -> bool:
     """
     Execute a jedi task.
+
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
     :param task: The task to execute

@@ -86,7 +86,6 @@ class JEDI(Driver):
         yield None
         self._write_runscript(path=path, envvars={})
 
-
     @task
     def validate_only(self):
         """
@@ -108,7 +107,6 @@ class JEDI(Driver):
             a.ready = lambda: True
         # execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
-
     @task
     def yaml_file(self):
         """
@@ -124,7 +122,6 @@ class JEDI(Driver):
             config_values=self._driver_config.get("yaml", {}),
             path=path,
         )
-
 
     # Private helper methods
 

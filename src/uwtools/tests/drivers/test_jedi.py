@@ -10,7 +10,7 @@ import yaml
 from iotaa import asset, external
 from pytest import fixture
 
-from uwtools.drivers import jedi 
+from uwtools.drivers import jedi
 from uwtools.scheduler import Slurm
 
 # Fixtures
@@ -27,33 +27,27 @@ def cycle():
 @fixture
 def config(tmp_path):
     return {
-    "jedi": {
-        "execution": {
-            "batchargs": {
-                "export": "NONE",
-                "nodes": 1,
-                "stdout": "/path/to/file",
-                "walltime": "00:02:00",
+        "jedi": {
+            "execution": {
+                "batchargs": {
+                    "export": "NONE",
+                    "nodes": 1,
+                    "stdout": "/path/to/file",
+                    "walltime": "00:02:00",
+                },
+                "envcmds": ["cmd1", "cmd2"],
+                "executable": "/scratch2/BMC/zrtrr/Naureen.Bharwani/build/bin/qg_forecast.x",  # str(tmp_path / "jedi.exe"),
+                "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
+                "mpicmd": "srun",
             },
-            "envcmds": ["cmd1", "cmd2"],
-            "executable": "/scratch2/BMC/zrtrr/Naureen.Bharwani/build/bin/qg_forecast.x", # str(tmp_path / "jedi.exe"),
-            "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
-            "mpicmd": "srun",
+            "configuration_file": {"update_values": {"jedi": {}}},
+            "run_dir": str(tmp_path),
         },
-        "configuration_file": {
-            "update_values": {
-                "jedi": {
-                    
-                }
-            }
+        "platform": {
+            "account": "me",
+            "scheduler": "slurm",
         },
-        "run_dir": str(tmp_path),
-    },
-    "platform": {
-        "account": "me",
-        "scheduler": "slurm",
-    },
-}
+    }
 
 
 @fixture
@@ -117,3 +111,11 @@ def test_JEDI_yaml_file(driverobj):
 
 def test_JEDI__driver_config(driverobj):
     assert driverobj._driver_config == driverobj._config["jedi"]
+
+
+def test_JEDI__runscript_path(driverobj):
+    assert driverobj._runscript_path == driverobj._rundir / "runscript.jedi"
+
+
+def test_JEDI__taskname(driverobj):
+    assert driverobj._taskname("foo") == "20240201 18Z jedi foo"    
