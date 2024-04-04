@@ -6,5 +6,7 @@ UW YAML for Components
 
    chgres_cube
    fv3
+   mpas
+   mpas_init
    sfc_climo_gen
    ungrib
