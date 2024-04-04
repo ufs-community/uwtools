@@ -76,5 +76,44 @@ def test_JEDI(driverobj):
     assert isinstance(driverobj, jedi.JEDI)
 
 
+def test_JEDI_dry_run(config_file, cycle):
+    with patch.object(jedi, "dryrun") as dryrun:
+        driverobj = jedi.JEDI(config_file=config_file, cycle=cycle, batch=True, dry_run=True)
+    assert driverobj._dry_run is True
+    dryrun.assert_called_once_with()
+
+
+def test_JEDI_provisioned_run_directory(driverobj):
+    with patch.multiple(
+        driverobj,
+        files_copied=D,
+        files_linked=D,
+        runscript=D,
+        # validate_only=D,
+        yaml_file=D,
+    ) as mocks:
+        driverobj.provisioned_run_directory()
+    for m in mocks:
+        mocks[m].assert_called_once_with()
+
+
+def test_JEDI_runscript(driverobj):
+    with patch.object(driverobj, "_runscript") as runscript:
+        driverobj.runscript()
+        runscript.assert_called_once()
+        args = ("envcmds", "envvars", "execution", "scheduler")
+        types = [list, dict, list, Slurm]
+        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
+
+
 def test_JEDI_validate_only(config_file, cycle, driverobj):
     driverobj.validate_only()
+
+
+def test_JEDI_yaml_file(driverobj):
+    pass
+    src = driverobj._rundir / "input.yaml"
+
+
+def test_JEDI__driver_config(driverobj):
+    assert driverobj._driver_config == driverobj._config["jedi"]

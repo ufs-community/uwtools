@@ -88,22 +88,6 @@ class JEDI(Driver):
 
 
     @task
-    def yaml_file(self):
-        """
-        The yaml file.
-        """
-        fn = "input.yaml"
-        yield self._taskname(fn)
-        path = self._rundir / fn
-        yield asset(path, path.is_file)
-        yield None
-        self._create_user_updated_config(
-            config_class=YAMLConfig,
-            config_values=self._driver_config.get("yaml", {}),
-            path=path,
-        )
-
-    @task
     def validate_only(self):
         """
         Validate config.
@@ -123,6 +107,24 @@ class JEDI(Driver):
             logging.info("%s: Config is valid", taskname)
             a.ready = lambda: True
         # execute(cmd=cmd, cwd=self._rundir, log_output=True)
+
+
+    @task
+    def yaml_file(self):
+        """
+        The yaml file.
+        """
+        fn = "input.yaml"
+        yield self._taskname(fn)
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        yield None
+        self._create_user_updated_config(
+            config_class=YAMLConfig,
+            config_values=self._driver_config.get("yaml", {}),
+            path=path,
+        )
+
 
     # Private helper methods
 
