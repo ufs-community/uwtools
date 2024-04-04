@@ -1,12 +1,11 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
-chgres_cube driver tests.
+JEDI driver tests.
 """
 import datetime as dt
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-import f90nml  # type: ignore
 import yaml
 from iotaa import asset, external
 from pytest import fixture
@@ -20,6 +19,7 @@ from uwtools.scheduler import Slurm
 @fixture
 def cycle():
     return dt.datetime(2024, 2, 1, 18)
+
 
 # Driver fixtures
 
@@ -55,6 +55,7 @@ def config(tmp_path):
     },
 }
 
+
 @fixture
 def config_file(config, tmp_path):
     path = tmp_path / "config.yaml"
@@ -69,6 +70,10 @@ def driverobj(config_file, cycle):
 
 
 # Driver tests
+
+
+def test_JEDI(driverobj):
+    assert isinstance(driverobj, jedi.JEDI)
 
 
 def test_JEDI_validate_only(config_file, cycle, driverobj):

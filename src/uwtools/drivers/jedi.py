@@ -116,8 +116,8 @@ class JEDI(Driver):
 
         path = self._rundir / Path("tests/fixtures/jedi.yaml")
         # yield file(path=path)
-        executable = self._driver_config["execution"]["executable"]
-        yield [asset(executable, executable.is_file), asset(path.is_file)]
+        executable = Path(self._driver_config["execution"]["executable"])
+        yield [asset(executable, executable.is_file), asset(path, path.is_file)]
         cmd = "time {x} --validate-only {p} 2>&1".format(x=executable, p=path)
         if cmd.success:
             logging.info("%s: Config is valid", taskname)
