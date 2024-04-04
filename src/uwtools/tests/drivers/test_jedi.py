@@ -42,12 +42,9 @@ def config(tmp_path):
                 "mpicmd": "srun",
             },
             "configuration_file": {
-                "base_file": str(fixture_path("jedi.yaml")), 
-                "update_values": {
-                    "jedi": {
-                        }
-                    }
-                },
+                "base_file": str(fixture_path("jedi.yaml")),
+                "update_values": {"jedi": {}},
+            },
             "run_dir": str(tmp_path),
         },
         "platform": {
@@ -111,6 +108,7 @@ def test_JEDI_validate_only(config_file, cycle, driverobj):
     driverobj.validate_only()
     assert False
 
+
 def test_JEDI_yaml_file(driverobj):
     pass
     src = driverobj._rundir / "input.yaml"
@@ -125,4 +123,4 @@ def test_JEDI__runscript_path(driverobj):
 
 
 def test_JEDI__taskname(driverobj):
-    assert driverobj._taskname("foo") == "20240201 18Z jedi foo"    
+    assert driverobj._taskname("foo") == "20240201 18Z jedi foo"

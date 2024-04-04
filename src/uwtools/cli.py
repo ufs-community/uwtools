@@ -466,9 +466,11 @@ def _add_subparser_jedi_task(subparsers: Subparsers, task: str, helpmsg: str) ->
     checks = _add_args_verbosity(optional)
     return checks
 
+
 def _dispatch_jedi(args: Args) -> bool:
     """
     Dispatch logic for jedi mode.
+
     :param args: Parsed command-line args.
     """
     return uwtools.api.jedi.execute(
@@ -481,6 +483,7 @@ def _dispatch_jedi(args: Args) -> bool:
 
 
 # Mode mpas
+
 
 def _add_subparser_mpas(subparsers: Subparsers) -> ModeChecks:
     """
@@ -586,7 +589,6 @@ def _dispatch_mpas_init(args: Args) -> bool:
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
     )
-
 
 
 # Mode rocoto
