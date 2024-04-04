@@ -12,6 +12,7 @@ from pytest import fixture
 
 from uwtools.drivers import jedi
 from uwtools.scheduler import Slurm
+from uwtools.tests.support import fixture_path
 
 # Fixtures
 
@@ -40,7 +41,13 @@ def config(tmp_path):
                 "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
                 "mpicmd": "srun",
             },
-            "configuration_file": {"update_values": {"jedi": {}}},
+            "configuration_file": {
+                "base_file": str(fixture_path("jedi.yaml")), 
+                "update_values": {
+                    "jedi": {
+                        }
+                    }
+                },
             "run_dir": str(tmp_path),
         },
         "platform": {
@@ -102,7 +109,7 @@ def test_JEDI_runscript(driverobj):
 
 def test_JEDI_validate_only(config_file, cycle, driverobj):
     driverobj.validate_only()
-
+    assert False
 
 def test_JEDI_yaml_file(driverobj):
     pass
