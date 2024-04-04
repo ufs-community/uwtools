@@ -85,7 +85,7 @@ class Driver(ABC):
         A run executed directly on the local system.
         """
         yield self._taskname("run via local execution")
-        path = self._rundir / "done"
+        path = self._rundir / f"done.{self._driver_name}"
         yield asset(path, path.is_file)
         yield self.provisioned_run_directory()
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)

@@ -98,28 +98,63 @@ The Drivers
 
 Drivers for NWP components are available as top-level CLI modes and API modules.
 
+Provided with a valid UW YAML configuration file, and CLI arguments when required, ``uw`` can prepare a fully provisioned run directory and execute a component either directly on the current system, or via a batch job submitted to an HPC scheduler.
+
+Each driver produces a list of available ``TASK`` arguments from its CLI ``--help, -h`` flag. The ``provisioned_run_directory`` will do everything except ``run`` the executable, but any of the tasks may be requested and only the steps required to produce that task will be performed.
+
+Over time, we'll add many other drivers to support a variety of UFS components from pre-processing to post-processing, along with many data assimilation components.
+
+Drivers for UFS
+^^^^^^^^^^^^^^^
+
+To prepare a complete forecast, drivers would typically be run in the order shown here (along with additional drivers still in development).
+
+sfc_climo_gen
+"""""""""""""
+
+| **CLI**: ``uw sfc_climo_gen -h``
+| **API**: ``import uwtools.api.drivers.sfc_climo_gen``
+
 chgres_cube
-^^^^^^^^^^^
+"""""""""""
 
 | **CLI**: ``uw chgres_cube -h``
 | **API**: ``import uwtools.api.drivers.chgres_cube``
 
 
 FV3
-^^^
+"""
 
 | **CLI**: ``uw fv3 -h``
 | **API**: ``import uwtools.api.drivers.fv3``
 
-sfc_climo_gen
-^^^^^^^^^^^^^
 
-| **CLI**: ``uw sfc_climo_gen -h``
-| **API**: ``import uwtools.api.drivers.sfc_climo_gen``
 
-Provided with a valid UW YAML configuration file, and CLI arguments when required, ``uw`` can prepare a fully provisioned run directory and execute a component either directly on the current system, or via a batch job submitted to an HPC scheduler.
+Drivers for MPAS
+^^^^^^^^^^^^^^^^
 
-Over time, we'll add many other drivers to support a variety of UFS components from pre-processing to post-processing, along with many data assimilation components.
+Drivers for working with standalone :mpas:`Model for Prediction Across Scales (MPAS)<>`, typically run in the order shown here:
+
+ungrib
+""""""
+
+| **CLI**: ``uw ungrib -h``
+| **API**: ``import uwtools.api.drivers.ungrib``
+
+
+mpas_init
+"""""""""
+
+| **CLI**: ``uw mpas_init -h``
+| **API**: ``import uwtools.api.drivers.mpas_init``
+
+mpas
+""""
+
+| **CLI**: ``uw mpas -h``
+| **API**: ``import uwtools.api.drivers.mpas``
+
+
 
 ------------------
 

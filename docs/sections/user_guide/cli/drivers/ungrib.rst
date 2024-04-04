@@ -78,7 +78,7 @@ Its contents are described in depth in section :ref:`ungrib_yaml`.
 
   .. code-block:: text
 
-     $ uw ungrib run --config-file config.yaml
+     $ uw ungrib run --config-file config.yaml --cycle 2021-04-01T12
 
   The driver creates a ``runscript.ungrib`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``ungrib``.
 
@@ -86,7 +86,7 @@ Its contents are described in depth in section :ref:`ungrib_yaml`.
 
   .. code-block:: text
 
-     $ uw ungrib run --config-file config.yaml --batch
+     $ uw ungrib run --config-file config.yaml --cycle 2021-04-01T12 --batch
 
   The driver creates a ``runscript.ungrib`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``ungrib:``.
 
@@ -94,10 +94,10 @@ Its contents are described in depth in section :ref:`ungrib_yaml`.
 
   .. code-block:: text
 
-     $ uw ungrib run --config-file config.yaml --batch --dry-run
+     $ uw ungrib run --config-file config.yaml --cycle 2021-04-01T12 --batch --dry-run
 
 * The ``run`` task depends on the other available tasks and executes them as prerequisites. It is possible to execute any task directly, which entails execution of any of *its* dependencies. For example, to create an ``ungrib`` run directory provisioned with all the files, directories, symlinks, etc. required per the configuration file:
 
   .. code-block:: text
 
-     $ uw ungrib provisioned_run_directory --config-file config.yaml --batch
+     $ uw ungrib provisioned_run_directory --config-file config.yaml --cycle 2021-04-01T12 --batch
