@@ -7,6 +7,8 @@ API
    file
    fv3
    logging
+   mpas
+   mpas_init
    rocoto
    sfc_climo_gen
    template

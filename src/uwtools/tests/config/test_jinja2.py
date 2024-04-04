@@ -17,7 +17,7 @@ from pytest import fixture, raises
 
 from uwtools.config import jinja2
 from uwtools.config.jinja2 import J2Template
-from uwtools.config.support import TaggedString
+from uwtools.config.support import UWYAMLConvert, UWYAMLRemove
 from uwtools.logging import log
 from uwtools.tests.support import logged, regex_logged
 
@@ -136,6 +136,14 @@ def test_dereference_no_op_due_to_error(caplog, logmsg, val):
     assert regex_logged(caplog, logmsg)
 
 
+def test_dereference_remove(caplog):
+    log.setLevel(logging.DEBUG)
+    remove = UWYAMLRemove(yaml.SafeLoader(""), yaml.ScalarNode(tag="!remove", value=""))
+    val = {"a": {"b": {"c": "cherry", "d": remove}}}
+    assert jinja2.dereference(val=val, context={}) == {"a": {"b": {"c": "cherry"}}}
+    assert regex_logged(caplog, "Removing value at: a > b > d")
+
+
 def test_dereference_str_expression_rendered():
     # Context permitting, Jinja2 variables/expressions are rendered:
     val = "{% for a in as %}{{ a }}{% endfor %}"
@@ -241,20 +249,6 @@ def test_render_fails(caplog, tmp_path):
     assert logged(caplog, "Render failed with error: 'dict object' has no attribute 'e'")
 
 
-@pytest.mark.parametrize("partial", [False, True])
-def test_render_partial(caplog, capsys, partial):
-    log.setLevel(logging.INFO)
-    template = StringIO(initial_value="{{ greeting }} {{ recipient }}")
-    with patch.object(jinja2, "readable") as readable:
-        readable.return_value.__enter__.return_value = template
-        jinja2.render(values_src={"greeting": "Hello"}, partial=partial)
-    if partial:
-        assert "Hello {{ recipient }}" in capsys.readouterr().out
-    else:
-        assert logged(caplog, "Required value(s) not provided:")
-        assert logged(caplog, "  recipient")
-
-
 def test_render_values_missing(caplog, template_file, values_file):
     log.setLevel(logging.INFO)
     # Read in the config, remove the "roses" key, then re-write it.
@@ -284,7 +278,7 @@ def test_unrendered(s, status):
 def test__deref_convert_no(caplog, tag):
     log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
-    val = TaggedString(loader, yaml.ScalarNode(tag=tag, value="foo"))
+    val = UWYAMLConvert(loader, yaml.ScalarNode(tag=tag, value="foo"))
     assert jinja2._deref_convert(val=val) == val
     assert not regex_logged(caplog, "Converted")
     assert regex_logged(caplog, "Conversion failed")
@@ -294,7 +288,7 @@ def test__deref_convert_no(caplog, tag):
 def test__deref_convert_ok(caplog, converted, tag, value):
     log.setLevel(logging.DEBUG)
     loader = yaml.SafeLoader(os.devnull)
-    val = TaggedString(loader, yaml.ScalarNode(tag=tag, value=value))
+    val = UWYAMLConvert(loader, yaml.ScalarNode(tag=tag, value=value))
     assert jinja2._deref_convert(val=val) == converted
     assert regex_logged(caplog, "Converted")
     assert not regex_logged(caplog, "Conversion failed")
@@ -543,3 +537,11 @@ class Test_J2Template:
         s = "{{ a }} {{ b.c }} {{ d.e.f[g] }} {{ h[i] }} {{ j[88] }} {{ k|default(l) }}"
         uvs = {"a", "b", "d", "g", "h", "i", "j", "k", "l"}
         assert J2Template(values={}, template_source=s).undeclared_variables == uvs
+
+    def test__template_str(self, testdata):
+        obj = J2Template(values=testdata.config, template_source=testdata.template)
+        assert obj._template_str == "{{greeting}} to {{recipient}}"
+
+    def test___repr__(self, testdata):
+        obj = J2Template(values=testdata.config, template_source=testdata.template)
+        assert str(obj) == "{{greeting}} to {{recipient}}"

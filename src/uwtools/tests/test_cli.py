@@ -14,11 +14,15 @@ from pytest import fixture, raises
 
 import uwtools.api.config
 import uwtools.api.fv3
+import uwtools.api.mpas
+import uwtools.api.mpas_init
 import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.api.ungrib
 import uwtools.drivers.fv3
+import uwtools.drivers.mpas
+import uwtools.drivers.mpas_init
 import uwtools.drivers.sfc_climo_gen
 import uwtools.drivers.ungrib
 from uwtools import cli
@@ -127,6 +131,34 @@ def test__add_subparser_fv3(subparsers):
         "restart_directory",
         "run",
         "runscript",
+    ]
+
+
+def test__add_subparser_mpas_init(subparsers):
+    cli._add_subparser_mpas_init(subparsers)
+    assert actions(subparsers.choices[STR.mpasinit]) == [
+        "boundary_files",
+        "files_copied",
+        "files_linked",
+        "namelist_file",
+        "provisioned_run_directory",
+        "run",
+        "runscript",
+        "streams_file",
+    ]
+
+
+def test__add_subparser_mpas(subparsers):
+    cli._add_subparser_mpas(subparsers)
+    assert actions(subparsers.choices[STR.mpas]) == [
+        "boundary_files",
+        "files_copied",
+        "files_linked",
+        "namelist_file",
+        "provisioned_run_directory",
+        "run",
+        "runscript",
+        "streams_file",
     ]
 
 
@@ -448,6 +480,38 @@ def test__dispatch_fv3():
     )
 
 
+def test__dispatch_mpas():
+    cycle = dt.datetime.now()
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "cycle": cycle,
+        "dry_run": False,
+        "graph_file": None,
+    }
+    with patch.object(uwtools.api.mpas, "execute") as execute:
+        cli._dispatch_mpas({**args, "action": "foo"})
+    execute.assert_called_once_with(
+        batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None, task="foo"
+    )
+
+
+def test__dispatch_mpas_init():
+    cycle = dt.datetime.now()
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "cycle": cycle,
+        "dry_run": False,
+        "graph_file": None,
+    }
+    with patch.object(uwtools.api.mpas_init, "execute") as execute:
+        cli._dispatch_mpas_init({**args, "action": "foo"})
+    execute.assert_called_once_with(
+        batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None, task="foo"
+    )
+
+
 @pytest.mark.parametrize(
     "params",
     [
@@ -534,8 +598,7 @@ def test__dispatch_template_render_fail(valsneeded):
         STR.env: 5,
         STR.searchpath: 6,
         STR.valsneeded: valsneeded,
-        STR.partial: 7,
-        STR.dryrun: 8,
+        STR.dryrun: 7,
     }
     with patch.object(uwtools.api.template, "render", side_effect=UWTemplateRenderError):
         assert cli._dispatch_template_render(args) is valsneeded
@@ -551,7 +614,6 @@ def test__dispatch_template_render_no_optional():
         STR.env: False,
         STR.searchpath: None,
         STR.valsneeded: False,
-        STR.partial: False,
         STR.dryrun: False,
     }
     with patch.object(uwtools.api.template, "render") as render:
@@ -565,7 +627,6 @@ def test__dispatch_template_render_no_optional():
         env=False,
         searchpath=None,
         values_needed=False,
-        partial=False,
         dry_run=False,
     )
 
@@ -580,8 +641,7 @@ def test__dispatch_template_render_yaml():
         STR.env: 5,
         STR.searchpath: 6,
         STR.valsneeded: 7,
-        STR.partial: 8,
-        STR.dryrun: 9,
+        STR.dryrun: 8,
     }
     with patch.object(uwtools.api.template, "render") as render:
         cli._dispatch_template_render(args)
@@ -594,8 +654,7 @@ def test__dispatch_template_render_yaml():
         env=5,
         searchpath=6,
         values_needed=7,
-        partial=8,
-        dry_run=9,
+        dry_run=8,
     )
 
 

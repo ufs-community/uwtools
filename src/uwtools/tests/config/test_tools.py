@@ -5,7 +5,9 @@ Tests for uwtools.config.tools module.
 
 import logging
 from pathlib import Path
+from textwrap import dedent
 
+import f90nml  # type: ignore
 import pytest
 import yaml
 from pytest import fixture, raises
@@ -294,6 +296,58 @@ def test_realize_config_output_file_conversion(tmp_path):
     assert compare_files(expected_file, outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read()[-1] == "\n"
+
+
+def test_realize_config_remove_nml_to_nml(tmp_path):
+    nml = NMLConfig({"constants": {"pi": 3.141, "e": 2.718}})
+    s = """
+    constants:
+      e: !remove
+    """
+    sup = tmp_path / "sup.yaml"
+    with open(sup, "w", encoding="utf-8") as f:
+        print(dedent(s).strip(), file=f)
+    cfg = tmp_path / "config.nml"
+    assert not cfg.is_file()
+    tools.realize_config(
+        input_config=nml,
+        output_file=cfg,
+        supplemental_configs=[sup],
+    )
+    assert f90nml.read(cfg) == {"constants": {"pi": 3.141}}
+
+
+def test_realize_config_remove_yaml_to_yaml_scalar(tmp_path):
+    yml = YAMLConfig({"a": {"b": {"c": 11, "d": 22, "e": 33}}})
+    s = """
+    a:
+      b:
+        d: !remove
+    """
+    sup = tmp_path / "sup.yaml"
+    with open(sup, "w", encoding="utf-8") as f:
+        print(dedent(s).strip(), file=f)
+    assert {"a": {"b": {"c": 11, "e": 33}}} == tools.realize_config(
+        input_config=yml,
+        output_format="yaml",
+        supplemental_configs=[sup],
+    )
+
+
+def test_realize_config_remove_yaml_to_yaml_subtree(tmp_path):
+    yml = YAMLConfig(yaml.safe_load("a: {b: {c: 11, d: 22, e: 33}}"))
+    s = """
+    a:
+      b: !remove
+    """
+    sup = tmp_path / "sup.yaml"
+    with open(sup, "w", encoding="utf-8") as f:
+        print(dedent(s).strip(), file=f)
+    assert {"a": {}} == tools.realize_config(
+        input_config=yml,
+        output_format="yaml",
+        supplemental_configs=[sup],
+    )
 
 
 def test_realize_config_simple_ini(tmp_path):

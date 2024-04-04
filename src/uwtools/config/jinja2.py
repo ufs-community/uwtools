@@ -7,22 +7,14 @@ from functools import cached_property
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Union
 
-from jinja2 import (
-    DebugUndefined,
-    Environment,
-    FileSystemLoader,
-    StrictUndefined,
-    Template,
-    Undefined,
-    meta,
-)
+from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined, meta
 from jinja2.exceptions import UndefinedError
 
-from uwtools.config.support import TaggedString, format_to_config
+from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, format_to_config
 from uwtools.logging import MSGWIDTH, log
 from uwtools.utils.file import get_file_format, readable, writable
 
-_ConfigVal = Union[bool, dict, float, int, list, str, TaggedString]
+_ConfigVal = Union[bool, dict, float, int, list, str, UWYAMLConvert, UWYAMLRemove]
 
 
 class J2Template:
@@ -109,7 +101,9 @@ class J2Template:
 # Public functions
 
 
-def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) -> _ConfigVal:
+def dereference(
+    val: _ConfigVal, context: dict, local: Optional[dict] = None, keys: Optional[List[str]] = None
+) -> _ConfigVal:
     """
     Render Jinja2 syntax, wherever possible.
 
@@ -126,17 +120,25 @@ def dereference(val: _ConfigVal, context: dict, local: Optional[dict] = None) ->
     :param val: A value possibly containing Jinja2 syntax.
     :param context: Values to use when rendering Jinja2 syntax.
     :param local: Local sibling values to use if a match is not found in context.
+    :param keys: The dict keys leading to this value.
     :return: The input value, with Jinja2 syntax rendered.
     """
     rendered: _ConfigVal = val  # fall-back value
     if isinstance(val, dict):
-        return {dereference(k, context): dereference(v, context, local=val) for k, v in val.items()}
+        keys = keys or []
+        new = {}
+        for k, v in val.items():
+            if isinstance(v, UWYAMLRemove):
+                _deref_debug("Removing value at", " > ".join([*keys, k]))
+            else:
+                new[dereference(k, context)] = dereference(v, context, local=val, keys=[*keys, k])
+        return new
     if isinstance(val, list):
         return [dereference(v, context) for v in val]
     if isinstance(val, str):
         _deref_debug("Rendering", val)
         rendered = _deref_render(val, context, local)
-    elif isinstance(val, TaggedString):
+    elif isinstance(val, UWYAMLConvert):
         _deref_debug("Rendering", val.value)
         val.value = _deref_render(val.value, context, local)
         rendered = _deref_convert(val)
@@ -154,7 +156,6 @@ def render(
     env: bool = False,
     searchpath: Optional[List[str]] = None,
     values_needed: bool = False,
-    partial: bool = False,
     dry_run: bool = False,
 ) -> Optional[str]:
     """
@@ -168,7 +169,6 @@ def render(
     :param env: Supplement values with environment variables?
     :param searchpath: Paths to search for extra templates.
     :param values_needed: Just report variables needed to render the template?
-    :param partial: Permit unrendered Jinja2 variables/expressions in output?
     :param dry_run: Run in dry-run mode?
     :return: The rendered template, or None.
     """
@@ -186,21 +186,18 @@ def render(
         _values_needed(undeclared_variables)
         return None
 
-    # If partial rendering has been requested, do a best-effort render. Otherwise, report any
-    # missing values and return an error to the caller.
+    # Render the template. If there are missing values, report them and return an error to the
+    # caller.
 
-    if partial:
-        rendered = Template(str(template), undefined=DebugUndefined).render(values)
-    else:
-        missing = [var for var in undeclared_variables if var not in values.keys()]
-        if missing:
-            _log_missing_values(missing)
-            return None
-        try:
-            rendered = template.render()
-        except UndefinedError as e:
-            log.error("Render failed with error: %s", str(e))
-            return None
+    missing = [var for var in undeclared_variables if var not in values.keys()]
+    if missing:
+        _log_missing_values(missing)
+        return None
+    try:
+        rendered = template.render()
+    except UndefinedError as e:
+        log.error("Render failed with error: %s", str(e))
+        return None
 
     # Log (dry-run mode) or write the rendered template.
 
@@ -224,7 +221,7 @@ def unrendered(s: str) -> bool:
 # Private functions
 
 
-def _deref_convert(val: TaggedString) -> _ConfigVal:
+def _deref_convert(val: UWYAMLConvert) -> _ConfigVal:
     """
     Convert a string tagged with an explicit type.
 
