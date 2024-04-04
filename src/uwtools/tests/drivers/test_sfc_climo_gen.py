@@ -140,7 +140,7 @@ def test_SfcClimoGen__runscript_path(driverobj):
     assert driverobj._runscript_path == driverobj._rundir / "runscript.sfc_climo_gen"
 
 
-def test_SfcClimoGen__taskanme(driverobj):
+def test_SfcClimoGen__taskname(driverobj):
     assert driverobj._taskname("foo") == "sfc_climo_gen foo"
 
 
