@@ -44,6 +44,7 @@ def test_realize():
     kwargs: dict = {
         "input_config": "path1",
         "input_format": "fmt1",
+        "output_block": None,
         "output_file": "path2",
         "output_format": "fmt2",
         "supplemental_configs": ["path3"],

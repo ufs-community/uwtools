@@ -15,7 +15,7 @@ The ``make docs`` command will build the docs under ``docs/build/html``, after w
 
 .. code-block:: text
 
-   file://<filesystem-path-to-your-clone>/docs/build/html/index.index.html
+   file://<filesystem-path-to-your-clone>/docs/build/html/index.html
 
 Rerun ``make docs`` and refresh your browser after making and saving changes.
 
