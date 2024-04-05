@@ -63,7 +63,7 @@ def config_file(config, tmp_path):
 
 @fixture
 def driverobj(config_file, cycle):
-    return jedi.JEDI(config_file=config_file, cycle=cycle, batch=True)
+    return jedi.JEDI(config=config_file, cycle=cycle, batch=True)
 
 
 # Driver tests
@@ -75,7 +75,7 @@ def test_JEDI(driverobj):
 
 def test_JEDI_dry_run(config_file, cycle):
     with patch.object(jedi, "dryrun") as dryrun:
-        driverobj = jedi.JEDI(config_file=config_file, cycle=cycle, batch=True, dry_run=True)
+        driverobj = jedi.JEDI(config=config_file, cycle=cycle, batch=True, dry_run=True)
     assert driverobj._dry_run is True
     dryrun.assert_called_once_with()
 
@@ -92,6 +92,19 @@ def test_JEDI_provisioned_run_directory(driverobj):
         driverobj.provisioned_run_directory()
     for m in mocks:
         mocks[m].assert_called_once_with()
+
+
+def test_JEDI_run_batch(driverobj):
+    with patch.object(driverobj, "_run_via_batch_submission") as func:
+        driverobj.run()
+    func.assert_called_once_with()
+
+
+def test_JEDI_run_local(driverobj):
+    driverobj._batch = False
+    with patch.object(driverobj, "_run_via_local_execution") as func:
+        driverobj.run()
+    func.assert_called_once_with()
 
 
 def test_JEDI_runscript(driverobj):

@@ -18,18 +18,16 @@ class JEDI(Driver):
     A driver for the JEDI component.
     """
 
-    def __init__(
-        self, config_file: Path, cycle: datetime, dry_run: bool = False, batch: bool = False
-    ):
+    def __init__(self, config: Path, cycle: datetime, dry_run: bool = False, batch: bool = False):
         """
         The driver.
 
-        :param config_file: Path to config file.
+        :param config: Path to config file.
         :param cycle: The forecast cycle.
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        super().__init__(config=config_file, dry_run=dry_run, batch=batch, cycle=cycle)
+        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle)
         if self._dry_run:
             dryrun()
         self._cycle = cycle
@@ -128,7 +126,6 @@ class JEDI(Driver):
         Returns the name of this driver.
         """
         return STR.jedi
-
 
     def _taskname(self, suffix: str) -> str:
         """

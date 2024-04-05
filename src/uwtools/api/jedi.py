@@ -32,7 +32,7 @@ def execute(
     :param graph_file: Write Graphviz DOT output here
     :return: True if task completes without raising an exception
     """
-    obj = _JEDI(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
+    obj = _JEDI(config=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
     getattr(obj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
