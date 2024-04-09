@@ -58,4 +58,5 @@ def test_tasks():
         "t2": "@task t2",
         "t3": "@tasks t3",
         "t1": "@external t1",
+        "validate": "Validate the UW driver config.",
     }

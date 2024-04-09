@@ -26,6 +26,8 @@ The ``uw`` mode for configuring and running the :ufs-utils:`chgres_cube<chgres-c
          A run
        runscript
          The runscript
+       validate
+         Validate the UW driver config
 
 All tasks take the same arguments. For example:
 
