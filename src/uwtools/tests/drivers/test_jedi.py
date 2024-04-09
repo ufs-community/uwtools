@@ -36,17 +36,19 @@ def config(tmp_path):
                     "stdout": "/path/to/file",
                     "walltime": "00:02:00",
                 },
-                "envcmds": ["cmd1", "cmd2"],
+                "envcmds": [
+                    "module use /scratch1/NCEPDEV/nems/role.epic/spack-stack/spack-stack-1.5.0/envs/unified-env-rocky8/install/modulefiles/Core",
+                    "module load stack-intel/2021.5.0",
+                    "module load stack-intel-oneapi-mpi/2021.5.1",
+                    "module load jedi-fv3-env/1.0.0",
+                ],
                 "executable": "/scratch2/BMC/zrtrr/Naureen.Bharwani/build/bin/qg_forecast.x",
                 "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
                 "mpicmd": "srun",
             },
             "configuration_file": {
                 "base_file": str(fixture_path("jedi.yaml")),
-                "update_values": {
-                    "jedi": {
-                    }
-                },
+                "update_values": {"jedi": {}},
             },
             "run_dir": str(tmp_path),
         },
@@ -143,6 +145,7 @@ def test_JEDI_runscript(driverobj):
 
 
 def test_JEDI_validate_only(config_file, cycle, driverobj):
+    # with patch.object(jedi, "run")
     driverobj.validate_only()
 
 

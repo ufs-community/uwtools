@@ -11,7 +11,7 @@ from iotaa import asset, dryrun, run, task, tasks
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import filecopy, symlink
+from uwtools.utils.tasks import file, filecopy, symlink
 
 
 class JEDI(Driver):
@@ -93,10 +93,11 @@ class JEDI(Driver):
         yield a
         path = Path(self._driver_config["configuration_file"]["base_file"])
         executable = Path(self._driver_config["execution"]["executable"])
-        yield [asset(executable, executable.is_file), asset(path, path.is_file)]
-        env = "; ".join(self._driver_config["execution"]["envcmds"])
-        cmd = "{env} time {x} --validate-only {p} 2>&1".format(env=env, x=executable, p=path)
-        result = run(taskname, f"{cmd} -eq 0")
+        yield [file(executable), file(path)]
+        env = " && ".join(self._driver_config["execution"]["envcmds"])
+        cmd = "{env} && time {x} --validate-only {p} 2>&1".format(env=env, x=executable, p=path)
+        result = run(taskname, cmd) 
+        breakpoint()
         if result.success:
             logging.info("%s: Config is valid", taskname)
             a.ready = lambda: True
