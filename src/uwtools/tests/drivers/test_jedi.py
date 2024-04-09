@@ -43,7 +43,10 @@ def config(tmp_path):
             },
             "configuration_file": {
                 "base_file": str(fixture_path("jedi.yaml")),
-                "update_values": {"jedi": {}},
+                "update_values": {
+                    "jedi": {
+                    }
+                },
             },
             "run_dir": str(tmp_path),
         },
@@ -110,7 +113,6 @@ def test_JEDI_provisioned_run_directory(driverobj):
         files_copied=D,
         files_linked=D,
         runscript=D,
-        # validate_only=D,
         yaml_file=D,
     ) as mocks:
         driverobj.provisioned_run_directory()
