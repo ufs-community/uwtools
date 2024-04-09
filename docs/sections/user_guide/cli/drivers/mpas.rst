@@ -35,7 +35,7 @@ The ``uw`` mode for configuring and running the MPAS forecast model. Each listed
        streams_file
          The streams file
        validate
-         Validate driver config
+         Validate the UW driver config
 
 All tasks take the same arguments. For example:
 

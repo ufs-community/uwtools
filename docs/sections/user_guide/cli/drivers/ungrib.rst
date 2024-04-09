@@ -29,7 +29,7 @@ The ``uw`` mode for configuring and running the WRF preprocessing component ``un
        runscript
          The runscript
        validate
-         Validate driver config
+         Validate the UW driver config
        vtable
          A symlink to the Vtable file
 

@@ -71,7 +71,7 @@ class Driver(ABC):
     @external
     def validate(self):
         """
-        Validate driver config.
+        Validate the UW driver config.
         """
         yield self._taskname("valid schema")
         yield asset(None, lambda: True)
