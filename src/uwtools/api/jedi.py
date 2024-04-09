@@ -25,14 +25,14 @@ def execute(
     Otherwise, the executable will be run directly on the current system.
     :param task: The task to execute
     :param cycle: The cycle.
-    :param config_file: Path to YAML config file
+    :param config: Path to YAML config file
     :param cycle: The cycle to run
     :param batch: Submit run to the batch system
     :param dry_run: Do not run the executable, just report what would have been done
     :param graph_file: Write Graphviz DOT output here
     :return: True if task completes without raising an exception
     """
-    obj = _JEDI(config=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
+    obj = _JEDI(config_file=config_file, cycle=cycle, batch=batch, dry_run=dry_run)
     getattr(obj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
