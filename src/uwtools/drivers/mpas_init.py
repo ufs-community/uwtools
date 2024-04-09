@@ -94,8 +94,9 @@ class MPASInit(Driver):
         path = self._rundir / fn
         yield asset(path, path.is_file)
         yield None
-        duration = timedelta(hours=self._driver_config["boundary_conditions"]["length"])
-        str_duration = str(duration).replace(" days, ", "")
+        stop_time = self._cycle + timedelta(
+            hours=self._driver_config["boundary_conditions"]["length"]
+        )
         try:
             namelist = self._driver_config["namelist"]
         except KeyError as e:
@@ -106,7 +107,7 @@ class MPASInit(Driver):
         update_values.setdefault("nhyd_model", {}).update(
             {
                 "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:00:00"),
-                "config_run_duration": str_duration,
+                "config_stop_time": stop_time.strftime("%Y-%m-%d_%H:00:00"),
             }
         )
         namelist["update_values"] = update_values

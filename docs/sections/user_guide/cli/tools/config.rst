@@ -154,10 +154,11 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
 
 .. code-block:: text
 
-   $ uw config realize --help
+   $ uw config realize -h
    usage: uw config realize [-h] [--version] [--input-file PATH] [--input-format {ini,nml,sh,yaml}]
                             [--output-file PATH] [--output-format {ini,nml,sh,yaml}]
-                            [--values-needed] [--total] [--dry-run] [--quiet] [--verbose]
+                            [--output-block KEY[:KEY:...]] [--values-needed] [--total] [--dry-run]
+                            [--quiet] [--verbose]
                             [PATH ...]
 
    Realize config
@@ -175,6 +176,8 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
          Path to output file (defaults to stdout)
      --output-format {ini,nml,sh,yaml}
          Output format
+     --output-block KEY[:KEY:...]
+         Colon-separated path of keys to the block to be output
      --values-needed
          Print report of values needed to render template
      --total
@@ -356,6 +359,18 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
        message: 'Good Night Moon Good Night Moon '
        recipient: Moon
        repeat: 2
+
+* To read the config from ``stdin`` and realize a subsection to ``stdout`` in a different format:
+
+  .. code-block:: text
+
+     $ cat config.yaml | uw config realize --input-format yaml --output-format sh --output-block values values1.yaml
+     date=20240105
+     empty=None
+     greeting='Good Night'
+     message='Good Night Moon Good Night Moon '
+     recipient=Moon
+     repeat=2
 
 * If the config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its contents:
 

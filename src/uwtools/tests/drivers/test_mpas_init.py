@@ -144,6 +144,18 @@ def test_MPASInit_files_copied_and_linked(config, cycle, key, task, test, tmp_pa
     assert all(getattr(dst, test)() for dst in [atm_dst, sfc_dst])
 
 
+def test_MPASInit_namelist_contents(cycle, driverobj):
+    dst = driverobj._rundir / "namelist.init_atmosphere"
+    assert not dst.is_file()
+    driverobj.namelist_file()
+    assert dst.is_file()
+    nml = f90nml.read(dst)
+    stop_time = cycle + dt.timedelta(hours=1)
+    f = "%Y-%m-%d_%H:00:00"
+    assert nml["nhyd_model"]["config_start_time"] == cycle.strftime(f)
+    assert nml["nhyd_model"]["config_stop_time"] == stop_time.strftime(f)
+
+
 def test_MPASInit_namelist_file(driverobj):
     dst = driverobj._rundir / "namelist.init_atmosphere"
     assert not dst.is_file()
