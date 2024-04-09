@@ -97,7 +97,6 @@ class JEDI(Driver):
         env = " && ".join(self._driver_config["execution"]["envcmds"])
         cmd = "{env} && time {x} --validate-only {p} 2>&1".format(env=env, x=executable, p=path)
         result = run(taskname, cmd) 
-        breakpoint()
         if result.success:
             logging.info("%s: Config is valid", taskname)
             a.ready = lambda: True

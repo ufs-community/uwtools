@@ -4,15 +4,16 @@ JEDI driver tests.
 """
 import datetime as dt
 from unittest.mock import DEFAULT as D
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import pytest
+import logging
 import yaml
 from pytest import fixture
 
 from uwtools.drivers import jedi
 from uwtools.scheduler import Slurm
-from uwtools.tests.support import fixture_path
+from uwtools.tests.support import fixture_path, regex_logged
 
 # Fixtures
 
@@ -144,9 +145,14 @@ def test_JEDI_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_JEDI_validate_only(config_file, cycle, driverobj):
-    # with patch.object(jedi, "run")
-    driverobj.validate_only()
+def test_JEDI_validate_only(caplog, config_file, cycle, driverobj):
+    logging.getLogger().setLevel(logging.INFO)
+    with patch.object(jedi, "run") as run:
+        result = Mock(output="", success=True)
+        run.return_value=result
+        driverobj.validate_only()
+        run.assert_called_once_with('20240201 18Z jedi validate_only', 'module use /scratch1/NCEPDEV/nems/role.epic/spack-stack/spack-stack-1.5.0/envs/unified-env-rocky8/install/modulefiles/Core && module load stack-intel/2021.5.0 && module load stack-intel-oneapi-mpi/2021.5.1 && module load jedi-fv3-env/1.0.0 && time /scratch2/BMC/zrtrr/Naureen.Bharwani/build/bin/qg_forecast.x --validate-only /scratch2/BMC/zrtrr/Naureen.Bharwani/uwtools/src/uwtools/tests/fixtures/jedi.yaml 2>&1')
+    assert regex_logged(caplog, "Config is valid")
 
 
 def test_JEDI_yaml_file(driverobj):
