@@ -26,6 +26,8 @@ The ``uw`` mode for configuring and running the :sfc-climo-gen:`sfc_climo_gen<>`
          A run
        runscript
          The runscript
+       validate
+         Validate driver config
 
 All tasks take the same arguments. For example:
 

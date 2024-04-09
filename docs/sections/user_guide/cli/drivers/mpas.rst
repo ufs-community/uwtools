@@ -34,7 +34,8 @@ The ``uw`` mode for configuring and running the MPAS forecast model. Each listed
          The runscript
        streams_file
          The streams file
-
+       validate
+         Validate driver config
 
 All tasks take the same arguments. For example:
 

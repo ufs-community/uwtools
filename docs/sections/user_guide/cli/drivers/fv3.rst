@@ -40,6 +40,8 @@ The ``uw`` mode for configuring and running FV3.
          A run
        runscript
          The runscript
+       validate
+         Validate driver config
 
 All tasks take the same arguments. For example:
 
