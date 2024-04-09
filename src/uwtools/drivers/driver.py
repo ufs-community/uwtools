@@ -11,7 +11,7 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Type
 
-from iotaa import asset, task, tasks
+from iotaa import asset, external, task, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
@@ -67,6 +67,14 @@ class Driver(ABC):
         """
         yield self._taskname("run")
         yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
+
+    @external
+    def validate(self):
+        """
+        Validate driver config.
+        """
+        yield self._taskname("valid schema")
+        yield asset(None, lambda: True)
 
     @task
     def _run_via_batch_submission(self):
