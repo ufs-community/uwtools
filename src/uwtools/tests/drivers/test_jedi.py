@@ -7,6 +7,7 @@ import logging
 from unittest.mock import DEFAULT as D
 from unittest.mock import Mock, patch
 
+import pytest
 import yaml
 from pytest import fixture
 
@@ -84,6 +85,19 @@ def test_JEDI_dry_run(config_file, cycle):
         driverobj = jedi.JEDI(config=config_file, cycle=cycle, batch=True, dry_run=True)
     assert driverobj._dry_run is True
     dryrun.assert_called_once_with()
+
+
+@pytest.mark.parametrize("key,task,test", [("files_to_copy", "files_copied", "is_file")])
+def test_JEDI_files_copied(caplog, config, cycle, key, task, test, tmp_path):
+    logging.getLogger().setLevel(logging.INFO)
+    with patch.object(jedi, "is_file") as is_file:
+        pass
+
+
+@pytest.mark.parametrize("key,task,test", [("files_to_link", "files_linked", "is_symlink")])
+def test_JEDI_files_copied(caplog, config, cycle, key, task, test, tmp_path):
+    logging.getLogger().setLevel(logging.INFO)
+    # with patch.object(jedi, "is_symlink") as is_symlink:
 
 
 def test_JEDI_provisioned_run_directory(driverobj):
