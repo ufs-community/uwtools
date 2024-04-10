@@ -3,11 +3,10 @@
 JEDI driver tests.
 """
 import datetime as dt
-from unittest.mock import DEFAULT as D
-from unittest.mock import patch, Mock
-
-import pytest
 import logging
+from unittest.mock import DEFAULT as D
+from unittest.mock import Mock, patch
+
 import yaml
 from pytest import fixture
 
@@ -38,10 +37,10 @@ def config(tmp_path):
                     "walltime": "00:02:00",
                 },
                 "envcmds": [
-                    "module use /scratch1/NCEPDEV/nems/role.epic/spack-stack/spack-stack-1.5.0/envs/unified-env-rocky8/install/modulefiles/Core",
-                    "module load stack-intel/2021.5.0",
-                    "module load stack-intel-oneapi-mpi/2021.5.1",
-                    "module load jedi-fv3-env/1.0.0",
+                    "cmd1",
+                    "cmd2",
+                    "module load right-modules",
+                    "module load jedi-modules",
                 ],
                 "executable": "/scratch2/BMC/zrtrr/Naureen.Bharwani/build/bin/qg_forecast.x",
                 "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
@@ -87,29 +86,6 @@ def test_JEDI_dry_run(config_file, cycle):
     dryrun.assert_called_once_with()
 
 
-@pytest.mark.parametrize(
-    "key,task,test",
-    [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
-)
-def test_JEDI_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
-    pass
-    # atm, sfc = "gfs.t%sz.atmanl.nc", "gfs.t%sz.sfcanl.nc"
-    # atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
-    # atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
-    # config["mpas"].update({key: {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
-    # path = tmp_path / "config.yaml"
-    # with open(path, "w", encoding="utf-8") as f:
-    #     yaml.dump(config, f)
-    # driverobj = jedi.JEDI(config=path, cycle=cycle, batch=True)
-    # atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
-    # assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
-    # atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
-    # for src in (atm_src, sfc_src):
-    #     src.touch()
-    # getattr(driverobj, task)()
-    # assert all(getattr(dst, test)() for dst in [atm_dst, sfc_dst])
-
-
 def test_JEDI_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
@@ -149,9 +125,12 @@ def test_JEDI_validate_only(caplog, config_file, cycle, driverobj):
     logging.getLogger().setLevel(logging.INFO)
     with patch.object(jedi, "run") as run:
         result = Mock(output="", success=True)
-        run.return_value=result
+        run.return_value = result
         driverobj.validate_only()
-        run.assert_called_once_with('20240201 18Z jedi validate_only', 'module use /scratch1/NCEPDEV/nems/role.epic/spack-stack/spack-stack-1.5.0/envs/unified-env-rocky8/install/modulefiles/Core && module load stack-intel/2021.5.0 && module load stack-intel-oneapi-mpi/2021.5.1 && module load jedi-fv3-env/1.0.0 && time /scratch2/BMC/zrtrr/Naureen.Bharwani/build/bin/qg_forecast.x --validate-only /scratch2/BMC/zrtrr/Naureen.Bharwani/uwtools/src/uwtools/tests/fixtures/jedi.yaml 2>&1')
+        run.assert_called_once_with(
+            "20240201 18Z jedi validate_only",
+            "cmd1 && cmd2 && module load right-modules && module load jedi-modules && time /scratch2/BMC/zrtrr/Naureen.Bharwani/build/bin/qg_forecast.x --validate-only /scratch2/BMC/zrtrr/Naureen.Bharwani/uwtools/src/uwtools/tests/fixtures/jedi.yaml 2>&1",
+        )
     assert regex_logged(caplog, "Config is valid")
 
 
