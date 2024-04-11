@@ -178,7 +178,7 @@ def test_JEDI_configuration_file(driverobj):
     # breakpoint()
     assert not (Path(driverobj._driver_config["run_dir"]) / "input.yaml").is_file()
     driverobj.configuration_file()
-    assert driverobj.configuration_file().taskname == '20240201 18Z jedi input.yaml'
+    assert driverobj.configuration_file().taskname == "20240201 18Z jedi input.yaml"
     # assert driverobj._rundir == driverobj._rundir / "input.yaml"
 
 

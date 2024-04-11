@@ -141,6 +141,7 @@ def test__add_subparser_fv3(subparsers):
 def test__add_subparser_jedi(subparsers):
     cli._add_subparser_jedi(subparsers)
     assert actions(subparsers.choices[STR.jedi]) == [
+        "configuration_file",
         "files_copied",
         "files_linked",
         "provisioned_run_directory",
@@ -148,7 +149,6 @@ def test__add_subparser_jedi(subparsers):
         "runscript",
         "validate",
         "validate_only",
-        "yaml_file",
     ]
 
 
