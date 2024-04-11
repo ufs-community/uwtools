@@ -4,8 +4,9 @@ JEDI driver tests.
 """
 import datetime as dt
 import logging
+from pathlib import Path
 from unittest.mock import DEFAULT as D
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 import pytest
 import yaml
@@ -51,7 +52,9 @@ def config(tmp_path):
                 "base_file": str(fixture_path("jedi.yaml")),
                 "update_values": {"jedi": {}},
             },
-            "run_dir": str(tmp_path),
+            "files_to_copy": {"foo": "/path/to/foo", "bar/baz": "/path/to/baz"},
+            "files_to_link": {"foo": "/path/to/foo", "bar/baz": "/path/to/baz"},
+            "run_dir": "/path/to/run",
         },
         "platform": {
             "account": "me",
@@ -87,17 +90,33 @@ def test_JEDI_dry_run(config_file, cycle):
     dryrun.assert_called_once_with()
 
 
-@pytest.mark.parametrize("key,task,test", [("files_to_copy", "files_copied", "is_file")])
-def test_JEDI_files_copied(caplog, config, cycle, key, task, test, tmp_path):
-    logging.getLogger().setLevel(logging.INFO)
-    with patch.object(jedi, "is_file") as is_file:
-        pass
+def test_JEDI_files_copied(caplog, driverobj):
+    # logging.getLogger().setLevel(logging.INFO)
+    with patch.object(jedi, "filecopy") as filecopy:
+        driverobj.files_copied()
+        assert filecopy.call_count == 2
+        assert (
+            call(src=Path("/path/to/baz"), dst=Path("/path/to/run/bar/baz"))
+            in filecopy.call_args_list
+        )
+        assert (
+            call(src=Path("/path/to/foo"), dst=Path("/path/to/run/foo")) in filecopy.call_args_list
+        )
 
 
-@pytest.mark.parametrize("key,task,test", [("files_to_link", "files_linked", "is_symlink")])
-def test_JEDI_files_copied(caplog, config, cycle, key, task, test, tmp_path):
-    logging.getLogger().setLevel(logging.INFO)
-    # with patch.object(jedi, "is_symlink") as is_symlink:
+def test_JEDI_files_linked(caplog, driverobj):
+    # logging.getLogger().setLevel(logging.INFO)
+    with patch.object(jedi, "symlink") as symlink:
+        driverobj.files_linked()
+        assert symlink.call_count == 2
+        assert (
+            call(target=Path("/path/to/baz"), linkname=Path("/path/to/run/bar/baz"))
+            in symlink.call_args_list
+        )
+        assert (
+            call(target=Path("/path/to/foo"), linkname=Path("/path/to/run/foo"))
+            in symlink.call_args_list
+        )
 
 
 def test_JEDI_provisioned_run_directory(driverobj):
