@@ -81,6 +81,7 @@ def test__add_subparser_chgres_cube(subparsers):
         "provisioned_run_directory",
         "run",
         "runscript",
+        "validate",
     ]
 
 
@@ -133,6 +134,7 @@ def test__add_subparser_fv3(subparsers):
         "restart_directory",
         "run",
         "runscript",
+        "validate",
     ]
 
 
@@ -160,6 +162,7 @@ def test__add_subparser_mpas(subparsers):
         "run",
         "runscript",
         "streams_file",
+        "validate",
     ]
 
 
@@ -174,6 +177,7 @@ def test__add_subparser_mpas_init(subparsers):
         "run",
         "runscript",
         "streams_file",
+        "validate",
     ]
 
 
@@ -199,6 +203,7 @@ def test__add_subparser_sfc_climo_gen(subparsers):
         "provisioned_run_directory",
         "run",
         "runscript",
+        "validate",
     ]
 
 
@@ -225,6 +230,7 @@ def test__add_subparser_ungrib(subparsers):
         "provisioned_run_directory",
         "run",
         "runscript",
+        "validate",
         "vtable",
     ]
 

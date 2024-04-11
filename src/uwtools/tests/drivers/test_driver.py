@@ -3,6 +3,7 @@
 Tests for uwtools.drivers.driver module.
 """
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
@@ -15,6 +16,8 @@ from pytest import fixture, raises
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import log
+from uwtools.tests.support import regex_logged
 
 # Helpers
 
@@ -102,6 +105,12 @@ def test_Driver_run(driverobj, batch):
         else:
             rvbs.assert_not_called()
             rvle.assert_called_once_with()
+
+
+def test_Driver_validate(caplog, driverobj):
+    log.setLevel(logging.INFO)
+    driverobj.validate()
+    assert regex_logged(caplog, "State: Ready")
 
 
 def test_Driver__run_via_batch_submission(driverobj):
@@ -278,7 +287,7 @@ def test_Driver__write_runscript(driverobj, tmp_path):
     export BAZ=qux
 
     time foo bar baz qux
-    test $? -eq 0 && touch /path/to/2024032218/run/done
+    test $? -eq 0 && touch /path/to/2024032218/run/done.concrete
     """
     with open(path, "r", encoding="utf-8") as f:
         actual = f.read()
