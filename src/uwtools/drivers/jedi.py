@@ -66,7 +66,7 @@ class JEDI(Driver):
         yield [
             self.files_copied(),
             self.files_linked(),
-            self.yaml_file(),
+            self.configuration_file(),
             self.runscript(),
         ]
 
@@ -101,9 +101,9 @@ class JEDI(Driver):
             a.ready = lambda: True
 
     @task
-    def yaml_file(self):
+    def configuration_file(self):
         """
-        The YAML file.
+        The configuration file.
         """
         fn = "input.yaml"
         yield self._taskname(fn)
@@ -112,7 +112,7 @@ class JEDI(Driver):
         yield None
         self._create_user_updated_config(
             config_class=YAMLConfig,
-            config_values=self._driver_config.get("yaml", {}),
+            config_values=self._driver_config.get("configuration_file", {}),
             path=path,
         )
 

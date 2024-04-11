@@ -146,6 +146,7 @@ def test__add_subparser_jedi(subparsers):
         "provisioned_run_directory",
         "run",
         "runscript",
+        "validate",
         "validate_only",
         "yaml_file",
     ]

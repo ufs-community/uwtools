@@ -123,7 +123,7 @@ def test_JEDI_provisioned_run_directory(driverobj):
         files_copied=D,
         files_linked=D,
         runscript=D,
-        yaml_file=D,
+        configuration_file=D,
     ) as mocks:
         driverobj.provisioned_run_directory()
     for m in mocks:
@@ -174,9 +174,12 @@ def test_JEDI_validate_only(caplog, driverobj):
     assert regex_logged(caplog, "Config is valid")
 
 
-def test_JEDI_yaml_file():
-    pass
-    # src = driverobj._rundir / "input.yaml"
+def test_JEDI_configuration_file(driverobj):
+    # breakpoint()
+    assert not (Path(driverobj._driver_config["run_dir"]) / "input.yaml").is_file()
+    driverobj.configuration_file()
+    assert driverobj.configuration_file().taskname == '20240201 18Z jedi input.yaml'
+    # assert driverobj._rundir == driverobj._rundir / "input.yaml"
 
 
 def test_JEDI__driver_config(driverobj):
