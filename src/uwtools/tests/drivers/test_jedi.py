@@ -8,13 +8,13 @@ from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import Mock, call, patch
 
-import pytest
 import yaml
+from iotaa import asset, external
 from pytest import fixture
 
 from uwtools.drivers import jedi
 from uwtools.scheduler import Slurm
-from uwtools.tests.support import fixture_path, regex_logged
+from uwtools.tests.support import regex_logged
 
 # Fixtures
 
@@ -39,17 +39,15 @@ def config(tmp_path):
                     "walltime": "00:02:00",
                 },
                 "envcmds": [
-                    "cmd1",
-                    "cmd2",
-                    "module load right-modules",
-                    "module load jedi-modules",
+                    "module load some-module",
+                    "module load jedi-module",
                 ],
                 "executable": "/path/to/qg_forecast.x",
                 "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
                 "mpicmd": "srun",
             },
             "configuration_file": {
-                "base_file": str(fixture_path("jedi.yaml")),
+                "base_file": "/path/to/jedi.yaml",
                 "update_values": {"jedi": {}},
             },
             "files_to_copy": {"foo": "/path/to/foo", "bar/baz": "/path/to/baz"},
@@ -155,19 +153,28 @@ def test_JEDI_runscript(driverobj):
 
 
 def test_JEDI_validate_only(caplog, driverobj):
+
+    @external
+    def file(path: Path):
+        yield "Mocked file task for %s" % path
+        yield asset(path, lambda: True)
+
     logging.getLogger().setLevel(logging.INFO)
-    with patch.object(jedi, "run") as run:
-        result = Mock(output="", success=True)
-        run.return_value = result
-        driverobj.validate_only()
-        run.assert_called_once_with(
-            "20240201 18Z jedi validate_only",
-            "cmd1 && cmd2 && module load right-modules && module load jedi-modules && time /path/to/qg_forecast.x --validate-only /scratch2/BMC/zrtrr/Naureen.Bharwani/uwtools/src/uwtools/tests/fixtures/jedi.yaml 2>&1",
-        )
+    with patch.object(jedi, "file"):
+        with patch.object(jedi, "run") as run:
+            result = Mock(output="", success=True)
+            run.return_value = result
+            driverobj.validate_only()
+            cmds = [
+                "module load some-module",
+                "module load jedi-module",
+                "time /path/to/qg_forecast.x --validate-only /path/to/jedi.yaml 2>&1",
+            ]
+            run.assert_called_once_with("20240201 18Z jedi validate_only", " && ".join(cmds))
     assert regex_logged(caplog, "Config is valid")
 
 
-def test_JEDI_yaml_file(driverobj):
+def test_JEDI_yaml_file():
     pass
     # src = driverobj._rundir / "input.yaml"
 

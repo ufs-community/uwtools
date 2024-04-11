@@ -477,7 +477,7 @@ def _dispatch_jedi(args: Args) -> bool:
     """
     return uwtools.api.jedi.execute(
         task=args[STR.action],
-        config_file=args[STR.cfgfile],
+        config=args[STR.cfgfile],
         cycle=args[STR.cycle],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],

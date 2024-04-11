@@ -9,7 +9,7 @@ from uwtools.api import jedi
 def test_execute(tmp_path):
     dot = tmp_path / "graph.dot"
     args: dict = {
-        "config_file": "config.yaml",
+        "config": "config.yaml",
         "cycle": dt.datetime.now(),
         "batch": False,
         "dry_run": True,

@@ -88,7 +88,6 @@ class JEDI(Driver):
         """
         taskname = self._taskname("validate_only")
         yield taskname
-
         a = asset(None, lambda: False)
         yield a
         path = Path(self._driver_config["configuration_file"]["base_file"])
@@ -104,7 +103,7 @@ class JEDI(Driver):
     @task
     def yaml_file(self):
         """
-        The yaml file.
+        The YAML file.
         """
         fn = "input.yaml"
         yield self._taskname(fn)
