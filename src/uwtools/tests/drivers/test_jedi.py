@@ -12,6 +12,7 @@ import yaml
 from iotaa import asset, external
 from pytest import fixture
 
+from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import jedi
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import regex_logged
@@ -47,11 +48,17 @@ def config(tmp_path):
                 "mpicmd": "srun",
             },
             "configuration_file": {
-                "base_file": "/path/to/jedi.yaml",
-                "update_values": {"jedi": {}},
+                "base_file": str(tmp_path / "jedi.yaml"),
+                "update_values": {"baz": "qux"},
             },
-            "files_to_copy": {"foo": "/path/to/foo", "bar/baz": "/path/to/baz"},
-            "files_to_link": {"foo": "/path/to/foo", "bar/baz": "/path/to/baz"},
+            "files_to_copy": {
+                "foo": "/path/to/foo",
+                "bar/baz": "/path/to/baz",
+            },
+            "files_to_link": {
+                "foo": "/path/to/foo",
+                "bar/baz": "/path/to/baz",
+            },
             "run_dir": str(tmp_path),
         },
         "platform": {
@@ -164,6 +171,7 @@ def test_JEDI_validate_only(caplog, driverobj):
         with patch.object(jedi, "run") as run:
             result = Mock(output="", success=True)
             run.return_value = result
+            driverobj._driver_config["configuration_file"]["base_file"] = "/path/to/jedi.yaml"
             driverobj.validate_only()
             cmds = [
                 "module load some-module",
@@ -175,11 +183,16 @@ def test_JEDI_validate_only(caplog, driverobj):
 
 
 def test_JEDI_configuration_file(driverobj):
-    # breakpoint()
-    assert not (Path(driverobj._driver_config["run_dir"]) / "input.yaml").is_file()
+    basecfg = {"foo": "bar"}
+    basefile = Path(driverobj._driver_config["configuration_file"]["base_file"])
+    with open(basefile, "w", encoding="utf-8") as f:
+        yaml.dump(basecfg, f)
+    cfgfile = Path(driverobj._driver_config["run_dir"]) / "input.yaml"
+    assert not cfgfile.is_file()
     driverobj.configuration_file()
-    assert driverobj.configuration_file().taskname == "20240201 18Z jedi input.yaml"
-    # assert driverobj._rundir == driverobj._rundir / "input.yaml"
+    assert cfgfile.is_file()
+    newcfg = YAMLConfig(config=cfgfile)
+    assert newcfg == {**basecfg, "baz": "qux"}
 
 
 def test_JEDI__driver_config(driverobj):
