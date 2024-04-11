@@ -19,7 +19,7 @@ def execute(
     graph_file: Optional[Path] = None,
 ) -> bool:
     """
-    Execute a jedi task.
+    Execute a JEDI task.
 
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
