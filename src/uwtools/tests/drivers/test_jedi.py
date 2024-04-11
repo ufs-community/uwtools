@@ -44,7 +44,7 @@ def config(tmp_path):
                     "module load right-modules",
                     "module load jedi-modules",
                 ],
-                "executable": "/scratch2/BMC/zrtrr/Naureen.Bharwani/build/bin/qg_forecast.x",
+                "executable": "/path/to/qg_forecast.x",
                 "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
                 "mpicmd": "srun",
             },
@@ -54,7 +54,7 @@ def config(tmp_path):
             },
             "files_to_copy": {"foo": "/path/to/foo", "bar/baz": "/path/to/baz"},
             "files_to_link": {"foo": "/path/to/foo", "bar/baz": "/path/to/baz"},
-            "run_dir": "/path/to/run",
+            "run_dir": str(tmp_path),
         },
         "platform": {
             "account": "me",
@@ -90,9 +90,9 @@ def test_JEDI_dry_run(config_file, cycle):
     dryrun.assert_called_once_with()
 
 
-def test_JEDI_files_copied(caplog, driverobj):
-    # logging.getLogger().setLevel(logging.INFO)
+def test_JEDI_files_copied(driverobj):
     with patch.object(jedi, "filecopy") as filecopy:
+        driverobj._driver_config["run_dir"] = "/path/to/run"
         driverobj.files_copied()
         assert filecopy.call_count == 2
         assert (
@@ -104,9 +104,9 @@ def test_JEDI_files_copied(caplog, driverobj):
         )
 
 
-def test_JEDI_files_linked(caplog, driverobj):
-    # logging.getLogger().setLevel(logging.INFO)
+def test_JEDI_files_linked(driverobj):
     with patch.object(jedi, "symlink") as symlink:
+        driverobj._driver_config["run_dir"] = "/path/to/run"
         driverobj.files_linked()
         assert symlink.call_count == 2
         assert (
@@ -154,7 +154,7 @@ def test_JEDI_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_JEDI_validate_only(caplog, config_file, cycle, driverobj):
+def test_JEDI_validate_only(caplog, driverobj):
     logging.getLogger().setLevel(logging.INFO)
     with patch.object(jedi, "run") as run:
         result = Mock(output="", success=True)
@@ -162,7 +162,7 @@ def test_JEDI_validate_only(caplog, config_file, cycle, driverobj):
         driverobj.validate_only()
         run.assert_called_once_with(
             "20240201 18Z jedi validate_only",
-            "cmd1 && cmd2 && module load right-modules && module load jedi-modules && time /scratch2/BMC/zrtrr/Naureen.Bharwani/build/bin/qg_forecast.x --validate-only /scratch2/BMC/zrtrr/Naureen.Bharwani/uwtools/src/uwtools/tests/fixtures/jedi.yaml 2>&1",
+            "cmd1 && cmd2 && module load right-modules && module load jedi-modules && time /path/to/qg_forecast.x --validate-only /scratch2/BMC/zrtrr/Naureen.Bharwani/uwtools/src/uwtools/tests/fixtures/jedi.yaml 2>&1",
         )
     assert regex_logged(caplog, "Config is valid")
 
