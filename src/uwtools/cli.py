@@ -548,7 +548,7 @@ def _add_subparser_mpas_init(subparsers: Subparsers) -> ModeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.mpasinit, "Execute MPASInit tasks")
+    parser = _add_subparser(subparsers, STR.mpasinit, "Execute MPAS Init tasks")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
