@@ -8,6 +8,7 @@ import filecmp
 import logging
 import sys
 from io import StringIO
+from textwrap import dedent
 from unittest.mock import patch
 
 import yaml
@@ -106,18 +107,34 @@ def test_simple(tmp_path):
 
 def test_constructor_error_no_quotes(tmp_path):
     # Test that Jinja2 template without quotes raises UWConfigError.
-
     tmpfile = tmp_path / "test.yaml"
     with tmpfile.open("w", encoding="utf-8") as f:
-        f.write(
-            """
-foo: {{ bar }}
-bar: 2
-"""
-        )
+        s = """
+        foo: {{ bar }}
+        bar: 2
+        """
+        f.write(dedent(s).strip())
     with raises(exceptions.UWConfigError) as e:
         YAMLConfig(tmpfile)
     assert "value is enclosed in quotes" in str(e.value)
+
+
+def test_constructor_error_not_dict_from_file(tmp_path):
+    # Test that a useful exception is raised if the YAML file input is a non-dict value.
+    tmpfile = tmp_path / "test.yaml"
+    with tmpfile.open("w", encoding="utf-8") as f:
+        f.write("hello")
+    with raises(exceptions.UWConfigError) as e:
+        YAMLConfig(tmpfile)
+    assert f"Parsed a str value from {tmpfile}, expected a dict" in str(e.value)
+
+
+def test_constructor_error_not_dict_from_stdin():
+    # Test that a useful exception is raised if the YAML stdin input is a non-dict value.
+    with patch.object(sys, "stdin", new=StringIO("a string")):
+        with raises(exceptions.UWConfigError) as e:
+            YAMLConfig()
+    assert "Parsed a str value from stdin, expected a dict" in str(e.value)
 
 
 def test_constructor_error_unregistered_constructor(tmp_path):
