@@ -950,10 +950,10 @@ def _add_arg_keys(group: Group) -> None:
 def _add_arg_output_block(group: Group):
     group.add_argument(
         _switch(STR.outblock),
-        help="Colon-separated path of keys to the block to be output",
-        metavar="KEY[:KEY:...]",
+        help="Dot-separated path of keys to the block to be output",
+        metavar="KEY[.KEY[.KEY]...]",
         required=False,
-        type=lambda s: s.split(":"),
+        type=lambda s: s.split("."),
     )
 
 

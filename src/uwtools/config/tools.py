@@ -321,6 +321,7 @@ Recognized file extensions are: {extensions}
 
 :param input_config: Input config source (None => read stdin).
 :param input_format: Format of the input config.
+:param output_block: Path through keys to the desired output block.
 :param output_file: Output config destination (None => write to stdout).
 :param output_format: Format of the output config.
 :param supplemental_configs: Sources of values used to modify input.

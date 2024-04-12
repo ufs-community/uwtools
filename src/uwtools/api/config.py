@@ -212,6 +212,7 @@ Recognized file extensions are: {extensions}
 
 :param input_config: Input config file (``None`` or unspecified => read ``stdin``)
 :param input_format: Format of the input config (optional if file's extension is recognized)
+:param output_block: Path through keys to the desired output block
 :param output_file: Output config file (``None`` or unspecified => write to ``stdout``)
 :param output_format: Format of the output config (optional if file's extension is recognized)
 :param supplemental_configs: Configs to merge, in order, onto the input
