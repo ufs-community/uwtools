@@ -5,7 +5,7 @@ Installation
 
    Developers should visit the :doc:`Developer Setup <../contributor_guide/developer_setup>` section located in the :doc:`Contributor Guide <../contributor_guide/index>`.
 
-The recommended installation mechanism uses the Python package and virtual-environment manager :conda:`conda<>`. We recommend the :miniforge:`Miniforge<>` variant of :miniconda:`Miniconda<>` which by default packages from the :conda-forge:`conda-forge<>` project.
+The recommended installation mechanism uses the Python package and virtual-environment manager :conda:`conda<>`. The :miniforge:`Miniforge<>` variant of :miniconda:`Miniconda<>`, which by default packages from the :conda-forge:`conda-forge<>` project, is an especially useful basis for working with conda.
 
 Use an Existing conda Installation
 ----------------------------------
