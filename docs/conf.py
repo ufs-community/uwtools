@@ -43,7 +43,6 @@ extlinks = {
     "json-schema": ("https://json-schema.org/%s", "%s"),
     "miniconda": ("https://docs.conda.io/projects/miniconda/en/latest/%s", "%s"),
     "miniforge": ("https://github.com/conda-forge/miniforge/%s", "%s"),
-    "miniforge3": ("https://github.com/conda-forge/miniforge/%s", "%s"),
     "mpas": ("https://www.mmm.ucar.edu/models/mpas/%s", "%s"),
     "mypy": ("https://mypy.readthedocs.io/en/stable/%s", "%s"),
     "noaa": ("https://www.noaa.gov/%s", "%s"),
