@@ -38,8 +38,6 @@ To create a standalone conda environment providing ``uwtools``:
 Use a Fresh Miniforge Installation
 ----------------------------------
 
-If no existing conda installation is available, install :miniforge:`Miniforge<>`.
-
 .. include:: ../../shared/miniforge_instructions.rst
 
 #. Continue with the `Use an Existing conda Installation`_ instructions.
