@@ -64,9 +64,9 @@ class JEDI(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
+            self.configuration_file(),
             self.files_copied(),
             self.files_linked(),
-            self.configuration_file(),
             self.runscript(),
         ]
 
