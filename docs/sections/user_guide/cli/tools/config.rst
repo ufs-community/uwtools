@@ -154,11 +154,11 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
 
 .. code-block:: text
 
-   $ uw config realize -h
+   $ uw config realize --help
    usage: uw config realize [-h] [--version] [--input-file PATH] [--input-format {ini,nml,sh,yaml}]
                             [--output-file PATH] [--output-format {ini,nml,sh,yaml}]
-                            [--output-block KEY[:KEY:...]] [--values-needed] [--total] [--dry-run]
-                            [--quiet] [--verbose]
+                            [--output-block KEY[.KEY[.KEY]...]] [--values-needed] [--total]
+                            [--dry-run] [--quiet] [--verbose]
                             [PATH ...]
 
    Realize config
@@ -176,8 +176,8 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
          Path to output file (defaults to stdout)
      --output-format {ini,nml,sh,yaml}
          Output format
-     --output-block KEY[:KEY:...]
-         Colon-separated path of keys to the block to be output
+     --output-block KEY[.KEY[.KEY]...]
+         Dot-separated path of keys to the block to be output
      --values-needed
          Print report of values needed to render template
      --total
@@ -190,6 +190,7 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
          Print all logging messages
      PATH
          Additional files to supplement primary input
+
 
 Examples
 ^^^^^^^^
