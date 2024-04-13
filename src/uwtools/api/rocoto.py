@@ -9,6 +9,7 @@ from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.rocoto import realize_rocoto_xml as _realize
 from uwtools.rocoto import validate_rocoto_xml_file as _validate
 from uwtools.utils.api import ensure_config as _ensure_config
+from uwtools.utils.api import str2path as _str2path
 
 
 def realize(
@@ -30,8 +31,7 @@ def realize(
     :param stdin_ok: OK to read from stdin?
     :return: ``True``
     """
-    output_file = Path(output_file) if isinstance(output_file, str) else output_file
-    _realize(config=_ensure_config(config, stdin_ok), output_file=output_file)
+    _realize(config=_ensure_config(config, stdin_ok), output_file=_str2path(output_file))
     return True
 
 

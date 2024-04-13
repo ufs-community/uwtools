@@ -16,6 +16,7 @@ from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import validate_yaml as _validate_yaml
 from uwtools.utils.api import ensure_config as _ensure_config
+from uwtools.utils.api import str2path as _str2path
 from uwtools.utils.file import FORMAT as _FORMAT
 
 # Public
@@ -129,17 +130,12 @@ def realize(
     input_config = (
         _YAMLConfig(config=input_config) if isinstance(input_config, dict) else input_config
     )
-    output_file = Path(output_file) if isinstance(output_file, str) else output_file
-    scs: Optional[List[Union[dict, _Config, Path]]] = (
-        [Path(x) if isinstance(x, str) else x for x in supplemental_configs]
-        if supplemental_configs
-        else None
-    )
+    scs = [_str2path(x) for x in supplemental_configs] if supplemental_configs else None
     _realize(
         input_config=_ensure_config(input_config, stdin_ok),
         input_format=input_format,
         output_block=output_block,
-        output_file=output_file,
+        output_file=_str2path(output_file),
         output_format=output_format,
         supplemental_configs=scs,
         values_needed=values_needed,
@@ -180,8 +176,9 @@ def validate(
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise
     """
-    config = Path(config) if isinstance(config, str) else config
-    return _validate_yaml(schema_file=_ensure_config(Path(schema_file), stdin_ok), config=config)
+    return _validate_yaml(
+        schema_file=_ensure_config(Path(schema_file), stdin_ok), config=_str2path(config)
+    )
 
 
 # Import-time code

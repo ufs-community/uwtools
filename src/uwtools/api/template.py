@@ -9,6 +9,8 @@ from typing import Dict, List, Optional, Union
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.jinja2 import render as _render
 from uwtools.exceptions import UWTemplateRenderError
+from uwtools.utils.api import ensure_config as _ensure_config
+from uwtools.utils.api import str2path as _str2path
 
 
 def render(
@@ -45,14 +47,11 @@ def render(
     :return: The rendered template string
     :raises: UWTemplateRenderError if template could not be rendered
     """
-    values_src = Path(values_src) if isinstance(values_src, str) else values_src
-    input_file = Path(input_file) if isinstance(input_file, str) else input_file
-    output_file = Path(output_file) if isinstance(output_file, str) else output_file
     result = _render(
-        values_src=values_src,
+        values_src=_str2path(values_src),
         values_format=values_format,
-        input_file=input_file,
-        output_file=output_file,
+        input_file=_str2path(input_file),
+        output_file=_str2path(output_file),
         overrides=overrides,
         env=env,
         searchpath=searchpath,
@@ -99,7 +98,7 @@ def translate(
     :param dry_run: Run in dry-run mode?
     :return: ``True``
     """
-    input_file = Path(input_file) if isinstance(input_file, str) else input_file
-    output_file = Path(output_file) if isinstance(output_file, str) else output_file
-    _convert_atparse_to_jinja2(input_file=input_file, output_file=output_file, dry_run=dry_run)
+    _convert_atparse_to_jinja2(
+        input_file=_str2path(input_file), output_file=_str2path(output_file), dry_run=dry_run
+    )
     return True

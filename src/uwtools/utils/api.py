@@ -20,4 +20,13 @@ def ensure_config(config: Optional[Union[dict, Config, Path, str]], stdin_ok: bo
     """
     if config is None and not stdin_ok:
         raise UWError("Set stdin_ok=True to enable read from stdin")
-    return Path(config) if isinstance(config, str) else config
+    return str2path(config)
+
+
+def str2path(val: Any) -> Any:
+    """
+    Return str value as Path, other types unmodified.
+
+    :param val: Any value.
+    """
+    return Path(val) if isinstance(val, str) else val
