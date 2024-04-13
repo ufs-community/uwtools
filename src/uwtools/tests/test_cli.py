@@ -47,7 +47,7 @@ def actions(parser: Parser) -> List[str]:
 
 
 @fixture
-def kwargs_dispatch_file():
+def args_dispatch_file():
     return {
         "target_dir": "/target/dir",
         "config_file": "/config/file",
@@ -317,7 +317,7 @@ def test__dict_from_key_eq_val_strings():
 
 def test__dispatch_chgres_cube():
     cycle = dt.datetime.now()
-    kwargs: dict = {
+    args: dict = {
         "batch": True,
         "config_file": "config.yaml",
         "cycle": cycle,
@@ -326,7 +326,7 @@ def test__dispatch_chgres_cube():
         "stdin_ok": True,
     }
     with patch.object(uwtools.api.chgres_cube, "execute") as execute:
-        cli._dispatch_chgres_cube({**kwargs, "action": "foo"})
+        cli._dispatch_chgres_cube({**args, "action": "foo"})
     execute.assert_called_once_with(
         batch=True,
         config="config.yaml",
@@ -442,17 +442,17 @@ def test__dispatch_config_realize_no_optional():
 
 
 def test__dispatch_config_validate_config_obj():
-    _dispatch_config_validate_kwargs = {
+    _dispatch_config_validate_args = {
         STR.schemafile: Path("/path/to/a.jsonschema"),
         STR.infile: Path("/path/to/config.yaml"),
     }
     with patch.object(uwtools.api.config, "_validate_yaml") as _validate_yaml:
-        cli._dispatch_config_validate(_dispatch_config_validate_kwargs)
-    _validate_yaml_kwargs = {
-        STR.schemafile: _dispatch_config_validate_kwargs[STR.schemafile],
-        STR.config: _dispatch_config_validate_kwargs[STR.infile],
+        cli._dispatch_config_validate(_dispatch_config_validate_args)
+    _validate_yaml_args = {
+        STR.schemafile: _dispatch_config_validate_args[STR.schemafile],
+        STR.config: _dispatch_config_validate_args[STR.infile],
     }
-    _validate_yaml.assert_called_once_with(**_validate_yaml_kwargs)
+    _validate_yaml.assert_called_once_with(**_validate_yaml_args)
 
 
 @pytest.mark.parametrize(
@@ -465,35 +465,35 @@ def test__dispatch_file(action, funcname):
     func.assert_called_once_with(args)
 
 
-def test__dispatch_file_copy(kwargs_dispatch_file):
-    kwargs = kwargs_dispatch_file
+def test__dispatch_file_copy(args_dispatch_file):
+    args = args_dispatch_file
     with patch.object(cli.uwtools.api.file, "copy") as copy:
-        cli._dispatch_file_copy(kwargs)
+        cli._dispatch_file_copy(args)
     copy.assert_called_once_with(
-        target_dir=kwargs["target_dir"],
-        config=kwargs["config_file"],
-        keys=kwargs["keys"],
-        dry_run=kwargs["dry_run"],
-        stdin_ok=kwargs["stdin_ok"],
+        target_dir=args["target_dir"],
+        config=args["config_file"],
+        keys=args["keys"],
+        dry_run=args["dry_run"],
+        stdin_ok=args["stdin_ok"],
     )
 
 
-def test__dispatch_file_link(kwargs_dispatch_file):
-    kwargs = kwargs_dispatch_file
+def test__dispatch_file_link(args_dispatch_file):
+    args = args_dispatch_file
     with patch.object(cli.uwtools.api.file, "link") as link:
-        cli._dispatch_file_link(kwargs)
+        cli._dispatch_file_link(args)
     link.assert_called_once_with(
-        target_dir=kwargs["target_dir"],
-        config=kwargs["config_file"],
-        keys=kwargs["keys"],
-        dry_run=kwargs["dry_run"],
-        stdin_ok=kwargs["stdin_ok"],
+        target_dir=args["target_dir"],
+        config=args["config_file"],
+        keys=args["keys"],
+        dry_run=args["dry_run"],
+        stdin_ok=args["stdin_ok"],
     )
 
 
 def test__dispatch_fv3():
     cycle = dt.datetime.now()
-    kwargs: dict = {
+    args: dict = {
         "batch": True,
         "config_file": "config.yaml",
         "cycle": cycle,
@@ -502,7 +502,7 @@ def test__dispatch_fv3():
         "stdin_ok": True,
     }
     with patch.object(uwtools.api.fv3, "execute") as execute:
-        cli._dispatch_fv3({**kwargs, "action": "foo"})
+        cli._dispatch_fv3({**args, "action": "foo"})
     execute.assert_called_once_with(
         batch=True,
         config="config.yaml",
@@ -516,7 +516,7 @@ def test__dispatch_fv3():
 
 def test__dispatch_mpas():
     cycle = dt.datetime.now()
-    kwargs: dict = {
+    args: dict = {
         "batch": True,
         "config_file": "config.yaml",
         "cycle": cycle,
@@ -525,7 +525,7 @@ def test__dispatch_mpas():
         "stdin_ok": True,
     }
     with patch.object(uwtools.api.mpas, "execute") as execute:
-        cli._dispatch_mpas({**kwargs, "action": "foo"})
+        cli._dispatch_mpas({**args, "action": "foo"})
     execute.assert_called_once_with(
         batch=True,
         config="config.yaml",
@@ -539,7 +539,7 @@ def test__dispatch_mpas():
 
 def test__dispatch_mpas_init():
     cycle = dt.datetime.now()
-    kwargs: dict = {
+    args: dict = {
         "batch": True,
         "config_file": "config.yaml",
         "cycle": cycle,
@@ -548,7 +548,7 @@ def test__dispatch_mpas_init():
         "stdin_ok": True,
     }
     with patch.object(uwtools.api.mpas_init, "execute") as execute:
-        cli._dispatch_mpas_init({**kwargs, "action": "foo"})
+        cli._dispatch_mpas_init({**args, "action": "foo"})
     execute.assert_called_once_with(
         batch=True,
         config="config.yaml",
@@ -610,7 +610,7 @@ def test__dispatch_rocoto_validate_xml_no_optional():
 
 
 def test__dispatch_sfc_climo_gen():
-    kwargs: dict = {
+    args: dict = {
         "batch": True,
         "config_file": "config.yaml",
         "dry_run": False,
@@ -618,7 +618,7 @@ def test__dispatch_sfc_climo_gen():
         "stdin_ok": True,
     }
     with patch.object(uwtools.api.sfc_climo_gen, "execute") as execute:
-        cli._dispatch_sfc_climo_gen({**kwargs, "action": "foo"})
+        cli._dispatch_sfc_climo_gen({**args, "action": "foo"})
     execute.assert_called_once_with(
         batch=True, config="config.yaml", dry_run=False, graph_file=None, task="foo", stdin_ok=True
     )
@@ -737,7 +737,7 @@ def test__dispatch_template_translate_no_optional():
 
 def test__dispatch_ungrib():
     cycle = dt.datetime.now()
-    kwargs: dict = {
+    args: dict = {
         "batch": True,
         "config_file": "config.yaml",
         "cycle": cycle,
@@ -746,7 +746,7 @@ def test__dispatch_ungrib():
         "stdin_ok": True,
     }
     with patch.object(uwtools.api.ungrib, "execute") as execute:
-        cli._dispatch_ungrib({**kwargs, "action": "foo"})
+        cli._dispatch_ungrib({**args, "action": "foo"})
     execute.assert_called_once_with(
         task="foo",
         batch=True,
