@@ -32,7 +32,7 @@ def execute(
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run forecast, just report what would have been done.
     :param graph_file: Write Graphviz DOT output here.
-    :param stdin_ok: OK to read config from stdin?
+    :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
     obj = _FV3(config=_ensure_config(config, stdin_ok), cycle=cycle, batch=batch, dry_run=dry_run)
