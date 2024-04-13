@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 import uwtools.drivers.support as _support
-from uwtools.api.support import ensure_config
 from uwtools.drivers.mpas_init import MPASInit as _MPASInit
+from uwtools.utils.api import ensure_config as _ensure_config
 
 
 def execute(
@@ -36,7 +36,7 @@ def execute(
     :return: ``True`` if task completes without raising an exception.
     """
     obj = _MPASInit(
-        config=ensure_config(config, stdin_ok), cycle=cycle, batch=batch, dry_run=dry_run
+        config=_ensure_config(config, stdin_ok), cycle=cycle, batch=batch, dry_run=dry_run
     )
     getattr(obj, task)()
     if graph_file:

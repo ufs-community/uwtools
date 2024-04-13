@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 import uwtools.drivers.support as _support
-from uwtools.api.support import ensure_config
 from uwtools.drivers.sfc_climo_gen import SfcClimoGen as _SfcClimoGen
+from uwtools.utils.api import ensure_config as _ensure_config
 
 
 def execute(
@@ -32,7 +32,7 @@ def execute(
     :param stdin_ok: OK to read config from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
-    obj = _SfcClimoGen(config=ensure_config(config, stdin_ok), batch=batch, dry_run=dry_run)
+    obj = _SfcClimoGen(config=_ensure_config(config, stdin_ok), batch=batch, dry_run=dry_run)
     getattr(obj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
