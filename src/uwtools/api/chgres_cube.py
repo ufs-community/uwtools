@@ -10,6 +10,7 @@ import iotaa as _iotaa
 
 import uwtools.drivers.support as _support
 from uwtools.drivers.chgres_cube import ChgresCube as _ChgresCube
+from uwtools.exceptions import UWError
 
 
 def execute(
@@ -19,6 +20,7 @@ def execute(
     batch: bool = False,
     dry_run: bool = False,
     graph_file: Optional[Union[Path, str]] = None,
+    stdin_ok: bool = False,
 ) -> bool:
     """
     Execute a ``chgres_cube`` task.
@@ -32,8 +34,11 @@ def execute(
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run the executable, just report what would have been done.
     :param graph_file: Write Graphviz DOT output here.
+    :param stdin_ok: OK to read config from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
+    if config is None and not stdin_ok:
+        raise UWError("Set stdin_ok=True to enable read from stdin")
     config = Path(config) if isinstance(config, str) else config
     obj = _ChgresCube(config=config, cycle=cycle, batch=batch, dry_run=dry_run)
     getattr(obj, task)()
