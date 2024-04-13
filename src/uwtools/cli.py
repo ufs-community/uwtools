@@ -265,6 +265,7 @@ def _dispatch_config_realize(args: Args) -> bool:
             values_needed=args[STR.valsneeded],
             total=args[STR.total],
             dry_run=args[STR.dryrun],
+            stdin_ok=True,
         )
     except UWConfigRealizeError:
         log.error(
@@ -280,7 +281,9 @@ def _dispatch_config_validate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.config.validate(schema_file=args[STR.schemafile], config=args[STR.infile])
+    return uwtools.api.config.validate(
+        schema_file=args[STR.schemafile], config=args[STR.infile], stdin_ok=True
+    )
 
 
 # Mode file

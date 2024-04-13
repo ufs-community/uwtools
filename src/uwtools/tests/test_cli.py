@@ -390,6 +390,7 @@ def test__dispatch_config_realize():
         values_needed=7,
         total=8,
         dry_run=9,
+        stdin_ok=True,
     )
 
 
@@ -438,6 +439,7 @@ def test__dispatch_config_realize_no_optional():
         values_needed=False,
         total=False,
         dry_run=False,
+        stdin_ok=True,
     )
 
 
