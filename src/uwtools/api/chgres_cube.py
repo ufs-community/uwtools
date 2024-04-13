@@ -4,7 +4,7 @@ API access to the uwtools ``chgres_cube`` driver.
 
 import datetime as dt
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import iotaa as _iotaa
 
@@ -15,10 +15,10 @@ from uwtools.drivers.chgres_cube import ChgresCube as _ChgresCube
 def execute(
     task: str,
     cycle: dt.datetime,
-    config: Optional[Path] = None,
+    config: Optional[Union[Path, str]] = None,
     batch: bool = False,
     dry_run: bool = False,
-    graph_file: Optional[Path] = None,
+    graph_file: Optional[Union[Path, str]] = None,
 ) -> bool:
     """
     Execute a ``chgres_cube`` task.
@@ -34,6 +34,7 @@ def execute(
     :param graph_file: Write Graphviz DOT output here.
     :return: ``True`` if task completes without raising an exception.
     """
+    config = Path(config) if isinstance(config, str) else config
     obj = _ChgresCube(config=config, cycle=cycle, batch=batch, dry_run=dry_run)
     getattr(obj, task)()
     if graph_file:

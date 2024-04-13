@@ -21,8 +21,8 @@ from uwtools.utils.file import FORMAT as _FORMAT
 
 
 def compare(
-    config_1_path: Path,
-    config_2_path: Path,
+    config_1_path: Union[Path, str],
+    config_2_path: Union[Path, str],
     config_1_format: Optional[str] = None,
     config_2_format: Optional[str] = None,
 ) -> bool:
@@ -30,14 +30,16 @@ def compare(
     NB: This docstring is dynamically replaced: See compare.__doc__ definition below.
     """
     return _compare(
-        config_1_path=config_1_path,
-        config_2_path=config_2_path,
+        config_1_path=Path(config_1_path),
+        config_2_path=Path(config_2_path),
         config_1_format=config_1_format,
         config_2_format=config_2_format,
     )
 
 
-def get_fieldtable_config(config: Union[dict, Optional[Path]] = None) -> _FieldTableConfig:
+def get_fieldtable_config(
+    config: Union[dict, Optional[Union[Path, str]]] = None
+) -> _FieldTableConfig:
     """
     Get a ``FieldTableConfig`` object.
 
@@ -45,20 +47,22 @@ def get_fieldtable_config(config: Union[dict, Optional[Path]] = None) -> _FieldT
         ``dict``
     :return: An initialized ``FieldTableConfig`` object
     """
+    config = Path(config) if isinstance(config, str) else config
     return _FieldTableConfig(config=config)
 
 
-def get_ini_config(config: Union[dict, Optional[Path]] = None) -> _INIConfig:
+def get_ini_config(config: Union[dict, Optional[Union[Path, str]]] = None) -> _INIConfig:
     """
     Get an ``INIConfig`` object.
 
     :param config: INI file to load (``None`` or unspecified => read ``stdin``), or initial ``dict``
     :return: An initialized ``INIConfig`` object
     """
+    config = Path(config) if isinstance(config, str) else config
     return _INIConfig(config=config)
 
 
-def get_nml_config(config: Union[dict, Optional[Path]] = None) -> _NMLConfig:
+def get_nml_config(config: Union[dict, Optional[Union[Path, str]]] = None) -> _NMLConfig:
     """
     Get an ``NMLConfig`` object.
 
@@ -66,10 +70,11 @@ def get_nml_config(config: Union[dict, Optional[Path]] = None) -> _NMLConfig:
         initial ``dict``
     :return: An initialized ``NMLConfig`` object
     """
+    config = Path(config) if isinstance(config, str) else config
     return _NMLConfig(config=config)
 
 
-def get_sh_config(config: Union[dict, Optional[Path]] = None) -> _SHConfig:
+def get_sh_config(config: Union[dict, Optional[Union[Path, str]]] = None) -> _SHConfig:
     """
     Get an ``SHConfig`` object.
 
@@ -77,10 +82,11 @@ def get_sh_config(config: Union[dict, Optional[Path]] = None) -> _SHConfig:
         ``stdin``), or initial ``dict``
     :return: An initialized ``SHConfig`` object
     """
+    config = Path(config) if isinstance(config, str) else config
     return _SHConfig(config=config)
 
 
-def get_yaml_config(config: Union[dict, Optional[Path]] = None) -> _YAMLConfig:
+def get_yaml_config(config: Union[dict, Optional[Union[Path, str]]] = None) -> _YAMLConfig:
     """
     Get a ``YAMLConfig`` object.
 
@@ -88,16 +94,17 @@ def get_yaml_config(config: Union[dict, Optional[Path]] = None) -> _YAMLConfig:
         ``dict``
     :return: An initialized ``YAMLConfig`` object
     """
+    config = Path(config) if isinstance(config, str) else config
     return _YAMLConfig(config=config)
 
 
 def realize(
-    input_config: Union[dict, _Config, Optional[Path]] = None,
+    input_config: Optional[Union[dict, _Config, Path, str]] = None,
     input_format: Optional[str] = None,
     output_block: Optional[List[Union[str, int]]] = None,
-    output_file: Optional[Path] = None,
+    output_file: Optional[Union[Path, str]] = None,
     output_format: Optional[str] = None,
-    supplemental_configs: Optional[List[Union[dict, _Config, Path]]] = None,
+    supplemental_configs: Optional[List[Union[dict, _Config, Path, str]]] = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -105,13 +112,20 @@ def realize(
     """
     NB: This docstring is dynamically replaced: See realize.__doc__ definition below.
     """
+    input_config = Path(input_config) if isinstance(input_config, str) else input_config
+    output_file = Path(output_file) if isinstance(output_file, str) else output_file
+    scs: Optional[List[Union[dict, _Config, Path]]] = (
+        [Path(x) if isinstance(x, str) else x for x in supplemental_configs]
+        if supplemental_configs
+        else None
+    )
     _realize(
         input_config=_ensure_config_arg_type(input_config),
         input_format=input_format,
         output_block=output_block,
         output_file=output_file,
         output_format=output_format,
-        supplemental_configs=supplemental_configs,
+        supplemental_configs=scs,
         values_needed=values_needed,
         total=total,
         dry_run=dry_run,
@@ -119,9 +133,9 @@ def realize(
 
 
 def realize_to_dict(  # pylint: disable=unused-argument
-    input_config: Union[dict, _Config, Optional[Path]] = None,
+    input_config: Optional[Union[dict, _Config, Path, str]] = None,
     input_format: Optional[str] = None,
-    supplemental_configs: Optional[List[Union[dict, _Config, Path]]] = None,
+    supplemental_configs: Optional[List[Union[dict, _Config, Path, str]]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> dict:
@@ -134,7 +148,7 @@ def realize_to_dict(  # pylint: disable=unused-argument
 
 
 def validate(
-    schema_file: Path, config: Optional[Union[dict, _YAMLConfig, Optional[Path]]] = None
+    schema_file: Union[Path, str], config: Optional[Union[dict, _YAMLConfig, Path, str]] = None
 ) -> bool:
     """
     Check whether the specified config conforms to the specified JSON Schema spec.
@@ -146,15 +160,16 @@ def validate(
     :param config: The config to validate
     :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise
     """
-    return _validate_yaml(schema_file=schema_file, config=config)
+    config = Path(config) if isinstance(config, str) else config
+    return _validate_yaml(schema_file=Path(schema_file), config=config)
 
 
 # Private
 
 
 def _ensure_config_arg_type(
-    config: Union[dict, _Config, Optional[Path]]
-) -> Union[_Config, Optional[Path]]:
+    config: Optional[Union[dict, _Config, Path, str]] = None
+) -> Optional[Union[_Config, Path]]:
     """
     Encapsulate a ``dict`` in a ``Config``; return a ``Config`` or path argument as-is.
 
@@ -162,6 +177,8 @@ def _ensure_config_arg_type(
     """
     if isinstance(config, dict):
         return _YAMLConfig(config=config)
+    if isinstance(config, str):
+        return Path(config)
     return config
 
 

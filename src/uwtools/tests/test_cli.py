@@ -6,6 +6,7 @@ import re
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import _SubParsersAction
+from pathlib import Path
 from typing import List
 from unittest.mock import patch
 
@@ -433,12 +434,17 @@ def test__dispatch_config_realize_no_optional():
 
 
 def test__dispatch_config_validate_config_obj():
-    config = uwtools.api.config._YAMLConfig(config={})
-    _dispatch_config_validate_args = {STR.schemafile: 1, STR.infile: config}
+    _dispatch_config_validate_kwargs = {
+        STR.schemafile: Path("/path/to/a.jsonschema"),
+        STR.infile: Path("/path/to/config.yaml"),
+    }
     with patch.object(uwtools.api.config, "_validate_yaml") as _validate_yaml:
-        cli._dispatch_config_validate(_dispatch_config_validate_args)
-    _validate_yaml_args = {STR.schemafile: 1, STR.config: config}
-    _validate_yaml.assert_called_once_with(**_validate_yaml_args)
+        cli._dispatch_config_validate(_dispatch_config_validate_kwargs)
+    _validate_yaml_kwargs = {
+        STR.schemafile: _dispatch_config_validate_kwargs[STR.schemafile],
+        STR.config: _dispatch_config_validate_kwargs[STR.infile],
+    }
+    _validate_yaml.assert_called_once_with(**_validate_yaml_kwargs)
 
 
 @pytest.mark.parametrize(

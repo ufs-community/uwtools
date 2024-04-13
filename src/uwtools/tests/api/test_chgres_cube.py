@@ -1,6 +1,7 @@
 # pylint: disable=missing-function-docstring,protected-access
 
 import datetime as dt
+from pathlib import Path
 from unittest.mock import patch
 
 import iotaa
@@ -10,7 +11,7 @@ from uwtools.api import chgres_cube
 
 def test_execute(tmp_path):
     dot = tmp_path / "graph.dot"
-    args: dict = {
+    kwargs: dict = {
         "batch": False,
         "config": "config.yaml",
         "cycle": dt.datetime.now(),
@@ -18,9 +19,9 @@ def test_execute(tmp_path):
         "graph_file": dot,
     }
     with patch.object(chgres_cube, "_ChgresCube") as ChgresCube:
-        assert chgres_cube.execute(**args, task="foo") is True
-    del args["graph_file"]
-    ChgresCube.assert_called_once_with(**args)
+        assert chgres_cube.execute(**kwargs, task="foo") is True
+    del kwargs["graph_file"]
+    ChgresCube.assert_called_once_with(**{**kwargs, "config": Path(kwargs["config"])})
     ChgresCube().foo.assert_called_once_with()
 
 
