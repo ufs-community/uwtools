@@ -677,6 +677,7 @@ def test__dispatch_template_render_no_optional():
         searchpath=None,
         values_needed=False,
         dry_run=False,
+        stdin_ok=True,
     )
 
 
@@ -704,6 +705,7 @@ def test__dispatch_template_render_yaml():
         searchpath=6,
         values_needed=7,
         dry_run=8,
+        stdin_ok=True,
     )
 
 

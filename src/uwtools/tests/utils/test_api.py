@@ -26,4 +26,18 @@ def test_ensure_config_stdin_ok():
 
 def test_ensure_config_str_to_path():
     val = "/some/path"
-    assert api.ensure_config(config=val, stdin_ok=False) == Path(val)
+    result = api.ensure_config(config=val, stdin_ok=False)
+    assert isinstance(result, Path)
+    assert result == Path(val)
+
+
+@pytest.mark.parametrize("val", [Path("/some/path"), {"foo": 88}])
+def test_str2path_passthrough(val):
+    assert api.str2path(val) == val
+
+
+def test_str2path_convert():
+    val = "/some/path"
+    result = api.str2path(val)
+    assert isinstance(result, Path)
+    assert result == Path(val)

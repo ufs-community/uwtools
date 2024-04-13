@@ -23,6 +23,7 @@ def render(
     searchpath: Optional[List[str]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
+    stdin_ok: bool = False,
 ) -> str:
     """
     Render a Jinja2 template to a file, based on specified values.
@@ -44,13 +45,14 @@ def render(
     :param searchpath: Paths to search for extra templates
     :param values_needed: Just report variables needed to render the template?
     :param dry_run: Run in dry-run mode?
+    :param stdin_ok: OK to read from stdin?
     :return: The rendered template string
     :raises: UWTemplateRenderError if template could not be rendered
     """
     result = _render(
         values_src=_str2path(values_src),
         values_format=values_format,
-        input_file=_str2path(input_file),
+        input_file=_ensure_config(input_file, stdin_ok),
         output_file=_str2path(output_file),
         overrides=overrides,
         env=env,
@@ -85,6 +87,7 @@ def translate(
     input_file: Optional[Union[Path, str]] = None,
     output_file: Optional[Union[Path, str]] = None,
     dry_run: bool = False,
+    stdin_ok: bool = False,
 ) -> bool:
     """
     Translate an atparse template to a Jinja2 template.
@@ -93,12 +96,16 @@ def translate(
     ``stdin`` is read. If no output file is specified, ``stdout`` is written to. In ``dry_run``
     mode, output is written to ``stderr``.
 
-    :param input_file: Path to the template containing atparse syntax
+    :param input_file: Path to the template containing atparse syntax (``None`` or unspecified =>
+        read ``stdin``)
     :param output_file: Path to the file to write the converted template to
     :param dry_run: Run in dry-run mode?
+    :param stdin_ok: OK to read from stdin?
     :return: ``True``
     """
     _convert_atparse_to_jinja2(
-        input_file=_str2path(input_file), output_file=_str2path(output_file), dry_run=dry_run
+        input_file=_ensure_config(input_file, stdin_ok),
+        output_file=_str2path(output_file),
+        dry_run=dry_run,
     )
     return True

@@ -760,6 +760,7 @@ def _dispatch_template_render(args: Args) -> bool:
             searchpath=args[STR.searchpath],
             values_needed=args[STR.valsneeded],
             dry_run=args[STR.dryrun],
+            stdin_ok=True,
         )
     except UWTemplateRenderError:
         if args[STR.valsneeded]:
@@ -779,6 +780,7 @@ def _dispatch_template_translate(args: Args) -> bool:
         input_file=args[STR.infile],
         output_file=args[STR.outfile],
         dry_run=args[STR.dryrun],
+        stdin_ok=True,
     )
 
 
