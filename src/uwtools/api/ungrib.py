@@ -8,7 +8,7 @@ from typing import Dict, Optional, Union
 
 import uwtools.drivers.support as _support
 from uwtools.drivers.ungrib import Ungrib as _Ungrib
-from uwtools.utils.api import ensure_config as _ensure_config
+from uwtools.utils.api import ensure_data_source as _ensure_data_source
 
 
 def execute(
@@ -36,7 +36,7 @@ def execute(
     :return: ``True`` if task completes without raising an exception.
     """
     obj = _Ungrib(
-        config=_ensure_config(config, stdin_ok), cycle=cycle, batch=batch, dry_run=dry_run
+        config=_ensure_data_source(config, stdin_ok), cycle=cycle, batch=batch, dry_run=dry_run
     )
     getattr(obj, task)()
     if graph_file:

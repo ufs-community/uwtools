@@ -8,7 +8,7 @@ from typing import Optional, Union
 from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.rocoto import realize_rocoto_xml as _realize
 from uwtools.rocoto import validate_rocoto_xml_file as _validate
-from uwtools.utils.api import ensure_config as _ensure_config
+from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.api import str2path as _str2path
 
 
@@ -31,7 +31,7 @@ def realize(
     :param stdin_ok: OK to read from stdin?
     :return: ``True``
     """
-    _realize(config=_ensure_config(config, stdin_ok), output_file=_str2path(output_file))
+    _realize(config=_ensure_data_source(config, stdin_ok), output_file=_str2path(output_file))
     return True
 
 
@@ -46,4 +46,4 @@ def validate(
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if the XML conforms to the schema, ``False`` otherwise
     """
-    return _validate(xml_file=_ensure_config(xml_file, stdin_ok))
+    return _validate(xml_file=_ensure_data_source(xml_file, stdin_ok))

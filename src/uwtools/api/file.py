@@ -7,7 +7,7 @@ from typing import List, Optional, Union
 
 from uwtools.file import FileCopier as _FileCopier
 from uwtools.file import FileLinker as _FileLinker
-from uwtools.utils.api import ensure_config as _ensure_config
+from uwtools.utils.api import ensure_data_source as _ensure_data_source
 
 
 def copy(
@@ -29,7 +29,7 @@ def copy(
     """
     _FileCopier(
         target_dir=Path(target_dir),
-        config=_ensure_config(config, stdin_ok),
+        config=_ensure_data_source(config, stdin_ok),
         keys=keys,
         dry_run=dry_run,
     ).go()
@@ -55,7 +55,7 @@ def link(
     """
     _FileLinker(
         target_dir=Path(target_dir),
-        config=_ensure_config(config, stdin_ok),
+        config=_ensure_data_source(config, stdin_ok),
         keys=keys,
         dry_run=dry_run,
     ).go()

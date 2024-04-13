@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Union
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.jinja2 import render as _render
 from uwtools.exceptions import UWTemplateRenderError
-from uwtools.utils.api import ensure_config as _ensure_config
+from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.api import str2path as _str2path
 
 
@@ -52,7 +52,7 @@ def render(
     result = _render(
         values_src=_str2path(values_src),
         values_format=values_format,
-        input_file=_ensure_config(input_file, stdin_ok),
+        input_file=_ensure_data_source(input_file, stdin_ok),
         output_file=_str2path(output_file),
         overrides=overrides,
         env=env,
@@ -104,7 +104,7 @@ def translate(
     :return: ``True``
     """
     _convert_atparse_to_jinja2(
-        input_file=_ensure_config(input_file, stdin_ok),
+        input_file=_ensure_data_source(input_file, stdin_ok),
         output_file=_str2path(output_file),
         dry_run=dry_run,
     )

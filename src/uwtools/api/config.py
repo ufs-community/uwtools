@@ -15,7 +15,7 @@ from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import validate_yaml as _validate_yaml
-from uwtools.utils.api import ensure_config as _ensure_config
+from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.api import str2path as _str2path
 from uwtools.utils.file import FORMAT as _FORMAT
 
@@ -50,7 +50,7 @@ def get_fieldtable_config(
     :param stdin_ok: OK to read from stdin?
     :return: An initialized ``FieldTableConfig`` object
     """
-    return _FieldTableConfig(config=_ensure_config(config, stdin_ok))
+    return _FieldTableConfig(config=_ensure_data_source(config, stdin_ok))
 
 
 def get_ini_config(
@@ -64,7 +64,7 @@ def get_ini_config(
     :param stdin_ok: OK to read from stdin?
     :return: An initialized ``INIConfig`` object
     """
-    return _INIConfig(config=_ensure_config(config, stdin_ok))
+    return _INIConfig(config=_ensure_data_source(config, stdin_ok))
 
 
 def get_nml_config(
@@ -79,7 +79,7 @@ def get_nml_config(
     :param stdin_ok: OK to read from stdin?
     :return: An initialized ``NMLConfig`` object
     """
-    return _NMLConfig(config=_ensure_config(config, stdin_ok))
+    return _NMLConfig(config=_ensure_data_source(config, stdin_ok))
 
 
 def get_sh_config(
@@ -94,7 +94,7 @@ def get_sh_config(
     :param stdin_ok: OK to read from stdin?
     :return: An initialized ``SHConfig`` object
     """
-    return _SHConfig(config=_ensure_config(config, stdin_ok))
+    return _SHConfig(config=_ensure_data_source(config, stdin_ok))
 
 
 def get_yaml_config(
@@ -109,7 +109,7 @@ def get_yaml_config(
     :param stdin_ok: OK to read from stdin?
     :return: An initialized ``YAMLConfig`` object
     """
-    return _YAMLConfig(config=_ensure_config(config, stdin_ok))
+    return _YAMLConfig(config=_ensure_data_source(config, stdin_ok))
 
 
 def realize(
@@ -132,7 +132,7 @@ def realize(
     )
     scs = [_str2path(x) for x in supplemental_configs] if supplemental_configs else None
     _realize(
-        input_config=_ensure_config(input_config, stdin_ok),
+        input_config=_ensure_data_source(input_config, stdin_ok),
         input_format=input_format,
         output_block=output_block,
         output_file=_str2path(output_file),
@@ -177,7 +177,7 @@ def validate(
     :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise
     """
     return _validate_yaml(
-        schema_file=_ensure_config(schema_file, stdin_ok), config=_str2path(config)
+        schema_file=_ensure_data_source(schema_file, stdin_ok), config=_str2path(config)
     )
 
 

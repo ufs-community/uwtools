@@ -8,7 +8,7 @@ from typing import Dict, Optional, Union
 
 import uwtools.drivers.support as _support
 from uwtools.drivers.fv3 import FV3 as _FV3
-from uwtools.utils.api import ensure_config as _ensure_config
+from uwtools.utils.api import ensure_data_source as _ensure_data_source
 
 
 def execute(
@@ -35,7 +35,9 @@ def execute(
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
-    obj = _FV3(config=_ensure_config(config, stdin_ok), cycle=cycle, batch=batch, dry_run=dry_run)
+    obj = _FV3(
+        config=_ensure_data_source(config, stdin_ok), cycle=cycle, batch=batch, dry_run=dry_run
+    )
     getattr(obj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
