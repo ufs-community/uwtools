@@ -10,8 +10,8 @@ from uwtools.file import FileLinker as _FileLinker
 
 
 def copy(
-    target_dir: Path,
-    config: Optional[Union[dict, Path]] = None,
+    target_dir: Union[Path, str],
+    config: Optional[Union[dict, Path, str]] = None,
     keys: Optional[List[str]] = None,
     dry_run: bool = False,
 ) -> bool:
@@ -24,13 +24,14 @@ def copy(
     :param dry_run: Do not copy files
     :return: ``True`` if no exception is raised
     """
-    _FileCopier(target_dir=target_dir, config=config, keys=keys, dry_run=dry_run).go()
+    config = Path(config) if isinstance(config, str) else config
+    _FileCopier(target_dir=Path(target_dir), config=config, keys=keys, dry_run=dry_run).go()
     return True
 
 
 def link(
-    target_dir: Path,
-    config: Optional[Union[dict, Path]] = None,
+    target_dir: Union[Path, str],
+    config: Optional[Union[dict, Path, str]] = None,
     keys: Optional[List[str]] = None,
     dry_run: bool = False,
 ) -> bool:
@@ -43,5 +44,6 @@ def link(
     :param dry_run: Do not link files
     :return: ``True`` if no exception is raised
     """
-    _FileLinker(target_dir=target_dir, config=config, keys=keys, dry_run=dry_run).go()
+    config = Path(config) if isinstance(config, str) else config
+    _FileLinker(target_dir=Path(target_dir), config=config, keys=keys, dry_run=dry_run).go()
     return True
