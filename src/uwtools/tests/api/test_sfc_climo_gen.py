@@ -1,24 +1,37 @@
-# pylint: disable=missing-function-docstring,protected-access
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
 from pathlib import Path
 from unittest.mock import patch
 
+from pytest import fixture, raises
+
 from uwtools.api import sfc_climo_gen
+from uwtools.exceptions import UWError
 
 
-def test_execute(tmp_path):
-    dot = tmp_path / "graph.dot"
-    kwargs: dict = {
+@fixture
+def kwargs():
+    return {
         "batch": False,
         "config": "config.yaml",
         "dry_run": True,
-        "graph_file": dot,
     }
+
+
+def test_execute(kwargs, tmp_path):
     with patch.object(sfc_climo_gen, "_SfcClimoGen") as SfcClimoGen:
-        assert sfc_climo_gen.execute(**kwargs, task="foo") is True
-    del kwargs["graph_file"]
+        assert (
+            sfc_climo_gen.execute(**kwargs, task="foo", graph_file=tmp_path / "graph.dot") is True
+        )
     SfcClimoGen.assert_called_once_with(**{**kwargs, "config": Path(kwargs["config"])})
     SfcClimoGen().foo.assert_called_once_with()
+
+
+def test_execute_stdin_not_ok(kwargs):
+    kwargs["config"] = None
+    with raises(UWError) as e:
+        sfc_climo_gen.execute(**kwargs, task="foo")
+    assert str(e.value) == "Set stdin_ok=True to enable read from stdin"
 
 
 def test_graph():

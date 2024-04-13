@@ -1,26 +1,37 @@
-# pylint: disable=missing-function-docstring,protected-access
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
 import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
 
+from pytest import fixture, raises
+
 from uwtools.api import fv3
+from uwtools.exceptions import UWError
 
 
-def test_execute(tmp_path):
-    dot = tmp_path / "graph.dot"
-    kwargs: dict = {
+@fixture
+def kwargs():
+    return {
         "batch": False,
         "config": "config.yaml",
         "cycle": dt.datetime.now(),
         "dry_run": True,
-        "graph_file": dot,
     }
+
+
+def test_execute(kwargs, tmp_path):
     with patch.object(fv3, "_FV3") as FV3:
-        assert fv3.execute(**kwargs, task="foo") is True
-    del kwargs["graph_file"]
+        assert fv3.execute(**kwargs, task="foo", graph_file=tmp_path / "graph.dot") is True
     FV3.assert_called_once_with(**{**kwargs, "config": Path(kwargs["config"])})
     FV3().foo.assert_called_once_with()
+
+
+def test_execute_stdin_not_ok(kwargs):
+    kwargs["config"] = None
+    with raises(UWError) as e:
+        fv3.execute(**kwargs, task="foo")
+    assert str(e.value) == "Set stdin_ok=True to enable read from stdin"
 
 
 def test_graph():

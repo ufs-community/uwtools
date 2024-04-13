@@ -22,9 +22,8 @@ def kwargs():
 
 
 def test_execute(kwargs, tmp_path):
-    dot = tmp_path / "graph.dot"
     with patch.object(chgres_cube, "_ChgresCube") as ChgresCube:
-        assert chgres_cube.execute(**kwargs, task="foo", graph_file=dot) is True
+        assert chgres_cube.execute(**kwargs, task="foo", graph_file=tmp_path / "graph.dot") is True
     ChgresCube.assert_called_once_with(**{**kwargs, "config": Path(kwargs["config"])})
     ChgresCube().foo.assert_called_once_with()
 
