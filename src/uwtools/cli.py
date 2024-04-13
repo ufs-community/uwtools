@@ -609,7 +609,9 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.rocoto.realize(config=args[STR.infile], output_file=args[STR.outfile])
+    return uwtools.api.rocoto.realize(
+        config=args[STR.infile], output_file=args[STR.outfile], stdin_ok=True
+    )
 
 
 def _dispatch_rocoto_validate(args: Args) -> bool:
@@ -618,7 +620,7 @@ def _dispatch_rocoto_validate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.rocoto.validate(xml_file=args[STR.infile])
+    return uwtools.api.rocoto.validate(xml_file=args[STR.infile], stdin_ok=True)
 
 
 # Mode sfc_climo_gen
