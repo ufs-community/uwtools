@@ -15,6 +15,7 @@ from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
 from uwtools.config.validator import validate_yaml as _validate_yaml
+from uwtools.utils.api import ensure_config as _ensure_config
 from uwtools.utils.file import FORMAT as _FORMAT
 
 # Public
@@ -38,64 +39,76 @@ def compare(
 
 
 def get_fieldtable_config(
-    config: Union[dict, Optional[Union[Path, str]]] = None
+    config: Union[dict, Optional[Union[Path, str]]] = None, stdin_ok=False
 ) -> _FieldTableConfig:
     """
     Get a ``FieldTableConfig`` object.
 
     :param config: FieldTable file to load (``None`` or unspecified => read ``stdin``), or initial
         ``dict``
+    :param stdin_ok: OK to read from stdin?
     :return: An initialized ``FieldTableConfig`` object
     """
-    config = Path(config) if isinstance(config, str) else config
-    return _FieldTableConfig(config=config)
+    return _FieldTableConfig(config=_ensure_config(config, stdin_ok))
 
 
-def get_ini_config(config: Union[dict, Optional[Union[Path, str]]] = None) -> _INIConfig:
+def get_ini_config(
+    config: Union[dict, Optional[Union[Path, str]]] = None,
+    stdin_ok: bool = False,
+) -> _INIConfig:
     """
     Get an ``INIConfig`` object.
 
     :param config: INI file to load (``None`` or unspecified => read ``stdin``), or initial ``dict``
+    :param stdin_ok: OK to read from stdin?
     :return: An initialized ``INIConfig`` object
     """
-    config = Path(config) if isinstance(config, str) else config
-    return _INIConfig(config=config)
+    return _INIConfig(config=_ensure_config(config, stdin_ok))
 
 
-def get_nml_config(config: Union[dict, Optional[Union[Path, str]]] = None) -> _NMLConfig:
+def get_nml_config(
+    config: Union[dict, Optional[Union[Path, str]]] = None,
+    stdin_ok: bool = False,
+) -> _NMLConfig:
     """
     Get an ``NMLConfig`` object.
 
     :param config: Fortran namelist file to load (``None`` or unspecified => read ``stdin``), or
         initial ``dict``
+    :param stdin_ok: OK to read from stdin?
     :return: An initialized ``NMLConfig`` object
     """
-    config = Path(config) if isinstance(config, str) else config
-    return _NMLConfig(config=config)
+    return _NMLConfig(config=_ensure_config(config, stdin_ok))
 
 
-def get_sh_config(config: Union[dict, Optional[Union[Path, str]]] = None) -> _SHConfig:
+def get_sh_config(
+    config: Union[dict, Optional[Union[Path, str]]] = None,
+    stdin_ok: bool = False,
+) -> _SHConfig:
     """
     Get an ``SHConfig`` object.
 
     :param config: File of shell 'key=value' pairs to load (``None`` or unspecified => read
         ``stdin``), or initial ``dict``
+    :param stdin_ok: OK to read from stdin?
     :return: An initialized ``SHConfig`` object
     """
-    config = Path(config) if isinstance(config, str) else config
-    return _SHConfig(config=config)
+    return _SHConfig(config=_ensure_config(config, stdin_ok))
 
 
-def get_yaml_config(config: Union[dict, Optional[Union[Path, str]]] = None) -> _YAMLConfig:
+def get_yaml_config(
+    config: Union[dict, Optional[Union[Path, str]]] = None,
+    stdin_ok: bool = False,
+) -> _YAMLConfig:
     """
     Get a ``YAMLConfig`` object.
 
     :param config: YAML file to load (``None`` or unspecified => read ``stdin``), or initial
         ``dict``
+    :param stdin_ok: OK to read from stdin?
     :return: An initialized ``YAMLConfig`` object
     """
-    config = Path(config) if isinstance(config, str) else config
-    return _YAMLConfig(config=config)
+    return _YAMLConfig(config=_ensure_config(config, stdin_ok))
 
 
 def realize(
@@ -108,11 +121,14 @@ def realize(
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
+    stdin_ok: bool = False,
 ) -> None:
     """
     NB: This docstring is dynamically replaced: See realize.__doc__ definition below.
     """
-    input_config = Path(input_config) if isinstance(input_config, str) else input_config
+    input_config = (
+        _YAMLConfig(config=input_config) if isinstance(input_config, dict) else input_config
+    )
     output_file = Path(output_file) if isinstance(output_file, str) else output_file
     scs: Optional[List[Union[dict, _Config, Path]]] = (
         [Path(x) if isinstance(x, str) else x for x in supplemental_configs]
@@ -120,7 +136,7 @@ def realize(
         else None
     )
     _realize(
-        input_config=_ensure_config_arg_type(input_config),
+        input_config=_ensure_config(input_config, stdin_ok),
         input_format=input_format,
         output_block=output_block,
         output_file=output_file,
@@ -138,6 +154,7 @@ def realize_to_dict(  # pylint: disable=unused-argument
     supplemental_configs: Optional[List[Union[dict, _Config, Path, str]]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
+    stdin_ok: bool = False,
 ) -> dict:
     """
     Realize a config to a ``dict``, based on an input config and optional supplemental configs.
@@ -148,7 +165,9 @@ def realize_to_dict(  # pylint: disable=unused-argument
 
 
 def validate(
-    schema_file: Union[Path, str], config: Optional[Union[dict, _YAMLConfig, Path, str]] = None
+    schema_file: Union[Path, str],
+    config: Optional[Union[dict, _YAMLConfig, Path, str]] = None,
+    stdin_ok: bool = False,
 ) -> bool:
     """
     Check whether the specified config conforms to the specified JSON Schema spec.
@@ -158,28 +177,11 @@ def validate(
 
     :param schema_file: The JSON Schema file to use for validation
     :param config: The config to validate
+    :param stdin_ok: OK to read from stdin?
     :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise
     """
     config = Path(config) if isinstance(config, str) else config
-    return _validate_yaml(schema_file=Path(schema_file), config=config)
-
-
-# Private
-
-
-def _ensure_config_arg_type(
-    config: Optional[Union[dict, _Config, Path, str]] = None
-) -> Optional[Union[_Config, Path]]:
-    """
-    Encapsulate a ``dict`` in a ``Config``; return a ``Config`` or path argument as-is.
-
-    :param config: A config as a ``dict``, ``Config``, or ``Path``
-    """
-    if isinstance(config, dict):
-        return _YAMLConfig(config=config)
-    if isinstance(config, str):
-        return Path(config)
-    return config
+    return _validate_yaml(schema_file=_ensure_config(Path(schema_file), stdin_ok), config=config)
 
 
 # Import-time code
@@ -236,6 +238,7 @@ Recognized file extensions are: {extensions}
 :param values_needed: Report complete, missing, and template values
 :param total: Require rendering of all Jinja2 variables/expressions
 :param dry_run: Log output instead of writing to output
+:param stdin_ok: OK to read from stdin?
 :raises: UWConfigRealizeError if ``total`` is ``True`` and any Jinja2 variable/expression was not rendered
 """.format(
     extensions=", ".join(_FORMAT.extensions())

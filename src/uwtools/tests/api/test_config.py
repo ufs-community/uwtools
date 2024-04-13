@@ -77,6 +77,7 @@ def test_realize_to_dict():
         "supplemental_configs": ["path3"],
         "values_needed": True,
         "dry_run": True,
+        "stdin_ok": False,
     }
     with patch.object(config, "_realize") as _realize:
         config.realize_to_dict(**kwargs)
@@ -103,29 +104,3 @@ def test_validate_config_file(tmp_path):
     with patch.object(config, "_validate_yaml", return_value=True) as _validate_yaml:
         assert config.validate(**kwargs)
     _validate_yaml.assert_called_once_with(schema_file=Path(kwargs["schema_file"]), config=cfg)
-
-
-def test__ensure_config_arg_type_config_obj():
-    config_obj = YAMLConfig(config={})
-    assert config._ensure_config_arg_type(config=config_obj) is config_obj
-
-
-def test__ensure_config_arg_type_dict():
-    config_dict = {"foo": 88}
-    config_obj = config._ensure_config_arg_type(config=config_dict)
-    assert isinstance(config_obj, YAMLConfig)
-    assert config_obj.data == config_dict
-
-
-def test__ensure_config_arg_type_path():
-    config_path = Path("/path/to/config.yaml")
-    config_obj = config._ensure_config_arg_type(config=config_path)
-    assert isinstance(config_obj, Path)
-    assert config_obj is config_path
-
-
-def test__ensure_config_arg_type_str():
-    config_path = "/path/to/config.yaml"
-    config_obj = config._ensure_config_arg_type(config=config_path)
-    assert isinstance(config_obj, Path)
-    assert str(config_obj) == config_path
