@@ -9,9 +9,7 @@ from uwtools.config.formats.base import Config
 from uwtools.exceptions import UWError
 
 
-def ensure_config(
-    config: Optional[Union[dict, Config, Path, str]] = None, stdin_ok: bool = False
-) -> Any:
+def ensure_config(config: Optional[Union[dict, Config, Path, str]], stdin_ok: bool) -> Any:
     """
     Ensure that a config is specified, if required, and is of the right type.
 
