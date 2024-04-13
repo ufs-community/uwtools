@@ -3,10 +3,9 @@
 from pathlib import Path
 from unittest.mock import patch
 
-from pytest import fixture, raises
+from pytest import fixture
 
 from uwtools.api import sfc_climo_gen
-from uwtools.exceptions import UWError
 
 
 @fixture
@@ -25,13 +24,6 @@ def test_execute(kwargs, tmp_path):
         )
     SfcClimoGen.assert_called_once_with(**{**kwargs, "config": Path(kwargs["config"])})
     SfcClimoGen().foo.assert_called_once_with()
-
-
-def test_execute_stdin_not_ok(kwargs):
-    kwargs["config"] = None
-    with raises(UWError) as e:
-        sfc_climo_gen.execute(**kwargs, task="foo")
-    assert str(e.value) == "Set stdin_ok=True to enable read from stdin"
 
 
 def test_graph():

@@ -4,10 +4,9 @@ import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
 
-from pytest import fixture, raises
+from pytest import fixture
 
 from uwtools.api import ungrib
-from uwtools.exceptions import UWError
 
 
 @fixture
@@ -26,13 +25,6 @@ def test_execute(kwargs, tmp_path):
         assert ungrib.execute(**kwargs, task="foo", graph_file=tmp_path / "graph.dot") is True
     Ungrib.assert_called_once_with(**{**kwargs, "config": Path(kwargs["config"])})
     Ungrib().foo.assert_called_once_with()
-
-
-def test_execute_stdin_not_ok(kwargs):
-    kwargs["config"] = None
-    with raises(UWError) as e:
-        ungrib.execute(**kwargs, task="foo")
-    assert str(e.value) == "Set stdin_ok=True to enable read from stdin"
 
 
 def test_graph():

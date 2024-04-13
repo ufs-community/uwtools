@@ -5,7 +5,7 @@ API access to ``uwtools`` file-management tools.
 from pathlib import Path
 from typing import List, Optional, Union
 
-from uwtools.exceptions import UWError
+from uwtools.api.support import ensure_config
 from uwtools.file import FileCopier as _FileCopier
 from uwtools.file import FileLinker as _FileLinker
 
@@ -27,10 +27,12 @@ def copy(
     :param stdin_ok: OK to read config from stdin?
     :return: ``True`` if no exception is raised
     """
-    if config is None and not stdin_ok:
-        raise UWError("Set stdin_ok=True to enable read from stdin")
-    config = Path(config) if isinstance(config, str) else config
-    _FileCopier(target_dir=Path(target_dir), config=config, keys=keys, dry_run=dry_run).go()
+    _FileCopier(
+        target_dir=Path(target_dir),
+        config=ensure_config(config, stdin_ok),
+        keys=keys,
+        dry_run=dry_run,
+    ).go()
     return True
 
 
@@ -51,8 +53,10 @@ def link(
     :param stdin_ok: OK to read config from stdin?
     :return: ``True`` if no exception is raised
     """
-    if config is None and not stdin_ok:
-        raise UWError("Set stdin_ok=True to enable read from stdin")
-    config = Path(config) if isinstance(config, str) else config
-    _FileLinker(target_dir=Path(target_dir), config=config, keys=keys, dry_run=dry_run).go()
+    _FileLinker(
+        target_dir=Path(target_dir),
+        config=ensure_config(config, stdin_ok),
+        keys=keys,
+        dry_run=dry_run,
+    ).go()
     return True

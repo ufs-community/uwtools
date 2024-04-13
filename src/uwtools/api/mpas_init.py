@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 import uwtools.drivers.support as _support
+from uwtools.api.support import ensure_config
 from uwtools.drivers.mpas_init import MPASInit as _MPASInit
-from uwtools.exceptions import UWError
 
 
 def execute(
@@ -35,10 +35,9 @@ def execute(
     :param stdin_ok: OK to read config from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
-    if config is None and not stdin_ok:
-        raise UWError("Set stdin_ok=True to enable read from stdin")
-    config = Path(config) if isinstance(config, str) else config
-    obj = _MPASInit(config=config, cycle=cycle, batch=batch, dry_run=dry_run)
+    obj = _MPASInit(
+        config=ensure_config(config, stdin_ok), cycle=cycle, batch=batch, dry_run=dry_run
+    )
     getattr(obj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
