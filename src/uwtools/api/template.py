@@ -12,10 +12,10 @@ from uwtools.exceptions import UWTemplateRenderError
 
 
 def render(
-    values_src: Optional[Union[dict, Path]] = None,
+    values_src: Optional[Union[dict, Path, str]] = None,
     values_format: Optional[str] = None,
-    input_file: Optional[Path] = None,
-    output_file: Optional[Path] = None,
+    input_file: Optional[Union[Path, str]] = None,
+    output_file: Optional[Union[Path, str]] = None,
     overrides: Optional[Dict[str, str]] = None,
     env: bool = False,
     searchpath: Optional[List[str]] = None,
@@ -45,6 +45,9 @@ def render(
     :return: The rendered template string
     :raises: UWTemplateRenderError if template could not be rendered
     """
+    values_src = Path(values_src) if isinstance(values_src, str) else values_src
+    input_file = Path(input_file) if isinstance(input_file, str) else input_file
+    output_file = Path(output_file) if isinstance(output_file, str) else output_file
     result = _render(
         values_src=values_src,
         values_format=values_format,
@@ -62,9 +65,9 @@ def render(
 
 
 def render_to_str(  # pylint: disable=unused-argument
-    values_src: Optional[Union[dict, Path]] = None,
+    values_src: Optional[Union[dict, Path, str]] = None,
     values_format: Optional[str] = None,
-    input_file: Optional[Path] = None,
+    input_file: Optional[Union[Path, str]] = None,
     overrides: Optional[Dict[str, str]] = None,
     env: bool = False,
     searchpath: Optional[List[str]] = None,
@@ -80,8 +83,8 @@ def render_to_str(  # pylint: disable=unused-argument
 
 
 def translate(
-    input_file: Optional[Path] = None,
-    output_file: Optional[Path] = None,
+    input_file: Optional[Union[Path, str]] = None,
+    output_file: Optional[Union[Path, str]] = None,
     dry_run: bool = False,
 ) -> bool:
     """
@@ -96,5 +99,7 @@ def translate(
     :param dry_run: Run in dry-run mode?
     :return: ``True``
     """
+    input_file = Path(input_file) if isinstance(input_file, str) else input_file
+    output_file = Path(output_file) if isinstance(output_file, str) else output_file
     _convert_atparse_to_jinja2(input_file=input_file, output_file=output_file, dry_run=dry_run)
     return True

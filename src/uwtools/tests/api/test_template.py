@@ -28,7 +28,14 @@ def kwargs():
 def test_render(kwargs):
     with patch.object(template, "_render") as _render:
         template.render(**kwargs)
-    _render.assert_called_once_with(**kwargs)
+    _render.assert_called_once_with(
+        **{
+            **kwargs,
+            "input_file": Path(kwargs["input_file"]),
+            "output_file": Path(kwargs["output_file"]),
+            "values_src": Path(kwargs["values_src"]),
+        }
+    )
 
 
 def test_render_fail(kwargs):
@@ -53,7 +60,7 @@ def test_translate():
     with patch.object(template, "_convert_atparse_to_jinja2") as _catj:
         assert template.translate(**kwargs)
     _catj.assert_called_once_with(
-        input_file=kwargs["input_file"],
-        output_file=kwargs["output_file"],
+        input_file=Path(kwargs["input_file"]),
+        output_file=Path(kwargs["output_file"]),
         dry_run=kwargs["dry_run"],
     )
