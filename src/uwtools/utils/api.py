@@ -9,18 +9,18 @@ from uwtools.config.formats.base import Config
 from uwtools.exceptions import UWError
 
 
-def ensure_config(config: Optional[Union[dict, Config, Path, str]], stdin_ok: bool) -> Any:
+def ensure_config(val: Optional[Union[dict, Config, Path, str]], stdin_ok: bool) -> Any:
     """
-    Ensure that a config is specified, if required, and is of the right type.
+    If stdin read is disabled, ensure that a data source was provided. Convert str -> Path.
 
-    :param config: Path to config file (read stdin if missing or None).
+    :param val: Data source as provided to API.
     :param stdin_ok: OK to read from stdin?
-    :return: The config, with a str value converted to a Path.
-    :raises: UWError if config is missing and stdin_ok is False.
+    :return: Data source, with a str converted to Path.
+    :raises: UWError if no data source was provided and stdin read is disabled.
     """
-    if config is None and not stdin_ok:
-        raise UWError("Set stdin_ok=True to enable read from stdin")
-    return str2path(config)
+    if val is None and not stdin_ok:
+        raise UWError("Set stdin_ok=True to permit read from stdin")
+    return str2path(val)
 
 
 def str2path(val: Any) -> Any:

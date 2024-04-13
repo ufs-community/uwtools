@@ -177,7 +177,7 @@ def validate(
     :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise
     """
     return _validate_yaml(
-        schema_file=_ensure_config(Path(schema_file), stdin_ok), config=_str2path(config)
+        schema_file=_ensure_config(schema_file, stdin_ok), config=_str2path(config)
     )
 
 
