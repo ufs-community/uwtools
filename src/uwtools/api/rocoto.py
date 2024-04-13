@@ -10,7 +10,9 @@ from uwtools.rocoto import realize_rocoto_xml as _realize
 from uwtools.rocoto import validate_rocoto_xml_file as _validate
 
 
-def realize(config: Union[_YAMLConfig, Optional[Path]], output_file: Optional[Path] = None) -> bool:
+def realize(
+    config: Optional[Union[_YAMLConfig, Path, str]], output_file: Optional[Union[Path, str]] = None
+) -> bool:
     """
     Realize the Rocoto workflow defined in the given YAML as XML.
 
@@ -24,15 +26,18 @@ def realize(config: Union[_YAMLConfig, Optional[Path]], output_file: Optional[Pa
         ``stdout``)
     :return: ``True``
     """
+    config = Path(config) if isinstance(config, str) else config
+    output_file = Path(output_file) if isinstance(output_file, str) else output_file
     _realize(config=config, output_file=output_file)
     return True
 
 
-def validate(xml_file: Optional[Path] = None) -> bool:
+def validate(xml_file: Optional[Union[Path, str]] = None) -> bool:
     """
     Validate purported Rocoto XML file against its schema.
 
     :param xml_file: Path to XML file (``None`` or unspecified => read ``stdin``)
     :return: ``True`` if the XML conforms to the schema, ``False`` otherwise
     """
+    xml_file = Path(xml_file) if isinstance(xml_file, str) else xml_file
     return _validate(xml_file=xml_file)
