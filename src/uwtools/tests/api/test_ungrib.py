@@ -1,6 +1,7 @@
 # pylint: disable=missing-function-docstring,protected-access
 
 import datetime as dt
+from pathlib import Path
 from unittest.mock import patch
 
 from uwtools.api import ungrib
@@ -9,7 +10,7 @@ from uwtools.api import ungrib
 def test_execute(tmp_path):
     cycle = dt.datetime.now()
     dot = tmp_path / "graph.dot"
-    args: dict = {
+    kwargs: dict = {
         "batch": False,
         "config": "config.yaml",
         "cycle": cycle,
@@ -17,9 +18,9 @@ def test_execute(tmp_path):
         "graph_file": dot,
     }
     with patch.object(ungrib, "_Ungrib") as Ungrib:
-        assert ungrib.execute(**args, task="foo") is True
-    del args["graph_file"]
-    Ungrib.assert_called_once_with(**args)
+        assert ungrib.execute(**kwargs, task="foo") is True
+    del kwargs["graph_file"]
+    Ungrib.assert_called_once_with(**{**kwargs, "config": Path(kwargs["config"])})
     Ungrib().foo.assert_called_once_with()
 
 
