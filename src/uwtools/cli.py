@@ -129,6 +129,7 @@ def _dispatch_chgres_cube(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 
@@ -360,6 +361,7 @@ def _dispatch_file_copy(args: Args) -> bool:
         config=args[STR.cfgfile],
         keys=args[STR.keys],
         dry_run=args[STR.dryrun],
+        stdin_ok=True,
     )
 
 
@@ -374,6 +376,7 @@ def _dispatch_file_link(args: Args) -> bool:
         config=args[STR.cfgfile],
         keys=args[STR.keys],
         dry_run=args[STR.dryrun],
+        stdin_ok=True,
     )
 
 
@@ -428,6 +431,7 @@ def _dispatch_fv3(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 
@@ -482,6 +486,7 @@ def _dispatch_mpas(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 
@@ -536,6 +541,7 @@ def _dispatch_mpas_init(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 
@@ -665,6 +671,7 @@ def _dispatch_sfc_climo_gen(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 
@@ -824,6 +831,7 @@ def _dispatch_ungrib(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 
