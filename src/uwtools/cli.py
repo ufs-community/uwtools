@@ -482,7 +482,7 @@ def _dispatch_jedi(args: Args) -> bool:
         cycle=args[STR.cycle],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
-        graph_file= args[STR.graphfile],
+        graph_file=args[STR.graphfile],
     )
 
 
