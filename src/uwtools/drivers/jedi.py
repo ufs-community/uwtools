@@ -35,6 +35,22 @@ class JEDI(Driver):
 
     # Workflow tasks
 
+    @task
+    def configuration_file(self):
+        """
+        The configuration file.
+        """
+        fn = "input.yaml"
+        yield self._taskname(fn)
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        yield None
+        self._create_user_updated_config(
+            config_class=YAMLConfig,
+            config_values=self._driver_config.get("configuration_file", {}),
+            path=path,
+        )
+
     @tasks
     def files_copied(self):
         """
@@ -90,31 +106,17 @@ class JEDI(Driver):
         yield taskname
         a = asset(None, lambda: False)
         yield a
-        path = Path(self._driver_config["configuration_file"]["base_file"])
+        base_file = Path(self._driver_config["configuration_file"]["base_file"])
         executable = Path(self._driver_config["execution"]["executable"])
-        yield [file(executable), file(path)]
+        yield [file(executable), file(base_file)]
         env = " && ".join(self._driver_config["execution"]["envcmds"])
-        cmd = "{env} && time {x} --validate-only {p} 2>&1".format(env=env, x=executable, p=path)
+        cmd = "{env} && time {x} --validate-only {bf} 2>&1".format(
+            env=env, x=executable, bf=base_file
+        )
         result = run(taskname, cmd)
         if result.success:
             logging.info("%s: Config is valid", taskname)
             a.ready = lambda: True
-
-    @task
-    def configuration_file(self):
-        """
-        The configuration file.
-        """
-        fn = "input.yaml"
-        yield self._taskname(fn)
-        path = self._rundir / fn
-        yield asset(path, path.is_file)
-        yield None
-        self._create_user_updated_config(
-            config_class=YAMLConfig,
-            config_values=self._driver_config.get("configuration_file", {}),
-            path=path,
-        )
 
     # Private helper methods
 
