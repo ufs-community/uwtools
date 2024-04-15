@@ -58,7 +58,9 @@ class FileStager:
                 raise UWConfigError("Config navigation %s failed" % " -> ".join(nav))
             log.debug("Following config key '%s'", key)
             cfg = cfg[key]
-        return cfg or {}
+        if not isinstance(cfg, dict):
+            raise UWConfigError("No file map found at %s" % " -> ".join(self._keys))
+        return cfg
 
     def _validate(self) -> bool:
         """

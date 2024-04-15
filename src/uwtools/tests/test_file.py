@@ -36,7 +36,7 @@ def test_FileStager(assets, source):
 
 @pytest.mark.parametrize("source", ("dict", "file"))
 def test_FileStager_bad_key(assets, source):
-    dstdir, cfgfile, cfgdict = assets
+    dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     with raises(UWConfigError) as e:
         file.FileStager(target_dir=dstdir, config=config, keys=["a", "x"])
@@ -65,3 +65,12 @@ def test_FileLinker_config_file(assets, source):
     stager.go()
     assert (dstdir / "foo").is_symlink()
     assert (dstdir / "subdir" / "bar").is_symlink()
+
+
+@pytest.mark.parametrize("val", [None, True, False, "str", 88, 3.14, [], tuple()])
+def test_FileStager_empty_val(assets, val):
+    dstdir, cfgdict, _ = assets
+    cfgdict["a"]["b"] = val
+    with raises(UWConfigError) as e:
+        file.FileStager(target_dir=dstdir, config=cfgdict, keys=["a", "b"])
+    assert str(e.value) == "No file map found at a -> b"
