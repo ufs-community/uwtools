@@ -195,10 +195,6 @@ def test_JEDI_configuration_file(driverobj):
     assert newcfg == {**basecfg, "baz": "qux"}
 
 
-def test_JEDI__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["jedi"]
-
-
 def test_JEDI__runscript_path(driverobj):
     assert driverobj._runscript_path == driverobj._rundir / "runscript.jedi"
 
