@@ -58,7 +58,7 @@ class FileStager:
                 raise UWConfigError("Config navigation %s failed" % " -> ".join(nav))
             log.debug("Following config key '%s'", key)
             cfg = cfg[key]
-        return cfg
+        return cfg or {}
 
     def _validate(self) -> bool:
         """
