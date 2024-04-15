@@ -47,7 +47,7 @@ class JEDI(Driver):
         yield None
         self._create_user_updated_config(
             config_class=YAMLConfig,
-            config_values=self._driver_config.get("configuration_file", {}),
+            config_values=self._driver_config["configuration_file"],
             path=path,
         )
 
@@ -100,7 +100,7 @@ class JEDI(Driver):
     @task
     def validate_only(self):
         """
-        Validate config.
+        Validate JEDI config YAML.
         """
         taskname = self._taskname("validate_only")
         yield taskname

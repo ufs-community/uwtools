@@ -1,8 +1,27 @@
+platform:
+  account: me
+  scheduler: slurm
 jedi:
   execution:
-    mpicmd: srun
     batchargs:
       nodes: 1
+      stdout: path/to/runscript.out
       walltime: 08:00:00
-    executable: "/path/to/jedi.exe"
-  run_dir: "/path/to/dir/run"
+    envcmds:
+      - module load some-module
+      - module load jedi-module
+    executable: /path/to/jedi
+    mpiargs:
+      - --export=ALL
+      - --ntasks $SLURM_CPUS_ON_NODE
+    mpicmd: srun
+    configuration_file: 
+      base_file: path/to/config.yaml
+      update_values: {"baz": "qux"}
+    files_to_copy:
+      copy_foo: /path/to/foo
+      copy_bar/baz: /path/to/baz
+    files_to_link:
+      link_foo: /path/to/foo
+      link_bar/baz: /path/to/baz
+    run_dir: /path/to/run
