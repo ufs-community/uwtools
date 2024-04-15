@@ -48,7 +48,7 @@ def config(tmp_path):
                 "mpicmd": "srun",
             },
             "configuration_file": {
-                "base_file": str(tmp_path / "jedi.yaml"),
+                "base_file": str(tmp_path / "config.yaml"),
                 "update_values": {"baz": "qux"},
             },
             "files_to_copy": {
@@ -171,12 +171,12 @@ def test_JEDI_validate_only(caplog, driverobj):
         with patch.object(jedi, "run") as run:
             result = Mock(output="", success=True)
             run.return_value = result
-            driverobj._driver_config["configuration_file"]["base_file"] = "/path/to/jedi.yaml"
+            driverobj._driver_config["configuration_file"]["base_file"] = "/path/to/config.yaml"
             driverobj.validate_only()
             cmds = [
                 "module load some-module",
                 "module load jedi-module",
-                "time /path/to/qg_forecast.x --validate-only /path/to/jedi.yaml 2>&1",
+                "time /path/to/qg_forecast.x --validate-only /path/to/config.yaml 2>&1",
             ]
             run.assert_called_once_with("20240201 18Z jedi validate_only", " && ".join(cmds))
     assert regex_logged(caplog, "Config is valid")
