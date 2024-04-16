@@ -5,7 +5,7 @@ Installation
 
    Developers should visit the :doc:`Developer Setup <../contributor_guide/developer_setup>` section located in the :doc:`Contributor Guide <../contributor_guide/index>`.
 
-The recommended installation mechanism uses the Python package and virtual-environment manager :conda:`conda<>`. Specifically, these instructions assume use of the :miniforge:`Miniforge<>` variant of :miniconda:`Miniconda<>`, built to use, by default, packages from the :conda-forge:`conda-forge<>` project. Users of the original :miniconda:`Miniconda<>` or the :anaconda:`Anaconda distribution<>` should add the flags ``-c conda-forge --override-channels`` to ``conda`` commands to specify the required package channels.
+The recommended installation mechanism uses the Python package and virtual-environment manager :conda:`conda<>`. The :miniforge:`Miniforge<>` variant of :miniconda:`Miniconda<>`, which by default uses packages from the :conda-forge:`conda-forge<>` project, is an especially useful basis for working with conda.
 
 Use an Existing conda Installation
 ----------------------------------
@@ -21,7 +21,7 @@ To install ``uwtools`` into an existing environment in an existing conda (e.g., 
 
    .. code-block:: text
 
-      conda install -c ufs-community uwtools=<version>
+      conda install -c ufs-community -c conda-forge --override-channels uwtools=<version>
 
 Create a Standalone ``uwtools`` Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -33,41 +33,39 @@ To create a standalone conda environment providing ``uwtools``:
 
    .. code-block:: text
 
-      conda create -n uwtools -c ufs-community uwtools=<version>
+      conda create -n uwtools -c ufs-community -c conda-forge --override-channels uwtools=<version>
 
 Use a Fresh Miniforge Installation
 ----------------------------------
 
-If no existing conda installation is available, install :miniforge:`Miniforge<>`.
-
-.. include:: ../../shared/miniforge3_instructions.rst
+.. include:: ../../shared/miniforge_instructions.rst
 
 #. Continue with the `Use an Existing conda Installation`_ instructions.
 
 Build the ``uwtools`` Package Locally
 -------------------------------------
 
-#. Install the necessary build packages into the conda installation's base environment (see the `Use a Fresh Miniforge Installation`_ instructions if an installation is unavailable or not writable):
+#. Install the necessary build packages into the conda installation's ``base`` environment (see the `Use a Fresh Miniforge Installation`_ instructions if an installation is unavailable or not writable):
 
    .. code-block:: text
 
-      conda install conda-build conda-verify
+      conda install -c conda-forge --override-channels conda-build conda-verify
 
 #. In a clone of the :uwtools:`uwtools repository<>`, build the ``uwtools`` package:
 
    .. code-block:: text
 
       cd /to/your/uwtools/clone
-      conda build recipe
+      conda build recipe -c conda-forge --override-channels
 
 #. Verify local availability of the newly built package:
 
    .. code-block:: text
 
-      conda search -c local --override-channels uwtools  # do not add -c conda-forge to this command
+      conda search -c local --override-channels uwtools
 
-#. Optionally, create an environment from the newly built package:
+#. Optionally, create an environment from the newly built package (specify the version if multiple local packages are available):
 
    .. code-block:: text
 
-      conda create -n uwtools -c local uwtools[=<version>]  # specify version if multiple choices are available
+      conda create -n uwtools -c local -c conda-forge --override-channels uwtools[=<version>]
