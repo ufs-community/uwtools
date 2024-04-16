@@ -171,12 +171,12 @@ def test_JEDI_validate_only(caplog, driverobj):
         with patch.object(jedi, "run") as run:
             result = Mock(output="", success=True)
             run.return_value = result
-            driverobj._driver_config["configuration_file"]["base_file"] = "/path/to/config.yaml"
             driverobj.validate_only()
+            cfgfile = Path(driverobj._driver_config["run_dir"]) / "jedi.yaml"
             cmds = [
                 "module load some-module",
                 "module load jedi-module",
-                "time /path/to/qg_forecast.x --validate-only /path/to/config.yaml 2>&1",
+                f"time /path/to/qg_forecast.x --validate-only {str(cfgfile)} 2>&1",
             ]
             run.assert_called_once_with("20240201 18Z jedi validate_only", " && ".join(cmds))
     assert regex_logged(caplog, "Config is valid")
@@ -187,7 +187,7 @@ def test_JEDI_configuration_file(driverobj):
     basefile = Path(driverobj._driver_config["configuration_file"]["base_file"])
     with open(basefile, "w", encoding="utf-8") as f:
         yaml.dump(basecfg, f)
-    cfgfile = Path(driverobj._driver_config["run_dir"]) / "input.yaml"
+    cfgfile = Path(driverobj._driver_config["run_dir"]) / "jedi.yaml"
     assert not cfgfile.is_file()
     driverobj.configuration_file()
     assert cfgfile.is_file()

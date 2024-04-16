@@ -6,7 +6,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from iotaa import asset, dryrun, run, task, tasks
+from iotaa import asset, dryrun, refs, run, task, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
@@ -40,7 +40,7 @@ class JEDI(Driver):
         """
         The configuration file.
         """
-        fn = "input.yaml"
+        fn = "jedi.yaml"
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
@@ -106,13 +106,12 @@ class JEDI(Driver):
         yield taskname
         a = asset(None, lambda: False)
         yield a
-        base_file = Path(self._driver_config["configuration_file"]["base_file"])
+        config_dep = self.configuration_file()
+        path = refs(config_dep)
         executable = Path(self._driver_config["execution"]["executable"])
-        yield [file(executable), file(base_file)]
+        yield [file(executable), config_dep]
         env = " && ".join(self._driver_config["execution"]["envcmds"])
-        cmd = "{env} && time {x} --validate-only {bf} 2>&1".format(
-            env=env, x=executable, bf=base_file
-        )
+        cmd = "{env} && time {x} --validate-only {p} 2>&1".format(env=env, x=executable, p=path)
         result = run(taskname, cmd)
         if result.success:
             logging.info("%s: Config is valid", taskname)
