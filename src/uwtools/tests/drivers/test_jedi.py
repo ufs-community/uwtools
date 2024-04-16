@@ -176,7 +176,7 @@ def test_JEDI_validate_only(caplog, driverobj):
             cmds = [
                 "module load some-module",
                 "module load jedi-module",
-                "time /path/to/qg_forecast.x --validate-only %s  2>&1" % (cfgfile),
+                "time /path/to/qg_forecast.x --validate-only %s 2>&1" % (cfgfile),
             ]
             run.assert_called_once_with("20240201 18Z jedi validate_only", " && ".join(cmds))
     assert regex_logged(caplog, "Config is valid")

@@ -84,6 +84,7 @@ class JEDI(Driver):
             self.files_copied(),
             self.files_linked(),
             self.runscript(),
+            self.validate_only(),
         ]
 
     @task
@@ -106,9 +107,9 @@ class JEDI(Driver):
         yield taskname
         a = asset(None, lambda: False)
         yield a
-        executable = file(Path(self._driver_config["execution"]["executable"]))
+        executable = Path(self._driver_config["execution"]["executable"])
         config = self.configuration_file()
-        yield [executable, config]
+        yield [file(executable), config]
         env = " && ".join(self._driver_config["execution"]["envcmds"])
         cmd = "%s && time %s --validate-only %s 2>&1" % (
             env,
