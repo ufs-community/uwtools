@@ -48,7 +48,7 @@ def config(tmp_path):
                 "mpicmd": "srun",
             },
             "configuration_file": {
-                "base_file": str(tmp_path / "config.yaml"),
+                "base_file": str(tmp_path / "base.yaml"),
                 "update_values": {"baz": "qux"},
             },
             "files_to_copy": {
@@ -70,7 +70,7 @@ def config(tmp_path):
 
 @fixture
 def config_file(config, tmp_path):
-    path = tmp_path / "config.yaml"
+    path = tmp_path / "base.yaml"
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
     return path
@@ -176,7 +176,7 @@ def test_JEDI_validate_only(caplog, driverobj):
             cmds = [
                 "module load some-module",
                 "module load jedi-module",
-                f"time /path/to/qg_forecast.x --validate-only {str(cfgfile)} 2>&1",
+                "time /path/to/qg_forecast.x --validate-only %s  2>&1" % (cfgfile),
             ]
             run.assert_called_once_with("20240201 18Z jedi validate_only", " && ".join(cmds))
     assert regex_logged(caplog, "Config is valid")
