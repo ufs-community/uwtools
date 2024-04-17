@@ -17,6 +17,7 @@ import uwtools.api.chgres_cube
 import uwtools.api.config
 import uwtools.api.file
 import uwtools.api.fv3
+import uwtools.api.jedi
 import uwtools.api.mpas
 import uwtools.api.mpas_init
 import uwtools.api.rocoto
@@ -63,6 +64,7 @@ def main() -> None:
             STR.config: _dispatch_config,
             STR.file: _dispatch_file,
             STR.fv3: _dispatch_fv3,
+            STR.jedi: _dispatch_jedi,
             STR.mpas: _dispatch_mpas,
             STR.mpasinit: _dispatch_mpas_init,
             STR.rocoto: _dispatch_rocoto,
@@ -431,6 +433,59 @@ def _dispatch_fv3(args: Args) -> bool:
     )
 
 
+# Mode jedi
+
+
+def _add_subparser_jedi(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: jedi
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.jedi, "Execute JEDI tasks")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_jedi_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.jedi.tasks().items()
+    }
+
+
+def _add_subparser_jedi_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+    """
+    Subparser for mode: jedi <task>
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_config_file(group=required, required=True)
+    _add_arg_cycle(required)
+    optional = _basic_setup(parser)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
+def _dispatch_jedi(args: Args) -> bool:
+    """
+    Dispatch logic for jedi mode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.jedi.execute(
+        task=args[STR.action],
+        config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
+    )
+
+
 # Mode mpas
 
 
@@ -459,6 +514,7 @@ def _add_subparser_mpas_task(subparsers: Subparsers, task: str, helpmsg: str) ->
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
+
     _add_arg_cycle(required)
     optional = _basic_setup(parser)
     _add_arg_config_file(group=optional, required=False)
@@ -1206,6 +1262,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         STR.config: _add_subparser_config(subparsers),
         STR.file: _add_subparser_file(subparsers),
         STR.fv3: _add_subparser_fv3(subparsers),
+        STR.jedi: _add_subparser_jedi(subparsers),
         STR.mpas: _add_subparser_mpas(subparsers),
         STR.mpasinit: _add_subparser_mpas_init(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),

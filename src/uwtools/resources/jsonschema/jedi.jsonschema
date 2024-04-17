@@ -1,0 +1,8 @@
+{
+  "properties": {
+    "jedi": {
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

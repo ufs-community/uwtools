@@ -14,6 +14,7 @@ from pytest import fixture, raises
 
 import uwtools.api.config
 import uwtools.api.fv3
+import uwtools.api.jedi
 import uwtools.api.mpas
 import uwtools.api.mpas_init
 import uwtools.api.rocoto
@@ -21,6 +22,7 @@ import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.api.ungrib
 import uwtools.drivers.fv3
+import uwtools.drivers.jedi
 import uwtools.drivers.mpas
 import uwtools.drivers.mpas_init
 import uwtools.drivers.sfc_climo_gen
@@ -136,9 +138,23 @@ def test__add_subparser_fv3(subparsers):
     ]
 
 
-def test__add_subparser_mpas_init(subparsers):
-    cli._add_subparser_mpas_init(subparsers)
-    assert actions(subparsers.choices[STR.mpasinit]) == [
+def test__add_subparser_jedi(subparsers):
+    cli._add_subparser_jedi(subparsers)
+    assert actions(subparsers.choices[STR.jedi]) == [
+        "configuration_file",
+        "files_copied",
+        "files_linked",
+        "provisioned_run_directory",
+        "run",
+        "runscript",
+        "validate",
+        "validate_only",
+    ]
+
+
+def test__add_subparser_mpas(subparsers):
+    cli._add_subparser_mpas(subparsers)
+    assert actions(subparsers.choices[STR.mpas]) == [
         "boundary_files",
         "files_copied",
         "files_linked",
@@ -151,9 +167,9 @@ def test__add_subparser_mpas_init(subparsers):
     ]
 
 
-def test__add_subparser_mpas(subparsers):
-    cli._add_subparser_mpas(subparsers)
-    assert actions(subparsers.choices[STR.mpas]) == [
+def test__add_subparser_mpas_init(subparsers):
+    cli._add_subparser_mpas_init(subparsers)
+    assert actions(subparsers.choices[STR.mpasinit]) == [
         "boundary_files",
         "files_copied",
         "files_linked",
@@ -488,6 +504,22 @@ def test__dispatch_fv3():
         cli._dispatch_fv3({**args, "action": "foo"})
     execute.assert_called_once_with(
         batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None, task="foo"
+    )
+
+
+def test__dispatch_jedi():
+    cycle = dt.datetime.now()
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "cycle": cycle,
+        "dry_run": False,
+        "graph_file": None,
+    }
+    with patch.object(uwtools.api.jedi, "execute") as execute:
+        cli._dispatch_jedi({**args, "action": "foo"})
+    execute.assert_called_once_with(
+        task="foo", config="config.yaml", cycle=cycle, batch=True, dry_run=False, graph_file=None
     )
 
 
