@@ -15,7 +15,7 @@ jedi:
       - --export=ALL
       - --ntasks $SLURM_CPUS_ON_NODE
     mpicmd: srun
-  configuration_file: 
+  configuration_file:
     base_file: path/to/config.yaml
     update_values: {"baz": "qux"}
   files_to_copy:
