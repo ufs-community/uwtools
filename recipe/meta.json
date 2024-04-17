@@ -4,7 +4,7 @@
   "name": "uwtools",
   "packages": {
     "dev": [
-      "black =24.3.*",
+      "black =24.4.*",
       "coverage =7.4.*",
       "docformatter =1.7.*",
       "f90nml =1.4.*",

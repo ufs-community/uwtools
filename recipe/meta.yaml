@@ -22,7 +22,7 @@ requirements:
     - pyyaml 6.0.*
 test:
   requires:
-    - black 24.3.*
+    - black 24.4.*
     - coverage 7.4.*
     - docformatter 1.7.*
     - isort 5.13.*
