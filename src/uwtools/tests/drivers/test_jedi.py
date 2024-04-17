@@ -127,10 +127,11 @@ def test_JEDI_files_linked(driverobj):
 def test_JEDI_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
+        configuration_file=D,
         files_copied=D,
         files_linked=D,
         runscript=D,
-        configuration_file=D,
+        validate_only=D,
     ) as mocks:
         driverobj.provisioned_run_directory()
     for m in mocks:
@@ -167,7 +168,7 @@ def test_JEDI_validate_only(caplog, driverobj):
         yield asset(path, lambda: True)
 
     logging.getLogger().setLevel(logging.INFO)
-    with patch.object(jedi, "file"):
+    with patch.object(jedi, "file", file):
         with patch.object(jedi, "run") as run:
             result = Mock(output="", success=True)
             run.return_value = result
@@ -176,7 +177,8 @@ def test_JEDI_validate_only(caplog, driverobj):
             cmds = [
                 "module load some-module",
                 "module load jedi-module",
-                "time /path/to/qg_forecast.x --validate-only %s 2>&1" % (cfgfile),
+                "time %s --validate-only %s 2>&1"
+                % (driverobj._driver_config["execution"]["executable"], cfgfile),
             ]
             run.assert_called_once_with("20240201 18Z jedi validate_only", " && ".join(cmds))
     assert regex_logged(caplog, "Config is valid")
