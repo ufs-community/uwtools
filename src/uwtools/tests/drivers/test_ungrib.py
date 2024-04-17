@@ -165,7 +165,7 @@ def test_Ungrib__runscript_path(driverobj):
     assert driverobj._runscript_path == driverobj._rundir / "runscript.ungrib"
 
 
-def test_Ungrib__taskanme(driverobj):
+def test_Ungrib__taskname(driverobj):
     assert driverobj._taskname("foo") == "20240201 18Z ungrib foo"
 
 
