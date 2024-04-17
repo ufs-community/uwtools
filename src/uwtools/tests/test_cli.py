@@ -544,7 +544,13 @@ def test__dispatch_jedi():
     with patch.object(uwtools.api.jedi, "execute") as execute:
         cli._dispatch_jedi({**args, "action": "foo"})
     execute.assert_called_once_with(
-        task="foo", config="config.yaml", cycle=cycle, batch=True, dry_run=False, graph_file=None
+        task="foo",
+        config="config.yaml",
+        cycle=cycle,
+        batch=True,
+        dry_run=False,
+        graph_file=None,
+        stdin_ok=True,
     )
 
 

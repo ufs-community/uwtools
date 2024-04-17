@@ -284,7 +284,9 @@ def _dispatch_config_validate(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.config.validate(
-        schema_file=args[STR.schemafile], config=args[STR.infile], stdin_ok=True
+        schema_file=args[STR.schemafile],
+        config=args[STR.infile],
+        stdin_ok=True,
     )
 
 
@@ -490,6 +492,7 @@ def _dispatch_jedi(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 
@@ -669,7 +672,9 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.rocoto.realize(
-        config=args[STR.infile], output_file=args[STR.outfile], stdin_ok=True
+        config=args[STR.infile],
+        output_file=args[STR.outfile],
+        stdin_ok=True,
     )
 
 

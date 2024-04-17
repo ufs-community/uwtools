@@ -36,7 +36,7 @@ def execute(
     :return: ``True`` if task completes without raising an exception.
     """
     obj = _MPAS(
-        config=_ensure_data_source(config, stdin_ok), cycle=cycle, batch=batch, dry_run=dry_run
+        cycle=cycle, config=_ensure_data_source(config, stdin_ok), batch=batch, dry_run=dry_run
     )
     getattr(obj, task)()
     if graph_file:
