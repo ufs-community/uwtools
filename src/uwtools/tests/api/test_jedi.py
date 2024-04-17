@@ -1,6 +1,7 @@
 # pylint: disable=missing-function-docstring,protected-access
 
 import datetime as dt
+from pathlib import Path
 from unittest.mock import patch
 
 from uwtools.api import jedi
@@ -9,8 +10,8 @@ from uwtools.api import jedi
 def test_execute(tmp_path):
     dot = tmp_path / "graph.dot"
     args: dict = {
-        "config": "config.yaml",
         "cycle": dt.datetime.now(),
+        "config": Path("config.yaml"),
         "batch": False,
         "dry_run": True,
         "graph_file": dot,

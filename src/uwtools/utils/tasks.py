@@ -10,6 +10,17 @@ from iotaa import asset, external, task
 
 
 @external
+def existing(path: Path):
+    """
+    An existing filesystem item (file, directory, or symlink).
+
+    :param path: Path to the item.
+    """
+    yield "Filesystem item %s" % path
+    yield asset(path, path.exists)
+
+
+@external
 def file(path: Path):
     """
     An existing file.
@@ -45,6 +56,6 @@ def symlink(target: Path, linkname: Path):
     """
     yield "Link %s -> %s" % (linkname, target)
     yield asset(linkname, linkname.exists)
-    yield file(target)
+    yield existing(target)
     linkname.parent.mkdir(parents=True, exist_ok=True)
     os.symlink(src=target, dst=linkname)

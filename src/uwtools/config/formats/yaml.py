@@ -12,6 +12,7 @@ from uwtools.config.support import (
     add_yaml_representers,
     log_and_error,
 )
+from uwtools.exceptions import UWConfigError
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
 
@@ -68,8 +69,12 @@ class YAMLConfig(Config):
         with readable(config_file) as f:
             try:
                 config = yaml.load(f.read(), Loader=loader)
-                assert isinstance(config, dict)
-                return config
+                if isinstance(config, dict):
+                    return config
+                raise UWConfigError(
+                    "Parsed a %s value from %s, expected a dict"
+                    % (type(config).__name__, config_file or "stdin")
+                )
             except yaml.constructor.ConstructorError as e:
                 if e.problem:
                     if "unhashable" in e.problem:

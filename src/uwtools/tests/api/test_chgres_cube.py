@@ -1,26 +1,29 @@
-# pylint: disable=missing-function-docstring,protected-access
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
 import datetime as dt
+from pathlib import Path
 from unittest.mock import patch
 
 import iotaa
+from pytest import fixture
 
 from uwtools.api import chgres_cube
 
 
-def test_execute(tmp_path):
-    dot = tmp_path / "graph.dot"
-    args: dict = {
+@fixture
+def kwargs():
+    return {
         "batch": False,
         "config": "config.yaml",
         "cycle": dt.datetime.now(),
         "dry_run": True,
-        "graph_file": dot,
     }
+
+
+def test_execute(kwargs, tmp_path):
     with patch.object(chgres_cube, "_ChgresCube") as ChgresCube:
-        assert chgres_cube.execute(**args, task="foo") is True
-    del args["graph_file"]
-    ChgresCube.assert_called_once_with(**args)
+        assert chgres_cube.execute(**kwargs, task="foo", graph_file=tmp_path / "graph.dot") is True
+    ChgresCube.assert_called_once_with(**{**kwargs, "config": Path(kwargs["config"])})
     ChgresCube().foo.assert_called_once_with()
 
 

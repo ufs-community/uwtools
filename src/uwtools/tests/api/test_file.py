@@ -1,5 +1,6 @@
 # pylint: disable=missing-function-docstring,redefined-outer-name
 
+from pathlib import Path
 from unittest.mock import patch
 
 from pytest import fixture
@@ -8,7 +9,7 @@ from uwtools.api import file
 
 
 @fixture
-def args():
+def kwargs():
     return {
         "target_dir": "/target/dir",
         "config": "/config/file",
@@ -17,15 +18,19 @@ def args():
     }
 
 
-def test_copy(args):
+def test_copy(kwargs):
     with patch.object(file, "_FileCopier") as FileCopier:
-        file.copy(**args)
-    FileCopier.assert_called_once_with(**args)
+        file.copy(**kwargs)
+    FileCopier.assert_called_once_with(
+        **{**kwargs, "target_dir": Path(kwargs["target_dir"]), "config": Path(kwargs["config"])}
+    )
     FileCopier().go.assert_called_once_with()
 
 
-def test_link(args):
+def test_link(kwargs):
     with patch.object(file, "_FileLinker") as FileLinker:
-        file.link(**args)
-    FileLinker.assert_called_once_with(**args)
+        file.link(**kwargs)
+    FileLinker.assert_called_once_with(
+        **{**kwargs, "target_dir": Path(kwargs["target_dir"]), "config": Path(kwargs["config"])}
+    )
     FileLinker().go.assert_called_once_with()

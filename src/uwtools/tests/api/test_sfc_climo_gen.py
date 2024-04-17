@@ -1,22 +1,28 @@
-# pylint: disable=missing-function-docstring,protected-access
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
+from pathlib import Path
 from unittest.mock import patch
+
+from pytest import fixture
 
 from uwtools.api import sfc_climo_gen
 
 
-def test_execute(tmp_path):
-    dot = tmp_path / "graph.dot"
-    args: dict = {
+@fixture
+def kwargs():
+    return {
         "batch": False,
         "config": "config.yaml",
         "dry_run": True,
-        "graph_file": dot,
     }
+
+
+def test_execute(kwargs, tmp_path):
     with patch.object(sfc_climo_gen, "_SfcClimoGen") as SfcClimoGen:
-        assert sfc_climo_gen.execute(**args, task="foo") is True
-    del args["graph_file"]
-    SfcClimoGen.assert_called_once_with(**args)
+        assert (
+            sfc_climo_gen.execute(**kwargs, task="foo", graph_file=tmp_path / "graph.dot") is True
+        )
+    SfcClimoGen.assert_called_once_with(**{**kwargs, "config": Path(kwargs["config"])})
     SfcClimoGen().foo.assert_called_once_with()
 
 

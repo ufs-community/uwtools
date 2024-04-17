@@ -107,7 +107,7 @@ Here, ``foo`` and ``bar`` are copies of their respective source files.
 ``link``
 --------
 
-The ``link`` action stages files in a target directory by linking files. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`file block <files_yaml>`.
+The ``link`` action stages files in a target directory by linking files, directories, or other symbolic links. Any ``KEY`` positional arguments are used to navigate, in the order given, from the top of the config to the :ref:`file block <files_yaml>`.
 
 .. code-block:: text
 

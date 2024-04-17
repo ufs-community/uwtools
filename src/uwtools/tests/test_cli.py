@@ -6,6 +6,7 @@ import re
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import _SubParsersAction
+from pathlib import Path
 from typing import List
 from unittest.mock import patch
 
@@ -54,6 +55,7 @@ def args_dispatch_file():
         "config_file": "/config/file",
         "keys": ["a", "b"],
         "dry_run": False,
+        "stdin_ok": True,
     }
 
 
@@ -337,11 +339,18 @@ def test__dispatch_chgres_cube():
         "cycle": cycle,
         "dry_run": False,
         "graph_file": None,
+        "stdin_ok": True,
     }
     with patch.object(uwtools.api.chgres_cube, "execute") as execute:
         cli._dispatch_chgres_cube({**args, "action": "foo"})
     execute.assert_called_once_with(
-        batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None, task="foo"
+        batch=True,
+        config="config.yaml",
+        cycle=cycle,
+        dry_run=False,
+        graph_file=None,
+        task="foo",
+        stdin_ok=True,
     )
 
 
@@ -397,6 +406,7 @@ def test__dispatch_config_realize():
         values_needed=7,
         total=8,
         dry_run=9,
+        stdin_ok=True,
     )
 
 
@@ -445,15 +455,21 @@ def test__dispatch_config_realize_no_optional():
         values_needed=False,
         total=False,
         dry_run=False,
+        stdin_ok=True,
     )
 
 
 def test__dispatch_config_validate_config_obj():
-    config = uwtools.api.config._YAMLConfig(config={})
-    _dispatch_config_validate_args = {STR.schemafile: 1, STR.infile: config}
+    _dispatch_config_validate_args = {
+        STR.schemafile: Path("/path/to/a.jsonschema"),
+        STR.infile: Path("/path/to/config.yaml"),
+    }
     with patch.object(uwtools.api.config, "_validate_yaml") as _validate_yaml:
         cli._dispatch_config_validate(_dispatch_config_validate_args)
-    _validate_yaml_args = {STR.schemafile: 1, STR.config: config}
+    _validate_yaml_args = {
+        STR.schemafile: _dispatch_config_validate_args[STR.schemafile],
+        STR.config: _dispatch_config_validate_args[STR.infile],
+    }
     _validate_yaml.assert_called_once_with(**_validate_yaml_args)
 
 
@@ -468,26 +484,28 @@ def test__dispatch_file(action, funcname):
 
 
 def test__dispatch_file_copy(args_dispatch_file):
-    a = args_dispatch_file
+    args = args_dispatch_file
     with patch.object(cli.uwtools.api.file, "copy") as copy:
-        cli._dispatch_file_copy(a)
+        cli._dispatch_file_copy(args)
     copy.assert_called_once_with(
-        target_dir=a["target_dir"],
-        config=a["config_file"],
-        keys=a["keys"],
-        dry_run=a["dry_run"],
+        target_dir=args["target_dir"],
+        config=args["config_file"],
+        keys=args["keys"],
+        dry_run=args["dry_run"],
+        stdin_ok=args["stdin_ok"],
     )
 
 
 def test__dispatch_file_link(args_dispatch_file):
-    a = args_dispatch_file
+    args = args_dispatch_file
     with patch.object(cli.uwtools.api.file, "link") as link:
-        cli._dispatch_file_link(a)
+        cli._dispatch_file_link(args)
     link.assert_called_once_with(
-        target_dir=a["target_dir"],
-        config=a["config_file"],
-        keys=a["keys"],
-        dry_run=a["dry_run"],
+        target_dir=args["target_dir"],
+        config=args["config_file"],
+        keys=args["keys"],
+        dry_run=args["dry_run"],
+        stdin_ok=args["stdin_ok"],
     )
 
 
@@ -499,11 +517,18 @@ def test__dispatch_fv3():
         "cycle": cycle,
         "dry_run": False,
         "graph_file": None,
+        "stdin_ok": True,
     }
     with patch.object(uwtools.api.fv3, "execute") as execute:
         cli._dispatch_fv3({**args, "action": "foo"})
     execute.assert_called_once_with(
-        batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None, task="foo"
+        batch=True,
+        config="config.yaml",
+        cycle=cycle,
+        dry_run=False,
+        graph_file=None,
+        task="foo",
+        stdin_ok=True,
     )
 
 
@@ -519,7 +544,13 @@ def test__dispatch_jedi():
     with patch.object(uwtools.api.jedi, "execute") as execute:
         cli._dispatch_jedi({**args, "action": "foo"})
     execute.assert_called_once_with(
-        task="foo", config="config.yaml", cycle=cycle, batch=True, dry_run=False, graph_file=None
+        task="foo",
+        config="config.yaml",
+        cycle=cycle,
+        batch=True,
+        dry_run=False,
+        graph_file=None,
+        stdin_ok=True,
     )
 
 
@@ -531,11 +562,18 @@ def test__dispatch_mpas():
         "cycle": cycle,
         "dry_run": False,
         "graph_file": None,
+        "stdin_ok": True,
     }
     with patch.object(uwtools.api.mpas, "execute") as execute:
         cli._dispatch_mpas({**args, "action": "foo"})
     execute.assert_called_once_with(
-        batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None, task="foo"
+        batch=True,
+        config="config.yaml",
+        cycle=cycle,
+        dry_run=False,
+        graph_file=None,
+        task="foo",
+        stdin_ok=True,
     )
 
 
@@ -547,11 +585,18 @@ def test__dispatch_mpas_init():
         "cycle": cycle,
         "dry_run": False,
         "graph_file": None,
+        "stdin_ok": True,
     }
     with patch.object(uwtools.api.mpas_init, "execute") as execute:
         cli._dispatch_mpas_init({**args, "action": "foo"})
     execute.assert_called_once_with(
-        batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None, task="foo"
+        batch=True,
+        config="config.yaml",
+        cycle=cycle,
+        dry_run=False,
+        graph_file=None,
+        task="foo",
+        stdin_ok=True,
     )
 
 
@@ -610,11 +655,12 @@ def test__dispatch_sfc_climo_gen():
         "config_file": "config.yaml",
         "dry_run": False,
         "graph_file": None,
+        "stdin_ok": True,
     }
     with patch.object(uwtools.api.sfc_climo_gen, "execute") as execute:
         cli._dispatch_sfc_climo_gen({**args, "action": "foo"})
     execute.assert_called_once_with(
-        batch=True, config="config.yaml", dry_run=False, graph_file=None, task="foo"
+        batch=True, config="config.yaml", dry_run=False, graph_file=None, task="foo", stdin_ok=True
     )
 
 
@@ -671,6 +717,7 @@ def test__dispatch_template_render_no_optional():
         searchpath=None,
         values_needed=False,
         dry_run=False,
+        stdin_ok=True,
     )
 
 
@@ -698,6 +745,7 @@ def test__dispatch_template_render_yaml():
         searchpath=6,
         values_needed=7,
         dry_run=8,
+        stdin_ok=True,
     )
 
 
@@ -737,11 +785,18 @@ def test__dispatch_ungrib():
         "cycle": cycle,
         "dry_run": False,
         "graph_file": None,
+        "stdin_ok": True,
     }
     with patch.object(uwtools.api.ungrib, "execute") as execute:
         cli._dispatch_ungrib({**args, "action": "foo"})
     execute.assert_called_once_with(
-        task="foo", batch=True, config="config.yaml", cycle=cycle, dry_run=False, graph_file=None
+        task="foo",
+        batch=True,
+        config="config.yaml",
+        cycle=cycle,
+        dry_run=False,
+        graph_file=None,
+        stdin_ok=True,
     )
 
 

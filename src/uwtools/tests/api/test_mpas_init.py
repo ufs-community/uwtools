@@ -1,25 +1,29 @@
-# pylint: disable=missing-function-docstring,protected-access
+# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
 import datetime as dt
+from pathlib import Path
 from unittest.mock import patch
+
+from pytest import fixture
 
 from uwtools.api import mpas_init
 
 
-def test_execute(tmp_path):
+@fixture
+def kwargs():
     cycle = dt.datetime.now()
-    dot = tmp_path / "graph.dot"
-    args: dict = {
+    return {
         "batch": False,
         "config": "config.yaml",
         "cycle": cycle,
         "dry_run": True,
-        "graph_file": dot,
     }
+
+
+def test_execute(kwargs, tmp_path):
     with patch.object(mpas_init, "_MPASInit") as MPASInit:
-        assert mpas_init.execute(**args, task="foo") is True
-    del args["graph_file"]
-    MPASInit.assert_called_once_with(**args)
+        assert mpas_init.execute(**kwargs, task="foo", graph_file=tmp_path / "graph.dot") is True
+    MPASInit.assert_called_once_with(**{**kwargs, "config": Path(kwargs["config"])})
     MPASInit().foo.assert_called_once_with()
 
 

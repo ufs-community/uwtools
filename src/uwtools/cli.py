@@ -131,6 +131,7 @@ def _dispatch_chgres_cube(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 
@@ -266,6 +267,7 @@ def _dispatch_config_realize(args: Args) -> bool:
             values_needed=args[STR.valsneeded],
             total=args[STR.total],
             dry_run=args[STR.dryrun],
+            stdin_ok=True,
         )
     except UWConfigRealizeError:
         log.error(
@@ -281,7 +283,11 @@ def _dispatch_config_validate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.config.validate(schema_file=args[STR.schemafile], config=args[STR.infile])
+    return uwtools.api.config.validate(
+        schema_file=args[STR.schemafile],
+        config=args[STR.infile],
+        stdin_ok=True,
+    )
 
 
 # Mode file
@@ -362,6 +368,7 @@ def _dispatch_file_copy(args: Args) -> bool:
         config=args[STR.cfgfile],
         keys=args[STR.keys],
         dry_run=args[STR.dryrun],
+        stdin_ok=True,
     )
 
 
@@ -376,6 +383,7 @@ def _dispatch_file_link(args: Args) -> bool:
         config=args[STR.cfgfile],
         keys=args[STR.keys],
         dry_run=args[STR.dryrun],
+        stdin_ok=True,
     )
 
 
@@ -430,6 +438,7 @@ def _dispatch_fv3(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 
@@ -483,6 +492,7 @@ def _dispatch_jedi(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 
@@ -538,6 +548,7 @@ def _dispatch_mpas(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 
@@ -592,6 +603,7 @@ def _dispatch_mpas_init(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 
@@ -659,7 +671,11 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.rocoto.realize(config=args[STR.infile], output_file=args[STR.outfile])
+    return uwtools.api.rocoto.realize(
+        config=args[STR.infile],
+        output_file=args[STR.outfile],
+        stdin_ok=True,
+    )
 
 
 def _dispatch_rocoto_validate(args: Args) -> bool:
@@ -668,7 +684,7 @@ def _dispatch_rocoto_validate(args: Args) -> bool:
 
     :param args: Parsed command-line args.
     """
-    return uwtools.api.rocoto.validate(xml_file=args[STR.infile])
+    return uwtools.api.rocoto.validate(xml_file=args[STR.infile], stdin_ok=True)
 
 
 # Mode sfc_climo_gen
@@ -721,6 +737,7 @@ def _dispatch_sfc_climo_gen(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 
@@ -807,6 +824,7 @@ def _dispatch_template_render(args: Args) -> bool:
             searchpath=args[STR.searchpath],
             values_needed=args[STR.valsneeded],
             dry_run=args[STR.dryrun],
+            stdin_ok=True,
         )
     except UWTemplateRenderError:
         if args[STR.valsneeded]:
@@ -826,6 +844,7 @@ def _dispatch_template_translate(args: Args) -> bool:
         input_file=args[STR.infile],
         output_file=args[STR.outfile],
         dry_run=args[STR.dryrun],
+        stdin_ok=True,
     )
 
 
@@ -880,6 +899,7 @@ def _dispatch_ungrib(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 

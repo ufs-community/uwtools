@@ -5,6 +5,7 @@ A driver for the jedi component.
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 from iotaa import asset, dryrun, refs, run, task, tasks
 
@@ -19,12 +20,18 @@ class JEDI(Driver):
     A driver for the JEDI component.
     """
 
-    def __init__(self, config: Path, cycle: datetime, dry_run: bool = False, batch: bool = False):
+    def __init__(
+        self,
+        cycle: datetime,
+        config: Optional[Path] = None,
+        dry_run: bool = False,
+        batch: bool = False,
+    ):
         """
         The driver.
 
-        :param config: Path to config file.
         :param cycle: The forecast cycle.
+        :param config: Path to config file.
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
