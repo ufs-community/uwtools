@@ -23,9 +23,6 @@ Or explicit:
 
 Additionally, UW defines the following tags to support use cases not covered by standard tags:
 
-UW YAML Tags
-------------
-
 ``!float``
 ^^^^^^^^^^
 
