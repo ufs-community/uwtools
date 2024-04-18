@@ -10,7 +10,6 @@ Here is a prototype UW YAML ``ungrib:`` block, explained in detail below:
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/ungrib.yaml
 
-
 UW YAML for the ``ungrib:`` Block
 ----------------------------------------
 
@@ -18,7 +17,6 @@ execution:
 ^^^^^^^^^^
 
 See :ref:`here <execution_yaml>` for details.
-
 
 gfs_files:
 ^^^^^^^^^^
@@ -49,7 +47,6 @@ run_dir:
 ^^^^^^^^
 
 The path to the directory where ``ungrib`` will find its namelist and write its outputs.
-
 
 vtable:
 ^^^^^^^
