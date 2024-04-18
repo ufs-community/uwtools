@@ -28,9 +28,14 @@ Additionally, UW defines the following tags to support use cases not covered by 
 
 Converts the tagged node to a Python ``float`` value.
 
-.. code-block:: yaml
+* Given input.yaml
+  .. code-block:: yaml
 
-   f2: !float '3.14'
+    f2: !float "{{ 3.141 + 2.718 }}"
+
+  .. code-block:: text
+     % uw config realize --input-file input.yaml --output-format yaml
+     f2: 5.859
 
 
 ``!int``
@@ -38,9 +43,20 @@ Converts the tagged node to a Python ``float`` value.
 
 Converts the tagged node to a Python ``int`` value.
 
-.. code-block:: yaml
 
-   cycle_day: !int "{{ cycle.strftime('%d') }}"
+* Given input.yaml
+  .. code-block:: yaml
+
+   values:
+    f1: 3
+    f2: 11
+    f3: !int "{{ (f1 + f2) * 10 }}"
+
+  .. code-block:: text
+     % uw config realize --input-file input.yaml --output-format yaml
+     f1: 3
+     f2: 11
+     f2: 140
 
 
 ``!include``
@@ -48,26 +64,40 @@ Converts the tagged node to a Python ``int`` value.
 
 Parse the tagged file and include its tags.
 
-.. code-block:: yaml
+* Given input.yaml
+  .. code-block:: yaml
 
-   salad: !INCLUDE [./fruit_config.yaml]
+     values: !INCLUDE [./supplemental.yaml]
 
+  and supplemental.yaml
+  .. code-block:: yaml
 
-``!list``
-^^^^^^^^^
+     e: 2.718
+     pi: 3.141
 
-Converts the tagged node to a Python ``list`` type.
-
-.. code-block:: yaml
-
-   file_names: !list [&gfs_file_names]
+  .. code-block:: text
+     % uw config realize --input-file input.yaml --output-format yaml
+     values:
+       e: 2.718
+       pi: 3.141
 
 
 ``!remove``
 ^^^^^^^^^^^
 
-Removes the tagged YAML key/value pair.
+Removes the tagged YAML key/value pair. For example:
 
-.. code-block:: yaml
+* Given input.yaml
+  .. code-block:: yaml
 
-   update_values: !remove
+     e: 2.718
+     pi: 3.141
+
+  and supplemental.yaml
+  .. code-block:: yaml
+
+     e: !remove
+
+  .. code-block:: text
+     % uw config realize --input-file input.yaml supplemental.yaml --output-format yaml
+     pi: 3.141
