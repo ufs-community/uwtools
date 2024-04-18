@@ -61,18 +61,18 @@ def ungrib_prop():
 
 
 def test_schema_chgres_cube():
-    d = {
+    config = {
         "execution": {"executable": "chgres_cube"},
         "run_dir": "/tmp",
     }
     errors = schema_validator("chgres-cube", "properties", "chgres_cube")
     # Basic correctness:
-    assert not errors(d)
+    assert not errors(config)
     # Some top-level keys are required:
     for key in ("execution", "run_dir"):
-        assert f"'{key}' is a required property" in errors(with_del(d, key))
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
-    assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
 
 
 def test_schema_chgres_cube_namelist(chgres_cube_prop):
@@ -114,24 +114,24 @@ def test_schema_chgres_cube_run_dir(chgres_cube_prop):
 
 
 def test_execution():
-    d = {"executable": "fv3"}
+    config = {"executable": "fv3"}
     batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
     mpiargs = {"mpiargs": ["--flag1", "--flag2"]}
     threads = {"threads": 32}
     errors = schema_validator("execution")
     # Basic correctness:
-    assert not errors(d)
+    assert not errors(config)
     # batchargs may optionally be specified:
-    assert not errors({**d, **batchargs})
+    assert not errors({**config, **batchargs})
     # mpiargs may be optionally specified:
-    assert not errors({**d, **mpiargs})
+    assert not errors({**config, **mpiargs})
     # threads may optionally be specified:
-    assert not errors({**d, **threads})
+    assert not errors({**config, **threads})
     # All properties are ok:
-    assert not errors({**d, **batchargs, **mpiargs, **threads})
+    assert not errors({**config, **batchargs, **mpiargs, **threads})
     # Additional properties are not allowed:
     assert "Additional properties are not allowed" in errors(
-        {**d, **mpiargs, **threads, "foo": "bar"}
+        {**config, **mpiargs, **threads, "foo": "bar"}
     )
 
 
@@ -193,7 +193,7 @@ def test_schema_files_to_stage():
 
 
 def test_schema_fv3():
-    d = {
+    config = {
         "domain": "regional",
         "execution": {"executable": "fv3"},
         "lateral_boundary_conditions": {"interval_hours": 1, "offset": 0, "path": "/tmp/file"},
@@ -202,14 +202,14 @@ def test_schema_fv3():
     }
     errors = schema_validator("fv3", "properties", "fv3")
     # Basic correctness:
-    assert not errors(d)
+    assert not errors(config)
     # Some top-level keys are required:
     for key in ("domain", "execution", "lateral_boundary_conditions", "length", "run_dir"):
-        assert f"'{key}' is a required property" in errors(with_del(d, key))
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Some top-level keys are optional:
     assert not errors(
         {
-            **d,
+            **config,
             "diag_table": "/path",
             "field_table": {"base_file": "/path"},
             "files_to_copy": {"fn": "/path"},
@@ -219,7 +219,9 @@ def test_schema_fv3():
         }
     )
     # Additional top-level keys are not allowed:
-    assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+    # lateral_boundary_conditions are optional when domain is global:
+    assert not errors({**with_del(config, "lateral_boundary_conditions"), "domain": "global"})
 
 
 def test_schema_fv3_diag_table(fv3_prop):
@@ -295,26 +297,26 @@ def test_schema_fv3_field_table_update_values(fv3_prop, fv3_field_table_vals):
 
 
 def test_schema_fv3_lateral_boundary_conditions(fv3_prop):
-    d = {
+    config = {
         "interval_hours": 1,
         "offset": 0,
         "path": "/some/path",
     }
     errors = fv3_prop("lateral_boundary_conditions")
     # Basic correctness:
-    assert not errors(d)
+    assert not errors(config)
     # All lateral_boundary_conditions items are required:
-    assert "'interval_hours' is a required property" in errors(with_del(d, "interval_hours"))
-    assert "'offset' is a required property" in errors(with_del(d, "offset"))
-    assert "'path' is a required property" in errors(with_del(d, "path"))
+    assert "'interval_hours' is a required property" in errors(with_del(config, "interval_hours"))
+    assert "'offset' is a required property" in errors(with_del(config, "offset"))
+    assert "'path' is a required property" in errors(with_del(config, "path"))
     # interval_hours must be an integer of at least 1:
-    assert "0 is less than the minimum of 1" in errors(with_set(d, 0, "interval_hours"))
-    assert "'s' is not of type 'integer'" in errors(with_set(d, "s", "interval_hours"))
+    assert "0 is less than the minimum of 1" in errors(with_set(config, 0, "interval_hours"))
+    assert "'s' is not of type 'integer'" in errors(with_set(config, "s", "interval_hours"))
     # offset must be an integer of at least 0:
-    assert "-1 is less than the minimum of 0" in errors(with_set(d, -1, "offset"))
-    assert "'s' is not of type 'integer'" in errors(with_set(d, "s", "offset"))
+    assert "-1 is less than the minimum of 0" in errors(with_set(config, -1, "offset"))
+    assert "'s' is not of type 'integer'" in errors(with_set(config, "s", "offset"))
     # path must be a string:
-    assert "88 is not of type 'string'" in errors(with_set(d, 88, "path"))
+    assert "88 is not of type 'string'" in errors(with_set(config, 88, "path"))
 
 
 def test_schema_fv3_length(fv3_prop):
@@ -398,7 +400,7 @@ def test_schema_fv3_run_dir(fv3_prop):
 
 
 def test_schema_jedi():
-    d = {
+    config = {
         "configuration_file": {
             "base_file": "/path/to/jedi.yaml",
             "update_values": {"foo": "bar", "baz": "qux"},
@@ -410,12 +412,12 @@ def test_schema_jedi():
     }
     errors = schema_validator("jedi", "properties", "jedi")
     # Basic correctness:
-    assert not errors(d)
+    assert not errors(config)
     # All top-level keys are required:
     for key in ("configuration_file", "execution", "run_dir"):
-        assert f"'{key}' is a required property" in errors(with_del(d, key))
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
-    assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
 
 
 def test_schema_jedi_configuration_file(jedi_prop):
@@ -473,20 +475,22 @@ def test_schema_namelist():
 
 
 def test_schema_platform():
-    d = {"account": "me", "scheduler": "slurm"}
+    config = {"account": "me", "scheduler": "slurm"}
     errors = schema_validator("platform", "properties", "platform")
     # Basic correctness:
-    assert not errors(d)
+    assert not errors(config)
     # Extra top-level keys are forbidden:
-    assert "Additional properties are not allowed" in errors(with_set(d, "bar", "foo"))
+    assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
     # There is a fixed set of supported schedulers:
-    assert "'foo' is not one of ['lsf', 'pbs', 'slurm']" in errors(with_set(d, "foo", "scheduler"))
+    assert "'foo' is not one of ['lsf', 'pbs', 'slurm']" in errors(
+        with_set(config, "foo", "scheduler")
+    )
     # account and scheduler are optional:
     assert not errors({})
     # account is required if scheduler is specified:
-    assert "'account' is a dependency of 'scheduler'" in errors(with_del(d, "account"))
+    assert "'account' is a dependency of 'scheduler'" in errors(with_del(config, "account"))
     # scheduler is required if account is specified:
-    assert "'scheduler' is a dependency of 'account'" in errors(with_del(d, "scheduler"))
+    assert "'scheduler' is a dependency of 'account'" in errors(with_del(config, "scheduler"))
 
 
 # rocoto
@@ -576,18 +580,18 @@ def test_schema_rocoto_workflow_cycledef():
 
 
 def test_schema_sfc_climo_gen():
-    d = {
+    config = {
         "execution": {"executable": "sfc_climo_gen"},
         "run_dir": "/tmp",
     }
     errors = schema_validator("sfc-climo-gen", "properties", "sfc_climo_gen")
     # Basic correctness:
-    assert not errors(d)
+    assert not errors(config)
     # Some top-level keys are required:
     for key in ("execution", "run_dir"):
-        assert f"'{key}' is a required property" in errors(with_del(d, key))
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
-    assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
 
 
 def test_schema_sfc_climo_gen_namelist(sfc_climo_gen_prop):
@@ -629,7 +633,7 @@ def test_schema_sfc_climo_gen_run_dir(sfc_climo_gen_prop):
 
 
 def test_schema_ungrib():
-    d = {
+    config = {
         "execution": {"executable": "/tmp/ungrib.exe"},
         "gfs_files": {
             "forecast_length": 24,
@@ -642,12 +646,12 @@ def test_schema_ungrib():
     }
     errors = schema_validator("ungrib", "properties", "ungrib")
     # Basic correctness:
-    assert not errors(d)
+    assert not errors(config)
     # All top-level keys are required:
     for key in ("execution", "gfs_files", "run_dir", "vtable"):
-        assert f"'{key}' is a required property" in errors(with_del(d, key))
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
-    assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
 
 
 def test_schema_ungrib_run_dir(ungrib_prop):
