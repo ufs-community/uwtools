@@ -175,7 +175,9 @@ def test_FV3_provisioned_run_directory(driverobj):
     ) as mocks:
         driverobj.provisioned_run_directory()
     for m in mocks:
-        mocks[m].assert_called_once_with()
+        if not m == "boundary_files":
+            mocks[m].assert_called_once_with()
+    mocks["boundary_files"].assert_not_called()
 
 
 def test_FV3_restart_directory(driverobj):
