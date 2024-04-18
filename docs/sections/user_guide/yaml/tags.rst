@@ -1,7 +1,7 @@
 .. _defining_YAML_tags:
 
-Defining YAML ``tags``
-==========================
+UW YAML tags
+============
 
 Tags are used to denote the type of a YAML node when converting to a Python object. Standard YAML tags are defined at http://yaml.org/type/index.html.
 
