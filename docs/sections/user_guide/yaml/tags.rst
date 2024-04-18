@@ -39,7 +39,7 @@ Converts the tagged node to a Python ``float`` type.
 ``!int``
 ^^^^^^^^
 
-Converts the tagged node to a Python ``integer`` type.
+Converts the tagged node to a Python ``int`` value.
 
 .. code-block:: yaml
 
