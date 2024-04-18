@@ -12,8 +12,6 @@ Here is a prototype UW YAML ``mpas:`` block, explained in detail below:
 
 An MPAS build provides prototype versions of certain required runtime files. Here, an arbitrarily named ``user:`` block defines an ``mpas_app`` variable, pointing to the directory where MPAS was installed, to reduce duplication in references to those files.
 
-
-
 UW YAML for the ``mpas:`` Block
 -------------------------------
 
@@ -21,7 +19,6 @@ execution:
 ^^^^^^^^^^
 
 See :ref:`here <execution_yaml>` for details.
-
 
 boundary_conditions:
 ^^^^^^^^^^^^^^^^^^^^
@@ -70,7 +67,6 @@ Jinja2 expressions can be used to reference the number of cores used in executio
    mpas:
      files_to_copy:
        conus.graph.info.part.{{mpas.execution["batchargs"]["cores"]}}: /path/to/conus.graph.info.part.{{mpas.execution["batchargs"]["cores"]}}
-
 
 files_to_link:
 ^^^^^^^^^^^^^^

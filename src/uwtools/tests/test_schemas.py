@@ -43,6 +43,11 @@ def fv3_prop():
 
 
 @fixture
+def jedi_prop():
+    return partial(schema_validator, "jedi", "properties", "jedi", "properties")
+
+
+@fixture
 def sfc_climo_gen_prop():
     return partial(schema_validator, "sfc-climo-gen", "properties", "sfc_climo_gen", "properties")
 
@@ -384,6 +389,50 @@ def test_schema_fv3_namelist_update_values(fv3_prop):
 
 def test_schema_fv3_run_dir(fv3_prop):
     errors = fv3_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# jedi
+
+
+def test_schema_jedi():
+    d = {
+        "configuration_file": {
+            "base_file": "/path/to/jedi.yaml",
+            "update_values": {"foo": "bar", "baz": "qux"},
+        },
+        "execution": {"executable": "/tmp/jedi.exe"},
+        "files_to_copy": {"file1": "src1", "file2": "src2"},
+        "files_to_link": {"link1": "src3", "link2": "src4"},
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("jedi", "properties", "jedi")
+    # Basic correctness:
+    assert not errors(d)
+    # All top-level keys are required:
+    for key in ("configuration_file", "execution", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(d, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**d, "foo": "bar"})
+
+
+def test_schema_jedi_configuration_file(jedi_prop):
+    bf = {"base_file": "/path/to/jedi.yaml"}
+    uv = {"update_values": {"foo": "bar", "baz": "qux"}}
+    errors = jedi_prop("configuration_file")
+    # base_file and update_values are ok together:
+    assert not errors({**bf, **uv})
+    # And either is ok alone:
+    assert not errors(bf)
+    assert not errors(uv)
+    # update_values cannot be empty:
+    assert "should be non-empty" in errors({"update_values": {}})
+
+
+def test_schema_jedi_run_dir(jedi_prop):
+    errors = jedi_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)

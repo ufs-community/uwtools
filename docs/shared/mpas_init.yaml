@@ -1,8 +1,3 @@
-user:
-  mpas_app: /path/to/mpas/installation
-platform:
-  account: me
-  scheduler: slurm
 mpas_init:
   boundary_conditions:
     interval_hours: 6
@@ -10,16 +5,16 @@ mpas_init:
     offset: 0
     path: /path/to/boundary/condition/files
   execution:
-    executable: init_atmosphere
     batchargs:
-      walltime: 01:30:00
       cores: 4
+      walltime: "01:30:00"
+    executable: init_atmosphere
     mpiargs:
-      - --ntasks=4
+      - "--ntasks=4"
     mpicmd: srun
   files_to_copy:
-    conus.static.nc: /path/to/conus.static.nc
     conus.graph.info.part.4: /path/to/conus.graph.info.part.4
+    conus.static.nc: /path/to/conus.static.nc
     stream_list.atmosphere.diagnostics: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.diagnostics"
     stream_list.atmosphere.output: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.output"
     stream_list.atmosphere.surface: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.surface"
@@ -40,21 +35,26 @@ mpas_init:
   namelist:
     base_file: "{{ user.mpas_app }}/MPAS-Model/namelist.init_atmosphere"
     update_values:
-      nhyd_model:
-        config_init_case: 9
       data_sources:
-        config_met_prefix: FILE
         config_fg_interval: !int "{{ mpas_init.boundary_conditions['interval_hours'] * 3600 }}"
-      vertical_grid:
-        config_blend_bdy_terrain: true
-      preproc_stages:
-        config_static_interp: false
-        config_native_gwd_static: false
+        config_met_prefix: FILE
       decomposition:
         config_block_decomp_file_prefix: conus.graph.info.part.
+      nhyd_model:
+        config_init_case: 9
+      preproc_stages:
+        config_native_gwd_static: false
+        config_static_interp: false
+      vertical_grid:
+        config_blend_bdy_terrain: true
   run_dir: /path/to/rundir
   streams:
     path: "{{ user.mpas_app }}/MPAS-Model/streams.init_atmosphere"
     values:
       input_filename: conus.init.nc
       output_filename: foo.nc
+platform:
+  account: me
+  scheduler: slurm
+user:
+  mpas_app: /path/to/mpas/installation

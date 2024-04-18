@@ -10,7 +10,6 @@ Here is a prototype UW YAML ``chgres_cube:`` block, explained in detail below:
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/chgres_cube.yaml
 
-
 UW YAML for the ``chgres_cube:`` Block
 --------------------------------------
 
@@ -18,7 +17,6 @@ execution
 ^^^^^^^^^
 
 See :ref:`here <execution_yaml>` for details.
-
 
 namelist
 ^^^^^^^^

@@ -5,58 +5,10 @@ fv3
 
 Structured YAML to run FV3 is validated by JSON Schema and requires the ``fv3:`` block, described below. If FV3 is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required. The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
 
-The ``fv3:`` Block
-------------------
-
 Here is a prototype UW YAML ``fv3:`` block, explained in detail below:
 
-.. code-block:: yaml
-
-   fv3:
-     diag_table: /path/to/diag_table_to_use
-     domain: regional
-     execution:
-       batchargs:
-         walltime: "00:10:00"
-       executable: ufs_model
-       mpiargs:
-         - "--export=NONE"
-       mpicmd: srun
-       threads: 1
-     field_table:
-       base_file: /path/to/field_table_to_use
-       update_values:
-         liq_wat:
-           longname: cloud water mixing ratio
-           units: kg/kg
-           profile_type:
-             name: fixed
-             surface_value: 2.0
-     files_to_copy:
-       INPUT/gfs_data.nc: /path/to/gfs_data.nc
-       INPUT/sfc_data.nc: /path/to/sfc_data.nc
-       INPUT/gfs_ctrl.nc: /path/to/gfs_ctrl.nc
-       ...
-     files_to_link:
-       co2historicaldata_2010.txt: src/uwtools/drivers/global_co2historicaldata_2010.txt
-       co2historicaldata_2011.txt: src/uwtools/drivers/global_co2historicaldata_2011.txt
-       ...
-     lateral_boundary_conditions:
-       interval_hours: 3
-       offset: 0
-       path: gfs_bndy.tile{tile}.f{forecast_hour}.nc
-     length: 12
-     model_configure:
-       base_file: /path/to/model_configure_to_use
-       update_values:
-         write_dopost: .false.
-     namelist:
-       base_file: /path/to/base/input.nml
-       update_values:
-         fv_core_nml:
-           k_split: 2
-           n_split: 6
-     run_dir: /path/to/runs/{{ cycle.strftime('%Y%m%d%H') }}
+.. highlight:: yaml
+.. literalinclude:: ../../../../shared/fv3.yaml
 
 UW YAML for the ``fv3:`` Block
 ------------------------------
@@ -102,7 +54,6 @@ files_to_link:
 ^^^^^^^^^^^^^^
 
 Identical to ``files_to_copy:`` except that symbolic links will be created in the run directory instead of copies.
-
 
 lateral_boundary_conditions:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
