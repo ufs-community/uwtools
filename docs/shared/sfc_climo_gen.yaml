@@ -1,38 +1,38 @@
 sfc_climo_gen:
- execution:
-   batchargs:
-     export: NONE
-     nodes: 1
-     stdout: /path/to/runscript.out
-     walltime: 00:02:00
-   envcmds:
-     - module use /path/to/modulefiles
-     - module load some_module
-   executable: /path/to/sfc_climo_gen
-   mpiargs:
-     - --export=ALL
-     - --ntasks $SLURM_CPUS_ON_NODE
-   mpicmd: srun
- namelist:
-   update_values:
-     config:
-       halo: 4
-       input_facsf_file: /path/to/facsf.1.0.nc
-       input_maximum_snow_albedo_file: /path/to/maximum_snow_albedo.0.05.nc
-       input_slope_type_file: /path/to/slope_type.1.0.nc
-       input_snowfree_albedo_file: /path/to/snowfree_albedo.4comp.0.05.nc
-       input_soil_type_file: /path/to/soil_type.statsgo.0.05.nc
-       input_substrate_temperature_file: /path/to/substrate_temperature.2.6x1.5.nc
-       input_vegetation_greenness_file: /path/to/vegetation_greenness.0.144.nc
-       input_vegetation_type_file: /path/to/vegetation_type.igbp.0.05.nc
-       maximum_snow_albedo_method: bilinear
-       mosaic_file_mdl: /path/to/C403_mosaic.halo4.nc
-       orog_dir_mdl: /path/to/orog-files-dir
-       orog_files_mdl:
-         - C403_oro_data.tile7.halo4.nc
-       snowfree_albedo_method: bilinear
-       vegetation_greenness_method: bilinear
- run_dir: /path/to/run
+  execution:
+    batchargs:
+      export: NONE
+      nodes: 1
+      stdout: /path/to/runscript.out
+      walltime: "00:02:00"
+    envcmds:
+      - module use /path/to/modulefiles
+      - module load some_module
+    executable: /path/to/sfc_climo_gen
+    mpiargs:
+      - "--export=ALL"
+      - "--ntasks $SLURM_CPUS_ON_NODE"
+    mpicmd: srun
+  namelist:
+    update_values:
+      config:
+        halo: 4
+        input_facsf_file: /path/to/facsf.1.0.nc
+        input_maximum_snow_albedo_file: /path/to/maximum_snow_albedo.0.05.nc
+        input_slope_type_file: /path/to/slope_type.1.0.nc
+        input_snowfree_albedo_file: /path/to/snowfree_albedo.4comp.0.05.nc
+        input_soil_type_file: /path/to/soil_type.statsgo.0.05.nc
+        input_substrate_temperature_file: /path/to/substrate_temperature.2.6x1.5.nc
+        input_vegetation_greenness_file: /path/to/vegetation_greenness.0.144.nc
+        input_vegetation_type_file: /path/to/vegetation_type.igbp.0.05.nc
+        maximum_snow_albedo_method: bilinear
+        mosaic_file_mdl: /path/to/C403_mosaic.halo4.nc
+        orog_dir_mdl: /path/to/orog-files-dir
+        orog_files_mdl:
+          - C403_oro_data.tile7.halo4.nc
+        snowfree_albedo_method: bilinear
+        vegetation_greenness_method: bilinear
+  run_dir: /path/to/run
 platform:
   account: me
   scheduler: slurm

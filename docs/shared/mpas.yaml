@@ -3,18 +3,17 @@ mpas:
     interval_hours: 6
     offset: 0
     path: /path/to/boundary/conditions/directory
-  length: 6
   execution:
-    executable: atmosphere_model
     batchargs:
-      walltime: 01:30:00
       cores: 32
+      walltime: "01:30:00"
+    executable: atmosphere_model
     mpiargs:
-      - --ntasks={{ mpas['execution']['batchargs']['cores'] }}
+      - "--ntasks={{ mpas['execution']['batchargs']['cores'] }}"
     mpicmd: srun
   files_to_copy:
-    conus.init.nc: /path/to/conus.init.nc
     conus.graph.info.part.32: /path/to/conus.graph.info.part.32
+    conus.init.nc: /path/to/conus.init.nc
     stream_list.atmosphere.diagnostics: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.diagnostics"
     stream_list.atmosphere.output: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.output"
     stream_list.atmosphere.surface: "{{ user.mpas_app }}/MPAS-Model/stream_list.atmosphere.surface"
@@ -32,22 +31,23 @@ mpas:
     RRTMG_SW_DATA.DBL: "{{ user.mpas_app }}/MPAS-Model/RRTMG_SW_DATA.DBL"
     SOILPARM.TBL: "{{ user.mpas_app }}/MPAS-Model/SOILPARM.TBL"
     VEGPARM.TBL: "{{ user.mpas_app }}/MPAS-Model/VEGPARM.TBL"
+  length: 6
   namelist:
     base_file: "{{ user.mpas_app }}/MPAS-Model/namelist.atmosphere"
     update_values:
-      nhyd_model:
-        config_dt: 60.0
-      limited_area:
-        config_apply_lbcs: true
       decomposition:
         config_block_decomp_file_prefix: conus.graph.info.part.
+      limited_area:
+        config_apply_lbcs: true
+      nhyd_model:
+        config_dt: 60
   run_dir: /path/to/run/directory
   streams:
     path: "{{ user.mpas_app }}/MPAS-Model/streams.atmosphere"
     values:
       input_filename: conus.init.nc
-      input_interval: 06:00:00
-      output_interval: 06:00:00
+      input_interval: "06:00:00"
+      output_interval: "06:00:00"
 platform:
   account: me
   scheduler: slurm
