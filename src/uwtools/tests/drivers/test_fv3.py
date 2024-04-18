@@ -160,7 +160,9 @@ def test_FV3_namelist_file(driverobj):
     assert dst.is_file()
 
 
-def test_FV3_provisioned_run_directory_global(driverobj):
+@pytest.mark.parametrize("domain", ("global", "regional"))
+def test_FV3_provisioned_run_directory_global(domain, driverobj):
+    driverobj._driver_config["domain"] = domain
     with patch.multiple(
         driverobj,
         boundary_files=D,
@@ -174,29 +176,12 @@ def test_FV3_provisioned_run_directory_global(driverobj):
         runscript=D,
     ) as mocks:
         driverobj.provisioned_run_directory()
+    excluded = ["boundary_files"] if domain == "global" else []
     for m in mocks:
-        if not m == "boundary_files":
+        if not m in excluded:
             mocks[m].assert_called_once_with()
-    mocks["boundary_files"].assert_not_called()
-
-
-def test_FV3_provisioned_run_directory_regional(driverobj):
-    driverobj._driver_config["domain"] = "regional"
-    with patch.multiple(
-        driverobj,
-        boundary_files=D,
-        diag_table=D,
-        field_table=D,
-        files_copied=D,
-        files_linked=D,
-        model_configure=D,
-        namelist_file=D,
-        restart_directory=D,
-        runscript=D,
-    ) as mocks:
-        driverobj.provisioned_run_directory()
-    for m in mocks:
-        mocks[m].assert_called_once_with()
+    for m in excluded:
+        mocks[m].assert_not_called()
 
 
 def test_FV3_restart_directory(driverobj):
