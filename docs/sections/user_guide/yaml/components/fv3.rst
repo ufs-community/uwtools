@@ -58,7 +58,7 @@ Identical to ``files_to_copy:`` except that symbolic links will be created in th
 lateral_boundary_conditions:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Describes how the lateral boundary conditions have been prepared for a limited-area configuration of the FV3 forecast.
+Describes how the lateral boundary conditions have been prepared for a limited-area configuration of the FV3 forecast. Required when ``domain`` is ``regional``.
 
 interval_hours:
 """""""""""""""
