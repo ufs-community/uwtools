@@ -1,6 +1,3 @@
-platform:
-  account: me
-  scheduler: slurm
 ungrib:
   execution:
     batchargs:
@@ -14,3 +11,6 @@ ungrib:
     path: /path/to/dir/gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}
   run_dir: /path/to/dir/run
   vtable: /path/to/Vtable.GFS
+platform:
+  account: me
+  scheduler: slurm

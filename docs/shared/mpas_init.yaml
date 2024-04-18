@@ -1,8 +1,3 @@
-user:
-  mpas_app: /path/to/mpas/installation
-platform:
-  account: me
-  scheduler: slurm
 mpas_init:
   boundary_conditions:
     interval_hours: 6
@@ -58,3 +53,8 @@ mpas_init:
     values:
       input_filename: conus.init.nc
       output_filename: foo.nc
+platform:
+  account: me
+  scheduler: slurm
+user:
+  mpas_app: /path/to/mpas/installation

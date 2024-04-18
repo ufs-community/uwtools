@@ -1,6 +1,3 @@
-platform:
-  account: me
-  scheduler: slurm
 chgres_cube:
   execution:
     executable: chgres_cube
@@ -29,5 +26,5 @@ chgres_cube:
         atm_files_input_grid: atm.t{{cycle.strftime('%H') }}z.nc
   run_dir: /path/to/dir
 platform:
-  account: foo
+  account: me
   scheduler: slurm

@@ -41,3 +41,6 @@ fv3:
        k_split: 2
        n_split: 6
  run_dir: /path/to/runs/{{ cycle.strftime('%Y%m%d%H') }}
+platform:
+  account: me
+  scheduler: slurm
