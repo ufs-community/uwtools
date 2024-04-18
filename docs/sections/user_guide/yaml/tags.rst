@@ -7,7 +7,7 @@ Tags are used to denote the type of a YAML node when converting to a Python obje
 
 Tags may be implicit:
 
-.. code-block:: text
+.. code-block:: yaml
 
    boolean: true
    integer: 3
@@ -15,7 +15,7 @@ Tags may be implicit:
 
 Or explicit:
 
-.. code-block:: text
+.. code-block:: yaml
 
    boolean: !!bool "true"
    integer: !!int "3"
