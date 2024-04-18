@@ -26,9 +26,7 @@ Additionally, UW defines the following tags to support use cases not covered by 
 ``!float``
 ^^^^^^^^^^
 
-Converts the tagged node to a Python ``float`` value. For example:
-
-Given ``input.yaml``:
+Converts the tagged node to a Python ``float`` value. For example, given ``input.yaml``:
 
 .. code-block:: yaml
 
@@ -43,9 +41,7 @@ Given ``input.yaml``:
 ``!int``
 ^^^^^^^^
 
-Converts the tagged node to a Python ``int`` value. For example:
-
-Given ``input.yaml``:
+Converts the tagged node to a Python ``int`` value. For example, given ``input.yaml``:
 
 .. code-block:: yaml
 
@@ -64,9 +60,7 @@ Given ``input.yaml``:
 ``!include``
 ^^^^^^^^^^^^
 
-Parse the tagged file and include its tags. For example:
-
-Given ``input.yaml``:
+Parse the tagged file and include its tags. For example, given ``input.yaml``:
 
 .. code-block:: yaml
 
@@ -90,9 +84,7 @@ and ``supplemental.yaml``:
 ``!remove``
 ^^^^^^^^^^^
 
-Removes the tagged YAML key/value pair. For example:
-
-Given ``input.yaml``:
+Removes the tagged YAML key/value pair. For example, given ``input.yaml``:
 
 .. code-block:: yaml
 
