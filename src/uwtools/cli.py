@@ -20,6 +20,7 @@ import uwtools.api.fv3
 import uwtools.api.jedi
 import uwtools.api.mpas
 import uwtools.api.mpas_init
+import uwtools.api.regional_esg_grid
 import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
 import uwtools.api.template
@@ -67,6 +68,7 @@ def main() -> None:
             STR.jedi: _dispatch_jedi,
             STR.mpas: _dispatch_mpas,
             STR.mpasinit: _dispatch_mpas_init,
+            STR.regionalesggrid: _dispatch_regional_esg_grid,
             STR.rocoto: _dispatch_rocoto,
             STR.sfcclimogen: _dispatch_sfc_climo_gen,
             STR.template: _dispatch_template,
@@ -604,6 +606,57 @@ def _dispatch_mpas_init(args: Args) -> bool:
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
         stdin_ok=True,
+    )
+
+
+# Mode regional esg grid
+
+
+def _add_subparser_regional_esg_grid(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: regional_esg_grid
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.regionalesggrid, "Execute Regional Esg Grid tasks")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_regional_esg_grid_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.regional_esg_grid.tasks().items()
+    }
+
+
+def _add_subparser_regional_esg_grid_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+    """
+    Subparser for mode: regional_esg_grid <task>
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_config_file(group=required, required=True)
+    _add_arg_cycle(required)
+    optional = _basic_setup(parser)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)    
+    _add_arg_graph_file(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
+def _dispatch_jedi(args: Args) -> bool:
+    """
+    Dispatch logic for jedi mode.
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.regional_esg_grid.execute(
+        task=args[STR.action],
+        config_file=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
     )
 
 
@@ -1285,6 +1338,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         STR.jedi: _add_subparser_jedi(subparsers),
         STR.mpas: _add_subparser_mpas(subparsers),
         STR.mpasinit: _add_subparser_mpas_init(subparsers),
+        STR.regionalesggrid: _add_subparser_regional_esg_grid(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),
         STR.sfcclimogen: _add_subparser_sfc_climo_gen(subparsers),
         STR.template: _add_subparser_template(subparsers),
