@@ -21,7 +21,7 @@ Or explicit:
    integer: !!int "3"
    float: !!float "3.14"
 
-Additionally, UW extends the following tags and constructors to support other formats:
+Additionally, UW defines the following tags to support use cases not covered by standard tags:
 
 UW YAML Tags
 ------------
