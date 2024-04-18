@@ -41,6 +41,11 @@
           "type": "string"
         }
       },
+      "required": [
+        "configuration_file",
+        "execution",
+        "run_dir"
+      ],
       "type": "object"
     }
   },
