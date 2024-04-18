@@ -28,7 +28,7 @@ Additionally, UW defines the following tags to support use cases not covered by 
 
 Converts the tagged node to a Python ``float`` value. For example:
 
-Given input.yaml:
+Given ``input.yaml``:
 
 .. code-block:: yaml
 
@@ -45,7 +45,7 @@ Given input.yaml:
 
 Converts the tagged node to a Python ``int`` value. For example:
 
-Given input.yaml:
+Given ``input.yaml``:
 
 .. code-block:: yaml
 
@@ -66,13 +66,13 @@ Given input.yaml:
 
 Parse the tagged file and include its tags. For example:
 
-Given input.yaml:
+Given ``input.yaml``:
 
 .. code-block:: yaml
 
    values: !INCLUDE [./supplemental.yaml]
 
-and supplemental.yaml:
+and ``supplemental.yaml``:
 
 .. code-block:: yaml
 
@@ -92,14 +92,14 @@ and supplemental.yaml:
 
 Removes the tagged YAML key/value pair. For example:
 
-Given input.yaml:
+Given ``input.yaml``:
 
 .. code-block:: yaml
 
    e: 2.718
    pi: 3.141
 
-and supplemental.yaml:
+and ``supplemental.yaml``:
 
 .. code-block:: yaml
 
