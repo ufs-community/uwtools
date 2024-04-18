@@ -3,7 +3,7 @@
 UW YAML tags
 ============
 
-Tags are used to denote the type of a YAML node when converting to a Python object. Standard YAML tags are defined `here<http://yaml.org/type/index.html>`.
+Tags are used to denote the type of a YAML node when converting to a Python object. Standard YAML tags are defined `here <http://yaml.org/type/index.html>`_.
 
 Tags may be implicit:
 
