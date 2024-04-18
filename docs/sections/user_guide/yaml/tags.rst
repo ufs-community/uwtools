@@ -29,7 +29,7 @@ UW YAML Tags
 ``!float``
 ^^^^^^^^^^
 
-Converts the tagged node to a Python ``float`` type.
+Converts the tagged node to a Python ``float`` value.
 
 .. code-block:: yaml
 
