@@ -178,10 +178,10 @@ def test_FV3_provisioned_run_directory_global(domain, driverobj):
         driverobj.provisioned_run_directory()
     excluded = ["boundary_files"] if domain == "global" else []
     for m in mocks:
-        if not m in excluded:
+        if m in excluded:
+            mocks[m].assert_not_called()
+        else:
             mocks[m].assert_called_once_with()
-    for m in excluded:
-        mocks[m].assert_not_called()
 
 
 def test_FV3_restart_directory(driverobj):
