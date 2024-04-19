@@ -1,0 +1,22 @@
+regional_esg_grid:
+  execution:
+    batchargs:
+      nodes: 1
+      stdout: /path/to/runscript.out
+      walltime: "08:00:00"
+    executable: regional_esg_grid
+    mpicmd: srun
+  namelist:
+    update_values:
+      config:
+        delx:
+        dely:
+        halo:
+        idim:
+        jdim:
+        target_iat:
+        target_ion:
+  run_dir: /path/to/run
+platform:
+  account: me
+  scheduler: slurm
