@@ -43,7 +43,7 @@ class RegionalEsgGrid(Driver):
         """
         The namelist file.
         """
-        fn = "regional_esg_grid.f90"
+        fn = "regional_esg_grid.nml"
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)

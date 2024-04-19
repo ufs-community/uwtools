@@ -4,18 +4,18 @@ regional_esg_grid:
       nodes: 1
       stdout: /path/to/runscript.out
       walltime: "08:00:00"
-    executable: regional_esg_grid
+    executable: /path/regional_esg_grid
     mpicmd: srun
   namelist:
     update_values:
       config:
-        delx:
-        dely:
-        halo:
-        idim:
-        jdim:
-        target_Iat:
-        target_Ion:
+        delx: 0.11
+        dely: 0.11
+        lx: 214
+        ly: 128
+        pazi: 0.0
+        target_Iat: 38.5
+        target_Ion: -97.5
   run_dir: /path/to/run
 platform:
   account: me
