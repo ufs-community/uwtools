@@ -94,7 +94,7 @@ class STR:
     outfmt: str = "output_format"
     quiet: str = "quiet"
     realize: str = "realize"
-    regionalesggrid: str = "regionalesggrid"
+    regionalesggrid: str = "regional_esg_grid"
     render: str = "render"
     rocoto: str = "rocoto"
     run: str = "run"

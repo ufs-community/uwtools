@@ -42,12 +42,6 @@ class RegionalEsgGrid(Driver):
     # Workflow tasks
 
     @task
-    def go(self):
-        yield "go"
-        yield asset(None, lambda: True)
-        yield None
-
-    @task
     def namelist_file(self):
         """
         The namelist file.
@@ -59,28 +53,22 @@ class RegionalEsgGrid(Driver):
         """
         Run directory provisioned with all required content.
         """
-        pass
-        """
         yield self._taskname("provisioned run directory")
         yield [
             self.namelist_file(),
             self.runscript(),
         ]
-        """
 
     @task
     def runscript(self):
         """
         The runscript.
         """
-        pass
-        """
         path = self._runscript_path
         yield self._taskname(path.name)
         yield asset(path, path.is_file)
         yield None
         self._write_runscript(path=path, envvars=envvars)
-        """
 
     # Private helper methods
 

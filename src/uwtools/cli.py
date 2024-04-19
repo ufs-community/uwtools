@@ -645,9 +645,9 @@ def _add_subparser_regional_esg_grid_task(subparsers: Subparsers, task: str, hel
     return checks
 
 
-def _dispatch_jedi(args: Args) -> bool:
+def _dispatch_regional_esg_grid(args: Args) -> bool:
     """
-    Dispatch logic for jedi mode.
+    Dispatch logic for regional esg grid mode.
     :param args: Parsed command-line args.
     """
     return uwtools.api.regional_esg_grid.execute(
