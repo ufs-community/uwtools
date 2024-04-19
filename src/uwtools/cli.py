@@ -626,7 +626,9 @@ def _add_subparser_regional_esg_grid(subparsers: Subparsers) -> ModeChecks:
     }
 
 
-def _add_subparser_regional_esg_grid_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+def _add_subparser_regional_esg_grid_task(
+    subparsers: Subparsers, task: str, helpmsg: str
+) -> ActionChecks:
     """
     Subparser for mode: regional_esg_grid <task>
     :param subparsers: Parent parser's subparsers, to add this subparser to.
@@ -636,10 +638,9 @@ def _add_subparser_regional_esg_grid_task(subparsers: Subparsers, task: str, hel
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_config_file(group=required, required=True)
-    _add_arg_cycle(required)
     optional = _basic_setup(parser)
     _add_arg_batch(optional)
-    _add_arg_dry_run(optional)    
+    _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
     checks = _add_args_verbosity(optional)
     return checks
@@ -648,15 +649,16 @@ def _add_subparser_regional_esg_grid_task(subparsers: Subparsers, task: str, hel
 def _dispatch_regional_esg_grid(args: Args) -> bool:
     """
     Dispatch logic for regional esg grid mode.
+
     :param args: Parsed command-line args.
     """
     return uwtools.api.regional_esg_grid.execute(
         task=args[STR.action],
         config_file=args[STR.cfgfile],
-        cycle=args[STR.cycle],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
     )
 
 

@@ -1,5 +1,5 @@
 """
-A driver for regional_esg_grid. 
+A driver for regional_esg_grid.
 """
 
 from datetime import datetime
@@ -21,7 +21,6 @@ class RegionalEsgGrid(Driver):
 
     def __init__(
         self,
-        cycle: datetime,
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
@@ -29,15 +28,13 @@ class RegionalEsgGrid(Driver):
         """
         The driver.
 
-        :param cycle: The cycle.
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle)
+        super().__init__(config=config, dry_run=dry_run, batch=batch)
         if self._dry_run:
             dryrun()
-        self._cycle = cycle
 
     # Workflow tasks
 
@@ -46,7 +43,16 @@ class RegionalEsgGrid(Driver):
         """
         The namelist file.
         """
-        pass
+        fn = "regional_esg_grid.f90"
+        yield self._taskname(fn)
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        yield None
+        self._create_user_updated_config(
+            config_class=NMLConfig,
+            config_values=self._driver_config[""].get("namelist", {}),
+            path=path,
+        )
 
     @tasks
     def provisioned_run_directory(self):
@@ -85,4 +91,4 @@ class RegionalEsgGrid(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
+        return "%s %s" % (self._driver_name, suffix)

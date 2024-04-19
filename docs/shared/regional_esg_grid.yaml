@@ -14,8 +14,8 @@ regional_esg_grid:
         halo:
         idim:
         jdim:
-        target_iat:
-        target_ion:
+        target_Iat:
+        target_Ion:
   run_dir: /path/to/run
 platform:
   account: me
