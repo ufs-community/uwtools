@@ -9,6 +9,5 @@ UW YAML
    execution
    files
    updating_values
-   field_table
    rocoto
    tags

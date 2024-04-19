@@ -34,84 +34,14 @@
         },
         "field_table": {
           "additionalProperties": false,
-          "anyOf": [
-            {
-              "required": [
-                "base_file"
-              ]
-            },
-            {
-              "required": [
-                "update_values"
-              ]
-            }
-          ],
           "properties": {
             "base_file": {
               "type": "string"
-            },
-            "update_values": {
-              "minProperties": 1,
-              "patternProperties": {
-                "^.*$": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "longname": {
-                      "type": "string"
-                    },
-                    "profile_type": {
-                      "additionalProperties": false,
-                      "allOf": [
-                        {
-                          "if": {
-                            "properties": {
-                              "name": {
-                                "const": "profile"
-                              }
-                            }
-                          },
-                          "then": {
-                            "required": [
-                              "top_value"
-                            ]
-                          }
-                        }
-                      ],
-                      "properties": {
-                        "name": {
-                          "enum": [
-                            "fixed",
-                            "profile"
-                          ]
-                        },
-                        "surface_value": {
-                          "type": "number"
-                        },
-                        "top_value": {
-                          "type": "number"
-                        }
-                      },
-                      "required": [
-                        "name",
-                        "surface_value"
-                      ],
-                      "type": "object"
-                    },
-                    "units": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "longname",
-                    "profile_type",
-                    "units"
-                  ],
-                  "type": "object"
-                }
-              },
-              "type": "object"
             }
           },
+          "required": [
+            "base_file"
+          ],
           "type": "object"
         },
         "files_to_copy": {
@@ -211,6 +141,7 @@
       "required": [
         "domain",
         "execution",
+        "field_table",
         "length",
         "run_dir"
       ],

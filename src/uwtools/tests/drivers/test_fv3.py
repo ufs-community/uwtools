@@ -38,6 +38,9 @@ def config(tmp_path):
                 "executable": "fv3",
                 "mpicmd": "srun",
             },
+            "field_table": {
+                "base_file": "/path/to/field_table_to_copy",
+            },
             "lateral_boundary_conditions": {
                 "interval_hours": 1,
                 "offset": 0,
@@ -107,8 +110,7 @@ def test_FV3_diag_table_warn(caplog, driverobj):
 
 def test_FV3_field_table(driverobj):
     src = driverobj._rundir / "field_table.in"
-    with open(src, "w", encoding="utf-8") as f:
-        yaml.dump({}, f)
+    src.touch()
     dst = driverobj._rundir / "field_table"
     assert not dst.is_file()
     driverobj._driver_config["field_table"] = {"base_file": src}
@@ -161,7 +163,7 @@ def test_FV3_namelist_file(driverobj):
 
 
 @pytest.mark.parametrize("domain", ("global", "regional"))
-def test_FV3_provisioned_run_directory_global(domain, driverobj):
+def test_FV3_provisioned_run_directory(domain, driverobj):
     driverobj._driver_config["domain"] = domain
     with patch.multiple(
         driverobj,

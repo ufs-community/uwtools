@@ -31,7 +31,7 @@ See :ref:`here <execution_yaml>` for details.
 field_table:
 ^^^^^^^^^^^^
 
-Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). See FV3 ``field_table`` documentation :weather-model-io:`here<field-table-file>`, or :ref:`defining_a_field_table` for UW YAML-specific details.
+The path to a :weather-model-io:`valid field-table file<field-table-file>` to be copied into the run directory.
 
 files_to_copy:
 ^^^^^^^^^^^^^^

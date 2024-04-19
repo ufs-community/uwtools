@@ -9,7 +9,6 @@ from typing import Optional
 
 from iotaa import asset, dryrun, task, tasks
 
-from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
@@ -90,12 +89,7 @@ class FV3(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield None
-        self._create_user_updated_config(
-            config_class=FieldTableConfig,
-            config_values=self._driver_config["field_table"],
-            path=path,
-        )
+        yield filecopy(src=self._driver_config["field_table"]["base_file"], dst=path)
 
     @tasks
     def files_copied(self):
