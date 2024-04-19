@@ -11,13 +11,6 @@ fv3:
     threads: 1
   field_table:
     base_file: /path/to/field_table_to_use
-    update_values:
-      liq_wat:
-        longname: cloud water mixing ratio
-        profile_type:
-          name: fixed
-          surface_value: 2
-        units: kg/kg
   files_to_copy:
     INPUT/gfs_ctrl.nc: /path/to/gfs_ctrl.nc
     INPUT/gfs_data.nc: /path/to/gfs_data.nc
