@@ -157,8 +157,7 @@ class FV3(Driver):
         Run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
-        yield [
-            self.boundary_files(),
+        required = [
             self.diag_table(),
             self.field_table(),
             self.files_copied(),
@@ -168,6 +167,9 @@ class FV3(Driver):
             self.restart_directory(),
             self.runscript(),
         ]
+        if self._driver_config["domain"] == "regional":
+            required.append(self.boundary_files())
+        yield required
 
     @task
     def restart_directory(self):
