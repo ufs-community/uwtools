@@ -11,3 +11,4 @@ UW YAML
    updating_values
    field_table
    rocoto
+   tags
