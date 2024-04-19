@@ -161,7 +161,7 @@ def test_FV3_namelist_file(driverobj):
 
 
 @pytest.mark.parametrize("domain", ("global", "regional"))
-def test_FV3_provisioned_run_directory_global(domain, driverobj):
+def test_FV3_provisioned_run_directory(domain, driverobj):
     driverobj._driver_config["domain"] = domain
     with patch.multiple(
         driverobj,
