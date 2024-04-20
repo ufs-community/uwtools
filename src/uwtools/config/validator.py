@@ -6,7 +6,8 @@ import json
 from pathlib import Path
 from typing import List, Optional, Union
 
-import jsonschema
+from jsonschema import Draft202012Validator
+from jsonschema.exceptions import ValidationError
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
@@ -54,8 +55,8 @@ def validate_yaml(
     log_msg = "%s UW schema-validation error%s found"
     log_method(log_msg, len(errors), "" if len(errors) == 1 else "s")
     for error in errors:
-        for line in str(error).split("\n"):
-            log.error(line)
+        log.error("Error at %s:", " -> ".join(str(k) for k in error.path))
+        log.error("%s%s", INDENT, error.message)
     return not bool(errors)
 
 
@@ -74,7 +75,7 @@ def _prep_config(config: Union[dict, YAMLConfig, Optional[Path]]) -> YAMLConfig:
     return cfgobj
 
 
-def _validation_errors(config: Union[dict, list], schema: dict) -> List[str]:
+def _validation_errors(config: Union[dict, list], schema: dict) -> List[ValidationError]:
     """
     Identify schema-validation errors.
 
@@ -91,5 +92,5 @@ def _validation_errors(config: Union[dict, list], schema: dict) -> List[str]:
             return Resource(contents=json.load(f), specification=DRAFT202012)  # type: ignore
 
     registry = Registry(retrieve=retrieve)  # type: ignore
-    validator = jsonschema.Draft202012Validator(schema, registry=registry)
+    validator = Draft202012Validator(schema, registry=registry)
     return list(validator.iter_errors(config))
