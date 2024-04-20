@@ -12,7 +12,7 @@ from referencing.jsonschema import DRAFT202012
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
+from uwtools.logging import INDENT, log
 from uwtools.utils.file import resource_path
 
 # Public functions

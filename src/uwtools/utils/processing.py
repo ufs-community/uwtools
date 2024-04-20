@@ -6,7 +6,7 @@ from pathlib import Path
 from subprocess import STDOUT, CalledProcessError, check_output
 from typing import Dict, Optional, Tuple, Union
 
-from uwtools.logging import log
+from uwtools.logging import INDENT, log
 
 
 def execute(
@@ -25,14 +25,13 @@ def execute(
     :return: A result object providing combined stder/stdout output and success values.
     """
 
-    indent = "  "
     log.info("Executing: %s", cmd)
     if cwd:
-        log.info("%sin %s", indent, cwd)
+        log.info("%sin %s", INDENT, cwd)
     if env:
-        log.info("%swith environment variables:", indent)
+        log.info("%swith environment variables:", INDENT)
         for key, val in env.items():
-            log.info("%s%s=%s", indent * 2, key, val)
+            log.info("%s%s=%s", INDENT * 2, key, val)
     try:
         output = check_output(
             cmd, cwd=cwd, encoding="utf=8", env=env, shell=True, stderr=STDOUT, text=True
@@ -41,11 +40,11 @@ def execute(
         success = True
     except CalledProcessError as e:
         output = e.output
-        log.error("%sFailed with status: %s", indent, e.returncode)
+        log.error("%sFailed with status: %s", INDENT, e.returncode)
         logfunc = log.error
         success = False
     if output and (log_output or not success):
-        logfunc("%sOutput:", indent)
+        logfunc("%sOutput:", INDENT)
         for line in output.split("\n"):
-            logfunc("%s%s", indent * 2, line)
+            logfunc("%s%s", INDENT * 2, line)
     return success, output

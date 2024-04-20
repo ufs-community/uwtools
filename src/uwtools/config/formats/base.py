@@ -14,7 +14,7 @@ import yaml
 from uwtools.config import jinja2
 from uwtools.config.support import INCLUDE_TAG, depth, log_and_error
 from uwtools.exceptions import UWConfigError
-from uwtools.logging import log
+from uwtools.logging import INDENT, log
 
 
 class Config(ABC, UserDict):
@@ -96,7 +96,7 @@ class Config(ABC, UserDict):
         template: List[str] = []
         for key, val in values.items():
             if isinstance(val, dict):
-                complete.append(f"    {parent}{key}")
+                complete.append(f"{INDENT}{parent}{key}")
                 c, e, t = self.characterize_values(val, f"{parent}{key}.")
                 complete, empty, template = complete + c, empty + e, template + t
             elif isinstance(val, list):
@@ -104,16 +104,16 @@ class Config(ABC, UserDict):
                     if isinstance(item, dict):
                         c, e, t = self.characterize_values(item, parent)
                         complete, empty, template = complete + c, empty + e, template + t
-                        complete.append(f"    {parent}{key}")
+                        complete.append(f"{INDENT}{parent}{key}")
                     elif "{{" in str(val) or "{%" in str(val):
-                        template.append(f"    {parent}{key}: {val}")
+                        template.append(f"{INDENT}{parent}{key}: {val}")
                         break
             elif "{{" in str(val) or "{%" in str(val):
-                template.append(f"    {parent}{key}: {val}")
+                template.append(f"{INDENT}{parent}{key}: {val}")
             elif val == "" or val is None:
-                empty.append(f"    {parent}{key}")
+                empty.append(f"{INDENT}{parent}{key}")
             else:
-                complete.append(f"    {parent}{key}")
+                complete.append(f"{INDENT}{parent}{key}")
         return complete, empty, template
 
     def compare_config(self, dict1: dict, dict2: Optional[dict] = None) -> bool:
@@ -169,7 +169,7 @@ class Config(ABC, UserDict):
         def logstate(state: str) -> None:
             log.debug("Dereferencing, %s value:", state)
             for line in str(self).split("\n"):
-                log.debug("  %s", line)
+                log.debug("%s%s", INDENT, line)
 
         while True:
             logstate("current")

@@ -16,6 +16,7 @@ import iotaa
 #
 # is 31 characters, leaving 69 for messages (e.g. separators) on a 100-character line.
 
+INDENT = "  "
 MSGWIDTH = 69
 
 
