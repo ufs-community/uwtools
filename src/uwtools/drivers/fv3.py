@@ -9,7 +9,6 @@ from typing import Optional
 
 from iotaa import asset, dryrun, task, tasks
 
-from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
@@ -90,12 +89,7 @@ class FV3(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield None
-        self._create_user_updated_config(
-            config_class=FieldTableConfig,
-            config_values=self._driver_config["field_table"],
-            path=path,
-        )
+        yield filecopy(src=self._driver_config["field_table"]["base_file"], dst=path)
 
     @tasks
     def files_copied(self):
@@ -157,8 +151,7 @@ class FV3(Driver):
         Run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
-        yield [
-            self.boundary_files(),
+        required = [
             self.diag_table(),
             self.field_table(),
             self.files_copied(),
@@ -168,6 +161,9 @@ class FV3(Driver):
             self.restart_directory(),
             self.runscript(),
         ]
+        if self._driver_config["domain"] == "regional":
+            required.append(self.boundary_files())
+        yield required
 
     @task
     def restart_directory(self):
