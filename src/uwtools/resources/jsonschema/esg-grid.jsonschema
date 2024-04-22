@@ -20,6 +20,29 @@
                       "string"
                     ]
                   },
+		  "properties": {
+		    "delx": {
+		      "type": "number"
+	 	    },
+		    "dely": {
+		      "type": "number"
+		    },
+		    "lx": {
+		      "type": "number"
+		    },
+		    "ly": {
+		      "type": "number"
+		    },
+		    "pazi": {
+		      "type": "number"
+		    },
+		    "plat": {
+		      "type": "number"
+		    },
+		    "plon": {
+		      "type": "number"
+		    }
+		  },
                   "type": "object"
                 }
               },
