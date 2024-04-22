@@ -132,7 +132,9 @@ def test_schema_esg_grid_namelist(esg_grid_prop):
 
 
 def test_schema_esg_grid_namelist_update_values(esg_grid_prop):
-    errors = esg_grid_prop("namelist", "properties", "update_values", "properties", "regional_grid_nml")
+    errors = esg_grid_prop(
+        "namelist", "properties", "update_values", "properties", "regional_grid_nml"
+    )
     # array, boolean, number, and string values are ok:
     assert not errors({"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"})
     # Other types are not, e.g.:
