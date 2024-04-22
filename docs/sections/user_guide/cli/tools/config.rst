@@ -191,7 +191,6 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
      PATH
          Additional files to supplement primary input
 
-
 Examples
 ^^^^^^^^
 
