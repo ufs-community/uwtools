@@ -2,19 +2,15 @@
 """
 EsgGrid driver tests.
 """
-import logging
-from pathlib import Path
 from unittest.mock import DEFAULT as D
-from unittest.mock import Mock, call, patch
+from unittest.mock import patch
 
-import f90nml # type: ignore
+import f90nml  # type: ignore
 import yaml
-from iotaa import asset, external
 from pytest import fixture
 
 from uwtools.drivers import esg_grid
 from uwtools.scheduler import Slurm
-from uwtools.tests.support import regex_logged
 
 # Driver fixtures
 

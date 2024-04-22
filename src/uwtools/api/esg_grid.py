@@ -2,7 +2,6 @@
 API access to the uwtools ``esg_grid`` driver.
 """
 
-import datetime as dt
 from pathlib import Path
 from typing import Dict, Optional, Union
 

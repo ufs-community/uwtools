@@ -335,7 +335,7 @@ def _dispatch_esg_grid(args: Args) -> bool:
     """
     return uwtools.api.esg_grid.execute(
         task=args[STR.action],
-        config_file=args[STR.cfgfile],
+        config=args[STR.cfgfile],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],

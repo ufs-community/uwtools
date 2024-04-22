@@ -1,6 +1,5 @@
 # pylint: disable=missing-function-docstring,protected-access
 
-import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
 

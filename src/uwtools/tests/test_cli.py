@@ -487,7 +487,6 @@ def test__dispatch_config_validate_config_obj():
 
 
 def test__dispatch_esg_grid():
-    cycle = dt.datetime.now()
     args: dict = {
         "batch": True,
         "config_file": "config.yaml",

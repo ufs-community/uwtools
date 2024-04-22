@@ -2,7 +2,6 @@
 A driver for esg_grid.
 """
 
-from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
@@ -11,7 +10,6 @@ from iotaa import asset, dryrun, task, tasks
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import file
 
 
 class EsgGrid(Driver):
