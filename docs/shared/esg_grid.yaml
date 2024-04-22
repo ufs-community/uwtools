@@ -11,8 +11,8 @@ esg_grid:
       config:
         delx: 0.11
         dely: 0.11
-        lx: 214
-        ly: 128
+        lx: -214
+        ly: -128
         pazi: 0.0
         target_Iat: 38.5
         target_Ion: -97.5

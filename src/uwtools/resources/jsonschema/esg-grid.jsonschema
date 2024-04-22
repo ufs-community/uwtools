@@ -8,9 +8,6 @@
         },
         "namelist": {
           "additionalProperties": false,
-          "required": [
-                "update_values"
-          ],
           "properties": {
             "update_values": {
               "properties": {
@@ -32,6 +29,9 @@
               "type": "object"
             }
           },
+          "required": [
+            "update_values"
+          ],
           "type": "object"
         },
         "run_dir": {
