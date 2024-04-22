@@ -43,14 +43,14 @@ class EsgGrid(Driver):
         """
         The namelist file.
         """
-        fn = "esg_grid.nml"
+        fn = "esg_grid.f90"
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
         yield None
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=self._driver_config[""].get("namelist", {}),
+            config_values=self._driver_config["namelist"],
             path=path,
         )
 
@@ -74,7 +74,7 @@ class EsgGrid(Driver):
         yield self._taskname(path.name)
         yield asset(path, path.is_file)
         yield None
-        self._write_runscript(path=path, envvars=envvars)
+        self._write_runscript(path=path, envvars={})
 
     # Private helper methods
 

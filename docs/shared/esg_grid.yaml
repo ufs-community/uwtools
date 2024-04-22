@@ -1,4 +1,4 @@
-regional_esg_grid:
+esg_grid:
   execution:
     batchargs:
       nodes: 1

@@ -1,8 +1,0 @@
-{
-  "properties": {
-    "regional_esg_grid": {
-      "type": "object"
-    }
-  },
-  "type": "object"
-}
