@@ -18,6 +18,11 @@ def chgres_cube_prop():
 
 
 @fixture
+def esg_grid_prop():
+    return partial(schema_validator, "esg-grid", "properties", "esg_grid", "properties")
+
+
+@fixture
 def fv3_prop():
     return partial(schema_validator, "fv3", "properties", "fv3", "properties")
 
@@ -85,6 +90,59 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_prop):
 
 def test_schema_chgres_cube_run_dir(chgres_cube_prop):
     errors = chgres_cube_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# esg-grid
+
+
+def test_schema_esg_grid():
+    config = {
+        "execution": {"executable": "esg_grid"},
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("esg-grid", "properties", "esg_grid")
+    # Basic correctness:
+    assert not errors(config)
+    # Some top-level keys are required:
+    for key in ("execution", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_esg_grid_namelist(esg_grid_prop):
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": {"regional_grid_nml": {"var": "val"}}}
+    errors = esg_grid_prop("namelist")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # base_file must be a string:
+    assert "88 is not of type 'string'" in errors({"base_file": 88})
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # regional_grid_nml is required with update_values:
+    assert "'regional_grid_nml' is a required property" in errors({"update_values": {}})
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_schema_esg_grid_namelist_update_values(esg_grid_prop):
+    errors = esg_grid_prop("namelist", "properties", "update_values", "properties", "regional_grid_nml")
+    # array, boolean, number, and string values are ok:
+    assert not errors({"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"})
+    # Other types are not, e.g.:
+    assert "None is not of type 'array', 'boolean', 'number', 'string'" in errors({"null": None})
+    # No minimum number of entries is required:
+    assert not errors({})
+
+
+def test_schema_esg_grid_run_dir(esg_grid_prop):
+    errors = esg_grid_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)

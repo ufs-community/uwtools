@@ -8,7 +8,22 @@
         },
         "namelist": {
           "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
           "properties": {
+            "base_file": {
+              "type": "string"
+            },
             "update_values": {
               "properties": {
                 "regional_grid_nml": {
@@ -20,30 +35,30 @@
                       "string"
                     ]
                   },
-		  "properties": {
-		    "delx": {
-		      "type": "number"
-	 	    },
-		    "dely": {
-		      "type": "number"
-		    },
-		    "lx": {
-		      "type": "number"
-		    },
-		    "ly": {
-		      "type": "number"
-		    },
-		    "pazi": {
-		      "type": "number"
-		    },
-		    "plat": {
-		      "type": "number"
-		    },
-		    "plon": {
-		      "type": "number"
-		    }
-		  },
-                  "type": "object"
+                  "properties": {
+                    "delx": {
+                      "type": "number"
+                    },
+                    "dely": {
+                      "type": "number"
+                    },
+                    "lx": {
+                      "type": "number"
+                    },
+                    "ly": {
+                      "type": "number"
+                    },
+                    "pazi": {
+                      "type": "number"
+                    },
+                    "plat": {
+                      "type": "number"
+                    },
+                    "plon": {
+                      "type": "number"
+                    }
+                 },
+                 "type": "object"
                 }
               },
               "required": [
@@ -52,9 +67,6 @@
               "type": "object"
             }
           },
-          "required": [
-            "update_values"
-          ],
           "type": "object"
         },
         "run_dir": {
