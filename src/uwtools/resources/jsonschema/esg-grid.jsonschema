@@ -7,7 +7,7 @@
           "$ref": "urn:uwtools:execution"
         },
         "namelist": {
-          "additionalProperties": true,
+          "additionalProperties": false,
           "required": [
                 "update_values"
           ],
