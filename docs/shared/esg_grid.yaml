@@ -4,19 +4,19 @@ esg_grid:
       nodes: 1
       stdout: /path/to/runscript.out
       walltime: "08:00:00"
-    executable: /path/regional_esg_grid
+    executable: /path/esg_grid
     mpicmd: srun
   namelist:
     update_values:
-      config:
+      regional_grid_nml:
         delx: 0.11
         dely: 0.11
         lx: -214
         ly: -128
         pazi: 0.0
-        target_Iat: 38.5
-        target_Ion: -97.5
-  run_dir: /path/to/run
+        plat: 38.5
+        plot: -97.5
+  run_dir: /scratch2/BMC/zrtrr/Naureen.Bharwani/uwtools 
 platform:
   account: me
   scheduler: slurm

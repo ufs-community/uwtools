@@ -41,7 +41,7 @@ class EsgGrid(Driver):
         """
         The namelist file.
         """
-        fn = "esg_grid.f90"
+        fn = "regional_grid.nml"
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)

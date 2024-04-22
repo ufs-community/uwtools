@@ -11,7 +11,7 @@
           "properties": {
             "update_values": {
               "properties": {
-                "config": {
+                "regional_grid_nml": {
                   "additionalProperties": {
                     "type": [
                       "array",
@@ -24,7 +24,7 @@
                 }
               },
               "required": [
-                "config"
+                "regional_grid_nml"
               ],
               "type": "object"
             }

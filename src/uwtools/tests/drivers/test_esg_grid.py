@@ -36,14 +36,14 @@ def config(tmp_path):
             },
             "namelist": {
                 "update_values": {
-                    "config": {
+                    "regional_grid_nml": {
                         "delx": 0.11,
                         "dely": 0.11,
                         "lx": -214,
                         "ly": -128,
                         "pazi": 0.0,
-                        "target_Iat": 38.5,
-                        "target_Ion": -97.5,
+                        "plat": 38.5,
+                        "plon": -97.5,
                     }
                 }
             },
@@ -84,7 +84,7 @@ def test_EsgGrid_dry_run(config_file):
 
 
 def test_EsgGrid_namelist_file(driverobj):
-    dst = driverobj._rundir / "esg_grid.f90"
+    dst = driverobj._rundir / "regional_grid.nml"
     assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
