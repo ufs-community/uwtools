@@ -1,6 +1,47 @@
 {
   "properties": {
-    "regional_esg_grid": {
+    "esg_grid": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "$ref": "urn:uwtools:execution"
+        },
+        "namelist": {
+          "additionalProperties": true,
+          "required": [
+                "update_values"
+          ],
+          "properties": {
+            "update_values": {
+              "properties": {
+                "config": {
+                  "additionalProperties": {
+                    "type": [
+                      "array",
+                      "boolean",
+                      "number",
+                      "string"
+                    ]
+                  },
+                  "type": "object"
+                }
+              },
+              "required": [
+                "config"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "run_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "run_dir"
+      ],
       "type": "object"
     }
   },

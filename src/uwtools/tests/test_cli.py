@@ -498,7 +498,7 @@ def test__dispatch_esg_grid():
         cli._dispatch_esg_grid({**args, "action": "foo"})
     execute.assert_called_once_with(
         task="foo",
-        config_file="config.yaml",
+        config="config.yaml",
         batch=True,
         dry_run=False,
         graph_file=None,
