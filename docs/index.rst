@@ -122,6 +122,12 @@ chgres_cube
 | **API**: ``import uwtools.api.drivers.chgres_cube``
 
 
+esg_grid
+"""""""""""
+
+| **CLI**: ``uw egs_grid -h``
+| **API**: ``import uwtools.api.drivers.esg_grid``
+
 FV3
 """
 

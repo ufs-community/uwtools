@@ -16,7 +16,7 @@ esg_grid:
         pazi: 0.0
         plat: 38.5
         plot: -97.5
-  run_dir: /scratch2/BMC/zrtrr/Naureen.Bharwani/uwtools 
+  run_dir: /path/to/esg_grid 
 platform:
   account: me
   scheduler: slurm

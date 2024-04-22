@@ -8,7 +8,7 @@ The ``uw`` mode for configuring and running the :ufs-utils:`chgres_cube<chgres-c
    $ uw chgres_cube --help
    usage: uw chgres_cube [-h] [--version] TASK ...
 
-   Execute chgres_cube tasks
+   Execute Chgres Cube tasks
 
    Optional arguments:
      -h, --help
