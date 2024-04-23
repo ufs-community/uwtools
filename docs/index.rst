@@ -112,7 +112,7 @@ To prepare a complete forecast, drivers would typically be run in the order show
 esg_grid
 """""""""""
 
-| **CLI**: ``uw egs_grid -h``
+| **CLI**: ``uw esg_grid -h``
 | **API**: ``import uwtools.api.drivers.esg_grid``
 
 sfc_climo_gen
