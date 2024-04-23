@@ -6,6 +6,7 @@ API
    config
    file
    fv3
+   global_equiv_resol
    logging
    mpas
    mpas_init

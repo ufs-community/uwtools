@@ -109,6 +109,12 @@ Drivers for UFS
 
 To prepare a complete forecast, drivers would typically be run in the order shown here (along with additional drivers still in development).
 
+global_equiv_resol
+""""""""""""""""""
+
+| **CLI**: ``uw global_equiv_resol -h``
+| **API**: ``import uwtools.api.drivers.global_equiv_resol``
+
 sfc_climo_gen
 """""""""""""
 
