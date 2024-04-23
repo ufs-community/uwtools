@@ -1,7 +1,7 @@
 .. _esg_grid_yaml:
 
-esg_grid_yaml
-=============
+esg_grid
+========
 
 Structured YAML to run :ufs-utils:`regional_esg_grid<regional-esg-grid>` is validated by JSON Schema and requires the ``esg_grid_yaml:`` block, described below. If ``esg_grid_yaml`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
