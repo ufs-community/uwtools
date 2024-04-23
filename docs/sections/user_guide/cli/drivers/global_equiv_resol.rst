@@ -1,5 +1,5 @@
 ``global_equiv_resol``
-==========
+======================
 
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``global_equiv_resol``.
 

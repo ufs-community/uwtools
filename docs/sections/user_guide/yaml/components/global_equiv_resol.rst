@@ -8,7 +8,7 @@ Structured YAML to run the WRF preprocessing component ``global_equiv_resol_yaml
 Here is a prototype UW YAML ``global_equiv_resol_yaml:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/global_equiv_resol_yaml.yaml
+.. literalinclude:: ../../../../shared/global_equiv_resol.yaml
 
 UW YAML for the ``global_equiv_resol_yaml:`` Block
 --------------------------------------------------
