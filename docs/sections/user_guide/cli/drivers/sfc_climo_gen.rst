@@ -8,7 +8,7 @@ The ``uw`` mode for configuring and running the :sfc-climo-gen:`sfc_climo_gen<>`
    $ uw sfc_climo_gen --help
    usage: uw sfc_climo_gen [-h] [--version] TASK ...
 
-   Execute Sfc Climo Gen tasks
+   Execute sfc_climo_gen tasks
 
    Optional arguments:
      -h, --help
