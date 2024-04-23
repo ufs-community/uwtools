@@ -27,7 +27,7 @@
             "update_values": {
               "properties": {
                 "regional_grid_nml": {
-                  "additionalProperties": false
+                  "additionalProperties": false,
                   "properties": {
                     "delx": {
                       "type": "number"
@@ -51,6 +51,15 @@
                       "type": "number"
                     }
                   },
+                  "required": [
+                    "delx",
+                    "dely",
+                    "lx",
+                    "ly",
+                    "pazi",
+                    "plat",
+                    "plon"
+                  ],
                   "type": "object"
                 }
               },

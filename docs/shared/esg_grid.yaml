@@ -5,7 +5,6 @@ esg_grid:
       stdout: /path/to/runscript.out
       walltime: "08:00:00"
     executable: /path/esg_grid
-    mpicmd: srun
   namelist:
     update_values:
       regional_grid_nml:
@@ -15,7 +14,7 @@ esg_grid:
         ly: -128
         pazi: 0.0
         plat: 38.5
-        plot: -97.5
+        plon: -97.5
   run_dir: /path/to/esg_grid 
 platform:
   account: me
