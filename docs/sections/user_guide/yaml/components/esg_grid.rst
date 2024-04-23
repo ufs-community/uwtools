@@ -10,8 +10,8 @@ Here is a prototype UW YAML ``esg_grid_yaml:`` block, explained in detail below:
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/esg_grid.yaml
 
-UW YAML for the ``esg_grid_yaml:`` Block
------------------------------------------
+UW YAML for the ``esg_grid:`` Block
+------------------------------------
 
 execution:
 ^^^^^^^^^^
