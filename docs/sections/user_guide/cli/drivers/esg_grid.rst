@@ -1,7 +1,7 @@
 ``esg_grid``
 ============
 
-The ``uw`` mode for configuring and running the :ufs-utils:`esg_grid<regional-esg-grid>` component.
+The ``uw`` mode for configuring and running the :ufs-utils:`regional_esg_grid<regional-esg-grid>` component.
 
 .. code-block:: text
 
