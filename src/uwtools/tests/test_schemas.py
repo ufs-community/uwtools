@@ -5,6 +5,7 @@ Granular tests of JSON Schema schemas.
 
 from functools import partial
 
+import pytest
 from pytest import fixture
 
 from uwtools.tests.support import schema_validator, with_del, with_set
@@ -20,6 +21,13 @@ def chgres_cube_prop():
 @fixture
 def fv3_prop():
     return partial(schema_validator, "fv3", "properties", "fv3", "properties")
+
+
+@fixture
+def global_equiv_resol_prop():
+    return partial(
+        schema_validator, "global-equiv-resol", "properties", "global_equiv_resol", "properties"
+    )
 
 
 @fixture
@@ -313,6 +321,33 @@ def test_schema_fv3_namelist_update_values(fv3_prop):
 
 def test_schema_fv3_run_dir(fv3_prop):
     errors = fv3_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# global_equiv_resol
+
+
+def test_schema_global_equiv_resol():
+    config = {
+        "execution": {"executable": "/tmp/global_equiv_resol.exe"},
+        "input_grid_file": "/tmp/input_grid_file",
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("global-equiv-resol", "properties", "global_equiv_resol")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("execution", "input_grid_file", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+@pytest.mark.parametrize("schema_entry", ["run_dir", "input_grid_file"])
+def test_schema_global_equiv_resol_paths(global_equiv_resol_prop, schema_entry):
+    errors = global_equiv_resol_prop(schema_entry)
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
