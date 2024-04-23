@@ -27,14 +27,7 @@
             "update_values": {
               "properties": {
                 "regional_grid_nml": {
-                  "additionalProperties": {
-                    "type": [
-                      "array",
-                      "boolean",
-                      "number",
-                      "string"
-                    ]
-                  },
+                  "additionalProperties": false
                   "properties": {
                     "delx": {
                       "type": "number"
