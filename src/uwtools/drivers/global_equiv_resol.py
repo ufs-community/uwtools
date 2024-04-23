@@ -2,15 +2,13 @@
 A driver for the ungrib component.
 """
 
-from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
-from iotaa import asset, dryrun, task, tasks
+from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import file
 
 
 class GlobalEquivResol(Driver):
@@ -31,7 +29,7 @@ class GlobalEquivResol(Driver):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle)
+        super().__init__(config=config, dry_run=dry_run, batch=batch)
         if self._dry_run:
             dryrun()
 
@@ -39,10 +37,12 @@ class GlobalEquivResol(Driver):
 
     @external
     def input_file(self):
-        path = self._driver_config["input_grid_file"]
+        """
+        Ensure the specified input grid file exists.
+        """
+        path = Path(self._driver_config["input_grid_file"])
         yield self._taskname(path.name)
         yield asset(path, path.is_file)
-
 
     @tasks
     def provisioned_run_directory(self):
@@ -64,7 +64,7 @@ class GlobalEquivResol(Driver):
         yield self._taskname(path.name)
         yield asset(path, path.is_file)
         yield None
-        self._write_runscript
+        self._write_runscript(path=path, envvars={})
 
     # Private helper methods
 
@@ -80,7 +80,7 @@ class GlobalEquivResol(Driver):
         """
         Returns the full command-line component invocation.
         """
-        executable = self._driver_config.get["execution"]["executable"]
+        executable = self._driver_config["execution"]["executable"]
         input_file_path = self._driver_config["input_grid_file"]
         return f"{executable} {input_file_path}"
 

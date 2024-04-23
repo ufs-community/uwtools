@@ -2,8 +2,8 @@
 """
 global_equiv_resol driver tests.
 """
-import datetime as dt
 import logging
+from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
@@ -11,8 +11,9 @@ import yaml
 from pytest import fixture
 
 from uwtools.drivers import global_equiv_resol
+from uwtools.logging import log
 from uwtools.scheduler import Slurm
-
+from uwtools.tests.support import regex_logged
 
 # Driver fixtures
 
@@ -29,7 +30,7 @@ def config(tmp_path):
                 "executable": "/path/to/global_equiv_resol.exe",
             },
             "run_dir": str(tmp_path),
-            "input_grid_file": str(tmp_path / "input" / "input_grid_file" ),
+            "input_grid_file": str(tmp_path / "input" / "input_grid_file"),
         },
         "platform": {
             "account": "myaccount",
@@ -60,18 +61,21 @@ def test_GlobalEquivResol(driverobj):
 
 def test_GlobalEquivResol_dry_run(config_file):
     with patch.object(global_equiv_resol, "dryrun") as dryrun:
-        driverobj = global_equiv_resol.GlobalEquivResol(config=config_file, batch=True, dry_run=True)
+        driverobj = global_equiv_resol.GlobalEquivResol(
+            config=config_file, batch=True, dry_run=True
+        )
     assert driverobj._dry_run is True
     dryrun.assert_called_once_with()
 
 
 def test_GlobalEquivResol_input_file(caplog, driverobj):
     log.setLevel(logging.INFO)
-    path = driverobj._driver_config["input_grid_file"]
+    path = Path(driverobj._driver_config["input_grid_file"])
     driverobj.input_file()
-    assert regex_logged(caplog, "State: Pending")
-    assert regex_logged(caplog, str(path))
+    assert regex_logged(caplog, "State: Pending (EXTERNAL)")
+    path.parent.mkdir()
     path.touch()
+    caplog.clear()
     driverobj.input_file()
     assert regex_logged(caplog, "State: Ready")
 

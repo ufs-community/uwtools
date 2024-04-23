@@ -461,7 +461,9 @@ def _add_subparser_global_equiv_resol(subparsers: Subparsers) -> ModeChecks:
     }
 
 
-def _add_subparser_global_equiv_resol_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+def _add_subparser_global_equiv_resol_task(
+    subparsers: Subparsers, task: str, helpmsg: str
+) -> ActionChecks:
     """
     Subparser for mode: global_equiv_resol_task <task>
 
@@ -492,6 +494,8 @@ def _dispatch_global_equiv_resol(args: Args) -> bool:
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],
+        stdin_ok=True,
+    )
 
 
 # Mode jedi

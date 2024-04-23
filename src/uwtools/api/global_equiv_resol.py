@@ -2,12 +2,11 @@
 API access to the ``uwtools`` ``global_equiv_resol`` driver.
 """
 
-import datetime as dt
 from pathlib import Path
 from typing import Dict, Optional, Union
 
 import uwtools.drivers.support as _support
-from uwtools.drivers.global_equiv_resol import GlobalEquivResolve as _GlobalEquivResolve
+from uwtools.drivers.global_equiv_resol import GlobalEquivResol as _GlobalEquivResol
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 
 
@@ -33,7 +32,7 @@ def execute(
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
-    obj = _GlobalEquivResolve(
+    obj = _GlobalEquivResol(
         config=_ensure_data_source(config, stdin_ok), batch=batch, dry_run=dry_run
     )
     getattr(obj, task)()
@@ -54,4 +53,4 @@ def tasks() -> Dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
     """
-    return _support.tasks(_GlobalEquivResolve)
+    return _support.tasks(_GlobalEquivResol)
