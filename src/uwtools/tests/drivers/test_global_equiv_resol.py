@@ -2,7 +2,6 @@
 """
 global_equiv_resol driver tests.
 """
-import logging
 from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
@@ -11,9 +10,7 @@ import yaml
 from pytest import fixture
 
 from uwtools.drivers import global_equiv_resol
-from uwtools.logging import log
 from uwtools.scheduler import Slurm
-from uwtools.tests.support import regex_logged
 
 # Driver fixtures
 
@@ -68,16 +65,12 @@ def test_GlobalEquivResol_dry_run(config_file):
     dryrun.assert_called_once_with()
 
 
-def test_GlobalEquivResol_input_file(caplog, driverobj):
-    log.setLevel(logging.INFO)
+def test_GlobalEquivResol_input_file(driverobj):
     path = Path(driverobj._driver_config["input_grid_file"])
-    driverobj.input_file()
-    assert regex_logged(caplog, "State: Pending (EXTERNAL)")
+    assert not driverobj.input_file().ready()
     path.parent.mkdir()
     path.touch()
-    caplog.clear()
-    driverobj.input_file()
-    assert regex_logged(caplog, "State: Ready")
+    assert driverobj.input_file().ready()
 
 
 def test_GlobalEquivResol_provisioned_run_directory(driverobj):
