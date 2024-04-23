@@ -329,7 +329,7 @@ def _add_subparser_esg_grid_task(subparsers: Subparsers, task: str, helpmsg: str
 
 def _dispatch_esg_grid(args: Args) -> bool:
     """
-    Dispatch logic for esg grid mode.
+    Dispatch logic for esg_grid mode.
 
     :param args: Parsed command-line args.
     """
