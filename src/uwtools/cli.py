@@ -18,6 +18,7 @@ import uwtools.api.config
 import uwtools.api.file
 import uwtools.api.fv3
 import uwtools.api.jedi
+import uwtools.api.make_hgrid
 import uwtools.api.mpas
 import uwtools.api.mpas_init
 import uwtools.api.rocoto
@@ -65,6 +66,7 @@ def main() -> None:
             STR.file: _dispatch_file,
             STR.fv3: _dispatch_fv3,
             STR.jedi: _dispatch_jedi,
+            STR.makehgrid: _dispatch_make_hgrid,
             STR.mpas: _dispatch_mpas,
             STR.mpasinit: _dispatch_mpas_init,
             STR.rocoto: _dispatch_rocoto,
@@ -489,6 +491,57 @@ def _dispatch_jedi(args: Args) -> bool:
         task=args[STR.action],
         config=args[STR.cfgfile],
         cycle=args[STR.cycle],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
+        stdin_ok=True,
+    )
+
+
+# Mode make_hgrid
+
+
+def _add_subparser_make_hgrid(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: make_hgrid
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.makehgrid, "Execute make_hgrid tasks")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_make_hgrid_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.make_hgrid.tasks().items()
+    }
+
+
+def _add_subparser_make_hgrid_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+    """
+    Subparser for mode: make_hgrid <task>
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_config_file(group=required, required=True)
+    optional = _basic_setup(parser)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
+def _dispatch_make_hgrid(args: Args) -> bool:
+    """
+    Dispatch logic for make_hgrid mode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.make_hgrid.execute(
+        task=args[STR.action],
+        config=args[STR.cfgfile],
         batch=args[STR.batch],
         dry_run=args[STR.dryrun],
         graph_file=args[STR.graphfile],

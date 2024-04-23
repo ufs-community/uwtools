@@ -28,6 +28,11 @@ def jedi_prop():
 
 
 @fixture
+def make_hgrid_prop():
+    return partial(schema_validator, "make-hgrid", "properties", "make_hgrid", "properties")
+
+
+@fixture
 def sfc_climo_gen_prop():
     return partial(schema_validator, "sfc-climo-gen", "properties", "sfc_climo_gen", "properties")
 
@@ -357,6 +362,32 @@ def test_schema_jedi_configuration_file(jedi_prop):
 
 def test_schema_jedi_run_dir(jedi_prop):
     errors = jedi_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# make_hgrid
+
+
+def test_schema_make_hgrid():
+    config = {
+        "execution": {"executable": "/tmp/make_hgrid.exe"},
+        "input_grid_file": "/tmp/input_grid_file",
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("make-hgrid", "properties", "make_hgrid")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("execution", "input_grid_file", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_make_hgrid_run_dir(make_hgrid_prop):
+    errors = make_hgrid_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)

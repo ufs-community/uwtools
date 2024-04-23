@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Dict, Optional, Union
 
 import uwtools.drivers.support as _support
-from uwtools.drivers.make_hgrid import make_hgrid as _make_hgrid
+from uwtools.drivers.make_hgrid import MakeHgrid as _MakeHgrid
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 
 
@@ -32,9 +32,7 @@ def execute(
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
-    obj = _make_hgrid(
-        config=_ensure_data_source(config, stdin_ok), batch=batch, dry_run=dry_run
-    )
+    obj = _MakeHgrid(config=_ensure_data_source(config, stdin_ok), batch=batch, dry_run=dry_run)
     getattr(obj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:
@@ -53,4 +51,4 @@ def tasks() -> Dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
     """
-    return _support.tasks(_make_hgrid)
+    return _support.tasks(_MakeHgrid)

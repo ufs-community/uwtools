@@ -1,0 +1,25 @@
+{
+  "properties": {
+    "make_hgrid": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "$ref": "urn:uwtools:execution"
+        },
+        "input_grid_file": {
+          "type": "string"
+        },
+        "run_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "input_grid_file",
+        "run_dir"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

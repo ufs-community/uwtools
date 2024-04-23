@@ -16,6 +16,7 @@ from pytest import fixture, raises
 import uwtools.api.config
 import uwtools.api.fv3
 import uwtools.api.jedi
+import uwtools.api.make_hgrid
 import uwtools.api.mpas
 import uwtools.api.mpas_init
 import uwtools.api.rocoto
@@ -24,6 +25,7 @@ import uwtools.api.template
 import uwtools.api.ungrib
 import uwtools.drivers.fv3
 import uwtools.drivers.jedi
+import uwtools.drivers.make_hgrid
 import uwtools.drivers.mpas
 import uwtools.drivers.mpas_init
 import uwtools.drivers.sfc_climo_gen
@@ -151,6 +153,17 @@ def test__add_subparser_jedi(subparsers):
         "runscript",
         "validate",
         "validate_only",
+    ]
+
+
+def test__add_subparser_make_hgrid(subparsers):
+    cli._add_subparser_make_hgrid(subparsers)
+    assert actions(subparsers.choices[STR.makehgrid]) == [
+        "input_file",
+        "provisioned_run_directory",
+        "run",
+        "runscript",
+        "validate",
     ]
 
 
@@ -550,6 +563,26 @@ def test__dispatch_jedi():
         batch=True,
         dry_run=False,
         graph_file=None,
+        stdin_ok=True,
+    )
+
+
+def test__dispatch_make_hgrid():
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "dry_run": False,
+        "graph_file": None,
+        "stdin_ok": True,
+    }
+    with patch.object(uwtools.api.make_hgrid, "execute") as execute:
+        cli._dispatch_make_hgrid({**args, "action": "foo"})
+    execute.assert_called_once_with(
+        batch=True,
+        config="config.yaml",
+        dry_run=False,
+        graph_file=None,
+        task="foo",
         stdin_ok=True,
     )
 
