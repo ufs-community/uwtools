@@ -112,7 +112,7 @@ def _add_subparser_chgres_cube_task(
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_cycle(required)
     optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional, required=False)
+    _add_arg_config_file(group=optional)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
@@ -319,7 +319,7 @@ def _add_subparser_file_common(parser: Parser) -> ActionChecks:
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_target_dir(required, required=True)
     optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional, required=False)
+    _add_arg_config_file(group=optional)
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_keys(optional)
@@ -419,7 +419,7 @@ def _add_subparser_fv3_task(subparsers: Subparsers, task: str, helpmsg: str) -> 
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_cycle(required)
     optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional, required=False)
+    _add_arg_config_file(group=optional)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
@@ -525,9 +525,9 @@ def _add_subparser_jedi_task(subparsers: Subparsers, task: str, helpmsg: str) ->
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_config_file(group=required, required=True)
     _add_arg_cycle(required)
     optional = _basic_setup(parser)
+    _add_arg_config_file(group=optional)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
@@ -583,7 +583,7 @@ def _add_subparser_mpas_task(subparsers: Subparsers, task: str, helpmsg: str) ->
 
     _add_arg_cycle(required)
     optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional, required=False)
+    _add_arg_config_file(group=optional)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
@@ -638,7 +638,7 @@ def _add_subparser_mpas_init_task(subparsers: Subparsers, task: str, helpmsg: st
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_cycle(required)
     optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional, required=False)
+    _add_arg_config_file(group=optional)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
@@ -773,7 +773,7 @@ def _add_subparser_sfc_climo_gen_task(
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional, required=False)
+    _add_arg_config_file(group=optional)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
@@ -934,7 +934,7 @@ def _add_subparser_ungrib_task(subparsers: Subparsers, task: str, helpmsg: str) 
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_cycle(required)
     optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional, required=False)
+    _add_arg_config_file(group=optional)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
@@ -972,7 +972,7 @@ def _add_arg_batch(group: Group) -> None:
     )
 
 
-def _add_arg_config_file(group: Group, required: bool) -> None:
+def _add_arg_config_file(group: Group, required: bool = False) -> None:
     msg = "Path to config file" + ("" if required else " (default: read from stdin)")
     group.add_argument(
         _switch(STR.cfgfile),
