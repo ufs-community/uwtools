@@ -372,7 +372,7 @@ def test_schema_jedi_run_dir(jedi_prop):
 
 def test_schema_make_hgrid():
     config = {
-        "execution": {"executable": "/tmp/make_hgrid.exe"},
+        "execution": {"executable": "make_hgrid"},
         "input_grid_file": "/tmp/input_grid_file",
         "run_dir": "/tmp",
     }
@@ -384,6 +384,28 @@ def test_schema_make_hgrid():
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+    # config must be a mapping:
+    assert "[] is not of type 'object'" in errors([])
+    # config needs at least one entry:
+    assert "{} should be non-empty" in errors({"config": {}})
+    # the following config keys are allowed:
+    assert not errors(
+        {
+            **config,
+            "config": {
+                "target_lon": -97.5,
+                "target_lat": 38.5,
+                "num_cells": 96,
+                "stretch": 1.0001,
+                "ratio": 2,
+                "istart_nest": 10,
+                "iend_nest": 87,
+                "jstart_nest": 19,
+                "jend_nest": 78,
+                "cell_names": True,
+            },
+        }
+    )
 
 
 def test_schema_make_hgrid_run_dir(make_hgrid_prop):

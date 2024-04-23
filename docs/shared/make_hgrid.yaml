@@ -1,11 +1,23 @@
 make_hgrid:
   execution:
     batchargs:
-      cores: 1
-      walltime: "00:01:00"
-    executable: /path/to/make_hgrid.exe
-  input_grid_file: /path/to/input/grid/file
-  run_dir: /path/to/dir/run
+      nodes: 1
+      stdout: /path/to/runscript.out
+      walltime: "08:00:00"
+    executable: /path/make_hgrid
+  config:
+    target_lon: -97.5
+    target_lat: 38.5
+    num_cells: 96
+    stretch: 1.0001
+    ratio: 2
+    istart_nest: 10
+    iend_nest: 87
+    jstart_nest: 19
+    jend_nest: 78
+    cell_names: true
+  run_dir: /path/to/make_hgrid 
+input_grid_file: /path/to/input/grid/file
 platform:
   account: me
   scheduler: slurm

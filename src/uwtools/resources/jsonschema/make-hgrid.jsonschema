@@ -3,6 +3,50 @@
     "make_hgrid": {
       "additionalProperties": false,
       "properties": {
+        "config": {
+          "additionalProperties": {
+            "type": [
+              "array",
+              "boolean",
+              "number",
+              "string"
+            ]
+          },
+          "minProperties": 1,
+          "properties": {
+            "cell_names": {
+              "type": "boolean"
+            },
+            "dely": {
+              "type": "number"
+            },
+            "iend_nest": {
+              "type": "number"
+            },
+            "istart_nest": {
+              "type": "number"
+            },
+            "jend_nest": {
+              "type": "number"
+            },
+            "jstart_nest": {
+              "type": "number"
+            },
+            "lx": {
+              "type": "number"
+            },
+            "ly": {
+              "type": "number"
+            },
+            "ratio": {
+              "type": "number"
+            },
+            "target_lon": {
+              "type": "number"
+            }
+          },
+          "type": "object"
+        },
         "execution": {
           "$ref": "urn:uwtools:execution"
         },
