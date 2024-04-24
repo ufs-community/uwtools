@@ -32,7 +32,10 @@ def ensure_data_source(
 
 def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., bool]:
     """
-    ???
+    Returns a function that executes tasks for the given driver.
+
+    :param driver_class: The driver class whose tasks to execute.
+    :param with_cycle: Does the driver's constructur take the 'cycle' parameter?
     """
 
     def execute(  # pylint: disable=unused-argument
@@ -65,9 +68,11 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
     return execute
 
 
-def make_tasks(driver_class: type[Driver]) -> Callable:
+def make_tasks(driver_class: type[Driver]) -> Callable[..., Dict[str, str]]:
     """
-    ???
+    Returns a function that maps task names to descriptions for the given driver.
+
+    :param driver_class: The driver class whose tasks and descriptions to map.
     """
 
     def tasks() -> Dict[str, str]:
