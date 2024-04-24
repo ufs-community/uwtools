@@ -24,7 +24,7 @@ def config(tmp_path):
                     "cores": 1,
                     "walltime": "00:01:00",
                 },
-                "executable": "/path/to/make_hgrid.exe",
+                "executable": "/path/to/make_hgrid",
             },
             "run_dir": str(tmp_path),
             "input_grid_file": str(tmp_path / "input" / "input_grid_file"),
@@ -111,7 +111,7 @@ def test_MakeHgrid__driver_config(driverobj):
 def test_MakeHgrid__runcmd(driverobj):
     cmd = driverobj._runcmd
     input_file_path = driverobj._driver_config["input_grid_file"]
-    assert cmd == f"/path/to/make_hgrid.exe {input_file_path}"
+    assert cmd == f"/path/to/make_hgrid {input_file_path}"
 
 
 def test_MakeHgrid__runscript_path(driverobj):

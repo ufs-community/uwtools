@@ -1,23 +1,26 @@
 make_hgrid:
-  execution:
-    batchargs:
+  execution: 
+    batchargs: 
       nodes: 1
       stdout: /path/to/runscript.out
       walltime: "08:00:00"
     executable: /path/make_hgrid
   config:
+    grid_type: gnomonic_ed
+    nlon: [192]
+    grid_name: C96_foo
+    do_schmidt: True
+    stretch_factor: 1.0001
     target_lon: -97.5
     target_lat: 38.5
-    num_cells: 96
-    stretch: 1.0001
-    ratio: 2
-    istart_nest: 10
-    iend_nest: 87
-    jstart_nest: 19
-    jend_nest: 78
-    cell_names: true
+    nest_grids: True
+    parent_tile: [6]
+    refine_ratio: [2]
+    istart_nest: [10]
+    iend_nest: [87]
+    jstart_nest: [19]
+    jend_nest: [78]
+    halo: 1
+    great_circle_algorithm: True
   run_dir: /path/to/make_hgrid 
-input_grid_file: /path/to/input/grid/file
-platform:
-  account: me
-  scheduler: slurm
+  input_grid_file: /path/to/input/grid/file

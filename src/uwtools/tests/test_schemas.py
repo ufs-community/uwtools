@@ -380,12 +380,10 @@ def test_schema_make_hgrid():
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("execution", "input_grid_file", "run_dir"):
+    for key in ("execution", "run_dir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
-    # config must be a mapping:
-    assert "[] is not of type 'object'" in errors([])
     # config needs at least one entry:
     assert "{} should be non-empty" in errors({"config": {}})
     # the following config keys are allowed:
@@ -393,16 +391,22 @@ def test_schema_make_hgrid():
         {
             **config,
             "config": {
+                "grid_type": "gnomonic_ed",
+                "nlon": [192],
+                "grid_name": "C96_foo",
+                "do_schmidt": True,
+                "stretch_factor": 1.0001,
                 "target_lon": -97.5,
                 "target_lat": 38.5,
-                "num_cells": 96,
-                "stretch": 1.0001,
-                "ratio": 2,
-                "istart_nest": 10,
-                "iend_nest": 87,
-                "jstart_nest": 19,
-                "jend_nest": 78,
-                "cell_names": True,
+                "nest_grids": True,
+                "parent_tile": [6],
+                "refine_ratio": [2],
+                "istart_nest": [10],
+                "iend_nest": [87],
+                "jstart_nest": [19],
+                "jend_nest": [78],
+                "halo": 1,
+                "great_circle_algorithm": True,
             },
         }
     )

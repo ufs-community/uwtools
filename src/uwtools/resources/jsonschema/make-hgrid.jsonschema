@@ -4,66 +4,116 @@
       "additionalProperties": false,
       "properties": {
         "config": {
-          "additionalProperties": {
-            "type": [
-              "array",
-              "boolean",
-              "number",
-              "string"
-            ]
-          },
-          "minProperties": 1,
+          "additionalProperties": false,
           "properties": {
-            "cell_names": {
-              "type": "boolean"
+            "grid_type": {
+              "type": "string",
+              "enum": [
+                "from_file",
+                "spectral_grid",
+                "regular_lonlat_grid",
+                "tripolar_grid",
+                "conformal_cubic_grid",
+                "gnomonic_ed",
+                "simple_cartesian_grid",
+                "f_plane_grid",
+                "beta_plane_grid"
+              ]
             },
-            "dely": {
-              "type": "number"
-            },
-            "iend_nest": {
-              "type": "number"
-            },
-            "istart_nest": {
-              "type": "number"
-            },
-            "jend_nest": {
-              "type": "number"
-            },
-            "jstart_nest": {
-              "type": "number"
-            },
-            "lx": {
-              "type": "number"
-            },
-            "ly": {
-              "type": "number"
-            },
-            "ratio": {
-              "type": "number"
-            },
-            "target_lon": {
-              "type": "number"
+            "my_grid_file": { "type": "string" },
+            "nxbnds": { "type": "integer" },
+            "nybnds": { "type": "integer" },
+            "xbnds": { "type": "array", "items": { "type": "number" } },
+            "ybnds": { "type": "array", "items": { "type": "number" } },
+            "nlon": { "type": "array", "items": { "type": "integer" } },
+            "nlat": { "type": "array", "items": { "type": "integer" } },
+            "dlon": { "type": "array", "items": { "type": "number" } },
+            "dlat": { "type": "array", "items": { "type": "number" } },
+            "lat_join": { "type": "number" },
+            "nratio": { "type": "number" },
+            "simple_dx": { "type": "number" },
+            "simple_dy": { "type": "number" },
+            "grid_name": { "type": "string" },
+            "center": { "type": "string", "enum": ["none", "t_cell", "c_cell"] },
+            "shift_fac": { "type": "number" },
+            "do_schmidt": { "type": "boolean" },
+            "do_cube_transform": { "type": "boolean" },
+            "stretch_factor": { "type": "number" },
+            "target_lon": { "type": "number" },
+            "target_lat": { "type": "number" },
+            "nest_grids": { "type": "integer" },
+            "parent_tile": { "type": "array", "items": { "type": "integer" } },
+            "refine_ratio": { "type": "array", "items": { "type": "number" } },
+            "halo": { "type": "integer" },
+            "istart_nest": { "type": "array", "items": { "type": "integer" } },
+            "iend_nest": { "type": "array", "items": { "type": "integer" } },
+            "jstart_nest": { "type": "array", "items": { "type": "integer" } },
+            "jend_nest": { "type": "array", "items": { "type": "integer" } },
+            "great_circle_algorithm": { "type": "boolean" },
+            "out_halo": { "type": "integer" },
+            "angular_midpoint": { "type": "boolean" },
+            "non_length_angle": { "type": "boolean" },
+            "rotate_poly": { "type": "boolean" },
+            "verbose": { "type": "boolean" }
+          },
+          "required": ["grid_type"],
+          "if": {
+            "properties": {
+              "grid_type": { "const": "from_file" }
             }
           },
-          "type": "object"
+          "then": {
+            "required": ["my_grid_file"]
+          },
+          "if": {
+            "properties": {
+              "grid_type": { "enum": ["tripolar_grid", "regular_lonlat_grid"] }
+            }
+          },
+          "then": {
+            "required": ["nxbnds", "nybnds", "xbnds", "ybnds"]
+          },
+          "if": {
+            "properties": {
+              "grid_type": { "const": "simple_cartesian_grid" }
+            }
+          },
+          "then": {
+            "required": ["nxbnds", "nybnds", "xbnds", "ybnds", "simple_dx", "simple_dy"]
+          },
+          "if": {
+            "properties": {
+              "grid_type": { "enum": ["f_plane_grid", "beta_plane_grid"] }
+            }
+          },
+          "then": {
+            "required": ["f_plane_latitude"]
+          },
+          "if": {
+            "properties": {
+              "grid_type": { "const": "gnomonic_ed" },
+              "nest_grids": { "type": "integer" }
+            }
+          },
+          "then": {
+            "required": ["halo"]
+          },
+          "if": {
+            "properties": {
+              "do_schmidt": { "type": "boolean" },
+              "do_cube_transform": { "type": "boolean" }
+            }
+          },
+          "then": {
+            "required": ["stretch_factor", "target_lat", "target_lon"]
+          }
         },
-        "execution": {
-          "$ref": "urn:uwtools:execution"
-        },
-        "input_grid_file": {
-          "type": "string"
-        },
-        "run_dir": {
-          "type": "string"
-        }
+        "execution": { "$ref": "urn:uwtools:execution" },
+        "input_grid_file": { "type": "string" },
+        "run_dir": { "type": "string" }
       },
-      "required": [
-        "execution",
-        "input_grid_file",
-        "run_dir"
-      ],
-      "type": "object"
+      "required": ["execution", "run_dir"]
     }
   },
-  "type": "object"
+  "required": ["make_hgrid"]
 }
