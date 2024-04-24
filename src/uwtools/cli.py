@@ -292,7 +292,7 @@ def _dispatch_config_validate(args: Args) -> bool:
     )
 
 
-# Mode esg grid
+# Mode esg_grid
 
 
 def _add_subparser_esg_grid(subparsers: Subparsers) -> ModeChecks:
