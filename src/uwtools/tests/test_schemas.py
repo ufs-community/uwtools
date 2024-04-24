@@ -111,6 +111,10 @@ def test_schema_esg_grid():
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+    # Additional mpi support is not allowed:
+    assert "Additional properties are not allowed ('mpicmd' was unexpected)" in errors(
+        {"execution": {"mpicmd": "srun"}}
+    )
 
 
 def test_schema_esg_grid_namelist(esg_grid_prop):
