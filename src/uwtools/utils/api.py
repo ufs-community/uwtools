@@ -48,7 +48,6 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
         If ``batch`` is specified, a runscript will be written and submitted to the batch system.
         Otherwise, the executable will be run directly on the current system.
 
-        :param driver_class: Class of driver object to instantiate.
         :param task: The task to execute.
         :param config: Path to config file (read stdin if missing or None).
         :param batch: Submit run to the batch system?
@@ -74,7 +73,6 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
         If ``batch`` is specified, a runscript will be written and submitted to the batch system.
         Otherwise, the executable will be run directly on the current system.
 
-        :param driver_class: Class of driver object to instantiate.
         :param task: The task to execute.
         :param cycle: The cycle.
         :param config: Path to config file (read stdin if missing or None).
