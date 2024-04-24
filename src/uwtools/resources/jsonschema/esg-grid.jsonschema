@@ -12,7 +12,7 @@
         "properties": {
           "namelist": {
             "properties": {
-              "update": {
+              "update_values": {
                 "required": [
                   "delx",
                   "dely",

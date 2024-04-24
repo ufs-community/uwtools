@@ -317,9 +317,8 @@ def _add_subparser_esg_grid_task(subparsers: Subparsers, task: str, helpmsg: str
     :param helpmsg: Help message for task.
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_config_file(group=required, required=True)
     optional = _basic_setup(parser)
+    _add_arg_config_file(group=optional, required=False)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)

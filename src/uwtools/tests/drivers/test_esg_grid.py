@@ -26,13 +26,7 @@ def config(tmp_path):
                     "stdout": "/path/to/file",
                     "walltime": "00:02:00",
                 },
-                "envcmds": [
-                    "module load some-module",
-                    "module load esg-grid-module",
-                ],
                 "executable": "/path/to/esg_grid",
-                "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
-                "mpicmd": "srun",
             },
             "namelist": {
                 "update_values": {
