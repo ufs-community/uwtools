@@ -115,7 +115,19 @@ def test_schema_esg_grid():
 
 def test_schema_esg_grid_namelist(esg_grid_prop):
     base_file = {"base_file": "/some/path"}
-    update_values = {"update_values": {"regional_grid_nml": {"var": "val"}}}
+    update_values = {
+        "update_values": {
+            "regional_grid_nml": {
+                "delx": 0.22,
+                "dely": 0.22,
+                "lx": -200,
+                "ly": -130,
+                "pazi": 0.0,
+                "plat": 45.5,
+                "plon": -100.5,
+            }
+        }
+    }
     errors = esg_grid_prop("namelist")
     # Just base_file is ok:
     assert not errors(base_file)
@@ -135,12 +147,22 @@ def test_schema_esg_grid_namelist_update_values(esg_grid_prop):
     errors = esg_grid_prop(
         "namelist", "properties", "update_values", "properties", "regional_grid_nml"
     )
-    # array, boolean, number, and string values are ok:
-    assert not errors({"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"})
-    # Other types are not, e.g.:
-    assert "None is not of type 'array', 'boolean', 'number', 'string'" in errors({"null": None})
-    # No minimum number of entries is required:
-    assert not errors({})
+    # Only defined namelist values are ok:
+    assert not errors(
+        {
+            "delx": 0.22,
+            "dely": 0.22,
+            "lx": -200,
+            "ly": -130,
+            "pazi": 0.0,
+            "plat": 45.5,
+            "plon": -100.5,
+        }
+    )
+    # Other values are not, e.g.:
+    assert "'null' was unexpected" in errors({"null": None})
+    # Minimum number of entries is required:
+    assert errors({})
 
 
 def test_schema_esg_grid_run_dir(esg_grid_prop):

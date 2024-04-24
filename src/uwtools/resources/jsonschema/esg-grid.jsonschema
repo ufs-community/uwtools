@@ -1,4 +1,37 @@
 {
+  "allOf": [
+    {
+      "if": {
+        "not": {
+          "required": [
+            "namelist.base_file"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "namelist": {
+            "properties": {
+              "update": {
+                "required": [
+                  "delx",
+                  "dely",
+                  "lx",
+                  "ly",
+                  "pazi",
+                  "plat",
+                  "plon"
+                ]
+              }
+            },
+            "required": [
+              "update_values"
+            ]
+          }
+        }
+      }
+    }
+  ],
   "properties": {
     "esg_grid": {
       "additionalProperties": false,
