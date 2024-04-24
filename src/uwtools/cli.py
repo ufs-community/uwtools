@@ -300,7 +300,7 @@ def _add_subparser_esg_grid(subparsers: Subparsers) -> ModeChecks:
     Subparser for mode: esg_grid
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.esggrid, "Execute Esg Grid tasks")
+    parser = _add_subparser(subparsers, STR.esggrid, "Execute esg_grid tasks")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
