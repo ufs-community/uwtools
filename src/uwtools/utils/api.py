@@ -43,7 +43,7 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
         stdin_ok: bool = False,
     ) -> bool:
         """
-        Execute a component task.
+        Execute a task.
 
         If ``batch`` is specified, a runscript will be written and submitted to the batch system.
         Otherwise, the executable will be run directly on the current system.
@@ -69,7 +69,7 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
         stdin_ok: bool = False,
     ) -> bool:
         """
-        Execute a component task.
+        Execute a task.
 
         If ``batch`` is specified, a runscript will be written and submitted to the batch system.
         Otherwise, the executable will be run directly on the current system.
@@ -128,7 +128,7 @@ def _execute(
     stdin_ok: bool = False,
 ) -> bool:
     """
-    Execute a component task.
+    Execute a task.
 
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
