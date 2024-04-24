@@ -1,0 +1,21 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "batchargs": {
+      "type": "object"
+    },
+    "envcmds": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "executable": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "executable"
+  ],
+  "type": "object"
+}
