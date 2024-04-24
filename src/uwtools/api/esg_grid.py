@@ -21,7 +21,7 @@ def execute(
     stdin_ok: bool = False,
 ) -> bool:
     """
-    Execute a ``esg_grid`` task.
+    Execute an ``esg_grid`` task.
 
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
