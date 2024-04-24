@@ -1,24 +1,12 @@
+"""
+Driver support.
+"""
+
 from typing import Dict
 
 import iotaa as _iotaa
 
 from uwtools.drivers.driver import Driver
-
-
-def execute(driver_class: type[Driver], **kwargs) -> bool:
-    """
-    Execute a driver task.
-
-    :param driver_class: Class of driver object to instantiate.
-    :param task: The task to execute.
-    :return: ``True`` if task completes without raising an exception.
-    """
-    obj = driver_class(**kwargs)
-    getattr(obj, kwargs["task"])()
-    if graph_file := kwargs["graph_file"]:
-        with open(graph_file, "w", encoding="utf-8") as f:
-            print(graph(), file=f)
-    return True
 
 
 def graph() -> str:
