@@ -3,14 +3,19 @@ API access to the uwtools ``chgres_cube`` driver.
 """
 
 import datetime as dt
+from functools import partial
 from pathlib import Path
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
-import iotaa as _iotaa
-
-import uwtools.drivers.support as _support
-from uwtools.drivers.chgres_cube import ChgresCube as _ChgresCube
+from uwtools.drivers.chgres_cube import ChgresCube as _Driver
+from uwtools.drivers.support import execute as _execute
+from uwtools.drivers.support import graph
+from uwtools.drivers.support import tasks as _tasks
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
+
+__all__ = ["execute", "graph", "tasks"]
+tasks = partial(_tasks, _Driver)
+tasks.__doc__ = _tasks.__doc__
 
 
 def execute(
@@ -37,25 +42,12 @@ def execute(
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
-    obj = _ChgresCube(
-        cycle=cycle, config=_ensure_data_source(config, stdin_ok), batch=batch, dry_run=dry_run
+    return _execute(
+        driver_class=_Driver,
+        task=task,
+        cycle=cycle,
+        config=_ensure_data_source(config, stdin_ok),
+        batch=batch,
+        dry_run=dry_run,
+        graph_file=graph_file,
     )
-    getattr(obj, task)()
-    if graph_file:
-        with open(graph_file, "w", encoding="utf-8") as f:
-            print(graph(), file=f)
-    return True
-
-
-def graph() -> str:
-    """
-    Returns Graphviz DOT code for the most recently executed task.
-    """
-    return _iotaa.graph()
-
-
-def tasks() -> Dict[str, str]:
-    """
-    Returns a mapping from task names to their one-line descriptions.
-    """
-    return _support.tasks(_ChgresCube)
