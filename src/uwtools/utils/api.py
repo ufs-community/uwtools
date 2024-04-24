@@ -4,13 +4,13 @@ Support for API modules.
 
 import datetime as dt
 import re
-from functools import partial
 from pathlib import Path
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.drivers.driver import Driver
-from uwtools.drivers.support import graph, tasks
+from uwtools.drivers.support import graph
+from uwtools.drivers.support import tasks as _tasks
 from uwtools.exceptions import UWError
 
 
@@ -37,25 +37,49 @@ def make_execute(
     ???
     """
 
-    def del_doc_param(obj: Callable, param: str):
-        assert obj.__doc__ is not None
-        obj.__doc__ = re.sub(rf"\n *:param {param}:.*\n", "\n", obj.__doc__)
+    def execute(  # pylint: disable=unused-argument
+        task: str,
+        config: Optional[Union[Path, str]] = None,
+        batch: bool = False,
+        dry_run: bool = False,
+        graph_file: Optional[Union[Path, str]] = None,
+        stdin_ok: bool = False,
+    ) -> bool:
+        return _execute(driver_class, **locals())
 
-    new = partial(_execute, driver_class)
-    new.__doc__ = re.sub(r"<NAME>", component_name, _execute.__doc__ or "")
-    del_doc_param(new, "driver_class")
-    if not with_cycle:
-        del_doc_param(new, "cycle")
-    return new
+    def execute_cycle(  # pylint: disable=unused-argument
+        task: str,
+        cycle: dt.datetime,
+        config: Optional[Union[Path, str]] = None,
+        batch: bool = False,
+        dry_run: bool = False,
+        graph_file: Optional[Union[Path, str]] = None,
+        stdin_ok: bool = False,
+    ) -> bool:
+        return _execute(driver_class, **locals())
+
+    assert _execute.__doc__ is not None
+    execute_cycle.__doc__ = re.sub(r"<NAME>", component_name, _execute.__doc__)
+    execute_cycle.__doc__ = re.sub(r"\n *:param driver_class:.*\n", "\n", execute_cycle.__doc__)
+    execute.__doc__ = re.sub(r"\n *:param cycle:.*\n", "\n", execute_cycle.__doc__)
+
+    if with_cycle:
+        return execute_cycle
+    return execute
 
 
 def make_tasks(driver_class: type[Driver]) -> Callable:
     """
     ???
     """
-    new = partial(tasks, driver_class)
-    new.__doc__ = tasks.__doc__
-    return new
+
+    def tasks() -> Dict[str, str]:
+        """
+        Returns a mapping from task names to their one-line descriptions.
+        """
+        return _tasks(driver_class)
+
+    return tasks
 
 
 def str2path(val: Any) -> Any:
@@ -65,6 +89,9 @@ def str2path(val: Any) -> Any:
     :param val: Any value.
     """
     return Path(val) if isinstance(val, str) else val
+
+
+# Private
 
 
 def _execute(
@@ -108,38 +135,38 @@ def _execute(
     return True
 
 
-def _execute_base(  # pylint: disable=unused-argument
-    driver_class: type[Driver],
-    task: str,
-    config: Optional[Union[Path, str]] = None,
-    batch: bool = False,
-    dry_run: bool = False,
-    graph_file: Optional[Union[Path, str]] = None,
-    stdin_ok: bool = False,
-) -> bool:
-    """
-    NB: This docstring is dynamically replaced.
-    """
-    return _execute(**locals())
+# def _execute_base(  # pylint: disable=unused-argument
+#     driver_class: type[Driver],
+#     task: str,
+#     config: Optional[Union[Path, str]] = None,
+#     batch: bool = False,
+#     dry_run: bool = False,
+#     graph_file: Optional[Union[Path, str]] = None,
+#     stdin_ok: bool = False,
+# ) -> bool:
+#     """
+#     NB: This docstring is dynamically replaced.
+#     """
+#     return _execute(**locals())
 
 
-_execute_base.__doc__ = re.sub(r"\n:param cycle:.*\n", "\n", _execute.__doc__ or "")
+# _execute_base.__doc__ = re.sub(r"\n:param cycle:.*\n", "\n", _execute.__doc__ or "")
 
 
-def _execute_cycle(  # pylint: disable=unused-argument
-    driver_class: type[Driver],
-    task: str,
-    cycle: dt.datetime,
-    config: Optional[Union[Path, str]] = None,
-    batch: bool = False,
-    dry_run: bool = False,
-    graph_file: Optional[Union[Path, str]] = None,
-    stdin_ok: bool = False,
-) -> bool:
-    """
-    NB: This docstring is dynamically replaced.
-    """
-    return _execute(**locals())
+# def _execute_cycle(  # pylint: disable=unused-argument
+#     driver_class: type[Driver],
+#     task: str,
+#     cycle: dt.datetime,
+#     config: Optional[Union[Path, str]] = None,
+#     batch: bool = False,
+#     dry_run: bool = False,
+#     graph_file: Optional[Union[Path, str]] = None,
+#     stdin_ok: bool = False,
+# ) -> bool:
+#     """
+#     NB: This docstring is dynamically replaced.
+#     """
+#     return _execute(**locals())
 
 
-_execute_cycle.__doc__ = _execute.__doc__
+# _execute_cycle.__doc__ = _execute.__doc__
