@@ -5,6 +5,7 @@ Granular tests of JSON Schema schemas.
 
 from functools import partial
 
+import yaml
 from pytest import fixture
 
 from uwtools.tests.support import schema_validator, with_del, with_set
@@ -132,6 +133,19 @@ def test_schema_esg_grid_namelist(esg_grid_prop):
             }
         }
     }
+    config = """
+        "regional_grid_nml": {
+            "delx": 0.22,
+            "dely": 0.22,
+            "lx": -200,
+            "ly": -130,
+            "pazi": 0.0,
+            "plat": 45.5,
+            "plon": -100.5,
+        }
+    """
+    cfg = yaml.safe_load(config)
+
     errors = esg_grid_prop("namelist")
     # Just base_file is ok:
     assert not errors(base_file)
@@ -139,12 +153,29 @@ def test_schema_esg_grid_namelist(esg_grid_prop):
     assert "88 is not of type 'string'" in errors({"base_file": 88})
     # Just update_values is ok:
     assert not errors(update_values)
-    # regional_grid_nml is required with update_values:
-    assert "'regional_grid_nml' is a required property" in errors({"update_values": {}})
     # A combination of base_file and update_values is ok:
     assert not errors({**base_file, **update_values})
+    # All key/value pairs in update_values must be present if no base_file is supplied:
+    assert "'dely' is a required property" in errors(
+        {"update_values": {"regional_grid_nml": {"delx": 0.11, "lx": -180, "plat": 38.0}}}
+    )
+
+    # Subsection of update_values is ok if base_file is supplied:
+    #  assert not errors(
+    #      {
+    #          **base_file,
+    #          "update_values": {"regional_grid_nml": {"delx": 0.11, "lx": -180, "plat": 38.0}},
+    #      }
+    #  )
+    # update_values values must be a number:
+    assert "'/some/str' is not of type 'number'" in errors(
+        {"update_values": {"regional_grid_nml": {"delx": "/some/str"}}}
+    )
+    # regional_grid_nml is required with update_values:
+    assert "'regional_grid_nml' is a required property" in errors({"update_values": {}})
     # At least one is required:
     assert "is not valid" in errors({})
+    # Just namelist file is not sufficient:
 
 
 def test_schema_esg_grid_namelist_update_values(esg_grid_prop):
