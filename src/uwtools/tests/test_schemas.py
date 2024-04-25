@@ -373,7 +373,6 @@ def test_schema_jedi_run_dir(jedi_prop):
 def test_schema_make_hgrid():
     config = {
         "execution": {"executable": "make_hgrid"},
-        "input_grid_file": "/tmp/input_grid_file",
         "run_dir": "/tmp",
     }
     errors = schema_validator("make-hgrid", "properties", "make_hgrid")
@@ -384,32 +383,69 @@ def test_schema_make_hgrid():
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
-    # config needs at least one entry:
-    assert "{} should be non-empty" in errors({"config": {}})
-    # the following config keys are allowed:
-    assert not errors(
-        {
-            **config,
-            "config": {
-                "grid_type": "gnomonic_ed",
-                "nlon": [192],
-                "grid_name": "C96_foo",
-                "do_schmidt": True,
-                "stretch_factor": 1.0001,
-                "target_lon": -97.5,
-                "target_lat": 38.5,
-                "nest_grids": True,
-                "parent_tile": [6],
-                "refine_ratio": [2],
-                "istart_nest": [10],
-                "iend_nest": [87],
-                "jstart_nest": [19],
-                "jend_nest": [78],
-                "halo": 1,
-                "great_circle_algorithm": True,
-            },
+    # config needs at least the grid_type key:
+    assert "'grid_type' is a required property" in errors({"config": {}})
+
+
+def test_schema_make_hgrid_grid_type():
+    # Get errors function from schema_validator
+    errors = schema_validator("make-hgrid", "properties", "make_hgrid")
+
+    # If grid_type is "from_file", my_grid_file is required
+    config = {
+        "execution": {"executable": "make_hgrid"},
+        "run_dir": "/tmp",
+        "config": {"grid_type": "from_file"},
+    }
+    assert "'my_grid_file' is a required property" in errors(config)
+
+    # If grid_type is "tripolar_grid" or "regular_lonlat_grid",
+    # nxbnds, nybnds, xbnds, and ybnds are required
+    for grid_type in ("tripolar_grid", "regular_lonlat_grid"):
+        config = {
+            "execution": {"executable": "make_hgrid"},
+            "run_dir": "/tmp",
+            "config": {"grid_type": grid_type},
         }
-    )
+        for prop in ("nxbnds", "nybnds", "xbnds", "ybnds"):
+            assert f"'{prop}' is a required property" in errors(config)
+
+    # If grid_type is "simple_cartesian_grid",
+    # nxbnds, nybnds, xbnds, ybnds, simple_dx, and simple_dy are required
+    config = {
+        "execution": {"executable": "make_hgrid"},
+        "run_dir": "/tmp",
+        "config": {"grid_type": "simple_cartesian_grid"},
+    }
+    for prop in ("nxbnds", "nybnds", "xbnds", "ybnds", "simple_dx", "simple_dy"):
+        assert f"'{prop}' is a required property" in errors(config)
+
+    # If grid_type is "f_plane_grid" or "beta_plane_grid", f_plane_latitude is required
+    for grid_type in ("f_plane_grid", "beta_plane_grid"):
+        config = {
+            "execution": {"executable": "make_hgrid"},
+            "run_dir": "/tmp",
+            "config": {"grid_type": grid_type},
+        }
+        assert "'f_plane_latitude' is a required property" in errors(config)
+
+    # If grid_type is "gnomonic_ed" and nest_grids is present, halo is required
+    config = {
+        "execution": {"executable": "make_hgrid"},
+        "run_dir": "/tmp",
+        "config": {"grid_type": "gnomonic_ed", "nest_grids": 1},
+    }
+    assert "'halo' is a required property" in errors(config)
+
+    # If do_schmidt and do_cube_transform are present,
+    # stretch_factor, target_lat, and target_lon are required
+    config = {
+        "execution": {"executable": "make_hgrid"},
+        "run_dir": "/tmp",
+        "config": {"grid_type": "gnomonic_ed", "do_schmidt": True, "do_cube_transform": True},
+    }
+    for prop in ("stretch_factor", "target_lat", "target_lon"):
+        assert f"'{prop}' is a required property" in errors(config)
 
 
 def test_schema_make_hgrid_run_dir(make_hgrid_prop):

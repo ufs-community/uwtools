@@ -159,7 +159,6 @@ def test__add_subparser_jedi(subparsers):
 def test__add_subparser_make_hgrid(subparsers):
     cli._add_subparser_make_hgrid(subparsers)
     assert actions(subparsers.choices[STR.makehgrid]) == [
-        "input_file",
         "provisioned_run_directory",
         "run",
         "runscript",

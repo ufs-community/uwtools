@@ -2,7 +2,6 @@
 """
 global_equiv_resol driver tests.
 """
-from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
@@ -27,7 +26,6 @@ def config(tmp_path):
                 "executable": "/path/to/make_hgrid",
             },
             "run_dir": str(tmp_path),
-            "input_grid_file": str(tmp_path / "input" / "input_grid_file"),
         },
         "platform": {
             "account": "myaccount",
@@ -63,18 +61,9 @@ def test_MakeHgrid_dry_run(config_file):
     dryrun.assert_called_once_with()
 
 
-def test_MakeHgrid_input_file(driverobj):
-    path = Path(driverobj._driver_config["input_grid_file"])
-    assert not driverobj.input_file().ready()
-    path.parent.mkdir()
-    path.touch()
-    assert driverobj.input_file().ready()
-
-
 def test_MakeHgrid_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
-        input_file=D,
         runscript=D,
     ) as mocks:
         driverobj.provisioned_run_directory()
@@ -106,12 +95,6 @@ def test_MakeHgrid_runscript(driverobj):
 
 def test_MakeHgrid__driver_config(driverobj):
     assert driverobj._driver_config == driverobj._config["make_hgrid"]
-
-
-def test_MakeHgrid__runcmd(driverobj):
-    cmd = driverobj._runcmd
-    input_file_path = driverobj._driver_config["input_grid_file"]
-    assert cmd == f"/path/to/make_hgrid {input_file_path}"
 
 
 def test_MakeHgrid__runscript_path(driverobj):
