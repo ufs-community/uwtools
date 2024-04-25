@@ -48,7 +48,16 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
         graph_file: Optional[Union[Path, str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
-        return _execute(driver_class, **locals())
+        return _execute(
+            driver_class=driver_class,
+            task=task,
+            cycle=None,
+            config=config,
+            batch=batch,
+            dry_run=dry_run,
+            graph_file=graph_file,
+            stdin_ok=stdin_ok,
+        )
 
     def execute_cycle(  # pylint: disable=unused-argument
         task: str,
@@ -59,7 +68,16 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
         graph_file: Optional[Union[Path, str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
-        return _execute(driver_class, **locals())
+        return _execute(
+            driver_class=driver_class,
+            task=task,
+            cycle=cycle,
+            config=config,
+            batch=batch,
+            dry_run=dry_run,
+            graph_file=graph_file,
+            stdin_ok=stdin_ok,
+        )
 
     assert _execute.__doc__ is not None
     execute_cycle.__doc__ = re.sub(r"\n *:param driver_class:.*\n", "\n", _execute.__doc__)
