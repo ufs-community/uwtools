@@ -11,6 +11,7 @@ from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 import yaml
+from iotaa import asset, task
 from pytest import fixture, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
@@ -39,6 +40,12 @@ class ConcreteDriver(driver.Driver):
 
     def _validate(self) -> None:
         pass
+
+    @task
+    def atask(self):
+        "A task"
+        yield "atask"
+        yield asset("atask", lambda: True)
 
 
 def write(path, s):
