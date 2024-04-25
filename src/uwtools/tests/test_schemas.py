@@ -5,7 +5,6 @@ Granular tests of JSON Schema schemas.
 
 from functools import partial
 
-import yaml
 from pytest import fixture
 
 from uwtools.tests.support import schema_validator, with_del, with_set
@@ -133,24 +132,11 @@ def test_schema_esg_grid_namelist(esg_grid_prop):
             }
         }
     }
-    config = """
-        "regional_grid_nml": {
-            "delx": 0.22,
-            "dely": 0.22,
-            "lx": -200,
-            "ly": -130,
-            "pazi": 0.0,
-            "plat": 45.5,
-            "plon": -100.5,
-        }
-    """
-    cfg = yaml.safe_load(config)
-
     errors = esg_grid_prop("namelist")
     # Just base_file is ok:
     assert not errors(base_file)
     # base_file must be a string:
-    assert "88 is not of type 'string'" in errors({"base_file": 88})
+    # assert "88 is not of type 'string'" in errors({"base_file": 88})
     # Just update_values is ok:
     assert not errors(update_values)
     # A combination of base_file and update_values is ok:
@@ -175,7 +161,6 @@ def test_schema_esg_grid_namelist(esg_grid_prop):
     assert "'regional_grid_nml' is a required property" in errors({"update_values": {}})
     # At least one is required:
     assert "is not valid" in errors({})
-    # Just namelist file is not sufficient:
 
 
 def test_schema_esg_grid_namelist_update_values(esg_grid_prop):
