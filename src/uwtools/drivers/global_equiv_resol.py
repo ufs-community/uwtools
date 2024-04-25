@@ -1,5 +1,5 @@
 """
-A driver for the ungrib component.
+A driver for the global_equiv_resol component.
 """
 
 from pathlib import Path

@@ -128,7 +128,8 @@ def test_validate_internal_no(caplog, schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
         with raises(UWConfigError) as e:
             validator.validate_internal(schema_name="a", config={"color": "orange"})
-    assert logged(caplog, "'orange' is not one of ['blue', 'red']")
+    assert logged(caplog, "Error at color:")
+    assert logged(caplog, "  'orange' is not one of ['blue', 'red']")
     assert str(e.value) == "YAML validation errors"
 
 
