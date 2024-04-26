@@ -11,7 +11,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined, me
 from jinja2.exceptions import UndefinedError
 
 from uwtools.config.support import UWYAMLConvert, UWYAMLRemove, format_to_config
-from uwtools.logging import MSGWIDTH, log
+from uwtools.logging import INDENT, MSGWIDTH, log
 from uwtools.utils.file import get_file_format, readable, writable
 
 _ConfigVal = Union[bool, dict, float, int, list, str, UWYAMLConvert, UWYAMLRemove]
@@ -294,7 +294,7 @@ def _log_missing_values(missing: List[str]) -> None:
     """
     log.error("Required value(s) not provided:")
     for key in missing:
-        log.error(f"  {key}")
+        log.error(f"{INDENT}{key}")
 
 
 def _register_filters(env: Environment) -> Environment:
@@ -369,7 +369,7 @@ def _values_needed(undeclared_variables: Set[str]) -> None:
     """
     log.info("Value(s) needed to render this template are:")
     for var in sorted(undeclared_variables):
-        log.info(f"  {var}")
+        log.info(f"{INDENT}{var}")
 
 
 def _write_template(output_file: Optional[Path], rendered_template: str) -> str:

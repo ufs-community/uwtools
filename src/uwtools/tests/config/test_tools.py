@@ -529,23 +529,23 @@ def test_realize_config_values_needed_ini(caplog):
     )
     expected = """
 Keys that are complete:
-    salad
-    salad.base
-    salad.fruit
-    salad.vegetable
-    salad.dressing
-    dessert
-    dessert.type
-    dessert.side
-    dessert.servings
+  salad
+  salad.base
+  salad.fruit
+  salad.vegetable
+  salad.dressing
+  dessert
+  dessert.type
+  dessert.side
+  dessert.servings
 
 Keys with unrendered Jinja2 variables/expressions:
-    salad.how_many: {{ amount }}
-    dessert.flavor: {{ flavor }}
+  salad.how_many: {{ amount }}
+  dessert.flavor: {{ flavor }}
 
 Keys that are set to empty:
-    salad.toppings
-    salad.meat
+  salad.toppings
+  salad.meat
 """.strip()
     actual = "\n".join(record.message for record in caplog.records)
     assert actual == expected
@@ -566,22 +566,22 @@ def test_realize_config_values_needed_yaml(caplog):
     actual = "\n".join(record.message for record in caplog.records)
     expected = """
 Keys that are complete:
-    FV3GFS
-    FV3GFS.nomads
-    FV3GFS.nomads.protocol
-    FV3GFS.nomads.file_names
-    FV3GFS.nomads.file_names.grib2
-    FV3GFS.nomads.file_names.testfalse
-    FV3GFS.nomads.file_names.testzero
+  FV3GFS
+  FV3GFS.nomads
+  FV3GFS.nomads.protocol
+  FV3GFS.nomads.file_names
+  FV3GFS.nomads.file_names.grib2
+  FV3GFS.nomads.file_names.testfalse
+  FV3GFS.nomads.file_names.testzero
 
 Keys with unrendered Jinja2 variables/expressions:
-    FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
-    FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
-    FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
+  FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
+  FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
+  FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
 
 Keys that are set to empty:
-    FV3GFS.nomads.file_names.nemsio
-    FV3GFS.nomads.testempty
+  FV3GFS.nomads.file_names.nemsio
+  FV3GFS.nomads.testempty
 """.strip()
     assert actual == expected
 
@@ -725,9 +725,9 @@ def test__realize_config_values_needed(caplog, tmp_path):
     c = YAMLConfig(config=path)
     tools._realize_config_values_needed(input_obj=c)
     msgs = "\n".join(record.message for record in caplog.records)
-    assert "Keys that are complete:\n    1" in msgs
-    assert "Keys with unrendered Jinja2 variables/expressions:\n    2" in msgs
-    assert "Keys that are set to empty:\n    3" in msgs
+    assert "Keys that are complete:\n  1" in msgs
+    assert "Keys with unrendered Jinja2 variables/expressions:\n  2" in msgs
+    assert "Keys that are set to empty:\n  3" in msgs
 
 
 def test__realize_config_values_needed_negative_results(caplog, tmp_path):
