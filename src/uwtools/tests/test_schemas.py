@@ -144,10 +144,8 @@ def test_schema_esg_grid_namelist(esg_grid_prop):
     # A combination of base_file and update_values is ok:
     assert not errors({**base_file, **update_values})
     # All key/value pairs in update_values must be present if base_file is not supplied:
-    assert (
-        "is not valid under any of the given schemas"
-        in errors(with_del(update_values, "update_values", "regional_grid_nml", "delx")
-        )
+    assert "is not valid under any of the given schemas" in errors(
+        with_del(update_values, "update_values", "regional_grid_nml", "delx")
     )
     # Subsection of update_values is ok if base_file is supplied:
     assert not errors(
@@ -189,16 +187,12 @@ def test_schema_esg_grid_namelist_update_values(esg_grid_prop):
     # A base_file with no update_values is ok:
     assert not errors(with_del(config, "update_values"))
     # It is an error to provide no base_file and only a partially-specified namelist:
-    assert (
-        "is not valid under any of the given schemas"
-        in errors(
-            with_del(with_del(config, "base_file"), "update_values", "regional_grid_nml", "delx")
-        )
+    assert "is not valid under any of the given schemas" in errors(
+        with_del(with_del(config, "base_file"), "update_values", "regional_grid_nml", "delx")
     )
     # update_values values must be a number:
-    assert (
-        "is not valid under any of the given schemas"
-        in errors({"update_values": {"regional_grid_nml": {"delx": "/some/str"}}})
+    assert "is not valid under any of the given schemas" in errors(
+        {"update_values": {"regional_grid_nml": {"delx": "/some/str"}}}
     )
     # It is an error to not provide at least one of base_file or update_values:
     assert "{} is not valid under any of the given schemas" in errors(
