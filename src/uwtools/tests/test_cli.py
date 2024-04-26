@@ -14,6 +14,7 @@ import pytest
 from pytest import fixture, raises
 
 import uwtools.api.config
+import uwtools.api.esg_grid
 import uwtools.api.fv3
 import uwtools.api.jedi
 import uwtools.api.mpas
@@ -22,6 +23,7 @@ import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.api.ungrib
+import uwtools.drivers.esg_grid
 import uwtools.drivers.fv3
 import uwtools.drivers.jedi
 import uwtools.drivers.mpas
@@ -105,6 +107,17 @@ def test__add_subparser_config_realize(subparsers):
 def test__add_subparser_config_validate(subparsers):
     cli._add_subparser_config_validate(subparsers)
     assert subparsers.choices[STR.validate]
+
+
+def test__add_subparser_esg_grid(subparsers):
+    cli._add_subparser_esg_grid(subparsers)
+    assert actions(subparsers.choices[STR.esggrid]) == [
+        "namelist_file",
+        "provisioned_run_directory",
+        "run",
+        "runscript",
+        "validate",
+    ]
 
 
 def test__add_subparser_file(subparsers):
@@ -471,6 +484,26 @@ def test__dispatch_config_validate_config_obj():
         STR.config: _dispatch_config_validate_args[STR.infile],
     }
     _validate_yaml.assert_called_once_with(**_validate_yaml_args)
+
+
+def test__dispatch_esg_grid():
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "dry_run": False,
+        "graph_file": None,
+        "stdin_ok": True,
+    }
+    with patch.object(uwtools.api.esg_grid, "execute") as execute:
+        cli._dispatch_esg_grid({**args, "action": "foo"})
+    execute.assert_called_once_with(
+        task="foo",
+        config="config.yaml",
+        batch=True,
+        dry_run=False,
+        graph_file=None,
+        stdin_ok=True,
+    )
 
 
 @pytest.mark.parametrize(

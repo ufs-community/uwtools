@@ -71,6 +71,7 @@ class STR:
     cycle: str = "cycle"
     dryrun: str = "dry_run"
     env: str = "env"
+    esggrid: str = "esg_grid"
     file1fmt: str = "file_1_format"
     file1path: str = "file_1_path"
     file2fmt: str = "file_2_format"
