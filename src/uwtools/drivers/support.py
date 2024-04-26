@@ -23,6 +23,6 @@ def tasks(driver_class: type[Driver]) -> Dict[str, str]:
     :param driver_class: Class of driver object to instantiate.
     """
     return {
-        task: getattr(driver_class, task).__doc__.strip().split("\n")[0]
+        task: (getattr(driver_class, task).__doc__ or "").strip().split("\n")[0]
         for task in _iotaa.tasknames(driver_class)
     }

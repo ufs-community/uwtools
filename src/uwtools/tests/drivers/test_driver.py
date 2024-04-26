@@ -43,7 +43,6 @@ class ConcreteDriver(driver.Driver):
 
     @task
     def atask(self):
-        "A task"
         yield "atask"
         yield asset("atask", lambda: True)
 
