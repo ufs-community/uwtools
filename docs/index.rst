@@ -109,6 +109,12 @@ Drivers for UFS
 
 To prepare a complete forecast, drivers would typically be run in the order shown here (along with additional drivers still in development).
 
+make_hgrid
+""""""""""
+
+| **CLI**: ``uw make_hgrid -h``
+| **API**: ``import uwtools.api.drivers.make_hgrid``
+
 sfc_climo_gen
 """""""""""""
 
