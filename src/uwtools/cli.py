@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, NoReturn, Tuple
 
 import uwtools.api
-import uwtools.api.chgres_cube
 import uwtools.api.config
 import uwtools.api.esg_grid
 import uwtools.api.file
@@ -79,63 +78,6 @@ def main() -> None:
     except UWError as e:
         log.error(str(e))
         sys.exit(1)
-
-
-# Mode chgres_cube
-
-
-def _add_subparser_chgres_cube(subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for mode: chgres_cube
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.chgrescube, "Execute chgres_cube tasks")
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {
-        task: _add_subparser_chgres_cube_task(subparsers, task, helpmsg)
-        for task, helpmsg in uwtools.api.chgres_cube.tasks().items()
-    }
-
-
-def _add_subparser_chgres_cube_task(
-    subparsers: Subparsers, task: str, helpmsg: str
-) -> ActionChecks:
-    """
-    Subparser for mode: chgres_cube <task>
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param task: The task to add a subparser for.
-    :param helpmsg: Help message for task.
-    """
-    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_cycle(required)
-    optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_chgres_cube(args: Args) -> bool:
-    """
-    Dispatch logic for chgres_cube mode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.chgres_cube.execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        cycle=args[STR.cycle],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
 
 
 # Mode config

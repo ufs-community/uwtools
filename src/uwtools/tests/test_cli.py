@@ -78,17 +78,6 @@ def test__abort(capsys):
     assert msg in capsys.readouterr().err
 
 
-def test__add_subparser_chgres_cube(subparsers):
-    cli._add_subparser_chgres_cube(subparsers)
-    assert actions(subparsers.choices[STR.chgrescube]) == [
-        "namelist_file",
-        "provisioned_run_directory",
-        "run",
-        "runscript",
-        "validate",
-    ]
-
-
 def test__add_subparser_config(subparsers):
     cli._add_subparser_config(subparsers)
     assert actions(subparsers.choices[STR.config]) == [STR.compare, STR.realize, STR.validate]
@@ -342,29 +331,6 @@ def test__check_verbosity_ok(flags):
 def test__dict_from_key_eq_val_strings():
     assert not cli._dict_from_key_eq_val_strings([])
     assert cli._dict_from_key_eq_val_strings(["a=1", "b=2"]) == {"a": "1", "b": "2"}
-
-
-def test__dispatch_chgres_cube():
-    cycle = dt.datetime.now()
-    args: dict = {
-        "batch": True,
-        "config_file": "config.yaml",
-        "cycle": cycle,
-        "dry_run": False,
-        "graph_file": None,
-        "stdin_ok": True,
-    }
-    with patch.object(uwtools.api.chgres_cube, "execute") as execute:
-        cli._dispatch_chgres_cube({**args, "action": "foo"})
-    execute.assert_called_once_with(
-        batch=True,
-        config="config.yaml",
-        cycle=cycle,
-        dry_run=False,
-        graph_file=None,
-        task="foo",
-        stdin_ok=True,
-    )
 
 
 @pytest.mark.parametrize(
@@ -904,3 +870,37 @@ def test__switch():
 
 def test__version():
     assert re.match(r"version \d+\.\d+\.\d+ build \d+", cli._version())
+
+
+# def test__add_subparser_chgres_cube(subparsers):
+#     cli._add_subparser_chgres_cube(subparsers)
+#     assert actions(subparsers.choices[STR.chgrescube]) == [
+#         "namelist_file",
+#         "provisioned_run_directory",
+#         "run",
+#         "runscript",
+#         "validate",
+#     ]
+
+
+# def test__dispatch_chgres_cube():
+#     cycle = dt.datetime.now()
+#     args: dict = {
+#         "batch": True,
+#         "config_file": "config.yaml",
+#         "cycle": cycle,
+#         "dry_run": False,
+#         "graph_file": None,
+#         "stdin_ok": True,
+#     }
+#     with patch.object(uwtools.api.chgres_cube, "execute") as execute:
+#         cli._dispatch_chgres_cube({**args, "action": "foo"})
+#     execute.assert_called_once_with(
+#         batch=True,
+#         config="config.yaml",
+#         cycle=cycle,
+#         dry_run=False,
+#         graph_file=None,
+#         task="foo",
+#         stdin_ok=True,
+#     )
