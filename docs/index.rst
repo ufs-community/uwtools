@@ -109,6 +109,12 @@ Drivers for UFS
 
 To prepare a complete forecast, drivers would typically be run in the order shown here (along with additional drivers still in development).
 
+esg_grid
+"""""""""""
+
+| **CLI**: ``uw esg_grid -h``
+| **API**: ``import uwtools.api.drivers.esg_grid``
+
 sfc_climo_gen
 """""""""""""
 
@@ -120,7 +126,6 @@ chgres_cube
 
 | **CLI**: ``uw chgres_cube -h``
 | **API**: ``import uwtools.api.drivers.chgres_cube``
-
 
 FV3
 """

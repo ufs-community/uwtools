@@ -1,0 +1,137 @@
+{
+  "$defs": {
+    "base_file": {
+      "type": "string"
+    },
+    "regional_grid_nml_properties": {
+      "additionalProperties": false,
+      "properties": {
+        "delx": {
+          "type": "number"
+        },
+        "dely": {
+          "type": "number"
+        },
+        "lx": {
+          "type": "number"
+        },
+        "ly": {
+          "type": "number"
+        },
+        "pazi": {
+          "type": "number"
+        },
+        "plat": {
+          "type": "number"
+        },
+        "plon": {
+          "type": "number"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "properties": {
+    "esg_grid": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "$ref": "urn:uwtools:execution-serial"
+        },
+        "namelist": {
+          "anyOf": [
+            {
+              "additionalProperties": false,
+              "properties": {
+                "base_file": {
+                  "$ref": "#/$defs/base_file"
+                }
+              },
+              "required": [
+                "base_file"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "base_file": {
+                  "$ref": "#/$defs/base_file"
+                },
+                "update_values": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "regional_grid_nml": {
+                      "allOf": [
+                        {
+                          "$ref": "#/$defs/regional_grid_nml_properties"
+                        }
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "regional_grid_nml"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "base_file",
+                "update_values"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "properties": {
+                "base_file": {
+                  "$ref": "#/$defs/base_file"
+                },
+                "update_values": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "regional_grid_nml": {
+                      "allOf": [
+                        {
+                          "$ref": "#/$defs/regional_grid_nml_properties"
+                        }
+                      ],
+                      "required": [
+                        "delx",
+                        "dely",
+                        "lx",
+                        "ly",
+                        "pazi",
+                        "plat",
+                        "plon"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "regional_grid_nml"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "update_values"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "run_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "run_dir"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}
