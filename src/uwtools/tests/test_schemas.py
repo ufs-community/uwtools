@@ -42,6 +42,23 @@ def ungrib_prop():
     return partial(schema_validator, "ungrib", "properties", "ungrib", "properties")
 
 
+@fixture
+def update_values():
+    return {
+        "update_values": {
+            "regional_grid_nml": {
+                "delx": 0.22,
+                "dely": 0.22,
+                "lx": -200,
+                "ly": -130,
+                "pazi": 0.0,
+                "plat": 45.5,
+                "plon": -100.5,
+            }
+        }
+    }
+
+
 # chgres-cube
 
 
@@ -117,21 +134,8 @@ def test_schema_esg_grid():
     )
 
 
-def test_schema_esg_grid_namelist(esg_grid_prop):
+def test_schema_esg_grid_namelist(esg_grid_prop, update_values):
     base_file = {"base_file": "/some/path"}
-    update_values = {
-        "update_values": {
-            "regional_grid_nml": {
-                "delx": 0.22,
-                "dely": 0.22,
-                "lx": -200,
-                "ly": -130,
-                "pazi": 0.0,
-                "plat": 45.5,
-                "plon": -100.5,
-            }
-        }
-    }
     errors = esg_grid_prop("namelist")
     # Just base_file is ok:
     assert not errors(base_file)
