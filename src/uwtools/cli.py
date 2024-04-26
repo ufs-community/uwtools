@@ -24,6 +24,7 @@ import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.api.ungrib
+import uwtools.api.upp
 import uwtools.config.jinja2
 import uwtools.rocoto
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
@@ -71,6 +72,7 @@ def main() -> None:
             STR.sfcclimogen: _dispatch_sfc_climo_gen,
             STR.template: _dispatch_template,
             STR.ungrib: _dispatch_ungrib,
+            STR.upp: _dispatch_upp,
         }
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except UWError as e:
@@ -903,6 +905,61 @@ def _dispatch_ungrib(args: Args) -> bool:
     )
 
 
+# Mode upp
+
+
+def _add_subparser_upp(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: upp
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.upp, "Execute UPP tasks")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_upp_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.upp.tasks().items()
+    }
+
+
+def _add_subparser_upp_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+    """
+    Subparser for mode: UPP <task>
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_cycle(required)
+    optional = _basic_setup(parser)
+    _add_arg_config_file(group=optional)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
+def _dispatch_upp(args: Args) -> bool:
+    """
+    Dispatch logic for upp mode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.upp.execute(
+        task=args[STR.action],
+        config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
+        stdin_ok=True,
+    )
+
+
 # Arguments
 
 # pylint: disable=missing-function-docstring
@@ -1289,6 +1346,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         STR.sfcclimogen: _add_subparser_sfc_climo_gen(subparsers),
         STR.template: _add_subparser_template(subparsers),
         STR.ungrib: _add_subparser_ungrib(subparsers),
+        STR.upp: _add_subparser_upp(subparsers),
     }
     return vars(parser.parse_args(raw_args)), checks
 

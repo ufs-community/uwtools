@@ -108,6 +108,7 @@ class STR:
     total: str = "total"
     translate: str = "translate"
     ungrib: str = "ungrib"
+    upp: str = "upp"
     validate: str = "validate"
     valsfile: str = "values_file"
     valsfmt: str = "values_format"
