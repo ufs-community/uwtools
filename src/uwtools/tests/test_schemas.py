@@ -72,7 +72,7 @@ def test_schema_chgres_cube():
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("execution", "run_dir"):
+    for key in ("execution", "namelist", "run_dir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -126,7 +126,7 @@ def test_schema_esg_grid():
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("execution", "run_dir"):
+    for key in ("execution", "namelist", "run_dir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -321,7 +321,7 @@ def test_schema_fv3():
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("domain", "execution", "lateral_boundary_conditions", "length", "run_dir"):
+    for key in ("domain", "execution", "lateral_boundary_conditions", "length", "namelist", "run_dir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Some top-level keys are optional:
     assert not errors(
@@ -647,7 +647,7 @@ def test_schema_sfc_climo_gen():
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("execution", "run_dir"):
+    for key in ("execution", "namelist", "run_dir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
