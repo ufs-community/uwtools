@@ -134,6 +134,12 @@ def test__add_subparser_for_driver(subparsers):
     assert actions(subparsers.choices[name]) == ["task1", "task2"]
 
 
+def test__add_subparser_for_driver_task(subparsers):
+    assert not subparsers.choices
+    cli._add_subparser_for_driver_task(subparsers, "task1", "task1 description")
+    assert subparsers.choices["task1"]
+
+
 def test__add_subparser_fv3(subparsers):
     cli._add_subparser_fv3(subparsers)
     assert actions(subparsers.choices[STR.fv3]) == [
