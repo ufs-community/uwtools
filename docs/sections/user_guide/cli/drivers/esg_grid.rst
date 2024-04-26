@@ -8,7 +8,7 @@ The ``uw`` mode for configuring and running the :ufs-utils:`regional_esg_grid<re
    $ uw esg_grid --help
     usage: uw esg_grid [-h] [--version] TASK ...
     
-    Execute Esg Grid tasks
+    Execute esg_grid tasks
     
     Optional arguments:
       -h, --help

@@ -136,53 +136,87 @@ def test_schema_esg_grid_namelist(esg_grid_prop):
     # Just base_file is ok:
     assert not errors(base_file)
     # base_file must be a string:
-    # assert "88 is not of type 'string'" in errors({"base_file": 88})
+    assert "{'base_file': 88} is not valid under any of the given schemas" in errors(
+        {"base_file": 88}
+    )
     # Just update_values is ok:
     assert not errors(update_values)
     # A combination of base_file and update_values is ok:
     assert not errors({**base_file, **update_values})
-    # All key/value pairs in update_values must be present if no base_file is supplied:
-    assert "'dely' is a required property" in errors(
-        {"update_values": {"regional_grid_nml": {"delx": 0.11, "lx": -180, "plat": 38.0}}}
+    # All key/value pairs in update_values must be present if base_file is not supplied:
+    assert (
+        "{'update_values': {'regional_grid_nml': {'delx': 0.11, 'lx': -180, 'plat': 38.0}}} is not valid under any of the given schemas"
+        in errors(
+            {"update_values": {"regional_grid_nml": {"delx": 0.11, "lx": -180, "plat": 38.0}}}
+        )
     )
-
     # Subsection of update_values is ok if base_file is supplied:
-    #  assert not errors(
-    #      {
-    #          **base_file,
-    #          "update_values": {"regional_grid_nml": {"delx": 0.11, "lx": -180, "plat": 38.0}},
-    #      }
-    #  )
-    # update_values values must be a number:
-    assert "'/some/str' is not of type 'number'" in errors(
-        {"update_values": {"regional_grid_nml": {"delx": "/some/str"}}}
+    assert not errors(
+        {
+            **base_file,
+            "update_values": {"regional_grid_nml": {"delx": 0.11, "lx": -180, "plat": 38.0}},
+        }
     )
     # regional_grid_nml is required with update_values:
-    assert "'regional_grid_nml' is a required property" in errors({"update_values": {}})
+    assert "{'update_values': {}} is not valid under any of the given schemas" in errors(
+        {"update_values": {}}
+    )
     # At least one is required:
     assert "is not valid" in errors({})
 
 
 def test_schema_esg_grid_namelist_update_values(esg_grid_prop):
-    errors = esg_grid_prop(
-        "namelist", "properties", "update_values", "properties", "regional_grid_nml"
+    config = {
+        "base_file": "some/str",
+        "update_values": {
+            "regional_grid_nml": {
+                "delx": 0.22,
+                "dely": 0.22,
+                "lx": -200,
+                "ly": -130,
+                "pazi": 0.0,
+                "plat": 45.5,
+                "plon": -100.5,
+            }
+        },
+    }
+    errors = esg_grid_prop("namelist")
+    # Basic correctness:
+    assert not errors(config)
+    # A base_file with partial update_values is ok:
+    assert not errors(with_del(config, "update_values", "regional_grid_nml", "delx"))
+    # A completely-specified update_values with no base_file is ok:
+    assert not errors(with_del(config, "base_file"))
+    # A base_file with no update_values is ok:
+    assert not errors(with_del(config, "update_values"))
+    # It is an error to provide no base_file and only a partially-specified namelist:
+    assert (
+        "{'update_values': {'regional_grid_nml': {'dely': 0.22, 'lx': -200, 'ly': -130, 'pazi': 0.0, 'plat': 45.5, 'plon': -100.5}}} is not valid under any of the given schemas"
+        in errors(
+            with_del(with_del(config, "base_file"), "update_values", "regional_grid_nml", "delx")
+        )
     )
-    # Only defined namelist values are ok:
-    assert not errors(
-        {
-            "delx": 0.22,
-            "dely": 0.22,
-            "lx": -200,
-            "ly": -130,
-            "pazi": 0.0,
-            "plat": 45.5,
-            "plon": -100.5,
-        }
+    # update_values values must be a number:
+    assert (
+        "{'update_values': {'regional_grid_nml': {'delx': '/some/str'}}} is not valid under any of the given schemas"
+        in errors({"update_values": {"regional_grid_nml": {"delx": "/some/str"}}})
     )
-    # Other values are not, e.g.:
-    assert "'null' was unexpected" in errors({"null": None})
-    # Minimum number of entries is required:
-    assert errors({})
+    # It is an error to not provide at least one of base_file or update_values:
+    assert "{} is not valid under any of the given schemas" in errors(
+        with_del(with_del(config, "base_file"), "update_values")
+    )
+
+
+def test_schema_esg_grid_regional_grid_nml_properties():
+    errors = partial(schema_validator("esg-grid", "$defs", "regional_grid_nml_properties"))
+    # An integer value is ok:
+    assert not errors({"delx": 88})
+    # A floating-point value is ok:
+    assert not errors({"delx": 3.14})
+    # It is an error for the value to be of type string:
+    assert "'foo' is not of type 'number'" in errors({"ly": "foo"})
+    # It is an error not to supply a value:
+    assert "{'delx'} is not of type 'object'" in errors({"delx"})
 
 
 def test_schema_esg_grid_run_dir(esg_grid_prop):
