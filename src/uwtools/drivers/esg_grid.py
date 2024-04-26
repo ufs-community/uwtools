@@ -12,7 +12,7 @@ from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
 
 
-class EsgGrid(Driver):
+class ESGGrid(Driver):
     """
     A driver for esg_grid.
     """

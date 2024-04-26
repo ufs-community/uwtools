@@ -16,11 +16,11 @@ def test_execute(tmp_path):
         "dry_run": True,
         "graph_file": dot,
     }
-    with patch.object(esg_grid, "_EsgGrid") as EsgGrid:
+    with patch.object(esg_grid, "_ESGGrid") as ESGGrid:
         assert esg_grid.execute(**args, task="foo") is True
     del args["graph_file"]
-    EsgGrid.assert_called_once_with(**args)
-    EsgGrid().foo.assert_called_once_with()
+    ESGGrid.assert_called_once_with(**args)
+    ESGGrid().foo.assert_called_once_with()
 
 
 def test_graph():
@@ -32,4 +32,4 @@ def test_graph():
 def test_tasks():
     with patch.object(esg_grid._support, "tasks") as _tasks:
         esg_grid.tasks()
-    _tasks.assert_called_once_with(esg_grid._EsgGrid)
+    _tasks.assert_called_once_with(esg_grid._ESGGrid)

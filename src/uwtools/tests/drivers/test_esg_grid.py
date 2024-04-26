@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
-EsgGrid driver tests.
+ESGGrid driver tests.
 """
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
@@ -60,24 +60,24 @@ def config_file(config, tmp_path):
 
 @fixture
 def driverobj(config_file):
-    return esg_grid.EsgGrid(config=config_file, batch=True)
+    return esg_grid.ESGGrid(config=config_file, batch=True)
 
 
 # Driver tests
 
 
-def test_EsgGrid(driverobj):
-    assert isinstance(driverobj, esg_grid.EsgGrid)
+def test_ESGGrid(driverobj):
+    assert isinstance(driverobj, esg_grid.ESGGrid)
 
 
-def test_EsgGrid_dry_run(config_file):
+def test_ESGGrid_dry_run(config_file):
     with patch.object(esg_grid, "dryrun") as dryrun:
-        driverobj = esg_grid.EsgGrid(config=config_file, batch=True, dry_run=True)
+        driverobj = esg_grid.ESGGrid(config=config_file, batch=True, dry_run=True)
     assert driverobj._dry_run is True
     dryrun.assert_called_once_with()
 
 
-def test_EsgGrid_namelist_file(driverobj):
+def test_ESGGrid_namelist_file(driverobj):
     dst = driverobj._rundir / "regional_grid.nml"
     assert not dst.is_file()
     driverobj.namelist_file()
@@ -85,7 +85,7 @@ def test_EsgGrid_namelist_file(driverobj):
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
-def test_EsgGrid_provisioned_run_directory(driverobj):
+def test_ESGGrid_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
         namelist_file=D,
@@ -96,20 +96,20 @@ def test_EsgGrid_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_EsgGrid_run_batch(driverobj):
+def test_ESGGrid_run_batch(driverobj):
     with patch.object(driverobj, "_run_via_batch_submission") as func:
         driverobj.run()
     func.assert_called_once_with()
 
 
-def test_EsgGrid_run_local(driverobj):
+def test_ESGGrid_run_local(driverobj):
     driverobj._batch = False
     with patch.object(driverobj, "_run_via_local_execution") as func:
         driverobj.run()
     func.assert_called_once_with()
 
 
-def test_EsgGrid_runscript(driverobj):
+def test_ESGGrid_runscript(driverobj):
     with patch.object(driverobj, "_runscript") as runscript:
         driverobj.runscript()
         runscript.assert_called_once()
@@ -118,17 +118,17 @@ def test_EsgGrid_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_EsgGrid__driver_config(driverobj):
+def test_ESGGrid__driver_config(driverobj):
     assert driverobj._driver_config == driverobj._config["esg_grid"]
 
 
-def test_EsgGrid__runscript_path(driverobj):
+def test_ESGGrid__runscript_path(driverobj):
     assert driverobj._runscript_path == driverobj._rundir / "runscript.esg_grid"
 
 
-def test_EsgGrid__taskname(driverobj):
+def test_ESGGrid__taskname(driverobj):
     assert driverobj._taskname("foo") == "esg_grid foo"
 
 
-def test_EsgGrid__validate(driverobj):
+def test_ESGGrid__validate(driverobj):
     driverobj._validate()
