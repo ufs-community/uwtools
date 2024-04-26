@@ -1,5 +1,5 @@
 """
-API access to the ``uwtools`` FV3 driver.
+API access to the ``uwtools`` ``fv3`` driver.
 """
 
 from uwtools.drivers.fv3 import FV3 as _Driver

@@ -1,5 +1,5 @@
 """
-API access to the ``uwtools`` ``mpas-init`` driver.
+API access to the ``uwtools`` ``mpas_init`` driver.
 """
 
 from uwtools.drivers.mpas_init import MPASInit as _Driver
