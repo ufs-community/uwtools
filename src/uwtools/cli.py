@@ -10,6 +10,7 @@ from argparse import HelpFormatter
 from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
 from functools import partial
+from importlib import import_module
 from pathlib import Path
 from typing import Any, Callable, Dict, List, NoReturn, Tuple
 
@@ -1198,7 +1199,7 @@ def _add_subparser_for_driver(name: str, subparsers: Subparsers) -> ModeChecks:
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
         task: _add_subparser_for_driver_task(subparsers, task, helpmsg)
-        for task, helpmsg in getattr(uwtools.api, name).tasks().items()
+        for task, helpmsg in import_module("uwtools.api.%s" % name).tasks().items()
     }
 
 
@@ -1295,7 +1296,7 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     :param name: Name of the driver to dispatch to.
     :param args: Parsed command-line args.
     """
-    execute: Callable[..., bool] = getattr(uwtools.api, name).execute
+    execute: Callable[..., bool] = import_module("uwtools.api.%s" % name).execute
     return execute(
         task=args[STR.action],
         config=args[STR.cfgfile],

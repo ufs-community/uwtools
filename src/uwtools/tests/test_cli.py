@@ -8,11 +8,12 @@ from argparse import ArgumentParser as Parser
 from argparse import _SubParsersAction
 from pathlib import Path
 from typing import List
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 from pytest import fixture, raises
 
+import uwtools.api
 import uwtools.api.config
 import uwtools.api.esg_grid
 import uwtools.api.fv3
@@ -776,6 +777,32 @@ def test__dispatch_template_translate_no_optional():
     )
 
 
+def test__dispatch_to_driver():
+    name = "adriver"
+    cycle = dt.datetime.now()
+    args: dict = {
+        "action": "foo",
+        "batch": True,
+        "config_file": "config.yaml",
+        "cycle": cycle,
+        "dry_run": False,
+        "graph_file": None,
+        "stdin_ok": True,
+    }
+    adriver = Mock()
+    with patch.object(cli, "import_module", return_value=adriver):
+        cli._dispatch_to_driver(name=name, args=args)
+        adriver.execute.assert_called_once_with(
+            batch=True,
+            config="config.yaml",
+            cycle=cycle,
+            dry_run=False,
+            graph_file=None,
+            task="foo",
+            stdin_ok=True,
+        )
+
+
 def test__dispatch_ungrib():
     cycle = dt.datetime.now()
     args: dict = {
@@ -881,26 +908,3 @@ def test__version():
 #         "runscript",
 #         "validate",
 #     ]
-
-
-# def test__dispatch_chgres_cube():
-#     cycle = dt.datetime.now()
-#     args: dict = {
-#         "batch": True,
-#         "config_file": "config.yaml",
-#         "cycle": cycle,
-#         "dry_run": False,
-#         "graph_file": None,
-#         "stdin_ok": True,
-#     }
-#     with patch.object(uwtools.api.chgres_cube, "execute") as execute:
-#         cli._dispatch_chgres_cube({**args, "action": "foo"})
-#     execute.assert_called_once_with(
-#         batch=True,
-#         config="config.yaml",
-#         cycle=cycle,
-#         dry_run=False,
-#         graph_file=None,
-#         task="foo",
-#         stdin_ok=True,
-#     )
