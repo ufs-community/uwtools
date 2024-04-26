@@ -37,9 +37,9 @@ More information about the structured UW YAML file for Rocoto can be found :any:
    $ uw rocoto realize --help
    usage: uw rocoto realize [-h] [--version] [--config-file PATH] [--output-file PATH] [--quiet]
                             [--verbose]
-   
+
    Realize a Rocoto XML workflow document
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
