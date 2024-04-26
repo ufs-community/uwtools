@@ -15,22 +15,8 @@ from pytest import fixture, raises
 
 import uwtools.api
 import uwtools.api.config
-import uwtools.api.esg_grid
-import uwtools.api.fv3
-import uwtools.api.jedi
-import uwtools.api.mpas
-import uwtools.api.mpas_init
 import uwtools.api.rocoto
-import uwtools.api.sfc_climo_gen
 import uwtools.api.template
-import uwtools.api.ungrib
-import uwtools.drivers.esg_grid
-import uwtools.drivers.fv3
-import uwtools.drivers.jedi
-import uwtools.drivers.mpas
-import uwtools.drivers.mpas_init
-import uwtools.drivers.sfc_climo_gen
-import uwtools.drivers.ungrib
 from uwtools import cli
 from uwtools.cli import STR
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
@@ -99,17 +85,6 @@ def test__add_subparser_config_validate(subparsers):
     assert subparsers.choices[STR.validate]
 
 
-def test__add_subparser_esg_grid(subparsers):
-    cli._add_subparser_esg_grid(subparsers)
-    assert actions(subparsers.choices[STR.esggrid]) == [
-        "namelist_file",
-        "provisioned_run_directory",
-        "run",
-        "runscript",
-        "validate",
-    ]
-
-
 def test__add_subparser_file(subparsers):
     cli._add_subparser_file(subparsers)
     assert actions(subparsers.choices[STR.file]) == [STR.copy, STR.link]
@@ -140,68 +115,6 @@ def test__add_subparser_for_driver_task(subparsers):
     assert subparsers.choices["task1"]
 
 
-def test__add_subparser_fv3(subparsers):
-    cli._add_subparser_fv3(subparsers)
-    assert actions(subparsers.choices[STR.fv3]) == [
-        "boundary_files",
-        "diag_table",
-        "field_table",
-        "files_copied",
-        "files_linked",
-        "model_configure",
-        "namelist_file",
-        "provisioned_run_directory",
-        "restart_directory",
-        "run",
-        "runscript",
-        "validate",
-    ]
-
-
-def test__add_subparser_jedi(subparsers):
-    cli._add_subparser_jedi(subparsers)
-    assert actions(subparsers.choices[STR.jedi]) == [
-        "configuration_file",
-        "files_copied",
-        "files_linked",
-        "provisioned_run_directory",
-        "run",
-        "runscript",
-        "validate",
-        "validate_only",
-    ]
-
-
-def test__add_subparser_mpas(subparsers):
-    cli._add_subparser_mpas(subparsers)
-    assert actions(subparsers.choices[STR.mpas]) == [
-        "boundary_files",
-        "files_copied",
-        "files_linked",
-        "namelist_file",
-        "provisioned_run_directory",
-        "run",
-        "runscript",
-        "streams_file",
-        "validate",
-    ]
-
-
-def test__add_subparser_mpas_init(subparsers):
-    cli._add_subparser_mpas_init(subparsers)
-    assert actions(subparsers.choices[STR.mpasinit]) == [
-        "boundary_files",
-        "files_copied",
-        "files_linked",
-        "namelist_file",
-        "provisioned_run_directory",
-        "run",
-        "runscript",
-        "streams_file",
-        "validate",
-    ]
-
-
 def test__add_subparser_rocoto(subparsers):
     cli._add_subparser_rocoto(subparsers)
     assert subparsers.choices[STR.rocoto]
@@ -217,17 +130,6 @@ def test__add_subparser_rocoto_validate(subparsers):
     assert subparsers.choices[STR.validate]
 
 
-def test__add_subparser_sfc_climo_gen(subparsers):
-    cli._add_subparser_sfc_climo_gen(subparsers)
-    assert actions(subparsers.choices[STR.sfcclimogen]) == [
-        "namelist_file",
-        "provisioned_run_directory",
-        "run",
-        "runscript",
-        "validate",
-    ]
-
-
 def test__add_subparser_template(subparsers):
     cli._add_subparser_template(subparsers)
     assert actions(subparsers.choices[STR.template]) == [STR.render, STR.translate]
@@ -241,19 +143,6 @@ def test__add_subparser_template_render(subparsers):
 def test__add_subparser_template_translate(subparsers):
     cli._add_subparser_template_translate(subparsers)
     assert subparsers.choices[STR.translate]
-
-
-def test__add_subparser_ungrib(subparsers):
-    cli._add_subparser_ungrib(subparsers)
-    assert actions(subparsers.choices[STR.ungrib]) == [
-        "gribfiles",
-        "namelist_file",
-        "provisioned_run_directory",
-        "run",
-        "runscript",
-        "validate",
-        "vtable",
-    ]
 
 
 @pytest.mark.parametrize(
@@ -468,26 +357,6 @@ def test__dispatch_config_validate_config_obj():
     _validate_yaml.assert_called_once_with(**_validate_yaml_args)
 
 
-def test__dispatch_esg_grid():
-    args: dict = {
-        "batch": True,
-        "config_file": "config.yaml",
-        "dry_run": False,
-        "graph_file": None,
-        "stdin_ok": True,
-    }
-    with patch.object(uwtools.api.esg_grid, "execute") as execute:
-        cli._dispatch_esg_grid({**args, "action": "foo"})
-    execute.assert_called_once_with(
-        task="foo",
-        config="config.yaml",
-        batch=True,
-        dry_run=False,
-        graph_file=None,
-        stdin_ok=True,
-    )
-
-
 @pytest.mark.parametrize(
     "action, funcname", [(STR.copy, "_dispatch_file_copy"), (STR.link, "_dispatch_file_link")]
 )
@@ -521,97 +390,6 @@ def test__dispatch_file_link(args_dispatch_file):
         keys=args["keys"],
         dry_run=args["dry_run"],
         stdin_ok=args["stdin_ok"],
-    )
-
-
-def test__dispatch_fv3():
-    cycle = dt.datetime.now()
-    args: dict = {
-        "batch": True,
-        "config_file": "config.yaml",
-        "cycle": cycle,
-        "dry_run": False,
-        "graph_file": None,
-        "stdin_ok": True,
-    }
-    with patch.object(uwtools.api.fv3, "execute") as execute:
-        cli._dispatch_fv3({**args, "action": "foo"})
-    execute.assert_called_once_with(
-        batch=True,
-        config="config.yaml",
-        cycle=cycle,
-        dry_run=False,
-        graph_file=None,
-        task="foo",
-        stdin_ok=True,
-    )
-
-
-def test__dispatch_jedi():
-    cycle = dt.datetime.now()
-    args: dict = {
-        "batch": True,
-        "config_file": "config.yaml",
-        "cycle": cycle,
-        "dry_run": False,
-        "graph_file": None,
-    }
-    with patch.object(uwtools.api.jedi, "execute") as execute:
-        cli._dispatch_jedi({**args, "action": "foo"})
-    execute.assert_called_once_with(
-        task="foo",
-        config="config.yaml",
-        cycle=cycle,
-        batch=True,
-        dry_run=False,
-        graph_file=None,
-        stdin_ok=True,
-    )
-
-
-def test__dispatch_mpas():
-    cycle = dt.datetime.now()
-    args: dict = {
-        "batch": True,
-        "config_file": "config.yaml",
-        "cycle": cycle,
-        "dry_run": False,
-        "graph_file": None,
-        "stdin_ok": True,
-    }
-    with patch.object(uwtools.api.mpas, "execute") as execute:
-        cli._dispatch_mpas({**args, "action": "foo"})
-    execute.assert_called_once_with(
-        batch=True,
-        config="config.yaml",
-        cycle=cycle,
-        dry_run=False,
-        graph_file=None,
-        task="foo",
-        stdin_ok=True,
-    )
-
-
-def test__dispatch_mpas_init():
-    cycle = dt.datetime.now()
-    args: dict = {
-        "batch": True,
-        "config_file": "config.yaml",
-        "cycle": cycle,
-        "dry_run": False,
-        "graph_file": None,
-        "stdin_ok": True,
-    }
-    with patch.object(uwtools.api.mpas_init, "execute") as execute:
-        cli._dispatch_mpas_init({**args, "action": "foo"})
-    execute.assert_called_once_with(
-        batch=True,
-        config="config.yaml",
-        cycle=cycle,
-        dry_run=False,
-        graph_file=None,
-        task="foo",
-        stdin_ok=True,
     )
 
 
@@ -662,21 +440,6 @@ def test__dispatch_rocoto_validate_xml_no_optional():
     with patch.object(uwtools.api.rocoto, "_validate") as validate:
         cli._dispatch_rocoto_validate(args)
     validate.assert_called_once_with(xml_file=None)
-
-
-def test__dispatch_sfc_climo_gen():
-    args: dict = {
-        "batch": True,
-        "config_file": "config.yaml",
-        "dry_run": False,
-        "graph_file": None,
-        "stdin_ok": True,
-    }
-    with patch.object(uwtools.api.sfc_climo_gen, "execute") as execute:
-        cli._dispatch_sfc_climo_gen({**args, "action": "foo"})
-    execute.assert_called_once_with(
-        batch=True, config="config.yaml", dry_run=False, graph_file=None, task="foo", stdin_ok=True
-    )
 
 
 @pytest.mark.parametrize(
@@ -816,29 +579,6 @@ def test__dispatch_to_driver():
             task="foo",
             stdin_ok=True,
         )
-
-
-def test__dispatch_ungrib():
-    cycle = dt.datetime.now()
-    args: dict = {
-        "batch": True,
-        "config_file": "config.yaml",
-        "cycle": cycle,
-        "dry_run": False,
-        "graph_file": None,
-        "stdin_ok": True,
-    }
-    with patch.object(uwtools.api.ungrib, "execute") as execute:
-        cli._dispatch_ungrib({**args, "action": "foo"})
-    execute.assert_called_once_with(
-        task="foo",
-        batch=True,
-        config="config.yaml",
-        cycle=cycle,
-        dry_run=False,
-        graph_file=None,
-        stdin_ok=True,
-    )
 
 
 @pytest.mark.parametrize("quiet", [False, True])
