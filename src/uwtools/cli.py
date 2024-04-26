@@ -352,7 +352,7 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
     """
     parser = _add_subparser(subparsers, STR.realize, "Realize a Rocoto XML workflow document")
     optional = _basic_setup(parser)
-    _add_arg_input_file(optional)
+    _add_arg_config_file(optional)
     _add_arg_output_file(optional)
     checks = _add_args_verbosity(optional)
     return checks
@@ -391,7 +391,7 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.rocoto.realize(
-        config=args[STR.infile],
+        config=args[STR.cfgfile],
         output_file=args[STR.outfile],
         stdin_ok=True,
     )
@@ -527,7 +527,7 @@ def _add_arg_batch(group: Group) -> None:
 
 
 def _add_arg_config_file(group: Group, required: bool = False) -> None:
-    msg = "Path to config file" + ("" if required else " (default: read from stdin)")
+    msg = "Path to UW YAML config file" + ("" if required else " (default: read from stdin)")
     group.add_argument(
         _switch(STR.cfgfile),
         "-c",

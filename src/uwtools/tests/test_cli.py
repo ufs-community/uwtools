@@ -409,14 +409,14 @@ def test__dispatch_rocoto(params):
 
 
 def test__dispatch_rocoto_realize():
-    args = {STR.infile: 1, STR.outfile: 2}
+    args = {STR.cfgfile: 1, STR.outfile: 2}
     with patch.object(uwtools.api.rocoto, "_realize") as _realize:
         cli._dispatch_rocoto_realize(args)
     _realize.assert_called_once_with(config=1, output_file=2)
 
 
 def test__dispatch_rocoto_realize_no_optional():
-    args = {STR.infile: None, STR.outfile: None}
+    args = {STR.cfgfile: None, STR.outfile: None}
     with patch.object(uwtools.api.rocoto, "_realize") as func:
         cli._dispatch_rocoto_realize(args)
     func.assert_called_once_with(config=None, output_file=None)
