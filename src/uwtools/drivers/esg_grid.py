@@ -83,14 +83,6 @@ class ESGGrid(Driver):
         """
         return STR.esggrid
 
-    @property
-    def _runcmd(self):
-        """
-        Returns the full command-line component invocation.
-        """
-        executable = self._driver_config["execution"]["executable"]
-        return "%s" % (executable)
-
     def _taskname(self, suffix: str) -> str:
         """
         Returns a common tag for graph-task log messages.
