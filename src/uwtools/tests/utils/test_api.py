@@ -62,7 +62,7 @@ def test_api_make_execute(execute_kwargs):
 def test_api_make_execute_cycle(execute_kwargs):
     execute_kwargs["cycle"] = dt.now()
     func = api.make_execute(driver_class=ConcreteDriver, with_cycle=True)
-    assert func.__name__ == "execute_cycle"
+    assert func.__name__ == "execute"
     assert func.__doc__ is not None
     assert ":param cycle:" in func.__doc__
     assert ":param driver_class:" not in func.__doc__

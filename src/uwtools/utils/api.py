@@ -79,6 +79,7 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
             stdin_ok=stdin_ok,
         )
 
+    execute_cycle.__name__ = "execute"
     assert _execute.__doc__ is not None
     execute_cycle.__doc__ = re.sub(r"\n *:param driver_class:.*\n", "\n", _execute.__doc__)
     execute.__doc__ = re.sub(r"\n *:param cycle:.*\n", "\n", execute_cycle.__doc__)
