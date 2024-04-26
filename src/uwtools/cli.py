@@ -61,8 +61,8 @@ def main() -> None:
         _abort(str(e))
     try:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
-        modes = {
-            STR.chgrescube: _dispatch_chgres_cube,
+        modes: Dict[str, Callable[..., bool]] = {
+            STR.chgrescube: partial(_dispatch_to_driver, "chgres_cube"),
             STR.config: _dispatch_config,
             STR.esggrid: _dispatch_esg_grid,
             STR.file: _dispatch_file,
@@ -120,7 +120,7 @@ def _add_subparser_for_driver_task(subparsers: Subparsers, task: str, helpmsg: s
     return checks
 
 
-def _dispatch_driver(name: str, args: Args) -> bool:
+def _dispatch_to_driver(name: str, args: Args) -> bool:
     """
     Dispatch logic for a driver mode.
 
@@ -1391,7 +1391,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     checks = {
-        STR.chgrescube: _add_subparser_chgres_cube(subparsers),
+        STR.chgrescube: _add_subparser_for_driver("chgres_cube", subparsers),
         STR.config: _add_subparser_config(subparsers),
         STR.esggrid: _add_subparser_esg_grid(subparsers),
         STR.file: _add_subparser_file(subparsers),
