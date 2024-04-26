@@ -6,6 +6,7 @@ esg_grid:
       walltime: "08:00:00"
     executable: /path/esg_grid
   namelist:
+    base_file: "/path/to/base_file"
     update_values:
       regional_grid_nml:
         delx: 0.11
