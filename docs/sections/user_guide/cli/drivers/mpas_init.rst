@@ -57,7 +57,7 @@ All tasks take the same arguments. For example:
      --version
          Show version info and exit
      --config-file PATH, -c PATH
-         Path to config file (default: read from stdin)
+         Path to UW YAML config file (default: read from stdin)
      --batch
          Submit run to batch scheduler
      --dry-run

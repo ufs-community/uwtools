@@ -49,7 +49,7 @@ The ``copy`` action stages files in a target directory by copying files. Any ``K
      --version
          Show version info and exit
      --config-file PATH, -c PATH
-         Path to config file
+         Path to UW YAML config file
      --dry-run
          Only log info, making no changes
      --quiet, -q
@@ -128,7 +128,7 @@ The ``link`` action stages files in a target directory by linking files, directo
      --version
          Show version info and exit
      --config-file PATH, -c PATH
-         Path to config file
+         Path to UW YAML config file
      --dry-run
          Only log info, making no changes
      --quiet, -q

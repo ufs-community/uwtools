@@ -35,18 +35,18 @@ More information about the structured UW YAML file for Rocoto can be found :any:
 .. code-block:: text
 
    $ uw rocoto realize --help
-   usage: uw rocoto realize [-h] [--version] [--input-file PATH] [--output-file PATH] [--quiet]
+   usage: uw rocoto realize [-h] [--version] [--config-file PATH] [--output-file PATH] [--quiet]
                             [--verbose]
-
+   
    Realize a Rocoto XML workflow document
-
+   
    Optional arguments:
      -h, --help
          Show help and exit
      --version
          Show version info and exit
-     --input-file PATH, -i PATH
-         Path to input file (defaults to stdin)
+     --config-file PATH, -c PATH
+         Path to UW YAML config file (default: read from stdin)
      --output-file PATH, -o PATH
          Path to output file (defaults to stdout)
      --quiet, -q
@@ -89,7 +89,7 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
 
   .. code-block:: xml
 
-     $ uw rocoto realize --input-file rocoto.yaml
+     $ uw rocoto realize --config-file rocoto.yaml
      [2024-01-02T13:41:25]     INFO 0 UW schema-validation errors found
      [2024-01-02T13:41:25]     INFO 0 Rocoto validation errors found
      <?xml version='1.0' encoding='utf-8'?>
@@ -117,7 +117,7 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
 
   .. code-block:: text
 
-     $ uw rocoto realize --input-file rocoto.yaml --output-file rocoto.xml
+     $ uw rocoto realize --config-file rocoto.yaml --output-file rocoto.xml
      [2024-01-02T13:45:46]     INFO 0 UW schema-validation errors found
      [2024-01-02T13:45:46]     INFO 0 Rocoto validation errors found
 
@@ -178,7 +178,7 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
 
   .. code-block:: text
 
-     $ uw rocoto realize --input-file rocoto.yaml --output-file rocoto.xml -q
+     $ uw rocoto realize --config-file rocoto.yaml --output-file rocoto.xml -q
      $
 
   The contents of ``rocoto.xml`` are unchanged from the previous example.
@@ -189,8 +189,8 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
 
   .. code-block:: text
 
-     $ uw rocoto realize --input-file rocoto.yaml --output-file rocoto.xml -v
-     [2024-01-02T14:00:01]    DEBUG Command: uw rocoto realize --input-file rocoto.yaml --output-file rocoto.xml -v
+     $ uw rocoto realize --config-file rocoto.yaml --output-file rocoto.xml -v
+     [2024-01-02T14:00:01]    DEBUG Command: uw rocoto realize --config-file rocoto.yaml --output-file rocoto.xml -v
      [2024-01-02T14:00:01]    DEBUG Dereferencing, initial value: {'workflow': {'attrs': {'realtime': ...
      [2024-01-02T14:00:01]    DEBUG Rendering: {'workflow': {'attrs': {'realtime': ...
      [2024-01-02T14:00:01]    DEBUG Rendering: {'attrs': {'realtime': False, 'scheduler': ...
