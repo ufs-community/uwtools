@@ -125,6 +125,15 @@ def test__add_subparser_file_link(subparsers):
     assert subparsers.choices[STR.link]
 
 
+def test__add_subparser_for_driver(subparsers):
+    name = "adriver"
+    adriver = Mock()
+    adriver.tasks.return_value = {"task1": "task1 description", "task2": "task2 description"}
+    with patch.object(cli, "import_module", return_value=adriver):
+        cli._add_subparser_for_driver(name, subparsers)
+    assert actions(subparsers.choices[name]) == ["task1", "task2"]
+
+
 def test__add_subparser_fv3(subparsers):
     cli._add_subparser_fv3(subparsers)
     assert actions(subparsers.choices[STR.fv3]) == [
@@ -897,14 +906,3 @@ def test__switch():
 
 def test__version():
     assert re.match(r"version \d+\.\d+\.\d+ build \d+", cli._version())
-
-
-# def test__add_subparser_chgres_cube(subparsers):
-#     cli._add_subparser_chgres_cube(subparsers)
-#     assert actions(subparsers.choices[STR.chgrescube]) == [
-#         "namelist_file",
-#         "provisioned_run_directory",
-#         "run",
-#         "runscript",
-#         "validate",
-#     ]

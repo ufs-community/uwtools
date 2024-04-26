@@ -62,7 +62,7 @@ def main() -> None:
     try:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         modes: Dict[str, Callable[..., bool]] = {
-            STR.chgrescube: partial(_dispatch_to_driver, "chgres_cube"),
+            STR.chgrescube: partial(_dispatch_to_driver, STR.chgrescube),
             STR.config: _dispatch_config,
             STR.esggrid: _dispatch_esg_grid,
             STR.file: _dispatch_file,
@@ -1194,7 +1194,7 @@ def _add_subparser_for_driver(name: str, subparsers: Subparsers) -> ModeChecks:
     :param name: Name of the driver whose subparser to configure.
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.chgrescube, "Execute %s tasks" % name)
+    parser = _add_subparser(subparsers, name, "Execute %s tasks" % name)
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
@@ -1329,7 +1329,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     checks = {
-        STR.chgrescube: _add_subparser_for_driver("chgres_cube", subparsers),
+        STR.chgrescube: _add_subparser_for_driver(STR.chgrescube, subparsers),
         STR.config: _add_subparser_config(subparsers),
         STR.esggrid: _add_subparser_esg_grid(subparsers),
         STR.file: _add_subparser_file(subparsers),
