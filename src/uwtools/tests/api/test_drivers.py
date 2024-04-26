@@ -6,7 +6,7 @@ from unittest.mock import patch
 import iotaa
 import pytest
 
-from uwtools.api import chgres_cube, fv3, jedi, mpas_init, mpas, sfc_climo_gen, ungrib
+from uwtools.api import chgres_cube, fv3, jedi, mpas, mpas_init, sfc_climo_gen, ungrib
 from uwtools.drivers import support
 from uwtools.utils import api
 
