@@ -81,66 +81,6 @@ def main() -> None:
         sys.exit(1)
 
 
-# PM
-
-
-def _add_subparser_for_driver(name: str, subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for a driver mode.
-
-    :param name: Name of the driver whose subparser to configure.
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.chgrescube, "Execute %s tasks" % name)
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {
-        task: _add_subparser_for_driver_task(subparsers, task, helpmsg)
-        for task, helpmsg in getattr(uwtools.api, name).tasks().items()
-    }
-
-
-def _add_subparser_for_driver_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
-    """
-    Subparser for a driver action.
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param task: The task to add a subparser for.
-    :param helpmsg: Help message for task.
-    """
-    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_cycle(required)
-    optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_to_driver(name: str, args: Args) -> bool:
-    """
-    Dispatch logic for a driver mode.
-
-    :param name: Name of the driver to dispatch to.
-    :param args: Parsed command-line args.
-    """
-    execute: Callable[..., bool] = getattr(uwtools.api, name).execute
-    return execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        cycle=args[STR.cycle],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
-
-
-# PM
-
 # Mode chgres_cube
 
 
@@ -1304,6 +1244,42 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     return parser
 
 
+def _add_subparser_for_driver(name: str, subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for a driver mode.
+
+    :param name: Name of the driver whose subparser to configure.
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.chgrescube, "Execute %s tasks" % name)
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_for_driver_task(subparsers, task, helpmsg)
+        for task, helpmsg in getattr(uwtools.api, name).tasks().items()
+    }
+
+
+def _add_subparser_for_driver_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+    """
+    Subparser for a driver action.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_cycle(required)
+    optional = _basic_setup(parser)
+    _add_arg_config_file(group=optional)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
 def _add_subparsers(parser: Parser, dest: str, metavar: str) -> Subparsers:
     """
     Add subparsers to a parser.
@@ -1368,6 +1344,25 @@ def _dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:
     :return: A dictionary based on the input key=value strings.
     """
     return dict([arg.split("=") for arg in config_items])
+
+
+def _dispatch_to_driver(name: str, args: Args) -> bool:
+    """
+    Dispatch logic for a driver mode.
+
+    :param name: Name of the driver to dispatch to.
+    :param args: Parsed command-line args.
+    """
+    execute: Callable[..., bool] = getattr(uwtools.api, name).execute
+    return execute(
+        task=args[STR.action],
+        config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
+        stdin_ok=True,
+    )
 
 
 def _formatter(prog: str) -> HelpFormatter:
