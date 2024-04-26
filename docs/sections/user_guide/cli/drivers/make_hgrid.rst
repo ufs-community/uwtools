@@ -1,5 +1,5 @@
 ``make_hgrid``
-============
+==============
 
 The ``uw`` mode for configuring and running the :ufs-utils:`make_hgrid<make-hgrid>` component.
 
