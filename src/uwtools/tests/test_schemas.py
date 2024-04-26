@@ -65,6 +65,7 @@ def update_values():
 def test_schema_chgres_cube():
     config = {
         "execution": {"executable": "chgres_cube"},
+        "namelist": {"base_file": "/path"},
         "run_dir": "/tmp",
     }
     errors = schema_validator("chgres-cube", "properties", "chgres_cube")
@@ -118,6 +119,7 @@ def test_schema_chgres_cube_run_dir(chgres_cube_prop):
 def test_schema_esg_grid():
     config = {
         "execution": {"executable": "esg_grid"},
+        "namelist": {"base_file": "/path"},
         "run_dir": "/tmp",
     }
     errors = schema_validator("esg-grid", "properties", "esg_grid")
@@ -312,6 +314,7 @@ def test_schema_fv3():
         "field_table": {"base_file": "/path"},
         "lateral_boundary_conditions": {"interval_hours": 1, "offset": 0, "path": "/tmp/file"},
         "length": 3,
+        "namelist": {"base_file": "/path"},
         "run_dir": "/tmp",
     }
     errors = schema_validator("fv3", "properties", "fv3")
@@ -637,6 +640,7 @@ def test_schema_rocoto_workflow_cycledef():
 def test_schema_sfc_climo_gen():
     config = {
         "execution": {"executable": "sfc_climo_gen"},
+        "namelist": {"base_file": "/path"},
         "run_dir": "/tmp",
     }
     errors = schema_validator("sfc-climo-gen", "properties", "sfc_climo_gen")

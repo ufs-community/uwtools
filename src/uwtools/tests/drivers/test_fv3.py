@@ -47,6 +47,13 @@ def config(tmp_path):
                 "path": str(tmp_path / "f{forecast_hour}"),
             },
             "length": 1,
+            "namelist": {
+                "update_values": {
+                    "namsfc": {
+                        "FNZORC": "igbp",
+                    },
+                },
+            },
             "run_dir": str(tmp_path),
         },
         "platform": {
