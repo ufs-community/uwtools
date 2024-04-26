@@ -5,6 +5,7 @@ UW YAML for Components
    :maxdepth: 1
 
    chgres_cube
+   esg_grid
    fv3
    mpas
    mpas_init

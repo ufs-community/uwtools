@@ -16,6 +16,7 @@ from typing import Any, Callable, Dict, List, NoReturn, Tuple
 import uwtools.api
 import uwtools.api.chgres_cube
 import uwtools.api.config
+import uwtools.api.esg_grid
 import uwtools.api.file
 import uwtools.api.fv3
 import uwtools.api.jedi
@@ -63,6 +64,7 @@ def main() -> None:
         modes = {
             STR.chgrescube: _dispatch_chgres_cube,
             STR.config: _dispatch_config,
+            STR.esggrid: _dispatch_esg_grid,
             STR.file: _dispatch_file,
             STR.fv3: _dispatch_fv3,
             STR.jedi: _dispatch_jedi,
@@ -347,6 +349,56 @@ def _dispatch_config_validate(args: Args) -> bool:
     return uwtools.api.config.validate(
         schema_file=args[STR.schemafile],
         config=args[STR.infile],
+        stdin_ok=True,
+    )
+
+
+# Mode esg_grid
+
+
+def _add_subparser_esg_grid(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: esg_grid
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.esggrid, "Execute esg_grid tasks")
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_esg_grid_task(subparsers, task, helpmsg)
+        for task, helpmsg in uwtools.api.esg_grid.tasks().items()
+    }
+
+
+def _add_subparser_esg_grid_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+    """
+    Subparser for mode: esg_grid <task>
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    optional = _basic_setup(parser)
+    _add_arg_config_file(group=optional, required=False)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
+def _dispatch_esg_grid(args: Args) -> bool:
+    """
+    Dispatch logic for esg_grid mode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.esg_grid.execute(
+        task=args[STR.action],
+        config=args[STR.cfgfile],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
         stdin_ok=True,
     )
 
@@ -1341,6 +1393,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     checks = {
         STR.chgrescube: _add_subparser_chgres_cube(subparsers),
         STR.config: _add_subparser_config(subparsers),
+        STR.esggrid: _add_subparser_esg_grid(subparsers),
         STR.file: _add_subparser_file(subparsers),
         STR.fv3: _add_subparser_fv3(subparsers),
         STR.jedi: _add_subparser_jedi(subparsers),

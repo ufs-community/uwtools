@@ -18,6 +18,11 @@ def chgres_cube_prop():
 
 
 @fixture
+def esg_grid_prop():
+    return partial(schema_validator, "esg-grid", "properties", "esg_grid", "properties")
+
+
+@fixture
 def fv3_prop():
     return partial(schema_validator, "fv3", "properties", "fv3", "properties")
 
@@ -35,6 +40,23 @@ def sfc_climo_gen_prop():
 @fixture
 def ungrib_prop():
     return partial(schema_validator, "ungrib", "properties", "ungrib", "properties")
+
+
+@fixture
+def update_values():
+    return {
+        "update_values": {
+            "regional_grid_nml": {
+                "delx": 0.22,
+                "dely": 0.22,
+                "lx": -200,
+                "ly": -130,
+                "pazi": 0.0,
+                "plat": 45.5,
+                "plon": -100.5,
+            }
+        }
+    }
 
 
 # chgres-cube
@@ -85,6 +107,117 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_prop):
 
 def test_schema_chgres_cube_run_dir(chgres_cube_prop):
     errors = chgres_cube_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# esg-grid
+
+
+def test_schema_esg_grid():
+    config = {
+        "execution": {"executable": "esg_grid"},
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("esg-grid", "properties", "esg_grid")
+    # Basic correctness:
+    assert not errors(config)
+    # Some top-level keys are required:
+    for key in ("execution", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+    # Additional MPI support is not allowed:
+    assert "Additional properties are not allowed ('mpicmd' was unexpected)" in errors(
+        {"execution": {"mpicmd": "srun"}}
+    )
+
+
+def test_schema_esg_grid_namelist(esg_grid_prop, update_values):
+    base_file = {"base_file": "/some/path"}
+    errors = esg_grid_prop("namelist")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # base_file must be a string:
+    assert "{'base_file': 88} is not valid under any of the given schemas" in errors(
+        {"base_file": 88}
+    )
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # All key/value pairs in update_values must be present if base_file is not supplied:
+    assert "is not valid under any of the given schemas" in errors(
+        with_del(update_values, "update_values", "regional_grid_nml", "delx")
+    )
+    # Subsection of update_values is ok if base_file is supplied:
+    assert not errors(
+        {
+            **base_file,
+            "update_values": {"regional_grid_nml": {"delx": 0.11, "lx": -180, "plat": 38.0}},
+        }
+    )
+    # regional_grid_nml is required with update_values:
+    assert "{'update_values': {}} is not valid under any of the given schemas" in errors(
+        with_del(update_values, "update_values", "regional_grid_nml")
+    )
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_schema_esg_grid_namelist_update_values(esg_grid_prop):
+    config = {
+        "base_file": "some/str",
+        "update_values": {
+            "regional_grid_nml": {
+                "delx": 0.22,
+                "dely": 0.22,
+                "lx": -200,
+                "ly": -130,
+                "pazi": 0.0,
+                "plat": 45.5,
+                "plon": -100.5,
+            }
+        },
+    }
+    errors = esg_grid_prop("namelist")
+    # Basic correctness:
+    assert not errors(config)
+    # A base_file with partial update_values is ok:
+    assert not errors(with_del(config, "update_values", "regional_grid_nml", "delx"))
+    # A completely-specified update_values with no base_file is ok:
+    assert not errors(with_del(config, "base_file"))
+    # A base_file with no update_values is ok:
+    assert not errors(with_del(config, "update_values"))
+    # It is an error to provide no base_file and only a partially-specified namelist:
+    assert "is not valid under any of the given schemas" in errors(
+        with_del(with_del(config, "base_file"), "update_values", "regional_grid_nml", "delx")
+    )
+    # update_values values must be a number:
+    assert "is not valid under any of the given schemas" in errors(
+        {"update_values": {"regional_grid_nml": {"delx": "/some/str"}}}
+    )
+    # It is an error to not provide at least one of base_file or update_values:
+    assert "{} is not valid under any of the given schemas" in errors(
+        with_del(with_del(config, "base_file"), "update_values")
+    )
+
+
+def test_schema_esg_grid_regional_grid_nml_properties():
+    errors = partial(schema_validator("esg-grid", "$defs", "regional_grid_nml_properties"))
+    # An integer value is ok:
+    assert not errors({"delx": 88})
+    # A floating-point value is ok:
+    assert not errors({"delx": 3.14})
+    # It is an error for the value to be of type string:
+    assert "'foo' is not of type 'number'" in errors({"ly": "foo"})
+    # It is an error not to supply a value:
+    assert "{'delx'} is not of type 'object'" in errors({"delx"})
+
+
+def test_schema_esg_grid_run_dir(esg_grid_prop):
+    errors = esg_grid_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
