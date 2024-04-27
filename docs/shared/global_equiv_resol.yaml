@@ -1,0 +1,11 @@
+global_equiv_resol:
+  execution:
+    batchargs:
+      cores: 1
+      walltime: "00:01:00"
+    executable: /path/to/global_equiv_resol.exe
+  input_grid_file: /path/to/input/grid/file
+  run_dir: /path/to/dir/run
+platform:
+  account: me
+  scheduler: slurm
