@@ -14,6 +14,7 @@ import pytest
 from pytest import fixture, raises
 
 import uwtools.api.config
+import uwtools.api.esg_grid
 import uwtools.api.fv3
 import uwtools.api.jedi
 import uwtools.api.make_hgrid
@@ -23,6 +24,7 @@ import uwtools.api.rocoto
 import uwtools.api.sfc_climo_gen
 import uwtools.api.template
 import uwtools.api.ungrib
+import uwtools.drivers.esg_grid
 import uwtools.drivers.fv3
 import uwtools.drivers.jedi
 import uwtools.drivers.make_hgrid
@@ -107,6 +109,17 @@ def test__add_subparser_config_realize(subparsers):
 def test__add_subparser_config_validate(subparsers):
     cli._add_subparser_config_validate(subparsers)
     assert subparsers.choices[STR.validate]
+
+
+def test__add_subparser_esg_grid(subparsers):
+    cli._add_subparser_esg_grid(subparsers)
+    assert actions(subparsers.choices[STR.esggrid]) == [
+        "namelist_file",
+        "provisioned_run_directory",
+        "run",
+        "runscript",
+        "validate",
+    ]
 
 
 def test__add_subparser_file(subparsers):
@@ -485,6 +498,26 @@ def test__dispatch_config_validate_config_obj():
     _validate_yaml.assert_called_once_with(**_validate_yaml_args)
 
 
+def test__dispatch_esg_grid():
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "dry_run": False,
+        "graph_file": None,
+        "stdin_ok": True,
+    }
+    with patch.object(uwtools.api.esg_grid, "execute") as execute:
+        cli._dispatch_esg_grid({**args, "action": "foo"})
+    execute.assert_called_once_with(
+        task="foo",
+        config="config.yaml",
+        batch=True,
+        dry_run=False,
+        graph_file=None,
+        stdin_ok=True,
+    )
+
+
 @pytest.mark.parametrize(
     "action, funcname", [(STR.copy, "_dispatch_file_copy"), (STR.link, "_dispatch_file_link")]
 )
@@ -537,6 +570,26 @@ def test__dispatch_fv3():
         batch=True,
         config="config.yaml",
         cycle=cycle,
+        dry_run=False,
+        graph_file=None,
+        task="foo",
+        stdin_ok=True,
+    )
+
+
+def test__dispatch_global_equiv_resol():
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "dry_run": False,
+        "graph_file": None,
+        "stdin_ok": True,
+    }
+    with patch.object(uwtools.api.global_equiv_resol, "execute") as execute:
+        cli._dispatch_global_equiv_resol({**args, "action": "foo"})
+    execute.assert_called_once_with(
+        batch=True,
+        config="config.yaml",
         dry_run=False,
         graph_file=None,
         task="foo",

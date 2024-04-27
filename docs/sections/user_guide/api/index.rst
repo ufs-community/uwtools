@@ -4,8 +4,10 @@ API
 .. toctree::
    chgres_cube
    config
+   esg_grid
    file
    fv3
+   global_equiv_resol
    logging
    make_hgrid
    mpas
