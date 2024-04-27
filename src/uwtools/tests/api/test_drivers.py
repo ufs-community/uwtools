@@ -6,12 +6,22 @@ from unittest.mock import patch
 import iotaa
 import pytest
 
-from uwtools.api import chgres_cube, esg_grid, fv3, jedi, mpas, mpas_init, sfc_climo_gen, ungrib
+from uwtools.api import (
+    chgres_cube,
+    esg_grid,
+    fv3,
+    global_equiv_resol,
+    jedi,
+    mpas,
+    mpas_init,
+    sfc_climo_gen,
+    ungrib,
+)
 from uwtools.drivers import support
 from uwtools.utils import api
 
 modules = [chgres_cube, esg_grid, fv3, jedi, mpas_init, mpas, sfc_climo_gen, ungrib]
-nocycle = [esg_grid, sfc_climo_gen]
+nocycle = [esg_grid, global_equiv_resol, sfc_climo_gen]
 
 
 @pytest.mark.parametrize("module", modules)
