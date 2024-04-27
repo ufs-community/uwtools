@@ -13,7 +13,7 @@ esg_grid:
         dely: 0.11
         lx: -214
         ly: -128
-        pazi: 0
+        pazi: 0.0
         plat: 38.5
         plon: -97.5
   run_dir: /path/to/esg_grid
