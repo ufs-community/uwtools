@@ -78,6 +78,7 @@ class STR:
     file2path: str = "file_2_path"
     file: str = "file"
     fv3: str = "fv3"
+    globalequivresol: str = "global_equiv_resol"
     graphfile: str = "graph_file"
     help: str = "help"
     infile: str = "input_file"

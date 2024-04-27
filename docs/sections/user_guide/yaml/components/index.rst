@@ -7,6 +7,7 @@ UW YAML for Components
    chgres_cube
    esg_grid
    fv3
+   global_equiv_resol
    mpas
    mpas_init
    sfc_climo_gen

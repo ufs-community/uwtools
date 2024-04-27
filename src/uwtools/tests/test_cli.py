@@ -565,6 +565,26 @@ def test__dispatch_fv3():
     )
 
 
+def test__dispatch_global_equiv_resol():
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "dry_run": False,
+        "graph_file": None,
+        "stdin_ok": True,
+    }
+    with patch.object(uwtools.api.global_equiv_resol, "execute") as execute:
+        cli._dispatch_global_equiv_resol({**args, "action": "foo"})
+    execute.assert_called_once_with(
+        batch=True,
+        config="config.yaml",
+        dry_run=False,
+        graph_file=None,
+        task="foo",
+        stdin_ok=True,
+    )
+
+
 def test__dispatch_jedi():
     cycle = dt.datetime.now()
     args: dict = {
