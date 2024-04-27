@@ -1,5 +1,5 @@
 """
-A driver for chgres_cube.
+A driver for make_hgrid.
 """
 
 from pathlib import Path

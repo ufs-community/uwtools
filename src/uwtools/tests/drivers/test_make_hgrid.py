@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
-global_equiv_resol driver tests.
+make_hgrid driver tests.
 """
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
@@ -106,4 +106,4 @@ def test_MakeHgrid__taskname(driverobj):
 
 
 def test_MakeHgrid__validate(driverobj):
-    driverobj._validate()  # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+    driverobj._validate()
