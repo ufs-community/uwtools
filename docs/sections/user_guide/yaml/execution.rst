@@ -75,14 +75,14 @@ The name of or path to the component's executable.
 mpiargs:
 """"""""
 
-An **array** (YAML sequence) of string arguments that should follow the MPI launch program (``mpiexec``, ``srun``, et al.) on the command line.
+An **array** (YAML sequence) of string arguments that should follow the MPI launch program (``mpiexec``, ``srun``, et al.) on the command line. This entry is only used when configuring parallel components.
 
 mpicmd:
 """""""
 
-The MPI launch program (``mpiexec``, ``srun``, et al.)
+The MPI launch program (``mpiexec``, ``srun``, et al.). This entry is only used when configuring parallel components.
 
 threads:
 """"""""
 
-Used to set the ``OMP_NUM_THREADS`` environment variable in the execution environment, to control the number of OpenMP threads to use when running the component.
+Used to set the ``OMP_NUM_THREADS`` environment variable in the execution environment, to control the number of OpenMP threads to use when running the component. This entry is only used when configuring parallel components.

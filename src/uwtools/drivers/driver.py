@@ -20,6 +20,7 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute
+from uwtools.utils.tasks import file
 
 
 class Driver(ABC):
@@ -84,7 +85,10 @@ class Driver(ABC):
         yield self._taskname("run via batch submission")
         path = Path("%s.submit" % self._runscript_path)
         yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
+        yield [
+            self.provisioned_run_directory(),
+            file(Path(self._driver_config["execution"]["executable"])),
+        ]
         self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
 
     @task
@@ -95,7 +99,10 @@ class Driver(ABC):
         yield self._taskname("run via local execution")
         path = self._rundir / f"done.{self._driver_name}"
         yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
+        yield [
+            self.provisioned_run_directory(),
+            file(Path(self._driver_config["execution"]["executable"])),
+        ]
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
         execute(cmd=cmd, cwd=self._rundir, log_output=True)
 

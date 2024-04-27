@@ -115,6 +115,12 @@ esg_grid
 | **CLI**: ``uw esg_grid -h``
 | **API**: ``import uwtools.api.drivers.esg_grid``
 
+global_equiv_resol
+""""""""""""""""""
+
+| **CLI**: ``uw global_equiv_resol -h``
+| **API**: ``import uwtools.api.drivers.global_equiv_resol``
+
 sfc_climo_gen
 """""""""""""
 

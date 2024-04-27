@@ -194,6 +194,8 @@ def test_FV3_restart_directory(driverobj):
 
 
 def test_FV3_run_batch(driverobj):
+    executable = Path(driverobj._driver_config["execution"]["executable"])
+    executable.touch()
     with patch.object(driverobj, "_run_via_batch_submission") as func:
         driverobj.run()
     func.assert_called_once_with()
@@ -201,6 +203,8 @@ def test_FV3_run_batch(driverobj):
 
 def test_FV3_run_local(driverobj):
     driverobj._batch = False
+    executable = Path(driverobj._driver_config["execution"]["executable"])
+    executable.touch()
     with patch.object(driverobj, "_run_via_local_execution") as func:
         driverobj.run()
     func.assert_called_once_with()
