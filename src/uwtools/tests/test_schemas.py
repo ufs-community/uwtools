@@ -249,6 +249,31 @@ def test_execution_threads():
     assert "3.14 is not of type 'integer'" in errors(3.14)
 
 
+# execution-serial
+
+
+def test_execution_serial():
+    config = {"executable": "fv3"}
+    batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
+    errors = schema_validator("execution")
+    # Basic correctness:
+    assert not errors(config)
+    # batchargs may optionally be specified:
+    assert not errors({**config, **batchargs})
+    # All properties are ok:
+    assert not errors({**config, **batchargs})
+    # Additional properties are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_execution_serial_batchargs():
+    test_execution_batchargs()
+
+
+def test_execution_serial_executable():
+    test_execution_batchargs()
+
+
 # files-to-stage
 
 
