@@ -32,7 +32,7 @@ Describes the required parameters to run a ``make_hgrid`` configuration.
 grid_type:
 """"""""""
 
-Specify type of topography. See the following options for more details:
+Specify grid type with one of the following recognized key words:
 
 * from_file:              --my_grid_file must be specified.
 * spectral_grid:          no other optional or required arguments.
@@ -41,7 +41,7 @@ Specify type of topography. See the following options for more details:
 * conformal_cubic_grid:   --nratio is optional argument.
 * gnomonic_ed:            equal distance gnomonic cubic grid.
 * simple_cartesian_grid:  --xbnds, --ybnds must be specified to define the grid bounds location and grid size. --simple_dx and --simple_dy must be specified to specify uniform cell length.
-* f_plane_grid:           For setting geometric fractors according f-plane. f_plane_latitude need to be specified
+* f_plane_grid:           For setting geometric fractors according f-plane. f_plane_latitude must be specified
 * beta_plane_grid:        For setting geometric fractors according to beta plane. f_plane_latitude need to be specified 
 
 
