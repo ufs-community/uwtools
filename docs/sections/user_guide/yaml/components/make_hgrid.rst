@@ -42,23 +42,23 @@ grid_type:
 
    * - Grid Type
      - Requirements
-   * - beta_plane_grid
+   * - ``beta_plane_grid``
      - For setting geometric factors according to beta plane. ``f_plane_latitude`` needs to be specified.
-   * - conformal_cubic_grid
+   * - ``conformal_cubic_grid``
      - ``nratio`` is an optional argument.
-   * - f_plane_grid
+   * - ``f_plane_grid``
      - For setting geometric factors according to f-plane. ``f_plane_latitude`` must be specified.
-   * - from_file
+   * - ``from_file``
      - ``my_grid_file`` must be specified.
-   * - gnomonic_ed
+   * - ``gnomonic_ed``
      - Equal distance gnomonic cubic grid.
-   * - simple_cartesian_grid
+   * - ``simple_cartesian_grid``
      - ``xbnds``, ``ybnds`` must be specified to define the grid bounds location and grid size. ``simple_dx`` and ``simple_dy`` must be specified to specify uniform cell length.
-   * - spectral_grid
+   * - ``spectral_grid``
      - No other optional or required arguments.
-   * - regular_lonlat_grid
+   * - ``regular_lonlat_grid``
      - ``nxbnds``, ``nybnds``, ``xbnds``, ``ybnds`` must be specified to define the grid bounds.
-   * - tripolar_grid
+   * - ``tripolar_grid``
      - ``nxbnds``, ``nybnds``, ``xbnds``, ``ybnds`` must be specified to define the grid bounds.
 
 
