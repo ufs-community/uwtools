@@ -1,42 +1,66 @@
 # pylint: disable=missing-function-docstring
 
 import os
+import stat
+from unittest.mock import patch
 
 from uwtools.utils import tasks
+
+# Helpers
+
+
+def ready(taskval):
+    return taskval.ready()  #
+
+
+# Tests
+
+
+def test_tasks_executable(tmp_path):
+    p = tmp_path / "program"
+    with patch.dict(os.environ, {"PATH": str(tmp_path)}, clear=True):
+        # Program does not exist:
+        assert not ready(tasks.executable(program=p))
+        # Program exists but is not executable:
+        p.touch()
+        assert not ready(tasks.executable(program=p))
+        # Program exists and is executable:
+        os.chmod(p, os.stat(p).st_mode | stat.S_IEXEC)  # set executable bits
+        assert ready(tasks.executable(program=p))
 
 
 def test_tasks_existing_missing(tmp_path):
     path = tmp_path / "x"
-    assert not tasks.existing(path=path).ready()  # type: ignore # pylint: disable=no-member
+    assert not ready(tasks.existing(path=path))
 
 
 def test_tasks_existing_present_directory(tmp_path):
     path = tmp_path / "directory"
     path.mkdir()
-    assert tasks.existing(path=path).ready()  # type: ignore # pylint: disable=no-member
+    assert ready(tasks.existing(path=path))
 
 
 def test_tasks_existing_present_file(tmp_path):
     path = tmp_path / "file"
     path.touch()
-    assert tasks.existing(path=path).ready()  # type: ignore # pylint: disable=no-member
+    assert ready(tasks.existing(path=path))
 
 
 def test_tasks_existing_present_symlink(tmp_path):
     path = tmp_path / "symlink"
     path.symlink_to(os.devnull)
-    assert tasks.existing(path=path).ready()  # type: ignore # pylint: disable=no-member
+    assert ready(tasks.existing(path=path))
 
 
 def test_tasks_file_missing(tmp_path):
     path = tmp_path / "file"
-    assert not tasks.file(path=path).ready()  # type: ignore # pylint: disable=no-member
+    assert not ready(tasks.file(path=path))
 
 
 def test_tasks_file_present(tmp_path):
     path = tmp_path / "file"
     path.touch()
-    assert tasks.file(path=path).ready()  # type: ignore # pylint: disable=no-member
+    assert ready(tasks.file(path=path))
 
 
 def test_tasks_filecopy(tmp_path):
