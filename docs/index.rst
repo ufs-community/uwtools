@@ -121,6 +121,12 @@ global_equiv_resol
 | **CLI**: ``uw global_equiv_resol -h``
 | **API**: ``import uwtools.api.drivers.global_equiv_resol``
 
+make_solo_mosaic
+""""""""""""""""
+
+| **CLI**: ``uw make_solo_mosaic -h``
+| **API**: ``import uwtools.api.drivers.make_solo_mosaic``
+
 sfc_climo_gen
 """""""""""""
 
