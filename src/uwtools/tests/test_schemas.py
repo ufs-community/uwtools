@@ -557,6 +557,14 @@ def test_schema_make_hgrid():
 
 def test_schema_make_hgrid_grid_type():
     # Get errors function from schema_validator.
+    # Initialize config object
+    config = {
+        "execution": {"executable": "make_hgrid"},
+        "run_dir": "/tmp",
+        "config": {"grid_type": "my_grid_file"},
+    }
+
+    # Get errors function from schema_validator
     errors = schema_validator("make-hgrid", "properties", "make_hgrid")
 
     # If grid_type is "from_file", my_grid_file is required.
@@ -565,55 +573,39 @@ def test_schema_make_hgrid_grid_type():
         "run_dir": "/tmp",
         "config": {"grid_type": "from_file"},
     }
+    # If grid_type is "from_file", my_grid_file is required
     assert "'my_grid_file' is a required property" in errors(config)
 
     # If grid_type is "tripolar_grid" or "regular_lonlat_grid",
     # nxbnds, nybnds, xbnds, and ybnds are required.
     for grid_type in ("tripolar_grid", "regular_lonlat_grid"):
-        config = {
-            "execution": {"executable": "make_hgrid"},
-            "run_dir": "/tmp",
-            "config": {"grid_type": grid_type},
-        }
         for prop in ("nxbnds", "nybnds", "xbnds", "ybnds"):
-            assert f"'{prop}' is a required property" in errors(config)
+            assert f"'{prop}' is a required property" in errors({**config, "grid_type": grid_type})
 
     # If grid_type is "simple_cartesian_grid",
-    # nxbnds, nybnds, xbnds, ybnds, simple_dx, and simple_dy are required.
-    config = {
-        "execution": {"executable": "make_hgrid"},
-        "run_dir": "/tmp",
-        "config": {"grid_type": "simple_cartesian_grid"},
-    }
+    # nxbnds, nybnds, xbnds, ybnds, simple_dx, and simple_dy are required
     for prop in ("nxbnds", "nybnds", "xbnds", "ybnds", "simple_dx", "simple_dy"):
-        assert f"'{prop}' is a required property" in errors(config)
+        assert f"'{prop}' is a required property" in errors(
+            {**config, "grid_type": "simple_cartesian_grid"}
+        )
 
     # If grid_type is "f_plane_grid" or "beta_plane_grid", f_plane_latitude is required.
     for grid_type in ("f_plane_grid", "beta_plane_grid"):
-        config = {
-            "execution": {"executable": "make_hgrid"},
-            "run_dir": "/tmp",
-            "config": {"grid_type": grid_type},
-        }
-        assert "'f_plane_latitude' is a required property" in errors(config)
+        assert "'f_plane_latitude' is a required property" in errors(
+            {**config, "grid_type": grid_type}
+        )
 
-    # If grid_type is "gnomonic_ed" and nest_grids is present, halo is required.
-    config = {
-        "execution": {"executable": "make_hgrid"},
-        "run_dir": "/tmp",
-        "config": {"grid_type": "gnomonic_ed", "nest_grids": 1},
-    }
-    assert "'halo' is a required property" in errors(config)
+    # If grid_type is "gnomonic_ed" and nest_grids is present, halo is required
+    assert "'halo' is a required property" in errors(
+        {**config, "grid_type": "gnomonic_ed", "nest_grids": 1}
+    )
 
     # If do_schmidt and do_cube_transform are present,
-    # stretch_factor, target_lat, and target_lon are required.
-    config = {
-        "execution": {"executable": "make_hgrid"},
-        "run_dir": "/tmp",
-        "config": {"grid_type": "gnomonic_ed", "do_schmidt": True, "do_cube_transform": True},
-    }
+    # stretch_factor, target_lat, and target_lon are required
     for prop in ("stretch_factor", "target_lat", "target_lon"):
-        assert f"'{prop}' is a required property" in errors(config)
+        assert f"'{prop}' is a required property" in errors(
+            {**config, "do_schmidt": True, "do_cube_transform": True}
+        )
 
 
 def test_schema_make_hgrid_run_dir(make_hgrid_prop):

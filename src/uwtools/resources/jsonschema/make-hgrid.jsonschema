@@ -283,7 +283,7 @@
           ]
         },
         "execution": {
-          "$ref": "urn:uwtools:execution"
+          "$ref": "urn:uwtools:execution-serial"
         },
         "run_dir": {
           "type": "string"
