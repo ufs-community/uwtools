@@ -34,7 +34,7 @@ Describes the required parameters to run a ``make_hgrid`` configuration.
 grid_type:
 """"""""""
 
-Specify grid type with one of the following recognized key words:
+``grid_type`` is the primary required key that defines the grid and additional required keys. It is specified with one of the following recognized key words:
 
 .. list-table:: Grid Types and Requirements
    :widths: 20 80
@@ -66,7 +66,7 @@ Specify grid type with one of the following recognized key words:
 angular_midpoint:
 """""""""""""""""
 
-If specified, when grid_type is from_file and the input is a NetCDF file, then the supergrid face midpoint coordinates are simply and independently (the lat independently from the lon) calculated as simple angular midpoints from the model grid coordinates.
+If specified, when ``grid_type`` is ``from_file`` and the input is a NetCDF file, then the supergrid face midpoint coordinates are simply and independently (the lat independently from the lon) calculated as simple angular midpoints from the model grid coordinates.
 
 center:
 """""""
@@ -76,12 +76,12 @@ Specify the center location of grid.
 do_cube_transform:
 """"""""""""""""""
 
-Set to re-orient the rotated cubed sphere so that tile 6 has 'north' facing upward. When do_cube_transform is set, the following must be set: --stretch_factor, --latget_lon, and --target_lat. 
+Set to re-orient the rotated cubed sphere so that tile 6 has 'north' facing upward. When ``do_cube_transform`` is set, the following must be set: ``stretch_factor``, ``latget_lon``, and ``target_lat``. 
 
 do_schmidt:
 """""""""""
 
-Set to do Schmidt transformation to create a stretched grid. When do_schmidt is set, the following must be set: --stretch_factor, --target_lon and --target_lat.
+Set to do Schmidt transformation to create a stretched grid. When ``do_schmidt`` is set, the following must be set: ``stretch_factor``, ``target_lon`` and ``target_lat``.
 
 dlat:
 """""
@@ -233,7 +233,7 @@ Will print out running time message when this is set. Otherwise the run will be 
 xbnds:
 """"""
 
-Specify boundaries for defining zonal regions of varying resolution. When --tripolar is present, also defines the longitude of the two new poles.
+Specify boundaries for defining zonal regions of varying resolution. When ``tripolar`` is present, also defines the longitude of the two new poles.
 
 ybnds:
 """"""
