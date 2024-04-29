@@ -232,20 +232,21 @@ The UW YAML for ``make_hgrid`` uses keys from the ``UFS_UTILS`` tool parameters.
 
 .. code-block:: yaml
 
-   grid_type: "gnomonic_ed"
-   nlon: ${2*GFDLgrid_NUM_CELLS}
-   grid_name: ${GRID_GEN_METHOD}
-   do_schmidt: True
-   stretch_factor: ${GFDLgrid_STRETCH_FAC}
-   target_lon: ${GFDLgrid_LON_T6_CTR}
-   target_lat: ${GFDLgrid_LAT_T6_CTR}
-   nest_grid: True
-   parent_tile: 6
-   refine_ratio: ${GFDLgrid_REFINE_RATIO}
-   istart_nest: ${GFDLgrid_ISTART_OF_RGNL_DOM_WITH_WIDE_HALO_ON_T6SG}
-   jstart_nest: ${GFDLgrid_JSTART_OF_RGNL_DOM_WITH_WIDE_HALO_ON_T6SG}
-   iend_nest: ${GFDLgrid_IEND_OF_RGNL_DOM_WITH_WIDE_HALO_ON_T6SG}
-   jend_nest: ${GFDLgrid_JEND_OF_RGNL_DOM_WITH_WIDE_HALO_ON_T6SG}
-   halo: 1
-   great_circle_algorithm: True
-:
+   make_hgrid:
+      config:
+         grid_type: "gnomonic_ed"
+         nlon: ${2*GFDLgrid_NUM_CELLS}
+         grid_name: ${GRID_GEN_METHOD}
+         do_schmidt: True
+         stretch_factor: ${GFDLgrid_STRETCH_FAC}
+         target_lon: ${GFDLgrid_LON_T6_CTR}
+         target_lat: ${GFDLgrid_LAT_T6_CTR}
+         nest_grid: True
+         parent_tile: 6
+         refine_ratio: ${GFDLgrid_REFINE_RATIO}
+         istart_nest: ${GFDLgrid_ISTART_OF_RGNL_DOM_WITH_WIDE_HALO_ON_T6SG}
+         jstart_nest: ${GFDLgrid_JSTART_OF_RGNL_DOM_WITH_WIDE_HALO_ON_T6SG}
+         iend_nest: ${GFDLgrid_IEND_OF_RGNL_DOM_WITH_WIDE_HALO_ON_T6SG}
+         jend_nest: ${GFDLgrid_JEND_OF_RGNL_DOM_WITH_WIDE_HALO_ON_T6SG}
+         halo: 1
+         great_circle_algorithm: True
