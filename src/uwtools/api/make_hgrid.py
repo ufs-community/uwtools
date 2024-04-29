@@ -19,7 +19,7 @@ def execute(
     stdin_ok: bool = False,
 ) -> bool:
     """
-    Execute an ``make_hgrid`` task.
+    Execute a ``make_hgrid`` task.
 
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
