@@ -23,7 +23,7 @@ def config(tmp_path):
                 "nest_grids": 1,
                 "halo": 1,
                 "parent_tile": [6],
-                "verbose": True
+                "verbose": True,
             },
             "execution": {
                 "batchargs": {

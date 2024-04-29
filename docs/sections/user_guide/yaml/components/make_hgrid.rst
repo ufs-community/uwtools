@@ -106,22 +106,22 @@ Specify the grid name.
 halo:
 """""
 
-Halo size is to make sure the nest, including the halo region, is fully contained within a single parent (coarse) tile.
+Halo size is to make sure the nest, including the halo region, is fully contained within a single parent (coarse) tile. It only needs to be specified when ``nest_grids`` is set.
 
 lat_join:
 """""""""
 
-Specify latitude for joining spherical and rotated bipolar grid. Default value is 65 degree
+Specify latitude for joining spherical and rotated bipolar grid. Default value is 65 degrees.
 
 my_grid_file:
 """""""""""""
 
-Read grid information from 'my_grid_file'. The file format can be ascii file or netcdf file.
+Read grid information from 'my_grid_file'. The file format can be ascii file or netcdf file. Required when ``grid_type`` is ``from_file``.
 
 nest_grids:
 """""""""""
 
-Set to create this # nested grids as well as the global grid.
+Set to create this # nested grids as well as the global grid. This option could only be set when ``grid_type`` is ``gnomonic_ed``.
 
 istart_nest:
 """"""""""""
@@ -178,7 +178,7 @@ Specify the refinement ratio when calculating cell length and area of supergrid.
 out_halo:
 """""""""
 
-Extra halo size data to be written out.
+Extra halo size data to be written out. This is only works for ``gnomonic_ed``.
 
 parent_tile:
 """"""""""""
