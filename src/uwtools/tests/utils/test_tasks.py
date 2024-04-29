@@ -10,7 +10,7 @@ from uwtools.utils import tasks
 
 
 def ready(taskval):
-    return taskval.ready()  #
+    return taskval.ready()
 
 
 # Tests
@@ -18,6 +18,7 @@ def ready(taskval):
 
 def test_tasks_executable(tmp_path):
     p = tmp_path / "program"
+    # Ensure that only our temp directory is on the path:
     with patch.dict(os.environ, {"PATH": str(tmp_path)}, clear=True):
         # Program does not exist:
         assert not ready(tasks.executable(program=p))
