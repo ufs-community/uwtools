@@ -5,7 +5,7 @@ make_hgrid
 
 Structured YAML to run :ufs-utils:`make_hgrid<make-hgrid>` is validated by JSON Schema and requires the ``make_hgrid:`` block, described below. If ``make_hgrid`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
-YAML keys and their descriptions are taken largely verbatim from the ``make_hgrid`` tool source code, available `here <https://github.com/NOAA-GFDL/FRE-NCtools/blob/65c34e76cfa2ff567f70da83f44cd6f991315f08/tools/make_hgrid/make_hgrid.c#L71>`_`
+YAML keys and their descriptions are taken largely verbatim from the ``make_hgrid`` tool source code, available `here <https://github.com/NOAA-GFDL/FRE-NCtools/blob/65c34e76cfa2ff567f70da83f44cd6f991315f08/tools/make_hgrid/make_hgrid.c#L71>`_.
 
 Here is a prototype UW YAML ``make_hgrid:`` block, explained in detail below:
 
@@ -36,18 +36,30 @@ grid_type:
 
 Specify grid type with one of the following recognized key words:
 
-| Grid Type               | Requirements                                                                                          |
-|-------------------------|-------------------------------------------------------------------------------------------------------|
-| from_file               | --my_grid_file must be specified.                                                                    |
-| spectral_grid           | No other optional or required arguments.                                                             |
-| regular_lonlat_grid     | --nxbnds, --nybnds, --xbnds, --ybnds must be specified to define the grid bounds.                     |
-| tripolar_grid           | --nxbnds, --nybnds, --xbnds, --ybnds must be specified to define the grid bounds.                     |
-| conformal_cubic_grid    | --nratio is an optional argument.                                                                    |
-| gnomonic_ed             | Equal distance gnomonic cubic grid.                                                                  |
-| simple_cartesian_grid   | --xbnds, --ybnds must be specified to define the grid bounds location and grid size. --simple_dx and --simple_dy must be specified to specify uniform cell length. |
-| f_plane_grid            | For setting geometric factors according to f-plane. f_plane_latitude must be specified.               |
-| beta_plane_grid         | For setting geometric factors according to beta plane. f_plane_latitude needs to be specified.       |
+.. list-table:: Grid Types and Requirements
+   :widths: 20 80
+   :header-rows: 1
 
+   * - Grid Type
+     - Requirements
+   * - from_file
+     - --my_grid_file must be specified.
+   * - spectral_grid
+     - No other optional or required arguments.
+   * - regular_lonlat_grid
+     - --nxbnds, --nybnds, --xbnds, --ybnds must be specified to define the grid bounds.
+   * - tripolar_grid
+     - --nxbnds, --nybnds, --xbnds, --ybnds must be specified to define the grid bounds.
+   * - conformal_cubic_grid
+     - --nratio is an optional argument.
+   * - gnomonic_ed
+     - Equal distance gnomonic cubic grid.
+   * - simple_cartesian_grid
+     - --xbnds, --ybnds must be specified to define the grid bounds location and grid size. --simple_dx and --simple_dy must be specified to specify uniform cell length.
+   * - f_plane_grid
+     - For setting geometric factors according to f-plane. f_plane_latitude must be specified.
+   * - beta_plane_grid
+     - For setting geometric factors according to beta plane. f_plane_latitude needs to be specified.
 
 
 angular_midpoint:
