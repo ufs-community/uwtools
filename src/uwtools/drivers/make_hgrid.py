@@ -63,6 +63,25 @@ class MakeHgrid(Driver):
         """
         return STR.makehgrid
 
+
+    @property
+    def _runcmd(self):
+        """
+        Returns the full command-line component invocation.
+        """
+        executable = self._driver_config["execution"]["executable"]
+        config = self._driver_config["config"]
+        flags = []
+        for k, v in config.items():
+            if isinstance(v, bool):
+                flags.append("--%s" % k)
+            elif isinstance(v, list):
+                flags.append("--%s %s" % (k, ",".join(map(str, v))))
+            else:
+                flags.append("--%s %s" % (k, v))
+        return f"{executable} " + " ".join(flags)
+
+
     def _taskname(self, suffix: str) -> str:
         """
         Returns a common tag for graph-task log messages.
