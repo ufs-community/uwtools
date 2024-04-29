@@ -540,6 +540,7 @@ def test_schema_jedi_run_dir(jedi_prop):
 
 def test_schema_make_hgrid():
     config = {
+        "config": {"grid_type": "from_file", "my_grid_file": "/path/to/my_grid_file"},
         "execution": {"executable": "make_hgrid"},
         "run_dir": "/tmp",
     }
@@ -547,17 +548,18 @@ def test_schema_make_hgrid():
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("execution", "run_dir"):
+    for key in ("config", "execution", "run_dir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
-    # config needs at least the grid_type key:
-    assert "'grid_type' is a required property" in errors({"config": {}})
 
 
 def test_schema_make_hgrid_grid_type():
     # Get errors function from schema_validator
     errors = schema_validator("make-hgrid", "properties", "make_hgrid", "properties", "config")
+
+    # config needs at least the grid_type key:
+    assert "'grid_type' is a required property" in errors({})
 
     # If grid_type is "from_file", my_grid_file is required
     assert "'my_grid_file' is a required property" in errors({"grid_type": "from_file"})

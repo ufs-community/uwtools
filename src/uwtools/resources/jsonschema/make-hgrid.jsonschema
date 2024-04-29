@@ -102,7 +102,11 @@
                   "do_schmidt": {
                     "type": "boolean"
                   }
-                }
+                },
+                "required": [
+                  "do_cube_transform",
+                  "do_schmidt"
+                ]
               },
               "then": {
                 "required": [
@@ -290,6 +294,7 @@
         }
       },
       "required": [
+        "config",
         "execution",
         "run_dir"
       ]

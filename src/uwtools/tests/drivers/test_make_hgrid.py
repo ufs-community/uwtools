@@ -18,6 +18,10 @@ from uwtools.scheduler import Slurm
 def config(tmp_path):
     return {
         "make_hgrid": {
+            "config": {
+                "grid_type": "from_file",
+                "my_grid_file": "/path/to/my_grid_file",
+            },
             "execution": {
                 "batchargs": {
                     "cores": 1,
