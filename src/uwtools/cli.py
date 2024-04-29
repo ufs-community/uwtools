@@ -1445,6 +1445,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         STR.fv3: _add_subparser_fv3(subparsers),
         STR.globalequivresol: _add_subparser_global_equiv_resol(subparsers),
         STR.jedi: _add_subparser_jedi(subparsers),
+        STR.makehgrid: _add_subparser_make_hgrid(subparsers),
         STR.mpas: _add_subparser_mpas(subparsers),
         STR.mpasinit: _add_subparser_mpas_init(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),
