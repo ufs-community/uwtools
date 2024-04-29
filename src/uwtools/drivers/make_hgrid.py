@@ -63,7 +63,6 @@ class MakeHgrid(Driver):
         """
         return STR.makehgrid
 
-
     @property
     def _runcmd(self):
         """
@@ -80,7 +79,6 @@ class MakeHgrid(Driver):
             else:
                 flags.append("--%s %s" % (k, v))
         return f"{executable} " + " ".join(flags)
-
 
     def _taskname(self, suffix: str) -> str:
         """
