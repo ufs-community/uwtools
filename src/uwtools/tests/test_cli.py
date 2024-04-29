@@ -17,6 +17,7 @@ import uwtools.api.config
 import uwtools.api.esg_grid
 import uwtools.api.fv3
 import uwtools.api.jedi
+import uwtools.api.make_solo_mosaic
 import uwtools.api.mpas
 import uwtools.api.mpas_init
 import uwtools.api.rocoto
@@ -26,6 +27,7 @@ import uwtools.api.ungrib
 import uwtools.drivers.esg_grid
 import uwtools.drivers.fv3
 import uwtools.drivers.jedi
+import uwtools.drivers.make_solo_mosaic
 import uwtools.drivers.mpas
 import uwtools.drivers.mpas_init
 import uwtools.drivers.sfc_climo_gen
@@ -714,6 +716,26 @@ def test__dispatch_sfc_climo_gen():
         cli._dispatch_sfc_climo_gen({**args, "action": "foo"})
     execute.assert_called_once_with(
         batch=True, config="config.yaml", dry_run=False, graph_file=None, task="foo", stdin_ok=True
+    )
+
+
+def test__dispatch_make_solo_mosaic():
+    args: dict = {
+        "batch": True,
+        "config_file": "config.yaml",
+        "dry_run": False,
+        "graph_file": None,
+        "stdin_ok": True,
+    }
+    with patch.object(uwtools.api.make_solo_mosaic, "execute") as execute:
+        cli._dispatch_make_solo_mosaic({**args, "action": "foo"})
+    execute.assert_called_once_with(
+        batch=True,
+        config="config.yaml",
+        dry_run=False,
+        graph_file=None,
+        task="foo",
+        stdin_ok=True,
     )
 
 

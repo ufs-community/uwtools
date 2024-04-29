@@ -1,0 +1,25 @@
+{
+  "properties": {
+    "make_solo_mosaic": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "$ref": "urn:uwtools:execution-serial"
+        },
+        "input_file": {
+          "type": "string"
+        },
+        "run_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "input_file",
+        "run_dir"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}
