@@ -19,8 +19,11 @@ def config(tmp_path):
     return {
         "make_hgrid": {
             "config": {
-                "grid_type": "from_file",
-                "my_grid_file": "/path/to/my_grid_file",
+                "grid_type": "gnomonic_ed",
+                "nest_grids": 1,
+                "halo": 1,
+                "parent_tile": [6],
+                "verbose": True
             },
             "execution": {
                 "batchargs": {
