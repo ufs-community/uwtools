@@ -3,7 +3,7 @@
 jedi
 ====
 
-Structured YAML to run :ufs-utils:`jedi<jedi>` is validated by JSON Schema and requires the ``jedi:`` block, described below. If ``jedi`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
+Structured YAML to run JEDI is validated by JSON Schema and requires the ``jedi:`` block, described below. If ``jedi`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
 Here is a prototype UW YAML jedi: block, explained in detail below:
 
