@@ -13,6 +13,7 @@ from functools import partial
 from importlib import import_module
 from pathlib import Path
 from typing import Any, Callable, Dict, List, NoReturn, Tuple
+from src.uwtools.api import make_hgrid
 
 import uwtools.api
 import uwtools.api.config
@@ -62,6 +63,7 @@ def main() -> None:
             STR.fv3: partial(_dispatch_to_driver, STR.fv3),
             STR.globalequivresol: partial(_dispatch_to_driver, STR.globalequivresol),
             STR.jedi: partial(_dispatch_to_driver, STR.jedi),
+            STR.makehgrid: partial(_dispatch_make_hgrid, STR.makehgrid),
             STR.mpas: partial(_dispatch_to_driver, STR.mpas),
             STR.mpasinit: partial(_dispatch_to_driver, STR.mpasinit),
             STR.rocoto: _dispatch_rocoto,
@@ -951,6 +953,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         STR.fv3: _add_subparser_for_driver(STR.fv3, subparsers),
         STR.globalequivresol: _add_subparser_for_driver(STR.globalequivresol, subparsers),
         STR.jedi: _add_subparser_for_driver(STR.jedi, subparsers),
+        STR.makehgrid: _add_subparser_for_driver(STR.makehgrid, subparsers),
         STR.mpas: _add_subparser_for_driver(STR.mpas, subparsers),
         STR.mpasinit: _add_subparser_for_driver(STR.mpasinit, subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),

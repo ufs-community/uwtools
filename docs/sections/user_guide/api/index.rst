@@ -9,6 +9,7 @@ API
    fv3
    global_equiv_resol
    logging
+   make_hgrid
    mpas
    mpas_init
    rocoto

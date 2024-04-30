@@ -87,6 +87,7 @@ class STR:
     keys: str = "keys"
     keyvalpairs: str = "key_eq_val_pairs"
     link: str = "link"
+    makehgrid: str = "make_hgrid"
     mode: str = "mode"
     model: str = "model"
     mpas: str = "mpas"
