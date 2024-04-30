@@ -9,6 +9,7 @@ from unittest.mock import PropertyMock, patch
 
 import pytest
 import yaml
+from iotaa import asset, external
 from pytest import fixture
 
 from uwtools.drivers import driver, fv3
@@ -21,6 +22,16 @@ from uwtools.tests.support import logged
 @fixture
 def cycle():
     return dt.datetime(2024, 2, 1, 18)
+
+
+@fixture
+def truetask():
+    @external
+    def true(*args, **kwargs):  # pylint: disable=unused-argument
+        yield "true"
+        yield asset(True, lambda: True)
+
+    return true
 
 
 # Driver fixtures
@@ -219,26 +230,28 @@ def test_FV3_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_FV3__run_via_batch_submission(driverobj):
+def test_FV3__run_via_batch_submission(driverobj, truetask):
     runscript = driverobj._runscript_path
     with patch.object(driverobj, "provisioned_run_directory") as prd:
         with patch.object(fv3.FV3, "_scheduler", new_callable=PropertyMock) as scheduler:
-            driverobj._run_via_batch_submission()
-            scheduler().submit_job.assert_called_once_with(
-                runscript=runscript, submit_file=Path(f"{runscript}.submit")
-            )
+            with patch.object(driver, "executable", truetask):
+                driverobj._run_via_batch_submission()
+                scheduler().submit_job.assert_called_once_with(
+                    runscript=runscript, submit_file=Path(f"{runscript}.submit")
+                )
         prd.assert_called_once_with()
 
 
-def test_FV3__run_via_local_execution(driverobj):
+def test_FV3__run_via_local_execution(driverobj, truetask):
     with patch.object(driverobj, "provisioned_run_directory") as prd:
         with patch.object(driver, "execute") as execute:
-            driverobj._run_via_local_execution()
-            execute.assert_called_once_with(
-                cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
-                cwd=driverobj._rundir,
-                log_output=True,
-            )
+            with patch.object(driver, "executable", truetask):
+                driverobj._run_via_local_execution()
+                execute.assert_called_once_with(
+                    cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
+                    cwd=driverobj._rundir,
+                    log_output=True,
+                )
         prd.assert_called_once_with()
 
 

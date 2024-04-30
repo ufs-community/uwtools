@@ -20,7 +20,7 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute
-from uwtools.utils.tasks import file
+from uwtools.utils.tasks import executable
 
 
 class Driver(ABC):
@@ -87,7 +87,7 @@ class Driver(ABC):
         yield asset(path, path.is_file)
         yield [
             self.provisioned_run_directory(),
-            file(Path(self._driver_config["execution"]["executable"])),
+            executable(self._driver_config["execution"]["executable"]),
         ]
         self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
 
@@ -101,7 +101,7 @@ class Driver(ABC):
         yield asset(path, path.is_file)
         yield [
             self.provisioned_run_directory(),
-            file(Path(self._driver_config["execution"]["executable"])),
+            executable((self._driver_config["execution"]["executable"])),
         ]
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
         execute(cmd=cmd, cwd=self._rundir, log_output=True)
