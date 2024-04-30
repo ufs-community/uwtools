@@ -101,7 +101,7 @@ class Driver(ABC):
         yield asset(path, path.is_file)
         yield [
             self.provisioned_run_directory(),
-            executable((self._driver_config["execution"]["executable"])),
+            executable(self._driver_config["execution"]["executable"]),
         ]
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
         execute(cmd=cmd, cwd=self._rundir, log_output=True)
