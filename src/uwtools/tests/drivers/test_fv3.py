@@ -219,28 +219,26 @@ def test_FV3_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_FV3__run_via_batch_submission(driverobj, truetask):
+def test_FV3__run_via_batch_submission(driverobj):
     runscript = driverobj._runscript_path
     with patch.object(driverobj, "provisioned_run_directory") as prd:
         with patch.object(fv3.FV3, "_scheduler", new_callable=PropertyMock) as scheduler:
-            with patch.object(driver, "executable", truetask):
-                driverobj._run_via_batch_submission()
-                scheduler().submit_job.assert_called_once_with(
-                    runscript=runscript, submit_file=Path(f"{runscript}.submit")
-                )
+            driverobj._run_via_batch_submission()
+            scheduler().submit_job.assert_called_once_with(
+                runscript=runscript, submit_file=Path(f"{runscript}.submit")
+            )
         prd.assert_called_once_with()
 
 
-def test_FV3__run_via_local_execution(driverobj, truetask):
+def test_FV3__run_via_local_execution(driverobj):
     with patch.object(driverobj, "provisioned_run_directory") as prd:
         with patch.object(driver, "execute") as execute:
-            with patch.object(driver, "executable", truetask):
-                driverobj._run_via_local_execution()
-                execute.assert_called_once_with(
-                    cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
-                    cwd=driverobj._rundir,
-                    log_output=True,
-                )
+            driverobj._run_via_local_execution()
+            execute.assert_called_once_with(
+                cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
+                cwd=driverobj._rundir,
+                log_output=True,
+            )
         prd.assert_called_once_with()
 
 
