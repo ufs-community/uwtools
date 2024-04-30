@@ -82,7 +82,8 @@ def test_MakeHgrid__runcmd(driverobj):
     cmd = driverobj._runcmd
     assert (
         cmd
-        == "/path/to/make_hgrid --grid_type gnomonic_ed --halo 1 --nest_grids 1 --parent_tile 6 --verbose"
+        == "/path/to/make_hgrid --grid_type gnomonic_ed --halo 1 \
+--nest_grids 1 --parent_tile 6 --verbose"
     )
 
 
