@@ -148,6 +148,8 @@
               "type": "boolean"
             },
             "f_plane_latitude": {
+              "maximum": 90,
+              "minimum": -90,
               "type": "number"
             },
             "great_circle_algorithm": {
@@ -201,7 +203,18 @@
               "type": "number"
             },
             "my_grid_file": {
-              "type": "string"
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array"
+                }
+              ]
             },
             "nest_grids": {
               "type": "integer"
@@ -231,6 +244,10 @@
               "type": "integer"
             },
             "out_halo": {
+              "enum": [
+                0,
+                1
+              ],
               "type": "integer"
             },
             "parent_tile": {
