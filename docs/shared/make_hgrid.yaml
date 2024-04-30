@@ -1,6 +1,6 @@
 make_hgrid:
-  execution: 
-    batchargs: 
+  execution:
+    batchargs:
       nodes: 1
       stdout: /path/to/runscript.out
       walltime: "08:00:00"
@@ -22,4 +22,4 @@ make_hgrid:
     stretch_factor: 1.0001
     target_lon: -97.5
     target_lat: 38.5
-  run_dir: /path/to/make_hgrid 
+  run_dir: /path/to/make_hgrid

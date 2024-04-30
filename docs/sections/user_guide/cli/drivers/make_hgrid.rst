@@ -34,7 +34,7 @@ All tasks take the same arguments. For example:
    $ uw make_hgrid run -h
    usage: uw make_hgrid run --config-file PATH [-h] [--version] [--batch] [--dry-run]
                                     [--graph-file PATH] [--quiet] [--verbose]
-   
+
    A run
 
    Optional arguments:
@@ -79,7 +79,7 @@ Its contents are described in section :ref:`make_hgrid_yaml`.
   .. code-block:: text
 
      $ uw make_hgrid run --config-file config.yaml --batch
-  
+
   The driver creates a ``runscript.make_hgrid`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``make_hgrid:``.
 
   Looking at the run command in ``runscript.make_hgrid`` shows us the specified executable as well as the YAML keys converted to appropriate command line flags.
