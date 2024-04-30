@@ -37,7 +37,7 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
     Returns a function that executes tasks for the given driver.
 
     :param driver_class: The driver class whose tasks to execute.
-    :param with_cycle: Does the driver's constructur take the 'cycle' parameter?
+    :param with_cycle: Does the driver's constructor take the 'cycle' parameter?
     """
 
     def execute(  # pylint: disable=unused-argument
