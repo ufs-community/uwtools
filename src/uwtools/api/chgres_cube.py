@@ -1,5 +1,5 @@
 """
-API access to the uwtools ``chgres_cube`` driver.
+API access to the ``uwtools`` ``chgres_cube`` driver.
 """
 
 from uwtools.drivers.chgres_cube import ChgresCube as _Driver
