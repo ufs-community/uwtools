@@ -1,5 +1,5 @@
 """
-API access to the uwtools ``esg_grid`` driver.
+API access to the ``uwtools`` ``esg_grid`` driver.
 """
 
 from uwtools.drivers.esg_grid import ESGGrid as _Driver
