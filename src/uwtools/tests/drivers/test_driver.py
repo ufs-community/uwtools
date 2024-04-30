@@ -128,17 +128,18 @@ def test_Driver__run_via_batch_submission(driverobj):
         prd.assert_called_once_with()
 
 
-def test_Driver__run_via_local_execution(driverobj):
+def test_Driver__run_via_local_execution(driverobj, truetask):
     executable = Path(driverobj._driver_config["execution"]["executable"])
     executable.touch()
     with patch.object(driverobj, "provisioned_run_directory") as prd:
         with patch.object(driver, "execute") as execute:
-            driverobj._run_via_local_execution()
-            execute.assert_called_once_with(
-                cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
-                cwd=driverobj._rundir,
-                log_output=True,
-            )
+            with patch.object(driver, "executable", truetask):
+                driverobj._run_via_local_execution()
+                execute.assert_called_once_with(
+                    cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
+                    cwd=driverobj._rundir,
+                    log_output=True,
+                )
         prd.assert_called_once_with()
 
 

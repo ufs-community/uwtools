@@ -9,7 +9,6 @@ from unittest.mock import PropertyMock, patch
 
 import pytest
 import yaml
-from iotaa import asset, external
 from pytest import fixture
 
 from uwtools.drivers import driver, fv3
@@ -22,16 +21,6 @@ from uwtools.tests.support import logged
 @fixture
 def cycle():
     return dt.datetime(2024, 2, 1, 18)
-
-
-@fixture
-def truetask():
-    @external
-    def true(*args, **kwargs):  # pylint: disable=unused-argument
-        yield "true"
-        yield asset(True, lambda: True)
-
-    return true
 
 
 # Driver fixtures
