@@ -12,6 +12,7 @@ from uwtools.api import (
     fv3,
     global_equiv_resol,
     jedi,
+    make_hgrid,
     mpas,
     mpas_init,
     sfc_climo_gen,
@@ -20,8 +21,8 @@ from uwtools.api import (
 from uwtools.drivers import support
 from uwtools.utils import api
 
-modules = [chgres_cube, esg_grid, fv3, jedi, mpas_init, mpas, sfc_climo_gen, ungrib]
-nocycle = [esg_grid, global_equiv_resol, sfc_climo_gen]
+modules = [chgres_cube, esg_grid, fv3, jedi, make_hgrid, mpas, mpas_init, sfc_climo_gen, ungrib]
+nocycle = [esg_grid, global_equiv_resol, make_hgrid, sfc_climo_gen]
 
 
 @pytest.mark.parametrize("module", modules)
