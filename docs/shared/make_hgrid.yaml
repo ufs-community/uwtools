@@ -1,25 +1,32 @@
 make_hgrid:
+  config:
+    do_schmidt: true
+    great_circle_algorithm: true
+    grid_name: C96_foo
+    grid_type: gnomonic_ed
+    halo: 1
+    iend_nest:
+      - 87
+    istart_nest:
+      - 10
+    jend_nest:
+      - 78
+    jstart_nest:
+      - 19
+    nest_grids: 1
+    nlon:
+      - 192
+    parent_tile:
+      - 6
+    refine_ratio:
+      - 2
+    stretch_factor: 1.0001
+    target_lat: 38.5
+    target_lon: -97.5
   execution:
     batchargs:
       nodes: 1
       stdout: /path/to/runscript.out
       walltime: "08:00:00"
     executable: /path/make_hgrid
-  config:
-    grid_type: gnomonic_ed
-    do_schmidt: True
-    great_circle_algorithm: True
-    grid_name: C96_foo
-    halo: 1
-    nest_grids: 1
-    istart_nest: [10]
-    iend_nest: [87]
-    jstart_nest: [19]
-    jend_nest: [78]
-    nlon: [192]
-    parent_tile: [6]
-    refine_ratio: [2]
-    stretch_factor: 1.0001
-    target_lon: -97.5
-    target_lat: 38.5
   run_dir: /path/to/make_hgrid
