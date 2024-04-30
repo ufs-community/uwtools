@@ -78,6 +78,14 @@ def test_MakeHgrid_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
+def test_MakeHgrid__runcmd(driverobj):
+    cmd = driverobj._runcmd
+    assert (
+        cmd
+        == "/path/to/make_hgrid --grid_type gnomonic_ed --halo 1 --nest_grids 1 --parent_tile 6 --verbose"
+    )
+
+
 def test_MakeHgrid_run_batch(driverobj):
     with patch.object(driverobj, "_run_via_batch_submission") as func:
         driverobj.run()
