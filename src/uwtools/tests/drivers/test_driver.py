@@ -115,16 +115,17 @@ def test_Driver_validate(caplog, driverobj):
     assert regex_logged(caplog, "State: Ready")
 
 
-def test_Driver__run_via_batch_submission(driverobj):
+def test_Driver__run_via_batch_submission(driverobj, truetask):
     runscript = driverobj._runscript_path
     executable = Path(driverobj._driver_config["execution"]["executable"])
     executable.touch()
     with patch.object(driverobj, "provisioned_run_directory") as prd:
         with patch.object(ConcreteDriver, "_scheduler", new_callable=PropertyMock) as scheduler:
-            driverobj._run_via_batch_submission()
-            scheduler().submit_job.assert_called_once_with(
-                runscript=runscript, submit_file=Path(f"{runscript}.submit")
-            )
+            with patch.object(driver, "executable", truetask):
+                driverobj._run_via_batch_submission()
+                scheduler().submit_job.assert_called_once_with(
+                    runscript=runscript, submit_file=Path(f"{runscript}.submit")
+                )
         prd.assert_called_once_with()
 
 
