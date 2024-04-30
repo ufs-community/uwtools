@@ -8,6 +8,7 @@ Drivers
    esg_grid
    fv3
    global_equiv_resol
+   make_hgrid
    mpas
    mpas_init
    sfc_climo_gen
