@@ -4,9 +4,21 @@ Common iotaa tasks.
 
 import os
 from pathlib import Path
-from shutil import copy
+from shutil import copy, which
+from typing import Union
 
 from iotaa import asset, external, task
+
+
+@external
+def executable(program: Union[Path, str]):
+    """
+    An executable program located on the current path.
+
+    :param program: Name of or path to the program.
+    """
+    yield "Executable program %s" % program
+    yield asset(program, lambda: bool(which(program)))
 
 
 @external
