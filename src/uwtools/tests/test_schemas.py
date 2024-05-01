@@ -41,6 +41,11 @@ def jedi_prop():
 
 
 @fixture
+def make_hgrid_prop():
+    return partial(schema_validator, "make-hgrid", "properties", "make_hgrid", "properties")
+
+
+@fixture
 def sfc_climo_gen_prop():
     return partial(schema_validator, "sfc-climo-gen", "properties", "sfc_climo_gen", "properties")
 
@@ -525,6 +530,68 @@ def test_schema_jedi_configuration_file(jedi_prop):
 
 def test_schema_jedi_run_dir(jedi_prop):
     errors = jedi_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# make_hgrid
+
+
+def test_schema_make_hgrid():
+    config = {
+        "config": {"grid_type": "from_file", "my_grid_file": "/path/to/my_grid_file"},
+        "execution": {"executable": "make_hgrid"},
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("make-hgrid", "properties", "make_hgrid")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("config", "execution", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_make_hgrid_grid_type():
+    # Get errors function from schema_validator
+    errors = schema_validator("make-hgrid", "properties", "make_hgrid", "properties", "config")
+
+    # config needs at least the grid_type key:
+    assert "'grid_type' is a required property" in errors({})
+
+    # If grid_type is "from_file", my_grid_file is required
+    assert "'my_grid_file' is a required property" in errors({"grid_type": "from_file"})
+
+    # If grid_type is "tripolar_grid" or "regular_lonlat_grid",
+    # nxbnds, nybnds, xbnds, and ybnds are required.
+    for prop in ("nxbnds", "nybnds", "xbnds", "ybnds"):
+        for grid_type in ("tripolar_grid", "regular_lonlat_grid"):
+            assert f"'{prop}' is a required property" in errors({"grid_type": grid_type})
+
+    # If grid_type is "simple_cartesian_grid",
+    # nxbnds, nybnds, xbnds, ybnds, simple_dx, and simple_dy are required
+    for prop in ("nxbnds", "nybnds", "xbnds", "ybnds", "simple_dx", "simple_dy"):
+        assert f"'{prop}' is a required property" in errors({"grid_type": "simple_cartesian_grid"})
+
+    # If grid_type is "f_plane_grid" or "beta_plane_grid", f_plane_latitude is required.
+    for grid_type in ("f_plane_grid", "beta_plane_grid"):
+        assert "'f_plane_latitude' is a required property" in errors({"grid_type": grid_type})
+
+    # If grid_type is "gnomonic_ed" and nest_grids is present, halo is required
+    assert "'halo' is a required property" in errors({"grid_type": "gnomonic_ed", "nest_grids": 1})
+
+    # If do_schmidt and do_cube_transform are present,
+    # stretch_factor, target_lat, and target_lon are required
+    for prop in ("stretch_factor", "target_lat", "target_lon"):
+        assert f"'{prop}' is a required property" in errors(
+            {"do_schmidt": True, "do_cube_transform": True}
+        )
+
+
+def test_schema_make_hgrid_run_dir(make_hgrid_prop):
+    errors = make_hgrid_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)

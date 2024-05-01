@@ -121,6 +121,12 @@ global_equiv_resol
 | **CLI**: ``uw global_equiv_resol -h``
 | **API**: ``import uwtools.api.drivers.global_equiv_resol``
 
+make_hgrid
+""""""""""
+
+| **CLI**: ``uw make_hgrid -h``
+| **API**: ``import uwtools.api.drivers.make_hgrid``
+
 make_solo_mosaic
 """"""""""""""""
 

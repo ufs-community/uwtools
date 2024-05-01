@@ -8,6 +8,7 @@ Drivers
    esg_grid
    fv3
    global_equiv_resol
+   make_hgrid
    make_solo_mosaic
    mpas
    mpas_init
