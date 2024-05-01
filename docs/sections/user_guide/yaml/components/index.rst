@@ -8,7 +8,6 @@ UW YAML for Components
    esg_grid
    fv3
    global_equiv_resol
-   jedi_documentation
    jedi
    make_hgrid
    mpas
