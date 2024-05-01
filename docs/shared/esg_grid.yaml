@@ -4,7 +4,7 @@ esg_grid:
       nodes: 1
       stdout: /path/to/runscript.out
       walltime: "08:00:00"
-    executable: /path/esg_grid
+    executable: /path/to/esg_grid
   namelist:
     base_file: /path/to/base_file
     update_values:
