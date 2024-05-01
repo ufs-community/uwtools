@@ -11,6 +11,7 @@ from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 import yaml
+from iotaa import asset, task
 from pytest import fixture, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
@@ -40,6 +41,11 @@ class ConcreteDriver(driver.Driver):
     def _validate(self) -> None:
         pass
 
+    @task
+    def atask(self):
+        yield "atask"
+        yield asset("atask", lambda: True)
+
 
 def write(path, s):
     with open(path, "w", encoding="utf-8") as f:
@@ -64,7 +70,7 @@ def driverobj(tmp_path):
                         "stdout": "{{ concrete.run_dir }}/out",
                         "walltime": "00:05:00",
                     },
-                    "executable": "qux",
+                    "executable": str(tmp_path / "qux"),
                     "mpiargs": ["bar", "baz"],
                     "mpicmd": "foo",
                 },
@@ -94,8 +100,10 @@ def test_Driver(driverobj):
 
 
 @pytest.mark.parametrize("batch", [True, False])
-def test_Driver_run(driverobj, batch):
+def test_Driver_run(batch, driverobj):
     driverobj._batch = batch
+    executable = Path(driverobj._driver_config["execution"]["executable"])
+    executable.touch()
     with patch.object(driverobj, "_run_via_batch_submission") as rvbs:
         with patch.object(driverobj, "_run_via_local_execution") as rvle:
             driverobj.run()
@@ -115,6 +123,8 @@ def test_Driver_validate(caplog, driverobj):
 
 def test_Driver__run_via_batch_submission(driverobj):
     runscript = driverobj._runscript_path
+    executable = Path(driverobj._driver_config["execution"]["executable"])
+    executable.touch()
     with patch.object(driverobj, "provisioned_run_directory") as prd:
         with patch.object(ConcreteDriver, "_scheduler", new_callable=PropertyMock) as scheduler:
             driverobj._run_via_batch_submission()
@@ -125,6 +135,8 @@ def test_Driver__run_via_batch_submission(driverobj):
 
 
 def test_Driver__run_via_local_execution(driverobj):
+    executable = Path(driverobj._driver_config["execution"]["executable"])
+    executable.touch()
     with patch.object(driverobj, "provisioned_run_directory") as prd:
         with patch.object(driver, "execute") as execute:
             driverobj._run_via_local_execution()
@@ -200,7 +212,8 @@ def test_Driver__resources_pass(driverobj):
 
 
 def test_Driver__runcmd(driverobj):
-    assert driverobj._runcmd == "foo bar baz qux"
+    executable = driverobj._driver_config["execution"]["executable"]
+    assert driverobj._runcmd == f"foo bar baz {executable}"
 
 
 def test_Driver__runscript(driverobj):
@@ -272,8 +285,9 @@ def test_Driver__validate(driverobj):
 
 def test_Driver__write_runscript(driverobj, tmp_path):
     path = tmp_path / "runscript"
+    executable = driverobj._driver_config["execution"]["executable"]
     driverobj._write_runscript(path=path, envvars={"FOO": "bar", "BAZ": "qux"})
-    expected = """
+    expected = f"""
     #!/bin/bash
 
     #SBATCH --account=me
@@ -286,7 +300,7 @@ def test_Driver__write_runscript(driverobj, tmp_path):
     export FOO=bar
     export BAZ=qux
 
-    time foo bar baz qux
+    time foo bar baz {executable}
     test $? -eq 0 && touch /path/to/2024032218/run/done.concrete
     """
     with open(path, "r", encoding="utf-8") as f:

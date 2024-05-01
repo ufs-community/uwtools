@@ -5,6 +5,7 @@ Granular tests of JSON Schema schemas.
 
 from functools import partial
 
+import pytest
 from pytest import fixture
 
 from uwtools.tests.support import schema_validator, with_del, with_set
@@ -18,13 +19,30 @@ def chgres_cube_prop():
 
 
 @fixture
+def esg_grid_prop():
+    return partial(schema_validator, "esg-grid", "properties", "esg_grid", "properties")
+
+
+@fixture
 def fv3_prop():
     return partial(schema_validator, "fv3", "properties", "fv3", "properties")
 
 
 @fixture
+def global_equiv_resol_prop():
+    return partial(
+        schema_validator, "global-equiv-resol", "properties", "global_equiv_resol", "properties"
+    )
+
+
+@fixture
 def jedi_prop():
     return partial(schema_validator, "jedi", "properties", "jedi", "properties")
+
+
+@fixture
+def make_hgrid_prop():
+    return partial(schema_validator, "make-hgrid", "properties", "make_hgrid", "properties")
 
 
 @fixture
@@ -35,6 +53,23 @@ def sfc_climo_gen_prop():
 @fixture
 def ungrib_prop():
     return partial(schema_validator, "ungrib", "properties", "ungrib", "properties")
+
+
+@fixture
+def update_values():
+    return {
+        "update_values": {
+            "regional_grid_nml": {
+                "delx": 0.22,
+                "dely": 0.22,
+                "lx": -200,
+                "ly": -130,
+                "pazi": 0.0,
+                "plat": 45.5,
+                "plon": -100.5,
+            }
+        }
+    }
 
 
 # chgres-cube
@@ -85,6 +120,117 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_prop):
 
 def test_schema_chgres_cube_run_dir(chgres_cube_prop):
     errors = chgres_cube_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# esg-grid
+
+
+def test_schema_esg_grid():
+    config = {
+        "execution": {"executable": "esg_grid"},
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("esg-grid", "properties", "esg_grid")
+    # Basic correctness:
+    assert not errors(config)
+    # Some top-level keys are required:
+    for key in ("execution", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+    # Additional MPI support is not allowed:
+    assert "Additional properties are not allowed ('mpicmd' was unexpected)" in errors(
+        {"execution": {"mpicmd": "srun"}}
+    )
+
+
+def test_schema_esg_grid_namelist(esg_grid_prop, update_values):
+    base_file = {"base_file": "/some/path"}
+    errors = esg_grid_prop("namelist")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # base_file must be a string:
+    assert "{'base_file': 88} is not valid under any of the given schemas" in errors(
+        {"base_file": 88}
+    )
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # All key/value pairs in update_values must be present if base_file is not supplied:
+    assert "is not valid under any of the given schemas" in errors(
+        with_del(update_values, "update_values", "regional_grid_nml", "delx")
+    )
+    # Subsection of update_values is ok if base_file is supplied:
+    assert not errors(
+        {
+            **base_file,
+            "update_values": {"regional_grid_nml": {"delx": 0.11, "lx": -180, "plat": 38.0}},
+        }
+    )
+    # regional_grid_nml is required with update_values:
+    assert "{'update_values': {}} is not valid under any of the given schemas" in errors(
+        with_del(update_values, "update_values", "regional_grid_nml")
+    )
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_schema_esg_grid_namelist_update_values(esg_grid_prop):
+    config = {
+        "base_file": "some/str",
+        "update_values": {
+            "regional_grid_nml": {
+                "delx": 0.22,
+                "dely": 0.22,
+                "lx": -200,
+                "ly": -130,
+                "pazi": 0.0,
+                "plat": 45.5,
+                "plon": -100.5,
+            }
+        },
+    }
+    errors = esg_grid_prop("namelist")
+    # Basic correctness:
+    assert not errors(config)
+    # A base_file with partial update_values is ok:
+    assert not errors(with_del(config, "update_values", "regional_grid_nml", "delx"))
+    # A completely-specified update_values with no base_file is ok:
+    assert not errors(with_del(config, "base_file"))
+    # A base_file with no update_values is ok:
+    assert not errors(with_del(config, "update_values"))
+    # It is an error to provide no base_file and only a partially-specified namelist:
+    assert "is not valid under any of the given schemas" in errors(
+        with_del(with_del(config, "base_file"), "update_values", "regional_grid_nml", "delx")
+    )
+    # update_values values must be a number:
+    assert "is not valid under any of the given schemas" in errors(
+        {"update_values": {"regional_grid_nml": {"delx": "/some/str"}}}
+    )
+    # It is an error to not provide at least one of base_file or update_values:
+    assert "{} is not valid under any of the given schemas" in errors(
+        with_del(with_del(config, "base_file"), "update_values")
+    )
+
+
+def test_schema_esg_grid_regional_grid_nml_properties():
+    errors = partial(schema_validator("esg-grid", "$defs", "regional_grid_nml_properties"))
+    # An integer value is ok:
+    assert not errors({"delx": 88})
+    # A floating-point value is ok:
+    assert not errors({"delx": 3.14})
+    # It is an error for the value to be of type string:
+    assert "'foo' is not of type 'number'" in errors({"ly": "foo"})
+    # It is an error not to supply a value:
+    assert "{'delx'} is not of type 'object'" in errors({"delx"})
+
+
+def test_schema_esg_grid_run_dir(esg_grid_prop):
+    errors = esg_grid_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
@@ -318,6 +464,33 @@ def test_schema_fv3_run_dir(fv3_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
+# global_equiv_resol
+
+
+def test_schema_global_equiv_resol():
+    config = {
+        "execution": {"executable": "/tmp/global_equiv_resol.exe"},
+        "input_grid_file": "/tmp/input_grid_file",
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("global-equiv-resol", "properties", "global_equiv_resol")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("execution", "input_grid_file", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+@pytest.mark.parametrize("schema_entry", ["run_dir", "input_grid_file"])
+def test_schema_global_equiv_resol_paths(global_equiv_resol_prop, schema_entry):
+    errors = global_equiv_resol_prop(schema_entry)
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
 # jedi
 
 
@@ -357,6 +530,68 @@ def test_schema_jedi_configuration_file(jedi_prop):
 
 def test_schema_jedi_run_dir(jedi_prop):
     errors = jedi_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# make_hgrid
+
+
+def test_schema_make_hgrid():
+    config = {
+        "config": {"grid_type": "from_file", "my_grid_file": "/path/to/my_grid_file"},
+        "execution": {"executable": "make_hgrid"},
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("make-hgrid", "properties", "make_hgrid")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("config", "execution", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_make_hgrid_grid_type():
+    # Get errors function from schema_validator
+    errors = schema_validator("make-hgrid", "properties", "make_hgrid", "properties", "config")
+
+    # config needs at least the grid_type key:
+    assert "'grid_type' is a required property" in errors({})
+
+    # If grid_type is "from_file", my_grid_file is required
+    assert "'my_grid_file' is a required property" in errors({"grid_type": "from_file"})
+
+    # If grid_type is "tripolar_grid" or "regular_lonlat_grid",
+    # nxbnds, nybnds, xbnds, and ybnds are required.
+    for prop in ("nxbnds", "nybnds", "xbnds", "ybnds"):
+        for grid_type in ("tripolar_grid", "regular_lonlat_grid"):
+            assert f"'{prop}' is a required property" in errors({"grid_type": grid_type})
+
+    # If grid_type is "simple_cartesian_grid",
+    # nxbnds, nybnds, xbnds, ybnds, simple_dx, and simple_dy are required
+    for prop in ("nxbnds", "nybnds", "xbnds", "ybnds", "simple_dx", "simple_dy"):
+        assert f"'{prop}' is a required property" in errors({"grid_type": "simple_cartesian_grid"})
+
+    # If grid_type is "f_plane_grid" or "beta_plane_grid", f_plane_latitude is required.
+    for grid_type in ("f_plane_grid", "beta_plane_grid"):
+        assert "'f_plane_latitude' is a required property" in errors({"grid_type": grid_type})
+
+    # If grid_type is "gnomonic_ed" and nest_grids is present, halo is required
+    assert "'halo' is a required property" in errors({"grid_type": "gnomonic_ed", "nest_grids": 1})
+
+    # If do_schmidt and do_cube_transform are present,
+    # stretch_factor, target_lat, and target_lon are required
+    for prop in ("stretch_factor", "target_lat", "target_lon"):
+        assert f"'{prop}' is a required property" in errors(
+            {"do_schmidt": True, "do_cube_transform": True}
+        )
+
+
+def test_schema_make_hgrid_run_dir(make_hgrid_prop):
+    errors = make_hgrid_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
