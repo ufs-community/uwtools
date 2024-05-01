@@ -803,33 +803,38 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     return parser
 
 
-def _add_subparser_for_driver(name: str, subparsers: Subparsers) -> ModeChecks:
+def _add_subparser_for_driver(name: str, subparsers: Subparsers, with_cycle: bool) -> ModeChecks:
     """
     Subparser for a driver mode.
 
     :param name: Name of the driver whose subparser to configure.
     :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param with_cycle: Does this driver require a cycle?
     """
     parser = _add_subparser(subparsers, name, "Execute %s tasks" % name)
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
-        task: _add_subparser_for_driver_task(subparsers, task, helpmsg)
+        task: _add_subparser_for_driver_task(subparsers, task, helpmsg, with_cycle)
         for task, helpmsg in import_module("uwtools.api.%s" % name).tasks().items()
     }
 
 
-def _add_subparser_for_driver_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
+def _add_subparser_for_driver_task(
+    subparsers: Subparsers, task: str, helpmsg: str, with_cycle: bool
+) -> ActionChecks:
     """
     Subparser for a driver action.
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     :param task: The task to add a subparser for.
     :param helpmsg: Help message for task.
+    :param with_cycle: Does this driver require a cycle?
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_cycle(required)
+    if with_cycle:
+        _add_arg_cycle(required)
     optional = _basic_setup(parser)
     _add_arg_config_file(group=optional)
     _add_arg_batch(optional)
@@ -945,20 +950,22 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     checks = {
-        STR.chgrescube: _add_subparser_for_driver(STR.chgrescube, subparsers),
+        STR.chgrescube: _add_subparser_for_driver(STR.chgrescube, subparsers, with_cycle=True),
         STR.config: _add_subparser_config(subparsers),
-        STR.esggrid: _add_subparser_for_driver(STR.esggrid, subparsers),
+        STR.esggrid: _add_subparser_for_driver(STR.esggrid, subparsers, with_cycle=False),
         STR.file: _add_subparser_file(subparsers),
-        STR.fv3: _add_subparser_for_driver(STR.fv3, subparsers),
-        STR.globalequivresol: _add_subparser_for_driver(STR.globalequivresol, subparsers),
-        STR.jedi: _add_subparser_for_driver(STR.jedi, subparsers),
-        STR.makehgrid: _add_subparser_for_driver(STR.makehgrid, subparsers),
-        STR.mpas: _add_subparser_for_driver(STR.mpas, subparsers),
-        STR.mpasinit: _add_subparser_for_driver(STR.mpasinit, subparsers),
+        STR.fv3: _add_subparser_for_driver(STR.fv3, subparsers, with_cycle=True),
+        STR.globalequivresol: _add_subparser_for_driver(
+            STR.globalequivresol, subparsers, with_cycle=False
+        ),
+        STR.jedi: _add_subparser_for_driver(STR.jedi, subparsers, with_cycle=True),
+        STR.makehgrid: _add_subparser_for_driver(STR.makehgrid, subparsers, with_cycle=False),
+        STR.mpas: _add_subparser_for_driver(STR.mpas, subparsers, with_cycle=True),
+        STR.mpasinit: _add_subparser_for_driver(STR.mpasinit, subparsers, with_cycle=True),
         STR.rocoto: _add_subparser_rocoto(subparsers),
-        STR.sfcclimogen: _add_subparser_for_driver(STR.sfcclimogen, subparsers),
+        STR.sfcclimogen: _add_subparser_for_driver(STR.sfcclimogen, subparsers, with_cycle=False),
         STR.template: _add_subparser_template(subparsers),
-        STR.ungrib: _add_subparser_for_driver(STR.ungrib, subparsers),
+        STR.ungrib: _add_subparser_for_driver(STR.ungrib, subparsers, with_cycle=True),
     }
     return vars(parser.parse_args(raw_args)), checks
 

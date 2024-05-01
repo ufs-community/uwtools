@@ -105,13 +105,13 @@ def test__add_subparser_for_driver(subparsers):
     adriver = Mock()
     adriver.tasks.return_value = {"task1": "task1 description", "task2": "task2 description"}
     with patch.object(cli, "import_module", return_value=adriver):
-        cli._add_subparser_for_driver(name, subparsers)
+        cli._add_subparser_for_driver(name, subparsers, with_cycle=True)
     assert actions(subparsers.choices[name]) == ["task1", "task2"]
 
 
 def test__add_subparser_for_driver_task(subparsers):
     assert not subparsers.choices
-    cli._add_subparser_for_driver_task(subparsers, "task1", "task1 description")
+    cli._add_subparser_for_driver_task(subparsers, "task1", "task1 description", with_cycle=True)
     assert subparsers.choices["task1"]
 
 
