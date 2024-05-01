@@ -111,19 +111,6 @@ class UPP(Driver):
         yield None
         self._write_runscript(path=path, envvars={})
 
-    @task
-    def vtable(self):
-        """
-        A symlink to the Vtable file.
-        """
-        path = self._rundir / "Vtable"
-        yield self._taskname(str(path))
-        yield asset(path, path.is_symlink)
-        infile = Path(self._driver_config["vtable"])
-        yield file(path=infile)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.symlink_to(Path(self._driver_config["vtable"]))
-
     # Private helper methods
 
     @property
