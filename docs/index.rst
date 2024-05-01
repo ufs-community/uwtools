@@ -145,6 +145,13 @@ FV3
 | **CLI**: ``uw fv3 -h``
 | **API**: ``import uwtools.api.drivers.fv3``
 
+JEDI
+""""
+
+| **CLI**: ``uw jedi -h``
+| **API**: ``import uwtools.api.drivers.jedi``
+
+
 
 
 Drivers for MPAS
