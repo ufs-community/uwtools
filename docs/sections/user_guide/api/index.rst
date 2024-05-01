@@ -10,6 +10,7 @@ API
    global_equiv_resol
    jedi
    logging
+   make_hgrid
    mpas
    mpas_init
    rocoto
