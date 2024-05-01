@@ -26,7 +26,7 @@ def config(tmp_path):
                 "executable": "/path/to/make_solo_mosaic.exe",
             },
             "run_dir": str(tmp_path),
-            "input_file": str(tmp_path / "input" / "input_file"),
+            "dir": str(tmp_path / "input" / "input_grid_file"),
         },
         "platform": {
             "account": "myaccount",
