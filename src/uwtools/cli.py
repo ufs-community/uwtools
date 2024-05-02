@@ -54,28 +54,28 @@ def main() -> None:
         _abort(str(e))
     try:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
-        # Collect tools.
-        modes: Dict[str, Callable[..., bool]] = {
+        tools: Dict[str, Callable[..., bool]] = {
             STR.config: _dispatch_config,
             STR.file: _dispatch_file,
             STR.rocoto: _dispatch_rocoto,
             STR.template: _dispatch_template,
         }
-        # Collect drivers.
-        for x in [
-            STR.chgrescube,
-            STR.esggrid,
-            STR.fv3,
-            STR.globalequivresol,
-            STR.jedi,
-            STR.makehgrid,
-            STR.mpas,
-            STR.mpasinit,
-            STR.sfcclimogen,
-            STR.ungrib,
-        ]:
-            modes[x] = partial(_dispatch_to_driver, x)
-        # Dispatch to appropriate mode.
+        drivers: Dict[str, Callable[..., bool]] = {
+            x: partial(_dispatch_to_driver, x)
+            for x in [
+                STR.chgrescube,
+                STR.esggrid,
+                STR.fv3,
+                STR.globalequivresol,
+                STR.jedi,
+                STR.makehgrid,
+                STR.mpas,
+                STR.mpasinit,
+                STR.sfcclimogen,
+                STR.ungrib,
+            ]
+        }
+        modes = {**tools, **drivers}
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except UWError as e:
         log.error(str(e))
@@ -955,27 +955,29 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     )
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
-    # Add tools.
-    checks = {
+    tools = {
         STR.config: _add_subparser_config(subparsers),
         STR.file: _add_subparser_file(subparsers),
         STR.rocoto: _add_subparser_rocoto(subparsers),
         STR.template: _add_subparser_template(subparsers),
     }
-    # Add drivers.
-    for x, with_cycle in [
-        (STR.chgrescube, True),
-        (STR.esggrid, False),
-        (STR.fv3, True),
-        (STR.globalequivresol, False),
-        (STR.jedi, True),
-        (STR.makehgrid, False),
-        (STR.mpas, True),
-        (STR.mpasinit, True),
-        (STR.sfcclimogen, False),
-        (STR.ungrib, True),
-    ]:
-        checks[x] = _add_subparser_for_driver(x, subparsers, with_cycle)
+    drivers = {
+        x: _add_subparser_for_driver(x, subparsers, with_cycle)
+        for x, with_cycle in [
+            (STR.chgrescube, True),
+            (STR.esggrid, False),
+            (STR.fv3, True),
+            (STR.globalequivresol, False),
+            (STR.jedi, True),
+            (STR.makehgrid, False),
+            (STR.mpas, True),
+            (STR.mpasinit, True),
+            (STR.sfcclimogen, False),
+            (STR.ungrib, True),
+        ]
+    }
+
+    checks = {**tools, **drivers}
     return vars(parser.parse_args(raw_args)), checks
 
 
