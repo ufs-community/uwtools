@@ -115,6 +115,9 @@ def make_execute(
     )
     execute.__doc__ = re.sub(r"\n *:param cycle:.*\n", "\n", execute_cycle.__doc__)
 
+    if with_leadtime and not with_cycle:
+        raise UWError("When leadtime is specified, cycle is required")
+
     if with_cycle:
         if with_leadtime:
             return execute_cycle_leadtime
