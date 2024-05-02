@@ -3,16 +3,15 @@ make_solo_mosaic:
     batchargs:
       cores: 1
       walltime: "00:01:00"
-    executable: /path/to/make_solo_mosaic.exe
+    executable: /scratch2/BMC/wrfruc/elcarpenter/srw-app/exec/make_solo_mosaic.exe
   config:
-    num_tiles: gnomonic_ed
-    dir: /path/to/dir
+    num_tiles: 1
+    dir: 
     mosaic_name: ocean_mosaic
     tile_file: ocean_hgrid.nc
     periodx: 360
     periody: 360
-  input_grid_file: /path/to/input/grid/file
-  run_dir: /path/to/dir/run
+  run_dir: /scratch2/BMC/wrfruc/elcarpenter/workflow-tools/rundir
 platform:
-  account: me
+  account: wrfruc
   scheduler: slurm
