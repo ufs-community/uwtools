@@ -925,7 +925,6 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     execute: Callable[..., bool] = import_module("uwtools.api.%s" % name).execute
-    breakpoint()
     return execute(
         task=args[STR.action],
         config=args[STR.cfgfile],
