@@ -24,6 +24,24 @@ def esg_grid_prop():
 
 
 @fixture
+def esg_namelist():
+    return {
+        "base_file": "/some/path",
+        "update_values": {
+            "regional_grid_nml": {
+                "delx": 0.22,
+                "dely": 0.22,
+                "lx": -200,
+                "ly": -130,
+                "pazi": 0.0,
+                "plat": 45.5,
+                "plon": -100.5,
+            }
+        },
+    }
+
+
+@fixture
 def fv3_prop():
     return partial(schema_validator, "fv3", "properties", "fv3", "properties")
 
@@ -55,36 +73,20 @@ def ungrib_prop():
     return partial(schema_validator, "ungrib", "properties", "ungrib", "properties")
 
 
-@fixture
-def update_values():
-    return {
-        "update_values": {
-            "regional_grid_nml": {
-                "delx": 0.22,
-                "dely": 0.22,
-                "lx": -200,
-                "ly": -130,
-                "pazi": 0.0,
-                "plat": 45.5,
-                "plon": -100.5,
-            }
-        }
-    }
-
-
 # chgres-cube
 
 
 def test_schema_chgres_cube():
     config = {
         "execution": {"executable": "chgres_cube"},
+        "namelist": {"base_file": "/path"},
         "run_dir": "/tmp",
     }
     errors = schema_validator("chgres-cube", "properties", "chgres_cube")
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("execution", "run_dir"):
+    for key in ("execution", "namelist", "run_dir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -131,13 +133,14 @@ def test_schema_chgres_cube_run_dir(chgres_cube_prop):
 def test_schema_esg_grid():
     config = {
         "execution": {"executable": "esg_grid"},
+        "namelist": {"base_file": "/path"},
         "run_dir": "/tmp",
     }
     errors = schema_validator("esg-grid", "properties", "esg_grid")
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("execution", "run_dir"):
+    for key in ("execution", "namelist", "run_dir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -147,86 +150,37 @@ def test_schema_esg_grid():
     )
 
 
-def test_schema_esg_grid_namelist(esg_grid_prop, update_values):
-    base_file = {"base_file": "/some/path"}
+def test_schema_esg_grid_namelist(esg_grid_prop, esg_namelist):
     errors = esg_grid_prop("namelist")
     # Just base_file is ok:
-    assert not errors(base_file)
+    assert not errors(esg_namelist)
     # base_file must be a string:
-    assert "{'base_file': 88} is not valid under any of the given schemas" in errors(
-        {"base_file": 88}
+    assert "not valid" in errors({**esg_namelist, "base_file": 88})
+    # Just update_values is ok, if it is complete:
+    assert not errors(with_del(esg_namelist, "base_file"))
+    # If base_file is not supplied, any missing namelist key is an error:
+    assert "not valid" in errors(
+        with_del(with_del(esg_namelist, "update_values", "regional_grid_nml", "delx"), "base_file")
     )
-    # Just update_values is ok:
-    assert not errors(update_values)
-    # A combination of base_file and update_values is ok:
-    assert not errors({**base_file, **update_values})
-    # All key/value pairs in update_values must be present if base_file is not supplied:
-    assert "is not valid under any of the given schemas" in errors(
-        with_del(update_values, "update_values", "regional_grid_nml", "delx")
-    )
-    # Subsection of update_values is ok if base_file is supplied:
-    assert not errors(
-        {
-            **base_file,
-            "update_values": {"regional_grid_nml": {"delx": 0.11, "lx": -180, "plat": 38.0}},
-        }
-    )
+    # A missing namelist key is ok if base_file is supplied:
+    assert not errors(with_del(esg_namelist, "update_values", "regional_grid_nml", "delx"))
     # regional_grid_nml is required with update_values:
-    assert "{'update_values': {}} is not valid under any of the given schemas" in errors(
-        with_del(update_values, "update_values", "regional_grid_nml")
-    )
-    # At least one is required:
-    assert "is not valid" in errors({})
+    assert "not valid" in errors(with_del(esg_namelist, "update_values", "regional_grid_nml"))
+    # At least one of base_file and/or update_values is required:
+    assert "not valid" in errors({})
 
 
-def test_schema_esg_grid_namelist_update_values(esg_grid_prop):
-    config = {
-        "base_file": "some/str",
-        "update_values": {
-            "regional_grid_nml": {
-                "delx": 0.22,
-                "dely": 0.22,
-                "lx": -200,
-                "ly": -130,
-                "pazi": 0.0,
-                "plat": 45.5,
-                "plon": -100.5,
-            }
-        },
-    }
-    errors = esg_grid_prop("namelist")
-    # Basic correctness:
-    assert not errors(config)
-    # A base_file with partial update_values is ok:
-    assert not errors(with_del(config, "update_values", "regional_grid_nml", "delx"))
-    # A completely-specified update_values with no base_file is ok:
-    assert not errors(with_del(config, "base_file"))
-    # A base_file with no update_values is ok:
-    assert not errors(with_del(config, "update_values"))
-    # It is an error to provide no base_file and only a partially-specified namelist:
-    assert "is not valid under any of the given schemas" in errors(
-        with_del(with_del(config, "base_file"), "update_values", "regional_grid_nml", "delx")
-    )
-    # update_values values must be a number:
-    assert "is not valid under any of the given schemas" in errors(
-        {"update_values": {"regional_grid_nml": {"delx": "/some/str"}}}
-    )
-    # It is an error to not provide at least one of base_file or update_values:
-    assert "{} is not valid under any of the given schemas" in errors(
-        with_del(with_del(config, "base_file"), "update_values")
-    )
-
-
-def test_schema_esg_grid_regional_grid_nml_properties():
+@pytest.mark.parametrize("key", ["delx", "dely", "lx", "ly", "pazi", "plat", "plon"])
+def test_schema_esg_grid_regional_grid_nml_properties(key):
     errors = partial(schema_validator("esg-grid", "$defs", "regional_grid_nml_properties"))
     # An integer value is ok:
-    assert not errors({"delx": 88})
+    assert not errors({key: 88})
     # A floating-point value is ok:
-    assert not errors({"delx": 3.14})
+    assert not errors({key: 3.14})
     # It is an error for the value to be of type string:
-    assert "'foo' is not of type 'number'" in errors({"ly": "foo"})
+    assert "not of type 'number'" in errors({key: "foo"})
     # It is an error not to supply a value:
-    assert "{'delx'} is not of type 'object'" in errors({"delx"})
+    assert "not of type 'object'" in errors({key})
 
 
 def test_schema_esg_grid_run_dir(esg_grid_prop):
@@ -300,6 +254,31 @@ def test_execution_threads():
     assert "3.14 is not of type 'integer'" in errors(3.14)
 
 
+# execution-serial
+
+
+def test_execution_serial():
+    config = {"executable": "fv3"}
+    batchargs = {"batchargs": {"queue": "string", "walltime": "string"}}
+    errors = schema_validator("execution")
+    # Basic correctness:
+    assert not errors(config)
+    # batchargs may optionally be specified:
+    assert not errors({**config, **batchargs})
+    # All properties are ok:
+    assert not errors({**config, **batchargs})
+    # Additional properties are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_execution_serial_batchargs():
+    test_execution_batchargs()
+
+
+def test_execution_serial_executable():
+    test_execution_batchargs()
+
+
 # files-to-stage
 
 
@@ -325,13 +304,21 @@ def test_schema_fv3():
         "field_table": {"base_file": "/path"},
         "lateral_boundary_conditions": {"interval_hours": 1, "offset": 0, "path": "/tmp/file"},
         "length": 3,
+        "namelist": {"base_file": "/path"},
         "run_dir": "/tmp",
     }
     errors = schema_validator("fv3", "properties", "fv3")
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("domain", "execution", "lateral_boundary_conditions", "length", "run_dir"):
+    for key in (
+        "domain",
+        "execution",
+        "lateral_boundary_conditions",
+        "length",
+        "namelist",
+        "run_dir",
+    ):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Some top-level keys are optional:
     assert not errors(
@@ -739,13 +726,14 @@ def test_schema_rocoto_workflow_cycledef():
 def test_schema_sfc_climo_gen():
     config = {
         "execution": {"executable": "sfc_climo_gen"},
+        "namelist": {"base_file": "/path"},
         "run_dir": "/tmp",
     }
     errors = schema_validator("sfc-climo-gen", "properties", "sfc_climo_gen")
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("execution", "run_dir"):
+    for key in ("execution", "namelist", "run_dir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
