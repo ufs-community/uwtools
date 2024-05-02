@@ -956,13 +956,13 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     tools = {
-        STR.config: _add_subparser_config(subparsers),
-        STR.file: _add_subparser_file(subparsers),
-        STR.rocoto: _add_subparser_rocoto(subparsers),
-        STR.template: _add_subparser_template(subparsers),
+        STR.config: partial(_add_subparser_config, subparsers),
+        STR.file: partial(_add_subparser_file, subparsers),
+        STR.rocoto: partial(_add_subparser_rocoto, subparsers),
+        STR.template: partial(_add_subparser_template, subparsers),
     }
     drivers = {
-        x: _add_subparser_for_driver(x, subparsers, with_cycle)
+        x: partial(_add_subparser_for_driver, x, subparsers, with_cycle)
         for x, with_cycle in [
             (STR.chgrescube, True),
             (STR.esggrid, False),
@@ -976,7 +976,8 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
             (STR.ungrib, True),
         ]
     }
-    checks = {**tools, **drivers}
+    modes = {**tools, **drivers}
+    checks = {k: modes[k]() for k in sorted(modes.keys())}
     return vars(parser.parse_args(raw_args)), checks
 
 
