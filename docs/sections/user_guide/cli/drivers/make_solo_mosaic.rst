@@ -18,8 +18,6 @@ The ``uw`` mode for configuring and running the UFS Utils preprocessing componen
 
    Positional arguments:
      TASK
-       input_file
-         Ensure the specified input grid file exists
        provisioned_run_directory
          Run directory provisioned with all required content
        run
