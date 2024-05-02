@@ -971,7 +971,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
             (STR.globalequivresol, False),
             (STR.jedi, True),
             (STR.makehgrid, False),
-            (STR.makesolomosaic, True),
+            (STR.makesolomosaic, False),
             (STR.mpas, True),
             (STR.mpasinit, True),
             (STR.sfcclimogen, False),
