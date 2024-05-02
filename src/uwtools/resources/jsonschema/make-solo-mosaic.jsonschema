@@ -6,7 +6,7 @@
         "execution": {
           "$ref": "urn:uwtools:execution-serial"
         },
-        "dir": {
+        "config": {
           "type": "string"
         },
         "run_dir": {
@@ -15,7 +15,7 @@
       },
       "required": [
         "execution",
-        "dir",
+        "config",
         "run_dir"
       ],
       "type": "object"
