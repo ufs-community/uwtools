@@ -975,7 +975,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
             (STR.mpasinit, True),
             (STR.sfcclimogen, False),
             (STR.ungrib, True),
-            (STR.upp, False),
+            (STR.upp, True),
         ]
     }
     modes = {**tools, **drivers}

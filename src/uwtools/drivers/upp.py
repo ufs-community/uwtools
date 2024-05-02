@@ -1,5 +1,5 @@
 """
-A driver for the UPP component.
+A driver for UPP.
 """
 
 from datetime import datetime, timedelta
@@ -8,10 +8,10 @@ from typing import Optional
 
 from iotaa import asset, dryrun, task, tasks
 
-from uwtools.config.formats.nml import NMLConfig
+# from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import file
+from uwtools.utils.tasks import file, symlink
 
 
 class UPP(Driver):
@@ -22,7 +22,7 @@ class UPP(Driver):
     def __init__(
         self,
         cycle: datetime,
-        lead_time: timedelta,
+        leadtime: timedelta,
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
@@ -31,7 +31,7 @@ class UPP(Driver):
         The driver.
 
         :param cycle: The cycle.
-        :param lead_time: The length of the forecast.
+        :param leadtime: The length of the forecast.
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
@@ -40,25 +40,28 @@ class UPP(Driver):
         if self._dry_run:
             dryrun()
         self._cycle = cycle
-        fcst_time = datetime.min() + lead_time
-        valid_time = cycle + lead_time
+        fcst_time = cycle  # datetime.min() + leadtime
+        valid_time = cycle + leadtime
         self._config.dereference(
-            context={**({"cycle": cycle, "fcst_time": fcst_time, "valid_time": valid_time}), **self._config.data}
+            context={
+                **({"cycle": cycle, "fcst_time": fcst_time, "valid_time": valid_time}),
+                **self._config.data,
+            }
         )
 
     # Workflow tasks
 
-    @tasks
-    def files_copied(self):
-        """
-        Files copied for run.
-        """
-        yield self._taskname("files copied")
-        if self._config
-        yield [
-            filecopy(src=Path(src), dst=self._rundir / dst)
-            for dst, src in self._driver_config.get("files_to_copy", {}).items()
-        ]
+    # @tasks
+    # def files_copied(self):
+    #     """
+    #     Files copied for run.
+    #     """
+    #     yield self._taskname("files copied")
+    #     if self._config
+    #     yield [
+    #         filecopy(src=Path(src), dst=self._rundir / dst)
+    #         for dst, src in self._driver_config.get("files_to_copy", {}).items()
+    #     ]
 
     @tasks
     def files_linked(self):
@@ -71,21 +74,21 @@ class UPP(Driver):
             for linkname, target in self._driver_config.get("files_to_link", {}).items()
         ]
 
-    @task
-    def namelist_file(self):
-        """
-        The namelist file.
-        """
-        path = self._rundir / f"itag.{fcst_time.strftime("%H:%M:%S")}"
-        yield self._taskname(str(path))
-        yield asset(path, path.is_file)
-        yield None
-        path.parent.mkdir(parents=True, exist_ok=True)
-        self._create_user_updated_config(
-            config_class=NMLConfig,
-            config_values=d,
-            path=path,
-        )
+    # @task
+    # def namelist_file(self):
+    #     """
+    #     The namelist file.
+    #     """
+    #     path = self._rundir / f"itag.{fcst_time.strftime("%H:%M:%S")}"
+    #     yield self._taskname(str(path))
+    #     yield asset(path, path.is_file)
+    #     yield None
+    #     path.parent.mkdir(parents=True, exist_ok=True)
+    #     self._create_user_updated_config(
+    #         config_class=NMLConfig,
+    #         config_values=d,
+    #         path=path,
+    #     )
 
     @tasks
     def provisioned_run_directory(self):
@@ -94,9 +97,9 @@ class UPP(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
-            self.files_copied(),
+            # self.files_copied(),
             self.files_linked(),
-            self.namelist_file(),
+            # self.namelist_file(),
             self.runscript(),
         ]
 
