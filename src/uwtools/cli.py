@@ -976,7 +976,6 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
             (STR.ungrib, True),
         ]
     }
-
     checks = {**tools, **drivers}
     return vars(parser.parse_args(raw_args)), checks
 
