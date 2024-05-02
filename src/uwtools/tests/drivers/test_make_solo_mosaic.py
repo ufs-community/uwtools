@@ -18,6 +18,10 @@ from uwtools.scheduler import Slurm
 def config(tmp_path):
     return {
         "make_solo_mosaic": {
+            "config": {
+                "dir": str(tmp_path / "input" / "input_grid_file"),
+                "num_tiles": 1,
+            },
             "execution": {
                 "batchargs": {
                     "cores": 1,
@@ -26,7 +30,6 @@ def config(tmp_path):
                 "executable": "/path/to/make_solo_mosaic.exe",
             },
             "run_dir": str(tmp_path),
-            "dir": str(tmp_path / "input" / "input_grid_file"),
         },
         "platform": {
             "account": "myaccount",
