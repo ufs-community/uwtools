@@ -86,6 +86,7 @@ class STR:
     jedi: str = "jedi"
     keys: str = "keys"
     keyvalpairs: str = "key_eq_val_pairs"
+    leadtime: str = "leadtime"
     link: str = "link"
     makehgrid: str = "make_hgrid"
     mode: str = "mode"

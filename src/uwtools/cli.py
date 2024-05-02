@@ -12,7 +12,7 @@ from argparse import _SubParsersAction as Subparsers
 from functools import partial
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Callable, Dict, List, NoReturn, Tuple
+from typing import Any, Callable, Dict, List, NoReturn, Optional, Tuple
 
 import uwtools.api
 import uwtools.api.config
@@ -642,6 +642,15 @@ def _add_arg_keys(group: Group) -> None:
     )
 
 
+def _add_arg_leadtime(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.leadtime),
+        help="Leadtime in hours",
+        required=True,
+        type=int,
+    )
+
+
 def _add_arg_output_block(group: Group):
     group.add_argument(
         _switch(STR.outblock),
@@ -810,25 +819,35 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     return parser
 
 
-def _add_subparser_for_driver(name: str, subparsers: Subparsers, with_cycle: bool) -> ModeChecks:
+def _add_subparser_for_driver(
+    name: str,
+    subparsers: Subparsers,
+    with_cycle: Optional[bool] = False,
+    with_leadtime: Optional[bool] = False,
+) -> ModeChecks:
     """
     Subparser for a driver mode.
 
     :param name: Name of the driver whose subparser to configure.
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     :param with_cycle: Does this driver require a cycle?
+    :param with_leadtime: Does this driver require a leadtime?
     """
     parser = _add_subparser(subparsers, name, "Execute %s tasks" % name)
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
-        task: _add_subparser_for_driver_task(subparsers, task, helpmsg, with_cycle)
+        task: _add_subparser_for_driver_task(subparsers, task, helpmsg, with_cycle, with_leadtime)
         for task, helpmsg in import_module("uwtools.api.%s" % name).tasks().items()
     }
 
 
 def _add_subparser_for_driver_task(
-    subparsers: Subparsers, task: str, helpmsg: str, with_cycle: bool
+    subparsers: Subparsers,
+    task: str,
+    helpmsg: str,
+    with_cycle: Optional[bool] = False,
+    with_leadtime: Optional[bool] = False,
 ) -> ActionChecks:
     """
     Subparser for a driver action.
@@ -837,11 +856,14 @@ def _add_subparser_for_driver_task(
     :param task: The task to add a subparser for.
     :param helpmsg: Help message for task.
     :param with_cycle: Does this driver require a cycle?
+    :param with_leadtime: Does this driver require a leadtime?
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
     if with_cycle:
         _add_arg_cycle(required)
+    if with_leadtime:
+        _add_arg_leadtime(required)
     optional = _basic_setup(parser)
     _add_arg_config_file(group=optional)
     _add_arg_batch(optional)
@@ -963,22 +985,18 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         STR.template: partial(_add_subparser_template, subparsers),
     }
     drivers = {
-        x: partial(_add_subparser_for_driver, x, subparsers, with_cycle)
-        for x, with_cycle in [
-            (STR.chgrescube, True),
-            (STR.esggrid, False),
-            (STR.fv3, True),
-            (STR.globalequivresol, False),
-            (STR.jedi, True),
-            (STR.makehgrid, False),
-            (STR.mpas, True),
-            (STR.mpasinit, True),
-            (STR.sfcclimogen, False),
-            (STR.ungrib, True),
-            (STR.upp, True),
-        ]
+        x: partial(_add_subparser_for_driver, x, subparsers)
+        for x in [STR.esggrid, STR.globalequivresol, STR.makehgrid, STR.sfcclimogen]
     }
-    modes = {**tools, **drivers}
+    drivers_with_cycle = {
+        x: partial(_add_subparser_for_driver, x, subparsers, with_cycle=True)
+        for x in [STR.chgrescube, STR.fv3, STR.jedi, STR.mpas, STR.mpasinit, STR.ungrib, STR.upp]
+    }
+    drivers_with_cycle_and_leadtime = {
+        x: partial(_add_subparser_for_driver, x, subparsers, with_cycle=True, with_leadtime=True)
+        for x in [STR.upp]
+    }
+    modes = {**tools, **drivers, **drivers_with_cycle, **drivers_with_cycle_and_leadtime}
     checks = {k: modes[k]() for k in sorted(modes.keys())}
     return vars(parser.parse_args(raw_args)), checks
 
