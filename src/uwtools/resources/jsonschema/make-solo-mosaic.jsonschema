@@ -4,7 +4,7 @@
       "additionalProperties": false,
       "properties": {
         "config": {
-          "additionalProperties": false,
+          "additionalProperties": true,
           "anyOf": [
             {
               "required": [
