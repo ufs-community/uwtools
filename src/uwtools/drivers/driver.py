@@ -16,7 +16,7 @@ from iotaa import asset, external, task, tasks
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute
@@ -33,6 +33,7 @@ class Driver(ABC):
         dry_run: bool = False,
         batch: bool = False,
         cycle: Optional[datetime] = None,
+        leadtime: Optional[int] = None,
     ) -> None:
         """
         A component driver.
@@ -42,6 +43,8 @@ class Driver(ABC):
         :param batch: Run component via the batch system?
         :param cycle: The cycle.
         """
+        if leadtime and not cycle:
+            raise UWError("When leadtime is specified, cycle is required")
         self._config = YAMLConfig(config=config)
         self._dry_run = dry_run
         self._batch = batch
