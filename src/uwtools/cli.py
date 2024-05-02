@@ -947,15 +947,17 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     execute: Callable[..., bool] = import_module("uwtools.api.%s" % name).execute
-    return execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        cycle=args[STR.cycle],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
+    kwargs = {
+        "task": args[STR.action],
+        "config": args[STR.cfgfile],
+        "batch": args[STR.batch],
+        "dry_run": args[STR.dryrun],
+        "graph_file": args[STR.graphfile],
+        "stdin_ok": True,
+    }
+    if cycle := args.get(STR.cycle):
+        kwargs[STR.cycle] = cycle
+    return execute(**kwargs)
 
 
 def _formatter(prog: str) -> HelpFormatter:
