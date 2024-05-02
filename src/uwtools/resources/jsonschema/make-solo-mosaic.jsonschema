@@ -3,11 +3,32 @@
     "make_solo_mosaic": {
       "additionalProperties": false,
       "properties": {
+        "config": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "dir"
+              ]
+            },
+            {
+              "required": [
+                "num_tiles"
+              ]
+            }
+          ],
+          "properties": {
+            "dir": {
+              "type": "string"
+            },
+            "num_tiles": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
         "execution": {
           "$ref": "urn:uwtools:execution-serial"
-        },
-        "config": {
-          "type": "string"
         },
         "run_dir": {
           "type": "string"

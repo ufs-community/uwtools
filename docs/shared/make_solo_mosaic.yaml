@@ -4,6 +4,13 @@ make_solo_mosaic:
       cores: 1
       walltime: "00:01:00"
     executable: /path/to/make_solo_mosaic.exe
+  config:
+    num_tiles: gnomonic_ed
+    dir: /path/to/dir
+    mosaic_name: ocean_mosaic
+    tile_file: ocean_hgrid.nc
+    periodx: 360
+    periody: 360
   input_grid_file: /path/to/input/grid/file
   run_dir: /path/to/dir/run
 platform:

@@ -75,6 +75,12 @@ def test_MakeSoloMosaic_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
+def test_MakeSoloMosaic__runcmd(driverobj):
+    dir_path = driverobj._config["make_solo_mosaic"]["config"]["dir"]
+    cmd = driverobj._runcmd
+    assert cmd == f"/path/to/make_solo_mosaic.exe --dir {dir_path} --num_tiles 1"
+
+
 def test_MakeSoloMosaic_run_batch(driverobj):
     with patch.object(driverobj, "_run_via_batch_submission") as func:
         driverobj.run()

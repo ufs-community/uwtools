@@ -36,9 +36,7 @@ class MakeSoloMosaic(Driver):
         Run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
-        yield [
-            self.runscript(),
-        ]
+        yield self.runscript()
 
     @task
     def runscript(self):
@@ -59,6 +57,18 @@ class MakeSoloMosaic(Driver):
         Returns the name of this driver.
         """
         return STR.makesolomosaic
+
+    @property
+    def _runcmd(self):
+        """
+        Returns the full command-line component invocation.
+        """
+        executable = self._driver_config["execution"]["executable"]
+        config = self._driver_config["config"]
+        flags = []
+        for k, v in config.items():
+            flags.append("--%s %s" % (k, v))
+        return f"{executable} " + " ".join(flags)
 
     def _taskname(self, suffix: str) -> str:
         """
