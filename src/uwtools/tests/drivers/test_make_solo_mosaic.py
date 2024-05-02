@@ -32,7 +32,7 @@ def config(tmp_path):
             "run_dir": str(tmp_path),
         },
         "platform": {
-            "account": "myaccount",
+            "account": "me",
             "scheduler": "slurm",
         },
     }
