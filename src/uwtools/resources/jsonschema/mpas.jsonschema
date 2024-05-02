@@ -83,6 +83,7 @@
       },
       "required": [
         "execution",
+        "namelist",
         "run_dir",
         "streams"
       ],

@@ -9,6 +9,7 @@ from unittest.mock import PropertyMock, patch
 
 import pytest
 import yaml
+from iotaa import asset, external
 from pytest import fixture
 
 from uwtools.drivers import driver, fv3
@@ -16,14 +17,6 @@ from uwtools.scheduler import Slurm
 from uwtools.tests.support import logged
 
 # Fixtures
-
-
-@fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
-
-
-# Driver fixtures
 
 
 @fixture
@@ -35,7 +28,7 @@ def config(tmp_path):
                 "batchargs": {
                     "walltime": "00:02:00",
                 },
-                "executable": "fv3",
+                "executable": str(tmp_path / "fv3"),
                 "mpicmd": "srun",
             },
             "field_table": {
@@ -47,6 +40,13 @@ def config(tmp_path):
                 "path": str(tmp_path / "f{forecast_hour}"),
             },
             "length": 1,
+            "namelist": {
+                "update_values": {
+                    "namsfc": {
+                        "FNZORC": "igbp",
+                    },
+                },
+            },
             "run_dir": str(tmp_path),
         },
         "platform": {
@@ -65,8 +65,23 @@ def config_file(config, tmp_path):
 
 
 @fixture
+def cycle():
+    return dt.datetime(2024, 2, 1, 18)
+
+
+@fixture
 def driverobj(config_file, cycle):
     return fv3.FV3(config=config_file, cycle=cycle, batch=True)
+
+
+@fixture
+def truetask():
+    @external
+    def true():
+        yield "true"
+        yield asset(True, lambda: True)
+
+    return true
 
 
 # Driver tests
@@ -74,13 +89,6 @@ def driverobj(config_file, cycle):
 
 def test_FV3(driverobj):
     assert isinstance(driverobj, fv3.FV3)
-
-
-def test_FV3_dry_run(config_file, cycle):
-    with patch.object(fv3, "dryrun") as dryrun:
-        driverobj = fv3.FV3(config=config_file, cycle=cycle, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
 
 
 def test_FV3_boundary_files(driverobj):
@@ -106,6 +114,13 @@ def test_FV3_diag_table(driverobj):
 def test_FV3_diag_table_warn(caplog, driverobj):
     driverobj.diag_table()
     assert logged(caplog, "No 'diag_table' defined in config")
+
+
+def test_FV3_dry_run(config_file, cycle):
+    with patch.object(fv3, "dryrun") as dryrun:
+        driverobj = fv3.FV3(config=config_file, cycle=cycle, batch=True, dry_run=True)
+    assert driverobj._dry_run is True
+    dryrun.assert_called_once_with()
 
 
 def test_FV3_field_table(driverobj):
@@ -219,19 +234,24 @@ def test_FV3_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_FV3__run_via_batch_submission(driverobj):
-    runscript = driverobj._runscript_path
-    with patch.object(driverobj, "provisioned_run_directory") as prd:
+def test_FV3__driver_config(driverobj):
+    assert driverobj._driver_config == driverobj._config["fv3"]
+
+
+def test_FV3__run_via_batch_submission(driverobj, truetask):
+    Path(driverobj._driver_config["execution"]["executable"]).touch()
+    with patch.object(driverobj, "provisioned_run_directory", truetask):
         with patch.object(fv3.FV3, "_scheduler", new_callable=PropertyMock) as scheduler:
             driverobj._run_via_batch_submission()
+            runscript = driverobj._runscript_path
             scheduler().submit_job.assert_called_once_with(
                 runscript=runscript, submit_file=Path(f"{runscript}.submit")
             )
-        prd.assert_called_once_with()
 
 
-def test_FV3__run_via_local_execution(driverobj):
-    with patch.object(driverobj, "provisioned_run_directory") as prd:
+def test_FV3__run_via_local_execution(driverobj, truetask):
+    Path(driverobj._driver_config["execution"]["executable"]).touch()
+    with patch.object(driverobj, "provisioned_run_directory", truetask):
         with patch.object(driver, "execute") as execute:
             driverobj._run_via_local_execution()
             execute.assert_called_once_with(
@@ -239,18 +259,13 @@ def test_FV3__run_via_local_execution(driverobj):
                 cwd=driverobj._rundir,
                 log_output=True,
             )
-        prd.assert_called_once_with()
-
-
-def test_FV3__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["fv3"]
 
 
 def test_FV3__runscript_path(driverobj):
     assert driverobj._runscript_path == driverobj._rundir / "runscript.fv3"
 
 
-def test_FV3__taskanme(driverobj):
+def test_FV3__taskname(driverobj):
     assert driverobj._taskname("foo") == "20240201 18Z fv3 foo"
 
 

@@ -29,7 +29,7 @@ The path to the directory where ``make_hgrid`` will write its outputs.
 config:
 ^^^^^^^
 
-Describes the required parameters to run a ``make_hgrid`` configuration. 
+Describes the required parameters to run a ``make_hgrid`` configuration.
 
 
 grid_type:
@@ -77,7 +77,7 @@ Specify the center location of grid.
 do_cube_transform:
 """"""""""""""""""
 
-Set to re-orient the rotated cubed sphere so that tile 6 has 'north' facing upward. When ``do_cube_transform`` is set, the following must be set: ``stretch_factor``, ``latget_lon``, and ``target_lat``. 
+Set to re-orient the rotated cubed sphere so that tile 6 has 'north' facing upward. When ``do_cube_transform`` is set, the following must be set: ``stretch_factor``, ``latget_lon``, and ``target_lat``.
 
 do_schmidt:
 """""""""""
@@ -97,7 +97,7 @@ Nominal resolution of zonal regions.
 great_circle_algorithm:
 """""""""""""""""""""""
 
-When specified, great_circle_algorithm will be used to compute grid cell area. 
+When specified, great_circle_algorithm will be used to compute grid cell area.
 
 grid_name:
 """"""""""
@@ -137,7 +137,7 @@ Specify the list of ending i-direction index(es) of nest grids in parent tile su
 jstart_nest:
 """"""""""""
 
-Specify the list of starting j-direction index(es) of nest grids in parent tile supergrid(Fortran index). 
+Specify the list of starting j-direction index(es) of nest grids in parent tile supergrid(Fortran index).
 
 jend_nest:
 """"""""""

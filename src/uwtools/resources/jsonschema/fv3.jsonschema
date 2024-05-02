@@ -143,6 +143,7 @@
         "execution",
         "field_table",
         "length",
+        "namelist",
         "run_dir"
       ],
       "type": "object"

@@ -45,7 +45,7 @@ class JEDI(Driver):
     @task
     def configuration_file(self):
         """
-        The configuration file.
+        The JEDI YAML configuration file.
         """
         fn = "jedi.yaml"
         yield self._taskname(fn)
