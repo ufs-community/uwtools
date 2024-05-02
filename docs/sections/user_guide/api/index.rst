@@ -8,6 +8,7 @@ API
    file
    fv3
    global_equiv_resol
+   jedi
    logging
    make_hgrid
    make_solo_mosaic
