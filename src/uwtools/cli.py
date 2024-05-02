@@ -54,22 +54,28 @@ def main() -> None:
         _abort(str(e))
     try:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
+        # Collect tools.
         modes: Dict[str, Callable[..., bool]] = {
-            STR.chgrescube: partial(_dispatch_to_driver, STR.chgrescube),
             STR.config: _dispatch_config,
-            STR.esggrid: partial(_dispatch_to_driver, STR.esggrid),
             STR.file: _dispatch_file,
-            STR.fv3: partial(_dispatch_to_driver, STR.fv3),
-            STR.globalequivresol: partial(_dispatch_to_driver, STR.globalequivresol),
-            STR.jedi: partial(_dispatch_to_driver, STR.jedi),
-            STR.makehgrid: partial(_dispatch_to_driver, STR.makehgrid),
-            STR.mpas: partial(_dispatch_to_driver, STR.mpas),
-            STR.mpasinit: partial(_dispatch_to_driver, STR.mpasinit),
             STR.rocoto: _dispatch_rocoto,
-            STR.sfcclimogen: partial(_dispatch_to_driver, STR.sfcclimogen),
             STR.template: _dispatch_template,
-            STR.ungrib: partial(_dispatch_to_driver, STR.ungrib),
         }
+        # Collect drivers.
+        for x in [
+            STR.chgrescube,
+            STR.esggrid,
+            STR.fv3,
+            STR.globalequivresol,
+            STR.jedi,
+            STR.makehgrid,
+            STR.mpas,
+            STR.mpasinit,
+            STR.sfcclimogen,
+            STR.ungrib,
+        ]:
+            modes[x] = partial(_dispatch_to_driver, x)
+        # Dispatch to appropriate mode.
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except UWError as e:
         log.error(str(e))
@@ -949,24 +955,27 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     )
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
+    # Add tools.
     checks = {
-        STR.chgrescube: _add_subparser_for_driver(STR.chgrescube, subparsers, with_cycle=True),
         STR.config: _add_subparser_config(subparsers),
-        STR.esggrid: _add_subparser_for_driver(STR.esggrid, subparsers, with_cycle=False),
         STR.file: _add_subparser_file(subparsers),
-        STR.fv3: _add_subparser_for_driver(STR.fv3, subparsers, with_cycle=True),
-        STR.globalequivresol: _add_subparser_for_driver(
-            STR.globalequivresol, subparsers, with_cycle=False
-        ),
-        STR.jedi: _add_subparser_for_driver(STR.jedi, subparsers, with_cycle=True),
-        STR.makehgrid: _add_subparser_for_driver(STR.makehgrid, subparsers, with_cycle=False),
-        STR.mpas: _add_subparser_for_driver(STR.mpas, subparsers, with_cycle=True),
-        STR.mpasinit: _add_subparser_for_driver(STR.mpasinit, subparsers, with_cycle=True),
         STR.rocoto: _add_subparser_rocoto(subparsers),
-        STR.sfcclimogen: _add_subparser_for_driver(STR.sfcclimogen, subparsers, with_cycle=False),
         STR.template: _add_subparser_template(subparsers),
-        STR.ungrib: _add_subparser_for_driver(STR.ungrib, subparsers, with_cycle=True),
     }
+    # Add drivers.
+    for x, with_cycle in [
+        (STR.chgrescube, True),
+        (STR.esggrid, False),
+        (STR.fv3, True),
+        (STR.globalequivresol, False),
+        (STR.jedi, True),
+        (STR.makehgrid, False),
+        (STR.mpas, True),
+        (STR.mpasinit, True),
+        (STR.sfcclimogen, False),
+        (STR.ungrib, True),
+    ]:
+        checks[x] = _add_subparser_for_driver(x, subparsers, with_cycle)
     return vars(parser.parse_args(raw_args)), checks
 
 
