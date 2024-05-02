@@ -41,7 +41,7 @@ All tasks take the same arguments. For example:
 
    Required arguments:
      --config-file PATH, -c PATH
-         Path to config file
+         Path to UW YAML config file
 
    Optional arguments:
      -h, --help

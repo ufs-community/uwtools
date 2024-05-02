@@ -141,7 +141,7 @@ class FV3(Driver):
         yield None
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=self._driver_config.get("namelist", {}),
+            config_values=self._driver_config["namelist"],
             path=path,
         )
 

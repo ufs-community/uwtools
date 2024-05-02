@@ -6,7 +6,7 @@ esg_grid:
       walltime: "08:00:00"
     executable: /path/to/esg_grid
   namelist:
-    base_file: "/path/to/base_file"
+    base_file: /path/to/base_file
     update_values:
       regional_grid_nml:
         delx: 0.11
@@ -16,7 +16,7 @@ esg_grid:
         pazi: 0.0
         plat: 38.5
         plon: -97.5
-  run_dir: /path/to/esg_grid 
+  run_dir: /path/to/esg_grid
 platform:
   account: me
   scheduler: slurm

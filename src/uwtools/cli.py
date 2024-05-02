@@ -10,24 +10,15 @@ from argparse import HelpFormatter
 from argparse import _ArgumentGroup as Group
 from argparse import _SubParsersAction as Subparsers
 from functools import partial
+from importlib import import_module
 from pathlib import Path
 from typing import Any, Callable, Dict, List, NoReturn, Tuple
 
-import uwtools.api.chgres_cube
+import uwtools.api
 import uwtools.api.config
-import uwtools.api.esg_grid
 import uwtools.api.file
-import uwtools.api.fv3
-import uwtools.api.global_equiv_resol
-import uwtools.api.jedi
-import uwtools.api.make_hgrid
-import uwtools.api.make_solo_mosaic
-import uwtools.api.mpas
-import uwtools.api.mpas_init
 import uwtools.api.rocoto
-import uwtools.api.sfc_climo_gen
 import uwtools.api.template
-import uwtools.api.ungrib
 import uwtools.config.jinja2
 import uwtools.rocoto
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
@@ -63,84 +54,32 @@ def main() -> None:
         _abort(str(e))
     try:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
-        modes = {
-            STR.chgrescube: _dispatch_chgres_cube,
+        tools: Dict[str, Callable[..., bool]] = {
             STR.config: _dispatch_config,
-            STR.esggrid: _dispatch_esg_grid,
             STR.file: _dispatch_file,
-            STR.fv3: _dispatch_fv3,
-            STR.globalequivresol: _dispatch_global_equiv_resol,
-            STR.jedi: _dispatch_jedi,
-            STR.makehgrid: _dispatch_make_hgrid,
-            STR.makesolomosaic: _dispatch_make_solo_mosaic,
-            STR.mpas: _dispatch_mpas,
-            STR.mpasinit: _dispatch_mpas_init,
             STR.rocoto: _dispatch_rocoto,
-            STR.sfcclimogen: _dispatch_sfc_climo_gen,
             STR.template: _dispatch_template,
-            STR.ungrib: _dispatch_ungrib,
         }
+        drivers: Dict[str, Callable[..., bool]] = {
+            x: partial(_dispatch_to_driver, x)
+            for x in [
+                STR.chgrescube,
+                STR.esggrid,
+                STR.fv3,
+                STR.globalequivresol,
+                STR.jedi,
+                STR.makehgrid,
+                STR.mpas,
+                STR.mpasinit,
+                STR.sfcclimogen,
+                STR.ungrib,
+            ]
+        }
+        modes = {**tools, **drivers}
         sys.exit(0 if modes[args[STR.mode]](args) else 1)
     except UWError as e:
         log.error(str(e))
         sys.exit(1)
-
-
-# Mode chgres_cube
-
-
-def _add_subparser_chgres_cube(subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for mode: chgres_cube
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.chgrescube, "Execute chgres_cube tasks")
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {
-        task: _add_subparser_chgres_cube_task(subparsers, task, helpmsg)
-        for task, helpmsg in uwtools.api.chgres_cube.tasks().items()
-    }
-
-
-def _add_subparser_chgres_cube_task(
-    subparsers: Subparsers, task: str, helpmsg: str
-) -> ActionChecks:
-    """
-    Subparser for mode: chgres_cube <task>
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param task: The task to add a subparser for.
-    :param helpmsg: Help message for task.
-    """
-    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_cycle(required)
-    optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_chgres_cube(args: Args) -> bool:
-    """
-    Dispatch logic for chgres_cube mode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.chgres_cube.execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        cycle=args[STR.cycle],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
 
 
 # Mode config
@@ -298,56 +237,6 @@ def _dispatch_config_validate(args: Args) -> bool:
     )
 
 
-# Mode esg_grid
-
-
-def _add_subparser_esg_grid(subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for mode: esg_grid
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.esggrid, "Execute esg_grid tasks")
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {
-        task: _add_subparser_esg_grid_task(subparsers, task, helpmsg)
-        for task, helpmsg in uwtools.api.esg_grid.tasks().items()
-    }
-
-
-def _add_subparser_esg_grid_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
-    """
-    Subparser for mode: esg_grid <task>
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param task: The task to add a subparser for.
-    :param helpmsg: Help message for task.
-    """
-    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional, required=False)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_esg_grid(args: Args) -> bool:
-    """
-    Dispatch logic for esg_grid mode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.esg_grid.execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
-
-
 # Mode file
 
 
@@ -445,384 +334,6 @@ def _dispatch_file_link(args: Args) -> bool:
     )
 
 
-# Mode fv3
-
-
-def _add_subparser_fv3(subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for mode: fv3
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.fv3, "Execute FV3 tasks")
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {
-        task: _add_subparser_fv3_task(subparsers, task, helpmsg)
-        for task, helpmsg in uwtools.api.fv3.tasks().items()
-    }
-
-
-def _add_subparser_fv3_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
-    """
-    Subparser for mode: fv3 <task>
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param task: The task to add a subparser for.
-    :param helpmsg: Help message for task.
-    """
-    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_cycle(required)
-    optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_fv3(args: Args) -> bool:
-    """
-    Dispatch logic for fv3 mode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.fv3.execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        cycle=args[STR.cycle],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
-
-
-# Mode global_equiv_resol
-
-
-def _add_subparser_global_equiv_resol(subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for mode: global_equiv_resol
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.globalequivresol, "Execute global_equiv_resol tasks")
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {
-        task: _add_subparser_global_equiv_resol_task(subparsers, task, helpmsg)
-        for task, helpmsg in uwtools.api.global_equiv_resol.tasks().items()
-    }
-
-
-def _add_subparser_global_equiv_resol_task(
-    subparsers: Subparsers, task: str, helpmsg: str
-) -> ActionChecks:
-    """
-    Subparser for mode: global_equiv_resol_task <task>
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param task: The task to add a subparser for.
-    :param helpmsg: Help message for task.
-    """
-    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_config_file(group=required, required=True)
-    optional = _basic_setup(parser)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_global_equiv_resol(args: Args) -> bool:
-    """
-    Dispatch logic for global_equiv_resol mode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.global_equiv_resol.execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
-
-
-# Mode jedi
-
-
-def _add_subparser_jedi(subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for mode: jedi
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.jedi, "Execute JEDI tasks")
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {
-        task: _add_subparser_jedi_task(subparsers, task, helpmsg)
-        for task, helpmsg in uwtools.api.jedi.tasks().items()
-    }
-
-
-def _add_subparser_jedi_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
-    """
-    Subparser for mode: jedi <task>
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param task: The task to add a subparser for.
-    :param helpmsg: Help message for task.
-    """
-    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_cycle(required)
-    optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_jedi(args: Args) -> bool:
-    """
-    Dispatch logic for jedi mode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.jedi.execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        cycle=args[STR.cycle],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
-
-
-# Mode make_hgrid
-
-
-def _add_subparser_make_hgrid(subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for mode: make_hgrid
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.makehgrid, "Execute make_hgrid tasks")
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {
-        task: _add_subparser_make_hgrid_task(subparsers, task, helpmsg)
-        for task, helpmsg in uwtools.api.make_hgrid.tasks().items()
-    }
-
-
-def _add_subparser_make_hgrid_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
-    """
-    Subparser for mode: make_hgrid <task>
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param task: The task to add a subparser for.
-    :param helpmsg: Help message for task.
-    """
-    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional, required=False)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_make_hgrid(args: Args) -> bool:
-    """
-    Dispatch logic for make_hgrid mode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.make_hgrid.execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
-
-
-# Mode make_solo_mosaic
-
-
-def _add_subparser_make_solo_mosaic(subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for mode: make_solo_mosaic
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.makesolomosaic, "Execute make_solo_mosaic tasks")
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {
-        task: _add_subparser_make_solo_mosaic_task(subparsers, task, helpmsg)
-        for task, helpmsg in uwtools.api.make_solo_mosaic.tasks().items()
-    }
-
-
-def _add_subparser_make_solo_mosaic_task(
-    subparsers: Subparsers, task: str, helpmsg: str
-) -> ActionChecks:
-    """
-    Subparser for mode: make_solo_mosaic_task <task>
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param task: The task to add a subparser for.
-    :param helpmsg: Help message for task.
-    """
-    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_config_file(group=required, required=True)
-    optional = _basic_setup(parser)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_make_solo_mosaic(args: Args) -> bool:
-    """
-    Dispatch logic for make_solo_mosaic mode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.make_solo_mosaic.execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
-
-
-# Mode mpas
-
-
-def _add_subparser_mpas(subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for mode: mpas
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.mpas, "Execute MPAS tasks")
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {
-        task: _add_subparser_mpas_task(subparsers, task, helpmsg)
-        for task, helpmsg in uwtools.api.mpas.tasks().items()
-    }
-
-
-def _add_subparser_mpas_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
-    """
-    Subparser for mode: mpas <task>
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param task: The task to add a subparser for.
-    :param helpmsg: Help message for task.
-    """
-    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-
-    _add_arg_cycle(required)
-    optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_mpas(args: Args) -> bool:
-    """
-    Dispatch logic for mpas mode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.mpas.execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        cycle=args[STR.cycle],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
-
-
-# Mode mpas_init
-
-
-def _add_subparser_mpas_init(subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for mode: mpas_init
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.mpasinit, "Execute MPAS Init tasks")
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {
-        task: _add_subparser_mpas_init_task(subparsers, task, helpmsg)
-        for task, helpmsg in uwtools.api.mpas_init.tasks().items()
-    }
-
-
-def _add_subparser_mpas_init_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
-    """
-    Subparser for mode: mpas_init <task>
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param task: The task to add a subparser for.
-    :param helpmsg: Help message for task.
-    """
-    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_cycle(required)
-    optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_mpas_init(args: Args) -> bool:
-    """
-    Dispatch logic for mpas_init mode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.mpas_init.execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        cycle=args[STR.cycle],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
-
-
 # Mode rocoto
 
 
@@ -849,7 +360,7 @@ def _add_subparser_rocoto_realize(subparsers: Subparsers) -> ActionChecks:
     """
     parser = _add_subparser(subparsers, STR.realize, "Realize a Rocoto XML workflow document")
     optional = _basic_setup(parser)
-    _add_arg_input_file(optional)
+    _add_arg_config_file(optional)
     _add_arg_output_file(optional)
     checks = _add_args_verbosity(optional)
     return checks
@@ -888,7 +399,7 @@ def _dispatch_rocoto_realize(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.rocoto.realize(
-        config=args[STR.infile],
+        config=args[STR.cfgfile],
         output_file=args[STR.outfile],
         stdin_ok=True,
     )
@@ -901,60 +412,6 @@ def _dispatch_rocoto_validate(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.rocoto.validate(xml_file=args[STR.infile], stdin_ok=True)
-
-
-# Mode sfc_climo_gen
-
-
-def _add_subparser_sfc_climo_gen(subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for mode: sfc_climo_gen
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.sfcclimogen, "Execute sfc_climo_gen tasks")
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {
-        task: _add_subparser_sfc_climo_gen_task(subparsers, task, helpmsg)
-        for task, helpmsg in uwtools.api.sfc_climo_gen.tasks().items()
-    }
-
-
-def _add_subparser_sfc_climo_gen_task(
-    subparsers: Subparsers, task: str, helpmsg: str
-) -> ActionChecks:
-    """
-    Subparser for mode: sfc_climo_gen <task>
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param task: The task to add a subparser for.
-    :param helpmsg: Help message for task.
-    """
-    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_sfc_climo_gen(args: Args) -> bool:
-    """
-    Dispatch logic for sfc_climo_gen mode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.sfc_climo_gen.execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
 
 
 # Mode template
@@ -1064,61 +521,6 @@ def _dispatch_template_translate(args: Args) -> bool:
     )
 
 
-# Mode ungrib
-
-
-def _add_subparser_ungrib(subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for mode: ungrib
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.ungrib, "Execute Ungrib tasks")
-    _basic_setup(parser)
-    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
-    return {
-        task: _add_subparser_ungrib_task(subparsers, task, helpmsg)
-        for task, helpmsg in uwtools.api.ungrib.tasks().items()
-    }
-
-
-def _add_subparser_ungrib_task(subparsers: Subparsers, task: str, helpmsg: str) -> ActionChecks:
-    """
-    Subparser for mode: ungrib <task>
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param task: The task to add a subparser for.
-    :param helpmsg: Help message for task.
-    """
-    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_cycle(required)
-    optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    checks = _add_args_verbosity(optional)
-    return checks
-
-
-def _dispatch_ungrib(args: Args) -> bool:
-    """
-    Dispatch logic for ungrib mode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.ungrib.execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        cycle=args[STR.cycle],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
-
-
 # Arguments
 
 # pylint: disable=missing-function-docstring
@@ -1133,7 +535,7 @@ def _add_arg_batch(group: Group) -> None:
 
 
 def _add_arg_config_file(group: Group, required: bool = False) -> None:
-    msg = "Path to config file" + ("" if required else " (default: read from stdin)")
+    msg = "Path to UW YAML config file" + ("" if required else " (default: read from stdin)")
     group.add_argument(
         _switch(STR.cfgfile),
         "-c",
@@ -1407,6 +809,47 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     return parser
 
 
+def _add_subparser_for_driver(name: str, subparsers: Subparsers, with_cycle: bool) -> ModeChecks:
+    """
+    Subparser for a driver mode.
+
+    :param name: Name of the driver whose subparser to configure.
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param with_cycle: Does this driver require a cycle?
+    """
+    parser = _add_subparser(subparsers, name, "Execute %s tasks" % name)
+    _basic_setup(parser)
+    subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
+    return {
+        task: _add_subparser_for_driver_task(subparsers, task, helpmsg, with_cycle)
+        for task, helpmsg in import_module("uwtools.api.%s" % name).tasks().items()
+    }
+
+
+def _add_subparser_for_driver_task(
+    subparsers: Subparsers, task: str, helpmsg: str, with_cycle: bool
+) -> ActionChecks:
+    """
+    Subparser for a driver action.
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    :param task: The task to add a subparser for.
+    :param helpmsg: Help message for task.
+    :param with_cycle: Does this driver require a cycle?
+    """
+    parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    if with_cycle:
+        _add_arg_cycle(required)
+    optional = _basic_setup(parser)
+    _add_arg_config_file(group=optional)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
+    checks = _add_args_verbosity(optional)
+    return checks
+
+
 def _add_subparsers(parser: Parser, dest: str, metavar: str) -> Subparsers:
     """
     Add subparsers to a parser.
@@ -1473,6 +916,25 @@ def _dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:
     return dict([arg.split("=") for arg in config_items])
 
 
+def _dispatch_to_driver(name: str, args: Args) -> bool:
+    """
+    Dispatch logic for a driver mode.
+
+    :param name: Name of the driver to dispatch to.
+    :param args: Parsed command-line args.
+    """
+    execute: Callable[..., bool] = import_module("uwtools.api.%s" % name).execute
+    return execute(
+        task=args[STR.action],
+        config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        batch=args[STR.batch],
+        dry_run=args[STR.dryrun],
+        graph_file=args[STR.graphfile],
+        stdin_ok=True,
+    )
+
+
 def _formatter(prog: str) -> HelpFormatter:
     """
     A standard formatter for help messages.
@@ -1493,23 +955,29 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     )
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
-    checks = {
-        STR.chgrescube: _add_subparser_chgres_cube(subparsers),
-        STR.config: _add_subparser_config(subparsers),
-        STR.esggrid: _add_subparser_esg_grid(subparsers),
-        STR.file: _add_subparser_file(subparsers),
-        STR.fv3: _add_subparser_fv3(subparsers),
-        STR.globalequivresol: _add_subparser_global_equiv_resol(subparsers),
-        STR.jedi: _add_subparser_jedi(subparsers),
-        STR.makehgrid: _add_subparser_make_hgrid(subparsers),
-        STR.mpas: _add_subparser_mpas(subparsers),
-        STR.mpasinit: _add_subparser_mpas_init(subparsers),
-        STR.rocoto: _add_subparser_rocoto(subparsers),
-        STR.sfcclimogen: _add_subparser_sfc_climo_gen(subparsers),
-        STR.makesolomosaic: _add_subparser_make_solo_mosaic(subparsers),
-        STR.template: _add_subparser_template(subparsers),
-        STR.ungrib: _add_subparser_ungrib(subparsers),
+    tools = {
+        STR.config: partial(_add_subparser_config, subparsers),
+        STR.file: partial(_add_subparser_file, subparsers),
+        STR.rocoto: partial(_add_subparser_rocoto, subparsers),
+        STR.template: partial(_add_subparser_template, subparsers),
     }
+    drivers = {
+        x: partial(_add_subparser_for_driver, x, subparsers, with_cycle)
+        for x, with_cycle in [
+            (STR.chgrescube, True),
+            (STR.esggrid, False),
+            (STR.fv3, True),
+            (STR.globalequivresol, False),
+            (STR.jedi, True),
+            (STR.makehgrid, False),
+            (STR.mpas, True),
+            (STR.mpasinit, True),
+            (STR.sfcclimogen, False),
+            (STR.ungrib, True),
+        ]
+    }
+    modes = {**tools, **drivers}
+    checks = {k: modes[k]() for k in sorted(modes.keys())}
     return vars(parser.parse_args(raw_args)), checks
 
 

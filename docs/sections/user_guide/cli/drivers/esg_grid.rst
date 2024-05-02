@@ -7,15 +7,15 @@ The ``uw`` mode for configuring and running the :ufs-utils:`regional_esg_grid<re
 
    $ uw esg_grid --help
     usage: uw esg_grid [-h] [--version] TASK ...
-    
+
     Execute esg_grid tasks
-    
+
     Optional arguments:
       -h, --help
           Show help and exit
       --version
           Show version info and exit
-    
+
     Positional arguments:
       TASK
         namelist_file
@@ -35,13 +35,13 @@ All tasks take the same arguments. For example:
 
     $ uw esg_grid run --help
     usage: uw esg_grid run --config-file PATH [-h] [--version] [--batch] [--dry-run] [--graph-file PATH] [--quiet] [--verbose]
-    
+
     A run
-    
+
     Required arguments:
       --config-file PATH, -c PATH
-          Path to config file
-    
+          Path to UW YAML config file
+
     Optional arguments:
       -h, --help
           Show help and exit
