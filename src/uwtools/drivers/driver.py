@@ -49,7 +49,6 @@ class Driver(ABC):
         self._config = YAMLConfig(config=config)
         self._dry_run = dry_run
         self._batch = batch
-        self._config.dereference()
         self._config.dereference(
             context={
                 **({"cycle": cycle} if cycle else {}),
