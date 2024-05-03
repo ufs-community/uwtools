@@ -11,7 +11,7 @@ from iotaa import asset, dryrun, task, tasks
 # from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import file, symlink
+from uwtools.utils.tasks import file, filecopy
 
 
 class UPP(Driver):
@@ -31,7 +31,7 @@ class UPP(Driver):
         The driver.
 
         :param cycle: The cycle.
-        :param leadtime: The length of the forecast.
+        :param leadtime: The leadtime.
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
@@ -40,39 +40,33 @@ class UPP(Driver):
         if self._dry_run:
             dryrun()
         self._cycle = cycle
-        fcst_time = cycle  # datetime.min() + leadtime
-        valid_time = cycle + leadtime
-        self._config.dereference(
-            context={
-                **({"cycle": cycle, "fcst_time": fcst_time, "valid_time": valid_time}),
-                **self._config.data,
-            }
-        )
+        self._leadtime = leadtime
+        # fcst_time = cycle  # datetime.min() + leadtime
+        # valid_time = cycle + leadtime
 
     # Workflow tasks
 
-    # @tasks
-    # def files_copied(self):
-    #     """
-    #     Files copied for run.
-    #     """
-    #     yield self._taskname("files copied")
-    #     if self._config
-    #     yield [
-    #         filecopy(src=Path(src), dst=self._rundir / dst)
-    #         for dst, src in self._driver_config.get("files_to_copy", {}).items()
-    #     ]
-
     @tasks
-    def files_linked(self):
+    def files_copied(self):
         """
-        Files linked for run.
+        Files copied for run.
         """
-        yield self._taskname("files linked")
+        yield self._taskname("files copied")
         yield [
-            symlink(target=Path(target), linkname=self._rundir / linkname)
-            for linkname, target in self._driver_config.get("files_to_link", {}).items()
+            filecopy(src=Path(src), dst=self._rundir / dst)
+            for dst, src in self._driver_config.get("files_to_copy", {}).items()
         ]
+
+    # @tasks
+    # def files_linked(self):
+    #     """
+    #     Files linked for run.
+    #     """
+    #     yield self._taskname("files linked")
+    #     yield [
+    #         symlink(target=Path(target), linkname=self._rundir / linkname)
+    #         for linkname, target in self._driver_config.get("files_to_link", {}).items()
+    #     ]
 
     # @task
     # def namelist_file(self):
@@ -97,10 +91,10 @@ class UPP(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
-            # self.files_copied(),
-            self.files_linked(),
+            self.files_copied(),
+            # self.files_linked(),
             # self.namelist_file(),
-            self.runscript(),
+            # self.runscript(),
         ]
 
     @task
@@ -143,7 +137,12 @@ class UPP(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
+        return "%s f%03d %s %s" % (
+            self._cycle.strftime("%Y%m%d %HZ"),
+            self._leadtime,
+            self._driver_name,
+            suffix,
+        )
 
 
 def _ext(n):

@@ -957,6 +957,8 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     }
     if cycle := args.get(STR.cycle):
         kwargs[STR.cycle] = cycle
+    if leadtime := args.get(STR.leadtime):
+        kwargs[STR.leadtime] = leadtime
     return execute(**kwargs)
 
 
@@ -992,7 +994,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     }
     drivers_with_cycle = {
         x: partial(_add_subparser_for_driver, x, subparsers, with_cycle=True)
-        for x in [STR.chgrescube, STR.fv3, STR.jedi, STR.mpas, STR.mpasinit, STR.ungrib, STR.upp]
+        for x in [STR.chgrescube, STR.fv3, STR.jedi, STR.mpas, STR.mpasinit, STR.ungrib]
     }
     drivers_with_cycle_and_leadtime = {
         x: partial(_add_subparser_for_driver, x, subparsers, with_cycle=True, with_leadtime=True)
