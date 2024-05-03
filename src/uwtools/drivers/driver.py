@@ -42,6 +42,7 @@ class Driver(ABC):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         :param cycle: The cycle.
+        :param leadtime: The leadtime.
         """
         if leadtime and not cycle:
             raise UWError("When leadtime is specified, cycle is required")
@@ -50,7 +51,11 @@ class Driver(ABC):
         self._batch = batch
         self._config.dereference()
         self._config.dereference(
-            context={**({"cycle": cycle} if cycle else {}), **self._config.data}
+            context={
+                **({"cycle": cycle} if cycle else {}),
+                **({"leadtime": leadtime} if leadtime else {}),
+                **self._config.data,
+            }
         )
         self._validate()
 
