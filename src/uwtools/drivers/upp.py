@@ -11,7 +11,7 @@ from iotaa import asset, dryrun, task, tasks
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import file, filecopy
+from uwtools.utils.tasks import file, filecopy, symlink
 
 
 class UPP(Driver):
@@ -55,16 +55,16 @@ class UPP(Driver):
             for dst, src in self._driver_config.get("files_to_copy", {}).items()
         ]
 
-    # @tasks
-    # def files_linked(self):
-    #     """
-    #     Files linked for run.
-    #     """
-    #     yield self._taskname("files linked")
-    #     yield [
-    #         symlink(target=Path(target), linkname=self._rundir / linkname)
-    #         for linkname, target in self._driver_config.get("files_to_link", {}).items()
-    #     ]
+    @tasks
+    def files_linked(self):
+        """
+        Files linked for run.
+        """
+        yield self._taskname("files linked")
+        yield [
+            symlink(target=Path(target), linkname=self._rundir / linkname)
+            for linkname, target in self._driver_config.get("files_to_link", {}).items()
+        ]
 
     @task
     def namelist_file(self):
@@ -90,8 +90,8 @@ class UPP(Driver):
         yield self._taskname("provisioned run directory")
         yield [
             self.files_copied(),
-            # self.files_linked(),
-            # self.namelist_file(),
+            self.files_linked(),
+            self.namelist_file(),
             # self.runscript(),
         ]
 
