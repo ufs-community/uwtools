@@ -2,13 +2,13 @@
 A driver for UPP.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 from iotaa import asset, dryrun, task, tasks
 
-# from uwtools.config.formats.nml import NMLConfig
+from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy
@@ -22,7 +22,7 @@ class UPP(Driver):
     def __init__(
         self,
         cycle: datetime,
-        leadtime: timedelta,
+        leadtime: int,
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
@@ -41,8 +41,6 @@ class UPP(Driver):
             dryrun()
         self._cycle = cycle
         self._leadtime = leadtime
-        # fcst_time = cycle  # datetime.min() + leadtime
-        # valid_time = cycle + leadtime
 
     # Workflow tasks
 
@@ -68,21 +66,21 @@ class UPP(Driver):
     #         for linkname, target in self._driver_config.get("files_to_link", {}).items()
     #     ]
 
-    # @task
-    # def namelist_file(self):
-    #     """
-    #     The namelist file.
-    #     """
-    #     path = self._rundir / f"itag.{fcst_time.strftime("%H:%M:%S")}"
-    #     yield self._taskname(str(path))
-    #     yield asset(path, path.is_file)
-    #     yield None
-    #     path.parent.mkdir(parents=True, exist_ok=True)
-    #     self._create_user_updated_config(
-    #         config_class=NMLConfig,
-    #         config_values=d,
-    #         path=path,
-    #     )
+    @task
+    def namelist_file(self):
+        """
+        The namelist file.
+        """
+        path = self._rundir / f"itag.f{self._leadtime:03}"
+        yield self._taskname(str(path))
+        yield asset(path, path.is_file)
+        yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self._create_user_updated_config(
+            config_class=NMLConfig,
+            config_values=self._driver_config["namelist"],
+            path=path,
+        )
 
     @tasks
     def provisioned_run_directory(self):

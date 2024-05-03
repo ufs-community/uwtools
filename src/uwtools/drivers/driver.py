@@ -6,7 +6,7 @@ import os
 import re
 import stat
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Type
@@ -46,13 +46,14 @@ class Driver(ABC):
         """
         if leadtime and not cycle:
             raise UWError("When leadtime is specified, cycle is required")
+        assert cycle
         self._config = YAMLConfig(config=config)
         self._dry_run = dry_run
         self._batch = batch
         self._config.dereference(
             context={
                 **({"cycle": cycle} if cycle else {}),
-                **({"leadtime": leadtime} if leadtime else {}),
+                **({"valid": cycle + timedelta(hours=leadtime)} if leadtime else {}),
                 **self._config.data,
             }
         )

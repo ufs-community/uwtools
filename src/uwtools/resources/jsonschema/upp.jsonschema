@@ -9,12 +9,81 @@
         "files_to_copy": {
           "$ref": "urn:uwtools:files-to-stage"
         },
+        "namelist": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "properties": {
+                "model_inputs": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "datestr": {
+                      "type": "string"
+                    },
+                    "filename": {
+                      "type": "string"
+                    },
+                    "filenameflux": {
+                      "type": "string"
+                    },
+                    "grib": {
+                      "type": "string"
+                    },
+                    "ioform": {
+                      "type": "string"
+                    },
+                    "modelname": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "namepgb": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "kpo": {
+                      "type": "integer"
+                    },
+                    "numx": {
+                      "type": "integer"
+                    },
+                    "po": {
+                      "items": {
+                        "type": "number"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
         "run_dir": {
           "type": "string"
         }
       },
       "required": [
         "execution",
+        "namelist",
         "run_dir"
       ],
       "type": "object"
