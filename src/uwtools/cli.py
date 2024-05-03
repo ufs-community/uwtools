@@ -63,6 +63,7 @@ def main() -> None:
         drivers: Dict[str, Callable[..., bool]] = {
             x: partial(_dispatch_to_driver, x)
             for x in [
+                STR.cdeps,
                 STR.chgrescube,
                 STR.esggrid,
                 STR.fv3,
@@ -964,6 +965,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
     drivers = {
         x: partial(_add_subparser_for_driver, x, subparsers, with_cycle)
         for x, with_cycle in [
+            (STR.cdeps, True),
             (STR.chgrescube, True),
             (STR.esggrid, False),
             (STR.fv3, True),

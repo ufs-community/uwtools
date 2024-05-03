@@ -63,6 +63,7 @@ class STR:
 
     action: str = "action"
     batch: str = "batch"
+    cdeps: str = "cdeps"
     cfgfile: str = "config_file"
     chgrescube: str = "chgres_cube"
     compare: str = "compare"
