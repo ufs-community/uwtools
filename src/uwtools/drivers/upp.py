@@ -11,7 +11,7 @@ from iotaa import asset, dryrun, task, tasks
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import file, filecopy, symlink
+from uwtools.utils.tasks import filecopy, symlink
 
 
 class UPP(Driver):
@@ -36,7 +36,13 @@ class UPP(Driver):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle, leadtime=leadtime)
+        super().__init__(
+            config=config,
+            dry_run=dry_run,
+            batch=batch,
+            cycle=cycle,
+            leadtime=leadtime,
+        )
         if self._dry_run:
             dryrun()
         self._cycle = cycle
@@ -115,19 +121,19 @@ class UPP(Driver):
         """
         return STR.upp
 
-    @task
-    def _gribfile(self, infile: Path, link: Path):
-        """
-        A symlink to an input GRIB file.
+    # @task
+    # def _gribfile(self, infile: Path, link: Path):
+    #     """
+    #     A symlink to an input GRIB file.
 
-        :param link: Link name.
-        :param infile: File to link.
-        """
-        yield self._taskname(str(link))
-        yield asset(link, link.is_symlink)
-        yield file(path=infile)
-        link.parent.mkdir(parents=True, exist_ok=True)
-        link.symlink_to(infile)
+    #     :param link: Link name.
+    #     :param infile: File to link.
+    #     """
+    #     yield self._taskname(str(link))
+    #     yield asset(link, link.is_symlink)
+    #     yield file(path=infile)
+    #     link.parent.mkdir(parents=True, exist_ok=True)
+    #     link.symlink_to(infile)
 
     def _taskname(self, suffix: str) -> str:
         """
@@ -143,9 +149,9 @@ class UPP(Driver):
         )
 
 
-def _ext(n):
-    """
-    Maps integers to 3-letter string.
-    """
-    b = 26
-    return "{:A>3}".format(("" if n < b else _ext(n // b)) + chr(65 + n % b))[-3:]
+# def _ext(n):
+#     """
+#     Maps integers to 3-letter string.
+#     """
+#     b = 26
+#     return "{:A>3}".format(("" if n < b else _ext(n // b)) + chr(65 + n % b))[-3:]
