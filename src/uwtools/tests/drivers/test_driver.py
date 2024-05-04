@@ -207,6 +207,7 @@ def test_Driver__resources_pass(driverobj):
         "account": account,
         "rundir": driverobj._rundir,
         "scheduler": scheduler,
+        "stdout": "runscript.concrete.out",
         "walltime": walltime,
     }
 

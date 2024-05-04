@@ -172,6 +172,7 @@ class Driver(ABC):
             "account": platform["account"],
             "rundir": self._rundir,
             "scheduler": platform["scheduler"],
+            "stdout": "%s.out" % self._runscript_path.name,  # config may override
             **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
 
