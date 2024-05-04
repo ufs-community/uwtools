@@ -77,7 +77,7 @@ class UPP(Driver):
         """
         The namelist file.
         """
-        path = self._rundir / f"itag.f{self._leadtime:03}"
+        path = self._namelist_path
         yield self._taskname(str(path))
         yield asset(path, path.is_file)
         yield None
@@ -98,7 +98,7 @@ class UPP(Driver):
             self.files_copied(),
             self.files_linked(),
             self.namelist_file(),
-            # self.runscript(),
+            self.runscript(),
         ]
 
     @task
@@ -135,6 +135,34 @@ class UPP(Driver):
     #     link.parent.mkdir(parents=True, exist_ok=True)
     #     link.symlink_to(infile)
 
+    @property
+    def _namelist_path(self) -> Path:
+        """
+        Path to the namelist file.
+        """
+        return self._rundir / f"{self._driver_name}-{self._validtime_str}.nml"
+
+    @property
+    def _runscript_path(self) -> Path:
+        """
+        Path to the runscript.
+        """
+        return self._rundir / f"runscript.{self._driver_name}-{self._validtime_str}"
+
+    @property
+    def _runcmd(self) -> str:
+        """
+        Returns the full command-line component invocation.
+        """
+        execution = self._driver_config.get("execution", {})
+        mpiargs = execution.get("mpiargs", [])
+        components = [
+            execution.get("mpicmd"),
+            *[str(x) for x in mpiargs],
+            "%s <%s" % (execution["executable"], self._namelist_path.name),
+        ]
+        return " ".join(filter(None, components))
+
     def _taskname(self, suffix: str) -> str:
         """
         Returns a common tag for graph-task log messages.
@@ -147,6 +175,10 @@ class UPP(Driver):
             self._driver_name,
             suffix,
         )
+
+    @property
+    def _validtime_str(self) -> str:
+        return self._validtime.strftime("%Y-%m-%dT%H:%M:%S")
 
 
 # def _ext(n):

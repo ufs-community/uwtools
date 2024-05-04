@@ -44,16 +44,17 @@ class Driver(ABC):
         :param cycle: The cycle.
         :param leadtime: The leadtime.
         """
-        if leadtime and not cycle:
-            raise UWError("When leadtime is specified, cycle is required")
-        assert cycle
         self._config = YAMLConfig(config=config)
         self._dry_run = dry_run
         self._batch = batch
+        if leadtime:
+            if not cycle:
+                raise UWError("When leadtime is specified, cycle is required")
+            self._validtime = cycle + timedelta(hours=leadtime)
         self._config.dereference(
             context={
                 **({"cycle": cycle} if cycle else {}),
-                **({"valid": cycle + timedelta(hours=leadtime)} if leadtime else {}),
+                **({"validtime": self._validtime} if leadtime else {}),
                 **self._config.data,
             }
         )
@@ -262,7 +263,7 @@ class Driver(ABC):
             envvars=envvars,
             execution=[
                 "time %s" % self._runcmd,
-                "test $? -eq 0 && touch %s/done.%s" % (self._rundir, self._driver_name),
+                "test $? -eq 0 && touch %s.done" % self._runscript_path.name,
             ],
             scheduler=self._scheduler if self._batch else None,
         )
