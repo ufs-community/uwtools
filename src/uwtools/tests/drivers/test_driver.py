@@ -301,7 +301,7 @@ def test_Driver__write_runscript(driverobj, tmp_path):
     export BAZ=qux
 
     time foo bar baz {executable}
-    test $? -eq 0 && touch /path/to/2024032218/run/done.concrete
+    test $? -eq 0 && touch runscript.concrete.done
     """
     with open(path, "r", encoding="utf-8") as f:
         actual = f.read()

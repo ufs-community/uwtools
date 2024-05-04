@@ -159,7 +159,7 @@ class UPP(Driver):
         components = [
             execution.get("mpicmd"),
             *[str(x) for x in mpiargs],
-            "%s <%s" % (execution["executable"], self._namelist_path.name),
+            "%s < %s" % (execution["executable"], self._namelist_path.name),
         ]
         return " ".join(filter(None, components))
 
