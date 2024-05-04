@@ -121,20 +121,6 @@ class UPP(Driver):
         """
         return STR.upp
 
-    # @task
-    # def _gribfile(self, infile: Path, link: Path):
-    #     """
-    #     A symlink to an input GRIB file.
-
-    #     :param link: Link name.
-    #     :param infile: File to link.
-    #     """
-    #     yield self._taskname(str(link))
-    #     yield asset(link, link.is_symlink)
-    #     yield file(path=infile)
-    #     link.parent.mkdir(parents=True, exist_ok=True)
-    #     link.symlink_to(infile)
-
     @property
     def _namelist_path(self) -> Path:
         """
@@ -179,11 +165,3 @@ class UPP(Driver):
     @property
     def _validtime_str(self) -> str:
         return self._validtime.strftime("%Y-%m-%dT%H:%M:%S")
-
-
-# def _ext(n):
-#     """
-#     Maps integers to 3-letter string.
-#     """
-#     b = 26
-#     return "{:A>3}".format(("" if n < b else _ext(n // b)) + chr(65 + n % b))[-3:]
