@@ -52,13 +52,17 @@
                       "type": "string"
                     },
                     "grib": {
-                      "enum": "grib2"
+                      "enum": [
+                        "grib2"
+                      ],
+                      "type": "string"
                     },
                     "ioform": {
                       "enum": [
                         "binarynemsio",
                         "netcdf"
-                      ]
+                      ],
+                      "type": "string"
                     },
                     "modelname": {
                       "enum": [
@@ -67,7 +71,8 @@
                         "GFS",
                         "RAPR",
                         "NMM"
-                      ]
+                      ],
+                      "type": "string"
                     }
                   },
                   "type": "object"
@@ -149,7 +154,10 @@
                       "type": "array"
                     },
                     "vtimeunits": {
-                      "enum": "FMIN"
+                      "enum": [
+                        "FMIN"
+                      ],
+                      "type": "string"
                     },
                     "write_ifi_debug_files": {
                       "type": "boolean"
