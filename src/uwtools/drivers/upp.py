@@ -126,7 +126,7 @@ class UPP(Driver):
         """
         Path to the namelist file.
         """
-        return self._rundir / f"{self._driver_name}-{self._validtime_str}.nml"
+        return self._rundir / "itag"  # f"{self._driver_name}-{self._validtime_str}.nml"
 
     @property
     def _runscript_path(self) -> Path:
