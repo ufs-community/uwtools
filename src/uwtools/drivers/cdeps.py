@@ -46,23 +46,21 @@ class CDEPS(Driver):
 
     @task
     def atm(self):
-        yield self._model_namelist_file("atm")
-
-    @task
-    def _model_namelist_file(self, compname: str):
         """
-        The namelist file, d{model_name}_in.
+        The atm namelist file.
         """
-        fn = "d%s_in" % (compname)
+        fn = "datm_in"
         yield self._taskname(f"namelist file {fn}")
         path = self._rundir / fn
         yield asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
-        print(self._driver_config[compname])
+        self._model_namelist_file("datm_nml", path)
+
+    def _model_namelist_file(self, group: str, path: str):
         self._create_user_updated_config(
-            config_class=YAMLConfig,
-            config_values=self._driver_config[compname],
+            config_class=NMLConfig,
+            config_values=self._driver_config[group],
             path=path,
         )
 
