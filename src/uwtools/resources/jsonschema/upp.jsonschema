@@ -36,22 +36,38 @@
                   "additionalProperties": false,
                   "properties": {
                     "datestr": {
+                      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}:[0-9]{2}:[0-9]{2}$",
                       "type": "string"
                     },
                     "filename": {
+                      "maxlength": 256,
+                      "type": "string"
+                    },
+                    "filenameflat": {
+                      "maxlength": 256,
                       "type": "string"
                     },
                     "filenameflux": {
+                      "maxlength": 256,
                       "type": "string"
                     },
                     "grib": {
-                      "type": "string"
+                      "enum": "grib2"
                     },
                     "ioform": {
-                      "type": "string"
+                      "enum": [
+                        "binarynemsio",
+                        "netcdf"
+                      ]
                     },
                     "modelname": {
-                      "type": "string"
+                      "enum": [
+                        "FV3R",
+                        "3DRTMA",
+                        "GFS",
+                        "RAPR",
+                        "NMM"
+                      ]
                     }
                   },
                   "type": "object"
@@ -59,8 +75,45 @@
                 "namepgb": {
                   "additionalProperties": false,
                   "properties": {
+                    "aqf_on": {
+                      "type": "boolean"
+                    },
+                    "d2d_chem": {
+                      "type": "boolean"
+                    },
+                    "d3d_on": {
+                      "type": "boolean"
+                    },
+                    "filenameaer": {
+                      "maxlength": 256,
+                      "type": "string"
+                    },
+                    "gccpp_on": {
+                      "type": "boolean"
+                    },
+                    "gocart_on": {
+                      "type": "boolean"
+                    },
+                    "gtg_on": {
+                      "type": "boolean"
+                    },
+                    "hyb_sigp": {
+                      "type": "boolean"
+                    },
                     "kpo": {
                       "type": "integer"
+                    },
+                    "kpv": {
+                      "type": "integer"
+                    },
+                    "kth": {
+                      "type": "integer"
+                    },
+                    "method_blsn": {
+                      "type": "boolean"
+                    },
+                    "nasa_on": {
+                      "type": "boolean"
                     },
                     "numx": {
                       "type": "integer"
@@ -69,7 +122,37 @@
                       "items": {
                         "type": "number"
                       },
+                      "maxItems": 70,
                       "type": "array"
+                    },
+                    "popascal": {
+                      "type": "boolean"
+                    },
+                    "pv": {
+                      "items": {
+                        "type": "number"
+                      },
+                      "maxItems": 70,
+                      "type": "array"
+                    },
+                    "rdaod": {
+                      "type": "boolean"
+                    },
+                    "slrutah_on": {
+                      "type": "boolean"
+                    },
+                    "th": {
+                      "items": {
+                        "type": "number"
+                      },
+                      "maxItems": 70,
+                      "type": "array"
+                    },
+                    "vtimeunits": {
+                      "enum": "FMIN"
+                    },
+                    "write_ifi_debug_files": {
+                      "type": "boolean"
                     }
                   },
                   "type": "object"
