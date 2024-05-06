@@ -12,8 +12,7 @@ import yaml
 from pytest import fixture
 
 from uwtools.drivers import upp
-
-# from uwtools.scheduler import Slurm
+from uwtools.scheduler import Slurm
 
 # Fixtures
 
@@ -145,57 +144,38 @@ def test_UPP_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-# def test_UPP_run_batch(driverobj):
-#     with patch.object(driverobj, "_run_via_batch_submission") as func:
-#         driverobj.run()
-#     func.assert_called_once_with()
+def test_UPP_run_batch(driverobj):
+    with patch.object(driverobj, "_run_via_batch_submission") as func:
+        driverobj.run()
+    func.assert_called_once_with()
 
 
-# def test_UPP_run_local(driverobj):
-#     driverobj._batch = False
-#     with patch.object(driverobj, "_run_via_local_execution") as func:
-#         driverobj.run()
-#     func.assert_called_once_with()
+def test_UPP_run_local(driverobj):
+    driverobj._batch = False
+    with patch.object(driverobj, "_run_via_local_execution") as func:
+        driverobj.run()
+    func.assert_called_once_with()
 
 
-# def test_UPP_runscript(driverobj):
-#     with patch.object(driverobj, "_runscript") as runscript:
-#         driverobj.runscript()
-#         runscript.assert_called_once()
-#         args = ("envcmds", "envvars", "execution", "scheduler")
-#         types = [list, dict, list, Slurm]
-#         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
+def test_UPP_runscript(driverobj):
+    with patch.object(driverobj, "_runscript") as runscript:
+        driverobj.runscript()
+        runscript.assert_called_once()
+        args = ("envcmds", "envvars", "execution", "scheduler")
+        types = [list, dict, list, Slurm]
+        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-# def test_UPP_vtable(driverobj):
-#     src = driverobj._rundir / "Vtable.GFS.in"
-#     src.touch()
-#     driverobj._driver_config["vtable"] = src
-#     dst = driverobj._rundir / "Vtable"
-#     assert not dst.is_symlink()
-#     driverobj.vtable()
-#     assert dst.is_symlink()
+def test_UPP__driver_config(driverobj):
+    assert driverobj._driver_config == driverobj._config["upp"]
 
 
-# def test_UPP__driver_config(driverobj):
-#     assert driverobj._driver_config == driverobj._config["upp"]
+def test_UPP__taskname(driverobj):
+    assert driverobj._taskname("foo") == "20240506 12Z f024 upp foo"
 
 
-# def test_UPP__runscript_path(driverobj):
-#     assert driverobj._runscript_path == driverobj._rundir / "runscript.upp"
-
-
-# def test_UPP__taskname(driverobj):
-#     assert driverobj._taskname("foo") == "20240201 18Z upp foo"
-
-
-# def test_UPP__validate(driverobj):
-#     driverobj._validate()
-
-
-# def test__ext():
-#     assert upp._ext(0) == "AAA"
-#     assert upp._ext(26) == "ABA"
+def test_UPP__validate(driverobj):
+    driverobj._validate()
 
 
 def test_UPP__namelist_path(driverobj):
