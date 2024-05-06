@@ -31,8 +31,8 @@ modules = [
     mpas,
     mpas_init,
     sfc_climo_gen,
-    ungrib,
     shave,
+    ungrib,
 ]
 nocycle = [esg_grid, global_equiv_resol, make_hgrid, sfc_climo_gen, shave]
 

@@ -1,7 +1,7 @@
 ``shave``
 =========
 
-The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``shave``. Documentation for this UFS Utils component is :ufs-utils:`here <global-equiv-resol>`.
+The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``shave``. Documentation for this UFS Utils component is :ufs-utils:`here <shave>`.
 
 .. code-block:: text
 
