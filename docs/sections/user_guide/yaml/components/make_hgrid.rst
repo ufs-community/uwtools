@@ -31,7 +31,6 @@ config:
 
 Describes the required parameters to run a ``make_hgrid`` configuration.
 
-
 grid_type:
 """"""""""
 
@@ -61,8 +60,6 @@ grid_type:
      - ``nxbnds``, ``nybnds``, ``xbnds``, ``ybnds`` must be specified to define the grid bounds.
    * - ``tripolar_grid``
      - ``nxbnds``, ``nybnds``, ``xbnds``, ``ybnds`` must be specified to define the grid bounds.
-
-
 
 angular_midpoint:
 """""""""""""""""
