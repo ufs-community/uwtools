@@ -989,16 +989,32 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         STR.template: partial(_add_subparser_template, subparsers),
     }
     drivers = {
-        x: partial(_add_subparser_for_driver, x, subparsers)
-        for x in [STR.esggrid, STR.globalequivresol, STR.makehgrid, STR.sfcclimogen]
+        component: partial(_add_subparser_for_driver, component, subparsers)
+        for component in [
+            STR.esggrid,
+            STR.globalequivresol,
+            STR.makehgrid,
+            STR.sfcclimogen,
+        ]
     }
     drivers_with_cycle = {
-        x: partial(_add_subparser_for_driver, x, subparsers, with_cycle=True)
-        for x in [STR.chgrescube, STR.fv3, STR.jedi, STR.mpas, STR.mpasinit, STR.ungrib]
+        component: partial(_add_subparser_for_driver, component, subparsers, with_cycle=True)
+        for component in [
+            STR.chgrescube,
+            STR.fv3,
+            STR.jedi,
+            STR.mpas,
+            STR.mpasinit,
+            STR.ungrib,
+        ]
     }
     drivers_with_cycle_and_leadtime = {
-        x: partial(_add_subparser_for_driver, x, subparsers, with_cycle=True, with_leadtime=True)
-        for x in [STR.upp]
+        component: partial(
+            _add_subparser_for_driver, component, subparsers, with_cycle=True, with_leadtime=True
+        )
+        for component in [
+            STR.upp,
+        ]
     }
     modes = {**tools, **drivers, **drivers_with_cycle, **drivers_with_cycle_and_leadtime}
     checks = {k: modes[k]() for k in sorted(modes.keys())}
