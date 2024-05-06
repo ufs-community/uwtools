@@ -69,6 +69,11 @@ def sfc_climo_gen_prop():
 
 
 @fixture
+def shave_prop():
+    return partial(schema_validator, "shave", "properties", "shave", "properties")
+
+
+@fixture
 def ungrib_prop():
     return partial(schema_validator, "ungrib", "properties", "ungrib", "properties")
 
@@ -769,6 +774,37 @@ def test_schema_sfc_climo_gen_namelist_update_values(sfc_climo_gen_prop):
 
 def test_schema_sfc_climo_gen_run_dir(sfc_climo_gen_prop):
     errors = sfc_climo_gen_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# shave
+
+
+def test_schema_shave():
+    config = {
+        "config": {
+            "input_grid_file": "/path/to/input_grid_file",
+            "nx": 88,
+            "ny": 88,
+            "nh4": 1,
+        },
+        "execution": {"executable": "shave"},
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("shave", "properties", "shave")
+    # Basic correctness:
+    assert not errors(config)
+    # Some top-level keys are required:
+    for key in ("execution", "run_dir", "config"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_shave_run_dir(shave_prop):
+    errors = shave_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)

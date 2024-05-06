@@ -65,6 +65,19 @@ class Shave(Driver):
         """
         return STR.shave
 
+    @property
+    def _runcmd(self):
+        """
+        Returns the full command-line component invocation.
+        """
+        executable = self._driver_config["execution"]["executable"]
+        config = self._driver_config["config"]
+        input_file = config.get("input_grid_file")
+        output_file = input_file.replace(".nc", "_NH0.nc")
+        flags = [config.get(key) for key in ["nx", "ny", "nh4", "input_grid_file"]]
+        flags.append(output_file)
+        return f"{executable} {' '.join(str(flag) for flag in flags)}"
+
     def _taskname(self, suffix: str) -> str:
         """
         Returns a common tag for graph-task log messages.
