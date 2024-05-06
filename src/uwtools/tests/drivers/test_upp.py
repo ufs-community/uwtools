@@ -128,6 +128,9 @@ def test_UPP_namelist_file(driverobj):
     nml = f90nml.read(dst)
     assert isinstance(nml, f90nml.Namelist)
     assert nml["model_inputs"]["datestr"] == datestr
+    assert nml["model_inputs"]["grib"] == "grib2"
+    assert nml["nampgb"]["kpo"] == 3
+    assert nml["nampgb"]["kpv"] == 88
 
 
 # def test_UPP_provisioned_run_directory(driverobj):
