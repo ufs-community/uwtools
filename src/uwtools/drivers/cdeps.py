@@ -55,7 +55,20 @@ class CDEPS(Driver):
         yield asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
-        self._model_namelist_file("datm_nml", path)
+        self._model_namelist_file("atm", path)
+
+    @task
+    def ocn(self):
+        """
+        The ocn namelist file.
+        """
+        fn = "docn_in"
+        yield self._taskname(f"namelist file {fn}")
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
+        self._model_namelist_file("ocn", path)
 
     def _model_namelist_file(self, group: str, path: str):
         self._create_user_updated_config(

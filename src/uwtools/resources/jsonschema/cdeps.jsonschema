@@ -6,20 +6,100 @@
         "execution": {
           "$ref": "urn:uwtools:execution"
         },
-        "datm_nml": {
+        "atm": {
           "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
           "properties": {
-            "datamode": {
+            "base_file": {
               "type": "string"
             },
-            "factorfn_data": {
-              "type": "string"
+            "update_values": {
+              "properties": {
+                "datm_nml": {
+                  "additionalProperties": {
+                    "type": [
+                      "array",
+                      "boolean",
+                      "number",
+                      "string"
+                    ]
+                  },
+                  "properties": {
+                    "datamode": {
+                      "type": "string"
+                    },
+                    "factorfn_data": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "required": [
+                "datm_nml"
+              ],
+              "type": "object"
             }
           },
-          "required": [
-            "datamode",
-            "factorfn_data"
+          "type": "object"
+        },
+        "ocn": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
           ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "properties": {
+                "datm_nml": {
+                  "additionalProperties": {
+                    "type": [
+                      "array",
+                      "boolean",
+                      "number",
+                      "string"
+                    ]
+                  },
+                  "properties": {
+                    "datamode": {
+                      "type": "string"
+                    },
+                    "model_maskfile": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "required": [
+                "docn_nml"
+              ],
+              "type": "object"
+            }
+          },
           "type": "object"
         },
         "run_dir": {
@@ -28,7 +108,6 @@
       },
       "required": [
         "execution",
-        "datm_nml",
         "run_dir"
       ],
       "type": "object"
