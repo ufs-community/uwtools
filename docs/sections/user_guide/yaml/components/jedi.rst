@@ -11,7 +11,7 @@ Here is a prototype UW YAML jedi: block, explained in detail below:
 .. literalinclude:: ../../../../shared/jedi.yaml
 
 UW YAML for the ``jedi:`` Block
-------------------------------------
+-------------------------------
 
 execution:
 ^^^^^^^^^^

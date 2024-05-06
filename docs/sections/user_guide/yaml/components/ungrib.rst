@@ -11,7 +11,7 @@ Here is a prototype UW YAML ``ungrib:`` block, explained in detail below:
 .. literalinclude:: ../../../../shared/ungrib.yaml
 
 UW YAML for the ``ungrib:`` Block
-----------------------------------------
+---------------------------------
 
 execution:
 ^^^^^^^^^^
