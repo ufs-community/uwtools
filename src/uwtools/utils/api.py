@@ -57,6 +57,7 @@ def make_execute(
             driver_class=driver_class,
             task=task,
             cycle=None,
+            leadtime=None,
             config=config,
             batch=batch,
             dry_run=dry_run,
@@ -76,6 +77,7 @@ def make_execute(
         return _execute(
             driver_class=driver_class,
             task=task,
+            leadtime=None,
             cycle=cycle,
             config=config,
             batch=batch,
