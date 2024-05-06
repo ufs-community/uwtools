@@ -7,15 +7,15 @@ The ``uw`` mode for configuring and running the JEDI framework.
 
     $ uw jedi -help
     usage: uw jedi [-h] [--version] TASK ...
-    
+
     Execute JEDI tasks
-    
+
     Optional arguments:
       -h, --help
           Show help and exit
       --version
           Show version info and exit
-    
+
     Positional arguments:
       TASK
         configuration_file
@@ -42,13 +42,13 @@ All tasks take the same arguments. For example:
    $ uw jedi run -help
    usage: uw jedi run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
                        [--graph-file PATH] [--quiet] [--verbose]
-    
+
    A run
-    
+
    Required arguments:
      --cycle CYCLE
          The cycle in ISO8601 format
-    
+
    Optional arguments:
      -h, --help
          Show help and exit

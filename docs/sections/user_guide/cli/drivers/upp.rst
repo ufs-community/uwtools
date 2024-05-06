@@ -7,15 +7,15 @@ The ``uw`` mode for configuring and running the `UPP <https://epic.noaa.gov/unif
 
    $ uw upp --help
    usage: uw upp [-h] [--version] TASK ...
-   
+
    Execute upp tasks
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
      --version
          Show version info and exit
-   
+
    Positional arguments:
      TASK
        files_copied
@@ -40,15 +40,15 @@ All tasks take the same arguments. For example:
    $ uw upp run --help
    usage: uw upp run --cycle CYCLE --leadtime LEADTIME [-h] [--version] [--config-file PATH]
                      [--batch] [--dry-run] [--graph-file PATH] [--quiet] [--verbose]
-   
+
    A run
-   
+
    Required arguments:
      --cycle CYCLE
          The cycle in ISO8601 format
      --leadtime LEADTIME
          Leadtime in hours
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
