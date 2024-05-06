@@ -18,7 +18,7 @@ UW YAML for the ``chgres_cube:`` Block
 execution
 ^^^^^^^^^
 
-See :ref:`here <execution_yaml>` for details.
+See :ref:`this page <execution_yaml>` for details.
 
 namelist
 ^^^^^^^^

@@ -18,7 +18,7 @@ UW YAML for the ``jedi:`` Block
 execution:
 ^^^^^^^^^^
 
-See :ref:`here <execution_yaml>` for details.
+See :ref:`this page <execution_yaml>` for details.
 
 configuration_file:
 ^^^^^^^^^^^^^^^^^^^
@@ -28,12 +28,6 @@ files_to_copy:
 ^^^^^^^^^^^^^^
 
 See :ref:`this page <files_yaml>` for details.
-
-.. code-block:: text
-
-   jedi:
-     files_to_copy:
-        f1: /path/to/f1
 
 files_to_link:
 ^^^^^^^^^^^^^^

@@ -18,7 +18,7 @@ UW YAML for the ``global_equiv_resol:`` Block
 execution:
 ^^^^^^^^^^
 
-See :ref:`here <execution_yaml>` for details.
+See :ref:`this page <execution_yaml>` for details.
 
 input_grid_file:
 ^^^^^^^^^^^^^^^^

@@ -19,18 +19,12 @@ UW YAML for the ``upp:`` Block
 execution:
 ^^^^^^^^^^
 
-See :ref:`here <execution_yaml>` for details.
+See :ref:`this page <execution_yaml>` for details.
 
 files_to_copy:
 ^^^^^^^^^^^^^^
 
 See :ref:`this page <files_yaml>` for details.
-
-.. code-block:: text
-
-   upp:
-     files_to_copy:
-        f1: /path/to/f1
 
 files_to_link:
 """"""""""""""

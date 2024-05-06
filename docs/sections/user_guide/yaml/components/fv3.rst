@@ -28,7 +28,7 @@ Accepted values are ``global`` and ``regional``.
 execution:
 ^^^^^^^^^^
 
-See :ref:`here <execution_yaml>` for details.
+See :ref:`this page <execution_yaml>` for details.
 
 field_table:
 ^^^^^^^^^^^^
