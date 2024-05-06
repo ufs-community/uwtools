@@ -81,7 +81,7 @@ def leadtime():
     return 24
 
 
-# Driver tests
+# Tests
 
 
 def test_UPP(driverobj):

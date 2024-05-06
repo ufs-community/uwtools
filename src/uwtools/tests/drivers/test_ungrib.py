@@ -17,14 +17,6 @@ from uwtools.scheduler import Slurm
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
-
-
-# Driver fixtures
-
-
-@fixture
 def config(tmp_path):
     return {
         "ungrib": {
@@ -45,7 +37,7 @@ def config(tmp_path):
             "vtable": str(tmp_path / "Vtable.GFS"),
         },
         "platform": {
-            "account": "wrfruc",
+            "account": "me",
             "scheduler": "slurm",
         },
     }
@@ -60,11 +52,16 @@ def config_file(config, tmp_path):
 
 
 @fixture
+def cycle():
+    return dt.datetime(2024, 2, 1, 18)
+
+
+@fixture
 def driverobj(config_file, cycle):
     return ungrib.Ungrib(config=config_file, cycle=cycle, batch=True)
 
 
-# Driver tests
+# Tests
 
 
 def test_Ungrib(driverobj):

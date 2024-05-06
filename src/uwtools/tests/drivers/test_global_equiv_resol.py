@@ -12,7 +12,7 @@ from pytest import fixture
 from uwtools.drivers import global_equiv_resol
 from uwtools.scheduler import Slurm
 
-# Driver fixtures
+# Fixtures
 
 
 @fixture
@@ -49,7 +49,7 @@ def driverobj(config_file):
     return global_equiv_resol.GlobalEquivResol(config=config_file, batch=True)
 
 
-# Driver tests
+# Tests
 
 
 def test_GlobalEquivResol(driverobj):
