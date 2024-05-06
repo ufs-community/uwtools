@@ -37,10 +37,71 @@
                   },
                   "properties": {
                     "datamode": {
+                      "enum": [
+                        "ATMMESH",
+                        "CFSR",
+                        "CLMNCEP",
+                        "CORE2_IAF",
+                        "CORE2_IAF_JRA",
+                        "CORE2_NYF",
+                        "CPLHIST",
+                        "ERA5",
+                        "GEFS",
+                        "GFS",
+                        "GFS_HAFS",
+                        "SIMPLE"
+                      ]
+                    },
+                    "anomaly_forcing": {
                       "type": "string"
+                    },
+                    "bias_correct": {
+                      "type": "string"
+                    },
+                    "export_all": {
+                      "type": "boolean"
                     },
                     "factorfn_data": {
                       "type": "string"
+                    },
+                    "factorfn_mesh": {
+                      "type": "string"
+                    },
+                    "flds_co2": {
+                      "type": "boolean"
+                    },
+                    "flds_presaero": {
+                      "type": "boolean"
+                    },
+                    "flds_presndep": {
+                      "type": "boolean"
+                    },
+                    "flds_preso3": {
+                      "type": "boolean"
+                    },
+                    "flds_wiso": {
+                      "type": "boolean"
+                    },
+                    "iradsw": {
+                      "type": "integer"
+                    },
+                    "model_maskfile": {
+                      "type": "string"
+                    },
+                    "model_meshfile": {
+                      "type": "string"
+                    },
+                    "nx_global": {
+                      "type": "integer"
+                    },
+                    "ny_global": {
+                      "type": "integer"
+                    },
+                    "restfilm": {
+                      "type": "string"
+                    },
+                    "skip_restart_read": {
+                      "type": "boolean"
                     }
                   },
                   "type": "object"
