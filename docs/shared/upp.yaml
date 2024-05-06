@@ -1,34 +1,41 @@
 upp:
   execution:
-    executable: upp.x
-  use_crtm: false
-  crtm_fix: /path/to/crtm/files
+    batchargs:
+      nodes: 1
+      export: NONE
+      walltime: 00:05:00
+    envcmds:
+      - module use /path/to/modulefiles
+      - module load runtime-module
+      - source /etc/profile.d/slurm.sh
+    executable: /path/to/upp.x
+    mpiargs:
+      - "--ntasks $SLURM_CPUS_ON_NODE"
+    mpicmd: srun
   files_to_copy:
-    eta_micro_lookup.dat: /path/to/lookup.dat
-    postxconfig-NT.txt: /path/to/post/config
+    postxconfig-NT.txt: /path/to/postxconfig-NT.txt
+  files_to_link:
+    eta_micro_lookup.dat: /path/to/nam_micro_lookup.dat
     params_grib2_tbl_new: /path/to/params_grib2_tbl_new
-  crtm_files:
-    - Nalli.IRwater.EmisCoeff.bin
-    - FAST*.bin
-    - NPOESS.IRland.EmisCoeff.bin
-    - NPOESS.IRsnow.EmisCoeff.bin
-    - NPOESS.IRice.EmisCoeff.bin
-    - AerosolCoeff.bin
-    - CloudCoeff.bin 
-    - '*.SpcCoeff.bin'
-    - '*.TauCoeff.bin'
-  namelist: # named itag; taken as input so arbitrary
-    base_file:
+  namelist:
     update_values:
       model_inputs:
-        datestr: "{{ valid_time.strftime('%Y-%m-%d_%H::%M:%S') }}"
-        filename: /path/to/forecast/dynf{{ fcst_time.strftime("%H:%M:%S") }}.nc
-        filenameflat: postxconfig-NT.txt
-        filenameflux: /path/to/forecast/phyf{{ fcst_time.strftime("%H:%M:%S") }}.nc
+        datestr: "{{ validtime.strftime('%Y-%m-%d_%H:%M:%S') }}"
+        filename: /path/to/dynf{{ user.leadtime }}.nc
+        filenameflux: /path/to/phyf{{ user.leadtime }}.nc
         grib: grib2
         ioform: netcdf
         modelname: FV3R
       nampgb:
-        kpo: 47
-        po: [1000.,975.,950.,925.,900.,875.,850.,825.,800.,775.,750.,725.,700.,675.,650.,625.,600.,575.,550.,525.,500.,475.,450.,425.,400.,375.,350.,325.,300.,275.,250.,225.,200.,175.,150.,125.,100.,70.,50.,30.,20.,10.,7.,5.,3.,2.,1.,]
+        kpo: 3
         numx: 1
+        po:
+          - 1000.
+          - 100.
+          - 1.
+  run_dir: /path/to/run
+platform:
+  account: me
+  scheduler: slurm
+user:
+  leadtime: "{{ '%03d' % ((validtime - cycle).total_seconds() // 3600) }}"
