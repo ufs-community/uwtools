@@ -8,7 +8,7 @@ from pathlib import Path
 # from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-# import f90nml  # type: ignore
+import f90nml  # type: ignore
 import yaml
 from pytest import fixture
 
@@ -117,15 +117,17 @@ def test_UPP_files_linked(driverobj):
         assert Path(driverobj._rundir / dst).is_symlink()
 
 
-# def test_UPP_namelist_file(driverobj):
-#     dst = driverobj._rundir / "namelist.wps"
-#     assert not dst.is_file()
-#     driverobj.namelist_file()
-#     assert dst.is_file()
-#     nml = f90nml.read(dst)
-#     assert isinstance(nml, f90nml.Namelist)
-#     assert nml["share"]["interval_seconds"] == 21600
-#     assert nml["share"]["end_date"] == "2024-02-02_06:00:00"
+def test_UPP_namelist_file(driverobj):
+    datestr = "2024-05-05_12:00:00"
+    with open(driverobj._driver_config["namelist"]["base_file"], "w", encoding="utf-8") as f:
+        print("&model_inputs datestr='%s' / &nampgb kpv=88 /" % datestr, file=f)
+    dst = driverobj._rundir / "itag"
+    assert not dst.is_file()
+    driverobj.namelist_file()
+    assert dst.is_file()
+    nml = f90nml.read(dst)
+    assert isinstance(nml, f90nml.Namelist)
+    assert nml["model_inputs"]["datestr"] == datestr
 
 
 # def test_UPP_provisioned_run_directory(driverobj):
