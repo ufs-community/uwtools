@@ -5,6 +5,9 @@ upp
 
 Structured YAML to run the UPP post-processor is validated by JSON Schema and requires the ``upp:`` block, described below. If UPP is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
+.. include:: ../../../../shared/injected_cycle.rst
+.. include:: ../../../../shared/injected_leadtime.rst
+
 Here is a prototype UW YAML ``upp:`` block, explained in detail below:
 
 .. highlight:: yaml
@@ -21,12 +24,18 @@ See :ref:`here <execution_yaml>` for details.
 files_to_copy:
 ^^^^^^^^^^^^^^
 
-TODO
+See :ref:`this page <files_yaml>` for details.
+
+.. code-block:: text
+
+   upp:
+     files_to_copy:
+        f1: /path/to/f1
 
 files_to_link:
 """"""""""""""
 
-TODO
+Identical to ``files_to_copy:`` except that symbolic links will be created in the run directory instead of copies.
 
 namelist_file:
 """"""""""""""

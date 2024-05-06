@@ -5,6 +5,8 @@ chgres_cube
 
 Structured YAML to run :ufs-utils:`chgres_cube<chgres-cube>` is validated by JSON Schema and requires the ``chgres_cube:`` block, described below. If ``chgres_cube`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
+.. include:: ../../../../shared/injected_cycle.rst
+
 Here is a prototype UW YAML ``chgres_cube:`` block, explained in detail below:
 
 .. highlight:: yaml

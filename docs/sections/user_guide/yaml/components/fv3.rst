@@ -5,6 +5,8 @@ fv3
 
 Structured YAML to run FV3 is validated by JSON Schema and requires the ``fv3:`` block, described below. If FV3 is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required. The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
 
+.. include:: ../../../../shared/injected_cycle.rst
+
 Here is a prototype UW YAML ``fv3:`` block, explained in detail below:
 
 .. highlight:: yaml
@@ -36,19 +38,7 @@ The path to a :weather-model-io:`valid field-table file<field-table-file>` to be
 files_to_copy:
 ^^^^^^^^^^^^^^
 
-See :ref:`this page <files_yaml>` for details. For the ``fv3`` driver, both keys and values may contain Jinja2 variables/expressions using a ``cycle`` variable, which is a Python ``datetime`` object corresponding to the FV3 cycle being run. This supports specification of cycle-specific filenames/paths. For example, a key-value pair
-
-.. code-block:: yaml
-
-   gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc: /some/path/{{ cycle.strftime('%Y%m%d')}}/{{ cycle.strftime('%H') }}/gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc
-
-would be rendered as
-
-.. code-block:: yaml
-
-   gfs.t18z.atmanl.nc: /some/path/20240212/18/gfs.t18z.atmanl.nc
-
-for the ``2024-02-12T18`` cycle.
+See :ref:`this page <files_yaml>` for details.
 
 files_to_link:
 ^^^^^^^^^^^^^^

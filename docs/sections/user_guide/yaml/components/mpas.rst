@@ -5,6 +5,8 @@ mpas
 
 Structured YAML to run MPAS is validated by JSON Schema and requires the ``mpas:`` block, described below. If ``mpas`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
+.. include:: ../../../../shared/injected_cycle.rst
+
 Here is a prototype UW YAML ``mpas:`` block, explained in detail below:
 
 .. highlight:: yaml
