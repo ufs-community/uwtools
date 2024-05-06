@@ -3,16 +3,16 @@
 UPP driver tests.
 """
 import datetime as dt
+from pathlib import Path
+
+# from unittest.mock import DEFAULT as D
+from unittest.mock import patch
 
 # import f90nml  # type: ignore
 import yaml
 from pytest import fixture
 
 from uwtools.drivers import upp
-
-# from unittest.mock import DEFAULT as D
-# from unittest.mock import patch
-
 
 # from uwtools.scheduler import Slurm
 
@@ -49,7 +49,7 @@ def config(tmp_path):
                     },
                 },
             },
-            "run_dir": str(tmp_path),
+            "run_dir": str(tmp_path / "run"),
         },
         "platform": {
             "account": "me",
@@ -88,34 +88,33 @@ def test_UPP(driverobj):
     assert isinstance(driverobj, upp.UPP)
 
 
-# def test_UPP_dry_run(config_file, cycle):
-#     with patch.object(upp, "dryrun") as dryrun:
-#         driverobj = upp.UPP(config=config_file, cycle=cycle, batch=True, dry_run=True)
-#     assert driverobj._dry_run is True
-#     dryrun.assert_called_once_with()
+def test_UPP_dry_run(config_file, cycle, leadtime):
+    with patch.object(upp, "dryrun") as dryrun:
+        driverobj = upp.UPP(
+            config=config_file, cycle=cycle, leadtime=leadtime, batch=True, dry_run=True
+        )
+    assert driverobj._dry_run is True
+    dryrun.assert_called_once_with()
 
 
-# def test_UPP__gribfile(driverobj):
-#     src = driverobj._rundir / "GRIBFILE.AAA.in"
-#     src.touch()
-#     dst = driverobj._rundir / "GRIBFILE.AAA"
-#     assert not dst.is_symlink()
-#     driverobj._gribfile(src, dst)
-#     assert dst.is_symlink()
+def test_UPP_files_copied(driverobj):
+    for _, src in driverobj._driver_config["files_to_copy"].items():
+        Path(src).touch()
+    for dst, _ in driverobj._driver_config["files_to_copy"].items():
+        assert not Path(driverobj._rundir / dst).is_file()
+    driverobj.files_copied()
+    for dst, _ in driverobj._driver_config["files_to_copy"].items():
+        assert Path(driverobj._rundir / dst).is_file()
 
 
-# def test_UPP_gribfiles(driverobj, tmp_path):
-#     links = []
-#     cycle_hr = 12
-#     for n, forecast_hour in enumerate((6, 12, 18)):
-#         links = [driverobj._rundir / f"GRIBFILE.{upp._ext(n)}"]
-#         infile = tmp_path / "gfs.t{cycle_hr:02d}z.pgrb2.0p25.f{forecast_hour:03d}".format(
-#             cycle_hr=cycle_hr, forecast_hour=forecast_hour
-#         )
-#         infile.touch()
-#     assert not any(link.is_file() for link in links)
-#     driverobj.gribfiles()
-#     assert all(link.is_symlink() for link in links)
+def test_UPP_files_linked(driverobj):
+    for _, src in driverobj._driver_config["files_to_link"].items():
+        Path(src).touch()
+    for dst, _ in driverobj._driver_config["files_to_link"].items():
+        assert not Path(driverobj._rundir / dst).is_file()
+    driverobj.files_linked()
+    for dst, _ in driverobj._driver_config["files_to_link"].items():
+        assert Path(driverobj._rundir / dst).is_symlink()
 
 
 # def test_UPP_namelist_file(driverobj):
