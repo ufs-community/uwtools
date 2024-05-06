@@ -5,7 +5,7 @@ The ``uw`` mode for configuring and running the UFS Utils preprocessing componen
 
 .. code-block:: text
 
-   $ uw make_hgrid -h
+   $ uw make_hgrid --help
    usage: uw make_hgrid [-h] [--version] TASK ...
 
    Execute make_hgrid tasks
@@ -31,7 +31,7 @@ All tasks take the same arguments. For example:
 
 .. code-block:: text
 
-   $ uw make_hgrid run -h
+   $ uw make_hgrid run --help
    usage: uw make_hgrid run --config-file PATH [-h] [--version] [--batch] [--dry-run]
                                     [--graph-file PATH] [--quiet] [--verbose]
 

@@ -5,7 +5,7 @@ The ``uw`` mode for configuring and running the JEDI framework.
 
 .. code-block:: text
 
-    $ uw jedi -help
+    $ uw jedi --help
     usage: uw jedi [-h] [--version] TASK ...
 
     Execute JEDI tasks
@@ -39,7 +39,7 @@ All tasks take the same arguments. For example:
 
 .. code-block:: text
 
-   $ uw jedi run -help
+   $ uw jedi run --help
    usage: uw jedi run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
                        [--graph-file PATH] [--quiet] [--verbose]
 

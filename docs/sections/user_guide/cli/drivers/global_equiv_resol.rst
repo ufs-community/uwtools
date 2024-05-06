@@ -5,7 +5,7 @@ The ``uw`` mode for configuring and running the UFS Utils preprocessing componen
 
 .. code-block:: text
 
-   $ uw global_equiv_resol -h
+   $ uw global_equiv_resol --help
    usage: uw global_equiv_resol [-h] [--version] TASK ...
 
    Execute global_equiv_resol tasks
@@ -33,7 +33,7 @@ All tasks take the same arguments. For example:
 
 .. code-block:: text
 
-   $ uw global_equiv_resol run -h
+   $ uw global_equiv_resol run --help
    usage: uw global_equiv_resol run --config-file PATH [-h] [--version] [--batch] [--dry-run]
                                     [--graph-file PATH] [--quiet] [--verbose]
 
