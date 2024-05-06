@@ -126,14 +126,14 @@ class UPP(Driver):
         """
         Path to the namelist file.
         """
-        return self._rundir / "itag"  # f"{self._driver_name}-{self._validtime_str}.nml"
+        return self._rundir / "itag"
 
     @property
     def _runscript_path(self) -> Path:
         """
         Path to the runscript.
         """
-        return self._rundir / f"runscript.{self._driver_name}-{self._validtime_str}"
+        return self._rundir / f"runscript.{self._driver_name}"
 
     @property
     def _runcmd(self) -> str:
@@ -161,7 +161,3 @@ class UPP(Driver):
             self._driver_name,
             suffix,
         )
-
-    @property
-    def _validtime_str(self) -> str:
-        return self._validtime.strftime("%Y-%m-%dT%H:%M:%S")
