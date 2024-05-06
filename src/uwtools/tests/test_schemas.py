@@ -73,6 +73,11 @@ def ungrib_prop():
     return partial(schema_validator, "ungrib", "properties", "ungrib", "properties")
 
 
+@fixture
+def upp_prop():
+    return partial(schema_validator, "upp", "properties", "upp", "properties")
+
+
 # chgres-cube
 
 
@@ -801,6 +806,52 @@ def test_schema_ungrib():
 
 def test_schema_ungrib_run_dir(ungrib_prop):
     errors = ungrib_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# upp
+
+
+def test_schema_upp():
+    config = {
+        "execution": {
+            "batchargs": {
+                "cores": 1,
+                "walltime": "00:01:00",
+            },
+            "executable": "/path/to/upp.exe",
+        },
+        "namelist": {
+            "base_file": "/path/to/base.nml",
+            "update_values": {
+                "model_inputs": {
+                    "grib": "grib2",
+                },
+                "nampgb": {
+                    "kpo": 3,
+                },
+            },
+        },
+        "run_dir": "/path/to/run",
+    }
+    errors = schema_validator("upp", "properties", "upp")
+    # Basic correctness:
+    assert not errors(config)
+    # Some top-level keys are required:
+    for key in ("execution", "namelist", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Other top-level keys are optional:
+    assert not errors({**config, "files_to_copy": {"dst": "src"}})
+    assert not errors({**config, "files_to_link": {"dst": "src"}})
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+# def test_schema_upp_namelist
+def test_schema_upp_run_dir(upp_prop):
+    errors = upp_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
