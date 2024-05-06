@@ -558,11 +558,13 @@ def test__dispatch_template_translate_no_optional():
 def test__dispatch_to_driver():
     name = "adriver"
     cycle = dt.datetime.now()
+    leadtime = 24
     args: dict = {
         "action": "foo",
         "batch": True,
         "config_file": "config.yaml",
         "cycle": cycle,
+        "leadtime": leadtime,
         "dry_run": False,
         "graph_file": None,
         "stdin_ok": True,
@@ -574,6 +576,7 @@ def test__dispatch_to_driver():
             batch=True,
             config="config.yaml",
             cycle=cycle,
+            leadtime=leadtime,
             dry_run=False,
             graph_file=None,
             task="foo",
