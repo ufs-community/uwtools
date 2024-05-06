@@ -72,6 +72,28 @@ def test_make_execute_cycle(execute_kwargs):
         _execute.assert_called_once_with(driver_class=ConcreteDriver, **execute_kwargs)
 
 
+def test_make_execute_cycle_leadtime(execute_kwargs):
+    execute_kwargs["cycle"] = dt.now()
+    execute_kwargs["leadtime"] = 24
+    func = api.make_execute(driver_class=ConcreteDriver, with_cycle=True, with_leadtime=True)
+    assert func.__name__ == "execute"
+    assert func.__doc__ is not None
+    assert ":param cycle:" in func.__doc__
+    assert ":param leadtime:" in func.__doc__
+    assert ":param driver_class:" not in func.__doc__
+    assert ":param task:" in func.__doc__
+    with patch.object(api, "_execute", return_value=True) as _execute:
+        assert func(**execute_kwargs) is True
+        _execute.assert_called_once_with(driver_class=ConcreteDriver, **execute_kwargs)
+
+
+def test_make_execute_leadtime_no_cycle_error(execute_kwargs):
+    execute_kwargs["leadtime"] = 24
+    with raises(UWError) as e:
+        api.make_execute(driver_class=ConcreteDriver, with_leadtime=True)
+    assert "When leadtime is specified, cycle is required" in str(e)
+
+
 def test_make_tasks():
     func = api.make_tasks(driver_class=ConcreteDriver)
     assert func.__name__ == "tasks"
@@ -101,6 +123,7 @@ def test__execute(execute_kwargs, tmp_path):
         "driver_class": ConcreteDriver,
         "config": config,
         "cycle": dt.now(),
+        "leadtime": 24,
         "graph_file": graph_file,
     }
     assert not graph_file.is_file()
