@@ -41,15 +41,15 @@
                       "type": "string"
                     },
                     "filename": {
-                      "maxlength": 256,
+                      "maxLength": 256,
                       "type": "string"
                     },
                     "filenameflat": {
-                      "maxlength": 256,
+                      "maxLength": 256,
                       "type": "string"
                     },
                     "filenameflux": {
-                      "maxlength": 256,
+                      "maxLength": 256,
                       "type": "string"
                     },
                     "grib": {
@@ -91,7 +91,7 @@
                       "type": "boolean"
                     },
                     "filenameaer": {
-                      "maxlength": 256,
+                      "maxLength": 256,
                       "type": "string"
                     },
                     "gccpp_on": {

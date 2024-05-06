@@ -849,7 +849,85 @@ def test_schema_upp():
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
 
 
-# def test_schema_upp_namelist
+def test_schema_upp_namelist(upp_prop):
+    maxpathlen = 256
+    errors = upp_prop("namelist")
+    # At least one of base_file or update_values is required:
+    assert "is not valid" in errors({})
+    # Just base_file is ok:
+    assert not errors({"base_file": "/path/to/base.nml"})
+    # Just update_values is ok:
+    assert not errors({"update_values": {"model_inputs": {"grib": "grib2"}}})
+    # Both base_file and update_values are ok:
+    assert not errors(
+        {"base_file": "/path/to/base.nml", "update_values": {"model_inputs": {"grib": "grib2"}}}
+    )
+    # model_inputs: datestr requires a specific format:
+    assert not errors({"update_values": {"model_inputs": {"datestr": "2024-05-06_12:00:00"}}})
+    assert "does not match" in errors(
+        {"update_values": {"model_inputs": {"datestr": "2024-05-06T12:00:00"}}}
+    )
+    # model_inputs: String pathnames have a max length:
+    for key in ["filename", "filenameflat", "filenameflux"]:
+        assert not errors({"update_values": {"model_inputs": {key: "c" * maxpathlen}}})
+        assert "too long" in errors(
+            {"update_values": {"model_inputs": {key: "c" * (maxpathlen + 1)}}}
+        )
+        assert "not of type 'string'" in errors({"update_values": {"model_inputs": {key: 88}}})
+    # model_inputs: Only one grib value is supported:
+    assert not errors({"update_values": {"model_inputs": {"grib": "grib2"}}})
+    assert "not one of ['grib2']" in errors({"update_values": {"model_inputs": {"grib": "grib1"}}})
+    assert "not of type 'string'" in errors({"update_values": {"model_inputs": {"grib": 88}}})
+    # model_inputs: Only certain ioform values are supported:
+    assert "not one of ['binarynemsio', 'netcdf']" in errors(
+        {"update_values": {"model_inputs": {"ioform": "jpg"}}}
+    )
+    # model_inputs: Only certain modelname values are supported:
+    assert "not one of ['FV3R', '3DRTMA', 'GFS', 'RAPR', 'NMM']" in errors(
+        {"update_values": {"model_inputs": {"modelname": "foo"}}}
+    )
+    # model_inputs: No other keys are supported:
+    assert "Additional properties are not allowed" in errors(
+        {"update_values": {"model_inputs": {"something": "else"}}}
+    )
+    # nampgb: Some boolean keys are supported:
+    for key in [
+        "aqf_on",
+        "d2d_chem",
+        "gccpp_on",
+        "gocart_on",
+        "gtg_on",
+        "hyb_sigp",
+        "method_blsn",
+        "nasa_on",
+        "popascal",
+        "rdaod",
+        "slrutah_on",
+        "write_ifi_debug_files",
+    ]:
+        assert not errors({"update_values": {"nampgb": {key: True}}})
+        assert "not of type 'boolean'" in errors({"update_values": {"nampgb": {key: 88}}})
+    # nampgb: String pathnames have a max length:
+    for key in ["filenameaer"]:
+        assert not errors({"update_values": {"nampgb": {key: "c" * maxpathlen}}})
+        assert "too long" in errors({"update_values": {"nampgb": {key: "c" * (maxpathlen + 1)}}})
+        assert "not of type 'string'" in errors({"update_values": {"nampgb": {key: 88}}})
+    # nampgb: Some integer keys are supported:
+    for key in ["kpo", "kpv", "kth", "numx"]:
+        assert not errors({"update_values": {"nampgb": {key: 88}}})
+        assert "not of type 'integer'" in errors({"update_values": {"nampgb": {key: True}}})
+    # nampgb: Some arrays of numbers are supported:
+    nitems = 70
+    for key in ["po", "pv", "th"]:
+        assert not errors({"update_values": {"nampgb": {key: [3.14] * nitems}}})
+        assert "too long" in errors({"update_values": {"nampgb": {key: [3.14] * (nitems + 1)}}})
+        assert "not of type 'number'" in errors(
+            {"update_values": {"nampgb": {key: [True] * nitems}}}
+        )
+    # nampgb: Only one vtimeunits value is supported:
+    assert "not one of ['FMIN']" in errors({"update_values": {"nampgb": {"vtimeunits": "FOO"}}})
+
+
 def test_schema_upp_run_dir(upp_prop):
     errors = upp_prop("run_dir")
     # Must be a string:
