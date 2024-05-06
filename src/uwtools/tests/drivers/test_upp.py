@@ -4,8 +4,7 @@ UPP driver tests.
 """
 import datetime as dt
 from pathlib import Path
-
-# from unittest.mock import DEFAULT as D
+from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
@@ -133,17 +132,17 @@ def test_UPP_namelist_file(driverobj):
     assert nml["nampgb"]["kpv"] == 88
 
 
-# def test_UPP_provisioned_run_directory(driverobj):
-#     with patch.multiple(
-#         driverobj,
-#         gribfiles=D,
-#         namelist_file=D,
-#         runscript=D,
-#         vtable=D,
-#     ) as mocks:
-#         driverobj.provisioned_run_directory()
-#     for m in mocks:
-#         mocks[m].assert_called_once_with()
+def test_UPP_provisioned_run_directory(driverobj):
+    with patch.multiple(
+        driverobj,
+        files_copied=D,
+        files_linked=D,
+        namelist_file=D,
+        runscript=D,
+    ) as mocks:
+        driverobj.provisioned_run_directory()
+    for m in mocks:
+        mocks[m].assert_called_once_with()
 
 
 # def test_UPP_run_batch(driverobj):
@@ -197,3 +196,11 @@ def test_UPP_namelist_file(driverobj):
 # def test__ext():
 #     assert upp._ext(0) == "AAA"
 #     assert upp._ext(26) == "ABA"
+
+
+def test_UPP__namelist_path(driverobj):
+    assert driverobj._namelist_path == driverobj._rundir / "itag"
+
+
+def test_UPP__runscript_path(driverobj):
+    assert driverobj._runscript_path == driverobj._rundir / "runscript.upp"
