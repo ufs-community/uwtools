@@ -38,8 +38,8 @@ All tasks take the same arguments. For example:
 .. code-block:: text
 
    $ uw ungrib run --help
-   usage: uw ungrib run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run] [--graph-file PATH]
-                        [--quiet] [--verbose]
+   usage: uw ungrib run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
+                        [--graph-file PATH] [--quiet] [--verbose]
 
    A run
 

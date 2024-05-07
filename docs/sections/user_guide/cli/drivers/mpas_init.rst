@@ -43,7 +43,7 @@ All tasks take the same arguments. For example:
 
    $ uw mpas_init run --help
    usage: uw mpas_init run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
-                        [--graph-file PATH] [--quiet] [--verbose]
+                           [--graph-file PATH] [--quiet] [--verbose]
 
    A run
 

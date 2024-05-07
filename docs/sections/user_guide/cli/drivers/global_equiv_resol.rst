@@ -34,20 +34,18 @@ All tasks take the same arguments. For example:
 .. code-block:: text
 
    $ uw global_equiv_resol run --help
-   usage: uw global_equiv_resol run --config-file PATH [-h] [--version] [--batch] [--dry-run]
+   usage: uw global_equiv_resol run [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
                                     [--graph-file PATH] [--quiet] [--verbose]
 
    A run
-
-   Required arguments:
-     --config-file PATH, -c PATH
-         Path to config file
 
    Optional arguments:
      -h, --help
          Show help and exit
      --version
          Show version info and exit
+     --config-file PATH, -c PATH
+         Path to UW YAML config file (default: read from stdin)
      --batch
          Submit run to batch scheduler
      --dry-run

@@ -42,14 +42,12 @@ All tasks take the same arguments. For example:
 .. code-block:: text
 
    $ uw mpas run --help
-   usage: uw mpas run --config-file PATH --cycle CYCLE [-h] [--version] [--batch] [--dry-run]
-                   [--graph-file PATH] [--quiet] [--verbose]
+   usage: uw mpas run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
+                      [--graph-file PATH] [--quiet] [--verbose]
 
    A run
 
    Required arguments:
-     --config-file PATH, -c PATH
-         Path to UW YAML config file
      --cycle CYCLE
          The cycle in ISO8601 format
 
@@ -58,6 +56,8 @@ All tasks take the same arguments. For example:
          Show help and exit
      --version
          Show version info and exit
+     --config-file PATH, -c PATH
+         Path to UW YAML config file (default: read from stdin)
      --batch
          Submit run to batch scheduler
      --dry-run

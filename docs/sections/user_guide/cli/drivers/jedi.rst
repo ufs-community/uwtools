@@ -41,7 +41,7 @@ All tasks take the same arguments. For example:
 
    $ uw jedi run --help
    usage: uw jedi run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
-                       [--graph-file PATH] [--quiet] [--verbose]
+                      [--graph-file PATH] [--quiet] [--verbose]
 
    A run
 
@@ -55,7 +55,7 @@ All tasks take the same arguments. For example:
      --version
          Show version info and exit
      --config-file PATH, -c PATH
-         Path to config file (default: read from stdin)
+         Path to UW YAML config file (default: read from stdin)
      --batch
          Submit run to batch scheduler
      --dry-run
