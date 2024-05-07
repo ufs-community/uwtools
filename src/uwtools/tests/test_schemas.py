@@ -69,6 +69,11 @@ def sfc_climo_gen_prop():
 
 
 @fixture
+def shave_prop():
+    return partial(schema_validator, "shave", "properties", "shave", "properties")
+
+
+@fixture
 def ungrib_prop():
     return partial(schema_validator, "ungrib", "properties", "ungrib", "properties")
 
@@ -769,6 +774,56 @@ def test_schema_sfc_climo_gen_namelist_update_values(sfc_climo_gen_prop):
 
 def test_schema_sfc_climo_gen_run_dir(sfc_climo_gen_prop):
     errors = sfc_climo_gen_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# shave
+
+
+def test_schema_shave():
+    config = {
+        "config": {
+            "input_grid_file": "/path/to/input_grid_file",
+            "nx": 88,
+            "ny": 88,
+            "nh4": 1,
+        },
+        "execution": {"executable": "shave"},
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("shave", "properties", "shave")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("config", "execution", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_shave_config_properties():
+    # Get errors function from schema_validator
+    errors = schema_validator("shave", "properties", "shave", "properties", "config")
+    for key in ("input_grid_file", "nx", "ny", "nh4"):
+        # All config keys are required:
+        assert f"'{key}' is a required property" in errors({})
+        # A string value is ok for input_grid_file:
+        if key == "input_grid_file":
+            assert "not of type 'string'" in str(errors({key: 88}))
+        # nx, ny, and nh4 must be positive integers:
+        elif key in ["nx", "ny", "nh4"]:
+            assert "not of type 'integer'" in str(errors({key: "/path/"}))
+            assert "0 is less than the minimum of 1" in str(errors({key: 0}))
+        # It is an error for the value to be a floating-point value:
+        assert "not of type" in str(errors({key: 3.14}))
+        # It is an error not to supply a value:
+        assert "None is not of type" in str(errors({key: None}))
+
+
+def test_schema_shave_run_dir(shave_prop):
+    errors = shave_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)

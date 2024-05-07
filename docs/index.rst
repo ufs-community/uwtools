@@ -133,6 +133,12 @@ sfc_climo_gen
 | **CLI**: ``uw sfc_climo_gen -h``
 | **API**: ``import uwtools.api.drivers.sfc_climo_gen``
 
+shave
+"""""
+
+| **CLI**: ``uw shave -h``
+| **API**: ``import uwtools.api.shave``
+
 chgres_cube
 """""""""""
 

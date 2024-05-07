@@ -15,5 +15,6 @@ API
    mpas_init
    rocoto
    sfc_climo_gen
+   shave
    template
    ungrib

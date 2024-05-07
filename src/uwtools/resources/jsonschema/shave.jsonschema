@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "shave": {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": false,
+          "properties": {
+            "input_grid_file": {
+              "type": "string"
+            },
+            "nh4": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "nx": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "ny": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "input_grid_file",
+            "nh4",
+            "nx",
+            "ny"
+          ]
+        },
+        "execution": {
+          "$ref": "urn:uwtools:execution-serial"
+        },
+        "run_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "config",
+        "run_dir"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

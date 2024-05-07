@@ -32,7 +32,7 @@ All tasks take the same arguments. For example:
 .. code-block:: text
 
    $ uw make_hgrid run -h
-   usage: uw make_hgrid run --config-file PATH [-h] [--version] [--batch] [--dry-run]
+   usage: uw make_hgrid run [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
                                     [--graph-file PATH] [--quiet] [--verbose]
 
    A run
@@ -62,7 +62,6 @@ The examples use a configuration file named ``config.yaml`` with content similar
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/make_hgrid.yaml
-
 
 Its contents are described in section :ref:`make_hgrid_yaml`.
 

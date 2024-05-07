@@ -72,6 +72,7 @@ def main() -> None:
                 STR.mpas,
                 STR.mpasinit,
                 STR.sfcclimogen,
+                STR.shave,
                 STR.ungrib,
             ]
         }
@@ -975,6 +976,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
             (STR.mpas, True),
             (STR.mpasinit, True),
             (STR.sfcclimogen, False),
+            (STR.shave, False),
             (STR.ungrib, True),
         ]
     }

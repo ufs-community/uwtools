@@ -1,0 +1,15 @@
+shave:
+  execution:
+    batchargs:
+      cores: 1
+      walltime: "00:01:00"
+    executable: /path/to/shave
+  config:
+    input_grid_file: /path/to/input/grid/file
+    nh4: 1
+    nx: 214
+    ny: 128
+  run_dir: /path/to/dir/run
+platform:
+  account: me
+  scheduler: slurm

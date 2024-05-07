@@ -103,6 +103,7 @@ class STR:
     schemafile: str = "schema_file"
     searchpath: str = "search_path"
     sfcclimogen: str = "sfc_climo_gen"
+    shave: str = "shave"
     suppfiles: str = "supplemental_files"
     targetdir: str = "target_dir"
     task: str = "task"
