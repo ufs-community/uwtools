@@ -1,9 +1,9 @@
 upp:
   execution:
     batchargs:
-      nodes: 1
       export: NONE
-      walltime: 00:05:00
+      nodes: 1
+      walltime: "00:05:00"
     envcmds:
       - module use /path/to/modulefiles
       - module load runtime-module
@@ -30,12 +30,12 @@ upp:
         kpo: 3
         numx: 1
         po:
-          - 1000.
-          - 100.
-          - 1.
+          - 1000
+          - 100
+          - 1
   run_dir: /path/to/run
+user:
+  leadtime: "{{ '%03d' % ((validtime - cycle).total_seconds() // 3600) }}"
 platform:
   account: me
   scheduler: slurm
-user:
-  leadtime: "{{ '%03d' % ((validtime - cycle).total_seconds() // 3600) }}"
