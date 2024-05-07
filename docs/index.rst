@@ -160,11 +160,11 @@ UPP
 Driver for JEDI
 ^^^^^^^^^^^^^^^
 
-| **CLI**: ``uw jedi -h``
-| **API**: ``import uwtools.api.jedi``
-
 JEDI
 """"
+
+| **CLI**: ``uw jedi -h``
+| **API**: ``import uwtools.api.jedi``
 
 Drivers for MPAS
 ^^^^^^^^^^^^^^^^
