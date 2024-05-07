@@ -5,7 +5,7 @@ The ``uw`` mode for configuring and running the UFS Utils preprocessing componen
 
 .. code-block:: text
 
-   $ uw shave -h
+   $ uw shave --help
    usage: uw shave [-h] [--version] TASK ...
 
    Execute shave tasks
@@ -33,7 +33,7 @@ All tasks take the same arguments. For example:
 
 .. code-block:: text
 
-   $ uw shave run -h
+   $ uw shave run --help
    usage: uw shave run --config-file PATH [-h] [--version] [--batch] [--dry-run]
                                     [--graph-file PATH] [--quiet] [--verbose]
 
@@ -66,8 +66,6 @@ The examples use a configuration file named ``config.yaml`` with content similar
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/shave.yaml
-
-
 Its contents are described in section :ref:`shave_yaml`.
 
 * Run ``shave`` on an interactive node

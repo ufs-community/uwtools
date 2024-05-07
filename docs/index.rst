@@ -137,7 +137,7 @@ shave
 """""
 
 | **CLI**: ``uw shave -h``
-| **API**: ``import uwtools.api.drivers.shave``
+| **API**: ``import uwtools.api.shave``
 
 chgres_cube
 """""""""""

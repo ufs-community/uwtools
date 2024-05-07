@@ -1,7 +1,7 @@
 .. _shave_yaml:
 
 shave
-========
+=====
 
 Structured YAML to run :ufs-utils:`shave<shave>` is validated by JSON Schema and requires the ``shave:`` block, described below. If ``shave`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
