@@ -797,13 +797,29 @@ def test_schema_shave():
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("execution", "run_dir", "config"):
+    for key in ("config", "execution", "run_dir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
-    # All config keys are required:
+
+
+def test_schema_shave_config_properties():
+    # Get errors function from schema_validator
+    errors = schema_validator("shave", "properties", "shave", "properties", "config")
     for key in ("input_grid_file", "nx", "ny", "nh4"):
-        assert f"'{key}' is a required property" in errors(with_del(config, "config", key))
+        # All config keys are required:
+        assert f"'{key}' is a required property" in errors({})
+        # A string value is ok for input_grid_file:
+        if key == "input_grid_file":
+            assert "not of type 'string'" in str(errors({key: 88}))
+        # nx, ny, and nh4 must be positive integers:
+        elif key in ["nx", "ny", "nh4"]:
+            assert "not of type 'integer'" in str(errors({key: "/path/"}))
+            assert "0 is less than the minimum of 1" in str(errors({key: 0}))
+        # It is an error for the value to be a floating-point value:
+        assert "not of type" in str(errors({key: 3.14}))
+        # It is an error not to supply a value:
+        assert "None is not of type" in str(errors({key: None}))
 
 
 def test_schema_shave_run_dir(shave_prop):

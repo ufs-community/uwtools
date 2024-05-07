@@ -10,12 +10,15 @@
               "type": "string"
             },
             "nh4": {
+              "minimum": 1,
               "type": "integer"
             },
             "nx": {
+              "minimum": 1,
               "type": "integer"
             },
             "ny": {
+              "minimum": 1,
               "type": "integer"
             }
           },
