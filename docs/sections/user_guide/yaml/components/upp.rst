@@ -51,7 +51,6 @@ The following namelists and variables can be customized:
 
 Read more on the UPP namelists, including variable meanings and appropriate values, `here <https://upp.readthedocs.io/en/develop/BuildingRunningTesting/InputsOutputs.html#itag>`_.
 
-
 run_dir:
 ^^^^^^^^
 

@@ -73,7 +73,6 @@ The examples use a configuration file named ``config.yaml`` with content similar
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/ungrib.yaml
 
-
 Its contents are described in depth in section :ref:`ungrib_yaml`.
 
 * Run ``ungrib`` on an interactive node

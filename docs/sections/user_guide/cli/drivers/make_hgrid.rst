@@ -34,9 +34,9 @@ All tasks take the same arguments. For example:
    $ uw make_hgrid run --help
    usage: uw make_hgrid run [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
                             [--graph-file PATH] [--quiet] [--verbose]
-   
+
    A run
-   
+
    Optional arguments:
      -h, --help
          Show help and exit

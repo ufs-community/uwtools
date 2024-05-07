@@ -75,7 +75,6 @@ The examples use a configuration file named ``config.yaml`` with content similar
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/jedi.yaml
 
-
 Its contents are described in section :ref:`jedi_yaml`.
 
 * Run ``jedi`` on an interactive node

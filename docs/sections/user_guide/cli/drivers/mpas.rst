@@ -69,7 +69,6 @@ All tasks take the same arguments. For example:
      --verbose, -v
          Print all logging messages
 
-
 Examples
 ^^^^^^^^
 
@@ -77,7 +76,6 @@ The examples use a configuration file named ``config.yaml`` with content similar
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/mpas.yaml
-
 
 Its contents are described in depth in section :ref:`mpas_yaml`.
 

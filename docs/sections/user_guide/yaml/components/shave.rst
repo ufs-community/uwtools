@@ -33,12 +33,10 @@ nh4:
 
 The number of halo rows/columns.
 
-
 nx:
 """
 
 The i/x dimensions of the compute domain (not including halo).
-
 
 ny:
 """

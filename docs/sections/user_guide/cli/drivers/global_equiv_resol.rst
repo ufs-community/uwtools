@@ -67,7 +67,6 @@ The examples use a configuration file named ``config.yaml`` with content similar
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/global_equiv_resol.yaml
 
-
 Its contents are described in section :ref:`global_equiv_resol_yaml`.
 
 * Run ``global_equiv_resol`` on an interactive node

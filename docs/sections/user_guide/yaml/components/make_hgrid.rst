@@ -156,12 +156,10 @@ nlon:
 
 Number of model grid points(supergrid) for each zonal regions of varying resolution.
 
-
 nxbnds:
 """""""
 
 Specify number of zonal regions for varying resolution.
-
 
 nybnds:
 """""""

@@ -77,7 +77,6 @@ The examples use a configuration file named ``config.yaml`` with content similar
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/mpas_init.yaml
 
-
 Its contents are described in depth in section :ref:`mpas_init_yaml`.
 
 * Run ``init_atmosphere`` on an interactive node

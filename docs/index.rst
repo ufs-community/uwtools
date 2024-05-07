@@ -177,7 +177,6 @@ ungrib
 | **CLI**: ``uw ungrib -h``
 | **API**: ``import uwtools.api.ungrib``
 
-
 mpas_init
 """""""""
 
