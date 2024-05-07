@@ -18,6 +18,7 @@ upp:
     eta_micro_lookup.dat: /path/to/nam_micro_lookup.dat
     params_grib2_tbl_new: /path/to/params_grib2_tbl_new
   namelist:
+    base_file: /path/to/base.nml
     update_values:
       model_inputs:
         datestr: "{{ validtime.strftime('%Y-%m-%d_%H:%M:%S') }}"
