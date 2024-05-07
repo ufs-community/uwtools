@@ -63,7 +63,6 @@ The examples use a configuration file named ``config.yaml`` with content similar
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/make_hgrid.yaml
 
-
 Its contents are described in section :ref:`make_hgrid_yaml`.
 
 * Run ``make_hgrid`` on an interactive node

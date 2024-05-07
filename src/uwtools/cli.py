@@ -72,6 +72,7 @@ def main() -> None:
                 STR.mpas,
                 STR.mpasinit,
                 STR.sfcclimogen,
+                STR.shave,
                 STR.ungrib,
                 STR.upp,
             ]
@@ -995,6 +996,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
             STR.globalequivresol,
             STR.makehgrid,
             STR.sfcclimogen,
+            STR.shave,
         ]
     }
     drivers_with_cycle = {

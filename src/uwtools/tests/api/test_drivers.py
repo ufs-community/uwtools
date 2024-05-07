@@ -16,6 +16,7 @@ from uwtools.api import (
     mpas,
     mpas_init,
     sfc_climo_gen,
+    shave,
     ungrib,
     upp,
 )
@@ -32,12 +33,12 @@ modules = [
     mpas,
     mpas_init,
     sfc_climo_gen,
+    shave,
     ungrib,
     upp,
 ]
 with_cycle = [chgres_cube, fv3, jedi, mpas, mpas_init, ungrib, upp]
 with_leadtime = [upp]
-
 
 @pytest.mark.parametrize("module", modules)
 def test_api_execute(module):
