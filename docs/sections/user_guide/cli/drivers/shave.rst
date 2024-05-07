@@ -60,6 +60,7 @@ The examples use a configuration file named ``config.yaml`` with content similar
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/shave.yaml
+
 Its contents are described in section :ref:`shave_yaml`.
 
 * Run ``shave`` on an interactive node
