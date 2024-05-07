@@ -18,7 +18,13 @@
             "ny": {
               "type": "integer"
             }
-          }
+          },
+          "required": [
+            "input_grid_file",
+            "nh4",
+            "nx",
+            "ny"
+          ]
         },
         "execution": {
           "$ref": "urn:uwtools:execution-serial"

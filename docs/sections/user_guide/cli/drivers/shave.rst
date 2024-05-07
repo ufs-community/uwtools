@@ -18,8 +18,6 @@ The ``uw`` mode for configuring and running the UFS Utils preprocessing componen
 
    Positional arguments:
      TASK
-       input_file
-         Ensure the specified input grid file exists
        provisioned_run_directory
          Run directory provisioned with all required content
        run
@@ -34,14 +32,10 @@ All tasks take the same arguments. For example:
 .. code-block:: text
 
    $ uw shave run --help
-   usage: uw shave run --config-file PATH [-h] [--version] [--batch] [--dry-run]
+   usage: uw shave run [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
                                     [--graph-file PATH] [--quiet] [--verbose]
 
    A run
-
-   Required arguments:
-     --config-file PATH, -c PATH
-         Path to config file
 
    Optional arguments:
      -h, --help

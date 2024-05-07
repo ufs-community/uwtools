@@ -796,11 +796,14 @@ def test_schema_shave():
     errors = schema_validator("shave", "properties", "shave")
     # Basic correctness:
     assert not errors(config)
-    # Some top-level keys are required:
+    # All top-level keys are required:
     for key in ("execution", "run_dir", "config"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+    # All config keys are required:
+    for key in ("input_grid_file", "nx", "ny", "nh4"):
+        assert f"'{key}' is a required property" in errors(with_del(config, "config", key))
 
 
 def test_schema_shave_run_dir(shave_prop):

@@ -25,7 +25,7 @@ def config(tmp_path):
                     "stdout": "/path/to/file",
                     "walltime": "00:02:00",
                 },
-                "executable": "/path/to/shave_nc.F90",
+                "executable": "/path/to/shave",
             },
             "config": {
                 "input_grid_file": "/path/to/input/grid/file.nc",
@@ -99,7 +99,7 @@ def test_Shave__runcmd(driverobj):
     nh4 = driverobj._driver_config["config"]["nh4"]
     input_file_path = driverobj._driver_config["config"]["input_grid_file"]
     output_file_path = input_file_path.replace(".nc", "_NH0.nc")
-    assert cmd == f"/path/to/shave_nc.F90 {nx} {ny} {nh4} {input_file_path} {output_file_path}"
+    assert cmd == f"/path/to/shave {nx} {ny} {nh4} {input_file_path} {output_file_path}"
 
 
 def test_Shave_runscript(driverobj):
