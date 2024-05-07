@@ -8,7 +8,7 @@ The ``uw`` mode for configuring and running the MPAS ``init_atmosphere`` tool. E
    $ uw mpas_init --help
    usage: uw mpas_init [-h] [--version] TASK ...
 
-   Execute MPASInit tasks
+   Execute mpas_init tasks
 
    Optional arguments:
      -h, --help
@@ -19,7 +19,7 @@ The ``uw`` mode for configuring and running the MPAS ``init_atmosphere`` tool. E
    Positional arguments:
      TASK
        boundary_files
-         Boundary-condition files
+         Boundary files
        files_copied
          Files copied for run
        files_linked

@@ -8,7 +8,7 @@ The ``uw`` mode for configuring and running the WRF preprocessing component ``un
    $ uw ungrib --help
    usage: uw ungrib [-h] [--version] TASK ...
 
-   Execute Ungrib tasks
+   Execute ungrib tasks
 
    Optional arguments:
      -h, --help
@@ -18,8 +18,8 @@ The ``uw`` mode for configuring and running the WRF preprocessing component ``un
 
    Positional arguments:
      TASK
-       gribfile
-         A symlink to the input GRIB file
+       gribfiles
+         Symlinks to all the GRIB files
        namelist_file
          The namelist file
        provisioned_run_directory

@@ -8,7 +8,7 @@ The ``uw`` mode for configuring and running FV3.
    $ uw fv3 --help
    usage: uw fv3 [-h] [--version] TASK ...
 
-   Execute FV3 tasks
+   Execute fv3 tasks
 
    Optional arguments:
      -h, --help

@@ -8,7 +8,7 @@ The ``uw`` mode for configuring and running the MPAS forecast model. Each listed
    $ uw mpas --help
    usage: uw mpas [-h] [--version] TASK ...
 
-   Execute MPAS tasks
+   Execute mpas tasks
 
    Optional arguments:
      -h, --help
@@ -19,7 +19,7 @@ The ``uw`` mode for configuring and running the MPAS forecast model. Each listed
    Positional arguments:
      TASK
        boundary_files
-         Boundary condition files
+         Boundary files
        files_copied
          Files copied for run
        files_linked
