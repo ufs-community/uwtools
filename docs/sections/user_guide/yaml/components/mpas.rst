@@ -25,9 +25,7 @@ See :ref:`this page <execution_yaml>` for details.
 boundary_conditions:
 ^^^^^^^^^^^^^^^^^^^^
 
-Describes the boundary condition files needed for the forecast. These will be the output from the
-``init_atmosphere`` executable, which may be run using the ``mpas_init`` UW driver. Please see its
-documentation :ref:`here <mpas_init_yaml>`.
+Describes the boundary condition files needed for the forecast. These will be the output from the ``init_atmosphere`` executable, which may be run using the ``mpas_init`` UW driver. Please see its documentation :ref:`here <mpas_init_yaml>`.
 
 interval_hours:
 """""""""""""""
@@ -78,8 +76,7 @@ Identical to ``files_to_copy:`` except that symbolic links will be created in th
 run_dir:
 ^^^^^^^^
 
-The path to the directory where ``mpas`` will find its namelist, streams file, and necessary data
-files and write its outputs.
+The path to the run directory.
 
 streams:
 ^^^^^^^^

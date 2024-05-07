@@ -54,4 +54,4 @@ Read more on the UPP namelists, including variable meanings and appropriate valu
 run_dir:
 ^^^^^^^^
 
-The path to the UPP run directory.
+The path to the run directory.

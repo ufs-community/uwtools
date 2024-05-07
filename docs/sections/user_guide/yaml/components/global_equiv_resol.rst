@@ -28,4 +28,4 @@ The path to the input grid file required by the program.
 run_dir:
 ^^^^^^^^
 
-The path to the directory where ``global_equiv_resol`` will find its namelist and write its outputs.
+The path to the run directory.

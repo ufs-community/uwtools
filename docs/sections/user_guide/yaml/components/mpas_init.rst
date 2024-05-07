@@ -25,8 +25,7 @@ See :ref:`this page <execution_yaml>` for details.
 boundary_conditions:
 ^^^^^^^^^^^^^^^^^^^^
 
-Describes the boundary condition files needed for the forecast. These will most likely be the output
-of the ``ungrib`` tool.
+Describes the boundary condition files needed for the forecast. These will most likely be the output of the ``ungrib`` tool.
 
 interval_hours:
 """""""""""""""
@@ -77,8 +76,7 @@ Identical to ``files_to_copy:`` except that symbolic links will be created in th
 run_dir:
 ^^^^^^^^
 
-The path to the directory where ``mpas_init`` will find its namelist, streams file, and necessary data
-files and write its outputs.
+The path to the run directory.
 
 streams:
 ^^^^^^^^

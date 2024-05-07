@@ -21,11 +21,6 @@ execution:
 
 See :ref:`this page <execution_yaml>` for details.
 
-run_dir:
-^^^^^^^^
-
-The path to the directory where ``make_hgrid`` will write its outputs.
-
 config:
 ^^^^^^^
 
@@ -235,3 +230,8 @@ ybnds:
 """"""
 
 Specify boundaries for defining meridional regions of varying resolution.
+
+run_dir:
+^^^^^^^^
+
+The path to the run directory.

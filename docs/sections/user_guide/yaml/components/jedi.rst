@@ -37,4 +37,4 @@ Identical to ``files_to_copy:`` except that symbolic links will be created in th
 run_dir:
 ^^^^^^^^
 
-The path to the directory where ``jedi`` will find its namelist and write its outputs.
+The path to the run directory.

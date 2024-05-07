@@ -48,7 +48,7 @@ An absolute-path template to the GRIB-formatted files to be processed by ``ungri
 run_dir:
 ^^^^^^^^
 
-The path to the directory where ``ungrib`` will find its namelist and write its outputs.
+The path to the run directory.
 
 vtable:
 ^^^^^^^

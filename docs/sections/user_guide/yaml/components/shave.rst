@@ -42,3 +42,8 @@ ny:
 """
 
 The j/y dimensions of the compute domain (not including halo)
+
+run_dir:
+^^^^^^^^
+
+The path to the run directory.

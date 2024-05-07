@@ -25,4 +25,4 @@ Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_va
 run_dir:
 ^^^^^^^^
 
-The path to the directory where ``esg_grid`` will find its namelist and write its outputs.
+The path to the run directory.

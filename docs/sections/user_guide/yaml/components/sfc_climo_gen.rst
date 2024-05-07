@@ -26,4 +26,4 @@ Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_va
 run_dir:
 ^^^^^^^^
 
-The path to the directory where ``sfc_climo_gen`` will find its namelist and write its outputs.
+The path to the run directory.
