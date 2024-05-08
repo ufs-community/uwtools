@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access
 
-from datetime import datetime as dt
+import datetime as dt
 from unittest.mock import patch
 
 import iotaa
@@ -53,8 +53,8 @@ def test_api_execute(module):
     }
     kwargs = {
         **kwbase,
-        **({"cycle": dt.now()} if module in with_cycle else {}),
-        **({"leadtime": 24} if module in with_leadtime else {}),
+        **({"cycle": dt.datetime.now()} if module in with_cycle else {}),
+        **({"leadtime": dt.timedelta(hours=24)} if module in with_leadtime else {}),
     }
     with patch.object(api, "_execute") as _execute:
         module.execute(**kwargs)

@@ -1,4 +1,4 @@
-* This driver receives a ``cycle`` argument, which it makes available as a Python ``datetime`` to Jinja2 when realizing its input config. This supports specification of cycle-specific values. For example, the key-value pair
+* This driver receives a ``cycle`` argument, which it makes available as a Python ``datetime`` object to Jinja2 when realizing its input config. This supports specification of cycle-specific values. For example, the key-value pair
 
   .. code-block:: yaml
 

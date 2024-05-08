@@ -33,7 +33,7 @@ class Driver(ABC):
         dry_run: bool = False,
         batch: bool = False,
         cycle: Optional[datetime] = None,
-        leadtime: Optional[int] = None,
+        leadtime: Optional[timedelta] = None,
     ) -> None:
         """
         A component driver.
@@ -47,14 +47,12 @@ class Driver(ABC):
         self._config = YAMLConfig(config=config)
         self._dry_run = dry_run
         self._batch = batch
-        if leadtime:
-            if not cycle:
-                raise UWError("When leadtime is specified, cycle is required")
-            self._validtime = cycle + timedelta(hours=leadtime)
+        if leadtime and not cycle:
+            raise UWError("When leadtime is specified, cycle is required")
         self._config.dereference(
             context={
                 **({"cycle": cycle} if cycle else {}),
-                **({"validtime": self._validtime} if leadtime else {}),
+                **({"leadtime": leadtime} if leadtime else {}),
                 **self._config.data,
             }
         )

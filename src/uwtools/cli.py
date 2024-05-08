@@ -27,6 +27,7 @@ from uwtools.strings import FORMAT, STR
 from uwtools.utils.file import get_file_format, resource_path
 
 FORMATS = FORMAT.extensions()
+LEADTIME_DESC = "HH[:MM[:SS]]"
 TITLE_REQ_ARG = "Required arguments"
 
 Args = Dict[str, Any]
@@ -646,9 +647,9 @@ def _add_arg_keys(group: Group) -> None:
 def _add_arg_leadtime(group: Group) -> None:
     group.add_argument(
         _switch(STR.leadtime),
-        help="Leadtime in hours",
+        help=f"Leadtime as {LEADTIME_DESC}",
         required=True,
-        type=int,
+        type=_timedelta_from_str,
     )
 
 
@@ -1031,6 +1032,22 @@ def _switch(arg: str) -> str:
     :return: The long-form switch.
     """
     return "--%s" % arg.replace("_", "-")
+
+
+def _timedelta_from_str(tds: str) -> dt.timedelta:
+    """
+    Return a timedelta parsed from a leadtime string.
+
+    :param tds: The timedelta string to parse.
+    """
+    fmts = ("%H:%M:%S", "%H:%M", "%H")
+    for fmt in fmts:
+        try:
+            t = dt.datetime.strptime(tds, fmt)
+            return dt.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
+        except ValueError:
+            pass
+    _abort(f"Specify leadtime as {LEADTIME_DESC}")
 
 
 def _version() -> str:

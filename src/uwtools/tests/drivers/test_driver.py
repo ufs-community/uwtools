@@ -2,9 +2,9 @@
 """
 Tests for uwtools.drivers.driver module.
 """
+import datetime as dt
 import json
 import logging
-from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import Mock, PropertyMock, patch
@@ -86,7 +86,11 @@ def config(tmp_path):
 @fixture
 def driverobj(config):
     return ConcreteDriver(
-        config=config, dry_run=True, batch=True, cycle=datetime(2024, 3, 22, 18), leadtime=24
+        config=config,
+        dry_run=True,
+        batch=True,
+        cycle=dt.datetime(2024, 3, 22, 18),
+        leadtime=dt.timedelta(hours=24),
     )
 
 
@@ -101,7 +105,7 @@ def test_Driver(driverobj):
 
 def test_Driver_cycle_leadtime_error(config):
     with raises(UWError) as e:
-        ConcreteDriver(config=config, leadtime=24)
+        ConcreteDriver(config=config, leadtime=dt.timedelta(hours=24))
     assert "When leadtime is specified, cycle is required" in str(e)
 
 

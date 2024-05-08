@@ -47,7 +47,7 @@ All tasks take the same arguments. For example:
      --cycle CYCLE
          The cycle in ISO8601 format
      --leadtime LEADTIME
-         Leadtime in hours
+         Leadtime as HH[:MM[:SS]]
 
    Optional arguments:
      -h, --help

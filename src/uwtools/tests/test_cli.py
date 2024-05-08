@@ -558,7 +558,7 @@ def test__dispatch_template_translate_no_optional():
 def test__dispatch_to_driver():
     name = "adriver"
     cycle = dt.datetime.now()
-    leadtime = 24
+    leadtime = dt.timedelta(hours=24)
     args: dict = {
         "action": "foo",
         "batch": True,
@@ -651,6 +651,15 @@ def test__parse_args():
 
 def test__switch():
     assert cli._switch("foo_bar") == "--foo-bar"
+
+
+def test__timedelta_from_str(capsys):
+    assert cli._timedelta_from_str("11:12:13") == dt.timedelta(hours=11, minutes=12, seconds=13)
+    assert cli._timedelta_from_str("11:12") == dt.timedelta(hours=11, minutes=12)
+    assert cli._timedelta_from_str("11") == dt.timedelta(hours=11)
+    with raises(SystemExit):
+        cli._timedelta_from_str("foo")
+    assert f"Specify leadtime as {cli.LEADTIME_DESC}" in capsys.readouterr().err
 
 
 def test__version():

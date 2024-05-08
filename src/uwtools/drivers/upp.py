@@ -2,7 +2,7 @@
 A driver for UPP.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -22,7 +22,7 @@ class UPP(Driver):
     def __init__(
         self,
         cycle: datetime,
-        leadtime: int,
+        leadtime: timedelta,
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
@@ -155,9 +155,8 @@ class UPP(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return "%s f%03d %s %s" % (
-            self._cycle.strftime("%Y%m%d %HZ"),
-            self._leadtime,
+        return "%s %s %s" % (
+            (self._cycle + self._leadtime).strftime("%Y%m%d %H:%M:%S"),
             self._driver_name,
             suffix,
         )

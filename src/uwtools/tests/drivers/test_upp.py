@@ -76,7 +76,7 @@ def driverobj(config_file, cycle, leadtime):
 
 @fixture
 def leadtime():
-    return 24
+    return dt.timedelta(hours=24)
 
 
 # Tests
@@ -171,7 +171,7 @@ def test_UPP__driver_config(driverobj):
 
 
 def test_UPP__taskname(driverobj):
-    assert driverobj._taskname("foo") == "20240506 12Z f024 upp foo"
+    assert driverobj._taskname("foo") == "20240507 12:00:00 upp foo"
 
 
 def test_UPP__validate(driverobj):

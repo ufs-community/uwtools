@@ -89,7 +89,7 @@ def make_execute(
     def execute_cycle_leadtime(  # pylint: disable=unused-argument
         task: str,
         cycle: dt.datetime,
-        leadtime: int,
+        leadtime: dt.timedelta,
         config: Optional[Union[Path, str]] = None,
         batch: bool = False,
         dry_run: bool = False,
@@ -159,7 +159,7 @@ def _execute(
     driver_class: type[Driver],
     task: str,
     cycle: Optional[dt.datetime] = None,
-    leadtime: Optional[int] = None,
+    leadtime: Optional[dt.timedelta] = None,
     config: Optional[Union[Path, str]] = None,
     batch: bool = False,
     dry_run: bool = False,

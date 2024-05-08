@@ -21,9 +21,9 @@ upp:
     base_file: /path/to/base.nml
     update_values:
       model_inputs:
-        datestr: "{{ validtime.strftime('%Y-%m-%d_%H:%M:%S') }}"
-        filename: /path/to/dynf{{ user.leadtime }}.nc
-        filenameflux: /path/to/phyf{{ user.leadtime }}.nc
+        datestr: "{{ (cycle + leadtime).strftime('%Y-%m-%d_%H:%M:%S') }}"
+        filename: /path/to/dynf{{ '%03d' % (leadtime.total_seconds() / 3600) }}.nc
+        filenameflux: /path/to/phyf{{ '%03d' % (leadtime.total_seconds() / 3600) }}.nc
         grib: grib2
         ioform: netcdf
         modelname: FV3R
@@ -35,8 +35,6 @@ upp:
           - 100
           - 1
   run_dir: /path/to/run
-user:
-  leadtime: "{{ '%03d' % ((validtime - cycle).total_seconds() // 3600) }}"
 platform:
   account: me
   scheduler: slurm
