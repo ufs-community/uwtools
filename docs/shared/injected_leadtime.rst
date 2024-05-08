@@ -2,7 +2,7 @@
 
   .. code-block:: yaml
 
-     suffix: f{{ '%03d' % leadtime.hours }}
+     suffix: f{{ '%03d' % (leadtime.total_seconds() / 3600) }}
 
   would be rendered as
 
