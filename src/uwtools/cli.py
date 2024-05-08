@@ -552,7 +552,7 @@ def _add_arg_config_file(group: Group, required: bool = False) -> None:
 def _add_arg_cycle(group: Group) -> None:
     group.add_argument(
         _switch(STR.cycle),
-        help="The cycle in ISO8601 format",
+        help="The cycle in ISO8601 format (e.g. 2024-05-08T18)",
         required=True,
         type=dt.datetime.fromisoformat,
     )

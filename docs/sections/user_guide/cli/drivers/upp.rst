@@ -45,7 +45,7 @@ All tasks take the same arguments. For example:
 
    Required arguments:
      --cycle CYCLE
-         The cycle in ISO8601 format
+         The cycle in ISO8601 format (e.g. 2024-05-08T18)
      --leadtime LEADTIME
          Leadtime as HH[:MM[:SS]]
 
