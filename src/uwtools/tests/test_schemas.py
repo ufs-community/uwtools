@@ -917,6 +917,10 @@ def test_schema_upp_namelist(upp_prop):
     assert not errors(
         {"base_file": "/path/to/base.nml", "update_values": {"model_inputs": {"grib": "grib2"}}}
     )
+    # Only two specific namelists are allowed:
+    assert "Additional properties are not allowed" in errors(
+        {"udpate_values": {"another_namelist": {}}}
+    )
     # model_inputs: datestr requires a specific format:
     assert not errors({"update_values": {"model_inputs": {"datestr": "2024-05-06_12:00:00"}}})
     assert "does not match" in errors(
@@ -930,7 +934,6 @@ def test_schema_upp_namelist(upp_prop):
         )
         assert "not of type 'string'" in errors({"update_values": {"model_inputs": {key: 88}}})
     # model_inputs: Only one grib value is supported:
-    assert not errors({"update_values": {"model_inputs": {"grib": "grib2"}}})
     assert "not one of ['grib2']" in errors({"update_values": {"model_inputs": {"grib": "grib1"}}})
     assert "not of type 'string'" in errors({"update_values": {"model_inputs": {"grib": 88}}})
     # model_inputs: Only certain ioform values are supported:
@@ -981,6 +984,10 @@ def test_schema_upp_namelist(upp_prop):
         )
     # nampgb: Only one vtimeunits value is supported:
     assert "not one of ['FMIN']" in errors({"update_values": {"nampgb": {"vtimeunits": "FOO"}}})
+    # nampgb: No other keys are supported:
+    assert "Additional properties are not allowed" in errors(
+        {"update_values": {"nampgb": {"something": "else"}}}
+    )
 
 
 def test_schema_upp_run_dir(upp_prop):
