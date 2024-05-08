@@ -647,7 +647,7 @@ def _add_arg_keys(group: Group) -> None:
 def _add_arg_leadtime(group: Group) -> None:
     group.add_argument(
         _switch(STR.leadtime),
-        help=f"Leadtime as {LEADTIME_DESC}",
+        help=f"The leadtime as {LEADTIME_DESC}",
         required=True,
         type=_timedelta_from_str,
     )
