@@ -33,6 +33,7 @@ class Driver(ABC):
         dry_run: bool = False,
         batch: bool = False,
         cycle: Optional[datetime] = None,
+        key_path: bool = False,
     ) -> None:
         """
         A component driver.
@@ -41,6 +42,7 @@ class Driver(ABC):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         :param cycle: The cycle.
+        :param key_path: Does this driver require a sub-section of YAML to be output?
         """
         self._config = YAMLConfig(config=config)
         self._dry_run = dry_run

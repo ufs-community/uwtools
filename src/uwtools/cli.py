@@ -12,7 +12,7 @@ from argparse import _SubParsersAction as Subparsers
 from functools import partial
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Callable, Dict, List, NoReturn, Tuple
+from typing import Any, Callable, Dict, List, NoReturn, Optional, Tuple
 
 import uwtools.api
 import uwtools.api.config
@@ -632,6 +632,16 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
     )
 
 
+def _add_arg_key_path(group: Group, required: bool = False) -> None:
+    group.add_argument(
+        _switch(STR.keypath),
+        help="Dot-separated path of keys to the sub-section of YAML to be output",
+        metavar="KEY[.KEY[.KEY]...]",
+        required=required,
+        type=lambda s: s.split("."),
+    )
+
+
 def _add_arg_keys(group: Group) -> None:
     group.add_argument(
         STR.keys,
@@ -809,25 +819,35 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     return parser
 
 
-def _add_subparser_for_driver(name: str, subparsers: Subparsers, with_cycle: bool) -> ModeChecks:
+def _add_subparser_for_driver(
+    name: str,
+    subparsers: Subparsers,
+    with_cycle: bool,
+    key_path: Optional[bool] = False,
+) -> ModeChecks:
     """
     Subparser for a driver mode.
 
     :param name: Name of the driver whose subparser to configure.
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     :param with_cycle: Does this driver require a cycle?
+    :param key_path: Does this driver require a sub-section of YAML to be output?
     """
     parser = _add_subparser(subparsers, name, "Execute %s tasks" % name)
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
-        task: _add_subparser_for_driver_task(subparsers, task, helpmsg, with_cycle)
+        task: _add_subparser_for_driver_task(subparsers, task, helpmsg, with_cycle, key_path)
         for task, helpmsg in import_module("uwtools.api.%s" % name).tasks().items()
     }
 
 
 def _add_subparser_for_driver_task(
-    subparsers: Subparsers, task: str, helpmsg: str, with_cycle: bool
+    subparsers: Subparsers,
+    task: str,
+    helpmsg: str,
+    with_cycle: bool,
+    key_path: Optional[bool] = False,
 ) -> ActionChecks:
     """
     Subparser for a driver action.
@@ -836,11 +856,14 @@ def _add_subparser_for_driver_task(
     :param task: The task to add a subparser for.
     :param helpmsg: Help message for task.
     :param with_cycle: Does this driver require a cycle?
+    :param key_path: Does this driver require a sub-section of YAML to be output?
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
     if with_cycle:
         _add_arg_cycle(required)
+    if key_path:
+        _add_arg_key_path(required)
     optional = _basic_setup(parser)
     _add_arg_config_file(group=optional)
     _add_arg_batch(optional)
@@ -934,6 +957,8 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     }
     if cycle := args.get(STR.cycle):
         kwargs[STR.cycle] = cycle
+    if key_path := args.get(STR.keypath):
+        kwargs[STR.keypath] = key_path
     return execute(**kwargs)
 
 
