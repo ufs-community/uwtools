@@ -16,7 +16,7 @@ UW YAML for the ``sfc_climo_gen:`` Block
 execution:
 ^^^^^^^^^^
 
-See :ref:`here <execution_yaml>` for details.
+See :ref:`this page <execution_yaml>` for details.
 
 namelist:
 ^^^^^^^^^
@@ -26,4 +26,4 @@ Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_va
 run_dir:
 ^^^^^^^^
 
-The path to the directory where ``sfc_climo_gen`` will find its namelist and write its outputs.
+The path to the run directory.

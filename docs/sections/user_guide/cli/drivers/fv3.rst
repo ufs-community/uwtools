@@ -8,7 +8,7 @@ The ``uw`` mode for configuring and running FV3.
    $ uw fv3 --help
    usage: uw fv3 [-h] [--version] TASK ...
 
-   Execute FV3 tasks
+   Execute fv3 tasks
 
    Optional arguments:
      -h, --help
@@ -57,7 +57,7 @@ All tasks take the same arguments. For example:
      --config-file PATH, -c PATH
          Path to UW YAML config file
      --cycle CYCLE
-         The cycle in ISO8601 format
+         The cycle in ISO8601 format (e.g. 2024-05-08T18)
 
    Optional arguments:
      -h, --help

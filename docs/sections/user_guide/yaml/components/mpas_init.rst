@@ -5,6 +5,8 @@ mpas_init
 
 Structured YAML to run MPAS Init is validated by JSON Schema and requires the ``mpas_init:`` block, described below. If ``mpas_init`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
+.. include:: ../../../../shared/injected_cycle.rst
+
 Here is a prototype UW YAML ``mpas_init:`` block, explained in detail below:
 
 .. highlight:: yaml
@@ -18,13 +20,12 @@ UW YAML for the ``mpas_init:`` Block
 execution:
 ^^^^^^^^^^
 
-See :ref:`here <execution_yaml>` for details.
+See :ref:`this page <execution_yaml>` for details.
 
 boundary_conditions:
 ^^^^^^^^^^^^^^^^^^^^
 
-Describes the boundary condition files needed for the forecast. These will most likely be the output
-of the ``ungrib`` tool.
+Describes the boundary condition files needed for the forecast. These will most likely be the output of the ``ungrib`` tool.
 
 interval_hours:
 """""""""""""""
@@ -75,8 +76,7 @@ Identical to ``files_to_copy:`` except that symbolic links will be created in th
 run_dir:
 ^^^^^^^^
 
-The path to the directory where ``mpas_init`` will find its namelist, streams file, and necessary data
-files and write its outputs.
+The path to the run directory.
 
 streams:
 ^^^^^^^^

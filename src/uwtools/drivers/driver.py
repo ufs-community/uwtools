@@ -6,7 +6,7 @@ import os
 import re
 import stat
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Type
@@ -16,7 +16,7 @@ from iotaa import asset, external, task, tasks
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute
@@ -33,6 +33,7 @@ class Driver(ABC):
         dry_run: bool = False,
         batch: bool = False,
         cycle: Optional[datetime] = None,
+        leadtime: Optional[timedelta] = None,
     ) -> None:
         """
         A component driver.
@@ -41,13 +42,19 @@ class Driver(ABC):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         :param cycle: The cycle.
+        :param leadtime: The leadtime.
         """
         self._config = YAMLConfig(config=config)
         self._dry_run = dry_run
         self._batch = batch
-        self._config.dereference()
+        if leadtime and not cycle:
+            raise UWError("When leadtime is specified, cycle is required")
         self._config.dereference(
-            context={**({"cycle": cycle} if cycle else {}), **self._config.data}
+            context={
+                **({"cycle": cycle} if cycle else {}),
+                **({"leadtime": leadtime} if leadtime else {}),
+                **self._config.data,
+            }
         )
         self._validate()
 
@@ -163,6 +170,7 @@ class Driver(ABC):
             "account": platform["account"],
             "rundir": self._rundir,
             "scheduler": platform["scheduler"],
+            "stdout": "%s.out" % self._runscript_path.name,  # config may override
             **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
 
@@ -254,7 +262,7 @@ class Driver(ABC):
             envvars=envvars,
             execution=[
                 "time %s" % self._runcmd,
-                "test $? -eq 0 && touch %s/done.%s" % (self._rundir, self._driver_name),
+                "test $? -eq 0 && touch %s.done" % self._runscript_path.name,
             ],
             scheduler=self._scheduler if self._batch else None,
         )

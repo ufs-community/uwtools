@@ -33,7 +33,7 @@ All tasks take the same arguments. For example:
 
    $ uw shave run --help
    usage: uw shave run [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
-                                    [--graph-file PATH] [--quiet] [--verbose]
+                       [--graph-file PATH] [--quiet] [--verbose]
 
    A run
 
@@ -42,6 +42,8 @@ All tasks take the same arguments. For example:
          Show help and exit
      --version
          Show version info and exit
+     --config-file PATH, -c PATH
+         Path to UW YAML config file (default: read from stdin)
      --batch
          Submit run to batch scheduler
      --dry-run

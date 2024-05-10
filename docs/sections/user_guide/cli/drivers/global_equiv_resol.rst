@@ -5,7 +5,7 @@ The ``uw`` mode for configuring and running the UFS Utils preprocessing componen
 
 .. code-block:: text
 
-   $ uw global_equiv_resol -h
+   $ uw global_equiv_resol --help
    usage: uw global_equiv_resol [-h] [--version] TASK ...
 
    Execute global_equiv_resol tasks
@@ -33,21 +33,19 @@ All tasks take the same arguments. For example:
 
 .. code-block:: text
 
-   $ uw global_equiv_resol run -h
-   usage: uw global_equiv_resol run --config-file PATH [-h] [--version] [--batch] [--dry-run]
+   $ uw global_equiv_resol run --help
+   usage: uw global_equiv_resol run [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
                                     [--graph-file PATH] [--quiet] [--verbose]
 
    A run
-
-   Required arguments:
-     --config-file PATH, -c PATH
-         Path to config file
 
    Optional arguments:
      -h, --help
          Show help and exit
      --version
          Show version info and exit
+     --config-file PATH, -c PATH
+         Path to UW YAML config file (default: read from stdin)
      --batch
          Submit run to batch scheduler
      --dry-run
@@ -66,7 +64,6 @@ The examples use a configuration file named ``config.yaml`` with content similar
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/global_equiv_resol.yaml
-
 
 Its contents are described in section :ref:`global_equiv_resol_yaml`.
 

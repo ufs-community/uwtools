@@ -80,7 +80,7 @@ def driverobj(config_file, cycle):
     return chgres_cube.ChgresCube(config=config_file, cycle=cycle, batch=True)
 
 
-# Driver tests
+# Tests
 
 
 def test_ChgresCube(driverobj):

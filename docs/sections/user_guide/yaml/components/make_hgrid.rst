@@ -19,18 +19,12 @@ UW YAML for the ``make_hgrid:`` Block
 execution:
 ^^^^^^^^^^
 
-See :ref:`here <execution_yaml>` for details.
-
-run_dir:
-^^^^^^^^
-
-The path to the directory where ``make_hgrid`` will write its outputs.
+See :ref:`this page <execution_yaml>` for details.
 
 config:
 ^^^^^^^
 
 Describes the required parameters to run a ``make_hgrid`` configuration.
-
 
 grid_type:
 """"""""""
@@ -61,8 +55,6 @@ grid_type:
      - ``nxbnds``, ``nybnds``, ``xbnds``, ``ybnds`` must be specified to define the grid bounds.
    * - ``tripolar_grid``
      - ``nxbnds``, ``nybnds``, ``xbnds``, ``ybnds`` must be specified to define the grid bounds.
-
-
 
 angular_midpoint:
 """""""""""""""""
@@ -159,12 +151,10 @@ nlon:
 
 Number of model grid points(supergrid) for each zonal regions of varying resolution.
 
-
 nxbnds:
 """""""
 
 Specify number of zonal regions for varying resolution.
-
 
 nybnds:
 """""""
@@ -240,3 +230,8 @@ ybnds:
 """"""
 
 Specify boundaries for defining meridional regions of varying resolution.
+
+run_dir:
+^^^^^^^^
+
+The path to the run directory.

@@ -11,7 +11,7 @@ from pytest import fixture
 from uwtools.drivers import make_hgrid
 from uwtools.scheduler import Slurm
 
-# Driver fixtures
+# Fixtures
 
 
 @fixture
@@ -54,7 +54,7 @@ def driverobj(config_file):
     return make_hgrid.MakeHgrid(config=config_file, batch=True)
 
 
-# Driver tests
+# Tests
 
 
 def test_MakeHgrid(driverobj):

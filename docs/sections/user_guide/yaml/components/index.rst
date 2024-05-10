@@ -15,3 +15,4 @@ UW YAML for Components
    sfc_climo_gen
    shave
    ungrib
+   upp

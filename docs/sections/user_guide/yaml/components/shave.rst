@@ -16,7 +16,7 @@ UW YAML for the ``shave:`` Block
 execution:
 ^^^^^^^^^^
 
-See :ref:`here <execution_yaml>` for details.
+See :ref:`this page <execution_yaml>` for details.
 
 config:
 ^^^^^^^
@@ -33,14 +33,17 @@ nh4:
 
 The number of halo rows/columns.
 
-
 nx:
 """
 
 The i/x dimensions of the compute domain (not including halo).
 
-
 ny:
 """
 
 The j/y dimensions of the compute domain (not including halo)
+
+run_dir:
+^^^^^^^^
+
+The path to the run directory.

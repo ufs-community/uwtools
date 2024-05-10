@@ -2,9 +2,9 @@
 """
 Tests for uwtools.drivers.driver module.
 """
+import datetime as dt
 import json
 import logging
-from datetime import datetime
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import Mock, PropertyMock, patch
@@ -16,7 +16,7 @@ from pytest import fixture, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.tests.support import regex_logged
 
@@ -57,34 +57,41 @@ def write(path, s):
 
 
 @fixture
-def driverobj(tmp_path):
-    cf = write(
-        tmp_path / "good.yaml",
-        {
-            "concrete": {
-                "base_file": str(write(tmp_path / "base.yaml", {"a": 11, "b": 22})),
-                "execution": {
-                    "batchargs": {
-                        "export": "NONE",
-                        "nodes": 1,
-                        "stdout": "{{ concrete.run_dir }}/out",
-                        "walltime": "00:05:00",
-                    },
-                    "executable": str(tmp_path / "qux"),
-                    "mpiargs": ["bar", "baz"],
-                    "mpicmd": "foo",
+def config(tmp_path):
+    return {
+        "concrete": {
+            "base_file": str(write(tmp_path / "base.yaml", {"a": 11, "b": 22})),
+            "execution": {
+                "batchargs": {
+                    "export": "NONE",
+                    "nodes": 1,
+                    "stdout": "{{ concrete.run_dir }}/out",
+                    "walltime": "00:05:00",
                 },
-                "run_dir": "{{ rootdir }}/{{ cycle.strftime('%Y%m%d%H') }}/run",
-                "update_values": {"a": 33},
+                "executable": str(tmp_path / "qux"),
+                "mpiargs": ["bar", "baz"],
+                "mpicmd": "foo",
             },
-            "platform": {
-                "account": "me",
-                "scheduler": "slurm",
-            },
-            "rootdir": "/path/to",
+            "run_dir": "{{ rootdir }}/{{ cycle.strftime('%Y%m%d%H') }}/run",
+            "update_values": {"a": 33},
         },
+        "platform": {
+            "account": "me",
+            "scheduler": "slurm",
+        },
+        "rootdir": "/path/to",
+    }
+
+
+@fixture
+def driverobj(config):
+    return ConcreteDriver(
+        config=config,
+        dry_run=True,
+        batch=True,
+        cycle=dt.datetime(2024, 3, 22, 18),
+        leadtime=dt.timedelta(hours=24),
     )
-    return ConcreteDriver(config=cf, dry_run=True, batch=True, cycle=datetime(2024, 3, 22, 18))
 
 
 # Tests
@@ -94,6 +101,12 @@ def test_Driver(driverobj):
     assert Path(driverobj._driver_config["base_file"]).name == "base.yaml"
     assert driverobj._dry_run is True
     assert driverobj._batch is True
+
+
+def test_Driver_cycle_leadtime_error(config):
+    with raises(UWError) as e:
+        ConcreteDriver(config=config, leadtime=dt.timedelta(hours=24))
+    assert "When leadtime is specified, cycle is required" in str(e)
 
 
 # Tests for workflow methods
@@ -207,6 +220,7 @@ def test_Driver__resources_pass(driverobj):
         "account": account,
         "rundir": driverobj._rundir,
         "scheduler": scheduler,
+        "stdout": "runscript.concrete.out",
         "walltime": walltime,
     }
 
@@ -301,7 +315,7 @@ def test_Driver__write_runscript(driverobj, tmp_path):
     export BAZ=qux
 
     time foo bar baz {executable}
-    test $? -eq 0 && touch /path/to/2024032218/run/done.concrete
+    test $? -eq 0 && touch runscript.concrete.done
     """
     with open(path, "r", encoding="utf-8") as f:
         actual = f.read()

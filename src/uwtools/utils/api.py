@@ -32,12 +32,17 @@ def ensure_data_source(
     return str2path(data_source)
 
 
-def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., bool]:
+def make_execute(
+    driver_class: type[Driver],
+    with_cycle: Optional[bool] = False,
+    with_leadtime: Optional[bool] = False,
+) -> Callable[..., bool]:
     """
     Returns a function that executes tasks for the given driver.
 
     :param driver_class: The driver class whose tasks to execute.
-    :param with_cycle: Does the driver's constructor take the 'cycle' parameter?
+    :param with_cycle: Does the driver's constructor take a 'cycle' parameter?
+    :param with_leadtime: Does the driver's constructor take a 'leadtime' parameter?
     """
 
     def execute(  # pylint: disable=unused-argument
@@ -52,6 +57,7 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
             driver_class=driver_class,
             task=task,
             cycle=None,
+            leadtime=None,
             config=config,
             batch=batch,
             dry_run=dry_run,
@@ -71,6 +77,7 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
         return _execute(
             driver_class=driver_class,
             task=task,
+            leadtime=None,
             cycle=cycle,
             config=config,
             batch=batch,
@@ -79,12 +86,43 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
             stdin_ok=stdin_ok,
         )
 
+    def execute_cycle_leadtime(  # pylint: disable=unused-argument
+        task: str,
+        cycle: dt.datetime,
+        leadtime: dt.timedelta,
+        config: Optional[Union[Path, str]] = None,
+        batch: bool = False,
+        dry_run: bool = False,
+        graph_file: Optional[Union[Path, str]] = None,
+        stdin_ok: bool = False,
+    ) -> bool:
+        return _execute(
+            driver_class=driver_class,
+            task=task,
+            cycle=cycle,
+            leadtime=leadtime,
+            config=config,
+            batch=batch,
+            dry_run=dry_run,
+            graph_file=graph_file,
+            stdin_ok=stdin_ok,
+        )
+
+    execute_cycle_leadtime.__name__ = "execute"
     execute_cycle.__name__ = "execute"
     assert _execute.__doc__ is not None
-    execute_cycle.__doc__ = re.sub(r"\n *:param driver_class:.*\n", "\n", _execute.__doc__)
+    execute_cycle_leadtime.__doc__ = re.sub(r"\n *:param driver_class:.*\n", "\n", _execute.__doc__)
+    execute_cycle.__doc__ = re.sub(
+        r"\n *:param leadtime:.*\n", "\n", execute_cycle_leadtime.__doc__
+    )
     execute.__doc__ = re.sub(r"\n *:param cycle:.*\n", "\n", execute_cycle.__doc__)
 
+    if with_leadtime and not with_cycle:
+        raise UWError("When leadtime is specified, cycle is required")
+
     if with_cycle:
+        if with_leadtime:
+            return execute_cycle_leadtime
         return execute_cycle
     return execute
 
@@ -121,6 +159,7 @@ def _execute(
     driver_class: type[Driver],
     task: str,
     cycle: Optional[dt.datetime] = None,
+    leadtime: Optional[dt.timedelta] = None,
     config: Optional[Union[Path, str]] = None,
     batch: bool = False,
     dry_run: bool = False,
@@ -136,6 +175,7 @@ def _execute(
     :param driver_class: Class of driver object to instantiate.
     :param task: The task to execute.
     :param cycle: The cycle.
+    :param leadtime: The leadtime.
     :param config: Path to config file (read stdin if missing or None).
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run the executable, just report what would have been done.
@@ -150,6 +190,8 @@ def _execute(
     )
     if cycle:
         kwargs["cycle"] = cycle
+    if leadtime:
+        kwargs["leadtime"] = leadtime
     obj = driver_class(**kwargs)
     getattr(obj, task)()
     if graph_file:

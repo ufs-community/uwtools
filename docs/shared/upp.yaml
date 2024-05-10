@@ -1,0 +1,40 @@
+upp:
+  execution:
+    batchargs:
+      export: NONE
+      nodes: 1
+      walltime: "00:05:00"
+    envcmds:
+      - module use /path/to/modulefiles
+      - module load runtime-module
+      - source /etc/profile.d/slurm.sh
+    executable: /path/to/upp.x
+    mpiargs:
+      - "--ntasks $SLURM_CPUS_ON_NODE"
+    mpicmd: srun
+  files_to_copy:
+    postxconfig-NT.txt: /path/to/postxconfig-NT.txt
+  files_to_link:
+    eta_micro_lookup.dat: /path/to/nam_micro_lookup.dat
+    params_grib2_tbl_new: /path/to/params_grib2_tbl_new
+  namelist:
+    base_file: /path/to/base.nml
+    update_values:
+      model_inputs:
+        datestr: "{{ (cycle + leadtime).strftime('%Y-%m-%d_%H:%M:%S') }}"
+        filename: /path/to/dynf{{ '%03d' % (leadtime.total_seconds() / 3600) }}.nc
+        filenameflux: /path/to/phyf{{ '%03d' % (leadtime.total_seconds() / 3600) }}.nc
+        grib: grib2
+        ioform: netcdf
+        modelname: FV3R
+      nampgb:
+        kpo: 3
+        numx: 1
+        po:
+          - 1000
+          - 100
+          - 1
+  run_dir: /path/to/run
+platform:
+  account: me
+  scheduler: slurm

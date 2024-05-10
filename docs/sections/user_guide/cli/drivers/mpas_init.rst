@@ -8,7 +8,7 @@ The ``uw`` mode for configuring and running the MPAS ``init_atmosphere`` tool. E
    $ uw mpas_init --help
    usage: uw mpas_init [-h] [--version] TASK ...
 
-   Execute MPASInit tasks
+   Execute mpas_init tasks
 
    Optional arguments:
      -h, --help
@@ -19,7 +19,7 @@ The ``uw`` mode for configuring and running the MPAS ``init_atmosphere`` tool. E
    Positional arguments:
      TASK
        boundary_files
-         Boundary-condition files
+         Boundary files
        files_copied
          Files copied for run
        files_linked
@@ -43,13 +43,13 @@ All tasks take the same arguments. For example:
 
    $ uw mpas_init run --help
    usage: uw mpas_init run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
-                        [--graph-file PATH] [--quiet] [--verbose]
+                           [--graph-file PATH] [--quiet] [--verbose]
 
    A run
 
    Required arguments:
      --cycle CYCLE
-         The cycle in ISO8601 format
+         The cycle in ISO8601 format (e.g. 2024-05-08T18)
 
    Optional arguments:
      -h, --help
@@ -76,7 +76,6 @@ The examples use a configuration file named ``config.yaml`` with content similar
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/mpas_init.yaml
-
 
 Its contents are described in depth in section :ref:`mpas_init_yaml`.
 

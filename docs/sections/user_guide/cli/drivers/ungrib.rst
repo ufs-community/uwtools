@@ -8,7 +8,7 @@ The ``uw`` mode for configuring and running the WRF preprocessing component ``un
    $ uw ungrib --help
    usage: uw ungrib [-h] [--version] TASK ...
 
-   Execute Ungrib tasks
+   Execute ungrib tasks
 
    Optional arguments:
      -h, --help
@@ -18,8 +18,8 @@ The ``uw`` mode for configuring and running the WRF preprocessing component ``un
 
    Positional arguments:
      TASK
-       gribfile
-         A symlink to the input GRIB file
+       gribfiles
+         Symlinks to all the GRIB files
        namelist_file
          The namelist file
        provisioned_run_directory
@@ -38,14 +38,14 @@ All tasks take the same arguments. For example:
 .. code-block:: text
 
    $ uw ungrib run --help
-   usage: uw ungrib run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run] [--graph-file PATH]
-                        [--quiet] [--verbose]
+   usage: uw ungrib run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
+                        [--graph-file PATH] [--quiet] [--verbose]
 
    A run
 
    Required arguments:
      --cycle CYCLE
-         The cycle in ISO8601 format
+         The cycle in ISO8601 format (e.g. 2024-05-08T18)
 
    Optional arguments:
      -h, --help
@@ -72,7 +72,6 @@ The examples use a configuration file named ``config.yaml`` with content similar
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/ungrib.yaml
-
 
 Its contents are described in depth in section :ref:`ungrib_yaml`.
 
