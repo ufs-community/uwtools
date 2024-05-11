@@ -76,7 +76,7 @@ def test_FileStager_bad_key(assets, source):
     config = cfgdict if source == "dict" else cfgfile
     with raises(UWConfigError) as e:
         file.FileStager(target_dir=dstdir, config=config, keys=["a", "x"])
-    assert str(e.value) == "Config navigation a -> x failed"
+    assert str(e.value) == "Failed following YAML key(s): a -> x"
 
 
 @pytest.mark.parametrize("val", [None, True, False, "str", 88, 3.14, [], tuple()])
