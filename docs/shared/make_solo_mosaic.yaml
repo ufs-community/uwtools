@@ -1,11 +1,11 @@
 make_solo_mosaic:
   config:
-    num_tiles: 1
     dir: /path/to/input
+    num_tiles: 1
     mosaic_name: ocean_mosaic
-    tile_file: C403_grid.tile7.halo6.nc
     periodx: 360
     periody: 360
+    tile_file: C403_grid.tile7.halo6.nc
   execution:
     batchargs:
       cores: 1
