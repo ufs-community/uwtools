@@ -999,6 +999,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
             STR.esggrid,
             STR.globalequivresol,
             STR.makehgrid,
+            STR.makesolomosaic,
             STR.sfcclimogen,
             STR.shave,
         ]
