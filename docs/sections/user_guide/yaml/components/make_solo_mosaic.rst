@@ -10,18 +10,36 @@ Documentation for the UFS Utils ``make_solo_mosaic`` program is :ufs-utils:`here
 Here is a prototype UW YAML ``make_solo_mosaic:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/global_equiv_resol.yaml
+.. literalinclude:: ../../../../shared/make_solo_mosaic.yaml
 
 UW YAML for the ``make_solo_mosaic:`` Block
 -------------------------------------------
+
+
+config:
+^^^^^^^
+
+Describes the required parameters to run a ``make_solo_mosaic`` configuration.
+
+
+dir:
+^^^^
+
+The path to the directory that contains the tile grid files.
+
 
 execution:
 ^^^^^^^^^^
 
 See :ref:`here <execution_yaml>` for details.
 
+num_tiles:
+^^^^^^^^^^
+
+Number of tiles in the mosaic.
+
 
 run_dir:
 ^^^^^^^^
 
-The path to the directory where ``make_solo_mosaic`` will find its namelist and write its outputs.
+The path to the run directory.

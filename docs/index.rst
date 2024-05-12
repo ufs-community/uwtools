@@ -131,7 +131,7 @@ make_solo_mosaic
 """"""""""""""""
 
 | **CLI**: ``uw make_solo_mosaic -h``
-| **API**: ``import uwtools.api.drivers.make_solo_mosaic``
+| **API**: ``import uwtools.api.make_solo_mosaic``
 
 sfc_climo_gen
 """""""""""""

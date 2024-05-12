@@ -1,17 +1,17 @@
 make_solo_mosaic:
+  config:
+    num_tiles: 1
+    dir: /path/to/input
+    mosaic_name: ocean_mosaic
+    tile_file: C403_grid.tile7.halo6.nc
+    periodx: 360
+    periody: 360
   execution:
     batchargs:
       cores: 1
       walltime: "00:01:00"
-    executable: /scratch2/BMC/wrfruc/elcarpenter/srw-app/exec/make_solo_mosaic.exe
-  config:
-    num_tiles: 1
-    dir: 
-    mosaic_name: ocean_mosaic
-    tile_file: ocean_hgrid.nc
-    periodx: 360
-    periody: 360
-  run_dir: /scratch2/BMC/wrfruc/elcarpenter/workflow-tools/rundir
+    executable: /path/to/make_solo_mosaic.exe
+  run_dir: /path/to/rundir
 platform:
   account: wrfruc
   scheduler: slurm

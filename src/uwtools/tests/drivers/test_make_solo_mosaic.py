@@ -11,7 +11,7 @@ from pytest import fixture
 from uwtools.drivers import make_solo_mosaic
 from uwtools.scheduler import Slurm
 
-# Driver fixtures
+# Fixtures
 
 
 @fixture
@@ -51,7 +51,7 @@ def driverobj(config_file):
     return make_solo_mosaic.MakeSoloMosaic(config=config_file, batch=True)
 
 
-# Driver tests
+# Tests
 
 
 def test_MakeSoloMosaic(driverobj):

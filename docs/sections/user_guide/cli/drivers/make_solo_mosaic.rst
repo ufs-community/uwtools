@@ -53,6 +53,7 @@ All tasks take the same arguments. For example:
      --quiet, -q
          Print no logging messages
      --verbose, -v
+         Print all logging messages
 
 Examples
 ^^^^^^^^
@@ -84,10 +85,10 @@ Its contents are described in section :ref:`make_solo_mosaic_yaml`.
 
   .. code-block:: text
 
-     uw make_solo_mosaic --help
+     time make_solo_mosaic --num_tiles 1 --dir /path/to/grid/ --tile_file C403_grid.tile7.halo6.nc --periodx 360 --periody 360
 
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 
   .. code-block:: text
 
-     $ uw make_hgrid run --config-file config.yaml --batch --dry-run
+     $ uw make_solo_mosaic run --config-file config.yaml --batch --dry-run
