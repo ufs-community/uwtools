@@ -14,4 +14,6 @@ Drivers
    mpas
    mpas_init
    sfc_climo_gen
+   shave
    ungrib
+   upp

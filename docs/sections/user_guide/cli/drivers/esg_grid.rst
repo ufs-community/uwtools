@@ -6,57 +6,56 @@ The ``uw`` mode for configuring and running the :ufs-utils:`regional_esg_grid<re
 .. code-block:: text
 
    $ uw esg_grid --help
-    usage: uw esg_grid [-h] [--version] TASK ...
+   usage: uw esg_grid [-h] [--version] TASK ...
 
-    Execute esg_grid tasks
+   Execute esg_grid tasks
 
-    Optional arguments:
-      -h, --help
-          Show help and exit
-      --version
-          Show version info and exit
+   Optional arguments:
+     -h, --help
+         Show help and exit
+     --version
+         Show version info and exit
 
-    Positional arguments:
-      TASK
-        namelist_file
-          The namelist file
-        provisioned_run_directory
-          Run directory provisioned with all required content
-        run
-          A run
-        runscript
-          The runscript
-        validate
-          Validate the UW driver config
+   Positional arguments:
+     TASK
+       namelist_file
+         The namelist file
+       provisioned_run_directory
+         Run directory provisioned with all required content
+       run
+         A run
+       runscript
+         The runscript
+       validate
+         Validate the UW driver config
 
 All tasks take the same arguments. For example:
 
 .. code-block:: text
 
-    $ uw esg_grid run --help
-    usage: uw esg_grid run --config-file PATH [-h] [--version] [--batch] [--dry-run] [--graph-file PATH] [--quiet] [--verbose]
+   $ uw esg_grid run --help
+   usage: uw esg_grid run [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
+                          [--graph-file PATH] [--quiet] [--verbose]
 
-    A run
+   A run
 
-    Required arguments:
-      --config-file PATH, -c PATH
-          Path to UW YAML config file
-
-    Optional arguments:
-      -h, --help
-          Show help and exit
-      --version
-          Show version info and exit
-      --batch
-          Submit run to batch scheduler
-      --dry-run
-          Only log info, making no changes
-      --graph-file PATH
-          Path to Graphviz DOT output [experimental]
-      --quiet, -q
-          Print no logging messages
-      --verbose, -v
-          Print all logging messages
+   Optional arguments:
+     -h, --help
+         Show help and exit
+     --version
+         Show version info and exit
+     --config-file PATH, -c PATH
+         Path to UW YAML config file (default: read from stdin)
+     --batch
+         Submit run to batch scheduler
+     --dry-run
+         Only log info, making no changes
+     --graph-file PATH
+         Path to Graphviz DOT output [experimental]
+     --quiet, -q
+         Print no logging messages
+     --verbose, -v
+         Print all logging messages
 
 Examples
 ^^^^^^^^

@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
-from datetime import datetime as dt
+import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
 
@@ -56,11 +56,13 @@ def test_make_execute(execute_kwargs):
     assert ":param task:" in func.__doc__
     with patch.object(api, "_execute", return_value=True) as _execute:
         assert func(**execute_kwargs) is True
-        _execute.assert_called_once_with(driver_class=ConcreteDriver, cycle=None, **execute_kwargs)
+        _execute.assert_called_once_with(
+            driver_class=ConcreteDriver, cycle=None, leadtime=None, **execute_kwargs
+        )
 
 
 def test_make_execute_cycle(execute_kwargs):
-    execute_kwargs["cycle"] = dt.now()
+    execute_kwargs["cycle"] = dt.datetime.now()
     func = api.make_execute(driver_class=ConcreteDriver, with_cycle=True)
     assert func.__name__ == "execute"
     assert func.__doc__ is not None
@@ -69,7 +71,31 @@ def test_make_execute_cycle(execute_kwargs):
     assert ":param task:" in func.__doc__
     with patch.object(api, "_execute", return_value=True) as _execute:
         assert func(**execute_kwargs) is True
+        _execute.assert_called_once_with(
+            driver_class=ConcreteDriver, leadtime=None, **execute_kwargs
+        )
+
+
+def test_make_execute_cycle_leadtime(execute_kwargs):
+    execute_kwargs["cycle"] = dt.datetime.now()
+    execute_kwargs["leadtime"] = dt.timedelta(hours=24)
+    func = api.make_execute(driver_class=ConcreteDriver, with_cycle=True, with_leadtime=True)
+    assert func.__name__ == "execute"
+    assert func.__doc__ is not None
+    assert ":param cycle:" in func.__doc__
+    assert ":param leadtime:" in func.__doc__
+    assert ":param driver_class:" not in func.__doc__
+    assert ":param task:" in func.__doc__
+    with patch.object(api, "_execute", return_value=True) as _execute:
+        assert func(**execute_kwargs) is True
         _execute.assert_called_once_with(driver_class=ConcreteDriver, **execute_kwargs)
+
+
+def test_make_execute_leadtime_no_cycle_error(execute_kwargs):
+    execute_kwargs["leadtime"] = dt.timedelta(hours=24)
+    with raises(UWError) as e:
+        api.make_execute(driver_class=ConcreteDriver, with_leadtime=True)
+    assert "When leadtime is specified, cycle is required" in str(e)
 
 
 def test_make_tasks():
@@ -100,7 +126,8 @@ def test__execute(execute_kwargs, tmp_path):
         **execute_kwargs,
         "driver_class": ConcreteDriver,
         "config": config,
-        "cycle": dt.now(),
+        "cycle": dt.datetime.now(),
+        "leadtime": dt.timedelta(hours=24),
         "graph_file": graph_file,
     }
     assert not graph_file.is_file()

@@ -21,14 +21,6 @@ from uwtools.tests.support import fixture_path
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
-
-
-# Driver fixtures
-
-
-@fixture
 def config(tmp_path):
     return {
         "mpas_init": {
@@ -89,11 +81,16 @@ def config_file(config, tmp_path):
 
 
 @fixture
+def cycle():
+    return dt.datetime(2024, 2, 1, 18)
+
+
+@fixture
 def driverobj(config_file, cycle):
     return mpas_init.MPASInit(config=config_file, cycle=cycle, batch=True)
 
 
-# Driver tests
+# Tests
 
 
 def test_MPASInit(driverobj):

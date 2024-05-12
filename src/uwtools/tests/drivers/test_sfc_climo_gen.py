@@ -13,6 +13,8 @@ from pytest import fixture
 from uwtools.drivers import sfc_climo_gen
 from uwtools.scheduler import Slurm
 
+# Fixtures
+
 config: dict = {
     "sfc_climo_gen": {
         "execution": {
@@ -71,7 +73,7 @@ def driverobj(config_file):
     return sfc_climo_gen.SfcClimoGen(config=config_file, batch=True)
 
 
-# Driver tests
+# Tests
 
 
 def test_SfcClimoGen(driverobj):

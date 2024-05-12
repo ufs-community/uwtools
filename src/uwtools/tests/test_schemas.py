@@ -69,8 +69,18 @@ def sfc_climo_gen_prop():
 
 
 @fixture
+def shave_prop():
+    return partial(schema_validator, "shave", "properties", "shave", "properties")
+
+
+@fixture
 def ungrib_prop():
     return partial(schema_validator, "ungrib", "properties", "ungrib", "properties")
+
+
+@fixture
+def upp_prop():
+    return partial(schema_validator, "upp", "properties", "upp", "properties")
 
 
 # chgres-cube
@@ -774,6 +784,56 @@ def test_schema_sfc_climo_gen_run_dir(sfc_climo_gen_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
+# shave
+
+
+def test_schema_shave():
+    config = {
+        "config": {
+            "input_grid_file": "/path/to/input_grid_file",
+            "nx": 88,
+            "ny": 88,
+            "nh4": 1,
+        },
+        "execution": {"executable": "shave"},
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("shave", "properties", "shave")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("config", "execution", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_shave_config_properties():
+    # Get errors function from schema_validator
+    errors = schema_validator("shave", "properties", "shave", "properties", "config")
+    for key in ("input_grid_file", "nx", "ny", "nh4"):
+        # All config keys are required:
+        assert f"'{key}' is a required property" in errors({})
+        # A string value is ok for input_grid_file:
+        if key == "input_grid_file":
+            assert "not of type 'string'" in str(errors({key: 88}))
+        # nx, ny, and nh4 must be positive integers:
+        elif key in ["nx", "ny", "nh4"]:
+            assert "not of type 'integer'" in str(errors({key: "/path/"}))
+            assert "0 is less than the minimum of 1" in str(errors({key: 0}))
+        # It is an error for the value to be a floating-point value:
+        assert "not of type" in str(errors({key: 3.14}))
+        # It is an error not to supply a value:
+        assert "None is not of type" in str(errors({key: None}))
+
+
+def test_schema_shave_run_dir(shave_prop):
+    errors = shave_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
 # ungrib
 
 
@@ -801,6 +861,137 @@ def test_schema_ungrib():
 
 def test_schema_ungrib_run_dir(ungrib_prop):
     errors = ungrib_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# upp
+
+
+def test_schema_upp():
+    config = {
+        "execution": {
+            "batchargs": {
+                "cores": 1,
+                "walltime": "00:01:00",
+            },
+            "executable": "/path/to/upp.exe",
+        },
+        "namelist": {
+            "base_file": "/path/to/base.nml",
+            "update_values": {
+                "model_inputs": {
+                    "grib": "grib2",
+                },
+                "nampgb": {
+                    "kpo": 3,
+                },
+            },
+        },
+        "run_dir": "/path/to/run",
+    }
+    errors = schema_validator("upp", "properties", "upp")
+    # Basic correctness:
+    assert not errors(config)
+    # Some top-level keys are required:
+    for key in ("execution", "namelist", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Other top-level keys are optional:
+    assert not errors({**config, "files_to_copy": {"dst": "src"}})
+    assert not errors({**config, "files_to_link": {"dst": "src"}})
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_upp_namelist(upp_prop):
+    maxpathlen = 256
+    errors = upp_prop("namelist")
+    # At least one of base_file or update_values is required:
+    assert "is not valid" in errors({})
+    # Just base_file is ok:
+    assert not errors({"base_file": "/path/to/base.nml"})
+    # Just update_values is ok:
+    assert not errors({"update_values": {"model_inputs": {"grib": "grib2"}}})
+    # Both base_file and update_values are ok:
+    assert not errors(
+        {"base_file": "/path/to/base.nml", "update_values": {"model_inputs": {"grib": "grib2"}}}
+    )
+    # Only two specific namelists are allowed:
+    assert "Additional properties are not allowed" in errors(
+        {"udpate_values": {"another_namelist": {}}}
+    )
+    # model_inputs: datestr requires a specific format:
+    assert not errors({"update_values": {"model_inputs": {"datestr": "2024-05-06_12:00:00"}}})
+    assert "does not match" in errors(
+        {"update_values": {"model_inputs": {"datestr": "2024-05-06T12:00:00"}}}
+    )
+    # model_inputs: String pathnames have a max length:
+    for key in ["filename", "filenameflat", "filenameflux"]:
+        assert not errors({"update_values": {"model_inputs": {key: "c" * maxpathlen}}})
+        assert "too long" in errors(
+            {"update_values": {"model_inputs": {key: "c" * (maxpathlen + 1)}}}
+        )
+        assert "not of type 'string'" in errors({"update_values": {"model_inputs": {key: 88}}})
+    # model_inputs: Only one grib value is supported:
+    assert "not one of ['grib2']" in errors({"update_values": {"model_inputs": {"grib": "grib1"}}})
+    assert "not of type 'string'" in errors({"update_values": {"model_inputs": {"grib": 88}}})
+    # model_inputs: Only certain ioform values are supported:
+    assert "not one of ['binarynemsio', 'netcdf']" in errors(
+        {"update_values": {"model_inputs": {"ioform": "jpg"}}}
+    )
+    # model_inputs: Only certain modelname values are supported:
+    assert "not one of ['FV3R', '3DRTMA', 'GFS', 'RAPR', 'NMM']" in errors(
+        {"update_values": {"model_inputs": {"modelname": "foo"}}}
+    )
+    # model_inputs: No other keys are supported:
+    assert "Additional properties are not allowed" in errors(
+        {"update_values": {"model_inputs": {"something": "else"}}}
+    )
+    # nampgb: Some boolean keys are supported:
+    for key in [
+        "aqf_on",
+        "d2d_chem",
+        "gccpp_on",
+        "gocart_on",
+        "gtg_on",
+        "hyb_sigp",
+        "method_blsn",
+        "nasa_on",
+        "popascal",
+        "rdaod",
+        "slrutah_on",
+        "write_ifi_debug_files",
+    ]:
+        assert not errors({"update_values": {"nampgb": {key: True}}})
+        assert "not of type 'boolean'" in errors({"update_values": {"nampgb": {key: 88}}})
+    # nampgb: String pathnames have a max length:
+    for key in ["filenameaer"]:
+        assert not errors({"update_values": {"nampgb": {key: "c" * maxpathlen}}})
+        assert "too long" in errors({"update_values": {"nampgb": {key: "c" * (maxpathlen + 1)}}})
+        assert "not of type 'string'" in errors({"update_values": {"nampgb": {key: 88}}})
+    # nampgb: Some integer keys are supported:
+    for key in ["kpo", "kpv", "kth", "numx"]:
+        assert not errors({"update_values": {"nampgb": {key: 88}}})
+        assert "not of type 'integer'" in errors({"update_values": {"nampgb": {key: True}}})
+    # nampgb: Some arrays of numbers are supported:
+    nitems = 70
+    for key in ["po", "pv", "th"]:
+        assert not errors({"update_values": {"nampgb": {key: [3.14] * nitems}}})
+        assert "too long" in errors({"update_values": {"nampgb": {key: [3.14] * (nitems + 1)}}})
+        assert "not of type 'number'" in errors(
+            {"update_values": {"nampgb": {key: [True] * nitems}}}
+        )
+    # nampgb: Only one vtimeunits value is supported:
+    assert "not one of ['FMIN']" in errors({"update_values": {"nampgb": {"vtimeunits": "FOO"}}})
+    # nampgb: No other keys are supported:
+    assert "Additional properties are not allowed" in errors(
+        {"update_values": {"nampgb": {"something": "else"}}}
+    )
+
+
+def test_schema_upp_run_dir(upp_prop):
+    errors = upp_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)

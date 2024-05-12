@@ -14,4 +14,6 @@ UW YAML for Components
    mpas
    mpas_init
    sfc_climo_gen
+   shave
    ungrib
+   upp
