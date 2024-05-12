@@ -15,29 +15,25 @@ Here is a prototype UW YAML ``make_solo_mosaic:`` block, explained in detail bel
 UW YAML for the ``make_solo_mosaic:`` Block
 -------------------------------------------
 
-
 config:
 ^^^^^^^
 
 Describes the required parameters to run a ``make_solo_mosaic`` configuration.
 
-
 dir:
-^^^^
+""""
 
 The path to the directory that contains the tile grid files.
 
+num_tiles:
+""""""""""
+
+Number of tiles in the mosaic.
 
 execution:
 ^^^^^^^^^^
 
 See :ref:`here <execution_yaml>` for details.
-
-num_tiles:
-^^^^^^^^^^
-
-Number of tiles in the mosaic.
-
 
 run_dir:
 ^^^^^^^^
