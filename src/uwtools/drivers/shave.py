@@ -75,11 +75,3 @@ class Shave(Driver):
         flags = [config.get(key) for key in ["nx", "ny", "nh4", "input_grid_file"]]
         flags.append(output_file)
         return f"{executable} {' '.join(str(flag) for flag in flags)}"
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s" % (self._driver_name, suffix)

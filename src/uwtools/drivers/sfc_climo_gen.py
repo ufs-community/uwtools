@@ -80,11 +80,3 @@ class SfcClimoGen(Driver):
         Returns the name of this driver.
         """
         return STR.sfcclimogen
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s" % (self._driver_name, suffix)

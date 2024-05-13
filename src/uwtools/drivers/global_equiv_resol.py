@@ -81,11 +81,3 @@ class GlobalEquivResol(Driver):
         executable = self._driver_config["execution"]["executable"]
         input_file_path = self._driver_config["input_grid_file"]
         return f"{executable} {input_file_path}"
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s" % (self._driver_name, suffix)

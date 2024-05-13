@@ -77,11 +77,3 @@ class MakeHgrid(Driver):
             else:
                 flags.append("--%s %s" % (k, v))
         return f"{executable} " + " ".join(flags)
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s" % (self._driver_name, suffix)
