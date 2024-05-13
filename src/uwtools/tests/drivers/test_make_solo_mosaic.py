@@ -66,10 +66,7 @@ def test_MakeSoloMosaic_dry_run(config_file):
 
 
 def test_MakeSoloMosaic_provisioned_run_directory(driverobj):
-    with patch.multiple(
-        driverobj,
-        runscript=D,
-    ) as mocks:
+    with patch.multiple(driverobj, runscript=D) as mocks:
         driverobj.provisioned_run_directory()
     for m in mocks:
         mocks[m].assert_called_once_with()
