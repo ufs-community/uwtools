@@ -28,15 +28,15 @@ boundary_conditions:
 Describes the boundary condition files needed for the forecast. These will be the output from the ``init_atmosphere`` executable, which may be run using the ``mpas_init`` UW driver. Please see its documentation :ref:`here <mpas_init_yaml>`.
 
   **interval_hours:**
-  
+
   Frequency interval of the given files, in integer hours.
-  
+
   **offset:**
-  
+
   How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
-  
+
   **path:**
-  
+
 An absolute path to the MPAS-ready files to be used for initial and lateral boundary conditions input. The names of the files are specified in the MPAS ``streams.atmosphere`` XML file, and may be specified in the ``streams: values:`` block of the driver YAML.
 
 length:
@@ -79,9 +79,9 @@ streams:
 ^^^^^^^^
 
   **path:**
-  
+
   The path to the base ``streams.atmosphere`` file that comes from the MPAS build.
-  
+
   **values:**
-  
+
   The set of key-value pairs that will render the appropriate XML entries in the streams input file.

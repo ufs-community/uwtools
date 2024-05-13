@@ -26,15 +26,15 @@ gfs_files:
 Describes the GRIB-formatted files to be processed by ``ungrib``.
 
   **forecast_length:**
-  
+
   The length of the forecast in integer hours.
-  
+
   **offset:**
-  
+
   How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
-  
+
   **interval_hours:**
-  
+
   Frequency interval of the given files, in integer hours.
 
   **path:**
