@@ -620,6 +620,26 @@ def test_schema_make_solo_mosaic():
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
 
 
+def test_schema_make_solo_mosaic_config():
+    # Get errors function from schema_validator
+    errors = schema_validator(
+        "make-solo-mosaic", "properties", "make_solo_mosaic", "properties", "config"
+    )
+    for key in ("dir", "num_tiles"):
+        # All config keys are required:
+        assert f"'{key}' is a required property" in errors({})
+        # A string value is ok for dir:
+        if key == "dir":
+            assert "not of type 'string'" in str(errors({key: 88}))
+        # num_tiles must be an integer:
+        else:
+            assert "not of type 'integer'" in str(errors({key: "/path/"}))
+        # It is an error for the value to be a floating-point value:
+        assert "not of type" in str(errors({key: 3.14}))
+        # It is an error not to supply a value:
+        assert "None is not of type" in str(errors({key: None}))
+
+
 def test_schema_make_solo_mosaic_run_dir(make_solo_mosaic_prop):
     errors = make_solo_mosaic_prop("run_dir")
     # Must be a string:
