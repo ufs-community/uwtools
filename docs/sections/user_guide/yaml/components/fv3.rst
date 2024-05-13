@@ -50,20 +50,17 @@ lateral_boundary_conditions:
 
 Describes how the lateral boundary conditions have been prepared for a limited-area configuration of the FV3 forecast. Required when ``domain`` is ``regional``.
 
-interval_hours:
-"""""""""""""""
-
-How frequently the lateral boundary conditions will be used in the FV3 forecast, in integer hours.
-
-offset:
-"""""""
-
-How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
-
-path:
-"""""
-
-An absolute-path template to the lateral boundary condition files prepared for the forecast. The Python ``int`` variable ``forecast_hour`` will be interpolated into, e.g., ``/path/to/srw.t00z.gfs_bndy.tile7.f{forecast_hour:03d}.nc``. Note that this is a Python string template rather than a Jinja2 template.
+  **interval_hours:**
+  
+  How frequently the lateral boundary conditions will be used in the FV3 forecast, in integer hours.
+  
+  **offset:**
+  
+  How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
+  
+  **path:**
+  
+  An absolute-path template to the lateral boundary condition files prepared for the forecast. The Python ``int`` variable ``forecast_hour`` will be interpolated into, e.g., ``/path/to/srw.t00z.gfs_bndy.tile7.f{forecast_hour:03d}.nc``. Note that this is a Python string template rather than a Jinja2 template.
 
 length:
 ^^^^^^^

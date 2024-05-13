@@ -23,25 +23,21 @@ config:
 
 Describes the required parameters to run a ``shave`` configuration.
 
-input_grid_file:
-""""""""""""""""
-
-Name of the grid file with extra points to be shaved.
-
-nh4:
-""""
-
-The number of halo rows/columns.
-
-nx:
-"""
-
-The i/x dimensions of the compute domain (not including halo).
-
-ny:
-"""
-
-The j/y dimensions of the compute domain (not including halo)
+  **input_grid_file:**
+  
+  Name of the grid file with extra points to be shaved.
+  
+  **nh4:**
+  
+  The number of halo rows/columns.
+  
+  **nx:**
+  
+  The i/x dimensions of the compute domain (not including halo).
+  
+  **ny:**
+  
+  The j/y dimensions of the compute domain (not including halo)
 
 run_dir:
 ^^^^^^^^

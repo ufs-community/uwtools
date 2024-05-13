@@ -27,17 +27,17 @@ files_to_copy:
 See :ref:`this page <files_yaml>` for details.
 
 files_to_link:
-""""""""""""""
-
+^^^^^^^^^^^^^^
+  
 Identical to ``files_to_copy:`` except that symbolic links will be created in the run directory instead of copies.
-
+  
 namelist_file:
-""""""""""""""
-
+^^^^^^^^^^^^^^
+  
 Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details).
-
+  
 The following namelists and variables can be customized:
-
+  
 .. list-table::
    :widths: 10 95
    :header-rows: 1
