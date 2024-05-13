@@ -108,6 +108,13 @@ def test_Driver_cycle_leadtime_error(config):
     assert "When leadtime is specified, cycle is required" in str(e)
 
 
+@pytest.mark.parametrize("val", (True, False))
+def test_Driver_dry_run(config, val):
+    with patch.object(driver, "dryrun") as dryrun:
+        ConcreteDriver(config=config, dry_run=val)
+        dryrun.assert_called_once_with(enable=val)
+
+
 # Tests for workflow methods
 
 
