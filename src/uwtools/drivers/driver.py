@@ -33,7 +33,7 @@ class Driver(ABC):
         dry_run: bool = False,
         batch: bool = False,
         cycle: Optional[datetime] = None,
-        key_path: bool = False,
+        key_path: Optional[List[str]] = None,
     ) -> None:
         """
         A component driver.
@@ -51,6 +51,9 @@ class Driver(ABC):
         self._config.dereference(
             context={**({"cycle": cycle} if cycle else {}), **self._config.data}
         )
+        key_path = key_path or []
+        for key in self._key_path:
+            self._config = self._config[key]
         self._validate()
 
     # Workflow tasks
