@@ -168,4 +168,4 @@ class MPAS(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
+        return self._taskname_with_cycle(self._cycle, suffix)

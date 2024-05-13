@@ -245,6 +245,14 @@ class Driver(ABC):
         """
         return "%s %s" % (self._driver_name, suffix)
 
+    def _taskname_with_cycle(self, cycle: datetime, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s %s" % (cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
+
     def _validate(self) -> None:
         """
         Perform all necessary schema validation.
