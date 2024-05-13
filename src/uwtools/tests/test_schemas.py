@@ -64,6 +64,13 @@ def make_hgrid_prop():
 
 
 @fixture
+def make_solo_mosaic_prop():
+    return partial(
+        schema_validator, "make-solo-mosaic", "properties", "make_solo_mosaic", "properties"
+    )
+
+
+@fixture
 def sfc_climo_gen_prop():
     return partial(schema_validator, "sfc-climo-gen", "properties", "sfc_climo_gen", "properties")
 
@@ -589,6 +596,49 @@ def test_schema_make_hgrid_grid_type():
 
 def test_schema_make_hgrid_run_dir(make_hgrid_prop):
     errors = make_hgrid_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# make_solo_mosaic
+
+
+def test_schema_make_solo_mosaic():
+    config = {
+        "config": {"dir": "path/to/dir", "num_tiles": 1},
+        "execution": {"executable": "make_solo_mosaic"},
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("make-solo-mosaic", "properties", "make_solo_mosaic")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("config", "execution", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_make_solo_mosaic_config(make_solo_mosaic_prop):
+    errors = make_solo_mosaic_prop("config")
+    for key in ("dir", "num_tiles"):
+        # All config keys are required:
+        assert f"'{key}' is a required property" in errors({})
+        # A string value is ok for dir:
+        if key == "dir":
+            assert "not of type 'string'" in str(errors({key: 88}))
+        # num_tiles must be an integer:
+        else:
+            assert "not of type 'integer'" in str(errors({key: "/path/"}))
+        # It is an error for the value to be a floating-point value:
+        assert "not of type" in str(errors({key: 3.14}))
+        # It is an error not to supply a value:
+        assert "None is not of type" in str(errors({key: None}))
+
+
+def test_schema_make_solo_mosaic_run_dir(make_solo_mosaic_prop):
+    errors = make_solo_mosaic_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
