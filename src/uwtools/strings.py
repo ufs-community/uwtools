@@ -89,6 +89,7 @@ class STR:
     leadtime: str = "leadtime"
     link: str = "link"
     makehgrid: str = "make_hgrid"
+    makesolomosaic: str = "make_solo_mosaic"
     mode: str = "mode"
     model: str = "model"
     mpas: str = "mpas"
