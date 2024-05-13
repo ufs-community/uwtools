@@ -4,27 +4,31 @@
       "additionalProperties": false,
       "properties": {
         "config": {
-          "additionalProperties": true,
-          "anyOf": [
-            {
-              "required": [
-                "dir"
-              ]
-            },
-            {
-              "required": [
-                "num_tiles"
-              ]
-            }
-          ],
+          "additionalProperties": false,
           "properties": {
             "dir": {
               "type": "string"
             },
+            "mosaic_name": {
+              "type": "integer"
+            },
             "num_tiles": {
               "type": "integer"
+            },
+            "periodx": {
+              "type": "integer"
+            },
+            "periody": {
+              "type": "integer"
+            },
+            "tile_name": {
+              "type": "string"
             }
           },
+          "required": [
+            "dir",
+            "num_tiles"
+          ],
           "type": "object"
         },
         "execution": {
