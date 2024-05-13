@@ -13,5 +13,5 @@ make_solo_mosaic:
     executable: /path/to/make_solo_mosaic.exe
   run_dir: /path/to/rundir
 platform:
-  account: wrfruc
+  account: me
   scheduler: slurm
