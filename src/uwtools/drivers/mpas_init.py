@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
-from iotaa import asset, dryrun, task, tasks
+from iotaa import asset, task, tasks
 
 from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
@@ -37,8 +37,6 @@ class MPASInit(Driver):
         :param batch: Run component via the batch system?
         """
         super().__init__(config=config, cycle=cycle, dry_run=dry_run, batch=batch)
-        if self._dry_run:
-            dryrun()
         self._cycle = cycle
 
     # Workflow tasks

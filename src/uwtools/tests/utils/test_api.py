@@ -19,7 +19,7 @@ def execute_kwargs():
         "task": "atask",
         "config": "/some/config",
         "batch": True,
-        "dry_run": True,
+        "dry_run": False,
         "graph_file": "/path/to/g.dot",
         "stdin_ok": True,
     }

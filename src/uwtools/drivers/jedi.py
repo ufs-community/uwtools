@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from iotaa import asset, dryrun, refs, run, task, tasks
+from iotaa import asset, refs, run, task, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
@@ -36,8 +36,6 @@ class JEDI(Driver):
         :param batch: Run component via the batch system?
         """
         super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle)
-        if self._dry_run:
-            dryrun()
         self._cycle = cycle
 
     # Workflow tasks

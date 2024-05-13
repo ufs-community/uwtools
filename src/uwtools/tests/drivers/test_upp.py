@@ -86,15 +86,6 @@ def test_UPP(driverobj):
     assert isinstance(driverobj, upp.UPP)
 
 
-def test_UPP_dry_run(config_file, cycle, leadtime):
-    with patch.object(upp, "dryrun") as dryrun:
-        driverobj = upp.UPP(
-            config=config_file, cycle=cycle, leadtime=leadtime, batch=True, dry_run=True
-        )
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
-
-
 def test_UPP_files_copied(driverobj):
     for _, src in driverobj._driver_config["files_to_copy"].items():
         Path(src).touch()

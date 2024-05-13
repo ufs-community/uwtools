@@ -5,7 +5,7 @@ A driver for sfc_climo_gen.
 from pathlib import Path
 from typing import Optional
 
-from iotaa import asset, dryrun, task, tasks
+from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
@@ -27,8 +27,6 @@ class SfcClimoGen(Driver):
         :param batch: Run component via the batch system?
         """
         super().__init__(config=config, dry_run=dry_run, batch=batch)
-        if self._dry_run:
-            dryrun()
 
     # Workflow tasks
 

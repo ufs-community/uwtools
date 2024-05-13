@@ -87,7 +87,7 @@ def config(tmp_path):
 def driverobj(config):
     return ConcreteDriver(
         config=config,
-        dry_run=True,
+        dry_run=False,
         batch=True,
         cycle=dt.datetime(2024, 3, 22, 18),
         leadtime=dt.timedelta(hours=24),
@@ -99,7 +99,6 @@ def driverobj(config):
 
 def test_Driver(driverobj):
     assert Path(driverobj._driver_config["base_file"]).name == "base.yaml"
-    assert driverobj._dry_run is True
     assert driverobj._batch is True
 
 

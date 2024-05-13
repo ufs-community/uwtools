@@ -46,7 +46,7 @@ def test_api_execute(module):
     kwbase = {
         "batch": True,
         "config": "/some/config",
-        "dry_run": True,
+        "dry_run": False,
         "graph_file": "/some/g.dot",
         "stdin_ok": True,
         "task": "foo",

@@ -56,7 +56,7 @@ def test_realize():
         "supplemental_configs": ["path3"],
         "values_needed": True,
         "total": True,
-        "dry_run": True,
+        "dry_run": False,
     }
     with patch.object(config, "_realize") as _realize:
         config.realize(**kwargs)
@@ -76,7 +76,7 @@ def test_realize_to_dict():
         "input_format": "fmt1",
         "supplemental_configs": ["path3"],
         "values_needed": True,
-        "dry_run": True,
+        "dry_run": False,
         "stdin_ok": False,
     }
     with patch.object(config, "_realize") as _realize:

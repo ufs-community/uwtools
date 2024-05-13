@@ -103,13 +103,6 @@ def test_MPAS_boundary_files(driverobj, cycle):
     assert all(link.is_symlink() for link in links)
 
 
-def test_MPAS_dry_run(config_file, cycle):
-    with patch.object(mpas, "dryrun") as dryrun:
-        driverobj = mpas.MPAS(config=config_file, cycle=cycle, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
-
-
 @pytest.mark.parametrize(
     "key,task,test",
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],

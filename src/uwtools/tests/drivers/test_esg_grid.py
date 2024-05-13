@@ -70,13 +70,6 @@ def test_ESGGrid(driverobj):
     assert isinstance(driverobj, esg_grid.ESGGrid)
 
 
-def test_ESGGrid_dry_run(config_file):
-    with patch.object(esg_grid, "dryrun") as dryrun:
-        driverobj = esg_grid.ESGGrid(config=config_file, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
-
-
 def test_ESGGrid_namelist_file(driverobj):
     dst = driverobj._rundir / "regional_grid.nml"
     assert not dst.is_file()

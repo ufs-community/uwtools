@@ -11,7 +11,7 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Type
 
-from iotaa import asset, external, task, tasks
+from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
@@ -44,8 +44,8 @@ class Driver(ABC):
         :param cycle: The cycle.
         :param leadtime: The leadtime.
         """
+        dryrun(enable=dry_run)
         self._config = YAMLConfig(config=config)
-        self._dry_run = dry_run
         self._batch = batch
         if leadtime and not cycle:
             raise UWError("When leadtime is specified, cycle is required")

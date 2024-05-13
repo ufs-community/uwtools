@@ -68,13 +68,6 @@ def test_Ungrib(driverobj):
     assert isinstance(driverobj, ungrib.Ungrib)
 
 
-def test_Ungrib_dry_run(config_file, cycle):
-    with patch.object(ungrib, "dryrun") as dryrun:
-        driverobj = ungrib.Ungrib(config=config_file, cycle=cycle, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
-
-
 def test_Ungrib__gribfile(driverobj):
     src = driverobj._rundir / "GRIBFILE.AAA.in"
     src.touch()

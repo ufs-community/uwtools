@@ -56,15 +56,6 @@ def test_GlobalEquivResol(driverobj):
     assert isinstance(driverobj, global_equiv_resol.GlobalEquivResol)
 
 
-def test_GlobalEquivResol_dry_run(config_file):
-    with patch.object(global_equiv_resol, "dryrun") as dryrun:
-        driverobj = global_equiv_resol.GlobalEquivResol(
-            config=config_file, batch=True, dry_run=True
-        )
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
-
-
 def test_GlobalEquivResol_input_file(driverobj):
     path = Path(driverobj._driver_config["input_grid_file"])
     assert not driverobj.input_file().ready()
