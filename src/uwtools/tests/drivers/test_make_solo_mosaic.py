@@ -2,7 +2,6 @@
 """
 make_solo_mosaic driver tests.
 """
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import yaml
@@ -66,10 +65,9 @@ def test_MakeSoloMosaic_dry_run(config_file):
 
 
 def test_MakeSoloMosaic_provisioned_run_directory(driverobj):
-    with patch.multiple(driverobj, runscript=D) as mocks:
+    with patch.object(driverobj, "runscript") as runscript:
         driverobj.provisioned_run_directory()
-    for m in mocks:
-        mocks[m].assert_called_once_with()
+        runscript.assert_called_once_with()
 
 
 def test_MakeSoloMosaic__runcmd(driverobj):
