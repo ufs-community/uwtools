@@ -93,7 +93,7 @@ def test_tasks_symlink_simple(tmp_path):
 
 def test_tasks_symlink_directory_hierarchy(tmp_path):
     target = tmp_path / "target"
-    link = tmp_path / "foo" / "bar" /  "link"
+    link = tmp_path / "foo" / "bar" / "link"
     target.touch()
     assert not link.is_file()
     tasks.symlink(target=target, linkname=link)
