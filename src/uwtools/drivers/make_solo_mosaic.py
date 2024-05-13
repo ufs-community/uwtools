@@ -64,11 +64,8 @@ class MakeSoloMosaic(Driver):
         Returns the full command-line component invocation.
         """
         executable = self._driver_config["execution"]["executable"]
-        config = self._driver_config["config"]
-        flags = []
-        for k, v in config.items():
-            flags.append("--%s %s" % (k, v))
-        return f"{executable} " + " ".join(flags)
+        flags = " ".join(f"--{k} {v}" for k, v in self._driver_config["config"].items())
+        return f"{executable} {flags}"
 
     def _taskname(self, suffix: str) -> str:
         """
