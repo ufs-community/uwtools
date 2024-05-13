@@ -25,10 +25,30 @@ dir:
 
 The path to the directory that contains the tile grid files.
 
+mosaic_name:
+""""""""""""
+
+The optional name of the output file.
+
 num_tiles:
 """"""""""
 
 Number of tiles in the mosaic.
+
+periodx:
+""""""""
+
+The period in the x-direction of the mosaic.
+
+periody:
+""""""""
+
+The period in the y-direction of the mosaic.
+
+tile_file:
+""""""""""
+
+The grid file name of all of the tiles in the mosaic.
 
 execution:
 ^^^^^^^^^^
