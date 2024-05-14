@@ -1,0 +1,50 @@
+{
+  "properties": {
+    "make_solo_mosaic": {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": false,
+          "properties": {
+            "dir": {
+              "type": "string"
+            },
+            "mosaic_name": {
+              "type": "integer"
+            },
+            "num_tiles": {
+              "type": "integer"
+            },
+            "periodx": {
+              "type": "integer"
+            },
+            "periody": {
+              "type": "integer"
+            },
+            "tile_name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "dir",
+            "num_tiles"
+          ],
+          "type": "object"
+        },
+        "execution": {
+          "$ref": "urn:uwtools:execution-serial"
+        },
+        "run_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "config",
+        "run_dir"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

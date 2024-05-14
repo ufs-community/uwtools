@@ -127,6 +127,12 @@ make_hgrid
 | **CLI**: ``uw make_hgrid -h``
 | **API**: ``import uwtools.api.make_hgrid``
 
+make_solo_mosaic
+""""""""""""""""
+
+| **CLI**: ``uw make_solo_mosaic -h``
+| **API**: ``import uwtools.api.make_solo_mosaic``
+
 sfc_climo_gen
 """""""""""""
 
