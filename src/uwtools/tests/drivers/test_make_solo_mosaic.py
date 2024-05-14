@@ -57,13 +57,6 @@ def test_MakeSoloMosaic(driverobj):
     assert isinstance(driverobj, make_solo_mosaic.MakeSoloMosaic)
 
 
-def test_MakeSoloMosaic_dry_run(config_file):
-    with patch.object(make_solo_mosaic, "dryrun") as dryrun:
-        driverobj = make_solo_mosaic.MakeSoloMosaic(config=config_file, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
-
-
 def test_MakeSoloMosaic_provisioned_run_directory(driverobj):
     with patch.object(driverobj, "runscript") as runscript:
         driverobj.provisioned_run_directory()

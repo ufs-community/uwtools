@@ -167,6 +167,13 @@ def test_dereference_str_variable_rendered_str():
     assert jinja2.dereference(val=val, context={"greeting": "hello"}) == "hello"
 
 
+def test_register_filters_env():
+    s = "hello {{ 'RECIPIENT' | env }}"
+    template = jinja2._register_filters(Environment(undefined=DebugUndefined)).from_string(s)
+    with patch.dict(os.environ, {"RECIPIENT": "world"}, clear=True):
+        assert template.render() == "hello world"
+
+
 @pytest.mark.parametrize("key", ["foo", "bar"])
 def test_register_filters_path_join(key):
     s = "{{ ['dir', %s] | path_join }}" % key

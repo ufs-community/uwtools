@@ -20,35 +20,29 @@ config:
 
 Describes the required parameters to run a ``make_solo_mosaic`` configuration.
 
-dir:
-""""
+  **dir:**
 
-The path to the directory that contains the tile grid files.
+  The path to the directory that contains the tile grid files.
 
-mosaic_name:
-""""""""""""
+  **mosaic_name:**
 
-The optional name of the output file.
+  The optional name of the output file.
 
-num_tiles:
-""""""""""
+  **num_tiles:**
 
-Number of tiles in the mosaic.
+  Number of tiles in the mosaic.
 
-periodx:
-""""""""
+  **periodx:**
 
-The period in the x-direction of the mosaic.
+  The period in the x-direction of the mosaic.
 
-periody:
-""""""""
+  **periody:**
 
-The period in the y-direction of the mosaic.
+  The period in the y-direction of the mosaic.
 
-tile_file:
-""""""""""
+  **tile_file:**
 
-The grid file name of all of the tiles in the mosaic.
+  The grid file name of all of the tiles in the mosaic.
 
 execution:
 ^^^^^^^^^^
