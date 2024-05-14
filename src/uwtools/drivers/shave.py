@@ -5,7 +5,7 @@ A driver for shave.
 from pathlib import Path
 from typing import Optional
 
-from iotaa import asset, dryrun, task, tasks
+from iotaa import asset, task, tasks
 
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
@@ -30,8 +30,6 @@ class Shave(Driver):
         :param batch: Run component via the batch system?
         """
         super().__init__(config=config, dry_run=dry_run, batch=batch)
-        if self._dry_run:
-            dryrun()
 
     # Workflow tasks
 
@@ -77,11 +75,3 @@ class Shave(Driver):
         flags = [config.get(key) for key in ["nx", "ny", "nh4", "input_grid_file"]]
         flags.append(output_file)
         return f"{executable} {' '.join(str(flag) for flag in flags)}"
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s" % (self._driver_name, suffix)

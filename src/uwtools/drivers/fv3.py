@@ -7,7 +7,7 @@ from pathlib import Path
 from shutil import copy
 from typing import Optional
 
-from iotaa import asset, dryrun, task, tasks
+from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
@@ -38,8 +38,6 @@ class FV3(Driver):
         :param batch: Run component via the batch system?
         """
         super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle)
-        if self._dry_run:
-            dryrun()
         self._cycle = cycle
 
     # Workflow tasks
@@ -209,4 +207,4 @@ class FV3(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
+        return self._taskname_with_cycle(self._cycle, suffix)

@@ -62,13 +62,6 @@ def test_Shave(driverobj):
     assert isinstance(driverobj, shave.Shave)
 
 
-def test_Shave_dry_run(config_file):
-    with patch.object(shave, "dryrun") as dryrun:
-        driverobj = shave.Shave(config=config_file, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
-
-
 def test_Shave_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,

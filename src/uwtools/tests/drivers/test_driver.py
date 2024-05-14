@@ -87,7 +87,7 @@ def config(tmp_path):
 def driverobj(config):
     return ConcreteDriver(
         config=config,
-        dry_run=True,
+        dry_run=False,
         batch=True,
         cycle=dt.datetime(2024, 3, 22, 18),
         leadtime=dt.timedelta(hours=24),
@@ -99,7 +99,6 @@ def driverobj(config):
 
 def test_Driver(driverobj):
     assert Path(driverobj._driver_config["base_file"]).name == "base.yaml"
-    assert driverobj._dry_run is True
     assert driverobj._batch is True
 
 
@@ -107,6 +106,13 @@ def test_Driver_cycle_leadtime_error(config):
     with raises(UWError) as e:
         ConcreteDriver(config=config, leadtime=dt.timedelta(hours=24))
     assert "When leadtime is specified, cycle is required" in str(e)
+
+
+@pytest.mark.parametrize("val", (True, False))
+def test_Driver_dry_run(config, val):
+    with patch.object(driver, "dryrun") as dryrun:
+        ConcreteDriver(config=config, dry_run=val)
+        dryrun.assert_called_once_with(enable=val)
 
 
 # Tests for workflow methods

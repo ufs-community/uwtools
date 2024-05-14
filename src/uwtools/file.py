@@ -36,8 +36,7 @@ class FileStager:
         :param dry_run: Do not copy files
         :raises: UWConfigError if config fails validation.
         """
-        if dry_run:
-            dryrun()
+        dryrun(enable=dry_run)
         self._target_dir = target_dir
         self._config = YAMLConfig(config=config)
         self._keys = keys or []

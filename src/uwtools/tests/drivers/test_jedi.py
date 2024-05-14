@@ -85,13 +85,6 @@ def test_JEDI(driverobj):
     assert isinstance(driverobj, jedi.JEDI)
 
 
-def test_JEDI_dry_run(config_file, cycle):
-    with patch.object(jedi, "dryrun") as dryrun:
-        driverobj = jedi.JEDI(config=config_file, cycle=cycle, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
-
-
 def test_JEDI_files_copied(driverobj):
     with patch.object(jedi, "filecopy") as filecopy:
         driverobj._driver_config["run_dir"] = "/path/to/run"

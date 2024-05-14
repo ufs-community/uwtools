@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
-from iotaa import asset, dryrun, task, tasks
+from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
@@ -43,8 +43,6 @@ class UPP(Driver):
             cycle=cycle,
             leadtime=leadtime,
         )
-        if self._dry_run:
-            dryrun()
         self._cycle = cycle
         self._leadtime = leadtime
 
@@ -155,8 +153,4 @@ class UPP(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return "%s %s %s" % (
-            (self._cycle + self._leadtime).strftime("%Y%m%d %H:%M:%S"),
-            self._driver_name,
-            suffix,
-        )
+        return self._taskname_with_cycle_and_leadtime(self._cycle, self._leadtime, suffix)

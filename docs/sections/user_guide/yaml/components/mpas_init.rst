@@ -27,23 +27,19 @@ boundary_conditions:
 
 Describes the boundary condition files needed for the forecast. These will most likely be the output of the ``ungrib`` tool.
 
-interval_hours:
-"""""""""""""""
+  **interval_hours:**
 
-Frequency interval of the given files, in integer hours.
+  Frequency interval of the given files, in integer hours.
 
-length:
-"""""""
+  **length:**
 
-The length of the forecast in integer hours.
+  The length of the forecast in integer hours.
 
-offset:
-"""""""
+  **offset:**
 
-How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
+  How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
 
-path:
-"""""
+  **path:**
 
 An absolute path to the output of the ``ungrib`` tool that will be used to prepare MPAS-ready initial and lateral boundary conditions. The names of the files are specified in the ``streams.init_atmosphere`` XML file, and may be specified in the ``streams: values:`` block of the driver YAML.
 
@@ -81,12 +77,10 @@ The path to the run directory.
 streams:
 ^^^^^^^^
 
-path:
-"""""
+  **path:**
 
-The path to the base ``streams.init_atmosphere`` file that comes from the MPAS build.
+  The path to the base ``streams.init_atmosphere`` file that comes from the MPAS build.
 
-values:
-"""""""
+  **values:**
 
-The set of key-value pairs that will render the appropriate XML entries in the streams input file.
+  The set of key-value pairs that will render the appropriate XML entries in the streams input file.
