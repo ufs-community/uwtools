@@ -6,7 +6,7 @@
         "execution": {
           "$ref": "urn:uwtools:execution"
         },
-        "atm": {
+        "atm_in": {
           "additionalProperties": false,
           "anyOf": [
             {
@@ -115,7 +115,132 @@
           },
           "type": "object"
         },
-        "ocn": {
+        "atm_streams": {
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ],
+              "required": [
+                "streams"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "streams": {
+              "patternProperties": {
+                "stream0[1-9]": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": [
+                      "array",
+                      "boolean",
+                      "number",
+                      "string"
+                    ]
+                  },
+                  "properties": {
+                    "taxmode": {
+                      "enum": [
+                        "cycle",
+                        "extend",
+                        "limit"
+                      ]
+                    }
+                  },
+                  "properties": {
+                    "mapalgo": {
+                      "enum": [
+                        "bilinear",
+                        "redist",
+                        "nn",
+                        "consf",
+                        "consd",
+                        "none"
+                      ]
+                    }
+                  },
+                  "properties": {
+                    "tinterpalgo": {
+                      "enum": [
+                        "lower",
+                        "upper",
+                        "nearest",
+                        "linear",
+                        "coszen"
+                      ]
+                    }
+                  },
+                  "properties": {
+                    "readmode": {
+                      "enum": [
+                        "single"
+                      ]
+                    }
+                  },
+                  "dtlimit": {
+                    "type": "integer"
+                  },
+                  "stream_offset": {
+                    "type": "integer"
+                  },
+                  "yearFirst": {
+                    "type": "integer"
+                  },
+                  "yearLast": {
+                    "type": "integer"
+                  },
+                  "yearAlign": {
+                    "type": "integer"
+                  },
+                  "stream_vectors": {
+                    "items": [
+                      { "type": "string" }
+                    ]
+                  },
+                  "stream_mesh_file": {
+                    "type": "string"
+                  },
+                  "stream_lev_dimname": {
+                    "type": "string"
+                  },
+                  "stream_data_files": {
+                    "items": [
+                      { "type": "string" }
+                    ]
+                  },
+                  "stream_data_variables": {
+                    "items": [
+                      { "type": "string" }
+                    ]
+                  },
+                  "required": [
+                    "taxmode",
+                    "mapalgo",
+                    "tinterpalgo",
+                    "readmode",
+                    "dtlimit",
+                    "stream_offset",
+                    "yearFirst",
+                    "yearLast",
+                    "yearAlign",
+                    "stream_vectors",
+                    "stream_mesh_file",
+                    "stream_lev_dimname",
+                    "stream_data_files",
+                    "stream_data_variables"
+                  ]
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "ocn_in": {
           "additionalProperties": false,
           "anyOf": [
             {
@@ -135,7 +260,7 @@
             },
             "update_values": {
               "properties": {
-                "datm_nml": {
+                "docn_nml": {
                   "additionalProperties": {
                     "type": [
                       "array",

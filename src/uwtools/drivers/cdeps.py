@@ -9,12 +9,12 @@ from typing import Optional
 
 from iotaa import asset, dryrun, task, tasks
 
+from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.strings import STR
-from uwtools.utils.tasks import filecopy, symlink
+from uwtools.utils.tasks import file, filecopy, symlink
 
 
 class CDEPS(Driver):
@@ -55,7 +55,7 @@ class CDEPS(Driver):
         yield asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
-        self._model_namelist_file("atm", path)
+        self._model_namelist_file("atm_in", path)
 
     @task
     def ocn(self):
@@ -68,13 +68,26 @@ class CDEPS(Driver):
         yield asset(path, path.is_file)
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
-        self._model_namelist_file("ocn", path)
+        self._model_namelist_file("ocn_in", path)
 
     def _model_namelist_file(self, group: str, path: str):
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=self._driver_config[group],
             path=path,
+        )
+
+    @task
+    def atm_stream(self):
+        fn = "datm.streams"
+        yield self._taskname(f"namelist file {fn}")
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        yield file(path=Path(self._driver_config["atm_streams"]["base_file"]))
+        render(
+            input_file=Path(self._driver_config["atm_streams"]["base_file"]),
+            output_file=path,
+            values_src=self._driver_config["atm_streams"],
         )
 
     # Private helper methods
