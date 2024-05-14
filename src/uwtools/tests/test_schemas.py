@@ -620,11 +620,8 @@ def test_schema_make_solo_mosaic():
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
 
 
-def test_schema_make_solo_mosaic_config():
-    # Get errors function from schema_validator
-    errors = schema_validator(
-        "make-solo-mosaic", "properties", "make_solo_mosaic", "properties", "config"
-    )
+def test_schema_make_solo_mosaic_config(make_solo_mosaic_prop):
+    errors = make_solo_mosaic_prop("config")
     for key in ("dir", "num_tiles"):
         # All config keys are required:
         assert f"'{key}' is a required property" in errors({})
