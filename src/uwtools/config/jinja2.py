@@ -310,7 +310,7 @@ def _register_filters(env: Environment) -> Environment:
             raise UndefinedError()
         return os.path.join(*path_components)
 
-    filters = dict(path_join=path_join)
+    filters = dict(env=lambda var: os.environ[var], path_join=path_join)
     env.filters.update(filters)
     return env
 
