@@ -27,6 +27,7 @@ from uwtools.strings import FORMAT, STR
 from uwtools.utils.file import get_file_format, resource_path
 
 FORMATS = FORMAT.extensions()
+LEADTIME_DESC = "HH[:MM[:SS]]"
 TITLE_REQ_ARG = "Required arguments"
 
 Args = Dict[str, Any]
@@ -69,10 +70,13 @@ def main() -> None:
                 STR.globalequivresol,
                 STR.jedi,
                 STR.makehgrid,
+                STR.makesolomosaic,
                 STR.mpas,
                 STR.mpasinit,
                 STR.sfcclimogen,
+                STR.shave,
                 STR.ungrib,
+                STR.upp,
             ]
         }
         modes = {**tools, **drivers}
@@ -547,9 +551,11 @@ def _add_arg_config_file(group: Group, required: bool = False) -> None:
 
 
 def _add_arg_cycle(group: Group) -> None:
+    offset = dt.timedelta(hours=(dt.datetime.now(dt.UTC).hour // 6) * 6)
+    cycle = dt.datetime.combine(dt.date.today(), dt.datetime.min.time()) + offset
     group.add_argument(
         _switch(STR.cycle),
-        help="The cycle in ISO8601 format",
+        help="The cycle in ISO8601 format (e.g. %s)" % cycle.strftime("%Y-%m-%dT%H"),
         required=True,
         type=dt.datetime.fromisoformat,
     )
@@ -648,6 +654,15 @@ def _add_arg_keys(group: Group) -> None:
         help="YAML key leading to file dst/src block",
         metavar="KEY",
         nargs="*",
+    )
+
+
+def _add_arg_leadtime(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.leadtime),
+        help=f"The leadtime as {LEADTIME_DESC}",
+        required=True,
+        type=_timedelta_from_str,
     )
 
 
@@ -822,22 +837,24 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
 def _add_subparser_for_driver(
     name: str,
     subparsers: Subparsers,
-    with_cycle: bool,
     key_path: Optional[bool] = False,
+    with_cycle: Optional[bool] = False,
+    with_leadtime: Optional[bool] = False,
 ) -> ModeChecks:
     """
     Subparser for a driver mode.
 
     :param name: Name of the driver whose subparser to configure.
     :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param with_cycle: Does this driver require a cycle?
     :param key_path: Does this driver require a sub-section of YAML to be output?
+    :param with_cycle: Does this driver require a cycle?
+    :param with_leadtime: Does this driver require a leadtime?
     """
     parser = _add_subparser(subparsers, name, "Execute %s tasks" % name)
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
-        task: _add_subparser_for_driver_task(subparsers, task, helpmsg, with_cycle, key_path)
+        task: _add_subparser_for_driver_task(subparsers, task, helpmsg, key_path, with_cycle, with_leadtime)
         for task, helpmsg in import_module("uwtools.api.%s" % name).tasks().items()
     }
 
@@ -846,8 +863,9 @@ def _add_subparser_for_driver_task(
     subparsers: Subparsers,
     task: str,
     helpmsg: str,
-    with_cycle: bool,
     key_path: Optional[bool] = False,
+    with_cycle: Optional[bool] = False,
+    with_leadtime: Optional[bool] = False,
 ) -> ActionChecks:
     """
     Subparser for a driver action.
@@ -855,15 +873,18 @@ def _add_subparser_for_driver_task(
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     :param task: The task to add a subparser for.
     :param helpmsg: Help message for task.
-    :param with_cycle: Does this driver require a cycle?
     :param key_path: Does this driver require a sub-section of YAML to be output?
+    :param with_cycle: Does this driver require a cycle?
+    :param with_leadtime: Does this driver require a leadtime?
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    if with_cycle:
-        _add_arg_cycle(required)
     if key_path:
         _add_arg_key_path(required)
+    if with_cycle:
+        _add_arg_cycle(required)
+    if with_leadtime:
+        _add_arg_leadtime(required)
     optional = _basic_setup(parser)
     _add_arg_config_file(group=optional)
     _add_arg_batch(optional)
@@ -955,10 +976,12 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
         "graph_file": args[STR.graphfile],
         "stdin_ok": True,
     }
-    if cycle := args.get(STR.cycle):
-        kwargs[STR.cycle] = cycle
     if key_path := args.get(STR.keypath):
         kwargs[STR.keypath] = key_path
+    if cycle := args.get(STR.cycle):
+        kwargs[STR.cycle] = cycle
+    if leadtime := args.get(STR.leadtime):
+        kwargs[STR.leadtime] = leadtime
     return execute(**kwargs)
 
 
@@ -989,21 +1012,36 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         STR.template: partial(_add_subparser_template, subparsers),
     }
     drivers = {
-        x: partial(_add_subparser_for_driver, x, subparsers, with_cycle)
-        for x, with_cycle in [
-            (STR.chgrescube, True),
-            (STR.esggrid, False),
-            (STR.fv3, True),
-            (STR.globalequivresol, False),
-            (STR.jedi, True),
-            (STR.makehgrid, False),
-            (STR.mpas, True),
-            (STR.mpasinit, True),
-            (STR.sfcclimogen, False),
-            (STR.ungrib, True),
+        component: partial(_add_subparser_for_driver, component, subparsers)
+        for component in [
+            STR.esggrid,
+            STR.globalequivresol,
+            STR.makehgrid,
+            STR.makesolomosaic,
+            STR.sfcclimogen,
+            STR.shave,
         ]
     }
-    modes = {**tools, **drivers}
+    drivers_with_cycle = {
+        component: partial(_add_subparser_for_driver, component, subparsers, with_cycle=True)
+        for component in [
+            STR.chgrescube,
+            STR.fv3,
+            STR.jedi,
+            STR.mpas,
+            STR.mpasinit,
+            STR.ungrib,
+        ]
+    }
+    drivers_with_cycle_and_leadtime = {
+        component: partial(
+            _add_subparser_for_driver, component, subparsers, with_cycle=True, with_leadtime=True
+        )
+        for component in [
+            STR.upp,
+        ]
+    }
+    modes = {**tools, **drivers, **drivers_with_cycle, **drivers_with_cycle_and_leadtime}
     checks = {k: modes[k]() for k in sorted(modes.keys())}
     return vars(parser.parse_args(raw_args)), checks
 
@@ -1016,6 +1054,22 @@ def _switch(arg: str) -> str:
     :return: The long-form switch.
     """
     return "--%s" % arg.replace("_", "-")
+
+
+def _timedelta_from_str(tds: str) -> dt.timedelta:
+    """
+    Return a timedelta parsed from a leadtime string.
+
+    :param tds: The timedelta string to parse.
+    """
+    fmts = ("%H:%M:%S", "%H:%M", "%H")
+    for fmt in fmts:
+        try:
+            t = dt.datetime.strptime(tds, fmt)
+            return dt.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
+        except ValueError:
+            pass
+    _abort(f"Specify leadtime as {LEADTIME_DESC}")
 
 
 def _version() -> str:

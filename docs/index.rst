@@ -110,49 +110,67 @@ Drivers for UFS
 To prepare a complete forecast, drivers would typically be run in the order shown here (along with additional drivers still in development).
 
 esg_grid
-"""""""""""
+""""""""
 
 | **CLI**: ``uw esg_grid -h``
-| **API**: ``import uwtools.api.drivers.esg_grid``
+| **API**: ``import uwtools.api.esg_grid``
 
 global_equiv_resol
 """"""""""""""""""
 
 | **CLI**: ``uw global_equiv_resol -h``
-| **API**: ``import uwtools.api.drivers.global_equiv_resol``
+| **API**: ``import uwtools.api.global_equiv_resol``
 
 make_hgrid
 """"""""""
 
 | **CLI**: ``uw make_hgrid -h``
-| **API**: ``import uwtools.api.drivers.make_hgrid``
+| **API**: ``import uwtools.api.make_hgrid``
+
+make_solo_mosaic
+""""""""""""""""
+
+| **CLI**: ``uw make_solo_mosaic -h``
+| **API**: ``import uwtools.api.make_solo_mosaic``
 
 sfc_climo_gen
 """""""""""""
 
 | **CLI**: ``uw sfc_climo_gen -h``
-| **API**: ``import uwtools.api.drivers.sfc_climo_gen``
+| **API**: ``import uwtools.api.sfc_climo_gen``
+
+shave
+"""""
+
+| **CLI**: ``uw shave -h``
+| **API**: ``import uwtools.api.shave``
 
 chgres_cube
 """""""""""
 
 | **CLI**: ``uw chgres_cube -h``
-| **API**: ``import uwtools.api.drivers.chgres_cube``
+| **API**: ``import uwtools.api.chgres_cube``
 
 FV3
 """
 
 | **CLI**: ``uw fv3 -h``
-| **API**: ``import uwtools.api.drivers.fv3``
+| **API**: ``import uwtools.api.fv3``
+
+UPP
+"""
+
+| **CLI**: ``uw upp -h``
+| **API**: ``import uwtools.api.upp``
+
+Driver for JEDI
+^^^^^^^^^^^^^^^
 
 JEDI
 """"
 
 | **CLI**: ``uw jedi -h``
-| **API**: ``import uwtools.api.drivers.jedi``
-
-
-
+| **API**: ``import uwtools.api.jedi``
 
 Drivers for MPAS
 ^^^^^^^^^^^^^^^^
@@ -163,22 +181,19 @@ ungrib
 """"""
 
 | **CLI**: ``uw ungrib -h``
-| **API**: ``import uwtools.api.drivers.ungrib``
-
+| **API**: ``import uwtools.api.ungrib``
 
 mpas_init
 """""""""
 
 | **CLI**: ``uw mpas_init -h``
-| **API**: ``import uwtools.api.drivers.mpas_init``
+| **API**: ``import uwtools.api.mpas_init``
 
 mpas
 """"
 
 | **CLI**: ``uw mpas -h``
-| **API**: ``import uwtools.api.drivers.mpas``
-
-
+| **API**: ``import uwtools.api.mpas``
 
 ------------------
 

@@ -11,7 +11,7 @@ from pytest import fixture
 from uwtools.drivers import make_hgrid
 from uwtools.scheduler import Slurm
 
-# Driver fixtures
+# Fixtures
 
 
 @fixture
@@ -54,18 +54,11 @@ def driverobj(config_file):
     return make_hgrid.MakeHgrid(config=config_file, batch=True)
 
 
-# Driver tests
+# Tests
 
 
 def test_MakeHgrid(driverobj):
     assert isinstance(driverobj, make_hgrid.MakeHgrid)
-
-
-def test_MakeHgrid_dry_run(config_file):
-    with patch.object(make_hgrid, "dryrun") as dryrun:
-        driverobj = make_hgrid.MakeHgrid(config=config_file, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
 
 
 def test_MakeHgrid_provisioned_run_directory(driverobj):

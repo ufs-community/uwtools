@@ -12,7 +12,7 @@ from pytest import fixture
 from uwtools.drivers import esg_grid
 from uwtools.scheduler import Slurm
 
-# Driver fixtures
+# Fixtures
 
 
 @fixture
@@ -63,18 +63,11 @@ def driverobj(config_file):
     return esg_grid.ESGGrid(config=config_file, batch=True, key_path=False)
 
 
-# Driver tests
+# Tests
 
 
 def test_ESGGrid(driverobj):
     assert isinstance(driverobj, esg_grid.ESGGrid)
-
-
-def test_ESGGrid_dry_run(config_file):
-    with patch.object(esg_grid, "dryrun") as dryrun:
-        driverobj = esg_grid.ESGGrid(config=config_file, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
 
 
 def test_ESGGrid_namelist_file(driverobj):

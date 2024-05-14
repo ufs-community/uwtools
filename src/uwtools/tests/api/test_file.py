@@ -14,7 +14,7 @@ def kwargs():
         "target_dir": "/target/dir",
         "config": "/config/file",
         "keys": ["a", "b"],
-        "dry_run": True,
+        "dry_run": False,
     }
 
 

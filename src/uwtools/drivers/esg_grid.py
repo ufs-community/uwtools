@@ -5,7 +5,7 @@ A driver for esg_grid.
 from pathlib import Path
 from typing import List, Optional
 
-from iotaa import asset, dryrun, task, tasks
+from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
@@ -33,8 +33,6 @@ class ESGGrid(Driver):
         :param key_path: Does this driver require a sub-section of YAML to be output?
         """
         super().__init__(config=config, dry_run=dry_run, batch=batch, key_path=key_path)
-        if self._dry_run:
-            dryrun()
 
     # Workflow tasks
 
@@ -84,11 +82,3 @@ class ESGGrid(Driver):
         Returns the name of this driver.
         """
         return STR.esggrid
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s" % (self._driver_name, suffix)

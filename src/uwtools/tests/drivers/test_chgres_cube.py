@@ -80,20 +80,11 @@ def driverobj(config_file, cycle):
     return chgres_cube.ChgresCube(config=config_file, cycle=cycle, batch=True, key_path=False)
 
 
-# Driver tests
+# Tests
 
 
 def test_ChgresCube(driverobj):
     assert isinstance(driverobj, chgres_cube.ChgresCube)
-
-
-def test_ChgresCube_dry_run(config_file, cycle):
-    with patch.object(chgres_cube, "dryrun") as dryrun:
-        driverobj = chgres_cube.ChgresCube(
-            config=config_file, cycle=cycle, batch=True, dry_run=True, key_path=False
-        )
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
 
 
 def test_ChgresCube_namelist_file(driverobj):

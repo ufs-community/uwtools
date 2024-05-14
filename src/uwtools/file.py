@@ -6,7 +6,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import List, Optional, Union
 
-from iotaa import tasks
+from iotaa import dryrun, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
@@ -36,10 +36,10 @@ class FileStager:
         :param dry_run: Do not copy files
         :raises: UWConfigError if config fails validation.
         """
+        dryrun(enable=dry_run)
         self._target_dir = target_dir
         self._config = YAMLConfig(config=config)
         self._keys = keys or []
-        self._dry_run = dry_run
         self._config.dereference()
         self._validate()
 
@@ -55,7 +55,7 @@ class FileStager:
         for key in self._keys:
             nav.append(key)
             if key not in cfg:
-                raise UWConfigError("Config navigation %s failed" % " -> ".join(nav))
+                raise UWConfigError("Failed following YAML key(s): %s" % " -> ".join(nav))
             log.debug("Following config key '%s'", key)
             cfg = cfg[key]
         if not isinstance(cfg, dict):

@@ -5,48 +5,46 @@ ungrib
 
 Structured YAML to run the WRF preprocessing component ``ungrib`` is validated by JSON Schema and requires the ``ungrib:`` block, described below. If ``ungrib`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
+.. include:: ../../../../shared/injected_cycle.rst
+
 Here is a prototype UW YAML ``ungrib:`` block, explained in detail below:
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/ungrib.yaml
 
 UW YAML for the ``ungrib:`` Block
-----------------------------------------
+---------------------------------
 
 execution:
 ^^^^^^^^^^
 
-See :ref:`here <execution_yaml>` for details.
+See :ref:`this page <execution_yaml>` for details.
 
 gfs_files:
 ^^^^^^^^^^
 
 Describes the GRIB-formatted files to be processed by ``ungrib``.
 
-forecast_length:
-""""""""""""""""
+  **forecast_length:**
 
-The length of the forecast in integer hours.
+  The length of the forecast in integer hours.
 
-offset:
-"""""""
+  **offset:**
 
-How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
+  How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
 
-interval_hours:
-"""""""""""""""
+  **interval_hours:**
 
-Frequency interval of the given files, in integer hours.
+  Frequency interval of the given files, in integer hours.
 
-path:
-"""""
+  **path:**
 
-An absolute-path template to the GRIB-formatted files to be processed by ``ungrib``. The Python ``int`` variables ``cycle_hour`` and ``forecast_hour`` will be interpolated into, e.g., ``/path/to/gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}``. Note that this is a Python string template rather than a Jinja2 template.
+  An absolute-path template to the GRIB-formatted files to be processed by ``ungrib``. The Python ``int`` variables ``cycle_hour`` and ``forecast_hour`` will be interpolated into, e.g., ``/path/to/gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}``. Note that this is a Python string template rather than a Jinja2 template.
 
 run_dir:
 ^^^^^^^^
 
-The path to the directory where ``ungrib`` will find its namelist and write its outputs.
+The path to the run directory.
 
 vtable:
 ^^^^^^^

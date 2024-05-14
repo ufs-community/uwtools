@@ -21,14 +21,6 @@ from uwtools.tests.support import fixture_path
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
-
-
-# Driver fixtures
-
-
-@fixture
 def config(tmp_path):
     return {
         "mpas_init": {
@@ -89,11 +81,16 @@ def config_file(config, tmp_path):
 
 
 @fixture
+def cycle():
+    return dt.datetime(2024, 2, 1, 18)
+
+
+@fixture
 def driverobj(config_file, cycle):
     return mpas_init.MPASInit(config=config_file, cycle=cycle, batch=True)
 
 
-# Driver tests
+# Tests
 
 
 def test_MPASInit(driverobj):
@@ -113,13 +110,6 @@ def test_MPASInit_boundary_files(cycle, driverobj):
         (input_path / f"FILE:{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H')}").touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
-
-
-def test_MPASInit_dry_run(config_file, cycle):
-    with patch.object(mpas_init, "dryrun") as dryrun:
-        driverobj = mpas_init.MPASInit(config=config_file, cycle=cycle, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
 
 
 @pytest.mark.parametrize(

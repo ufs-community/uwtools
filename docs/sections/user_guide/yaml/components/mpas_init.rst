@@ -5,6 +5,8 @@ mpas_init
 
 Structured YAML to run MPAS Init is validated by JSON Schema and requires the ``mpas_init:`` block, described below. If ``mpas_init`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
+.. include:: ../../../../shared/injected_cycle.rst
+
 Here is a prototype UW YAML ``mpas_init:`` block, explained in detail below:
 
 .. highlight:: yaml
@@ -18,31 +20,26 @@ UW YAML for the ``mpas_init:`` Block
 execution:
 ^^^^^^^^^^
 
-See :ref:`here <execution_yaml>` for details.
+See :ref:`this page <execution_yaml>` for details.
 
 boundary_conditions:
 ^^^^^^^^^^^^^^^^^^^^
 
-Describes the boundary condition files needed for the forecast. These will most likely be the output
-of the ``ungrib`` tool.
+Describes the boundary condition files needed for the forecast. These will most likely be the output of the ``ungrib`` tool.
 
-interval_hours:
-"""""""""""""""
+  **interval_hours:**
 
-Frequency interval of the given files, in integer hours.
+  Frequency interval of the given files, in integer hours.
 
-length:
-"""""""
+  **length:**
 
-The length of the forecast in integer hours.
+  The length of the forecast in integer hours.
 
-offset:
-"""""""
+  **offset:**
 
-How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
+  How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
 
-path:
-"""""
+  **path:**
 
 An absolute path to the output of the ``ungrib`` tool that will be used to prepare MPAS-ready initial and lateral boundary conditions. The names of the files are specified in the ``streams.init_atmosphere`` XML file, and may be specified in the ``streams: values:`` block of the driver YAML.
 
@@ -75,18 +72,15 @@ Identical to ``files_to_copy:`` except that symbolic links will be created in th
 run_dir:
 ^^^^^^^^
 
-The path to the directory where ``mpas_init`` will find its namelist, streams file, and necessary data
-files and write its outputs.
+The path to the run directory.
 
 streams:
 ^^^^^^^^
 
-path:
-"""""
+  **path:**
 
-The path to the base ``streams.init_atmosphere`` file that comes from the MPAS build.
+  The path to the base ``streams.init_atmosphere`` file that comes from the MPAS build.
 
-values:
-"""""""
+  **values:**
 
-The set of key-value pairs that will render the appropriate XML entries in the streams input file.
+  The set of key-value pairs that will render the appropriate XML entries in the streams input file.

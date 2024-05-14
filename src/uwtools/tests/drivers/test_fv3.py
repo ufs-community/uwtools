@@ -84,7 +84,7 @@ def truetask():
     return true
 
 
-# Driver tests
+# Tests
 
 
 def test_FV3(driverobj):
@@ -114,13 +114,6 @@ def test_FV3_diag_table(driverobj):
 def test_FV3_diag_table_warn(caplog, driverobj):
     driverobj.diag_table()
     assert logged(caplog, "No 'diag_table' defined in config")
-
-
-def test_FV3_dry_run(config_file, cycle):
-    with patch.object(fv3, "dryrun") as dryrun:
-        driverobj = fv3.FV3(config=config_file, cycle=cycle, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
 
 
 def test_FV3_field_table(driverobj):

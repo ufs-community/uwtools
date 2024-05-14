@@ -11,9 +11,12 @@ API
    jedi
    logging
    make_hgrid
+   make_solo_mosaic
    mpas
    mpas_init
    rocoto
    sfc_climo_gen
+   shave
    template
    ungrib
+   upp

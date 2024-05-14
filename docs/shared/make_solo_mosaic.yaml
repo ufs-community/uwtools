@@ -1,0 +1,17 @@
+make_solo_mosaic:
+  config:
+    dir: /path/to/input
+    num_tiles: 1
+    mosaic_name: ocean_mosaic
+    periodx: 360
+    periody: 360
+    tile_file: C403_grid.tile7.halo6.nc
+  execution:
+    batchargs:
+      cores: 1
+      walltime: "00:01:00"
+    executable: /path/to/make_solo_mosaic.exe
+  run_dir: /path/to/rundir
+platform:
+  account: me
+  scheduler: slurm

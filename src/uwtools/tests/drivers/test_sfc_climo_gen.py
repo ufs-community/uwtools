@@ -13,6 +13,8 @@ from pytest import fixture
 from uwtools.drivers import sfc_climo_gen
 from uwtools.scheduler import Slurm
 
+# Fixtures
+
 config: dict = {
     "sfc_climo_gen": {
         "execution": {
@@ -71,18 +73,11 @@ def driverobj(config_file):
     return sfc_climo_gen.SfcClimoGen(config=config_file, batch=True)
 
 
-# Driver tests
+# Tests
 
 
 def test_SfcClimoGen(driverobj):
     assert isinstance(driverobj, sfc_climo_gen.SfcClimoGen)
-
-
-def test_SfcClimoGen_dry_run(config_file):
-    with patch.object(sfc_climo_gen, "dryrun") as dryrun:
-        driverobj = sfc_climo_gen.SfcClimoGen(config=config_file, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
 
 
 def test_SfcClimoGen_namelist_file(driverobj):

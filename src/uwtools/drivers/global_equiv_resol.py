@@ -5,7 +5,7 @@ A driver for the global_equiv_resol component.
 from pathlib import Path
 from typing import Optional
 
-from iotaa import asset, dryrun, external, task, tasks
+from iotaa import asset, external, task, tasks
 
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
@@ -30,8 +30,6 @@ class GlobalEquivResol(Driver):
         :param batch: Run component via the batch system?
         """
         super().__init__(config=config, dry_run=dry_run, batch=batch)
-        if self._dry_run:
-            dryrun()
 
     # Workflow tasks
 
@@ -83,11 +81,3 @@ class GlobalEquivResol(Driver):
         executable = self._driver_config["execution"]["executable"]
         input_file_path = self._driver_config["input_grid_file"]
         return f"{executable} {input_file_path}"
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s" % (self._driver_name, suffix)

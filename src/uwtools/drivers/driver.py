@@ -6,17 +6,17 @@ import os
 import re
 import stat
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Type
 
-from iotaa import asset, external, task, tasks
+from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
-from uwtools.exceptions import UWConfigError
+from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute
@@ -34,6 +34,7 @@ class Driver(ABC):
         batch: bool = False,
         cycle: Optional[datetime] = None,
         key_path: Optional[List[str]] = None,
+        leadtime: Optional[timedelta] = None,
     ) -> None:
         """
         A component driver.
@@ -43,13 +44,19 @@ class Driver(ABC):
         :param batch: Run component via the batch system?
         :param cycle: The cycle.
         :param key_path: Does this driver require a sub-section of YAML to be output?
+        :param leadtime: The leadtime.
         """
+        dryrun(enable=dry_run)
         self._config = YAMLConfig(config=config)
-        self._dry_run = dry_run
         self._batch = batch
-        self._config.dereference()
+        if leadtime and not cycle:
+            raise UWError("When leadtime is specified, cycle is required")
         self._config.dereference(
-            context={**({"cycle": cycle} if cycle else {}), **self._config.data}
+            context={
+                **({"cycle": cycle} if cycle else {}),
+                **({"leadtime": leadtime} if leadtime else {}),
+                **self._config.data,
+            }
         )
         key_path = key_path or []
         for key in key_path:
@@ -147,14 +154,6 @@ class Driver(ABC):
         Returns the name of this driver.
         """
 
-    @abstractmethod
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-
     @property
     def _resources(self) -> Dict[str, Any]:
         """
@@ -168,6 +167,7 @@ class Driver(ABC):
             "account": platform["account"],
             "rundir": self._rundir,
             "scheduler": platform["scheduler"],
+            "stdout": "%s.out" % self._runscript_path.name,  # config may override
             **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
 
@@ -184,6 +184,13 @@ class Driver(ABC):
             execution["executable"],  # component executable name
         ]
         return " ".join(filter(None, components))
+
+    @property
+    def _rundir(self) -> Path:
+        """
+        The path to the component's run directory.
+        """
+        return Path(self._driver_config["run_dir"])
 
     def _runscript(
         self,
@@ -222,13 +229,6 @@ class Driver(ABC):
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())
 
     @property
-    def _rundir(self) -> Path:
-        """
-        The path to the component's run directory.
-        """
-        return Path(self._driver_config["run_dir"])
-
-    @property
     def _runscript_path(self) -> Path:
         """
         Returns the path to the runscript.
@@ -241,6 +241,36 @@ class Driver(ABC):
         Returns the job scheduler specified by the platform information.
         """
         return JobScheduler.get_scheduler(self._resources)
+
+    def _taskname(self, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s" % (self._driver_name, suffix)
+
+    def _taskname_with_cycle(self, cycle: datetime, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s %s" % (cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
+
+    def _taskname_with_cycle_and_leadtime(
+        self, cycle: datetime, leadtime: timedelta, suffix: str
+    ) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s %s" % (
+            (cycle + leadtime).strftime("%Y%m%d %H:%M:%S"),
+            self._driver_name,
+            suffix,
+        )
 
     def _validate(self) -> None:
         """
@@ -259,7 +289,7 @@ class Driver(ABC):
             envvars=envvars,
             execution=[
                 "time %s" % self._runcmd,
-                "test $? -eq 0 && touch %s/done.%s" % (self._rundir, self._driver_name),
+                "test $? -eq 0 && touch %s.done" % self._runscript_path.name,
             ],
             scheduler=self._scheduler if self._batch else None,
         )
