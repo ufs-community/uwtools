@@ -71,7 +71,7 @@ def cycle():
 
 @fixture
 def driverobj(config_file, cycle):
-    return fv3.FV3(config=config_file, cycle=cycle, batch=True)
+    return fv3.FV3(config=config_file, cycle=cycle, batch=True, key_path=False)
 
 
 @fixture

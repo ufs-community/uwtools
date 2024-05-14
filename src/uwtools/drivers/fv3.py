@@ -5,7 +5,7 @@ A driver for the FV3 model.
 from datetime import datetime
 from pathlib import Path
 from shutil import copy
-from typing import Optional
+from typing import List, Optional
 
 from iotaa import asset, dryrun, task, tasks
 
@@ -28,6 +28,7 @@ class FV3(Driver):
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
+        key_path: Optional[List[str]] = None,
     ):
         """
         The driver.
@@ -36,8 +37,9 @@ class FV3(Driver):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
+        :param key_path: Does this driver require a sub-section of YAML to be output?
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle)
+        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path)
         if self._dry_run:
             dryrun()
         self._cycle = cycle

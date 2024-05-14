@@ -52,7 +52,7 @@ class Driver(ABC):
             context={**({"cycle": cycle} if cycle else {}), **self._config.data}
         )
         key_path = key_path or []
-        for key in self.key_path:
+        for key in key_path:
             self._config = self._config[key]
         self._validate()
 
