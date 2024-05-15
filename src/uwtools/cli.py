@@ -551,7 +551,7 @@ def _add_arg_config_file(group: Group, required: bool = False) -> None:
 
 
 def _add_arg_cycle(group: Group) -> None:
-    offset = dt.timedelta(hours=(dt.datetime.now(dt.UTC).hour // 6) * 6)
+    offset = dt.timedelta(hours=(dt.datetime.now(dt.timezone.utc).hour // 6) * 6)
     cycle = dt.datetime.combine(dt.date.today(), dt.datetime.min.time()) + offset
     group.add_argument(
         _switch(STR.cycle),
