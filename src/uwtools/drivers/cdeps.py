@@ -44,10 +44,32 @@ class CDEPS(Driver):
 
     # Workflow tasks
 
-    @task
+    @tasks
     def atm(self):
         """
-        The atm namelist file.
+        It creates data atmosphere configuration with all required content.
+        """
+        yield self._taskname("data atmosphere configuration")
+        yield [
+            self.atm_nml(),
+            self.atm_stream(),
+        ]
+
+    @tasks
+    def ocn(self):
+        """
+        It creates data ocean configuration with all required content.
+        """
+        yield self._taskname("data atmosphere configuration")
+        yield [
+            self.ocn_nml(),
+            self.ocn_stream(),
+        ]
+
+    @task
+    def atm_nml(self):
+        """
+        It creates data atmosphere Fortran namelist file (datm_in).
         """
         fn = "datm_in"
         yield self._taskname(f"namelist file {fn}")
@@ -58,9 +80,9 @@ class CDEPS(Driver):
         self._model_namelist_file("atm_in", path)
 
     @task
-    def ocn(self):
+    def ocn_nml(self):
         """
-        The ocn namelist file.
+        It creates data ocean Fortran namelist file (docn_in).
         """
         fn = "docn_in"
         yield self._taskname(f"namelist file {fn}")
@@ -70,6 +92,32 @@ class CDEPS(Driver):
         path.parent.mkdir(parents=True, exist_ok=True)
         self._model_namelist_file("ocn_in", path)
 
+    @task
+    def atm_stream(self):
+        """
+        It creates data atmosphere stream config file (datm.streams).
+        """
+        fn = "datm.streams"
+        yield self._taskname(f"namelist file {fn}")
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        temp_path = self._driver_config["atm_streams"]["base_file"]
+        yield file(path=Path(temp_path))
+        self._model_stream_file("atm_streams", path, temp_path)
+
+    @task
+    def ocn_stream(self):
+        """
+        It creates data ocean stream config file (docn.streams).
+        """
+        fn = "docn.streams"
+        yield self._taskname(f"namelist file {fn}")
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        temp_path = self._driver_config["ocn_streams"]["base_file"]
+        yield file(path=Path(temp_path))
+        self._model_stream_file("ocn_streams", path, temp_path)
+
     def _model_namelist_file(self, group: str, path: str):
         self._create_user_updated_config(
             config_class=NMLConfig,
@@ -77,17 +125,11 @@ class CDEPS(Driver):
             path=path,
         )
 
-    @task
-    def atm_stream(self):
-        fn = "datm.streams"
-        yield self._taskname(f"namelist file {fn}")
-        path = self._rundir / fn
-        yield asset(path, path.is_file)
-        yield file(path=Path(self._driver_config["atm_streams"]["base_file"]))
+    def _model_stream_file(self, group: str, path: str, template: str):
         render(
-            input_file=Path(self._driver_config["atm_streams"]["base_file"]),
+            input_file=Path(template),
             output_file=path,
-            values_src=self._driver_config["atm_streams"],
+            values_src=self._driver_config[group],
         )
 
     # Private helper methods
