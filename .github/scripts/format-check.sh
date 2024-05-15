@@ -1,6 +1,4 @@
-# Actions invokes script with: bash -e <script>
-
-set -a
+set -ae
 
 unformatted() {
   set -x
