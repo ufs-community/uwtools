@@ -75,7 +75,7 @@ def cycle():
 
 @fixture
 def driverobj(config_file, cycle):
-    return jedi.JEDI(config=config_file, cycle=cycle, batch=True)
+    return jedi.JEDI(config=config_file, cycle=cycle, batch=True, key_path=False)
 
 
 # Tests

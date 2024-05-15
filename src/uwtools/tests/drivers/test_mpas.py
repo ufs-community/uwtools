@@ -76,7 +76,7 @@ def cycle():
 
 @fixture
 def driverobj(config_file, cycle):
-    return mpas.MPAS(config=config_file, cycle=cycle, batch=True)
+    return mpas.MPAS(config=config_file, cycle=cycle, batch=True, key_path=False)
 
 
 # Tests

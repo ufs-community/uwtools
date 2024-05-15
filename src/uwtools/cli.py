@@ -854,7 +854,9 @@ def _add_subparser_for_driver(
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
-        task: _add_subparser_for_driver_task(subparsers, task, helpmsg, key_path, with_cycle, with_leadtime)
+        task: _add_subparser_for_driver_task(
+            subparsers, task, helpmsg, key_path, with_cycle, with_leadtime
+        )
         for task, helpmsg in import_module("uwtools.api.%s" % name).tasks().items()
     }
 

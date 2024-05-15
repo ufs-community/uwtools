@@ -117,10 +117,12 @@ def test_Driver_dry_run(config, val):
 
 # Tests for workflow methods
 
-def test_key_path(driverobj): #key_path, driverobj):
+
+def test_key_path(driverobj):  # key_path, driverobj):
     pass
     # assert driverobj._key_path == {"foo": driverobj._config}
     # assert 1 == 0
+
 
 @pytest.mark.parametrize("batch", [True, False])
 def test_Driver_run(batch, driverobj):

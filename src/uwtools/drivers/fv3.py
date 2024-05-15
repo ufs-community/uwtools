@@ -39,7 +39,9 @@ class FV3(Driver):
         :param batch: Run component via the batch system?
         :param key_path: Does this driver require a sub-section of YAML to be output?
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path)
+        super().__init__(
+            config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
+        )
         self._cycle = cycle
 
     # Workflow tasks

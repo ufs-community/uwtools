@@ -47,7 +47,7 @@ def config_file(config, tmp_path):
 
 @fixture
 def driverobj(config_file):
-    return make_solo_mosaic.MakeSoloMosaic(config=config_file, batch=True)
+    return make_solo_mosaic.MakeSoloMosaic(config=config_file, batch=True, key_path=False)
 
 
 # Tests
