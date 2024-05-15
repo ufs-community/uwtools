@@ -660,12 +660,7 @@ def test_schema_make_solo_mosaic_run_dir(make_solo_mosaic_prop):
 def test_schema_mpas():
     config = {
         "execution": {"executable": "atmosphere_model"},
-        "namelist": {
-            "base_file": "path/to/simple.nml",
-            "update_values": {
-                "nhyd_model": {"config_start_time": "12", "config_stop_time": "12"},
-            },
-        },
+        "namelist": {"base_file": "path/to/simple.nml"},
         "run_dir": "path/to/rundir",
         "streams": {"path": "path/to/streams.atmosphere.in", "values": {"world": "user"}},
     }
@@ -774,12 +769,7 @@ def test_schema_mpas_streams(mpas_prop):
 def test_schema_mpas_init():
     config = {
         "execution": {"executable": "mpas_init"},
-        "namelist": {
-            "base_file": "path/to/simple.nml",
-            "update_values": {
-                "nhyd_model": {"config_start_time": "12", "config_stop_time": "12"},
-            },
-        },
+        "namelist": {"base_file": "path/to/simple.nml"},
         "run_dir": "path/to/rundir",
         "streams": {"path": "path/to/streams.atmosphere.in", "values": {"world": "user"}},
     }
