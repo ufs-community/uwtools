@@ -673,12 +673,7 @@ def test_schema_mpas():
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in (
-        "execution",
-        "namelist",
-        "run_dir",
-        "streams",
-    ):
+    for key in ("execution", "namelist", "run_dir", "streams"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -792,12 +787,7 @@ def test_schema_mpas_init():
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in (
-        "execution",
-        "namelist",
-        "run_dir",
-        "streams",
-    ):
+    for key in ("execution", "namelist", "run_dir", "streams"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
