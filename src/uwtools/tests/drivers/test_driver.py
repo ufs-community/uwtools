@@ -90,6 +90,7 @@ def driverobj(config):
         dry_run=False,
         batch=True,
         cycle=dt.datetime(2024, 3, 22, 18),
+        key_path=config,
         leadtime=dt.timedelta(hours=24),
     )
 
@@ -118,10 +119,11 @@ def test_Driver_dry_run(config, val):
 # Tests for workflow methods
 
 
-def test_key_path(driverobj):  # key_path, driverobj):
-    pass
+def test_key_path(driverobj):
+    breakpoint()
+    driver._config = {"foo": driverobj._config}
+    driver._key_path = "foo[.concrete]"
     # assert driverobj._key_path == {"foo": driverobj._config}
-    # assert 1 == 0
 
 
 @pytest.mark.parametrize("batch", [True, False])
