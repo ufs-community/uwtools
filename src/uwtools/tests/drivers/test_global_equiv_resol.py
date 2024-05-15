@@ -46,7 +46,7 @@ def config_file(config, tmp_path):
 
 @fixture
 def driverobj(config_file):
-    return global_equiv_resol.GlobalEquivResol(config=config_file, batch=True, key_path=False)
+    return global_equiv_resol.GlobalEquivResol(config=config_file, batch=True)
 
 
 # Tests

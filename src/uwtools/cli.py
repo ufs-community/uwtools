@@ -638,12 +638,12 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
     )
 
 
-def _add_arg_key_path(group: Group, required: bool = False) -> None:
+def _add_arg_key_path(group: Group):
     group.add_argument(
         _switch(STR.keypath),
         help="Dot-separated path of keys to the sub-section of YAML to be output",
         metavar="KEY[.KEY[.KEY]...]",
-        required=required,
+        required=False,
         type=lambda s: s.split("."),
     )
 
@@ -837,7 +837,7 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
 def _add_subparser_for_driver(
     name: str,
     subparsers: Subparsers,
-    key_path: Optional[bool] = False,
+    key_path: Optional[List[str]] = None,
     with_cycle: Optional[bool] = False,
     with_leadtime: Optional[bool] = False,
 ) -> ModeChecks:
@@ -865,7 +865,7 @@ def _add_subparser_for_driver_task(
     subparsers: Subparsers,
     task: str,
     helpmsg: str,
-    key_path: Optional[bool] = False,
+    key_path: Optional[List[str]] = None,
     with_cycle: Optional[bool] = False,
     with_leadtime: Optional[bool] = False,
 ) -> ActionChecks:
@@ -881,8 +881,6 @@ def _add_subparser_for_driver_task(
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    if key_path:
-        _add_arg_key_path(required)
     if with_cycle:
         _add_arg_cycle(required)
     if with_leadtime:
@@ -892,6 +890,7 @@ def _add_subparser_for_driver_task(
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
+    _add_arg_key_path(optional)
     checks = _add_args_verbosity(optional)
     return checks
 

@@ -60,7 +60,7 @@ def config_file(config, tmp_path):
 
 @fixture
 def driverobj(config_file):
-    return esg_grid.ESGGrid(config=config_file, batch=True, key_path=False)
+    return esg_grid.ESGGrid(config=config_file, batch=True)
 
 
 # Tests

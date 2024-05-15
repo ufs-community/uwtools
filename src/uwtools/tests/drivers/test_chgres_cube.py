@@ -77,7 +77,7 @@ def config_file(tmp_path):
 
 @fixture
 def driverobj(config_file, cycle):
-    return chgres_cube.ChgresCube(config=config_file, cycle=cycle, batch=True, key_path=False)
+    return chgres_cube.ChgresCube(config=config_file, cycle=cycle, batch=True)
 
 
 # Tests
