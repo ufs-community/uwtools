@@ -152,7 +152,6 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_total(optional)
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
-    _add_arg_supplemental_files(optional)
     return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
         partial(_check_file_vs_format, STR.outfile, STR.outfmt),
@@ -214,7 +213,6 @@ def _dispatch_config_realize(args: Args) -> bool:
             output_block=args[STR.outblock],
             output_file=args[STR.outfile],
             output_format=args[STR.outfmt],
-            supplemental_configs=args[STR.suppfiles],
             values_needed=args[STR.valsneeded],
             total=args[STR.total],
             dry_run=args[STR.dryrun],
@@ -716,16 +714,6 @@ def _add_arg_search_path(group: Group) -> None:
     )
 
 
-def _add_arg_supplemental_files(group: Group) -> None:
-    group.add_argument(
-        STR.suppfiles,
-        help="Additional files to supplement primary input",
-        metavar="PATH",
-        nargs="*",
-        type=Path,
-    )
-
-
 def _add_arg_target_dir(group: Group, required: bool) -> None:
     group.add_argument(
         _switch(STR.targetdir),
@@ -741,6 +729,27 @@ def _add_arg_total(group: Group) -> None:
         _switch(STR.total),
         action="store_true",
         help="Require rendering of all Jinja2 variables/expressions",
+    )
+
+
+def _add_arg_update_file(group: Group, required: bool = False) -> None:
+    group.add_argument(
+        _switch(STR.infile),
+        "-i",
+        help="Path to update file (defaults to stdin)",
+        metavar="PATH",
+        required=required,
+        type=Path,
+    )
+
+
+def _add_arg_update_format(group: Group, choices: List[str], required: bool = False) -> None:
+    group.add_argument(
+        _switch(STR.infmt),
+        choices=choices,
+        help="Input format",
+        required=required,
+        type=str,
     )
 
 
