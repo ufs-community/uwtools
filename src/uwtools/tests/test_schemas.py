@@ -758,6 +758,21 @@ def test_schema_mpas_run_dir(mpas_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
+def test_schema_mpas_streams(mpas_prop):
+    config = {"path": "/some/path", "values": {"nml": {"var": "val"}}}
+    errors = mpas_prop("streams")
+    # Basic correctness:
+    assert not errors(config)
+    # All streams items are required:
+    assert "'path' is a required property" in errors(with_del(config, "path"))
+    assert "'values' is a required property" in errors(with_del(config, "values"))
+    # path must be a string:
+    assert "1 is not of type 'string'" in errors(with_set(config, 1, "path"))
+    # values must be an object:
+    assert "1 is not of type 'object'" in errors(with_set(config, -1, "values"))
+    assert "'s' is not of type 'object'" in errors(with_set(config, "s", "values"))
+
+
 # mpas_init
 
 
@@ -854,6 +869,21 @@ def test_schema_mpas_init_run_dir(mpas_init_prop):
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
+
+
+def test_schema_mpas_init_streams(mpas_init_prop):
+    config = {"path": "/some/path", "values": {"nml": {"var": "val"}}}
+    errors = mpas_init_prop("streams")
+    # Basic correctness:
+    assert not errors(config)
+    # All streams items are required:
+    assert "'path' is a required property" in errors(with_del(config, "path"))
+    assert "'values' is a required property" in errors(with_del(config, "values"))
+    # path must be a string:
+    assert "1 is not of type 'string'" in errors(with_set(config, 1, "path"))
+    # values must be an object:
+    assert "1 is not of type 'object'" in errors(with_set(config, -1, "values"))
+    assert "'s' is not of type 'object'" in errors(with_set(config, "s", "values"))
 
 
 # namelist
