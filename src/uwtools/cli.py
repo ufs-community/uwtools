@@ -145,6 +145,8 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_input_format(optional, choices=FORMATS)
+    _add_arg_update_file(optional)
+    _add_arg_update_format(optional, choices=FORMATS)
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=FORMATS)
     _add_arg_output_block(optional)
@@ -734,8 +736,8 @@ def _add_arg_total(group: Group) -> None:
 
 def _add_arg_update_file(group: Group, required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.infile),
-        "-i",
+        _switch(STR.updatefile),
+        "-u",
         help="Path to update file (defaults to stdin)",
         metavar="PATH",
         required=required,
@@ -745,7 +747,7 @@ def _add_arg_update_file(group: Group, required: bool = False) -> None:
 
 def _add_arg_update_format(group: Group, choices: List[str], required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.infmt),
+        _switch(STR.updatefmt),
         choices=choices,
         help="Input format",
         required=required,
