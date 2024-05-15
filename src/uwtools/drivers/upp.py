@@ -4,7 +4,7 @@ A driver for UPP.
 
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from iotaa import asset, task, tasks
 
@@ -26,6 +26,7 @@ class UPP(Driver):
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
+        key_path: Optional[List[str]] = None,
     ):
         """
         The driver.
@@ -35,12 +36,14 @@ class UPP(Driver):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
+        :param key_path: Does this driver require a sub-section of YAML to be output?
         """
         super().__init__(
             config=config,
             dry_run=dry_run,
             batch=batch,
             cycle=cycle,
+            key_path=key_path,
             leadtime=leadtime,
         )
         self._cycle = cycle
