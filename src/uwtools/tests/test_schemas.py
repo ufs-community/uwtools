@@ -234,12 +234,13 @@ def test_execution():
 
 def test_execution_batchargs():
     errors = schema_validator("execution", "properties", "batchargs")
-    # Basic correctness, empty map is ok:
-    assert not errors({})
+    # Basic correctness, only walltime is required:
+    assert "'walltime' is a required property" in errors({})
+    assert not errors({"walltime": "00:05:00"})
     # Managed properties are fine:
-    assert not errors({"queue": "string", "walltime": "string"})
+    assert not errors({"queue": "string", "walltime": "00:05:00"})
     # But so are unknown ones:
-    assert not errors({"--foo": 88})
+    assert not errors({"--foo": 88, "walltime": "00:05:00"})
     # It just has to be a map:
     assert "[] is not of type 'object'" in errors([])
 
