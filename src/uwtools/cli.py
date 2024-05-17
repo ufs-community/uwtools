@@ -837,7 +837,6 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
 def _add_subparser_for_driver(
     name: str,
     subparsers: Subparsers,
-    key_path: Optional[List[str]] = None,
     with_cycle: Optional[bool] = False,
     with_leadtime: Optional[bool] = False,
 ) -> ModeChecks:
@@ -846,7 +845,6 @@ def _add_subparser_for_driver(
 
     :param name: Name of the driver whose subparser to configure.
     :param subparsers: Parent parser's subparsers, to add this subparser to.
-    :param key_path: Does this driver require a sub-section of YAML to be output?
     :param with_cycle: Does this driver require a cycle?
     :param with_leadtime: Does this driver require a leadtime?
     """
@@ -854,9 +852,7 @@ def _add_subparser_for_driver(
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
-        task: _add_subparser_for_driver_task(
-            subparsers, task, helpmsg, key_path, with_cycle, with_leadtime
-        )
+        task: _add_subparser_for_driver_task(subparsers, task, helpmsg, with_cycle, with_leadtime)
         for task, helpmsg in import_module("uwtools.api.%s" % name).tasks().items()
     }
 
@@ -865,7 +861,6 @@ def _add_subparser_for_driver_task(
     subparsers: Subparsers,
     task: str,
     helpmsg: str,
-    key_path: Optional[List[str]] = None,
     with_cycle: Optional[bool] = False,
     with_leadtime: Optional[bool] = False,
 ) -> ActionChecks:
@@ -875,7 +870,6 @@ def _add_subparser_for_driver_task(
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     :param task: The task to add a subparser for.
     :param helpmsg: Help message for task.
-    :param key_path: Does this driver require a sub-section of YAML to be output?
     :param with_cycle: Does this driver require a cycle?
     :param with_leadtime: Does this driver require a leadtime?
     """
@@ -890,7 +884,6 @@ def _add_subparser_for_driver_task(
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
-    _add_arg_key_path(optional)
     checks = _add_args_verbosity(optional)
     return checks
 

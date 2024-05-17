@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 from iotaa import asset, dryrun, external, task, tasks
 
@@ -29,7 +29,7 @@ class Driver(ABC):
 
     def __init__(
         self,
-        config: Optional[Path] = None,
+        config: Optional[Union[dict, Path]],
         dry_run: bool = False,
         batch: bool = False,
         cycle: Optional[datetime] = None,
