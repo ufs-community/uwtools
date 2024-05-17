@@ -115,10 +115,11 @@ def get_yaml_config(
 def realize(
     input_config: Optional[Union[dict, _Config, Path, str]] = None,
     input_format: Optional[str] = None,
-    output_block: Optional[List[Union[str, int]]] = None,
+    update_config: Optional[Union[dict, _Config, Path, str]] = None,
+    update_format: Optional[str] = None,
     output_file: Optional[Union[Path, str]] = None,
     output_format: Optional[str] = None,
-    supplemental_configs: Optional[List[Union[dict, _Config, Path, str]]] = None,
+    output_block: Optional[List[Union[str, int]]] = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -130,14 +131,14 @@ def realize(
     input_config = (
         _YAMLConfig(config=input_config) if isinstance(input_config, dict) else input_config
     )
-    scs = [_str2path(x) for x in supplemental_configs] if supplemental_configs else None
     _realize(
         input_config=_ensure_data_source(input_config, stdin_ok),
         input_format=input_format,
-        output_block=output_block,
+        update_config=_ensure_data_source(update_config, stdin_ok),
+        update_format=update_format,
         output_file=_str2path(output_file),
         output_format=output_format,
-        supplemental_configs=scs,
+        output_block=output_block,
         values_needed=values_needed,
         total=total,
         dry_run=dry_run,
@@ -147,13 +148,14 @@ def realize(
 def realize_to_dict(  # pylint: disable=unused-argument
     input_config: Optional[Union[dict, _Config, Path, str]] = None,
     input_format: Optional[str] = None,
-    supplemental_configs: Optional[List[Union[dict, _Config, Path, str]]] = None,
+    update_config: Optional[Union[dict, _Config, Path, str]] = None,
+    update_format: Optional[str] = None,
     values_needed: bool = False,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> dict:
     """
-    Realize a config to a ``dict``, based on an input config and optional supplemental configs.
+    Realize a config to a ``dict``, based on a base input config and optional update config.
 
     See ``realize()`` for details on arguments, etc.
     """
@@ -203,20 +205,21 @@ Recognized file extensions are: {extensions}
 
 
 realize.__doc__ = """
-Realize a config based on an input config and optional supplemental configs.
+Realize a config based on a base input config and an optional update config.
 
-If no input is specified, ``stdin`` is read. A ``dict`` or ``Config`` object may also be provided as
-input.  If no output is specified, ``stdout`` is written to. When an input or output filename is
-specified, its format will be deduced from its extension, if possible. This can be overridden by
-specifying the format explicitly, and it is required to do so for reads from ``stdin`` or writes to
-``stdout``, as no attempt is made to deduce the format of streamed data.
+The input config may be specified as a filesystem path, a ``dict``, or a ``Config`` object. When it
+is not, it will be read from stdin.
 
-If optional supplemental configs (which may likewise be file paths or ``Config`` / ``dict`` objects)
-are provided, they will be merged, in the order specified, onto the input config. The format of all
-input configs must match.
+If an update config is specified, it is merged onto the input config, augmenting or overriding base
+values. It may be specified as a filesystem path, a ``dict``, or a ``Config`` object. When it is
+not, it will be read from stdin.
 
-If the input-config format is YAML, any supported output format may be specified. For all other
-input formats, the output format must match the input.
+At most one of the input config or the update config may be left unspecified, in which case the
+other will be read from stdin. If neither filename or format is specified for the update config, no
+update will be performed.
+
+The output destination may be specified as a filesystem path. When it is not, it will be written to
+stdout.
 
 If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
 ``dry_run`` mode, output is written to ``stderr``.
@@ -228,10 +231,11 @@ Recognized file extensions are: {extensions}
 
 :param input_config: Input config file (``None`` or unspecified => read ``stdin``)
 :param input_format: Format of the input config (optional if file's extension is recognized)
-:param output_block: Path through keys to the desired output block
+:param update_config: Input config file (``None`` or unspecified => read ``stdin``)
+:param update_format: Format of the update config (optional if file's extension is recognized)
 :param output_file: Output config file (``None`` or unspecified => write to ``stdout``)
 :param output_format: Format of the output config (optional if file's extension is recognized)
-:param supplemental_configs: Configs to merge, in order, onto the input
+:param output_block: Path through keys to the desired output block
 :param values_needed: Report complete, missing, and template values
 :param total: Require rendering of all Jinja2 variables/expressions
 :param dry_run: Log output instead of writing to output

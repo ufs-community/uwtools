@@ -266,33 +266,32 @@ def test__dispatch_config_compare():
     )
 
 
-@pytest.mark.skip("FIXME")
 def test__dispatch_config_realize():
     args = {
-        STR.infile: 1,
-        STR.infmt: 2,
-        STR.updatefile: 3,
-        STR.updatefmt: 4,
-        STR.outfile: 5,
-        STR.outfmt: 6,
-        STR.outblock: 7,
-        STR.valsneeded: 8,
-        STR.total: 9,
-        STR.dryrun: 10,
+        STR.infile: "in",
+        STR.infmt: "yaml",
+        STR.updatefile: "update",
+        STR.updatefmt: "yaml",
+        STR.outfile: "out",
+        STR.outfmt: "yaml",
+        STR.outblock: "foo.bar",
+        STR.valsneeded: False,
+        STR.total: False,
+        STR.dryrun: False,
     }
     with patch.object(cli.uwtools.api.config, "realize") as realize:
         cli._dispatch_config_realize(args)
     realize.assert_called_once_with(
-        input_config=1,
-        input_format=2,
-        update_config=3,
-        update_format=4,
-        output_file=5,
-        output_format=6,
-        output_block=7,
-        values_needed=8,
-        total=9,
-        dry_run=10,
+        input_config="in",
+        input_format="yaml",
+        update_config="update",
+        update_format="yaml",
+        output_file="out",
+        output_format="yaml",
+        output_block="foo.bar",
+        values_needed=False,
+        total=False,
+        dry_run=False,
         stdin_ok=True,
     )
 

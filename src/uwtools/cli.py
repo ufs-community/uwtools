@@ -212,9 +212,11 @@ def _dispatch_config_realize(args: Args) -> bool:
         uwtools.api.config.realize(
             input_config=args[STR.infile],
             input_format=args[STR.infmt],
-            output_block=args[STR.outblock],
+            update_config=args[STR.updatefile],
+            update_format=args[STR.updatefmt],
             output_file=args[STR.outfile],
             output_format=args[STR.outfmt],
+            output_block=args[STR.outblock],
             values_needed=args[STR.valsneeded],
             total=args[STR.total],
             dry_run=args[STR.dryrun],

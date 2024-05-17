@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Callable, List, Optional, Union
 
 from uwtools.config.formats.base import Config
-from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import unrendered
 from uwtools.config.support import depth, format_to_config, log_and_error
 from uwtools.exceptions import UWConfigRealizeError, UWError
@@ -79,10 +78,11 @@ def config_check_depths_update(config_obj: Union[Config, dict], target_format: s
 def realize_config(
     input_config: Union[Config, Optional[Path]] = None,
     input_format: Optional[str] = None,
-    output_block: Optional[List[Union[str, int]]] = None,
+    update_config: Union[Config, Optional[Path]] = None,
+    update_format: Optional[str] = None,
     output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
-    supplemental_configs: Optional[List[Union[dict, Config, Path]]] = None,
+    output_block: Optional[List[Union[str, int]]] = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -90,21 +90,31 @@ def realize_config(
     """
     NB: This docstring is dynamically replaced: See realize_config.__doc__ definition below.
     """
+    if updating := bool(update_config or update_format):
+        if not update_config and not input_config:
+            raise UWError("The input config and output config may not both be unspecified")
     input_format = _ensure_format("input", input_format, input_config)
-    output_format = _ensure_format("output", output_format, output_file)
-    _validate_format_output(input_format, output_format)
     input_obj: Config = (
         input_config
         if isinstance(input_config, Config)
         else format_to_config(input_format)(config=input_config)
     )
-    if supplemental_configs:
-        input_obj = _realize_config_update(input_obj, input_format, supplemental_configs)
+    if updating:
+        update_format = _ensure_format("update", update_format, update_config)
+        _validate_format("update", update_format, input_format)
+        update_obj: Config = (
+            update_config
+            if isinstance(update_config, Config)
+            else format_to_config(update_format)(config=update_config)
+        )
+        input_obj = _realize_config_update(input_obj, update_obj)
     input_obj.dereference()
+    output_format = _ensure_format("output", output_format, output_file)
+    _validate_format("output", output_format, input_format)
     output_data = input_obj.data
     if output_block is not None:
         for key in output_block:
-            output_data = output_data.get(key, {})
+            output_data = output_data[key]
     config_check_depths_realize(output_data, output_format)
     if dry_run:
         for line in str(input_obj).strip().split("\n"):
@@ -170,38 +180,20 @@ def _print_config_section(config: dict, key_path: List[str]) -> None:
     print("\n".join(sorted(output_lines)))
 
 
-def _realize_config_update(
-    config_obj: Config,
-    config_fmt: str,
-    supplemental_configs: Optional[List[Union[dict, Config, Path]]] = None,
-) -> Config:
+def _realize_config_update(input_obj: Config, update_obj: Config) -> Config:
     """
     Update config with values from other configs, if given.
 
-    :param config_obj: The config to update.
-    :param config_fmt: Format of config's source.
-    :param supplemental_configs: Sources of values to modify input.
+    :param input_obj: The config to update.
+    :param update_obj: The config providing update values.
     :return: The input config, possibly updated.
     """
-    if supplemental_configs:
-        log.debug("Before update, config has depth %s", config_obj.depth)
-        supplemental_obj: Config
-        for idx, supplemental_config in enumerate(supplemental_configs):
-            _validate_format_supplemental(config_fmt, supplemental_config, idx)
-            if isinstance(supplemental_config, dict):
-                supplemental_obj = YAMLConfig(config=supplemental_config)
-            elif isinstance(supplemental_config, Config):
-                supplemental_obj = supplemental_config
-            else:
-                supplemental_format = get_file_format(supplemental_config)
-                supplemental_obj = format_to_config(supplemental_format)(config=supplemental_config)
-            log.debug("Supplemental config has depth %s", supplemental_obj.depth)
-            config_check_depths_update(supplemental_obj, config_obj.get_format())
-            config_obj.update_values(supplemental_obj)
-            log.debug("After update, config has depth %s", config_obj.depth)
-    else:
-        log.debug("Input config has depth %s", config_obj.depth)
-    return config_obj
+    log.debug("Initial input config depth: %s", input_obj.depth)
+    log.debug("Update config depth: %s", update_obj.depth)
+    config_check_depths_update(update_obj, input_obj.get_format())
+    input_obj.update_values(update_obj)
+    log.debug("Final input config depth: %s", input_obj.depth)
+    return input_obj
 
 
 def _realize_config_values_needed(input_obj: Config) -> bool:
@@ -253,43 +245,19 @@ def _validate_depth(
         )
 
 
-def _validate_format_output(input_fmt: str, output_fmt: str) -> None:
+def _validate_format(other_fmt_desc: str, other_fmt: str, input_fmt: str) -> None:
     """
-    Ensure output format agrees with input.
+    Ensure a format agrees with the input format.
 
+    :param other_fmt_desc: Description of other format.
+    :param other_fmt: Other format.
     :param input_fmt: Input format.
-    :param output_fmt: Output format.
-    :raises: UWError if output format is incompatible.
+    :raises: UWError if other format is incompatible.
     """
-    if FORMAT.yaml not in (input_fmt, output_fmt) and input_fmt != output_fmt:
+    if FORMAT.yaml not in (input_fmt, other_fmt) and input_fmt != other_fmt:
         raise UWError(
-            "Accepted output formats for input format %s are %s or yaml" % (input_fmt, input_fmt)
-        )
-
-
-def _validate_format_supplemental(
-    config_fmt: str, supplemental_cfg: Union[dict, Config, Path], idx: int
-) -> None:
-    """
-    Ensure supplemental config format agrees with base config format.
-
-    :param config_fmt: Base config format.
-    :param supplemental_cfg: Supplemental config to check.
-    :param idx: Index of supplemental config for identification purposes.
-    :raises: UWError if supplemental config format is incompatible.
-    """
-    pre = f"Supplemental config #{idx + 1}"
-    if isinstance(supplemental_cfg, dict):
-        log.debug("%s is a dict: Cannot validate its format vs %s", pre, config_fmt)
-        return
-    sc_fmt = (
-        supplemental_cfg.get_format()
-        if isinstance(supplemental_cfg, Config)
-        else _ensure_format(desc=pre, config=supplemental_cfg)
-    )
-    if sc_fmt not in (FORMAT.yaml, config_fmt):
-        raise UWError(
-            "%s format %s must be %s or input format %s" % (pre, sc_fmt, FORMAT.yaml, config_fmt)
+            "Accepted %s format for input format %s are %s or %s"
+            % (other_fmt_desc, input_fmt, input_fmt, FORMAT.yaml)
         )
 
 
@@ -321,10 +289,11 @@ Recognized file extensions are: {extensions}
 
 :param input_config: Input config source (None => read stdin).
 :param input_format: Format of the input config.
-:param output_block: Path through keys to the desired output block.
+:param update_config: Input config source (None => read stdin).
+:param update_format: Format of the update config.
 :param output_file: Output config destination (None => write to stdout).
 :param output_format: Format of the output config.
-:param supplemental_configs: Sources of values used to modify input.
+:param output_block: Path through keys to the desired output block.
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.
