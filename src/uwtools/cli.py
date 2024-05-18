@@ -931,12 +931,6 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
     return args
 
 
-def _check_update(args: Args) -> Args:
-    if args[STR.updatefile]:
-        args[STR.updatefmt] = get_file_format(args[STR.updatefile])
-    return args
-
-
 def _check_template_render_vals_args(args: Args) -> Args:
     # In "template render" mode, a values file is optional, as values used to render the template
     # will be taken from the environment or from key=value command-line pairs by default. But if a
@@ -945,6 +939,12 @@ def _check_template_render_vals_args(args: Args) -> Args:
     if args.get(STR.valsfile) is not None:
         if args.get(STR.valsfmt) is None:
             args[STR.valsfmt] = get_file_format(args[STR.valsfile])
+    return args
+
+
+def _check_update(args: Args) -> Args:
+    if args[STR.updatefile]:
+        args[STR.updatefmt] = get_file_format(args[STR.updatefile])
     return args
 
 
