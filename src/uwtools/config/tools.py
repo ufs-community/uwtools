@@ -91,8 +91,8 @@ def realize_config(
     NB: This docstring is dynamically replaced: See realize_config.__doc__ definition below.
     """
     if updating := bool(update_config or update_format):
-        if not update_config and not input_config:
-            raise UWError("The input config and output config may not both be unspecified")
+        if not input_config and not update_config:
+            raise UWError("The input config and update config may not both be unspecified")
     input_format = _ensure_format("input", input_format, input_config)
     input_obj: Config = (
         input_config

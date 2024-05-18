@@ -157,6 +157,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
         partial(_check_file_vs_format, STR.outfile, STR.outfmt),
+        _check_update,
     ]
 
 
@@ -927,6 +928,12 @@ def _check_file_vs_format(file_arg: str, format_arg: str, args: Args) -> Args:
         if args.get(file_arg) is None:
             _abort("Specify %s when %s is not specified" % (_switch(format_arg), _switch(file_arg)))
         args[format_arg] = get_file_format(args[file_arg])
+    return args
+
+
+def _check_update(args: Args) -> Args:
+    if args[STR.updatefile]:
+        args[STR.updatefmt] = get_file_format(args[STR.updatefile])
     return args
 
 
