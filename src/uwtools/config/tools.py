@@ -91,7 +91,7 @@ def realize_config(
     NB: This docstring is dynamically replaced: See realize_config.__doc__ definition below.
     """
     input_obj, input_format = _realize_config_input_setup(input_config, input_format)
-    input_obj = _realize_config_update(input_obj, input_format, update_config, update_format)
+    input_obj = _realize_config_update(input_obj, update_config, update_format)
     input_obj.dereference()
     output_data, output_format = _realize_config_output_setup(
         input_obj, input_format, output_file, output_format, output_block
@@ -188,6 +188,8 @@ def _realize_config_output_setup(
     PM WRITEME.
     """
     output_format = _ensure_format("output", output_format, output_file)
+    if not output_file:
+        log.debug("Writing output to stdout")
     _validate_format("output", output_format, input_format)
     output_data = input_obj.data
     if output_block is not None:
@@ -199,7 +201,6 @@ def _realize_config_output_setup(
 
 def _realize_config_update(
     input_obj: Config,
-    input_format: str,
     update_config: Union[Config, Optional[Path]] = None,
     update_format: Optional[str] = None,
 ) -> Config:
@@ -208,7 +209,9 @@ def _realize_config_update(
     """
     if update_config or update_format:
         update_format = _ensure_format("update", update_format, update_config)
-        _validate_format("update", update_format, input_format)
+        if not update_config:
+            log.debug("Reading update from stdin")
+        _validate_format("update", update_format, update_format)
         update_obj: Config = (
             update_config
             if isinstance(update_config, Config)

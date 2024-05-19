@@ -943,8 +943,9 @@ def _check_template_render_vals_args(args: Args) -> Args:
 
 
 def _check_update(args: Args) -> Args:
-    if args[STR.updatefile]:
-        args[STR.updatefmt] = get_file_format(args[STR.updatefile])
+    if args.get(STR.updatefile) is not None:
+        if args.get(STR.updatefmt) is None:
+            args[STR.updatefmt] = get_file_format(args[STR.updatefile])
     return args
 
 
