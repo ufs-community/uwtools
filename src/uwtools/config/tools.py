@@ -164,7 +164,11 @@ def _realize_config_input_setup(
     input_config: Union[Config, Optional[Path]] = None, input_format: Optional[str] = None
 ) -> Tuple[Config, str]:
     """
-    PM WRITEME.
+    Set up config-realize input.
+
+    :param input_config: Input config source (None => read stdin).
+    :param input_format: Format of the input config.
+    :return: The input Config object and its format name.
     """
     input_format = _ensure_format("input", input_format, input_config)
     if not input_config:
@@ -185,11 +189,17 @@ def _realize_config_output_setup(
     output_block: Optional[List[Union[str, int]]] = None,
 ) -> Tuple[dict, str]:
     """
-    PM WRITEME.
+    Set up config-realize output.
+
+    :param input_obj: The input Config object.
+    :param input_format: Format of the input config.
+    :param output_file: Output config destination (None => write to stdout).
+    :param output_format: Format of the output config.
+    :param output_block: Path through keys to the desired output block.
+    :return: The unrealized data to output and the output format name.
     """
     output_format = _ensure_format("output", output_format, output_file)
-    if not output_file:
-        log.debug("Writing output to stdout")
+    log.debug("Writing output to %s" % (output_file or "stdout"))
     _validate_format("output", output_format, input_format)
     output_data = input_obj.data
     if output_block is not None:
@@ -205,7 +215,12 @@ def _realize_config_update(
     update_format: Optional[str] = None,
 ) -> Config:
     """
-    PM WRITEME.
+    Set up config-realize update.
+
+    :param input_obj: The input Config object.
+    :param update_config: Input config source (None => read stdin).
+    :param update_format: Format of the update config.
+    :return: The updated but unrealized Config object.
     """
     if update_config or update_format:
         update_format = _ensure_format("update", update_format, update_config)
@@ -223,21 +238,6 @@ def _realize_config_update(
         input_obj.update_values(update_obj)
         log.debug("Final input config depth: %s", input_obj.depth)
     return input_obj
-
-
-# def _realize_config_update(input_obj: Config, update_obj: Config) -> Config:
-#     """
-#     Update config with values from other configs, if given.
-#     :param input_obj: The config to update.
-#     :param update_obj: The config providing update values.
-#     :return: The input config, possibly updated.
-#     """
-#     log.debug("Initial input config depth: %s", input_obj.depth)
-#     log.debug("Update config depth: %s", update_obj.depth)
-#     config_check_depths_update(update_obj, input_obj.get_format())
-#     input_obj.update_values(update_obj)
-#     log.debug("Final input config depth: %s", input_obj.depth)
-#     return input_obj
 
 
 def _realize_config_values_needed(input_obj: Config) -> bool:
