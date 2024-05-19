@@ -75,55 +75,6 @@ def config_check_depths_update(config_obj: Union[Config, dict], target_format: s
     _validate_depth(config_obj, target_format, "update", bad_depth)
 
 
-def _realize_config_input_setup(
-    input_config: Union[Config, Optional[Path]] = None, input_format: Optional[str] = None
-) -> Tuple[Config, str]:
-    input_format = _ensure_format("input", input_format, input_config)
-    if not input_config:
-        log.debug("Reading input from stdin")
-    input_obj: Config = (
-        input_config
-        if isinstance(input_config, Config)
-        else format_to_config(input_format)(config=input_config)
-    )
-    return input_obj, input_format
-
-
-def _realize_config_output_setup(
-    input_obj: Config,
-    input_format: str,
-    output_file: Optional[Path] = None,
-    output_format: Optional[str] = None,
-    output_block: Optional[List[Union[str, int]]] = None,
-) -> Tuple[dict, str]:
-    output_format = _ensure_format("output", output_format, output_file)
-    _validate_format("output", output_format, input_format)
-    output_data = input_obj.data
-    if output_block is not None:
-        for key in output_block:
-            output_data = output_data[key]
-    config_check_depths_realize(output_data, output_format)
-    return output_data, output_format
-
-
-def _realize_config_update_setup(
-    input_obj: Config,
-    input_format: str,
-    update_config: Union[Config, Optional[Path]] = None,
-    update_format: Optional[str] = None,
-) -> Config:
-    if update_config or update_format:
-        update_format = _ensure_format("update", update_format, update_config)
-        _validate_format("update", update_format, input_format)
-        update_obj: Config = (
-            update_config
-            if isinstance(update_config, Config)
-            else format_to_config(update_format)(config=update_config)
-        )
-        input_obj = _realize_config_update(input_obj, update_obj)
-    return input_obj
-
-
 def realize_config(
     input_config: Union[Config, Optional[Path]] = None,
     input_format: Optional[str] = None,
@@ -139,36 +90,9 @@ def realize_config(
     """
     NB: This docstring is dynamically replaced: See realize_config.__doc__ definition below.
     """
-    # if updating := bool(update_config or update_format):
-    #     if not input_config and not update_config:
-    #         raise UWError("The input config and update config may not both be unspecified")
-    # input_format = _ensure_format("input", input_format, input_config)
-    # if not input_config:
-    #     log.debug("Reading input from stdin")
-    # input_obj: Config = (
-    #     input_config
-    #     if isinstance(input_config, Config)
-    #     else format_to_config(input_format)(config=input_config)
-    # )
     input_obj, input_format = _realize_config_input_setup(input_config, input_format)
-    # if update_config or update_format:
-    #     update_format = _ensure_format("update", update_format, update_config)
-    #     _validate_format("update", update_format, input_format)
-    #     update_obj: Config = (
-    #         update_config
-    #         if isinstance(update_config, Config)
-    #         else format_to_config(update_format)(config=update_config)
-    #     )
-    #     input_obj = _realize_config_update(input_obj, update_obj)
-    input_obj = _realize_config_update_setup(input_obj, input_format, update_config, update_format)
+    input_obj = _realize_config_update(input_obj, input_format, update_config, update_format)
     input_obj.dereference()
-    # output_format = _ensure_format("output", output_format, output_file)
-    # _validate_format("output", output_format, input_format)
-    # output_data = input_obj.data
-    # if output_block is not None:
-    #     for key in output_block:
-    #         output_data = output_data[key]
-    # config_check_depths_realize(output_data, output_format)
     output_data, output_format = _realize_config_output_setup(
         input_obj, input_format, output_file, output_format, output_block
     )
@@ -236,20 +160,81 @@ def _print_config_section(config: dict, key_path: List[str]) -> None:
     print("\n".join(sorted(output_lines)))
 
 
-def _realize_config_update(input_obj: Config, update_obj: Config) -> Config:
+def _realize_config_input_setup(
+    input_config: Union[Config, Optional[Path]] = None, input_format: Optional[str] = None
+) -> Tuple[Config, str]:
     """
-    Update config with values from other configs, if given.
+    PM WRITEME.
+    """
+    input_format = _ensure_format("input", input_format, input_config)
+    if not input_config:
+        log.debug("Reading input from stdin")
+    input_obj: Config = (
+        input_config
+        if isinstance(input_config, Config)
+        else format_to_config(input_format)(config=input_config)
+    )
+    return input_obj, input_format
 
-    :param input_obj: The config to update.
-    :param update_obj: The config providing update values.
-    :return: The input config, possibly updated.
+
+def _realize_config_output_setup(
+    input_obj: Config,
+    input_format: str,
+    output_file: Optional[Path] = None,
+    output_format: Optional[str] = None,
+    output_block: Optional[List[Union[str, int]]] = None,
+) -> Tuple[dict, str]:
     """
-    log.debug("Initial input config depth: %s", input_obj.depth)
-    log.debug("Update config depth: %s", update_obj.depth)
-    config_check_depths_update(update_obj, input_obj.get_format())
-    input_obj.update_values(update_obj)
-    log.debug("Final input config depth: %s", input_obj.depth)
+    PM WRITEME.
+    """
+    output_format = _ensure_format("output", output_format, output_file)
+    _validate_format("output", output_format, input_format)
+    output_data = input_obj.data
+    if output_block is not None:
+        for key in output_block:
+            output_data = output_data[key]
+    config_check_depths_realize(output_data, output_format)
+    return output_data, output_format
+
+
+def _realize_config_update(
+    input_obj: Config,
+    input_format: str,
+    update_config: Union[Config, Optional[Path]] = None,
+    update_format: Optional[str] = None,
+) -> Config:
+    """
+    PM WRITEME.
+    """
+    if update_config or update_format:
+        update_format = _ensure_format("update", update_format, update_config)
+        _validate_format("update", update_format, input_format)
+        update_obj: Config = (
+            update_config
+            if isinstance(update_config, Config)
+            else format_to_config(update_format)(config=update_config)
+        )
+        log.debug("Initial input config depth: %s", input_obj.depth)
+        log.debug("Update config depth: %s", update_obj.depth)
+        config_check_depths_update(update_obj, input_obj.get_format())
+        input_obj.update_values(update_obj)
+        log.debug("Final input config depth: %s", input_obj.depth)
     return input_obj
+
+
+# def _realize_config_update(input_obj: Config, update_obj: Config) -> Config:
+#     """
+#     Update config with values from other configs, if given.
+#     :param input_obj: The config to update.
+#     :param update_obj: The config providing update values.
+#     :return: The input config, possibly updated.
+#     """
+#     log.debug("Initial input config depth: %s", input_obj.depth)
+#     log.debug("Update config depth: %s", update_obj.depth)
+#     config_check_depths_update(update_obj, input_obj.get_format())
+#     input_obj.update_values(update_obj)
+#     log.debug("Final input config depth: %s", input_obj.depth)
+#     return input_obj
 
 
 def _realize_config_values_needed(input_obj: Config) -> bool:
