@@ -160,9 +160,9 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
                             [--output-file PATH] [--output-format {ini,nml,sh,yaml}]
                             [--output-block KEY[.KEY[.KEY]...]] [--values-needed] [--total]
                             [--dry-run] [--quiet] [--verbose]
-   
+
    Realize config
-   
+
    Optional arguments:
      -h, --help
          Show help and exit
@@ -229,10 +229,10 @@ and YAML file ``update.yaml`` with the following contents:
      [2024-05-20T18:33:01]     INFO   values.message
      [2024-05-20T18:33:01]     INFO   values.recipient
      [2024-05-20T18:33:01]     INFO   values.repeat
-     [2024-05-20T18:33:01]     INFO 
+     [2024-05-20T18:33:01]     INFO
      [2024-05-20T18:33:01]     INFO Keys with unrendered Jinja2 variables/expressions:
      [2024-05-20T18:33:01]     INFO   values.date: {{ yyyymmdd }}
-     [2024-05-20T18:33:01]     INFO 
+     [2024-05-20T18:33:01]     INFO
      [2024-05-20T18:33:01]     INFO Keys that are set to empty:
      [2024-05-20T18:33:01]     INFO   values.empty
 
