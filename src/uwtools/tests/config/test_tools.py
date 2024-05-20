@@ -5,21 +5,18 @@ Tests for uwtools.config.tools module.
 
 import logging
 import sys
-from configparser import ConfigParser
 from io import StringIO
 from pathlib import Path
 from textwrap import dedent
 from unittest.mock import patch
 
 import yaml
-from f90nml import Namelist  # type: ignore
 from pytest import fixture, raises
 
 from uwtools.config import tools
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
-
-# from uwtools.config.formats.sh import SHConfig
+from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import depth
 from uwtools.exceptions import UWConfigError, UWError
@@ -679,29 +676,35 @@ def test__print_config_section_yaml_not_dict():
 
 
 def test__realize_config_input_setup_ini_cfgobj():
-    d = {"section": {"foo": "bar"}}
-    cfgobj = INIConfig(config=d)
+    data = {"section": {"foo": "bar"}}
+    cfgobj = INIConfig(config=data)
     input_obj, input_format = tools._realize_config_input_setup(input_config=cfgobj)
-    assert input_obj.data == d
+    assert input_obj.data == data
     assert input_format == FORMAT.ini
 
 
 def test__realize_config_input_setup_ini_file(tmp_path):
+    data = """
+    [section]
+    foo = bar
+    """
     path = tmp_path / "config.ini"
-    d = {"section": {"foo": "bar"}}
-    INIConfig(config=d).dump(path)
+    with open(path, "w", encoding="utf-8") as f:
+        print(dedent(data).strip(), file=f)
     input_obj, input_format = tools._realize_config_input_setup(input_config=path)
-    assert input_obj.data == d
+    assert input_obj.data == {"section": {"foo": "bar"}}
     assert input_format == FORMAT.ini
 
 
 def test__realize_config_input_setup_ini_stdin(caplog):
+    data = """
+    [section]
+    foo = bar
+    """
     stdinproxy.cache_clear()
     log.setLevel(logging.DEBUG)
-    c = ConfigParser()
-    c["section"] = {"foo": "bar"}
     s = StringIO()
-    c.write(s)
+    print(dedent(data).strip(), file=s)
     s.seek(0)
     with patch.object(sys, "stdin", new=s):
         input_obj, input_format = tools._realize_config_input_setup(input_format=FORMAT.ini)
@@ -711,34 +714,114 @@ def test__realize_config_input_setup_ini_stdin(caplog):
 
 
 def test__realize_config_input_setup_nml_cfgobj():
-    d = {"nl": {"pi": 3.14}}
-    cfgobj = NMLConfig(config=d)
+    data = {"nl": {"pi": 3.14}}
+    cfgobj = NMLConfig(config=data)
     input_obj, input_format = tools._realize_config_input_setup(input_config=cfgobj)
-    assert input_obj.data == d
+    assert input_obj.data == data
     assert input_format == FORMAT.nml
 
 
 def test__realize_config_input_setup_nml_file(tmp_path):
+    data = """
+    &nl
+      pi = 3.14
+    /
+    """
     path = tmp_path / "config.nml"
-    d = {"nl": {"pi": 3.14}}
-    NMLConfig(config=d).dump(path)
+    with open(path, "w", encoding="utf-8") as f:
+        print(dedent(data).strip(), file=f)
     input_obj, input_format = tools._realize_config_input_setup(input_config=path)
-    assert input_obj.data == d
+    assert input_obj["nl"]["pi"] == 3.14
     assert input_format == FORMAT.nml
 
 
 def test__realize_config_input_setup_nml_stdin(caplog):
+    data = """
+    &nl
+      pi = 3.14
+    /
+    """
     stdinproxy.cache_clear()
     log.setLevel(logging.DEBUG)
-    d = {"nl": {"pi": 3.14}}
-    n = Namelist(d)
     s = StringIO()
-    n.write(s)
+    print(dedent(data).strip(), file=s)
     s.seek(0)
     with patch.object(sys, "stdin", new=s):
         input_obj, input_format = tools._realize_config_input_setup(input_format=FORMAT.nml)
-    assert input_obj.data == d
+    assert input_obj["nl"]["pi"] == 3.14
     assert input_format == FORMAT.nml
+    assert logged(caplog, "Reading input from stdin")
+
+
+def test__realize_config_input_setup_sh_cfgobj():
+    data = {"foo": "bar"}
+    cfgobj = SHConfig(config=data)
+    input_obj, input_format = tools._realize_config_input_setup(input_config=cfgobj)
+    assert input_obj.data == data
+    assert input_format == FORMAT.sh
+
+
+def test__realize_config_input_setup_sh_file(tmp_path):
+    data = """
+    foo=bar
+    """
+    path = tmp_path / "config.sh"
+    with open(path, "w", encoding="utf-8") as f:
+        print(dedent(data).strip(), file=f)
+    input_obj, input_format = tools._realize_config_input_setup(input_config=path)
+    assert input_obj.data == {"foo": "bar"}
+    assert input_format == FORMAT.sh
+
+
+def test__realize_config_input_setup_sh_stdin(caplog):
+    data = """
+    foo=bar
+    """
+    stdinproxy.cache_clear()
+    log.setLevel(logging.DEBUG)
+    s = StringIO()
+    print(dedent(data).strip(), file=s)
+    s.seek(0)
+    with patch.object(sys, "stdin", new=s):
+        input_obj, input_format = tools._realize_config_input_setup(input_format=FORMAT.sh)
+    assert input_obj.data == {"foo": "bar"}
+    assert input_format == FORMAT.sh
+    assert logged(caplog, "Reading input from stdin")
+
+
+def test__realize_config_input_setup_yaml_cfgobj():
+    data = {"foo": "bar"}
+    cfgobj = YAMLConfig(config=data)
+    input_obj, input_format = tools._realize_config_input_setup(input_config=cfgobj)
+    assert input_obj.data == data
+    assert input_format == FORMAT.yaml
+
+
+def test__realize_config_input_setup_yaml_file(tmp_path):
+    data = """
+    foo: bar
+    """
+    path = tmp_path / "config.yaml"
+    with open(path, "w", encoding="utf-8") as f:
+        print(dedent(data).strip(), file=f)
+    input_obj, input_format = tools._realize_config_input_setup(input_config=path)
+    assert input_obj.data == {"foo": "bar"}
+    assert input_format == FORMAT.yaml
+
+
+def test__realize_config_input_setup_yaml_stdin(caplog):
+    data = """
+    foo: bar
+    """
+    stdinproxy.cache_clear()
+    log.setLevel(logging.DEBUG)
+    s = StringIO()
+    print(dedent(data).strip(), file=s)
+    s.seek(0)
+    with patch.object(sys, "stdin", new=s):
+        input_obj, input_format = tools._realize_config_input_setup(input_format=FORMAT.yaml)
+    assert input_obj.data == {"foo": "bar"}
+    assert input_format == FORMAT.yaml
     assert logged(caplog, "Reading input from stdin")
 
 
