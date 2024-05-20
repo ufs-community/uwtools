@@ -487,28 +487,28 @@ def test_realize_config_values_needed_ini(caplog):
         output_format=FORMAT.ini,
         values_needed=True,
     )
-    expected = """
-Keys that are complete:
-  salad
-  salad.base
-  salad.fruit
-  salad.vegetable
-  salad.dressing
-  dessert
-  dessert.type
-  dessert.side
-  dessert.servings
-
-Keys with unrendered Jinja2 variables/expressions:
-  salad.how_many: {{ amount }}
-  dessert.flavor: {{ flavor }}
-
-Keys that are set to empty:
-  salad.toppings
-  salad.meat
-""".strip()
     actual = "\n".join(record.message for record in caplog.records)
-    assert actual == expected
+    expected = """
+    Keys that are complete:
+      salad
+      salad.base
+      salad.fruit
+      salad.vegetable
+      salad.dressing
+      dessert
+      dessert.type
+      dessert.side
+      dessert.servings
+
+    Keys with unrendered Jinja2 variables/expressions:
+      salad.how_many: {{ amount }}
+      dessert.flavor: {{ flavor }}
+
+    Keys that are set to empty:
+      salad.toppings
+      salad.meat
+    """
+    assert actual.strip() == dedent(expected).strip()
 
 
 def test_realize_config_values_needed_yaml(caplog):
@@ -525,25 +525,25 @@ def test_realize_config_values_needed_yaml(caplog):
     )
     actual = "\n".join(record.message for record in caplog.records)
     expected = """
-Keys that are complete:
-  FV3GFS
-  FV3GFS.nomads
-  FV3GFS.nomads.protocol
-  FV3GFS.nomads.file_names
-  FV3GFS.nomads.file_names.grib2
-  FV3GFS.nomads.file_names.testfalse
-  FV3GFS.nomads.file_names.testzero
+    Keys that are complete:
+      FV3GFS
+      FV3GFS.nomads
+      FV3GFS.nomads.protocol
+      FV3GFS.nomads.file_names
+      FV3GFS.nomads.file_names.grib2
+      FV3GFS.nomads.file_names.testfalse
+      FV3GFS.nomads.file_names.testzero
 
-Keys with unrendered Jinja2 variables/expressions:
-  FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
-  FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
-  FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
+    Keys with unrendered Jinja2 variables/expressions:
+      FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
+      FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
+      FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
 
-Keys that are set to empty:
-  FV3GFS.nomads.file_names.nemsio
-  FV3GFS.nomads.testempty
-""".strip()
-    assert actual == expected
+    Keys that are set to empty:
+      FV3GFS.nomads.file_names.nemsio
+      FV3GFS.nomads.testempty
+    """
+    assert actual.strip() == dedent(expected).strip()
 
 
 def test__ensure_format_bad():
@@ -577,12 +577,12 @@ def test__print_config_section_ini(capsys):
     tools._print_config_section(config_obj.data, section)
     actual = capsys.readouterr().out
     expected = """
-flavor={{ flavor }}
-servings=0
-side=False
-type=pie
-""".lstrip()
-    assert actual == expected
+    flavor={{ flavor }}
+    servings=0
+    side=False
+    type=pie
+    """
+    assert actual.strip() == dedent(expected).strip()
 
 
 def test__print_config_section_ini_missing_section():
@@ -600,10 +600,10 @@ def test__print_config_section_yaml(capsys):
     tools._print_config_section(config_obj.data, section)
     actual = capsys.readouterr().out
     expected = """
-name=fixed
-surface_value=0.0
-""".lstrip()
-    assert actual == expected
+    name=fixed
+    surface_value=0.0
+    """
+    assert actual.strip() == dedent(expected).strip()
 
 
 def test__print_config_section_yaml_for_nonscalar():
