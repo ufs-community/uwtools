@@ -38,6 +38,22 @@ def actions(parser: Parser) -> List[str]:
 
 
 @fixture
+def args_config_realize():
+    return {
+        STR.infile: "in",
+        STR.infmt: "yaml",
+        STR.updatefile: "update",
+        STR.updatefmt: "yaml",
+        STR.outfile: "out",
+        STR.outfmt: "yaml",
+        STR.outblock: "foo.bar",
+        STR.valsneeded: False,
+        STR.total: False,
+        STR.dryrun: False,
+    }
+
+
+@fixture
 def args_dispatch_file():
     return {
         "target_dir": "/target/dir",
@@ -219,6 +235,26 @@ def test__check_template_render_vals_args_noop_explicit_valsfmt():
     assert cli._check_template_render_vals_args(args) == args
 
 
+@pytest.mark.parametrize(
+    "fmt,fn,ok",
+    [
+        (None, "update.txt", False),
+        ("yaml", "udpate.txt", True),
+        (None, "update.yaml", True),
+        ("yaml", "update.yaml", True),
+        ("jpg", "udpate.yaml", True),
+    ],
+)
+def test__check_update(fmt, fn, ok):
+    args = {STR.updatefile: fn, STR.updatefmt: fmt}
+    if ok:
+        assert cli._check_update(args) == args
+    else:
+        with raises(UWError) as e:
+            cli._check_update(args)
+        assert "Cannot deduce format" in str(e.value)
+
+
 def test__check_verbosity_fail(capsys):
     log.setLevel(logging.INFO)
     args = {STR.quiet: True, STR.verbose: True}
@@ -266,21 +302,9 @@ def test__dispatch_config_compare():
     )
 
 
-def test__dispatch_config_realize():
-    args = {
-        STR.infile: "in",
-        STR.infmt: "yaml",
-        STR.updatefile: "update",
-        STR.updatefmt: "yaml",
-        STR.outfile: "out",
-        STR.outfmt: "yaml",
-        STR.outblock: "foo.bar",
-        STR.valsneeded: False,
-        STR.total: False,
-        STR.dryrun: False,
-    }
+def test__dispatch_config_realize(args_config_realize):
     with patch.object(cli.uwtools.api.config, "realize") as realize:
-        cli._dispatch_config_realize(args)
+        cli._dispatch_config_realize(args_config_realize)
     realize.assert_called_once_with(
         input_config="in",
         input_format="yaml",
@@ -296,57 +320,11 @@ def test__dispatch_config_realize():
     )
 
 
-def test__dispatch_config_realize_fail(caplog):
+def test__dispatch_config_realize_fail(caplog, args_config_realize):
     log.setLevel(logging.ERROR)
-    args = {
-        x: None
-        for x in (
-            STR.dryrun,
-            STR.infile,
-            STR.infmt,
-            STR.outblock,
-            STR.outfile,
-            STR.outfmt,
-            STR.total,
-            STR.updatefile,
-            STR.updatefmt,
-            STR.valsneeded,
-        )
-    }
     with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
-        assert cli._dispatch_config_realize(args) is False
+        assert cli._dispatch_config_realize(args_config_realize) is False
     assert regex_logged(caplog, "Config could not be realized")
-
-
-@pytest.mark.skip("FIXME")
-def test__dispatch_config_realize_no_optional():
-    args = {
-        STR.dryrun: False,
-        STR.infile: None,
-        STR.infmt: None,
-        STR.outblock: None,
-        STR.outfile: None,
-        STR.outfmt: None,
-        STR.total: False,
-        STR.updatefile: None,
-        STR.updatefmt: None,
-        STR.valsneeded: False,
-    }
-    with patch.object(cli.uwtools.api.config, "realize") as realize:
-        cli._dispatch_config_realize(args)
-    realize.assert_called_once_with(
-        dry_run=False,
-        input_config=None,
-        input_format=None,
-        output_block=None,
-        output_file=None,
-        output_format=None,
-        stdin_ok=True,
-        total=False,
-        update_config=None,
-        update_format=None,
-        values_needed=False,
-    )
 
 
 def test__dispatch_config_validate_config_obj():
