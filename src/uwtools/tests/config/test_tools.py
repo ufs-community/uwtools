@@ -10,6 +10,7 @@ from pathlib import Path
 from textwrap import dedent
 from unittest.mock import patch
 
+import f90nml  # type: ignore
 import yaml
 from pytest import fixture, raises
 
@@ -323,56 +324,56 @@ def test_realize_config_output_file_format(tmp_path):
     assert compare_files(outfile, infile)
 
 
-# def test_realize_config_remove_nml_to_nml(tmp_path):
-#     nml = NMLConfig({"constants": {"pi": 3.141, "e": 2.718}})
-#     s = """
-#     constants:
-#       e: !remove
-#     """
-#     sup = tmp_path / "sup.yaml"
-#     with open(sup, "w", encoding="utf-8") as f:
-#         print(dedent(s).strip(), file=f)
-#     cfg = tmp_path / "config.nml"
-#     assert not cfg.is_file()
-#     tools.realize_config(
-#         input_config=nml,
-#         output_file=cfg,
-#         supplemental_configs=[sup],
-#     )
-#     assert f90nml.read(cfg) == {"constants": {"pi": 3.141}}
+def test_realize_config_remove_nml_to_nml(tmp_path):
+    input_config = NMLConfig({"constants": {"pi": 3.141, "e": 2.718}})
+    s = """
+    constants:
+      e: !remove
+    """
+    update_config = tmp_path / "update.yaml"
+    with open(update_config, "w", encoding="utf-8") as f:
+        print(dedent(s).strip(), file=f)
+    output_file = tmp_path / "config.nml"
+    assert not output_file.is_file()
+    tools.realize_config(
+        input_config=input_config,
+        update_config=update_config,
+        output_file=output_file,
+    )
+    assert f90nml.read(output_file) == {"constants": {"pi": 3.141}}
 
 
-# def test_realize_config_remove_yaml_to_yaml_scalar(tmp_path):
-#     yml = YAMLConfig({"a": {"b": {"c": 11, "d": 22, "e": 33}}})
-#     s = """
-#     a:
-#       b:
-#         d: !remove
-#     """
-#     sup = tmp_path / "sup.yaml"
-#     with open(sup, "w", encoding="utf-8") as f:
-#         print(dedent(s).strip(), file=f)
-#     assert {"a": {"b": {"c": 11, "e": 33}}} == tools.realize_config(
-#         input_config=yml,
-#         output_format="yaml",
-#         supplemental_configs=[sup],
-#     )
+def test_realize_config_remove_yaml_to_yaml_scalar(tmp_path):
+    input_config = YAMLConfig({"a": {"b": {"c": 11, "d": 22, "e": 33}}})
+    s = """
+    a:
+      b:
+        d: !remove
+    """
+    update_config = tmp_path / "update.yaml"
+    with open(update_config, "w", encoding="utf-8") as f:
+        print(dedent(s).strip(), file=f)
+    assert {"a": {"b": {"c": 11, "e": 33}}} == tools.realize_config(
+        input_config=input_config,
+        update_config=update_config,
+        output_format="yaml",
+    )
 
 
-# def test_realize_config_remove_yaml_to_yaml_subtree(tmp_path):
-#     yml = YAMLConfig(yaml.safe_load("a: {b: {c: 11, d: 22, e: 33}}"))
-#     s = """
-#     a:
-#       b: !remove
-#     """
-#     sup = tmp_path / "sup.yaml"
-#     with open(sup, "w", encoding="utf-8") as f:
-#         print(dedent(s).strip(), file=f)
-#     assert {"a": {}} == tools.realize_config(
-#         input_config=yml,
-#         output_format="yaml",
-#         supplemental_configs=[sup],
-#     )
+def test_realize_config_remove_yaml_to_yaml_subtree(tmp_path):
+    input_config = YAMLConfig(yaml.safe_load("a: {b: {c: 11, d: 22, e: 33}}"))
+    s = """
+    a:
+      b: !remove
+    """
+    update_config = tmp_path / "update.yaml"
+    with open(update_config, "w", encoding="utf-8") as f:
+        print(dedent(s).strip(), file=f)
+    assert {"a": {}} == tools.realize_config(
+        input_config=input_config,
+        update_config=update_config,
+        output_format="yaml",
+    )
 
 
 def test_realize_config_simple_ini(tmp_path):
