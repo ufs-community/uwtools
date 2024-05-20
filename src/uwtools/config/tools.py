@@ -300,7 +300,7 @@ def _validate_format(other_fmt_desc: str, other_fmt: str, input_fmt: str) -> Non
     """
     if FORMAT.yaml not in (input_fmt, other_fmt) and input_fmt != other_fmt:
         raise UWError(
-            "Accepted %s format for input format %s are %s or %s"
+            "Accepted %s formats for input format %s are %s or %s"
             % (other_fmt_desc, input_fmt, input_fmt, FORMAT.yaml)
         )
 

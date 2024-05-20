@@ -11,8 +11,7 @@ from textwrap import dedent
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-
-# import pytest
+import pytest
 import yaml
 from pytest import fixture, raises
 
@@ -827,60 +826,17 @@ def test__realize_config_values_needed_negative_results(caplog, tmp_path):
     assert "No keys are set to empty." in msgs
 
 
-# @pytest.mark.parametrize("input_fmt", FORMAT.extensions())
-# @pytest.mark.parametrize("output_fmt", FORMAT.extensions())
-# def test__validate_format_output(input_fmt, output_fmt):
-#     call = lambda: tools._validate_format_output(input_fmt=input_fmt, output_fmt=output_fmt)
-#     if FORMAT.yaml in (input_fmt, output_fmt) or input_fmt == output_fmt:
-#         call()  # no exception raised
-#     else:
-#         with raises(UWError) as e:
-#             call()
-#         assert (
-#             str(e.value) == "Accepted output formats for input format "
-#             f"{input_fmt} are {input_fmt} or yaml"
-#         )
-
-
-# def test__validate_format_supplemental_fail_obj():
-#     config_fmt = FORMAT.ini
-#     sc = NMLConfig(config={"n": {"k": "v"}})
-#     with raises(UWError) as e:
-#         tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
-#     assert str(e.value) == "Supplemental config #88 format %s must be yaml or input format %s" % (
-#         FORMAT.nml,
-#         config_fmt,
-#     )
-
-
-# def test__validate_format_supplemental_fail_path():
-#     config_fmt = FORMAT.ini
-#     sc = Path("/path/to/config.nml")
-#     with raises(UWError) as e:
-#         tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
-#     assert str(e.value) == "Supplemental config #%s format %s must be yaml or input format %s" % (
-#         88,
-#         FORMAT.nml,
-#         config_fmt,
-#     )
-
-
-# def test__validate_format_supplemental_pass_dict(caplog):
-#     log.setLevel(logging.DEBUG)
-#     config_fmt = FORMAT.yaml
-#     sc: dict = {}
-#     tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
-#     msg = "Supplemental config #%s is a dict: Cannot validate its format vs %s" % (88, config_fmt)
-#     assert logged(caplog, msg)
-
-
-# def test__validate_format_supplemental_pass_match_obj():
-#     config_fmt = FORMAT.yaml
-#     sc = YAMLConfig(config={})
-#     tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
-
-
-# def test__validate_format_supplemental_pass_match_path():
-#     config_fmt = FORMAT.yaml
-#     sc = Path("/path/to/config.yaml")
-#     tools._validate_format_supplemental(config_fmt=config_fmt, supplemental_cfg=sc, idx=87)
+@pytest.mark.parametrize("input_fmt", FORMAT.extensions())
+@pytest.mark.parametrize("other_fmt", FORMAT.extensions())
+def test__validate_format(input_fmt, other_fmt):
+    call = lambda: tools._validate_format(
+        other_fmt_desc="other", other_fmt=other_fmt, input_fmt=input_fmt
+    )
+    if FORMAT.yaml in (input_fmt, other_fmt) or input_fmt == other_fmt:
+        call()  # no exception raised
+    else:
+        with raises(UWError) as e:
+            call()
+        assert str(e.value) == "Accepted other formats for input format {x} are {x} or yaml".format(
+            x=input_fmt
+        )
