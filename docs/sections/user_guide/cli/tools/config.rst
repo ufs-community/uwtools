@@ -3,27 +3,9 @@
 
 The ``uw`` mode for handling configuration files (configs).
 
-.. code-block:: text
-
-   $ uw config --help
-   usage: uw config [-h] [--version] ACTION ...
-
-   Handle configs
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     ACTION
-       compare
-         Compare configs
-       realize
-         Realize config
-       validate
-         Validate config
+.. literalinclude:: assets/config-help.cmd
+   :emphasize-lines: 1
+.. literalinclude:: assets/config-help.out
 
 .. _cli_config_compare_examples:
 

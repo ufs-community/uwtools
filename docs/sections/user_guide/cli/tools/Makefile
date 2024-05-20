@@ -1,2 +1,8 @@
-all:
-	$(info HELLO FROM TOOLS)
+SUBDIRS = assets
+
+.PHONY: all $(SUBDIRS)
+
+all: $(SUBDIRS)
+
+$(SUBDIRS):
+	$(MAKE) -C $@
