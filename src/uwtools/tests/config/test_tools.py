@@ -285,32 +285,6 @@ def test_realize_config_incompatible_file_type():
         )
 
 
-def test_realize_config_output_block(tmp_path, realize_config_testobj):
-    """
-    Test that output_block subsets the input as expected.
-    """
-    outfile = tmp_path / "test_output.yaml"
-    tools.realize_config(
-        input_config=realize_config_testobj,
-        output_block=[1],
-        output_file=outfile,
-    )
-    assert YAMLConfig(config=outfile).data == {2: {3: 88}}
-
-
-def test_realize_config_output_block_format_conversion(tmp_path):
-    """
-    Test that output_block subsets the input as expected for output format.
-    """
-    outfile = tmp_path / "test_output.nml"
-    tools.realize_config(
-        input_config=YAMLConfig({"a": {"b": {"c": 88}}}),
-        output_block=["a"],
-        output_file=outfile,
-    )
-    assert NMLConfig(config=outfile).data == {"b": {"c": 88}}
-
-
 def test_realize_config_output_file_format(tmp_path):
     """
     Test that output_format overrides bad output_file extension.
@@ -777,6 +751,16 @@ def test__realize_config_input_setup_yaml_stdin(caplog):
     assert input_obj.data == {"foo": "bar"}
     assert input_format == FORMAT.yaml
     assert logged(caplog, "Reading input from stdin")
+
+
+def test__realize_config_output_setup(caplog, tmp_path):
+    log.setLevel(logging.DEBUG)
+    input_obj = YAMLConfig({"a": {"b": {"foo": "bar"}}})
+    output_file = tmp_path / "output.yaml"
+    assert tools._realize_config_output_setup(
+        input_obj=input_obj, output_file=output_file, output_block=["a", "b"]
+    ) == ({"foo": "bar"}, FORMAT.yaml)
+    assert logged(caplog, f"Writing output to {output_file}")
 
 
 def test__realize_config_update(realize_config_testobj):

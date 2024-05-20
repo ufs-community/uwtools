@@ -94,7 +94,7 @@ def realize_config(
     input_obj = _realize_config_update(input_obj, update_config, update_format)
     input_obj.dereference()
     output_data, output_format = _realize_config_output_setup(
-        input_obj, input_format, output_file, output_format, output_block
+        input_obj, output_file, output_format, output_block
     )
     if dry_run:
         for line in str(input_obj).strip().split("\n"):
@@ -183,7 +183,6 @@ def _realize_config_input_setup(
 
 def _realize_config_output_setup(
     input_obj: Config,
-    input_format: str,
     output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
     output_block: Optional[List[Union[str, int]]] = None,
@@ -192,7 +191,6 @@ def _realize_config_output_setup(
     Set up config-realize output.
 
     :param input_obj: The input Config object.
-    :param input_format: Format of the input config.
     :param output_file: Output config destination (None => write to stdout).
     :param output_format: Format of the output config.
     :param output_block: Path through keys to the desired output block.
@@ -200,7 +198,7 @@ def _realize_config_output_setup(
     """
     output_format = _ensure_format("output", output_format, output_file)
     log.debug("Writing output to %s" % (output_file or "stdout"))
-    _validate_format("output", output_format, input_format)
+    _validate_format("output", output_format, input_obj.get_format())
     output_data = input_obj.data
     if output_block is not None:
         for key in output_block:
