@@ -4,23 +4,29 @@ Tests for uwtools.config.tools module.
 """
 
 import logging
+import sys
+from configparser import ConfigParser
+from io import StringIO
 from pathlib import Path
 from textwrap import dedent
+from unittest.mock import patch
 
-# import f90nml  # type: ignore
-# import pytest
 import yaml
 from pytest import fixture, raises
 
 from uwtools.config import tools
 from uwtools.config.formats.ini import INIConfig
 from uwtools.config.formats.nml import NMLConfig
+
+# from uwtools.config.formats.sh import SHConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.support import depth
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
+from uwtools.strings import FORMAT
 from uwtools.tests.support import compare_files, fixture_path, logged
-from uwtools.utils.file import FORMAT, writable
+from uwtools.utils.file import _stdinproxy as stdinproxy
+from uwtools.utils.file import writable
 
 # Fixtures
 
@@ -669,6 +675,38 @@ def test__print_config_section_yaml_not_dict():
     with raises(UWConfigError) as e:
         tools._print_config_section(config_obj.data, section)
     assert "must be a dictionary" in str(e.value)
+
+
+def test__realize_config_input_setup_ini_cfgobj():
+    d = {"section": {"foo": "bar"}}
+    cfgobj = INIConfig(config=d)
+    input_obj, input_format = tools._realize_config_input_setup(input_config=cfgobj)
+    assert input_obj.data == d
+    assert input_format == FORMAT.ini
+
+
+def test__realize_config_input_setup_ini_file(tmp_path):
+    path = tmp_path / "config.ini"
+    d = {"section": {"foo": "bar"}}
+    INIConfig(config=d).dump(path)
+    input_obj, input_format = tools._realize_config_input_setup(input_config=path)
+    assert input_obj.data == d
+    assert input_format == FORMAT.ini
+
+
+def test__realize_config_input_setup_ini_stdin(caplog):
+    stdinproxy.cache_clear()
+    log.setLevel(logging.DEBUG)
+    s = StringIO()
+    c = ConfigParser()
+    c["section"] = {"foo": "bar"}
+    c.write(s)
+    s.seek(0)
+    with patch.object(sys, "stdin", new=s):
+        input_obj, input_format = tools._realize_config_input_setup(input_format=FORMAT.ini)
+    assert input_obj.data == {"section": {"foo": "bar"}}
+    assert input_format == FORMAT.ini
+    assert logged(caplog, "Reading input from stdin")
 
 
 # @pytest.mark.parametrize(

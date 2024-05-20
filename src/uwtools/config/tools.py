@@ -126,7 +126,7 @@ def _ensure_format(
     :raises: UWError if the format cannot be determined.
     """
     if isinstance(config, Config):
-        return FORMAT.yaml
+        return config.get_format()
     if fmt is None:
         if config is not None:
             fmt = get_file_format(config)
