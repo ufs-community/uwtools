@@ -12,6 +12,7 @@ from textwrap import dedent
 from unittest.mock import patch
 
 import yaml
+from f90nml import Namelist  # type: ignore
 from pytest import fixture, raises
 
 from uwtools.config import tools
@@ -697,15 +698,47 @@ def test__realize_config_input_setup_ini_file(tmp_path):
 def test__realize_config_input_setup_ini_stdin(caplog):
     stdinproxy.cache_clear()
     log.setLevel(logging.DEBUG)
-    s = StringIO()
     c = ConfigParser()
     c["section"] = {"foo": "bar"}
+    s = StringIO()
     c.write(s)
     s.seek(0)
     with patch.object(sys, "stdin", new=s):
         input_obj, input_format = tools._realize_config_input_setup(input_format=FORMAT.ini)
     assert input_obj.data == {"section": {"foo": "bar"}}
     assert input_format == FORMAT.ini
+    assert logged(caplog, "Reading input from stdin")
+
+
+def test__realize_config_input_setup_nml_cfgobj():
+    d = {"nl": {"pi": 3.14}}
+    cfgobj = NMLConfig(config=d)
+    input_obj, input_format = tools._realize_config_input_setup(input_config=cfgobj)
+    assert input_obj.data == d
+    assert input_format == FORMAT.nml
+
+
+def test__realize_config_input_setup_nml_file(tmp_path):
+    path = tmp_path / "config.nml"
+    d = {"nl": {"pi": 3.14}}
+    NMLConfig(config=d).dump(path)
+    input_obj, input_format = tools._realize_config_input_setup(input_config=path)
+    assert input_obj.data == d
+    assert input_format == FORMAT.nml
+
+
+def test__realize_config_input_setup_nml_stdin(caplog):
+    stdinproxy.cache_clear()
+    log.setLevel(logging.DEBUG)
+    d = {"nl": {"pi": 3.14}}
+    n = Namelist(d)
+    s = StringIO()
+    n.write(s)
+    s.seek(0)
+    with patch.object(sys, "stdin", new=s):
+        input_obj, input_format = tools._realize_config_input_setup(input_format=FORMAT.nml)
+    assert input_obj.data == d
+    assert input_format == FORMAT.nml
     assert logged(caplog, "Reading input from stdin")
 
 
