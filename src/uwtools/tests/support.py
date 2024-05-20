@@ -4,7 +4,7 @@ import re
 from copy import deepcopy
 from importlib import resources
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Union
 
 import yaml
 from _pytest.logging import LogCaptureFixture
@@ -13,7 +13,7 @@ from uwtools.config.validator import _validation_errors
 from uwtools.utils.file import resource_path
 
 
-def compare_files(path1: str, path2: str) -> bool:
+def compare_files(path1: Union[Path, str], path2: Union[Path, str]) -> bool:
     """
     Determines whether the two given files are identical up to any number of trailing newlines,
     which are ignored. Print the contents of both files when they do not match.

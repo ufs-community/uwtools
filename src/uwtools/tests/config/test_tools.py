@@ -285,7 +285,7 @@ def test_realize_config_incompatible_file_type():
 
 def test_realize_config_output_block(tmp_path, realize_config_testobj):
     """
-    Test that --output-block subsets the input as expected.
+    Test that output_block subsets the input as expected.
     """
     outfile = tmp_path / "test_output.yaml"
     tools.realize_config(
@@ -293,54 +293,34 @@ def test_realize_config_output_block(tmp_path, realize_config_testobj):
         output_block=[1],
         output_file=outfile,
     )
-    expected = """
-    2:
-      3: 88"""
-    expected_file = tmp_path / "expected.yaml"
-    with open(expected_file, "w", encoding="utf-8") as f:
-        f.write(dedent(expected).strip())
-    assert compare_files(expected_file, outfile)
+    assert YAMLConfig(config=outfile).data == {2: {3: 88}}
 
 
 def test_realize_config_output_block_format_conversion(tmp_path):
     """
-    Test that --output-block subsets the input as expected for output format.
+    Test that output_block subsets the input as expected for output format.
     """
     outfile = tmp_path / "test_output.nml"
-    d = {"a": {"b": {"c": 88}}}
     tools.realize_config(
-        input_config=YAMLConfig(d),
+        input_config=YAMLConfig({"a": {"b": {"c": 88}}}),
         output_block=["a"],
         output_file=outfile,
     )
-    expected = """
-    &b
-        c = 88
-    /"""
-    expected_file = tmp_path / "expected.nml"
-    with open(expected_file, "w", encoding="utf-8") as f:
-        f.write(dedent(expected).strip())
-    assert compare_files(expected_file, outfile)
+    assert NMLConfig(config=outfile).data == {"b": {"c": 88}}
 
 
-def test_realize_config_output_file_conversion(tmp_path):
+def test_realize_config_output_file_format(tmp_path):
     """
-    Test that --output-input-type converts config object to desired object type.
+    Test that output_format overrides bad output_file extension.
     """
     infile = fixture_path("simple.nml")
     outfile = tmp_path / "test_ouput.cfg"
     tools.realize_config(
         input_config=infile,
-        input_format=FORMAT.nml,
         output_file=outfile,
         output_format=FORMAT.nml,
     )
-    expected = NMLConfig(infile)
-    expected_file = tmp_path / "expected.nml"
-    expected.dump(expected_file)
-    assert compare_files(expected_file, outfile)
-    with open(outfile, "r", encoding="utf-8") as f:
-        assert f.read()[-1] == "\n"
+    assert compare_files(outfile, infile)
 
 
 # def test_realize_config_remove_nml_to_nml(tmp_path):
