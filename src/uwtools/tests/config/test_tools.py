@@ -331,7 +331,7 @@ def test_realize_config_remove_yaml_to_yaml_scalar(tmp_path):
     assert {"a": {"b": {"c": 11, "e": 33}}} == tools.realize_config(
         input_config=input_config,
         update_config=update_config,
-        output_format="yaml",
+        output_format=FORMAT.yaml,
     )
 
 
@@ -347,7 +347,7 @@ def test_realize_config_remove_yaml_to_yaml_subtree(tmp_path):
     assert {"a": {}} == tools.realize_config(
         input_config=input_config,
         update_config=update_config,
-        output_format="yaml",
+        output_format=FORMAT.yaml,
     )
 
 
@@ -443,7 +443,7 @@ def test_realize_config_update_none(capsys, tmp_path):
 def test_realize_config_total_fail():
     with raises(UWConfigError) as e:
         tools.realize_config(
-            input_config=YAMLConfig({"foo": "{{ bar }}"}), output_format="yaml", total=True
+            input_config=YAMLConfig({"foo": "{{ bar }}"}), output_format=FORMAT.yaml, total=True
         )
     assert str(e.value) == "Config could not be totally realized"
 
@@ -763,11 +763,26 @@ def test__realize_config_output_setup(caplog, tmp_path):
     assert logged(caplog, f"Writing output to {output_file}")
 
 
-def test__realize_config_update(realize_config_testobj):
+def test__realize_config_update_cfgobj(realize_config_testobj):
     assert realize_config_testobj[1][2][3] == 88
     update_config = YAMLConfig(config={1: {2: {3: 99}}})
     o = tools._realize_config_update(input_obj=realize_config_testobj, update_config=update_config)
     assert o[1][2][3] == 99
+
+
+def test__realize_config_update_stdin(caplog, realize_config_testobj):
+    stdinproxy.cache_clear()
+    log.setLevel(logging.DEBUG)
+    assert realize_config_testobj[1][2][3] == 88
+    s = StringIO()
+    print("{1: {2: {3: 99}}}", file=s)
+    s.seek(0)
+    with patch.object(sys, "stdin", new=s):
+        o = tools._realize_config_update(
+            input_obj=realize_config_testobj, update_format=FORMAT.yaml
+        )
+    assert o[1][2][3] == 99
+    assert logged(caplog, "Reading update from stdin")
 
 
 def test__realize_config_update_noop(realize_config_testobj):
