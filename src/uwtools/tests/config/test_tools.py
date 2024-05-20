@@ -405,77 +405,48 @@ def test_realize_config_simple_yaml(tmp_path):
     help_realize_config_simple("simple2.yaml", FORMAT.yaml, tmp_path)
 
 
-# def test_realize_config_single_dereference(capsys, tmp_path):
-#     path = tmp_path / "a.yaml"
-#     supplemental_path = tmp_path / "b.yaml"
-#     with writable(path) as f:
-#         yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}"}, f)
-#     with writable(supplemental_path) as f:
-#         yaml.dump({"2": "b", "temporalis": "c", "deref": "d"}, f)
-#     tools.realize_config(
-#         input_config=path,
-#         input_format=FORMAT.yaml,
-#         output_format=FORMAT.yaml,
-#         supplemental_configs=[supplemental_path],
-#     )
-#     expected = """'1': a
-# '2': b
-# '3': c
-# deref: d
-# temporalis: c
-# """
-#     actual = capsys.readouterr().out
-#     assert actual == expected
+def test_realize_config_single_dereference(capsys, tmp_path):
+    input_config = tmp_path / "a.yaml"
+    update_config = tmp_path / "b.yaml"
+    with writable(input_config) as f:
+        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}"}, f)
+    with writable(update_config) as f:
+        yaml.dump({"2": "b", "temporalis": "c", "deref": "d"}, f)
+    tools.realize_config(
+        input_config=input_config,
+        update_config=update_config,
+        output_format=FORMAT.yaml,
+    )
+    actual = capsys.readouterr().out.strip()
+    expected = """
+    '1': a
+    '2': b
+    '3': c
+    deref: d
+    temporalis: c
+    """
+    assert actual == dedent(expected).strip()
 
 
-# def test_realize_config_supp_bad_format(tmp_path):
-#     path = tmp_path / "a.yaml"
-#     supplemental_path = tmp_path / "b.clj"
-#     msg = f"Cannot deduce format of '{supplemental_path}' from unknown extension 'clj'"
-#     with writable(path) as f:
-#         yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}", "deref": "b"}, f)
-#     with writable(supplemental_path) as f:
-#         yaml.dump({"2": "b", "temporalis": "c"}, f)
-#     with raises(UWError) as e:
-#         tools.realize_config(
-#             input_config=path,
-#             input_format=FORMAT.yaml,
-#             output_format=FORMAT.yaml,
-#             supplemental_configs=[supplemental_path],
-#             dry_run=True,
-#         )
-#     assert msg in str(e.value)
+def test_realize_config_update_bad_format(tmp_path):
+    input_config = tmp_path / "a.yaml"
+    update_config = tmp_path / "b.clj"
+    with writable(input_config) as f:
+        yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}", "deref": "b"}, f)
+    with writable(update_config) as f:
+        yaml.dump({"2": "b", "temporalis": "c"}, f)
+    with raises(UWError) as e:
+        tools.realize_config(
+            input_config=input_config,
+            update_config=update_config,
+            output_format=FORMAT.yaml,
+            dry_run=True,
+        )
+    msg = f"Cannot deduce format of '{update_config}' from unknown extension 'clj'"
+    assert msg in str(e.value)
 
 
-# def test_realize_config_supp_list(capsys, tmp_path):
-#     path = tmp_path / "a.yaml"
-#     supplemental_path = tmp_path / "b.yaml"
-#     second_supp_path = tmp_path / "c.yaml"
-#     with writable(path) as f:
-#         yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}"}, f)
-#     with writable(supplemental_path) as f:
-#         yaml.dump({"2": "b", "temporalis": "c"}, f)
-#     with writable(second_supp_path) as f:
-#         yaml.dump({"4": "d", "tempus": "fugit", "deref": "{{ tempus }}"}, f)
-#     tools.realize_config(
-#         input_config=path,
-#         input_format=FORMAT.yaml,
-#         output_format=FORMAT.yaml,
-#         supplemental_configs=[supplemental_path, second_supp_path],
-#     )
-#     expected = """'1': a
-# '2': b
-# '3': c
-# temporalis: c
-# '4': d
-# deref: fugit
-# tempus: fugit
-# """
-#     actual = capsys.readouterr().out
-#     assert actual == expected
-
-
-def test_realize_config_supp_none(capsys, tmp_path):
+def test_realize_config_update_none(capsys, tmp_path):
     path = tmp_path / "a.yaml"
     with writable(path) as f:
         yaml.dump({"1": "a", "2": "{{ deref }}", "3": "{{ temporalis }}", "deref": "b"}, f)
@@ -484,13 +455,14 @@ def test_realize_config_supp_none(capsys, tmp_path):
         input_format=FORMAT.yaml,
         output_format=FORMAT.yaml,
     )
-    expected = """'1': a
-'2': b
-'3': '{{ temporalis }}'
-deref: b
-"""
-    actual = capsys.readouterr().out
-    assert actual == expected
+    expected = """
+    '1': a
+    '2': b
+    '3': '{{ temporalis }}'
+    deref: b
+    """
+    actual = capsys.readouterr().out.strip()
+    assert actual == dedent(expected).strip()
 
 
 def test_realize_config_total_fail():
