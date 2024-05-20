@@ -14,46 +14,17 @@ The ``uw`` mode for handling configuration files (configs).
 
 The ``compare`` action lets users compare two config files.
 
-.. code-block:: text
-
-   $ uw config compare --help
-   usage: uw config compare --file-1-path PATH --file-2-path PATH [-h] [--version]
-                            [--file-1-format {ini,nml,sh,yaml}] [--file-2-format {ini,nml,sh,yaml}]
-                            [--quiet] [--verbose]
-
-   Compare configs
-
-   Required arguments:
-     --file-1-path PATH
-         Path to file 1
-     --file-2-path PATH
-         Path to file 2
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --file-1-format {ini,nml,sh,yaml}
-         Format of file 1
-     --file-2-format {ini,nml,sh,yaml}
-         Format of file 2
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: assets/config-compare-help.cmd
+   :emphasize-lines: 1
+.. literalinclude:: assets/config-compare-help.out
 
 Examples
 ^^^^^^^^
 
 The examples that follow use namelist files ``values1.nml`` and ``values2.nml``, both initially with the following contents:
 
-.. code-block:: fortran
-
-   &values
-     greeting = "Hello"
-     recipient = "World"
-   /
+.. literalinclude:: assets/config-compare-match-values1-nml.in
+   :language: fortran
 
 * To compare two config files with the same contents:
 

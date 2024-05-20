@@ -1,5 +1,5 @@
 COMMANDS = $(wildcard *.cmd)
-OUTPUTS = $(COMMANDS:cmd=out)
+OUTPUTS  = $(COMMANDS:cmd=out)
 
 .PHONY: all
 

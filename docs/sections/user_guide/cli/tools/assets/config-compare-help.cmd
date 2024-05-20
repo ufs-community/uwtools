@@ -1,0 +1,1 @@
+uw config compare --help
