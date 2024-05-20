@@ -251,7 +251,7 @@ and YAML file ``update.yaml`` with the following contents:
 
   Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
 
-* Values in the input file can be overridden via one or more supplemental files specified as positional arguments. Priority increases from left to right.
+* Values in the input file can be updates via an optional update file:
 
   .. code-block:: text
 
