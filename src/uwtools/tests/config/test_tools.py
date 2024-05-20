@@ -146,26 +146,22 @@ def test_compare_configs_bad_format(caplog):
     assert logged(caplog, msg)
 
 
-def test_config_check_depths_realize_fail(caplog, realize_config_testobj):
+def test_config_check_depths_realize_fail(realize_config_testobj):
     depthin = depth(realize_config_testobj.data)
     with raises(UWConfigError) as e:
         tools.config_check_depths_realize(
             config_obj=realize_config_testobj, target_format=FORMAT.ini
         )
-    msg = f"Cannot realize depth-{depthin} config to type-'ini' config"
-    assert logged(caplog, msg)
-    assert msg in str(e.value)
+    assert f"Cannot realize depth-{depthin} config to type-'ini' config" in str(e.value)
 
 
-def test_config_check_depths_update_fail(caplog, realize_config_testobj):
+def test_config_check_depths_update_fail(realize_config_testobj):
     depthin = depth(realize_config_testobj.data)
     with raises(UWConfigError) as e:
         tools.config_check_depths_update(
             config_obj=realize_config_testobj, target_format=FORMAT.ini
         )
-    msg = f"Cannot update depth-{depthin} config to type-'ini' config"
-    assert logged(caplog, msg)
-    assert msg in str(e.value)
+    assert f"Cannot update depth-{depthin} config to type-'ini' config" in str(e.value)
 
 
 def test_realize_config_conversion_cfg_to_yaml(tmp_path):

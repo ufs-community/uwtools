@@ -8,7 +8,7 @@ from typing import Callable, List, Optional, Tuple, Union
 from uwtools.config.formats.base import Config
 from uwtools.config.jinja2 import unrendered
 from uwtools.config.support import depth, format_to_config, log_and_error
-from uwtools.exceptions import UWConfigRealizeError, UWError
+from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
 from uwtools.logging import MSGWIDTH, log
 from uwtools.strings import FORMAT
 from uwtools.utils.file import get_file_format
@@ -282,7 +282,7 @@ def _validate_depth(
     target_class = format_to_config(target_format)
     config = config_obj.data if isinstance(config_obj, Config) else config_obj
     if bad_depth(target_class.get_depth_threshold(), depth(config)):
-        raise log_and_error(
+        raise UWConfigError(
             "Cannot %s depth-%s config to type-'%s' config" % (action, depth(config), target_format)
         )
 
