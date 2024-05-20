@@ -236,7 +236,7 @@ and YAML file ``update.yaml`` with the following contents:
      [2024-05-20T18:33:01]     INFO Keys that are set to empty:
      [2024-05-20T18:33:01]     INFO   values.empty
 
-* To realize the config to ``stdout``, tghe output format must be explicitly specified:
+* To realize the config to ``stdout``, the output format must be explicitly specified:
 
   .. code-block:: text
 
