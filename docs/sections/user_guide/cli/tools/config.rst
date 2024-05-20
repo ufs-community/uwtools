@@ -236,7 +236,7 @@ and YAML file ``update.yaml`` with the following contents:
      [2024-05-20T18:33:01]     INFO Keys that are set to empty:
      [2024-05-20T18:33:01]     INFO   values.empty
 
-* To realize the config to ``stdout``, a target output format must be explicitly specified:
+* To realize the config to ``stdout``, tghe output format must be explicitly specified:
 
   .. code-block:: text
 
@@ -295,27 +295,7 @@ and YAML file ``update.yaml`` with the following contents:
      [2024-05-20T19:05:55]     INFO   recipient: Moon
      [2024-05-20T19:05:55]     INFO   repeat: 2
 
-* If an input file is read from ``stdin``, ``uw`` will not automatically know how to parse its contents:
-
-  .. code-block:: text
-
-     $ cat config.yaml | uw config realize --update-file update.yaml --output-format yaml
-     Specify --input-format when --input-file is not specified
-
-  The format can be explicitly specified  (``config.txt`` is a copy of ``config.yaml``):
-
-  .. code-block:: text
-
-     $ cat config.yaml | uw config realize --update-file update.yaml --output-format yaml --input-format yaml
-     values:
-       date: 20240105
-       empty: null
-       greeting: Good Night
-       message: Good Night Moon Good Night Moon
-       recipient: Moon
-       repeat: 2
-
-* Similarly, if the config file has an unrecognized (or no) extension, ``uw`` will not automatically know how to parse its contents:
+* If the config file has an unrecognized (or no) extension, ``uw`` will not automatically know how to parse its contents:
 
   .. code-block:: text
 
@@ -327,6 +307,26 @@ and YAML file ``update.yaml`` with the following contents:
   .. code-block:: text
 
      $ uw config realize --input-file config.txt --update-file update.yaml --output-format yaml --input-format yaml
+     values:
+       date: 20240105
+       empty: null
+       greeting: Good Night
+       message: Good Night Moon Good Night Moon
+       recipient: Moon
+       repeat: 2
+
+* Similarly, if an input file is read from ``stdin``, ``uw`` will not automatically know how to parse its contents:
+
+  .. code-block:: text
+
+     $ cat config.yaml | uw config realize --update-file update.yaml --output-format yaml
+     Specify --input-format when --input-file is not specified
+
+  The format can be explicitly specified  (``config.txt`` is a copy of ``config.yaml``):
+
+  .. code-block:: text
+
+     $ cat config.yaml | uw config realize --update-file update.yaml --output-format yaml --input-format yaml
      values:
        date: 20240105
        empty: null
@@ -355,6 +355,26 @@ and YAML file ``update.yaml`` with the following contents:
 
       $ uw config realize --input-file config.yaml --output-format sh
       [2024-05-20T19:17:02]    ERROR Cannot realize depth-2 config to type-'sh' config
+
+* It is possible to provide update values, rather than the input config, on ``stdin``. Usage rules are as follows:
+
+  * Only if either ``--update-file`` or ``--update-config`` are specified will ``uw`` attempt to read and apply update values to the input config.
+  * If ``--update-file`` is provided with an unrecognized (or no) extension, or if the update values are provided on ``stdin``, ``--update-format`` must be used to specify the correct format.
+  * At least one of the input config and the update config must be provided via file: They cannot be streamed from ``stdin`` simultaneously.
+
+  For example, here the update config is provided on ``stdin`` and the input config is read from a file:
+
+  .. code-block:: text
+
+     $ echo "yyyymmdd: 20240520" | uw config realize --input-file config.yaml --update-format yaml --output-format yaml
+     values:
+       date: '20240520'
+       empty: null
+       greeting: Hello
+       message: Hello World
+       recipient: World
+       repeat: 1
+     yyyymmdd: 20240520
 
 * By default, variables/expressions that cannot be rendered are passed through unchanged in the output. For example, given config file ``flowers.yaml`` with contents
 
