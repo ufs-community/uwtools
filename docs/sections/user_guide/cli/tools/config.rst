@@ -295,18 +295,38 @@ and YAML file ``update.yaml`` with the following contents:
      [2024-05-20T19:05:55]     INFO   recipient: Moon
      [2024-05-20T19:05:55]     INFO   repeat: 2
 
-* If an input file is read alone from ``stdin``, ``uw`` will not know how to parse its contents:
+* If an input file is read from ``stdin``, ``uw`` will not automatically know how to parse its contents:
 
   .. code-block:: text
 
-     $ cat config.yaml | uw config realize --update-file update.yaml --output-file realized.yaml
+     $ cat config.yaml | uw config realize --update-file update.yaml --output-format yaml
      Specify --input-format when --input-file is not specified
 
-* To read the config from ``stdin`` and realize to ``stdout``:
+  The format can be explicitly specified  (``config.txt`` is a copy of ``config.yaml``):
 
   .. code-block:: text
 
-     $ cat config.yaml | uw config realize --input-format yaml --update-file update.yaml --output-format yaml
+     $ cat config.yaml | uw config realize --update-file update.yaml --output-format yaml --input-format yaml
+     values:
+       date: 20240105
+       empty: null
+       greeting: Good Night
+       message: Good Night Moon Good Night Moon
+       recipient: Moon
+       repeat: 2
+
+* Similarly, if the config file has an unrecognized (or no) extension, ``uw`` will not automatically know how to parse its contents:
+
+  .. code-block:: text
+
+     $ uw config realize --input-file config.txt --update-file update.yaml --output-format yaml
+     Cannot deduce format of 'config.txt' from unknown extension 'txt'
+
+  The format can be explicitly specified  (``config.txt`` is a copy of ``config.yaml``):
+
+  .. code-block:: text
+
+     $ uw config realize --input-file config.txt --update-file update.yaml --output-format yaml --input-format yaml
      values:
        date: 20240105
        empty: null
@@ -335,26 +355,6 @@ and YAML file ``update.yaml`` with the following contents:
 
       $ uw config realize --input-file config.yaml --output-format sh
       [2024-05-20T19:17:02]    ERROR Cannot realize depth-2 config to type-'sh' config
-
-* If the config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its contents:
-
-  .. code-block:: text
-
-     $ uw config realize --input-file config.txt --update-file update.yaml --output-format yaml
-     Cannot deduce format of 'config.txt' from unknown extension 'txt'
-
-  In this case, the format can be explicitly specified  (``config.txt`` is a copy of ``config.yaml``):
-
-  .. code-block:: text
-
-     $ uw config realize --input-file config.txt --input-format yaml --update-file update.yaml --output-format yaml
-     values:
-       date: 20240105
-       empty: null
-       greeting: Good Night
-       message: 'Good Night Moon Good Night Moon '
-       recipient: Moon
-       repeat: 2
 
 * By default, variables/expressions that cannot be rendered are passed through unchanged in the output. For example, given config file ``flowers.yaml`` with contents
 
