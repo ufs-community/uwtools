@@ -11,6 +11,8 @@ from textwrap import dedent
 from unittest.mock import patch
 
 import f90nml  # type: ignore
+
+# import pytest
 import yaml
 from pytest import fixture, raises
 
@@ -778,51 +780,25 @@ def test__realize_config_input_setup_yaml_stdin(caplog):
     assert logged(caplog, "Reading input from stdin")
 
 
-# @pytest.mark.parametrize(
-#     "supplemental_configs", [YAMLConfig(config={1: {2: {3: 99}}}), {1: {2: {3: 99}}}]
-# )
-# def test__realize_config_update(realize_config_testobj, supplemental_configs):
-#     assert realize_config_testobj[1][2][3] == 88
-#     o = tools._realize_config_update(
-#         config_obj=realize_config_testobj,
-#         config_fmt="yaml",
-#         supplemental_configs=[supplemental_configs],
-#     )
-#     assert o[1][2][3] == 99
+def test__realize_config_update(realize_config_testobj):
+    assert realize_config_testobj[1][2][3] == 88
+    update_config = YAMLConfig(config={1: {2: {3: 99}}})
+    o = tools._realize_config_update(input_obj=realize_config_testobj, update_config=update_config)
+    assert o[1][2][3] == 99
 
 
-# def test__realize_config_update_noop(realize_config_testobj):
-#     assert realize_config_testobj == tools._realize_config_update(
-#         config_obj=realize_config_testobj, config_fmt="yaml", supplemental_configs=None
-#     )
+def test__realize_config_update_noop(realize_config_testobj):
+    assert tools._realize_config_update(input_obj=realize_config_testobj) == realize_config_testobj
 
 
-# def test__realize_config_update_file(realize_config_testobj, tmp_path):
-#     values = {1: {2: {3: 99}}}
-#     path = tmp_path / "config.yaml"
-#     with open(path, "w", encoding="utf-8") as f:
-#         yaml.dump(values, f)
-#     assert realize_config_testobj[1][2][3] == 88
-#     o = tools._realize_config_update(
-#         config_obj=realize_config_testobj, config_fmt="yaml", supplemental_configs=[path]
-#     )
-#     assert o[1][2][3] == 99
-
-
-# def test__realize_config_update_list(realize_config_testobj, tmp_path):
-#     values = {1: {2: {3: 99}}}
-#     path = tmp_path / "config.yaml"
-#     with open(path, "w", encoding="utf-8") as f:
-#         yaml.dump(values, f)
-#     values2 = {1: {2: {3: 77}}}
-#     path2 = tmp_path / "config2.yaml"
-#     with open(path2, "w", encoding="utf-8") as f:
-#         yaml.dump(values2, f)
-#     assert realize_config_testobj[1][2][3] == 88
-#     o = tools._realize_config_update(
-#         config_obj=realize_config_testobj, config_fmt="yaml", supplemental_configs=[path, path2]
-#     )
-#     assert o[1][2][3] == 77
+def test__realize_config_update_file(realize_config_testobj, tmp_path):
+    assert realize_config_testobj[1][2][3] == 88
+    values = {1: {2: {3: 99}}}
+    update_config = tmp_path / "config.yaml"
+    with open(update_config, "w", encoding="utf-8") as f:
+        yaml.dump(values, f)
+    o = tools._realize_config_update(input_obj=realize_config_testobj, update_config=update_config)
+    assert o[1][2][3] == 99
 
 
 def test__realize_config_values_needed(caplog, tmp_path):
