@@ -1,0 +1,37 @@
+usage: uw config realize [-h] [--version] [--input-file PATH]
+                         [--input-format {ini,nml,sh,yaml}]
+                         [--output-file PATH]
+                         [--output-format {ini,nml,sh,yaml}]
+                         [--output-block KEY[.KEY[.KEY]...]] [--values-needed]
+                         [--total] [--dry-run] [--quiet] [--verbose]
+                         [PATH ...]
+
+Realize config
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --input-file PATH, -i PATH
+      Path to input file (defaults to stdin)
+  --input-format {ini,nml,sh,yaml}
+      Input format
+  --output-file PATH, -o PATH
+      Path to output file (defaults to stdout)
+  --output-format {ini,nml,sh,yaml}
+      Output format
+  --output-block KEY[.KEY[.KEY]...]
+      Dot-separated path of keys to the block to be output
+  --values-needed
+      Print report of values needed to render template
+  --total
+      Require rendering of all Jinja2 variables/expressions
+  --dry-run
+      Only log info, making no changes
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages
+  PATH
+      Additional files to supplement primary input
