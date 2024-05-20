@@ -65,7 +65,7 @@ def make_execute(
             batch=batch,
             dry_run=dry_run,
             graph_file=graph_file,
-            key_path=None,
+            key_path=key_path,
             stdin_ok=stdin_ok,
         )
 
@@ -88,7 +88,7 @@ def make_execute(
             batch=batch,
             dry_run=dry_run,
             graph_file=graph_file,
-            key_path=None,
+            key_path=key_path,
             stdin_ok=stdin_ok,
         )
 
@@ -112,7 +112,7 @@ def make_execute(
             batch=batch,
             dry_run=dry_run,
             graph_file=graph_file,
-            key_path=None,
+            key_path=key_path,
             stdin_ok=stdin_ok,
         )
 
@@ -197,11 +197,10 @@ def _execute(
         config=ensure_data_source(config, stdin_ok),
         batch=batch,
         dry_run=dry_run,
+        key_path=key_path,
     )
     if cycle:
         kwargs["cycle"] = cycle
-    if key_path:
-        kwargs["key_path"] = key_path
     if leadtime:
         kwargs["leadtime"] = leadtime
     obj = driver_class(**kwargs)
