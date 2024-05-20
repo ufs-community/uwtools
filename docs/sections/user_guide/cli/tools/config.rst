@@ -28,19 +28,15 @@ The examples that follow use namelist files ``a.nml`` and ``b.nml``, both initia
 
 * To compare two config files with the same contents:
 
-.. literalinclude:: config/compare-match.cmd
-   :emphasize-lines: 1
-.. literalinclude:: config/compare-match.out
+  .. literalinclude:: config/compare-match.cmd
+     :emphasize-lines: 1
+  .. literalinclude:: config/compare-match.out
 
-* If there are differences between the config files, they will be shown below the dashed line. For example, with ``recipient: World`` removed from ``values1.nml``:
+* If there are differences between the config files, they will be shown below the dashed line. For example, ``c.nml`` is missing the line ``recipient: World``:
 
-  .. code-block:: text
-
-     $ uw config compare --file-1-path values1.nml --file-2-path values2.nml
-     [2024-01-08T16:54:03]     INFO - values1.nml
-     [2024-01-08T16:54:03]     INFO + values2.nml
-     [2024-01-08T16:54:03]     INFO ---------------------------------------------------------------------
-     [2024-01-08T16:54:03]     INFO values:       recipient:  - None + World
+  .. literalinclude:: config/compare-diff.cmd
+     :emphasize-lines: 1
+  .. literalinclude:: config/compare-diff.out
 
 * If a config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its contents:
 
