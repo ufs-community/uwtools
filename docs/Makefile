@@ -13,6 +13,7 @@ clean:
 	$(RM) -rv $(BUILDDIR)
 
 docs:
+	$(MAKE) -C sections
 	$(MAKE) linkcheck
 	$(MAKE) html
 
