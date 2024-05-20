@@ -329,11 +329,11 @@ Realize an output config based on an input config and optional values-providing 
 
 Recognized file extensions are: {extensions}
 
-:param input_config: Input config source (None => read stdin).
+:param input_config: Input config source (None => read ``stdin``).
 :param input_format: Format of the input config.
-:param update_config: Input config source (None => read stdin).
+:param update_config: Input config source (None => read ``stdin``).
 :param update_format: Format of the update config.
-:param output_file: Output config destination (None => write to stdout).
+:param output_file: Output config destination (None => write to ``stdout``).
 :param output_format: Format of the output config.
 :param output_block: Path through keys to the desired output block.
 :param values_needed: Report complete, missing, and template values.

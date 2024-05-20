@@ -28,7 +28,7 @@ def realize(
         ``YAMLConfig`` object
     :param output_file: Path to write rendered XML file (``None`` or unspecified => write to
         ``stdout``)
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: ``True``
     """
     _realize(config=_ensure_data_source(config, stdin_ok), output_file=_str2path(output_file))
@@ -43,7 +43,7 @@ def validate(
     Validate purported Rocoto XML file against its schema.
 
     :param xml_file: Path to XML file (``None`` or unspecified => read ``stdin``)
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if the XML conforms to the schema, ``False`` otherwise
     """
     return _validate(xml_file=_ensure_data_source(xml_file, stdin_ok))

@@ -47,7 +47,7 @@ def get_fieldtable_config(
 
     :param config: FieldTable file to load (``None`` or unspecified => read ``stdin``), or initial
         ``dict``
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``FieldTableConfig`` object
     """
     return _FieldTableConfig(config=_ensure_data_source(config, stdin_ok))
@@ -61,7 +61,7 @@ def get_ini_config(
     Get an ``INIConfig`` object.
 
     :param config: INI file to load (``None`` or unspecified => read ``stdin``), or initial ``dict``
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``INIConfig`` object
     """
     return _INIConfig(config=_ensure_data_source(config, stdin_ok))
@@ -76,7 +76,7 @@ def get_nml_config(
 
     :param config: Fortran namelist file to load (``None`` or unspecified => read ``stdin``), or
         initial ``dict``
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``NMLConfig`` object
     """
     return _NMLConfig(config=_ensure_data_source(config, stdin_ok))
@@ -91,7 +91,7 @@ def get_sh_config(
 
     :param config: File of shell 'key=value' pairs to load (``None`` or unspecified => read
         ``stdin``), or initial ``dict``
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``SHConfig`` object
     """
     return _SHConfig(config=_ensure_data_source(config, stdin_ok))
@@ -106,7 +106,7 @@ def get_yaml_config(
 
     :param config: YAML file to load (``None`` or unspecified => read ``stdin``), or initial
         ``dict``
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``YAMLConfig`` object
     """
     return _YAMLConfig(config=_ensure_data_source(config, stdin_ok))
@@ -175,7 +175,7 @@ def validate(
 
     :param schema_file: The JSON Schema file to use for validation
     :param config: The config to validate
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise
     """
     return _validate_yaml(
@@ -208,18 +208,18 @@ realize.__doc__ = """
 Realize a config based on a base input config and an optional update config.
 
 The input config may be specified as a filesystem path, a ``dict``, or a ``Config`` object. When it
-is not, it will be read from stdin.
+is not, it will be read from ``stdin``.
 
 If an update config is specified, it is merged onto the input config, augmenting or overriding base
 values. It may be specified as a filesystem path, a ``dict``, or a ``Config`` object. When it is
-not, it will be read from stdin.
+not, it will be read from ``stdin``.
 
 At most one of the input config or the update config may be left unspecified, in which case the
-other will be read from stdin. If neither filename or format is specified for the update config, no
+other will be read from ``stdin``. If neither filename or format is specified for the update config, no
 update will be performed.
 
 The output destination may be specified as a filesystem path. When it is not, it will be written to
-stdout.
+``stdout``.
 
 If ``values_needed`` is ``True``, a report of values needed to realize the config is logged. In
 ``dry_run`` mode, output is written to ``stderr``.
@@ -239,7 +239,7 @@ Recognized file extensions are: {extensions}
 :param values_needed: Report complete, missing, and template values
 :param total: Require rendering of all Jinja2 variables/expressions
 :param dry_run: Log output instead of writing to output
-:param stdin_ok: OK to read from stdin?
+:param stdin_ok: OK to read from ``stdin``?
 :raises: UWConfigRealizeError if ``total`` is ``True`` and any Jinja2 variable/expression was not rendered
 """.format(
     extensions=", ".join(_FORMAT.extensions())

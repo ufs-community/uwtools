@@ -24,7 +24,7 @@ def copy(
     :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
     :param keys: YAML keys leading to file dst/src block
     :param dry_run: Do not copy files
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if no exception is raised
     """
     _FileCopier(
@@ -50,7 +50,7 @@ def link(
     :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
     :param keys: YAML keys leading to file dst/src block
     :param dry_run: Do not link files
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if no exception is raised
     """
     _FileLinker(
