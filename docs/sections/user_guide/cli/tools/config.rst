@@ -6,6 +6,7 @@ The ``uw`` mode for handling configuration files (configs).
 .. literalinclude:: config/help.cmd
    :emphasize-lines: 1
 .. literalinclude:: config/help.out
+   :language: text
 
 .. _cli_config_compare_examples:
 
@@ -17,6 +18,7 @@ The ``compare`` action lets users compare two config files.
 .. literalinclude:: config/compare-help.cmd
    :emphasize-lines: 1
 .. literalinclude:: config/compare-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
@@ -31,65 +33,44 @@ The examples that follow use namelist files ``a.nml`` and ``b.nml``, both initia
   .. literalinclude:: config/compare-match.cmd
      :emphasize-lines: 1
   .. literalinclude:: config/compare-match.out
+     :language: text
 
 * If there are differences between the config files, they will be shown below the dashed line. For example, ``c.nml`` is missing the line ``recipient: World``:
 
   .. literalinclude:: config/compare-diff.cmd
      :emphasize-lines: 1
   .. literalinclude:: config/compare-diff.out
+     :language: text
 
 * If a config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its contents:
 
-  .. code-block:: text
+  .. literalinclude:: config/compare-bad-extension.cmd
+     :emphasize-lines: 1
+  .. literalinclude:: config/compare-bad-extension.out
+     :language: text
 
-     $ uw config compare --file-1-path values.txt --file-2-path values1.nml
-     Cannot deduce format of 'values.txt' from unknown extension 'txt'
+  In this case, the format can be explicitly specified (``a.txt`` is a copy of ``a.nml``):
 
-  In this case, the format can be explicitly specified (``values.txt`` is a copy of ``values1.nml``):
-
-  .. code-block:: text
-
-     $ uw config compare --file-1-path values.txt --file-1-format nml --file-2-path values2.nml
-     [2024-01-08T16:56:54]     INFO - values.txt
-     [2024-01-08T16:56:54]     INFO + values2.nml
-     [2024-01-08T16:56:54]     INFO ---------------------------------------------------------------------
-     [2024-01-08T16:56:54]     INFO values:       recipient:  - None + World
+  .. literalinclude:: config/compare-bad-extension-fix.cmd
+     :emphasize-lines: 1
+  .. literalinclude:: config/compare-bad-extension-fix.out
+     :language: text
 
 * To request verbose log output:
 
-  .. code-block:: text
+  .. literalinclude:: config/compare-verbose.cmd
+     :emphasize-lines: 1
+  .. literalinclude:: config/compare-verbose.out
+     :language: text
 
-     $ uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose
-     [2024-01-08T16:57:28]    DEBUG Command: uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose
-     [2024-01-08T16:57:28]     INFO - values1.nml
-     [2024-01-08T16:57:28]     INFO + values2.nml
-     [2024-01-08T16:57:28]     INFO ---------------------------------------------------------------------
-     [2024-01-08T16:57:28]     INFO values:       recipient:  - None + World
-
-  If additional information is needed, ``--debug`` can be used which will return the stack trace from any unhandled exception as well.
-
-  Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
-
-  .. code-block:: text
-
-     $ uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose 2>compare.log
-
-  The contents of ``compare.log``:
-
-   .. code-block:: text
-
-      [2024-01-08T16:59:20]    DEBUG Command: uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose
-      [2024-01-08T16:59:20]     INFO - values1.nml
-      [2024-01-08T16:59:20]     INFO + values2.nml
-      [2024-01-08T16:59:20]     INFO ---------------------------------------------------------------------
-      [2024-01-08T16:59:20]     INFO values:       recipient:  - None + World
+  Note that ``uw`` logs to ``stderr``. Use `shell redirection <https://www.gnu.org/software/bash/manual/html_node/Redirections.html>`_ as needed.
 
 .. note:: Comparisons are supported only for configs of the same format, e.g. YAML vs YAML, Fortran namelist vs Fortran namelist, etc. ``uw`` will flag invalid comparisons:
 
-   .. code-block:: text
-
-      $ uw config compare --file-1-path a.yaml --file-2-path b.nml
-      [2024-01-23T23:21:37]    ERROR Formats do not match: yaml vs nml
+   .. literalinclude:: config/compare-format-mismatch.cmd
+      :emphasize-lines: 1
+   .. literalinclude:: config/compare-format-mismatch.out
+      :language: text
 
 .. _cli_config_realize_examples:
 
