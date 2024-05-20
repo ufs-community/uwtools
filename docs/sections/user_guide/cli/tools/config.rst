@@ -3,9 +3,9 @@
 
 The ``uw`` mode for handling configuration files (configs).
 
-.. literalinclude:: assets/config-help.cmd
+.. literalinclude:: config/help.cmd
    :emphasize-lines: 1
-.. literalinclude:: assets/config-help.out
+.. literalinclude:: config/help.out
 
 .. _cli_config_compare_examples:
 
@@ -14,26 +14,23 @@ The ``uw`` mode for handling configuration files (configs).
 
 The ``compare`` action lets users compare two config files.
 
-.. literalinclude:: assets/config-compare-help.cmd
+.. literalinclude:: config/compare-help.cmd
    :emphasize-lines: 1
-.. literalinclude:: assets/config-compare-help.out
+.. literalinclude:: config/compare-help.out
 
 Examples
 ^^^^^^^^
 
-The examples that follow use namelist files ``values1.nml`` and ``values2.nml``, both initially with the following contents:
+The examples that follow use namelist files ``a.nml`` and ``b.nml``, both initially with the following contents:
 
-.. literalinclude:: assets/config-compare-match-values1-nml.in
+.. literalinclude:: config/a.nml
    :language: fortran
 
 * To compare two config files with the same contents:
 
-  .. code-block:: text
-
-     $ uw config compare --file-1-path values1.nml --file-2-path values2.nml
-     [2024-01-08T16:53:04]     INFO - values1.nml
-     [2024-01-08T16:53:04]     INFO + values2.nml
-     [2024-01-08T16:53:04]     INFO ---------------------------------------------------------------------
+.. literalinclude:: config/compare-match.cmd
+   :emphasize-lines: 1
+.. literalinclude:: config/compare-match.out
 
 * If there are differences between the config files, they will be shown below the dashed line. For example, with ``recipient: World`` removed from ``values1.nml``:
 

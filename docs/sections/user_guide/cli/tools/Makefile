@@ -1,4 +1,4 @@
-SUBDIRS = assets
+SUBDIRS = config
 
 .PHONY: all $(SUBDIRS)
 

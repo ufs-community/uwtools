@@ -1,9 +1,9 @@
 COMMANDS = $(wildcard *.cmd)
 OUTPUTS  = $(COMMANDS:cmd=out)
 
-.PHONY: all
+.PHONY: all $(OUTPUTS)
 
 all: $(OUTPUTS)
 
-%.out: %.cmd
-	$$(cat $<) >$@
+$(OUTPUTS):
+	$$(cat $(basename $@).cmd) >$@ 2>&1
