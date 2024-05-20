@@ -968,10 +968,9 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
         "batch": args[STR.batch],
         "dry_run": args[STR.dryrun],
         "graph_file": args[STR.graphfile],
+        "key_path": args[STR.keypath],
         "stdin_ok": True,
     }
-    if key_path := args.get(STR.keypath):
-        kwargs[STR.keypath] = key_path
     if cycle := args.get(STR.cycle):
         kwargs[STR.cycle] = cycle
     if leadtime := args.get(STR.leadtime):

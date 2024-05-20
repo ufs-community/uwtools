@@ -34,7 +34,6 @@ def ensure_data_source(
 
 def make_execute(
     driver_class: type[Driver],
-    key_path: Optional[List[str]] = None,
     with_cycle: Optional[bool] = False,
     with_leadtime: Optional[bool] = False,
 ) -> Callable[..., bool]:
@@ -42,7 +41,6 @@ def make_execute(
     Returns a function that executes tasks for the given driver.
 
     :param driver_class: The driver class whose tasks to execute.
-    :param key_path: Does this driver require a sub-section of YAML to be output?
     :param with_cycle: Does the driver's constructor take a 'cycle' parameter?
     :param with_leadtime: Does the driver's constructor take a 'leadtime' parameter?
     """
