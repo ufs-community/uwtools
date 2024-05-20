@@ -187,7 +187,7 @@ def _execute(
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run the executable, just report what would have been done.
     :param graph_file: Write Graphviz DOT output here.
-    :param key_path: Does this driver require a sub-section of YAML to be output?
+    :param key_path: Path of keys to subsection of config file. 
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
