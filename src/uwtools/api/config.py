@@ -231,7 +231,7 @@ Recognized file extensions are: {extensions}
 
 :param input_config: Input config file (``None`` or unspecified => read ``stdin``)
 :param input_format: Format of the input config (optional if file's extension is recognized)
-:param update_config: Input config file (``None`` or unspecified => read ``stdin``)
+:param update_config: Update config file (``None`` or unspecified => read ``stdin``)
 :param update_format: Format of the update config (optional if file's extension is recognized)
 :param output_file: Output config file (``None`` or unspecified => write to ``stdout``)
 :param output_format: Format of the output config (optional if file's extension is recognized)
