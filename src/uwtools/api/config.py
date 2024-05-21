@@ -155,7 +155,7 @@ def realize_to_dict(  # pylint: disable=unused-argument
     stdin_ok: bool = False,
 ) -> dict:
     """
-    Realize a config to a ``dict``, based on a base input config and optional update config.
+    Realize a config to a ``dict``, based on a base input config and an optional update config.
 
     See ``realize()`` for details on arguments, etc.
     """
