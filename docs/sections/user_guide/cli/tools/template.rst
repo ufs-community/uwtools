@@ -3,115 +3,59 @@
 
 The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 
-.. code-block:: text
-
-   $ uw template --help
-   usage: uw template [-h] [--version] ACTION ...
-
-   Handle templates
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     ACTION
-       render
-         Render a template
-       translate
-         Translate atparse to Jinja2
+.. literalinclude:: template/help.cmd
+   :emphasize-lines: 1
+.. literalinclude:: template/help.out
+   :language: text
 
 .. _cli_template_render_examples:
 
 ``render``
 ----------
 
-.. code-block:: text
-
-   $ uw template render --help
-   usage: uw template render [-h] [--version] [--input-file PATH] [--output-file PATH]
-                             [--values-file PATH] [--values-format {ini,nml,sh,yaml}] [--env]
-                             [--search-path PATH[:PATH:...]] [--values-needed] [--dry-run] [--quiet]
-                             [--verbose]
-                             [KEY=VALUE ...]
-
-   Render a template
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --input-file PATH, -i PATH
-         Path to input file (defaults to stdin)
-     --output-file PATH, -o PATH
-         Path to output file (defaults to stdout)
-     --values-file PATH
-         Path to file providing override or interpolation values
-     --values-format {ini,nml,sh,yaml}
-         Values format
-     --env
-         Use environment variables
-     --search-path PATH[:PATH:...]
-         Colon-separated paths to search for extra templates
-     --values-needed
-         Print report of values needed to render template
-     --dry-run
-         Only log info, making no changes
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
-     KEY=VALUE
-         A key=value pair to override/supplement config
+.. literalinclude:: template/render-help.cmd
+   :emphasize-lines: 1
+.. literalinclude:: template/render-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
 The examples in this section use a template file named ``template`` with the following contents:
 
-.. code-block:: jinja
-
-   {{ greeting }}, {{ recipient }}!
+.. literalinclude:: template/template
+   :language: jinja
 
 and a YAML file called ``values.yaml`` with the following contents:
 
-.. code-block:: yaml
-
-   greeting: Hello
-   recipient: World
+.. literalinclude:: template/values.yaml
+   :language: yaml
 
 * To show the values needed to render the template:
 
-  .. code-block:: text
-
-     $ uw template render --input-file template --values-needed
-     [2023-12-18T19:16:08]     INFO Value(s) needed to render this template are:
-     [2023-12-18T19:16:08]     INFO   greeting
-     [2023-12-18T19:16:08]     INFO   recipient
+  .. literalinclude:: template/render-exec-values-needed.cmd
+     :emphasize-lines: 1
+  .. literalinclude:: template/render-exec-values-needed.out
+     :language: text
 
 * To render the template to ``stdout``:
 
-  .. code-block:: text
-
-     $ uw template render --input-file template --values-file values.yaml
-     Hello, World!
+  .. literalinclude:: template/render-exec-stdout.cmd
+     :emphasize-lines: 1
+  .. literalinclude:: template/render-exec-stdout.out
+     :language: text
 
   Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
 
 * To render the template to a file via command-line argument:
 
-  .. code-block:: text
-
-     $ uw template render --input-file template --values-file values.yaml --output-file rendered
+  .. literalinclude:: template/render-exec-file.cmd
+     :emphasize-lines: 1
 
   The content of ``rendered``:
 
-  .. code-block:: text
-
-     Hello, World!
+  .. literalinclude:: template/rendered
+     :language: text
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
