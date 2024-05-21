@@ -302,7 +302,7 @@ and YAML file ``update.yaml`` with the following contents:
      $ uw config realize --input-file config.txt --update-file update.yaml --output-format yaml
      Cannot deduce format of 'config.txt' from unknown extension 'txt'
 
-  The format can be explicitly specified  (``config.txt`` is a copy of ``config.yaml``):
+  The format must be explicitly specified  (``config.txt`` is a copy of ``config.yaml``):
 
   .. code-block:: text
 
@@ -322,7 +322,7 @@ and YAML file ``update.yaml`` with the following contents:
      $ cat config.yaml | uw config realize --update-file update.yaml --output-format yaml
      Specify --input-format when --input-file is not specified
 
-  The format can be explicitly specified  (``config.txt`` is a copy of ``config.yaml``):
+  The format must be explicitly specified:
 
   .. code-block:: text
 
