@@ -638,7 +638,7 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
     )
 
 
-def _add_arg_key_path(group: Group):
+def _add_arg_key_path(group: Group) -> None:
     group.add_argument(
         _switch(STR.keypath),
         help="Dot-separated path of keys to the subsection of config file",
@@ -884,6 +884,7 @@ def _add_subparser_for_driver_task(
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
+    _add_arg_key_path(optional)
     checks = _add_args_verbosity(optional)
     return checks
 

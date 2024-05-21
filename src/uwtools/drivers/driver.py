@@ -43,7 +43,7 @@ class Driver(ABC):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         :param cycle: The cycle.
-        :param key_path: Path of keys to subsection of config file. 
+        :param key_path: Path of keys to subsection of config file.
         :param leadtime: The leadtime.
         """
         dryrun(enable=dry_run)
