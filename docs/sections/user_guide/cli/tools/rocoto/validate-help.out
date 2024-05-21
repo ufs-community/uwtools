@@ -1,0 +1,16 @@
+usage: uw rocoto validate [-h] [--version] [--input-file PATH] [--quiet]
+                          [--verbose]
+
+Validate Rocoto XML
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --input-file PATH, -i PATH
+      Path to input file (defaults to stdin)
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages

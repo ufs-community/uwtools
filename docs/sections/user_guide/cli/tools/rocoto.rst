@@ -84,165 +84,48 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
 ``validate``
 ------------
 
-.. code-block:: text
-
-   $ uw rocoto validate --help
-   usage: uw rocoto validate [-h] [--version] [--input-file PATH] [--quiet] [--verbose]
-
-   Validate Rocoto XML
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --input-file PATH, -i PATH
-         Path to input file (defaults to stdin)
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: rocoto/validate-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: rocoto/validate-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
-The examples in this section use a Rocoto XML file called ``rocoto.xml`` with the following content:
+The examples in this section use a Rocoto XML file called ``rocoto-good.xml`` with the following content:
 
-.. code-block:: xml
-   :linenos:
-
-   <?xml version='1.0' encoding='utf-8'?>
-   <!DOCTYPE workflow [
-     <!ENTITY ACCOUNT "myaccount">
-     <!ENTITY FOO "test.log">
-   ]>
-   <workflow realtime="False" scheduler="slurm">
-     <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
-     <log>/some/path/to/&FOO;</log>
-     <task name="hello" cycledefs="howdy">
-       <account>&ACCOUNT;</account>
-       <nodes>1:ppn=1</nodes>
-       <walltime>00:01:00</walltime>
-       <command>echo hello $person</command>
-       <jobname>hello</jobname>
-       <envar>
-         <name>person</name>
-         <value>siri</value>
-       </envar>
-     </task>
-   </workflow>
+.. literalinclude:: rocoto/rocoto-good.xml
+   :language: xml
 
 * To validate an XML from ``stdin``:
 
-  .. code-block:: text
+  .. literalinclude:: rocoto/validate-good-stdin.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/validate-good-stdin.out
+     :language: text
 
-     $ cat rocoto.xml | uw rocoto validate
-     [2024-01-02T14:18:46]     INFO 0 Rocoto validation errors found
+* To validate an XML from file ``rocoto-good.xml``:
 
-* To validate an XML from file ``rocoto.xml``:
-
-  .. code-block:: text
-
-     $ uw rocoto validate --input-file rocoto.xml
-     [2024-01-02T14:18:46]     INFO 0 Rocoto validation errors found
+  .. literalinclude:: rocoto/validate-good-file.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/validate-good-file.out
+     :language: text
 
 * When the XML is invalid:
 
-  In this example, the ``<command>`` line was removed from the XML.
+  In this example, the ``<command>`` line was removed from ``rocoto-good.xml`` to create ``rocoto-bad.xml``.
 
-  .. code-block:: text
+  .. literalinclude:: rocoto/validate-bad-file.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/validate-bad-file.out
+     :language: text
 
-     $ uw rocoto validate --input-file rocoto.xml
-     [2024-01-10T21:54:51]    ERROR 3 Rocoto validation errors found
-     [2024-01-10T21:54:51]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_NOELEM: Expecting an element command, got nothing
-     [2024-01-10T21:54:51]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_INTERSEQ: Invalid sequence in interleave
-     [2024-01-10T21:54:51]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_CONTENTVALID: Element task failed to validate content
-     [2024-01-10T21:54:51]    ERROR Invalid Rocoto XML:
-     [2024-01-10T21:54:51]    ERROR  1 <?xml version='1.0' encoding='utf-8'?>
-     [2024-01-10T21:54:51]    ERROR  2 <!DOCTYPE workflow [
-     [2024-01-10T21:54:51]    ERROR  3   <!ENTITY ACCOUNT "myaccount">
-     [2024-01-10T21:54:51]    ERROR  4   <!ENTITY FOO "test.log">
-     [2024-01-10T21:54:51]    ERROR  5 ]>
-     [2024-01-10T21:54:51]    ERROR  6 <workflow realtime="False" scheduler="slurm">
-     [2024-01-10T21:54:51]    ERROR  7   <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
-     [2024-01-10T21:54:51]    ERROR  8   <log>/some/path/to/&FOO;</log>
-     [2024-01-10T21:54:51]    ERROR  9   <task name="hello" cycledefs="howdy">
-     [2024-01-10T21:54:51]    ERROR 10     <account>&ACCOUNT;</account>
-     [2024-01-10T21:54:51]    ERROR 11     <nodes>1:ppn=1</nodes>
-     [2024-01-10T21:54:51]    ERROR 12     <walltime>00:01:00</walltime>
-     [2024-01-10T21:54:51]    ERROR 13     <jobname>hello</jobname>
-     [2024-01-10T21:54:51]    ERROR 14     <envar>
-     [2024-01-10T21:54:51]    ERROR 15       <name>person</name>
-     [2024-01-10T21:54:51]    ERROR 16       <value>siri</value>
-     [2024-01-10T21:54:51]    ERROR 17     </envar>
-     [2024-01-10T21:54:51]    ERROR 18   </task>
-     [2024-01-10T21:54:51]    ERROR 19 </workflow>
+  To decode the three ``ERROR:RELAXNGV`` messages, it is easiest to read from the bottom up. They say:
 
-  To decode this type of output, it is easiest to interpret it from the bottom up. It says:
-
-  * The task starting at Line 9 has invalid content.
-  * There was an invalid sequence.
-  * It was expecting a ``<command>`` element, but there wasn't one.
-
-  In the following example, an empty ``<dependency>`` element was added at the end of the task:
-
-  .. code-block:: xml
-     :linenos:
-
-     <?xml version='1.0' encoding='utf-8'?>
-     <!DOCTYPE workflow [
-       <!ENTITY ACCOUNT "myaccount">
-       <!ENTITY FOO "test.log">
-     ]>
-     <workflow realtime="False" scheduler="slurm">
-       <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
-       <log>/some/path/to/&FOO;</log>
-       <task name="hello" cycledefs="howdy">
-         <account>&ACCOUNT;</account>
-         <nodes>1:ppn=1</nodes>
-         <walltime>00:01:00</walltime>
-         <command>echo hello $person</command>
-         <jobname>hello</jobname>
-         <envar>
-           <name>person</name>
-           <value>siri</value>
-         </envar>
-         <dependency>
-         </dependency>
-       </task>
-     </workflow>
-
-  .. code-block:: text
-
-     $ uw rocoto validate --input-file rocoto.xml
-     [2024-01-10T21:56:14]    ERROR 2 Rocoto validation errors found
-     [2024-01-10T21:56:14]    ERROR <string>:0:0:ERROR:RELAXNGV:RELAXNG_ERR_INTEREXTRA: Extra element dependency in interleave
-     [2024-01-10T21:56:14]    ERROR <string>:9:0:ERROR:RELAXNGV:RELAXNG_ERR_CONTENTVALID: Element task failed to validate content
-     [2024-01-10T21:56:14]    ERROR Invalid Rocoto XML:
-     [2024-01-10T21:56:14]    ERROR  1 <?xml version='1.0' encoding='utf-8'?>
-     [2024-01-10T21:56:14]    ERROR  2 <!DOCTYPE workflow [
-     [2024-01-10T21:56:14]    ERROR  3   <!ENTITY ACCOUNT "myaccount">
-     [2024-01-10T21:56:14]    ERROR  4   <!ENTITY FOO "test.log">
-     [2024-01-10T21:56:14]    ERROR  5 ]>
-     [2024-01-10T21:56:14]    ERROR  6 <workflow realtime="False" scheduler="slurm">
-     [2024-01-10T21:56:14]    ERROR  7   <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
-     [2024-01-10T21:56:14]    ERROR  8   <log>/some/path/to/&FOO;</log>
-     [2024-01-10T21:56:14]    ERROR  9   <task name="hello" cycledefs="howdy">
-     [2024-01-10T21:56:14]    ERROR 10     <account>&ACCOUNT;</account>
-     [2024-01-10T21:56:14]    ERROR 11     <nodes>1:ppn=1</nodes>
-     [2024-01-10T21:56:14]    ERROR 12     <walltime>00:01:00</walltime>
-     [2024-01-10T21:56:14]    ERROR 13     <command>echo hello $person</command>
-     [2024-01-10T21:56:14]    ERROR 14     <jobname>hello</jobname>
-     [2024-01-10T21:56:14]    ERROR 15     <envar>
-     [2024-01-10T21:56:14]    ERROR 16       <name>person</name>
-     [2024-01-10T21:56:14]    ERROR 17       <value>siri</value>
-     [2024-01-10T21:56:14]    ERROR 18     </envar>
-     [2024-01-10T21:56:14]    ERROR 19     <dependency>
-     [2024-01-10T21:56:14]    ERROR 20     </dependency>
-     [2024-01-10T21:56:14]    ERROR 21   </task>
-     [2024-01-10T21:56:14]    ERROR 22 </workflow>
-
-  Once again, interpreting from the bottom:
-
-  * The content of the task starting at Line 9 is not valid.
-  * There is an extra element ``<dependency>`` in the task.
+  * At line 9 column 0 (i.e. ``<string>:9:0``), the element (i.e. ``<task>``) failed to validate.
+  * The sequence of interleaved elements under ``<task>`` was invalid.
+  * A ``<command>`` element was expected, but it wasn't found.

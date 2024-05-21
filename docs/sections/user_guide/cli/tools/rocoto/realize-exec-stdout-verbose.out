@@ -1,21 +1,21 @@
-[2024-05-21T03:05:03]    DEBUG Command: uw rocoto realize --config-file rocoto.yaml --output-file rocoto.xml --verbose
-[2024-05-21T03:05:03]    DEBUG Dereferencing, current value:
-[2024-05-21T03:05:03]    DEBUG   workflow:
-[2024-05-21T03:05:03]    DEBUG     attrs:
-[2024-05-21T03:05:03]    DEBUG       realtime: false
-[2024-05-21T03:05:03]    DEBUG       scheduler: slurm
-[2024-05-21T03:05:03]    DEBUG     cycledef:
-[2024-05-21T03:05:03]    DEBUG     - attrs:
-[2024-05-21T03:05:03]    DEBUG         group: howdy
-[2024-05-21T03:05:03]    DEBUG       spec: 202209290000 202209300000 06:00:00
+[2024-05-21T03:25:01]    DEBUG Command: uw rocoto realize --config-file rocoto.yaml --output-file rocoto.xml --verbose
+[2024-05-21T03:25:01]    DEBUG Dereferencing, current value:
+[2024-05-21T03:25:01]    DEBUG   workflow:
+[2024-05-21T03:25:01]    DEBUG     attrs:
+[2024-05-21T03:25:01]    DEBUG       realtime: false
+[2024-05-21T03:25:01]    DEBUG       scheduler: slurm
+[2024-05-21T03:25:01]    DEBUG     cycledef:
+[2024-05-21T03:25:01]    DEBUG     - attrs:
+[2024-05-21T03:25:01]    DEBUG         group: howdy
+[2024-05-21T03:25:01]    DEBUG       spec: 202209290000 202209300000 06:00:00
 ...
-[2024-05-21T03:05:03]    DEBUG   account: '&ACCOUNT;'
-[2024-05-21T03:05:03]    DEBUG   attrs:
-[2024-05-21T03:05:03]    DEBUG     cycledefs: howdy
-[2024-05-21T03:05:03]    DEBUG   command: echo hello $person
-[2024-05-21T03:05:03]    DEBUG   envars:
-[2024-05-21T03:05:03]    DEBUG     person: siri
-[2024-05-21T03:05:03]    DEBUG   jobname: hello
-[2024-05-21T03:05:03]    DEBUG   nodes: 1:ppn=1
-[2024-05-21T03:05:03]    DEBUG   walltime: 00:01:00
-[2024-05-21T03:05:03]     INFO 0 Rocoto validation errors found
+[2024-05-21T03:25:01]    DEBUG   account: '&ACCOUNT;'
+[2024-05-21T03:25:01]    DEBUG   attrs:
+[2024-05-21T03:25:01]    DEBUG     cycledefs: howdy
+[2024-05-21T03:25:01]    DEBUG   command: echo hello $person
+[2024-05-21T03:25:01]    DEBUG   envars:
+[2024-05-21T03:25:01]    DEBUG     person: siri
+[2024-05-21T03:25:01]    DEBUG   jobname: hello
+[2024-05-21T03:25:01]    DEBUG   nodes: 1:ppn=1
+[2024-05-21T03:25:01]    DEBUG   walltime: 00:01:00
+[2024-05-21T03:25:01]     INFO 0 Rocoto validation errors found
