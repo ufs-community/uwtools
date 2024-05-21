@@ -1,0 +1,25 @@
+usage: uw file copy --target-dir PATH [-h] [--version] [--config-file PATH]
+                    [--dry-run] [--quiet] [--verbose]
+                    [KEY ...]
+
+Copy files
+
+Required arguments:
+  --target-dir PATH
+      Path to target directory
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --config-file PATH, -c PATH
+      Path to UW YAML config file (default: read from stdin)
+  --dry-run
+      Only log info, making no changes
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages
+  KEY
+      YAML key leading to file dst/src block

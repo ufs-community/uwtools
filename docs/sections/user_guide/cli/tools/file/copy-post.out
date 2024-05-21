@@ -1,0 +1,6 @@
+dst
+├── foo
+└── subdir
+    └── bar
+
+2 directories, 2 files
