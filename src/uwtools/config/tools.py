@@ -224,7 +224,7 @@ def _realize_config_update(
         update_format = _ensure_format("update", update_format, update_config)
         if not update_config:
             log.debug("Reading update from stdin")
-        _validate_format("update", update_format, update_format)
+        _validate_format("update", update_format, input_obj.get_format())
         update_obj: Config = (
             update_config
             if isinstance(update_config, Config)
