@@ -49,7 +49,7 @@ and a YAML file called ``values.yaml`` with the following contents:
   .. literalinclude:: template/render-exec-stdout.out
      :language: text
 
-  Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
+  :shell-redirection:`Shell redirection<>` may also be used to stream output to a file, another process, etc.
 
 * To render the template to a file via command-line argument:
 
@@ -176,90 +176,63 @@ Note that, in the previous two examples, the ``var=val`` syntax preceding the ``
   .. literalinclude:: template/render-exec-macros-dir.out
      :language: text
 
-* Non-YAML-formatted files may also be used as value sources. For example, ``template``
+* Non-YAML-formatted files may also be used as value sources. For example, ``values.nml`` with contents
 
-  .. code-block:: jinja
+  .. literalinclude:: template/values.nml
+     :language: fortran
 
-     {{ values.greeting }}, {{ values.recipient }}!
+  can be used to render ``template``:
 
-  can be rendered with ``values.nml``
-
-  .. code-block:: fortran
-
-     &values
-       greeting = "Hello"
-       recipient = "World"
-     /
-
-  like so:
-
-  .. code-block:: text
-
-     $ uw template render --input-file template --values-file values.nml
-     Hello, World!
+  .. literalinclude:: template/render-exec-nml.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: template/render-exec-nml.out
+     :language: text
 
 .. _cli_template_translate_examples:
 
 ``translate``
 -------------
 
-.. code-block:: text
-
-   $ uw template translate --help
-   usage: uw template translate [-h] [--version] [--input-file PATH] [--output-file PATH] [--dry-run]
-                                [--quiet] [--verbose]
-
-   Translate atparse to Jinja2
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --input-file PATH, -i PATH
-         Path to input file (defaults to stdin)
-     --output-file PATH, -o PATH
-         Path to output file (defaults to stdout)
-     --dry-run
-         Only log info, making no changes
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: template/translate-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: template/translate-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
 The examples in this section use atparse-formatted template file ``atparse.txt`` with the following contents:
 
-.. code-block:: text
-
-   @[greeting], @[recipient]!
+  .. literalinclude:: template/atparse.txt
+     :language: text
 
 * To convert an atparse-formatted template file to Jinja2 format:
 
-  .. code-block:: text
+  .. literalinclude:: template/translate-exec-stdout.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: template/translate-exec-stdout.out
+     :language: text
 
-     $ uw template translate --input-file atparse.txt
-     {{ greeting }}, {{ recipient }}!
-
-  Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
+  :shell-redirection:`Shell redirection<>` may also be used to stream output to a file, another process, etc.
 
 * To convert the template to a file via command-line argument:
 
-  .. code-block:: text
-
-     $ uw template translate --input-file atparse.txt --output-file jinja2.txt
+  .. literalinclude:: template/translate-exec-file.cmd
+     :language: text
+     :emphasize-lines: 1
 
   The content of ``jinja2.txt``:
 
-  .. code-block:: jinja
-
-     {{ greeting }}, {{ recipient }}!
+  .. literalinclude:: template/jinja2.txt
+     :language: jinja
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
-  .. code-block:: text
-
-     $ uw template translate --input-file atparse.txt --dry-run
-     [2024-02-06T21:53:43]     INFO {{ greeting }}, {{ recipient }}!
+  .. literalinclude:: template/translate-exec-dry-run.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: template/translate-exec-dry-run.out
+     :language: text

@@ -190,7 +190,7 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
        recipient: World
        repeat: 1
 
-  Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
+  :shell-redirection:`Shell redirection<>` may also be used to stream output to a file, another process, etc.
 
 * Values in the input file can be overridden via one or more supplemental files specified as positional arguments. Priority increases from left to right.
 
@@ -518,7 +518,7 @@ and the YAML file ``values.yaml`` with the following contents:
      $ uw config validate --schema-file schema.jsonschema --input-file values.yaml
      [2024-01-03T17:23:07]     INFO 0 UW schema-validation errors found
 
-  Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
+  :shell-redirection:`Shell redirection<>` may also be used to stream output to a file, another process, etc.
 
 * To read the *config* from ``stdin`` and print validation results to ``stdout``:
 
