@@ -3,67 +3,19 @@
 
 The ``uw`` mode for configuring and running the WRF preprocessing component ``ungrib``.
 
-.. code-block:: text
-
-   $ uw ungrib --help
-   usage: uw ungrib [-h] [--version] TASK ...
-
-   Execute ungrib tasks
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     TASK
-       gribfiles
-         Symlinks to all the GRIB files
-       namelist_file
-         The namelist file
-       provisioned_run_directory
-         Run directory provisioned with all required content
-       run
-         A run
-       runscript
-         The runscript
-       validate
-         Validate the UW driver config
-       vtable
-         A symlink to the Vtable file
+.. literalinclude:: ungrib/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: ungrib/help.out
+   :language: text
 
 All tasks take the same arguments. For example:
 
-.. code-block:: text
-
-   $ uw ungrib run --help
-   usage: uw ungrib run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
-                        [--graph-file PATH] [--quiet] [--verbose]
-
-   A run
-
-   Required arguments:
-     --cycle CYCLE
-         The cycle in ISO8601 format (e.g. 2024-05-08T18)
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --config-file PATH, -c PATH
-         Path to UW YAML config file (default: read from stdin)
-     --batch
-         Submit run to batch scheduler
-     --dry-run
-         Only log info, making no changes
-     --graph-file PATH
-         Path to Graphviz DOT output [experimental]
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: ungrib/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: ungrib/run-help.out
+   :language: text
 
 Examples
 ^^^^^^^^

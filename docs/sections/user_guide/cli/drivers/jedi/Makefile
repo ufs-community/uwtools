@@ -1,0 +1,9 @@
+COMMANDS = $(wildcard *.cmd)
+OUTPUTS  = $(COMMANDS:cmd=out)
+
+.PHONY: all $(OUTPUTS)
+
+all: $(OUTPUTS)
+
+$(OUTPUTS):
+	bash $(basename $@).cmd >$@ 2>&1 | true

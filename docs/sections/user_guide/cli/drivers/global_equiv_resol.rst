@@ -3,59 +3,19 @@
 
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``global_equiv_resol``. Documentation for this UFS Utils component is :ufs-utils:`here <global-equiv-resol>`.
 
-.. code-block:: text
-
-   $ uw global_equiv_resol --help
-   usage: uw global_equiv_resol [-h] [--version] TASK ...
-
-   Execute global_equiv_resol tasks
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     TASK
-       input_file
-         Ensure the specified input grid file exists
-       provisioned_run_directory
-         Run directory provisioned with all required content
-       run
-         A run
-       runscript
-         The runscript
-       validate
-         Validate the UW driver config
+.. literalinclude:: global_equiv_resol/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: global_equiv_resol/help.out
+   :language: text
 
 All tasks take the same arguments. For example:
 
-.. code-block:: text
-
-   $ uw global_equiv_resol run --help
-   usage: uw global_equiv_resol run [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
-                                    [--graph-file PATH] [--quiet] [--verbose]
-
-   A run
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --config-file PATH, -c PATH
-         Path to UW YAML config file (default: read from stdin)
-     --batch
-         Submit run to batch scheduler
-     --dry-run
-         Only log info, making no changes
-     --graph-file PATH
-         Path to Graphviz DOT output [experimental]
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: global_equiv_resol/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: global_equiv_resol/run-help.out
+   :language: text
 
 Examples
 ^^^^^^^^

@@ -3,57 +3,19 @@
 
 The ``uw`` mode for configuring and running the UFS Utils preprocessing component ``shave``. Documentation for this UFS Utils component is :ufs-utils:`here <shave>`.
 
-.. code-block:: text
-
-   $ uw shave --help
-   usage: uw shave [-h] [--version] TASK ...
-
-   Execute shave tasks
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     TASK
-       provisioned_run_directory
-         Run directory provisioned with all required content
-       run
-         A run
-       runscript
-         The runscript
-       validate
-         Validate the UW driver config
+.. literalinclude:: shave/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: shave/help.out
+   :language: text
 
 All tasks take the same arguments. For example:
 
-.. code-block:: text
-
-   $ uw shave run --help
-   usage: uw shave run [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
-                       [--graph-file PATH] [--quiet] [--verbose]
-
-   A run
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --config-file PATH, -c PATH
-         Path to UW YAML config file (default: read from stdin)
-     --batch
-         Submit run to batch scheduler
-     --dry-run
-         Only log info, making no changes
-     --graph-file PATH
-         Path to Graphviz DOT output [experimental]
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: shave/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: shave/run-help.out
+   :language: text
 
 Examples
 ^^^^^^^^

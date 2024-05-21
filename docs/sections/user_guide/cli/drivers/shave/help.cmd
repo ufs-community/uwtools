@@ -1,0 +1,1 @@
+uw shave --help

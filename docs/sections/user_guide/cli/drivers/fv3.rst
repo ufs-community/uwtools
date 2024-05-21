@@ -3,77 +3,19 @@
 
 The ``uw`` mode for configuring and running FV3.
 
-.. code-block:: text
-
-   $ uw fv3 --help
-   usage: uw fv3 [-h] [--version] TASK ...
-
-   Execute fv3 tasks
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     TASK
-       boundary_files
-         Lateral boundary-condition files
-       diag_table
-         The diag_table file
-       field_table
-         The field_table file
-       files_copied
-         Files copied for run
-       files_linked
-         Files linked for run
-       model_configure
-         The model_configure file
-       namelist_file
-         The namelist file
-       provisioned_run_directory
-         Run directory provisioned with all required content
-       restart_directory
-         The RESTART directory
-       run
-         A run
-       runscript
-         The runscript
-       validate
-         Validate the UW driver config
+.. literalinclude:: fv3/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: fv3/help.out
+   :language: text
 
 All tasks take the same arguments. For example:
 
-.. code-block:: text
-
-   $ uw fv3 run --help
-   usage: uw fv3 run --config-file PATH --cycle CYCLE [-h] [--version] [--batch] [--dry-run]
-                     [--graph-file PATH] [--quiet] [--verbose]
-
-   A run
-
-   Required arguments:
-     --config-file PATH, -c PATH
-         Path to UW YAML config file
-     --cycle CYCLE
-         The cycle in ISO8601 format (e.g. 2024-05-08T18)
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --batch
-         Submit run to batch scheduler
-     --dry-run
-         Only log info, making no changes
-     --graph-file PATH
-         Path to Graphviz DOT output [experimental]
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: fv3/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: fv3/run-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
