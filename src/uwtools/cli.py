@@ -752,7 +752,7 @@ def _add_arg_update_format(group: Group, choices: List[str], required: bool = Fa
     group.add_argument(
         _switch(STR.updatefmt),
         choices=choices,
-        help="Input format",
+        help="Update format",
         required=required,
         type=str,
     )
