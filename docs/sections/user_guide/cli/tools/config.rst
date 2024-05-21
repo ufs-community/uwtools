@@ -63,7 +63,7 @@ The examples that follow use namelist files ``a.nml`` and ``b.nml``, both initia
   .. literalinclude:: config/compare-verbose.out
      :language: text
 
-  Note that ``uw`` logs to ``stderr``. Use `shell redirection <https://www.gnu.org/software/bash/manual/html_node/Redirections.html>`_ as needed.
+  Note that ``uw`` logs to ``stderr``. Use :shell-redirection:`shell redirection<>` as needed.
 
 .. note:: Comparisons are supported only for configs of the same format, e.g. YAML vs YAML, Fortran namelist vs Fortran namelist, etc. ``uw`` will flag invalid comparisons:
 
