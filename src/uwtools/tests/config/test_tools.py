@@ -624,6 +624,7 @@ def test__realize_config_input_setup_ini_stdin(caplog):
     data = """
     [section]
     foo = bar
+    baz = 88
     """
     stdinproxy.cache_clear()
     log.setLevel(logging.DEBUG)
@@ -632,7 +633,7 @@ def test__realize_config_input_setup_ini_stdin(caplog):
     s.seek(0)
     with patch.object(sys, "stdin", new=s):
         input_obj, input_format = tools._realize_config_input_setup(input_format=FORMAT.ini)
-    assert input_obj.data == {"section": {"foo": "bar"}}
+    assert input_obj.data == {"section": {"foo": "bar", "baz": "88"}}  # note: 88 is str, not int
     assert input_format == FORMAT.ini
     assert logged(caplog, "Reading input from stdin")
 
