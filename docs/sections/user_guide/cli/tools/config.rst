@@ -4,6 +4,7 @@
 The ``uw`` mode for handling configuration files (configs).
 
 .. literalinclude:: config/help.cmd
+   :language: text
    :emphasize-lines: 1
 .. literalinclude:: config/help.out
    :language: text
@@ -16,6 +17,7 @@ The ``uw`` mode for handling configuration files (configs).
 The ``compare`` action lets users compare two config files.
 
 .. literalinclude:: config/compare-help.cmd
+   :language: text
    :emphasize-lines: 1
 .. literalinclude:: config/compare-help.out
    :language: text
@@ -31,6 +33,7 @@ The examples that follow use namelist files ``a.nml`` and ``b.nml``, both initia
 * To compare two config files with the same contents:
 
   .. literalinclude:: config/compare-match.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: config/compare-match.out
      :language: text
@@ -38,6 +41,7 @@ The examples that follow use namelist files ``a.nml`` and ``b.nml``, both initia
 * If there are differences between the config files, they will be shown below the dashed line. For example, ``c.nml`` is missing the line ``recipient: World``:
 
   .. literalinclude:: config/compare-diff.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: config/compare-diff.out
      :language: text
@@ -45,6 +49,7 @@ The examples that follow use namelist files ``a.nml`` and ``b.nml``, both initia
 * If a config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its contents:
 
   .. literalinclude:: config/compare-bad-extension.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: config/compare-bad-extension.out
      :language: text
@@ -52,6 +57,7 @@ The examples that follow use namelist files ``a.nml`` and ``b.nml``, both initia
   In this case, the format can be explicitly specified (``a.txt`` is a copy of ``a.nml``):
 
   .. literalinclude:: config/compare-bad-extension-fix.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: config/compare-bad-extension-fix.out
      :language: text
@@ -59,6 +65,7 @@ The examples that follow use namelist files ``a.nml`` and ``b.nml``, both initia
 * To request verbose log output:
 
   .. literalinclude:: config/compare-verbose.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: config/compare-verbose.out
      :language: text
@@ -67,10 +74,11 @@ The examples that follow use namelist files ``a.nml`` and ``b.nml``, both initia
 
 .. note:: Comparisons are supported only for configs of the same format, e.g. YAML vs YAML, Fortran namelist vs Fortran namelist, etc. ``uw`` will flag invalid comparisons:
 
-   .. literalinclude:: config/compare-format-mismatch.cmd
-      :emphasize-lines: 1
-   .. literalinclude:: config/compare-format-mismatch.out
-      :language: text
+  .. literalinclude:: config/compare-format-mismatch.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/compare-format-mismatch.out
+     :language: text
 
 .. _cli_config_realize_examples:
 

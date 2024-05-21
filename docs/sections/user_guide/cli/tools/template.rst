@@ -4,6 +4,7 @@
 The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 
 .. literalinclude:: template/help.cmd
+   :language: text
    :emphasize-lines: 1
 .. literalinclude:: template/help.out
    :language: text
@@ -14,6 +15,7 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 ----------
 
 .. literalinclude:: template/render-help.cmd
+   :language: text
    :emphasize-lines: 1
 .. literalinclude:: template/render-help.out
    :language: text
@@ -34,6 +36,7 @@ and a YAML file called ``values.yaml`` with the following contents:
 * To show the values needed to render the template:
 
   .. literalinclude:: template/render-exec-values-needed.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: template/render-exec-values-needed.out
      :language: text
@@ -41,6 +44,7 @@ and a YAML file called ``values.yaml`` with the following contents:
 * To render the template to ``stdout``:
 
   .. literalinclude:: template/render-exec-stdout.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: template/render-exec-stdout.out
      :language: text
@@ -50,16 +54,18 @@ and a YAML file called ``values.yaml`` with the following contents:
 * To render the template to a file via command-line argument:
 
   .. literalinclude:: template/render-exec-file.cmd
+     :language: text
      :emphasize-lines: 1
 
   The content of ``rendered``:
 
   .. literalinclude:: template/rendered
-     :language: text
+     :language: jinja
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
   .. literalinclude:: template/render-exec-dry-run.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: template/render-exec-dry-run.out
      :language: text
@@ -67,6 +73,7 @@ and a YAML file called ``values.yaml`` with the following contents:
 * To read the template from ``stdin`` and render to ``stdout``:
 
   .. literalinclude:: template/render-exec-read-stdin.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: template/render-exec-read-stdin.out
      :language: text
@@ -74,6 +81,7 @@ and a YAML file called ``values.yaml`` with the following contents:
 * If the values file has an unrecognized (or no) extension, ``uw`` will not know how to parse its contents:
 
   .. literalinclude:: template/render-exec-bad-extension.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: template/render-exec-bad-extension.out
      :language: text
@@ -81,6 +89,7 @@ and a YAML file called ``values.yaml`` with the following contents:
   In this case, the format can be explicitly specified (``values.txt`` is identical to ``values.yaml``):
 
   .. literalinclude:: template/render-exec-explicit-extension.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: template/render-exec-explicit-extension.out
      :language: text
@@ -88,6 +97,7 @@ and a YAML file called ``values.yaml`` with the following contents:
 * To request verbose log output:
 
   .. literalinclude:: template/render-exec-verbose.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: template/render-exec-verbose.out
      :language: text
@@ -102,6 +112,7 @@ and a YAML file called ``values.yaml`` with the following contents:
   It is an error to render a template without providing all needed values.
 
   .. literalinclude:: template/render-exec-missing-value.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: template/render-exec-missing-value.out
      :language: text
@@ -109,6 +120,7 @@ and a YAML file called ``values.yaml`` with the following contents:
   Values may also be supplemented by ``key=value`` command-line arguments:
 
   .. literalinclude:: template/render-exec-cli-value.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: template/render-exec-cli-value.out
      :language: text
@@ -116,56 +128,53 @@ and a YAML file called ``values.yaml`` with the following contents:
   The optional ``--env`` switch allows environment variables to be used to supply values:
 
   .. literalinclude:: template/render-exec-env-value.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: template/render-exec-env-value.out
      :language: text
 
-  (Note that ``recipient=You`` is shell syntax for exporting environment variable ``recipient`` only for the duration of the command that follows. It should not be confused with the two ``key=value`` pairs later on the command line, which are arguments to ``uw``.)
-
   Values from ``key=value`` arguments override values from file, and environment variables override both:
 
   .. literalinclude:: template/render-exec-combo-value.cmd
+     :language: text
      :emphasize-lines: 1
   .. literalinclude:: template/render-exec-combo-value.out
      :language: text
 
-  (Note that ``recipient=Sunshine`` is shell syntax for exporting environment variable ``recipient`` only for the duration of the command that follows. It should not be confused with the two ``key=value`` pairs later on the command line, which are arguments to ``uw``.)
+Note that, in the previous two examples, the ``var=val`` syntax preceding the ``uw`` command is shell syntax for exporting environment variable ``var`` only for the duration of the command that follows. It should not be confused with the two ``key=value`` pairs later on the command line, which are arguments to ``uw``.)
 
 * Jinja2 supports references to additional templates via, for example, `import <https://jinja.palletsprojects.com/en/latest/templates/#import>`_ expressions, and ``uw`` provides support as follows:
 
   #. By default, the directory containing the primary template file is used as the search path for additional templates.
   #. The optional ``--search-path`` flag overrides the default search path with any number of explicitly specified, colon-separated paths.
 
-  For example, given file ``template``
+  For example, given file ``template-with-macros``
 
-  .. code-block:: text
+  .. literalinclude:: template/template-with-macros
+     :language: jinja
 
-     {% import "macros" as m -%}
-     {{ m.double(11) }}
+  and file ``macros`` (in the same directory as ``template-with-macros``)
 
-  and file ``macros`` (in the same directory as ``template``)
-
-  .. code-block:: text
-
-     {% macro double(n) -%}
-     {{ n * 2 }}
-     {%- endmacro %}
+  .. literalinclude:: template/macros
+     :language: jinja
 
   the template is rendered as
 
-  .. code-block:: text
+  .. literalinclude:: template/render-exec-macros.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: template/render-exec-macros.out
+     :language: text
 
-     $ uw template render --input-file template
-     22
+  The ``--search-path`` option could also be specified with a colon-separated set of directories to be searched for templates.
 
-  The invocation ``uw template render --input-file template --search-path $PWD`` would behave identically. Alternatively, ``--search-path`` could be specified with a colon-separated set of directories to be searched for templates.
+  **NB**: Reading the primary template from ``stdin`` requires use of ``--search-path``, as there is no implicit directory related to the input. For example, given the existence of directory ``macros-dir``:
 
-  **NB**: Reading the primary template from ``stdin`` requires use of ``--search-path``, as there is no implicit directory related to the input. For example, given the existence of ``/path/to/macros``:
-
-  .. code-block:: text
-
-     $ cat template | uw template render --search-path /path/to
-     22
+  .. literalinclude:: template/render-exec-macros-dir.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: template/render-exec-macros-dir.out
+     :language: text
 
 * Non-YAML-formatted files may also be used as value sources. For example, ``template``
 
