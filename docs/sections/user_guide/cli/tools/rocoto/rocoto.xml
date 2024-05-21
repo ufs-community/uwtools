@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE workflow [
+  <!ENTITY ACCOUNT "myaccount">
+  <!ENTITY FOO "test.log">
+]>
+<workflow realtime="False" scheduler="slurm">
+  <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
+  <log>/some/path/to/&FOO;</log>
+  <task name="hello" cycledefs="howdy">
+    <account>&ACCOUNT;</account>
+    <nodes>1:ppn=1</nodes>
+    <walltime>00:01:00</walltime>
+    <command>echo hello $person</command>
+    <jobname>hello</jobname>
+    <envar>
+      <name>person</name>
+      <value>siri</value>
+    </envar>
+  </task>
+</workflow>

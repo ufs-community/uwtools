@@ -3,25 +3,11 @@
 
 The ``uw`` mode for realizing and validating Rocoto XML documents.
 
-.. code-block:: text
-
-   $ uw rocoto --help
-   usage: uw rocoto [-h] [--version] ACTION ...
-
-   Realize and validate Rocoto XML Documents
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     ACTION
-       realize
-         Realize a Rocoto XML workflow document
-       validate
-         Validate Rocoto XML
+.. literalinclude:: rocoto/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: rocoto/help.out
+   :language: text
 
 .. _cli_rocoto_realize_examples:
 
@@ -32,177 +18,66 @@ In ``uw`` terminology, to ``realize`` a configuration file is to transform it fr
 
 More information about the structured UW YAML file for Rocoto can be found :any:`here<defining_a_workflow>`.
 
-.. code-block:: text
-
-   $ uw rocoto realize --help
-   usage: uw rocoto realize [-h] [--version] [--config-file PATH] [--output-file PATH] [--quiet]
-                            [--verbose]
-
-   Realize a Rocoto XML workflow document
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --config-file PATH, -c PATH
-         Path to UW YAML config file (default: read from stdin)
-     --output-file PATH, -o PATH
-         Path to output file (defaults to stdout)
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: rocoto/realize-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: rocoto/realize-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
 The examples in this section use a UW YAML file called ``rocoto.yaml`` with the following contents:
 
-.. code-block:: python
-
-   workflow:
-     attrs:
-       realtime: false
-       scheduler: slurm
-     cycledef:
-       - attrs:
-           group: howdy
-         spec: 202209290000 202209300000 06:00:00
-     entities:
-       ACCOUNT: myaccount
-       FOO: test.log
-     log: /some/path/to/&FOO;
-     tasks:
-       task_hello:
-         attrs:
-           cycledefs: howdy
-         account: "&ACCOUNT;"
-         command: "echo hello $person"
-         jobname: hello
-         nodes: 1:ppn=1
-         walltime: 00:01:00
-         envars:
-           person: siri
+.. literalinclude:: rocoto/rocoto.yaml
+   :language: yaml
 
 * To realize a UW YAML input file to ``stdout`` in Rocoto XML format:
 
-  .. code-block:: xml
-
-     $ uw rocoto realize --config-file rocoto.yaml
-     [2024-01-02T13:41:25]     INFO 0 UW schema-validation errors found
-     [2024-01-02T13:41:25]     INFO 0 Rocoto validation errors found
-     <?xml version='1.0' encoding='utf-8'?>
-     <!DOCTYPE workflow [
-       <!ENTITY ACCOUNT "myaccount">
-       <!ENTITY FOO "test.log">
-     ]>
-     <workflow realtime="False" scheduler="slurm">
-       <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
-       <log>/some/path/to/&FOO;</log>
-       <task name="hello" cycledefs="howdy">
-         <account>&ACCOUNT;</account>
-         <nodes>1:ppn=1</nodes>
-         <walltime>00:01:00</walltime>
-         <command>echo hello $person</command>
-         <jobname>hello</jobname>
-         <envar>
-           <name>person</name>
-           <value>siri</value>
-         </envar>
-       </task>
-     </workflow>
+  .. literalinclude:: rocoto/realize-exec-stdout.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/realize-exec-stdout.out
+     :language: xml
 
 * To realize a UW YAML input file to a file named ``rocoto.xml``:
 
-  .. code-block:: text
-
-     $ uw rocoto realize --config-file rocoto.yaml --output-file rocoto.xml
-     [2024-01-02T13:45:46]     INFO 0 UW schema-validation errors found
-     [2024-01-02T13:45:46]     INFO 0 Rocoto validation errors found
+  .. literalinclude:: rocoto/realize-exec-file.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/realize-exec-file.out
+     :language: text
 
   The content of ``rocoto.xml``:
 
-  .. code-block:: xml
-
-     <?xml version='1.0' encoding='utf-8'?>
-     <!DOCTYPE workflow [
-       <!ENTITY ACCOUNT "myaccount">
-       <!ENTITY FOO "test.log">
-     ]>
-     <workflow realtime="False" scheduler="slurm">
-       <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
-       <log>/some/path/to/&FOO;</log>
-       <task name="hello" cycledefs="howdy">
-         <account>&ACCOUNT;</account>
-         <nodes>1:ppn=1</nodes>
-         <walltime>00:01:00</walltime>
-         <command>echo hello $person</command>
-         <jobname>hello</jobname>
-         <envar>
-           <name>person</name>
-           <value>siri</value>
-         </envar>
-       </task>
-     </workflow>
+  .. literalinclude:: rocoto/rocoto.xml
+     :language: xml
 
 * To read the UW YAML from ``stdin`` and write the XML to ``stdout``:
 
-  .. code-block:: xml
-
-     $ cat rocoto.yaml | uw rocoto realize
-     [2024-01-02T14:09:08]     INFO 0 UW schema-validation errors found
-     [2024-01-02T14:09:08]     INFO 0 Rocoto validation errors found
-     <?xml version='1.0' encoding='utf-8'?>
-     <!DOCTYPE workflow [
-       <!ENTITY ACCOUNT "myaccount">
-       <!ENTITY FOO "test.log">
-     ]>
-     <workflow realtime="False" scheduler="slurm">
-       <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
-       <log>/some/path/to/&FOO;</log>
-       <task name="hello" cycledefs="howdy">
-         <account>&ACCOUNT;</account>
-         <nodes>1:ppn=1</nodes>
-         <walltime>00:01:00</walltime>
-         <command>echo hello $person</command>
-         <jobname>hello</jobname>
-         <envar>
-           <name>person</name>
-           <value>siri</value>
-         </envar>
-       </task>
-     </workflow>
+  .. literalinclude:: rocoto/realize-exec-stdin-stdout.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/realize-exec-stdin-stdout.out
+     :language: xml
 
 * To realize a UW YAML input file to a file named ``rocoto.xml`` in quiet mode:
 
-  .. code-block:: text
-
-     $ uw rocoto realize --config-file rocoto.yaml --output-file rocoto.xml -q
-     $
+  .. literalinclude:: rocoto/realize-exec-stdout-quiet.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/realize-exec-stdout-quiet.out
+     :language: xml
 
   The contents of ``rocoto.xml`` are unchanged from the previous example.
 
-* To realize a UW YAML file to a file named ``rocoto.xml`` with verbose log output:
+* To realize a UW YAML file to a file named ``rocoto.xml`` with verbose log output (some output elided for brevity):
 
-  .. note:: This output has been shortened for demonstration purposes.
-
-  .. code-block:: text
-
-     $ uw rocoto realize --config-file rocoto.yaml --output-file rocoto.xml -v
-     [2024-01-02T14:00:01]    DEBUG Command: uw rocoto realize --config-file rocoto.yaml --output-file rocoto.xml -v
-     [2024-01-02T14:00:01]    DEBUG Dereferencing, initial value: {'workflow': {'attrs': {'realtime': ...
-     [2024-01-02T14:00:01]    DEBUG Rendering: {'workflow': {'attrs': {'realtime': ...
-     [2024-01-02T14:00:01]    DEBUG Rendering: {'attrs': {'realtime': False, 'scheduler': ...
-     [2024-01-02T14:00:01]    DEBUG Rendering: {'realtime': False, 'scheduler': 'slurm'}
-     [2024-01-02T14:00:01]    DEBUG Rendering: False
-     [2024-01-02T14:00:01]    DEBUG Rendered: False
-     [2024-01-02T14:00:01]    DEBUG Rendering: slurm
-     ...
-     [2024-01-02T14:00:01]    DEBUG Rendering: {'person': 'siri'}
-     [2024-01-02T14:00:01]    DEBUG Rendering: siri
-     [2024-01-02T14:00:01]     INFO 0 UW schema-validation errors found
-     [2024-01-02T14:00:01]     INFO 0 Rocoto validation errors found
+  .. literalinclude:: rocoto/realize-exec-stdout-verbose.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: rocoto/realize-exec-stdout-verbose.out
+     :language: xml
 
 .. _cli_rocoto_validate_examples:
 
