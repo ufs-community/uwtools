@@ -1,0 +1,1 @@
+uw file link --help
