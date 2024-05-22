@@ -88,7 +88,7 @@ Removes the tagged YAML key/value pair. For example, given ``input.yaml``:
    e: 2.718
    pi: 3.141
 
-and ``supplemental.yaml``:
+and ``update.yaml``:
 
 .. code-block:: yaml
 
@@ -96,5 +96,5 @@ and ``supplemental.yaml``:
 
 .. code-block:: text
 
-   % uw config realize --input-file input.yaml supplemental.yaml --output-format yaml
+   % uw config realize --input-file input.yaml --update-file update.yaml --output-format yaml
    pi: 3.141
