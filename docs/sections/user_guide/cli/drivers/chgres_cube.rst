@@ -93,7 +93,8 @@ Its contents are described in depth in section :ref:`chgres_cube_yaml`. Each of 
 
      $ uw chgres_cube run --config-file config.yaml --cycle 2023-12-15T18 --batch --dry-run
 
-.. literalinclude:: ../../../../shared/key_path.rst
+
+.. include:: ../../../../shared/key_path.rst
 
 * The ``run`` task depends on the other available tasks and executes them as prerequisites. It is possible to execute any task directly, which entails execution of any of *its* dependencies. For example, to create a ``chgres_cube`` run directory provisioned with all the files, directories, symlinks, etc. required per the configuration file:
 
