@@ -36,7 +36,7 @@ class MPASInit(Driver):
         :param cycle: The cycle.
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
-        :param key_path: Path of keys to subsection of config file.
+        :param key_path: Keys leading through the config to the driver's configuration block.
         """
         super().__init__(
             config=config, cycle=cycle, dry_run=dry_run, batch=batch, key_path=key_path
