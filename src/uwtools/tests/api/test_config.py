@@ -50,10 +50,11 @@ def test_realize():
     kwargs: dict = {
         "input_config": "path1",
         "input_format": "fmt1",
+        "update_config": "path2",
+        "update_format": "fmt2",
+        "output_file": "path3",
+        "output_format": "fmt3",
         "output_block": None,
-        "output_file": "path2",
-        "output_format": "fmt2",
-        "supplemental_configs": ["path3"],
         "values_needed": True,
         "total": True,
         "dry_run": False,
@@ -64,8 +65,8 @@ def test_realize():
         **{
             **kwargs,
             "input_config": Path(kwargs["input_config"]),
+            "update_config": Path(kwargs["update_config"]),
             "output_file": Path(kwargs["output_file"]),
-            "supplemental_configs": [Path(x) for x in kwargs["supplemental_configs"]],
         }
     )
 
@@ -74,7 +75,8 @@ def test_realize_to_dict():
     kwargs: dict = {
         "input_config": "path1",
         "input_format": "fmt1",
-        "supplemental_configs": ["path3"],
+        "update_config": None,
+        "update_format": None,
         "values_needed": True,
         "dry_run": False,
         "stdin_ok": False,

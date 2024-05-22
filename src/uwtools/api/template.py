@@ -45,7 +45,7 @@ def render(
     :param searchpath: Paths to search for extra templates
     :param values_needed: Just report variables needed to render the template?
     :param dry_run: Run in dry-run mode?
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: The rendered template string
     :raises: UWTemplateRenderError if template could not be rendered
     """
@@ -100,7 +100,7 @@ def translate(
         read ``stdin``)
     :param output_file: Path to the file to write the converted template to
     :param dry_run: Run in dry-run mode?
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: ``True``
     """
     _convert_atparse_to_jinja2(
