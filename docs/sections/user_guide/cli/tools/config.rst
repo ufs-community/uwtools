@@ -14,7 +14,7 @@ The ``uw`` mode for handling configuration files (configs).
 ``compare``
 -----------
 
-The ``compare`` action lets users compare two config files.
+The ``compare`` action compares two config files.
 
 .. literalinclude:: config/compare-help.cmd
    :language: text
@@ -25,7 +25,7 @@ The ``compare`` action lets users compare two config files.
 Examples
 ^^^^^^^^
 
-The examples that follow use namelist files ``a.nml`` and ``b.nml``, both initially with the following contents:
+The examples that follow use identical namelist files ``a.nml`` and ``b.nml`` with contents:
 
 .. literalinclude:: config/a.nml
    :language: fortran
@@ -54,7 +54,7 @@ The examples that follow use namelist files ``a.nml`` and ``b.nml``, both initia
   .. literalinclude:: config/compare-bad-extension.out
      :language: text
 
-  In this case, the format can be explicitly specified (``a.txt`` is a copy of ``a.nml``):
+  The format must be explicitly specified (``a.txt`` is a copy of ``a.nml``):
 
   .. literalinclude:: config/compare-bad-extension-fix.cmd
      :language: text
@@ -95,17 +95,17 @@ In ``uw`` terminology, to realize a configuration file is to transform it from i
 Examples
 ^^^^^^^^
 
-The initial examples in this section use YAML file ``config.yaml`` with the following contents:
+The initial examples in this section use YAML file ``config.yaml`` with contents:
 
 .. literalinclude:: config/config.yaml
    :language: yaml
 
-and YAML file ``update.yaml`` with the following contents:
+and YAML file ``update.yaml`` with contents:
 
 .. literalinclude:: config/update.yaml
    :language: yaml
 
-* To show the values in the input config file that have unrendered Jinja2 variables/expressions or empty keys:
+* For a report of input-config values with unrendered Jinja2 variables/expressions or empty/null keys:
 
   .. literalinclude:: config/realize-values-needed.cmd
      :language: text
@@ -135,11 +135,8 @@ and YAML file ``update.yaml`` with the following contents:
 
   .. literalinclude:: config/realize-update-file-outfile.cmd
      :language: text
-     :emphasize-lines: 1
-
-  The contents of ``realized.yaml``:
-
-  .. literalinclude:: config/realized.yaml
+     :emphasize-lines: 2
+  .. literalinclude:: config/realize-update-file-outfile.out
      :language: text
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
@@ -158,7 +155,7 @@ and YAML file ``update.yaml`` with the following contents:
   .. literalinclude:: config/realize-extension-file-bad.out
      :language: text
 
-  The format must be explicitly specified  (``config.txt`` is a copy of ``config.yaml``):
+  The format must be explicitly specified  (here, ``config.txt`` is a copy of ``config.yaml``):
 
   .. literalinclude:: config/realize-extension-file-fix.cmd
      :language: text
@@ -268,12 +265,12 @@ The ``validate`` action ensures that a given config file is structured properly.
 Examples
 ^^^^^^^^
 
-The examples that follow use the :json-schema:`JSON Schema<understanding-json-schema/reference>` file ``schema.jsonschema`` with the following contents:
+The examples that follow use the :json-schema:`JSON Schema<understanding-json-schema/reference>` file ``schema.jsonschema`` with contents:
 
 .. literalinclude:: config/schema.jsonschema
    :language: json
 
-and the YAML file ``values.yaml`` with the following contents:
+and the YAML file ``values.yaml`` with contents:
 
 .. literalinclude:: config/values.yaml
    :language: yaml

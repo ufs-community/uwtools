@@ -1,15 +1,22 @@
-[2024-05-22T16:22:57]     INFO Validating config against internal schema files-to-stage
-[2024-05-22T16:22:57]     INFO 0 UW schema-validation errors found
-[2024-05-22T16:22:57]     INFO File copies: Initial state: Pending
-[2024-05-22T16:22:57]     INFO File copies: Checking requirements
-[2024-05-22T16:22:57]     INFO Copy src/foo -> dst-copy/foo: Initial state: Pending
-[2024-05-22T16:22:57]     INFO Copy src/foo -> dst-copy/foo: Checking requirements
-[2024-05-22T16:22:57]     INFO Copy src/foo -> dst-copy/foo: Requirement(s) ready
-[2024-05-22T16:22:57]     INFO Copy src/foo -> dst-copy/foo: Executing
-[2024-05-22T16:22:57]     INFO Copy src/foo -> dst-copy/foo: Final state: Ready
-[2024-05-22T16:22:57]     INFO Copy src/bar -> dst-copy/subdir/bar: Initial state: Pending
-[2024-05-22T16:22:57]     INFO Copy src/bar -> dst-copy/subdir/bar: Checking requirements
-[2024-05-22T16:22:57]     INFO Copy src/bar -> dst-copy/subdir/bar: Requirement(s) ready
-[2024-05-22T16:22:57]     INFO Copy src/bar -> dst-copy/subdir/bar: Executing
-[2024-05-22T16:22:57]     INFO Copy src/bar -> dst-copy/subdir/bar: Final state: Ready
-[2024-05-22T16:22:57]     INFO File copies: Final state: Ready
+[2024-05-22T17:33:51]     INFO Validating config against internal schema files-to-stage
+[2024-05-22T17:33:51]     INFO 0 UW schema-validation errors found
+[2024-05-22T17:33:51]     INFO File copies: Initial state: Pending
+[2024-05-22T17:33:51]     INFO File copies: Checking requirements
+[2024-05-22T17:33:51]     INFO Copy src/foo -> dst-copy/foo: Initial state: Pending
+[2024-05-22T17:33:51]     INFO Copy src/foo -> dst-copy/foo: Checking requirements
+[2024-05-22T17:33:51]     INFO Copy src/foo -> dst-copy/foo: Requirement(s) ready
+[2024-05-22T17:33:51]     INFO Copy src/foo -> dst-copy/foo: Executing
+[2024-05-22T17:33:51]     INFO Copy src/foo -> dst-copy/foo: Final state: Ready
+[2024-05-22T17:33:51]     INFO Copy src/bar -> dst-copy/subdir/bar: Initial state: Pending
+[2024-05-22T17:33:51]     INFO Copy src/bar -> dst-copy/subdir/bar: Checking requirements
+[2024-05-22T17:33:51]     INFO Copy src/bar -> dst-copy/subdir/bar: Requirement(s) ready
+[2024-05-22T17:33:51]     INFO Copy src/bar -> dst-copy/subdir/bar: Executing
+[2024-05-22T17:33:51]     INFO Copy src/bar -> dst-copy/subdir/bar: Final state: Ready
+[2024-05-22T17:33:51]     INFO File copies: Final state: Ready
+
+dst-copy
+├── foo
+└── subdir
+    └── bar
+
+2 directories, 2 files

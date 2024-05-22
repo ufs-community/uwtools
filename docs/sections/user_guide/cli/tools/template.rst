@@ -23,12 +23,12 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 Examples
 ^^^^^^^^
 
-The examples in this section use a template file named ``template`` with the following contents:
+The examples in this section use a template file named ``template`` with contents:
 
 .. literalinclude:: template/template
    :language: jinja
 
-and a YAML file called ``values.yaml`` with the following contents:
+and a YAML file called ``values.yaml`` with contents:
 
 .. literalinclude:: template/values.yaml
    :language: yaml
@@ -203,7 +203,7 @@ Note that, in the previous two examples, the ``var=val`` syntax preceding the ``
 Examples
 ^^^^^^^^
 
-The examples in this section use atparse-formatted template file ``atparse.txt`` with the following contents:
+The examples in this section use atparse-formatted template file ``atparse.txt`` with contents:
 
   .. literalinclude:: template/atparse.txt
      :language: text

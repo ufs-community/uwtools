@@ -27,7 +27,7 @@ More information about the structured UW YAML file for Rocoto can be found :any:
 Examples
 ^^^^^^^^
 
-The examples in this section use a UW YAML file called ``rocoto.yaml`` with the following contents:
+The examples in this section use a UW YAML file called ``rocoto.yaml`` with contents:
 
 .. literalinclude:: rocoto/rocoto.yaml
    :language: yaml
@@ -44,14 +44,9 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
 
   .. literalinclude:: rocoto/realize-exec-file.cmd
      :language: text
-     :emphasize-lines: 1
+     :emphasize-lines: 2
   .. literalinclude:: rocoto/realize-exec-file.out
      :language: text
-
-  The contents of ``rocoto.xml``:
-
-  .. literalinclude:: rocoto/rocoto.xml
-     :language: xml
 
 * To read the UW YAML from ``stdin`` and write the XML to ``stdout``:
 
@@ -61,17 +56,7 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
   .. literalinclude:: rocoto/realize-exec-stdin-stdout.out
      :language: xml
 
-* To realize a UW YAML input file to a file named ``rocoto.xml`` in quiet mode:
-
-  .. literalinclude:: rocoto/realize-exec-stdout-quiet.cmd
-     :language: text
-     :emphasize-lines: 1
-  .. literalinclude:: rocoto/realize-exec-stdout-quiet.out
-     :language: xml
-
-  The ``rocoto.xml`` produced by this command are identical to the previous example.
-
-* To see verbose log output while realizing a UW YAML file to a file named ``rocoto.xml`` (some output elided for brevity):
+* To see verbose log output (Rocoto XML and some output elided for brevity):
 
   .. literalinclude:: rocoto/realize-exec-stdout-verbose.cmd
      :language: text
@@ -93,7 +78,7 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
 Examples
 ^^^^^^^^
 
-The examples in this section use a Rocoto XML file called ``rocoto-good.xml`` with the following contents:
+The examples in this section use a Rocoto XML file called ``rocoto-good.xml`` with contents:
 
 .. literalinclude:: rocoto/rocoto-good.xml
    :language: xml

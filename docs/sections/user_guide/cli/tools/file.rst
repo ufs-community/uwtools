@@ -32,13 +32,6 @@ Given ``copy-config.yaml`` containing
 .. literalinclude:: file/copy-exec.out
    :language: text
 
-After executing this command:
-
-.. literalinclude:: file/copy-post.cmd
-   :emphasize-lines: 1
-.. literalinclude:: file/copy-post.out
-   :language: text
-
 Here, ``foo`` and ``bar`` are copies of their respective source files.
 
 .. _cli_file_link_examples:
@@ -63,13 +56,6 @@ Given ``link-config.yaml`` containing
 .. literalinclude:: file/link-exec.cmd
    :emphasize-lines: 2
 .. literalinclude:: file/link-exec.out
-   :language: text
-
-After executing this command:
-
-.. literalinclude:: file/link-post.cmd
-   :emphasize-lines: 1
-.. literalinclude:: file/link-post.out
    :language: text
 
 Here, ``foo`` and ``bar`` are symbolic links.

@@ -1,2 +1,23 @@
-[2024-05-22T16:22:53]     INFO 0 UW schema-validation errors found
-[2024-05-22T16:22:53]     INFO 0 Rocoto validation errors found
+[2024-05-22T17:33:51]     INFO 0 UW schema-validation errors found
+[2024-05-22T17:33:52]     INFO 0 Rocoto validation errors found
+
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE workflow [
+  <!ENTITY ACCOUNT "myaccount">
+  <!ENTITY FOO "test.log">
+]>
+<workflow realtime="False" scheduler="slurm">
+  <cycledef group="howdy">202209290000 202209300000 06:00:00</cycledef>
+  <log>/some/path/to/&FOO;</log>
+  <task name="hello" cycledefs="howdy">
+    <account>&ACCOUNT;</account>
+    <nodes>1:ppn=1</nodes>
+    <walltime>00:01:00</walltime>
+    <command>echo hello $person</command>
+    <jobname>hello</jobname>
+    <envar>
+      <name>person</name>
+      <value>siri</value>
+    </envar>
+  </task>
+</workflow>

@@ -1,6 +1,0 @@
-dst-link
-├── foo -> ../src/foo
-└── subdir
-    └── bar -> ../../src/bar
-
-2 directories, 2 files
