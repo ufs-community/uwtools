@@ -1,2 +1,2 @@
-rm -rf dst
-uw file link --target-dir dst --config-file link-config.yaml config files
+rm -rf dst-link
+uw file link --target-dir dst-link --config-file link-config.yaml config files

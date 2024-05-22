@@ -1,4 +1,4 @@
-dst
+dst-link
 ├── foo -> ../src/foo
 └── subdir
     └── bar -> ../../src/bar
