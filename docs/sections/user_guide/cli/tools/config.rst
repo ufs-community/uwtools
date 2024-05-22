@@ -144,77 +144,61 @@ and YAML file ``update.yaml`` with the following contents:
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --update-file update.yaml --output-file realized.yaml --dry-run
-     [2024-05-20T19:05:55]     INFO values:
-     [2024-05-20T19:05:55]     INFO   date: 20240105
-     [2024-05-20T19:05:55]     INFO   empty: null
-     [2024-05-20T19:05:55]     INFO   greeting: Good Night
-     [2024-05-20T19:05:55]     INFO   message: Good Night Moon Good Night Moon
-     [2024-05-20T19:05:55]     INFO   recipient: Moon
-     [2024-05-20T19:05:55]     INFO   repeat: 2
+  .. literalinclude:: config/realize-dry-run.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-dry-run.out
+     :language: text
 
 * If the config file has an unrecognized (or no) extension, ``uw`` will not automatically know how to parse its contents:
 
-  .. code-block:: text
-
-     $ uw config realize --input-file config.txt --update-file update.yaml --output-format yaml
-     Cannot deduce format of 'config.txt' from unknown extension 'txt'
+  .. literalinclude:: config/realize-extension-file-bad.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-extension-file-bad.out
+     :language: text
 
   The format must be explicitly specified  (``config.txt`` is a copy of ``config.yaml``):
 
-  .. code-block:: text
-
-     $ uw config realize --input-file config.txt --update-file update.yaml --output-format yaml --input-format yaml
-     values:
-       date: 20240105
-       empty: null
-       greeting: Good Night
-       message: Good Night Moon Good Night Moon
-       recipient: Moon
-       repeat: 2
+  .. literalinclude:: config/realize-extension-file-fix.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-extension-file-fix.out
+     :language: text
 
 * Similarly, if an input file is read from ``stdin``, ``uw`` will not automatically know how to parse its contents:
 
-  .. code-block:: text
-
-     $ cat config.yaml | uw config realize --update-file update.yaml --output-format yaml
-     Specify --input-format when --input-file is not specified
+  .. literalinclude:: config/realize-extension-stdin-bad.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-extension-stdin-bad.out
+     :language: text
 
   The format must be explicitly specified:
 
-  .. code-block:: text
-
-     $ cat config.yaml | uw config realize --update-file update.yaml --output-format yaml --input-format yaml
-     values:
-       date: 20240105
-       empty: null
-       greeting: Good Night
-       message: Good Night Moon Good Night Moon
-       recipient: Moon
-       repeat: 2
+  .. literalinclude:: config/realize-extension-stdin-fix.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-extension-stdin-fix.out
+     :language: text
 
 * This example demonstrates: 1. Reading a config from ``stdin``, 2. Extracting a specific subsection with the ``--output-block`` option, and 3. Writing the output in a different format:
 
-  .. code-block:: text
-
-     $ cat config.yaml | uw config realize --input-format yaml --update-file update.yaml --output-block values --output-format sh
-     date=20240105
-     empty=None
-     greeting='Good Night'
-     message='Good Night Moon Good Night Moon'
-     recipient=Moon
-     repeat=2
+  .. literalinclude:: config/realize-combo.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-combo.out
+     :language: text
 
 .. note:: Combining configs with incompatible depths is not supported. ``ini`` and ``nml`` configs are depth-2, as they organize their key-value pairs (one level) under top-level sections or namelists (a second level). ``sh`` configs are depth-1, and ``yaml`` configs have arbitrary depth.
 
    For example, when attempting to generate a ``sh`` config from the original depth-2 ``config.yaml``:
 
-   .. code-block:: text
-
-      $ uw config realize --input-file config.yaml --output-format sh
-      [2024-05-20T19:17:02]    ERROR Cannot realize depth-2 config to type-'sh' config
+   .. literalinclude:: config/realize-depth-mismatch.cmd
+      :language: text
+      :emphasize-lines: 1
+   .. literalinclude:: config/realize-depth-mismatch.out
+      :language: text
 
 * It is possible to provide the update config, rather than the input config, on ``stdin``. Usage rules are as follows:
 
@@ -224,138 +208,49 @@ and YAML file ``update.yaml`` with the following contents:
 
   For example, here the update config is provided on ``stdin`` and the input config is read from a file:
 
-  .. code-block:: text
-
-     $ echo "yyyymmdd: 20240520" | uw config realize --input-file config.yaml --update-format yaml --output-format yaml
-     values:
-       date: '20240520'
-       empty: null
-       greeting: Hello
-       message: Hello World
-       recipient: World
-       repeat: 1
-     yyyymmdd: 20240520
+  .. literalinclude:: config/realize-update-stdin.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-update-stdin.out
+     :language: text
 
 * By default, variables/expressions that cannot be rendered are passed through unchanged in the output. For example, given config file ``flowers.yaml`` with contents
 
-  .. code-block:: yaml
-
-     roses: "{{ color1 }}"
-     violets: "{{ color2 }}"
-     color1: red
-
-  .. code-block:: text
-
-     $ uw config realize --input-file flowers.yaml --output-format yaml
-     roses: red
-     violets: '{{ color2 }}'
-     color1: red
-     $ echo $?
-     0
+  .. literalinclude:: config/flowers.yaml
+     :language: yaml
+  .. literalinclude:: config/realize-flowers-noop.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-flowers-noop.out
+     :language: text
 
   Adding the ``--total`` flag, however, requires ``uw`` to totally realize the config, and to exit with error status if it cannot:
 
-  .. code-block:: text
+  .. literalinclude:: config/realize-flowers-total.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-flowers-total.out
+     :language: text
 
-     $ uw config realize --input-file flowers.yaml --output-format yaml --total
-     [2024-05-20T18:39:37]    ERROR Config could not be realized. Try with --values-needed for details.
-     $ echo $?
-     1
+* Realization of individual values is all-or-nothing. If a single value contains a mix of renderable and unrenderable variables/expressions, then the entire value remains unrealized. For example, given ``roses.yaml`` with contents
 
-* Realization of individual values is all-or-nothing. If a single value contains a mix of renderable and unrenderable variables/expressions, then the entire value remains unrealized. For example, given ``flowers.yaml`` with contents
-
-  .. code-block:: yaml
-
-     roses: "{{ color1 }} or {{ color2 }}"
-     color1: red
-
-  .. code-block:: text
-
-     $ uw config realize --input-file flowers.yaml --output-format yaml
-     roses: '{{ color1 }} or {{ color2 }}'
-     color1: red
+  .. literalinclude:: config/roses.yaml
+     :language: yaml
+  .. literalinclude:: config/realize-roses-noop.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-roses-noop.out
+     :language: text
 
 * To request verbose log output:
 
-  .. code-block:: text
+  .. literalinclude:: config/realize-verbose.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-verbose.out
+     :language: text
 
-     $ echo "{hello: '{{ recipient }}', recipient: world}" | uw config realize --input-format yaml --output-format yaml --verbose
-     [2024-05-20T19:09:21]    DEBUG Command: uw config realize --input-format yaml --output-format yaml --verbose
-     [2024-05-20T19:09:21]    DEBUG Reading input from stdin
-     [2024-05-20T19:09:21]    DEBUG Dereferencing, current value:
-     [2024-05-20T19:09:21]    DEBUG   hello: '{{ recipient }}'
-     [2024-05-20T19:09:21]    DEBUG   recipient: world
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendering: {{ recipient }}
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendered: world
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendering: hello
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendered: hello
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendering: world
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendered: world
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendering: recipient
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendered: recipient
-     [2024-05-20T19:09:21]    DEBUG Dereferencing, current value:
-     [2024-05-20T19:09:21]    DEBUG   hello: world
-     [2024-05-20T19:09:21]    DEBUG   recipient: world
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendering: world
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendered: world
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendering: hello
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendered: hello
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendering: world
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendered: world
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendering: recipient
-     [2024-05-20T19:09:21]    DEBUG [dereference] Rendered: recipient
-     [2024-05-20T19:09:21]    DEBUG Dereferencing, final value:
-     [2024-05-20T19:09:21]    DEBUG   hello: world
-     [2024-05-20T19:09:21]    DEBUG   recipient: world
-     [2024-05-20T19:09:21]    DEBUG Writing output to stdout
-     hello: world
-     recipient: world
-
-  Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
-
-  .. code-block:: text
-
-     $ echo "{hello: '{{ recipient }}', recipient: world}" | uw config realize --input-format yaml --output-format yaml --verbose >realized.yaml 2>realized.log
-
-  The contents of ``realized.yaml``:
-
-  .. code-block:: yaml
-
-     hello: world
-     recipient: world
-
-  The contents of ``realized.log``:
-
-  .. code-block:: text
-
-     [2024-05-20T19:10:11]    DEBUG Command: uw config realize --input-format yaml --output-format yaml --verbose
-     [2024-05-20T19:10:11]    DEBUG Reading input from stdin
-     [2024-05-20T19:10:11]    DEBUG Dereferencing, current value:
-     [2024-05-20T19:10:11]    DEBUG   hello: '{{ recipient }}'
-     [2024-05-20T19:10:11]    DEBUG   recipient: world
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendering: {{ recipient }}
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendered: world
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendering: hello
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendered: hello
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendering: world
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendered: world
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendering: recipient
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendered: recipient
-     [2024-05-20T19:10:11]    DEBUG Dereferencing, current value:
-     [2024-05-20T19:10:11]    DEBUG   hello: world
-     [2024-05-20T19:10:11]    DEBUG   recipient: world
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendering: world
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendered: world
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendering: hello
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendered: hello
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendering: world
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendered: world
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendering: recipient
-     [2024-05-20T19:10:11]    DEBUG [dereference] Rendered: recipient
-     [2024-05-20T19:10:11]    DEBUG Dereferencing, final value:
-     [2024-05-20T19:10:11]    DEBUG   hello: world
-     [2024-05-20T19:10:11]    DEBUG   recipient: world
-     [2024-05-20T19:10:11]    DEBUG Writing output to stdout
+  Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately via :shell-redirection:`shell redirection<>`.
 
 .. _cli_config_validate_examples:
 

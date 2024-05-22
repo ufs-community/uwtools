@@ -1,0 +1,2 @@
+roses: '{{ color1 }} or {{ color2 }}'
+color1: red

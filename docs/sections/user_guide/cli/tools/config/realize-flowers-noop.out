@@ -1,0 +1,5 @@
+roses: red
+violets: '{{ color2 }}'
+color1: red
+
+Exit status: 0
