@@ -87,135 +87,60 @@ The examples that follow use namelist files ``a.nml`` and ``b.nml``, both initia
 
 In ``uw`` terminology, to realize a configuration file is to transform it from its raw form into its final, usable state. The ``realize`` action can build a complete config file from two or more separate files.
 
-.. code-block:: text
-
-   $ uw config realize --help
-   usage: uw config realize [-h] [--version] [--input-file PATH] [--input-format {ini,nml,sh,yaml}]
-                            [--update-file PATH] [--update-format {ini,nml,sh,yaml}]
-                            [--output-file PATH] [--output-format {ini,nml,sh,yaml}]
-                            [--output-block KEY[.KEY[.KEY]...]] [--values-needed] [--total]
-                            [--dry-run] [--quiet] [--verbose]
-
-   Realize config
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --input-file PATH, -i PATH
-         Path to input file (defaults to stdin)
-     --input-format {ini,nml,sh,yaml}
-         Input format
-     --update-file PATH, -u PATH
-         Path to update file (defaults to stdin)
-     --update-format {ini,nml,sh,yaml}
-         Input format
-     --output-file PATH, -o PATH
-         Path to output file (defaults to stdout)
-     --output-format {ini,nml,sh,yaml}
-         Output format
-     --output-block KEY[.KEY[.KEY]...]
-         Dot-separated path of keys to the block to be output
-     --values-needed
-         Print report of values needed to render template
-     --total
-         Require rendering of all Jinja2 variables/expressions
-     --dry-run
-         Only log info, making no changes
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: config/realize-help.cmd
+   :emphasize-lines: 1
+.. literalinclude:: config/realize-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
 The initial examples in this section use YAML file ``config.yaml`` with the following contents:
 
-.. code-block:: yaml
-
-   values:
-     date: '{{ yyyymmdd }}'
-     empty:
-     greeting: Hello
-     message: '{{ ((greeting + " " + recipient + " ") * repeat) | trim }}'
-     recipient: World
-     repeat: 1
+.. literalinclude:: config/config.yaml
+   :language: yaml
 
 and YAML file ``update.yaml`` with the following contents:
 
-.. code-block:: yaml
-
-   values:
-     date: 20240105
-     greeting: Good Night
-     recipient: Moon
-     repeat: 2
+.. literalinclude:: config/update.yaml
+   :language: yaml
 
 * To show the values in the input config file that have unrendered Jinja2 variables/expressions or empty keys:
 
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --output-format yaml --values-needed
-     [2024-05-20T18:33:01]     INFO Keys that are complete:
-     [2024-05-20T18:33:01]     INFO   values
-     [2024-05-20T18:33:01]     INFO   values.greeting
-     [2024-05-20T18:33:01]     INFO   values.message
-     [2024-05-20T18:33:01]     INFO   values.recipient
-     [2024-05-20T18:33:01]     INFO   values.repeat
-     [2024-05-20T18:33:01]     INFO
-     [2024-05-20T18:33:01]     INFO Keys with unrendered Jinja2 variables/expressions:
-     [2024-05-20T18:33:01]     INFO   values.date: {{ yyyymmdd }}
-     [2024-05-20T18:33:01]     INFO
-     [2024-05-20T18:33:01]     INFO Keys that are set to empty:
-     [2024-05-20T18:33:01]     INFO   values.empty
+  .. literalinclude:: config/realize-values-needed.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-values-needed.out
+     :language: text
 
 * To realize the config to ``stdout``, the output format must be explicitly specified:
 
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --output-format yaml
-     values:
-       date: '{{ yyyymmdd }}'
-       empty: null
-       greeting: Hello
-       message: Hello World
-       recipient: World
-       repeat: 1
+  .. literalinclude:: config/realize-stdout.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-stdout.out
+     :language: text
 
   :shell-redirection:`Shell redirection<>` may also be used to stream output to a file, another process, etc.
 
 * Values in the input file can be updated via an optional update file:
 
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --update-file update.yaml --output-format yaml
-     values:
-       date: 20240105
-       empty: null
-       greeting: Good Night
-       message: Good Night Moon Good Night Moon
-       recipient: Moon
-       repeat: 2
+  .. literalinclude:: config/realize-update-file.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-update-file.out
+     :language: text
 
 * To realize the config to a file via command-line argument:
 
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --update-file update.yaml --output-file realized.yaml
+  .. literalinclude:: config/realize-update-file-outfile.cmd
+     :language: text
+     :emphasize-lines: 1
 
   The contents of ``realized.yaml``:
 
-  .. code-block:: yaml
-
-     values:
-       date: 20240105
-       empty: null
-       greeting: Good Night
-       message: Good Night Moon Good Night Moon
-       recipient: Moon
-       repeat: 2
+  .. literalinclude:: config/realized.yaml
+     :language: text
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
