@@ -93,6 +93,11 @@ Its contents are described in depth in section :ref:`chgres_cube_yaml`. Each of 
 
      $ uw chgres_cube run --config-file config.yaml --cycle 2023-12-15T18 --batch --dry-run
 
+* Specifying the ``--key-path`` flag follows a path of keys leading through the config to extract the driver's configuration block.
+
+.. highlight:: yaml
+.. literalinclude:: ../../../../shared/arg_key_path.yaml
+
 * The ``run`` task depends on the other available tasks and executes them as prerequisites. It is possible to execute any task directly, which entails execution of any of *its* dependencies. For example, to create a ``chgres_cube`` run directory provisioned with all the files, directories, symlinks, etc. required per the configuration file:
 
   .. code-block:: text
