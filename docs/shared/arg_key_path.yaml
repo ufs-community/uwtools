@@ -1,9 +1,0 @@
-foo:
-  bar:
-    driver:
-      ...
-      driver configuration
-      ...
-platform:
-  account: me
-  scheduler: slurm
