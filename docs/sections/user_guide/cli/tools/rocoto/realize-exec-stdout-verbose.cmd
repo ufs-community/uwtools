@@ -1,4 +1,5 @@
-out=$(uw rocoto realize --config-file rocoto.yaml --verbose >/dev/null 2>&1)
-echo "$out" | head -n10
+rm -f rocoto.log
+uw rocoto realize --config-file rocoto.yaml --verbose >/dev/null 2>rocoto.log
+head -n10 rocoto.log
 echo ...
-echo "$out" | tail -n10
+tail -n10 rocoto.log

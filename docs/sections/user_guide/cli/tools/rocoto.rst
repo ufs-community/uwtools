@@ -27,7 +27,7 @@ More information about the structured UW YAML file for Rocoto can be found :any:
 Examples
 ^^^^^^^^
 
-The examples in this section use a UW YAML file called ``rocoto.yaml`` with contents:
+The examples in this section use a UW YAML file ``rocoto.yaml`` with contents:
 
 .. literalinclude:: rocoto/rocoto.yaml
    :language: yaml
@@ -60,7 +60,7 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with cont
 
   .. literalinclude:: rocoto/realize-exec-stdout-verbose.cmd
      :language: text
-     :emphasize-lines: 1
+     :emphasize-lines: 2
   .. literalinclude:: rocoto/realize-exec-stdout-verbose.out
      :language: xml
 
@@ -78,12 +78,12 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with cont
 Examples
 ^^^^^^^^
 
-The examples in this section use a Rocoto XML file called ``rocoto-good.xml`` with contents:
+The examples in this section use a Rocoto XML file ``rocoto-good.xml`` with contents:
 
 .. literalinclude:: rocoto/rocoto-good.xml
    :language: xml
 
-* To validate an XML from ``stdin``:
+* To validate XML from ``stdin``:
 
   .. literalinclude:: rocoto/validate-good-stdin.cmd
      :language: text
@@ -91,7 +91,7 @@ The examples in this section use a Rocoto XML file called ``rocoto-good.xml`` wi
   .. literalinclude:: rocoto/validate-good-stdin.out
      :language: text
 
-* To validate an XML from file ``rocoto-good.xml``:
+* To validate XML from file ``rocoto-good.xml``:
 
   .. literalinclude:: rocoto/validate-good-file.cmd
      :language: text
