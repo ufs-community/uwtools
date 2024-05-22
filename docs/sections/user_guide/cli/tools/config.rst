@@ -259,137 +259,59 @@ and YAML file ``update.yaml`` with the following contents:
 
 The ``validate`` action ensures that a given config file is structured properly.
 
-.. code-block:: text
-
-   $ uw config validate --help
-   usage: uw config validate --schema-file PATH [-h] [--version] [--input-file PATH] [--quiet]
-                             [--verbose]
-
-   Validate config
-
-   Required arguments:
-     --schema-file PATH
-         Path to schema file to use for validation
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --input-file PATH, -i PATH
-         Path to input file (defaults to stdin)
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+  .. literalinclude:: config/validate-help.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/validate-help.out
+     :language: text
 
 Examples
 ^^^^^^^^
 
 The examples that follow use the :json-schema:`JSON Schema<understanding-json-schema/reference>` file ``schema.jsonschema`` with the following contents:
 
-.. code-block:: json
-
-   {
-     "$schema": "http://json-schema.org/draft-07/schema#",
-     "type": "object",
-     "properties": {
-       "values": {
-         "type": "object",
-         "properties": {
-           "greeting": {
-             "type": "string"
-           },
-           "recipient": {
-             "type": "string"
-           }
-         },
-         "required": ["greeting", "recipient"],
-         "additionalProperties": false
-       }
-     },
-     "required": ["values"],
-     "additionalProperties": false
-   }
+.. literalinclude:: config/schema.jsonschema
+   :language: json
 
 and the YAML file ``values.yaml`` with the following contents:
 
-.. code-block:: yaml
-
-   values:
-     greeting: Hello
-     recipient: World
+.. literalinclude:: config/values.yaml
+   :language: yaml
 
 * To validate a YAML config against a given JSON schema:
 
-  .. code-block:: text
-
-     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml
-     [2024-01-03T17:23:07]     INFO 0 UW schema-validation errors found
+  .. literalinclude:: config/validate-pass.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/validate-pass.out
+     :language: text
 
   :shell-redirection:`Shell redirection<>` may also be used to stream output to a file, another process, etc.
 
 * To read the *config* from ``stdin`` and print validation results to ``stdout``:
 
-  .. code-block:: text
+  .. literalinclude:: config/validate-pass-stdin.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/validate-pass-stdin.out
+     :language: text
 
-     $ cat values.yaml | uw config validate --schema-file schema.jsonschema
-     [2024-01-03T17:26:29]     INFO 0 UW schema-validation errors found
+* If a config fails validation, differences from the schema will be displayed. For example, ``values-bad.yaml``:
 
-* However, reading the *schema* from ``stdin`` is **not** supported:
-
-  .. code-block:: text
-
-     $ cat schema.jsonschema | uw config validate --input-file values.yaml
-     uw config validate: error: the following arguments are required: --schema-file
-
-* If a config fails validation, differences from the schema will be displayed. For example, with ``recipient: World`` removed from ``values.yaml``:
-
-  .. code-block:: text
-
-     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml
-     [2024-01-03T17:31:19]    ERROR 1 UW schema-validation error found
-     [2024-01-03T17:31:19]    ERROR 'recipient' is a required property
-     [2024-01-03T17:31:19]    ERROR
-     [2024-01-03T17:31:19]    ERROR Failed validating 'required' in schema['properties']['values']:
-     [2024-01-03T17:31:19]    ERROR     {'additionalProperties': False,
-     [2024-01-03T17:31:19]    ERROR      'properties': {'greeting': {'type': 'string'},
-     [2024-01-03T17:31:19]    ERROR                     'recipient': {'type': 'string'}},
-     [2024-01-03T17:31:19]    ERROR      'required': ['greeting', 'recipient'],
-     [2024-01-03T17:31:19]    ERROR      'type': 'object'}
-     [2024-01-03T17:31:19]    ERROR
-     [2024-01-03T17:31:19]    ERROR On instance['values']:
-     [2024-01-03T17:31:19]    ERROR     {'greeting': 'Hello'}
+  .. literalinclude:: config/values-bad.yaml
+     :language: yaml
+  .. literalinclude:: config/validate-fail.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/validate-fail.out
+     :language: text
 
 * To request verbose log output:
 
-  .. code-block:: text
+  .. literalinclude:: config/validate-verbose.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/validate-verbose.out
+     :language: text
 
-     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
-     [2024-01-03T17:29:46]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
-     [2024-01-03T17:29:46]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-     [2024-01-03T17:29:46]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-     [2024-01-03T17:29:46]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World'}
-     [2024-01-03T17:29:46]    DEBUG Rendering: Hello
-     [2024-01-03T17:29:46]    DEBUG Rendering: World
-     [2024-01-03T17:29:46]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-     [2024-01-03T17:29:46]     INFO 0 UW schema-validation errors found
-
-  Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
-
-  .. code-block:: text
-
-     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose 2>validate.log
-
-  The contents of ``validate.log``:
-
-  .. code-block:: text
-
-     [2024-01-03T17:30:49]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
-     [2024-01-03T17:30:49]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-     [2024-01-03T17:30:49]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-     [2024-01-03T17:30:49]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World'}
-     [2024-01-03T17:30:49]    DEBUG Rendering: Hello
-     [2024-01-03T17:30:49]    DEBUG Rendering: World
-     [2024-01-03T17:30:49]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-     [2024-01-03T17:30:49]     INFO 0 UW schema-validation errors found
+  Note that ``uw`` logs to ``stderr``, so the stream can be :shell-redirection:`redirected<>`.

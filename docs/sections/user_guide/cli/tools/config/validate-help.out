@@ -1,0 +1,20 @@
+usage: uw config validate --schema-file PATH [-h] [--version]
+                          [--input-file PATH] [--quiet] [--verbose]
+
+Validate config
+
+Required arguments:
+  --schema-file PATH
+      Path to schema file to use for validation
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --input-file PATH, -i PATH
+      Path to input file (defaults to stdin)
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages
