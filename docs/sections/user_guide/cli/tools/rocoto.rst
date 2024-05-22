@@ -48,7 +48,7 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
   .. literalinclude:: rocoto/realize-exec-file.out
      :language: text
 
-  The content of ``rocoto.xml``:
+  The contents of ``rocoto.xml``:
 
   .. literalinclude:: rocoto/rocoto.xml
      :language: xml
@@ -69,9 +69,9 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
   .. literalinclude:: rocoto/realize-exec-stdout-quiet.out
      :language: xml
 
-  The contents of ``rocoto.xml`` are unchanged from the previous example.
+  The ``rocoto.xml`` produced by this command are identical to the previous example.
 
-* To realize a UW YAML file to a file named ``rocoto.xml`` with verbose log output (some output elided for brevity):
+* To see verbose log output while realizing a UW YAML file to a file named ``rocoto.xml`` (some output elided for brevity):
 
   .. literalinclude:: rocoto/realize-exec-stdout-verbose.cmd
      :language: text
@@ -93,7 +93,7 @@ The examples in this section use a UW YAML file called ``rocoto.yaml`` with the 
 Examples
 ^^^^^^^^
 
-The examples in this section use a Rocoto XML file called ``rocoto-good.xml`` with the following content:
+The examples in this section use a Rocoto XML file called ``rocoto-good.xml`` with the following contents:
 
 .. literalinclude:: rocoto/rocoto-good.xml
    :language: xml

@@ -40,7 +40,7 @@ When the Linux diff tool just doesn't work for comparing unordered namelists wit
 Realize Mode
 """"""""""""
 
-This mode renders values created by :jinja2:`Jinja2 templates<templates>`, and lets you override values in one file or object with those from others, not necessarily with the same configuration format. With ``uwtools``, you can even reference the content of other files to build up a configuration from its pieces.
+This mode renders values created by :jinja2:`Jinja2 templates<templates>`, and lets you override values in one file or object with those from others, not necessarily with the same configuration format. With ``uwtools``, you can even reference the contents of other files to build up a configuration from its pieces.
 
 | :any:`CLI documentation with examples<cli_config_realize_examples>`
 

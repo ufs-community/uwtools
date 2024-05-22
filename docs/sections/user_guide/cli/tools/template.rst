@@ -57,7 +57,7 @@ and a YAML file called ``values.yaml`` with the following contents:
      :language: text
      :emphasize-lines: 1
 
-  The content of ``rendered``:
+  The contents of ``rendered``:
 
   .. literalinclude:: template/rendered
      :language: jinja
@@ -224,7 +224,7 @@ The examples in this section use atparse-formatted template file ``atparse.txt``
      :language: text
      :emphasize-lines: 1
 
-  The content of ``jinja2.txt``:
+  The contents of ``jinja2.txt``:
 
   .. literalinclude:: template/jinja2.txt
      :language: jinja

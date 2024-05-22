@@ -20,7 +20,7 @@ All tasks take the same arguments. For example:
 Examples
 ^^^^^^^^
 
-The examples use a configuration file named ``config.yaml`` with content similar to:
+The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/esg_grid.yaml

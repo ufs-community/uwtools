@@ -350,7 +350,7 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.rocoto, "Realize and validate Rocoto XML Documents")
+    parser = _add_subparser(subparsers, STR.rocoto, "Realize and validate Rocoto XML documents")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
