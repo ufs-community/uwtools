@@ -1,10 +1,11 @@
 usage: uw config realize [-h] [--version] [--input-file PATH]
                          [--input-format {ini,nml,sh,yaml}]
+                         [--update-file PATH]
+                         [--update-format {ini,nml,sh,yaml}]
                          [--output-file PATH]
                          [--output-format {ini,nml,sh,yaml}]
                          [--output-block KEY[.KEY[.KEY]...]] [--values-needed]
                          [--total] [--dry-run] [--quiet] [--verbose]
-                         [PATH ...]
 
 Realize config
 
@@ -17,6 +18,10 @@ Optional arguments:
       Path to input file (defaults to stdin)
   --input-format {ini,nml,sh,yaml}
       Input format
+  --update-file PATH, -u PATH
+      Path to update file (defaults to stdin)
+  --update-format {ini,nml,sh,yaml}
+      Update format
   --output-file PATH, -o PATH
       Path to output file (defaults to stdout)
   --output-format {ini,nml,sh,yaml}
@@ -33,5 +38,3 @@ Optional arguments:
       Print no logging messages
   --verbose, -v
       Print all logging messages
-  PATH
-      Additional files to supplement primary input
