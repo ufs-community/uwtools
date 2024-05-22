@@ -23,7 +23,7 @@ The ``uw`` mode for handling :jinja2:`Jinja2 templates<templates>`.
 Examples
 ^^^^^^^^
 
-The examples in this section use a template file named ``template`` with contents:
+The examples in this section use a template file ``template`` with contents:
 
 .. literalinclude:: template/template
    :language: jinja
@@ -55,12 +55,9 @@ and a YAML file called ``values.yaml`` with contents:
 
   .. literalinclude:: template/render-exec-file.cmd
      :language: text
-     :emphasize-lines: 1
-
-  The contents of ``rendered``:
-
-  .. literalinclude:: template/rendered
-     :language: jinja
+     :emphasize-lines: 2
+  .. literalinclude:: template/render-exec-file.out
+     :language: text
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
@@ -86,7 +83,7 @@ and a YAML file called ``values.yaml`` with contents:
   .. literalinclude:: template/render-exec-bad-extension.out
      :language: text
 
-  In this case, the format can be explicitly specified (``values.txt`` is identical to ``values.yaml``):
+  The format must be explicitly specified (here, ``values.txt`` is identical to ``values.yaml``):
 
   .. literalinclude:: template/render-exec-explicit-extension.cmd
      :language: text
@@ -222,12 +219,9 @@ The examples in this section use atparse-formatted template file ``atparse.txt``
 
   .. literalinclude:: template/translate-exec-file.cmd
      :language: text
-     :emphasize-lines: 1
-
-  The contents of ``jinja2.txt``:
-
-  .. literalinclude:: template/jinja2.txt
-     :language: jinja
+     :emphasize-lines: 2
+  .. literalinclude:: template/translate-exec-file.out
+     :language: text
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 

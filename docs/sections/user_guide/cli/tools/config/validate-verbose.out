@@ -1,20 +1,20 @@
-[2024-05-22T17:43:39]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
-[2024-05-22T17:43:39]    DEBUG Dereferencing, current value:
-[2024-05-22T17:43:39]    DEBUG   values:
-[2024-05-22T17:43:39]    DEBUG     greeting: Hello
-[2024-05-22T17:43:39]    DEBUG     recipient: World
-[2024-05-22T17:43:39]    DEBUG [dereference] Rendering: Hello
-[2024-05-22T17:43:39]    DEBUG [dereference] Rendered: Hello
-[2024-05-22T17:43:39]    DEBUG [dereference] Rendering: greeting
-[2024-05-22T17:43:39]    DEBUG [dereference] Rendered: greeting
-[2024-05-22T17:43:39]    DEBUG [dereference] Rendering: World
-[2024-05-22T17:43:39]    DEBUG [dereference] Rendered: World
-[2024-05-22T17:43:39]    DEBUG [dereference] Rendering: recipient
-[2024-05-22T17:43:39]    DEBUG [dereference] Rendered: recipient
-[2024-05-22T17:43:39]    DEBUG [dereference] Rendering: values
-[2024-05-22T17:43:39]    DEBUG [dereference] Rendered: values
-[2024-05-22T17:43:39]    DEBUG Dereferencing, final value:
-[2024-05-22T17:43:39]    DEBUG   values:
-[2024-05-22T17:43:39]    DEBUG     greeting: Hello
-[2024-05-22T17:43:39]    DEBUG     recipient: World
-[2024-05-22T17:43:39]     INFO 0 UW schema-validation errors found
+[2024-05-22T17:48:50]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
+[2024-05-22T17:48:50]    DEBUG Dereferencing, current value:
+[2024-05-22T17:48:50]    DEBUG   values:
+[2024-05-22T17:48:50]    DEBUG     greeting: Hello
+[2024-05-22T17:48:50]    DEBUG     recipient: World
+[2024-05-22T17:48:50]    DEBUG [dereference] Rendering: Hello
+[2024-05-22T17:48:50]    DEBUG [dereference] Rendered: Hello
+[2024-05-22T17:48:50]    DEBUG [dereference] Rendering: greeting
+[2024-05-22T17:48:50]    DEBUG [dereference] Rendered: greeting
+[2024-05-22T17:48:50]    DEBUG [dereference] Rendering: World
+[2024-05-22T17:48:50]    DEBUG [dereference] Rendered: World
+[2024-05-22T17:48:50]    DEBUG [dereference] Rendering: recipient
+[2024-05-22T17:48:50]    DEBUG [dereference] Rendered: recipient
+[2024-05-22T17:48:50]    DEBUG [dereference] Rendering: values
+[2024-05-22T17:48:50]    DEBUG [dereference] Rendered: values
+[2024-05-22T17:48:50]    DEBUG Dereferencing, final value:
+[2024-05-22T17:48:50]    DEBUG   values:
+[2024-05-22T17:48:50]    DEBUG     greeting: Hello
+[2024-05-22T17:48:50]    DEBUG     recipient: World
+[2024-05-22T17:48:50]     INFO 0 UW schema-validation errors found

@@ -1,15 +1,15 @@
-[2024-05-22T17:43:39]    DEBUG Command: uw template render --input-file template --values-file values.yaml --verbose
-[2024-05-22T17:43:39]    DEBUG Internal arguments:
-[2024-05-22T17:43:39]    DEBUG ---------------------------------------------------------------------
-[2024-05-22T17:43:39]    DEBUG       values_src: values.yaml
-[2024-05-22T17:43:39]    DEBUG    values_format: yaml
-[2024-05-22T17:43:39]    DEBUG       input_file: template
-[2024-05-22T17:43:39]    DEBUG      output_file: None
-[2024-05-22T17:43:39]    DEBUG        overrides: {}
-[2024-05-22T17:43:39]    DEBUG              env: False
-[2024-05-22T17:43:39]    DEBUG       searchpath: None
-[2024-05-22T17:43:39]    DEBUG    values_needed: False
-[2024-05-22T17:43:39]    DEBUG          dry_run: False
-[2024-05-22T17:43:39]    DEBUG ---------------------------------------------------------------------
-[2024-05-22T17:43:39]    DEBUG Read initial values from values.yaml
+[2024-05-22T17:48:50]    DEBUG Command: uw template render --input-file template --values-file values.yaml --verbose
+[2024-05-22T17:48:50]    DEBUG Internal arguments:
+[2024-05-22T17:48:50]    DEBUG ---------------------------------------------------------------------
+[2024-05-22T17:48:50]    DEBUG       values_src: values.yaml
+[2024-05-22T17:48:50]    DEBUG    values_format: yaml
+[2024-05-22T17:48:50]    DEBUG       input_file: template
+[2024-05-22T17:48:50]    DEBUG      output_file: None
+[2024-05-22T17:48:50]    DEBUG        overrides: {}
+[2024-05-22T17:48:50]    DEBUG              env: False
+[2024-05-22T17:48:50]    DEBUG       searchpath: None
+[2024-05-22T17:48:50]    DEBUG    values_needed: False
+[2024-05-22T17:48:50]    DEBUG          dry_run: False
+[2024-05-22T17:48:50]    DEBUG ---------------------------------------------------------------------
+[2024-05-22T17:48:50]    DEBUG Read initial values from values.yaml
 Hello, World!
