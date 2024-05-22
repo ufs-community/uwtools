@@ -1,4 +1,0 @@
-[2024-05-22T15:33:19]    ERROR Required value(s) not provided:
-[2024-05-22T15:33:19]    ERROR   greeting
-[2024-05-22T15:33:19]    ERROR   recipient
-[2024-05-22T15:33:19]    ERROR Template could not be rendered

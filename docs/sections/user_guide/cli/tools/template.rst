@@ -166,7 +166,7 @@ Note that, in the previous two examples, the ``var=val`` syntax preceding the ``
   .. literalinclude:: template/render-exec-macros.out
      :language: text
 
-  The ``--search-path`` option could also be specified with a colon-separated set of directories to be searched for templates.
+  The ``--search-path`` option can also be specified with a colon-separated set of directories to be searched for templates.
 
   **NB**: Reading the primary template from ``stdin`` requires use of ``--search-path``, as there is no implicit directory related to the input. For example, given the existence of directory ``macros-dir``:
 
@@ -176,17 +176,17 @@ Note that, in the previous two examples, the ``var=val`` syntax preceding the ``
   .. literalinclude:: template/render-exec-macros-dir.out
      :language: text
 
-* Non-YAML-formatted files may also be used as value sources. For example, ``values.nml`` with contents
+* Non-YAML-formatted files may also be used as value sources. For example, ``values.sh`` with contents
 
-  .. literalinclude:: template/values.nml
+  .. literalinclude:: template/values.sh
      :language: fortran
 
   can be used to render ``template``:
 
-  .. literalinclude:: template/render-exec-nml.cmd
+  .. literalinclude:: template/render-exec-sh.cmd
      :language: text
      :emphasize-lines: 1
-  .. literalinclude:: template/render-exec-nml.out
+  .. literalinclude:: template/render-exec-sh.out
      :language: text
 
 .. _cli_template_translate_examples:
