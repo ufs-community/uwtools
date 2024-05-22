@@ -356,11 +356,11 @@ and YAML file ``update.yaml`` with the following contents:
       $ uw config realize --input-file config.yaml --output-format sh
       [2024-05-20T19:17:02]    ERROR Cannot realize depth-2 config to type-'sh' config
 
-* It is possible to provide update values, rather than the input config, on ``stdin``. Usage rules are as follows:
+* It is possible to provide the update config, rather than the input config, on ``stdin``. Usage rules are as follows:
 
   * Only if either ``--update-file`` or ``--update-config`` are specified will ``uw`` attempt to read and apply update values to the input config.
   * If ``--update-file`` is provided with an unrecognized (or no) extension, or if the update values are provided on ``stdin``, ``--update-format`` must be used to specify the correct format.
-  * At least one of the input config and the update config must be provided via file: They cannot be streamed from ``stdin`` simultaneously.
+  * When updating, the input config, the update config, or both must be provided via file; they cannot be streamed from ``stdin`` simultaneously.
 
   For example, here the update config is provided on ``stdin`` and the input config is read from a file:
 
