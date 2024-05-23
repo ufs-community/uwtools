@@ -1,12 +1,13 @@
 usage: uw upp run --cycle CYCLE --leadtime LEADTIME [-h] [--version]
                   [--config-file PATH] [--batch] [--dry-run]
-                  [--graph-file PATH] [--quiet] [--verbose]
+                  [--graph-file PATH] [--key-path KEY[.KEY...]] [--quiet]
+                  [--verbose]
 
 A run
 
 Required arguments:
   --cycle CYCLE
-      The cycle in ISO8601 format (e.g. 2024-05-23T12)
+      The cycle in ISO8601 format (e.g. 2024-05-23T18)
   --leadtime LEADTIME
       The leadtime as HH[:MM[:SS]]
 
@@ -23,6 +24,9 @@ Optional arguments:
       Only log info, making no changes
   --graph-file PATH
       Path to Graphviz DOT output [experimental]
+  --key-path KEY[.KEY...]
+      Dot-separated path of keys leading through the config to the driver's
+      configuration block
   --quiet, -q
       Print no logging messages
   --verbose, -v

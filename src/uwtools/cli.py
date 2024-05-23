@@ -530,7 +530,7 @@ def _dispatch_template_translate(args: Args) -> bool:
 
 # Arguments
 
-# pylint: disable=line-too-long, missing-function-docstring
+# pylint: disable=missing-function-docstring
 
 
 def _add_arg_batch(group: Group) -> None:
@@ -644,7 +644,8 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
 def _add_arg_key_path(group: Group) -> None:
     group.add_argument(
         _switch(STR.keypath),
-        help="Dot-separated path of keys leading through the config to the driver's configuration block",
+        help="Dot-separated path of keys leading through the config "
+        "to the driver's configuration block",
         metavar="KEY[.KEY...]",
         required=False,
         type=lambda s: s.split("."),

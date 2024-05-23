@@ -1,5 +1,6 @@
 usage: uw esg_grid run [-h] [--version] [--config-file PATH] [--batch]
-                       [--dry-run] [--graph-file PATH] [--quiet] [--verbose]
+                       [--dry-run] [--graph-file PATH]
+                       [--key-path KEY[.KEY...]] [--quiet] [--verbose]
 
 A run
 
@@ -16,6 +17,9 @@ Optional arguments:
       Only log info, making no changes
   --graph-file PATH
       Path to Graphviz DOT output [experimental]
+  --key-path KEY[.KEY...]
+      Dot-separated path of keys leading through the config to the driver's
+      configuration block
   --quiet, -q
       Print no logging messages
   --verbose, -v
