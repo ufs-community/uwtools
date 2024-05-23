@@ -3,9 +3,9 @@
 .. highlight:: yaml
 .. literalinclude:: /shared/key_path_nested.yaml
 
-  is equivalent to using config
+is equivalent to using config
 
 .. highlight:: yaml
 .. literalinclude:: /shared/key_path_simple.yaml
 
-  without specifying ``--key-path``.
+without specifying ``--key-path``.
