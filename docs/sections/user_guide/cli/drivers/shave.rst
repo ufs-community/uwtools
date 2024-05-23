@@ -48,3 +48,5 @@ Its contents are described in section :ref:`shave_yaml`.
   .. code-block:: text
 
      $ uw shave run --config-file config.yaml --batch --dry-run
+
+.. include:: ../../../../shared/key_path.rst

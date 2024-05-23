@@ -44,6 +44,8 @@ The examples use a configuration file named ``config.yaml``. Its contents are de
 
      $ uw fv3 run --config-file config.yaml --cycle 2024-02-11T12 --batch --dry-run
 
+.. include:: ../../../../shared/key_path.rst
+
 * The ``run`` task depends on the other available tasks and executes them as prerequisites. It is possible to execute any task directly, which entails execution of any of *its* dependencies. For example, to create an FV3 run directory provisioned with all the files, directories, symlinks, etc. required per the configuration file:
 
   .. code-block:: text

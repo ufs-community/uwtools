@@ -31,7 +31,7 @@ Its contents are described in section :ref:`jedi_yaml`.
 
    .. code-block:: text
 
-      $ uw jedi run --config-file config.yaml
+      $ uw jedi run --config-file config.yaml --cycle 2024-05-22T12
 
 The driver creates a ``runscript.jedi`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``jedi``.
 
@@ -39,7 +39,7 @@ The driver creates a ``runscript.jedi`` file in the directory specified by ``run
 
    .. code-block:: text
 
-      $ uw jedi run --config-file config.yaml --batch
+      $ uw jedi run --config-file config.yaml --cycle 2024-05-22T12 --batch
 
 The driver creates a ``runscript.jedi`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``jedi:``.
 
@@ -47,4 +47,6 @@ The driver creates a ``runscript.jedi`` file in the directory specified by ``run
 
   .. code-block:: text
 
-     $ uw jedi run --config-file config.yaml --batch --dry-run
+     $ uw jedi run --config-file config.yaml --cycle 2024-05-22T12 --batch --dry-run
+
+.. include:: ../../../../shared/key_path.rst

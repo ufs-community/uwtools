@@ -21,6 +21,7 @@ def execute_kwargs():
         "batch": True,
         "dry_run": False,
         "graph_file": "/path/to/g.dot",
+        "key_path": None,
         "stdin_ok": True,
     }
 

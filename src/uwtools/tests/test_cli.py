@@ -546,11 +546,12 @@ def test__dispatch_to_driver():
     args: dict = {
         "action": "foo",
         "batch": True,
-        "config_file": "config.yaml",
+        "config_file": "/path/to/config",
         "cycle": cycle,
         "leadtime": leadtime,
         "dry_run": False,
         "graph_file": None,
+        "key_path": ["foo", "bar"],
         "stdin_ok": True,
     }
     adriver = Mock()
@@ -558,11 +559,12 @@ def test__dispatch_to_driver():
         cli._dispatch_to_driver(name=name, args=args)
         adriver.execute.assert_called_once_with(
             batch=True,
-            config="config.yaml",
+            config="/path/to/config",
             cycle=cycle,
             leadtime=leadtime,
             dry_run=False,
             graph_file=None,
+            key_path=["foo", "bar"],
             task="foo",
             stdin_ok=True,
         )

@@ -5,7 +5,7 @@ Support for API modules.
 import datetime as dt
 import re
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.drivers.driver import Driver
@@ -51,6 +51,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
+        key_path: Optional[List[str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -62,6 +63,7 @@ def make_execute(
             batch=batch,
             dry_run=dry_run,
             graph_file=graph_file,
+            key_path=key_path,
             stdin_ok=stdin_ok,
         )
 
@@ -72,6 +74,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
+        key_path: Optional[List[str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -83,6 +86,7 @@ def make_execute(
             batch=batch,
             dry_run=dry_run,
             graph_file=graph_file,
+            key_path=key_path,
             stdin_ok=stdin_ok,
         )
 
@@ -94,6 +98,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
+        key_path: Optional[List[str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -105,6 +110,7 @@ def make_execute(
             batch=batch,
             dry_run=dry_run,
             graph_file=graph_file,
+            key_path=key_path,
             stdin_ok=stdin_ok,
         )
 
@@ -164,6 +170,7 @@ def _execute(
     batch: bool = False,
     dry_run: bool = False,
     graph_file: Optional[Union[Path, str]] = None,
+    key_path: Optional[List[str]] = None,
     stdin_ok: bool = False,
 ) -> bool:
     """
@@ -180,6 +187,7 @@ def _execute(
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run the executable, just report what would have been done.
     :param graph_file: Write Graphviz DOT output here.
+    :param key_path: Path of keys to subsection of config file.
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
@@ -187,6 +195,7 @@ def _execute(
         config=ensure_data_source(config, stdin_ok),
         batch=batch,
         dry_run=dry_run,
+        key_path=key_path,
     )
     if cycle:
         kwargs["cycle"] = cycle

@@ -54,3 +54,5 @@ Its contents are described in section :ref:`make_solo_mosaic_yaml`.
   .. code-block:: text
 
      $ uw make_solo_mosaic run --config-file config.yaml --batch --dry-run
+
+.. include:: ../../../../shared/key_path.rst

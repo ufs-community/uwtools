@@ -1,0 +1,4 @@
+foo:
+  bar:
+    driver:
+      # driver config block

@@ -48,3 +48,5 @@ Its contents are described in section :ref:`global_equiv_resol_yaml`.
   .. code-block:: text
 
      $ uw global_equiv_resol run --config-file config.yaml --batch --dry-run
+
+.. include:: ../../../../shared/key_path.rst

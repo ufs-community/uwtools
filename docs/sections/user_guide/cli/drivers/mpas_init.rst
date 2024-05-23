@@ -49,6 +49,8 @@ Its contents are described in depth in section :ref:`mpas_init_yaml`.
 
      $ uw mpas_init run --config-file config.yaml --cycle 2023-12-18T00 --batch --dry-run
 
+.. include:: ../../../../shared/key_path.rst
+
 * The ``run`` task depends on the other available tasks and executes them as prerequisites. It is possible to execute any task directly, which entails execution of any of *its* dependencies. For example, to create an ``mpas_init`` run directory provisioned with all the files, directories, symlinks, etc. required per the configuration file:
 
   .. code-block:: text
