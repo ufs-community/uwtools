@@ -40,6 +40,8 @@ The examples that follow use identical namelist files ``a.nml`` and ``b.nml`` wi
 
 * If there are differences between the config files, they will be shown below the dashed line. For example, ``c.nml`` is missing the line ``recipient: World``:
 
+  .. literalinclude:: config/c.nml
+     :language: fortran
   .. literalinclude:: config/compare-diff.cmd
      :language: text
      :emphasize-lines: 1

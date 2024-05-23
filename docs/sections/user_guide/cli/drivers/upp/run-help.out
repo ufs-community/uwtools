@@ -6,7 +6,7 @@ A run
 
 Required arguments:
   --cycle CYCLE
-      The cycle in ISO8601 format (e.g. 2024-05-23T00)
+      The cycle in ISO8601 format (e.g. 2024-05-23T12)
   --leadtime LEADTIME
       The leadtime as HH[:MM[:SS]]
 
