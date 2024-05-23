@@ -1,1 +1,3 @@
-[2024-05-22T17:56:11]     INFO 0 UW schema-validation errors found
+[2024-05-23T02:09:25]    ERROR 1 UW schema-validation error found
+[2024-05-23T02:09:25]    ERROR Error at values:
+[2024-05-23T02:09:25]    ERROR   'recipient' is a required property
