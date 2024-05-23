@@ -3,63 +3,19 @@
 
 The ``uw`` mode for configuring and running the :ufs-utils:`chgres_cube<chgres-cube>` component.
 
-.. code-block:: text
-
-   $ uw chgres_cube --help
-   usage: uw chgres_cube [-h] [--version] TASK ...
-
-   Execute chgres_cube tasks
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     TASK
-       namelist_file
-         The namelist file
-       provisioned_run_directory
-         Run directory provisioned with all required content
-       run
-         A run
-       runscript
-         The runscript
-       validate
-         Validate the UW driver config
+.. literalinclude:: chgres_cube/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: chgres_cube/help.out
+   :language: text
 
 All tasks take the same arguments. For example:
 
-.. code-block:: text
-
-   $ uw chgres_cube run --help
-   usage: uw chgres_cube run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch]
-                             [--dry-run] [--graph-file PATH] [--quiet] [--verbose]
-
-   A run
-
-   Required arguments:
-     --cycle CYCLE
-         The cycle in ISO8601 format (e.g. 2024-05-08T18)
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --config-file PATH, -c PATH
-         Path to UW YAML config file (default: read from stdin)
-     --batch
-         Submit run to batch scheduler
-     --dry-run
-         Only log info, making no changes
-     --graph-file PATH
-         Path to Graphviz DOT output [experimental]
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: chgres_cube/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: chgres_cube/run-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
@@ -101,4 +57,3 @@ Its contents are described in depth in section :ref:`chgres_cube_yaml`. Each of 
   .. code-block:: text
 
      $ uw chgres_cube provisioned_run_directory --config-file config.yaml --cycle 2023-12-15T18 --batch
-

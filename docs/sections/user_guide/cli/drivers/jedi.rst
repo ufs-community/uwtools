@@ -3,74 +3,24 @@
 
 The ``uw`` mode for configuring and running the JEDI framework.
 
-.. code-block:: text
-
-   $ uw jedi --help
-   usage: uw jedi [-h] [--version] TASK ...
-
-   Execute jedi tasks
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     TASK
-       configuration_file
-         The JEDI YAML configuration file
-       files_copied
-         Files copied for run
-       files_linked
-         Files linked for run
-       provisioned_run_directory
-         Run directory provisioned with all required content
-       run
-         A run
-       runscript
-         The runscript
-       validate
-         Validate the UW driver config
-       validate_only
-         Validate JEDI config YAML
+.. literalinclude:: jedi/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: jedi/help.out
+   :language: text
 
 All tasks take the same arguments. For example:
 
-.. code-block:: text
-
-   $ uw jedi run --help
-   usage: uw jedi run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
-                      [--graph-file PATH] [--quiet] [--verbose]
-
-   A run
-
-   Required arguments:
-     --cycle CYCLE
-         The cycle in ISO8601 format (e.g. 2024-05-08T18)
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --config-file PATH, -c PATH
-         Path to UW YAML config file (default: read from stdin)
-     --batch
-         Submit run to batch scheduler
-     --dry-run
-         Only log info, making no changes
-     --graph-file PATH
-         Path to Graphviz DOT output [experimental]
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: jedi/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: jedi/run-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
-The examples use a configuration file named ``config.yaml`` with content similar to:
+The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/jedi.yaml

@@ -21,6 +21,7 @@ devshell:
 	condev-shell || true
 
 docs:
+	$(MAKE) -C docs examples
 	$(MAKE) -C docs docs
 
 env: package

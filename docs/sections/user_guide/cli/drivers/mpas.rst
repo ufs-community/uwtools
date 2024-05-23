@@ -3,76 +3,24 @@
 
 The ``uw`` mode for configuring and running the MPAS forecast model. Each listed ``TASK`` may be called to generate the runtime asset(s) it is responsible for, and will call any task it depends on as needed. A ``provisioned_run_directory`` comprises everything needed for a run, and a ``run`` runs the MPAS executable.
 
-.. code-block:: text
-
-   $ uw mpas --help
-   usage: uw mpas [-h] [--version] TASK ...
-
-   Execute mpas tasks
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     TASK
-       boundary_files
-         Boundary files
-       files_copied
-         Files copied for run
-       files_linked
-         Files linked for run
-       namelist_file
-         The namelist file
-       provisioned_run_directory
-         Run directory provisioned with all required content
-       run
-         A run
-       runscript
-         The runscript
-       streams_file
-         The streams file
-       validate
-         Validate the UW driver config
+.. literalinclude:: mpas/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: mpas/help.out
+   :language: text
 
 All tasks take the same arguments. For example:
 
-.. code-block:: text
-
-   $ uw mpas run --help
-   usage: uw mpas run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
-                      [--graph-file PATH] [--quiet] [--verbose]
-
-   A run
-
-   Required arguments:
-     --cycle CYCLE
-         The cycle in ISO8601 format (e.g. 2024-05-08T18)
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --config-file PATH, -c PATH
-         Path to UW YAML config file (default: read from stdin)
-     --batch
-         Submit run to batch scheduler
-     --dry-run
-         Only log info, making no changes
-     --graph-file PATH
-         Path to Graphviz DOT output [experimental]
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: mpas/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: mpas/run-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
-The examples use a configuration file named ``config.yaml`` with content similar to:
+The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/mpas.yaml

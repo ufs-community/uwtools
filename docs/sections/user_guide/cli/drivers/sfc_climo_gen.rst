@@ -3,64 +3,24 @@
 
 The ``uw`` mode for configuring and running the :sfc-climo-gen:`sfc_climo_gen<>` component.
 
-.. code-block:: text
-
-   $ uw sfc_climo_gen --help
-   usage: uw sfc_climo_gen [-h] [--version] TASK ...
-
-   Execute sfc_climo_gen tasks
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     TASK
-       namelist_file
-         The namelist file
-       provisioned_run_directory
-         Run directory provisioned with all required content
-       run
-         A run
-       runscript
-         The runscript
-       validate
-         Validate the UW driver config
+.. literalinclude:: sfc_climo_gen/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: sfc_climo_gen/help.out
+   :language: text
 
 All tasks take the same arguments. For example:
 
-.. code-block:: text
-
-   $ uw sfc_climo_gen run --help
-   usage: uw sfc_climo_gen run [-h] [--version] [--config-file PATH] [--batch] [--dry-run]
-                               [--graph-file PATH] [--quiet] [--verbose]
-
-   A run
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --config-file PATH, -c PATH
-         Path to UW YAML config file (default: read from stdin)
-     --batch
-         Submit run to batch scheduler
-     --dry-run
-         Only log info, making no changes
-     --graph-file PATH
-         Path to Graphviz DOT output [experimental]
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: sfc_climo_gen/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: sfc_climo_gen/run-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
-The examples use a configuration file named ``config.yaml`` with content similar to:
+The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/sfc_climo_gen.yaml

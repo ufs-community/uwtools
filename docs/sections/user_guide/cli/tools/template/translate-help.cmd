@@ -1,0 +1,1 @@
+uw template translate --help

@@ -1,0 +1,28 @@
+usage: uw jedi [-h] [--version] TASK ...
+
+Execute jedi tasks
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+
+Positional arguments:
+  TASK
+    configuration_file
+      The JEDI YAML configuration file
+    files_copied
+      Files copied for run
+    files_linked
+      Files linked for run
+    provisioned_run_directory
+      Run directory provisioned with all required content
+    run
+      A run
+    runscript
+      The runscript
+    validate
+      Validate the UW driver config
+    validate_only
+      Validate JEDI config YAML

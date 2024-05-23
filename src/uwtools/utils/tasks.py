@@ -70,4 +70,7 @@ def symlink(target: Path, linkname: Path):
     yield asset(linkname, linkname.exists)
     yield existing(target)
     linkname.parent.mkdir(parents=True, exist_ok=True)
-    os.symlink(src=target, dst=linkname)
+    os.symlink(
+        src=target if target.is_absolute() else os.path.relpath(target, linkname.parent),
+        dst=linkname,
+    )

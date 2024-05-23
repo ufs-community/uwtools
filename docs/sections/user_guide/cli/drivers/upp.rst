@@ -3,74 +3,24 @@
 
 The ``uw`` mode for configuring and running the `UPP <https://epic.noaa.gov/unified-post-processor/>`_ component.
 
-.. code-block:: text
-
-   $ uw upp --help
-   usage: uw upp [-h] [--version] TASK ...
-
-   Execute upp tasks
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     TASK
-       files_copied
-         Files copied for run
-       files_linked
-         Files linked for run
-       namelist_file
-         The namelist file
-       provisioned_run_directory
-         Run directory provisioned with all required content
-       run
-         A run
-       runscript
-         The runscript
-       validate
-         Validate the UW driver config
+.. literalinclude:: upp/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: upp/help.out
+   :language: text
 
 All tasks take the same arguments. For example:
 
-.. code-block:: text
-
-   $ uw upp run --help
-   usage: uw upp run --cycle CYCLE --leadtime LEADTIME [-h] [--version] [--config-file PATH]
-                     [--batch] [--dry-run] [--graph-file PATH] [--quiet] [--verbose]
-
-   A run
-
-   Required arguments:
-     --cycle CYCLE
-         The cycle in ISO8601 format (e.g. 2024-05-08T18)
-     --leadtime LEADTIME
-         Leadtime as HH[:MM[:SS]]
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --config-file PATH, -c PATH
-         Path to UW YAML config file (default: read from stdin)
-     --batch
-         Submit run to batch scheduler
-     --dry-run
-         Only log info, making no changes
-     --graph-file PATH
-         Path to Graphviz DOT output [experimental]
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: upp/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: upp/run-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
-The examples use a configuration file named ``config.yaml`` with content similar to:
+The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
 .. literalinclude:: ../../../../shared/upp.yaml

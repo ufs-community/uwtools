@@ -1,0 +1,7 @@
+values:
+  date: '{{ yyyymmdd }}'
+  empty:
+  greeting: Hello
+  message: '{{ ((greeting + " " + recipient + " ") * repeat) | trim }}'
+  recipient: World
+  repeat: 1

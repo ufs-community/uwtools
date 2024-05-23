@@ -1,0 +1,21 @@
+[2024-05-23T19:39:16]    DEBUG Command: uw rocoto realize --config-file rocoto.yaml --verbose
+[2024-05-23T19:39:16]    DEBUG Dereferencing, current value:
+[2024-05-23T19:39:16]    DEBUG   workflow:
+[2024-05-23T19:39:16]    DEBUG     attrs:
+[2024-05-23T19:39:16]    DEBUG       realtime: false
+[2024-05-23T19:39:16]    DEBUG       scheduler: slurm
+[2024-05-23T19:39:16]    DEBUG     cycledef:
+[2024-05-23T19:39:16]    DEBUG     - attrs:
+[2024-05-23T19:39:16]    DEBUG         group: howdy
+[2024-05-23T19:39:16]    DEBUG       spec: 202209290000 202209300000 06:00:00
+...
+[2024-05-23T19:39:16]    DEBUG   account: '&ACCOUNT;'
+[2024-05-23T19:39:16]    DEBUG   attrs:
+[2024-05-23T19:39:16]    DEBUG     cycledefs: howdy
+[2024-05-23T19:39:16]    DEBUG   command: echo hello $person
+[2024-05-23T19:39:16]    DEBUG   envars:
+[2024-05-23T19:39:16]    DEBUG     person: siri
+[2024-05-23T19:39:16]    DEBUG   jobname: hello
+[2024-05-23T19:39:16]    DEBUG   nodes: 1:ppn=1
+[2024-05-23T19:39:16]    DEBUG   walltime: 00:01:00
+[2024-05-23T19:39:16]     INFO 0 Rocoto validation errors found
