@@ -245,7 +245,7 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
     :param input_obj: The config to update.
     :return: True
     """
-    complete, empty, template = input_obj.characterize_values(input_obj.data, parent="")
+    complete, template = input_obj.characterize_values(input_obj.data, parent="")
     if complete:
         log.info("Keys that are complete:")
         for var in complete:
@@ -260,12 +260,6 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
     else:
         log.info("No keys have unrendered Jinja2 variables/expressions.")
     log.info("")
-    if empty:
-        log.info("Keys that are set to empty:")
-        for var in empty:
-            log.info(var)
-    else:
-        log.info("No keys are set to empty.")
     return True
 
 
