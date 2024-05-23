@@ -4,7 +4,7 @@ usage: uw config realize [-h] [--version] [--input-file PATH]
                          [--update-format {ini,nml,sh,yaml}]
                          [--output-file PATH]
                          [--output-format {ini,nml,sh,yaml}]
-                         [--output-block KEY[.KEY[.KEY]...]] [--values-needed]
+                         [--output-block KEY[.KEY...]] [--values-needed]
                          [--total] [--dry-run] [--quiet] [--verbose]
 
 Realize config
@@ -26,7 +26,7 @@ Optional arguments:
       Path to output file (defaults to stdout)
   --output-format {ini,nml,sh,yaml}
       Output format
-  --output-block KEY[.KEY[.KEY]...]
+  --output-block KEY[.KEY...]
       Dot-separated path of keys to the block to be output
   --values-needed
       Print report of values needed to render template
