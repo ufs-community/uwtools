@@ -47,7 +47,6 @@ class INIConfig(Config):
         :param path: Path to dump config to.
         """
         config_check_depths_dump(config_obj=self, target_format=FORMAT.ini)
-
         self.dump_dict(self.data, path)
 
     @staticmethod

@@ -38,6 +38,22 @@ def actions(parser: Parser) -> List[str]:
 
 
 @fixture
+def args_config_realize():
+    return {
+        STR.infile: "in",
+        STR.infmt: "yaml",
+        STR.updatefile: "update",
+        STR.updatefmt: "yaml",
+        STR.outfile: "out",
+        STR.outfmt: "yaml",
+        STR.outblock: "foo.bar",
+        STR.valsneeded: False,
+        STR.total: False,
+        STR.dryrun: False,
+    }
+
+
+@fixture
 def args_dispatch_file():
     return {
         "target_dir": "/target/dir",
@@ -219,6 +235,26 @@ def test__check_template_render_vals_args_noop_explicit_valsfmt():
     assert cli._check_template_render_vals_args(args) == args
 
 
+@pytest.mark.parametrize(
+    "fmt,fn,ok",
+    [
+        (None, "update.txt", False),
+        ("yaml", "udpate.txt", True),
+        (None, "update.yaml", True),
+        ("yaml", "update.yaml", True),
+        ("jpg", "udpate.yaml", True),
+    ],
+)
+def test__check_update(fmt, fn, ok):
+    args = {STR.updatefile: fn, STR.updatefmt: fmt}
+    if ok:
+        assert cli._check_update(args) == args
+    else:
+        with raises(UWError) as e:
+            cli._check_update(args)
+        assert "Cannot deduce format" in str(e.value)
+
+
 def test__check_verbosity_fail(capsys):
     log.setLevel(logging.INFO)
     args = {STR.quiet: True, STR.verbose: True}
@@ -266,81 +302,29 @@ def test__dispatch_config_compare():
     )
 
 
-def test__dispatch_config_realize():
-    args = {
-        STR.infile: 1,
-        STR.infmt: 2,
-        STR.outblock: 3,
-        STR.outfile: 4,
-        STR.outfmt: 5,
-        STR.suppfiles: 6,
-        STR.valsneeded: 7,
-        STR.total: 8,
-        STR.dryrun: 9,
-    }
+def test__dispatch_config_realize(args_config_realize):
     with patch.object(cli.uwtools.api.config, "realize") as realize:
-        cli._dispatch_config_realize(args)
+        cli._dispatch_config_realize(args_config_realize)
     realize.assert_called_once_with(
-        input_config=1,
-        input_format=2,
-        output_block=3,
-        output_file=4,
-        output_format=5,
-        supplemental_configs=6,
-        values_needed=7,
-        total=8,
-        dry_run=9,
-        stdin_ok=True,
-    )
-
-
-def test__dispatch_config_realize_fail(caplog):
-    log.setLevel(logging.ERROR)
-    args = {
-        x: None
-        for x in (
-            STR.infile,
-            STR.infmt,
-            STR.outblock,
-            STR.outfile,
-            STR.outfmt,
-            STR.suppfiles,
-            STR.valsneeded,
-            STR.total,
-            STR.dryrun,
-        )
-    }
-    with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
-        assert cli._dispatch_config_realize(args) is False
-    assert regex_logged(caplog, "Config could not be realized")
-
-
-def test__dispatch_config_realize_no_optional():
-    args = {
-        STR.infile: None,
-        STR.infmt: None,
-        STR.outblock: None,
-        STR.outfile: None,
-        STR.outfmt: None,
-        STR.suppfiles: ["/foo.vals"],
-        STR.valsneeded: False,
-        STR.total: False,
-        STR.dryrun: False,
-    }
-    with patch.object(cli.uwtools.api.config, "realize") as realize:
-        cli._dispatch_config_realize(args)
-    realize.assert_called_once_with(
-        input_config=None,
-        input_format=None,
-        output_block=None,
-        output_file=None,
-        output_format=None,
-        supplemental_configs=["/foo.vals"],
+        input_config="in",
+        input_format="yaml",
+        update_config="update",
+        update_format="yaml",
+        output_file="out",
+        output_format="yaml",
+        output_block="foo.bar",
         values_needed=False,
         total=False,
         dry_run=False,
         stdin_ok=True,
     )
+
+
+def test__dispatch_config_realize_fail(caplog, args_config_realize):
+    log.setLevel(logging.ERROR)
+    with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
+        assert cli._dispatch_config_realize(args_config_realize) is False
+    assert regex_logged(caplog, "Config could not be realized")
 
 
 def test__dispatch_config_validate_config_obj():

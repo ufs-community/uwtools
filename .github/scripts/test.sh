@@ -1,6 +1,4 @@
-# Actions invokes script with: bash -e <script>
-
-set -a
+set -ae
 
 SUPPORTED_PYTHON_VERSIONS=( 3.9 3.10 3.11 3.12 )
 

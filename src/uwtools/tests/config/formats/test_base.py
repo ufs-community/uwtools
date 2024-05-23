@@ -167,7 +167,7 @@ def test_derefernce_context_override(tmp_path):
 
 
 @pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
-def test_invalid_config(caplog, fmt2, tmp_path):
+def test_invalid_config(fmt2, tmp_path):
     """
     Test that invalid config files will error when attempting to dump.
     """
@@ -177,9 +177,7 @@ def test_invalid_config(caplog, fmt2, tmp_path):
     depthin = depth(cfgin.data)
     with raises(UWConfigError) as e:
         tools.format_to_config(fmt2).dump_dict(cfg=cfgin.data, path=outfile)
-    msg = f"Cannot dump depth-{depthin} config to type-'{fmt2}' config"
-    assert logged(caplog, msg)
-    assert msg in str(e.value)
+    assert f"Cannot dump depth-{depthin} config to type-'{fmt2}' config" in str(e.value)
 
 
 def test_parse_include(config):

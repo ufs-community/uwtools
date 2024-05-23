@@ -71,6 +71,16 @@ def make_solo_mosaic_prop():
 
 
 @fixture
+def mpas_prop():
+    return partial(schema_validator, "mpas", "properties", "mpas", "properties")
+
+
+@fixture
+def mpas_init_prop():
+    return partial(schema_validator, "mpas-init", "properties", "mpas_init", "properties")
+
+
+@fixture
 def sfc_climo_gen_prop():
     return partial(schema_validator, "sfc-climo-gen", "properties", "sfc_climo_gen", "properties")
 
@@ -234,12 +244,13 @@ def test_execution():
 
 def test_execution_batchargs():
     errors = schema_validator("execution", "properties", "batchargs")
-    # Basic correctness, empty map is ok:
-    assert not errors({})
+    # Basic correctness, only walltime is required:
+    assert "'walltime' is a required property" in errors({})
+    assert not errors({"walltime": "00:05:00"})
     # Managed properties are fine:
-    assert not errors({"queue": "string", "walltime": "string"})
+    assert not errors({"queue": "string", "walltime": "00:05:00"})
     # But so are unknown ones:
-    assert not errors({"--foo": 88})
+    assert not errors({"--foo": 88, "walltime": "00:05:00"})
     # It just has to be a map:
     assert "[] is not of type 'object'" in errors([])
 
@@ -642,6 +653,218 @@ def test_schema_make_solo_mosaic_run_dir(make_solo_mosaic_prop):
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
+
+
+# mpas
+
+
+def test_schema_mpas():
+    config = {
+        "execution": {"executable": "atmosphere_model"},
+        "namelist": {"base_file": "path/to/simple.nml"},
+        "run_dir": "path/to/rundir",
+        "streams": {"path": "path/to/streams.atmosphere.in", "values": {"world": "user"}},
+    }
+    errors = schema_validator("mpas", "properties", "mpas")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("execution", "namelist", "run_dir", "streams"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_mpas_lateral_boundary_conditions(mpas_prop):
+    config = {
+        "interval_hours": 1,
+        "offset": 0,
+        "path": "/some/path",
+    }
+    errors = mpas_prop("lateral_boundary_conditions")
+    # Basic correctness:
+    assert not errors(config)
+    # All lateral_boundary_conditions items are required:
+    assert "'interval_hours' is a required property" in errors(with_del(config, "interval_hours"))
+    assert "'offset' is a required property" in errors(with_del(config, "offset"))
+    assert "'path' is a required property" in errors(with_del(config, "path"))
+    # interval_hours must be an integer of at least 1:
+    assert "0 is less than the minimum of 1" in errors(with_set(config, 0, "interval_hours"))
+    assert "'s' is not of type 'integer'" in errors(with_set(config, "s", "interval_hours"))
+    # offset must be an integer of at least 0:
+    assert "-1 is less than the minimum of 0" in errors(with_set(config, -1, "offset"))
+    assert "'s' is not of type 'integer'" in errors(with_set(config, "s", "offset"))
+    # path must be a string:
+    assert "88 is not of type 'string'" in errors(with_set(config, 88, "path"))
+
+
+def test_schema_mpas_length(mpas_prop):
+    errors = mpas_prop("length")
+    # Positive int is ok:
+    assert not errors(6)
+    # Zero is not ok:
+    assert "0 is less than the minimum of 1" in errors(0)
+    # A negative number is not ok:
+    assert "-1 is less than the minimum of 1" in errors(-1)
+    # Something other than an int is not ok:
+    assert "'a string' is not of type 'integer'" in errors("a string")
+
+
+def test_schema_mpas_namelist(mpas_prop):
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": {"nml": {"var": "val"}}}
+    errors = mpas_prop("namelist")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # base_file must be a string:
+    assert "88 is not of type 'string'" in errors({"base_file": 88})
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_schema_mpas_namelist_update_values(mpas_prop):
+    errors = mpas_prop("namelist", "properties", "update_values")
+    # array, boolean, number, and string values are ok:
+    assert not errors(
+        {"nml": {"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"}}
+    )
+    # Other types are not, e.g.:
+    assert "None is not of type 'array', 'boolean', 'number', 'string'" in errors(
+        {"nml": {"null": None}}
+    )
+    # At least one namelist entry is required:
+    assert "{} should be non-empty" in errors({})
+    # At least one val/var pair is required:
+    assert "{} should be non-empty" in errors({"nml": {}})
+
+
+def test_schema_mpas_run_dir(mpas_prop):
+    errors = mpas_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+def test_schema_mpas_streams(mpas_prop):
+    config = {"path": "/some/path", "values": {"nml": {"var": "val"}}}
+    errors = mpas_prop("streams")
+    # Basic correctness:
+    assert not errors(config)
+    # All streams items are required:
+    assert "'path' is a required property" in errors(with_del(config, "path"))
+    assert "'values' is a required property" in errors(with_del(config, "values"))
+    # path must be a string:
+    assert "1 is not of type 'string'" in errors(with_set(config, 1, "path"))
+    # values must be an object:
+    assert "1 is not of type 'object'" in errors(with_set(config, -1, "values"))
+    assert "'s' is not of type 'object'" in errors(with_set(config, "s", "values"))
+
+
+# mpas_init
+
+
+def test_schema_mpas_init():
+    config = {
+        "execution": {"executable": "mpas_init"},
+        "namelist": {"base_file": "path/to/simple.nml"},
+        "run_dir": "path/to/rundir",
+        "streams": {"path": "path/to/streams.atmosphere.in", "values": {"world": "user"}},
+    }
+    errors = schema_validator("mpas-init", "properties", "mpas_init")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("execution", "namelist", "run_dir", "streams"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_mpas_init_boundary_conditions(mpas_init_prop):
+    config = {
+        "interval_hours": 1,
+        "length": 1,
+        "offset": 0,
+        "path": "/some/path",
+    }
+    errors = mpas_init_prop("boundary_conditions")
+    # Basic correctness:
+    assert not errors(config)
+    # All lateral_boundary_conditions items are required:
+    assert "'interval_hours' is a required property" in errors(with_del(config, "interval_hours"))
+    assert "'length' is a required property" in errors(with_del(config, "length"))
+    assert "'offset' is a required property" in errors(with_del(config, "offset"))
+    assert "'path' is a required property" in errors(with_del(config, "path"))
+    # interval_hours must be an integer of at least 1:
+    assert "0 is less than the minimum of 1" in errors(with_set(config, 0, "interval_hours"))
+    assert "'s' is not of type 'integer'" in errors(with_set(config, "s", "interval_hours"))
+    # offset must be an integer of at least 0:
+    assert "-1 is less than the minimum of 0" in errors(with_set(config, -1, "offset"))
+    assert "'s' is not of type 'integer'" in errors(with_set(config, "s", "offset"))
+    # path must be a string:
+    assert "88 is not of type 'string'" in errors(with_set(config, 88, "path"))
+    # length must be a positive int
+    assert "0 is less than the minimum of 1" in errors(with_set(config, 0, "length"))
+    assert "-1 is less than the minimum of 1" in errors(with_set(config, -1, "length"))
+    assert "'s' is not of type 'integer'" in errors(with_set(config, "s", "length"))
+
+
+def test_schema_mpas_init_namelist(mpas_init_prop):
+    base_file = {"base_file": "/some/path"}
+    update_values = {"update_values": {"nml": {"var": "val"}}}
+    errors = mpas_init_prop("namelist")
+    # Just base_file is ok:
+    assert not errors(base_file)
+    # base_file must be a string:
+    assert "88 is not of type 'string'" in errors({"base_file": 88})
+    # Just update_values is ok:
+    assert not errors(update_values)
+    # A combination of base_file and update_values is ok:
+    assert not errors({**base_file, **update_values})
+    # At least one is required:
+    assert "is not valid" in errors({})
+
+
+def test_schema_mpas_init_namelist_update_values(mpas_init_prop):
+    errors = mpas_init_prop("namelist", "properties", "update_values")
+    # array, boolean, number, and string values are ok:
+    assert not errors(
+        {"nml": {"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"}}
+    )
+    # Other types are not, e.g.:
+    assert "None is not of type 'array', 'boolean', 'number', 'string'" in errors(
+        {"nml": {"null": None}}
+    )
+    # At least one namelist entry is required:
+    assert "{} should be non-empty" in errors({})
+    # At least one val/var pair is required:
+    assert "{} should be non-empty" in errors({"nml": {}})
+
+
+def test_schema_mpas_init_run_dir(mpas_init_prop):
+    errors = mpas_init_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+def test_schema_mpas_init_streams(mpas_init_prop):
+    config = {"path": "/some/path", "values": {"nml": {"var": "val"}}}
+    errors = mpas_init_prop("streams")
+    # Basic correctness:
+    assert not errors(config)
+    # All streams items are required:
+    assert "'path' is a required property" in errors(with_del(config, "path"))
+    assert "'values' is a required property" in errors(with_del(config, "values"))
+    # path must be a string:
+    assert "1 is not of type 'string'" in errors(with_set(config, 1, "path"))
+    # values must be an object:
+    assert "1 is not of type 'object'" in errors(with_set(config, -1, "values"))
+    assert "'s' is not of type 'object'" in errors(with_set(config, "s", "values"))
 
 
 # namelist
