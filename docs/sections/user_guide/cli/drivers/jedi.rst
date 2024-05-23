@@ -98,3 +98,5 @@ The driver creates a ``runscript.jedi`` file in the directory specified by ``run
   .. code-block:: text
 
      $ uw jedi run --config-file config.yaml --cycle 2024-05-22T12 --batch --dry-run
+
+.. include:: ../../../../shared/key_path.rst
