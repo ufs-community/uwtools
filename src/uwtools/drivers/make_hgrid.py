@@ -3,7 +3,7 @@ A driver for make_hgrid.
 """
 
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from iotaa import asset, task, tasks
 
@@ -21,6 +21,7 @@ class MakeHgrid(Driver):
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
+        key_path: Optional[List[str]] = None,
     ):
         """
         The driver.
@@ -28,8 +29,9 @@ class MakeHgrid(Driver):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
+        :param key_path: Keys leading through the config to the driver's configuration block.
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch)
+        super().__init__(config=config, dry_run=dry_run, batch=batch, key_path=key_path)
 
     # Workflow tasks
 

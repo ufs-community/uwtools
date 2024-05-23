@@ -530,7 +530,7 @@ def _dispatch_template_translate(args: Args) -> bool:
 
 # Arguments
 
-# pylint: disable=missing-function-docstring
+# pylint: disable=line-too-long, missing-function-docstring
 
 
 def _add_arg_batch(group: Group) -> None:
@@ -638,6 +638,16 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
         help="A key=value pair to override/supplement config",
         metavar="KEY=VALUE",
         nargs="*",
+    )
+
+
+def _add_arg_key_path(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.keypath),
+        help="Dot-separated path of keys leading through the config to the driver's configuration block",
+        metavar="KEY[.KEY...]",
+        required=False,
+        type=lambda s: s.split("."),
     )
 
 
@@ -888,6 +898,7 @@ def _add_subparser_for_driver_task(
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
+    _add_arg_key_path(optional)
     checks = _add_args_verbosity(optional)
     return checks
 
@@ -979,6 +990,7 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
         "batch": args[STR.batch],
         "dry_run": args[STR.dryrun],
         "graph_file": args[STR.graphfile],
+        "key_path": args[STR.keypath],
         "stdin_ok": True,
     }
     if cycle := args.get(STR.cycle):

@@ -84,6 +84,7 @@ class STR:
     infile: str = "input_file"
     infmt: str = "input_format"
     jedi: str = "jedi"
+    keypath: str = "key_path"
     keys: str = "keys"
     keyvalpairs: str = "key_eq_val_pairs"
     leadtime: str = "leadtime"

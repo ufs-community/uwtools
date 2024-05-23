@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 from iotaa import asset, dryrun, external, task, tasks
 
@@ -29,10 +29,11 @@ class Driver(ABC):
 
     def __init__(
         self,
-        config: Optional[Path] = None,
+        config: Optional[Union[dict, Path]],
         dry_run: bool = False,
         batch: bool = False,
         cycle: Optional[datetime] = None,
+        key_path: Optional[List[str]] = None,
         leadtime: Optional[timedelta] = None,
     ) -> None:
         """
@@ -42,6 +43,7 @@ class Driver(ABC):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         :param cycle: The cycle.
+        :param key_path: Keys leading through the config to the driver's configuration block.
         :param leadtime: The leadtime.
         """
         dryrun(enable=dry_run)
@@ -56,6 +58,9 @@ class Driver(ABC):
                 **self._config.data,
             }
         )
+        key_path = key_path or []
+        for key in key_path:
+            self._config = self._config[key]
         self._validate()
 
     # Workflow tasks
