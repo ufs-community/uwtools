@@ -1,12 +1,13 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
-Tests for uwtools.drivers.driver module.
+Tests for uwtools.drivers.standalonedriver module.
 """
 import datetime as dt
 import json
 import logging
 from pathlib import Path
-from unittest.mock import patch
+from textwrap import dedent
+from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 import yaml
@@ -14,7 +15,7 @@ from iotaa import asset, task
 from pytest import fixture, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.drivers import driver
+from uwtools.drivers import standalonedriver
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.tests.support import regex_logged
@@ -22,7 +23,7 @@ from uwtools.tests.support import regex_logged
 # Helpers
 
 
-class ConcreteDriver(driver.Driver):
+class ConcreteDriver(standalonedriver.StandaloneDriver):
     """
     Driver subclass for testing purposes.
     """
@@ -109,7 +110,7 @@ def test_Driver_cycle_leadtime_error(config):
 
 @pytest.mark.parametrize("val", (True, False))
 def test_Driver_dry_run(config, val):
-    with patch.object(driver, "dryrun") as dryrun:
+    with patch.object(standalonedriver, "dryrun") as dryrun:
         ConcreteDriver(config=config, dry_run=val)
         dryrun.assert_called_once_with(enable=val)
 
@@ -129,10 +130,53 @@ def test_key_path(config):
     assert config == driverobj._config
 
 
+@pytest.mark.parametrize("batch", [True, False])
+def test_Driver_run(batch, driverobj):
+    driverobj._batch = batch
+    executable = Path(driverobj._driver_config["execution"]["executable"])
+    executable.touch()
+    with patch.object(driverobj, "_run_via_batch_submission") as rvbs:
+        with patch.object(driverobj, "_run_via_local_execution") as rvle:
+            driverobj.run()
+        if batch:
+            rvbs.assert_called_once_with()
+            rvle.assert_not_called()
+        else:
+            rvbs.assert_not_called()
+            rvle.assert_called_once_with()
+
+
 def test_Driver_validate(caplog, driverobj):
     log.setLevel(logging.INFO)
     driverobj.validate()
     assert regex_logged(caplog, "State: Ready")
+
+
+def test_Driver__run_via_batch_submission(driverobj):
+    runscript = driverobj._runscript_path
+    executable = Path(driverobj._driver_config["execution"]["executable"])
+    executable.touch()
+    with patch.object(driverobj, "provisioned_run_directory") as prd:
+        with patch.object(ConcreteDriver, "_scheduler", new_callable=PropertyMock) as scheduler:
+            driverobj._run_via_batch_submission()
+            scheduler().submit_job.assert_called_once_with(
+                runscript=runscript, submit_file=Path(f"{runscript}.submit")
+            )
+        prd.assert_called_once_with()
+
+
+def test_Driver__run_via_local_execution(driverobj):
+    executable = Path(driverobj._driver_config["execution"]["executable"])
+    executable.touch()
+    with patch.object(driverobj, "provisioned_run_directory") as prd:
+        with patch.object(standalonedriver, "execute") as execute:
+            driverobj._run_via_local_execution()
+            execute.assert_called_once_with(
+                cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
+                cwd=driverobj._rundir,
+                log_output=True,
+            )
+        prd.assert_called_once_with()
 
 
 # Tests for private helper methods
@@ -199,13 +243,67 @@ def test_Driver__resources_pass(driverobj):
     }
 
 
+def test_Driver__runcmd(driverobj):
+    executable = driverobj._driver_config["execution"]["executable"]
+    assert driverobj._runcmd == f"foo bar baz {executable}"
+
+
+def test_Driver__runscript(driverobj):
+    expected = """
+    #!/bin/bash
+
+    #DIR --d1
+    #DIR --d2
+
+    cmd1
+    cmd2
+
+    export VAR1=1
+    export VAR2=2
+
+    foo
+    bar
+    """
+    scheduler = Mock(directives=["#DIR --d1", "#DIR --d2"])
+    assert (
+        driverobj._runscript(
+            execution=["foo", "bar"],
+            envcmds=["cmd1", "cmd2"],
+            envvars={"VAR1": 1, "VAR2": 2},
+            scheduler=scheduler,
+        )
+        == dedent(expected).strip()
+    )
+
+
+def test_Driver__runscript_execution_only(driverobj):
+    expected = """
+    #!/bin/bash
+
+    foo
+    bar
+    """
+    assert driverobj._runscript(execution=["foo", "bar"]) == dedent(expected).strip()
+
+
 def test_Driver__rundir(driverobj):
     assert driverobj._rundir == Path("/path/to/2024032218/run")
 
 
+def test_Driver__runscript_path(driverobj):
+    assert driverobj._runscript_path == Path("/path/to/2024032218/run/runscript.concrete")
+
+
+def test_Driver__scheduler(driverobj):
+    with patch.object(standalonedriver, "JobScheduler") as JobScheduler:
+        scheduler = JobScheduler.get_scheduler()
+        assert driverobj._scheduler == scheduler
+        JobScheduler.get_scheduler.assert_called_with(driverobj._resources)
+
+
 def test_Driver__validate(driverobj):
-    with patch.object(driverobj, "_validate", driver.Driver._validate):
-        with patch.object(driver, "validate_internal") as validate_internal:
+    with patch.object(driverobj, "_validate", standalonedriver.StandaloneDriver._validate):
+        with patch.object(standalonedriver, "validate_internal") as validate_internal:
             driverobj._validate(driverobj)
         assert validate_internal.call_args_list[0].kwargs == {
             "schema_name": "concrete",
@@ -215,3 +313,28 @@ def test_Driver__validate(driverobj):
             "schema_name": "platform",
             "config": driverobj._config,
         }
+
+
+def test_Driver__write_runscript(driverobj, tmp_path):
+    path = tmp_path / "runscript"
+    executable = driverobj._driver_config["execution"]["executable"]
+    driverobj._write_runscript(path=path, envvars={"FOO": "bar", "BAZ": "qux"})
+    expected = f"""
+    #!/bin/bash
+
+    #SBATCH --account=me
+    #SBATCH --chdir=/path/to/2024032218/run
+    #SBATCH --export=NONE
+    #SBATCH --nodes=1
+    #SBATCH --output=/path/to/2024032218/run/out
+    #SBATCH --time=00:05:00
+
+    export FOO=bar
+    export BAZ=qux
+
+    time foo bar baz {executable}
+    test $? -eq 0 && touch runscript.concrete.done
+    """
+    with open(path, "r", encoding="utf-8") as f:
+        actual = f.read()
+    assert actual.strip() == dedent(expected).strip()

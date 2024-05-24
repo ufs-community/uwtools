@@ -7,11 +7,11 @@ from typing import List, Optional
 
 from iotaa import asset, task, tasks
 
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.standalonedriver import StandaloneDriver
 from uwtools.strings import STR
 
 
-class MakeHgrid(Driver):
+class MakeHgrid(StandaloneDriver):
     """
     A driver for make_hgrid.
     """

@@ -58,10 +58,7 @@ class WaveWatchIII(Driver):
         Run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
-        yield [
-            self.namelist_file(),
-            self.runscript(),
-        ]
+        yield [self.namelist_file()]
 
     # Private helper methods
 
@@ -70,4 +67,4 @@ class WaveWatchIII(Driver):
         """
         Returns the name of this driver.
         """
-        return STR.esggrid
+        return STR.ww3

@@ -10,13 +10,13 @@ from iotaa import asset, task, tasks
 
 from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.standalonedriver import StandaloneDriver
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
 
-class MPASInit(Driver):
+class MPASInit(StandaloneDriver):
     """
     A driver for mpas-init.
     """

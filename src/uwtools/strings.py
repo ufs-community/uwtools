@@ -123,3 +123,4 @@ class STR:
     valsneeded: str = "values_needed"
     verbose: str = "verbose"
     version: str = "version"
+    ww3: str = "ww3"

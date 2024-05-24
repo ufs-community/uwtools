@@ -10,7 +10,6 @@ import yaml
 from pytest import fixture
 
 from uwtools.drivers import ww3
-from uwtools.scheduler import Slurm
 
 # Fixtures
 
@@ -29,9 +28,7 @@ def config(tmp_path):
                     "CDMAX": 0.25,
                     "CTYPE": 0,
                 },
-                "update_values": {
-                    "BOUND_NML": {}
-                },
+                "update_values": {"BOUND_NML": {}},
             },
             "run_dir": str(tmp_path),
         },

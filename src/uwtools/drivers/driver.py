@@ -2,24 +2,18 @@
 An abstract class for component drivers.
 """
 
-import os
-import re
-import stat
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from pathlib import Path
-from textwrap import dedent
 from typing import Any, Dict, List, Optional, Type, Union
 
-from iotaa import asset, dryrun, external, task, tasks
+from iotaa import asset, dryrun, external, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
-from uwtools.scheduler import JobScheduler
-from uwtools.utils.processing import execute
 
 
 class Driver(ABC):
@@ -72,14 +66,6 @@ class Driver(ABC):
         Run directory provisioned with all required content.
         """
 
-    @tasks
-    def run(self):
-        """
-        A run.
-        """
-        yield self._taskname("run")
-        yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
-
     @external
     def validate(self):
         """
@@ -87,29 +73,6 @@ class Driver(ABC):
         """
         yield self._taskname("valid schema")
         yield asset(None, lambda: True)
-
-    @task
-    def _run_via_batch_submission(self):
-        """
-        A run executed via the batch system.
-        """
-        yield self._taskname("run via batch submission")
-        path = Path("%s.submit" % self._runscript_path)
-        yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
-        self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
-
-    @task
-    def _run_via_local_execution(self):
-        """
-        A run executed directly on the local system.
-        """
-        yield self._taskname("run via local execution")
-        path = self._rundir / f"done.{self._driver_name}"
-        yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
-        cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
-        execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
     # Private helper methods
 
@@ -166,24 +129,7 @@ class Driver(ABC):
         return {
             "account": platform["account"],
             "rundir": self._rundir,
-            "scheduler": platform["scheduler"],
-            "stdout": "%s.out" % self._runscript_path.name,  # config may override
-            **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
-
-    @property
-    def _runcmd(self) -> str:
-        """
-        Returns the full command-line component invocation.
-        """
-        execution = self._driver_config.get("execution", {})
-        mpiargs = execution.get("mpiargs", [])
-        components = [
-            execution.get("mpicmd"),  # MPI run program
-            *[str(x) for x in mpiargs],  # MPI arguments
-            execution["executable"],  # component executable name
-        ]
-        return " ".join(filter(None, components))
 
     @property
     def _rundir(self) -> Path:
@@ -191,56 +137,6 @@ class Driver(ABC):
         The path to the component's run directory.
         """
         return Path(self._driver_config["run_dir"])
-
-    def _runscript(
-        self,
-        execution: List[str],
-        envcmds: Optional[List[str]] = None,
-        envvars: Optional[Dict[str, str]] = None,
-        scheduler: Optional[JobScheduler] = None,
-    ) -> str:
-        """
-        Returns a driver runscript.
-
-        :param execution: Statements to execute.
-        :param envcmds: Shell commands to set up runtime environment.
-        :param envvars: Environment variables to set in runtime environment.
-        :param scheduler: A job-scheduler object.
-        """
-        # Render script sections into a template, remove any extraneous newlines related to elided
-        # sections, then return the resulting string.
-        template = """
-        #!/bin/bash
-
-        {directives}
-
-        {envcmds}
-
-        {envvars}
-
-        {execution}
-        """
-        rs = dedent(template).format(
-            directives="\n".join(scheduler.directives if scheduler else ""),
-            envcmds="\n".join(envcmds or []),
-            envvars="\n".join([f"export {k}={v}" for k, v in (envvars or {}).items()]),
-            execution="\n".join(execution),
-        )
-        return re.sub(r"\n\n\n+", "\n\n", rs.strip())
-
-    @property
-    def _runscript_path(self) -> Path:
-        """
-        Returns the path to the runscript.
-        """
-        return self._rundir / f"runscript.{self._driver_name}"
-
-    @property
-    def _scheduler(self) -> JobScheduler:
-        """
-        Returns the job scheduler specified by the platform information.
-        """
-        return JobScheduler.get_scheduler(self._resources)
 
     def _taskname(self, suffix: str) -> str:
         """
@@ -278,21 +174,3 @@ class Driver(ABC):
         """
         for schema_name in (self._driver_name.replace("_", "-"), "platform"):
             validate_internal(schema_name=schema_name, config=self._config)
-
-    def _write_runscript(self, path: Path, envvars: Dict[str, str]) -> None:
-        """
-        Write the runscript.
-        """
-        path.parent.mkdir(parents=True, exist_ok=True)
-        rs = self._runscript(
-            envcmds=self._driver_config.get("execution", {}).get("envcmds", []),
-            envvars=envvars,
-            execution=[
-                "time %s" % self._runcmd,
-                "test $? -eq 0 && touch %s.done" % self._runscript_path.name,
-            ],
-            scheduler=self._scheduler if self._batch else None,
-        )
-        with open(path, "w", encoding="utf-8") as f:
-            print(rs, file=f)
-        os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
