@@ -1,7 +1,7 @@
 ww3:
   namelist:
     base_file: /path/to/base_file
-    update_values: /path/to/update_file
+    additional_files: /path/to/update_file
   run_dir: /path/to/esg_grid
 platform:
   account: me

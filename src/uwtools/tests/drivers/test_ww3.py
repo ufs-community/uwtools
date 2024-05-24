@@ -19,16 +19,8 @@ def config(tmp_path):
     return {
         "ww3": {
             "namelist": {
-                "misc": {
-                    "CICE0": 0.25,
-                    "CICEN": 0.75,
-                    "FLAGTR": 4,
-                },
-                "FLX3": {
-                    "CDMAX": 0.25,
-                    "CTYPE": 0,
-                },
-                "update_values": {"BOUND_NML": {}},
+                "base_file": str(tmp_path / "namelists.nml"),
+                "additional_files": str(tmp_path / "additional.nml"),
             },
             "run_dir": str(tmp_path),
         },
@@ -60,18 +52,28 @@ def test_WaveWatchIII(driverobj):
 
 
 def test_WaveWatchIII_namelist_file(driverobj):
+    with open(driverobj._driver_config["namelist"]["base_file"], "w", encoding="utf-8") as f:
+        print(
+            "&MISC CICE0 = 0.25, CICEN = 0.75, FLAGTR = 4 / "
+            "&FLX3 CDMAX = 3.5E-3 , CTYPE = 0 / END OF NAMELISTS",
+            file=f,
+        )
     dst = driverobj._rundir / "namelists.nml"
-    assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
-    assert isinstance(f90nml.read(dst), f90nml.Namelist)
+    nml = f90nml.read(dst)
+    assert isinstance(nml, f90nml.Namelist)
+    assert nml["MISC"]["CICE0"] == 0.25
+    assert nml["MISC"]["CICEN"] == 0.75
+    assert nml["MISC"]["FLAGTR"] == 4
+    assert nml["FLX3"]["CDMAX"] == 3.5e-3
+    assert nml["FLX3"]["CTYPE"] == 0
 
 
 def test_WaveWatchIII_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
         namelist_file=D,
-        runscript=D,
     ) as mocks:
         driverobj.provisioned_run_directory()
     for m in mocks:

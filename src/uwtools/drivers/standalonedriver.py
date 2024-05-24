@@ -50,7 +50,6 @@ class StandaloneDriver(Driver):
             key_path=key_path,
             leadtime=leadtime,
         )
-        self._cycle = cycle
 
     # Workflow tasks
 

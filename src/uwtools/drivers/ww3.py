@@ -41,11 +41,11 @@ class WaveWatchIII(Driver):
         """
         The namelist file.
         """
-        fn = "namelists.nml"
-        yield self._taskname(fn)
-        path = self._rundir / fn
+        path = self._namelist_path
+        yield self._taskname(str(path))
         yield asset(path, path.is_file)
         yield None
+        path.parent.mkdir(parents=True, exist_ok=True)
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=self._driver_config["namelist"],
@@ -68,3 +68,10 @@ class WaveWatchIII(Driver):
         Returns the name of this driver.
         """
         return STR.ww3
+
+    @property
+    def _namelist_path(self) -> Path:
+        """
+        Path to the namelist file.
+        """
+        return self._rundir / "namelists.nml"

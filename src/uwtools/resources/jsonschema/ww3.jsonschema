@@ -1,56 +1,32 @@
 {
   "properties": {
-    "type": "object",
     "ww3": {
       "additionalProperties": false,
       "properties": {
         "namelist": {
-          "anyOf": [
-            {
-              "additionalProperties": false,
-              "properties": {
-                "base_file": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "base_file"
-              ],
-              "type": "object"
+          "additionalProperties": false,
+          "properties": {
+            "additional_files": {
+              "type": "string"
             },
-            {
-              "additionalProperties": false,
-              "properties": {
-                "base_file": {
-                  "type": "string"
-                },
-                "required": [
-                  "base_file",
-                  "update_values"
-                ],
-                "type": "object",
-                "update_values": {
-                  "minProperties": 1,
-                  "patternProperties": {
-                    "^.nml": {
-                      "type": "string"
-                    }
-                  },
-                  "type": "object"
-                }
-              }
+            "base_file": {
+              "type": "string"
             }
-          ]
+          },
+          "required": [
+            "base_file"
+          ],
+          "type": "object"
         },
-        "required": [
-          "namelist",
-          "run_dir"
-        ],
         "run_dir": {
           "type": "string"
-        },
-        "type": "object"
-      }
+        }
+      },
+      "required": [
+        "namelist",
+        "run_dir"
+      ],
+      "type": "object"
     }
   }
 }

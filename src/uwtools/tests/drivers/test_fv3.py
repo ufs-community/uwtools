@@ -12,7 +12,7 @@ import yaml
 from iotaa import asset, external
 from pytest import fixture
 
-from uwtools.drivers import driver, fv3
+from uwtools.drivers import fv3, standalonedriver
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import logged
 
@@ -245,7 +245,7 @@ def test_FV3__run_via_batch_submission(driverobj, truetask):
 def test_FV3__run_via_local_execution(driverobj, truetask):
     Path(driverobj._driver_config["execution"]["executable"]).touch()
     with patch.object(driverobj, "provisioned_run_directory", truetask):
-        with patch.object(driver, "execute") as execute:
+        with patch.object(standalonedriver, "execute") as execute:
             driverobj._run_via_local_execution()
             execute.assert_called_once_with(
                 cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),

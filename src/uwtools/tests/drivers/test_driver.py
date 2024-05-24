@@ -187,15 +187,11 @@ def test_Driver__resources_fail(driverobj):
 
 def test_Driver__resources_pass(driverobj):
     account = "me"
-    scheduler = "slurm"
     walltime = "00:05:00"
     driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
     assert driverobj._resources == {
         "account": account,
         "rundir": driverobj._rundir,
-        "scheduler": scheduler,
-        "stdout": "runscript.concrete.out",
-        "walltime": walltime,
     }
 
 
