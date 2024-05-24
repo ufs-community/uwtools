@@ -13,6 +13,7 @@ from iotaa import asset, task
 from pytest import fixture
 
 from uwtools.drivers import standalonedriver
+from uwtools.exceptions import UWConfigError
 
 # Helpers
 
@@ -143,6 +144,12 @@ def test_StandaloneDriver__run_via_local_execution(driverobj):
 
 
 # Tests for private helper methods
+
+def test_StandaloneDriver__resources_fail(driverobj):
+    del driverobj._config["platform"]
+    with raises(UWConfigError) as e:
+        assert driverobj._resources
+    assert str(e.value) == "Required 'platform' block missing in config"
 
 
 def test_StandaloneDriver__resources_pass(driverobj):

@@ -84,5 +84,9 @@ def test_WaveWatchIII__driver_config(driverobj):
     assert driverobj._driver_config == driverobj._config["ww3"]
 
 
+def test_WaveWatchIII__namelist_path(driverobj):
+    assert driverobj._namelist_path == driverobj._rundir / "namelists.nml"
+
+
 def test_WaveWatchIII__validate(driverobj):
     driverobj._validate()
