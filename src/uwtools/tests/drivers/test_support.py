@@ -5,7 +5,7 @@ Tests for uwtools.drivers.support module.
 from iotaa import asset, external, task, tasks
 
 from uwtools.drivers import support
-from uwtools.drivers.standalonedriver import StandaloneDriver
+from uwtools.drivers.driver import StandaloneDriver
 
 
 def test_graph():

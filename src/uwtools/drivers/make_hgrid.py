@@ -7,7 +7,7 @@ from typing import List, Optional
 
 from iotaa import asset, task, tasks
 
-from uwtools.drivers.standalonedriver import StandaloneDriver
+from uwtools.drivers.driver import StandaloneDriver
 from uwtools.strings import STR
 
 

@@ -10,15 +10,15 @@ from unittest.mock import Mock, PropertyMock, patch
 
 import pytest
 from iotaa import asset, task
-from pytest import fixture
+from pytest import fixture, raises
 
-from uwtools.drivers import standalonedriver
+from uwtools.drivers import driver
 from uwtools.exceptions import UWConfigError
 
 # Helpers
 
 
-class ConcreteDriver(standalonedriver.StandaloneDriver):
+class ConcreteDriver(driver.StandaloneDriver):
     """
     Driver subclass for testing purposes.
     """
@@ -133,7 +133,7 @@ def test_StandaloneDriver__run_via_local_execution(driverobj):
     executable = Path(driverobj._driver_config["execution"]["executable"])
     executable.touch()
     with patch.object(driverobj, "provisioned_run_directory") as prd:
-        with patch.object(standalonedriver, "execute") as execute:
+        with patch.object(driver, "execute") as execute:
             driverobj._run_via_local_execution()
             execute.assert_called_once_with(
                 cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
@@ -144,6 +144,7 @@ def test_StandaloneDriver__run_via_local_execution(driverobj):
 
 
 # Tests for private helper methods
+
 
 def test_StandaloneDriver__resources_fail(driverobj):
     del driverobj._config["platform"]
@@ -214,7 +215,7 @@ def test_StandaloneDriver__runscript_path(driverobj):
 
 
 def test_StandaloneDriver__scheduler(driverobj):
-    with patch.object(standalonedriver, "JobScheduler") as JobScheduler:
+    with patch.object(driver, "JobScheduler") as JobScheduler:
         scheduler = JobScheduler.get_scheduler()
         assert driverobj._scheduler == scheduler
         JobScheduler.get_scheduler.assert_called_with(driverobj._resources)

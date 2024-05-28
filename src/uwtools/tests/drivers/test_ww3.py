@@ -59,6 +59,7 @@ def test_WaveWatchIII_namelist_file(driverobj):
             file=f,
         )
     dst = driverobj._rundir / "namelists.nml"
+    assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
     nml = f90nml.read(dst)
@@ -78,6 +79,10 @@ def test_WaveWatchIII_provisioned_run_directory(driverobj):
         driverobj.provisioned_run_directory()
     for m in mocks:
         mocks[m].assert_called_once_with()
+
+
+def test_WaveWatchIII_restart_directory_path(driverobj):
+    assert driverobj.restart_directory == driverobj._rundir / "restart_wave/"
 
 
 def test_WaveWatchIII__driver_config(driverobj):

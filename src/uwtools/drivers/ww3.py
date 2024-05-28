@@ -58,7 +58,17 @@ class WaveWatchIII(Driver):
         Run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
-        yield [self.namelist_file()]
+        yield [self.namelist_file(), self.restart_directory()]
+
+    @tasks
+    def restart_directory(self):
+        """
+        Files copied for run.
+        """
+        yield self._taskname("restart directory")
+        fn = "restart_wave"
+        path = self._rundir / fn
+        yield asset(path, path.is_dir)
 
     # Private helper methods
 

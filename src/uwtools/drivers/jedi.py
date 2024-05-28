@@ -10,7 +10,7 @@ from typing import List, Optional
 from iotaa import asset, refs, run, task, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.drivers.standalonedriver import StandaloneDriver
+from uwtools.drivers.driver import StandaloneDriver
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
