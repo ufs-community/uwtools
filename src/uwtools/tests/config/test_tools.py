@@ -446,8 +446,8 @@ def test_realize_config_total_fail():
 
 def test_realize_config_values_needed_ini(caplog):
     """
-    Test that the values_needed flag logs keys completed, keys containing unrendered Jinja2
-    variables/expressions, and keys set to empty.
+    Test that the values_needed flag logs keys completed and keys containing unrendered Jinja2
+    variables/expressions.
     """
     log.setLevel(logging.INFO)
     tools.realize_config(
@@ -464,6 +464,8 @@ def test_realize_config_values_needed_ini(caplog):
       salad.fruit
       salad.vegetable
       salad.dressing
+      salad.toppings
+      salad.meat
       dessert
       dessert.type
       dessert.side
@@ -472,18 +474,14 @@ def test_realize_config_values_needed_ini(caplog):
     Keys with unrendered Jinja2 variables/expressions:
       salad.how_many: {{ amount }}
       dessert.flavor: {{ flavor }}
-
-    Keys that are set to empty:
-      salad.toppings
-      salad.meat
     """
     assert actual.strip() == dedent(expected).strip()
 
 
 def test_realize_config_values_needed_yaml(caplog):
     """
-    Test that the values_needed flag logs keys completed, keys containing unrendered Jinja2
-    variables/expressions and keys set to empty.
+    Test that the values_needed flag logs keys completed and keys containing unrendered Jinja2
+    variables/expressions.
     """
     log.setLevel(logging.INFO)
     tools.realize_config(
@@ -500,17 +498,15 @@ def test_realize_config_values_needed_yaml(caplog):
       FV3GFS.nomads.protocol
       FV3GFS.nomads.file_names
       FV3GFS.nomads.file_names.grib2
+      FV3GFS.nomads.file_names.nemsio
       FV3GFS.nomads.file_names.testfalse
       FV3GFS.nomads.file_names.testzero
+      FV3GFS.nomads.testempty
 
     Keys with unrendered Jinja2 variables/expressions:
       FV3GFS.nomads.url: https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/gfs.{{ yyyymmdd }}/{{ hh }}/atmos
       FV3GFS.nomads.file_names.grib2.anl: ['gfs.t{{ hh }}z.atmanl.nemsio', 'gfs.t{{ hh }}z.sfcanl.nemsio']
       FV3GFS.nomads.file_names.grib2.fcst: ['gfs.t{{ hh }}z.pgrb2.0p25.f{{ fcst_hr03d }}']
-
-    Keys that are set to empty:
-      FV3GFS.nomads.file_names.nemsio
-      FV3GFS.nomads.testempty
     """
     assert actual.strip() == dedent(expected).strip()
 
@@ -755,7 +751,7 @@ def test__realize_config_output_setup(caplog, tmp_path):
     input_obj = YAMLConfig({"a": {"b": {"foo": "bar"}}})
     output_file = tmp_path / "output.yaml"
     assert tools._realize_config_output_setup(
-        input_obj=input_obj, output_file=output_file, output_block=["a", "b"]
+        input_obj=input_obj, output_file=output_file, key_path=["a", "b"]
     ) == ({"foo": "bar"}, FORMAT.yaml)
     assert logged(caplog, f"Writing output to {output_file}")
 
@@ -806,7 +802,6 @@ def test__realize_config_values_needed(caplog, tmp_path):
     msgs = "\n".join(record.message for record in caplog.records)
     assert "Keys that are complete:\n  1" in msgs
     assert "Keys with unrendered Jinja2 variables/expressions:\n  2" in msgs
-    assert "Keys that are set to empty:\n  3" in msgs
 
 
 def test__realize_config_values_needed_negative_results(caplog, tmp_path):
@@ -819,7 +814,6 @@ def test__realize_config_values_needed_negative_results(caplog, tmp_path):
     msgs = "\n".join(record.message for record in caplog.records)
     assert "No keys are complete." in msgs
     assert "No keys have unrendered Jinja2 variables/expressions." in msgs
-    assert "No keys are set to empty." in msgs
 
 
 @pytest.mark.parametrize("input_fmt", FORMAT.extensions())

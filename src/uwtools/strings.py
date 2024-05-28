@@ -95,7 +95,6 @@ class STR:
     model: str = "model"
     mpas: str = "mpas"
     mpasinit: str = "mpas_init"
-    outblock: str = "output_block"
     outfile: str = "output_file"
     outfmt: str = "output_format"
     quiet: str = "quiet"

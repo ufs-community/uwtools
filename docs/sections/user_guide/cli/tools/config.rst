@@ -181,7 +181,7 @@ and YAML file ``update.yaml`` with contents:
   .. literalinclude:: config/realize-extension-stdin-fix.out
      :language: text
 
-* This example demonstrates: 1. Reading a config from ``stdin``, 2. Extracting a specific subsection with the ``--output-block`` option, and 3. Writing the output in a different format:
+* This example demonstrates: 1. Reading a config from ``stdin``, 2. Extracting a specific subsection with the ``--key-path`` option, and 3. Writing the output in a different format:
 
   .. literalinclude:: config/realize-combo.cmd
      :language: text
