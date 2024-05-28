@@ -54,7 +54,7 @@ def test_realize():
         "update_format": "fmt2",
         "output_file": "path3",
         "output_format": "fmt3",
-        "output_block": None,
+        "key_path": None,
         "values_needed": True,
         "total": True,
         "dry_run": False,

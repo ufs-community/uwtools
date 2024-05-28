@@ -751,7 +751,7 @@ def test__realize_config_output_setup(caplog, tmp_path):
     input_obj = YAMLConfig({"a": {"b": {"foo": "bar"}}})
     output_file = tmp_path / "output.yaml"
     assert tools._realize_config_output_setup(
-        input_obj=input_obj, output_file=output_file, output_block=["a", "b"]
+        input_obj=input_obj, output_file=output_file, key_path=["a", "b"]
     ) == ({"foo": "bar"}, FORMAT.yaml)
     assert logged(caplog, f"Writing output to {output_file}")
 

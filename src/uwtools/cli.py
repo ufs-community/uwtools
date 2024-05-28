@@ -149,7 +149,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_update_format(optional, choices=FORMATS)
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=FORMATS)
-    _add_arg_output_block(optional)
+    _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to the block to be output")
     _add_arg_values_needed(optional)
     _add_arg_total(optional)
     _add_arg_dry_run(optional)
@@ -217,7 +217,7 @@ def _dispatch_config_realize(args: Args) -> bool:
             update_format=args[STR.updatefmt],
             output_file=args[STR.outfile],
             output_format=args[STR.outfmt],
-            output_block=args[STR.outblock],
+            key_path=args[STR.keypath],
             values_needed=args[STR.valsneeded],
             total=args[STR.total],
             dry_run=args[STR.dryrun],
@@ -641,11 +641,10 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
     )
 
 
-def _add_arg_key_path(group: Group) -> None:
+def _add_arg_key_path(group: Group, helpmsg: str) -> None:
     group.add_argument(
         _switch(STR.keypath),
-        help="Dot-separated path of keys leading through the config "
-        "to the driver's configuration block",
+        help=helpmsg,
         metavar="KEY[.KEY...]",
         required=False,
         type=lambda s: s.split("."),
@@ -667,16 +666,6 @@ def _add_arg_leadtime(group: Group) -> None:
         help=f"The leadtime as {LEADTIME_DESC}",
         required=True,
         type=_timedelta_from_str,
-    )
-
-
-def _add_arg_output_block(group: Group):
-    group.add_argument(
-        _switch(STR.outblock),
-        help="Dot-separated path of keys to the block to be output",
-        metavar="KEY[.KEY...]",
-        required=False,
-        type=lambda s: s.split("."),
     )
 
 
@@ -899,7 +888,11 @@ def _add_subparser_for_driver_task(
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
-    _add_arg_key_path(optional)
+    _add_arg_key_path(
+        optional,
+        helpmsg="Dot-separated path of keys leading through the config "
+        "to the driver's configuration block",
+    )
     checks = _add_args_verbosity(optional)
     return checks
 
