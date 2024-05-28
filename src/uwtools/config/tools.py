@@ -82,7 +82,7 @@ def realize_config(
     update_format: Optional[str] = None,
     output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
-    output_block: Optional[List[Union[str, int]]] = None,
+    key_path: Optional[List[Union[str, int]]] = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -94,7 +94,7 @@ def realize_config(
     input_obj = _realize_config_update(input_obj, update_config, update_format)
     input_obj.dereference()
     output_data, output_format = _realize_config_output_setup(
-        input_obj, output_file, output_format, output_block
+        input_obj, output_file, output_format, key_path
     )
     if dry_run:
         for line in str(input_obj).strip().split("\n"):
@@ -185,7 +185,7 @@ def _realize_config_output_setup(
     input_obj: Config,
     output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
-    output_block: Optional[List[Union[str, int]]] = None,
+    key_path: Optional[List[Union[str, int]]] = None,
 ) -> Tuple[dict, str]:
     """
     Set up config-realize output.
@@ -193,15 +193,15 @@ def _realize_config_output_setup(
     :param input_obj: The input Config object.
     :param output_file: Output config destination (None => write to stdout).
     :param output_format: Format of the output config.
-    :param output_block: Path through keys to the desired output block.
+    :param key_path: Path through keys to the desired output block.
     :return: The unrealized data to output and the output format name.
     """
     output_format = _ensure_format("output", output_format, output_file)
     log.debug("Writing output to %s" % (output_file or "stdout"))
     _validate_format("output", output_format, input_obj.get_format())
     output_data = input_obj.data
-    if output_block is not None:
-        for key in output_block:
+    if key_path is not None:
+        for key in key_path:
             output_data = output_data[key]
     config_check_depths_realize(output_data, output_format)
     return output_data, output_format
@@ -238,14 +238,13 @@ def _realize_config_update(
     return input_obj
 
 
-def _realize_config_values_needed(input_obj: Config) -> bool:
+def _realize_config_values_needed(input_obj: Config) -> None:
     """
     Print a report characterizing input values as complete, empty, or template placeholders.
 
     :param input_obj: The config to update.
-    :return: True
     """
-    complete, empty, template = input_obj.characterize_values(input_obj.data, parent="")
+    complete, template = input_obj.characterize_values(input_obj.data, parent="")
     if complete:
         log.info("Keys that are complete:")
         for var in complete:
@@ -259,14 +258,6 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
             log.info(var)
     else:
         log.info("No keys have unrendered Jinja2 variables/expressions.")
-    log.info("")
-    if empty:
-        log.info("Keys that are set to empty:")
-        for var in empty:
-            log.info(var)
-    else:
-        log.info("No keys are set to empty.")
-    return True
 
 
 def _validate_depth(
@@ -335,7 +326,7 @@ Recognized file extensions are: {extensions}
 :param update_format: Format of the update config.
 :param output_file: Output config destination (None => write to ``stdout``).
 :param output_format: Format of the output config.
-:param output_block: Path through keys to the desired output block.
+:param key_path: Path through keys to the desired output block.
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.

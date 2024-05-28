@@ -119,7 +119,7 @@ def realize(
     update_format: Optional[str] = None,
     output_file: Optional[Union[Path, str]] = None,
     output_format: Optional[str] = None,
-    output_block: Optional[List[Union[str, int]]] = None,
+    key_path: Optional[List[Union[str, int]]] = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -138,7 +138,7 @@ def realize(
         update_format=update_format,
         output_file=_str2path(output_file),
         output_format=output_format,
-        output_block=output_block,
+        key_path=key_path,
         values_needed=values_needed,
         total=total,
         dry_run=dry_run,
@@ -235,7 +235,7 @@ Recognized file extensions are: {extensions}
 :param update_format: Format of the update config (optional if file's extension is recognized)
 :param output_file: Output config file (``None`` or unspecified => write to ``stdout``)
 :param output_format: Format of the output config (optional if file's extension is recognized)
-:param output_block: Path through keys to the desired output block
+:param key_path: Path through keys to the desired output block
 :param values_needed: Report complete, missing, and template values
 :param total: Require rendering of all Jinja2 variables/expressions
 :param dry_run: Log output instead of writing to output

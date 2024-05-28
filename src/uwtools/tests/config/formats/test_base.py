@@ -80,9 +80,8 @@ def test__load_paths(config, tmp_path):
 
 def test_characterize_values(config):
     values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
-    complete, empty, template = config.characterize_values(values=values, parent="p")
-    assert complete == ["  p4", "  p4.a", "  pb", "  p5", "  p6"]
-    assert empty == ["  p1", "  p2"]
+    complete, template = config.characterize_values(values=values, parent="p")
+    assert complete == ["  p1", "  p2", "  p4", "  p4.a", "  pb", "  p5", "  p6"]
     assert template == ["  p3: {{ n }}"]
 
 
