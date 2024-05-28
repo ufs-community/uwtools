@@ -238,12 +238,11 @@ def _realize_config_update(
     return input_obj
 
 
-def _realize_config_values_needed(input_obj: Config) -> bool:
+def _realize_config_values_needed(input_obj: Config) -> None:
     """
     Print a report characterizing input values as complete, empty, or template placeholders.
 
     :param input_obj: The config to update.
-    :return: True
     """
     complete, template = input_obj.characterize_values(input_obj.data, parent="")
     if complete:
@@ -259,8 +258,6 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
             log.info(var)
     else:
         log.info("No keys have unrendered Jinja2 variables/expressions.")
-    log.info("")
-    return True
 
 
 def _validate_depth(
