@@ -7,9 +7,10 @@ from unittest.mock import patch
 
 import f90nml  # type: ignore
 import yaml
-from pytest import fixture
+from pytest import fixture, raises
 
 from uwtools.drivers import ww3
+from uwtools.exceptions import UWConfigError
 
 # Fixtures
 
@@ -20,7 +21,7 @@ def config(tmp_path):
         "ww3": {
             "namelist": {
                 "base_file": str(tmp_path / "namelists.nml"),
-                "additional_files": str(tmp_path / "additional.nml"),
+                "additional_files": str(tmp_path / "ww3_grid.nml"),
             },
             "run_dir": str(tmp_path),
         },
@@ -52,23 +53,19 @@ def test_WaveWatchIII(driverobj):
 
 
 def test_WaveWatchIII_namelist_file(driverobj):
-    with open(driverobj._driver_config["namelist"]["base_file"], "w", encoding="utf-8") as f:
-        print(
-            "&MISC CICE0 = 0.25, CICEN = 0.75, FLAGTR = 4 / "
-            "&FLX3 CDMAX = 3.5E-3 , CTYPE = 0 / END OF NAMELISTS",
-            file=f,
-        )
     dst = driverobj._rundir / "namelists.nml"
     assert not dst.is_file()
     driverobj.namelist_file()
     assert dst.is_file()
-    nml = f90nml.read(dst)
-    assert isinstance(nml, f90nml.Namelist)
-    assert nml["MISC"]["CICE0"] == 0.25
-    assert nml["MISC"]["CICEN"] == 0.75
-    assert nml["MISC"]["FLAGTR"] == 4
-    assert nml["FLX3"]["CDMAX"] == 3.5e-3
-    assert nml["FLX3"]["CTYPE"] == 0
+    assert isinstance(f90nml.read(dst), f90nml.Namelist)
+
+
+def test_WaveWatchIII_namelist_missing(driverobj):
+    path = driverobj._rundir / "namelists.nml"
+    del driverobj._driver_config["namelist"]
+    with raises(UWConfigError) as e:
+        assert driverobj.namelist_file()
+    assert str(e.value) == ("Provide either a 'namelist' YAML block or the %s file" % path)
 
 
 def test_WaveWatchIII_provisioned_run_directory(driverobj):
@@ -81,16 +78,12 @@ def test_WaveWatchIII_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_WaveWatchIII_restart_directory_path(driverobj):
-    assert driverobj.restart_directory == driverobj._rundir / "restart_wave/"
-
-
 def test_WaveWatchIII__driver_config(driverobj):
     assert driverobj._driver_config == driverobj._config["ww3"]
 
 
-def test_WaveWatchIII__namelist_path(driverobj):
-    assert driverobj._namelist_path == driverobj._rundir / "namelists.nml"
+def test_WaveWatchIII___restart_path(driverobj):
+    assert driverobj._restart_path == driverobj._rundir / "restart_wave"
 
 
 def test_WaveWatchIII__validate(driverobj):
