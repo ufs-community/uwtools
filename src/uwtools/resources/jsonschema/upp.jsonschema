@@ -168,6 +168,9 @@
                 }
               },
               "type": "object"
+            },
+            "validate": {
+              "type": "boolean"
             }
           },
           "type": "object"

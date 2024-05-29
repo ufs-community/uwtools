@@ -74,6 +74,9 @@
                     "regional_grid_nml"
                   ],
                   "type": "object"
+                },
+                "validate": {
+                  "type": "boolean"
                 }
               },
               "required": [
