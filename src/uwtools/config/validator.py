@@ -19,6 +19,24 @@ from uwtools.utils.file import resource_path
 # Public functions
 
 
+def validate(schema: dict, config: dict) -> bool:
+    """
+    Report any errors arising from validation of the given config against the given JSON Schema.
+
+    :param schema: The JSON Schema to use for validation.
+    :param config: The config to validate.
+    :return: Did the YAML file conform to the schema?
+    """
+    errors = _validation_errors(config, schema)
+    log_method = log.error if errors else log.info
+    log_msg = "%s UW schema-validation error%s found"
+    log_method(log_msg, len(errors), "" if len(errors) == 1 else "s")
+    for error in errors:
+        log.error("Error at %s:", " -> ".join(str(k) for k in error.path))
+        log.error("%s%s", INDENT, error.message)
+    return not bool(errors)
+
+
 def validate_internal(
     schema_name: str, config: Union[dict, YAMLConfig, Optional[Path]] = None
 ) -> None:
@@ -41,7 +59,7 @@ def validate_yaml(
     schema_file: Path, config: Union[dict, YAMLConfig, Optional[Path]] = None
 ) -> bool:
     """
-    Report any errors arising from validation of the given config against the given JSON Schema.
+    Validate a YAML config against the JSON Schema in the given schema file.
 
     :param schema_file: The JSON Schema file to use for validation.
     :param config: The config to validate.
@@ -50,14 +68,7 @@ def validate_yaml(
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
     cfgobj = _prep_config(config)
-    errors = _validation_errors(cfgobj.data, schema)
-    log_method = log.error if errors else log.info
-    log_msg = "%s UW schema-validation error%s found"
-    log_method(log_msg, len(errors), "" if len(errors) == 1 else "s")
-    for error in errors:
-        log.error("Error at %s:", " -> ".join(str(k) for k in error.path))
-        log.error("%s%s", INDENT, error.message)
-    return not bool(errors)
+    return validate(schema, cfgobj.data)
 
 
 # Private functions

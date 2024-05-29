@@ -115,7 +115,9 @@ class Driver(ABC):
 
     @staticmethod
     def _create_user_updated_config(
-        config_class: Type[Config], config_values: dict, path: Path
+        config_class: Type[Config],
+        config_values: dict,
+        path: Path,  # schema: Optional[dict] = None
     ) -> None:
         """
         Create a config from a base file, user-provided values, or a combination of the two.
@@ -123,15 +125,17 @@ class Driver(ABC):
         :param config_class: The Config subclass matching the config type.
         :param config_values: The configuration object to update base values with.
         :param path: Path to dump file to.
+        :param schema: Schema to validate final config against.
         """
-        path.parent.mkdir(parents=True, exist_ok=True)
         user_values = config_values.get("update_values", {})
         if base_file := config_values.get("base_file"):
             config_obj = config_class(base_file)
             config_obj.update_values(user_values)
             config_obj.dereference()
+            path.parent.mkdir(parents=True, exist_ok=True)
             config_obj.dump(path)
         else:
+            path.parent.mkdir(parents=True, exist_ok=True)
             config_class.dump_dict(cfg=user_values, path=path)
         log.debug(f"Wrote config to {path}")
 
