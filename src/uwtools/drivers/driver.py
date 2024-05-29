@@ -137,8 +137,7 @@ class Driver(ABC):
         else:
             config = user_values
             dump = partial(config_class.dump_dict, config, path)
-        if schema:
-            validate(schema, config)
+        validate(schema=schema or {"type": "object"}, config=config)
         path.parent.mkdir(parents=True, exist_ok=True)
         dump()
         log.debug(f"Wrote config to {path}")
