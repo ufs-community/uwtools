@@ -7,6 +7,7 @@ import re
 import stat
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
+from functools import partial
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Type, Union
@@ -15,7 +16,7 @@ from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.validator import validate_internal
+from uwtools.config.validator import validate, validate_internal
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
@@ -115,9 +116,7 @@ class Driver(ABC):
 
     @staticmethod
     def _create_user_updated_config(
-        config_class: Type[Config],
-        config_values: dict,
-        path: Path,  # schema: Optional[dict] = None
+        config_class: Type[Config], config_values: dict, path: Path, schema: Optional[dict] = None
     ) -> None:
         """
         Create a config from a base file, user-provided values, or a combination of the two.
@@ -129,14 +128,18 @@ class Driver(ABC):
         """
         user_values = config_values.get("update_values", {})
         if base_file := config_values.get("base_file"):
-            config_obj = config_class(base_file)
-            config_obj.update_values(user_values)
-            config_obj.dereference()
-            path.parent.mkdir(parents=True, exist_ok=True)
-            config_obj.dump(path)
+            cfgobj = config_class(base_file)
+            cfgobj.update_values(user_values)
+            cfgobj.dereference()
+            config = cfgobj.data
+            dump = partial(cfgobj.dump, path)
         else:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            config_class.dump_dict(cfg=user_values, path=path)
+            config = user_values
+            dump = partial(config_class.dump_dict, config, path)
+        if schema:
+            validate(schema, config)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        dump()
         log.debug(f"Wrote config to {path}")
 
     @property
