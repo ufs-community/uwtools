@@ -271,7 +271,9 @@ def _add_subparser_file_common(parser: Parser) -> ActionChecks:
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_target_dir(required, required=True)
     optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional)
+    _add_arg_config_file(optional)
+    _add_arg_cycle(optional)
+    _add_arg_leadtime(optional)
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_keys(optional)
@@ -553,13 +555,13 @@ def _add_arg_config_file(group: Group, required: bool = False) -> None:
     )
 
 
-def _add_arg_cycle(group: Group) -> None:
+def _add_arg_cycle(group: Group, required: bool = False) -> None:
     offset = dt.timedelta(hours=(dt.datetime.now(dt.timezone.utc).hour // 6) * 6)
     cycle = dt.datetime.combine(dt.date.today(), dt.datetime.min.time()) + offset
     group.add_argument(
         _switch(STR.cycle),
         help="The cycle in ISO8601 format (e.g. %s)" % cycle.strftime("%Y-%m-%dT%H"),
-        required=True,
+        required=required,
         type=dt.datetime.fromisoformat,
     )
 
@@ -660,11 +662,11 @@ def _add_arg_keys(group: Group) -> None:
     )
 
 
-def _add_arg_leadtime(group: Group) -> None:
+def _add_arg_leadtime(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.leadtime),
         help=f"The leadtime as {LEADTIME_DESC}",
-        required=True,
+        required=required,
         type=_timedelta_from_str,
     )
 
@@ -880,11 +882,11 @@ def _add_subparser_for_driver_task(
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
     if with_cycle:
-        _add_arg_cycle(required)
+        _add_arg_cycle(required, required=True)
     if with_leadtime:
-        _add_arg_leadtime(required)
+        _add_arg_leadtime(required, required=True)
     optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional)
+    _add_arg_config_file(optional)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
