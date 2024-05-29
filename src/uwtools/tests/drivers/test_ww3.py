@@ -5,6 +5,7 @@ WW3 driver tests.
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
+import f90nml  # type: ignore
 import yaml
 from pytest import fixture
 
@@ -54,14 +55,11 @@ def test_WaveWatchIII(driverobj):
 
 
 def test_WaveWatchIII_namelist_file(driverobj):
-    src = driverobj._rundir / "ww3_shel.inp.IN"
-    with open(src, "w", encoding="utf-8") as f:
-        yaml.dump({}, f)
     dst = driverobj._rundir / "ww3_shel.nml"
     assert not dst.is_file()
-    driverobj._driver_config["namelist_file"] = {"base_file": src}
     driverobj.namelist_file()
-    assert src.is_file()
+    assert dst.is_file()
+    assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
 def test_WaveWatchIII_provisioned_run_directory(driverobj):

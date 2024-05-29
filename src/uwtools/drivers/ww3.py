@@ -36,7 +36,7 @@ class WaveWatchIII(Driver):
 
     # Workflow tasks
 
-    @tasks
+    @task
     def namelist_file(self):
         """
         The namelist file.
