@@ -50,6 +50,7 @@ class ESGGrid(Driver):
             config_class=NMLConfig,
             config_values=self._driver_config["namelist"],
             path=path,
+            schema=self._namelist_schema,
         )
 
     @tasks

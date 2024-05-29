@@ -117,6 +117,7 @@ class MPASInit(Driver):
             config_class=NMLConfig,
             config_values=namelist,
             path=path,
+            schema=self._namelist_schema,
         )
 
     @tasks
