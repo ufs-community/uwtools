@@ -13,10 +13,10 @@ Here is a prototype UW YAML ``ww3:`` block, explained in detail below:
 UW YAML for the ``ww3:`` Block
 ------------------------------
 
-namelist:
-^^^^^^^^^
+namelists:
+^^^^^^^^^^
 
-Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details).
+The path to the namelist(s) used by the WaveWatchIII configuration. Namelists will be symlinked to the run directory.
 
 run_dir:
 ^^^^^^^^

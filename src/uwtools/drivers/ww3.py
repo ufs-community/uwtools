@@ -5,12 +5,10 @@ A driver for ww3.
 from pathlib import Path
 from typing import List, Optional
 
-import f90nml  # type: ignore
 from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
-from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
 
 
@@ -38,28 +36,19 @@ class WaveWatchIII(Driver):
 
     # Workflow tasks
 
-    @task
+    @tasks
     def namelist_file(self):
         """
         The namelist file.
         """
-        path = self._rundir / "namelists.nml"
-        yield self._taskname(str(path))
+        fn = "ww3_shel.nml"
+        yield self._taskname(fn)
+        path = self._rundir / fn
         yield asset(path, path.is_file)
         yield None
-        try:
-            namelist = self._driver_config["namelist"]
-        except KeyError as e:
-            raise UWConfigError(
-                "Provide either a 'namelist' YAML block or the %s file" % path
-            ) from e
-        additional_files = namelist.get("additional_files", {})
-        for file in additional_files:
-            yield asset(file, Path(file).is_file)
-            namelist = f90nml.read(file)
         self._create_user_updated_config(
             config_class=NMLConfig,
-            config_values=namelist,
+            config_values=self._driver_config["namelist"],
             path=path,
         )
 
@@ -68,10 +57,19 @@ class WaveWatchIII(Driver):
         """
         Run directory provisioned with all required content.
         """
-        path = self._restart_path
-        path.parent.mkdir(parents=True, exist_ok=True)
         yield self._taskname("provisioned run directory")
-        yield [self.namelist_file()]
+        yield [self.namelist_file(), self.restart_directory()]
+
+    @task
+    def restart_directory(self):
+        """
+        The restart directory.
+        """
+        yield self._taskname("restart directory")
+        path = self._rundir / "restart_wave"
+        yield asset(path, path.is_dir)
+        yield None
+        path.mkdir(parents=True)
 
     # Private helper methods
 
@@ -81,17 +79,3 @@ class WaveWatchIII(Driver):
         Returns the name of this driver.
         """
         return STR.ww3
-
-    @property
-    def _namelist_path(self) -> Path:
-        """
-        Path to the namelist file.
-        """
-        return self._rundir / "namelists.nml"
-
-    @property
-    def _restart_path(self):
-        """
-        Path to the restart directory.
-        """
-        return self._rundir / "restart_wave"

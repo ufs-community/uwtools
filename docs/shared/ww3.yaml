@@ -1,8 +1,12 @@
 ww3:
   namelist:
-    base_file: /path/to/base_file
-    additional_files: /path/to/update_file
-  run_dir: /path/to/esg_grid
+    base_file: "{{ user.ww3_app }}/ww3/ww3_shel.inp.IN"
+    update_values:
+      input_nml:
+        input_forcing_winds: "C"
+  run_dir: /path/to/run/directory
 platform:
   account: me
   scheduler: slurm
+user:
+  ww3_app: /path/to/ww3/installation
