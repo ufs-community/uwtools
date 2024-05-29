@@ -322,6 +322,8 @@ def _dispatch_file_copy(args: Args) -> bool:
     return uwtools.api.file.copy(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        leadtime=args[STR.leadtime],
         keys=args[STR.keys],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
@@ -337,6 +339,8 @@ def _dispatch_file_link(args: Args) -> bool:
     return uwtools.api.file.link(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        leadtime=args[STR.leadtime],
         keys=args[STR.keys],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
