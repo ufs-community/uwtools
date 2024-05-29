@@ -1,0 +1,15 @@
+[2024-05-29T16:44:14]     INFO Validating config against internal schema files-to-stage
+[2024-05-29T16:44:14]     INFO 0 UW schema-validation errors found
+[2024-05-29T16:44:14]     INFO File links: Initial state: Pending
+[2024-05-29T16:44:14]     INFO File links: Checking requirements
+[2024-05-29T16:44:14]     INFO Link dst-link-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Initial state: Pending
+[2024-05-29T16:44:14]     INFO Link dst-link-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Checking requirements
+[2024-05-29T16:44:14]     INFO Link dst-link-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Requirement(s) ready
+[2024-05-29T16:44:14]     INFO Link dst-link-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Executing
+[2024-05-29T16:44:14]     INFO Link dst-link-timedep/baz-2024-05-29T18 -> src/20240529/12/006/baz: Final state: Ready
+[2024-05-29T16:44:14]     INFO File links: Final state: Ready
+
+dst-link-timedep
+└── baz-2024-05-29T18 -> ../src/20240529/12/006/baz
+
+1 directory, 1 file

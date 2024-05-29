@@ -68,3 +68,12 @@ Given ``link-config.yaml`` containing
    :language: text
 
 Here, ``foo`` and ``bar`` are symbolic links.
+
+The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
+
+.. literalinclude:: file/link-config-timedep.yaml
+   :language: yaml
+.. literalinclude:: file/link-exec-timedep.cmd
+   :emphasize-lines: 2
+.. literalinclude:: file/link-exec-timedep.out
+   :language: text
