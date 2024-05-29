@@ -161,6 +161,28 @@ class Driver(ABC):
         Returns the name of this driver.
         """
 
+    def _namelist_schema(self, keys: Optional[List[str]] = None) -> dict:
+        """
+        Locate and return the (sub)schema for validating the driver's namelist content.
+
+        :param keys: Keys leading to the namelist-validating (sub)schema.
+        """
+        if self._driver_config["namelist"].get("validate", True):
+            schema_file = get_schema_file(schema_name=self._driver_name.replace("_", "-"))
+            with open(schema_file, "r", encoding="utf-8") as f:
+                schema: dict = json.load(f)
+            default_keys = [
+                "properties",
+                self._driver_name,
+                "properties",
+                "namelist",
+                "properties",
+                "update_values",
+            ]
+            for key in keys or default_keys:
+                schema = schema[key]
+        return {"type": "object"}
+
     @property
     def _resources(self) -> Dict[str, Any]:
         """
@@ -248,16 +270,6 @@ class Driver(ABC):
         Returns the job scheduler specified by the platform information.
         """
         return JobScheduler.get_scheduler(self._resources)
-
-    @property
-    def _namelist_schema(self) -> dict:
-        if self._driver_config["namelist"].get("validate", True):
-            schema_file = get_schema_file(schema_name=self._driver_name.replace("_", "-"))
-            with open(schema_file, "r", encoding="utf-8") as f:
-                schema: dict = json.load(f)
-            for x in [self._driver_name, "namelist", "update_values"]:
-                schema = schema["properties"][x]
-        return {"type": "object"}
 
     def _taskname(self, suffix: str) -> str:
         """

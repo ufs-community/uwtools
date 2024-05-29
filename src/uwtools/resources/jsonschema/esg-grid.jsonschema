@@ -3,6 +3,29 @@
     "base_file": {
       "type": "string"
     },
+    "namelist": {
+      "additionalproperties": true,
+      "properties": {
+        "regional_grid_nml": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/regional_grid_nml_properties"
+            }
+          ],
+          "required": [
+            "delx",
+            "dely",
+            "lx",
+            "ly",
+            "pazi",
+            "plat",
+            "plon"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
     "regional_grid_nml_properties": {
       "additionalProperties": false,
       "properties": {
