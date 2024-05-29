@@ -68,7 +68,7 @@ def validate_yaml(
     with open(schema_file, "r", encoding="utf-8") as f:
         schema = json.load(f)
     cfgobj = _prep_config(config)
-    return validate(schema, cfgobj.data)
+    return validate(schema=schema, config=cfgobj.data)
 
 
 # Private functions
