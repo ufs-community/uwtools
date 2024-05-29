@@ -124,6 +124,26 @@ def write_as_json(data: Dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
+def test_validate(config, schema):
+    assert validator.validate(schema=schema, config=config)
+
+
+def test_validate_fail_bad_enum_val(caplog, config, schema):
+    log.setLevel(logging.INFO)
+    config["color"] = "yellow"  # invalid enum value
+    assert not validator.validate(schema=schema, config=config)
+    assert any(x for x in caplog.records if "1 UW schema-validation error found" in x.message)
+    assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
+
+
+def test_validate_fail_bad_number_val(caplog, config, schema):
+    log.setLevel(logging.INFO)
+    config["number"] = "string"  # invalid number value
+    assert not validator.validate(schema=schema, config=config)
+    assert any(x for x in caplog.records if "1 UW schema-validation error found" in x.message)
+    assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
+
+
 def test_validate_internal_no(caplog, schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
         with raises(UWConfigError) as e:
