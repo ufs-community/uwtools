@@ -3,8 +3,8 @@
     "base_file": {
       "type": "string"
     },
-    "namelist": {
-      "additionalproperties": true,
+    "namelist_final": {
+      "additionalproperties": false,
       "properties": {
         "regional_grid_nml": {
           "allOf": [
@@ -115,30 +115,10 @@
                   "$ref": "#/$defs/base_file"
                 },
                 "update_values": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "regional_grid_nml": {
-                      "allOf": [
-                        {
-                          "$ref": "#/$defs/regional_grid_nml_properties"
-                        }
-                      ],
-                      "required": [
-                        "delx",
-                        "dely",
-                        "lx",
-                        "ly",
-                        "pazi",
-                        "plat",
-                        "plon"
-                      ],
-                      "type": "object"
-                    }
-                  },
+                  "$ref": "#/$defs/namelist_final",
                   "required": [
                     "regional_grid_nml"
-                  ],
-                  "type": "object"
+                  ]
                 }
               },
               "required": [
