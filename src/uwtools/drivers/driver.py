@@ -2,6 +2,7 @@
 An abstract class for component drivers.
 """
 
+import json
 import os
 import re
 import stat
@@ -16,7 +17,7 @@ from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.validator import validate, validate_internal
+from uwtools.config.validator import get_schema_file, validate, validate_internal
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
@@ -248,6 +249,16 @@ class Driver(ABC):
         Returns the job scheduler specified by the platform information.
         """
         return JobScheduler.get_scheduler(self._resources)
+
+    @property
+    def _namelist_schema(self) -> dict:
+        if self._driver_config["namelist"].get("validate", True):
+            schema_file = get_schema_file(schema_name=self._driver_name.replace("_", "-"))
+            with open(schema_file, "r", encoding="utf-8") as f:
+                schema: dict = json.load(f)
+            for x in [self._driver_name, "namelist", "update_values"]:
+                schema = schema["properties"][x]
+        return {"type": "object"}
 
     def _taskname(self, suffix: str) -> str:
         """

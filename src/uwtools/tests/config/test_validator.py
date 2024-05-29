@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Dict, Tuple
 from unittest.mock import patch
 
+import pytest
 import yaml
 from pytest import fixture, raises
 
@@ -122,6 +123,11 @@ def write_as_json(data: Dict[str, Any], path: Path) -> Path:
 
 
 # Test functions
+
+
+@pytest.mark.skip("PM FIXME")
+def test_get_get_schema_file():
+    pass
 
 
 def test_validate(config, schema):

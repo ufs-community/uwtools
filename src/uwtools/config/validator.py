@@ -19,6 +19,15 @@ from uwtools.utils.file import resource_path
 # Public functions
 
 
+def get_schema_file(schema_name: str) -> Path:
+    """
+    Returns the path to the JSON Schema file with a given name.
+
+    :param schema_name: Name of uwtools schema to validate the config against.
+    """
+    return resource_path("jsonschema") / f"{schema_name}.jsonschema"
+
+
 def validate(schema: dict, config: dict) -> bool:
     """
     Report any errors arising from validation of the given config against the given JSON Schema.
@@ -49,7 +58,7 @@ def validate_internal(
     """
 
     log.info("Validating config against internal schema %s", schema_name)
-    schema_file = resource_path("jsonschema") / f"{schema_name}.jsonschema"
+    schema_file = get_schema_file(schema_name)
     log.debug("Using schema file: %s", schema_file)
     if not validate_yaml(config=config, schema_file=schema_file):
         raise UWConfigError("YAML validation errors")
