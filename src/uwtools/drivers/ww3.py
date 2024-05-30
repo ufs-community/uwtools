@@ -1,5 +1,5 @@
 """
-A driver for ww3.
+A library driver for ww3.
 """
 
 from pathlib import Path
@@ -8,13 +8,13 @@ from typing import List, Optional
 from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import Assets
 from uwtools.strings import STR
 
 
-class WaveWatchIII(Driver):
+class WaveWatchIII(Assets):
     """
-    A driver for ww3.
+    A library driver for ww3.
     """
 
     def __init__(

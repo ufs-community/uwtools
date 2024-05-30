@@ -22,9 +22,9 @@ from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute
 
 
-class Driver(ABC):
+class Assets(ABC):
     """
-    An abstract class for component drivers.
+    An abstract class containing assets for all component drivers.
     """
 
     def __init__(
@@ -182,9 +182,9 @@ class Driver(ABC):
             validate_internal(schema_name=schema_name, config=self._config)
 
 
-class StandaloneDriver(Driver):
+class Driver(Assets):
     """
-    An abstract class for component drivers.
+    An abstract class for standalone component drivers.
     """
 
     def __init__(
@@ -197,7 +197,7 @@ class StandaloneDriver(Driver):
         leadtime: Optional[timedelta] = None,
     ) -> None:
         """
-        A component driver.
+        A standalone component driver.
 
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
@@ -253,7 +253,7 @@ class StandaloneDriver(Driver):
     @property
     def _resources(self) -> Dict[str, Any]:
         """
-        Returns configuration data for the runscript.
+        Returns platform configuration data.
         """
         try:
             platform = self._config["platform"]

@@ -9,7 +9,7 @@ import yaml
 from pytest import fixture, raises
 
 from uwtools.exceptions import UWError
-from uwtools.tests.drivers.test_standalonedriver import ConcreteDriver
+from uwtools.tests.drivers.test_driver import ConcreteDriver
 from uwtools.utils import api
 
 

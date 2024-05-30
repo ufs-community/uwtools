@@ -1,6 +1,6 @@
 ww3:
   namelist:
-    base_file: "{{ user.ww3_app }}/ww3/ww3_shel.inp.IN"
+    base_file: /path/to/ww3/ww3_shel.inp.IN
     update_values:
       input_nml:
         input_forcing_winds: "C"
@@ -8,5 +8,3 @@ ww3:
 platform:
   account: me
   scheduler: slurm
-user:
-  ww3_app: /path/to/ww3/installation

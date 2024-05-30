@@ -11,13 +11,13 @@ from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.drivers.driver import StandaloneDriver
+from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.tasks import filecopy, symlink
 
 
-class FV3(StandaloneDriver):
+class FV3(Driver):
     """
     A driver for the FV3 model.
     """

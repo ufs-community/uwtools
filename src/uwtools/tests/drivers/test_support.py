@@ -5,7 +5,7 @@ Tests for uwtools.drivers.support module.
 from iotaa import asset, external, task, tasks
 
 from uwtools.drivers import support
-from uwtools.drivers.driver import StandaloneDriver
+from uwtools.drivers.driver import Driver
 
 
 def test_graph():
@@ -19,7 +19,7 @@ def test_graph():
 
 
 def test_tasks():
-    class SomeDriver(StandaloneDriver):
+    class SomeDriver(Driver):
         def provisioned_run_directory(self):
             pass
 

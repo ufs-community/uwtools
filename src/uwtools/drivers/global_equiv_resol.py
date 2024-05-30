@@ -7,11 +7,11 @@ from typing import List, Optional
 
 from iotaa import asset, external, task, tasks
 
-from uwtools.drivers.driver import StandaloneDriver
+from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
 
 
-class GlobalEquivResol(StandaloneDriver):
+class GlobalEquivResol(Driver):
     """
     A driver for global_equiv_resol.
     """

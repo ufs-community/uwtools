@@ -9,12 +9,12 @@ from typing import List, Optional
 from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.drivers.driver import StandaloneDriver
+from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
 
-class ChgresCube(StandaloneDriver):
+class ChgresCube(Driver):
     """
     A driver for chgres_cube.
     """
