@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
-Tests for uwtools.drivers.standalonedriver module.
+Tests for uwtools.drivers.driver module.
 """
 import datetime as dt
 import json
