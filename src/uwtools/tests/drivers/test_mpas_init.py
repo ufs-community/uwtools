@@ -3,6 +3,7 @@
 MPASInit driver tests.
 """
 import datetime as dt
+import logging
 from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
@@ -14,8 +15,9 @@ from pytest import fixture, raises
 
 from uwtools.drivers import mpas_init
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import log
 from uwtools.scheduler import Slurm
-from uwtools.tests.support import fixture_path
+from uwtools.tests.support import fixture_path, logged
 
 # Fixtures
 
@@ -152,6 +154,13 @@ def test_MPASInit_namelist_file(driverobj):
     driverobj.namelist_file()
     assert dst.is_file()
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
+
+
+def test_MPASInit_namelist_file_fails_validation(caplog, driverobj):
+    log.setLevel(logging.INFO)
+    driverobj._driver_config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
+    driverobj.namelist_file()
+    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
 def test_MPASInit_namelist_missing(driverobj):

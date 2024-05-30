@@ -3,6 +3,7 @@
 FV3 driver tests.
 """
 import datetime as dt
+import logging
 from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
@@ -13,6 +14,7 @@ from iotaa import asset, external
 from pytest import fixture
 
 from uwtools.drivers import driver, fv3
+from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import logged
 
@@ -168,6 +170,13 @@ def test_FV3_namelist_file(driverobj):
     driverobj._driver_config["namelist_file"] = {"base_file": src}
     driverobj.namelist_file()
     assert dst.is_file()
+
+
+def test_FV3_namelist_file_fails_validation(caplog, driverobj):
+    log.setLevel(logging.INFO)
+    driverobj._driver_config["namelist"]["update_values"]["namsfc"]["foo"] = None
+    driverobj.namelist_file()
+    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
 @pytest.mark.parametrize("domain", ("global", "regional"))

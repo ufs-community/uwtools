@@ -3,6 +3,7 @@
 UPP driver tests.
 """
 import datetime as dt
+import logging
 from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
@@ -12,7 +13,9 @@ import yaml
 from pytest import fixture
 
 from uwtools.drivers import upp
+from uwtools.logging import log
 from uwtools.scheduler import Slurm
+from uwtools.tests.support import logged
 
 # Fixtures
 
@@ -120,6 +123,14 @@ def test_UPP_namelist_file(driverobj):
     assert nml["model_inputs"]["grib"] == "grib2"
     assert nml["nampgb"]["kpo"] == 3
     assert nml["nampgb"]["kpv"] == 88
+
+
+def test_UPP_namelist_file_fails_validation(caplog, driverobj):
+    log.setLevel(logging.INFO)
+    driverobj._driver_config["namelist"]["update_values"]["nampgb"]["kpo"] = "string"
+    del driverobj._driver_config["namelist"]["base_file"]
+    driverobj.namelist_file()
+    assert logged(caplog, "  'string' is not of type 'integer'")
 
 
 def test_UPP_provisioned_run_directory(driverobj):

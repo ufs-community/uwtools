@@ -107,7 +107,7 @@ def test_ChgresCube_namelist_file(driverobj):
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
-def test_ChgresCube_namelist_file_fail_validation(caplog, driverobj):
+def test_ChgresCube_namelist_file_fails_validation(caplog, driverobj):
     log.setLevel(logging.INFO)
     driverobj._driver_config["namelist"]["update_values"]["config"]["convert_atm"] = "string"
     with patch.object(chgres_cube, "file", new=ready):

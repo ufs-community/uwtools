@@ -2,6 +2,7 @@
 """
 ESGGrid driver tests.
 """
+import logging
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
@@ -10,7 +11,9 @@ import yaml
 from pytest import fixture
 
 from uwtools.drivers import esg_grid
+from uwtools.logging import log
 from uwtools.scheduler import Slurm
+from uwtools.tests.support import logged
 
 # Fixtures
 
@@ -76,6 +79,13 @@ def test_ESGGrid_namelist_file(driverobj):
     driverobj.namelist_file()
     assert dst.is_file()
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
+
+
+def test_ESGGrid_namelist_file_fails_validation(caplog, driverobj):
+    log.setLevel(logging.INFO)
+    driverobj._driver_config["namelist"]["update_values"]["regional_grid_nml"]["delx"] = "string"
+    driverobj.namelist_file()
+    assert logged(caplog, "  'string' is not of type 'number'")
 
 
 def test_ESGGrid_provisioned_run_directory(driverobj):
