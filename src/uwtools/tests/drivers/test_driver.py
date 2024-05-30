@@ -383,7 +383,6 @@ def test_Driver__namelist_schema_default_disable(driverobj):
         assert driverobj._namelist_schema() == {"type": "object"}
 
 
-
 def test_Driver__resources_fail(driverobj):
     del driverobj._config["platform"]
     with raises(UWConfigError) as e:

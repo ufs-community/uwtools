@@ -23,6 +23,9 @@
             },
             "update_values": {
               "$ref": "urn:uwtools:namelist"
+            },
+            "validate": {
+              "type": "boolean"
             }
           },
           "type": "object"

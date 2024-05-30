@@ -2,14 +2,19 @@
 """
 WW3 driver tests.
 """
+import logging
+from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
 import yaml
+from iotaa import refs
 from pytest import fixture
 
 from uwtools.drivers import ww3
+from uwtools.logging import log
+from uwtools.tests.support import logged
 
 # Fixtures
 
@@ -54,12 +59,23 @@ def test_WaveWatchIII(driverobj):
     assert isinstance(driverobj, ww3.WaveWatchIII)
 
 
-def test_WaveWatchIII_namelist_file(driverobj):
+def test_WaveWatchIII_namelist_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
     dst = driverobj._rundir / "ww3_shel.nml"
     assert not dst.is_file()
-    driverobj.namelist_file()
+    path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()
+    assert logged(caplog, f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
+
+
+def test_WaveWatchIII_namelist_file_fails_validation(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    driverobj._driver_config["namelist"]["update_values"]["input_nml"]["input_forcing_winds"] = None
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert logged(caplog, f"Failed to validate {path}")
+    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
 def test_WaveWatchIII_provisioned_run_directory(driverobj):

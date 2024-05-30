@@ -4,6 +4,7 @@ ww3:
     update_values:
       input_nml:
         input_forcing_winds: "C"
+    validate: true
   run_dir: /path/to/run/directory
 platform:
   account: me
