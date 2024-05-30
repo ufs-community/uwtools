@@ -90,21 +90,6 @@
                 "base_file": {
                   "$ref": "#/$defs/base_file"
                 },
-                "validate": {
-                  "type": "boolean"
-                }
-              },
-              "required": [
-                "base_file"
-              ],
-              "type": "object"
-            },
-            {
-              "additionalProperties": false,
-              "properties": {
-                "base_file": {
-                  "$ref": "#/$defs/base_file"
-                },
                 "update_values": {
                   "additionalProperties": false,
                   "properties": {
@@ -127,17 +112,13 @@
                 }
               },
               "required": [
-                "base_file",
-                "update_values"
+                "base_file"
               ],
               "type": "object"
             },
             {
               "additionalProperties": false,
               "properties": {
-                "base_file": {
-                  "$ref": "#/$defs/base_file"
-                },
                 "update_values": {
                   "$ref": "#/$defs/namelist_final"
                 },
