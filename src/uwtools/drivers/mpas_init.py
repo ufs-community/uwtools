@@ -85,6 +85,6 @@ class MPASInit(MPASBase):
     @property
     def _streams_fn(self) -> str:
         """
-        Teh streams filename.
+        The streams filename.
         """
         return "streams.init_atmosphere"
