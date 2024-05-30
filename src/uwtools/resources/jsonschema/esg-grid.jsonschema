@@ -3,10 +3,11 @@
     "base_file": {
       "type": "string"
     },
-    "namelist_final": {
+    "namelist_content": {
       "additionalproperties": false,
       "properties": {
         "regional_grid_nml": {
+          "additionalProperties": false,
           "properties": {
             "delx": {
               "type": "number"
@@ -46,33 +47,6 @@
         "regional_grid_nml"
       ],
       "type": "object"
-    },
-    "regional_grid_nml_properties": {
-      "additionalProperties": false,
-      "properties": {
-        "delx": {
-          "type": "number"
-        },
-        "dely": {
-          "type": "number"
-        },
-        "lx": {
-          "type": "number"
-        },
-        "ly": {
-          "type": "number"
-        },
-        "pazi": {
-          "type": "number"
-        },
-        "plat": {
-          "type": "number"
-        },
-        "plon": {
-          "type": "number"
-        }
-      },
-      "type": "object"
     }
   },
   "properties": {
@@ -96,7 +70,7 @@
                     "regional_grid_nml": {
                       "allOf": [
                         {
-                          "$ref": "#/$defs/regional_grid_nml_properties"
+                          "$ref": "#/$defs/namelist_content/properties/regional_grid_nml/properties"
                         }
                       ],
                       "type": "object"
@@ -120,7 +94,7 @@
               "additionalProperties": false,
               "properties": {
                 "update_values": {
-                  "$ref": "#/$defs/namelist_final"
+                  "$ref": "#/$defs/namelist_content"
                 },
                 "validate": {
                   "type": "boolean"

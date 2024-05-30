@@ -199,16 +199,28 @@ def test_schema_esg_grid_namelist(esg_grid_prop, esg_namelist):
 
 
 @pytest.mark.parametrize("key", ["delx", "dely", "lx", "ly", "pazi", "plat", "plon"])
-def test_schema_esg_grid_regional_grid_nml_properties(key):
-    errors = partial(schema_validator("esg-grid", "$defs", "regional_grid_nml_properties"))
-    # An integer value is ok:
-    assert not errors({key: 88})
+def test_schema_esg_grid_namelist_content(key):
+    config: dict = {
+        "regional_grid_nml": {
+            "delx": 88,
+            "dely": 88,
+            "lx": 88,
+            "ly": 88,
+            "pazi": 88,
+            "plat": 88,
+            "plon": 88,
+        }
+    }
+    errors = partial(schema_validator("esg-grid", "$defs", "namelist_content"))
+    assert not errors(config)
     # A floating-point value is ok:
-    assert not errors({key: 3.14})
+    config["regional_grid_nml"][key] = 3.14
+    assert not errors(config)
     # It is an error for the value to be of type string:
-    assert "not of type 'number'" in errors({key: "foo"})
-    # It is an error not to supply a value:
-    assert "not of type 'object'" in errors({key})
+    config["regional_grid_nml"][key] = "foo"
+    assert "not of type 'number'" in errors(config)
+    # Each key is required:
+    assert "is a required property" in errors(with_del(config, "regional_grid_nml", key))
 
 
 def test_schema_esg_grid_run_dir(esg_grid_prop):
