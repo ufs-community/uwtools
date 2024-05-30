@@ -23,6 +23,7 @@ chgres_cube:
         sfc_files_input_grid: sfc.t{{cycle.strftime('%H') }}z.nc
         varmap_file: /path/to/varmap_table
         vcoord_file_target_grid: /path/to/global_hyblev.l65.txt
+    validate: true
   run_dir: /path/to/dir
 platform:
   account: me

@@ -36,8 +36,9 @@ def esg_namelist():
                 "pazi": 0.0,
                 "plat": 45.5,
                 "plon": -100.5,
-            }
+            },
         },
+        "validate": True,
     }
 
 
@@ -106,7 +107,7 @@ def upp_prop():
 def test_schema_chgres_cube():
     config = {
         "execution": {"executable": "chgres_cube"},
-        "namelist": {"base_file": "/path"},
+        "namelist": {"base_file": "/path", "validate": True},
         "run_dir": "/tmp",
     }
     errors = schema_validator("chgres-cube", "properties", "chgres_cube")
@@ -160,7 +161,7 @@ def test_schema_chgres_cube_run_dir(chgres_cube_prop):
 def test_schema_esg_grid():
     config = {
         "execution": {"executable": "esg_grid"},
-        "namelist": {"base_file": "/path"},
+        "namelist": {"base_file": "/path", "validate": True},
         "run_dir": "/tmp",
     }
     errors = schema_validator("esg-grid", "properties", "esg_grid")
@@ -198,16 +199,28 @@ def test_schema_esg_grid_namelist(esg_grid_prop, esg_namelist):
 
 
 @pytest.mark.parametrize("key", ["delx", "dely", "lx", "ly", "pazi", "plat", "plon"])
-def test_schema_esg_grid_regional_grid_nml_properties(key):
-    errors = partial(schema_validator("esg-grid", "$defs", "regional_grid_nml_properties"))
-    # An integer value is ok:
-    assert not errors({key: 88})
+def test_schema_esg_grid_namelist_content(key):
+    config: dict = {
+        "regional_grid_nml": {
+            "delx": 88,
+            "dely": 88,
+            "lx": 88,
+            "ly": 88,
+            "pazi": 88,
+            "plat": 88,
+            "plon": 88,
+        }
+    }
+    errors = partial(schema_validator("esg-grid", "$defs", "namelist_content"))
+    assert not errors(config)
     # A floating-point value is ok:
-    assert not errors({key: 3.14})
+    config["regional_grid_nml"][key] = 3.14
+    assert not errors(config)
     # It is an error for the value to be of type string:
-    assert "not of type 'number'" in errors({key: "foo"})
-    # It is an error not to supply a value:
-    assert "not of type 'object'" in errors({key})
+    config["regional_grid_nml"][key] = "foo"
+    assert "not of type 'number'" in errors(config)
+    # Each key is required:
+    assert "is a required property" in errors(with_del(config, "regional_grid_nml", key))
 
 
 def test_schema_esg_grid_run_dir(esg_grid_prop):
@@ -332,7 +345,7 @@ def test_schema_fv3():
         "field_table": {"base_file": "/path"},
         "lateral_boundary_conditions": {"interval_hours": 1, "offset": 0, "path": "/tmp/file"},
         "length": 3,
-        "namelist": {"base_file": "/path"},
+        "namelist": {"base_file": "/path", "validate": True},
         "run_dir": "/tmp",
     }
     errors = schema_validator("fv3", "properties", "fv3")
@@ -356,7 +369,7 @@ def test_schema_fv3():
             "files_to_copy": {"fn": "/path"},
             "files_to_link": {"fn": "/path"},
             "model_configure": {"base_file": "/path"},
-            "namelist": {"base_file": "/path"},
+            "namelist": {"base_file": "/path", "validate": True},
         }
     )
     # Additional top-level keys are not allowed:
@@ -661,7 +674,7 @@ def test_schema_make_solo_mosaic_run_dir(make_solo_mosaic_prop):
 def test_schema_mpas():
     config = {
         "execution": {"executable": "atmosphere_model"},
-        "namelist": {"base_file": "path/to/simple.nml"},
+        "namelist": {"base_file": "path/to/simple.nml", "validate": True},
         "run_dir": "path/to/rundir",
         "streams": {"path": "path/to/streams.atmosphere.in", "values": {"world": "user"}},
     }
@@ -770,7 +783,7 @@ def test_schema_mpas_streams(mpas_prop):
 def test_schema_mpas_init():
     config = {
         "execution": {"executable": "mpas_init"},
-        "namelist": {"base_file": "path/to/simple.nml"},
+        "namelist": {"base_file": "path/to/simple.nml", "validate": True},
         "run_dir": "path/to/rundir",
         "streams": {"path": "path/to/streams.atmosphere.in", "values": {"world": "user"}},
     }
@@ -1009,7 +1022,7 @@ def test_schema_rocoto_workflow_cycledef():
 def test_schema_sfc_climo_gen():
     config = {
         "execution": {"executable": "sfc_climo_gen"},
-        "namelist": {"base_file": "/path"},
+        "namelist": {"base_file": "/path", "validate": True},
         "run_dir": "/tmp",
     }
     errors = schema_validator("sfc-climo-gen", "properties", "sfc_climo_gen")
@@ -1161,6 +1174,7 @@ def test_schema_upp():
                     "kpo": 3,
                 },
             },
+            "validate": True,
         },
         "run_dir": "/path/to/run",
     }

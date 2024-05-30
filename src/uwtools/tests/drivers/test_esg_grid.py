@@ -2,15 +2,20 @@
 """
 ESGGrid driver tests.
 """
+import logging
+from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
 import yaml
+from iotaa import refs
 from pytest import fixture
 
 from uwtools.drivers import esg_grid
+from uwtools.logging import log
 from uwtools.scheduler import Slurm
+from uwtools.tests.support import logged
 
 # Fixtures
 
@@ -70,12 +75,23 @@ def test_ESGGrid(driverobj):
     assert isinstance(driverobj, esg_grid.ESGGrid)
 
 
-def test_ESGGrid_namelist_file(driverobj):
+def test_ESGGrid_namelist_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
     dst = driverobj._rundir / "regional_grid.nml"
     assert not dst.is_file()
-    driverobj.namelist_file()
+    path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()
+    assert logged(caplog, f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
+
+
+def test_ESGGrid_namelist_file_fails_validation(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    driverobj._driver_config["namelist"]["update_values"]["regional_grid_nml"]["delx"] = "string"
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert logged(caplog, f"Failed to validate {path}")
+    assert logged(caplog, "  'string' is not of type 'number'")
 
 
 def test_ESGGrid_provisioned_run_directory(driverobj):

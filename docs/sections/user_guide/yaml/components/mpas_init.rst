@@ -69,6 +69,13 @@ files_to_link:
 
 Identical to ``files_to_copy:`` except that symbolic links will be created in the run directory instead of copies.
 
+namelist:
+^^^^^^^^^
+
+Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details).
+
+.. include:: ../../../../shared/validate_namelist.rst
+
 run_dir:
 ^^^^^^^^
 

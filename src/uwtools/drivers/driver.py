@@ -2,11 +2,13 @@
 An abstract class for component drivers.
 """
 
+import json
 import os
 import re
 import stat
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
+from functools import partial
 from pathlib import Path
 from textwrap import dedent
 from typing import Any, Dict, List, Optional, Type, Union
@@ -15,7 +17,7 @@ from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.validator import validate_internal
+from uwtools.config.validator import get_schema_file, validate, validate_internal
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
@@ -33,8 +35,8 @@ class Driver(ABC):
         dry_run: bool = False,
         batch: bool = False,
         cycle: Optional[datetime] = None,
-        key_path: Optional[List[str]] = None,
         leadtime: Optional[timedelta] = None,
+        key_path: Optional[List[str]] = None,
     ) -> None:
         """
         A component driver.
@@ -43,8 +45,8 @@ class Driver(ABC):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         :param cycle: The cycle.
-        :param key_path: Keys leading through the config to the driver's configuration block.
         :param leadtime: The leadtime.
+        :param key_path: Keys leading through the config to the driver's configuration block.
         """
         dryrun(enable=dry_run)
         self._config = YAMLConfig(config=config)
@@ -115,7 +117,7 @@ class Driver(ABC):
 
     @staticmethod
     def _create_user_updated_config(
-        config_class: Type[Config], config_values: dict, path: Path
+        config_class: Type[Config], config_values: dict, path: Path, schema: Optional[dict] = None
     ) -> None:
         """
         Create a config from a base file, user-provided values, or a combination of the two.
@@ -123,17 +125,24 @@ class Driver(ABC):
         :param config_class: The Config subclass matching the config type.
         :param config_values: The configuration object to update base values with.
         :param path: Path to dump file to.
+        :param schema: Schema to validate final config against.
         """
-        path.parent.mkdir(parents=True, exist_ok=True)
         user_values = config_values.get("update_values", {})
         if base_file := config_values.get("base_file"):
-            config_obj = config_class(base_file)
-            config_obj.update_values(user_values)
-            config_obj.dereference()
-            config_obj.dump(path)
+            cfgobj = config_class(base_file)
+            cfgobj.update_values(user_values)
+            cfgobj.dereference()
+            config = cfgobj.data
+            dump = partial(cfgobj.dump, path)
         else:
-            config_class.dump_dict(cfg=user_values, path=path)
-        log.debug(f"Wrote config to {path}")
+            config = user_values
+            dump = partial(config_class.dump_dict, config, path)
+        if validate(schema=schema or {"type": "object"}, config=config):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            dump()
+            log.debug(f"Wrote config to {path}")
+        else:
+            log.debug(f"Failed to validate {path}")
 
     @property
     def _driver_config(self) -> Dict[str, Any]:
@@ -153,6 +162,34 @@ class Driver(ABC):
         """
         Returns the name of this driver.
         """
+
+    def _namelist_schema(
+        self, config_keys: Optional[List[str]] = None, schema_keys: Optional[List[str]] = None
+    ) -> dict:
+        """
+        Returns the (sub)schema for validating the driver's namelist content.
+
+        :param config_keys: Keys leading to the namelist block in the driver config.
+        :param schema_keys: Keys leading to the namelist-validating (sub)schema.
+        """
+        schema: dict = {"type": "object"}
+        nmlcfg = self._driver_config
+        for config_key in config_keys or ["namelist"]:
+            nmlcfg = nmlcfg[config_key]
+        if nmlcfg.get("validate", True):
+            schema_file = get_schema_file(schema_name=self._driver_name.replace("_", "-"))
+            with open(schema_file, "r", encoding="utf-8") as f:
+                schema = json.load(f)
+            for schema_key in schema_keys or [
+                "properties",
+                self._driver_name,
+                "properties",
+                "namelist",
+                "properties",
+                "update_values",
+            ]:
+                schema = schema[schema_key]
+        return schema
 
     @property
     def _resources(self) -> Dict[str, Any]:

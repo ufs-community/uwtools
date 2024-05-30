@@ -3,16 +3,18 @@
 FV3 driver tests.
 """
 import datetime as dt
+import logging
 from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
 import pytest
 import yaml
-from iotaa import asset, external
+from iotaa import asset, external, refs
 from pytest import fixture
 
 from uwtools.drivers import driver, fv3
+from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import logged
 
@@ -159,15 +161,26 @@ def test_FV3_model_configure(driverobj):
     assert dst.is_file()
 
 
-def test_FV3_namelist_file(driverobj):
+def test_FV3_namelist_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
     src = driverobj._rundir / "input.nml.in"
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
     dst = driverobj._rundir / "input.nml"
     assert not dst.is_file()
     driverobj._driver_config["namelist_file"] = {"base_file": src}
-    driverobj.namelist_file()
+    path = Path(refs(driverobj.namelist_file()))
+    assert logged(caplog, f"Wrote config to {path}")
     assert dst.is_file()
+
+
+def test_FV3_namelist_file_fails_validation(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    driverobj._driver_config["namelist"]["update_values"]["namsfc"]["foo"] = None
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert logged(caplog, f"Failed to validate {path}")
+    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
 @pytest.mark.parametrize("domain", ("global", "regional"))

@@ -33,6 +33,7 @@ fv3:
       fv_core_nml:
         k_split: 2
         n_split: 6
+    validate: true
   run_dir: /path/to/runs/{{ cycle.strftime('%Y%m%d%H') }}
 platform:
   account: me

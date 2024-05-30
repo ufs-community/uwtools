@@ -124,6 +124,31 @@ def write_as_json(data: Dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
+def test_get_schema_file():
+    with patch.object(validator, "resource_path", return_value=Path("/foo/bar")):
+        assert validator.get_schema_file("baz") == Path("/foo/bar/baz.jsonschema")
+
+
+def test_validate(config, schema):
+    assert validator.validate(schema=schema, config=config)
+
+
+def test_validate_fail_bad_enum_val(caplog, config, schema):
+    log.setLevel(logging.INFO)
+    config["color"] = "yellow"  # invalid enum value
+    assert not validator.validate(schema=schema, config=config)
+    assert any(x for x in caplog.records if "1 UW schema-validation error found" in x.message)
+    assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
+
+
+def test_validate_fail_bad_number_val(caplog, config, schema):
+    log.setLevel(logging.INFO)
+    config["number"] = "string"  # invalid number value
+    assert not validator.validate(schema=schema, config=config)
+    assert any(x for x in caplog.records if "1 UW schema-validation error found" in x.message)
+    assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
+
+
 def test_validate_internal_no(caplog, schema_file):
     with patch.object(validator, "resource_path", return_value=schema_file.parent):
         with raises(UWConfigError) as e:
@@ -138,27 +163,11 @@ def test_validate_internal_ok(schema_file):
         validator.validate_internal(schema_name="a", config={"color": "blue"})
 
 
-def test_validate_yaml(assets):
+def test_validate_yaml(assets, config, schema):
     schema_file, _, cfgobj = assets
-    assert validator.validate_yaml(schema_file=schema_file, config=cfgobj)
-
-
-def test_validate_yaml_fail_bad_enum_val(assets, caplog):
-    log.setLevel(logging.INFO)
-    schema_file, _, cfgobj = assets
-    cfgobj["color"] = "yellow"  # invalid enum value
-    assert not validator.validate_yaml(schema_file=schema_file, config=cfgobj)
-    assert any(x for x in caplog.records if "1 UW schema-validation error found" in x.message)
-    assert any(x for x in caplog.records if "'yellow' is not one of" in x.message)
-
-
-def test_validate_yaml_fail_bad_number_val(assets, caplog):
-    log.setLevel(logging.INFO)
-    schema_file, _, cfgobj = assets
-    cfgobj["number"] = "string"  # invalid number value
-    assert not validator.validate_yaml(schema_file=schema_file, config=cfgobj)
-    assert any(x for x in caplog.records if "1 UW schema-validation error found" in x.message)
-    assert any(x for x in caplog.records if "'string' is not of type 'number'" in x.message)
+    with patch.object(validator, "validate") as validate:
+        validator.validate_yaml(schema_file=schema_file, config=cfgobj)
+    validate.assert_called_once_with(schema=schema, config=config)
 
 
 def test_prep_config_cfgobj(prep_config_dict):
