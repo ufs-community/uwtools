@@ -23,6 +23,8 @@ namelist:
 
 Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). Namelist options are described :ufs-utils:`here<id57>`.
 
+.. include:: ../../../../shared/validate_namelist.rst
+
 run_dir:
 ^^^^^^^^
 
