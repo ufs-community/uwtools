@@ -1,47 +1,23 @@
 """
-A driver for the MPAS component.
+A driver for the MPAS Atmosphere component.
 """
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
-from typing import List, Optional
 
-from iotaa import asset, task, tasks
+from iotaa import asset, task
 
-from uwtools.api.template import render
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.mpas_base import MPASBase
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
-from uwtools.utils.tasks import file, filecopy, symlink
+from uwtools.utils.tasks import symlink
 
 
-class MPAS(Driver):
+class MPAS(MPASBase):
     """
-    A driver for MPAS.
+    A driver for MPAS Atmosphere.
     """
-
-    def __init__(
-        self,
-        cycle: datetime,
-        config: Optional[Path] = None,
-        dry_run: bool = False,
-        batch: bool = False,
-        key_path: Optional[List[str]] = None,
-    ):
-        """
-        The driver.
-
-        :param cycle: The cycle.
-        :param config: Path to config file (read stdin if missing or None).
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
-        super().__init__(
-            config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
-        )
-        self._cycle = cycle
 
     # Workflow tasks
 
@@ -61,28 +37,6 @@ class MPAS(Driver):
             linkname = self._rundir / fn
             symlinks[linkname] = Path(lbcs["path"]) / fn
         yield [symlink(target=t, linkname=l) for l, t in symlinks.items()]
-
-    @tasks
-    def files_copied(self):
-        """
-        Files copied for run.
-        """
-        yield self._taskname("files copied")
-        yield [
-            filecopy(src=Path(src), dst=self._rundir / dst)
-            for dst, src in self._driver_config.get("files_to_copy", {}).items()
-        ]
-
-    @tasks
-    def files_linked(self):
-        """
-        Files linked for run.
-        """
-        yield self._taskname("files linked")
-        yield [
-            symlink(target=Path(target), linkname=self._rundir / linkname)
-            for linkname, target in self._driver_config.get("files_to_link", {}).items()
-        ]
 
     @task
     def namelist_file(self):
@@ -116,48 +70,6 @@ class MPAS(Driver):
             schema=self._namelist_schema(),
         )
 
-    @tasks
-    def provisioned_run_directory(self):
-        """
-        Run directory provisioned with all required content.
-        """
-        yield self._taskname("provisioned run directory")
-        yield [
-            self.boundary_files(),
-            self.files_copied(),
-            self.files_linked(),
-            self.namelist_file(),
-            self.runscript(),
-            self.streams_file(),
-        ]
-
-    @task
-    def runscript(self):
-        """
-        The runscript.
-        """
-        path = self._runscript_path
-        yield self._taskname(path.name)
-        yield asset(path, path.is_file)
-        yield None
-        self._write_runscript(path=path, envvars={})
-
-    @task
-    def streams_file(self):
-        """
-        The streams file.
-        """
-        fn = "streams.atmosphere"
-        yield self._taskname(fn)
-        path = self._rundir / fn
-        yield asset(path, path.is_file)
-        yield file(path=Path(self._driver_config["streams"]["path"]))
-        render(
-            input_file=Path(self._driver_config["streams"]["path"]),
-            output_file=path,
-            values_src=self._driver_config["streams"]["values"],
-        )
-
     # Private helper methods
 
     @property
@@ -167,10 +79,9 @@ class MPAS(Driver):
         """
         return STR.mpas
 
-    def _taskname(self, suffix: str) -> str:
+    @property
+    def _streams_fn(self) -> str:
         """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
+        The streams filename.
         """
-        return self._taskname_with_cycle(self._cycle, suffix)
+        return "streams.atmosphere"
