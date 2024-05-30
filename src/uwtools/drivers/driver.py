@@ -137,10 +137,12 @@ class Driver(ABC):
         else:
             config = user_values
             dump = partial(config_class.dump_dict, config, path)
-        validate(schema=schema or {"type": "object"}, config=config)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        dump()
-        log.debug(f"Wrote config to {path}")
+        if validate(schema=schema or {"type": "object"}, config=config):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            dump()
+            log.debug(f"Wrote config to {path}")
+        else:
+            log.debug(f"Failed to validate {path}")
 
     @property
     def _driver_config(self) -> Dict[str, Any]:

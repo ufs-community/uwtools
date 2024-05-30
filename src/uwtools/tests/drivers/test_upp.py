@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 import f90nml  # type: ignore
 import yaml
+from iotaa import refs
 from pytest import fixture
 
 from uwtools.drivers import upp
@@ -109,14 +110,16 @@ def test_UPP_files_linked(driverobj):
         assert Path(driverobj._rundir / dst).is_symlink()
 
 
-def test_UPP_namelist_file(driverobj):
+def test_UPP_namelist_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
     datestr = "2024-05-05_12:00:00"
     with open(driverobj._driver_config["namelist"]["base_file"], "w", encoding="utf-8") as f:
         print("&model_inputs datestr='%s' / &nampgb kpv=88 /" % datestr, file=f)
     dst = driverobj._rundir / "itag"
     assert not dst.is_file()
-    driverobj.namelist_file()
+    path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()
+    assert logged(caplog, f"Wrote config to {path}")
     nml = f90nml.read(dst)
     assert isinstance(nml, f90nml.Namelist)
     assert nml["model_inputs"]["datestr"] == datestr
@@ -126,10 +129,12 @@ def test_UPP_namelist_file(driverobj):
 
 
 def test_UPP_namelist_file_fails_validation(caplog, driverobj):
-    log.setLevel(logging.INFO)
+    log.setLevel(logging.DEBUG)
     driverobj._driver_config["namelist"]["update_values"]["nampgb"]["kpo"] = "string"
     del driverobj._driver_config["namelist"]["base_file"]
-    driverobj.namelist_file()
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert logged(caplog, f"Failed to validate {path}")
     assert logged(caplog, "  'string' is not of type 'integer'")
 
 
