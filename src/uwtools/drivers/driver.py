@@ -163,27 +163,32 @@ class Driver(ABC):
         Returns the name of this driver.
         """
 
-    def _namelist_schema(self, keys: Optional[List[str]] = None) -> dict:
+    def _namelist_schema(
+        self, config_keys: Optional[List[str]] = None, schema_keys: Optional[List[str]] = None
+    ) -> dict:
         """
-        Locate and return the (sub)schema for validating the driver's namelist content.
+        Returns the (sub)schema for validating the driver's namelist content.
 
-        :param keys: Keys leading to the namelist-validating (sub)schema.
+        :param config_keys: Keys leading to the namelist block in the driver config.
+        :param schema_keys: Keys leading to the namelist-validating (sub)schema.
         """
         schema: dict = {"type": "object"}
-        keys = keys or [
-            "properties",
-            self._driver_name,
-            "properties",
-            "namelist",
-            "properties",
-            "update_values",
-        ]
-        if self._driver_config["namelist"].get("validate", True):
+        nmlcfg = self._driver_config
+        for config_key in config_keys or ["namelist"]:
+            nmlcfg = nmlcfg[config_key]
+        if nmlcfg.get("validate", True):
             schema_file = get_schema_file(schema_name=self._driver_name.replace("_", "-"))
             with open(schema_file, "r", encoding="utf-8") as f:
                 schema = json.load(f)
-            for key in keys:
-                schema = schema[key]
+            for schema_key in schema_keys or [
+                "properties",
+                self._driver_name,
+                "properties",
+                "namelist",
+                "properties",
+                "update_values",
+            ]:
+                schema = schema[schema_key]
         return schema
 
     @property
