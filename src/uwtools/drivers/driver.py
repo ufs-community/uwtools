@@ -170,19 +170,19 @@ class Driver(ABC):
         :param keys: Keys leading to the namelist-validating (sub)schema.
         """
         schema: dict = {"type": "object"}
+        keys = keys or [
+            "properties",
+            self._driver_name,
+            "properties",
+            "namelist",
+            "properties",
+            "update_values",
+        ]
         if self._driver_config["namelist"].get("validate", True):
             schema_file = get_schema_file(schema_name=self._driver_name.replace("_", "-"))
             with open(schema_file, "r", encoding="utf-8") as f:
                 schema = json.load(f)
-            default_keys = [
-                "properties",
-                self._driver_name,
-                "properties",
-                "namelist",
-                "properties",
-                "update_values",
-            ]
-            for key in keys or default_keys:
+            for key in keys:
                 schema = schema[key]
         return schema
 
