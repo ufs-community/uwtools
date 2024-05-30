@@ -3,6 +3,7 @@
 chgres_cube driver tests.
 """
 import datetime as dt
+import logging
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
@@ -12,7 +13,9 @@ from iotaa import asset, external
 from pytest import fixture
 
 from uwtools.drivers import chgres_cube
+from uwtools.logging import log
 from uwtools.scheduler import Slurm
+from uwtools.tests.support import logged
 
 # Fixtures
 
@@ -104,14 +107,12 @@ def test_ChgresCube_namelist_file(driverobj):
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
-def test_ChgresCube_namelist_file_fail_validation(driverobj):
-    driverobj._driver_config["namelist"]["update_values"]["config"]["convert_atm"] = "bad value"
-    dst = driverobj._rundir / "fort.41"
-    assert not dst.is_file()
+def test_ChgresCube_namelist_file_fail_validation(caplog, driverobj):
+    log.setLevel(logging.INFO)
+    driverobj._driver_config["namelist"]["update_values"]["config"]["convert_atm"] = "string"
     with patch.object(chgres_cube, "file", new=ready):
         driverobj.namelist_file()
-    assert dst.is_file()
-    assert isinstance(f90nml.read(dst), f90nml.Namelist)
+    assert logged(caplog, "  'string' is not of type 'boolean'")
 
 
 def test_ChgresCube_provisioned_run_directory(driverobj):
