@@ -97,9 +97,6 @@
                     "regional_grid_nml"
                   ],
                   "type": "object"
-                },
-                "validate": {
-                  "type": "boolean"
                 }
               },
               "required": [
@@ -126,7 +123,13 @@
               ],
               "type": "object"
             }
-          ]
+          ],
+          "properties": {
+            "validate": {
+              "type": "boolean"
+            }
+          },
+          "type": "object"
         },
         "run_dir": {
           "type": "string"

@@ -47,6 +47,7 @@ mpas_init:
         config_static_interp: false
       vertical_grid:
         config_blend_bdy_terrain: true
+    validate: true
   run_dir: /path/to/rundir
   streams:
     path: "{{ user.mpas_app }}/MPAS-Model/streams.init_atmosphere"
