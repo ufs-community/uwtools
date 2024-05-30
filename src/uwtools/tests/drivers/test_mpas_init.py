@@ -3,6 +3,7 @@
 MPASInit driver tests.
 """
 import datetime as dt
+import logging
 from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
@@ -10,12 +11,14 @@ from unittest.mock import patch
 import f90nml  # type: ignore
 import pytest
 import yaml
+from iotaa import refs
 from pytest import fixture, raises
 
 from uwtools.drivers import mpas_init
 from uwtools.exceptions import UWConfigError
+from uwtools.logging import log
 from uwtools.scheduler import Slurm
-from uwtools.tests.support import fixture_path
+from uwtools.tests.support import fixture_path, logged
 
 # Fixtures
 
@@ -146,12 +149,23 @@ def test_MPASInit_namelist_contents(cycle, driverobj):
     assert nml["nhyd_model"]["config_stop_time"] == stop_time.strftime(f)
 
 
-def test_MPASInit_namelist_file(driverobj):
+def test_MPASInit_namelist_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
     dst = driverobj._rundir / "namelist.init_atmosphere"
     assert not dst.is_file()
-    driverobj.namelist_file()
+    path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()
+    assert logged(caplog, f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
+
+
+def test_MPASInit_namelist_file_fails_validation(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    driverobj._driver_config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert logged(caplog, f"Failed to validate {path}")
+    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
 def test_MPASInit_namelist_missing(driverobj):

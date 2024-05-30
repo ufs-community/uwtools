@@ -306,6 +306,84 @@ def test_Driver__run_via_local_execution(driverobj):
 # Tests for private helper methods
 
 
+@pytest.mark.parametrize(
+    "base_file,update_values,expected",
+    [
+        (False, False, {}),
+        (False, True, {"a": 33}),
+        (True, False, {"a": 11, "b": 22}),
+        (True, True, {"a": 33, "b": 22}),
+    ],
+)
+def test_Driver__create_user_updated_config_base_file(
+    base_file, driverobj, expected, tmp_path, update_values
+):
+    path = tmp_path / "updated.yaml"
+    dc = driverobj._driver_config
+    if not base_file:
+        del dc["base_file"]
+    if not update_values:
+        del dc["update_values"]
+    ConcreteDriver._create_user_updated_config(config_class=YAMLConfig, config_values=dc, path=path)
+    with open(path, "r", encoding="utf-8") as f:
+        updated = yaml.safe_load(f)
+    assert updated == expected
+
+
+def test_Driver__driver_config_fail(driverobj):
+    del driverobj._config["concrete"]
+    with raises(UWConfigError) as e:
+        assert driverobj._driver_config
+    assert str(e.value) == "Required 'concrete' block missing in config"
+
+
+def test_Driver__driver_config_pass(driverobj):
+    assert set(driverobj._driver_config.keys()) == {
+        "base_file",
+        "execution",
+        "run_dir",
+        "update_values",
+    }
+
+
+def test_Driver__namelist_schema_custom(driverobj, tmp_path):
+    nmlschema = {"properties": {"n": {"type": "integer"}}, "type": "object"}
+    schema = {"foo": {"bar": nmlschema}}
+    schema_path = tmp_path / "test.jsonschema"
+    with open(schema_path, "w", encoding="utf-8") as f:
+        json.dump(schema, f)
+    with patch.object(ConcreteDriver, "_driver_config", new_callable=PropertyMock) as dc:
+        dc.return_value = {"baz": {"qux": {"validate": True}}}
+        with patch.object(driver, "get_schema_file", return_value=schema_path):
+            assert (
+                driverobj._namelist_schema(config_keys=["baz", "qux"], schema_keys=["foo", "bar"])
+                == nmlschema
+            )
+
+
+def test_Driver__namelist_schema_default(driverobj, tmp_path):
+    nmlschema = {"properties": {"n": {"type": "integer"}}, "type": "object"}
+    schema = {
+        "properties": {
+            "concrete": {"properties": {"namelist": {"properties": {"update_values": nmlschema}}}}
+        }
+    }
+    schema_path = tmp_path / "test.jsonschema"
+    with open(schema_path, "w", encoding="utf-8") as f:
+        json.dump(schema, f)
+    with patch.object(ConcreteDriver, "_driver_config", new_callable=PropertyMock) as dc:
+        dc.return_value = {"namelist": {"validate": True}}
+        with patch.object(driver, "get_schema_file", return_value=schema_path):
+            assert driverobj._namelist_schema() == nmlschema
+
+
+def test_Driver__namelist_schema_default_disable(driverobj):
+    with patch.object(ConcreteDriver, "_driver_config", new_callable=PropertyMock) as dc:
+        dc.return_value = {"namelist": {"validate": False}}
+        assert driverobj._namelist_schema() == {"type": "object"}
+
+
+
 def test_Driver__resources_fail(driverobj):
     del driverobj._config["platform"]
     with raises(UWConfigError) as e:

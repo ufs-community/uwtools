@@ -77,6 +77,8 @@ namelist:
 
 Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<namelist-file-input-nml>`.
 
+.. include:: ../../../../shared/validate_namelist.rst
+
 run_dir:
 ^^^^^^^^
 
