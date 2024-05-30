@@ -35,8 +35,8 @@ class Driver(ABC):
         dry_run: bool = False,
         batch: bool = False,
         cycle: Optional[datetime] = None,
-        key_path: Optional[List[str]] = None,
         leadtime: Optional[timedelta] = None,
+        key_path: Optional[List[str]] = None,
     ) -> None:
         """
         A component driver.
@@ -45,8 +45,8 @@ class Driver(ABC):
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         :param cycle: The cycle.
-        :param key_path: Keys leading through the config to the driver's configuration block.
         :param leadtime: The leadtime.
+        :param key_path: Keys leading through the config to the driver's configuration block.
         """
         dryrun(enable=dry_run)
         self._config = YAMLConfig(config=config)
@@ -181,6 +181,7 @@ class Driver(ABC):
             ]
             for key in keys or default_keys:
                 schema = schema[key]
+            return schema
         return {"type": "object"}
 
     @property

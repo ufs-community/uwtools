@@ -7,11 +7,29 @@
       "additionalproperties": false,
       "properties": {
         "regional_grid_nml": {
-          "allOf": [
-            {
-              "$ref": "#/$defs/regional_grid_nml_properties"
+          "properties": {
+            "delx": {
+              "type": "number"
+            },
+            "dely": {
+              "type": "number"
+            },
+            "lx": {
+              "type": "number"
+            },
+            "ly": {
+              "type": "number"
+            },
+            "pazi": {
+              "type": "number"
+            },
+            "plat": {
+              "type": "number"
+            },
+            "plon": {
+              "type": "number"
             }
-          ],
+          },
           "required": [
             "delx",
             "dely",
@@ -24,6 +42,9 @@
           "type": "object"
         }
       },
+      "required": [
+        "regional_grid_nml"
+      ],
       "type": "object"
     },
     "regional_grid_nml_properties": {
@@ -118,10 +139,7 @@
                   "$ref": "#/$defs/base_file"
                 },
                 "update_values": {
-                  "$ref": "#/$defs/namelist_final",
-                  "required": [
-                    "regional_grid_nml"
-                  ]
+                  "$ref": "#/$defs/namelist_final"
                 },
                 "validate": {
                   "type": "boolean"
