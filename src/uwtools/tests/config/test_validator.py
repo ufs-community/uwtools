@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Any, Dict, Tuple
 from unittest.mock import patch
 
-import pytest
 import yaml
 from pytest import fixture, raises
 
@@ -125,9 +124,9 @@ def write_as_json(data: Dict[str, Any], path: Path) -> Path:
 # Test functions
 
 
-@pytest.mark.skip("PM FIXME")
-def test_get_get_schema_file():
-    pass
+def test_get_schema_file():
+    with patch.object(validator, "resource_path", return_value=Path("/foo/bar")):
+        assert validator.get_schema_file("baz") == Path("/foo/bar/baz.jsonschema")
 
 
 def test_validate(config, schema):
