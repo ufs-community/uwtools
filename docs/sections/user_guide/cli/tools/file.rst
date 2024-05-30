@@ -34,6 +34,15 @@ Given ``copy-config.yaml`` containing
 
 Here, ``foo`` and ``bar`` are copies of their respective source files.
 
+The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
+
+.. literalinclude:: file/copy-config-timedep.yaml
+   :language: yaml
+.. literalinclude:: file/copy-exec-timedep.cmd
+   :emphasize-lines: 2
+.. literalinclude:: file/copy-exec-timedep.out
+   :language: text
+
 .. _cli_file_link_examples:
 
 ``link``
@@ -59,3 +68,12 @@ Given ``link-config.yaml`` containing
    :language: text
 
 Here, ``foo`` and ``bar`` are symbolic links.
+
+The ``--cycle`` and ``--leadtime`` options can be used to make Python ``datetime`` and ``timedelta`` objects, respectively, available for use in Jinja2 expression in the config. For example:
+
+.. literalinclude:: file/link-config-timedep.yaml
+   :language: yaml
+.. literalinclude:: file/link-exec-timedep.cmd
+   :emphasize-lines: 2
+.. literalinclude:: file/link-exec-timedep.out
+   :language: text

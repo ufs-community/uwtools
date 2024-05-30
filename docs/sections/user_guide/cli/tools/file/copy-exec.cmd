@@ -1,4 +1,4 @@
-rm -rf dst-copy
-uw file copy --target-dir dst-copy --config-file copy-config.yaml config files
+rm -rf copy-dst
+uw file copy --target-dir copy-dst --config-file copy-config.yaml config files
 echo
-tree dst-copy
+tree copy-dst
