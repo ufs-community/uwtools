@@ -58,6 +58,8 @@ def args_dispatch_file():
     return {
         "target_dir": "/target/dir",
         "config_file": "/config/file",
+        "cycle": dt.datetime.now(),
+        "leadtime": dt.timedelta(hours=6),
         "keys": ["a", "b"],
         "dry_run": False,
         "stdin_ok": True,
@@ -358,6 +360,8 @@ def test__dispatch_file_copy(args_dispatch_file):
     copy.assert_called_once_with(
         target_dir=args["target_dir"],
         config=args["config_file"],
+        cycle=args["cycle"],
+        leadtime=args["leadtime"],
         keys=args["keys"],
         dry_run=args["dry_run"],
         stdin_ok=args["stdin_ok"],
@@ -371,6 +375,8 @@ def test__dispatch_file_link(args_dispatch_file):
     link.assert_called_once_with(
         target_dir=args["target_dir"],
         config=args["config_file"],
+        cycle=args["cycle"],
+        leadtime=args["leadtime"],
         keys=args["keys"],
         dry_run=args["dry_run"],
         stdin_ok=args["stdin_ok"],
