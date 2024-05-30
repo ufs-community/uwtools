@@ -36,7 +36,7 @@ def esg_namelist():
                 "pazi": 0.0,
                 "plat": 45.5,
                 "plon": -100.5,
-            }
+            },
         },
     }
 
@@ -106,7 +106,7 @@ def upp_prop():
 def test_schema_chgres_cube():
     config = {
         "execution": {"executable": "chgres_cube"},
-        "namelist": {"base_file": "/path"},
+        "namelist": {"base_file": "/path", "validate": True},
         "run_dir": "/tmp",
     }
     errors = schema_validator("chgres-cube", "properties", "chgres_cube")
@@ -332,7 +332,7 @@ def test_schema_fv3():
         "field_table": {"base_file": "/path"},
         "lateral_boundary_conditions": {"interval_hours": 1, "offset": 0, "path": "/tmp/file"},
         "length": 3,
-        "namelist": {"base_file": "/path"},
+        "namelist": {"base_file": "/path", "validate": True},
         "run_dir": "/tmp",
     }
     errors = schema_validator("fv3", "properties", "fv3")
@@ -356,7 +356,7 @@ def test_schema_fv3():
             "files_to_copy": {"fn": "/path"},
             "files_to_link": {"fn": "/path"},
             "model_configure": {"base_file": "/path"},
-            "namelist": {"base_file": "/path"},
+            "namelist": {"base_file": "/path", "validate": True},
         }
     )
     # Additional top-level keys are not allowed:
@@ -661,7 +661,7 @@ def test_schema_make_solo_mosaic_run_dir(make_solo_mosaic_prop):
 def test_schema_mpas():
     config = {
         "execution": {"executable": "atmosphere_model"},
-        "namelist": {"base_file": "path/to/simple.nml"},
+        "namelist": {"base_file": "path/to/simple.nml", "validate": True},
         "run_dir": "path/to/rundir",
         "streams": {"path": "path/to/streams.atmosphere.in", "values": {"world": "user"}},
     }
@@ -770,7 +770,7 @@ def test_schema_mpas_streams(mpas_prop):
 def test_schema_mpas_init():
     config = {
         "execution": {"executable": "mpas_init"},
-        "namelist": {"base_file": "path/to/simple.nml"},
+        "namelist": {"base_file": "path/to/simple.nml", "validate": True},
         "run_dir": "path/to/rundir",
         "streams": {"path": "path/to/streams.atmosphere.in", "values": {"world": "user"}},
     }
@@ -1009,7 +1009,7 @@ def test_schema_rocoto_workflow_cycledef():
 def test_schema_sfc_climo_gen():
     config = {
         "execution": {"executable": "sfc_climo_gen"},
-        "namelist": {"base_file": "/path"},
+        "namelist": {"base_file": "/path", "validate": True},
         "run_dir": "/tmp",
     }
     errors = schema_validator("sfc-climo-gen", "properties", "sfc_climo_gen")
@@ -1161,6 +1161,7 @@ def test_schema_upp():
                     "kpo": 3,
                 },
             },
+            "validate": True,
         },
         "run_dir": "/path/to/run",
     }
