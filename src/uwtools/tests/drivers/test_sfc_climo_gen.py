@@ -54,7 +54,8 @@ def config_file(tmp_path):
                         "snowfree_albedo_method": "bilinear",
                         "vegetation_greenness_method": "bilinear",
                     }
-                }
+                },
+                "validate": True,
             },
             "run_dir": "/path/to/dir",
         },
@@ -76,6 +77,8 @@ def driverobj(config_file):
 
 
 # Helpers
+
+
 @external
 def ready(x):
     yield x
