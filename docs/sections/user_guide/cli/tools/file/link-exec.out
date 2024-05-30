@@ -1,20 +1,20 @@
-[2024-05-23T19:39:16]     INFO Validating config against internal schema files-to-stage
-[2024-05-23T19:39:16]     INFO 0 UW schema-validation errors found
-[2024-05-23T19:39:16]     INFO File links: Initial state: Pending
-[2024-05-23T19:39:16]     INFO File links: Checking requirements
-[2024-05-23T19:39:16]     INFO Link dst-link/foo -> src/foo: Initial state: Pending
-[2024-05-23T19:39:16]     INFO Link dst-link/foo -> src/foo: Checking requirements
-[2024-05-23T19:39:16]     INFO Link dst-link/foo -> src/foo: Requirement(s) ready
-[2024-05-23T19:39:16]     INFO Link dst-link/foo -> src/foo: Executing
-[2024-05-23T19:39:16]     INFO Link dst-link/foo -> src/foo: Final state: Ready
-[2024-05-23T19:39:16]     INFO Link dst-link/subdir/bar -> src/bar: Initial state: Pending
-[2024-05-23T19:39:16]     INFO Link dst-link/subdir/bar -> src/bar: Checking requirements
-[2024-05-23T19:39:16]     INFO Link dst-link/subdir/bar -> src/bar: Requirement(s) ready
-[2024-05-23T19:39:16]     INFO Link dst-link/subdir/bar -> src/bar: Executing
-[2024-05-23T19:39:16]     INFO Link dst-link/subdir/bar -> src/bar: Final state: Ready
-[2024-05-23T19:39:16]     INFO File links: Final state: Ready
+[2024-05-29T16:50:14]     INFO Validating config against internal schema files-to-stage
+[2024-05-29T16:50:14]     INFO 0 UW schema-validation errors found
+[2024-05-29T16:50:14]     INFO File links: Initial state: Pending
+[2024-05-29T16:50:14]     INFO File links: Checking requirements
+[2024-05-29T16:50:14]     INFO Link link-dst/foo -> src/foo: Initial state: Pending
+[2024-05-29T16:50:14]     INFO Link link-dst/foo -> src/foo: Checking requirements
+[2024-05-29T16:50:14]     INFO Link link-dst/foo -> src/foo: Requirement(s) ready
+[2024-05-29T16:50:14]     INFO Link link-dst/foo -> src/foo: Executing
+[2024-05-29T16:50:14]     INFO Link link-dst/foo -> src/foo: Final state: Ready
+[2024-05-29T16:50:14]     INFO Link link-dst/subdir/bar -> src/bar: Initial state: Pending
+[2024-05-29T16:50:14]     INFO Link link-dst/subdir/bar -> src/bar: Checking requirements
+[2024-05-29T16:50:14]     INFO Link link-dst/subdir/bar -> src/bar: Requirement(s) ready
+[2024-05-29T16:50:14]     INFO Link link-dst/subdir/bar -> src/bar: Executing
+[2024-05-29T16:50:14]     INFO Link link-dst/subdir/bar -> src/bar: Final state: Ready
+[2024-05-29T16:50:14]     INFO File links: Final state: Ready
 
-dst-link
+link-dst
 ├── foo -> ../src/foo
 └── subdir
     └── bar -> ../../src/bar

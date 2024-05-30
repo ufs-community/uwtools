@@ -2,6 +2,7 @@
 File handling.
 """
 
+import datetime as dt
 from functools import cached_property
 from pathlib import Path
 from typing import List, Optional, Union
@@ -24,6 +25,8 @@ class FileStager:
         self,
         target_dir: Path,
         config: Optional[Union[dict, Path]] = None,
+        cycle: Optional[dt.datetime] = None,
+        leadtime: Optional[dt.timedelta] = None,
         keys: Optional[List[str]] = None,
         dry_run: bool = False,
     ) -> None:
@@ -32,6 +35,8 @@ class FileStager:
 
         :param target_dir: Path to target directory
         :param config: YAML-file path, or dict (read stdin if missing or None).
+        :param cycle: A datetime object to make available for use in the config.
+        :param leadtime: A timedelta object to make available for use in the config.
         :param keys: YAML keys leading to file dst/src block
         :param dry_run: Do not copy files
         :raises: UWConfigError if config fails validation.
@@ -40,7 +45,13 @@ class FileStager:
         self._target_dir = target_dir
         self._config = YAMLConfig(config=config)
         self._keys = keys or []
-        self._config.dereference()
+        self._config.dereference(
+            context={
+                **({"cycle": cycle} if cycle else {}),
+                **({"leadtime": leadtime} if leadtime else {}),
+                **self._config.data,
+            }
+        )
         self._validate()
 
     @cached_property
