@@ -88,11 +88,3 @@ class MPASInit(MPASBase):
         Teh streams filename.
         """
         return "streams.init_atmosphere"
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return self._taskname_with_cycle(self._cycle, suffix)

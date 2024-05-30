@@ -11,7 +11,6 @@ from iotaa import asset, task, tasks
 
 from uwtools.api.template import render
 from uwtools.drivers.driver import Driver
-from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
 
@@ -125,11 +124,11 @@ class MPASBase(Driver):
     # Private helper methods
 
     @property
+    @abstractmethod
     def _driver_name(self) -> str:
         """
         Returns the name of this driver.
         """
-        return STR.mpasinit
 
     @property
     @abstractmethod
