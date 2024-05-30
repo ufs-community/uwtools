@@ -68,6 +68,9 @@
               "properties": {
                 "base_file": {
                   "$ref": "#/$defs/base_file"
+                },
+                "validate": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -97,6 +100,9 @@
                     "regional_grid_nml"
                   ],
                   "type": "object"
+                },
+                "validate": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -116,6 +122,9 @@
                   "required": [
                     "regional_grid_nml"
                   ]
+                },
+                "validate": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -123,13 +132,7 @@
               ],
               "type": "object"
             }
-          ],
-          "properties": {
-            "validate": {
-              "type": "boolean"
-            }
-          },
-          "type": "object"
+          ]
         },
         "run_dir": {
           "type": "string"

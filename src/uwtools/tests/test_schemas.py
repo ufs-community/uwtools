@@ -38,6 +38,7 @@ def esg_namelist():
                 "plon": -100.5,
             },
         },
+        "validate": True,
     }
 
 
@@ -160,7 +161,7 @@ def test_schema_chgres_cube_run_dir(chgres_cube_prop):
 def test_schema_esg_grid():
     config = {
         "execution": {"executable": "esg_grid"},
-        "namelist": {"base_file": "/path"},
+        "namelist": {"base_file": "/path", "validate": True},
         "run_dir": "/tmp",
     }
     errors = schema_validator("esg-grid", "properties", "esg_grid")
