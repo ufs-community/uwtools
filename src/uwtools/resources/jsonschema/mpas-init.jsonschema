@@ -70,18 +70,27 @@
           "type": "string"
         },
         "streams": {
+          "addtionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
           "properties": {
-            "path": {
+            "base_file": {
               "type": "string"
             },
-            "values": {
+            "update_values": {
               "type": "object"
             }
           },
-          "required": [
-            "path",
-            "values"
-          ],
           "type": "object"
         }
       },

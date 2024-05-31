@@ -50,8 +50,8 @@ mpas_init:
     validate: true
   run_dir: /path/to/rundir
   streams:
-    path: "{{ user.mpas_app }}/MPAS-Model/streams.init_atmosphere"
-    values:
+    base_file: "{{ user.mpas_app }}/MPAS-Model/streams.init_atmosphere"
+    update_values:
       input_filename: conus.init.nc
       output_filename: foo.nc
 platform:

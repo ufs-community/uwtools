@@ -47,8 +47,8 @@ def config(tmp_path):
             },
             "run_dir": str(tmp_path),
             "streams": {
-                "path": str(tmp_path / "streams.atmosphere.in"),
-                "values": {
+                "base_file": str(tmp_path / "streams.atmosphere.in"),
+                "update_values": {
                     "world": "user",
                 },
             },
@@ -193,7 +193,7 @@ def test_MPAS_runscript(driverobj):
 
 
 def test_MPAS_streams(driverobj):
-    src = driverobj._driver_config["streams"]["path"]
+    src = driverobj._driver_config["streams"]["base_file"]
     with open(src, "w", encoding="utf-8") as f:
         f.write("Hello, {{ world }}")
     assert not (driverobj._rundir / "streams.atmosphere").is_file()

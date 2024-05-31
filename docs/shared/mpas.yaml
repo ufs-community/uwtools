@@ -44,8 +44,8 @@ mpas:
     validate: true
   run_dir: /path/to/run/directory
   streams:
-    path: "{{ user.mpas_app }}/MPAS-Model/streams.atmosphere"
-    values:
+    base_file: "{{ user.mpas_app }}/MPAS-Model/streams.atmosphere"
+    update_values:
       input_filename: conus.init.nc
       input_interval: "06:00:00"
       output_interval: "06:00:00"

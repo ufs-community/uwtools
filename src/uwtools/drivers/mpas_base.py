@@ -114,11 +114,11 @@ class MPASBase(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield file(path=Path(self._driver_config["streams"]["path"]))
+        yield file(path=Path(self._driver_config["streams"]["base_file"]))
         render(
-            input_file=Path(self._driver_config["streams"]["path"]),
+            input_file=Path(self._driver_config["streams"]["base_file"]),
             output_file=path,
-            values_src=self._driver_config["streams"]["values"],
+            values_src=self._driver_config["streams"]["update_values"],
         )
 
     # Private helper methods

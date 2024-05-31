@@ -47,8 +47,8 @@ def config(tmp_path):
             },
             "run_dir": str(tmp_path),
             "streams": {
-                "path": str(tmp_path / "streams.init_atmosphere.in"),
-                "values": {
+                "base_file": str(tmp_path / "streams.init_atmosphere.in"),
+                "update_values": {
                     "world": "user",
                 },
             },
@@ -124,10 +124,7 @@ def test_MPASInit_files_copied_and_linked(config, cycle, key, task, test, tmp_pa
     atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
     config["mpas_init"].update({key: {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    driverobj = mpas_init.MPASInit(config=path, cycle=cycle, batch=True)
+    driverobj = mpas_init.MPASInit(config=config, cycle=cycle, batch=True)
     atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
     assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
     atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
@@ -214,7 +211,7 @@ def test_MPASInit_runscript(driverobj):
 
 
 def test_MPASInit_streams_file(driverobj):
-    src = driverobj._driver_config["streams"]["path"]
+    src = driverobj._driver_config["streams"]["base_file"]
     with open(src, "w", encoding="utf-8") as f:
         f.write("Hello, {{ world }}")
     assert not (driverobj._rundir / "streams.init_atmosphere").is_file()
