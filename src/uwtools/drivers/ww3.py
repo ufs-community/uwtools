@@ -7,9 +7,10 @@ from typing import List, Optional
 
 from iotaa import asset, task, tasks
 
-from uwtools.config.formats.nml import NMLConfig
+from uwtools.api.template import render
 from uwtools.drivers.driver import Assets
 from uwtools.strings import STR
+from uwtools.utils.tasks import file
 
 
 class WaveWatchIII(Assets):
@@ -45,12 +46,11 @@ class WaveWatchIII(Assets):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield None
-        self._create_user_updated_config(
-            config_class=NMLConfig,
-            config_values=self._driver_config["namelist"],
-            path=path,
-            schema=self._namelist_schema(),
+        yield file(path=Path(self._driver_config["namelist"]["base_file"]))
+        render(
+            input_file=Path(self._driver_config["namelist"]["base_file"]),
+            output_file=path,
+            overrides=self._driver_config["namelist"]["update_values"],
         )
 
     @tasks

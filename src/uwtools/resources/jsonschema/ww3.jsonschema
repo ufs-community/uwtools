@@ -13,12 +13,11 @@
               "$ref": "urn:uwtools:namelist"
             }
           },
+          "required": [
+            "base_file"
+          ],
           "type": "object"
         },
-        "required": [
-          "base_file",
-          "update_values"
-        ],
         "run_dir": {
           "type": "string"
         }
