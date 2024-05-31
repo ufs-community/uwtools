@@ -26,7 +26,7 @@ from uwtools.utils.processing import execute
 
 class Assets(ABC):
     """
-    An abstract class containing assets for all component drivers.
+    An abstract class to provision assets for component drivers.
     """
 
     def __init__(
