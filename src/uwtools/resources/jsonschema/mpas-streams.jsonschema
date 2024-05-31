@@ -15,6 +15,9 @@
       "name": {
         "type": "string"
       },
+      "packages": {
+        "type": "string"
+      },
       "type": {
         "enum": [
           "input",

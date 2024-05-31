@@ -96,6 +96,7 @@ def mpas_streams():
             "interval": "6:00:00",
             "mutable": True,
             "name": "oututp",
+            "packages": "foo",
             "type": "output",
         },
     ]
@@ -875,7 +876,26 @@ def test_schema_mpas_init_run_dir(mpas_init_prop):
 
 def test_schema_mpas_streams(mpas_streams):
     errors = schema_validator("mpas-streams")
+    # Basic correctness:
     assert not errors(mpas_streams)
+    # Certain properties are required:
+    for prop in ["filename_template", "interval", "mutable", "name", "type"]:
+        assert "is a required property" in errors(
+            [mpas_streams[0], with_del(mpas_streams[1], prop)]
+        )
+    # Certain additional properties are optional:
+    assert not errors([mpas_streams[0], with_del(mpas_streams[1], "packages")])
+    # Properties must have correct types:
+    for prop in ["filename_template", "interval", "packages", "name"]:
+        assert "is not of type 'string'" in errors(
+            [mpas_streams[0], {**mpas_streams[1], prop: None}]
+        )
+    assert "is not of type 'boolean'" in errors(
+        [mpas_streams[0], {**mpas_streams[1], "mutable": None}]
+    )
+    assert "is not one of ['input', 'output'" in errors(
+        [mpas_streams[0], {**mpas_streams[1], "type": None}]
+    )
 
 
 # namelist
