@@ -82,6 +82,26 @@ def mpas_init_prop():
 
 
 @fixture
+def mpas_streams():
+    return [
+        {
+            "filename_template": "init.nc",
+            "interval": "initial_only",
+            "mutable": False,
+            "name": "input",
+            "type": "input",
+        },
+        {
+            "filename_template": "output.$Y-$M-$D $h.$m.$s.nc",
+            "interval": "6:00:00",
+            "mutable": True,
+            "name": "oututp",
+            "type": "output",
+        },
+    ]
+
+
+@fixture
 def sfc_climo_gen_prop():
     return partial(schema_validator, "sfc-climo-gen", "properties", "sfc_climo_gen", "properties")
 
@@ -671,15 +691,12 @@ def test_schema_make_solo_mosaic_run_dir(make_solo_mosaic_prop):
 # mpas
 
 
-def test_schema_mpas():
+def test_schema_mpas(mpas_streams):
     config = {
         "execution": {"executable": "atmosphere_model"},
         "namelist": {"base_file": "path/to/simple.nml", "validate": True},
         "run_dir": "path/to/rundir",
-        "streams": {
-            "base_file": "path/to/streams.atmosphere.in",
-            "update_values": {"world": "user"},
-        },
+        "streams": mpas_streams,
     }
     errors = schema_validator("mpas", "properties", "mpas")
     # Basic correctness:
@@ -765,34 +782,15 @@ def test_schema_mpas_run_dir(mpas_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-def test_schema_mpas_streams(mpas_prop):
-    config = {"base_file": "/some/path", "update_values": {"nml": {"var": "val"}}}
-    errors = mpas_prop("streams")
-    # Basic correctness:
-    assert not errors(config)
-    # At least one of base_file or update_values is required:
-    assert "is not valid" in errors(with_del(with_del(config, "base_file"), "update_values"))
-    assert not errors(with_del(config, "base_file"))
-    assert not errors(with_del(config, "update_values"))
-    # path must be a string:
-    assert "1 is not of type 'string'" in errors(with_set(config, 1, "base_file"))
-    # values must be an object:
-    assert "1 is not of type 'object'" in errors(with_set(config, -1, "update_values"))
-    assert "'s' is not of type 'object'" in errors(with_set(config, "s", "update_values"))
-
-
 # mpas_init
 
 
-def test_schema_mpas_init():
+def test_schema_mpas_init(mpas_streams):
     config = {
         "execution": {"executable": "mpas_init"},
         "namelist": {"base_file": "path/to/simple.nml", "validate": True},
         "run_dir": "path/to/rundir",
-        "streams": {
-            "base_file": "path/to/streams.atmosphere.in",
-            "update_values": {"world": "user"},
-        },
+        "streams": mpas_streams,
     }
     errors = schema_validator("mpas-init", "properties", "mpas_init")
     # Basic correctness:
@@ -872,20 +870,12 @@ def test_schema_mpas_init_run_dir(mpas_init_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-def test_schema_mpas_init_streams(mpas_init_prop):
-    config = {"base_file": "/some/path", "update_values": {"nml": {"var": "val"}}}
-    errors = mpas_init_prop("streams")
-    # Basic correctness:
-    assert not errors(config)
-    # At least one of base_file or update_values is required:
-    assert "is not valid" in errors(with_del(with_del(config, "base_file"), "update_values"))
-    assert not errors(with_del(config, "base_file"))
-    assert not errors(with_del(config, "update_values"))
-    # path must be a string:
-    assert "1 is not of type 'string'" in errors(with_set(config, 1, "base_file"))
-    # values must be an object:
-    assert "1 is not of type 'object'" in errors(with_set(config, -1, "update_values"))
-    assert "'s' is not of type 'object'" in errors(with_set(config, "s", "update_values"))
+# mpas-streams
+
+
+def test_schema_mpas_streams(mpas_streams):
+    errors = schema_validator("mpas-streams")
+    assert not errors(mpas_streams)
 
 
 # namelist
