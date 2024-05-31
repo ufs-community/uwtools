@@ -93,10 +93,11 @@ def mpas_streams():
         },
         {
             "filename_template": "output.$Y-$M-$D $h.$m.$s.nc",
+            "files": ["f1", "f2"],
             "interval": "6:00:00",
             "mutable": True,
             "name": "oututp",
-            "packages": "foo",
+            "packages": "pkg",
             "type": "output",
         },
     ]
@@ -875,27 +876,25 @@ def test_schema_mpas_init_run_dir(mpas_init_prop):
 
 
 def test_schema_mpas_streams(mpas_streams):
+    addprop = lambda k, v: [mpas_streams[0], {**mpas_streams[1], k: v}]
+    delprop = lambda k: [mpas_streams[0], with_del(mpas_streams[1], k)]
     errors = schema_validator("mpas-streams")
     # Basic correctness:
     assert not errors(mpas_streams)
     # Certain properties are required:
     for prop in ["filename_template", "interval", "mutable", "name", "type"]:
-        assert "is a required property" in errors(
-            [mpas_streams[0], with_del(mpas_streams[1], prop)]
-        )
+        assert "is a required property" in errors(delprop(prop))
     # Certain additional properties are optional:
-    assert not errors([mpas_streams[0], with_del(mpas_streams[1], "packages")])
+    for prop in ["files", "packages"]:
+        assert not errors(delprop(prop))
     # Properties must have correct types:
     for prop in ["filename_template", "interval", "packages", "name"]:
-        assert "is not of type 'string'" in errors(
-            [mpas_streams[0], {**mpas_streams[1], prop: None}]
-        )
-    assert "is not of type 'boolean'" in errors(
-        [mpas_streams[0], {**mpas_streams[1], "mutable": None}]
-    )
-    assert "is not one of ['input', 'output'" in errors(
-        [mpas_streams[0], {**mpas_streams[1], "type": None}]
-    )
+        assert "is not of type 'string'" in errors(addprop(prop, None))
+    assert "is not of type 'array'" in errors(addprop("files", None))
+    assert "is not of type 'boolean'" in errors(addprop("mutable", None))
+    assert "is not of type 'string'" in errors(addprop("files", [None]))
+    assert "is not one of ['input', 'output'" in errors(addprop("type", None))
+    assert "should be non-empty" in errors(addprop("files", []))
 
 
 # namelist

@@ -6,6 +6,13 @@
       "filename_template": {
         "type": "string"
       },
+      "files": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
       "interval": {
         "type": "string"
       },
