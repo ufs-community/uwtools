@@ -230,8 +230,8 @@ class Driver(Assets):
         dry_run: bool = False,
         batch: bool = False,
         cycle: Optional[datetime] = None,
-        key_path: Optional[List[str]] = None,
         leadtime: Optional[timedelta] = None,
+        key_path: Optional[List[str]] = None,
     ) -> None:
         """
         A standalone component driver.

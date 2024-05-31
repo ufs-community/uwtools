@@ -14,9 +14,11 @@ UW YAML for the ``ww3:`` Block
 ------------------------------
 
 namelist:
-^^^^^^^^^^
+^^^^^^^^^
 
-The path to the namelist(s) used by the WaveWatchIII configuration. Namelists will be symlinked to the run directory.
+Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details).
+
+.. include:: ../../../../shared/validate_namelist.rst
 
 run_dir:
 ^^^^^^^^

@@ -5,31 +5,20 @@
       "properties": {
         "namelist": {
           "additionalProperties": false,
-          "anyOf": [
-            {
-              "required": [
-                "base_file"
-              ]
-            },
-            {
-              "required": [
-                "update_values"
-              ]
-            }
-          ],
           "properties": {
             "base_file": {
               "type": "string"
             },
             "update_values": {
               "$ref": "urn:uwtools:namelist"
-            },
-            "validate": {
-              "type": "boolean"
             }
           },
           "type": "object"
         },
+        "required": [
+          "base_file",
+          "update_values"
+        ],
         "run_dir": {
           "type": "string"
         }

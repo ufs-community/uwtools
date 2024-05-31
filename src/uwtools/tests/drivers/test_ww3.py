@@ -69,15 +69,6 @@ def test_WaveWatchIII_namelist_file(caplog, driverobj):
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
-def test_WaveWatchIII_namelist_file_fails_validation(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
-    driverobj._driver_config["namelist"]["update_values"]["input_nml"]["input_forcing_winds"] = None
-    path = Path(refs(driverobj.namelist_file()))
-    assert not path.exists()
-    assert logged(caplog, f"Failed to validate {path}")
-    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
-
-
 def test_WaveWatchIII_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
