@@ -86,17 +86,18 @@ def mpas_streams():
     return [
         {
             "filename_template": "init.nc",
-            "interval": "initial_only",
+            "input_interval": "initial_only",
             "mutable": False,
             "name": "input",
             "type": "input",
         },
         {
+            "filename_interval": "input_interval",
             "filename_template": "output.$Y-$M-$D $h.$m.$s.nc",
             "files": ["f1", "f2"],
-            "interval": "6:00:00",
             "mutable": True,
-            "name": "oututp",
+            "name": "output",
+            "output_interval": "6:00:00",
             "packages": "pkg",
             "type": "output",
         },
@@ -882,18 +883,27 @@ def test_schema_mpas_streams(mpas_streams):
     # Basic correctness:
     assert not errors(mpas_streams)
     # Certain properties are required:
-    for prop in ["filename_template", "interval", "mutable", "name", "type"]:
+    for prop in ["filename_template", "mutable", "name", "type"]:
         assert "is a required property" in errors(delprop(prop))
     # Certain additional properties are optional:
-    for prop in ["files", "packages"]:
+    for prop in ["filename_interval", "files", "packages"]:
         assert not errors(delprop(prop))
     # Properties must have correct types:
-    for prop in ["filename_template", "interval", "packages", "name"]:
+    for prop in [
+        "filename_interval",
+        "filename_template",
+        "input_interval",
+        "output_interval",
+        "packages",
+        "name",
+    ]:
         assert "is not of type 'string'" in errors(addprop(prop, None))
     assert "is not of type 'array'" in errors(addprop("files", None))
     assert "is not of type 'boolean'" in errors(addprop("mutable", None))
     assert "is not of type 'string'" in errors(addprop("files", [None]))
-    assert "is not one of ['input', 'output'" in errors(addprop("type", None))
+    assert "is not one of ['input', 'input;output', 'none', 'output'" in errors(
+        addprop("type", None)
+    )
     assert "should be non-empty" in errors(addprop("files", []))
 
 

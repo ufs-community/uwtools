@@ -3,6 +3,9 @@
   "items": {
     "additionalProperties": false,
     "properties": {
+      "filename_interval": {
+        "type": "string"
+      },
       "filename_template": {
         "type": "string"
       },
@@ -13,7 +16,7 @@
         "minItems": 1,
         "type": "array"
       },
-      "interval": {
+      "input_interval": {
         "type": "string"
       },
       "mutable": {
@@ -22,19 +25,23 @@
       "name": {
         "type": "string"
       },
+      "output_interval": {
+        "type": "string"
+      },
       "packages": {
         "type": "string"
       },
       "type": {
         "enum": [
           "input",
+          "input;output",
+          "none",
           "output"
         ]
       }
     },
     "required": [
       "filename_template",
-      "interval",
       "mutable",
       "name",
       "type"

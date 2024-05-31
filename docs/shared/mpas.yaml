@@ -44,11 +44,18 @@ mpas:
     validate: true
   run_dir: /path/to/run/directory
   streams:
-    base_file: "{{ user.mpas_app }}/MPAS-Model/streams.atmosphere"
-    update_values:
-      input_filename: conus.init.nc
-      input_interval: "06:00:00"
-      output_interval: "06:00:00"
+    - name: input
+      type: input
+      filename_template: conus.init.nc
+      input_interval: initial_only
+      mutable: false
+    - name: output
+      type: output
+      filename_template: history.$Y-$M-$D_$h.$m.$s.nc
+      output_interval: "6:00:00"
+      mutable: true
+      files:
+        - stream_list.atmosphere.output
 platform:
   account: me
   scheduler: slurm

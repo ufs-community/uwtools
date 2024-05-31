@@ -8,10 +8,11 @@ from pathlib import Path
 from typing import List, Optional
 
 from iotaa import asset, task, tasks
+from lxml import etree
+from lxml.etree import Element, SubElement
 
-from uwtools.api.template import render
 from uwtools.drivers.driver import Driver
-from uwtools.utils.tasks import file, filecopy, symlink
+from uwtools.utils.tasks import filecopy, symlink
 
 
 class MPASBase(Driver):
@@ -114,12 +115,22 @@ class MPASBase(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield file(path=Path(self._driver_config["streams"]["base_file"]))
-        render(
-            input_file=Path(self._driver_config["streams"]["base_file"]),
-            output_file=path,
-            values_src=self._driver_config["streams"]["update_values"],
-        )
+        yield None
+        streams = Element("streams")
+        for item in self._driver_config["streams"]:
+            stream = SubElement(streams, "stream" if item["mutable"] else "immutable_stream")
+            for attr in ["name", "type", "filename_template"]:
+                stream.set(attr, item[attr])
+            for attr in ["filename_interval", "input_interval", "output_interval", "packages"]:
+                if attr in item:
+                    stream.set(attr, item[attr])
+            if files := item.get("files"):
+                for file in files:
+                    SubElement(stream, "file", name=file)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        xml = etree.tostring(streams, pretty_print=True, encoding="utf-8").decode()
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(xml)
 
     # Private helper methods
 

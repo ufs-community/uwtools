@@ -50,10 +50,16 @@ mpas_init:
     validate: true
   run_dir: /path/to/rundir
   streams:
-    base_file: "{{ user.mpas_app }}/MPAS-Model/streams.init_atmosphere"
-    update_values:
-      input_filename: conus.init.nc
-      output_filename: foo.nc
+    - name: input
+      type: input
+      filename_template: conus.static.nc
+      input_interval: initial_only
+      mutable: false
+    - name: output
+      type: output
+      filename_template: conus.init.nc
+      output_interval: initial_only
+      mutable: false
 platform:
   account: me
   scheduler: slurm
