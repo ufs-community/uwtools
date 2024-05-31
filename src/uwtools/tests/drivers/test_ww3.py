@@ -18,7 +18,7 @@ def config(tmp_path):
     return {
         "ww3": {
             "namelist": {
-                "base_file": str(tmp_path / "ww3_shel.nml"),
+                "base_file": str(tmp_path / "ww3_shel.inp.IN"),
                 "update_values": {
                     "input_nml": {
                         "input_forcing_winds": "C",
@@ -57,7 +57,7 @@ def test_WaveWatchIII(driverobj):
 def test_WaveWatchIII_namelist_file(driverobj):
     src = driverobj._driver_config["namelist"]["base_file"]
     with open(src, "w", encoding="utf-8") as f:
-        f.write("Hello, {{ world }}")
+        yaml.dump({}, f)
     assert not (driverobj._rundir / "ww3_shel.nml").is_file()
     driverobj.namelist_file()
     assert (driverobj._rundir / "ww3_shel.nml").is_file()
