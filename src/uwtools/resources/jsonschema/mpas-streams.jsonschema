@@ -1,0 +1,36 @@
+{
+  "addtionalProperties": false,
+  "items": {
+    "additionalProperties": false,
+    "properties": {
+      "filename_template": {
+        "type": "string"
+      },
+      "interval": {
+        "type": "string"
+      },
+      "mutable": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "string"
+      },
+      "type": {
+        "enum": [
+          "input",
+          "output"
+        ]
+      }
+    },
+    "required": [
+      "filename_template",
+      "interval",
+      "mutable",
+      "name",
+      "type"
+    ],
+    "type": "object"
+  },
+  "minItems": 1,
+  "type": "array"
+}

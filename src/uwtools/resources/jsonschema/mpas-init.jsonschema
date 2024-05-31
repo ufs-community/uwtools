@@ -70,28 +70,7 @@
           "type": "string"
         },
         "streams": {
-          "addtionalProperties": false,
-          "anyOf": [
-            {
-              "required": [
-                "base_file"
-              ]
-            },
-            {
-              "required": [
-                "update_values"
-              ]
-            }
-          ],
-          "properties": {
-            "base_file": {
-              "type": "string"
-            },
-            "update_values": {
-              "type": "object"
-            }
-          },
-          "type": "object"
+          "$ref": "urn:uwtools:mpas-streams"
         }
       },
       "required": [
