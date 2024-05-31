@@ -2,6 +2,36 @@
   "addtionalProperties": false,
   "items": {
     "additionalProperties": false,
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "type": {
+              "pattern": "input.*"
+            }
+          }
+        },
+        "then": {
+          "required": [
+            "input_interval"
+          ]
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "type": {
+              "pattern": ".*output"
+            }
+          }
+        },
+        "then": {
+          "required": [
+            "output_interval"
+          ]
+        }
+      }
+    ],
     "properties": {
       "filename_interval": {
         "type": "string"

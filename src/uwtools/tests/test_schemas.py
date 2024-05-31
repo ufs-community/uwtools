@@ -904,7 +904,15 @@ def test_schema_mpas_streams(mpas_streams):
     assert "is not one of ['input', 'input;output', 'none', 'output'" in errors(
         addprop("type", None)
     )
+    # Array items should not be empty:
     assert "should be non-empty" in errors(addprop("files", []))
+    # Interval items are conditionally required based on input/output settings:
+    x1 = {"filename_template": "a", "mutable": False, "name": "b"}
+    x2 = {**x1, "type": "input;output"}
+    for x in [{**x1, "type": "input"}, {**x2, "output_interval": "foo"}]:
+        assert "'input_interval' is a required property" in errors([x])
+    for x in [{**x1, "type": "output"}, {**x2, "input_interval": "foo"}]:
+        assert "'output_interval' is a required property" in errors([x])
 
 
 # namelist
