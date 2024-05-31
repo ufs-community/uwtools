@@ -214,23 +214,6 @@ def test_Asset__driver_config_pass(assetobj):
     }
 
 
-def test_Asset__resources_fail(assetobj):
-    del assetobj._config["platform"]
-    with raises(UWConfigError) as e:
-        assert assetobj._resources
-    assert str(e.value) == "Required 'platform' block missing in config"
-
-
-def test_Asset__resources_pass(assetobj):
-    account = "me"
-    walltime = "00:05:00"
-    assetobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
-    assert assetobj._resources == {
-        "account": account,
-        "rundir": assetobj._rundir,
-    }
-
-
 def test_Asset__rundir(assetobj):
     assert assetobj._rundir == Path("/path/to/2024032218/run")
 
@@ -241,10 +224,6 @@ def test_Asset__validate(assetobj):
             assetobj._validate(assetobj)
         assert validate_internal.call_args_list[0].kwargs == {
             "schema_name": "concrete",
-            "config": assetobj._config,
-        }
-        assert validate_internal.call_args_list[1].kwargs == {
-            "schema_name": "platform",
             "config": assetobj._config,
         }
 
@@ -456,6 +435,20 @@ def test_Driver__scheduler(driverobj):
         scheduler = JobScheduler.get_scheduler()
         assert driverobj._scheduler == scheduler
         JobScheduler.get_scheduler.assert_called_with(driverobj._resources)
+
+
+def test_Driver__validate(assetobj):
+    with patch.object(assetobj, "_validate", driver.Driver._validate):
+        with patch.object(driver, "validate_internal") as validate_internal:
+            assetobj._validate(assetobj)
+        assert validate_internal.call_args_list[0].kwargs == {
+            "schema_name": "concrete",
+            "config": assetobj._config,
+        }
+        assert validate_internal.call_args_list[1].kwargs == {
+            "schema_name": "platform",
+            "config": assetobj._config,
+        }
 
 
 def test_Driver__write_runscript(driverobj, tmp_path):

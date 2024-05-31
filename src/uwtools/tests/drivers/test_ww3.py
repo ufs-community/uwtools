@@ -27,10 +27,6 @@ def config(tmp_path):
             },
             "run_dir": str(tmp_path),
         },
-        "platform": {
-            "account": "me",
-            "scheduler": "slurm",
-        },
     }
 
 

@@ -161,20 +161,6 @@ class Assets(ABC):
         return schema
 
     @property
-    def _resources(self) -> Dict[str, Any]:
-        """
-        Returns configuration data for the runscript.
-        """
-        try:
-            platform = self._config["platform"]
-        except KeyError as e:
-            raise UWConfigError("Required 'platform' block missing in config") from e
-        return {
-            "account": platform["account"],
-            "rundir": self._rundir,
-        }
-
-    @property
     def _rundir(self) -> Path:
         """
         The path to the component's run directory.
@@ -215,42 +201,14 @@ class Assets(ABC):
         """
         Perform all necessary schema validation.
         """
-        for schema_name in (self._driver_name.replace("_", "-"), "platform"):
-            validate_internal(schema_name=schema_name, config=self._config)
+        schema_name = self._driver_name.replace("_", "-")
+        validate_internal(schema_name=schema_name, config=self._config)
 
 
 class Driver(Assets):
     """
     An abstract class for standalone component drivers.
     """
-
-    def __init__(
-        self,
-        config: Optional[Union[dict, Path]],
-        dry_run: bool = False,
-        batch: bool = False,
-        cycle: Optional[datetime] = None,
-        leadtime: Optional[timedelta] = None,
-        key_path: Optional[List[str]] = None,
-    ) -> None:
-        """
-        A standalone component driver.
-
-        :param config: Path to config file (read stdin if missing or None).
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
-        :param cycle: The cycle.
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        :param leadtime: The leadtime.
-        """
-        super().__init__(
-            config=config,
-            dry_run=dry_run,
-            batch=batch,
-            cycle=cycle,
-            key_path=key_path,
-            leadtime=leadtime,
-        )
 
     # Workflow tasks
 
@@ -367,6 +325,13 @@ class Driver(Assets):
         Returns the job scheduler specified by the platform information.
         """
         return JobScheduler.get_scheduler(self._resources)
+
+    def _validate(self) -> None:
+        """
+        Perform all necessary schema validation.
+        """
+        for schema_name in (self._driver_name.replace("_", "-"), "platform"):
+            validate_internal(schema_name=schema_name, config=self._config)
 
     def _write_runscript(self, path: Path, envvars: Dict[str, str]) -> None:
         """
