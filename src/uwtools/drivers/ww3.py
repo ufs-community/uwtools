@@ -1,5 +1,5 @@
 """
-A library driver for ww3.
+An assets driver for ww3.
 """
 
 from pathlib import Path

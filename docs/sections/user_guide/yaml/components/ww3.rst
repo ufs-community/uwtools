@@ -16,7 +16,9 @@ UW YAML for the ``ww3:`` Block
 namelist:
 ^^^^^^^^^
 
-Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details).
+The WaveWatchIII namelist file can be provisioned either by:
+1. Providing a path to a complete, ready-to-use namelist file as the value of the `base_file:` key and omitting the `update_values:` key, or
+2. Providing a path to a namelist file containing Jinja2 expressions as the value of the `base_file:` key and a mapping from variable names to values used to render those Jinja2 expressions as the value of the `update_values:` key.
 
 .. include:: ../../../../shared/validate_namelist.rst
 
