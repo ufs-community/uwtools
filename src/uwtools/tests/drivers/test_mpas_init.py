@@ -12,6 +12,7 @@ import f90nml  # type: ignore
 import pytest
 import yaml
 from iotaa import refs
+from lxml import etree
 from pytest import fixture, raises
 
 from uwtools.drivers import mpas_init
@@ -46,12 +47,22 @@ def config(tmp_path):
                 },
             },
             "run_dir": str(tmp_path),
-            "streams": {
-                "base_file": str(tmp_path / "streams.init_atmosphere.in"),
-                "update_values": {
-                    "world": "user",
+            "streams": [
+                {
+                    "filename_template": "conus.static.nc",
+                    "input_interval": "initial_only",
+                    "mutable": False,
+                    "name": "input",
+                    "type": "input",
                 },
-            },
+                {
+                    "filename_template": "conus.init.nc",
+                    "mutable": False,
+                    "name": "output",
+                    "output_interval": "initial_only",
+                    "type": "output",
+                },
+            ],
             "files_to_link": {
                 "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
                 "CAM_AEROPT_DATA.DBL": "src/MPAS-Model/CAM_AEROPT_DATA.DBL",
@@ -210,13 +221,17 @@ def test_MPASInit_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_MPASInit_streams_file(driverobj):
-    src = driverobj._driver_config["streams"]["base_file"]
-    with open(src, "w", encoding="utf-8") as f:
-        f.write("Hello, {{ world }}")
-    assert not (driverobj._rundir / "streams.init_atmosphere").is_file()
+def test_MPASInit_streams_file(config, driverobj):
     driverobj.streams_file()
-    assert (driverobj._rundir / "streams.init_atmosphere").is_file()
+    path = Path(driverobj._driver_config["run_dir"]) / driverobj._streams_fn
+    with open(path, "r", encoding="utf-8") as f:
+        xml = etree.parse(f).getroot()
+    assert xml.tag == "streams"
+    children = xml.getchildren()  # type: ignore
+    for i, child in enumerate(children):
+        for k, v in config["mpas_init"]["streams"][i].items():
+            if k != "mutable":
+                assert child.get(k) == v
 
 
 def test_MPASInit__runscript_path(driverobj):
