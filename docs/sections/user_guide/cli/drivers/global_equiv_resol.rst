@@ -23,7 +23,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/global_equiv_resol.yaml
+.. literalinclude:: /shared/global_equiv_resol.yaml
 
 Its contents are described in section :ref:`global_equiv_resol_yaml`.
 
@@ -49,4 +49,4 @@ Its contents are described in section :ref:`global_equiv_resol_yaml`.
 
      $ uw global_equiv_resol run --config-file config.yaml --batch --dry-run
 
-.. include:: ../../../../shared/key_path.rst
+.. include:: /shared/key_path.rst

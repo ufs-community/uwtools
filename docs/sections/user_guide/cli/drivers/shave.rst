@@ -23,7 +23,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/shave.yaml
+.. literalinclude:: /shared/shave.yaml
 
 Its contents are described in section :ref:`shave_yaml`.
 
@@ -49,4 +49,4 @@ Its contents are described in section :ref:`shave_yaml`.
 
      $ uw shave run --config-file config.yaml --batch --dry-run
 
-.. include:: ../../../../shared/key_path.rst
+.. include:: /shared/key_path.rst

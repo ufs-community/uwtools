@@ -23,7 +23,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/make_hgrid.yaml
+.. literalinclude:: /shared/make_hgrid.yaml
 
 Its contents are described in section :ref:`make_hgrid_yaml`.
 
@@ -55,4 +55,4 @@ Its contents are described in section :ref:`make_hgrid_yaml`.
 
      $ uw make_hgrid run --config-file config.yaml --batch --dry-run
 
-.. include:: ../../../../shared/key_path.rst
+.. include:: /shared/key_path.rst

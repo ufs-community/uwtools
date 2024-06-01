@@ -23,7 +23,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/jedi.yaml
+.. literalinclude:: /shared/jedi.yaml
 
 Its contents are described in section :ref:`jedi_yaml`.
 
@@ -49,4 +49,4 @@ The driver creates a ``runscript.jedi`` file in the directory specified by ``run
 
      $ uw jedi run --config-file config.yaml --cycle 2024-05-22T12 --batch --dry-run
 
-.. include:: ../../../../shared/key_path.rst
+.. include:: /shared/key_path.rst

@@ -23,7 +23,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/sfc_climo_gen.yaml
+.. literalinclude:: /shared/sfc_climo_gen.yaml
 
 Its contents are described in depth in section :ref:`sfc_climo_gen_yaml`.
 
@@ -49,7 +49,7 @@ Its contents are described in depth in section :ref:`sfc_climo_gen_yaml`.
 
      $ uw sfc_climo_gen run --config-file config.yaml --batch --dry-run
 
-.. include:: ../../../../shared/key_path.rst
+.. include:: /shared/key_path.rst
 
 * The ``run`` task depends on the other available tasks and executes them as prerequisites. It is possible to execute any task directly, which entails execution of any of *its* dependencies. For example, to create an ``sfc_climo_gen`` run directory provisioned with all the files, directories, symlinks, etc. required per the configuration file:
 
