@@ -229,9 +229,13 @@ def test_MPASInit_streams_file(config, driverobj):
     assert xml.tag == "streams"
     children = xml.getchildren()  # type: ignore
     for i, child in enumerate(children):
-        for k, v in config["mpas_init"]["streams"][i].items():
-            if k != "mutable":
+        block = config["mpas_init"]["streams"][i]
+        for k, v in block.items():
+            if k not in ["files", "mutable"]:
                 assert child.get(k) == v
+        assert child.tag == "stream" if child.get("mutable") else "immutable_stream"
+        for name in block.get("files", []):
+            assert child.xpath(f"//file[@name='{name}']")
 
 
 def test_MPASInit__runscript_path(driverobj):

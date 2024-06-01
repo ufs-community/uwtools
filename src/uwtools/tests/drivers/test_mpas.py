@@ -57,6 +57,9 @@ def config(tmp_path):
                 },
                 {
                     "filename_template": "history.$Y-$M-$D_$h.$m.$s.nc",
+                    "files": [
+                        "stream_list.atmosphere.output",
+                    ],
                     "mutable": True,
                     "name": "output",
                     "output_interval": "6:00:00",
@@ -211,9 +214,13 @@ def test_MPAS_streams_file(config, driverobj):
     assert xml.tag == "streams"
     children = xml.getchildren()  # type: ignore
     for i, child in enumerate(children):
-        for k, v in config["mpas"]["streams"][i].items():
-            if k != "mutable":
+        block = config["mpas"]["streams"][i]
+        for k, v in block.items():
+            if k not in ["files", "mutable"]:
                 assert child.get(k) == v
+        assert child.tag == "stream" if child.get("mutable") else "immutable_stream"
+        for name in block.get("files", []):
+            assert child.xpath(f"//file[@name='{name}']")
 
 
 def test_MPAS__runscript_path(driverobj):
