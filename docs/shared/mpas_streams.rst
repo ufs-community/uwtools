@@ -1,44 +1,44 @@
 streams:
 ^^^^^^^^
 
-See the "Configuring Model Input and Output" chapter in the _MPAS-Atmosphere Model User’s Guide_, available from the `MPAS releases page <https://mpas-dev.github.io/atmosphere/atmosphere_download>`_, for additional information, including the specifics of supported values, on these attributes..
+See the "Configuring Model Input and Output" chapter in the *MPAS-Atmosphere Model User’s Guide*, available from the `MPAS releases page <https://mpas-dev.github.io/atmosphere/atmosphere_download>`_, for additional information, including the specifics of supported values, on these attributes..
 
 **Required attributes:**
 
-``filename_template:``
+  ``filename_template:``
 
-The template for files that exist or will be created by the stream. (type: string)
+  The template for files that exist or will be created by the stream. (type: string)
 
-``mutable:``
+  ``mutable:``
 
-Whether the set of fields that belong to the stream may be modified at model run-time. (type: boolean)
+  Whether the set of fields that belong to the stream may be modified at model run-time. (type: boolean)
 
-``name:``
+  ``name:``
 
-A unique name used to refer to the stream. (type: string)
+  A unique name used to refer to the stream. (type: string)
 
-``type:``
+  ``type:``
 
-One of ``input``, ``output``, ``input;output``, or ``none``. (type: string)
+  One of ``input``, ``output``, ``input;output``, or ``none``. (type: string)
 
 **Optional attributes:**
 
-``filename_interval:``
+  ``filename_interval:``
 
-The interval at which the stream will be read. (type: string)
+  The interval at which the stream will be read. (type: string)
 
-``files:``
+  ``files:``
 
-Names of files, each of which lists variables, one per line, to associate with the stream. (type: sequence of strings)
+  Names of files, each of which lists variables, one per line, to associate with the stream. (type: sequence of strings)
 
-``input_interval:``
+  ``input_interval:``
 
-The interval at which the stream will be read. Required if ``type:`` includes ``input``.  (type: string)
+  The interval at which the stream will be read. Required if ``type:`` includes ``input``.  (type: string)
 
-``output_interval:``
+  ``output_interval:``
 
-The interval at which the stream will be written. Required if ``type:`` includes ``output``. (type: string)
+  The interval at which the stream will be written. Required if ``type:`` includes ``output``. (type: string)
 
-``packages:``
+  ``packages:``
 
-Packages attached to the stream. (type: semicolon-separated list of strings)
+  Packages attached to the stream. (type: semicolon-separated list of strings)
