@@ -5,12 +5,12 @@ ungrib
 
 Structured YAML to run the WRF preprocessing component ``ungrib`` is validated by JSON Schema and requires the ``ungrib:`` block, described below. If ``ungrib`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
-.. include:: ../../../../shared/injected_cycle.rst
+.. include:: /shared/injected_cycle.rst
 
 Here is a prototype UW YAML ``ungrib:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/ungrib.yaml
+.. literalinclude:: /shared/ungrib.yaml
 
 UW YAML for the ``ungrib:`` Block
 ---------------------------------
