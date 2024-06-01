@@ -121,7 +121,7 @@ class MPASBase(Driver):
             stream = SubElement(streams, "stream" if item["mutable"] else "immutable_stream")
             for attr in ["name", "type", "filename_template"]:
                 stream.set(attr, item[attr])
-            for attr in ["filename_interval", "input_interval", "output_interval", "packages"]:
+            for attr in ["input_interval", "output_interval", "filename_interval", "packages"]:
                 if attr in item:
                     stream.set(attr, item[attr])
             if files := item.get("files"):
