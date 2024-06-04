@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 """
-WW3 driver tests.
+WaveWatchIII driver tests.
 """
 import datetime as dt
 from unittest.mock import DEFAULT as D

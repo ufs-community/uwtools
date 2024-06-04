@@ -16,7 +16,7 @@ UW YAML for the ``ww3:`` Block
 namelist:
 ^^^^^^^^^
 
-.. important:: Fortran namelists for WaveWatchIII are used here as templates to be realized. Input namelists will not have their configurations validated, only the associated YAML. Other files are not currently supported.:
+.. important:: The WaveWatchIII namelist file is provisioned by rendering an input template file containing Jinja2 expressions. Unlike namelist files provisioned by ``uwtools`` for other components, the WaveWatchIII namelist file will not be validated.
 
   **template_file:**
 
@@ -24,7 +24,7 @@ namelist:
 
   **template_values:**
 
-  The set of key-value pairs that will render the appropriate XML entries in the template input file.
+  Key-value pairs necessary to render all Jinja2 expressions in the input template file named by ``template_file:``.
 
 run_dir:
 ^^^^^^^^
