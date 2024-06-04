@@ -60,14 +60,14 @@ def test_WaveWatchIII_namelist_file(driverobj):
         yaml.dump({}, f)
     dst = driverobj._rundir / "ww3_shel.nml"
     assert not dst.is_file()
-    driverobj.template_file()
+    driverobj.namelist_file()
     assert dst.is_file()
 
 
 def test_WaveWatchIII_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
-        template_file=D,
+        namelist_file=D,
         restart_directory=D,
     ) as mocks:
         driverobj.provisioned_run_directory()

@@ -44,9 +44,9 @@ class WaveWatchIII(Assets):
     # Workflow tasks
 
     @task
-    def template_file(self):
+    def namelist_file(self):
         """
-        The namelist template file.
+        Render the namelist from the template file.
         """
         fn = "ww3_shel.nml"
         yield self._taskname(fn)
@@ -65,7 +65,7 @@ class WaveWatchIII(Assets):
         Run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
-        yield [self.template_file(), self.restart_directory()]
+        yield [self.namelist_file(), self.restart_directory()]
 
     @task
     def restart_directory(self):
