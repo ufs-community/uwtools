@@ -24,9 +24,9 @@ from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute
 
 
-class Driver(ABC):
+class Assets(ABC):
     """
-    An abstract class for component drivers.
+    An abstract class to provision assets for component drivers.
     """
 
     def __init__(
@@ -74,14 +74,6 @@ class Driver(ABC):
         Run directory provisioned with all required content.
         """
 
-    @tasks
-    def run(self):
-        """
-        A run.
-        """
-        yield self._taskname("run")
-        yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
-
     @external
     def validate(self):
         """
@@ -89,29 +81,6 @@ class Driver(ABC):
         """
         yield self._taskname("valid schema")
         yield asset(None, lambda: True)
-
-    @task
-    def _run_via_batch_submission(self):
-        """
-        A run executed via the batch system.
-        """
-        yield self._taskname("run via batch submission")
-        path = Path("%s.submit" % self._runscript_path)
-        yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
-        self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
-
-    @task
-    def _run_via_local_execution(self):
-        """
-        A run executed directly on the local system.
-        """
-        yield self._taskname("run via local execution")
-        path = self._rundir / f"done.{self._driver_name}"
-        yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
-        cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
-        execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
     # Private helper methods
 
@@ -192,9 +161,94 @@ class Driver(ABC):
         return schema
 
     @property
+    def _rundir(self) -> Path:
+        """
+        The path to the component's run directory.
+        """
+        return Path(self._driver_config["run_dir"])
+
+    def _taskname(self, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s" % (self._driver_name, suffix)
+
+    def _taskname_with_cycle(self, cycle: datetime, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s %s" % (cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
+
+    def _taskname_with_cycle_and_leadtime(
+        self, cycle: datetime, leadtime: timedelta, suffix: str
+    ) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s %s" % (
+            (cycle + leadtime).strftime("%Y%m%d %H:%M:%S"),
+            self._driver_name,
+            suffix,
+        )
+
+    def _validate(self) -> None:
+        """
+        Perform all necessary schema validation.
+        """
+        schema_name = self._driver_name.replace("_", "-")
+        validate_internal(schema_name=schema_name, config=self._config)
+
+
+class Driver(Assets):
+    """
+    An abstract class for standalone component drivers.
+    """
+
+    # Workflow tasks
+
+    @tasks
+    def run(self):
+        """
+        A run.
+        """
+        yield self._taskname("run")
+        yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
+
+    @task
+    def _run_via_batch_submission(self):
+        """
+        A run executed via the batch system.
+        """
+        yield self._taskname("run via batch submission")
+        path = Path("%s.submit" % self._runscript_path)
+        yield asset(path, path.is_file)
+        yield self.provisioned_run_directory()
+        self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
+
+    @task
+    def _run_via_local_execution(self):
+        """
+        A run executed directly on the local system.
+        """
+        yield self._taskname("run via local execution")
+        path = self._rundir / f"done.{self._driver_name}"
+        yield asset(path, path.is_file)
+        yield self.provisioned_run_directory()
+        cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
+        execute(cmd=cmd, cwd=self._rundir, log_output=True)
+
+    # Private helper methods
+
+    @property
     def _resources(self) -> Dict[str, Any]:
         """
-        Returns configuration data for the runscript.
+        Returns platform configuration data.
         """
         try:
             platform = self._config["platform"]
@@ -221,13 +275,6 @@ class Driver(ABC):
             execution["executable"],  # component executable name
         ]
         return " ".join(filter(None, components))
-
-    @property
-    def _rundir(self) -> Path:
-        """
-        The path to the component's run directory.
-        """
-        return Path(self._driver_config["run_dir"])
 
     def _runscript(
         self,
@@ -278,36 +325,6 @@ class Driver(ABC):
         Returns the job scheduler specified by the platform information.
         """
         return JobScheduler.get_scheduler(self._resources)
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s" % (self._driver_name, suffix)
-
-    def _taskname_with_cycle(self, cycle: datetime, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s %s" % (cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
-
-    def _taskname_with_cycle_and_leadtime(
-        self, cycle: datetime, leadtime: timedelta, suffix: str
-    ) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s %s" % (
-            (cycle + leadtime).strftime("%Y%m%d %H:%M:%S"),
-            self._driver_name,
-            suffix,
-        )
 
     def _validate(self) -> None:
         """
