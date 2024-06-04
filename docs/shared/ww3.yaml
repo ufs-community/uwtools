@@ -2,8 +2,7 @@ ww3:
   namelist:
     template_file: /path/to/ww3/ww3_shel.nml.IN
     template_values:
-      input_nml:
-        input_forcing_winds: "C"
+      input_forcing_winds: "C"
   run_dir: /path/to/run/directory
 platform:
   account: me
