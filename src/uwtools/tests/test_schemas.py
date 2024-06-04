@@ -1295,8 +1295,8 @@ def test_schema_upp_run_dir(upp_prop):
 def test_schema_ww3():
     config = {
         "namelist": {
-            "base_file": "/tmp/ww3_shel.inp.IN",
-            "update_values": {
+            "template_file": "/tmp/ww3_shel.nml",
+            "template_values": {
                 "input_nml": {
                     "input_forcing_winds": "C",
                 },
@@ -1316,15 +1316,15 @@ def test_schema_ww3():
 
 def test_schema_ww3_namelist(ww3_prop):
     errors = ww3_prop("namelist")
-    # At least base_file is required:
-    assert "'base_file' is a required property" in errors({})
-    # Just base_file is ok:
-    assert not errors({"base_file": "/path/to/ww3_shel.nml"})
-    # Both base_file and update_values are ok:
+    # At least template_file is required:
+    assert "'template_file' is a required property" in errors({})
+    # Just template_file is ok:
+    assert not errors({"template_file": "/path/to/ww3_shel.nml"})
+    # Both template_file and template_values are ok:
     assert not errors(
         {
-            "base_file": "/path/to/ww3_shel.nml",
-            "update_values": {"input_nml": {"input_forcing_winds": "C"}},
+            "template_file": "/path/to/ww3_shel.nml",
+            "template_values": {"input_nml": {"input_forcing_winds": "C"}},
         }
     )
 

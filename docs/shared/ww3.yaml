@@ -1,7 +1,7 @@
 ww3:
   namelist:
-    base_file: /path/to/ww3/ww3_shel.inp.IN
-    update_values:
+    template_file: /path/to/ww3/ww3_shel.nml
+    template_values:
       input_nml:
         input_forcing_winds: "C"
   run_dir: /path/to/run/directory

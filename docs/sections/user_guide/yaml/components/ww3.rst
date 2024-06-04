@@ -16,11 +16,15 @@ UW YAML for the ``ww3:`` Block
 namelist:
 ^^^^^^^^^
 
-The WaveWatchIII namelist file can be provisioned either by:
-1. Providing a path to a complete, ready-to-use namelist file as the value of the `base_file:` key and omitting the `update_values:` key, or
-2. Providing a path to a namelist file containing Jinja2 expressions as the value of the `base_file:` key and a mapping from variable names to values used to render those Jinja2 expressions as the value of the `update_values:` key.
+.. important:: Fortran namelists for WaveWatchIII are used here as templates to be realized. Input namelists will not have their configurations validated, only the associated YAML. Other files are not currently supported.
 
-.. include:: ../../../../shared/validate_namelist.rst
+  **template_file:**
+
+  The path to the base ``ww3_shel.nml`` file that comes from the WW3 build.
+
+  **template_values:**
+
+  The set of key-value pairs that will render the appropriate XML entries in the template input file.
 
 run_dir:
 ^^^^^^^^

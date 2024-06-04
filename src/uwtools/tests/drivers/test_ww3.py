@@ -2,6 +2,7 @@
 """
 WW3 driver tests.
 """
+import datetime as dt
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
@@ -18,8 +19,8 @@ def config(tmp_path):
     return {
         "ww3": {
             "namelist": {
-                "base_file": str(tmp_path / "ww3_shel.inp.IN"),
-                "update_values": {
+                "template_file": str(tmp_path / "ww3_shel.nml"),
+                "template_values": {
                     "input_nml": {
                         "input_forcing_winds": "C",
                     },
@@ -39,8 +40,13 @@ def config_file(config, tmp_path):
 
 
 @fixture
-def driverobj(config_file):
-    return ww3.WaveWatchIII(config=config_file, batch=True)
+def cycle():
+    return dt.datetime(2024, 2, 1, 18)
+
+
+@fixture
+def driverobj(config_file, cycle):
+    return ww3.WaveWatchIII(config=config_file, cycle=cycle, batch=True)
 
 
 # Tests
@@ -51,18 +57,18 @@ def test_WaveWatchIII(driverobj):
 
 
 def test_WaveWatchIII_namelist_file(driverobj):
-    src = driverobj._driver_config["namelist"]["base_file"]
+    src = driverobj._driver_config["namelist"]["template_file"]
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
     assert not (driverobj._rundir / "ww3_shel.nml").is_file()
-    driverobj.namelist_file()
+    driverobj.template_file()
     assert (driverobj._rundir / "ww3_shel.nml").is_file()
 
 
 def test_WaveWatchIII_provisioned_run_directory(driverobj):
     with patch.multiple(
         driverobj,
-        namelist_file=D,
+        template_file=D,
         restart_directory=D,
     ) as mocks:
         driverobj.provisioned_run_directory()

@@ -2,6 +2,7 @@
 An assets driver for ww3.
 """
 
+from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
@@ -20,6 +21,7 @@ class WaveWatchIII(Assets):
 
     def __init__(
         self,
+        cycle: datetime,
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
@@ -28,29 +30,33 @@ class WaveWatchIII(Assets):
         """
         The driver.
 
+        :param cycle: The cycle.
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
         :param key_path: Keys leading through the config to the driver's configuration block.
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch, key_path=key_path)
+        super().__init__(
+            config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
+        )
+        self._cycle = cycle
 
     # Workflow tasks
 
     @task
-    def namelist_file(self):
+    def template_file(self):
         """
-        The namelist file.
+        The namelist template file.
         """
         fn = "ww3_shel.nml"
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield file(path=Path(self._driver_config["namelist"]["base_file"]))
+        yield file(path=Path(self._driver_config["namelist"]["template_file"]))
         render(
-            input_file=Path(self._driver_config["namelist"]["base_file"]),
+            input_file=Path(self._driver_config["namelist"]["template_file"]),
             output_file=path,
-            overrides=self._driver_config["namelist"]["update_values"],
+            overrides=self._driver_config["namelist"]["template_values"],
         )
 
     @tasks
@@ -59,7 +65,7 @@ class WaveWatchIII(Assets):
         Run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
-        yield [self.namelist_file(), self.restart_directory()]
+        yield [self.template_file(), self.restart_directory()]
 
     @task
     def restart_directory(self):

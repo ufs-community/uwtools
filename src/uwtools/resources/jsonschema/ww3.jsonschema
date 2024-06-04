@@ -6,15 +6,15 @@
         "namelist": {
           "additionalProperties": false,
           "properties": {
-            "base_file": {
+            "template_file": {
               "type": "string"
             },
-            "update_values": {
+            "template_values": {
               "$ref": "urn:uwtools:namelist"
             }
           },
           "required": [
-            "base_file"
+            "template_file"
           ],
           "type": "object"
         },
