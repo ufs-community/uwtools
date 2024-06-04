@@ -16,7 +16,7 @@ UW YAML for the ``ww3:`` Block
 namelist:
 ^^^^^^^^^
 
-.. important:: Fortran namelists for WaveWatchIII are used here as templates to be realized. Input namelists will not have their configurations validated, only the associated YAML. Other files are not currently supported.
+.. important:: Fortran namelists for WaveWatchIII are used here as templates to be realized. Input namelists will not have their configurations validated, only the associated YAML. Other files are not currently supported.:
 
   **template_file:**
 

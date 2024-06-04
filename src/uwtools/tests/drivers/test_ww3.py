@@ -19,7 +19,7 @@ def config(tmp_path):
     return {
         "ww3": {
             "namelist": {
-                "template_file": str(tmp_path / "ww3_shel.nml"),
+                "template_file": str(tmp_path / "ww3_shel.nml.IN"),
                 "template_values": {
                     "input_nml": {
                         "input_forcing_winds": "C",
