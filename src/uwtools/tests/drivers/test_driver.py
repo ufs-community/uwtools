@@ -23,6 +23,30 @@ from uwtools.tests.support import regex_logged
 # Helpers
 
 
+class ConcreteAssets(driver.Assets):
+    """
+    Driver subclass for testing purposes.
+    """
+
+    def provisioned_run_directory(self):
+        pass
+
+    @property
+    def _driver_name(self) -> str:
+        return "concrete"
+
+    def _taskname(self, suffix: str) -> str:
+        return "concrete"
+
+    def _validate(self) -> None:
+        pass
+
+    @task
+    def atask(self):
+        yield "atask"
+        yield asset("atask", lambda: True)
+
+
 class ConcreteDriver(driver.Driver):
     """
     Driver subclass for testing purposes.
@@ -84,6 +108,17 @@ def config(tmp_path):
 
 
 @fixture
+def assetobj(config):
+    return ConcreteAssets(
+        config=config,
+        dry_run=False,
+        batch=True,
+        cycle=dt.datetime(2024, 3, 22, 18),
+        leadtime=dt.timedelta(hours=24),
+    )
+
+
+@fixture
 def driverobj(config):
     return ConcreteDriver(
         config=config,
@@ -94,24 +129,24 @@ def driverobj(config):
     )
 
 
-# Tests
+# Asset Tests
 
 
-def test_Driver(driverobj):
-    assert Path(driverobj._driver_config["base_file"]).name == "base.yaml"
-    assert driverobj._batch is True
+def test_Assets(assetobj):
+    assert Path(assetobj._driver_config["base_file"]).name == "base.yaml"
+    assert assetobj._batch is True
 
 
-def test_Driver_cycle_leadtime_error(config):
+def test_Asset_cycle_leadtime_error(config):
     with raises(UWError) as e:
-        ConcreteDriver(config=config, leadtime=dt.timedelta(hours=24))
+        ConcreteAssets(config=config, leadtime=dt.timedelta(hours=24))
     assert "When leadtime is specified, cycle is required" in str(e)
 
 
 @pytest.mark.parametrize("val", (True, False))
-def test_Driver_dry_run(config, val):
+def test_Asset_dry_run(config, val):
     with patch.object(driver, "dryrun") as dryrun:
-        ConcreteDriver(config=config, dry_run=val)
+        ConcreteAssets(config=config, dry_run=val)
         dryrun.assert_called_once_with(enable=val)
 
 
@@ -119,7 +154,7 @@ def test_Driver_dry_run(config, val):
 
 
 def test_key_path(config):
-    driverobj = ConcreteDriver(
+    assetobj = ConcreteAssets(
         config={"foo": {"bar": config}},
         dry_run=False,
         batch=True,
@@ -127,7 +162,81 @@ def test_key_path(config):
         key_path=["foo", "bar"],
         leadtime=dt.timedelta(hours=24),
     )
-    assert config == driverobj._config
+    assert config == assetobj._config
+
+
+def test_Asset_validate(caplog, assetobj):
+    log.setLevel(logging.INFO)
+    assetobj.validate()
+    assert regex_logged(caplog, "State: Ready")
+
+
+# Tests for private helper methods
+
+
+@pytest.mark.parametrize(
+    "base_file,update_values,expected",
+    [
+        (False, False, {}),
+        (False, True, {"a": 33}),
+        (True, False, {"a": 11, "b": 22}),
+        (True, True, {"a": 33, "b": 22}),
+    ],
+)
+def test_Asset__create_user_updated_config_base_file(
+    base_file, assetobj, expected, tmp_path, update_values
+):
+    path = tmp_path / "updated.yaml"
+    dc = assetobj._driver_config
+    if not base_file:
+        del dc["base_file"]
+    if not update_values:
+        del dc["update_values"]
+    ConcreteAssets._create_user_updated_config(config_class=YAMLConfig, config_values=dc, path=path)
+    with open(path, "r", encoding="utf-8") as f:
+        updated = yaml.safe_load(f)
+    assert updated == expected
+
+
+def test_Asset__driver_config_fail(assetobj):
+    del assetobj._config["concrete"]
+    with raises(UWConfigError) as e:
+        assert assetobj._driver_config
+    assert str(e.value) == "Required 'concrete' block missing in config"
+
+
+def test_Asset__driver_config_pass(assetobj):
+    assert set(assetobj._driver_config.keys()) == {
+        "base_file",
+        "execution",
+        "run_dir",
+        "update_values",
+    }
+
+
+def test_Asset__rundir(assetobj):
+    assert assetobj._rundir == Path("/path/to/2024032218/run")
+
+
+def test_Asset__validate(assetobj):
+    with patch.object(assetobj, "_validate", driver.Assets._validate):
+        with patch.object(driver, "validate_internal") as validate_internal:
+            assetobj._validate(assetobj)
+        assert validate_internal.call_args_list[0].kwargs == {
+            "schema_name": "concrete",
+            "config": assetobj._config,
+        }
+
+
+# Driver Tests
+
+
+def test_Driver(driverobj):
+    assert Path(driverobj._driver_config["base_file"]).name == "base.yaml"
+    assert driverobj._batch is True
+
+
+# Tests for workflow methods
 
 
 @pytest.mark.parametrize("batch", [True, False])
@@ -144,12 +253,6 @@ def test_Driver_run(batch, driverobj):
         else:
             rvbs.assert_not_called()
             rvle.assert_called_once_with()
-
-
-def test_Driver_validate(caplog, driverobj):
-    log.setLevel(logging.INFO)
-    driverobj.validate()
-    assert regex_logged(caplog, "State: Ready")
 
 
 def test_Driver__run_via_batch_submission(driverobj):
@@ -323,10 +426,6 @@ def test_Driver__runscript_execution_only(driverobj):
     assert driverobj._runscript(execution=["foo", "bar"]) == dedent(expected).strip()
 
 
-def test_Driver__rundir(driverobj):
-    assert driverobj._rundir == Path("/path/to/2024032218/run")
-
-
 def test_Driver__runscript_path(driverobj):
     assert driverobj._runscript_path == Path("/path/to/2024032218/run/runscript.concrete")
 
@@ -338,17 +437,17 @@ def test_Driver__scheduler(driverobj):
         JobScheduler.get_scheduler.assert_called_with(driverobj._resources)
 
 
-def test_Driver__validate(driverobj):
-    with patch.object(driverobj, "_validate", driver.Driver._validate):
+def test_Driver__validate(assetobj):
+    with patch.object(assetobj, "_validate", driver.Driver._validate):
         with patch.object(driver, "validate_internal") as validate_internal:
-            driverobj._validate(driverobj)
+            assetobj._validate(assetobj)
         assert validate_internal.call_args_list[0].kwargs == {
             "schema_name": "concrete",
-            "config": driverobj._config,
+            "config": assetobj._config,
         }
         assert validate_internal.call_args_list[1].kwargs == {
             "schema_name": "platform",
-            "config": driverobj._config,
+            "config": assetobj._config,
         }
 
 

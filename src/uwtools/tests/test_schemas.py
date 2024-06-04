@@ -124,6 +124,11 @@ def upp_prop():
     return partial(schema_validator, "upp", "properties", "upp", "properties")
 
 
+@fixture
+def ww3_prop():
+    return partial(schema_validator, "ww3", "properties", "ww3", "properties")
+
+
 # chgres-cube
 
 
@@ -1314,6 +1319,51 @@ def test_schema_upp_namelist(upp_prop):
 
 def test_schema_upp_run_dir(upp_prop):
     errors = upp_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# ungrib
+
+
+def test_schema_ww3():
+    config = {
+        "namelist": {
+            "template_file": "/tmp/ww3_shel.nml",
+            "template_values": {
+                "input_forcing_winds": "C",
+            },
+        },
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("ww3", "properties", "ww3")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("namelist", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_ww3_namelist(ww3_prop):
+    errors = ww3_prop("namelist")
+    # At least template_file is required:
+    assert "'template_file' is a required property" in errors({})
+    # Just template_file is ok:
+    assert not errors({"template_file": "/path/to/ww3_shel.nml"})
+    # Both template_file and template_values are ok:
+    assert not errors(
+        {
+            "template_file": "/path/to/ww3_shel.nml",
+            "template_values": {"input_forcing_winds": "C"},
+        }
+    )
+
+
+def test_schema_ww3_run_dir(ww3_prop):
+    errors = ww3_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
