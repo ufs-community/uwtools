@@ -1,6 +1,6 @@
 ww3:
   namelist:
-    template_file: /path/to/ww3/ww3_shel.nml
+    template_file: /path/to/ww3/ww3_shel.nml.IN
     template_values:
       input_nml:
         input_forcing_winds: "C"
