@@ -10,7 +10,10 @@
               "type": "string"
             },
             "template_values": {
-              "$ref": "urn:uwtools:namelist"
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
             }
           },
           "required": [
