@@ -58,9 +58,10 @@ def test_WaveWatchIII_namelist_file(driverobj):
     src = driverobj._driver_config["namelist"]["template_file"]
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
-    assert not (driverobj._rundir / "ww3_shel.nml").is_file()
+    dst = driverobj._rundir / "ww3_shel.nml"
+    assert not dst.is_file()
     driverobj.template_file()
-    assert (driverobj._rundir / "ww3_shel.nml").is_file()
+    assert dst.is_file()
 
 
 def test_WaveWatchIII_provisioned_run_directory(driverobj):
