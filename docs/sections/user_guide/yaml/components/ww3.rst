@@ -16,7 +16,7 @@ UW YAML for the ``ww3:`` Block
 namelist:
 ^^^^^^^^^
 
-.. important:: The WaveWatchIII namelist file is provisioned by rendering an input template file containing Jinja2 expressions. Unlike namelist files provisioned by ``uwtools`` for other components, the WaveWatchIII namelist file will not be validated.
+  .. important:: The WaveWatchIII namelist file is provisioned by rendering an input template file containing Jinja2 expressions. Unlike namelist files provisioned by ``uwtools`` for other components, the WaveWatchIII namelist file will not be validated.
 
   **template_file:**
 
