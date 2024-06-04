@@ -21,9 +21,7 @@ def config(tmp_path):
             "namelist": {
                 "template_file": str(tmp_path / "ww3_shel.nml.IN"),
                 "template_values": {
-                    "input_nml": {
-                        "input_forcing_winds": "C",
-                    },
+                    "input_forcing_winds": "C",
                 },
             },
             "run_dir": str(tmp_path),

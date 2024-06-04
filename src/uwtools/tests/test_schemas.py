@@ -1297,9 +1297,7 @@ def test_schema_ww3():
         "namelist": {
             "template_file": "/tmp/ww3_shel.nml",
             "template_values": {
-                "input_nml": {
-                    "input_forcing_winds": "C",
-                },
+                "input_forcing_winds": "C",
             },
         },
         "run_dir": "/tmp",
@@ -1324,7 +1322,7 @@ def test_schema_ww3_namelist(ww3_prop):
     assert not errors(
         {
             "template_file": "/path/to/ww3_shel.nml",
-            "template_values": {"input_nml": {"input_forcing_winds": "C"}},
+            "template_values": {"input_forcing_winds": "C"},
         }
     )
 
