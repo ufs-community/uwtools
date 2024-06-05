@@ -60,17 +60,6 @@ def fixture_path(suffix: str = "") -> Path:
     return fixture_pathobj(suffix)
 
 
-def fixture_uri(suffix: str = "") -> str:
-    """
-    Returns a file:// URI path to a test-fixture resource file.
-
-    :param suffix: A subpath relative to the location of the unit-test fixture resource files. The
-        prefix path to the resources files is known to Python and varies based on installation
-        location.
-    """
-    return fixture_pathobj(suffix).as_uri()
-
-
 def logged(caplog: LogCaptureFixture, msg: str) -> bool:
     """
     Does the given message occur in the log capture?

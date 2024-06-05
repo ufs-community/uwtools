@@ -23,7 +23,7 @@ lint() {
   msg Running linter
   (
     set -eux
-    pylint .
+    pylint -j 4 .
   )
   msg OK
 }
@@ -45,8 +45,7 @@ unittest() {
   msg Running unit tests
   (
     set -eux
-    coverage run -m pytest -vv .
-    coverage report
+    pytest --cov=uwtools -n 4 .
   )
   msg OK
 }
