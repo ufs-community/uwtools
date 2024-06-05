@@ -426,6 +426,10 @@ def test_Driver__runscript_execution_only(driverobj):
     assert driverobj._runscript(execution=["foo", "bar"]) == dedent(expected).strip()
 
 
+def test_Driver__runscript_done_file(driverobj):
+    assert driverobj._runscript_done_file == "runscript.concrete.done"
+
+
 def test_Driver__runscript_path(driverobj):
     assert driverobj._runscript_path == Path("/path/to/2024032218/run/runscript.concrete")
 

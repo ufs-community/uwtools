@@ -100,8 +100,10 @@ def test_readable_file(tmp_path):
 
 
 def test_readable_nofile():
-    with file.readable() as f:
-        assert hasattr(f, "read")
+    file._stdinproxy.cache_clear()
+    with patch.object(sys, "stdin", new=StringIO("hello")):
+        with file.readable() as f:
+            assert f.read() == "hello"
 
 
 def test_resource_path():

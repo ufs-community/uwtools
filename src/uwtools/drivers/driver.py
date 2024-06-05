@@ -237,7 +237,7 @@ class Driver(Assets):
         A run executed directly on the local system.
         """
         yield self._taskname("run via local execution")
-        path = self._rundir / f"done.{self._driver_name}"
+        path = self._rundir / self._runscript_done_file
         yield asset(path, path.is_file)
         yield self.provisioned_run_directory()
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
@@ -313,6 +313,13 @@ class Driver(Assets):
         return re.sub(r"\n\n\n+", "\n\n", rs.strip())
 
     @property
+    def _runscript_done_file(self):
+        """
+        The path to the done file produced by the successful completion of a run script.
+        """
+        return f"{self._runscript_path.name}.done"
+
+    @property
     def _runscript_path(self) -> Path:
         """
         Returns the path to the runscript.
@@ -343,7 +350,7 @@ class Driver(Assets):
             envvars=envvars,
             execution=[
                 "time %s" % self._runcmd,
-                "test $? -eq 0 && touch %s.done" % self._runscript_path.name,
+                "test $? -eq 0 && touch %s" % self._runscript_done_file,
             ],
             scheduler=self._scheduler if self._batch else None,
         )
