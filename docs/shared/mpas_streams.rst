@@ -19,6 +19,10 @@ The ``streams:`` block comprises a mapping from stream names to sub-mappings pro
 
 **Optional attributes:**
 
+  ``clobber_mode:``
+
+  One of ``append``, ``never_modify``, ``overwrite``, ``replace_files``, or ``truncate``. (type: string)
+
   ``filename_interval:``
 
   The interval at which the stream will be read. (type: string)
@@ -31,6 +35,10 @@ The ``streams:`` block comprises a mapping from stream names to sub-mappings pro
 
   The interval at which the stream will be read. Required if ``type:`` includes ``input``.  (type: string)
 
+  ``io_type:``
+
+  One of ``netcdf``, ``netcdf4``, ``pnetcdf``, or ``pnetcdf,cdf5``. (type: string)
+
   ``output_interval:``
 
   The interval at which the stream will be written. Required if ``type:`` includes ``output``. (type: string)
@@ -38,6 +46,14 @@ The ``streams:`` block comprises a mapping from stream names to sub-mappings pro
   ``packages:``
 
   Packages attached to the stream. (type: semicolon-separated list of strings)
+
+  ``precision:``
+
+  One of ``double``, ``native``, or ``single``. (type: string)
+
+  ``reference_time:``
+
+  A time that is an integral number of filename intervals from the timestamp of any file associated with the stream. (type: string)
 
   ``streams:``
 
