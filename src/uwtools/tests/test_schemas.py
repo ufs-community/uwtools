@@ -970,7 +970,7 @@ def test_schema_mpas_streams_properties_enum(mpas_streams):
             "is not one of ['overwrite', 'truncate', 'replace_files', 'never_modify', 'append']"
             in errors({k: {**v, "clobber_mode": None}})
         )
-        assert "is not one of ['pnetcdf4', 'pnetcdf,cdf5', 'netcdf', 'netcdf4']" in errors(
+        assert "is not one of ['pnetcdf', 'pnetcdf,cdf5', 'netcdf', 'netcdf4']" in errors(
             {k: {**v, "io_type": None}}
         )
         assert "is not one of ['single', 'double', 'native']" in errors(

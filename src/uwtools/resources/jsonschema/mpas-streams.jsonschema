@@ -60,7 +60,7 @@
       },
       "io_type": {
         "enum": [
-          "pnetcdf4",
+          "pnetcdf",
           "pnetcdf,cdf5",
           "netcdf",
           "netcdf4"
