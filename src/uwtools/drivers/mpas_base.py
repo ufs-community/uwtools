@@ -8,10 +8,11 @@ from pathlib import Path
 from typing import List, Optional
 
 from iotaa import asset, task, tasks
+from lxml import etree
+from lxml.etree import Element, SubElement
 
-from uwtools.api.template import render
 from uwtools.drivers.driver import Driver
-from uwtools.utils.tasks import file, filecopy, symlink
+from uwtools.utils.tasks import filecopy, symlink
 
 
 class MPASBase(Driver):
@@ -114,12 +115,33 @@ class MPASBase(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield file(path=Path(self._driver_config["streams"]["path"]))
-        render(
-            input_file=Path(self._driver_config["streams"]["path"]),
-            output_file=path,
-            values_src=self._driver_config["streams"]["values"],
-        )
+        yield None
+        streams = Element("streams")
+        for k, v in self._driver_config["streams"].items():
+            stream = SubElement(streams, "stream" if v["mutable"] else "immutable_stream")
+            stream.set("name", k)
+            for attr in ["type", "filename_template"]:
+                stream.set(attr, v[attr])
+            for attr in [
+                "clobber_mode",
+                "input_interval",
+                "io_type",
+                "output_interval",
+                "filename_interval",
+                "packages",
+                "precision",
+                "reference_time",
+            ]:
+                if attr in v:
+                    stream.set(attr, v[attr])
+            for elem in ("file", "stream", "var", "var_array", "var_struct"):
+                if items := v.get(f"{elem}s"):
+                    for item in items:
+                        SubElement(stream, elem, name=item)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        xml = etree.tostring(streams, pretty_print=True, encoding="utf-8").decode()
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(xml)
 
     # Private helper methods
 

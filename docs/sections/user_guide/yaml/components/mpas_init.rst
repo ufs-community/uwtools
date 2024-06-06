@@ -5,12 +5,12 @@ mpas_init
 
 Structured YAML to run MPAS Init is validated by JSON Schema and requires the ``mpas_init:`` block, described below. If ``mpas_init`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
-.. include:: ../../../../shared/injected_cycle.rst
+.. include:: /shared/injected_cycle.rst
 
 Here is a prototype UW YAML ``mpas_init:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/mpas_init.yaml
+.. literalinclude:: /shared/mpas_init.yaml
 
 An MPAS build provides prototype versions of certain required runtime files. Here, an arbitrarily named ``user:`` block defines an ``mpas_app`` variable, pointing to the directory where MPAS was installed, to reduce duplication in references to those files.
 
@@ -74,20 +74,11 @@ namelist:
 
 Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details).
 
-.. include:: ../../../../shared/validate_namelist.rst
+.. include:: /shared/validate_namelist.rst
 
 run_dir:
 ^^^^^^^^
 
 The path to the run directory.
 
-streams:
-^^^^^^^^
-
-  **path:**
-
-  The path to the base ``streams.init_atmosphere`` file that comes from the MPAS build.
-
-  **values:**
-
-  The set of key-value pairs that will render the appropriate XML entries in the streams input file.
+.. include:: /shared/mpas_streams.rst

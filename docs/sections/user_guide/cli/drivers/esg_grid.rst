@@ -23,7 +23,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/esg_grid.yaml
+.. literalinclude:: /shared/esg_grid.yaml
 
 Its contents are described in depth in section :ref:`esg_grid_yaml`.
 
@@ -49,7 +49,7 @@ The driver creates a ``runscript.esg_grid`` file in the directory specified by `
 
      $ uw esg_grid run --config-file config.yaml --batch --dry-run
 
-.. include:: ../../../../shared/key_path.rst
+.. include:: /shared/key_path.rst
 
 * The ``run`` task depends on the other available tasks and executes them as prerequisites. It is possible to execute any task directly, which entails execution of any of *its* dependencies. For example, to create an ``esg_grid`` run directory provisioned with all the files, directories, symlinks, etc. required per the configuration file:
 

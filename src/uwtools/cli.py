@@ -150,7 +150,7 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=FORMATS)
     _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to the block to be output")
-    _add_arg_values_needed(optional)
+    _add_arg_values_needed(optional, helpmsg="Print report of values needed to realize config")
     _add_arg_total(optional)
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
@@ -473,7 +473,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_values_format(optional, choices=FORMATS)
     _add_arg_env(optional)
     _add_arg_search_path(optional)
-    _add_arg_values_needed(optional)
+    _add_arg_values_needed(optional, helpmsg="Print report of values needed to render template")
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_key_eq_val_pairs(optional)
@@ -784,11 +784,11 @@ def _add_arg_values_format(group: Group, choices: List[str]) -> None:
     )
 
 
-def _add_arg_values_needed(group: Group) -> None:
+def _add_arg_values_needed(group: Group, helpmsg: str) -> None:
     group.add_argument(
         _switch(STR.valsneeded),
         action="store_true",
-        help="Print report of values needed to render template",
+        help=helpmsg,
     )
 
 

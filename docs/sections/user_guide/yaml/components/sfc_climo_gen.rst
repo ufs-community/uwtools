@@ -8,7 +8,7 @@ Structured YAML to run :sfc-climo-gen:`sfc_climo_gen<>` is validated by JSON Sch
 Here is a prototype UW YAML ``sfc_climo_gen:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/sfc_climo_gen.yaml
+.. literalinclude:: /shared/sfc_climo_gen.yaml
 
 UW YAML for the ``sfc_climo_gen:`` Block
 ----------------------------------------
@@ -23,7 +23,7 @@ namelist:
 
 Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). Namelist options are described :ufs-utils:`here<id57>`.
 
-.. include:: ../../../../shared/validate_namelist.rst
+.. include:: /shared/validate_namelist.rst
 
 run_dir:
 ^^^^^^^^

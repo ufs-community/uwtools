@@ -5,12 +5,12 @@ fv3
 
 Structured YAML to run FV3 is validated by JSON Schema and requires the ``fv3:`` block, described below. If FV3 is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required. The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
 
-.. include:: ../../../../shared/injected_cycle.rst
+.. include:: /shared/injected_cycle.rst
 
 Here is a prototype UW YAML ``fv3:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/fv3.yaml
+.. literalinclude:: /shared/fv3.yaml
 
 UW YAML for the ``fv3:`` Block
 ------------------------------
@@ -77,7 +77,7 @@ namelist:
 
 Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<namelist-file-input-nml>`.
 
-.. include:: ../../../../shared/validate_namelist.rst
+.. include:: /shared/validate_namelist.rst
 
 run_dir:
 ^^^^^^^^

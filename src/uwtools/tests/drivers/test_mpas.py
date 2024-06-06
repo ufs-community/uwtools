@@ -12,6 +12,7 @@ import f90nml  # type: ignore
 import pytest
 import yaml
 from iotaa import refs
+from lxml import etree
 from pytest import fixture, raises
 
 from uwtools.drivers import mpas
@@ -33,6 +34,10 @@ def config(tmp_path):
                     "walltime": "01:30:00",
                 },
             },
+            "files_to_link": {
+                "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
+                "CAM_AEROPT_DATA.DBL": "src/MPAS-Model/CAM_AEROPT_DATA.DBL",
+            },
             "lateral_boundary_conditions": {
                 "interval_hours": 1,
                 "offset": 0,
@@ -47,14 +52,27 @@ def config(tmp_path):
             },
             "run_dir": str(tmp_path),
             "streams": {
-                "path": str(tmp_path / "streams.atmosphere.in"),
-                "values": {
-                    "world": "user",
+                "input": {
+                    "filename_template": "conus.init.nc",
+                    "input_interval": "initial_only",
+                    "mutable": False,
+                    "type": "input",
                 },
-            },
-            "files_to_link": {
-                "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
-                "CAM_AEROPT_DATA.DBL": "src/MPAS-Model/CAM_AEROPT_DATA.DBL",
+                "output": {
+                    "clobber_mode": "overwrite",
+                    "filename_template": "history.$Y-$M-$D_$h.$m.$s.nc",
+                    "files": ["stream_list.atmosphere.output"],
+                    "io_type": "pnetcdf",
+                    "mutable": True,
+                    "output_interval": "6:00:00",
+                    "precision": "single",
+                    "reference_time": "2024-06-06 00:00:00",
+                    "streams": ["stream1", "stream2"],
+                    "type": "output",
+                    "vars": ["v1", "v2"],
+                    "var_arrays": ["va1", "va2"],
+                    "var_structs": ["vs1", "vs2"],
+                },
             },
         },
         "platform": {
@@ -80,6 +98,30 @@ def cycle():
 @fixture
 def driverobj(config_file, cycle):
     return mpas.MPAS(config=config_file, cycle=cycle, batch=True)
+
+
+# Helpers
+
+
+def streams_file(config, driverobj, drivername):
+    array_elements = {"file", "stream", "var", "var_array", "var_struct"}
+    array_elements_tested = set()
+    driverobj.streams_file()
+    path = Path(driverobj._driver_config["run_dir"]) / driverobj._streams_fn
+    with open(path, "r", encoding="utf-8") as f:
+        xml = etree.parse(f).getroot()
+    assert xml.tag == "streams"
+    for child in xml.getchildren():  # type: ignore
+        block = config[drivername]["streams"][child.get("name")]
+        for k, v in block.items():
+            if k not in [*[f"{e}s" for e in array_elements], "mutable"]:
+                assert child.get(k) == v
+        assert child.tag == "stream" if block["mutable"] else "immutable_stream"
+        for e in array_elements:
+            for name in block.get(f"{e}s", []):
+                assert child.xpath(f"//{e}[@name='{name}']")
+                array_elements_tested.add(e)
+    assert array_elements_tested == array_elements
 
 
 # Tests
@@ -192,13 +234,8 @@ def test_MPAS_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_MPAS_streams(driverobj):
-    src = driverobj._driver_config["streams"]["path"]
-    with open(src, "w", encoding="utf-8") as f:
-        f.write("Hello, {{ world }}")
-    assert not (driverobj._rundir / "streams.atmosphere").is_file()
-    driverobj.streams_file()
-    assert (driverobj._rundir / "streams.atmosphere").is_file()
+def test_MPAS_streams_file(config, driverobj):
+    streams_file(config, driverobj, "mpas")
 
 
 def test_MPAS__runscript_path(driverobj):

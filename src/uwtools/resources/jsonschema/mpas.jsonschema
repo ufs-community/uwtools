@@ -69,19 +69,7 @@
           "type": "string"
         },
         "streams": {
-          "properties": {
-            "path": {
-              "type": "string"
-            },
-            "values": {
-              "type": "object"
-            }
-          },
-          "required": [
-            "path",
-            "values"
-          ],
-          "type": "object"
+          "$ref": "urn:uwtools:mpas-streams"
         }
       },
       "required": [

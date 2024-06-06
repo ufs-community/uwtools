@@ -82,6 +82,35 @@ def mpas_init_prop():
 
 
 @fixture
+def mpas_streams():
+    return {
+        "input": {
+            "filename_template": "init.nc",
+            "input_interval": "initial_only",
+            "mutable": False,
+            "type": "input",
+        },
+        "output": {
+            "clobber_mode": "overwrite",
+            "filename_interval": "input_interval",
+            "filename_template": "output.$Y-$M-$D $h.$m.$s.nc",
+            "files": ["f1", "f2"],
+            "io_type": "netcdf4",
+            "mutable": True,
+            "output_interval": "6:00:00",
+            "packages": "pkg",
+            "precision": "double",
+            "reference_time": "2014-01-01 00:00:00",
+            "streams": ["s1", "s2"],
+            "type": "output",
+            "var_arrays": ["va1", "va2"],
+            "var_structs": ["vs1", "vs2"],
+            "vars": ["v1", "v2"],
+        },
+    }
+
+
+@fixture
 def sfc_climo_gen_prop():
     return partial(schema_validator, "sfc-climo-gen", "properties", "sfc_climo_gen", "properties")
 
@@ -676,12 +705,12 @@ def test_schema_make_solo_mosaic_run_dir(make_solo_mosaic_prop):
 # mpas
 
 
-def test_schema_mpas():
+def test_schema_mpas(mpas_streams):
     config = {
         "execution": {"executable": "atmosphere_model"},
         "namelist": {"base_file": "path/to/simple.nml", "validate": True},
         "run_dir": "path/to/rundir",
-        "streams": {"path": "path/to/streams.atmosphere.in", "values": {"world": "user"}},
+        "streams": mpas_streams,
     }
     errors = schema_validator("mpas", "properties", "mpas")
     # Basic correctness:
@@ -767,30 +796,15 @@ def test_schema_mpas_run_dir(mpas_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-def test_schema_mpas_streams(mpas_prop):
-    config = {"path": "/some/path", "values": {"nml": {"var": "val"}}}
-    errors = mpas_prop("streams")
-    # Basic correctness:
-    assert not errors(config)
-    # All streams items are required:
-    assert "'path' is a required property" in errors(with_del(config, "path"))
-    assert "'values' is a required property" in errors(with_del(config, "values"))
-    # path must be a string:
-    assert "1 is not of type 'string'" in errors(with_set(config, 1, "path"))
-    # values must be an object:
-    assert "1 is not of type 'object'" in errors(with_set(config, -1, "values"))
-    assert "'s' is not of type 'object'" in errors(with_set(config, "s", "values"))
-
-
 # mpas_init
 
 
-def test_schema_mpas_init():
+def test_schema_mpas_init(mpas_streams):
     config = {
         "execution": {"executable": "mpas_init"},
         "namelist": {"base_file": "path/to/simple.nml", "validate": True},
         "run_dir": "path/to/rundir",
-        "streams": {"path": "path/to/streams.atmosphere.in", "values": {"world": "user"}},
+        "streams": mpas_streams,
     }
     errors = schema_validator("mpas-init", "properties", "mpas_init")
     # Basic correctness:
@@ -870,19 +884,115 @@ def test_schema_mpas_init_run_dir(mpas_init_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-def test_schema_mpas_init_streams(mpas_init_prop):
-    config = {"path": "/some/path", "values": {"nml": {"var": "val"}}}
-    errors = mpas_init_prop("streams")
+# mpas-streams
+
+
+def test_schema_mpas_streams(mpas_streams):
+    errors = schema_validator("mpas-streams")
     # Basic correctness:
-    assert not errors(config)
-    # All streams items are required:
-    assert "'path' is a required property" in errors(with_del(config, "path"))
-    assert "'values' is a required property" in errors(with_del(config, "values"))
-    # path must be a string:
-    assert "1 is not of type 'string'" in errors(with_set(config, 1, "path"))
-    # values must be an object:
-    assert "1 is not of type 'object'" in errors(with_set(config, -1, "values"))
-    assert "'s' is not of type 'object'" in errors(with_set(config, "s", "values"))
+    assert not errors(mpas_streams)
+
+
+def test_schema_mpas_streams_intervals(mpas_streams):
+    # Interval items are conditionally required based on input/output settings.
+    errors = schema_validator("mpas-streams")
+    assert "'input_interval' is a required property" in errors(
+        with_del(mpas_streams, "input", "input_interval")
+    )
+    assert "'output_interval' is a required property" in errors(
+        with_del(mpas_streams, "output", "output_interval")
+    )
+    x = {"x": {"filename_template": "t", "mutable": False, "type": "input;output"}}
+    assert "'input_interval' is a required property" in errors(
+        {**x, "output_interval": "initial_only"}
+    )
+    assert "'output_interval' is a required property" in errors(
+        {**x, "input_interval": "initial_only"}
+    )
+
+
+def test_schema_mpas_streams_properties_optional(mpas_streams):
+    props = {
+        "clobber_mode",
+        "filename_interval",
+        "files",
+        "io_type",
+        "packages",
+        "precision",
+        "reference_time",
+        "streams",
+        "var_arrays",
+        "var_structs",
+        "vars",
+    }
+    exercised = set()
+    errors = schema_validator("mpas-streams")
+    for k, v in mpas_streams.items():
+        for prop in props:
+            if prop in v:
+                assert not errors(with_del(mpas_streams, k, prop))
+                exercised.add(prop)
+    assert exercised == props
+
+
+def test_schema_mpas_streams_properties_required(mpas_streams):
+    props = {"filename_template", "mutable", "type"}
+    exercised = set()
+    errors = schema_validator("mpas-streams")
+    for k, v in mpas_streams.items():
+        for prop in props:
+            if prop in v:
+                assert "is a required property" in errors(with_del(mpas_streams, k, prop))
+                exercised.add(prop)
+    assert exercised == props
+
+
+def test_schema_mpas_streams_properties_values_array(mpas_streams):
+    errors = schema_validator("mpas-streams")
+    for k, v in mpas_streams.items():
+        for prop in ["files", "streams", "vars", "var_arrays", "var_structs"]:
+            assert "is not of type 'array'" in errors({k: {**v, prop: None}})
+            assert "is not of type 'string'" in errors({k: {**v, prop: [None]}})
+            assert "should be non-empty" in errors({k: {**v, prop: []}})
+
+
+def test_schema_mpas_streams_properties_boolean(mpas_streams):
+    errors = schema_validator("mpas-streams")
+    for k, v in mpas_streams.items():
+        for prop in ["mutable"]:
+            assert "is not of type 'boolean'" in errors({k: {**v, prop: None}})
+
+
+def test_schema_mpas_streams_properties_enum(mpas_streams):
+    errors = schema_validator("mpas-streams")
+    for k, v in mpas_streams.items():
+        assert (
+            "is not one of ['overwrite', 'truncate', 'replace_files', 'never_modify', 'append']"
+            in errors({k: {**v, "clobber_mode": None}})
+        )
+        assert "is not one of ['pnetcdf', 'pnetcdf,cdf5', 'netcdf', 'netcdf4']" in errors(
+            {k: {**v, "io_type": None}}
+        )
+        assert "is not one of ['single', 'double', 'native']" in errors(
+            {k: {**v, "precision": None}}
+        )
+        assert "is not one of ['input', 'input;output', 'none', 'output'" in errors(
+            {k: {**v, "type": None}}
+        )
+
+
+def test_schema_mpas_streams_properties_string(mpas_streams):
+    errors = schema_validator("mpas-streams")
+    for k, v in mpas_streams.items():
+        for prop in [
+            "filename_interval",
+            "filename_template",
+            "input_interval",
+            "output_interval",
+            "packages",
+            "reference_time",
+        ]:
+            assert "is not of type 'string'" in errors({k: {**v, prop: None}})
 
 
 # namelist

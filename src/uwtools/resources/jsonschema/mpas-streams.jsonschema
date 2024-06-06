@@ -1,0 +1,133 @@
+{
+  "additionalProperties": {
+    "addtionalProperties": false,
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "type": {
+              "pattern": "input.*"
+            }
+          }
+        },
+        "then": {
+          "required": [
+            "input_interval"
+          ]
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "type": {
+              "pattern": ".*output"
+            }
+          }
+        },
+        "then": {
+          "required": [
+            "output_interval"
+          ]
+        }
+      }
+    ],
+    "minItems": 1,
+    "properties": {
+      "clobber_mode": {
+        "enum": [
+          "overwrite",
+          "truncate",
+          "replace_files",
+          "never_modify",
+          "append"
+        ]
+      },
+      "filename_interval": {
+        "type": "string"
+      },
+      "filename_template": {
+        "type": "string"
+      },
+      "files": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "input_interval": {
+        "type": "string"
+      },
+      "io_type": {
+        "enum": [
+          "pnetcdf",
+          "pnetcdf,cdf5",
+          "netcdf",
+          "netcdf4"
+        ]
+      },
+      "mutable": {
+        "type": "boolean"
+      },
+      "output_interval": {
+        "type": "string"
+      },
+      "packages": {
+        "type": "string"
+      },
+      "precision": {
+        "enum": [
+          "single",
+          "double",
+          "native"
+        ]
+      },
+      "reference_time": {
+        "type": "string"
+      },
+      "streams": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "type": {
+        "enum": [
+          "input",
+          "input;output",
+          "none",
+          "output"
+        ]
+      },
+      "var_arrays": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "var_structs": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "vars": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "filename_template",
+      "mutable",
+      "type"
+    ],
+    "type": "object"
+  },
+  "type": "object"
+}

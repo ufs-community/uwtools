@@ -29,7 +29,7 @@ Optional arguments:
   --key-path KEY[.KEY...]
       Dot-separated path of keys to the block to be output
   --values-needed
-      Print report of values needed to render template
+      Print report of values needed to realize config
   --total
       Require rendering of all Jinja2 variables/expressions
   --dry-run

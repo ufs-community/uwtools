@@ -23,7 +23,7 @@ Examples
 The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/make_solo_mosaic.yaml
+.. literalinclude:: /shared/make_solo_mosaic.yaml
 
 Its contents are described in section :ref:`make_solo_mosaic_yaml`.
 
@@ -55,4 +55,4 @@ Its contents are described in section :ref:`make_solo_mosaic_yaml`.
 
      $ uw make_solo_mosaic run --config-file config.yaml --batch --dry-run
 
-.. include:: ../../../../shared/key_path.rst
+.. include:: /shared/key_path.rst

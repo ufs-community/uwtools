@@ -18,6 +18,7 @@ from uwtools.drivers import mpas_init
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
+from uwtools.tests.drivers.test_mpas import streams_file
 from uwtools.tests.support import fixture_path, logged
 
 # Fixtures
@@ -27,30 +28,17 @@ from uwtools.tests.support import fixture_path, logged
 def config(tmp_path):
     return {
         "mpas_init": {
-            "execution": {
-                "executable": "mpas_init",
-                "batchargs": {
-                    "walltime": "01:30:00",
-                },
-            },
             "boundary_conditions": {
                 "interval_hours": 1,
                 "length": 1,
                 "offset": 0,
                 "path": str(tmp_path / "input_path"),
             },
-            "namelist": {
-                "base_file": str(fixture_path("simple.nml")),
-                "update_values": {
-                    "nhyd_model": {"config_start_time": "12", "config_stop_time": "12"},
+            "execution": {
+                "batchargs": {
+                    "walltime": "01:30:00",
                 },
-            },
-            "run_dir": str(tmp_path),
-            "streams": {
-                "path": str(tmp_path / "streams.init_atmosphere.in"),
-                "values": {
-                    "world": "user",
-                },
+                "executable": "mpas_init",
             },
             "files_to_link": {
                 "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
@@ -66,6 +54,32 @@ def config(tmp_path):
                 "RRTMG_SW_DATA.DBL": "src/MPAS-Model/RRTMG_SW_DATA.DBL",
                 "SOILPARM.TBL": "src/MPAS-Model/SOILPARM.TBL",
                 "VEGPARM.TBL": "src/MPAS-Model/VEGPARM.TBL",
+            },
+            "namelist": {
+                "base_file": str(fixture_path("simple.nml")),
+                "update_values": {
+                    "nhyd_model": {"config_start_time": "12", "config_stop_time": "12"},
+                },
+            },
+            "run_dir": str(tmp_path),
+            "streams": {
+                "input": {
+                    "filename_template": "conus.static.nc",
+                    "input_interval": "initial_only",
+                    "mutable": False,
+                    "type": "input",
+                },
+                "output": {
+                    "filename_template": "conus.init.nc",
+                    "files": ["stream_list.atmosphere.output"],
+                    "mutable": False,
+                    "output_interval": "initial_only",
+                    "streams": ["stream1", "stream2"],
+                    "type": "output",
+                    "vars": ["v1", "v2"],
+                    "var_arrays": ["va1", "va2"],
+                    "var_structs": ["vs1", "vs2"],
+                },
             },
         },
         "platform": {
@@ -124,10 +138,7 @@ def test_MPASInit_files_copied_and_linked(config, cycle, key, task, test, tmp_pa
     atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
     config["mpas_init"].update({key: {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    driverobj = mpas_init.MPASInit(config=path, cycle=cycle, batch=True)
+    driverobj = mpas_init.MPASInit(config=config, cycle=cycle, batch=True)
     atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
     assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
     atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
@@ -213,13 +224,8 @@ def test_MPASInit_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_MPASInit_streams_file(driverobj):
-    src = driverobj._driver_config["streams"]["path"]
-    with open(src, "w", encoding="utf-8") as f:
-        f.write("Hello, {{ world }}")
-    assert not (driverobj._rundir / "streams.init_atmosphere").is_file()
-    driverobj.streams_file()
-    assert (driverobj._rundir / "streams.init_atmosphere").is_file()
+def test_MPASInit_streams_file(config, driverobj):
+    streams_file(config, driverobj, "mpas_init")
 
 
 def test_MPASInit__runscript_path(driverobj):
