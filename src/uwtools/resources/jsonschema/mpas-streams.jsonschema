@@ -33,6 +33,15 @@
     ],
     "minItems": 1,
     "properties": {
+      "clobber_mode": {
+        "enum": [
+          "overwrite",
+          "truncate",
+          "replace_files",
+          "never_modify",
+          "append"
+        ]
+      },
       "filename_interval": {
         "type": "string"
       },
@@ -49,6 +58,14 @@
       "input_interval": {
         "type": "string"
       },
+      "io_type": {
+        "enum": [
+          "pnetcdf4",
+          "pnetcdf,cdf5",
+          "netcdf",
+          "netcdf4"
+        ]
+      },
       "mutable": {
         "type": "boolean"
       },
@@ -56,6 +73,16 @@
         "type": "string"
       },
       "packages": {
+        "type": "string"
+      },
+      "precision": {
+        "enum": [
+          "single",
+          "double",
+          "native"
+        ]
+      },
+      "reference_time": {
         "type": "string"
       },
       "streams": {

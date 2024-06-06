@@ -91,17 +91,21 @@ def mpas_streams():
             "type": "input",
         },
         "output": {
+            "clobber_mode": "overwrite",
             "filename_interval": "input_interval",
             "filename_template": "output.$Y-$M-$D $h.$m.$s.nc",
             "files": ["f1", "f2"],
+            "io_type": "netcdf4",
             "mutable": True,
             "output_interval": "6:00:00",
             "packages": "pkg",
+            "precision": "double",
+            "reference_time": "2014-01-01 00:00:00",
             "streams": ["s1", "s2"],
             "type": "output",
-            "vars": ["v1", "v2"],
             "var_arrays": ["va1", "va2"],
             "var_structs": ["vs1", "vs2"],
+            "vars": ["v1", "v2"],
         },
     }
 
