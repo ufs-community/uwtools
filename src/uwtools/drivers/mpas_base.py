@@ -122,7 +122,16 @@ class MPASBase(Driver):
             stream.set("name", k)
             for attr in ["type", "filename_template"]:
                 stream.set(attr, v[attr])
-            for attr in ["input_interval", "output_interval", "filename_interval", "packages"]:
+            for attr in [
+                "clobber_mode",
+                "input_interval",
+                "io_type",
+                "output_interval",
+                "filename_interval",
+                "packages",
+                "precision",
+                "reference_time",
+            ]:
                 if attr in v:
                     stream.set(attr, v[attr])
             for elem in ("file", "stream", "var", "var_array", "var_struct"):
