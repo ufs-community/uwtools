@@ -28,17 +28,32 @@ from uwtools.tests.support import fixture_path, logged
 def config(tmp_path):
     return {
         "mpas_init": {
-            "execution": {
-                "executable": "mpas_init",
-                "batchargs": {
-                    "walltime": "01:30:00",
-                },
-            },
             "boundary_conditions": {
                 "interval_hours": 1,
                 "length": 1,
                 "offset": 0,
                 "path": str(tmp_path / "input_path"),
+            },
+            "execution": {
+                "batchargs": {
+                    "walltime": "01:30:00",
+                },
+                "executable": "mpas_init",
+            },
+            "files_to_link": {
+                "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
+                "CAM_AEROPT_DATA.DBL": "src/MPAS-Model/CAM_AEROPT_DATA.DBL",
+                "GENPARM.TBL": "src/MPAS-Model/GENPARM.TBL",
+                "LANDUSE.TBL": "src/MPAS-Model/LANDUSE.TBL",
+                "OZONE_DAT.TBL": "src/MPAS-Model/OZONE_DAT.TBL",
+                "OZONE_LAT.TBL": "src/MPAS-Model/OZONE_LAT.TBL",
+                "OZONE_PLEV.TBL": "src/MPAS-Model/OZONE_PLEV.TBL",
+                "RRTMG_LW_DATA": "src/MPAS-Model/RRTMG_LW_DATA",
+                "RRTMG_LW_DATA.DBL": "src/MPAS-Model/RRTMG_LW_DATA.DBL",
+                "RRTMG_SW_DATA": "src/MPAS-Model/RRTMG_SW_DATA",
+                "RRTMG_SW_DATA.DBL": "src/MPAS-Model/RRTMG_SW_DATA.DBL",
+                "SOILPARM.TBL": "src/MPAS-Model/SOILPARM.TBL",
+                "VEGPARM.TBL": "src/MPAS-Model/VEGPARM.TBL",
             },
             "namelist": {
                 "base_file": str(fixture_path("simple.nml")),
@@ -56,25 +71,15 @@ def config(tmp_path):
                 },
                 "output": {
                     "filename_template": "conus.init.nc",
+                    "files": ["stream_list.atmosphere.output"],
                     "mutable": False,
                     "output_interval": "initial_only",
+                    "streams": ["stream1", "stream2"],
                     "type": "output",
+                    "vars": ["v1", "v2"],
+                    "var_arrays": ["va1", "va2"],
+                    "var_structs": ["vs1", "vs2"],
                 },
-            },
-            "files_to_link": {
-                "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
-                "CAM_AEROPT_DATA.DBL": "src/MPAS-Model/CAM_AEROPT_DATA.DBL",
-                "GENPARM.TBL": "src/MPAS-Model/GENPARM.TBL",
-                "LANDUSE.TBL": "src/MPAS-Model/LANDUSE.TBL",
-                "OZONE_DAT.TBL": "src/MPAS-Model/OZONE_DAT.TBL",
-                "OZONE_LAT.TBL": "src/MPAS-Model/OZONE_LAT.TBL",
-                "OZONE_PLEV.TBL": "src/MPAS-Model/OZONE_PLEV.TBL",
-                "RRTMG_LW_DATA": "src/MPAS-Model/RRTMG_LW_DATA",
-                "RRTMG_LW_DATA.DBL": "src/MPAS-Model/RRTMG_LW_DATA.DBL",
-                "RRTMG_SW_DATA": "src/MPAS-Model/RRTMG_SW_DATA",
-                "RRTMG_SW_DATA.DBL": "src/MPAS-Model/RRTMG_SW_DATA.DBL",
-                "SOILPARM.TBL": "src/MPAS-Model/SOILPARM.TBL",
-                "VEGPARM.TBL": "src/MPAS-Model/VEGPARM.TBL",
             },
         },
         "platform": {

@@ -34,6 +34,10 @@ def config(tmp_path):
                     "walltime": "01:30:00",
                 },
             },
+            "files_to_link": {
+                "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
+                "CAM_AEROPT_DATA.DBL": "src/MPAS-Model/CAM_AEROPT_DATA.DBL",
+            },
             "lateral_boundary_conditions": {
                 "interval_hours": 1,
                 "offset": 0,
@@ -56,17 +60,15 @@ def config(tmp_path):
                 },
                 "output": {
                     "filename_template": "history.$Y-$M-$D_$h.$m.$s.nc",
-                    "files": [
-                        "stream_list.atmosphere.output",
-                    ],
+                    "files": ["stream_list.atmosphere.output"],
                     "mutable": True,
                     "output_interval": "6:00:00",
+                    "streams": ["stream1", "stream2"],
                     "type": "output",
+                    "vars": ["v1", "v2"],
+                    "var_arrays": ["va1", "va2"],
+                    "var_structs": ["vs1", "vs2"],
                 },
-            },
-            "files_to_link": {
-                "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
-                "CAM_AEROPT_DATA.DBL": "src/MPAS-Model/CAM_AEROPT_DATA.DBL",
             },
         },
         "platform": {
@@ -98,20 +100,24 @@ def driverobj(config_file, cycle):
 
 
 def streams_file(config, driverobj, drivername):
+    array_elements = {"file", "stream", "var", "var_array", "var_struct"}
+    array_elements_tested = set()
     driverobj.streams_file()
     path = Path(driverobj._driver_config["run_dir"]) / driverobj._streams_fn
     with open(path, "r", encoding="utf-8") as f:
         xml = etree.parse(f).getroot()
     assert xml.tag == "streams"
-    children = xml.getchildren()  # type: ignore
-    for child in children:
+    for child in xml.getchildren():  # type: ignore
         block = config[drivername]["streams"][child.get("name")]
         for k, v in block.items():
-            if k not in ["files", "mutable"]:
+            if k not in [*[f"{e}s" for e in array_elements], "mutable"]:
                 assert child.get(k) == v
         assert child.tag == "stream" if block["mutable"] else "immutable_stream"
-        for name in block.get("files", []):
-            assert child.xpath(f"//file[@name='{name}']")
+        for e in array_elements:
+            for name in block.get(f"{e}s", []):
+                assert child.xpath(f"//{e}[@name='{name}']")
+                array_elements_tested.add(e)
+    assert array_elements_tested == array_elements
 
 
 # Tests
