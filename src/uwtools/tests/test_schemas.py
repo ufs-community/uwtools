@@ -908,9 +908,8 @@ def test_schema_mpas_streams_intervals(mpas_streams):
 
 
 def test_schema_mpas_streams_properties(mpas_streams):
+    tested_required, tested_optional = False, False
     errors = schema_validator("mpas-streams")
-    # Various property tests:
-    tested_required, tested_optional, tested_types = False, False, False
     for k, v in mpas_streams.items():
         # Certain properties are required:
         for prop in ["filename_template", "mutable", "type"]:
@@ -949,12 +948,9 @@ def test_schema_mpas_streams_properties(mpas_streams):
             "input_interval",
             "output_interval",
             "packages",
-            "name",
         ]:
-            if prop in v:
-                assert "is not of type 'string'" in errors({k: {**v, prop: None}})
-                tested_types = True
-    assert tested_required and tested_optional and tested_types
+            assert "is not of type 'string'" in errors({k: {**v, prop: None}})
+    assert tested_required and tested_optional
 
 
 # namelist
