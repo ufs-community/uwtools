@@ -125,9 +125,10 @@ class MPASBase(Driver):
             for attr in ["input_interval", "output_interval", "filename_interval", "packages"]:
                 if attr in v:
                     stream.set(attr, v[attr])
-            if files := v.get("files"):
-                for file in files:
-                    SubElement(stream, "file", name=file)
+            for elem in ("file", "stream", "var", "var_array", "var_struct"):
+                if items := v.get(f"{elem}s"):
+                    for item in items:
+                        SubElement(stream, elem, name=item)
         path.parent.mkdir(parents=True, exist_ok=True)
         xml = etree.tostring(streams, pretty_print=True, encoding="utf-8").decode()
         with open(path, "w", encoding="utf-8") as f:

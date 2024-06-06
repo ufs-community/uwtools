@@ -58,6 +58,13 @@
       "packages": {
         "type": "string"
       },
+      "streams": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
       "type": {
         "enum": [
           "input",
@@ -65,6 +72,27 @@
           "none",
           "output"
         ]
+      },
+      "var_arrays": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "var_structs": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "vars": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
       }
     },
     "required": [
