@@ -97,7 +97,11 @@ def mpas_streams():
             "mutable": True,
             "output_interval": "6:00:00",
             "packages": "pkg",
+            "streams": ["s1", "s2"],
             "type": "output",
+            "vars": ["v1", "v2"],
+            "var_arrays": ["va1", "va2"],
+            "var_structs": ["vs1", "vs2"],
         },
     }
 
@@ -914,11 +918,31 @@ def test_schema_mpas_streams_properties(mpas_streams):
                 assert "is a required property" in errors(with_del(mpas_streams, k, prop))
                 tested_required = True
         # Certain additional properties are optional:
-        for prop in ["filename_interval", "files", "packages"]:
+        for prop in [
+            "filename_interval",
+            "files",
+            "packages",
+            "streams",
+            "vars",
+            "var_arrays",
+            "var_structs",
+        ]:
             if prop in v:
                 assert not errors(with_del(mpas_streams, k, prop))
                 tested_optional = True
-        # Properties must have correct types:
+        # Test array values:
+        for prop in ["files", "streams", "vars", "var_arrays", "var_structs"]:
+            assert "is not of type 'array'" in errors({k: {**v, prop: None}})
+            assert "is not of type 'string'" in errors({k: {**v, prop: [None]}})
+            assert "should be non-empty" in errors({k: {**v, prop: []}})
+        # Test boolean values:
+        for prop in ["mutable"]:
+            assert "is not of type 'boolean'" in errors({k: {**v, prop: None}})
+        # Test enum values:
+        assert "is not one of ['input', 'input;output', 'none', 'output'" in errors(
+            {k: {**v, "type": None}}
+        )
+        # Test string values:
         for prop in [
             "filename_interval",
             "filename_template",
@@ -930,14 +954,6 @@ def test_schema_mpas_streams_properties(mpas_streams):
             if prop in v:
                 assert "is not of type 'string'" in errors({k: {**v, prop: None}})
                 tested_types = True
-        assert "is not of type 'array'" in errors({k: {**v, "files": None}})
-        assert "is not of type 'boolean'" in errors({k: {**v, "mutable": None}})
-        assert "is not of type 'string'" in errors({k: {**v, "files": [None]}})
-        assert "is not one of ['input', 'input;output', 'none', 'output'" in errors(
-            {k: {**v, "type": None}}
-        )
-        # Array items should not be empty:
-        assert "should be non-empty" in errors({k: {**v, "files": []}})
     assert tested_required and tested_optional and tested_types
 
 
