@@ -894,8 +894,8 @@ def test_schema_mpas_streams(mpas_streams):
 
 
 def test_schema_mpas_streams_intervals(mpas_streams):
+    # Interval items are conditionally required based on input/output settings.
     errors = schema_validator("mpas-streams")
-    # Interval items are conditionally required based on input/output settings:
     assert "'input_interval' is a required property" in errors(
         with_del(mpas_streams, "input", "input_interval")
     )
@@ -912,59 +912,85 @@ def test_schema_mpas_streams_intervals(mpas_streams):
 
 
 def test_schema_mpas_streams_properties_optional(mpas_streams):
-    exercised = False
+    props = {
+        "clobber_mode",
+        "filename_interval",
+        "files",
+        "io_type",
+        "packages",
+        "precision",
+        "reference_time",
+        "streams",
+        "var_arrays",
+        "var_structs",
+        "vars",
+    }
+    exercised = set()
     errors = schema_validator("mpas-streams")
     for k, v in mpas_streams.items():
-        # Certain additional properties are optional:
-        for prop in [
-            "filename_interval",
-            "files",
-            "packages",
-            "streams",
-            "vars",
-            "var_arrays",
-            "var_structs",
-        ]:
+        for prop in props:
             if prop in v:
                 assert not errors(with_del(mpas_streams, k, prop))
-                exercised = True
-    assert exercised
+                exercised.add(prop)
+    assert exercised == props
 
 
 def test_schema_mpas_streams_properties_required(mpas_streams):
-    exercised = False
+    props = {"filename_template", "mutable", "type"}
+    exercised = set()
     errors = schema_validator("mpas-streams")
     for k, v in mpas_streams.items():
-        # Certain properties are required:
-        for prop in ["filename_template", "mutable", "type"]:
+        for prop in props:
             if prop in v:
                 assert "is a required property" in errors(with_del(mpas_streams, k, prop))
-                exercised = True
-    assert exercised
+                exercised.add(prop)
+    assert exercised == props
 
 
-def test_schema_mpas_streams_properties_values(mpas_streams):
+def test_schema_mpas_streams_properties_values_array(mpas_streams):
     errors = schema_validator("mpas-streams")
     for k, v in mpas_streams.items():
-        # Test array values:
         for prop in ["files", "streams", "vars", "var_arrays", "var_structs"]:
             assert "is not of type 'array'" in errors({k: {**v, prop: None}})
             assert "is not of type 'string'" in errors({k: {**v, prop: [None]}})
             assert "should be non-empty" in errors({k: {**v, prop: []}})
-        # Test boolean values:
+
+
+def test_schema_mpas_streams_properties_boolean(mpas_streams):
+    errors = schema_validator("mpas-streams")
+    for k, v in mpas_streams.items():
         for prop in ["mutable"]:
             assert "is not of type 'boolean'" in errors({k: {**v, prop: None}})
-        # Test enum values:
+
+
+def test_schema_mpas_streams_properties_enum(mpas_streams):
+    errors = schema_validator("mpas-streams")
+    for k, v in mpas_streams.items():
+        assert (
+            "is not one of ['overwrite', 'truncate', 'replace_files', 'never_modify', 'append']"
+            in errors({k: {**v, "clobber_mode": None}})
+        )
+        assert "is not one of ['pnetcdf4', 'pnetcdf,cdf5', 'netcdf', 'netcdf4']" in errors(
+            {k: {**v, "io_type": None}}
+        )
+        assert "is not one of ['single', 'double', 'native']" in errors(
+            {k: {**v, "precision": None}}
+        )
         assert "is not one of ['input', 'input;output', 'none', 'output'" in errors(
             {k: {**v, "type": None}}
         )
-        # Test string values:
+
+
+def test_schema_mpas_streams_properties_string(mpas_streams):
+    errors = schema_validator("mpas-streams")
+    for k, v in mpas_streams.items():
         for prop in [
             "filename_interval",
             "filename_template",
             "input_interval",
             "output_interval",
             "packages",
+            "reference_time",
         ]:
             assert "is not of type 'string'" in errors({k: {**v, prop: None}})
 
