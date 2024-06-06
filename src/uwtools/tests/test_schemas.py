@@ -907,15 +907,10 @@ def test_schema_mpas_streams_intervals(mpas_streams):
     )
 
 
-def test_schema_mpas_streams_properties(mpas_streams):
-    tested_required, tested_optional = False, False
+def test_schema_mpas_streams_properties_optional(mpas_streams):
+    exercised = False
     errors = schema_validator("mpas-streams")
     for k, v in mpas_streams.items():
-        # Certain properties are required:
-        for prop in ["filename_template", "mutable", "type"]:
-            if prop in v:
-                assert "is a required property" in errors(with_del(mpas_streams, k, prop))
-                tested_required = True
         # Certain additional properties are optional:
         for prop in [
             "filename_interval",
@@ -928,7 +923,25 @@ def test_schema_mpas_streams_properties(mpas_streams):
         ]:
             if prop in v:
                 assert not errors(with_del(mpas_streams, k, prop))
-                tested_optional = True
+                exercised = True
+    assert exercised
+
+
+def test_schema_mpas_streams_properties_required(mpas_streams):
+    exercised = False
+    errors = schema_validator("mpas-streams")
+    for k, v in mpas_streams.items():
+        # Certain properties are required:
+        for prop in ["filename_template", "mutable", "type"]:
+            if prop in v:
+                assert "is a required property" in errors(with_del(mpas_streams, k, prop))
+                exercised = True
+    assert exercised
+
+
+def test_schema_mpas_streams_properties_values(mpas_streams):
+    errors = schema_validator("mpas-streams")
+    for k, v in mpas_streams.items():
         # Test array values:
         for prop in ["files", "streams", "vars", "var_arrays", "var_structs"]:
             assert "is not of type 'array'" in errors({k: {**v, prop: None}})
@@ -950,7 +963,6 @@ def test_schema_mpas_streams_properties(mpas_streams):
             "packages",
         ]:
             assert "is not of type 'string'" in errors({k: {**v, prop: None}})
-    assert tested_required and tested_optional
 
 
 # namelist
