@@ -117,14 +117,15 @@ class MPASBase(Driver):
         yield asset(path, path.is_file)
         yield None
         streams = Element("streams")
-        for item in self._driver_config["streams"]:
-            stream = SubElement(streams, "stream" if item["mutable"] else "immutable_stream")
-            for attr in ["name", "type", "filename_template"]:
-                stream.set(attr, item[attr])
+        for k, v in self._driver_config["streams"].items():
+            stream = SubElement(streams, "stream" if v["mutable"] else "immutable_stream")
+            stream.set("name", k)
+            for attr in ["type", "filename_template"]:
+                stream.set(attr, v[attr])
             for attr in ["input_interval", "output_interval", "filename_interval", "packages"]:
-                if attr in item:
-                    stream.set(attr, item[attr])
-            if files := item.get("files"):
+                if attr in v:
+                    stream.set(attr, v[attr])
+            if files := v.get("files"):
                 for file in files:
                     SubElement(stream, "file", name=file)
         path.parent.mkdir(parents=True, exist_ok=True)

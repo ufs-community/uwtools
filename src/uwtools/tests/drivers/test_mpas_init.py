@@ -47,22 +47,20 @@ def config(tmp_path):
                 },
             },
             "run_dir": str(tmp_path),
-            "streams": [
-                {
+            "streams": {
+                "input": {
                     "filename_template": "conus.static.nc",
                     "input_interval": "initial_only",
                     "mutable": False,
-                    "name": "input",
                     "type": "input",
                 },
-                {
+                "output": {
                     "filename_template": "conus.init.nc",
                     "mutable": False,
-                    "name": "output",
                     "output_interval": "initial_only",
                     "type": "output",
                 },
-            ],
+            },
             "files_to_link": {
                 "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
                 "CAM_AEROPT_DATA.DBL": "src/MPAS-Model/CAM_AEROPT_DATA.DBL",
@@ -228,12 +226,12 @@ def test_MPASInit_streams_file(config, driverobj):
         xml = etree.parse(f).getroot()
     assert xml.tag == "streams"
     children = xml.getchildren()  # type: ignore
-    for i, child in enumerate(children):
-        block = config["mpas_init"]["streams"][i]
+    for child in children:
+        block = config["mpas_init"]["streams"][child.get("name")]
         for k, v in block.items():
             if k not in ["files", "mutable"]:
                 assert child.get(k) == v
-        assert child.tag == "stream" if child.get("mutable") else "immutable_stream"
+        assert child.tag == "stream" if block["mutable"] else "immutable_stream"
         for name in block.get("files", []):
             assert child.xpath(f"//file[@name='{name}']")
 
