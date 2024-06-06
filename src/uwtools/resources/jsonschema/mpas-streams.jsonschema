@@ -1,7 +1,6 @@
 {
-  "addtionalProperties": false,
-  "items": {
-    "additionalProperties": false,
+  "additionalProperties": {
+    "addtionalProperties": false,
     "allOf": [
       {
         "if": {
@@ -32,6 +31,7 @@
         }
       }
     ],
+    "minItems": 1,
     "properties": {
       "filename_interval": {
         "type": "string"
@@ -52,9 +52,6 @@
       "mutable": {
         "type": "boolean"
       },
-      "name": {
-        "type": "string"
-      },
       "output_interval": {
         "type": "string"
       },
@@ -73,11 +70,9 @@
     "required": [
       "filename_template",
       "mutable",
-      "name",
       "type"
     ],
     "type": "object"
   },
-  "minItems": 1,
-  "type": "array"
+  "type": "object"
 }

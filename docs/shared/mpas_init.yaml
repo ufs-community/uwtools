@@ -50,12 +50,12 @@ mpas_init:
     validate: true
   run_dir: /path/to/rundir
   streams:
-    - name: input
+    input:
       type: input
       filename_template: conus.static.nc
       input_interval: initial_only
       mutable: false
-    - name: output
+    output:
       type: output
       filename_template: conus.init.nc
       output_interval: initial_only

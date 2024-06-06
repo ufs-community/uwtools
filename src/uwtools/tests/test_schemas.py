@@ -83,25 +83,23 @@ def mpas_init_prop():
 
 @fixture
 def mpas_streams():
-    return [
-        {
+    return {
+        "input": {
             "filename_template": "init.nc",
             "input_interval": "initial_only",
             "mutable": False,
-            "name": "input",
             "type": "input",
         },
-        {
+        "output": {
             "filename_interval": "input_interval",
             "filename_template": "output.$Y-$M-$D $h.$m.$s.nc",
             "files": ["f1", "f2"],
             "mutable": True,
-            "name": "output",
             "output_interval": "6:00:00",
             "packages": "pkg",
             "type": "output",
         },
-    ]
+    }
 
 
 @fixture
@@ -882,42 +880,65 @@ def test_schema_mpas_init_run_dir(mpas_init_prop):
 
 
 def test_schema_mpas_streams(mpas_streams):
-    addprop = lambda k, v: [mpas_streams[0], {**mpas_streams[1], k: v}]
-    delprop = lambda k: [mpas_streams[0], with_del(mpas_streams[1], k)]
     errors = schema_validator("mpas-streams")
     # Basic correctness:
     assert not errors(mpas_streams)
-    # Certain properties are required:
-    for prop in ["filename_template", "mutable", "name", "type"]:
-        assert "is a required property" in errors(delprop(prop))
-    # Certain additional properties are optional:
-    for prop in ["filename_interval", "files", "packages"]:
-        assert not errors(delprop(prop))
-    # Properties must have correct types:
-    for prop in [
-        "filename_interval",
-        "filename_template",
-        "input_interval",
-        "output_interval",
-        "packages",
-        "name",
-    ]:
-        assert "is not of type 'string'" in errors(addprop(prop, None))
-    assert "is not of type 'array'" in errors(addprop("files", None))
-    assert "is not of type 'boolean'" in errors(addprop("mutable", None))
-    assert "is not of type 'string'" in errors(addprop("files", [None]))
-    assert "is not one of ['input', 'input;output', 'none', 'output'" in errors(
-        addprop("type", None)
-    )
-    # Array items should not be empty:
-    assert "should be non-empty" in errors(addprop("files", []))
+
+
+def test_schema_mpas_streams_intervals(mpas_streams):
+    errors = schema_validator("mpas-streams")
     # Interval items are conditionally required based on input/output settings:
-    x1 = {"filename_template": "a", "mutable": False, "name": "b"}
-    x2 = {**x1, "type": "input;output"}
-    for x in [{**x1, "type": "input"}, {**x2, "output_interval": "foo"}]:
-        assert "'input_interval' is a required property" in errors([x])
-    for x in [{**x1, "type": "output"}, {**x2, "input_interval": "foo"}]:
-        assert "'output_interval' is a required property" in errors([x])
+    assert "'input_interval' is a required property" in errors(
+        with_del(mpas_streams, "input", "input_interval")
+    )
+    assert "'output_interval' is a required property" in errors(
+        with_del(mpas_streams, "output", "output_interval")
+    )
+    x = {"x": {"filename_template": "t", "mutable": False, "type": "input;output"}}
+    assert "'input_interval' is a required property" in errors(
+        {**x, "output_interval": "initial_only"}
+    )
+    assert "'output_interval' is a required property" in errors(
+        {**x, "input_interval": "initial_only"}
+    )
+
+
+def test_schema_mpas_streams_properties(mpas_streams):
+    errors = schema_validator("mpas-streams")
+    # Various property tests:
+    tested_required, tested_optional, tested_types = False, False, False
+    for k, v in mpas_streams.items():
+        # Certain properties are required:
+        for prop in ["filename_template", "mutable", "type"]:
+            if prop in v:
+                assert "is a required property" in errors(with_del(mpas_streams, k, prop))
+                tested_required = True
+        # Certain additional properties are optional:
+        for prop in ["filename_interval", "files", "packages"]:
+            if prop in v:
+                assert not errors(with_del(mpas_streams, k, prop))
+                tested_optional = True
+        # Properties must have correct types:
+        for prop in [
+            "filename_interval",
+            "filename_template",
+            "input_interval",
+            "output_interval",
+            "packages",
+            "name",
+        ]:
+            if prop in v:
+                assert "is not of type 'string'" in errors({k: {**v, prop: None}})
+                tested_types = True
+        assert "is not of type 'array'" in errors({k: {**v, "files": None}})
+        assert "is not of type 'boolean'" in errors({k: {**v, "mutable": None}})
+        assert "is not of type 'string'" in errors({k: {**v, "files": [None]}})
+        assert "is not one of ['input', 'input;output', 'none', 'output'" in errors(
+            {k: {**v, "type": None}}
+        )
+        # Array items should not be empty:
+        assert "should be non-empty" in errors({k: {**v, "files": []}})
+    assert tested_required and tested_optional and tested_types
 
 
 # namelist

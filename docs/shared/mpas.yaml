@@ -44,12 +44,12 @@ mpas:
     validate: true
   run_dir: /path/to/run/directory
   streams:
-    - name: input
+    input:
       type: input
       filename_template: conus.init.nc
       input_interval: initial_only
       mutable: false
-    - name: output
+    output:
       type: output
       filename_template: history.$Y-$M-$D_$h.$m.$s.nc
       output_interval: "6:00:00"
