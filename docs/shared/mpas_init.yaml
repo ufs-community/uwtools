@@ -51,15 +51,15 @@ mpas_init:
   run_dir: /path/to/rundir
   streams:
     input:
-      type: input
       filename_template: conus.static.nc
       input_interval: initial_only
       mutable: false
+      type: input
     output:
-      type: output
       filename_template: conus.init.nc
-      output_interval: initial_only
       mutable: false
+      output_interval: initial_only
+      type: output
 platform:
   account: me
   scheduler: slurm
