@@ -12,13 +12,13 @@ import f90nml  # type: ignore
 import pytest
 import yaml
 from iotaa import refs
-from lxml import etree
 from pytest import fixture, raises
 
 from uwtools.drivers import mpas_init
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
+from uwtools.tests.drivers.test_mpas import streams_file
 from uwtools.tests.support import fixture_path, logged
 
 # Fixtures
@@ -220,20 +220,7 @@ def test_MPASInit_runscript(driverobj):
 
 
 def test_MPASInit_streams_file(config, driverobj):
-    driverobj.streams_file()
-    path = Path(driverobj._driver_config["run_dir"]) / driverobj._streams_fn
-    with open(path, "r", encoding="utf-8") as f:
-        xml = etree.parse(f).getroot()
-    assert xml.tag == "streams"
-    children = xml.getchildren()  # type: ignore
-    for child in children:
-        block = config["mpas_init"]["streams"][child.get("name")]
-        for k, v in block.items():
-            if k not in ["files", "mutable"]:
-                assert child.get(k) == v
-        assert child.tag == "stream" if block["mutable"] else "immutable_stream"
-        for name in block.get("files", []):
-            assert child.xpath(f"//file[@name='{name}']")
+    streams_file(config, driverobj, "mpas_init")
 
 
 def test_MPASInit__runscript_path(driverobj):

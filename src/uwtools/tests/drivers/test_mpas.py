@@ -94,6 +94,26 @@ def driverobj(config_file, cycle):
     return mpas.MPAS(config=config_file, cycle=cycle, batch=True)
 
 
+# Helpers
+
+
+def streams_file(config, driverobj, drivername):
+    driverobj.streams_file()
+    path = Path(driverobj._driver_config["run_dir"]) / driverobj._streams_fn
+    with open(path, "r", encoding="utf-8") as f:
+        xml = etree.parse(f).getroot()
+    assert xml.tag == "streams"
+    children = xml.getchildren()  # type: ignore
+    for child in children:
+        block = config[drivername]["streams"][child.get("name")]
+        for k, v in block.items():
+            if k not in ["files", "mutable"]:
+                assert child.get(k) == v
+        assert child.tag == "stream" if block["mutable"] else "immutable_stream"
+        for name in block.get("files", []):
+            assert child.xpath(f"//file[@name='{name}']")
+
+
 # Tests
 
 
@@ -205,20 +225,7 @@ def test_MPAS_runscript(driverobj):
 
 
 def test_MPAS_streams_file(config, driverobj):
-    driverobj.streams_file()
-    path = Path(driverobj._driver_config["run_dir"]) / driverobj._streams_fn
-    with open(path, "r", encoding="utf-8") as f:
-        xml = etree.parse(f).getroot()
-    assert xml.tag == "streams"
-    children = xml.getchildren()  # type: ignore
-    for child in children:
-        block = config["mpas"]["streams"][child.get("name")]
-        for k, v in block.items():
-            if k not in ["files", "mutable"]:
-                assert child.get(k) == v
-        assert child.tag == "stream" if block["mutable"] else "immutable_stream"
-        for name in block.get("files", []):
-            assert child.xpath(f"//file[@name='{name}']")
+    streams_file(config, driverobj, "mpas")
 
 
 def test_MPAS__runscript_path(driverobj):
