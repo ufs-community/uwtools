@@ -1180,6 +1180,7 @@ def test_schema_schism_run_dir(schism_prop):
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
 
+
 # sfc-climo-gen
 
 

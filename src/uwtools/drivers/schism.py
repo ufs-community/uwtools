@@ -67,7 +67,6 @@ class SCHISM(Assets):
         yield self._taskname("provisioned run directory")
         yield [self.namelist_file()]
 
-
     # Private helper methods
 
     @property
