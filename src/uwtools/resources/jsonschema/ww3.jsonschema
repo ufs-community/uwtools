@@ -11,8 +11,14 @@
             },
             "template_values": {
               "additionalProperties": {
-                "type": "string"
+                "type": [
+                  "array",
+                  "boolean",
+                  "number",
+                  "string"
+                ]
               },
+              "minProperties": 1,
               "type": "object"
             }
           },
