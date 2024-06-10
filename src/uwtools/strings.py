@@ -103,6 +103,7 @@ class STR:
     rocoto: str = "rocoto"
     run: str = "run"
     schemafile: str = "schema_file"
+    schism: str = "schism"
     searchpath: str = "search_path"
     sfcclimogen: str = "sfc_climo_gen"
     shave: str = "shave"
