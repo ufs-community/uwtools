@@ -65,7 +65,7 @@ class SCHISM(Assets):
         Run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
-        yield [self.namelist_file()]
+        yield self.namelist_file()
 
     # Private helper methods
 
