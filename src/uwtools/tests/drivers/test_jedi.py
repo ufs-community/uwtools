@@ -187,6 +187,18 @@ def test_JEDI_configuration_file(driverobj):
     assert newcfg == {**basecfg, "baz": "qux"}
 
 
+def test_JEDI__config_fn(driverobj):
+    assert driverobj._config_fn == "jedi.yaml"
+
+
+def test_JEDI__runcmd(driverobj):
+    executable = driverobj._driver_config["execution"]["executable"]
+    config = driverobj._rundir / driverobj._config_fn
+    assert (
+        driverobj._runcmd == f"srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE {executable} {config}"
+    )
+
+
 def test_JEDI__runscript_path(driverobj):
     assert driverobj._runscript_path == driverobj._rundir / "runscript.jedi"
 

@@ -49,7 +49,7 @@ class JEDI(Driver):
         """
         The JEDI YAML configuration file.
         """
-        fn = "jedi.yaml"
+        fn = self._config_fn
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
@@ -130,11 +130,34 @@ class JEDI(Driver):
     # Private helper methods
 
     @property
+    def _config_fn(self) -> str:
+        """
+        Returns the name of the config file used in execution.
+        """
+        return "jedi.yaml"
+
+    @property
     def _driver_name(self) -> str:
         """
         Returns the name of this driver.
         """
         return STR.jedi
+
+    @property
+    def _runcmd(self) -> str:
+        """
+        Returns the full command-line component invocation.
+        """
+        execution = self._driver_config.get("execution", {})
+        jedi_config = self._rundir / self._config_fn
+        mpiargs = execution.get("mpiargs", [])
+        components = [
+            execution.get("mpicmd"),  # MPI run program
+            *[str(x) for x in mpiargs],  # MPI arguments
+            execution["executable"],  # component executable name
+            str(jedi_config),  # JEDI config file
+        ]
+        return " ".join(filter(None, components))
 
     def _taskname(self, suffix: str) -> str:
         """
