@@ -18,7 +18,7 @@ from pytest import fixture
 from uwtools.drivers import mpas
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
-from uwtools.tests.support import fixture_path, logged
+from uwtools.tests.support import fixture_path, logged, regex_logged
 
 # Fixtures
 
@@ -186,6 +186,15 @@ def test_MPAS_namelist_file_fails_validation(caplog, driverobj):
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
     assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
+
+
+def test_MPAS_namelist_file_missing_base_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    base_file = str(Path(driverobj._driver_config["run_dir"]) / "missing.nml")
+    driverobj._driver_config["namelist"]["base_file"] = base_file
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
 def test_MPAS_provisioned_run_directory(driverobj):
