@@ -35,7 +35,7 @@ def existing(path: Path):
 @external
 def file(path: Path):
     """
-    An existing file.
+    An existing file or symlink to an existing file.
 
     :param path: Path to the file.
     """
