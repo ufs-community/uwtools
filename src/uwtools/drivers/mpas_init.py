@@ -9,7 +9,6 @@ from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.mpas_base import MPASBase
-from uwtools.exceptions import UWConfigError
 from uwtools.strings import STR
 from uwtools.utils.tasks import symlink
 
@@ -53,12 +52,7 @@ class MPASInit(MPASBase):
         stop_time = self._cycle + timedelta(
             hours=self._driver_config["boundary_conditions"]["length"]
         )
-        try:
-            namelist = self._driver_config["namelist"]
-        except KeyError as e:
-            raise UWConfigError(
-                "Provide either a 'namelist' YAML block or the %s file" % path
-            ) from e
+        namelist = self._driver_config["namelist"]
         update_values = namelist.get("update_values", {})
         update_values.setdefault("nhyd_model", {}).update(
             {

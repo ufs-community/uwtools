@@ -12,10 +12,9 @@ import f90nml  # type: ignore
 import pytest
 import yaml
 from iotaa import refs
-from pytest import fixture, raises
+from pytest import fixture
 
 from uwtools.drivers import mpas_init
-from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.drivers.test_mpas import streams_file
@@ -177,14 +176,6 @@ def test_MPASInit_namelist_file_fails_validation(caplog, driverobj):
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
     assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
-
-
-def test_MPASInit_namelist_missing(driverobj):
-    path = driverobj._rundir / "namelist.init_atmosphere"
-    del driverobj._driver_config["namelist"]
-    with raises(UWConfigError) as e:
-        assert driverobj.namelist_file()
-    assert str(e.value) == ("Provide either a 'namelist' YAML block or the %s file" % path)
 
 
 def test_MPASInit_provisioned_run_directory(driverobj):
