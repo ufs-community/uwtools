@@ -11,7 +11,7 @@ from iotaa import asset, task, tasks
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import file
+from uwtools.utils.tasks import existing, file
 
 
 class ChgresCube(Driver):
@@ -60,7 +60,10 @@ class ChgresCube(Driver):
             Path(config_files["data_dir_input_grid"]) / config_files[k]
             for k in ("atm_files_input_grid", "grib2_file_input_grid", "sfc_files_input_grid")
         ]
-        yield [file(input_path) for input_path in input_paths]
+        base_file = self._driver_config["namelist"].get("base_file")
+        yield [file(input_path) for input_path in input_paths] + (
+            [existing(Path(base_file))] if base_file else []
+        )
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=self._driver_config["namelist"],

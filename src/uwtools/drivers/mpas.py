@@ -10,7 +10,7 @@ from iotaa import asset, task
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.mpas_base import MPASBase
 from uwtools.strings import STR
-from uwtools.utils.tasks import symlink
+from uwtools.utils.tasks import existing, symlink
 
 
 class MPAS(MPASBase):
@@ -45,7 +45,8 @@ class MPAS(MPASBase):
         path = self._rundir / "namelist.atmosphere"
         yield self._taskname(str(path))
         yield asset(path, path.is_file)
-        yield None
+        base_file = self._driver_config["namelist"].get("base_file")
+        yield existing(Path(base_file)) if base_file else None
         duration = timedelta(hours=self._driver_config["length"])
         str_duration = str(duration).replace(" days, ", "")
         namelist = self._driver_config["namelist"]

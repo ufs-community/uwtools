@@ -11,7 +11,7 @@ from iotaa import asset, task, tasks
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import filecopy, symlink
+from uwtools.utils.tasks import existing, filecopy, symlink
 
 
 class UPP(Driver):
@@ -81,7 +81,8 @@ class UPP(Driver):
         path = self._namelist_path
         yield self._taskname(str(path))
         yield asset(path, path.is_file)
-        yield None
+        base_file = self._driver_config["namelist"].get("base_file")
+        yield existing(Path(base_file)) if base_file else None
         path.parent.mkdir(parents=True, exist_ok=True)
         self._create_user_updated_config(
             config_class=NMLConfig,

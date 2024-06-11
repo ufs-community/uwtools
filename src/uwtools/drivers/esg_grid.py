@@ -10,6 +10,7 @@ from iotaa import asset, task, tasks
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
+from uwtools.utils.tasks import existing
 
 
 class ESGGrid(Driver):
@@ -45,7 +46,8 @@ class ESGGrid(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield None
+        base_file = self._driver_config["namelist"].get("base_file")
+        yield existing(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=self._driver_config["namelist"],

@@ -12,7 +12,7 @@ from iotaa import asset, refs, run, task, tasks
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import file, filecopy, symlink
+from uwtools.utils.tasks import existing, file, filecopy, symlink
 
 
 class JEDI(Driver):
@@ -53,7 +53,8 @@ class JEDI(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield None
+        base_file = self._driver_config["configuration_file"].get("base_file")
+        yield existing(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=YAMLConfig,
             config_values=self._driver_config["configuration_file"],
