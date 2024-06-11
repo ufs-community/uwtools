@@ -53,7 +53,8 @@ class JEDI(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield None
+        base_file = self._driver_config["configuration_file"].get("base_file")
+        yield file(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=YAMLConfig,
             config_values=self._driver_config["configuration_file"],
