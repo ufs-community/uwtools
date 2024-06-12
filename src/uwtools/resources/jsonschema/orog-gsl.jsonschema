@@ -1,0 +1,56 @@
+{
+  "properties": {
+    "orog_gsl": {
+      "additionalProperties": false,
+      "properties": {
+        "config": {
+          "additionalProperties": false,
+          "properties": {
+            "halo": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "input_grid_file": {
+              "type": "string"
+            },
+            "resolution": {
+              "type": "integer"
+            },
+            "tile": {
+              "maximum": 7,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "topo_data_2p5m": {
+              "type": "string"
+            },
+            "topo_data_30s": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "halo",
+            "input_grid_file",
+            "resolution",
+            "tile",
+            "topo_data_2p5m",
+            "topo_data_30s"
+          ]
+        },
+        "execution": {
+          "$ref": "urn:uwtools:execution-serial"
+        },
+        "run_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "config",
+        "execution",
+        "run_dir"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}
