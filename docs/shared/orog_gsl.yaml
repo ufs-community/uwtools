@@ -1,7 +1,7 @@
 orog_gsl:
   config:
-    grid_file: /path/to/C{{ orog_gsl.config.resolution }}_grid.tile{{ orog_gsl.config.tile }}.halo{{ orog_gsl.config.halo }}.nc
     halo: 4
+    input_grid_file: /path/to/C{{ orog_gsl.config.resolution }}_grid.tile{{ orog_gsl.config.tile }}.halo{{ orog_gsl.config.halo }}.nc
     resolution: 403
     tile: 7
     topo_data_2p5m: /path/to/geo_em.d01.lat-lon.2.5m.HGT_M.nc
