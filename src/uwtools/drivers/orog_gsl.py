@@ -41,10 +41,11 @@ class OrogGSL(Driver):
         """
         The input grid file.
         """
-        path = Path(self._driver_config["config"]["input_grid_file"])
+        src = Path(self._driver_config["config"]["input_grid_file"])
+        dst = Path(self._driver_config["run_dir"]) / src.name
         yield self._taskname("Input grid")
-        yield asset(path, path.is_file)
-        yield symlink(target=path, linkname=Path(self._driver_config["run_dir"]) / path.name)
+        yield asset(dst, dst.is_file)
+        yield symlink(target=src, linkname=dst)
 
     @tasks
     def provisioned_run_directory(self):
@@ -75,20 +76,22 @@ class OrogGSL(Driver):
         """
         Global topographic data on 2.5-minute lat-lon grid.
         """
-        path = Path(self._driver_config["config"]["topo_data_2p5m"])
-        yield self._taskname("Global 2.5m topo data")
-        yield asset(path, path.is_file)
-        yield symlink(target=path, linkname=Path(self._driver_config["run_dir"]) / path.name)
+        src = Path(self._driver_config["config"]["topo_data_2p5m"])
+        dst = Path(self._driver_config["run_dir"]) / src.name
+        yield self._taskname("Input grid")
+        yield asset(dst, dst.is_file)
+        yield symlink(target=src, linkname=dst)
 
     @task
     def topo_data_30s(self):
         """
         Global topographic data on 30-second lat-lon grid.
         """
-        path = Path(self._driver_config["config"]["topo_data_30s"])
-        yield self._taskname("Global 30s topo data")
-        yield asset(path, path.is_file)
-        yield symlink(target=path, linkname=Path(self._driver_config["run_dir"]) / path.name)
+        src = Path(self._driver_config["config"]["topo_data_30s"])
+        dst = Path(self._driver_config["run_dir"]) / src.name
+        yield self._taskname("Input grid")
+        yield asset(dst, dst.is_file)
+        yield symlink(target=src, linkname=dst)
 
     # Private helper methods
 
@@ -104,6 +107,6 @@ class OrogGSL(Driver):
         """
         Returns the full command-line component invocation.
         """
-        inputs = "\n".join(self._driver_config["config"][k] for k in ("tile", "resolution", "halo"))
+        inputs = "\n".join(str(self._driver_config["config"][k]) for k in ("tile", "resolution", "halo"))
         executable = self._driver_config["execution"]["executable"]
         return f"echo '%s' | %s" % (inputs, executable)
