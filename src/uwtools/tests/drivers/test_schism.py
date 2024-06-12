@@ -54,7 +54,7 @@ def test_SCHISM(driverobj):
     assert isinstance(driverobj, schism.SCHISM)
 
 
-def test_WaveWatchIII_namelist_file(driverobj):
+def test_SCHISM_namelist_file(driverobj):
     src = driverobj._driver_config["namelist"]["template_file"]
     with open(src, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
