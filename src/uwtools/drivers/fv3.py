@@ -14,7 +14,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.strings import STR
-from uwtools.utils.tasks import filecopy, symlink
+from uwtools.utils.tasks import file, filecopy, symlink
 
 
 class FV3(Driver):
@@ -124,7 +124,8 @@ class FV3(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield None
+        base_file = self._driver_config["model_configure"].get("base_file")
+        yield file(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=YAMLConfig,
             config_values=self._driver_config["model_configure"],
@@ -140,7 +141,8 @@ class FV3(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield None
+        base_file = self._driver_config["namelist"].get("base_file")
+        yield file(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=self._driver_config["namelist"],

@@ -16,7 +16,7 @@ from pytest import fixture
 from uwtools.drivers import driver, fv3
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
-from uwtools.tests.support import logged
+from uwtools.tests.support import logged, regex_logged
 
 # Fixtures
 
@@ -150,15 +150,22 @@ def test_FV3_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
     assert all(getattr(dst, test)() for dst in [atm_dst, sfc_dst])
 
 
-def test_FV3_model_configure(driverobj):
+@pytest.mark.parametrize("base_file_exists", [True, False])
+def test_FV3_model_configure(base_file_exists, caplog, driverobj):
+    log.setLevel(logging.DEBUG)
     src = driverobj._rundir / "model_configure.in"
-    with open(src, "w", encoding="utf-8") as f:
-        yaml.dump({}, f)
+    if base_file_exists:
+        with open(src, "w", encoding="utf-8") as f:
+            yaml.dump({}, f)
     dst = driverobj._rundir / "model_configure"
     assert not dst.is_file()
     driverobj._driver_config["model_configure"] = {"base_file": src}
     driverobj.model_configure()
-    assert dst.is_file()
+    if base_file_exists:
+        assert dst.is_file()
+    else:
+        assert not dst.is_file()
+        assert regex_logged(caplog, f"{src}: State: Not Ready (external asset)")
 
 
 def test_FV3_namelist_file(caplog, driverobj):
@@ -181,6 +188,15 @@ def test_FV3_namelist_file_fails_validation(caplog, driverobj):
     assert not path.exists()
     assert logged(caplog, f"Failed to validate {path}")
     assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
+
+
+def test_FV3_namelist_file_missing_base_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    base_file = str(Path(driverobj._driver_config["run_dir"]) / "missing.nml")
+    driverobj._driver_config["namelist"]["base_file"] = base_file
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
 @pytest.mark.parametrize("domain", ("global", "regional"))

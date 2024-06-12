@@ -52,9 +52,10 @@ class WaveWatchIII(Assets):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield file(path=Path(self._driver_config["namelist"]["template_file"]))
+        template_file = Path(self._driver_config["namelist"]["template_file"])
+        yield file(template_file)
         render(
-            input_file=Path(self._driver_config["namelist"]["template_file"]),
+            input_file=template_file,
             output_file=path,
             overrides=self._driver_config["namelist"]["template_values"],
         )

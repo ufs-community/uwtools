@@ -12,14 +12,13 @@ import f90nml  # type: ignore
 import pytest
 import yaml
 from iotaa import refs
-from pytest import fixture, raises
+from pytest import fixture
 
 from uwtools.drivers import mpas_init
-from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.drivers.test_mpas import streams_file
-from uwtools.tests.support import fixture_path, logged
+from uwtools.tests.support import fixture_path, logged, regex_logged
 
 # Fixtures
 
@@ -179,12 +178,13 @@ def test_MPASInit_namelist_file_fails_validation(caplog, driverobj):
     assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
 
 
-def test_MPASInit_namelist_missing(driverobj):
-    path = driverobj._rundir / "namelist.init_atmosphere"
-    del driverobj._driver_config["namelist"]
-    with raises(UWConfigError) as e:
-        assert driverobj.namelist_file()
-    assert str(e.value) == ("Provide either a 'namelist' YAML block or the %s file" % path)
+def test_MPASInit_namelist_file_missing_base_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    base_file = str(Path(driverobj._driver_config["run_dir"]) / "missing.nml")
+    driverobj._driver_config["namelist"]["base_file"] = base_file
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
 def test_MPASInit_provisioned_run_directory(driverobj):
