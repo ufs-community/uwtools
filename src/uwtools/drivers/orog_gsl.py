@@ -107,6 +107,6 @@ class OrogGSL(Driver):
         """
         Returns the full command-line component invocation.
         """
-        inputs = "\n".join(str(self._driver_config["config"][k]) for k in ("tile", "resolution", "halo"))
+        inputs = [str(self._driver_config["config"][k]) for k in ("tile", "resolution", "halo")]
         executable = self._driver_config["execution"]["executable"]
-        return f"echo '%s' | %s" % (inputs, executable)
+        return "echo '%s' | %s" % ("\n".join(inputs), executable)
