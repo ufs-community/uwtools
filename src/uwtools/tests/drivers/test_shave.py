@@ -10,7 +10,7 @@ from pytest import fixture
 from uwtools.drivers import shave
 from uwtools.scheduler import Slurm
 
-# Driver fixtures
+# Fixtures
 
 
 @fixture
@@ -46,7 +46,7 @@ def driverobj(config):
     return shave.Shave(config=config, batch=True)
 
 
-# Driver tests
+# Tests
 
 
 def test_Shave(driverobj):

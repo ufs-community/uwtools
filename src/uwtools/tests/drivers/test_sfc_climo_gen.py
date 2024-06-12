@@ -16,6 +16,15 @@ from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import logged
 
+# Helpers
+
+
+@external
+def ready(x):
+    yield x
+    yield asset(x, lambda: True)
+
+
 # Fixtures
 
 
@@ -69,15 +78,6 @@ def config(tmp_path):
 @fixture
 def driverobj(config):
     return sfc_climo_gen.SfcClimoGen(config=config, batch=True)
-
-
-# Helpers
-
-
-@external
-def ready(x):
-    yield x
-    yield asset(x, lambda: True)
 
 
 # Tests

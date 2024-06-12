@@ -41,8 +41,11 @@ class OrogGSL(Driver):
         """
         The input grid file.
         """
+        fn = "C%s_grid.tile%s.halo%s.nc" % tuple(
+            self._driver_config["config"][k] for k in ["resolution", "tile", "halo"]
+        )
         src = Path(self._driver_config["config"]["input_grid_file"])
-        dst = Path(self._driver_config["run_dir"]) / src.name
+        dst = Path(self._driver_config["run_dir"]) / fn
         yield self._taskname("Input grid")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
@@ -76,8 +79,9 @@ class OrogGSL(Driver):
         """
         Global topographic data on 2.5-minute lat-lon grid.
         """
+        fn = "geo_em.d01.lat-lon.2.5m.HGT_M.nc"
         src = Path(self._driver_config["config"]["topo_data_2p5m"])
-        dst = Path(self._driver_config["run_dir"]) / src.name
+        dst = Path(self._driver_config["run_dir"]) / fn
         yield self._taskname("Input grid")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
@@ -87,8 +91,9 @@ class OrogGSL(Driver):
         """
         Global topographic data on 30-second lat-lon grid.
         """
+        fn = "HGT.Beljaars_filtered.lat-lon.30s_res.nc"
         src = Path(self._driver_config["config"]["topo_data_30s"])
-        dst = Path(self._driver_config["run_dir"]) / src.name
+        dst = Path(self._driver_config["run_dir"]) / fn
         yield self._taskname("Input grid")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
