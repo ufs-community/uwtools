@@ -41,9 +41,7 @@ class Shave(Driver):
         Run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
-        yield [
-            self.runscript(),
-        ]
+        yield self.runscript()
 
     @task
     def runscript(self):
@@ -72,8 +70,8 @@ class Shave(Driver):
         """
         executable = self._driver_config["execution"]["executable"]
         config = self._driver_config["config"]
-        input_file = config.get("input_grid_file")
+        input_file = config["input_grid_file"]
         output_file = input_file.replace(".nc", "_NH0.nc")
-        flags = [config.get(key) for key in ["nx", "ny", "nh4", "input_grid_file"]]
+        flags = [config[key] for key in ["nx", "ny", "nh4", "input_grid_file"]]
         flags.append(output_file)
         return f"{executable} {' '.join(str(flag) for flag in flags)}"
