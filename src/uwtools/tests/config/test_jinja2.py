@@ -433,6 +433,7 @@ def test__supplement_values_priority(supplemental_values):
 
 
 def test__values_needed(caplog):
+    log.setLevel(logging.DEBUG)
     undeclared_variables = {"roses_color", "lavender_smell"}
     jinja2._values_needed(undeclared_variables)
     assert logged(caplog, "Value(s) needed to render this template are:")
