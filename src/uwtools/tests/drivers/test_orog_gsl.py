@@ -84,6 +84,20 @@ def test_OrogGSL_run_local(driverobj):
     func.assert_called_once_with()
 
 
+def test_OrogGSL_topo_data_2p5m(driverobj):
+    path = Path(driverobj._driver_config["run_dir"]) / "geo_em.d01.lat-lon.2.5m.HGT_M.nc"
+    assert not path.is_file()
+    driverobj.topo_data_2p5m()
+    assert path.is_symlink()
+
+
+def test_OrogGSL_topo_data_3os(driverobj):
+    path = Path(driverobj._driver_config["run_dir"]) / "HGT.Beljaars_filtered.lat-lon.30s_res.nc"
+    assert not path.is_file()
+    driverobj.topo_data_30s()
+    assert path.is_symlink()
+
+
 def test_OrogGSL__runcmd(driverobj):
     inputs = [str(driverobj._driver_config["config"][k]) for k in ("tile", "resolution", "halo")]
     assert driverobj._runcmd == "echo '%s' | %s" % (
