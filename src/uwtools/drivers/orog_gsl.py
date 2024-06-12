@@ -104,10 +104,6 @@ class OrogGSL(Driver):
         """
         Returns the full command-line component invocation.
         """
+        inputs = "\n".join(self._driver_config["config"][k] for k in ("tile", "resolution", "halo"))
         executable = self._driver_config["execution"]["executable"]
-        config = self._driver_config["config"]
-        input_file = config.get("input_grid_file")
-        output_file = input_file.replace(".nc", "_NH0.nc")
-        flags = [config.get(key) for key in ["nx", "ny", "nh4", "input_grid_file"]]
-        flags.append(output_file)
-        return f"{executable} {' '.join(str(flag) for flag in flags)}"
+        return f"echo '%s' | %s" % (inputs, executable)
