@@ -9,7 +9,6 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import yaml
 from iotaa import refs
 from pytest import fixture
 
@@ -27,10 +26,10 @@ def cycle():
 
 
 @fixture
-def config_file(tmp_path):
+def config(tmp_path):
     afile = tmp_path / "afile"
     afile.touch()
-    config: dict = {
+    return {
         "chgres_cube": {
             "execution": {
                 "batchargs": {
@@ -73,15 +72,11 @@ def config_file(tmp_path):
             "scheduler": "slurm",
         },
     }
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
 
 
 @fixture
-def driverobj(config_file, cycle):
-    return chgres_cube.ChgresCube(config=config_file, cycle=cycle, batch=True)
+def driverobj(config, cycle):
+    return chgres_cube.ChgresCube(config=config, cycle=cycle, batch=True)
 
 
 # Tests

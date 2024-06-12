@@ -5,7 +5,6 @@ Shave driver tests.
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-import yaml
 from pytest import fixture
 
 from uwtools.drivers import shave
@@ -43,16 +42,8 @@ def config(tmp_path):
 
 
 @fixture
-def config_file(config, tmp_path):
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
-
-
-@fixture
-def driverobj(config_file):
-    return shave.Shave(config=config_file, batch=True)
+def driverobj(config):
+    return shave.Shave(config=config, batch=True)
 
 
 # Driver tests

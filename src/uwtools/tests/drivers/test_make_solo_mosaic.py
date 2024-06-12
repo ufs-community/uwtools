@@ -4,7 +4,6 @@ make_solo_mosaic driver tests.
 """
 from unittest.mock import patch
 
-import yaml
 from pytest import fixture
 
 from uwtools.drivers import make_solo_mosaic
@@ -38,16 +37,8 @@ def config(tmp_path):
 
 
 @fixture
-def config_file(config, tmp_path):
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
-
-
-@fixture
-def driverobj(config_file):
-    return make_solo_mosaic.MakeSoloMosaic(config=config_file, batch=True)
+def driverobj(config):
+    return make_solo_mosaic.MakeSoloMosaic(config=config, batch=True)
 
 
 # Tests

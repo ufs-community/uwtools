@@ -7,7 +7,6 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import yaml
 from pytest import fixture
 
 from uwtools.drivers import ungrib
@@ -44,21 +43,13 @@ def config(tmp_path):
 
 
 @fixture
-def config_file(config, tmp_path):
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
-
-
-@fixture
 def cycle():
     return dt.datetime(2024, 2, 1, 18)
 
 
 @fixture
-def driverobj(config_file, cycle):
-    return ungrib.Ungrib(config=config_file, cycle=cycle, batch=True)
+def driverobj(config, cycle):
+    return ungrib.Ungrib(config=config, cycle=cycle, batch=True)
 
 
 # Tests
