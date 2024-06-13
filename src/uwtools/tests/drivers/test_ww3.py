@@ -9,7 +9,8 @@ from unittest.mock import patch
 import yaml
 from pytest import fixture
 
-from uwtools.drivers import ww3
+from uwtools.drivers.driver import Assets
+from uwtools.drivers.ww3 import WaveWatchIII
 
 # Fixtures
 
@@ -36,14 +37,19 @@ def cycle():
 
 @fixture
 def driverobj(config, cycle):
-    return ww3.WaveWatchIII(config=config, cycle=cycle, batch=True)
+    return WaveWatchIII(config=config, cycle=cycle, batch=True)
 
 
 # Tests
 
 
-def test_WaveWatchIII(driverobj):
-    assert isinstance(driverobj, ww3.WaveWatchIII)
+def test_WaveWatchIII():
+    for method in [
+        "_driver_config",
+        "_taskname",
+        "_validate",
+    ]:
+        assert getattr(WaveWatchIII, method) is getattr(Assets, method)
 
 
 def test_WaveWatchIII_namelist_file(driverobj):
@@ -74,9 +80,5 @@ def test_WaveWatchIII_restart_directory(driverobj):
     assert path.is_dir()
 
 
-def test_WaveWatchIII__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["ww3"]
-
-
-def test_WaveWatchIII__validate(driverobj):
-    driverobj._validate()
+def test_WaveWatchIII__driver_name(driverobj):
+    assert driverobj._driver_name == "ww3"
