@@ -53,6 +53,7 @@ def test_GlobalEquivResol():
         "_runscript_done_file",
         "_runscript_path",
         "_scheduler",
+        "_taskname",
         "_validate",
         "_write_runscript",
         "run",
