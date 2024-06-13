@@ -90,6 +90,7 @@ def test_SfcClimoGen():
         "_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
+        "_runcmd",
         "_runscript",
         "_runscript_done_file",
         "_runscript_path",
