@@ -65,6 +65,7 @@ def test_FilterTopo():
         "_validate",
         "_write_runscript",
         "run",
+        "runscript",
     ]:
         assert getattr(FilterTopo, method) is getattr(Driver, method)
 
@@ -83,5 +84,5 @@ def test_FilterTopo_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_FilterTopo__taskname(driverobj):
-    assert driverobj._taskname("foo") == "filter_topo foo"
+def test_FilterTopo__driver_name(driverobj):
+    assert driverobj._driver_name == "filter_topo"
