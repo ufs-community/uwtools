@@ -104,17 +104,6 @@ class UPP(Driver):
             self.runscript(),
         ]
 
-    @task
-    def runscript(self):
-        """
-        The runscript.
-        """
-        path = self._runscript_path
-        yield self._taskname(path.name)
-        yield asset(path, path.is_file)
-        yield None
-        self._write_runscript(path)
-
     # Private helper methods
 
     @property
