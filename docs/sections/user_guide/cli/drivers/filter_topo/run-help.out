@@ -1,6 +1,6 @@
-usage: uw orog_gsl run [-h] [--version] [--config-file PATH] [--batch]
-                       [--dry-run] [--graph-file PATH]
-                       [--key-path KEY[.KEY...]] [--quiet] [--verbose]
+usage: uw filter_topo run [-h] [--version] [--config-file PATH] [--batch]
+                          [--dry-run] [--graph-file PATH]
+                          [--key-path KEY[.KEY...]] [--quiet] [--verbose]
 
 A run
 
