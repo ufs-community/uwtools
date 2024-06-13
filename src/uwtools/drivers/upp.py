@@ -121,13 +121,6 @@ class UPP(Driver):
         return self._rundir / "itag"
 
     @property
-    def _runscript_path(self) -> Path:
-        """
-        Path to the runscript.
-        """
-        return self._rundir / f"runscript.{self._driver_name}"
-
-    @property
     def _runcmd(self) -> str:
         """
         Returns the full command-line component invocation.
