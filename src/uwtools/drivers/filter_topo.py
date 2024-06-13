@@ -7,9 +7,9 @@ from typing import List, Optional
 
 from iotaa import asset, task, tasks
 
+from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
-from uwtools.utils.tasks import symlink
 
 
 class FilterTopo(Driver):
@@ -37,66 +37,20 @@ class FilterTopo(Driver):
     # Workflow tasks
 
     @task
-    def input_grid_file(self):
-        """
-        The input grid file.
-        """
-        fn = "C%s_grid.tile%s.halo%s.nc" % tuple(
-            self._driver_config["config"][k] for k in ["resolution", "tile", "halo"]
-        )
-        src = Path(self._driver_config["config"]["input_grid_file"])
-        dst = Path(self._driver_config["run_dir"]) / fn
-        yield self._taskname("Input grid")
-        yield asset(dst, dst.is_file)
-        yield symlink(target=src, linkname=dst)
-
-    @task
-    def mosaic_file(self):
-        """
-        The mosaic file from the make_solo_mosaic program.
-        """
-        raise NotImplemented()
-        # fn = "geo_em.d01.lat-lon.2.5m.HGT_M.nc"
-        # src = Path(self._driver_config["config"]["topo_data_2p5m"])
-        # dst = Path(self._driver_config["run_dir"]) / fn
-        # yield self._taskname("Input grid")
-        # yield asset(dst, dst.is_file)
-        # yield symlink(target=src, linkname=dst)
-
-    @task
     def namelist_file(self):
         """
         The namelist file.
         """
-        raise NotImplemented()
-        # fn = "fort.41"
-        # yield self._taskname(f"namelist file {fn}")
-        # path = self._rundir / fn
-        # yield asset(path, path.is_file)
-        # vals = self._driver_config["namelist"]["update_values"]["config"]
-        # input_paths = [Path(v) for k, v in vals.items() if k.startswith("input_")]
-        # input_paths += [Path(vals["mosaic_file_mdl"])]
-        # input_paths += [Path(vals["orog_dir_mdl"]) / fn for fn in vals["orog_files_mdl"]]
-        # yield [file(input_path) for input_path in input_paths]
-        # self._create_user_updated_config(
-        #     config_class=NMLConfig,
-        #     config_values=self._driver_config["namelist"],
-        #     path=path,
-        #     schema=self._namelist_schema(),
-        # )
-
-    @task
-    def orog_file(self):
-        """
-        The orography file from the orog program.
-        """
-        raise NotImplemented()
-        # fn = "HGT.Beljaars_filtered.lat-lon.30s_res.nc"
-        # src = Path(self._driver_config["config"]["topo_data_30s"])
-        # dst = Path(self._driver_config["run_dir"]) / fn
-        # yield self._taskname("Input grid")
-        # yield asset(dst, dst.is_file)
-        # yield symlink(target=src, linkname=dst)
+        fn = "input.nml"
+        path = self._rundir / fn
+        yield self._taskname(f"namelist file {fn}")
+        yield asset(path, path.is_file)
+        self._create_user_updated_config(
+            config_class=NMLConfig,
+            config_values=self._driver_config["namelist"],
+            path=path,
+            schema=self._namelist_schema(),
+        )
 
     @tasks
     def provisioned_run_directory(self):
@@ -105,10 +59,7 @@ class FilterTopo(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
-            self.input_grid_file(),
-            self.mosaic_file(),
             self.namelist_file(),
-            self.orog_file(),
             self.runscript(),
         ]
 
@@ -131,13 +82,3 @@ class FilterTopo(Driver):
         Returns the name of this driver.
         """
         return STR.filtertopo
-
-    @property
-    def _runcmd(self):
-        """
-        Returns the full command-line component invocation.
-        """
-        raise NotImplemented()
-        # inputs = [str(self._driver_config["config"][k]) for k in ("tile", "resolution", "halo")]
-        # executable = self._driver_config["execution"]["executable"]
-        # return "echo '%s' | %s" % ("\n".join(inputs), executable)

@@ -77,6 +77,7 @@ class STR:
     file2fmt: str = "file_2_format"
     file2path: str = "file_2_path"
     file: str = "file"
+    filtertopo: str = "filter_topo"
     fv3: str = "fv3"
     globalequivresol: str = "global_equiv_resol"
     graphfile: str = "graph_file"
