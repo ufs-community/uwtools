@@ -103,7 +103,7 @@ def test_make_tasks():
     func = api.make_tasks(driver_class=ConcreteDriver)
     assert func.__name__ == "tasks"
     taskmap = func()
-    assert list(taskmap.keys()) == ["atask", "run", "validate"]
+    assert list(taskmap.keys()) == ["atask", "run", "runscript", "validate"]
 
 
 @pytest.mark.parametrize("val", [Path("/some/path"), {"foo": 88}])

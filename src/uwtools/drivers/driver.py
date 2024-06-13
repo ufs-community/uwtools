@@ -221,6 +221,17 @@ class Driver(Assets):
         yield (self._run_via_batch_submission() if self._batch else self._run_via_local_execution())
 
     @task
+    def runscript(self):
+        """
+        The runscript.
+        """
+        path = self._runscript_path
+        yield self._taskname(path.name)
+        yield asset(path, path.is_file)
+        yield None
+        self._write_runscript(path)
+
+    @task
     def _run_via_batch_submission(self):
         """
         A run executed via the batch system.
