@@ -8,16 +8,17 @@ filter_topo:
       - module load module_name
     executable: /path/to/filter_topo
   namelist:
-    filter_topo_nml:
-      grid_file: /path/to/C{{ filter_topo.namelist.filter_topo_nml.res }}_mosaic.halo6.nc
-      grid_type: 0
-      mask_field: land_frac
-      regional: true
-      res: 403
-      stretch_fac: 0.999
-      topo_field: orog_filt
-      topo_file: /path/to/C403_filtered_orog
-      zero_ocean: true
+    update_values:
+      filter_topo_nml:
+        grid_file: /path/to/C{{ filter_topo.namelist.filter_topo_nml.res }}_mosaic.halo6.nc
+        grid_type: 0
+        mask_field: land_frac
+        regional: true
+        res: 403
+        stretch_fac: 0.999
+        topo_field: orog_filt
+        topo_file: /path/to/C403_filtered_orog
+        zero_ocean: true
   run_dir: /path/to/run/dir
 platform:
   account: me

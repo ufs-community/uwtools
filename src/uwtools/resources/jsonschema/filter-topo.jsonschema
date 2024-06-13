@@ -1,0 +1,93 @@
+{
+  "properties": {
+    "filter_topo": {
+      "additionalProperties": false,
+      "properties": {
+        "execution": {
+          "$ref": "urn:uwtools:execution-serial"
+        },
+        "namelist": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "additionalProperties": false,
+              "properties": {
+                "filter_topo_nml": {
+                  "additionalProperties": {
+                    "type": [
+                      "array",
+                      "boolean",
+                      "number",
+                      "string"
+                    ]
+                  },
+                  "minProperties": 1,
+                  "properties": {
+                    "grid_file": {
+                      "type": "string"
+                    },
+                    "grid_type": {
+                      "type": "integer"
+                    },
+                    "mask_field": {
+                      "type": "string"
+                    },
+                    "regional": {
+                      "type": "boolean"
+                    },
+                    "res": {
+                      "type": "integer"
+                    },
+                    "stretch_fac": {
+                      "type": "number"
+                    },
+                    "topo_field": {
+                      "type": "string"
+                    },
+                    "topo_file": {
+                      "type": "string"
+                    },
+                    "zero_ocean": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "required": [
+                "filter_topo_nml"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "run_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "execution",
+        "namelist",
+        "run_dir"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}
