@@ -14,7 +14,11 @@ orog_gsl:
       - module use /path/to/modules
       - module load module_name
     executable: /path/to/orog_gsl
+<<<<<<< HEAD
   run_dir: /path/to/run/dir
+=======
+  run_dir: /path/to/dir/run
+>>>>>>> uw-607-orog-gsl-driver
 platform:
   account: me
   scheduler: slurm
