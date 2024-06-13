@@ -8,8 +8,8 @@ from unittest.mock import patch
 
 from pytest import fixture
 
-from uwtools.drivers import orog_gsl
-from uwtools.scheduler import Slurm
+from uwtools.drivers.driver import Driver
+from uwtools.drivers.orog_gsl import OrogGSL
 
 # Fixtures
 
@@ -45,14 +45,28 @@ def config(tmp_path):
 
 @fixture
 def driverobj(config):
-    return orog_gsl.OrogGSL(config=config, batch=True)
+    return OrogGSL(config=config, batch=True)
 
 
 # Tests
 
 
-def test_OrogGSL(driverobj):
-    assert isinstance(driverobj, orog_gsl.OrogGSL)
+def test_OrogGSL():
+    for method in [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_validate",
+        "_write_runscript",
+        "run",
+        "runscript",
+    ]:
+        assert getattr(OrogGSL, method) is getattr(Driver, method)
 
 
 def test_OrogGSL_input_grid_file(driverobj):
@@ -71,19 +85,6 @@ def test_OrogGSL_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_OrogGSL_run_batch(driverobj):
-    with patch.object(driverobj, "_run_via_batch_submission") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_OrogGSL_run_local(driverobj):
-    driverobj._batch = False
-    with patch.object(driverobj, "_run_via_local_execution") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
 def test_OrogGSL_topo_data_2p5m(driverobj):
     path = Path(driverobj._driver_config["run_dir"]) / "geo_em.d01.lat-lon.2.5m.HGT_M.nc"
     assert not path.is_file()
@@ -98,34 +99,13 @@ def test_OrogGSL_topo_data_3os(driverobj):
     assert path.is_symlink()
 
 
+def test_OrogGSL__driver_name(driverobj):
+    assert driverobj._driver_name == "orog_gsl"
+
+
 def test_OrogGSL__runcmd(driverobj):
     inputs = [str(driverobj._driver_config["config"][k]) for k in ("tile", "resolution", "halo")]
     assert driverobj._runcmd == "echo '%s' | %s" % (
         "\n".join(inputs),
         driverobj._driver_config["execution"]["executable"],
     )
-
-
-def test_OrogGSL_runscript(driverobj):
-    with patch.object(driverobj, "_runscript") as runscript:
-        driverobj.runscript()
-        runscript.assert_called_once()
-        args = ("envcmds", "envvars", "execution", "scheduler")
-        types = [list, dict, list, Slurm]
-        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
-
-
-def test_OrogGSL__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["orog_gsl"]
-
-
-def test_OrogGSL__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript.orog_gsl"
-
-
-def test_OrogGSL__taskname(driverobj):
-    assert driverobj._taskname("foo") == "orog_gsl foo"
-
-
-def test_OrogGSL__validate(driverobj):
-    driverobj._validate()

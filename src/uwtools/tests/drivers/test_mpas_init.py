@@ -13,10 +13,9 @@ import pytest
 from iotaa import refs
 from pytest import fixture
 
-from uwtools.drivers import mpas_init
+from uwtools.drivers.mpas_base import MPASBase
+from uwtools.drivers.mpas_init import MPASInit
 from uwtools.logging import log
-from uwtools.scheduler import Slurm
-from uwtools.tests.drivers.test_mpas import streams_file
 from uwtools.tests.support import fixture_path, logged, regex_logged
 
 # Fixtures
@@ -94,14 +93,29 @@ def cycle():
 
 @fixture
 def driverobj(config, cycle):
-    return mpas_init.MPASInit(config=config, cycle=cycle, batch=True)
+    return MPASInit(config=config, cycle=cycle, batch=True)
 
 
 # Tests
 
 
-def test_MPASInit(driverobj):
-    assert isinstance(driverobj, mpas_init.MPASInit)
+def test_MPASInit():
+    for method in [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runcmd",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_validate",
+        "_write_runscript",
+        "run",
+        "runscript",
+    ]:
+        assert getattr(MPASInit, method) is getattr(MPASBase, method)
 
 
 def test_MPASInit_boundary_files(cycle, driverobj):
@@ -128,7 +142,7 @@ def test_MPASInit_files_copied_and_linked(config, cycle, key, task, test, tmp_pa
     atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
     config["mpas_init"].update({key: {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
-    driverobj = mpas_init.MPASInit(config=config, cycle=cycle, batch=True)
+    driverobj = MPASInit(config=config, cycle=cycle, batch=True)
     atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
     assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
     atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
@@ -193,39 +207,9 @@ def test_MPASInit_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_MPASInit_run_batch(driverobj):
-    with patch.object(driverobj, "_run_via_batch_submission") as func:
-        driverobj.run()
-    func.assert_called_once_with()
+def test_MPASInit__driver_name(driverobj):
+    assert driverobj._driver_name == "mpas_init"
 
 
-def test_MPASInit_run_local(driverobj):
-    driverobj._batch = False
-    with patch.object(driverobj, "_run_via_local_execution") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_MPASInit_runscript(driverobj):
-    with patch.object(driverobj, "_runscript") as runscript:
-        driverobj.runscript()
-        runscript.assert_called_once()
-        args = ("envcmds", "envvars", "execution", "scheduler")
-        types = [list, dict, list, Slurm]
-        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
-
-
-def test_MPASInit_streams_file(config, driverobj):
-    streams_file(config, driverobj, "mpas_init")
-
-
-def test_MPASInit__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript.mpas_init"
-
-
-def test_MPASInit__taskname(driverobj):
-    assert driverobj._taskname("foo") == "20240201 18Z mpas_init foo"
-
-
-def test_MPASInit__validate(driverobj):
-    driverobj._validate()
+def test_MPASInit__streams_fn(driverobj):
+    assert driverobj._streams_fn == "streams.init_atmosphere"
