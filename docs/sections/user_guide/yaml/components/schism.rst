@@ -8,7 +8,7 @@ Structured YAML to configure SCHISM as part of a compiled coupled executable is 
 Here is a prototype UW YAML ``schism:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/schism.yaml
+.. literalinclude:: /shared/schism.yaml
 
 UW YAML for the ``schism:`` Block
 ---------------------------------

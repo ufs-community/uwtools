@@ -1449,7 +1449,7 @@ def test_schema_upp_run_dir(upp_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# wavewatch III
+# ww3
 
 
 def test_schema_ww3():
