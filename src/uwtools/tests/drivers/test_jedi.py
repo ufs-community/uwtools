@@ -14,8 +14,9 @@ from pytest import fixture
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import jedi
+from uwtools.drivers.driver import Driver
+from uwtools.drivers.jedi import JEDI
 from uwtools.logging import log
-from uwtools.scheduler import Slurm
 from uwtools.tests.support import regex_logged
 
 # Fixtures
@@ -70,14 +71,52 @@ def cycle():
 
 @fixture
 def driverobj(config, cycle):
-    return jedi.JEDI(config=config, cycle=cycle, batch=True)
+    return JEDI(config=config, cycle=cycle, batch=True)
 
 
 # Tests
 
 
-def test_JEDI(driverobj):
-    assert isinstance(driverobj, jedi.JEDI)
+def test_JEDI():
+    for method in [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_validate",
+        "_write_runscript",
+        "run",
+        "runscript",
+    ]:
+        assert getattr(JEDI, method) is getattr(Driver, method)
+
+
+def test_JEDI_configuration_file(driverobj):
+    basecfg = {"foo": "bar"}
+    base_file = Path(driverobj._driver_config["configuration_file"]["base_file"])
+    with open(base_file, "w", encoding="utf-8") as f:
+        yaml.dump(basecfg, f)
+    cfgfile = Path(driverobj._driver_config["run_dir"]) / "jedi.yaml"
+    assert not cfgfile.is_file()
+    driverobj.configuration_file()
+    assert cfgfile.is_file()
+    newcfg = YAMLConfig(config=cfgfile)
+    assert newcfg == {**basecfg, "baz": "qux"}
+
+
+def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    base_file = Path(driverobj._driver_config["run_dir"]) / "missing"
+    driverobj._driver_config["configuration_file"]["base_file"] = base_file
+    cfgfile = Path(driverobj._driver_config["run_dir"]) / "jedi.yaml"
+    assert not cfgfile.is_file()
+    driverobj.configuration_file()
+    assert not cfgfile.is_file()
+    assert regex_logged(caplog, f"{base_file}: State: Not Ready (external asset)")
 
 
 def test_JEDI_files_copied(driverobj):
@@ -123,28 +162,6 @@ def test_JEDI_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_JEDI_run_batch(driverobj):
-    with patch.object(driverobj, "_run_via_batch_submission") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_JEDI_run_local(driverobj):
-    driverobj._batch = False
-    with patch.object(driverobj, "_run_via_local_execution") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_JEDI_runscript(driverobj):
-    with patch.object(driverobj, "_runscript") as runscript:
-        driverobj.runscript()
-        runscript.assert_called_once()
-        args = ("envcmds", "envvars", "execution", "scheduler")
-        types = [list, dict, list, Slurm]
-        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
-
-
 def test_JEDI_validate_only(caplog, driverobj):
 
     @external
@@ -169,32 +186,12 @@ def test_JEDI_validate_only(caplog, driverobj):
     assert regex_logged(caplog, "Config is valid")
 
 
-def test_JEDI_configuration_file(driverobj):
-    basecfg = {"foo": "bar"}
-    base_file = Path(driverobj._driver_config["configuration_file"]["base_file"])
-    with open(base_file, "w", encoding="utf-8") as f:
-        yaml.dump(basecfg, f)
-    cfgfile = Path(driverobj._driver_config["run_dir"]) / "jedi.yaml"
-    assert not cfgfile.is_file()
-    driverobj.configuration_file()
-    assert cfgfile.is_file()
-    newcfg = YAMLConfig(config=cfgfile)
-    assert newcfg == {**basecfg, "baz": "qux"}
-
-
-def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
-    log.setLevel(logging.DEBUG)
-    base_file = Path(driverobj._driver_config["run_dir"]) / "missing"
-    driverobj._driver_config["configuration_file"]["base_file"] = base_file
-    cfgfile = Path(driverobj._driver_config["run_dir"]) / "jedi.yaml"
-    assert not cfgfile.is_file()
-    driverobj.configuration_file()
-    assert not cfgfile.is_file()
-    assert regex_logged(caplog, f"{base_file}: State: Not Ready (external asset)")
-
-
 def test_JEDI__config_fn(driverobj):
     assert driverobj._config_fn == "jedi.yaml"
+
+
+def test_JEFI__driver_name(driverobj):
+    assert driverobj._driver_name == "jedi"
 
 
 def test_JEDI__runcmd(driverobj):
@@ -203,10 +200,6 @@ def test_JEDI__runcmd(driverobj):
     assert (
         driverobj._runcmd == f"srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE {executable} {config}"
     )
-
-
-def test_JEDI__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript.jedi"
 
 
 def test_JEDI__taskname(driverobj):
