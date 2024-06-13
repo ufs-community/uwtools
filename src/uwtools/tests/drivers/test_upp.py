@@ -173,5 +173,9 @@ def test_UPP__namelist_path(driverobj):
     assert driverobj._namelist_path == driverobj._rundir / "itag"
 
 
+def test_UPP__runcmd(driverobj):
+    assert driverobj._runcmd == "%s < itag" % driverobj._driver_config["execution"]["executable"]
+
+
 def test_UPP__taskname(driverobj):
     assert driverobj._taskname("foo") == "20240507 12:00:00 upp foo"
