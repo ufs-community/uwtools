@@ -14,6 +14,7 @@ API
    make_solo_mosaic
    mpas
    mpas_init
+   orog_gsl
    rocoto
    sfc_climo_gen
    shave

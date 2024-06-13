@@ -95,6 +95,7 @@ class STR:
     model: str = "model"
     mpas: str = "mpas"
     mpasinit: str = "mpas_init"
+    oroggsl: str = "orog_gsl"
     outfile: str = "output_file"
     outfmt: str = "output_format"
     quiet: str = "quiet"

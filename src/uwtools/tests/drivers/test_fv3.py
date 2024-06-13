@@ -59,21 +59,13 @@ def config(tmp_path):
 
 
 @fixture
-def config_file(config, tmp_path):
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
-
-
-@fixture
 def cycle():
     return dt.datetime(2024, 2, 1, 18)
 
 
 @fixture
-def driverobj(config_file, cycle):
-    return fv3.FV3(config=config_file, cycle=cycle, batch=True)
+def driverobj(config, cycle):
+    return fv3.FV3(config=config, cycle=cycle, batch=True)
 
 
 @fixture

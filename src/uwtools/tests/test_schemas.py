@@ -531,7 +531,7 @@ def test_schema_fv3_run_dir(fv3_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# global_equiv_resol
+# global-equiv-resol
 
 
 def test_schema_global_equiv_resol():
@@ -602,7 +602,7 @@ def test_schema_jedi_run_dir(jedi_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# make_hgrid
+# make-hgrid
 
 
 def test_schema_make_hgrid():
@@ -664,7 +664,7 @@ def test_schema_make_hgrid_run_dir(make_hgrid_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# make_solo_mosaic
+# make-solo-mosaic
 
 
 def test_schema_make_solo_mosaic():
@@ -801,7 +801,7 @@ def test_schema_mpas_run_dir(mpas_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# mpas_init
+# mpas-init
 
 
 def test_schema_mpas_init(mpas_streams):
@@ -1029,6 +1029,49 @@ def test_schema_namelist():
     assert "[] is not of type 'object'" in errors([])
     # Name-value level level must be a mapping:
     assert "[] is not of type 'object'" in errors({"namelist": []})
+
+
+# orog-gsl
+
+
+def test_schema_orog_gsl():
+    config = {
+        "config": {
+            "halo": 4,
+            "input_grid_file": "/path/to/gridfile",
+            "resolution": 304,
+            "tile": 7,
+            "topo_data_2p5m": "/path/to/topo2p5m",
+            "topo_data_30s": "/path/to/topo30s",
+        },
+        "execution": {
+            "executable": "/path/to/orog_gsl",
+        },
+        "run_dir": "/path/to/run/dir",
+    }
+    errors = schema_validator("orog-gsl", "properties", "orog_gsl")
+    # Basic correctness:
+    assert not errors(config)
+    # All config keys are requried:
+    for key in ["halo", "input_grid_file", "resolution", "tile", "topo_data_2p5m", "topo_data_30s"]:
+        assert f"'{key}' is a required property" in errors(with_del(config, "config", key))
+    # Other config keys are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        with_set(config, "bar", "config", "foo")
+    )
+    # Some config keys require integer values:
+    for key in ["halo", "resolution", "tile"]:
+        assert "is not of type 'integer'" in errors(with_set(config, None, "config", key))
+    # Some config keys require string values:
+    for key in ["input_grid_file", "topo_data_2p5m", "topo_data_30s"]:
+        assert "is not of type 'string'" in errors(with_set(config, None, "config", key))
+    # Some top level keys are required:
+    for key in ["config", "execution", "run_dir"]:
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Other top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
+    # Top-level run_dir key requires a string value:
+    assert "is not of type 'string'" in errors(with_set(config, None, key))
 
 
 # platform

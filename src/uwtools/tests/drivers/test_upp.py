@@ -9,7 +9,6 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import yaml
 from iotaa import refs
 from pytest import fixture
 
@@ -61,21 +60,13 @@ def config(tmp_path):
 
 
 @fixture
-def config_file(config, tmp_path):
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
-
-
-@fixture
 def cycle():
     return dt.datetime(2024, 5, 6, 12)
 
 
 @fixture
-def driverobj(config_file, cycle, leadtime):
-    return upp.UPP(config=config_file, cycle=cycle, leadtime=leadtime, batch=True)
+def driverobj(config, cycle, leadtime):
+    return upp.UPP(config=config, cycle=cycle, leadtime=leadtime, batch=True)
 
 
 @fixture

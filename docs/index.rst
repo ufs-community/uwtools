@@ -133,6 +133,12 @@ make_solo_mosaic
 | **CLI**: ``uw make_solo_mosaic -h``
 | **API**: ``import uwtools.api.make_solo_mosaic``
 
+orog_gsl
+""""""""
+
+| **CLI**: ``uw orog_gsl -h``
+| **API**: ``import uwtools.api.orog_gsl``
+
 sfc_climo_gen
 """""""""""""
 

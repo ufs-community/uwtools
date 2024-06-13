@@ -5,7 +5,6 @@ make_hgrid driver tests.
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-import yaml
 from pytest import fixture
 
 from uwtools.drivers import make_hgrid
@@ -20,8 +19,8 @@ def config(tmp_path):
         "make_hgrid": {
             "config": {
                 "grid_type": "gnomonic_ed",
-                "nest_grids": 1,
                 "halo": 1,
+                "nest_grids": 1,
                 "parent_tile": [6],
                 "verbose": True,
             },
@@ -42,16 +41,8 @@ def config(tmp_path):
 
 
 @fixture
-def config_file(config, tmp_path):
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
-
-
-@fixture
-def driverobj(config_file):
-    return make_hgrid.MakeHgrid(config=config_file, batch=True)
+def driverobj(config):
+    return make_hgrid.MakeHgrid(config=config, batch=True)
 
 
 # Tests
@@ -72,12 +63,15 @@ def test_MakeHgrid_provisioned_run_directory(driverobj):
 
 
 def test_MakeHgrid__runcmd(driverobj):
-    cmd = driverobj._runcmd
-    assert (
-        cmd
-        == "/path/to/make_hgrid --grid_type gnomonic_ed --halo 1 \
---nest_grids 1 --parent_tile 6 --verbose"
-    )
+    expected = [
+        "/path/to/make_hgrid",
+        "--grid_type gnomonic_ed",
+        "--halo 1",
+        "--nest_grids 1",
+        "--parent_tile 6",
+        "--verbose",
+    ]
+    assert driverobj._runcmd == " ".join(expected)
 
 
 def test_MakeHgrid_run_batch(driverobj):
