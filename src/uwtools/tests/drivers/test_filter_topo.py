@@ -8,7 +8,8 @@ filter_topo driver tests.
 
 from pytest import fixture
 
-from uwtools.drivers import filter_topo
+from uwtools.drivers.driver import Driver
+from uwtools.drivers.filter_topo import FilterTopo
 
 # from uwtools.scheduler import Slurm
 
@@ -17,8 +18,6 @@ from uwtools.drivers import filter_topo
 
 @fixture
 def config():
-    # afile = tmp_path / "afile"
-    # afile.touch()
     return {
         "filter_topo": {
             "execution": {
@@ -46,14 +45,32 @@ def config():
 
 @fixture
 def driverobj(config):
-    return filter_topo.FilterTopo(config=config, batch=True)
+    return FilterTopo(config=config, batch=True)
 
 
 # Tests
 
 
 def test_FilterTopo(driverobj):
-    assert isinstance(driverobj, filter_topo.FilterTopo)
+    assert isinstance(driverobj, FilterTopo)
+
+
+def test_FilterTopo_inheritance():
+    for method in [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runcmd",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_validate",
+        "_write_runscript",
+        "run",
+    ]:
+        assert getattr(FilterTopo, method) is getattr(Driver, method)
 
 
 # def test_FilterTopo_provisioned_run_directory(driverobj):
@@ -65,19 +82,6 @@ def test_FilterTopo(driverobj):
 #         mocks[m].assert_called_once_with()
 
 
-# def test_FilterTopo_run_batch(driverobj):
-#     with patch.object(driverobj, "_run_via_batch_submission") as func:
-#         driverobj.run()
-#         func.assert_called_once_with()
-
-
-# def test_FilterTopo_run_local(driverobj):
-#     driverobj._batch = False
-#     with patch.object(driverobj, "_run_via_local_execution") as func:
-#         driverobj.run()
-#         func.assert_called_once_with()
-
-
 # def test_FilterTopo_runscript(driverobj):
 #     with patch.object(driverobj, "_runscript") as runscript:
 #         driverobj.runscript()
@@ -87,17 +91,5 @@ def test_FilterTopo(driverobj):
 #         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-# def test_FilterTopo__driver_config(driverobj):
-#     assert driverobj._driver_config == driverobj._config["filter_topo"]
-
-
-# def test_FilterTopo__runscript_path(driverobj):
-#     assert driverobj._runscript_path == driverobj._rundir / "runscript.filter_topo"
-
-
-# def test_FilterTopo__taskname(driverobj):
-#     assert driverobj._taskname("foo") == "filter_topo foo"
-
-
-# def test_FilterTopo__validate(driverobj):
-#     driverobj._validate()
+def test_FilterTopo__taskname(driverobj):
+    assert driverobj._taskname("foo") == "filter_topo foo"
