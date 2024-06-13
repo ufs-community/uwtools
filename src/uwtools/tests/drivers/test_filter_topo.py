@@ -3,8 +3,8 @@
 filter_topo driver tests.
 """
 # from pathlib import Path
-# from unittest.mock import DEFAULT as D
-# from unittest.mock import patch
+from unittest.mock import DEFAULT as D
+from unittest.mock import patch
 
 from pytest import fixture
 
@@ -73,22 +73,11 @@ def test_FilterTopo_inheritance():
         assert getattr(FilterTopo, method) is getattr(Driver, method)
 
 
-# def test_FilterTopo_provisioned_run_directory(driverobj):
-#     with patch.multiple(
-#         driverobj, input_grid_file=D, runscript=D, topo_data_2p5m=D, topo_data_30s=D
-#     ) as mocks:
-#         driverobj.provisioned_run_directory()
-#     for m in mocks:
-#         mocks[m].assert_called_once_with()
-
-
-# def test_FilterTopo_runscript(driverobj):
-#     with patch.object(driverobj, "_runscript") as runscript:
-#         driverobj.runscript()
-#         runscript.assert_called_once()
-#         args = ("envcmds", "envvars", "execution", "scheduler")
-#         types = [list, dict, list, Slurm]
-#         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
+def test_FilterTopo_provisioned_run_directory(driverobj):
+    with patch.multiple(driverobj, namelist_file=D, runscript=D) as mocks:
+        driverobj.provisioned_run_directory()
+    for m in mocks:
+        mocks[m].assert_called_once_with()
 
 
 def test_FilterTopo__taskname(driverobj):
