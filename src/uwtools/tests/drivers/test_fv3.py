@@ -6,14 +6,15 @@ import datetime as dt
 import logging
 from pathlib import Path
 from unittest.mock import DEFAULT as D
-from unittest.mock import PropertyMock, patch
+from unittest.mock import patch
 
 import pytest
 import yaml
 from iotaa import asset, external, refs
 from pytest import fixture
 
-from uwtools.drivers import driver, fv3
+from uwtools.drivers.driver import Driver
+from uwtools.drivers.fv3 import FV3
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import logged, regex_logged
@@ -65,7 +66,7 @@ def cycle():
 
 @fixture
 def driverobj(config, cycle):
-    return fv3.FV3(config=config, cycle=cycle, batch=True)
+    return FV3(config=config, cycle=cycle, batch=True)
 
 
 @fixture
@@ -81,8 +82,22 @@ def truetask():
 # Tests
 
 
-def test_FV3(driverobj):
-    assert isinstance(driverobj, fv3.FV3)
+def test_FV3():
+    for method in [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runcmd",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_validate",
+        "_write_runscript",
+        "run",
+    ]:
+        assert getattr(FV3, method) is getattr(Driver, method)
 
 
 def test_FV3_boundary_files(driverobj):
@@ -132,7 +147,7 @@ def test_FV3_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
     path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
         yaml.dump(config, f)
-    driverobj = fv3.FV3(config=path, cycle=cycle, batch=True)
+    driverobj = FV3(config=path, cycle=cycle, batch=True)
     atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
     assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
     atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
@@ -222,23 +237,6 @@ def test_FV3_restart_directory(driverobj):
     assert path.is_dir()
 
 
-def test_FV3_run_batch(driverobj):
-    executable = Path(driverobj._driver_config["execution"]["executable"])
-    executable.touch()
-    with patch.object(driverobj, "_run_via_batch_submission") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_FV3_run_local(driverobj):
-    driverobj._batch = False
-    executable = Path(driverobj._driver_config["execution"]["executable"])
-    executable.touch()
-    with patch.object(driverobj, "_run_via_local_execution") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
 def test_FV3_runscript(driverobj):
     with patch.object(driverobj, "_runscript") as runscript:
         driverobj.runscript()
@@ -248,40 +246,9 @@ def test_FV3_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_FV3__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["fv3"]
-
-
-def test_FV3__run_via_batch_submission(driverobj, truetask):
-    Path(driverobj._driver_config["execution"]["executable"]).touch()
-    with patch.object(driverobj, "provisioned_run_directory", truetask):
-        with patch.object(fv3.FV3, "_scheduler", new_callable=PropertyMock) as scheduler:
-            driverobj._run_via_batch_submission()
-            runscript = driverobj._runscript_path
-            scheduler().submit_job.assert_called_once_with(
-                runscript=runscript, submit_file=Path(f"{runscript}.submit")
-            )
-
-
-def test_FV3__run_via_local_execution(driverobj, truetask):
-    Path(driverobj._driver_config["execution"]["executable"]).touch()
-    with patch.object(driverobj, "provisioned_run_directory", truetask):
-        with patch.object(driver, "execute") as execute:
-            driverobj._run_via_local_execution()
-            execute.assert_called_once_with(
-                cmd="{x} >{x}.out 2>&1".format(x=driverobj._runscript_path),
-                cwd=driverobj._rundir,
-                log_output=True,
-            )
-
-
-def test_FV3__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript.fv3"
-
-
 def test_FV3__taskname(driverobj):
     assert driverobj._taskname("foo") == "20240201 18Z fv3 foo"
 
 
-def test_FV3__validate(driverobj):
-    driverobj._validate()
+def test_FV3__driver_name(driverobj):
+    assert driverobj._driver_name == "fv3"
