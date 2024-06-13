@@ -1,1 +1,1 @@
-uw orog_gal run --help
+uw orog_gsl run --help
