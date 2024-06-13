@@ -8,7 +8,6 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import yaml
 from iotaa import refs
 from pytest import fixture
 
@@ -56,16 +55,8 @@ def config(tmp_path):
 
 
 @fixture
-def config_file(config, tmp_path):
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
-
-
-@fixture
-def driverobj(config_file):
-    return esg_grid.ESGGrid(config=config_file, batch=True)
+def driverobj(config):
+    return esg_grid.ESGGrid(config=config, batch=True)
 
 
 # Tests

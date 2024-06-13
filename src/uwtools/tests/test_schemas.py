@@ -116,6 +116,11 @@ def sfc_climo_gen_prop():
 
 
 @fixture
+def schism_prop():
+    return partial(schema_validator, "schism", "properties", "schism", "properties")
+
+
+@fixture
 def shave_prop():
     return partial(schema_validator, "shave", "properties", "shave", "properties")
 
@@ -526,7 +531,7 @@ def test_schema_fv3_run_dir(fv3_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# global_equiv_resol
+# global-equiv-resol
 
 
 def test_schema_global_equiv_resol():
@@ -597,7 +602,7 @@ def test_schema_jedi_run_dir(jedi_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# make_hgrid
+# make-hgrid
 
 
 def test_schema_make_hgrid():
@@ -659,7 +664,7 @@ def test_schema_make_hgrid_run_dir(make_hgrid_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# make_solo_mosaic
+# make-solo-mosaic
 
 
 def test_schema_make_solo_mosaic():
@@ -796,7 +801,7 @@ def test_schema_mpas_run_dir(mpas_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# mpas_init
+# mpas-init
 
 
 def test_schema_mpas_init(mpas_streams):
@@ -1026,6 +1031,49 @@ def test_schema_namelist():
     assert "[] is not of type 'object'" in errors({"namelist": []})
 
 
+# orog-gsl
+
+
+def test_schema_orog_gsl():
+    config = {
+        "config": {
+            "halo": 4,
+            "input_grid_file": "/path/to/gridfile",
+            "resolution": 304,
+            "tile": 7,
+            "topo_data_2p5m": "/path/to/topo2p5m",
+            "topo_data_30s": "/path/to/topo30s",
+        },
+        "execution": {
+            "executable": "/path/to/orog_gsl",
+        },
+        "run_dir": "/path/to/run/dir",
+    }
+    errors = schema_validator("orog-gsl", "properties", "orog_gsl")
+    # Basic correctness:
+    assert not errors(config)
+    # All config keys are requried:
+    for key in ["halo", "input_grid_file", "resolution", "tile", "topo_data_2p5m", "topo_data_30s"]:
+        assert f"'{key}' is a required property" in errors(with_del(config, "config", key))
+    # Other config keys are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        with_set(config, "bar", "config", "foo")
+    )
+    # Some config keys require integer values:
+    for key in ["halo", "resolution", "tile"]:
+        assert "is not of type 'integer'" in errors(with_set(config, None, "config", key))
+    # Some config keys require string values:
+    for key in ["input_grid_file", "topo_data_2p5m", "topo_data_30s"]:
+        assert "is not of type 'string'" in errors(with_set(config, None, "config", key))
+    # Some top level keys are required:
+    for key in ["config", "execution", "run_dir"]:
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Other top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
+    # Top-level run_dir key requires a string value:
+    assert "is not of type 'string'" in errors(with_set(config, None, "run_dir"))
+
+
 # platform
 
 
@@ -1129,6 +1177,51 @@ def test_schema_rocoto_workflow_cycledef():
     assert "'x 202312011200 06:00:00' is not valid" in errors([{"spec": "x 202312011200 06:00:00"}])
     # Spec with bad activation offset attribute:
     assert "'foo' is not valid" in errors([{"attrs": {"activation_offset": "foo"}, "spec": spec}])
+
+
+# schism
+
+
+def test_schema_schism():
+    config = {
+        "namelist": {
+            "template_file": "/tmp/param.nml",
+            "template_values": {
+                "dt": 100,
+            },
+        },
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("schism", "properties", "schism")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("namelist", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_schism_namelist(schism_prop):
+    errors = schism_prop("namelist")
+    # At least template_file is required:
+    assert "'template_file' is a required property" in errors({})
+    # Just template_file is ok:
+    assert not errors({"template_file": "/path/to/param.nml"})
+    # Both template_file and template_values are ok:
+    assert not errors(
+        {
+            "template_file": "/path/to/param.nml",
+            "template_values": {"dt": 100},
+        }
+    )
+
+
+def test_schema_schism_run_dir(schism_prop):
+    errors = schism_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
 
 
 # sfc-climo-gen
@@ -1399,7 +1492,7 @@ def test_schema_upp_run_dir(upp_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# ungrib
+# ww3
 
 
 def test_schema_ww3():

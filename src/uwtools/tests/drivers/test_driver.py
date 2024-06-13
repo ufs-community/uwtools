@@ -153,9 +153,11 @@ def test_Asset_dry_run(config, val):
 # Tests for workflow methods
 
 
-def test_key_path(config):
+def test_key_path(config, tmp_path):
+    config_file = tmp_path / "config.yaml"
+    config_file.write_text(yaml.dump({"foo": {"bar": config}}))
     assetobj = ConcreteAssets(
-        config={"foo": {"bar": config}},
+        config=config_file,
         dry_run=False,
         batch=True,
         cycle=dt.datetime(2024, 3, 22, 18),
@@ -165,7 +167,7 @@ def test_key_path(config):
     assert config == assetobj._config
 
 
-def test_Asset_validate(caplog, assetobj):
+def test_Asset_validate(assetobj, caplog):
     log.setLevel(logging.INFO)
     assetobj.validate()
     assert regex_logged(caplog, "State: Ready")
@@ -184,7 +186,7 @@ def test_Asset_validate(caplog, assetobj):
     ],
 )
 def test_Asset__create_user_updated_config_base_file(
-    base_file, assetobj, expected, tmp_path, update_values
+    assetobj, base_file, expected, tmp_path, update_values
 ):
     path = tmp_path / "updated.yaml"
     dc = assetobj._driver_config

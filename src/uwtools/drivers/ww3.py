@@ -66,7 +66,10 @@ class WaveWatchIII(Assets):
         Run directory provisioned with all required content.
         """
         yield self._taskname("provisioned run directory")
-        yield [self.namelist_file(), self.restart_directory()]
+        yield [
+            self.namelist_file(),
+            self.restart_directory(),
+        ]
 
     @task
     def restart_directory(self):

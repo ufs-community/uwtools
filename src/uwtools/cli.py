@@ -73,6 +73,7 @@ def main() -> None:
                 STR.makesolomosaic,
                 STR.mpas,
                 STR.mpasinit,
+                STR.oroggsl,
                 STR.sfcclimogen,
                 STR.shave,
                 STR.ungrib,
@@ -1033,6 +1034,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
             STR.globalequivresol,
             STR.makehgrid,
             STR.makesolomosaic,
+            STR.oroggsl,
             STR.sfcclimogen,
             STR.shave,
         ]

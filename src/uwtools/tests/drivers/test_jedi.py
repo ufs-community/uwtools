@@ -23,6 +23,8 @@ from uwtools.tests.support import regex_logged
 
 @fixture
 def config(tmp_path):
+    base_file = tmp_path / "base.yaml"
+    base_file.write_text("foo: bar")
     return {
         "jedi": {
             "execution": {
@@ -41,7 +43,7 @@ def config(tmp_path):
                 "mpicmd": "srun",
             },
             "configuration_file": {
-                "base_file": str(tmp_path / "base.yaml"),
+                "base_file": str(base_file),
                 "update_values": {"baz": "qux"},
             },
             "files_to_copy": {
@@ -62,21 +64,13 @@ def config(tmp_path):
 
 
 @fixture
-def config_file(config, tmp_path):
-    path = tmp_path / "base.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
-
-
-@fixture
 def cycle():
     return dt.datetime(2024, 2, 1, 18)
 
 
 @fixture
-def driverobj(config_file, cycle):
-    return jedi.JEDI(config=config_file, cycle=cycle, batch=True)
+def driverobj(config, cycle):
+    return jedi.JEDI(config=config, cycle=cycle, batch=True)
 
 
 # Tests
