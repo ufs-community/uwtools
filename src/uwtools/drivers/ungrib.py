@@ -121,7 +121,7 @@ class Ungrib(Driver):
         yield self._taskname(path.name)
         yield asset(path, path.is_file)
         yield None
-        self._write_runscript(path=path, envvars={})
+        self._write_runscript(path)
 
     @task
     def vtable(self):

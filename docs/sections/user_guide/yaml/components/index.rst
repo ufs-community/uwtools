@@ -13,6 +13,7 @@ UW YAML for Components
    make_solo_mosaic
    mpas
    mpas_init
+   orog_gsl
    schism
    sfc_climo_gen
    shave

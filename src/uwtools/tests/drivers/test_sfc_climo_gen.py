@@ -8,7 +8,6 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import yaml
 from iotaa import asset, external, refs
 from pytest import fixture
 
@@ -17,12 +16,21 @@ from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import logged
 
+# Helpers
+
+
+@external
+def ready(x):
+    yield x
+    yield asset(x, lambda: True)
+
+
 # Fixtures
 
 
 @fixture
-def config_file(tmp_path):
-    config: dict = {
+def config(tmp_path):
+    return {
         "sfc_climo_gen": {
             "execution": {
                 "batchargs": {
@@ -58,32 +66,18 @@ def config_file(tmp_path):
                 },
                 "validate": True,
             },
-            "run_dir": "/path/to/dir",
+            "run_dir": str(tmp_path),
         },
         "platform": {
             "account": "me",
             "scheduler": "slurm",
         },
     }
-    path = tmp_path / "config.yaml"
-    config["sfc_climo_gen"]["run_dir"] = tmp_path.as_posix()
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
 
 
 @fixture
-def driverobj(config_file):
-    return sfc_climo_gen.SfcClimoGen(config=config_file, batch=True)
-
-
-# Helpers
-
-
-@external
-def ready(x):
-    yield x
-    yield asset(x, lambda: True)
+def driverobj(config):
+    return sfc_climo_gen.SfcClimoGen(config=config, batch=True)
 
 
 # Tests

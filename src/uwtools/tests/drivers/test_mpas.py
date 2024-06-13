@@ -20,6 +20,30 @@ from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import fixture_path, logged, regex_logged
 
+# Helpers
+
+
+def streams_file(config, driverobj, drivername):
+    array_elements = {"file", "stream", "var", "var_array", "var_struct"}
+    array_elements_tested = set()
+    driverobj.streams_file()
+    path = Path(driverobj._driver_config["run_dir"]) / driverobj._streams_fn
+    with open(path, "r", encoding="utf-8") as f:
+        xml = etree.parse(f).getroot()
+    assert xml.tag == "streams"
+    for child in xml.getchildren():  # type: ignore
+        block = config[drivername]["streams"][child.get("name")]
+        for k, v in block.items():
+            if k not in [*[f"{e}s" for e in array_elements], "mutable"]:
+                assert child.get(k) == v
+        assert child.tag == "stream" if block["mutable"] else "immutable_stream"
+        for e in array_elements:
+            for name in block.get(f"{e}s", []):
+                assert child.xpath(f"//{e}[@name='{name}']")
+                array_elements_tested.add(e)
+    assert array_elements_tested == array_elements
+
+
 # Fixtures
 
 
@@ -82,45 +106,13 @@ def config(tmp_path):
 
 
 @fixture
-def config_file(config, tmp_path):
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
-
-
-@fixture
 def cycle():
     return dt.datetime(2024, 3, 22, 6)
 
 
 @fixture
-def driverobj(config_file, cycle):
-    return mpas.MPAS(config=config_file, cycle=cycle, batch=True)
-
-
-# Helpers
-
-
-def streams_file(config, driverobj, drivername):
-    array_elements = {"file", "stream", "var", "var_array", "var_struct"}
-    array_elements_tested = set()
-    driverobj.streams_file()
-    path = Path(driverobj._driver_config["run_dir"]) / driverobj._streams_fn
-    with open(path, "r", encoding="utf-8") as f:
-        xml = etree.parse(f).getroot()
-    assert xml.tag == "streams"
-    for child in xml.getchildren():  # type: ignore
-        block = config[drivername]["streams"][child.get("name")]
-        for k, v in block.items():
-            if k not in [*[f"{e}s" for e in array_elements], "mutable"]:
-                assert child.get(k) == v
-        assert child.tag == "stream" if block["mutable"] else "immutable_stream"
-        for e in array_elements:
-            for name in block.get(f"{e}s", []):
-                assert child.xpath(f"//{e}[@name='{name}']")
-                array_elements_tested.add(e)
-    assert array_elements_tested == array_elements
+def driverobj(config, cycle):
+    return mpas.MPAS(config=config, cycle=cycle, batch=True)
 
 
 # Tests

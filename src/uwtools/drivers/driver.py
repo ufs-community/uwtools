@@ -340,14 +340,14 @@ class Driver(Assets):
         for schema_name in (self._driver_name.replace("_", "-"), "platform"):
             validate_internal(schema_name=schema_name, config=self._config)
 
-    def _write_runscript(self, path: Path, envvars: Dict[str, str]) -> None:
+    def _write_runscript(self, path: Path, envvars: Optional[Dict[str, str]] = None) -> None:
         """
         Write the runscript.
         """
         path.parent.mkdir(parents=True, exist_ok=True)
         rs = self._runscript(
             envcmds=self._driver_config.get("execution", {}).get("envcmds", []),
-            envvars=envvars,
+            envvars=envvars or {},
             execution=[
                 "time %s" % self._runcmd,
                 "test $? -eq 0 && touch %s" % self._runscript_done_file,
