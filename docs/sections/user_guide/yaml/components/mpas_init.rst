@@ -72,7 +72,7 @@ Identical to ``files_to_copy:`` except that symbolic links will be created in th
 namelist:
 ^^^^^^^^^
 
-Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details).
+Supports ``base_file:`` and ``update_values:`` blocks (see :ref:`updating_values` for details).
 
 .. include:: /shared/validate_namelist.rst
 
