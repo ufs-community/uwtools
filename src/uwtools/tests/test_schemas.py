@@ -526,7 +526,7 @@ def test_schema_fv3_run_dir(fv3_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# global_equiv_resol
+# global-equiv-resol
 
 
 def test_schema_global_equiv_resol():
@@ -597,7 +597,7 @@ def test_schema_jedi_run_dir(jedi_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# make_hgrid
+# make-hgrid
 
 
 def test_schema_make_hgrid():
@@ -659,7 +659,7 @@ def test_schema_make_hgrid_run_dir(make_hgrid_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# make_solo_mosaic
+# make-solo-mosaic
 
 
 def test_schema_make_solo_mosaic():
@@ -796,7 +796,7 @@ def test_schema_mpas_run_dir(mpas_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# mpas_init
+# mpas-init
 
 
 def test_schema_mpas_init(mpas_streams):
@@ -1442,7 +1442,7 @@ def test_schema_upp_run_dir(upp_prop):
     assert "88 is not of type 'string'" in errors(88)
 
 
-# ungrib
+# ww3
 
 
 def test_schema_ww3():
