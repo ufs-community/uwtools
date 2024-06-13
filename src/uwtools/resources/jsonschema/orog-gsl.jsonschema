@@ -7,7 +7,6 @@
           "additionalProperties": false,
           "properties": {
             "halo": {
-              "minimum": 0,
               "type": "integer"
             },
             "input_grid_file": {

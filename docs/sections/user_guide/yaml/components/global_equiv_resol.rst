@@ -3,7 +3,7 @@
 global_equiv_resol
 ==================
 
-Structured YAML to run the WRF preprocessing component ``global_equiv_resol`` is validated by JSON Schema and requires the ``global_equiv_resol:`` block, described below. If ``global_equiv_resol`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
+Structured YAML to run the component ``global_equiv_resol`` is validated by JSON Schema and requires the ``global_equiv_resol:`` block, described below. If ``global_equiv_resol`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
 Documentation for the UFS Utils ``global_equiv_resol`` program is :ufs-utils:`here <global-equiv-resol>`.
 
