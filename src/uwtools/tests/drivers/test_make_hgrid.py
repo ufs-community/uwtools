@@ -19,8 +19,8 @@ def config(tmp_path):
         "make_hgrid": {
             "config": {
                 "grid_type": "gnomonic_ed",
-                "nest_grids": 1,
                 "halo": 1,
+                "nest_grids": 1,
                 "parent_tile": [6],
                 "verbose": True,
             },
@@ -66,8 +66,8 @@ def test_MakeHgrid__runcmd(driverobj):
     expected = [
         "/path/to/make_hgrid",
         "--grid_type gnomonic_ed",
-        "--nest_grids 1",
         "--halo 1",
+        "--nest_grids 1",
         "--parent_tile 6",
         "--verbose",
     ]
