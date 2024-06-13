@@ -374,6 +374,56 @@ def test_schema_files_to_stage():
     assert "True is not of type 'string'" in errors({"file1": True})
 
 
+# filter-topo
+
+
+def test_schema_filter_topo():
+    config = {
+        "execution": {
+            "executable": "/path/to/orog_gsl",
+        },
+        "namelist": {
+            "update_values": {
+                "filter_topo_nml": {
+                    "grid_file": "/path/to/grid/file",
+                    "grid_type": 0,
+                    "mask_field": "land_frac",
+                    "regional": True,
+                    "res": 403,
+                    "stretch_fac": 0.999,
+                    "topo_field": "orog_filt",
+                    "topo_file": "/path/to/topo/file",
+                    "zero_ocean": True,
+                }
+            }
+        },
+        "run_dir": "/path/to/run/dir",
+    }
+    errors = schema_validator("filter-topo", "properties", "filter_topo")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are requried:
+    for key in ["execution", "namelist", "run_dir"]:
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Other top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
+    # Top-level run_dir key requires a string value:
+    assert "is not of type 'string'" in errors(with_set(config, None, "run_dir"))
+    # # Other config keys are not allowed:
+    # assert "Additional properties are not allowed" in errors(
+    #     with_set(config, "bar", "config", "foo")
+    # )
+    # # Some config keys require integer values:
+    # for key in ["halo", "resolution", "tile"]:
+    #     assert "is not of type 'integer'" in errors(with_set(config, None, "config", key))
+    # # Some config keys require string values:
+    # for key in ["input_grid_file", "topo_data_2p5m", "topo_data_30s"]:
+    #     assert "is not of type 'string'" in errors(with_set(config, None, "config", key))
+    # # Some top level keys are required:
+    # for key in ["config", "execution", "run_dir"]:
+    #     assert f"'{key}' is a required property" in errors(with_del(config, key))
+
+
 # fv3
 
 
@@ -1071,7 +1121,7 @@ def test_schema_orog_gsl():
     # Other top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
     # Top-level run_dir key requires a string value:
-    assert "is not of type 'string'" in errors(with_set(config, None, key))
+    assert "is not of type 'string'" in errors(with_set(config, None, "run_dir"))
 
 
 # platform
