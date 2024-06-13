@@ -18,7 +18,7 @@ UW YAML for the ``orog_gsl:`` Block
 config:
 ^^^^^^^
 
-Describes the required parameters to run a ``orog_gsl`` configuration.
+Configuration parameters for the ``orog_gsl`` component.
 
   **halo:**
 
