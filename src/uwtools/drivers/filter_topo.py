@@ -45,6 +45,7 @@ class FilterTopo(Driver):
         path = self._rundir / fn
         yield self._taskname(f"namelist file {fn}")
         yield asset(path, path.is_file)
+        yield None
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=self._driver_config["namelist"],

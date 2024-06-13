@@ -2,22 +2,22 @@
 """
 filter_topo driver tests.
 """
-# from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
+import f90nml  # type: ignore
+from iotaa import refs
 from pytest import fixture
 
+from uwtools.config.support import from_od
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.filter_topo import FilterTopo
-
-# from uwtools.scheduler import Slurm
 
 # Fixtures
 
 
 @fixture
-def config():
+def config(tmp_path):
     return {
         "filter_topo": {
             "execution": {
@@ -38,7 +38,7 @@ def config():
                     }
                 }
             },
-            "run_dir": "/path/to/run/dir",
+            "run_dir": str(tmp_path),
         }
     }
 
@@ -51,11 +51,7 @@ def driverobj(config):
 # Tests
 
 
-def test_FilterTopo(driverobj):
-    assert isinstance(driverobj, FilterTopo)
-
-
-def test_FilterTopo_inheritance():
+def test_FilterTopo():
     for method in [
         "_driver_config",
         "_resources",
@@ -71,6 +67,13 @@ def test_FilterTopo_inheritance():
         "run",
     ]:
         assert getattr(FilterTopo, method) is getattr(Driver, method)
+
+
+def test_FilterTopo_namelist_file(driverobj):
+    path = refs(driverobj.namelist_file())
+    actual = from_od(f90nml.read(path).todict())
+    expected = driverobj._driver_config["namelist"]["update_values"]
+    assert actual == expected
 
 
 def test_FilterTopo_provisioned_run_directory(driverobj):

@@ -58,6 +58,12 @@ def test_format_to_config_fail():
         support.format_to_config("no-such-config-type")
 
 
+def test_from_od():
+    assert support.from_od(d=OrderedDict([("example", OrderedDict([("key", "value")]))])) == {
+        "example": {"key": "value"}
+    }
+
+
 def test_log_and_error(caplog):
     log.setLevel(logging.ERROR)
     msg = "Something bad happened"
