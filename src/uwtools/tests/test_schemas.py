@@ -1071,7 +1071,7 @@ def test_schema_orog_gsl():
     # Other top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
     # Top-level run_dir key requires a string value:
-    assert "is not of type 'string'" in errors(with_set(config, None, key))
+    assert "is not of type 'string'" in errors(with_set(config, None, "run_dir"))
 
 
 # platform
