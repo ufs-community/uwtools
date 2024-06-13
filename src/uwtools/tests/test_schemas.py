@@ -400,6 +400,7 @@ def test_schema_filter_topo():
         "run_dir": "/path/to/run/dir",
     }
     errors = schema_validator("filter-topo", "properties", "filter_topo")
+    nmlkeys = ("namelist", "update_values", "filter_topo_nml")
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are requried:
@@ -409,19 +410,39 @@ def test_schema_filter_topo():
     assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
     # Top-level run_dir key requires a string value:
     assert "is not of type 'string'" in errors(with_set(config, None, "run_dir"))
-    # # Other config keys are not allowed:
-    # assert "Additional properties are not allowed" in errors(
-    #     with_set(config, "bar", "config", "foo")
-    # )
-    # # Some config keys require integer values:
-    # for key in ["halo", "resolution", "tile"]:
-    #     assert "is not of type 'integer'" in errors(with_set(config, None, "config", key))
-    # # Some config keys require string values:
-    # for key in ["input_grid_file", "topo_data_2p5m", "topo_data_30s"]:
-    #     assert "is not of type 'string'" in errors(with_set(config, None, "config", key))
-    # # Some top level keys are required:
-    # for key in ["config", "execution", "run_dir"]:
-    #     assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Namelist filter_topo_nml is required:
+    assert "is a required property" in errors(with_del(config, *nmlkeys))
+    # Additional namelists are not allowed:
+    assert "not allowed" in errors(
+        with_set(config, {}, "namelist", "update_values", "additonal_namelist")
+    )
+    # All filter_topo_nml keys are optional:
+    for key in [
+        "grid_file",
+        "grid_type",
+        "mask_field",
+        "regional",
+        "res",
+        "stretch_fac",
+        "topo_field",
+        "topo_file",
+        "zero_ocean",
+    ]:
+        assert not errors(with_del(config, *nmlkeys, key))
+    # Additional filter_topo_nml keys are allowd:
+    assert not errors(with_set(config, "val", *nmlkeys, "key"))
+    # Some config keys require boolean values:
+    for key in ["regional", "zero_ocean"]:
+        assert "is not of type 'boolean'" in errors(with_set(config, None, *nmlkeys, key))
+    # Some config keys require integer values:
+    for key in ["grid_type", "res"]:
+        assert "is not of type 'integer'" in errors(with_set(config, None, *nmlkeys, key))
+    # Some config keys require number values:
+    for key in ["stretch_fac"]:
+        assert "is not of type 'number'" in errors(with_set(config, None, *nmlkeys, key))
+    # Some config keys require string values:
+    for key in ["grid_file", "mask_field", "topo_field", "topo_file"]:
+        assert "is not of type 'string'" in errors(with_set(config, None, *nmlkeys, key))
 
 
 # fv3
