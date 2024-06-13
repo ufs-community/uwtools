@@ -1,6 +1,6 @@
 {
   "properties": {
-    "ww3": {
+    "schism": {
       "additionalProperties": false,
       "properties": {
         "namelist": {

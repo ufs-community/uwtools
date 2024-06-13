@@ -116,6 +116,11 @@ def sfc_climo_gen_prop():
 
 
 @fixture
+def schism_prop():
+    return partial(schema_validator, "schism", "properties", "schism", "properties")
+
+
+@fixture
 def shave_prop():
     return partial(schema_validator, "shave", "properties", "shave", "properties")
 
@@ -1172,6 +1177,51 @@ def test_schema_rocoto_workflow_cycledef():
     assert "'x 202312011200 06:00:00' is not valid" in errors([{"spec": "x 202312011200 06:00:00"}])
     # Spec with bad activation offset attribute:
     assert "'foo' is not valid" in errors([{"attrs": {"activation_offset": "foo"}, "spec": spec}])
+
+
+# schism
+
+
+def test_schema_schism():
+    config = {
+        "namelist": {
+            "template_file": "/tmp/param.nml",
+            "template_values": {
+                "dt": 100,
+            },
+        },
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("schism", "properties", "schism")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("namelist", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_schism_namelist(schism_prop):
+    errors = schism_prop("namelist")
+    # At least template_file is required:
+    assert "'template_file' is a required property" in errors({})
+    # Just template_file is ok:
+    assert not errors({"template_file": "/path/to/param.nml"})
+    # Both template_file and template_values are ok:
+    assert not errors(
+        {
+            "template_file": "/path/to/param.nml",
+            "template_values": {"dt": 100},
+        }
+    )
+
+
+def test_schema_schism_run_dir(schism_prop):
+    errors = schism_prop("run_dir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
 
 
 # sfc-climo-gen

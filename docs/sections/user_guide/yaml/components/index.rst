@@ -14,6 +14,7 @@ UW YAML for Components
    mpas
    mpas_init
    orog_gsl
+   schism
    sfc_climo_gen
    shave
    ungrib
