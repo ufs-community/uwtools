@@ -6,8 +6,8 @@ from unittest.mock import patch
 
 from pytest import fixture
 
-from uwtools.drivers import make_solo_mosaic
-from uwtools.scheduler import Slurm
+from uwtools.drivers.driver import Driver
+from uwtools.drivers.make_solo_mosaic import MakeSoloMosaic
 
 # Fixtures
 
@@ -38,14 +38,28 @@ def config(tmp_path):
 
 @fixture
 def driverobj(config):
-    return make_solo_mosaic.MakeSoloMosaic(config=config, batch=True)
+    return MakeSoloMosaic(config=config, batch=True)
 
 
 # Tests
 
 
-def test_MakeSoloMosaic(driverobj):
-    assert isinstance(driverobj, make_solo_mosaic.MakeSoloMosaic)
+def test_MakeSoloMosaic():
+    for method in [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_validate",
+        "_write_runscript",
+        "run",
+        "runscript",
+    ]:
+        assert getattr(MakeSoloMosaic, method) is getattr(Driver, method)
 
 
 def test_MakeSoloMosaic_provisioned_run_directory(driverobj):
@@ -54,40 +68,14 @@ def test_MakeSoloMosaic_provisioned_run_directory(driverobj):
         runscript.assert_called_once_with()
 
 
+def test_MakeSoloMosiac__driver_name(driverobj):
+    assert driverobj._driver_name == "make_solo_mosaic"
+
+
 def test_MakeSoloMosaic__runcmd(driverobj):
     dir_path = driverobj._config["make_solo_mosaic"]["config"]["dir"]
     cmd = driverobj._runcmd
     assert cmd == f"/path/to/make_solo_mosaic.exe --dir {dir_path} --num_tiles 1"
-
-
-def test_MakeSoloMosaic_run_batch(driverobj):
-    with patch.object(driverobj, "_run_via_batch_submission") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_MakeSoloMosaic_run_local(driverobj):
-    driverobj._batch = False
-    with patch.object(driverobj, "_run_via_local_execution") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_MakeSoloMosaic_runscript(driverobj):
-    with patch.object(driverobj, "_runscript") as runscript:
-        driverobj.runscript()
-        runscript.assert_called_once()
-        args = ("envcmds", "envvars", "execution", "scheduler")
-        types = [list, dict, list, Slurm]
-        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
-
-
-def test_MakeSoloMosaic__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["make_solo_mosaic"]
-
-
-def test_MakeSoloMosaic__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript.make_solo_mosaic"
 
 
 def test_MakeSoloMosaic__taskname(driverobj):
