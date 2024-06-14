@@ -16,6 +16,7 @@ from pytest import fixture
 from uwtools.drivers.mpas_base import MPASBase
 from uwtools.drivers.mpas_init import MPASInit
 from uwtools.logging import log
+from uwtools.tests.drivers.test_mpas import streams_file
 from uwtools.tests.support import fixture_path, logged, regex_logged
 
 # Fixtures
@@ -115,6 +116,7 @@ def test_MPASInit():
         "_write_runscript",
         "run",
         "runscript",
+        "streams_file",
     ]:
         assert getattr(MPASInit, method) is getattr(MPASBase, method)
 
@@ -210,6 +212,10 @@ def test_MPASInit_provisioned_run_directory(driverobj):
 
 def test_MPASInit__driver_name(driverobj):
     assert driverobj._driver_name == "mpas_init"
+
+
+def test_MPASInit_streams_file(config, driverobj):
+    streams_file(config, driverobj, "mpas_init")
 
 
 def test_MPASInit__streams_fn(driverobj):

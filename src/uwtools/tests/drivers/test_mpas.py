@@ -134,6 +134,7 @@ def test_MPAS():
         "_write_runscript",
         "run",
         "runscript",
+        "streams_file",
     ]:
         assert getattr(MPAS, method) is getattr(MPASBase, method)
 
@@ -222,6 +223,10 @@ def test_MPAS_provisioned_run_directory(driverobj):
 
 def test_MPAS__driver_name(driverobj):
     assert driverobj._driver_name == "mpas"
+
+
+def test_MPAS_streams_file(config, driverobj):
+    streams_file(config, driverobj, "mpas")
 
 
 def test_MPAS__streams_fn(driverobj):
