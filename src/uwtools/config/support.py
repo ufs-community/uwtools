@@ -58,7 +58,7 @@ def format_to_config(fmt: str) -> Type:
 
 def from_od(d: Union[OrderedDict, Dict]) -> dict:
     """
-    Returns a (nested) dict with content equivalent to the given (nested) OrdereDict.
+    Returns a (nested) dict with content equivalent to the given (nested) OrderedDict.
 
     :param d: A (possibly nested) OrderedDict.
     """
