@@ -3,6 +3,17 @@
     "filter_topo": {
       "additionalProperties": false,
       "properties": {
+        "config": {
+          "additionalProperties": false,
+          "properties": {
+            "input_grid_file": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "input_grid_file"
+          ]
+        },
         "execution": {
           "$ref": "urn:uwtools:execution-serial"
         },
@@ -82,6 +93,7 @@
         }
       },
       "required": [
+        "config",
         "execution",
         "namelist",
         "run_dir"

@@ -15,6 +15,15 @@ Here is a prototype UW YAML ``filter_topo:`` block, explained in detail below:
 UW YAML for the ``filter_topo:`` Block
 --------------------------------------
 
+config:
+^^^^^^^
+
+Configuration parameters for the ``orog_gsl`` component.
+
+  **input_grid_file:**
+
+  Path to the tiled input grid file.
+
 namelist:
 ^^^^^^^^^
 

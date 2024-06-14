@@ -2,6 +2,7 @@
 """
 filter_topo driver tests.
 """
+from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
@@ -18,8 +19,13 @@ from uwtools.drivers.filter_topo import FilterTopo
 
 @fixture
 def config(tmp_path):
+    input_grid_file = tmp_path / "C403_grid.tile7.halo4.nc"
+    input_grid_file.touch()
     return {
         "filter_topo": {
+            "config": {
+                "input_grid_file": str(input_grid_file),
+            },
             "execution": {
                 "executable": "/path/to/orog_gsl",
             },
@@ -38,7 +44,7 @@ def config(tmp_path):
                     }
                 }
             },
-            "run_dir": str(tmp_path),
+            "run_dir": str(tmp_path / "run"),
         }
     }
 
@@ -69,6 +75,13 @@ def test_FilterTopo():
         "runscript",
     ]:
         assert getattr(FilterTopo, method) is getattr(Driver, method)
+
+
+def test_FilterTopo_input_grid_file(driverobj):
+    path = Path(driverobj._driver_config["run_dir"]) / "C403_grid.tile7.halo4.nc"
+    assert not path.is_file()
+    driverobj.input_grid_file()
+    assert path.is_symlink()
 
 
 def test_FilterTopo_namelist_file(driverobj):

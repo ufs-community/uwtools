@@ -10,6 +10,7 @@ from iotaa import asset, task, tasks
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
+from uwtools.utils.tasks import symlink
 
 
 class FilterTopo(Driver):
@@ -35,6 +36,17 @@ class FilterTopo(Driver):
         super().__init__(config=config, dry_run=dry_run, batch=batch, key_path=key_path)
 
     # Workflow tasks
+
+    @task
+    def input_grid_file(self):
+        """
+        The input grid file.
+        """
+        src = Path(self._driver_config["config"]["input_grid_file"])
+        dst = Path(self._driver_config["run_dir"]) / src.name
+        yield self._taskname("Input grid")
+        yield asset(dst, dst.is_file)
+        yield symlink(target=src, linkname=dst)
 
     @task
     def namelist_file(self):
