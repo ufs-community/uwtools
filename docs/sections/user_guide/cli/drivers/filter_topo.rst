@@ -47,7 +47,7 @@ Its contents are described in section :ref:`filter_topo_yaml`.
 
   .. code-block:: text
 
-     time filter_topo --num_tiles 1 --dir /path/to/grid/ --tile_file C403_grid.tile7.halo6.nc --periodx 360 --periody 360
+     time filter_topo
 
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 
