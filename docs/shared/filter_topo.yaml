@@ -19,7 +19,7 @@ filter_topo:
         res: 403
         stretch_fac: 0.999
         topo_field: orog_filt
-        topo_file: /path/to/C403_filtered_orog
+        topo_file: /path/to/C403_filtered_orog # filter_topo adds a .tile{n}.nc extension
         zero_ocean: true
   run_dir: /path/to/run/dir
 platform:
