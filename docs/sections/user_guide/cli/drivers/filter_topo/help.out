@@ -10,6 +10,8 @@ Optional arguments:
 
 Positional arguments:
   TASK
+    input_grid_file
+      The input grid file
     namelist_file
       The namelist file
     provisioned_run_directory
