@@ -43,12 +43,6 @@ Its contents are described in section :ref:`filter_topo_yaml`.
 
   The driver creates a ``runscript.filter_topo`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``filter_topo:``.
 
-  Looking at the run command in ``runscript.filter_topo`` shows us the specified executable as well as the YAML keys converted to appropriate command line flags.
-
-  .. code-block:: text
-
-     time filter_topo
-
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 
   .. code-block:: text

@@ -43,12 +43,6 @@ Its contents are described in section :ref:`make_solo_mosaic_yaml`.
 
   The driver creates a ``runscript.make_solo_mosaic`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``make_solo_mosaic:``.
 
-  Looking at the run command in ``runscript.make_solo_mosaic`` shows us the specified executable as well as the YAML keys converted to appropriate command line flags.
-
-  .. code-block:: text
-
-     time make_solo_mosaic --num_tiles 1 --dir /path/to/grid/ --tile_file C403_grid.tile7.halo6.nc --periodx 360 --periody 360
-
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 
   .. code-block:: text
