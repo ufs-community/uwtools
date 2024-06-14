@@ -190,7 +190,7 @@ def test_JEDI__config_fn(driverobj):
     assert driverobj._config_fn == "jedi.yaml"
 
 
-def test_JEFI__driver_name(driverobj):
+def test_JEDI__driver_name(driverobj):
     assert driverobj._driver_name == "jedi"
 
 
