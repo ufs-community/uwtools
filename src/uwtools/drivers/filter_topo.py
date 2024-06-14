@@ -72,6 +72,7 @@ class FilterTopo(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield [
+            self.input_grid_file(),
             self.namelist_file(),
             self.runscript(),
         ]
