@@ -35,6 +35,14 @@ Its contents are described in section :ref:`make_hgrid_yaml`.
 
   The driver creates a ``runscript.make_hgrid`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``make_hgrid``.
 
+  An example runscript:
+
+  .. literalinclude:: make_hgrid/runscript.cmd
+     :language: text
+     :emphasize-lines: 5
+  .. literalinclude:: make_hgrid/runscript.out
+     :language: text
+
 * Run ``make_hgrid`` via a batch job
 
   .. code-block:: text

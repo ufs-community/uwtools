@@ -35,6 +35,15 @@ Its contents are described in section :ref:`make_solo_mosaic_yaml`.
 
   The driver creates a ``runscript.make_solo_mosaic`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``make_solo_mosaic``.
 
+..
+  An example runscript:
+
+  .. literalinclude:: make_solo_mosaic/runscript.cmd
+     :language: text
+     :emphasize-lines: 5
+  .. literalinclude:: make_solo_mosaic/runscript.out
+     :language: text
+
 * Run ``make_solo_mosaic`` via a batch job
 
   .. code-block:: text
