@@ -28,5 +28,5 @@ make_hgrid:
       nodes: 1
       stdout: /path/to/runscript.out
       walltime: "08:00:00"
-    executable: /path/make_hgrid
-  run_dir: /path/to/make_hgrid
+    executable: /path/to/make_hgrid
+  run_dir: /path/to/run/dir
