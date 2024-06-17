@@ -84,6 +84,7 @@ class STR:
     help: str = "help"
     infile: str = "input_file"
     infmt: str = "input_format"
+    ioda: str = "ioda"
     jedi: str = "jedi"
     keypath: str = "key_path"
     keys: str = "keys"
