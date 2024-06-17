@@ -1,6 +1,6 @@
-usage: uw jedi [-h] [--version] TASK ...
+usage: uw ioda [-h] [--version] TASK ...
 
-Execute jedi tasks
+Execute ioda tasks
 
 Optional arguments:
   -h, --help
