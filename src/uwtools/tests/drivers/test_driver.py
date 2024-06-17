@@ -18,6 +18,7 @@ from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
+from uwtools.scheduler import Slurm
 from uwtools.tests.support import regex_logged
 
 # Helpers
@@ -96,7 +97,7 @@ def config(tmp_path):
                 "mpiargs": ["bar", "baz"],
                 "mpicmd": "foo",
             },
-            "run_dir": "{{ rootdir }}/{{ cycle.strftime('%Y%m%d%H') }}/run",
+            "run_dir": str(tmp_path),
             "update_values": {"a": 33},
         },
         "platform": {
@@ -217,7 +218,7 @@ def test_Asset__driver_config_pass(assetobj):
 
 
 def test_Asset__rundir(assetobj):
-    assert assetobj._rundir == Path("/path/to/2024032218/run")
+    assert assetobj._rundir == Path(assetobj._driver_config["run_dir"])
 
 
 def test_Asset__validate(assetobj):
@@ -255,6 +256,15 @@ def test_Driver_run(batch, driverobj):
         else:
             rvbs.assert_not_called()
             rvle.assert_called_once_with()
+
+
+def test_Driver_runscript(driverobj):
+    with patch.object(driverobj, "_runscript") as runscript:
+        driverobj.runscript()
+        runscript.assert_called_once()
+        args = ("envcmds", "envvars", "execution", "scheduler")
+        types = [list, dict, list, Slurm]
+        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
 def test_Driver__run_via_batch_submission(driverobj):
@@ -433,7 +443,8 @@ def test_Driver__runscript_done_file(driverobj):
 
 
 def test_Driver__runscript_path(driverobj):
-    assert driverobj._runscript_path == Path("/path/to/2024032218/run/runscript.concrete")
+    run_dir = Path(driverobj._driver_config["run_dir"])
+    assert driverobj._runscript_path == run_dir / "runscript.concrete"
 
 
 def test_Driver__scheduler(driverobj):
@@ -457,18 +468,19 @@ def test_Driver__validate(assetobj):
         }
 
 
-def test_Driver__write_runscript(driverobj, tmp_path):
-    path = tmp_path / "runscript"
+def test_Driver__write_runscript(driverobj):
+    run_dir = driverobj._driver_config["run_dir"]
+    path = Path(run_dir) / "runscript"
     executable = driverobj._driver_config["execution"]["executable"]
     driverobj._write_runscript(path=path, envvars={"FOO": "bar", "BAZ": "qux"})
     expected = f"""
     #!/bin/bash
 
     #SBATCH --account=me
-    #SBATCH --chdir=/path/to/2024032218/run
+    #SBATCH --chdir={run_dir}
     #SBATCH --export=NONE
     #SBATCH --nodes=1
-    #SBATCH --output=/path/to/2024032218/run/out
+    #SBATCH --output={run_dir}/out
     #SBATCH --time=00:05:00
 
     export FOO=bar

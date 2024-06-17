@@ -104,17 +104,6 @@ class UPP(Driver):
             self.runscript(),
         ]
 
-    @task
-    def runscript(self):
-        """
-        The runscript.
-        """
-        path = self._runscript_path
-        yield self._taskname(path.name)
-        yield asset(path, path.is_file)
-        yield None
-        self._write_runscript(path)
-
     # Private helper methods
 
     @property
@@ -130,13 +119,6 @@ class UPP(Driver):
         Path to the namelist file.
         """
         return self._rundir / "itag"
-
-    @property
-    def _runscript_path(self) -> Path:
-        """
-        Path to the runscript.
-        """
-        return self._rundir / f"runscript.{self._driver_name}"
 
     @property
     def _runcmd(self) -> str:

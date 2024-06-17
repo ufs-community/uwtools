@@ -115,6 +115,12 @@ esg_grid
 | **CLI**: ``uw esg_grid -h``
 | **API**: ``import uwtools.api.esg_grid``
 
+filter_topo
+"""""""""""
+
+| **CLI**: ``uw filter_topo -h``
+| **API**: ``import uwtools.api.filter_topo``
+
 global_equiv_resol
 """"""""""""""""""
 

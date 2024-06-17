@@ -22,7 +22,8 @@ See :ref:`this page <execution_yaml>` for details.
 
 configuration_file:
 ^^^^^^^^^^^^^^^^^^^
-Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details).
+
+Supports ``base_file:`` and ``update_values:`` blocks (see :ref:`updating_values` for details).
 
 files_to_copy:
 ^^^^^^^^^^^^^^

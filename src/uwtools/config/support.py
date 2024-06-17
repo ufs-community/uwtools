@@ -56,6 +56,15 @@ def format_to_config(fmt: str) -> Type:
     return cfgclass
 
 
+def from_od(d: Union[OrderedDict, Dict]) -> dict:
+    """
+    Returns a (nested) dict with content equivalent to the given (nested) OrderedDict.
+
+    :param d: A (possibly nested) OrderedDict.
+    """
+    return {key: from_od(val) if isinstance(val, dict) else val for key, val in d.items()}
+
+
 def log_and_error(msg: str) -> Exception:
     """
     Log an error message and return an exception for the caller to potentially raise.
@@ -88,9 +97,6 @@ def _represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes
     :param dumper: The YAML dumper.
     :param data: The OrderedDict to serialize.
     """
-
-    def from_od(d: Union[OrderedDict, Dict]) -> dict:
-        return {key: from_od(val) if isinstance(val, dict) else val for key, val in d.items()}
 
     return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
 

@@ -9,7 +9,8 @@ from unittest.mock import patch
 import yaml
 from pytest import fixture
 
-from uwtools.drivers import schism
+from uwtools.drivers.driver import Assets
+from uwtools.drivers.schism import SCHISM
 
 # Fixtures
 
@@ -36,14 +37,19 @@ def cycle():
 
 @fixture
 def driverobj(config, cycle):
-    return schism.SCHISM(config=config, cycle=cycle, batch=True)
+    return SCHISM(config=config, cycle=cycle, batch=True)
 
 
 # Tests
 
 
-def test_SCHISM(driverobj):
-    assert isinstance(driverobj, schism.SCHISM)
+def test_SCHISM():
+    for method in [
+        "_driver_config",
+        "_taskname",
+        "_validate",
+    ]:
+        assert getattr(SCHISM, method) is getattr(Assets, method)
 
 
 def test_SCHISM_namelist_file(driverobj):
@@ -66,9 +72,5 @@ def test_SCHISM_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_SCHISM__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["schism"]
-
-
-def test_SCHISM__validate(driverobj):
-    driverobj._validate()
+def test_SCHISM__driver_name(driverobj):
+    assert driverobj._driver_name == "schism"

@@ -66,6 +66,7 @@ def main() -> None:
             for x in [
                 STR.chgrescube,
                 STR.esggrid,
+                STR.filtertopo,
                 STR.fv3,
                 STR.globalequivresol,
                 STR.jedi,
@@ -1031,6 +1032,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         component: partial(_add_subparser_for_driver, component, subparsers)
         for component in [
             STR.esggrid,
+            STR.filtertopo,
             STR.globalequivresol,
             STR.makehgrid,
             STR.makesolomosaic,

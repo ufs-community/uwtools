@@ -96,17 +96,6 @@ class MPASBase(Driver):
         ]
 
     @task
-    def runscript(self):
-        """
-        The runscript.
-        """
-        path = self._runscript_path
-        yield self._taskname(path.name)
-        yield asset(path, path.is_file)
-        yield None
-        self._write_runscript(path)
-
-    @task
     def streams_file(self):
         """
         The streams file.

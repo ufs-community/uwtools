@@ -1,0 +1,27 @@
+filter_topo:
+  config:
+    input_grid_file: /path/to/C403_grid.tile7.halo6.nc
+  execution:
+    batchargs:
+      cores: 1
+      walltime: "00:01:00"
+    envcmds:
+      - module use /path/to/modules
+      - module load module_name
+    executable: /path/to/filter_topo
+  namelist:
+    update_values:
+      filter_topo_nml:
+        grid_file: /path/to/C{{ filter_topo.namelist.filter_topo_nml.res }}_mosaic.halo6.nc
+        grid_type: 0
+        mask_field: land_frac
+        regional: true
+        res: 403
+        stretch_fac: 0.999
+        topo_field: orog_filt
+        topo_file: /path/to/C403_filtered_orog # filter_topo adds a .tile{n}.nc extension
+        zero_ocean: true
+  run_dir: /path/to/run/dir
+platform:
+  account: me
+  scheduler: slurm

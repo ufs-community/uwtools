@@ -5,7 +5,7 @@ A driver for make_solo_mosaic.
 from pathlib import Path
 from typing import List, Optional
 
-from iotaa import asset, task, tasks
+from iotaa import tasks
 
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
@@ -42,17 +42,6 @@ class MakeSoloMosaic(Driver):
         """
         yield self._taskname("provisioned run directory")
         yield self.runscript()
-
-    @task
-    def runscript(self):
-        """
-        The runscript.
-        """
-        path = self._runscript_path
-        yield self._taskname(path.name)
-        yield asset(path, path.is_file)
-        yield None
-        self._write_runscript(path)
 
     # Private helper methods
 

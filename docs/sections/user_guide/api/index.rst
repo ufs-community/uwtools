@@ -6,6 +6,7 @@ API
    config
    esg_grid
    file
+   filter_topo
    fv3
    global_equiv_resol
    jedi

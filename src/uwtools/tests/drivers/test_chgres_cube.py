@@ -12,7 +12,8 @@ import f90nml  # type: ignore
 from iotaa import refs
 from pytest import fixture
 
-from uwtools.drivers import chgres_cube
+from uwtools.drivers.chgres_cube import ChgresCube
+from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import logged, regex_logged
@@ -76,14 +77,28 @@ def config(tmp_path):
 
 @fixture
 def driverobj(config, cycle):
-    return chgres_cube.ChgresCube(config=config, cycle=cycle, batch=True)
+    return ChgresCube(config=config, cycle=cycle, batch=True)
 
 
 # Tests
 
 
-def test_ChgresCube(driverobj):
-    assert isinstance(driverobj, chgres_cube.ChgresCube)
+def test_ChgresCube():
+    for method in [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runcmd",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_validate",
+        "_write_runscript",
+        "run",
+    ]:
+        assert getattr(ChgresCube, method) is getattr(Driver, method)
 
 
 def test_ChgresCube_namelist_file(caplog, driverobj):
@@ -121,19 +136,6 @@ def test_ChgresCube_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_ChgresCube_run_batch(driverobj):
-    with patch.object(driverobj, "_run_via_batch_submission") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_ChgresCube_run_local(driverobj):
-    driverobj._batch = False
-    with patch.object(driverobj, "_run_via_local_execution") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
 def test_ChgresCube_runscript(driverobj):
     with patch.object(driverobj, "_runscript") as runscript:
         driverobj.runscript()
@@ -143,17 +145,9 @@ def test_ChgresCube_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_ChgresCube__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["chgres_cube"]
-
-
-def test_ChgresCube__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript.chgres_cube"
+def test_ChgresCube__driver_name(driverobj):
+    assert driverobj._driver_name == "chgres_cube"
 
 
 def test_ChgresCube__taskname(driverobj):
     assert driverobj._taskname("foo") == "20240201 18Z chgres_cube foo"
-
-
-def test_ChgresCube__validate(driverobj):
-    driverobj._validate()

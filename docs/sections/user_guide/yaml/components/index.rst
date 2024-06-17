@@ -6,6 +6,7 @@ UW YAML for Components
 
    chgres_cube
    esg_grid
+   filter_topo
    fv3
    global_equiv_resol
    jedi
