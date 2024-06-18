@@ -11,7 +11,7 @@ Optional arguments:
 Positional arguments:
   TASK
     configuration_file
-      The JEDI YAML configuration file
+      The executable's YAML configuration file
     files_copied
       Files copied for run
     files_linked
@@ -24,5 +24,3 @@ Positional arguments:
       The runscript
     validate
       Validate the UW driver config
-    validate_only
-      Validate JEDI config YAML
