@@ -1,17 +1,13 @@
+from collections import OrderedDict
 from pathlib import Path
 from types import SimpleNamespace as ns
 from typing import Optional
 
 import yaml
+from f90nml import Namelist  # type: ignore
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import (
-    INCLUDE_TAG,
-    UWYAMLConvert,
-    UWYAMLRemove,
-    add_yaml_representers,
-    log_and_error,
-)
+from uwtools.config.support import INCLUDE_TAG, UWYAMLConvert, UWYAMLRemove, from_od, log_and_error
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
@@ -52,7 +48,7 @@ class YAMLConfig(Config):
         """
         The string representation of a YAMLConfig object.
         """
-        add_yaml_representers()
+        self._add_yaml_representers()
         return yaml.dump(self.data, default_flow_style=False).strip()
 
     # Private methods
@@ -128,7 +124,7 @@ class YAMLConfig(Config):
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to.
         """
-        add_yaml_representers()
+        YAMLConfig._add_yaml_representers()
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
 
@@ -145,3 +141,36 @@ class YAMLConfig(Config):
         Returns the config's format name.
         """
         return FORMAT.yaml
+
+    # Private methods
+
+    @staticmethod
+    def _add_yaml_representers() -> None:
+        """
+        Add representers to the YAML dumper for custom types.
+        """
+        yaml.add_representer(UWYAMLConvert, UWYAMLConvert.represent)
+        yaml.add_representer(Namelist, YAMLConfig._represent_namelist)
+        yaml.add_representer(OrderedDict, YAMLConfig._represent_ordereddict)
+
+    @staticmethod
+    def _represent_namelist(dumper: yaml.Dumper, data: Namelist) -> yaml.nodes.MappingNode:
+        """
+        Convert an f90nml Namelist to an OrderedDict, then represent as a YAML mapping.
+
+        :param dumper: The YAML dumper.
+        :param data: The f90nml Namelist to serialize.
+        """
+        namelist_dict = data.todict()
+        return dumper.represent_mapping("tag:yaml.org,2002:map", namelist_dict)
+
+    @staticmethod
+    def _represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes.MappingNode:
+        """
+        Recursrively convert an OrderedDict to a dict, then represent as a YAML mapping.
+
+        :param dumper: The YAML dumper.
+        :param data: The OrderedDict to serialize.
+        """
+
+        return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))

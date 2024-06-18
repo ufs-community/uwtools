@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access
 """
 Tests for uwtools.config.formats.yaml module.
 """
@@ -7,10 +7,12 @@ import datetime
 import filecmp
 import logging
 import sys
+from collections import OrderedDict
 from io import StringIO
 from textwrap import dedent
 from unittest.mock import patch
 
+import f90nml  # type: ignore
 import yaml
 from pytest import raises
 
@@ -175,3 +177,28 @@ def test_unexpected_error(tmp_path):
         with raises(UWConfigError) as e:
             YAMLConfig(config=cfgfile)
         assert msg in str(e.value)
+
+
+def test__add_yaml_representers():
+    cfgobj = YAMLConfig({})
+    cfgobj._add_yaml_representers()
+    representers = yaml.Dumper.yaml_representers
+    assert support.UWYAMLConvert in representers
+    assert OrderedDict in representers
+    assert f90nml.Namelist in representers
+
+
+def test__represent_namelist():
+    cfgobj = YAMLConfig({})
+    cfgobj._add_yaml_representers()
+    namelist = f90nml.reads("&namelist\n key = value\n/\n")
+    expected = "{namelist: {key: value}}"
+    assert yaml.dump(namelist, default_flow_style=True).strip() == expected
+
+
+def test__represent_ordereddict():
+    cfgobj = YAMLConfig({})
+    cfgobj._add_yaml_representers()
+    ordereddict_values = OrderedDict([("example", OrderedDict([("key", "value")]))])
+    expected = "{example: {key: value}}"
+    assert yaml.dump(ordereddict_values, default_flow_style=True).strip() == expected
