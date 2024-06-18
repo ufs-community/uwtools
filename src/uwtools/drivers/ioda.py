@@ -8,36 +8,14 @@ from typing import List, Optional
 
 from iotaa import tasks
 
-from uwtools.drivers.jedi import JEDI
+from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.strings import STR
 
 
-class IODA(JEDI):
+class IODA(JEDIBase):
     """
     A driver for the IODA component.
     """
-
-    def __init__(
-        self,
-        cycle: datetime,
-        config: Optional[Path] = None,
-        dry_run: bool = False,
-        batch: bool = False,
-        key_path: Optional[List[str]] = None,
-    ):
-        """
-        The driver.
-
-        :param cycle: The forecast cycle.
-        :param config: Path to config file.
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
-        super().__init__(
-            config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
-        )
-        self._cycle = cycle
 
     @tasks
     def provisioned_run_directory(self):
@@ -68,10 +46,11 @@ class IODA(JEDI):
         """
         return STR.ioda
 
-    def _taskname(self, suffix: str) -> str:
+    @property
+    def _runcmd(self) -> str:
         """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
+        Returns the full command-line component invocation.
         """
-        return self._taskname_with_cycle(self._cycle, suffix)
+        executable = self._driver_config["execution"]["executable"]
+        jedi_config = self._rundir / self._config_fn
+        return " ".join(executable, jedi_config)

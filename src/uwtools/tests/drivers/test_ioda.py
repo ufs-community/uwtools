@@ -32,8 +32,6 @@ def config(tmp_path):
                     "module load jedi-module",
                 ],
                 "executable": "/path/to/bufr2ioda.x",
-                "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
-                "mpicmd": "srun",
             },
             "configuration_file": {
                 "base_file": str(base_file),
