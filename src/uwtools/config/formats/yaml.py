@@ -116,15 +116,15 @@ class YAMLConfig(Config):
         """
         self.dump_dict(self.data, path)
 
-    @staticmethod
-    def dump_dict(cfg: dict, path: Optional[Path] = None) -> None:
+    @classmethod
+    def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
         """
         Dumps a provided config dictionary in YAML format.
 
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to.
         """
-        YAMLConfig._add_yaml_representers()
+        cls._add_yaml_representers()
         with writable(path) as f:
             yaml.dump(cfg, f, sort_keys=False)
 
@@ -144,17 +144,17 @@ class YAMLConfig(Config):
 
     # Private methods
 
-    @staticmethod
-    def _add_yaml_representers() -> None:
+    @classmethod
+    def _add_yaml_representers(cls) -> None:
         """
         Add representers to the YAML dumper for custom types.
         """
         yaml.add_representer(UWYAMLConvert, UWYAMLConvert.represent)
-        yaml.add_representer(Namelist, YAMLConfig._represent_namelist)
-        yaml.add_representer(OrderedDict, YAMLConfig._represent_ordereddict)
+        yaml.add_representer(Namelist, cls._represent_namelist)
+        yaml.add_representer(OrderedDict, cls._represent_ordereddict)
 
-    @staticmethod
-    def _represent_namelist(dumper: yaml.Dumper, data: Namelist) -> yaml.nodes.MappingNode:
+    @classmethod
+    def _represent_namelist(cls, dumper: yaml.Dumper, data: Namelist) -> yaml.nodes.MappingNode:
         """
         Convert an f90nml Namelist to an OrderedDict, then represent as a YAML mapping.
 
@@ -164,8 +164,10 @@ class YAMLConfig(Config):
         namelist_dict = data.todict()
         return dumper.represent_mapping("tag:yaml.org,2002:map", namelist_dict)
 
-    @staticmethod
-    def _represent_ordereddict(dumper: yaml.Dumper, data: OrderedDict) -> yaml.nodes.MappingNode:
+    @classmethod
+    def _represent_ordereddict(
+        cls, dumper: yaml.Dumper, data: OrderedDict
+    ) -> yaml.nodes.MappingNode:
         """
         Recursrively convert an OrderedDict to a dict, then represent as a YAML mapping.
 
