@@ -180,8 +180,7 @@ def test_unexpected_error(tmp_path):
 
 
 def test__add_yaml_representers():
-    cfgobj = YAMLConfig({})
-    cfgobj._add_yaml_representers()
+    YAMLConfig._add_yaml_representers()
     representers = yaml.Dumper.yaml_representers
     assert support.UWYAMLConvert in representers
     assert OrderedDict in representers
@@ -189,16 +188,14 @@ def test__add_yaml_representers():
 
 
 def test__represent_namelist():
-    cfgobj = YAMLConfig({})
-    cfgobj._add_yaml_representers()
+    YAMLConfig._add_yaml_representers()
     namelist = f90nml.reads("&namelist\n key = value\n/\n")
     expected = "{namelist: {key: value}}"
     assert yaml.dump(namelist, default_flow_style=True).strip() == expected
 
 
 def test__represent_ordereddict():
-    cfgobj = YAMLConfig({})
-    cfgobj._add_yaml_representers()
+    YAMLConfig._add_yaml_representers()
     ordereddict_values = OrderedDict([("example", OrderedDict([("key", "value")]))])
     expected = "{example: {key: value}}"
     assert yaml.dump(ordereddict_values, default_flow_style=True).strip() == expected
