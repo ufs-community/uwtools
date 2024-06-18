@@ -1,0 +1,53 @@
+{
+  "properties": {
+    "ioda": {
+      "additionalProperties": false,
+      "properties": {
+        "configuration_file": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "minProperties": 1,
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "execution": {
+          "$ref": "urn:uwtools:execution-serial"
+        },
+        "files_to_copy": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "files_to_link": {
+          "$ref": "urn:uwtools:files-to-stage"
+        },
+        "run_dir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "configuration_file",
+        "execution",
+        "run_dir"
+      ],
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

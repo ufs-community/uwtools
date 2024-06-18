@@ -13,9 +13,9 @@ from iotaa import asset, external
 from pytest import fixture
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.drivers import jedi
-from uwtools.drivers.driver import Driver
+from uwtools.drivers import jedi, jedi_base
 from uwtools.drivers.jedi import JEDI
+from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.logging import log
 from uwtools.tests.support import regex_logged
 
@@ -92,7 +92,7 @@ def test_JEDI():
         "run",
         "runscript",
     ]:
-        assert getattr(JEDI, method) is getattr(Driver, method)
+        assert getattr(JEDI, method) is getattr(JEDIBase, method)
 
 
 def test_JEDI_configuration_file(driverobj):
@@ -120,7 +120,7 @@ def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
 
 
 def test_JEDI_files_copied(driverobj):
-    with patch.object(jedi, "filecopy") as filecopy:
+    with patch.object(jedi_base, "filecopy") as filecopy:
         driverobj._driver_config["run_dir"] = "/path/to/run"
         driverobj.files_copied()
         assert filecopy.call_count == 2
@@ -134,7 +134,7 @@ def test_JEDI_files_copied(driverobj):
 
 
 def test_JEDI_files_linked(driverobj):
-    with patch.object(jedi, "symlink") as symlink:
+    with patch.object(jedi_base, "symlink") as symlink:
         driverobj._driver_config["run_dir"] = "/path/to/run"
         driverobj.files_linked()
         assert symlink.call_count == 2

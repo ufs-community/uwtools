@@ -136,13 +136,6 @@ class MPASBase(Driver):
 
     @property
     @abstractmethod
-    def _driver_name(self) -> str:
-        """
-        Returns the name of this driver.
-        """
-
-    @property
-    @abstractmethod
     def _streams_fn(self) -> str:
         """
         The streams filename.

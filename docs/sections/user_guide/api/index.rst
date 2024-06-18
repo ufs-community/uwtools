@@ -9,6 +9,7 @@ API
    filter_topo
    fv3
    global_equiv_resol
+   ioda
    jedi
    logging
    make_hgrid
