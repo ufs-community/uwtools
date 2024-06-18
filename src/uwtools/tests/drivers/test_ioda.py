@@ -8,8 +8,8 @@ from unittest.mock import patch
 
 from pytest import fixture
 
-from uwtools.drivers.driver import Driver
 from uwtools.drivers.ioda import IODA
+from uwtools.drivers.jedi_base import JEDIBase
 
 # Fixtures
 
@@ -82,7 +82,7 @@ def test_IODA():
         "run",
         "runscript",
     ]:
-        assert getattr(IODA, method) is getattr(Driver, method)
+        assert getattr(IODA, method) is getattr(JEDIBase, method)
 
 
 def test_IODA_provisioned_run_directory(driverobj):
@@ -104,6 +104,11 @@ def test_IODA__config_fn(driverobj):
 
 def test_IODA__driver_name(driverobj):
     assert driverobj._driver_name == "ioda"
+
+
+def test_IODA__runcmd(driverobj):
+    config = str(driverobj._rundir / driverobj._config_fn)
+    assert driverobj._runcmd == f"/path/to/bufr2ioda.x {config}"
 
 
 def test_IODA__taskname(driverobj):

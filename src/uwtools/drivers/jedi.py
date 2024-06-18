@@ -3,16 +3,13 @@ A driver for the jedi component.
 """
 
 import logging
-from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
 
 from iotaa import asset, refs, run, task, tasks
 
-from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.strings import STR
-from uwtools.utils.tasks import file, filecopy, symlink
+from uwtools.utils.tasks import file
 
 
 class JEDI(JEDIBase):

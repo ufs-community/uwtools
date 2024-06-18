@@ -2,10 +2,6 @@
 A driver for the ioda component.
 """
 
-from datetime import datetime
-from pathlib import Path
-from typing import List, Optional
-
 from iotaa import tasks
 
 from uwtools.drivers.jedi_base import JEDIBase
@@ -52,5 +48,5 @@ class IODA(JEDIBase):
         Returns the full command-line component invocation.
         """
         executable = self._driver_config["execution"]["executable"]
-        jedi_config = self._rundir / self._config_fn
-        return " ".join(executable, jedi_config)
+        jedi_config = str(self._rundir / self._config_fn)
+        return " ".join([executable, jedi_config])

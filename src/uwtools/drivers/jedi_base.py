@@ -2,16 +2,15 @@
 A base class for jedi-based drivers.
 """
 
-import logging
+from abc import abstractmethod
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from iotaa import asset, refs, run, task, tasks
+from iotaa import asset, task, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
-from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
 
