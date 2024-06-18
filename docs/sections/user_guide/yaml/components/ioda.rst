@@ -7,7 +7,7 @@ Structured YAML to run IODA is validated by JSON Schema and requires the ``ioda:
 
 .. include:: /shared/injected_cycle.rst
 
-Here is a prototype UW YAML ioda: block, explained in detail below:
+Here is a prototype UW YAML ``ioda:`` block, explained in detail below:
 
 .. highlight:: yaml
 .. literalinclude:: /shared/ioda.yaml
