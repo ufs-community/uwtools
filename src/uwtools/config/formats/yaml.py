@@ -176,3 +176,17 @@ class YAMLConfig(Config):
         """
 
         return dumper.represent_mapping("tag:yaml.org,2002:map", from_od(data))
+
+
+def _write_plain_open_ended(self, *args, **kwargs) -> None:
+    """
+    Write YAML without ...
+
+    end-of-stream marker.
+    """
+    self.write_plain_base(*args, **kwargs)
+    self.open_ended = False
+
+
+setattr(yaml.emitter.Emitter, "write_plain_base", yaml.emitter.Emitter.write_plain)
+setattr(yaml.emitter.Emitter, "write_plain", _write_plain_open_ended)
