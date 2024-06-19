@@ -178,6 +178,12 @@ UPP
 Driver for JEDI
 ^^^^^^^^^^^^^^^
 
+IODA
+""""
+
+| **CLI**: ``uw ioda -h``
+| **API**: ``import uwtools.api.ioda``
+
 JEDI
 """"
 

@@ -9,6 +9,7 @@ Drivers
    filter_topo
    fv3
    global_equiv_resol
+   ioda
    jedi
    make_hgrid
    make_solo_mosaic
