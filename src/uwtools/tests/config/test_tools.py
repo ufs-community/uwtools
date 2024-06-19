@@ -347,6 +347,16 @@ def test_realize_config_remove_yaml_to_yaml_subtree(tmp_path):
     )
 
 
+def test_realize_config_scalar_value(capsys):
+    stdinproxy.cache_clear()
+    tools.realize_config(
+        input_config=YAMLConfig(config={"foo": {"bar": "baz"}}),
+        output_format="yaml",
+        key_path=["foo", "bar"],
+    )
+    assert capsys.readouterr().out.strip() == "baz"
+
+
 def test_realize_config_simple_ini(tmp_path):
     """
     Test that providing an INI file with necessary settings will create an INI config file.
