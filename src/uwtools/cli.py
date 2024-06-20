@@ -998,7 +998,7 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     }
     if cycle := args.get(STR.cycle):
         kwargs[STR.cycle] = cycle
-    if leadtime := args.get(STR.leadtime):
+    if (leadtime := args.get(STR.leadtime)) is not None:
         kwargs[STR.leadtime] = leadtime
     return execute(**kwargs)
 
