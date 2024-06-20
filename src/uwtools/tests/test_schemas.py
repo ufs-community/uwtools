@@ -55,6 +55,11 @@ def global_equiv_resol_prop():
 
 
 @fixture
+def ioda_prop():
+    return partial(schema_validator, "ioda", "properties", "ioda", "properties")
+
+
+@fixture
 def jedi_prop():
     return partial(schema_validator, "jedi", "properties", "jedi", "properties")
 
@@ -637,6 +642,50 @@ def test_schema_global_equiv_resol():
 @pytest.mark.parametrize("schema_entry", ["run_dir", "input_grid_file"])
 def test_schema_global_equiv_resol_paths(global_equiv_resol_prop, schema_entry):
     errors = global_equiv_resol_prop(schema_entry)
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# ioda
+
+
+def test_schema_ioda():
+    config = {
+        "configuration_file": {
+            "base_file": "/path/to/ioda.yaml",
+            "update_values": {"foo": "bar", "baz": "qux"},
+        },
+        "execution": {"executable": "/tmp/ioda.exe"},
+        "files_to_copy": {"file1": "src1", "file2": "src2"},
+        "files_to_link": {"link1": "src3", "link2": "src4"},
+        "run_dir": "/tmp",
+    }
+    errors = schema_validator("ioda", "properties", "ioda")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("configuration_file", "execution", "run_dir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_ioda_configuration_file(ioda_prop):
+    bf = {"base_file": "/path/to/ioda.yaml"}
+    uv = {"update_values": {"foo": "bar", "baz": "qux"}}
+    errors = ioda_prop("configuration_file")
+    # base_file and update_values are ok together:
+    assert not errors({**bf, **uv})
+    # And either is ok alone:
+    assert not errors(bf)
+    assert not errors(uv)
+    # update_values cannot be empty:
+    assert "should be non-empty" in errors({"update_values": {}})
+
+
+def test_schema_ioda_run_dir(ioda_prop):
+    errors = ioda_prop("run_dir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)

@@ -17,7 +17,7 @@ docs:
 	$(MAKE) html
 
 examples:
-	$(MAKE) -C sections
+	COLUMNS=80 $(MAKE) -C sections
 
 linkcheck:
 	$(SPHINXBUILD) -b linkcheck $(SPHINXOPTS) -c $(CURDIR) $(CURDIR) build/linkcheck

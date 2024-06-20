@@ -3,85 +3,21 @@ A driver for the jedi component.
 """
 
 import logging
-from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
 
 from iotaa import asset, refs, run, task, tasks
 
-from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.jedi_base import JEDIBase
 from uwtools.strings import STR
-from uwtools.utils.tasks import file, filecopy, symlink
+from uwtools.utils.tasks import file
 
 
-class JEDI(Driver):
+class JEDI(JEDIBase):
     """
     A driver for the JEDI component.
     """
 
-    def __init__(
-        self,
-        cycle: datetime,
-        config: Optional[Path] = None,
-        dry_run: bool = False,
-        batch: bool = False,
-        key_path: Optional[List[str]] = None,
-    ):
-        """
-        The driver.
-
-        :param cycle: The forecast cycle.
-        :param config: Path to config file.
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
-        super().__init__(
-            config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
-        )
-        self._cycle = cycle
-
     # Workflow tasks
-
-    @task
-    def configuration_file(self):
-        """
-        The JEDI YAML configuration file.
-        """
-        fn = self._config_fn
-        yield self._taskname(fn)
-        path = self._rundir / fn
-        yield asset(path, path.is_file)
-        base_file = self._driver_config["configuration_file"].get("base_file")
-        yield file(Path(base_file)) if base_file else None
-        self._create_user_updated_config(
-            config_class=YAMLConfig,
-            config_values=self._driver_config["configuration_file"],
-            path=path,
-        )
-
-    @tasks
-    def files_copied(self):
-        """
-        Files copied for run.
-        """
-        yield self._taskname("files copied")
-        yield [
-            filecopy(src=Path(src), dst=self._rundir / dst)
-            for dst, src in self._driver_config.get("files_to_copy", {}).items()
-        ]
-
-    @tasks
-    def files_linked(self):
-        """
-        Files linked for run.
-        """
-        yield self._taskname("files linked")
-        yield [
-            symlink(target=Path(target), linkname=self._rundir / linkname)
-            for linkname, target in self._driver_config.get("files_to_link", {}).items()
-        ]
 
     @tasks
     def provisioned_run_directory(self):
@@ -138,7 +74,7 @@ class JEDI(Driver):
         """
         Returns the full command-line component invocation.
         """
-        execution = self._driver_config.get("execution", {})
+        execution = self._driver_config["execution"]
         jedi_config = self._rundir / self._config_fn
         mpiargs = execution.get("mpiargs", [])
         components = [
@@ -148,11 +84,3 @@ class JEDI(Driver):
             str(jedi_config),  # JEDI config file
         ]
         return " ".join(filter(None, components))
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return self._taskname_with_cycle(self._cycle, suffix)

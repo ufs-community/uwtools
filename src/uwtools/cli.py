@@ -69,6 +69,7 @@ def main() -> None:
                 STR.filtertopo,
                 STR.fv3,
                 STR.globalequivresol,
+                STR.ioda,
                 STR.jedi,
                 STR.makehgrid,
                 STR.makesolomosaic,
@@ -1046,6 +1047,7 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         for component in [
             STR.chgrescube,
             STR.fv3,
+            STR.ioda,
             STR.jedi,
             STR.mpas,
             STR.mpasinit,

@@ -1,4 +1,4 @@
-jedi:
+ioda:
   configuration_file:
     base_file: path/to/config.yaml
     update_values:
@@ -7,15 +7,12 @@ jedi:
     batchargs:
       nodes: 1
       stdout: path/to/runscript.out
-      walltime: "08:00:00"
+      walltime: "00:05:00"
     envcmds:
       - module load some-module
-      - module load jedi-module
-    executable: /path/to/jedi
-    mpiargs:
-      - "--export=ALL"
-      - "--ntasks $SLURM_CPUS_ON_NODE"
-    mpicmd: srun
+      - module load ioda-module
+    executable: /path/to/a/ioda/exe
+    mpicmd: time
   files_to_copy:
     d/f2: /path/to/f2
     f1: /path/to/f1
