@@ -56,7 +56,7 @@ class Assets(ABC):
         self._config.dereference(
             context={
                 **({"cycle": cycle} if cycle else {}),
-                **({"leadtime": leadtime} if leadtime else {}),
+                **({"leadtime": leadtime} if leadtime is not None else {}),
                 **self._config.data,
             }
         )

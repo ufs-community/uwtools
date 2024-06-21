@@ -71,6 +71,33 @@ def test_api_execute(module):
         )
 
 
+@pytest.mark.parametrize("fhr", [0, 9, 120, 240])
+@pytest.mark.parametrize("module", with_leadtime)
+def test_api_execute_with_leadtimes(fhr, module):
+    kwbase = {
+        "batch": True,
+        "config": "/some/config",
+        "dry_run": False,
+        "graph_file": "/some/g.dot",
+        "key_path": None,
+        "stdin_ok": True,
+        "task": "foo",
+    }
+    kwargs = {
+        **kwbase,
+        **({"cycle": dt.datetime.now()}),
+        **({"leadtime": dt.timedelta(hours=fhr)}),
+    }
+    with patch.object(api, "_execute") as _execute:
+        module.execute(**kwargs)
+        _execute.assert_called_once_with(
+            driver_class=module._Driver,
+            cycle=kwargs["cycle"],
+            leadtime=kwargs["leadtime"],
+            **kwbase
+        )
+
+
 @pytest.mark.parametrize("module", modules)
 def test_api_graph(module):
     assert module.graph is support.graph
