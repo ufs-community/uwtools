@@ -9,7 +9,7 @@ Required arguments:
   --cycle CYCLE
       The cycle in ISO8601 format (e.g. 2024-05-23T18)
   --leadtime LEADTIME
-      The leadtime as HH[:MM[:SS]]
+      The leadtime as hours[:minutes[:seconds]]
 
 Optional arguments:
   -h, --help
