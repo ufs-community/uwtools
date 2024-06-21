@@ -4,6 +4,7 @@ Modal CLI.
 
 import datetime as dt
 import json
+import re
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import HelpFormatter
@@ -27,7 +28,7 @@ from uwtools.strings import FORMAT, STR
 from uwtools.utils.file import get_file_format, resource_path
 
 FORMATS = FORMAT.extensions()
-LEADTIME_DESC = "HH[:MM[:SS]]"
+LEADTIME_DESC = "hours[:minutes[:seconds]]"
 TITLE_REQ_ARG = "Required arguments"
 
 Args = Dict[str, Any]
@@ -998,7 +999,7 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     }
     if cycle := args.get(STR.cycle):
         kwargs[STR.cycle] = cycle
-    if leadtime := args.get(STR.leadtime):
+    if (leadtime := args.get(STR.leadtime)) is not None:
         kwargs[STR.leadtime] = leadtime
     return execute(**kwargs)
 
@@ -1083,13 +1084,9 @@ def _timedelta_from_str(tds: str) -> dt.timedelta:
 
     :param tds: The timedelta string to parse.
     """
-    fmts = ("%H:%M:%S", "%H:%M", "%H")
-    for fmt in fmts:
-        try:
-            t = dt.datetime.strptime(tds, fmt)
-            return dt.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
-        except ValueError:
-            pass
+    if matches := re.match(r"(\d+)(:(\d+))?(:(\d+))?", tds):
+        h, m, s = [int(matches.groups()[n] or 0) for n in (0, 2, 4)]
+        return dt.timedelta(hours=h, minutes=m, seconds=s)
     _abort(f"Specify leadtime as {LEADTIME_DESC}")
 
 
