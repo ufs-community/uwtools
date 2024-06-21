@@ -199,7 +199,7 @@ def _execute(
     )
     if cycle:
         kwargs["cycle"] = cycle
-    if leadtime:
+    if leadtime is not None:
         kwargs["leadtime"] = leadtime
     obj = driver_class(**kwargs)
     getattr(obj, task)()

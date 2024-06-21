@@ -129,7 +129,7 @@ def driverobj(config):
     )
 
 
-# Asset Tests
+# Assets Tests
 
 
 def test_Assets(assetobj):
@@ -137,14 +137,15 @@ def test_Assets(assetobj):
     assert assetobj._batch is True
 
 
-def test_Asset_cycle_leadtime_error(config):
+@pytest.mark.parametrize("hours", [0, 24, 168])
+def test_Assets_cycle_leadtime_error(config, hours):
     with raises(UWError) as e:
-        ConcreteAssets(config=config, leadtime=dt.timedelta(hours=24))
+        ConcreteAssets(config=config, leadtime=dt.timedelta(hours=hours))
     assert "When leadtime is specified, cycle is required" in str(e)
 
 
 @pytest.mark.parametrize("val", (True, False))
-def test_Asset_dry_run(config, val):
+def test_Assets_dry_run(config, val):
     with patch.object(driver, "dryrun") as dryrun:
         ConcreteAssets(config=config, dry_run=val)
         dryrun.assert_called_once_with(enable=val)
@@ -165,7 +166,7 @@ def test_key_path(config):
     assert config == assetobj._config
 
 
-def test_Asset_validate(caplog, assetobj):
+def test_Assets_validate(assetobj, caplog):
     log.setLevel(logging.INFO)
     assetobj.validate()
     assert regex_logged(caplog, "State: Ready")
@@ -183,8 +184,8 @@ def test_Asset_validate(caplog, assetobj):
         (True, True, {"a": 33, "b": 22}),
     ],
 )
-def test_Asset__create_user_updated_config_base_file(
-    base_file, assetobj, expected, tmp_path, update_values
+def test_Assets__create_user_updated_config_base_file(
+    assetobj, base_file, expected, tmp_path, update_values
 ):
     path = tmp_path / "updated.yaml"
     dc = assetobj._driver_config
@@ -198,14 +199,14 @@ def test_Asset__create_user_updated_config_base_file(
     assert updated == expected
 
 
-def test_Asset__driver_config_fail(assetobj):
+def test_Assets__driver_config_fail(assetobj):
     del assetobj._config["concrete"]
     with raises(UWConfigError) as e:
         assert assetobj._driver_config
     assert str(e.value) == "Required 'concrete' block missing in config"
 
 
-def test_Asset__driver_config_pass(assetobj):
+def test_Assets__driver_config_pass(assetobj):
     assert set(assetobj._driver_config.keys()) == {
         "base_file",
         "execution",
@@ -214,11 +215,11 @@ def test_Asset__driver_config_pass(assetobj):
     }
 
 
-def test_Asset__rundir(assetobj):
-    assert assetobj._rundir == Path("/path/to/2024032218/run")
+def test_Assets__rundir(assetobj):
+    assert assetobj._rundir == Path(assetobj._driver_config["run_dir"])
 
 
-def test_Asset__validate(assetobj):
+def test_Assets__validate(assetobj):
     with patch.object(assetobj, "_validate", driver.Assets._validate):
         with patch.object(driver, "validate_internal") as validate_internal:
             assetobj._validate(assetobj)

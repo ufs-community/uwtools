@@ -5,10 +5,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-import yaml
 from pytest import fixture, raises
 
 from uwtools.exceptions import UWError
+from uwtools.tests.drivers import test_driver
 from uwtools.tests.drivers.test_driver import ConcreteDriver
 from uwtools.utils import api
 
@@ -118,20 +118,19 @@ def test_str2path_convert():
     assert result == Path(val)
 
 
-def test__execute(execute_kwargs, tmp_path):
-    config = tmp_path / "config.yaml"
-    with open(config, "w", encoding="utf-8") as f:
-        yaml.dump({"some": "config"}, f)
+@pytest.mark.parametrize("hours", [0, 24, 168])
+def test__execute(execute_kwargs, hours, tmp_path):
     graph_file = tmp_path / "g.dot"
-    kwargs = {
-        **execute_kwargs,
-        "driver_class": ConcreteDriver,
-        "config": config,
-        "cycle": dt.datetime.now(),
-        "leadtime": dt.timedelta(hours=24),
-        "graph_file": graph_file,
-    }
-    assert not graph_file.is_file()
-    with patch.object(ConcreteDriver, "_validate"):
+    with patch.object(test_driver, "ConcreteDriver", wraps=test_driver.ConcreteDriver) as cd:
+        kwargs = {
+            **execute_kwargs,
+            "driver_class": cd,
+            "config": {"some": "config"},
+            "cycle": dt.datetime.now(),
+            "leadtime": dt.timedelta(hours=hours),
+            "graph_file": graph_file,
+        }
+        assert not graph_file.is_file()
         assert api._execute(**kwargs) is True
+        assert cd.call_args.kwargs["leadtime"] == dt.timedelta(hours=hours)
     assert graph_file.is_file()
