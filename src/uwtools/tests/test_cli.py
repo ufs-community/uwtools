@@ -545,10 +545,11 @@ def test__dispatch_template_translate_no_optional():
     )
 
 
-def test__dispatch_to_driver():
+@pytest.mark.parametrize("hours", [0, 24, 168])
+def test__dispatch_to_driver(hours):
     name = "adriver"
     cycle = dt.datetime.now()
-    leadtime = dt.timedelta(hours=24)
+    leadtime = dt.timedelta(hours=hours)
     args: dict = {
         "action": "foo",
         "batch": True,
