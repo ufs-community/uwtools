@@ -650,6 +650,7 @@ def test__timedelta_from_str(capsys):
     assert cli._timedelta_from_str("111:222:333").total_seconds() == 111 * 3600 + 222 * 60 + 333
     assert cli._timedelta_from_str("111:222").total_seconds() == 111 * 3600 + 222 * 60
     assert cli._timedelta_from_str("111").total_seconds() == 111 * 3600
+    assert cli._timedelta_from_str("01:15:07").total_seconds() == 1 * 3600 + 15 * 60 + 7
     with raises(SystemExit):
         cli._timedelta_from_str("foo")
     assert f"Specify leadtime as {cli.LEADTIME_DESC}" in capsys.readouterr().err
