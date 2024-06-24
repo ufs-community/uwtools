@@ -59,7 +59,7 @@ class ChgresCube(Driver):
         ] + [
             Path(config_files["data_dir_input_grid"]) / config_files[k]
             for k in ("atm_files_input_grid", "grib2_file_input_grid", "sfc_files_input_grid")
-            if config_files.get(k)
+            if k in config_files
         ]
         base_file = self._driver_config["namelist"].get("base_file")
         yield [file(input_path) for input_path in input_paths] + (
