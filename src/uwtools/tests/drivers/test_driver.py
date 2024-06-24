@@ -9,10 +9,9 @@ from pathlib import Path
 from textwrap import dedent
 from unittest.mock import Mock, PropertyMock, patch
 
-import pytest
 import yaml
 from iotaa import asset, task
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
@@ -138,14 +137,14 @@ def test_Assets(assetobj):
     assert assetobj._batch is True
 
 
-@pytest.mark.parametrize("hours", [0, 24, 168])
+@mark.parametrize("hours", [0, 24, 168])
 def test_Assets_cycle_leadtime_error(config, hours):
     with raises(UWError) as e:
         ConcreteAssets(config=config, leadtime=dt.timedelta(hours=hours))
     assert "When leadtime is specified, cycle is required" in str(e)
 
 
-@pytest.mark.parametrize("val", (True, False))
+@mark.parametrize("val", (True, False))
 def test_Assets_dry_run(config, val):
     with patch.object(driver, "dryrun") as dryrun:
         ConcreteAssets(config=config, dry_run=val)
@@ -178,7 +177,7 @@ def test_Assets_validate(assetobj, caplog):
 # Tests for private helper methods
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "base_file,update_values,expected",
     [
         (False, False, {}),
@@ -243,7 +242,7 @@ def test_Driver(driverobj):
 # Tests for workflow methods
 
 
-@pytest.mark.parametrize("batch", [True, False])
+@mark.parametrize("batch", [True, False])
 def test_Driver_run(batch, driverobj):
     driverobj._batch = batch
     executable = Path(driverobj._driver_config["execution"]["executable"])
@@ -298,7 +297,7 @@ def test_Driver__run_via_local_execution(driverobj):
 # Tests for private helper methods
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "base_file,update_values,expected",
     [
         (False, False, {}),

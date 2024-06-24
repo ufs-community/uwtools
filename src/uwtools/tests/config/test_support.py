@@ -6,9 +6,8 @@ Tests for uwtools.config.jinja2 module.
 import logging
 from collections import OrderedDict
 
-import pytest
 import yaml
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config import support
 from uwtools.config.formats.fieldtable import FieldTableConfig
@@ -22,14 +21,12 @@ from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
 
 
-@pytest.mark.parametrize(
-    "d,n", [({1: 88}, 1), ({1: {2: 88}}, 2), ({1: {2: {3: 88}}}, 3), ({1: {}}, 2)]
-)
+@mark.parametrize("d,n", [({1: 88}, 1), ({1: {2: 88}}, 2), ({1: {2: {3: 88}}}, 3), ({1: {}}, 2)])
 def test_depth(d, n):
     assert support.depth(d) == n
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "cfgtype,fmt",
     [
         (FieldTableConfig, FORMAT.fieldtable),

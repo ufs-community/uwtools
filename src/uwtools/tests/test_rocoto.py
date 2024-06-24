@@ -7,8 +7,7 @@ from typing import List
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
-import pytest
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools import rocoto
 from uwtools.config.formats.yaml import YAMLConfig
@@ -166,7 +165,7 @@ class Test__RocotoXML:
         mocks["_add_task_dependency"].assert_called_once_with(task, "qux")
         mocks["_add_task_envar"].assert_called_once_with(task, "A", "apple")
 
-    @pytest.mark.parametrize("cores", [1, "1"])
+    @mark.parametrize("cores", [1, "1"])
     def test__add_task_cores_int_or_str(self, cores, instance, root):
         # Ensure that either int or str "cores" values are accepted.
         config = {"command": "c", "cores": cores, "walltime": "00:00:01"}
@@ -181,7 +180,7 @@ class Test__RocotoXML:
         assert and_.tag == "and"
         assert and_.xpath("or[1]/taskdep")[0].get("task") == "foo"
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         "value",
         ["/some/file", {"cyclestr": {"value": "@Y@m@d@H", "attrs": {"offset": "06:00:00"}}}],
     )
@@ -208,7 +207,7 @@ class Test__RocotoXML:
         with raises(UWConfigError):
             instance._add_task_dependency(e=root, config=config)
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         "tag_config",
         [("and", {"strneq": {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}})],
     )
@@ -263,7 +262,7 @@ class Test__RocotoXML:
         assert streq.tag == "streq"
         assert streq.get("left") == "&RUN_GSI;"
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         "config",
         [
             ("streq", {"attrs": {"left": "&RUN_GSI;", "right": "YES"}}),
@@ -296,7 +295,7 @@ class Test__RocotoXML:
         assert taskvalid.tag == "taskvalid"
         assert taskvalid.get("task") == "foo"
 
-    @pytest.mark.parametrize(
+    @mark.parametrize(
         "value",
         [
             "202301031200",

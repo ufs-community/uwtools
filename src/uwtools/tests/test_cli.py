@@ -10,8 +10,7 @@ from pathlib import Path
 from typing import List
 from unittest.mock import Mock, patch
 
-import pytest
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 import uwtools.api
 import uwtools.api.config
@@ -163,7 +162,7 @@ def test__add_subparser_template_translate(subparsers):
     assert subparsers.choices[STR.translate]
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "vals",
     [
         (STR.file1path, STR.file1fmt),
@@ -198,7 +197,7 @@ def test__check_file_vs_format_pass_explicit():
     assert args[STR.infmt] == fmt
 
 
-@pytest.mark.parametrize("fmt", FORMAT.formats())
+@mark.parametrize("fmt", FORMAT.formats())
 def test__check_file_vs_format_pass_implicit(fmt):
     # The format is correctly deduced for a file with a known extension.
     args = {STR.infile: f"/path/to/input.{fmt}", STR.infmt: None}
@@ -237,7 +236,7 @@ def test__check_template_render_vals_args_noop_explicit_valsfmt():
     assert cli._check_template_render_vals_args(args) == args
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "fmt,fn,ok",
     [
         (None, "update.txt", False),
@@ -265,7 +264,7 @@ def test__check_verbosity_fail(capsys):
     assert "--quiet may not be used with --verbose" in capsys.readouterr().err
 
 
-@pytest.mark.parametrize("flags", ([STR.quiet], [STR.verbose]))
+@mark.parametrize("flags", ([STR.quiet], [STR.verbose]))
 def test__check_verbosity_ok(flags):
     args = {flag: True for flag in flags}
     assert cli._check_verbosity(args) == args
@@ -276,7 +275,7 @@ def test__dict_from_key_eq_val_strings():
     assert cli._dict_from_key_eq_val_strings(["a=1", "b=2"]) == {"a": "1", "b": "2"}
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "params",
     [
         (STR.compare, "_dispatch_config_compare"),
@@ -343,7 +342,7 @@ def test__dispatch_config_validate_config_obj():
     _validate_yaml.assert_called_once_with(**_validate_yaml_args)
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "action, funcname", [(STR.copy, "_dispatch_file_copy"), (STR.link, "_dispatch_file_link")]
 )
 def test__dispatch_file(action, funcname):
@@ -383,7 +382,7 @@ def test__dispatch_file_link(args_dispatch_file):
     )
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "params",
     [
         (STR.realize, "_dispatch_rocoto_realize"),
@@ -432,7 +431,7 @@ def test__dispatch_rocoto_validate_xml_no_optional():
     validate.assert_called_once_with(xml_file=None)
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "params",
     [(STR.render, "_dispatch_template_render"), (STR.translate, "_dispatch_template_translate")],
 )
@@ -444,7 +443,7 @@ def test__dispatch_template(params):
     func.assert_called_once_with(args)
 
 
-@pytest.mark.parametrize("valsneeded", [False, True])
+@mark.parametrize("valsneeded", [False, True])
 def test__dispatch_template_render_fail(valsneeded):
     args = {
         STR.infile: 1,
@@ -545,7 +544,7 @@ def test__dispatch_template_translate_no_optional():
     )
 
 
-@pytest.mark.parametrize("hours", [0, 24, 168])
+@mark.parametrize("hours", [0, 24, 168])
 def test__dispatch_to_driver(hours):
     name = "adriver"
     cycle = dt.datetime.now()
@@ -577,8 +576,8 @@ def test__dispatch_to_driver(hours):
         )
 
 
-@pytest.mark.parametrize("quiet", [False, True])
-@pytest.mark.parametrize("verbose", [False, True])
+@mark.parametrize("quiet", [False, True])
+@mark.parametrize("verbose", [False, True])
 def test_main_fail_checks(capsys, quiet, verbose):
     # Using mode 'template render' for testing.
     raw_args = ["testing", STR.template, STR.render]
@@ -597,7 +596,7 @@ def test_main_fail_checks(capsys, quiet, verbose):
                 assert e.value.code == 0
 
 
-@pytest.mark.parametrize("vals", [(True, 0), (False, 1)])
+@mark.parametrize("vals", [(True, 0), (False, 1)])
 def test_main_fail_dispatch(vals):
     # Using mode 'template render' for testing.
     dispatch_retval, exit_status = vals

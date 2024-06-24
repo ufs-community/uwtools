@@ -9,11 +9,10 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import pytest
 import yaml
 from iotaa import refs
 from lxml import etree
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers.mpas import MPAS
 from uwtools.drivers.mpas_base import MPASBase
@@ -156,7 +155,7 @@ def test_MPAS_boundary_files(driverobj, cycle):
     assert all(link.is_symlink() for link in links)
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "key,task,test",
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
 )
