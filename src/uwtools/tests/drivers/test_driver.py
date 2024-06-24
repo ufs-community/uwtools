@@ -259,10 +259,9 @@ def test_Driver_run(batch, driverobj):
 
 
 @mark.parametrize(
-    "arg_type", [("envcmds", list), ("envvars", dict), ("execution", list), ("scheduler", Slurm)]
+    "arg,type_", [("envcmds", list), ("envvars", dict), ("execution", list), ("scheduler", Slurm)]
 )
-def test_Driver_runscript(arg_type, driverobj):
-    arg, type_ = arg_type
+def test_Driver_runscript(arg, driverobj, type_):
     with patch.object(driverobj, "_runscript") as runscript:
         driverobj.runscript()
         runscript.assert_called_once()
