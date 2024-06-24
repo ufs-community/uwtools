@@ -258,13 +258,15 @@ def test_Driver_run(batch, driverobj):
             rvle.assert_called_once_with()
 
 
-def test_Driver_runscript(driverobj):
+@mark.parametrize(
+    "arg_type", [("envcmds", list), ("envvars", dict), ("execution", list), ("scheduler", Slurm)]
+)
+def test_Driver_runscript(arg_type, driverobj):
+    arg, type_ = arg_type
     with patch.object(driverobj, "_runscript") as runscript:
         driverobj.runscript()
         runscript.assert_called_once()
-        args = ("envcmds", "envvars", "execution", "scheduler")
-        types = [list, dict, list, Slurm]
-        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
+        assert isinstance(runscript.call_args.kwargs[arg], type_)
 
 
 def test_Driver__run_via_batch_submission(driverobj):
