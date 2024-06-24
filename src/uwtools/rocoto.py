@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass
 from math import log10
 from pathlib import Path
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 from lxml import etree
 from lxml.etree import Element, SubElement, _Element
@@ -399,7 +399,7 @@ class _RocotoXML:
         for attr, val in config.get(STR.attrs, {}).items():
             e.set(attr, str(val))
 
-    def _tag_name(self, key: str) -> Tuple[str, str]:
+    def _tag_name(self, key: str) -> tuple[str, str]:
         """
         Return the tag and metadata extracted from a metadata-bearing key.
 

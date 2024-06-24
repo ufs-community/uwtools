@@ -5,7 +5,7 @@ Support for rendering Jinja2 templates.
 import os
 from functools import cached_property
 from pathlib import Path
-from typing import Optional, Set, Union
+from typing import Optional, Union
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined, meta
 from jinja2.exceptions import UndefinedError
@@ -88,7 +88,7 @@ class J2Template:
         return self._template.render(self._values)
 
     @property
-    def undeclared_variables(self) -> Set[str]:
+    def undeclared_variables(self) -> set[str]:
         """
         Returns the names of variables needed to render the template.
 
@@ -361,7 +361,7 @@ def _supplement_values(
     return values
 
 
-def _values_needed(undeclared_variables: Set[str]) -> None:
+def _values_needed(undeclared_variables: set[str]) -> None:
     """
     Log variables needed to render the template.
 

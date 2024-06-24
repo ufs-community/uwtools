@@ -3,7 +3,7 @@ Tools for working with configs.
 """
 
 from pathlib import Path
-from typing import Callable, Optional, Tuple, Union
+from typing import Callable, Optional, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.config.jinja2 import unrendered
@@ -162,7 +162,7 @@ def _print_config_section(config: dict, key_path: list[str]) -> None:
 
 def _realize_config_input_setup(
     input_config: Union[Config, Optional[Path]] = None, input_format: Optional[str] = None
-) -> Tuple[Config, str]:
+) -> tuple[Config, str]:
     """
     Set up config-realize input.
 
@@ -186,7 +186,7 @@ def _realize_config_output_setup(
     output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
     key_path: Optional[list[Union[str, int]]] = None,
-) -> Tuple[dict, str]:
+) -> tuple[dict, str]:
     """
     Set up config-realize output.
 

@@ -13,7 +13,7 @@ from argparse import _SubParsersAction as Subparsers
 from functools import partial
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Callable, NoReturn, Optional, Tuple
+from typing import Any, Callable, NoReturn, Optional
 
 import uwtools.api
 import uwtools.api.config
@@ -1012,7 +1012,7 @@ def _formatter(prog: str) -> HelpFormatter:
     return HelpFormatter(prog, max_help_position=6)
 
 
-def _parse_args(raw_args: list[str]) -> Tuple[Args, Checks]:
+def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
     """
     Parse command-line arguments.
 

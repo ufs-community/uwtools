@@ -7,7 +7,7 @@ from collections import UserDict
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 
 import yaml
 
@@ -83,7 +83,7 @@ class Config(ABC, UserDict):
 
     # Public methods
 
-    def characterize_values(self, values: dict, parent: str) -> Tuple[list, list]:
+    def characterize_values(self, values: dict, parent: str) -> tuple[list, list]:
         """
         Characterize values as complete or as template placeholders.
 

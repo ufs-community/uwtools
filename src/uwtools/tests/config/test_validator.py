@@ -5,7 +5,7 @@ Tests for uwtools.config.validator module.
 import json
 import logging
 from pathlib import Path
-from typing import Any, Tuple
+from typing import Any
 from unittest.mock import patch
 
 import yaml
@@ -22,7 +22,7 @@ from uwtools.utils.file import resource_path
 
 
 @fixture
-def assets(config, schema, tmp_path) -> Tuple[Path, Path, YAMLConfig]:
+def assets(config, schema, tmp_path) -> tuple[Path, Path, YAMLConfig]:
     config_file = tmp_path / "config.yaml"
     schema_file = tmp_path / "schema.yaml"
     write_as_json(config, config_file)
