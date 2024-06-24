@@ -3,7 +3,7 @@ Tools for working with configs.
 """
 
 from pathlib import Path
-from typing import Callable, List, Optional, Tuple, Union
+from typing import Callable, Optional, Tuple, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.config.jinja2 import unrendered
@@ -82,7 +82,7 @@ def realize_config(
     update_format: Optional[str] = None,
     output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
-    key_path: Optional[List[Union[str, int]]] = None,
+    key_path: Optional[list[Union[str, int]]] = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -135,7 +135,7 @@ def _ensure_format(
     return fmt
 
 
-def _print_config_section(config: dict, key_path: List[str]) -> None:
+def _print_config_section(config: dict, key_path: list[str]) -> None:
     """
     Descends into the config via the given keys, then prints the contents of the located subtree as
     key=value pairs, one per line.
@@ -185,7 +185,7 @@ def _realize_config_output_setup(
     input_obj: Config,
     output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
-    key_path: Optional[List[Union[str, int]]] = None,
+    key_path: Optional[list[Union[str, int]]] = None,
 ) -> Tuple[dict, str]:
     """
     Set up config-realize output.

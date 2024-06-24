@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections import OrderedDict
 from importlib import import_module
-from typing import Dict, Type, Union
+from typing import Type, Union
 
 import yaml
 
@@ -46,7 +46,7 @@ def format_to_config(fmt: str) -> Type:
     return cfgclass
 
 
-def from_od(d: Union[OrderedDict, Dict]) -> dict:
+def from_od(d: Union[OrderedDict, dict]) -> dict:
     """
     Returns a (nested) dict with content equivalent to the given (nested) OrderedDict.
 
@@ -105,7 +105,7 @@ class UWYAMLConvert(UWYAMLTag):
 
         Will raise an exception if the value cannot be represented as the specified type.
         """
-        converters: Dict[str, Union[Type[float], Type[int]]] = dict(zip(self.TAGS, [float, int]))
+        converters: dict[str, Union[Type[float], Type[int]]] = dict(zip(self.TAGS, [float, int]))
         return converters[self.tag](self.value)
 
 

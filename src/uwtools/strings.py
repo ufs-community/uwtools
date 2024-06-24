@@ -3,7 +3,6 @@ Canonical strings used throughout uwtools.
 """
 
 from dataclasses import dataclass, fields
-from typing import Dict, List
 
 
 @dataclass(frozen=True)
@@ -37,14 +36,14 @@ class FORMAT:
     yml: str = _yaml
 
     @staticmethod
-    def extensions() -> List[str]:
+    def extensions() -> list[str]:
         """
         Returns recognized filename extensions.
         """
         return [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
 
     @staticmethod
-    def formats() -> Dict[str, str]:
+    def formats() -> dict[str, str]:
         """
         Returns the recognized format names.
         """

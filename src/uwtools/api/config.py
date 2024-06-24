@@ -4,7 +4,7 @@ API access to ``uwtools`` configuration management tools.
 
 import os
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from uwtools.config.formats.fieldtable import FieldTableConfig as _FieldTableConfig
 from uwtools.config.formats.ini import INIConfig as _INIConfig
@@ -119,7 +119,7 @@ def realize(
     update_format: Optional[str] = None,
     output_file: Optional[Union[Path, str]] = None,
     output_format: Optional[str] = None,
-    key_path: Optional[List[Union[str, int]]] = None,
+    key_path: Optional[list[Union[str, int]]] = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,

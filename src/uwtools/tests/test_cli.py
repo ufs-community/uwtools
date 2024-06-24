@@ -7,7 +7,6 @@ import sys
 from argparse import ArgumentParser as Parser
 from argparse import _SubParsersAction
 from pathlib import Path
-from typing import List
 from unittest.mock import Mock, patch
 
 from pytest import fixture, mark, raises
@@ -26,7 +25,7 @@ from uwtools.utils.file import FORMAT
 # Helpers
 
 
-def actions(parser: Parser) -> List[str]:
+def actions(parser: Parser) -> list[str]:
     # Return actions (named subparsers) belonging to the given parser.
     if actions := [x for x in parser._actions if isinstance(x, _SubParsersAction)]:
         return list(actions[0].choices.keys())

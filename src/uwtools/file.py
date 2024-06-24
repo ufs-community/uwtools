@@ -5,7 +5,7 @@ File handling.
 import datetime as dt
 from functools import cached_property
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from iotaa import dryrun, tasks
 
@@ -27,7 +27,7 @@ class FileStager:
         config: Optional[Union[dict, Path]] = None,
         cycle: Optional[dt.datetime] = None,
         leadtime: Optional[dt.timedelta] = None,
-        keys: Optional[List[str]] = None,
+        keys: Optional[list[str]] = None,
         dry_run: bool = False,
     ) -> None:
         """

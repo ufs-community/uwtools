@@ -3,7 +3,6 @@
 Tests for uwtools.rocoto module.
 """
 
-from typing import List
 from unittest.mock import DEFAULT as D
 from unittest.mock import PropertyMock, patch
 
@@ -379,7 +378,7 @@ class Test__RocotoXML:
         mocks["_add_workflow_tasks"].assert_called_once_with(workflow, "5")
 
     def test__add_workflow_cycledef(self, instance, root):
-        config: List[dict] = [
+        config: list[dict] = [
             {"attrs": {"group": "g1"}, "spec": "t1"},
             {"attrs": {"group": "g2"}, "spec": "t2"},
         ]

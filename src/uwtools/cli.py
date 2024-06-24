@@ -13,7 +13,7 @@ from argparse import _SubParsersAction as Subparsers
 from functools import partial
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Callable, Dict, List, NoReturn, Optional, Tuple
+from typing import Any, Callable, NoReturn, Optional, Tuple
 
 import uwtools.api
 import uwtools.api.config
@@ -31,10 +31,10 @@ FORMATS = FORMAT.extensions()
 LEADTIME_DESC = "hours[:minutes[:seconds]]"
 TITLE_REQ_ARG = "Required arguments"
 
-Args = Dict[str, Any]
-ActionChecks = List[Callable[[Args], Args]]
-ModeChecks = Dict[str, ActionChecks]
-Checks = Dict[str, ModeChecks]
+Args = dict[str, Any]
+ActionChecks = list[Callable[[Args], Args]]
+ModeChecks = dict[str, ActionChecks]
+Checks = dict[str, ModeChecks]
 
 
 def main() -> None:
@@ -56,13 +56,13 @@ def main() -> None:
         _abort(str(e))
     try:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
-        tools: Dict[str, Callable[..., bool]] = {
+        tools: dict[str, Callable[..., bool]] = {
             STR.config: _dispatch_config,
             STR.file: _dispatch_file,
             STR.rocoto: _dispatch_rocoto,
             STR.template: _dispatch_template,
         }
-        drivers: Dict[str, Callable[..., bool]] = {
+        drivers: dict[str, Callable[..., bool]] = {
             x: partial(_dispatch_to_driver, x)
             for x in [
                 STR.chgrescube,
@@ -591,7 +591,7 @@ def _add_arg_env(group: Group) -> None:
 
 
 def _add_arg_file_format(
-    group: Group, switch: str, helpmsg: str, choices: List[str], required: bool = False
+    group: Group, switch: str, helpmsg: str, choices: list[str], required: bool = False
 ) -> None:
     group.add_argument(
         switch,
@@ -632,7 +632,7 @@ def _add_arg_input_file(group: Group, required: bool = False) -> None:
     )
 
 
-def _add_arg_input_format(group: Group, choices: List[str], required: bool = False) -> None:
+def _add_arg_input_format(group: Group, choices: list[str], required: bool = False) -> None:
     group.add_argument(
         _switch(STR.infmt),
         choices=choices,
@@ -690,7 +690,7 @@ def _add_arg_output_file(group: Group, required: bool = False) -> None:
     )
 
 
-def _add_arg_output_format(group: Group, choices: List[str], required: bool = False) -> None:
+def _add_arg_output_format(group: Group, choices: list[str], required: bool = False) -> None:
     group.add_argument(
         _switch(STR.outfmt),
         choices=choices,
@@ -758,7 +758,7 @@ def _add_arg_update_file(group: Group, required: bool = False) -> None:
     )
 
 
-def _add_arg_update_format(group: Group, choices: List[str], required: bool = False) -> None:
+def _add_arg_update_format(group: Group, choices: list[str], required: bool = False) -> None:
     group.add_argument(
         _switch(STR.updatefmt),
         choices=choices,
@@ -778,7 +778,7 @@ def _add_arg_values_file(group: Group, required: bool = False) -> None:
     )
 
 
-def _add_arg_values_format(group: Group, choices: List[str]) -> None:
+def _add_arg_values_format(group: Group, choices: list[str]) -> None:
     group.add_argument(
         _switch(STR.valsfmt),
         choices=choices,
@@ -970,7 +970,7 @@ def _check_verbosity(args: Args) -> Args:
     return args
 
 
-def _dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:
+def _dict_from_key_eq_val_strings(config_items: list[str]) -> dict[str, str]:
     """
     Given a list of key=value strings, return a dictionary of key/value pairs.
 
@@ -1012,7 +1012,7 @@ def _formatter(prog: str) -> HelpFormatter:
     return HelpFormatter(prog, max_help_position=6)
 
 
-def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
+def _parse_args(raw_args: list[str]) -> Tuple[Args, Checks]:
     """
     Parse command-line arguments.
 

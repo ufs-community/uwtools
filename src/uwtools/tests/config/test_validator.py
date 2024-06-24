@@ -5,7 +5,7 @@ Tests for uwtools.config.validator module.
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Tuple
 from unittest.mock import patch
 
 import yaml
@@ -31,7 +31,7 @@ def assets(config, schema, tmp_path) -> Tuple[Path, Path, YAMLConfig]:
 
 
 @fixture
-def config(tmp_path) -> Dict[str, Any]:
+def config(tmp_path) -> dict[str, Any]:
     return {
         "color": "blue",
         "dir": str(tmp_path),
@@ -78,7 +78,7 @@ def rocoto_assets():
 
 
 @fixture
-def schema() -> Dict[str, Any]:
+def schema() -> dict[str, Any]:
     return {
         "properties": {
             "color": {
@@ -115,7 +115,7 @@ def schema_file(schema, tmp_path) -> Path:
 # Helpers
 
 
-def write_as_json(data: Dict[str, Any], path: Path) -> Path:
+def write_as_json(data: dict[str, Any], path: Path) -> Path:
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     return path
