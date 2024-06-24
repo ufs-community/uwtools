@@ -64,7 +64,7 @@ def test_api_execute(module):
     with patch.object(api, "_execute") as _execute:
         module.execute(**kwargs)
         _execute.assert_called_once_with(
-            driver_class=module._Driver,
+            driver_class=module._driver,
             cycle=kwargs["cycle"] if module in with_cycle else None,
             leadtime=kwargs["leadtime"] if module in with_leadtime else None,
             **kwbase
@@ -80,4 +80,4 @@ def test_api_graph(module):
 def test_api_tasks(module):
     with patch.object(iotaa, "tasknames") as tasknames:
         module.tasks()
-        tasknames.assert_called_once_with(module._Driver)
+        tasknames.assert_called_once_with(module._driver)
