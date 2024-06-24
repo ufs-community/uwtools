@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 import f90nml  # type: ignore
 from iotaa import asset, external, refs
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers import sfc_climo_gen
 from uwtools.drivers.driver import Driver
@@ -84,8 +84,9 @@ def driverobj(config):
 # Tests
 
 
-def test_SfcClimoGen():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_resources",
         "_run_via_batch_submission",
@@ -100,8 +101,10 @@ def test_SfcClimoGen():
         "_write_runscript",
         "run",
         "runscript",
-    ]:
-        assert getattr(SfcClimoGen, method) is getattr(Driver, method)
+    ],
+)
+def test_SfcClimoGen(method):
+    assert getattr(SfcClimoGen, method) is getattr(Driver, method)
 
 
 def test_SfcClimoGen_namelist_file(caplog, driverobj):

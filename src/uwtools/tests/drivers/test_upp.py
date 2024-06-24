@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 import f90nml  # type: ignore
 from iotaa import refs
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.upp import UPP
@@ -77,8 +77,9 @@ def leadtime():
 # Tests
 
 
-def test_UPP():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_resources",
         "_run_via_batch_submission",
@@ -91,8 +92,10 @@ def test_UPP():
         "_write_runscript",
         "run",
         "runscript",
-    ]:
-        assert getattr(UPP, method) is getattr(Driver, method)
+    ],
+)
+def test_UPP(method):
+    assert getattr(UPP, method) is getattr(Driver, method)
 
 
 def test_UPP_files_copied(driverobj):
