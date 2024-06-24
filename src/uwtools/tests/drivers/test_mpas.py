@@ -117,8 +117,9 @@ def driverobj(config, cycle):
 # Tests
 
 
-def test_MPAS():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_resources",
         "_run_via_batch_submission",
@@ -134,8 +135,10 @@ def test_MPAS():
         "run",
         "runscript",
         "streams_file",
-    ]:
-        assert getattr(MPAS, method) is getattr(MPASBase, method)
+    ],
+)
+def test_MPAS(method):
+    assert getattr(MPAS, method) is getattr(MPASBase, method)
 
 
 def test_MPAS_boundary_files(driverobj, cycle):
@@ -148,9 +151,8 @@ def test_MPAS_boundary_files(driverobj, cycle):
     infile_path = Path(driverobj._driver_config["lateral_boundary_conditions"]["path"])
     infile_path.mkdir()
     for n in ns:
-        (
-            infile_path / f"lbc.{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
-        ).touch()
+        path = infile_path / f"lbc.{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
+        path.touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
 

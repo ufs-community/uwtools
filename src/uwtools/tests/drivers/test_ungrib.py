@@ -7,7 +7,7 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers import ungrib
 from uwtools.drivers.driver import Driver
@@ -56,8 +56,9 @@ def driverobj(config, cycle):
 # Tests
 
 
-def test_Ungrib():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_resources",
         "_run_via_batch_submission",
@@ -71,8 +72,10 @@ def test_Ungrib():
         "_write_runscript",
         "run",
         "runscript",
-    ]:
-        assert getattr(Ungrib, method) is getattr(Driver, method)
+    ],
+)
+def test_Ungrib(method):
+    assert getattr(Ungrib, method) is getattr(Driver, method)
 
 
 def test_Ungrib_gribfiles(driverobj, tmp_path):

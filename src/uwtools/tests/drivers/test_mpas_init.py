@@ -99,8 +99,9 @@ def driverobj(config, cycle):
 # Tests
 
 
-def test_MPASInit():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_resources",
         "_run_via_batch_submission",
@@ -116,8 +117,10 @@ def test_MPASInit():
         "run",
         "runscript",
         "streams_file",
-    ]:
-        assert getattr(MPASInit, method) is getattr(MPASBase, method)
+    ],
+)
+def test_MPASInit(method):
+    assert getattr(MPASInit, method) is getattr(MPASBase, method)
 
 
 def test_MPASInit_boundary_files(cycle, driverobj):

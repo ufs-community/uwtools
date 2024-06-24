@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.orog_gsl import OrogGSL
@@ -51,8 +51,9 @@ def driverobj(config):
 # Tests
 
 
-def test_OrogGSL():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_resources",
         "_run_via_batch_submission",
@@ -66,8 +67,10 @@ def test_OrogGSL():
         "_write_runscript",
         "run",
         "runscript",
-    ]:
-        assert getattr(OrogGSL, method) is getattr(Driver, method)
+    ],
+)
+def test_OrogGSL(method):
+    assert getattr(OrogGSL, method) is getattr(Driver, method)
 
 
 def test_OrogGSL_input_grid_file(driverobj):

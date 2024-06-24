@@ -81,8 +81,9 @@ def truetask():
 # Tests
 
 
-def test_FV3():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_resources",
         "_run_via_batch_submission",
@@ -95,8 +96,10 @@ def test_FV3():
         "_validate",
         "_write_runscript",
         "run",
-    ]:
-        assert getattr(FV3, method) is getattr(Driver, method)
+    ],
+)
+def test_FV3(method):
+    assert getattr(FV3, method) is getattr(Driver, method)
 
 
 def test_FV3_boundary_files(driverobj):
