@@ -17,10 +17,12 @@ from uwtools.api import (
     mpas,
     mpas_init,
     orog_gsl,
+    schism,
     sfc_climo_gen,
     shave,
     ungrib,
     upp,
+    ww3,
 )
 from uwtools.drivers import support
 from uwtools.utils import api
@@ -36,12 +38,14 @@ modules = [
     mpas,
     mpas_init,
     orog_gsl,
+    schism,
     sfc_climo_gen,
     shave,
     ungrib,
     upp,
+    ww3,
 ]
-with_cycle = [chgres_cube, fv3, jedi, mpas, mpas_init, ungrib, upp]
+with_cycle = [chgres_cube, fv3, jedi, mpas, mpas_init, schism, ungrib, upp, ww3]
 with_leadtime = [upp]
 
 
