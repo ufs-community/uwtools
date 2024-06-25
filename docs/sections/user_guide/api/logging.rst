@@ -2,4 +2,4 @@
 =======================
 
 .. automodule:: uwtools.api.logging
-    :members:
+   :members:

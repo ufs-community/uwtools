@@ -2,4 +2,5 @@
 ====================
 
 .. automodule:: uwtools.api.ioda
-    :members:
+   :inherited-members:
+   :members:

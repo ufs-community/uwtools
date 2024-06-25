@@ -2,4 +2,5 @@
 ==================================
 
 .. automodule:: uwtools.api.global_equiv_resol
-    :members:
+   :inherited-members:
+   :members:

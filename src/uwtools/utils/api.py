@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional, Union
 
 from uwtools.config.formats.base import Config
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverT
 from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.exceptions import UWError
@@ -33,7 +33,7 @@ def ensure_data_source(
 
 
 def make_execute(
-    driver_class: type[Driver],
+    driver_class: DriverT,
     with_cycle: Optional[bool] = False,
     with_leadtime: Optional[bool] = False,
 ) -> Callable[..., bool]:
@@ -133,7 +133,7 @@ def make_execute(
     return execute
 
 
-def make_tasks(driver_class: type[Driver]) -> Callable[..., dict[str, str]]:
+def make_tasks(driver_class: DriverT) -> Callable[..., dict[str, str]]:
     """
     Returns a function that maps task names to descriptions for the given driver.
 
@@ -162,7 +162,7 @@ def str2path(val: Any) -> Any:
 
 
 def _execute(
-    driver_class: type[Driver],
+    driver_class: DriverT,
     task: str,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,

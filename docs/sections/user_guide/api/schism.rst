@@ -1,6 +1,6 @@
-``uwtools.api.ungrib``
+``uwtools.api.schism``
 ======================
 
-.. automodule:: uwtools.api.ungrib
+.. automodule:: uwtools.api.schism
    :inherited-members:
    :members:

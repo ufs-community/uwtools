@@ -1,6 +1,6 @@
-``uwtools.api.upp``
+``uwtools.api.ww3``
 ===================
 
-.. automodule:: uwtools.api.upp
+.. automodule:: uwtools.api.ww3
    :inherited-members:
    :members:

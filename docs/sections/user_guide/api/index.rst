@@ -18,8 +18,10 @@ API
    mpas_init
    orog_gsl
    rocoto
+   schism
    sfc_climo_gen
    shave
    template
    ungrib
    upp
+   ww3
