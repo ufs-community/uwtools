@@ -105,7 +105,7 @@ class UWYAMLConvert(UWYAMLTag):
 
         Will raise an exception if the value cannot be represented as the specified type.
         """
-        converters: dict[str, Union[Type[float], Type[int]]] = dict(zip(self.TAGS, [float, int]))
+        converters: dict[str, Union[type[float], type[int]]] = dict(zip(self.TAGS, [float, int]))
         return converters[self.tag](self.value)
 
 

@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Optional, Type, Union
+from typing import Any, Optional, Union
 
 from iotaa import asset, dryrun, external, task, tasks
 
@@ -87,7 +87,7 @@ class Assets(ABC):
 
     @staticmethod
     def _create_user_updated_config(
-        config_class: Type[Config], config_values: dict, path: Path, schema: Optional[dict] = None
+        config_class: type[Config], config_values: dict, path: Path, schema: Optional[dict] = None
     ) -> None:
         """
         Create a config from a base file, user-provided values, or a combination of the two.
@@ -369,3 +369,6 @@ class Driver(Assets):
         with open(path, "w", encoding="utf-8") as f:
             print(rs, file=f)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
+
+
+DriverT = Union[type[Assets], type[Driver]]

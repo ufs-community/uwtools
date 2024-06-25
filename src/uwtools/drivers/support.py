@@ -4,7 +4,7 @@ Driver support.
 
 import iotaa as _iotaa
 
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverT
 
 
 def graph() -> str:
@@ -14,7 +14,7 @@ def graph() -> str:
     return _iotaa.graph()
 
 
-def tasks(driver_class: type[Driver]) -> dict[str, str]:
+def tasks(driver_class: DriverT) -> dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
 
