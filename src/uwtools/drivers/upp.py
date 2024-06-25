@@ -4,7 +4,7 @@ A driver for UPP.
 
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from iotaa import asset, task, tasks
 
@@ -26,7 +26,7 @@ class UPP(Driver):
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
-        key_path: Optional[List[str]] = None,
+        key_path: Optional[list[str]] = None,
     ):
         """
         The driver.

@@ -7,9 +7,8 @@ import logging
 import os
 from unittest.mock import patch
 
-import pytest
 import yaml
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
@@ -85,7 +84,7 @@ def test_characterize_values(config):
     assert template == ["  p3: {{ n }}"]
 
 
-@pytest.mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
+@mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
 def test_compare_config(caplog, fmt, salad_base):
     """
     Compare two config objects.
@@ -165,7 +164,7 @@ def test_derefernce_context_override(tmp_path):
     assert config["file"] == "gfs.t06z.atmanl.nc"
 
 
-@pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
+@mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
 def test_invalid_config(fmt2, tmp_path):
     """
     Test that invalid config files will error when attempting to dump.

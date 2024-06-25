@@ -6,7 +6,7 @@ import datetime as dt
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers.ioda import IODA
 from uwtools.drivers.jedi_base import JEDIBase
@@ -67,8 +67,9 @@ def driverobj(config, cycle):
 # Tests
 
 
-def test_IODA():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_resources",
         "_run_via_batch_submission",
@@ -81,8 +82,10 @@ def test_IODA():
         "_write_runscript",
         "run",
         "runscript",
-    ]:
-        assert getattr(IODA, method) is getattr(JEDIBase, method)
+    ],
+)
+def test_IODA(method):
+    assert getattr(IODA, method) is getattr(JEDIBase, method)
 
 
 def test_IODA_provisioned_run_directory(driverobj):

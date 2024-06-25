@@ -10,7 +10,7 @@ from unittest.mock import Mock, call, patch
 
 import yaml
 from iotaa import asset, external
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import jedi, jedi_base
@@ -77,8 +77,9 @@ def driverobj(config, cycle):
 # Tests
 
 
-def test_JEDI():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_resources",
         "_run_via_batch_submission",
@@ -91,8 +92,10 @@ def test_JEDI():
         "_write_runscript",
         "run",
         "runscript",
-    ]:
-        assert getattr(JEDI, method) is getattr(JEDIBase, method)
+    ],
+)
+def test_JEDI(method):
+    assert getattr(JEDI, method) is getattr(JEDIBase, method)
 
 
 def test_JEDI_configuration_file(driverobj):

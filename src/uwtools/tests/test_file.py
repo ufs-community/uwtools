@@ -1,9 +1,8 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
 import iotaa
-import pytest
 import yaml
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools import file
 from uwtools.exceptions import UWConfigError
@@ -26,7 +25,7 @@ def assets(tmp_path):
     return dstdir, cfgdict, cfgfile
 
 
-@pytest.mark.parametrize("source", ("dict", "file"))
+@mark.parametrize("source", ("dict", "file"))
 def test_FileCopier(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
@@ -49,7 +48,7 @@ def test_FileCopier_config_file_dry_run(assets):
     iotaa.dryrun(False)
 
 
-@pytest.mark.parametrize("source", ("dict", "file"))
+@mark.parametrize("source", ("dict", "file"))
 def test_FileLinker(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
@@ -61,7 +60,7 @@ def test_FileLinker(assets, source):
     assert (dstdir / "subdir" / "bar").is_symlink()
 
 
-@pytest.mark.parametrize("source", ("dict", "file"))
+@mark.parametrize("source", ("dict", "file"))
 def test_FileStager(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
@@ -70,7 +69,7 @@ def test_FileStager(assets, source):
     assert stager._validate() is True
 
 
-@pytest.mark.parametrize("source", ("dict", "file"))
+@mark.parametrize("source", ("dict", "file"))
 def test_FileStager_bad_key(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
@@ -79,7 +78,7 @@ def test_FileStager_bad_key(assets, source):
     assert str(e.value) == "Failed following YAML key(s): a -> x"
 
 
-@pytest.mark.parametrize("val", [None, True, False, "str", 88, 3.14, [], tuple()])
+@mark.parametrize("val", [None, True, False, "str", 88, 3.14, [], tuple()])
 def test_FileStager_empty_val(assets, val):
     dstdir, cfgdict, _ = assets
     cfgdict["a"]["b"] = val

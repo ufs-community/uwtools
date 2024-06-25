@@ -3,7 +3,7 @@ A driver for the global_equiv_resol component.
 """
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from iotaa import asset, external, tasks
 
@@ -21,7 +21,7 @@ class GlobalEquivResol(Driver):
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
-        key_path: Optional[List[str]] = None,
+        key_path: Optional[list[str]] = None,
     ):
         """
         The driver.

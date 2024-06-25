@@ -5,7 +5,7 @@ A base class for MPAS drivers.
 from abc import abstractmethod
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from iotaa import asset, task, tasks
 from lxml import etree
@@ -26,7 +26,7 @@ class MPASBase(Driver):
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
-        key_path: Optional[List[str]] = None,
+        key_path: Optional[list[str]] = None,
     ):
         """
         The driver.

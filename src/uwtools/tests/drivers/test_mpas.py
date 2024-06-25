@@ -9,11 +9,10 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import pytest
 import yaml
 from iotaa import refs
 from lxml import etree
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers.mpas import MPAS
 from uwtools.drivers.mpas_base import MPASBase
@@ -118,8 +117,9 @@ def driverobj(config, cycle):
 # Tests
 
 
-def test_MPAS():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_resources",
         "_run_via_batch_submission",
@@ -135,8 +135,10 @@ def test_MPAS():
         "run",
         "runscript",
         "streams_file",
-    ]:
-        assert getattr(MPAS, method) is getattr(MPASBase, method)
+    ],
+)
+def test_MPAS(method):
+    assert getattr(MPAS, method) is getattr(MPASBase, method)
 
 
 def test_MPAS_boundary_files(driverobj, cycle):
@@ -149,14 +151,13 @@ def test_MPAS_boundary_files(driverobj, cycle):
     infile_path = Path(driverobj._driver_config["lateral_boundary_conditions"]["path"])
     infile_path.mkdir()
     for n in ns:
-        (
-            infile_path / f"lbc.{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
-        ).touch()
+        path = infile_path / f"lbc.{(cycle+dt.timedelta(hours=n)).strftime('%Y-%m-%d_%H.%M.%S')}.nc"
+        path.touch()
     driverobj.boundary_files()
     assert all(link.is_symlink() for link in links)
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "key,task,test",
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
 )

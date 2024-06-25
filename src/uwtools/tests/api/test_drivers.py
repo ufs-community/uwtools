@@ -4,7 +4,7 @@ import datetime as dt
 from unittest.mock import patch
 
 import iotaa
-import pytest
+from pytest import mark
 
 from uwtools.api import (
     chgres_cube,
@@ -45,7 +45,7 @@ with_cycle = [chgres_cube, fv3, jedi, mpas, mpas_init, ungrib, upp]
 with_leadtime = [upp]
 
 
-@pytest.mark.parametrize("module", modules)
+@mark.parametrize("module", modules)
 def test_api_execute(module):
     kwbase = {
         "batch": True,
@@ -71,12 +71,12 @@ def test_api_execute(module):
         )
 
 
-@pytest.mark.parametrize("module", modules)
+@mark.parametrize("module", modules)
 def test_api_graph(module):
     assert module.graph is support.graph
 
 
-@pytest.mark.parametrize("module", modules)
+@mark.parametrize("module", modules)
 def test_api_tasks(module):
     with patch.object(iotaa, "tasknames") as tasknames:
         module.tasks()

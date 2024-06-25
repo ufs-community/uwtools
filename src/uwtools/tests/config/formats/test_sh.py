@@ -3,7 +3,7 @@
 Tests for uwtools.config.formats.sh module.
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from pytest import raises
 
@@ -46,7 +46,7 @@ def test_sh(salad_base):
     """
     infile = fixture_path("simple.sh")
     cfgobj = SHConfig(infile)
-    expected: Dict[str, Any] = {
+    expected: dict[str, Any] = {
         **salad_base["salad"],
         "how_many": "12",
     }

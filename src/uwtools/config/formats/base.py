@@ -7,7 +7,7 @@ from collections import UserDict
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import yaml
 
@@ -63,7 +63,7 @@ class Config(ABC, UserDict):
         :param config_file: Path to config file to load.
         """
 
-    def _load_paths(self, config_files: List[Path]) -> dict:
+    def _load_paths(self, config_files: list[Path]) -> dict:
         """
         Merge and return the contents of a collection of config files.
 
@@ -83,7 +83,7 @@ class Config(ABC, UserDict):
 
     # Public methods
 
-    def characterize_values(self, values: dict, parent: str) -> Tuple[list, list]:
+    def characterize_values(self, values: dict, parent: str) -> tuple[list, list]:
         """
         Characterize values as complete or as template placeholders.
 
@@ -91,8 +91,8 @@ class Config(ABC, UserDict):
         :param parent: Parent key.
         :return: Lists of of complete and template-placeholder values.
         """
-        complete: List[str] = []
-        template: List[str] = []
+        complete: list[str] = []
+        template: list[str] = []
         for key, val in values.items():
             if isinstance(val, dict):
                 complete.append(f"{INDENT}{parent}{key}")
