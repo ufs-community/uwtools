@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from functools import partial
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Optional, Type, Union
 
 from iotaa import asset, dryrun, external, task, tasks
 
@@ -36,7 +36,7 @@ class Assets(ABC):
         batch: bool = False,
         cycle: Optional[datetime] = None,
         leadtime: Optional[timedelta] = None,
-        key_path: Optional[List[str]] = None,
+        key_path: Optional[list[str]] = None,
     ) -> None:
         """
         A component driver.
@@ -115,13 +115,13 @@ class Assets(ABC):
             log.debug(f"Failed to validate {path}")
 
     @property
-    def _driver_config(self) -> Dict[str, Any]:
+    def _driver_config(self) -> dict[str, Any]:
         """
         Returns the config block specific to this driver.
         """
         name = self._driver_name
         try:
-            driver_config: Dict[str, Any] = self._config[name]
+            driver_config: dict[str, Any] = self._config[name]
             return driver_config
         except KeyError as e:
             raise UWConfigError("Required '%s' block missing in config" % name) from e
@@ -134,7 +134,7 @@ class Assets(ABC):
         """
 
     def _namelist_schema(
-        self, config_keys: Optional[List[str]] = None, schema_keys: Optional[List[str]] = None
+        self, config_keys: Optional[list[str]] = None, schema_keys: Optional[list[str]] = None
     ) -> dict:
         """
         Returns the (sub)schema for validating the driver's namelist content.
@@ -258,7 +258,7 @@ class Driver(Assets):
     # Private helper methods
 
     @property
-    def _resources(self) -> Dict[str, Any]:
+    def _resources(self) -> dict[str, Any]:
         """
         Returns platform configuration data.
         """
@@ -290,9 +290,9 @@ class Driver(Assets):
 
     def _runscript(
         self,
-        execution: List[str],
-        envcmds: Optional[List[str]] = None,
-        envvars: Optional[Dict[str, str]] = None,
+        execution: list[str],
+        envcmds: Optional[list[str]] = None,
+        envvars: Optional[dict[str, str]] = None,
         scheduler: Optional[JobScheduler] = None,
     ) -> str:
         """
@@ -352,7 +352,7 @@ class Driver(Assets):
         for schema_name in (self._driver_name.replace("_", "-"), "platform"):
             validate_internal(schema_name=schema_name, config=self._config)
 
-    def _write_runscript(self, path: Path, envvars: Optional[Dict[str, str]] = None) -> None:
+    def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
         """
         Write the runscript.
         """

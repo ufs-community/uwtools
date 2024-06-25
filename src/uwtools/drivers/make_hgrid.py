@@ -3,7 +3,7 @@ A driver for make_hgrid.
 """
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from iotaa import tasks
 
@@ -21,7 +21,7 @@ class MakeHgrid(Driver):
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
-        key_path: Optional[List[str]] = None,
+        key_path: Optional[list[str]] = None,
     ):
         """
         The driver.

@@ -2,8 +2,6 @@
 Driver support.
 """
 
-from typing import Dict
-
 import iotaa as _iotaa
 
 from uwtools.drivers.driver import Driver
@@ -16,7 +14,7 @@ def graph() -> str:
     return _iotaa.graph()
 
 
-def tasks(driver_class: type[Driver]) -> Dict[str, str]:
+def tasks(driver_class: type[Driver]) -> dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
 

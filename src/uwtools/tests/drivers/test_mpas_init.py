@@ -9,9 +9,8 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import pytest
 from iotaa import refs
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers.mpas_base import MPASBase
 from uwtools.drivers.mpas_init import MPASInit
@@ -100,8 +99,9 @@ def driverobj(config, cycle):
 # Tests
 
 
-def test_MPASInit():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_resources",
         "_run_via_batch_submission",
@@ -117,8 +117,10 @@ def test_MPASInit():
         "run",
         "runscript",
         "streams_file",
-    ]:
-        assert getattr(MPASInit, method) is getattr(MPASBase, method)
+    ],
+)
+def test_MPASInit(method):
+    assert getattr(MPASInit, method) is getattr(MPASBase, method)
 
 
 def test_MPASInit_boundary_files(cycle, driverobj):
@@ -136,7 +138,7 @@ def test_MPASInit_boundary_files(cycle, driverobj):
     assert all(link.is_symlink() for link in links)
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "key,task,test",
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
 )

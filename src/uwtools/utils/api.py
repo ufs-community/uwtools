@@ -5,7 +5,7 @@ Support for API modules.
 import datetime as dt
 import re
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 from uwtools.config.formats.base import Config
 from uwtools.drivers.driver import Driver
@@ -51,7 +51,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[List[str]] = None,
+        key_path: Optional[list[str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -74,7 +74,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[List[str]] = None,
+        key_path: Optional[list[str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -98,7 +98,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[List[str]] = None,
+        key_path: Optional[list[str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -133,14 +133,14 @@ def make_execute(
     return execute
 
 
-def make_tasks(driver_class: type[Driver]) -> Callable[..., Dict[str, str]]:
+def make_tasks(driver_class: type[Driver]) -> Callable[..., dict[str, str]]:
     """
     Returns a function that maps task names to descriptions for the given driver.
 
     :param driver_class: The driver class whose tasks and descriptions to map.
     """
 
-    def tasks() -> Dict[str, str]:
+    def tasks() -> dict[str, str]:
         """
         Returns a mapping from task names to their one-line descriptions.
         """
@@ -170,7 +170,7 @@ def _execute(
     batch: bool = False,
     dry_run: bool = False,
     graph_file: Optional[Union[Path, str]] = None,
-    key_path: Optional[List[str]] = None,
+    key_path: Optional[list[str]] = None,
     stdin_ok: bool = False,
 ) -> bool:
     """

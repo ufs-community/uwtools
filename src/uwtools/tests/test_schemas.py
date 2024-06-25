@@ -5,8 +5,7 @@ Granular tests of JSON Schema schemas.
 
 from functools import partial
 
-import pytest
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.tests.support import schema_validator, with_del, with_set
 
@@ -242,7 +241,7 @@ def test_schema_esg_grid_namelist(esg_grid_prop, esg_namelist):
     assert "not valid" in errors({})
 
 
-@pytest.mark.parametrize("key", ["delx", "dely", "lx", "ly", "pazi", "plat", "plon"])
+@mark.parametrize("key", ["delx", "dely", "lx", "ly", "pazi", "plat", "plon"])
 def test_schema_esg_grid_namelist_content(key):
     config: dict = {
         "regional_grid_nml": {
@@ -639,7 +638,7 @@ def test_schema_global_equiv_resol():
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
 
 
-@pytest.mark.parametrize("schema_entry", ["run_dir", "input_grid_file"])
+@mark.parametrize("schema_entry", ["run_dir", "input_grid_file"])
 def test_schema_global_equiv_resol_paths(global_equiv_resol_prop, schema_entry):
     errors = global_equiv_resol_prop(schema_entry)
     # Must be a string:

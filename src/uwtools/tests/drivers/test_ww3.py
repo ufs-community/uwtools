@@ -7,7 +7,7 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import yaml
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers.driver import Assets
 from uwtools.drivers.ww3 import WaveWatchIII
@@ -43,13 +43,16 @@ def driverobj(config, cycle):
 # Tests
 
 
-def test_WaveWatchIII():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_taskname",
         "_validate",
-    ]:
-        assert getattr(WaveWatchIII, method) is getattr(Assets, method)
+    ],
+)
+def test_WaveWatchIII(method):
+    assert getattr(WaveWatchIII, method) is getattr(Assets, method)
 
 
 def test_WaveWatchIII_namelist_file(driverobj):

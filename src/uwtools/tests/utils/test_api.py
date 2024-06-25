@@ -4,8 +4,7 @@ import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.exceptions import UWError
 from uwtools.tests.drivers import test_driver
@@ -26,7 +25,7 @@ def execute_kwargs():
     }
 
 
-@pytest.mark.parametrize("val", [Path("/some/path"), {"foo": 88}])
+@mark.parametrize("val", [Path("/some/path"), {"foo": 88}])
 def test_ensure_data_source_passthrough(val):
     assert api.ensure_data_source(data_source=val, stdin_ok=False) == val
 
@@ -106,7 +105,7 @@ def test_make_tasks():
     assert list(taskmap.keys()) == ["atask", "run", "runscript", "validate"]
 
 
-@pytest.mark.parametrize("val", [Path("/some/path"), {"foo": 88}])
+@mark.parametrize("val", [Path("/some/path"), {"foo": 88}])
 def test_str2path_passthrough(val):
     assert api.str2path(val) == val
 
@@ -118,7 +117,7 @@ def test_str2path_convert():
     assert result == Path(val)
 
 
-@pytest.mark.parametrize("hours", [0, 24, 168])
+@mark.parametrize("hours", [0, 24, 168])
 def test__execute(execute_kwargs, hours, tmp_path):
     graph_file = tmp_path / "g.dot"
     with patch.object(test_driver, "ConcreteDriver", wraps=test_driver.ConcreteDriver) as cd:

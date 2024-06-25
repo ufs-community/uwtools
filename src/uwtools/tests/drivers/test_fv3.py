@@ -8,10 +8,9 @@ from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-import pytest
 import yaml
 from iotaa import asset, external, refs
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers.driver import Driver
 from uwtools.drivers.fv3 import FV3
@@ -82,8 +81,9 @@ def truetask():
 # Tests
 
 
-def test_FV3():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_resources",
         "_run_via_batch_submission",
@@ -96,8 +96,10 @@ def test_FV3():
         "_validate",
         "_write_runscript",
         "run",
-    ]:
-        assert getattr(FV3, method) is getattr(Driver, method)
+    ],
+)
+def test_FV3(method):
+    assert getattr(FV3, method) is getattr(Driver, method)
 
 
 def test_FV3_boundary_files(driverobj):
@@ -135,7 +137,7 @@ def test_FV3_field_table(driverobj):
     assert dst.is_file()
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "key,task,test",
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
 )
@@ -157,7 +159,7 @@ def test_FV3_files_copied_and_linked(config, cycle, key, task, test, tmp_path):
     assert all(getattr(dst, test)() for dst in [atm_dst, sfc_dst])
 
 
-@pytest.mark.parametrize("base_file_exists", [True, False])
+@mark.parametrize("base_file_exists", [True, False])
 def test_FV3_model_configure(base_file_exists, caplog, driverobj):
     log.setLevel(logging.DEBUG)
     src = driverobj._rundir / "model_configure.in"
@@ -206,7 +208,7 @@ def test_FV3_namelist_file_missing_base_file(caplog, driverobj):
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
-@pytest.mark.parametrize("domain", ("global", "regional"))
+@mark.parametrize("domain", ("global", "regional"))
 def test_FV3_provisioned_run_directory(domain, driverobj):
     driverobj._driver_config["domain"] = domain
     with patch.multiple(

@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 import f90nml  # type: ignore
 from iotaa import refs
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers.chgres_cube import ChgresCube
 from uwtools.drivers.driver import Driver
@@ -83,8 +83,9 @@ def driverobj(config, cycle):
 # Tests
 
 
-def test_ChgresCube():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_resources",
         "_run_via_batch_submission",
@@ -97,8 +98,10 @@ def test_ChgresCube():
         "_validate",
         "_write_runscript",
         "run",
-    ]:
-        assert getattr(ChgresCube, method) is getattr(Driver, method)
+    ],
+)
+def test_ChgresCube(method):
+    assert getattr(ChgresCube, method) is getattr(Driver, method)
 
 
 def test_ChgresCube_namelist_file(caplog, driverobj):

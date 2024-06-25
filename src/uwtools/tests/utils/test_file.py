@@ -9,7 +9,7 @@ from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.exceptions import UWError
 from uwtools.utils import file
@@ -58,8 +58,9 @@ def test__stdinproxy():
         assert file._stdinproxy().read() == msg1  # <-- the NEW message
 
 
-def test_get_file_format():
-    for ext, file_type in {
+@mark.parametrize(
+    "ext,file_type",
+    {
         "atparse": "atparse",
         "bash": "sh",
         "cfg": "ini",
@@ -70,8 +71,10 @@ def test_get_file_format():
         "sh": "sh",
         "yaml": "yaml",
         "yml": "yaml",
-    }.items():
-        assert file.get_file_format(Path(f"a.{ext}")) == file_type
+    }.items(),
+)
+def test_get_file_format(ext, file_type):
+    assert file.get_file_format(Path(f"a.{ext}")) == file_type
 
 
 def test_get_file_format_unrecognized():

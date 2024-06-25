@@ -6,7 +6,7 @@
 Tests for uwtools.scheduler module.
 """
 
-from typing import Any, Dict
+from typing import Any
 from unittest.mock import patch
 
 from pytest import fixture, raises
@@ -54,7 +54,7 @@ class ConcreteScheduler(scheduler.JobScheduler):
         return directive_separator
 
     @property
-    def _managed_directives(self) -> Dict[str, Any]:
+    def _managed_directives(self) -> dict[str, Any]:
         return managed_directives
 
     @property

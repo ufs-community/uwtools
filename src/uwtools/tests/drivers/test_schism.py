@@ -7,7 +7,7 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import yaml
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers.driver import Assets
 from uwtools.drivers.schism import SCHISM
@@ -43,13 +43,16 @@ def driverobj(config, cycle):
 # Tests
 
 
-def test_SCHISM():
-    for method in [
+@mark.parametrize(
+    "method",
+    [
         "_driver_config",
         "_taskname",
         "_validate",
-    ]:
-        assert getattr(SCHISM, method) is getattr(Assets, method)
+    ],
+)
+def test_SCHISM(method):
+    assert getattr(SCHISM, method) is getattr(Assets, method)
 
 
 def test_SCHISM_namelist_file(driverobj):
