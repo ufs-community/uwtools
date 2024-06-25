@@ -2,4 +2,4 @@
 ======================
 
 .. automodule:: uwtools.api.rocoto
-    :members:
+   :members:

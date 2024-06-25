@@ -2,4 +2,5 @@
 =====================
 
 .. automodule:: uwtools.api.shave
-    :members:
+   :inherited-members:
+   :members:

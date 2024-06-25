@@ -2,4 +2,5 @@
 ================================
 
 .. automodule:: uwtools.api.make_solo_mosaic
-    :members:
+   :inherited-members:
+   :members:

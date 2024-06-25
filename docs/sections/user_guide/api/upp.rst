@@ -2,4 +2,5 @@
 ===================
 
 .. automodule:: uwtools.api.upp
-    :members:
+   :inherited-members:
+   :members:

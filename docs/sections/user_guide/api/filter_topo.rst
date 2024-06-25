@@ -2,4 +2,5 @@
 ===========================
 
 .. automodule:: uwtools.api.filter_topo
-    :members:
+   :inherited-members:
+   :members:

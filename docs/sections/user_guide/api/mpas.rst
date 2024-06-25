@@ -2,4 +2,5 @@
 ====================
 
 .. automodule:: uwtools.api.mpas
-    :members:
+   :inherited-members:
+   :members:
