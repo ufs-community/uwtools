@@ -51,12 +51,13 @@ class Assets(ABC):
         dryrun(enable=dry_run)
         self._config = YAMLConfig(config=config)
         self._batch = batch
-        if leadtime and not cycle:
+        has_leadtime = leadtime is not None
+        if has_leadtime and not cycle:
             raise UWError("When leadtime is specified, cycle is required")
         self._config.dereference(
             context={
                 **({"cycle": cycle} if cycle else {}),
-                **({"leadtime": leadtime} if leadtime else {}),
+                **({"leadtime": leadtime} if has_leadtime else {}),
                 **self._config.data,
             }
         )

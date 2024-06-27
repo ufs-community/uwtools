@@ -19,7 +19,7 @@ Optional arguments:
   --cycle CYCLE
       The cycle in ISO8601 format (e.g. 2024-05-29T12)
   --leadtime LEADTIME
-      The leadtime as HH[:MM[:SS]]
+      The leadtime as hours[:minutes[:seconds]]
   --dry-run
       Only log info, making no changes
   --quiet, -q
