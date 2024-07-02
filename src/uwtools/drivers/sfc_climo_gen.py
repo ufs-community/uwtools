@@ -3,7 +3,6 @@ A driver for sfc_climo_gen.
 """
 
 from pathlib import Path
-from typing import Optional
 
 from iotaa import asset, task, tasks
 
@@ -17,23 +16,6 @@ class SfcClimoGen(Driver):
     """
     A driver for sfc_climo_gen.
     """
-
-    def __init__(
-        self,
-        config: Optional[Path] = None,
-        dry_run: bool = False,
-        batch: bool = False,
-        key_path: Optional[list[str]] = None,
-    ):
-        """
-        The driver.
-
-        :param config: Path to config file (read stdin if missing or None).
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
-        super().__init__(config=config, dry_run=dry_run, batch=batch, key_path=key_path)
 
     # Workflow tasks
 

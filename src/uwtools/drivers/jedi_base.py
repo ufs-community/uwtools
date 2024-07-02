@@ -3,9 +3,7 @@ A base class for jedi-based drivers.
 """
 
 from abc import abstractmethod
-from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from iotaa import asset, task, tasks
 
@@ -18,27 +16,6 @@ class JEDIBase(Driver):
     """
     A base class for the JEDI-like drivers.
     """
-
-    def __init__(
-        self,
-        cycle: datetime,
-        config: Optional[Path] = None,
-        dry_run: bool = False,
-        batch: bool = False,
-        key_path: Optional[list[str]] = None,
-    ):
-        """
-        The driver.
-
-        :param cycle: The forecast cycle.
-        :param config: Path to config file.
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
-        super().__init__(
-            config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
-        )
 
     # Workflow tasks
 
