@@ -9,7 +9,7 @@ from unittest.mock import patch
 import yaml
 from pytest import fixture, mark
 
-from uwtools.drivers.driver import Assets
+from uwtools.drivers.driver import AssetsWithCycle
 from uwtools.drivers.schism import SCHISM
 
 # Fixtures
@@ -52,7 +52,7 @@ def driverobj(config, cycle):
     ],
 )
 def test_SCHISM(method):
-    assert getattr(SCHISM, method) is getattr(Assets, method)
+    assert getattr(SCHISM, method) is getattr(AssetsWithCycle, method)
 
 
 def test_SCHISM_namelist_file(driverobj):

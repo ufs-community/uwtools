@@ -101,11 +101,3 @@ class UPP(DriverWithCycleAndLeadtime):
             "%s < %s" % (execution["executable"], self._namelist_path.name),
         ]
         return " ".join(filter(None, components))
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return self._taskname_with_cycle_and_leadtime(suffix)

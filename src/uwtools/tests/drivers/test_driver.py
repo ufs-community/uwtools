@@ -15,7 +15,7 @@ from pytest import fixture, mark, raises
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers import driver
-from uwtools.exceptions import UWConfigError, UWError
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import Slurm
 from uwtools.tests.support import regex_logged
@@ -23,7 +23,7 @@ from uwtools.tests.support import regex_logged
 # Helpers
 
 
-class ConcreteAssets(driver.Assets):
+class ConcreteAssets(driver.AssetsWithCycleAndLeadtime):
     """
     Driver subclass for testing purposes.
     """
@@ -137,12 +137,12 @@ def test_Assets(assetsobj):
     assert assetsobj._batch is True
 
 
-def test_Assets__repr__(assetsobj):
+def test_Assets_repr(assetsobj):
     expected = "concrete 2024-03-22T18:00 24:00:00 in %s" % assetsobj._driver_config["run_dir"]
     assert repr(assetsobj) == expected
 
 
-def test_Assets__str__(assetsobj):
+def test_Assets_str(assetsobj):
     assert str(assetsobj) == "concrete"
 
 
@@ -164,17 +164,12 @@ def test_Assets_config_full(assetsobj):
     assert not new is old
 
 
-@mark.parametrize("hours", [0, 24, 168])
-def test_Assets_cycle_leadtime_error(config, hours):
-    with raises(UWError) as e:
-        ConcreteAssets(config=config, leadtime=dt.timedelta(hours=hours))
-    assert "When leadtime is specified, cycle is required" in str(e)
-
-
 @mark.parametrize("val", (True, False))
 def test_Assets_dry_run(config, val):
     with patch.object(driver, "dryrun") as dryrun:
-        ConcreteAssets(config=config, dry_run=val)
+        ConcreteAssets(
+            config=config, cycle=dt.datetime.now(), leadtime=dt.timedelta(hours=6), dry_run=val
+        )
         dryrun.assert_called_once_with(enable=val)
 
 

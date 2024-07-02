@@ -19,7 +19,7 @@ from iotaa import asset, dryrun, external, task, tasks
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import get_schema_file, validate, validate_internal
-from uwtools.exceptions import UWConfigError, UWError
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute
@@ -49,29 +49,24 @@ class Assets(ABC):
         :param key_path: Keys leading through the config to the driver's configuration block.
         :param dry_run: Run in dry-run mode?
         """
-        has_leadtime = leadtime is not None
-        if has_leadtime and not cycle:
-            raise UWError("When leadtime is specified, cycle is required")
         self._config = YAMLConfig(config=config)
         self._config.dereference(
             context={
                 **({"cycle": cycle} if cycle else {}),
-                **({"leadtime": leadtime} if has_leadtime else {}),
+                **({"leadtime": leadtime} if leadtime is not None else {}),
                 **self._config.data,
             }
         )
         for key in key_path or []:
             self._config = self._config[key]
         self._validate()
-        self._cycle = cycle
-        self._leadtime = leadtime
         self._batch = batch
         dryrun(enable=dry_run)
 
     def __repr__(self) -> str:
-        cycle = self._cycle.strftime("%Y-%m-%dT%H:%M") if self._cycle else None
+        cycle = self._cycle.strftime("%Y-%m-%dT%H:%M") if hasattr(self, "_cycle") else None
         leadtime = None
-        if self._leadtime is not None:
+        if hasattr(self, "_leadtime"):
             h, r = divmod(self._leadtime.total_seconds(), 3600)
             m, s = divmod(r, 60)
             leadtime = "%02d:%02d:%02d" % (h, m, s)
@@ -206,29 +201,6 @@ class Assets(ABC):
         """
         return "%s %s" % (self._driver_name, suffix)
 
-    def _taskname_with_cycle(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        assert self._cycle
-        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
-
-    def _taskname_with_cycle_and_leadtime(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        assert self._cycle
-        assert self._leadtime is not None
-        return "%s %s %s" % (
-            (self._cycle + self._leadtime).strftime("%Y%m%d %H:%M:%S"),
-            self._driver_name,
-            suffix,
-        )
-
     def _validate(self) -> None:
         """
         Perform all necessary schema validation.
@@ -239,7 +211,7 @@ class Assets(ABC):
 
 class AssetsWithCycle(Assets):
     """
-    An abstract class to provision cycle-based assets for component drivers.
+    An abstract class to provision assets for cycle-based components.
     """
 
     def __init__(
@@ -263,6 +235,62 @@ class AssetsWithCycle(Assets):
             config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
         )
         self._cycle = cycle
+
+    def _taskname(self, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
+
+
+class AssetsWithCycleAndLeadtime(Assets):
+    """
+    An abstract class to provision assets for cycle-and-leadtime-based components.
+    """
+
+    def __init__(
+        self,
+        cycle: datetime,
+        leadtime: timedelta,
+        config: Optional[Path] = None,
+        dry_run: bool = False,
+        batch: bool = False,
+        key_path: Optional[list[str]] = None,
+    ):
+        """
+        The driver.
+
+        :param cycle: The cycle.
+        :param leadtime: The leadtime.
+        :param config: Path to config file (read stdin if missing or None).
+        :param dry_run: Run in dry-run mode?
+        :param batch: Run component via the batch system?
+        :param key_path: Keys leading through the config to the driver's configuration block.
+        """
+        super().__init__(
+            config=config,
+            dry_run=dry_run,
+            batch=batch,
+            cycle=cycle,
+            key_path=key_path,
+            leadtime=leadtime,
+        )
+        self._cycle = cycle
+        self._leadtime = leadtime
+
+    def _taskname(self, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s %s" % (
+            (self._cycle + self._leadtime).strftime("%Y%m%d %H:%M:%S"),
+            self._driver_name,
+            suffix,
+        )
 
 
 class Driver(Assets):
@@ -480,6 +508,14 @@ class DriverWithCycle(Driver):
         )
         self._cycle = cycle
 
+    def _taskname(self, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
+
 
 class DriverWithCycleAndLeadtime(Driver):
     """
@@ -515,6 +551,18 @@ class DriverWithCycleAndLeadtime(Driver):
         )
         self._cycle = cycle
         self._leadtime = leadtime
+
+    def _taskname(self, suffix: str) -> str:
+        """
+        Returns a common tag for graph-task log messages.
+
+        :param suffix: Log-string suffix.
+        """
+        return "%s %s %s" % (
+            (self._cycle + self._leadtime).strftime("%Y%m%d %H:%M:%S"),
+            self._driver_name,
+            suffix,
+        )
 
 
 DriverT = Union[type[Assets], type[Driver]]

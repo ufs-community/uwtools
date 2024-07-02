@@ -9,7 +9,7 @@ from unittest.mock import patch
 import yaml
 from pytest import fixture, mark
 
-from uwtools.drivers.driver import Assets
+from uwtools.drivers.driver import AssetsWithCycle
 from uwtools.drivers.ww3 import WaveWatchIII
 
 # Fixtures
@@ -52,7 +52,7 @@ def driverobj(config, cycle):
     ],
 )
 def test_WaveWatchIII(method):
-    assert getattr(WaveWatchIII, method) is getattr(Assets, method)
+    assert getattr(WaveWatchIII, method) is getattr(AssetsWithCycle, method)
 
 
 def test_WaveWatchIII_namelist_file(driverobj):

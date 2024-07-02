@@ -116,11 +116,3 @@ class MPASBase(DriverWithCycle):
         """
         The streams filename.
         """
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return self._taskname_with_cycle(suffix)
