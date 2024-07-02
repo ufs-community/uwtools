@@ -1,8 +1,11 @@
-# pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
+# pylint: disable=missing-class-docstring
+# pylint: disable=missing-function-docstring
+# pylint: disable=protected-access
+# pylint: disable=redefined-outer-name
 """
 Tests for uwtools.drivers.driver module.
 """
-import datetime as dt
+# import datetime as dt
 import json
 import logging
 from pathlib import Path
@@ -23,10 +26,12 @@ from uwtools.tests.support import regex_logged
 # Helpers
 
 
-class ConcreteAssets(driver.Assets):
-    """
-    Driver subclass for testing purposes.
-    """
+class ConcreteAssetsTimeInvariant(driver.AssetsTimeInvariant):
+
+    @task
+    def atask(self):
+        yield "atask"
+        yield asset("atask", lambda: True)
 
     def provisioned_run_directory(self):
         pass
@@ -35,22 +40,18 @@ class ConcreteAssets(driver.Assets):
     def _driver_name(self) -> str:
         return "concrete"
 
-    def _taskname(self, suffix: str) -> str:
-        return "concrete"
-
     def _validate(self) -> None:
         pass
+
+
+class ConcreteDriverTimeInvariant(driver.DriverTimeInvariant):
+
+    __test__ = False
 
     @task
     def atask(self):
         yield "atask"
         yield asset("atask", lambda: True)
-
-
-class ConcreteDriver(driver.Driver):
-    """
-    Driver subclass for testing purposes.
-    """
 
     def provisioned_run_directory(self):
         pass
@@ -59,16 +60,8 @@ class ConcreteDriver(driver.Driver):
     def _driver_name(self) -> str:
         return "concrete"
 
-    def _taskname(self, suffix: str) -> str:
-        return "concrete"
-
     def _validate(self) -> None:
         pass
-
-    @task
-    def atask(self):
-        yield "atask"
-        yield asset("atask", lambda: True)
 
 
 def write(path, s):
@@ -109,23 +102,12 @@ def config(tmp_path):
 
 @fixture
 def assetsobj(config):
-    return ConcreteAssets(
-        config=config,
-        dry_run=False,
-        cycle=dt.datetime(2024, 3, 22, 18),
-        leadtime=dt.timedelta(hours=24),
-    )
+    return ConcreteAssetsTimeInvariant(config=config, dry_run=False)
 
 
 @fixture
 def driverobj(config):
-    return ConcreteDriver(
-        config=config,
-        dry_run=False,
-        batch=True,
-        cycle=dt.datetime(2024, 3, 22, 18),
-        leadtime=dt.timedelta(hours=24),
-    )
+    return ConcreteDriverTimeInvariant(config=config, dry_run=False, batch=True)
 
 
 # Assets Tests
@@ -165,9 +147,7 @@ def test_Assets_config_full(assetsobj):
 @mark.parametrize("val", (True, False))
 def test_Assets_dry_run(config, val):
     with patch.object(driver, "dryrun") as dryrun:
-        ConcreteAssets(
-            config=config, cycle=dt.datetime.now(), leadtime=dt.timedelta(hours=6), dry_run=val
-        )
+        ConcreteAssetsTimeInvariant(config=config, dry_run=val)
         dryrun.assert_called_once_with(enable=val)
 
 
@@ -177,12 +157,8 @@ def test_Assets_dry_run(config, val):
 def test_key_path(config, tmp_path):
     config_file = tmp_path / "config.yaml"
     config_file.write_text(yaml.dump({"foo": {"bar": config}}))
-    assetsobj = ConcreteAssets(
-        config=config_file,
-        dry_run=False,
-        cycle=dt.datetime(2024, 3, 22, 18),
-        key_path=["foo", "bar"],
-        leadtime=dt.timedelta(hours=24),
+    assetsobj = ConcreteAssetsTimeInvariant(
+        config=config_file, dry_run=False, key_path=["foo", "bar"]
     )
     assert config == assetsobj._config
 
@@ -214,7 +190,9 @@ def test_Assets__create_user_updated_config_base_file(
         del dc["base_file"]
     if not update_values:
         del dc["update_values"]
-    ConcreteAssets._create_user_updated_config(config_class=YAMLConfig, config_values=dc, path=path)
+    ConcreteAssetsTimeInvariant._create_user_updated_config(
+        config_class=YAMLConfig, config_values=dc, path=path
+    )
     with open(path, "r", encoding="utf-8") as f:
         updated = yaml.safe_load(f)
     assert updated == expected
@@ -292,7 +270,9 @@ def test_Driver__run_via_batch_submission(driverobj):
     executable = Path(driverobj._driver_config["execution"]["executable"])
     executable.touch()
     with patch.object(driverobj, "provisioned_run_directory") as prd:
-        with patch.object(ConcreteDriver, "_scheduler", new_callable=PropertyMock) as scheduler:
+        with patch.object(
+            ConcreteDriverTimeInvariant, "_scheduler", new_callable=PropertyMock
+        ) as scheduler:
             driverobj._run_via_batch_submission()
             scheduler().submit_job.assert_called_once_with(
                 runscript=runscript, submit_file=Path(f"{runscript}.submit")
@@ -335,7 +315,9 @@ def test_Driver__create_user_updated_config_base_file(
         del dc["base_file"]
     if not update_values:
         del dc["update_values"]
-    ConcreteDriver._create_user_updated_config(config_class=YAMLConfig, config_values=dc, path=path)
+    ConcreteDriverTimeInvariant._create_user_updated_config(
+        config_class=YAMLConfig, config_values=dc, path=path
+    )
     with open(path, "r", encoding="utf-8") as f:
         updated = yaml.safe_load(f)
     assert updated == expected
@@ -363,7 +345,9 @@ def test_Driver__namelist_schema_custom(driverobj, tmp_path):
     schema_path = tmp_path / "test.jsonschema"
     with open(schema_path, "w", encoding="utf-8") as f:
         json.dump(schema, f)
-    with patch.object(ConcreteDriver, "_driver_config", new_callable=PropertyMock) as dc:
+    with patch.object(
+        ConcreteDriverTimeInvariant, "_driver_config", new_callable=PropertyMock
+    ) as dc:
         dc.return_value = {"baz": {"qux": {"validate": True}}}
         with patch.object(driver, "get_schema_file", return_value=schema_path):
             assert (
@@ -382,14 +366,18 @@ def test_Driver__namelist_schema_default(driverobj, tmp_path):
     schema_path = tmp_path / "test.jsonschema"
     with open(schema_path, "w", encoding="utf-8") as f:
         json.dump(schema, f)
-    with patch.object(ConcreteDriver, "_driver_config", new_callable=PropertyMock) as dc:
+    with patch.object(
+        ConcreteDriverTimeInvariant, "_driver_config", new_callable=PropertyMock
+    ) as dc:
         dc.return_value = {"namelist": {"validate": True}}
         with patch.object(driver, "get_schema_file", return_value=schema_path):
             assert driverobj._namelist_schema() == nmlschema
 
 
 def test_Driver__namelist_schema_default_disable(driverobj):
-    with patch.object(ConcreteDriver, "_driver_config", new_callable=PropertyMock) as dc:
+    with patch.object(
+        ConcreteDriverTimeInvariant, "_driver_config", new_callable=PropertyMock
+    ) as dc:
         dc.return_value = {"namelist": {"validate": False}}
         assert driverobj._namelist_schema() == {"type": "object"}
 
