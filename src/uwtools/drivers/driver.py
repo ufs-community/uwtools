@@ -69,9 +69,15 @@ class Assets(ABC):
         dryrun(enable=dry_run)
 
     def __repr__(self) -> str:
-        cycle = [self._cycle.strftime("%Y-%m-%dT%H:%M")] if self._cycle else []
-        leadtime = [str(self._leadtime)] if self._leadtime is not None else []
-        return " ".join([str(self), *cycle, *leadtime, "in", self._driver_config["run_dir"]])
+        cycle = self._cycle.strftime("%Y-%m-%dT%H:%M") if self._cycle else None
+        leadtime = None
+        if self._leadtime is not None:
+            h, r = divmod(self._leadtime.total_seconds(), 3600)
+            m, s = divmod(r, 60)
+            leadtime = "%02d:%02d:%02d" % (h, m, s)
+        return " ".join(
+            filter(None, [str(self), cycle, leadtime, "in", self._driver_config["run_dir"]])
+        )
 
     def __str__(self) -> str:
         return self._driver_name

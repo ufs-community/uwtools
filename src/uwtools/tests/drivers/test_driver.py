@@ -108,7 +108,7 @@ def config(tmp_path):
 
 
 @fixture
-def assetobj(config):
+def assetsobj(config):
     return ConcreteAssets(
         config=config,
         dry_run=False,
@@ -132,9 +132,18 @@ def driverobj(config):
 # Assets Tests
 
 
-def test_Assets(assetobj):
-    assert Path(assetobj._driver_config["base_file"]).name == "base.yaml"
-    assert assetobj._batch is True
+def test_Assets(assetsobj):
+    assert Path(assetsobj._driver_config["base_file"]).name == "base.yaml"
+    assert assetsobj._batch is True
+
+
+def test_Assets__repr__(assetsobj):
+    expected = "concrete 2024-03-22T18:00 24:00:00 in %s" % assetsobj._driver_config["run_dir"]
+    assert repr(assetsobj) == expected
+
+
+def test_Assets__str__(assetsobj):
+    assert str(assetsobj) == "concrete"
 
 
 @mark.parametrize("hours", [0, 24, 168])
@@ -157,7 +166,7 @@ def test_Assets_dry_run(config, val):
 def test_key_path(config, tmp_path):
     config_file = tmp_path / "config.yaml"
     config_file.write_text(yaml.dump({"foo": {"bar": config}}))
-    assetobj = ConcreteAssets(
+    assetsobj = ConcreteAssets(
         config=config_file,
         dry_run=False,
         batch=True,
@@ -165,12 +174,12 @@ def test_key_path(config, tmp_path):
         key_path=["foo", "bar"],
         leadtime=dt.timedelta(hours=24),
     )
-    assert config == assetobj._config
+    assert config == assetsobj._config
 
 
-def test_Assets_validate(assetobj, caplog):
+def test_Assets_validate(assetsobj, caplog):
     log.setLevel(logging.INFO)
-    assetobj.validate()
+    assetsobj.validate()
     assert regex_logged(caplog, "State: Ready")
 
 
@@ -187,10 +196,10 @@ def test_Assets_validate(assetobj, caplog):
     ],
 )
 def test_Assets__create_user_updated_config_base_file(
-    assetobj, base_file, expected, tmp_path, update_values
+    assetsobj, base_file, expected, tmp_path, update_values
 ):
     path = tmp_path / "updated.yaml"
-    dc = assetobj._driver_config
+    dc = assetsobj._driver_config
     if not base_file:
         del dc["base_file"]
     if not update_values:
@@ -201,15 +210,15 @@ def test_Assets__create_user_updated_config_base_file(
     assert updated == expected
 
 
-def test_Assets__driver_config_fail(assetobj):
-    del assetobj._config["concrete"]
+def test_Assets__driver_config_fail(assetsobj):
+    del assetsobj._config["concrete"]
     with raises(UWConfigError) as e:
-        assert assetobj._driver_config
+        assert assetsobj._driver_config
     assert str(e.value) == "Required 'concrete' block missing in config"
 
 
-def test_Assets__driver_config_pass(assetobj):
-    assert set(assetobj._driver_config.keys()) == {
+def test_Assets__driver_config_pass(assetsobj):
+    assert set(assetsobj._driver_config.keys()) == {
         "base_file",
         "execution",
         "run_dir",
@@ -217,17 +226,17 @@ def test_Assets__driver_config_pass(assetobj):
     }
 
 
-def test_Assets__rundir(assetobj):
-    assert assetobj._rundir == Path(assetobj._driver_config["run_dir"])
+def test_Assets__rundir(assetsobj):
+    assert assetsobj._rundir == Path(assetsobj._driver_config["run_dir"])
 
 
-def test_Assets__validate(assetobj):
-    with patch.object(assetobj, "_validate", driver.Assets._validate):
+def test_Assets__validate(assetsobj):
+    with patch.object(assetsobj, "_validate", driver.Assets._validate):
         with patch.object(driver, "validate_internal") as validate_internal:
-            assetobj._validate(assetobj)
+            assetsobj._validate(assetsobj)
         assert validate_internal.call_args_list[0].kwargs == {
             "schema_name": "concrete",
-            "config": assetobj._config,
+            "config": assetsobj._config,
         }
 
 
@@ -455,17 +464,17 @@ def test_Driver__scheduler(driverobj):
         JobScheduler.get_scheduler.assert_called_with(driverobj._resources)
 
 
-def test_Driver__validate(assetobj):
-    with patch.object(assetobj, "_validate", driver.Driver._validate):
+def test_Driver__validate(assetsobj):
+    with patch.object(assetsobj, "_validate", driver.Driver._validate):
         with patch.object(driver, "validate_internal") as validate_internal:
-            assetobj._validate(assetobj)
+            assetsobj._validate(assetsobj)
         assert validate_internal.call_args_list[0].kwargs == {
             "schema_name": "concrete",
-            "config": assetobj._config,
+            "config": assetsobj._config,
         }
         assert validate_internal.call_args_list[1].kwargs == {
             "schema_name": "platform",
-            "config": assetobj._config,
+            "config": assetsobj._config,
         }
 
 
