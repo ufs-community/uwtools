@@ -7,12 +7,12 @@ from pathlib import Path
 from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.strings import STR
 from uwtools.utils.tasks import symlink
 
 
-class FilterTopo(Driver):
+class FilterTopo(DriverTimeInvariant):
     """
     A driver for filter_topo.
     """

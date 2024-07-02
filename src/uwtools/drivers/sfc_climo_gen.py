@@ -7,12 +7,12 @@ from pathlib import Path
 from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
 
-class SfcClimoGen(Driver):
+class SfcClimoGen(DriverTimeInvariant):
     """
     A driver for sfc_climo_gen.
     """

@@ -4,11 +4,11 @@ A driver for shave.
 
 from iotaa import tasks
 
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.strings import STR
 
 
-class Shave(Driver):
+class Shave(DriverTimeInvariant):
     """
     A driver for shave.
     """

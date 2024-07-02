@@ -4,11 +4,11 @@ A driver for make_solo_mosaic.
 
 from iotaa import tasks
 
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.strings import STR
 
 
-class MakeSoloMosaic(Driver):
+class MakeSoloMosaic(DriverTimeInvariant):
     """
     A driver for make_solo_mosaic.
     """

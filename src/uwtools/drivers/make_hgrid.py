@@ -4,11 +4,11 @@ A driver for make_hgrid.
 
 from iotaa import tasks
 
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.strings import STR
 
 
-class MakeHgrid(Driver):
+class MakeHgrid(DriverTimeInvariant):
     """
     A driver for make_hgrid.
     """

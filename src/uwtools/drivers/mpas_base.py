@@ -9,11 +9,11 @@ from iotaa import asset, task, tasks
 from lxml import etree
 from lxml.etree import Element, SubElement
 
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverWithCycle
 from uwtools.utils.tasks import filecopy, symlink
 
 
-class MPASBase(Driver):
+class MPASBase(DriverWithCycle):
     """
     A base class for MPAS drivers.
     """

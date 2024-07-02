@@ -7,12 +7,12 @@ from pathlib import Path
 from iotaa import asset, task, tasks
 
 from uwtools.api.template import render
-from uwtools.drivers.driver import Assets
+from uwtools.drivers.driver import AssetsWithCycle
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
 
-class SCHISM(Assets):
+class SCHISM(AssetsWithCycle):
     """
     An assets driver for SCHISM.
     """

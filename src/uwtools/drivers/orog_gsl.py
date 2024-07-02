@@ -6,12 +6,12 @@ from pathlib import Path
 
 from iotaa import asset, task, tasks
 
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.strings import STR
 from uwtools.utils.tasks import symlink
 
 
-class OrogGSL(Driver):
+class OrogGSL(DriverTimeInvariant):
     """
     A driver for orog_gsl.
     """

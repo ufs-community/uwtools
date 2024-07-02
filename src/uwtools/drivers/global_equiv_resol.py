@@ -6,11 +6,11 @@ from pathlib import Path
 
 from iotaa import asset, external, tasks
 
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.strings import STR
 
 
-class GlobalEquivResol(Driver):
+class GlobalEquivResol(DriverTimeInvariant):
     """
     A driver for global_equiv_resol.
     """
