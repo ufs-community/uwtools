@@ -5,7 +5,7 @@
 """
 Tests for uwtools.drivers.driver module.
 """
-# import datetime as dt
+import datetime as dt
 import json
 import logging
 from pathlib import Path
@@ -123,9 +123,24 @@ def test_Assets(assetsobj):
     assert Path(assetsobj._driver_config["base_file"]).name == "base.yaml"
 
 
-def test_Assets_repr(assetsobj):
-    expected = "concrete in %s" % assetsobj._driver_config["run_dir"]
-    assert repr(assetsobj) == expected
+def test_Assets_repr_time_invariant(config):
+    obj = ConcreteAssetsTimeInvariant(config=config)
+    expected = "concrete in %s" % obj._driver_config["run_dir"]
+    assert repr(obj) == expected
+
+
+def test_Assets_repr_with_cycle(config):
+    obj = ConcreteAssetsWithCycle(config=config, cycle=dt.datetime(2024, 7, 2, 12))
+    expected = "concrete 2024-07-02T12:00 in %s" % obj._driver_config["run_dir"]
+    assert repr(obj) == expected
+
+
+def test_Assets_repr_with_cycle_and_leadtime(config):
+    obj = ConcreteAssetsWithCycleAndLeadtime(
+        config=config, cycle=dt.datetime(2024, 7, 2, 12), leadtime=dt.timedelta(hours=6)
+    )
+    expected = "concrete 2024-07-02T12:00 06:00:00 in %s" % obj._driver_config["run_dir"]
+    assert repr(obj) == expected
 
 
 def test_Assets_str(assetsobj):
