@@ -4,8 +4,8 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
 import yaml
+from pytest import mark
 
 from uwtools.api import config
 from uwtools.config.formats.yaml import YAMLConfig
@@ -29,7 +29,7 @@ def test_compare():
     )
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "classname,f",
     [
         ("_FieldTableConfig", config.get_fieldtable_config),
@@ -50,13 +50,14 @@ def test_realize():
     kwargs: dict = {
         "input_config": "path1",
         "input_format": "fmt1",
-        "output_block": None,
-        "output_file": "path2",
-        "output_format": "fmt2",
-        "supplemental_configs": ["path3"],
+        "update_config": "path2",
+        "update_format": "fmt2",
+        "output_file": "path3",
+        "output_format": "fmt3",
+        "key_path": None,
         "values_needed": True,
         "total": True,
-        "dry_run": True,
+        "dry_run": False,
     }
     with patch.object(config, "_realize") as _realize:
         config.realize(**kwargs)
@@ -64,8 +65,8 @@ def test_realize():
         **{
             **kwargs,
             "input_config": Path(kwargs["input_config"]),
+            "update_config": Path(kwargs["update_config"]),
             "output_file": Path(kwargs["output_file"]),
-            "supplemental_configs": [Path(x) for x in kwargs["supplemental_configs"]],
         }
     )
 
@@ -74,9 +75,10 @@ def test_realize_to_dict():
     kwargs: dict = {
         "input_config": "path1",
         "input_format": "fmt1",
-        "supplemental_configs": ["path3"],
+        "update_config": None,
+        "update_format": None,
         "values_needed": True,
-        "dry_run": True,
+        "dry_run": False,
         "stdin_ok": False,
     }
     with patch.object(config, "_realize") as _realize:
@@ -86,7 +88,7 @@ def test_realize_to_dict():
     )
 
 
-@pytest.mark.parametrize("cfg", [{"foo": "bar"}, YAMLConfig(config={})])
+@mark.parametrize("cfg", [{"foo": "bar"}, YAMLConfig(config={})])
 def test_validate(cfg):
     kwargs: dict = {"schema_file": "schema-file", "config": cfg}
     with patch.object(config, "_validate_yaml", return_value=True) as _validate_yaml:

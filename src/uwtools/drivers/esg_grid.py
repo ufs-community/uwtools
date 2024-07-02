@@ -5,11 +5,12 @@ A driver for esg_grid.
 from pathlib import Path
 from typing import Optional
 
-from iotaa import asset, dryrun, task, tasks
+from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.strings import STR
+from uwtools.utils.tasks import file
 
 
 class ESGGrid(Driver):
@@ -22,6 +23,7 @@ class ESGGrid(Driver):
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
+        key_path: Optional[list[str]] = None,
     ):
         """
         The driver.
@@ -29,10 +31,9 @@ class ESGGrid(Driver):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
+        :param key_path: Keys leading through the config to the driver's configuration block.
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch)
-        if self._dry_run:
-            dryrun()
+        super().__init__(config=config, dry_run=dry_run, batch=batch, key_path=key_path)
 
     # Workflow tasks
 
@@ -45,11 +46,13 @@ class ESGGrid(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield None
+        base_file = self._driver_config["namelist"].get("base_file")
+        yield file(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=self._driver_config["namelist"],
             path=path,
+            schema=self._namelist_schema(schema_keys=["$defs", "namelist_content"]),
         )
 
     @tasks
@@ -63,17 +66,6 @@ class ESGGrid(Driver):
             self.runscript(),
         ]
 
-    @task
-    def runscript(self):
-        """
-        The runscript.
-        """
-        path = self._runscript_path
-        yield self._taskname(path.name)
-        yield asset(path, path.is_file)
-        yield None
-        self._write_runscript(path=path, envvars={})
-
     # Private helper methods
 
     @property
@@ -82,11 +74,3 @@ class ESGGrid(Driver):
         Returns the name of this driver.
         """
         return STR.esggrid
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s" % (self._driver_name, suffix)

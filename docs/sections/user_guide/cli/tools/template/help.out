@@ -1,0 +1,16 @@
+usage: uw template [-h] [--version] ACTION ...
+
+Handle templates
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+
+Positional arguments:
+  ACTION
+    render
+      Render a template
+    translate
+      Translate atparse to Jinja2

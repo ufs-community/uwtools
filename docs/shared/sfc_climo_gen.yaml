@@ -32,7 +32,8 @@ sfc_climo_gen:
           - C403_oro_data.tile7.halo4.nc
         snowfree_albedo_method: bilinear
         vegetation_greenness_method: bilinear
-  run_dir: /path/to/run
+    validate: true
+  run_dir: /path/to/run/dir
 platform:
   account: me
   scheduler: slurm

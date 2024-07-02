@@ -1,0 +1,16 @@
+usage: uw rocoto [-h] [--version] ACTION ...
+
+Realize and validate Rocoto XML documents
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+
+Positional arguments:
+  ACTION
+    realize
+      Realize a Rocoto XML workflow document
+    validate
+      Validate Rocoto XML

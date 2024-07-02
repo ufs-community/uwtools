@@ -4,7 +4,7 @@ Utilities for interacting with external processes.
 
 from pathlib import Path
 from subprocess import STDOUT, CalledProcessError, check_output
-from typing import Dict, Optional, Tuple, Union
+from typing import Optional, Union
 
 from uwtools.logging import INDENT, log
 
@@ -12,9 +12,9 @@ from uwtools.logging import INDENT, log
 def execute(
     cmd: str,
     cwd: Optional[Union[Path, str]] = None,
-    env: Optional[Dict[str, str]] = None,
+    env: Optional[dict[str, str]] = None,
     log_output: Optional[bool] = False,
-) -> Tuple[bool, str]:
+) -> tuple[bool, str]:
     """
     Execute a command in a subshell.
 

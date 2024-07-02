@@ -3,147 +3,84 @@
 
 The ``uw`` mode for handling configuration files (configs).
 
-.. code-block:: text
-
-   $ uw config --help
-   usage: uw config [-h] [--version] ACTION ...
-
-   Handle configs
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     ACTION
-       compare
-         Compare configs
-       realize
-         Realize config
-       validate
-         Validate config
+.. literalinclude:: config/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: config/help.out
+   :language: text
 
 .. _cli_config_compare_examples:
 
 ``compare``
 -----------
 
-The ``compare`` action lets users compare two config files.
+The ``compare`` action compares two config files.
 
-.. code-block:: text
-
-   $ uw config compare --help
-   usage: uw config compare --file-1-path PATH --file-2-path PATH [-h] [--version]
-                            [--file-1-format {ini,nml,sh,yaml}] [--file-2-format {ini,nml,sh,yaml}]
-                            [--quiet] [--verbose]
-
-   Compare configs
-
-   Required arguments:
-     --file-1-path PATH
-         Path to file 1
-     --file-2-path PATH
-         Path to file 2
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --file-1-format {ini,nml,sh,yaml}
-         Format of file 1
-     --file-2-format {ini,nml,sh,yaml}
-         Format of file 2
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: config/compare-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: config/compare-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
-The examples that follow use namelist files ``values1.nml`` and ``values2.nml``, both initially with the following contents:
+The examples that follow use identical namelist files ``a.nml`` and ``b.nml`` with contents:
 
-.. code-block:: fortran
-
-   &values
-     greeting = "Hello"
-     recipient = "World"
-   /
+.. literalinclude:: config/a.nml
+   :language: fortran
 
 * To compare two config files with the same contents:
 
-  .. code-block:: text
+  .. literalinclude:: config/compare-match.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/compare-match.out
+     :language: text
 
-     $ uw config compare --file-1-path values1.nml --file-2-path values2.nml
-     [2024-01-08T16:53:04]     INFO - values1.nml
-     [2024-01-08T16:53:04]     INFO + values2.nml
-     [2024-01-08T16:53:04]     INFO ---------------------------------------------------------------------
+* If there are differences between the config files, they will be shown below the dashed line. For example, ``c.nml`` is missing the line ``recipient: World``:
 
-* If there are differences between the config files, they will be shown below the dashed line. For example, with ``recipient: World`` removed from ``values1.nml``:
-
-  .. code-block:: text
-
-     $ uw config compare --file-1-path values1.nml --file-2-path values2.nml
-     [2024-01-08T16:54:03]     INFO - values1.nml
-     [2024-01-08T16:54:03]     INFO + values2.nml
-     [2024-01-08T16:54:03]     INFO ---------------------------------------------------------------------
-     [2024-01-08T16:54:03]     INFO values:       recipient:  - None + World
+  .. literalinclude:: config/c.nml
+     :language: fortran
+  .. literalinclude:: config/compare-diff.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/compare-diff.out
+     :language: text
 
 * If a config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its contents:
 
-  .. code-block:: text
+  .. literalinclude:: config/compare-bad-extension.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/compare-bad-extension.out
+     :language: text
 
-     $ uw config compare --file-1-path values.txt --file-2-path values1.nml
-     Cannot deduce format of 'values.txt' from unknown extension 'txt'
+  The format must be explicitly specified (``a.txt`` is a copy of ``a.nml``):
 
-  In this case, the format can be explicitly specified (``values.txt`` is a copy of ``values1.nml``):
-
-  .. code-block:: text
-
-     $ uw config compare --file-1-path values.txt --file-1-format nml --file-2-path values2.nml
-     [2024-01-08T16:56:54]     INFO - values.txt
-     [2024-01-08T16:56:54]     INFO + values2.nml
-     [2024-01-08T16:56:54]     INFO ---------------------------------------------------------------------
-     [2024-01-08T16:56:54]     INFO values:       recipient:  - None + World
+  .. literalinclude:: config/compare-bad-extension-fix.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/compare-bad-extension-fix.out
+     :language: text
 
 * To request verbose log output:
 
-  .. code-block:: text
+  .. literalinclude:: config/compare-verbose.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/compare-verbose.out
+     :language: text
 
-     $ uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose
-     [2024-01-08T16:57:28]    DEBUG Command: uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose
-     [2024-01-08T16:57:28]     INFO - values1.nml
-     [2024-01-08T16:57:28]     INFO + values2.nml
-     [2024-01-08T16:57:28]     INFO ---------------------------------------------------------------------
-     [2024-01-08T16:57:28]     INFO values:       recipient:  - None + World
-
-  If additional information is needed, ``--debug`` can be used which will return the stack trace from any unhandled exception as well.
-
-  Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
-
-  .. code-block:: text
-
-     $ uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose 2>compare.log
-
-  The contents of ``compare.log``:
-
-   .. code-block:: text
-
-      [2024-01-08T16:59:20]    DEBUG Command: uw config compare --file-1-path values1.nml --file-2-path values2.nml --verbose
-      [2024-01-08T16:59:20]     INFO - values1.nml
-      [2024-01-08T16:59:20]     INFO + values2.nml
-      [2024-01-08T16:59:20]     INFO ---------------------------------------------------------------------
-      [2024-01-08T16:59:20]     INFO values:       recipient:  - None + World
+  Note that ``uw`` logs to ``stderr``. Use :shell-redirection:`shell redirection<>` as needed.
 
 .. note:: Comparisons are supported only for configs of the same format, e.g. YAML vs YAML, Fortran namelist vs Fortran namelist, etc. ``uw`` will flag invalid comparisons:
 
-   .. code-block:: text
-
-      $ uw config compare --file-1-path a.yaml --file-2-path b.nml
-      [2024-01-23T23:21:37]    ERROR Formats do not match: yaml vs nml
+  .. literalinclude:: config/compare-format-mismatch.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/compare-format-mismatch.out
+     :language: text
 
 .. _cli_config_realize_examples:
 
@@ -152,361 +89,167 @@ The examples that follow use namelist files ``values1.nml`` and ``values2.nml``,
 
 In ``uw`` terminology, to realize a configuration file is to transform it from its raw form into its final, usable state. The ``realize`` action can build a complete config file from two or more separate files.
 
-.. code-block:: text
-
-   $ uw config realize --help
-   usage: uw config realize [-h] [--version] [--input-file PATH] [--input-format {ini,nml,sh,yaml}]
-                            [--output-file PATH] [--output-format {ini,nml,sh,yaml}]
-                            [--output-block KEY[.KEY[.KEY]...]] [--values-needed] [--total]
-                            [--dry-run] [--quiet] [--verbose]
-                            [PATH ...]
-
-   Realize config
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --input-file PATH, -i PATH
-         Path to input file (defaults to stdin)
-     --input-format {ini,nml,sh,yaml}
-         Input format
-     --output-file PATH, -o PATH
-         Path to output file (defaults to stdout)
-     --output-format {ini,nml,sh,yaml}
-         Output format
-     --output-block KEY[.KEY[.KEY]...]
-         Dot-separated path of keys to the block to be output
-     --values-needed
-         Print report of values needed to render template
-     --total
-         Require rendering of all Jinja2 variables/expressions
-     --dry-run
-         Only log info, making no changes
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
-     PATH
-         Additional files to supplement primary input
+.. literalinclude:: config/realize-help.cmd
+   :emphasize-lines: 1
+.. literalinclude:: config/realize-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
-The examples in this section use the YAML file ``config.yaml`` with the following contents:
+The initial examples in this section use YAML file ``config.yaml`` with contents:
 
-.. code-block:: yaml
+.. literalinclude:: config/config.yaml
+   :language: yaml
 
-   values:
-     date: '{{ yyyymmdd }}'
-     empty:
-     greeting: Hello
-     message: '{{ (greeting + " " + recipient + " ") * repeat }}'
-     recipient: World
-     repeat: 1
+and YAML file ``update.yaml`` with contents:
 
-and the supplemental YAML file ``values1.yaml`` with the following contents:
+.. literalinclude:: config/update.yaml
+   :language: yaml
 
-.. code-block:: yaml
+* For a report of input-config values with unrendered Jinja2 variables/expressions or empty/null keys:
 
-   values:
-     date: 20240105
-     greeting: Good Night
-     recipient: Moon
-     repeat: 2
+  .. literalinclude:: config/realize-values-needed.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-values-needed.out
+     :language: text
 
-and an additional supplemental YAML file ``values2.yaml`` with the following contents:
+* To realize the config to ``stdout``, the output format must be explicitly specified:
 
-.. code-block:: yaml
+  .. literalinclude:: config/realize-stdout.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-stdout.out
+     :language: text
 
-   values:
-     empty: false
-     repeat: 3
+  :shell-redirection:`Shell redirection<>` may also be used to stream output to a file, another process, etc.
 
-* To show the values in the input config file that have unrendered Jinja2 variables/expressions or empty keys:
+* Values in the input file can be updated via an optional update file:
 
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --output-format yaml --values-needed
-     [2024-01-23T22:28:40]     INFO Keys that are complete:
-     [2024-01-23T22:28:40]     INFO     values
-     [2024-01-23T22:28:40]     INFO     values.greeting
-     [2024-01-23T22:28:40]     INFO     values.message
-     [2024-01-23T22:28:40]     INFO     values.recipient
-     [2024-01-23T22:28:40]     INFO     values.repeat
-     [2024-01-23T22:28:40]     INFO
-     [2024-01-23T22:28:40]     INFO Keys with unrendered Jinja2 variables/expressions:
-     [2024-01-23T22:28:40]     INFO     values.date: {{ yyyymmdd }}
-     [2024-01-23T22:28:40]     INFO
-     [2024-01-23T22:28:40]     INFO Keys that are set to empty:
-     [2024-01-23T22:28:40]     INFO     values.empty
-
-* To realize the config to ``stdout``, a target output format must be explicitly specified:
-
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --output-format yaml
-     values:
-       date: '{{ yyyymmdd }}'
-       empty: null
-       greeting: Hello
-       message: 'Hello World '
-       recipient: World
-       repeat: 1
-
-  Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
-
-* Values in the input file can be overridden via one or more supplemental files specified as positional arguments. Priority increases from left to right.
-
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --output-format yaml values1.yaml values2.yaml
-     values:
-       date: 20240105
-       empty: false
-       greeting: Good Night
-       message: 'Good Night Moon Good Night Moon Good Night Moon '
-       recipient: Moon
-       repeat: 3
+  .. literalinclude:: config/realize-update-file.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-update-file.out
+     :language: text
 
 * To realize the config to a file via command-line argument:
 
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --output-file realized.yaml values1.yaml
-
-  The contents of ``realized.yaml``:
-
-  .. code-block:: yaml
-
-     values:
-       date: 20240105
-       empty: null
-       greeting: Good Night
-       message: 'Good Night Moon Good Night Moon '
-       recipient: Moon
-       repeat: 2
-
-* By default, variables/expressions that cannot be rendered are passed through unchanged in the output. For example, given config file ``config.yaml`` with contents
-
-  .. code-block:: yaml
-
-     roses: "{{ color1 }}"
-     violets: "{{ color2 }}"
-     color1: red
-
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --output-format yaml values.yaml
-     roses: red
-     violets: '{{ color2 }}'
-     color1: red
-     $ echo $?
-     0
-
-  Adding the ``--total`` flag, however, requires ``uw`` to totally realize the config, and to exit with error status if it cannot:
-
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --output-format yaml values.yaml --total
-     [2024-04-02T00:53:04]    ERROR Config could not be realized. Try with --values-needed for details.
-     $ echo $?
-     1
-
-* Realization of individual values is all-or-nothing. If a single value contains a mix of renderable and unrenderable variables/expressions, then the entire value remains unrealized. For example, given ``config.yaml`` with contents
-
-  .. code-block:: yaml
-
-     roses: "{{ color1 }} or {{ color2 }}"
-     color1: red
-
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --output-format yaml
-     roses: '{{ color1 }} or {{ color2 }}'
-     color1: red
+  .. literalinclude:: config/realize-update-file-outfile.cmd
+     :language: text
+     :emphasize-lines: 2
+  .. literalinclude:: config/realize-update-file-outfile.out
+     :language: text
 
 * With the ``--dry-run`` flag specified, nothing is written to ``stdout`` (or to a file if ``--output-file`` is specified), but a report of what would have been written is logged to ``stderr``:
 
-  .. code-block:: text
+  .. literalinclude:: config/realize-dry-run.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-dry-run.out
+     :language: text
 
-     $ uw config realize --input-file config.yaml --output-file realized.yaml --dry-run values1.yaml
-     [2024-01-23T22:31:08]     INFO values:
-     [2024-01-23T22:31:08]     INFO   date: 20240105
-     [2024-01-23T22:31:08]     INFO   empty: null
-     [2024-01-23T22:31:08]     INFO   greeting: Good Night
-     [2024-01-23T22:31:08]     INFO   message: 'Good Night Moon Good Night Moon '
-     [2024-01-23T22:31:08]     INFO   recipient: Moon
-     [2024-01-23T22:31:08]     INFO   repeat: 2
+* If the config file has an unrecognized (or no) extension, ``uw`` will not automatically know how to parse its contents:
 
-* If an input file is read alone from ``stdin``, ``uw`` will not know how to parse its contents:
+  .. literalinclude:: config/realize-extension-file-bad.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-extension-file-bad.out
+     :language: text
 
-  .. code-block:: text
+  The format must be explicitly specified  (here, ``config.txt`` is a copy of ``config.yaml``):
 
-     $ cat config.yaml | uw config realize --output-file realized.yaml values1.yaml
-     Specify --input-format when --input-file is not specified
+  .. literalinclude:: config/realize-extension-file-fix.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-extension-file-fix.out
+     :language: text
 
-* To read the config from ``stdin`` and realize to ``stdout``:
+* Similarly, if an input file is read from ``stdin``, ``uw`` will not automatically know how to parse its contents:
 
-  .. code-block:: text
+  .. literalinclude:: config/realize-extension-stdin-bad.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-extension-stdin-bad.out
+     :language: text
 
-     $ cat config.yaml | uw config realize --input-format yaml --output-format yaml values1.yaml
-     values:
-       date: 20240105
-       empty: null
-       greeting: Good Night
-       message: 'Good Night Moon Good Night Moon '
-       recipient: Moon
-       repeat: 2
+  The format must be explicitly specified:
 
-* To read the config from ``stdin`` and realize a subsection to ``stdout`` in a different format:
+  .. literalinclude:: config/realize-extension-stdin-fix.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-extension-stdin-fix.out
+     :language: text
 
-  .. code-block:: text
+* This example demonstrates: 1. Reading a config from ``stdin``, 2. Extracting a specific subsection with the ``--key-path`` option, and 3. Writing the output in a different format:
 
-     $ cat config.yaml | uw config realize --input-format yaml --output-format sh --output-block values values1.yaml
-     date=20240105
-     empty=None
-     greeting='Good Night'
-     message='Good Night Moon Good Night Moon '
-     recipient=Moon
-     repeat=2
-
-* If the config file has an unrecognized (or no) extension, ``uw`` will not know how to parse its contents:
-
-  .. code-block:: text
-
-     $ uw config realize --input-file config.txt --output-format yaml values1.yaml
-     Cannot deduce format of 'config.txt' from unknown extension 'txt'
-
-  In this case, the format can be explicitly specified  (``config.txt`` is a copy of ``config.yaml``):
-
-  .. code-block:: text
-
-     $ uw config realize --input-file config.txt --input-format yaml --output-format yaml values1.yaml
-     values:
-       date: 20240105
-       empty: null
-       greeting: Good Night
-       message: 'Good Night Moon Good Night Moon '
-       recipient: Moon
-       repeat: 2
-
-* To request verbose log output:
-
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --output-format yaml --verbose values1.yaml
-     [2024-01-23T22:59:58]    DEBUG Command: uw config realize --input-file config.yaml --output-format yaml --verbose values1.yaml
-     [2024-01-23T22:59:58]    DEBUG Before update, config has depth 2
-     [2024-01-23T22:59:58]    DEBUG Supplemental config has depth 2
-     [2024-01-23T22:59:58]    DEBUG After update, config has depth 2
-     [2024-01-23T22:59:58]    DEBUG Dereferencing, current value:
-     [2024-01-23T22:59:58]    DEBUG   values:
-     [2024-01-23T22:59:58]    DEBUG     date: 20240105
-     [2024-01-23T22:59:58]    DEBUG     empty: null
-     [2024-01-23T22:59:58]    DEBUG     greeting: Good Night
-     [2024-01-23T22:59:58]    DEBUG     message: '{{ (greeting + " " + recipient + " ") * repeat }}'
-     [2024-01-23T22:59:58]    DEBUG     recipient: Moon
-     [2024-01-23T22:59:58]    DEBUG     repeat: 2
-     ...
-     [2024-01-23T22:59:58]    DEBUG Dereferencing, final value:
-     [2024-01-23T22:59:58]    DEBUG   values:
-     [2024-01-23T22:59:58]    DEBUG     date: 20240105
-     [2024-01-23T22:59:58]    DEBUG     empty: null
-     [2024-01-23T22:59:58]    DEBUG     greeting: Good Night
-     [2024-01-23T22:59:58]    DEBUG     message: 'Good Night Moon Good Night Moon '
-     [2024-01-23T22:59:58]    DEBUG     recipient: Moon
-     [2024-01-23T22:59:58]    DEBUG     repeat: 2
-     values:
-       date: 20240105
-       empty: null
-       greeting: Good Night
-       message: 'Good Night Moon Good Night Moon '
-       recipient: Moon
-       repeat: 2
-
-  Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately:
-
-  .. code-block:: text
-
-     $ uw config realize --input-file config.yaml --output-format yaml --verbose values1.yaml >realized.yaml 2>realized.log
-
-  The contents of ``realized.yaml``:
-
-  .. code-block:: yaml
-
-     values:
-       date: 20240105
-       empty: null
-       greeting: Good Night
-       message: 'Good Night Moon Good Night Moon '
-       recipient: Moon
-       repeat: 2
-
-  The contents of ``realized.log``:
-
-  .. code-block:: text
-
-     [2024-01-23T23:01:23]    DEBUG Command: uw config realize --input-file config.yaml --output-format yaml --verbose values1.yaml
-     [2024-01-23T23:01:23]    DEBUG Before update, config has depth 2
-     [2024-01-23T23:01:23]    DEBUG Supplemental config has depth 2
-     [2024-01-23T23:01:23]    DEBUG After update, config has depth 2
-     [2024-01-23T23:01:23]    DEBUG Dereferencing, current value:
-     [2024-01-23T23:01:23]    DEBUG   values:
-     [2024-01-23T23:01:23]    DEBUG     date: 20240105
-     [2024-01-23T23:01:23]    DEBUG     empty: null
-     [2024-01-23T23:01:23]    DEBUG     greeting: Good Night
-     [2024-01-23T23:01:23]    DEBUG     message: '{{ (greeting + " " + recipient + " ") * repeat }}'
-     [2024-01-23T23:01:23]    DEBUG     recipient: Moon
-     [2024-01-23T23:01:23]    DEBUG     repeat: 2
-     [2024-01-23T23:01:23]    DEBUG [dereference] Accepting: 20240105
-     [2024-01-23T23:01:23]    DEBUG [dereference] Accepting: None
-     [2024-01-23T23:01:23]    DEBUG [dereference] Rendering: Good Night
-     [2024-01-23T23:01:23]    DEBUG [dereference] Rendered: Good Night
-     [2024-01-23T23:01:23]    DEBUG [dereference] Rendering: {{ (greeting + " " + recipient + " ") * repeat }}
-     [2024-01-23T23:01:23]    DEBUG [dereference] Rendered: Good Night Moon Good Night Moon
-     [2024-01-23T23:01:23]    DEBUG [dereference] Rendering: Moon
-     [2024-01-23T23:01:23]    DEBUG [dereference] Rendered: Moon
-     [2024-01-23T23:01:23]    DEBUG [dereference] Accepting: 2
-     ...
-     [2024-01-23T23:01:23]    DEBUG Dereferencing, final value:
-     [2024-01-23T23:01:23]    DEBUG   values:
-     [2024-01-23T23:01:23]    DEBUG     date: 20240105
-     [2024-01-23T23:01:23]    DEBUG     empty: null
-     [2024-01-23T23:01:23]    DEBUG     greeting: Good Night
-     [2024-01-23T23:01:23]    DEBUG     message: 'Good Night Moon Good Night Moon '
-     [2024-01-23T23:01:23]    DEBUG     recipient: Moon
-     [2024-01-23T23:01:23]    DEBUG     repeat: 2
+  .. literalinclude:: config/realize-combo.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-combo.out
+     :language: text
 
 .. note:: Combining configs with incompatible depths is not supported. ``ini`` and ``nml`` configs are depth-2, as they organize their key-value pairs (one level) under top-level sections or namelists (a second level). ``sh`` configs are depth-1, and ``yaml`` configs have arbitrary depth.
 
-   For example, when attempting to generate a ``sh`` config from a depth-2 ``yaml``:
+   For example, when attempting to generate a ``sh`` config from the original depth-2 ``config.yaml``:
 
-   .. code-block:: text
+   .. literalinclude:: config/realize-depth-mismatch.cmd
+      :language: text
+      :emphasize-lines: 1
+   .. literalinclude:: config/realize-depth-mismatch.out
+      :language: text
 
-      $ uw config realize --input-file config.yaml --output-format sh
-      [2024-01-23T23:02:42]    ERROR Cannot realize depth-2 config to type-'sh' config
-      Cannot realize depth-2 config to type-'sh' config
+* It is possible to provide the update config, rather than the input config, on ``stdin``. Usage rules are as follows:
 
-.. note:: In recognition of the different sets of value types representable in each config format, ``uw`` supports two format-combination schemes:
+  * Only if either ``--update-file`` or ``--update-config`` are specified will ``uw`` attempt to read and apply update values to the input config.
+  * If ``--update-file`` is provided with an unrecognized (or no) extension, or if the update values are provided on ``stdin``, ``--update-format`` must be used to specify the correct format.
+  * When updating, the input config, the update config, or both must be provided via file; they cannot be streamed from ``stdin`` simultaneously.
 
-   1. **Output matches input:** The format of the output config matches that of the input config.
-   2. **YAML:** YAML is accepted as either input or output with any other format. In the worst case, values always have a string representation, but note that, for example, the string representation of a YAML sequence (Python ``list``) in an INI output config may not be useful.
+  For example, here the update config is provided on ``stdin`` and the input config is read from a file:
 
-   In all cases, any supplemental configs must be in the same format as the input config and must have recognized extensions.
+  .. literalinclude:: config/realize-update-stdin.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-update-stdin.out
+     :language: text
 
-   ``uw`` considers invalid combination requests errors:
+* By default, variables/expressions that cannot be rendered are passed through unchanged in the output. For example, given config file ``flowers.yaml`` with contents
 
-   .. code-block:: text
+  .. literalinclude:: config/flowers.yaml
+     :language: yaml
+  .. literalinclude:: config/realize-flowers-noop.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-flowers-noop.out
+     :language: text
 
-      $ uw config realize --input-file b.nml --output-file a.ini
-      Accepted output formats for input format nml are nml or yaml
+  Adding the ``--total`` flag, however, requires ``uw`` to totally realize the config, and to exit with error status if it cannot:
 
-   .. code-block:: text
+  .. literalinclude:: config/realize-flowers-total.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-flowers-total.out
+     :language: text
 
-      $ uw config realize --input-file a.yaml --output-file c.yaml b.nml
-      Supplemental config #1 format nml must match input format yaml
+* Realization of individual values is all-or-nothing. If a single value contains a mix of renderable and unrenderable variables/expressions, then the entire value remains unrealized. For example, given ``roses.yaml`` with contents
+
+  .. literalinclude:: config/roses.yaml
+     :language: yaml
+  .. literalinclude:: config/realize-roses-noop.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-roses-noop.out
+     :language: text
+
+* To request verbose log output:
+
+  .. literalinclude:: config/realize-verbose.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/realize-verbose.out
+     :language: text
+
+  Note that ``uw`` logs to ``stderr`` and writes non-log output to ``stdout``, so the streams can be redirected separately via :shell-redirection:`shell redirection<>`.
 
 .. _cli_config_validate_examples:
 
@@ -515,137 +258,59 @@ and an additional supplemental YAML file ``values2.yaml`` with the following con
 
 The ``validate`` action ensures that a given config file is structured properly.
 
-.. code-block:: text
-
-   $ uw config validate --help
-   usage: uw config validate --schema-file PATH [-h] [--version] [--input-file PATH] [--quiet]
-                             [--verbose]
-
-   Validate config
-
-   Required arguments:
-     --schema-file PATH
-         Path to schema file to use for validation
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --input-file PATH, -i PATH
-         Path to input file (defaults to stdin)
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+  .. literalinclude:: config/validate-help.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/validate-help.out
+     :language: text
 
 Examples
 ^^^^^^^^
 
-The examples that follow use the :json-schema:`JSON Schema<understanding-json-schema/reference>` file ``schema.jsonschema`` with the following contents:
+The examples that follow use the :json-schema:`JSON Schema<understanding-json-schema/reference>` file ``schema.jsonschema`` with contents:
 
-.. code-block:: json
+.. literalinclude:: config/schema.jsonschema
+   :language: json
 
-   {
-     "$schema": "http://json-schema.org/draft-07/schema#",
-     "type": "object",
-     "properties": {
-       "values": {
-         "type": "object",
-         "properties": {
-           "greeting": {
-             "type": "string"
-           },
-           "recipient": {
-             "type": "string"
-           }
-         },
-         "required": ["greeting", "recipient"],
-         "additionalProperties": false
-       }
-     },
-     "required": ["values"],
-     "additionalProperties": false
-   }
+and the YAML file ``values.yaml`` with contents:
 
-and the YAML file ``values.yaml`` with the following contents:
-
-.. code-block:: yaml
-
-   values:
-     greeting: Hello
-     recipient: World
+.. literalinclude:: config/values.yaml
+   :language: yaml
 
 * To validate a YAML config against a given JSON schema:
 
-  .. code-block:: text
+  .. literalinclude:: config/validate-pass.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/validate-pass.out
+     :language: text
 
-     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml
-     [2024-01-03T17:23:07]     INFO 0 UW schema-validation errors found
-
-  Shell redirection via ``|``, ``>``, et al. may also be used to stream output to a file, another process, etc.
+  :shell-redirection:`Shell redirection<>` may also be used to stream output to a file, another process, etc.
 
 * To read the *config* from ``stdin`` and print validation results to ``stdout``:
 
-  .. code-block:: text
+  .. literalinclude:: config/validate-pass-stdin.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/validate-pass-stdin.out
+     :language: text
 
-     $ cat values.yaml | uw config validate --schema-file schema.jsonschema
-     [2024-01-03T17:26:29]     INFO 0 UW schema-validation errors found
+* If a config fails validation, differences from the schema will be displayed. For example, ``values-bad.yaml``:
 
-* However, reading the *schema* from ``stdin`` is **not** supported:
-
-  .. code-block:: text
-
-     $ cat schema.jsonschema | uw config validate --input-file values.yaml
-     uw config validate: error: the following arguments are required: --schema-file
-
-* If a config fails validation, differences from the schema will be displayed. For example, with ``recipient: World`` removed from ``values.yaml``:
-
-  .. code-block:: text
-
-     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml
-     [2024-01-03T17:31:19]    ERROR 1 UW schema-validation error found
-     [2024-01-03T17:31:19]    ERROR 'recipient' is a required property
-     [2024-01-03T17:31:19]    ERROR
-     [2024-01-03T17:31:19]    ERROR Failed validating 'required' in schema['properties']['values']:
-     [2024-01-03T17:31:19]    ERROR     {'additionalProperties': False,
-     [2024-01-03T17:31:19]    ERROR      'properties': {'greeting': {'type': 'string'},
-     [2024-01-03T17:31:19]    ERROR                     'recipient': {'type': 'string'}},
-     [2024-01-03T17:31:19]    ERROR      'required': ['greeting', 'recipient'],
-     [2024-01-03T17:31:19]    ERROR      'type': 'object'}
-     [2024-01-03T17:31:19]    ERROR
-     [2024-01-03T17:31:19]    ERROR On instance['values']:
-     [2024-01-03T17:31:19]    ERROR     {'greeting': 'Hello'}
+  .. literalinclude:: config/values-bad.yaml
+     :language: yaml
+  .. literalinclude:: config/validate-fail.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/validate-fail.out
+     :language: text
 
 * To request verbose log output:
 
-  .. code-block:: text
+  .. literalinclude:: config/validate-verbose.cmd
+     :language: text
+     :emphasize-lines: 1
+  .. literalinclude:: config/validate-verbose.out
+     :language: text
 
-     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
-     [2024-01-03T17:29:46]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
-     [2024-01-03T17:29:46]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-     [2024-01-03T17:29:46]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-     [2024-01-03T17:29:46]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World'}
-     [2024-01-03T17:29:46]    DEBUG Rendering: Hello
-     [2024-01-03T17:29:46]    DEBUG Rendering: World
-     [2024-01-03T17:29:46]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-     [2024-01-03T17:29:46]     INFO 0 UW schema-validation errors found
-
-  Note that ``uw`` logs to ``stderr``, so the stream can be redirected:
-
-  .. code-block:: text
-
-     $ uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose 2>validate.log
-
-  The contents of ``validate.log``:
-
-  .. code-block:: text
-
-     [2024-01-03T17:30:49]    DEBUG Command: uw config validate --schema-file schema.jsonschema --input-file values.yaml --verbose
-     [2024-01-03T17:30:49]    DEBUG Dereferencing, initial value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-     [2024-01-03T17:30:49]    DEBUG Rendering: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-     [2024-01-03T17:30:49]    DEBUG Rendering: {'greeting': 'Hello', 'recipient': 'World'}
-     [2024-01-03T17:30:49]    DEBUG Rendering: Hello
-     [2024-01-03T17:30:49]    DEBUG Rendering: World
-     [2024-01-03T17:30:49]    DEBUG Dereferencing, final value: {'values': {'greeting': 'Hello', 'recipient': 'World'}}
-     [2024-01-03T17:30:49]     INFO 0 UW schema-validation errors found
+  Note that ``uw`` logs to ``stderr``, so the stream can be :shell-redirection:`redirected<>`.

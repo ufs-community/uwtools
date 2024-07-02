@@ -1,5 +1,6 @@
 ``uwtools.api.ungrib``
-=============================
+======================
 
 .. automodule:: uwtools.api.ungrib
-    :members:
+   :inherited-members:
+   :members:

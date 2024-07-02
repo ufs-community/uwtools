@@ -1,0 +1,18 @@
+usage: uw rocoto realize [-h] [--version] [--config-file PATH]
+                         [--output-file PATH] [--quiet] [--verbose]
+
+Realize a Rocoto XML workflow document
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --config-file PATH, -c PATH
+      Path to UW YAML config file (default: read from stdin)
+  --output-file PATH, -o PATH
+      Path to output file (defaults to stdout)
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages

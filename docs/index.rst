@@ -40,7 +40,7 @@ When the Linux diff tool just doesn't work for comparing unordered namelists wit
 Realize Mode
 """"""""""""
 
-This mode renders values created by :jinja2:`Jinja2 templates<templates>`, and lets you override values in one file or object with those from others, not necessarily with the same configuration format. With ``uwtools``, you can even reference the content of other files to build up a configuration from its pieces.
+This mode renders values created by :jinja2:`Jinja2 templates<templates>`, and lets you override values in one file or object with those from others, not necessarily with the same configuration format. With ``uwtools``, you can even reference the contents of other files to build up a configuration from its pieces.
 
 | :any:`CLI documentation with examples<cli_config_realize_examples>`
 
@@ -110,49 +110,85 @@ Drivers for UFS
 To prepare a complete forecast, drivers would typically be run in the order shown here (along with additional drivers still in development).
 
 esg_grid
-"""""""""""
+""""""""
 
 | **CLI**: ``uw esg_grid -h``
-| **API**: ``import uwtools.api.drivers.esg_grid``
+| **API**: ``import uwtools.api.esg_grid``
+
+filter_topo
+"""""""""""
+
+| **CLI**: ``uw filter_topo -h``
+| **API**: ``import uwtools.api.filter_topo``
 
 global_equiv_resol
 """"""""""""""""""
 
 | **CLI**: ``uw global_equiv_resol -h``
-| **API**: ``import uwtools.api.drivers.global_equiv_resol``
+| **API**: ``import uwtools.api.global_equiv_resol``
 
 make_hgrid
 """"""""""
 
 | **CLI**: ``uw make_hgrid -h``
-| **API**: ``import uwtools.api.drivers.make_hgrid``
+| **API**: ``import uwtools.api.make_hgrid``
+
+make_solo_mosaic
+""""""""""""""""
+
+| **CLI**: ``uw make_solo_mosaic -h``
+| **API**: ``import uwtools.api.make_solo_mosaic``
+
+orog_gsl
+""""""""
+
+| **CLI**: ``uw orog_gsl -h``
+| **API**: ``import uwtools.api.orog_gsl``
 
 sfc_climo_gen
 """""""""""""
 
 | **CLI**: ``uw sfc_climo_gen -h``
-| **API**: ``import uwtools.api.drivers.sfc_climo_gen``
+| **API**: ``import uwtools.api.sfc_climo_gen``
+
+shave
+"""""
+
+| **CLI**: ``uw shave -h``
+| **API**: ``import uwtools.api.shave``
 
 chgres_cube
 """""""""""
 
 | **CLI**: ``uw chgres_cube -h``
-| **API**: ``import uwtools.api.drivers.chgres_cube``
+| **API**: ``import uwtools.api.chgres_cube``
 
 FV3
 """
 
 | **CLI**: ``uw fv3 -h``
-| **API**: ``import uwtools.api.drivers.fv3``
+| **API**: ``import uwtools.api.fv3``
+
+UPP
+"""
+
+| **CLI**: ``uw upp -h``
+| **API**: ``import uwtools.api.upp``
+
+Driver for JEDI
+^^^^^^^^^^^^^^^
+
+IODA
+""""
+
+| **CLI**: ``uw ioda -h``
+| **API**: ``import uwtools.api.ioda``
 
 JEDI
 """"
 
 | **CLI**: ``uw jedi -h``
-| **API**: ``import uwtools.api.drivers.jedi``
-
-
-
+| **API**: ``import uwtools.api.jedi``
 
 Drivers for MPAS
 ^^^^^^^^^^^^^^^^
@@ -163,22 +199,19 @@ ungrib
 """"""
 
 | **CLI**: ``uw ungrib -h``
-| **API**: ``import uwtools.api.drivers.ungrib``
-
+| **API**: ``import uwtools.api.ungrib``
 
 mpas_init
 """""""""
 
 | **CLI**: ``uw mpas_init -h``
-| **API**: ``import uwtools.api.drivers.mpas_init``
+| **API**: ``import uwtools.api.mpas_init``
 
 mpas
 """"
 
 | **CLI**: ``uw mpas -h``
-| **API**: ``import uwtools.api.drivers.mpas``
-
-
+| **API**: ``import uwtools.api.mpas``
 
 ------------------
 

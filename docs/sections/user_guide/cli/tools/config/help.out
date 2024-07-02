@@ -1,0 +1,18 @@
+usage: uw config [-h] [--version] ACTION ...
+
+Handle configs
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+
+Positional arguments:
+  ACTION
+    compare
+      Compare configs
+    realize
+      Realize config
+    validate
+      Validate config

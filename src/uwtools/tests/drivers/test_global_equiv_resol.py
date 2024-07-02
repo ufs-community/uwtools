@@ -6,13 +6,12 @@ from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-import yaml
-from pytest import fixture
+from pytest import fixture, mark
 
-from uwtools.drivers import global_equiv_resol
-from uwtools.scheduler import Slurm
+from uwtools.drivers.driver import Driver
+from uwtools.drivers.global_equiv_resol import GlobalEquivResol
 
-# Driver fixtures
+# Fixtures
 
 
 @fixture
@@ -37,32 +36,33 @@ def config(tmp_path):
 
 
 @fixture
-def config_file(config, tmp_path):
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
+def driverobj(config):
+    return GlobalEquivResol(config=config, batch=True)
 
 
-@fixture
-def driverobj(config_file):
-    return global_equiv_resol.GlobalEquivResol(config=config_file, batch=True)
+# Tests
 
 
-# Driver tests
-
-
-def test_GlobalEquivResol(driverobj):
-    assert isinstance(driverobj, global_equiv_resol.GlobalEquivResol)
-
-
-def test_GlobalEquivResol_dry_run(config_file):
-    with patch.object(global_equiv_resol, "dryrun") as dryrun:
-        driverobj = global_equiv_resol.GlobalEquivResol(
-            config=config_file, batch=True, dry_run=True
-        )
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
+@mark.parametrize(
+    "method",
+    [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_taskname",
+        "_validate",
+        "_write_runscript",
+        "run",
+        "runscript",
+    ],
+)
+def test_GlobalEquivResol(method):
+    assert getattr(GlobalEquivResol, method) is getattr(Driver, method)
 
 
 def test_GlobalEquivResol_input_file(driverobj):
@@ -84,45 +84,11 @@ def test_GlobalEquivResol_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_GlobalEquivResol_run_batch(driverobj):
-    with patch.object(driverobj, "_run_via_batch_submission") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_GlobalEquivResol_run_local(driverobj):
-    driverobj._batch = False
-    with patch.object(driverobj, "_run_via_local_execution") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_GlobalEquivResol_runscript(driverobj):
-    with patch.object(driverobj, "_runscript") as runscript:
-        driverobj.runscript()
-        runscript.assert_called_once()
-        args = ("envcmds", "envvars", "execution", "scheduler")
-        types = [list, dict, list, Slurm]
-        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
-
-
-def test_GlobalEquivResol__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["global_equiv_resol"]
-
-
 def test_GlobalEquivResol__runcmd(driverobj):
     cmd = driverobj._runcmd
     input_file_path = driverobj._driver_config["input_grid_file"]
     assert cmd == f"/path/to/global_equiv_resol.exe {input_file_path}"
 
 
-def test_GlobalEquivResol__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript.global_equiv_resol"
-
-
-def test_GlobalEquivResol__taskname(driverobj):
-    assert driverobj._taskname("foo") == "global_equiv_resol foo"
-
-
-def test_GlobalEquivResol__validate(driverobj):
-    driverobj._validate()
+def test_FilterTopo__driver_name(driverobj):
+    assert driverobj._driver_name == "global_equiv_resol"

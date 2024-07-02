@@ -2,6 +2,15 @@
   "additionalProperties": false,
   "properties": {
     "batchargs": {
+      "additionalProperties": true,
+      "properties": {
+        "walltime": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "walltime"
+      ],
       "type": "object"
     },
     "envcmds": {

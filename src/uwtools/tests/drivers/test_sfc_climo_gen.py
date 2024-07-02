@@ -2,101 +2,130 @@
 """
 sfc_climo_gen driver tests.
 """
+import logging
+from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import yaml
-from iotaa import asset, external
-from pytest import fixture
+from iotaa import asset, external, refs
+from pytest import fixture, mark
 
 from uwtools.drivers import sfc_climo_gen
-from uwtools.scheduler import Slurm
+from uwtools.drivers.driver import Driver
+from uwtools.drivers.sfc_climo_gen import SfcClimoGen
+from uwtools.logging import log
+from uwtools.tests.support import logged
 
-config: dict = {
-    "sfc_climo_gen": {
-        "execution": {
-            "batchargs": {
-                "export": "NONE",
-                "nodes": 1,
-                "stdout": "/path/to/file",
-                "walltime": "00:02:00",
+# Helpers
+
+
+@external
+def ready(x):
+    yield x
+    yield asset(x, lambda: True)
+
+
+# Fixtures
+
+
+@fixture
+def config(tmp_path):
+    return {
+        "sfc_climo_gen": {
+            "execution": {
+                "batchargs": {
+                    "export": "NONE",
+                    "nodes": 1,
+                    "stdout": "/path/to/file",
+                    "walltime": "00:02:00",
+                },
+                "envcmds": ["cmd1", "cmd2"],
+                "executable": "/path/to/sfc_climo_gen",
+                "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
+                "mpicmd": "srun",
             },
-            "envcmds": ["cmd1", "cmd2"],
-            "executable": "/path/to/sfc_climo_gen",
-            "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
-            "mpicmd": "srun",
+            "namelist": {
+                "update_values": {
+                    "config": {
+                        "halo": 4,
+                        "input_facsf_file": "/path/to/file",
+                        "input_maximum_snow_albedo_file": "/path/to/file",
+                        "input_slope_type_file": "/path/to/file",
+                        "input_snowfree_albedo_file": "/path/to/file",
+                        "input_soil_type_file": "/path/to/file",
+                        "input_substrate_temperature_file": "/path/to/file",
+                        "input_vegetation_greenness_file": "/path/to/file",
+                        "input_vegetation_type_file": "/path/to/file",
+                        "maximum_snow_albedo_method": "bilinear",
+                        "mosaic_file_mdl": "/path/to/file",
+                        "orog_dir_mdl": "/path/to/dir",
+                        "orog_files_mdl": ["C403_oro_data.tile7.halo4.nc"],
+                        "snowfree_albedo_method": "bilinear",
+                        "vegetation_greenness_method": "bilinear",
+                    }
+                },
+                "validate": True,
+            },
+            "run_dir": str(tmp_path),
         },
-        "namelist": {
-            "update_values": {
-                "config": {
-                    "halo": 4,
-                    "input_facsf_file": "/path/to/file",
-                    "input_maximum_snow_albedo_file": "/path/to/file",
-                    "input_slope_type_file": "/path/to/file",
-                    "input_snowfree_albedo_file": "/path/to/file",
-                    "input_soil_type_file": "/path/to/file",
-                    "input_substrate_temperature_file": "/path/to/file",
-                    "input_vegetation_greenness_file": "/path/to/file",
-                    "input_vegetation_type_file": "/path/to/file",
-                    "maximum_snow_albedo_method": "bilinear",
-                    "mosaic_file_mdl": "/path/to/file",
-                    "orog_dir_mdl": "/path/to/dir",
-                    "orog_files_mdl": ["C403_oro_data.tile7.halo4.nc"],
-                    "snowfree_albedo_method": "bilinear",
-                    "vegetation_greenness_method": "bilinear",
-                }
-            }
+        "platform": {
+            "account": "me",
+            "scheduler": "slurm",
         },
-        "run_dir": "/path/to/dir",
-    },
-    "platform": {
-        "account": "me",
-        "scheduler": "slurm",
-    },
-}
+    }
 
 
 @fixture
-def config_file(tmp_path):
-    path = tmp_path / "config.yaml"
-    config["sfc_climo_gen"]["run_dir"] = tmp_path.as_posix()
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
+def driverobj(config):
+    return SfcClimoGen(config=config, batch=True)
 
 
-@fixture
-def driverobj(config_file):
-    return sfc_climo_gen.SfcClimoGen(config=config_file, batch=True)
+# Tests
 
 
-# Driver tests
+@mark.parametrize(
+    "method",
+    [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runcmd",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_taskname",
+        "_validate",
+        "_write_runscript",
+        "run",
+        "runscript",
+    ],
+)
+def test_SfcClimoGen(method):
+    assert getattr(SfcClimoGen, method) is getattr(Driver, method)
 
 
-def test_SfcClimoGen(driverobj):
-    assert isinstance(driverobj, sfc_climo_gen.SfcClimoGen)
-
-
-def test_SfcClimoGen_dry_run(config_file):
-    with patch.object(sfc_climo_gen, "dryrun") as dryrun:
-        driverobj = sfc_climo_gen.SfcClimoGen(config=config_file, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
-
-
-def test_SfcClimoGen_namelist_file(driverobj):
-    @external
-    def ready(x):
-        yield x
-        yield asset(x, lambda: True)
-
+def test_SfcClimoGen_namelist_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
     dst = driverobj._rundir / "fort.41"
     assert not dst.is_file()
     with patch.object(sfc_climo_gen, "file", new=ready):
-        driverobj.namelist_file()
+        path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()
+    assert logged(caplog, f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
+
+
+def test_SfcClimoGen_namelist_file_fails_validation(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    driverobj._driver_config["namelist"]["update_values"]["config"]["halo"] = "string"
+    with patch.object(sfc_climo_gen, "file", new=ready):
+        path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert logged(caplog, f"Failed to validate {path}")
+    assert logged(caplog, "  'string' is not of type 'integer'")
 
 
 def test_SfcClimoGen_provisioned_run_directory(driverobj):
@@ -110,39 +139,5 @@ def test_SfcClimoGen_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_SfcClimoGen_run_batch(driverobj):
-    with patch.object(driverobj, "_run_via_batch_submission") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_SfcClimoGen_run_local(driverobj):
-    driverobj._batch = False
-    with patch.object(driverobj, "_run_via_local_execution") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_SfcClimoGen_runscript(driverobj):
-    with patch.object(driverobj, "_runscript") as runscript:
-        driverobj.runscript()
-        runscript.assert_called_once()
-        args = ("envcmds", "envvars", "execution", "scheduler")
-        types = [list, dict, list, Slurm]
-        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
-
-
-def test_SfcClimoGen__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["sfc_climo_gen"]
-
-
-def test_SfcClimoGen__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript.sfc_climo_gen"
-
-
-def test_SfcClimoGen__taskname(driverobj):
-    assert driverobj._taskname("foo") == "sfc_climo_gen foo"
-
-
-def test_SfcClimoGen__validate(driverobj):
-    driverobj._validate()
+def test_SfcClimoGen__driver_name(driverobj):
+    assert driverobj._driver_name == "sfc_climo_gen"

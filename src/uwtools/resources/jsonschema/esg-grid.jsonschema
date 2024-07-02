@@ -3,31 +3,49 @@
     "base_file": {
       "type": "string"
     },
-    "regional_grid_nml_properties": {
-      "additionalProperties": false,
+    "namelist_content": {
+      "additionalproperties": false,
       "properties": {
-        "delx": {
-          "type": "number"
-        },
-        "dely": {
-          "type": "number"
-        },
-        "lx": {
-          "type": "number"
-        },
-        "ly": {
-          "type": "number"
-        },
-        "pazi": {
-          "type": "number"
-        },
-        "plat": {
-          "type": "number"
-        },
-        "plon": {
-          "type": "number"
+        "regional_grid_nml": {
+          "additionalProperties": false,
+          "properties": {
+            "delx": {
+              "type": "number"
+            },
+            "dely": {
+              "type": "number"
+            },
+            "lx": {
+              "type": "number"
+            },
+            "ly": {
+              "type": "number"
+            },
+            "pazi": {
+              "type": "number"
+            },
+            "plat": {
+              "type": "number"
+            },
+            "plon": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "delx",
+            "dely",
+            "lx",
+            "ly",
+            "pazi",
+            "plat",
+            "plon"
+          ],
+          "type": "object"
         }
       },
+      "required": [
+        "regional_grid_nml"
+      ],
       "type": "object"
     }
   },
@@ -45,6 +63,26 @@
               "properties": {
                 "base_file": {
                   "$ref": "#/$defs/base_file"
+                },
+                "update_values": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "regional_grid_nml": {
+                      "allOf": [
+                        {
+                          "$ref": "#/$defs/namelist_content/properties/regional_grid_nml/properties"
+                        }
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "regional_grid_nml"
+                  ],
+                  "type": "object"
+                },
+                "validate": {
+                  "type": "boolean"
                 }
               },
               "required": [
@@ -55,64 +93,11 @@
             {
               "additionalProperties": false,
               "properties": {
-                "base_file": {
-                  "$ref": "#/$defs/base_file"
-                },
                 "update_values": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "regional_grid_nml": {
-                      "allOf": [
-                        {
-                          "$ref": "#/$defs/regional_grid_nml_properties"
-                        }
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "regional_grid_nml"
-                  ],
-                  "type": "object"
-                }
-              },
-              "required": [
-                "base_file",
-                "update_values"
-              ],
-              "type": "object"
-            },
-            {
-              "additionalProperties": false,
-              "properties": {
-                "base_file": {
-                  "$ref": "#/$defs/base_file"
+                  "$ref": "#/$defs/namelist_content"
                 },
-                "update_values": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "regional_grid_nml": {
-                      "allOf": [
-                        {
-                          "$ref": "#/$defs/regional_grid_nml_properties"
-                        }
-                      ],
-                      "required": [
-                        "delx",
-                        "dely",
-                        "lx",
-                        "ly",
-                        "pazi",
-                        "plat",
-                        "plon"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "regional_grid_nml"
-                  ],
-                  "type": "object"
+                "validate": {
+                  "type": "boolean"
                 }
               },
               "required": [

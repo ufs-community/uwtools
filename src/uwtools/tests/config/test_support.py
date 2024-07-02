@@ -6,11 +6,8 @@ Tests for uwtools.config.jinja2 module.
 import logging
 from collections import OrderedDict
 
-import f90nml  # type: ignore
-import pytest
 import yaml
-from f90nml import Namelist
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config import support
 from uwtools.config.formats.fieldtable import FieldTableConfig
@@ -24,22 +21,12 @@ from uwtools.tests.support import logged
 from uwtools.utils.file import FORMAT
 
 
-def test_add_yaml_representers():
-    support.add_yaml_representers()
-    representers = yaml.Dumper.yaml_representers
-    assert support.UWYAMLConvert in representers
-    assert OrderedDict in representers
-    assert Namelist in representers
-
-
-@pytest.mark.parametrize(
-    "d,n", [({1: 88}, 1), ({1: {2: 88}}, 2), ({1: {2: {3: 88}}}, 3), ({1: {}}, 2)]
-)
+@mark.parametrize("d,n", [({1: 88}, 1), ({1: {2: 88}}, 2), ({1: {2: {3: 88}}}, 3), ({1: {}}, 2)])
 def test_depth(d, n):
     assert support.depth(d) == n
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "cfgtype,fmt",
     [
         (FieldTableConfig, FORMAT.fieldtable),
@@ -58,6 +45,12 @@ def test_format_to_config_fail():
         support.format_to_config("no-such-config-type")
 
 
+def test_from_od():
+    assert support.from_od(d=OrderedDict([("example", OrderedDict([("key", "value")]))])) == {
+        "example": {"key": "value"}
+    }
+
+
 def test_log_and_error(caplog):
     log.setLevel(logging.ERROR)
     msg = "Something bad happened"
@@ -65,18 +58,6 @@ def test_log_and_error(caplog):
         raise support.log_and_error(msg)
     assert msg in str(e.value)
     assert logged(caplog, msg)
-
-
-def test_represent_namelist():
-    namelist = f90nml.reads("&namelist\n key = value\n/\n")
-    assert yaml.dump(namelist, default_flow_style=True).strip() == "{namelist: {key: value}}"
-
-
-def test_represent_ordereddict():
-    ordereddict_values = OrderedDict([("example", OrderedDict([("key", "value")]))])
-    assert (
-        yaml.dump(ordereddict_values, default_flow_style=True).strip() == "{example: {key: value}}"
-    )
 
 
 class Test_UWYAMLConvert:

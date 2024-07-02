@@ -5,7 +5,7 @@ Support for rendering Jinja2 templates.
 import os
 from functools import cached_property
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Union
+from typing import Optional, Union
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Undefined, meta
 from jinja2.exceptions import UndefinedError
@@ -26,7 +26,7 @@ class J2Template:
         self,
         values: dict,
         template_source: Optional[Union[str, Path]] = None,
-        searchpath: Optional[List[str]] = None,
+        searchpath: Optional[list[str]] = None,
     ) -> None:
         """
         :param values: Values needed to render the provided template.
@@ -88,7 +88,7 @@ class J2Template:
         return self._template.render(self._values)
 
     @property
-    def undeclared_variables(self) -> Set[str]:
+    def undeclared_variables(self) -> set[str]:
         """
         Returns the names of variables needed to render the template.
 
@@ -102,7 +102,7 @@ class J2Template:
 
 
 def dereference(
-    val: _ConfigVal, context: dict, local: Optional[dict] = None, keys: Optional[List[str]] = None
+    val: _ConfigVal, context: dict, local: Optional[dict] = None, keys: Optional[list[str]] = None
 ) -> _ConfigVal:
     """
     Render Jinja2 syntax, wherever possible.
@@ -152,9 +152,9 @@ def render(
     values_format: Optional[str] = None,
     input_file: Optional[Path] = None,
     output_file: Optional[Path] = None,
-    overrides: Optional[Dict[str, str]] = None,
+    overrides: Optional[dict[str, str]] = None,
     env: bool = False,
-    searchpath: Optional[List[str]] = None,
+    searchpath: Optional[list[str]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> Optional[str]:
@@ -286,7 +286,7 @@ def _dry_run_template(rendered_template: str) -> str:
     return rendered_template
 
 
-def _log_missing_values(missing: List[str]) -> None:
+def _log_missing_values(missing: list[str]) -> None:
     """
     Log values missing from template and raise an exception.
 
@@ -305,12 +305,12 @@ def _register_filters(env: Environment) -> Environment:
     :return: The input Environment, with filters added.
     """
 
-    def path_join(path_components: List[str]) -> str:
+    def path_join(path_components: list[str]) -> str:
         if any(isinstance(x, Undefined) for x in path_components):
             raise UndefinedError()
         return os.path.join(*path_components)
 
-    filters = dict(path_join=path_join)
+    filters = dict(env=lambda var: os.environ[var], path_join=path_join)
     env.filters.update(filters)
     return env
 
@@ -332,7 +332,7 @@ def _report(args: dict) -> None:
 def _supplement_values(
     values_src: Optional[Union[dict, Path]] = None,
     values_format: Optional[str] = None,
-    overrides: Optional[Dict[str, str]] = None,
+    overrides: Optional[dict[str, str]] = None,
     env: bool = False,
 ) -> dict:
     """
@@ -361,7 +361,7 @@ def _supplement_values(
     return values
 
 
-def _values_needed(undeclared_variables: Set[str]) -> None:
+def _values_needed(undeclared_variables: set[str]) -> None:
     """
     Log variables needed to render the template.
 

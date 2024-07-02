@@ -64,7 +64,7 @@ def test_tasks_file_present(tmp_path):
     assert ready(tasks.file(path=path))
 
 
-def test_tasks_filecopy(tmp_path):
+def test_tasks_filecopy_simple(tmp_path):
     src = tmp_path / "src"
     dst = tmp_path / "dst"
     src.touch()
@@ -73,9 +73,27 @@ def test_tasks_filecopy(tmp_path):
     assert dst.is_file()
 
 
-def test_tasks_symlink(tmp_path):
+def test_tasks_filecopy_directory_hierarchy(tmp_path):
+    src = tmp_path / "src"
+    dst = tmp_path / "foo" / "bar" / "dst"
+    src.touch()
+    assert not dst.is_file()
+    tasks.filecopy(src=src, dst=dst)
+    assert dst.is_file()
+
+
+def test_tasks_symlink_simple(tmp_path):
     target = tmp_path / "target"
     link = tmp_path / "link"
+    target.touch()
+    assert not link.is_file()
+    tasks.symlink(target=target, linkname=link)
+    assert link.is_symlink()
+
+
+def test_tasks_symlink_directory_hierarchy(tmp_path):
+    target = tmp_path / "target"
+    link = tmp_path / "foo" / "bar" / "link"
     target.touch()
     assert not link.is_file()
     tasks.symlink(target=target, linkname=link)

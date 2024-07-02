@@ -10,26 +10,22 @@ from unittest.mock import Mock, call, patch
 
 import yaml
 from iotaa import asset, external
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.drivers import jedi
-from uwtools.scheduler import Slurm
+from uwtools.drivers import jedi, jedi_base
+from uwtools.drivers.jedi import JEDI
+from uwtools.drivers.jedi_base import JEDIBase
+from uwtools.logging import log
 from uwtools.tests.support import regex_logged
 
 # Fixtures
 
 
 @fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
-
-
-# Driver fixtures
-
-
-@fixture
 def config(tmp_path):
+    base_file = tmp_path / "base.yaml"
+    base_file.write_text("foo: bar")
     return {
         "jedi": {
             "execution": {
@@ -48,7 +44,7 @@ def config(tmp_path):
                 "mpicmd": "srun",
             },
             "configuration_file": {
-                "base_file": str(tmp_path / "base.yaml"),
+                "base_file": str(base_file),
                 "update_values": {"baz": "qux"},
             },
             "files_to_copy": {
@@ -69,34 +65,65 @@ def config(tmp_path):
 
 
 @fixture
-def config_file(config, tmp_path):
-    path = tmp_path / "base.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
+def cycle():
+    return dt.datetime(2024, 2, 1, 18)
 
 
 @fixture
-def driverobj(config_file, cycle):
-    return jedi.JEDI(config=config_file, cycle=cycle, batch=True)
+def driverobj(config, cycle):
+    return JEDI(config=config, cycle=cycle, batch=True)
 
 
-# Driver tests
+# Tests
 
 
-def test_JEDI(driverobj):
-    assert isinstance(driverobj, jedi.JEDI)
+@mark.parametrize(
+    "method",
+    [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_validate",
+        "_write_runscript",
+        "run",
+        "runscript",
+    ],
+)
+def test_JEDI(method):
+    assert getattr(JEDI, method) is getattr(JEDIBase, method)
 
 
-def test_JEDI_dry_run(config_file, cycle):
-    with patch.object(jedi, "dryrun") as dryrun:
-        driverobj = jedi.JEDI(config=config_file, cycle=cycle, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
+def test_JEDI_configuration_file(driverobj):
+    basecfg = {"foo": "bar"}
+    base_file = Path(driverobj._driver_config["configuration_file"]["base_file"])
+    with open(base_file, "w", encoding="utf-8") as f:
+        yaml.dump(basecfg, f)
+    cfgfile = Path(driverobj._driver_config["run_dir"]) / "jedi.yaml"
+    assert not cfgfile.is_file()
+    driverobj.configuration_file()
+    assert cfgfile.is_file()
+    newcfg = YAMLConfig(config=cfgfile)
+    assert newcfg == {**basecfg, "baz": "qux"}
+
+
+def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    base_file = Path(driverobj._driver_config["run_dir"]) / "missing"
+    driverobj._driver_config["configuration_file"]["base_file"] = base_file
+    cfgfile = Path(driverobj._driver_config["run_dir"]) / "jedi.yaml"
+    assert not cfgfile.is_file()
+    driverobj.configuration_file()
+    assert not cfgfile.is_file()
+    assert regex_logged(caplog, f"{base_file}: State: Not Ready (external asset)")
 
 
 def test_JEDI_files_copied(driverobj):
-    with patch.object(jedi, "filecopy") as filecopy:
+    with patch.object(jedi_base, "filecopy") as filecopy:
         driverobj._driver_config["run_dir"] = "/path/to/run"
         driverobj.files_copied()
         assert filecopy.call_count == 2
@@ -110,7 +137,7 @@ def test_JEDI_files_copied(driverobj):
 
 
 def test_JEDI_files_linked(driverobj):
-    with patch.object(jedi, "symlink") as symlink:
+    with patch.object(jedi_base, "symlink") as symlink:
         driverobj._driver_config["run_dir"] = "/path/to/run"
         driverobj.files_linked()
         assert symlink.call_count == 2
@@ -138,28 +165,6 @@ def test_JEDI_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_JEDI_run_batch(driverobj):
-    with patch.object(driverobj, "_run_via_batch_submission") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_JEDI_run_local(driverobj):
-    driverobj._batch = False
-    with patch.object(driverobj, "_run_via_local_execution") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_JEDI_runscript(driverobj):
-    with patch.object(driverobj, "_runscript") as runscript:
-        driverobj.runscript()
-        runscript.assert_called_once()
-        args = ("envcmds", "envvars", "execution", "scheduler")
-        types = [list, dict, list, Slurm]
-        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
-
-
 def test_JEDI_validate_only(caplog, driverobj):
 
     @external
@@ -184,21 +189,20 @@ def test_JEDI_validate_only(caplog, driverobj):
     assert regex_logged(caplog, "Config is valid")
 
 
-def test_JEDI_configuration_file(driverobj):
-    basecfg = {"foo": "bar"}
-    basefile = Path(driverobj._driver_config["configuration_file"]["base_file"])
-    with open(basefile, "w", encoding="utf-8") as f:
-        yaml.dump(basecfg, f)
-    cfgfile = Path(driverobj._driver_config["run_dir"]) / "jedi.yaml"
-    assert not cfgfile.is_file()
-    driverobj.configuration_file()
-    assert cfgfile.is_file()
-    newcfg = YAMLConfig(config=cfgfile)
-    assert newcfg == {**basecfg, "baz": "qux"}
+def test_JEDI__config_fn(driverobj):
+    assert driverobj._config_fn == "jedi.yaml"
 
 
-def test_JEDI__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript.jedi"
+def test_JEDI__driver_name(driverobj):
+    assert driverobj._driver_name == "jedi"
+
+
+def test_JEDI__runcmd(driverobj):
+    executable = driverobj._driver_config["execution"]["executable"]
+    config = driverobj._rundir / driverobj._config_fn
+    assert (
+        driverobj._runcmd == f"srun --export=ALL --ntasks $SLURM_CPUS_ON_NODE {executable} {config}"
+    )
 
 
 def test_JEDI__taskname(driverobj):

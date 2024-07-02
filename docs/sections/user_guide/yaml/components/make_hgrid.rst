@@ -11,7 +11,7 @@ Structured YAML to run :ufs-utils:`make_hgrid<make-hgrid>` is validated by JSON 
 Here is a prototype UW YAML ``make_hgrid:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/make_hgrid.yaml
+.. literalinclude:: /shared/make_hgrid.yaml
 
 UW YAML for the ``make_hgrid:`` Block
 -------------------------------------
@@ -19,224 +19,183 @@ UW YAML for the ``make_hgrid:`` Block
 execution:
 ^^^^^^^^^^
 
-See :ref:`here <execution_yaml>` for details.
-
-run_dir:
-^^^^^^^^
-
-The path to the directory where ``make_hgrid`` will write its outputs.
+See :ref:`this page <execution_yaml>` for details.
 
 config:
 ^^^^^^^
 
 Describes the required parameters to run a ``make_hgrid`` configuration.
 
+  **grid_type:**
 
-grid_type:
-""""""""""
+  ``grid_type`` is the primary required key that defines the grid and additional required keys. It is specified with one of the following recognized key words:
 
-``grid_type`` is the primary required key that defines the grid and additional required keys. It is specified with one of the following recognized key words:
+  .. list-table:: Grid Types and Requirements
+     :widths: 20 80
+     :header-rows: 1
 
-.. list-table:: Grid Types and Requirements
-   :widths: 20 80
-   :header-rows: 1
+     * - Grid Type
+       - Requirements
+     * - ``beta_plane_grid``
+       - For setting geometric factors according to beta plane. ``f_plane_latitude`` needs to be specified.
+     * - ``conformal_cubic_grid``
+       - ``nratio`` is an optional argument.
+     * - ``f_plane_grid``
+       - For setting geometric factors according to f-plane. ``f_plane_latitude`` must be specified.
+     * - ``from_file``
+       - ``my_grid_file`` must be specified.
+     * - ``gnomonic_ed``
+       - Equal distance gnomonic cubic grid.
+     * - ``simple_cartesian_grid``
+       - ``xbnds``, ``ybnds`` must be specified to define the grid bounds location and grid size. ``simple_dx`` and ``simple_dy`` must be specified to specify uniform cell length.
+     * - ``spectral_grid``
+       - No other optional or required arguments.
+     * - ``regular_lonlat_grid``
+       - ``nxbnds``, ``nybnds``, ``xbnds``, ``ybnds`` must be specified to define the grid bounds.
+     * - ``tripolar_grid``
+       - ``nxbnds``, ``nybnds``, ``xbnds``, ``ybnds`` must be specified to define the grid bounds.
 
-   * - Grid Type
-     - Requirements
-   * - ``beta_plane_grid``
-     - For setting geometric factors according to beta plane. ``f_plane_latitude`` needs to be specified.
-   * - ``conformal_cubic_grid``
-     - ``nratio`` is an optional argument.
-   * - ``f_plane_grid``
-     - For setting geometric factors according to f-plane. ``f_plane_latitude`` must be specified.
-   * - ``from_file``
-     - ``my_grid_file`` must be specified.
-   * - ``gnomonic_ed``
-     - Equal distance gnomonic cubic grid.
-   * - ``simple_cartesian_grid``
-     - ``xbnds``, ``ybnds`` must be specified to define the grid bounds location and grid size. ``simple_dx`` and ``simple_dy`` must be specified to specify uniform cell length.
-   * - ``spectral_grid``
-     - No other optional or required arguments.
-   * - ``regular_lonlat_grid``
-     - ``nxbnds``, ``nybnds``, ``xbnds``, ``ybnds`` must be specified to define the grid bounds.
-   * - ``tripolar_grid``
-     - ``nxbnds``, ``nybnds``, ``xbnds``, ``ybnds`` must be specified to define the grid bounds.
+  **angular_midpoint:**
 
+  If specified, when ``grid_type`` is ``from_file`` and the input is a NetCDF file, then the supergrid face midpoint coordinates are simply and independently (the lat independently from the lon) calculated as simple angular midpoints from the model grid coordinates.
 
+  **center:**
 
-angular_midpoint:
-"""""""""""""""""
+  Specify the center location of grid.
 
-If specified, when ``grid_type`` is ``from_file`` and the input is a NetCDF file, then the supergrid face midpoint coordinates are simply and independently (the lat independently from the lon) calculated as simple angular midpoints from the model grid coordinates.
+  **do_cube_transform:**
 
-center:
-"""""""
+  Set to re-orient the rotated cubed sphere so that tile 6 has 'north' facing upward. When ``do_cube_transform`` is set, the following must be set: ``stretch_factor``, ``latget_lon``, and ``target_lat``.
 
-Specify the center location of grid.
+  **do_schmidt:**
 
-do_cube_transform:
-""""""""""""""""""
+  Set to do Schmidt transformation to create a stretched grid. When ``do_schmidt`` is set, the following must be set: ``stretch_factor``, ``target_lon`` and ``target_lat``.
 
-Set to re-orient the rotated cubed sphere so that tile 6 has 'north' facing upward. When ``do_cube_transform`` is set, the following must be set: ``stretch_factor``, ``latget_lon``, and ``target_lat``.
+  **dlat:**
 
-do_schmidt:
-"""""""""""
+  Nominal resolution of meridional regions.
 
-Set to do Schmidt transformation to create a stretched grid. When ``do_schmidt`` is set, the following must be set: ``stretch_factor``, ``target_lon`` and ``target_lat``.
+  **dlon:**
 
-dlat:
-"""""
+  Nominal resolution of zonal regions.
 
-Nominal resolution of meridional regions.
+  **great_circle_algorithm:**
 
-dlon:
-"""""
+  When specified, great_circle_algorithm will be used to compute grid cell area.
 
-Nominal resolution of zonal regions.
+  **grid_name:**
 
-great_circle_algorithm:
-"""""""""""""""""""""""
+  Specify the grid name.
 
-When specified, great_circle_algorithm will be used to compute grid cell area.
+  **halo:**
 
-grid_name:
-""""""""""
+  Halo size is to make sure the nest, including the halo region, is fully contained within a single parent (coarse) tile. It only needs to be specified when ``nest_grids`` is set.
 
-Specify the grid name.
+  **lat_join:**
 
-halo:
-"""""
+  Specify latitude for joining spherical and rotated bipolar grid. Default value is 65 degrees.
 
-Halo size is to make sure the nest, including the halo region, is fully contained within a single parent (coarse) tile. It only needs to be specified when ``nest_grids`` is set.
+  **my_grid_file:**
 
-lat_join:
-"""""""""
+  Read grid information from 'my_grid_file'. The file format can be ascii file or netcdf file. Required when ``grid_type`` is ``from_file``.
 
-Specify latitude for joining spherical and rotated bipolar grid. Default value is 65 degrees.
+  **nest_grids:**
 
-my_grid_file:
-"""""""""""""
+  Set to create this # nested grids as well as the global grid. This option could only be set when ``grid_type`` is ``gnomonic_ed``.
 
-Read grid information from 'my_grid_file'. The file format can be ascii file or netcdf file. Required when ``grid_type`` is ``from_file``.
+  **istart_nest:**
 
-nest_grids:
-"""""""""""
+  Specify the list of starting i-direction index(es) of nest grid(s) in parent tile supergrid(Fortran index).
 
-Set to create this # nested grids as well as the global grid. This option could only be set when ``grid_type`` is ``gnomonic_ed``.
+  **iend_nest:**
 
-istart_nest:
-""""""""""""
+  Specify the list of ending i-direction index(es) of nest grids in parent tile supergrid(Fortran index).
 
-Specify the list of starting i-direction index(es) of nest grid(s) in parent tile supergrid(Fortran index).
+  **jstart_nest:**
 
-iend_nest:
-""""""""""
+  Specify the list of starting j-direction index(es) of nest grids in parent tile supergrid(Fortran index).
 
-Specify the list of ending i-direction index(es) of nest grids in parent tile supergrid(Fortran index).
+  **jend_nest:**
 
-jstart_nest:
-""""""""""""
+  Specify the list of ending j-direction index(es) of nest grids in parent tile supergrid(Fortran index).
 
-Specify the list of starting j-direction index(es) of nest grids in parent tile supergrid(Fortran index).
+  **non_length_angle:**
 
-jend_nest:
-""""""""""
+  When specified, will not output length(dx,dy) and angle (angle_dx, angle_dy).
 
-Specify the list of ending j-direction index(es) of nest grids in parent tile supergrid(Fortran index).
+  **nlat:**
 
-non_length_angle:
-"""""""""""""""""
+  Number of model grid points(supergrid) for each meridinal regions of varying resolution.
 
-When specified, will not output length(dx,dy) and angle (angle_dx, angle_dy).
+  **nlon:**
 
-nlat:
-"""""
+  Number of model grid points(supergrid) for each zonal regions of varying resolution.
 
-Number of model grid points(supergrid) for each meridinal regions of varying resolution.
+  **nxbnds:**
 
-nlon:
-"""""
+  Specify number of zonal regions for varying resolution.
 
-Number of model grid points(supergrid) for each zonal regions of varying resolution.
+  **nybnds:**
 
+  Specify number of meridinal regions for varying resolution.
 
-nxbnds:
-"""""""
+  **nratio:**
 
-Specify number of zonal regions for varying resolution.
+  Specify the refinement ratio when calculating cell length and area of supergrid.
 
+  **out_halo:**
 
-nybnds:
-"""""""
+  Extra halo size data to be written out. This is only works for ``gnomonic_ed``.
 
-Specify number of meridinal regions for varying resolution.
+  **parent_tile:**
 
-nratio:
-"""""""
+  Specify the list of the parent tile number(s) of nest grid(s).
 
-Specify the refinement ratio when calculating cell length and area of supergrid.
+  **refine_ratio:**
 
-out_halo:
-"""""""""
+  Specify the list of refinement ratio(s) for nest grid(s).
 
-Extra halo size data to be written out. This is only works for ``gnomonic_ed``.
+  **rotate_poly:**
 
-parent_tile:
-""""""""""""
+  Set to calculate polar polygon areas by calculating the area of a copy of the polygon, with the copy  being rotated far away from the pole.
 
-Specify the list of the parent tile number(s) of nest grid(s).
+  **shift_fac:**
 
-refine_ratio:
-"""""""""""""
+  Shift west by 180/shift_fac. Default value is 18.
 
-Specify the list of refinement ratio(s) for nest grid(s).
+  **simple_dx:**
 
-rotate_poly:
-""""""""""""
+  Specify the uniform cell length in x-direction for simple cartesian grid.
 
-Set to calculate polar polygon areas by calculating the area of a copy of the polygon, with the copy  being rotated far away from the pole.
+  **simple_dy:**
 
-shift_fac:
-""""""""""
+  Specify the uniform cell length in y-direction for simple cartesian grid.
 
-Shift west by 180/shift_fac. Default value is 18.
+  **stretch_factor:**
 
-simple_dx:
-""""""""""
+  Stretching factor for the grid.
 
-Specify the uniform cell length in x-direction for simple cartesian grid.
+  **target_lat:**
 
-simple_dy:
-""""""""""
+  Center latitude of the highest resolution tile.
 
-Specify the uniform cell length in y-direction for simple cartesian grid.
+  **target_lon:**
 
-stretch_factor:
-"""""""""""""""
+  Center longitude of the highest resolution tile.
 
-Stretching factor for the grid.
+  **verbose:**
 
-target_lat:
-"""""""""""
+  Will print out running time message when this is set. Otherwise the run will be silent when there is no error.
 
-Center latitude of the highest resolution tile.
+  **xbnds:**
 
-target_lon:
-"""""""""""
+  Specify boundaries for defining zonal regions of varying resolution. When ``tripolar`` is present, also defines the longitude of the two new poles.
 
-Center longitude of the highest resolution tile.
+  **ybnds:**
 
-verbose:
-""""""""
+  Specify boundaries for defining meridional regions of varying resolution.
 
-Will print out running time message when this is set. Otherwise the run will be silent when there is no error.
+run_dir:
+^^^^^^^^
 
-xbnds:
-""""""
-
-Specify boundaries for defining zonal regions of varying resolution. When ``tripolar`` is present, also defines the longitude of the two new poles.
-
-ybnds:
-""""""
-
-Specify boundaries for defining meridional regions of varying resolution.
+The path to the run directory.

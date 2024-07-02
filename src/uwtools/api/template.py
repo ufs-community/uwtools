@@ -4,7 +4,7 @@ API access to ``uwtools`` templating logic.
 
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from uwtools.config.atparse_to_jinja2 import convert as _convert_atparse_to_jinja2
 from uwtools.config.jinja2 import render as _render
@@ -18,9 +18,9 @@ def render(
     values_format: Optional[str] = None,
     input_file: Optional[Union[Path, str]] = None,
     output_file: Optional[Union[Path, str]] = None,
-    overrides: Optional[Dict[str, str]] = None,
+    overrides: Optional[dict[str, str]] = None,
     env: bool = False,
-    searchpath: Optional[List[str]] = None,
+    searchpath: Optional[list[str]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
     stdin_ok: bool = False,
@@ -45,7 +45,7 @@ def render(
     :param searchpath: Paths to search for extra templates
     :param values_needed: Just report variables needed to render the template?
     :param dry_run: Run in dry-run mode?
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: The rendered template string
     :raises: UWTemplateRenderError if template could not be rendered
     """
@@ -69,9 +69,9 @@ def render_to_str(  # pylint: disable=unused-argument
     values_src: Optional[Union[dict, Path, str]] = None,
     values_format: Optional[str] = None,
     input_file: Optional[Union[Path, str]] = None,
-    overrides: Optional[Dict[str, str]] = None,
+    overrides: Optional[dict[str, str]] = None,
     env: bool = False,
-    searchpath: Optional[List[str]] = None,
+    searchpath: Optional[list[str]] = None,
     values_needed: bool = False,
     dry_run: bool = False,
 ) -> str:
@@ -100,7 +100,7 @@ def translate(
         read ``stdin``)
     :param output_file: Path to the file to write the converted template to
     :param dry_run: Run in dry-run mode?
-    :param stdin_ok: OK to read from stdin?
+    :param stdin_ok: OK to read from ``stdin``?
     :return: ``True``
     """
     _convert_atparse_to_jinja2(

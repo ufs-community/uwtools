@@ -1,0 +1,7 @@
+values:
+  date: '{{ yyyymmdd }}'
+  empty: null
+  greeting: Hello
+  message: Hello World
+  recipient: World
+  repeat: 1

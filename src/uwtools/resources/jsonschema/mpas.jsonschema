@@ -58,6 +58,9 @@
             },
             "update_values": {
               "$ref": "urn:uwtools:namelist"
+            },
+            "validate": {
+              "type": "boolean"
             }
           },
           "type": "object"
@@ -66,19 +69,7 @@
           "type": "string"
         },
         "streams": {
-          "properties": {
-            "path": {
-              "type": "string"
-            },
-            "values": {
-              "type": "object"
-            }
-          },
-          "required": [
-            "path",
-            "values"
-          ],
-          "type": "object"
+          "$ref": "urn:uwtools:mpas-streams"
         }
       },
       "required": [

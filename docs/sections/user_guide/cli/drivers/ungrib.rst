@@ -3,76 +3,27 @@
 
 The ``uw`` mode for configuring and running the WRF preprocessing component ``ungrib``.
 
-.. code-block:: text
-
-   $ uw ungrib --help
-   usage: uw ungrib [-h] [--version] TASK ...
-
-   Execute Ungrib tasks
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     TASK
-       gribfile
-         A symlink to the input GRIB file
-       namelist_file
-         The namelist file
-       provisioned_run_directory
-         Run directory provisioned with all required content
-       run
-         A run
-       runscript
-         The runscript
-       validate
-         Validate the UW driver config
-       vtable
-         A symlink to the Vtable file
+.. literalinclude:: ungrib/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: ungrib/help.out
+   :language: text
 
 All tasks take the same arguments. For example:
 
-.. code-block:: text
-
-   $ uw ungrib run --help
-   usage: uw ungrib run --cycle CYCLE [-h] [--version] [--config-file PATH] [--batch] [--dry-run] [--graph-file PATH]
-                        [--quiet] [--verbose]
-
-   A run
-
-   Required arguments:
-     --cycle CYCLE
-         The cycle in ISO8601 format
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --config-file PATH, -c PATH
-         Path to UW YAML config file (default: read from stdin)
-     --batch
-         Submit run to batch scheduler
-     --dry-run
-         Only log info, making no changes
-     --graph-file PATH
-         Path to Graphviz DOT output [experimental]
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: ungrib/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: ungrib/run-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
-The examples use a configuration file named ``config.yaml`` with content similar to:
+The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/ungrib.yaml
-
+.. literalinclude:: /shared/ungrib.yaml
 
 Its contents are described in depth in section :ref:`ungrib_yaml`.
 
@@ -97,6 +48,8 @@ Its contents are described in depth in section :ref:`ungrib_yaml`.
   .. code-block:: text
 
      $ uw ungrib run --config-file config.yaml --cycle 2021-04-01T12 --batch --dry-run
+
+.. include:: /shared/key_path.rst
 
 * The ``run`` task depends on the other available tasks and executes them as prerequisites. It is possible to execute any task directly, which entails execution of any of *its* dependencies. For example, to create an ``ungrib`` run directory provisioned with all the files, directories, symlinks, etc. required per the configuration file:
 

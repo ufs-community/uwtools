@@ -7,14 +7,14 @@ from pathlib import Path
 from shutil import copy
 from typing import Optional
 
-from iotaa import asset, dryrun, task, tasks
+from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.drivers.driver import Driver
 from uwtools.logging import log
 from uwtools.strings import STR
-from uwtools.utils.tasks import filecopy, symlink
+from uwtools.utils.tasks import file, filecopy, symlink
 
 
 class FV3(Driver):
@@ -28,6 +28,7 @@ class FV3(Driver):
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
+        key_path: Optional[list[str]] = None,
     ):
         """
         The driver.
@@ -36,10 +37,11 @@ class FV3(Driver):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
+        :param key_path: Keys leading through the config to the driver's configuration block.
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle)
-        if self._dry_run:
-            dryrun()
+        super().__init__(
+            config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
+        )
         self._cycle = cycle
 
     # Workflow tasks
@@ -122,7 +124,8 @@ class FV3(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield None
+        base_file = self._driver_config["model_configure"].get("base_file")
+        yield file(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=YAMLConfig,
             config_values=self._driver_config["model_configure"],
@@ -138,11 +141,13 @@ class FV3(Driver):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield None
+        base_file = self._driver_config["namelist"].get("base_file")
+        yield file(Path(base_file)) if base_file else None
         self._create_user_updated_config(
             config_class=NMLConfig,
             config_values=self._driver_config["namelist"],
             path=path,
+            schema=self._namelist_schema(),
         )
 
     @tasks
@@ -209,4 +214,4 @@ class FV3(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
+        return self._taskname_with_cycle(self._cycle, suffix)

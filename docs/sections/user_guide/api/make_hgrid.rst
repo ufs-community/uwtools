@@ -2,4 +2,5 @@
 ==========================
 
 .. automodule:: uwtools.api.make_hgrid
-    :members:
+   :inherited-members:
+   :members:

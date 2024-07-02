@@ -5,10 +5,10 @@ Support for API modules.
 import datetime as dt
 import re
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 from uwtools.config.formats.base import Config
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverT
 from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.exceptions import UWError
@@ -32,12 +32,17 @@ def ensure_data_source(
     return str2path(data_source)
 
 
-def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., bool]:
+def make_execute(
+    driver_class: DriverT,
+    with_cycle: Optional[bool] = False,
+    with_leadtime: Optional[bool] = False,
+) -> Callable[..., bool]:
     """
     Returns a function that executes tasks for the given driver.
 
     :param driver_class: The driver class whose tasks to execute.
-    :param with_cycle: Does the driver's constructor take the 'cycle' parameter?
+    :param with_cycle: Does the driver's constructor take a 'cycle' parameter?
+    :param with_leadtime: Does the driver's constructor take a 'leadtime' parameter?
     """
 
     def execute(  # pylint: disable=unused-argument
@@ -46,16 +51,19 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
+        key_path: Optional[list[str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
             driver_class=driver_class,
             task=task,
             cycle=None,
+            leadtime=None,
             config=config,
             batch=batch,
             dry_run=dry_run,
             graph_file=graph_file,
+            key_path=key_path,
             stdin_ok=stdin_ok,
         )
 
@@ -66,37 +74,73 @@ def make_execute(driver_class: type[Driver], with_cycle: bool) -> Callable[..., 
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
+        key_path: Optional[list[str]] = None,
+        stdin_ok: bool = False,
+    ) -> bool:
+        return _execute(
+            driver_class=driver_class,
+            task=task,
+            leadtime=None,
+            cycle=cycle,
+            config=config,
+            batch=batch,
+            dry_run=dry_run,
+            graph_file=graph_file,
+            key_path=key_path,
+            stdin_ok=stdin_ok,
+        )
+
+    def execute_cycle_leadtime(  # pylint: disable=unused-argument
+        task: str,
+        cycle: dt.datetime,
+        leadtime: dt.timedelta,
+        config: Optional[Union[Path, str]] = None,
+        batch: bool = False,
+        dry_run: bool = False,
+        graph_file: Optional[Union[Path, str]] = None,
+        key_path: Optional[list[str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
             driver_class=driver_class,
             task=task,
             cycle=cycle,
+            leadtime=leadtime,
             config=config,
             batch=batch,
             dry_run=dry_run,
             graph_file=graph_file,
+            key_path=key_path,
             stdin_ok=stdin_ok,
         )
 
+    execute_cycle_leadtime.__name__ = "execute"
     execute_cycle.__name__ = "execute"
     assert _execute.__doc__ is not None
-    execute_cycle.__doc__ = re.sub(r"\n *:param driver_class:.*\n", "\n", _execute.__doc__)
+    execute_cycle_leadtime.__doc__ = re.sub(r"\n *:param driver_class:.*\n", "\n", _execute.__doc__)
+    execute_cycle.__doc__ = re.sub(
+        r"\n *:param leadtime:.*\n", "\n", execute_cycle_leadtime.__doc__
+    )
     execute.__doc__ = re.sub(r"\n *:param cycle:.*\n", "\n", execute_cycle.__doc__)
 
+    if with_leadtime and not with_cycle:
+        raise UWError("When leadtime is specified, cycle is required")
+
     if with_cycle:
+        if with_leadtime:
+            return execute_cycle_leadtime
         return execute_cycle
     return execute
 
 
-def make_tasks(driver_class: type[Driver]) -> Callable[..., Dict[str, str]]:
+def make_tasks(driver_class: DriverT) -> Callable[..., dict[str, str]]:
     """
     Returns a function that maps task names to descriptions for the given driver.
 
     :param driver_class: The driver class whose tasks and descriptions to map.
     """
 
-    def tasks() -> Dict[str, str]:
+    def tasks() -> dict[str, str]:
         """
         Returns a mapping from task names to their one-line descriptions.
         """
@@ -118,13 +162,15 @@ def str2path(val: Any) -> Any:
 
 
 def _execute(
-    driver_class: type[Driver],
+    driver_class: DriverT,
     task: str,
     cycle: Optional[dt.datetime] = None,
+    leadtime: Optional[dt.timedelta] = None,
     config: Optional[Union[Path, str]] = None,
     batch: bool = False,
     dry_run: bool = False,
     graph_file: Optional[Union[Path, str]] = None,
+    key_path: Optional[list[str]] = None,
     stdin_ok: bool = False,
 ) -> bool:
     """
@@ -136,10 +182,12 @@ def _execute(
     :param driver_class: Class of driver object to instantiate.
     :param task: The task to execute.
     :param cycle: The cycle.
+    :param leadtime: The leadtime.
     :param config: Path to config file (read stdin if missing or None).
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run the executable, just report what would have been done.
     :param graph_file: Write Graphviz DOT output here.
+    :param key_path: Path of keys to subsection of config file.
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
@@ -147,9 +195,12 @@ def _execute(
         config=ensure_data_source(config, stdin_ok),
         batch=batch,
         dry_run=dry_run,
+        key_path=key_path,
     )
     if cycle:
         kwargs["cycle"] = cycle
+    if leadtime is not None:
+        kwargs["leadtime"] = leadtime
     obj = driver_class(**kwargs)
     getattr(obj, task)()
     if graph_file:

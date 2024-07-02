@@ -1,0 +1,8 @@
+values:
+  date: '20240520'
+  empty: null
+  greeting: Hello
+  message: Hello World
+  recipient: World
+  repeat: 1
+yyyymmdd: 20240520

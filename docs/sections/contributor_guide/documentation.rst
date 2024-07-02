@@ -7,8 +7,7 @@ Locally Building and Previewing Documentation
 To locally build the docs:
 
 #. Obtain a development shell as described in the :doc:`Developer Setup <developer_setup>` section.
-#. From the root of your clone: ``cd docs``
-#. Install the required doc packages: ``source install-deps``
+#. From the clone root, install the required doc packages: ``source docs/install-deps``
 #. Build the docs: ``make docs``
 
 The ``make docs`` command will build the docs under ``docs/build/html``, after which you can preview them in your web browser at the URL
@@ -17,7 +16,7 @@ The ``make docs`` command will build the docs under ``docs/build/html``, after w
 
    file://<filesystem-path-to-your-clone>/docs/build/html/index.html
 
-Rerun ``make docs`` and refresh your browser after making and saving changes.
+Re-run ``make docs`` and refresh your browser after making and saving changes. Note that some documentation content is dynamically generated: Timestamps shown in e.g. log messages are expected and are ok to commit.
 
 If, at some point, you remove and recreate the conda development environment underlying your development shell, you will need to rerun the ``source install-deps`` command in the new environment/shell. Until then, the installed doc packages will persist and support docs generation.
 

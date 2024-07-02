@@ -3,81 +3,27 @@
 
 The ``uw`` mode for configuring and running the MPAS forecast model. Each listed ``TASK`` may be called to generate the runtime asset(s) it is responsible for, and will call any task it depends on as needed. A ``provisioned_run_directory`` comprises everything needed for a run, and a ``run`` runs the MPAS executable.
 
-.. code-block:: text
-
-   $ uw mpas --help
-   usage: uw mpas [-h] [--version] TASK ...
-
-   Execute MPAS tasks
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     TASK
-       boundary_files
-         Boundary condition files
-       files_copied
-         Files copied for run
-       files_linked
-         Files linked for run
-       namelist_file
-         The namelist file
-       provisioned_run_directory
-         Run directory provisioned with all required content
-       run
-         A run
-       runscript
-         The runscript
-       streams_file
-         The streams file
-       validate
-         Validate the UW driver config
+.. literalinclude:: mpas/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: mpas/help.out
+   :language: text
 
 All tasks take the same arguments. For example:
 
-.. code-block:: text
-
-   $ uw mpas run --help
-   usage: uw mpas run --config-file PATH --cycle CYCLE [-h] [--version] [--batch] [--dry-run]
-                   [--graph-file PATH] [--quiet] [--verbose]
-
-   A run
-
-   Required arguments:
-     --config-file PATH, -c PATH
-         Path to UW YAML config file
-     --cycle CYCLE
-         The cycle in ISO8601 format
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --batch
-         Submit run to batch scheduler
-     --dry-run
-         Only log info, making no changes
-     --graph-file PATH
-         Path to Graphviz DOT output [experimental]
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
-
+.. literalinclude:: mpas/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: mpas/run-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
-The examples use a configuration file named ``config.yaml`` with content similar to:
+The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/mpas.yaml
-
+.. literalinclude:: /shared/mpas.yaml
 
 Its contents are described in depth in section :ref:`mpas_yaml`.
 
@@ -102,6 +48,8 @@ Its contents are described in depth in section :ref:`mpas_yaml`.
   .. code-block:: text
 
      $ uw mpas run --config-file config.yaml --cycle 2025-02-12T12 --batch --dry-run
+
+.. include:: /shared/key_path.rst
 
 * The ``run`` task depends on the other available tasks and executes them as prerequisites. It is possible to execute any task directly, which entails execution of any of *its* dependencies. For example, to create an ``mpas`` run directory provisioned with all the files, directories, symlinks, etc. required per the configuration file:
 

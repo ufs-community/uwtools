@@ -7,9 +7,8 @@ import logging
 import os
 from unittest.mock import patch
 
-import pytest
 import yaml
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
@@ -80,13 +79,12 @@ def test__load_paths(config, tmp_path):
 
 def test_characterize_values(config):
     values = {1: "", 2: None, 3: "{{ n }}", 4: {"a": 88}, 5: [{"b": 99}], 6: "string"}
-    complete, empty, template = config.characterize_values(values=values, parent="p")
-    assert complete == ["  p4", "  p4.a", "  pb", "  p5", "  p6"]
-    assert empty == ["  p1", "  p2"]
+    complete, template = config.characterize_values(values=values, parent="p")
+    assert complete == ["  p1", "  p2", "  p4", "  p4.a", "  pb", "  p5", "  p6"]
     assert template == ["  p3: {{ n }}"]
 
 
-@pytest.mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
+@mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
 def test_compare_config(caplog, fmt, salad_base):
     """
     Compare two config objects.
@@ -166,8 +164,8 @@ def test_derefernce_context_override(tmp_path):
     assert config["file"] == "gfs.t06z.atmanl.nc"
 
 
-@pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
-def test_invalid_config(caplog, fmt2, tmp_path):
+@mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
+def test_invalid_config(fmt2, tmp_path):
     """
     Test that invalid config files will error when attempting to dump.
     """
@@ -177,9 +175,7 @@ def test_invalid_config(caplog, fmt2, tmp_path):
     depthin = depth(cfgin.data)
     with raises(UWConfigError) as e:
         tools.format_to_config(fmt2).dump_dict(cfg=cfgin.data, path=outfile)
-    msg = f"Cannot dump depth-{depthin} config to type-'{fmt2}' config"
-    assert logged(caplog, msg)
-    assert msg in str(e.value)
+    assert f"Cannot dump depth-{depthin} config to type-'{fmt2}' config" in str(e.value)
 
 
 def test_parse_include(config):

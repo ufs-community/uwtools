@@ -1,0 +1,21 @@
+usage: uw template translate [-h] [--version] [--input-file PATH]
+                             [--output-file PATH] [--dry-run] [--quiet]
+                             [--verbose]
+
+Translate atparse to Jinja2
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --input-file PATH, -i PATH
+      Path to input file (defaults to stdin)
+  --output-file PATH, -o PATH
+      Path to output file (defaults to stdout)
+  --dry-run
+      Only log info, making no changes
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages

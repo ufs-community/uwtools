@@ -28,6 +28,7 @@ class CDEPS(Driver):
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
+        key_path: Optional[list[str]] = None,
     ):
         """
         The driver.
@@ -36,10 +37,9 @@ class CDEPS(Driver):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
+        :param key_path: Keys leading through the config to the driver's configuration block.
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle)
-        if self._dry_run:
-            dryrun()
+        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path)
         self._cycle = cycle
 
     # Workflow tasks

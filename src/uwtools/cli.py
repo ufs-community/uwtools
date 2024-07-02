@@ -4,6 +4,7 @@ Modal CLI.
 
 import datetime as dt
 import json
+import re
 import sys
 from argparse import ArgumentParser as Parser
 from argparse import HelpFormatter
@@ -12,7 +13,7 @@ from argparse import _SubParsersAction as Subparsers
 from functools import partial
 from importlib import import_module
 from pathlib import Path
-from typing import Any, Callable, Dict, List, NoReturn, Tuple
+from typing import Any, Callable, NoReturn, Optional
 
 import uwtools.api
 import uwtools.api.config
@@ -27,12 +28,13 @@ from uwtools.strings import FORMAT, STR
 from uwtools.utils.file import get_file_format, resource_path
 
 FORMATS = FORMAT.extensions()
+LEADTIME_DESC = "hours[:minutes[:seconds]]"
 TITLE_REQ_ARG = "Required arguments"
 
-Args = Dict[str, Any]
-ActionChecks = List[Callable[[Args], Args]]
-ModeChecks = Dict[str, ActionChecks]
-Checks = Dict[str, ModeChecks]
+Args = dict[str, Any]
+ActionChecks = list[Callable[[Args], Args]]
+ModeChecks = dict[str, ActionChecks]
+Checks = dict[str, ModeChecks]
 
 
 def main() -> None:
@@ -54,26 +56,32 @@ def main() -> None:
         _abort(str(e))
     try:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
-        tools: Dict[str, Callable[..., bool]] = {
+        tools: dict[str, Callable[..., bool]] = {
             STR.config: _dispatch_config,
             STR.file: _dispatch_file,
             STR.rocoto: _dispatch_rocoto,
             STR.template: _dispatch_template,
         }
-        drivers: Dict[str, Callable[..., bool]] = {
+        drivers: dict[str, Callable[..., bool]] = {
             x: partial(_dispatch_to_driver, x)
             for x in [
                 STR.cdeps,
                 STR.chgrescube,
                 STR.esggrid,
+                STR.filtertopo,
                 STR.fv3,
                 STR.globalequivresol,
+                STR.ioda,
                 STR.jedi,
                 STR.makehgrid,
+                STR.makesolomosaic,
                 STR.mpas,
                 STR.mpasinit,
+                STR.oroggsl,
                 STR.sfcclimogen,
+                STR.shave,
                 STR.ungrib,
+                STR.upp,
             ]
         }
         modes = {**tools, **drivers}
@@ -142,17 +150,19 @@ def _add_subparser_config_realize(subparsers: Subparsers) -> ActionChecks:
     optional = _basic_setup(parser)
     _add_arg_input_file(optional)
     _add_arg_input_format(optional, choices=FORMATS)
+    _add_arg_update_file(optional)
+    _add_arg_update_format(optional, choices=FORMATS)
     _add_arg_output_file(optional)
     _add_arg_output_format(optional, choices=FORMATS)
-    _add_arg_output_block(optional)
-    _add_arg_values_needed(optional)
+    _add_arg_key_path(optional, helpmsg="Dot-separated path of keys to the block to be output")
+    _add_arg_values_needed(optional, helpmsg="Print report of values needed to realize config")
     _add_arg_total(optional)
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
-    _add_arg_supplemental_files(optional)
     return checks + [
         partial(_check_file_vs_format, STR.infile, STR.infmt),
         partial(_check_file_vs_format, STR.outfile, STR.outfmt),
+        _check_update,
     ]
 
 
@@ -208,10 +218,11 @@ def _dispatch_config_realize(args: Args) -> bool:
         uwtools.api.config.realize(
             input_config=args[STR.infile],
             input_format=args[STR.infmt],
-            output_block=args[STR.outblock],
+            update_config=args[STR.updatefile],
+            update_format=args[STR.updatefmt],
             output_file=args[STR.outfile],
             output_format=args[STR.outfmt],
-            supplemental_configs=args[STR.suppfiles],
+            key_path=args[STR.keypath],
             values_needed=args[STR.valsneeded],
             total=args[STR.total],
             dry_run=args[STR.dryrun],
@@ -265,7 +276,9 @@ def _add_subparser_file_common(parser: Parser) -> ActionChecks:
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_target_dir(required, required=True)
     optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional)
+    _add_arg_config_file(optional)
+    _add_arg_cycle(optional)
+    _add_arg_leadtime(optional)
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_keys(optional)
@@ -314,6 +327,8 @@ def _dispatch_file_copy(args: Args) -> bool:
     return uwtools.api.file.copy(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        leadtime=args[STR.leadtime],
         keys=args[STR.keys],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
@@ -329,6 +344,8 @@ def _dispatch_file_link(args: Args) -> bool:
     return uwtools.api.file.link(
         target_dir=args[STR.targetdir],
         config=args[STR.cfgfile],
+        cycle=args[STR.cycle],
+        leadtime=args[STR.leadtime],
         keys=args[STR.keys],
         dry_run=args[STR.dryrun],
         stdin_ok=True,
@@ -344,7 +361,7 @@ def _add_subparser_rocoto(subparsers: Subparsers) -> ModeChecks:
 
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     """
-    parser = _add_subparser(subparsers, STR.rocoto, "Realize and validate Rocoto XML Documents")
+    parser = _add_subparser(subparsers, STR.rocoto, "Realize and validate Rocoto XML documents")
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.action.upper())
     return {
@@ -461,7 +478,7 @@ def _add_subparser_template_render(subparsers: Subparsers) -> ActionChecks:
     _add_arg_values_format(optional, choices=FORMATS)
     _add_arg_env(optional)
     _add_arg_search_path(optional)
-    _add_arg_values_needed(optional)
+    _add_arg_values_needed(optional, helpmsg="Print report of values needed to render template")
     _add_arg_dry_run(optional)
     checks = _add_args_verbosity(optional)
     _add_arg_key_eq_val_pairs(optional)
@@ -547,11 +564,13 @@ def _add_arg_config_file(group: Group, required: bool = False) -> None:
     )
 
 
-def _add_arg_cycle(group: Group) -> None:
+def _add_arg_cycle(group: Group, required: bool = False) -> None:
+    offset = dt.timedelta(hours=(dt.datetime.now(dt.timezone.utc).hour // 6) * 6)
+    cycle = dt.datetime.combine(dt.date.today(), dt.datetime.min.time()) + offset
     group.add_argument(
         _switch(STR.cycle),
-        help="The cycle in ISO8601 format",
-        required=True,
+        help="The cycle in ISO8601 format (e.g. %s)" % cycle.strftime("%Y-%m-%dT%H"),
+        required=required,
         type=dt.datetime.fromisoformat,
     )
 
@@ -573,7 +592,7 @@ def _add_arg_env(group: Group) -> None:
 
 
 def _add_arg_file_format(
-    group: Group, switch: str, helpmsg: str, choices: List[str], required: bool = False
+    group: Group, switch: str, helpmsg: str, choices: list[str], required: bool = False
 ) -> None:
     group.add_argument(
         switch,
@@ -614,7 +633,7 @@ def _add_arg_input_file(group: Group, required: bool = False) -> None:
     )
 
 
-def _add_arg_input_format(group: Group, choices: List[str], required: bool = False) -> None:
+def _add_arg_input_format(group: Group, choices: list[str], required: bool = False) -> None:
     group.add_argument(
         _switch(STR.infmt),
         choices=choices,
@@ -633,6 +652,16 @@ def _add_arg_key_eq_val_pairs(group: Group) -> None:
     )
 
 
+def _add_arg_key_path(group: Group, helpmsg: str) -> None:
+    group.add_argument(
+        _switch(STR.keypath),
+        help=helpmsg,
+        metavar="KEY[.KEY...]",
+        required=False,
+        type=lambda s: s.split("."),
+    )
+
+
 def _add_arg_keys(group: Group) -> None:
     group.add_argument(
         STR.keys,
@@ -642,13 +671,12 @@ def _add_arg_keys(group: Group) -> None:
     )
 
 
-def _add_arg_output_block(group: Group):
+def _add_arg_leadtime(group: Group, required: bool = False) -> None:
     group.add_argument(
-        _switch(STR.outblock),
-        help="Dot-separated path of keys to the block to be output",
-        metavar="KEY[.KEY[.KEY]...]",
-        required=False,
-        type=lambda s: s.split("."),
+        _switch(STR.leadtime),
+        help=f"The leadtime as {LEADTIME_DESC}",
+        required=required,
+        type=_timedelta_from_str,
     )
 
 
@@ -663,7 +691,7 @@ def _add_arg_output_file(group: Group, required: bool = False) -> None:
     )
 
 
-def _add_arg_output_format(group: Group, choices: List[str], required: bool = False) -> None:
+def _add_arg_output_format(group: Group, choices: list[str], required: bool = False) -> None:
     group.add_argument(
         _switch(STR.outfmt),
         choices=choices,
@@ -702,16 +730,6 @@ def _add_arg_search_path(group: Group) -> None:
     )
 
 
-def _add_arg_supplemental_files(group: Group) -> None:
-    group.add_argument(
-        STR.suppfiles,
-        help="Additional files to supplement primary input",
-        metavar="PATH",
-        nargs="*",
-        type=Path,
-    )
-
-
 def _add_arg_target_dir(group: Group, required: bool) -> None:
     group.add_argument(
         _switch(STR.targetdir),
@@ -730,6 +748,27 @@ def _add_arg_total(group: Group) -> None:
     )
 
 
+def _add_arg_update_file(group: Group, required: bool = False) -> None:
+    group.add_argument(
+        _switch(STR.updatefile),
+        "-u",
+        help="Path to update file (defaults to stdin)",
+        metavar="PATH",
+        required=required,
+        type=Path,
+    )
+
+
+def _add_arg_update_format(group: Group, choices: list[str], required: bool = False) -> None:
+    group.add_argument(
+        _switch(STR.updatefmt),
+        choices=choices,
+        help="Update format",
+        required=required,
+        type=str,
+    )
+
+
 def _add_arg_values_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.valsfile),
@@ -740,7 +779,7 @@ def _add_arg_values_file(group: Group, required: bool = False) -> None:
     )
 
 
-def _add_arg_values_format(group: Group, choices: List[str]) -> None:
+def _add_arg_values_format(group: Group, choices: list[str]) -> None:
     group.add_argument(
         _switch(STR.valsfmt),
         choices=choices,
@@ -750,11 +789,11 @@ def _add_arg_values_format(group: Group, choices: List[str]) -> None:
     )
 
 
-def _add_arg_values_needed(group: Group) -> None:
+def _add_arg_values_needed(group: Group, helpmsg: str) -> None:
     group.add_argument(
         _switch(STR.valsneeded),
         action="store_true",
-        help="Print report of values needed to render template",
+        help=helpmsg,
     )
 
 
@@ -810,25 +849,35 @@ def _add_subparser(subparsers: Subparsers, name: str, helpmsg: str) -> Parser:
     return parser
 
 
-def _add_subparser_for_driver(name: str, subparsers: Subparsers, with_cycle: bool) -> ModeChecks:
+def _add_subparser_for_driver(
+    name: str,
+    subparsers: Subparsers,
+    with_cycle: Optional[bool] = False,
+    with_leadtime: Optional[bool] = False,
+) -> ModeChecks:
     """
     Subparser for a driver mode.
 
     :param name: Name of the driver whose subparser to configure.
     :param subparsers: Parent parser's subparsers, to add this subparser to.
     :param with_cycle: Does this driver require a cycle?
+    :param with_leadtime: Does this driver require a leadtime?
     """
     parser = _add_subparser(subparsers, name, "Execute %s tasks" % name)
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.action, STR.task.upper())
     return {
-        task: _add_subparser_for_driver_task(subparsers, task, helpmsg, with_cycle)
+        task: _add_subparser_for_driver_task(subparsers, task, helpmsg, with_cycle, with_leadtime)
         for task, helpmsg in import_module("uwtools.api.%s" % name).tasks().items()
     }
 
 
 def _add_subparser_for_driver_task(
-    subparsers: Subparsers, task: str, helpmsg: str, with_cycle: bool
+    subparsers: Subparsers,
+    task: str,
+    helpmsg: str,
+    with_cycle: Optional[bool] = False,
+    with_leadtime: Optional[bool] = False,
 ) -> ActionChecks:
     """
     Subparser for a driver action.
@@ -837,16 +886,24 @@ def _add_subparser_for_driver_task(
     :param task: The task to add a subparser for.
     :param helpmsg: Help message for task.
     :param with_cycle: Does this driver require a cycle?
+    :param with_leadtime: Does this driver require a leadtime?
     """
     parser = _add_subparser(subparsers, task, helpmsg.rstrip("."))
     required = parser.add_argument_group(TITLE_REQ_ARG)
     if with_cycle:
-        _add_arg_cycle(required)
+        _add_arg_cycle(required, required=True)
+    if with_leadtime:
+        _add_arg_leadtime(required, required=True)
     optional = _basic_setup(parser)
-    _add_arg_config_file(group=optional)
+    _add_arg_config_file(optional)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
     _add_arg_graph_file(optional)
+    _add_arg_key_path(
+        optional,
+        helpmsg="Dot-separated path of keys leading through the config "
+        "to the driver's configuration block",
+    )
     checks = _add_args_verbosity(optional)
     return checks
 
@@ -901,13 +958,20 @@ def _check_template_render_vals_args(args: Args) -> Args:
     return args
 
 
+def _check_update(args: Args) -> Args:
+    if args.get(STR.updatefile) is not None:
+        if args.get(STR.updatefmt) is None:
+            args[STR.updatefmt] = get_file_format(args[STR.updatefile])
+    return args
+
+
 def _check_verbosity(args: Args) -> Args:
     if args.get(STR.quiet) and args.get(STR.verbose):
         _abort("%s may not be used with %s" % (_switch(STR.quiet), _switch(STR.verbose)))
     return args
 
 
-def _dict_from_key_eq_val_strings(config_items: List[str]) -> Dict[str, str]:
+def _dict_from_key_eq_val_strings(config_items: list[str]) -> dict[str, str]:
     """
     Given a list of key=value strings, return a dictionary of key/value pairs.
 
@@ -925,15 +989,20 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     execute: Callable[..., bool] = import_module("uwtools.api.%s" % name).execute
-    return execute(
-        task=args[STR.action],
-        config=args[STR.cfgfile],
-        cycle=args[STR.cycle],
-        batch=args[STR.batch],
-        dry_run=args[STR.dryrun],
-        graph_file=args[STR.graphfile],
-        stdin_ok=True,
-    )
+    kwargs = {
+        "task": args[STR.action],
+        "config": args[STR.cfgfile],
+        "batch": args[STR.batch],
+        "dry_run": args[STR.dryrun],
+        "graph_file": args[STR.graphfile],
+        "key_path": args[STR.keypath],
+        "stdin_ok": True,
+    }
+    if cycle := args.get(STR.cycle):
+        kwargs[STR.cycle] = cycle
+    if (leadtime := args.get(STR.leadtime)) is not None:
+        kwargs[STR.leadtime] = leadtime
+    return execute(**kwargs)
 
 
 def _formatter(prog: str) -> HelpFormatter:
@@ -944,7 +1013,7 @@ def _formatter(prog: str) -> HelpFormatter:
     return HelpFormatter(prog, max_help_position=6)
 
 
-def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
+def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
     """
     Parse command-line arguments.
 
@@ -963,22 +1032,40 @@ def _parse_args(raw_args: List[str]) -> Tuple[Args, Checks]:
         STR.template: partial(_add_subparser_template, subparsers),
     }
     drivers = {
-        x: partial(_add_subparser_for_driver, x, subparsers, with_cycle)
-        for x, with_cycle in [
-            (STR.cdeps, True),
-            (STR.chgrescube, True),
-            (STR.esggrid, False),
-            (STR.fv3, True),
-            (STR.globalequivresol, False),
-            (STR.jedi, True),
-            (STR.makehgrid, False),
-            (STR.mpas, True),
-            (STR.mpasinit, True),
-            (STR.sfcclimogen, False),
-            (STR.ungrib, True),
+        component: partial(_add_subparser_for_driver, component, subparsers)
+        for component in [
+            STR.esggrid,
+            STR.filtertopo,
+            STR.globalequivresol,
+            STR.makehgrid,
+            STR.makesolomosaic,
+            STR.oroggsl,
+            STR.sfcclimogen,
+            STR.shave,
         ]
     }
-    modes = {**tools, **drivers}
+    drivers_with_cycle = {
+        component: partial(_add_subparser_for_driver, component, subparsers, with_cycle=True)
+        for component in [
+            STR.cdeps,
+            STR.chgrescube,
+            STR.fv3,
+            STR.ioda,
+            STR.jedi,
+            STR.mpas,
+            STR.mpasinit,
+            STR.ungrib,
+        ]
+    }
+    drivers_with_cycle_and_leadtime = {
+        component: partial(
+            _add_subparser_for_driver, component, subparsers, with_cycle=True, with_leadtime=True
+        )
+        for component in [
+            STR.upp,
+        ]
+    }
+    modes = {**tools, **drivers, **drivers_with_cycle, **drivers_with_cycle_and_leadtime}
     checks = {k: modes[k]() for k in sorted(modes.keys())}
     return vars(parser.parse_args(raw_args)), checks
 
@@ -991,6 +1078,18 @@ def _switch(arg: str) -> str:
     :return: The long-form switch.
     """
     return "--%s" % arg.replace("_", "-")
+
+
+def _timedelta_from_str(tds: str) -> dt.timedelta:
+    """
+    Return a timedelta parsed from a leadtime string.
+
+    :param tds: The timedelta string to parse.
+    """
+    if matches := re.match(r"(\d+)(:(\d+))?(:(\d+))?", tds):
+        h, m, s = [int(matches.groups()[n] or 0) for n in (0, 2, 4)]
+        return dt.timedelta(hours=h, minutes=m, seconds=s)
+    _abort(f"Specify leadtime as {LEADTIME_DESC}")
 
 
 def _version() -> str:

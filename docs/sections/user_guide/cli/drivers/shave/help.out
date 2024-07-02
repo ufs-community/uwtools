@@ -1,0 +1,20 @@
+usage: uw shave [-h] [--version] TASK ...
+
+Execute shave tasks
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+
+Positional arguments:
+  TASK
+    provisioned_run_directory
+      Run directory provisioned with all required content
+    run
+      A run
+    runscript
+      The runscript
+    validate
+      Validate the UW driver config

@@ -3,13 +3,12 @@ Tools for working with configs.
 """
 
 from pathlib import Path
-from typing import Callable, List, Optional, Union
+from typing import Callable, Optional, Union
 
 from uwtools.config.formats.base import Config
-from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.jinja2 import unrendered
 from uwtools.config.support import depth, format_to_config, log_and_error
-from uwtools.exceptions import UWConfigRealizeError, UWError
+from uwtools.exceptions import UWConfigError, UWConfigRealizeError, UWError
 from uwtools.logging import MSGWIDTH, log
 from uwtools.strings import FORMAT
 from uwtools.utils.file import get_file_format
@@ -79,10 +78,11 @@ def config_check_depths_update(config_obj: Union[Config, dict], target_format: s
 def realize_config(
     input_config: Union[Config, Optional[Path]] = None,
     input_format: Optional[str] = None,
-    output_block: Optional[List[Union[str, int]]] = None,
+    update_config: Union[Config, Optional[Path]] = None,
+    update_format: Optional[str] = None,
     output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
-    supplemental_configs: Optional[List[Union[dict, Config, Path]]] = None,
+    key_path: Optional[list[Union[str, int]]] = None,
     values_needed: bool = False,
     total: bool = False,
     dry_run: bool = False,
@@ -90,22 +90,12 @@ def realize_config(
     """
     NB: This docstring is dynamically replaced: See realize_config.__doc__ definition below.
     """
-    input_format = _ensure_format("input", input_format, input_config)
-    output_format = _ensure_format("output", output_format, output_file)
-    _validate_format_output(input_format, output_format)
-    input_obj: Config = (
-        input_config
-        if isinstance(input_config, Config)
-        else format_to_config(input_format)(config=input_config)
-    )
-    if supplemental_configs:
-        input_obj = _realize_config_update(input_obj, input_format, supplemental_configs)
+    input_obj, input_format = _realize_config_input_setup(input_config, input_format)
+    input_obj = _realize_config_update(input_obj, update_config, update_format)
     input_obj.dereference()
-    output_data = input_obj.data
-    if output_block is not None:
-        for key in output_block:
-            output_data = output_data.get(key, {})
-    config_check_depths_realize(output_data, output_format)
+    output_data, output_format = _realize_config_output_setup(
+        input_obj, output_file, output_format, key_path
+    )
     if dry_run:
         for line in str(input_obj).strip().split("\n"):
             log.info(line)
@@ -136,7 +126,7 @@ def _ensure_format(
     :raises: UWError if the format cannot be determined.
     """
     if isinstance(config, Config):
-        return FORMAT.yaml
+        return config.get_format()
     if fmt is None:
         if config is not None:
             fmt = get_file_format(config)
@@ -145,7 +135,7 @@ def _ensure_format(
     return fmt
 
 
-def _print_config_section(config: dict, key_path: List[str]) -> None:
+def _print_config_section(config: dict, key_path: list[str]) -> None:
     """
     Descends into the config via the given keys, then prints the contents of the located subtree as
     key=value pairs, one per line.
@@ -170,48 +160,91 @@ def _print_config_section(config: dict, key_path: List[str]) -> None:
     print("\n".join(sorted(output_lines)))
 
 
+def _realize_config_input_setup(
+    input_config: Union[Config, Optional[Path]] = None, input_format: Optional[str] = None
+) -> tuple[Config, str]:
+    """
+    Set up config-realize input.
+
+    :param input_config: Input config source (None => read stdin).
+    :param input_format: Format of the input config.
+    :return: The input Config object and its format name.
+    """
+    input_format = _ensure_format("input", input_format, input_config)
+    if not input_config:
+        log.debug("Reading input from stdin")
+    input_obj: Config = (
+        input_config
+        if isinstance(input_config, Config)
+        else format_to_config(input_format)(config=input_config)
+    )
+    return input_obj, input_format
+
+
+def _realize_config_output_setup(
+    input_obj: Config,
+    output_file: Optional[Path] = None,
+    output_format: Optional[str] = None,
+    key_path: Optional[list[Union[str, int]]] = None,
+) -> tuple[dict, str]:
+    """
+    Set up config-realize output.
+
+    :param input_obj: The input Config object.
+    :param output_file: Output config destination (None => write to stdout).
+    :param output_format: Format of the output config.
+    :param key_path: Path through keys to the desired output block.
+    :return: The unrealized data to output and the output format name.
+    """
+    output_format = _ensure_format("output", output_format, output_file)
+    log.debug("Writing output to %s" % (output_file or "stdout"))
+    _validate_format("output", output_format, input_obj.get_format())
+    output_data = input_obj.data
+    if key_path is not None:
+        for key in key_path:
+            output_data = output_data[key]
+    config_check_depths_realize(output_data, output_format)
+    return output_data, output_format
+
+
 def _realize_config_update(
-    config_obj: Config,
-    config_fmt: str,
-    supplemental_configs: Optional[List[Union[dict, Config, Path]]] = None,
+    input_obj: Config,
+    update_config: Union[Config, Optional[Path]] = None,
+    update_format: Optional[str] = None,
 ) -> Config:
     """
-    Update config with values from other configs, if given.
+    Set up config-realize update.
 
-    :param config_obj: The config to update.
-    :param config_fmt: Format of config's source.
-    :param supplemental_configs: Sources of values to modify input.
-    :return: The input config, possibly updated.
+    :param input_obj: The input Config object.
+    :param update_config: Input config source (None => read stdin).
+    :param update_format: Format of the update config.
+    :return: The updated but unrealized Config object.
     """
-    if supplemental_configs:
-        log.debug("Before update, config has depth %s", config_obj.depth)
-        supplemental_obj: Config
-        for idx, supplemental_config in enumerate(supplemental_configs):
-            _validate_format_supplemental(config_fmt, supplemental_config, idx)
-            if isinstance(supplemental_config, dict):
-                supplemental_obj = YAMLConfig(config=supplemental_config)
-            elif isinstance(supplemental_config, Config):
-                supplemental_obj = supplemental_config
-            else:
-                supplemental_format = get_file_format(supplemental_config)
-                supplemental_obj = format_to_config(supplemental_format)(config=supplemental_config)
-            log.debug("Supplemental config has depth %s", supplemental_obj.depth)
-            config_check_depths_update(supplemental_obj, config_obj.get_format())
-            config_obj.update_values(supplemental_obj)
-            log.debug("After update, config has depth %s", config_obj.depth)
-    else:
-        log.debug("Input config has depth %s", config_obj.depth)
-    return config_obj
+    if update_config or update_format:
+        update_format = _ensure_format("update", update_format, update_config)
+        if not update_config:
+            log.debug("Reading update from stdin")
+        _validate_format("update", update_format, input_obj.get_format())
+        update_obj: Config = (
+            update_config
+            if isinstance(update_config, Config)
+            else format_to_config(update_format)(config=update_config)
+        )
+        log.debug("Initial input config depth: %s", input_obj.depth)
+        log.debug("Update config depth: %s", update_obj.depth)
+        config_check_depths_update(update_obj, input_obj.get_format())
+        input_obj.update_values(update_obj)
+        log.debug("Final input config depth: %s", input_obj.depth)
+    return input_obj
 
 
-def _realize_config_values_needed(input_obj: Config) -> bool:
+def _realize_config_values_needed(input_obj: Config) -> None:
     """
     Print a report characterizing input values as complete, empty, or template placeholders.
 
     :param input_obj: The config to update.
-    :return: True
     """
-    complete, empty, template = input_obj.characterize_values(input_obj.data, parent="")
+    complete, template = input_obj.characterize_values(input_obj.data, parent="")
     if complete:
         log.info("Keys that are complete:")
         for var in complete:
@@ -225,14 +258,6 @@ def _realize_config_values_needed(input_obj: Config) -> bool:
             log.info(var)
     else:
         log.info("No keys have unrendered Jinja2 variables/expressions.")
-    log.info("")
-    if empty:
-        log.info("Keys that are set to empty:")
-        for var in empty:
-            log.info(var)
-    else:
-        log.info("No keys are set to empty.")
-    return True
 
 
 def _validate_depth(
@@ -248,48 +273,24 @@ def _validate_depth(
     target_class = format_to_config(target_format)
     config = config_obj.data if isinstance(config_obj, Config) else config_obj
     if bad_depth(target_class.get_depth_threshold(), depth(config)):
-        raise log_and_error(
+        raise UWConfigError(
             "Cannot %s depth-%s config to type-'%s' config" % (action, depth(config), target_format)
         )
 
 
-def _validate_format_output(input_fmt: str, output_fmt: str) -> None:
+def _validate_format(other_fmt_desc: str, other_fmt: str, input_fmt: str) -> None:
     """
-    Ensure output format agrees with input.
+    Ensure a format agrees with the input format.
 
+    :param other_fmt_desc: Description of other format.
+    :param other_fmt: Other format.
     :param input_fmt: Input format.
-    :param output_fmt: Output format.
-    :raises: UWError if output format is incompatible.
+    :raises: UWError if other format is incompatible.
     """
-    if FORMAT.yaml not in (input_fmt, output_fmt) and input_fmt != output_fmt:
+    if FORMAT.yaml not in (input_fmt, other_fmt) and input_fmt != other_fmt:
         raise UWError(
-            "Accepted output formats for input format %s are %s or yaml" % (input_fmt, input_fmt)
-        )
-
-
-def _validate_format_supplemental(
-    config_fmt: str, supplemental_cfg: Union[dict, Config, Path], idx: int
-) -> None:
-    """
-    Ensure supplemental config format agrees with base config format.
-
-    :param config_fmt: Base config format.
-    :param supplemental_cfg: Supplemental config to check.
-    :param idx: Index of supplemental config for identification purposes.
-    :raises: UWError if supplemental config format is incompatible.
-    """
-    pre = f"Supplemental config #{idx + 1}"
-    if isinstance(supplemental_cfg, dict):
-        log.debug("%s is a dict: Cannot validate its format vs %s", pre, config_fmt)
-        return
-    sc_fmt = (
-        supplemental_cfg.get_format()
-        if isinstance(supplemental_cfg, Config)
-        else _ensure_format(desc=pre, config=supplemental_cfg)
-    )
-    if sc_fmt not in (FORMAT.yaml, config_fmt):
-        raise UWError(
-            "%s format %s must be %s or input format %s" % (pre, sc_fmt, FORMAT.yaml, config_fmt)
+            "Accepted %s formats for input format %s are %s or %s"
+            % (other_fmt_desc, input_fmt, input_fmt, FORMAT.yaml)
         )
 
 
@@ -319,12 +320,13 @@ Realize an output config based on an input config and optional values-providing 
 
 Recognized file extensions are: {extensions}
 
-:param input_config: Input config source (None => read stdin).
+:param input_config: Input config source (None => read ``stdin``).
 :param input_format: Format of the input config.
-:param output_block: Path through keys to the desired output block.
-:param output_file: Output config destination (None => write to stdout).
+:param update_config: Input config source (None => read ``stdin``).
+:param update_format: Format of the update config.
+:param output_file: Output config destination (None => write to ``stdout``).
 :param output_format: Format of the output config.
-:param supplemental_configs: Sources of values used to modify input.
+:param key_path: Path through keys to the desired output block.
 :param values_needed: Report complete, missing, and template values.
 :param total: Require rendering of all Jinja2 variables/expressions.
 :param dry_run: Log output instead of writing to output.

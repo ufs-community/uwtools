@@ -1,8 +1,8 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
-import pytest
+import iotaa
 import yaml
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools import file
 from uwtools.exceptions import UWConfigError
@@ -25,26 +25,8 @@ def assets(tmp_path):
     return dstdir, cfgdict, cfgfile
 
 
-@pytest.mark.parametrize("source", ("dict", "file"))
-def test_FileStager(assets, source):
-    dstdir, cfgdict, cfgfile = assets
-    config = cfgdict if source == "dict" else cfgfile
-    stager = file.FileStager(target_dir=dstdir, config=config, keys=["a", "b"])
-    assert set(stager._file_map.keys()) == {"foo", "subdir/bar"}
-    assert stager._validate() is True
-
-
-@pytest.mark.parametrize("source", ("dict", "file"))
-def test_FileStager_bad_key(assets, source):
-    dstdir, cfgdict, cfgfile = assets
-    config = cfgdict if source == "dict" else cfgfile
-    with raises(UWConfigError) as e:
-        file.FileStager(target_dir=dstdir, config=config, keys=["a", "x"])
-    assert str(e.value) == "Config navigation a -> x failed"
-
-
-@pytest.mark.parametrize("source", ("dict", "file"))
-def test_FileCopier_config_file(assets, source):
+@mark.parametrize("source", ("dict", "file"))
+def test_FileCopier(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     assert not (dstdir / "foo").exists()
@@ -55,8 +37,19 @@ def test_FileCopier_config_file(assets, source):
     assert (dstdir / "subdir" / "bar").is_file()
 
 
-@pytest.mark.parametrize("source", ("dict", "file"))
-def test_FileLinker_config_file(assets, source):
+def test_FileCopier_config_file_dry_run(assets):
+    dstdir, cfgdict, _ = assets
+    assert not (dstdir / "foo").exists()
+    assert not (dstdir / "subdir" / "bar").exists()
+    stager = file.FileCopier(target_dir=dstdir, config=cfgdict, keys=["a", "b"], dry_run=True)
+    stager.go()
+    assert not (dstdir / "foo").exists()
+    assert not (dstdir / "subdir" / "bar").exists()
+    iotaa.dryrun(False)
+
+
+@mark.parametrize("source", ("dict", "file"))
+def test_FileLinker(assets, source):
     dstdir, cfgdict, cfgfile = assets
     config = cfgdict if source == "dict" else cfgfile
     assert not (dstdir / "foo").exists()
@@ -67,7 +60,25 @@ def test_FileLinker_config_file(assets, source):
     assert (dstdir / "subdir" / "bar").is_symlink()
 
 
-@pytest.mark.parametrize("val", [None, True, False, "str", 88, 3.14, [], tuple()])
+@mark.parametrize("source", ("dict", "file"))
+def test_FileStager(assets, source):
+    dstdir, cfgdict, cfgfile = assets
+    config = cfgdict if source == "dict" else cfgfile
+    stager = file.FileStager(target_dir=dstdir, config=config, keys=["a", "b"])
+    assert set(stager._file_map.keys()) == {"foo", "subdir/bar"}
+    assert stager._validate() is True
+
+
+@mark.parametrize("source", ("dict", "file"))
+def test_FileStager_bad_key(assets, source):
+    dstdir, cfgdict, cfgfile = assets
+    config = cfgdict if source == "dict" else cfgfile
+    with raises(UWConfigError) as e:
+        file.FileStager(target_dir=dstdir, config=config, keys=["a", "x"])
+    assert str(e.value) == "Failed following YAML key(s): a -> x"
+
+
+@mark.parametrize("val", [None, True, False, "str", 88, 3.14, [], tuple()])
 def test_FileStager_empty_val(assets, val):
     dstdir, cfgdict, _ = assets
     cfgdict["a"]["b"] = val

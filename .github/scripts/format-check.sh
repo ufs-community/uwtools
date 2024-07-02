@@ -1,11 +1,10 @@
-# Actions invokes script with: bash -e <script>
-
-set -a
+set -ae
 
 unformatted() {
   set -x
   make format
   if [[ -n "$(git status --porcelain)" ]]; then
+    git --no-pager diff
     (set +x && echo UNFORMATTED CODE DETECTED)
     return 1
   fi

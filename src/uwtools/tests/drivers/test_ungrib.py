@@ -7,21 +7,13 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import yaml
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers import ungrib
-from uwtools.scheduler import Slurm
+from uwtools.drivers.driver import Driver
+from uwtools.drivers.ungrib import Ungrib
 
 # Fixtures
-
-
-@fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
-
-
-# Driver fixtures
 
 
 @fixture
@@ -45,46 +37,45 @@ def config(tmp_path):
             "vtable": str(tmp_path / "Vtable.GFS"),
         },
         "platform": {
-            "account": "wrfruc",
+            "account": "me",
             "scheduler": "slurm",
         },
     }
 
 
 @fixture
-def config_file(config, tmp_path):
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
+def cycle():
+    return dt.datetime(2024, 2, 1, 18)
 
 
 @fixture
-def driverobj(config_file, cycle):
-    return ungrib.Ungrib(config=config_file, cycle=cycle, batch=True)
+def driverobj(config, cycle):
+    return Ungrib(config=config, cycle=cycle, batch=True)
 
 
-# Driver tests
+# Tests
 
 
-def test_Ungrib(driverobj):
-    assert isinstance(driverobj, ungrib.Ungrib)
-
-
-def test_Ungrib_dry_run(config_file, cycle):
-    with patch.object(ungrib, "dryrun") as dryrun:
-        driverobj = ungrib.Ungrib(config=config_file, cycle=cycle, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
-
-
-def test_Ungrib__gribfile(driverobj):
-    src = driverobj._rundir / "GRIBFILE.AAA.in"
-    src.touch()
-    dst = driverobj._rundir / "GRIBFILE.AAA"
-    assert not dst.is_symlink()
-    driverobj._gribfile(src, dst)
-    assert dst.is_symlink()
+@mark.parametrize(
+    "method",
+    [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runcmd",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_validate",
+        "_write_runscript",
+        "run",
+        "runscript",
+    ],
+)
+def test_Ungrib(method):
+    assert getattr(Ungrib, method) is getattr(Driver, method)
 
 
 def test_Ungrib_gribfiles(driverobj, tmp_path):
@@ -125,28 +116,6 @@ def test_Ungrib_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_Ungrib_run_batch(driverobj):
-    with patch.object(driverobj, "_run_via_batch_submission") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_Ungrib_run_local(driverobj):
-    driverobj._batch = False
-    with patch.object(driverobj, "_run_via_local_execution") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_Ungrib_runscript(driverobj):
-    with patch.object(driverobj, "_runscript") as runscript:
-        driverobj.runscript()
-        runscript.assert_called_once()
-        args = ("envcmds", "envvars", "execution", "scheduler")
-        types = [list, dict, list, Slurm]
-        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
-
-
 def test_Ungrib_vtable(driverobj):
     src = driverobj._rundir / "Vtable.GFS.in"
     src.touch()
@@ -157,20 +126,21 @@ def test_Ungrib_vtable(driverobj):
     assert dst.is_symlink()
 
 
-def test_Ungrib__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["ungrib"]
+def test_Ungrib__driver_name(driverobj):
+    assert driverobj._driver_name == "ungrib"
 
 
-def test_Ungrib__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript.ungrib"
+def test_Ungrib__gribfile(driverobj):
+    src = driverobj._rundir / "GRIBFILE.AAA.in"
+    src.touch()
+    dst = driverobj._rundir / "GRIBFILE.AAA"
+    assert not dst.is_symlink()
+    driverobj._gribfile(src, dst)
+    assert dst.is_symlink()
 
 
 def test_Ungrib__taskname(driverobj):
     assert driverobj._taskname("foo") == "20240201 18Z ungrib foo"
-
-
-def test_Ungrib__validate(driverobj):
-    driverobj._validate()
 
 
 def test__ext():

@@ -5,10 +5,12 @@ fv3
 
 Structured YAML to run FV3 is validated by JSON Schema and requires the ``fv3:`` block, described below. If FV3 is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required. The configuration files required by the UFS Weather Model are documented :weather-model-io:`here<model-configuration-files>`.
 
+.. include:: /shared/injected_cycle.rst
+
 Here is a prototype UW YAML ``fv3:`` block, explained in detail below:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/fv3.yaml
+.. literalinclude:: /shared/fv3.yaml
 
 UW YAML for the ``fv3:`` Block
 ------------------------------
@@ -26,7 +28,7 @@ Accepted values are ``global`` and ``regional``.
 execution:
 ^^^^^^^^^^
 
-See :ref:`here <execution_yaml>` for details.
+See :ref:`this page <execution_yaml>` for details.
 
 field_table:
 ^^^^^^^^^^^^
@@ -36,19 +38,7 @@ The path to a :weather-model-io:`valid field-table file<field-table-file>` to be
 files_to_copy:
 ^^^^^^^^^^^^^^
 
-See :ref:`this page <files_yaml>` for details. For the ``fv3`` driver, both keys and values may contain Jinja2 variables/expressions using a ``cycle`` variable, which is a Python ``datetime`` object corresponding to the FV3 cycle being run. This supports specification of cycle-specific filenames/paths. For example, a key-value pair
-
-.. code-block:: yaml
-
-   gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc: /some/path/{{ cycle.strftime('%Y%m%d')}}/{{ cycle.strftime('%H') }}/gfs.t{{ cycle.strftime('%H') }}z.atmanl.nc
-
-would be rendered as
-
-.. code-block:: yaml
-
-   gfs.t18z.atmanl.nc: /some/path/20240212/18/gfs.t18z.atmanl.nc
-
-for the ``2024-02-12T18`` cycle.
+See :ref:`this page <files_yaml>` for details.
 
 files_to_link:
 ^^^^^^^^^^^^^^
@@ -60,20 +50,17 @@ lateral_boundary_conditions:
 
 Describes how the lateral boundary conditions have been prepared for a limited-area configuration of the FV3 forecast. Required when ``domain`` is ``regional``.
 
-interval_hours:
-"""""""""""""""
+  **interval_hours:**
 
-How frequently the lateral boundary conditions will be used in the FV3 forecast, in integer hours.
+  How frequently the lateral boundary conditions will be used in the FV3 forecast, in integer hours.
 
-offset:
-"""""""
+  **offset:**
 
-How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
+  How many hours earlier the external model used for boundary conditions started compared to the desired forecast cycle, in integer hours.
 
-path:
-"""""
+  **path:**
 
-An absolute-path template to the lateral boundary condition files prepared for the forecast. The Python ``int`` variable ``forecast_hour`` will be interpolated into, e.g., ``/path/to/srw.t00z.gfs_bndy.tile7.f{forecast_hour:03d}.nc``. Note that this is a Python string template rather than a Jinja2 template.
+  An absolute-path template to the lateral boundary condition files prepared for the forecast. The Python ``int`` variable ``forecast_hour`` will be interpolated into, e.g., ``/path/to/srw.t00z.gfs_bndy.tile7.f{forecast_hour:03d}.nc``. Note that this is a Python string template rather than a Jinja2 template.
 
 length:
 ^^^^^^^
@@ -83,14 +70,16 @@ The length of the forecast in integer hours.
 model_configure:
 ^^^^^^^^^^^^^^^^
 
-Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<model-configure-file>`.
+Supports ``base_file:`` and ``update_values:`` blocks (see :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<model-configure-file>`.
 
 namelist:
 ^^^^^^^^^
 
-Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<namelist-file-input-nml>`.
+Supports ``base_file:`` and ``update_values:`` blocks (see :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<namelist-file-input-nml>`.
+
+.. include:: /shared/validate_namelist.rst
 
 run_dir:
 ^^^^^^^^
 
-The path to the directory where FV3 will find its inputs, configuration files, etc., and where it will write its output.
+The path to the run directory.

@@ -1,5 +1,6 @@
 # pylint: disable=missing-function-docstring,redefined-outer-name
 
+import datetime as dt
 from pathlib import Path
 from unittest.mock import patch
 
@@ -13,8 +14,10 @@ def kwargs():
     return {
         "target_dir": "/target/dir",
         "config": "/config/file",
+        "cycle": dt.datetime.now(),
+        "leadtime": dt.timedelta(hours=6),
         "keys": ["a", "b"],
-        "dry_run": True,
+        "dry_run": False,
     }
 
 

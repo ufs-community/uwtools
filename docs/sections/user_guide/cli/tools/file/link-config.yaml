@@ -1,0 +1,4 @@
+config:
+  files:
+    foo: src/foo
+    subdir/bar: src/bar

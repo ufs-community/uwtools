@@ -1,0 +1,4 @@
+#!/bin/bash
+
+time /path/to/make_hgrid --do_schmidt --great_circle_algorithm --grid_name C96_foo --grid_type gnomonic_ed --halo 1 --iend_nest 87 --istart_nest 10 --jend_nest 78 --jstart_nest 19 --nest_grids 1 --nlon 192 --parent_tile 6 --refine_ratio 2 --stretch_factor 1.0001 --target_lat 38.5 --target_lon -97.5
+test $? -eq 0 && touch runscript.make_hgrid.done

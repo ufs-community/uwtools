@@ -7,7 +7,7 @@ from collections import UserDict
 from copy import deepcopy
 from io import StringIO
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import yaml
 
@@ -44,7 +44,7 @@ class Config(ABC, UserDict):
 
     def __repr__(self) -> str:
         """
-        Returns the string representation of a Config object.
+        Returns the YAML string representation of a Config object.
         """
         s = StringIO()
         yaml.dump(self.data, s)
@@ -63,7 +63,7 @@ class Config(ABC, UserDict):
         :param config_file: Path to config file to load.
         """
 
-    def _load_paths(self, config_files: List[Path]) -> dict:
+    def _load_paths(self, config_files: list[Path]) -> dict:
         """
         Merge and return the contents of a collection of config files.
 
@@ -83,38 +83,35 @@ class Config(ABC, UserDict):
 
     # Public methods
 
-    def characterize_values(self, values: dict, parent: str) -> Tuple[list, list, list]:
+    def characterize_values(self, values: dict, parent: str) -> tuple[list, list]:
         """
-        Characterize values as complete, empty, or template placeholders.
+        Characterize values as complete or as template placeholders.
 
         :param values: The dictionary to examine.
         :param parent: Parent key.
-        :return: Lists of of complete, empty, and template-placeholder values.
+        :return: Lists of of complete and template-placeholder values.
         """
-        complete: List[str] = []
-        empty: List[str] = []
-        template: List[str] = []
+        complete: list[str] = []
+        template: list[str] = []
         for key, val in values.items():
             if isinstance(val, dict):
                 complete.append(f"{INDENT}{parent}{key}")
-                c, e, t = self.characterize_values(val, f"{parent}{key}.")
-                complete, empty, template = complete + c, empty + e, template + t
+                c, t = self.characterize_values(val, f"{parent}{key}.")
+                complete, template = complete + c, template + t
             elif isinstance(val, list):
                 for item in val:
                     if isinstance(item, dict):
-                        c, e, t = self.characterize_values(item, parent)
-                        complete, empty, template = complete + c, empty + e, template + t
+                        c, t = self.characterize_values(item, parent)
+                        complete, template = complete + c, template + t
                         complete.append(f"{INDENT}{parent}{key}")
                     elif "{{" in str(val) or "{%" in str(val):
                         template.append(f"{INDENT}{parent}{key}: {val}")
                         break
             elif "{{" in str(val) or "{%" in str(val):
                 template.append(f"{INDENT}{parent}{key}: {val}")
-            elif val == "" or val is None:
-                empty.append(f"{INDENT}{parent}{key}")
             else:
                 complete.append(f"{INDENT}{parent}{key}")
-        return complete, empty, template
+        return complete, template
 
     def compare_config(self, dict1: dict, dict2: Optional[dict] = None) -> bool:
         """

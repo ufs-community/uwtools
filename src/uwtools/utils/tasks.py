@@ -35,7 +35,7 @@ def existing(path: Path):
 @external
 def file(path: Path):
     """
-    An existing file.
+    An existing file or symlink to an existing file.
 
     :param path: Path to the file.
     """
@@ -54,7 +54,7 @@ def filecopy(src: Path, dst: Path):
     yield "Copy %s -> %s" % (src, dst)
     yield asset(dst, dst.is_file)
     yield file(src)
-    dst.parent.mkdir(exist_ok=True)
+    dst.parent.mkdir(parents=True, exist_ok=True)
     copy(src, dst)
 
 
@@ -70,4 +70,7 @@ def symlink(target: Path, linkname: Path):
     yield asset(linkname, linkname.exists)
     yield existing(target)
     linkname.parent.mkdir(parents=True, exist_ok=True)
-    os.symlink(src=target, dst=linkname)
+    os.symlink(
+        src=target if target.is_absolute() else os.path.relpath(target, linkname.parent),
+        dst=linkname,
+    )

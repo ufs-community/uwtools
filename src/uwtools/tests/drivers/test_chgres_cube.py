@@ -3,60 +3,20 @@
 chgres_cube driver tests.
 """
 import datetime as dt
+import logging
+from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import yaml
-from iotaa import asset, external
-from pytest import fixture
+from iotaa import refs
+from pytest import fixture, mark
 
-from uwtools.drivers import chgres_cube
+from uwtools.drivers.chgres_cube import ChgresCube
+from uwtools.drivers.driver import Driver
+from uwtools.logging import log
 from uwtools.scheduler import Slurm
-
-config: dict = {
-    "chgres_cube": {
-        "execution": {
-            "batchargs": {
-                "export": "NONE",
-                "nodes": 1,
-                "stdout": "/path/to/file",
-                "walltime": "00:02:00",
-            },
-            "envcmds": ["cmd1", "cmd2"],
-            "executable": "/path/to/chgres_cube",
-            "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
-            "mpicmd": "srun",
-        },
-        "namelist": {
-            "update_values": {
-                "config": {
-                    "atm_core_files_input_grid": "/path/to/file",
-                    "atm_files_input_grid": "/path/to/file",
-                    "atm_tracer_files_input_grid": "/path/to/file",
-                    "atm_weight_file": "/path/to/file",
-                    "convert_atm": True,
-                    "data_dir_input_grid": "/path/to/file",
-                    "external_model": "GFS",
-                    "fix_dir_target_grid": "/path/to/dir",
-                    "geogrid_file_input_grid": "/path/to/file",
-                    "grib2_file_input_grid": "/path/to/file",
-                    "mosaic_file_input_grid": "/path/to/file",
-                    "mosaic_file_target_grid": "/path/to/file",
-                    "sfc_files_input_grid": "/path/to/file",
-                    "varmap_file": "/path/to/file",
-                    "vcoord_file_target_grid": "/path/to/file",
-                }
-            }
-        },
-        "run_dir": "/path/to/dir",
-    },
-    "platform": {
-        "account": "me",
-        "scheduler": "slurm",
-    },
-}
-
+from uwtools.tests.support import logged, regex_logged
 
 # Fixtures
 
@@ -67,47 +27,109 @@ def cycle():
 
 
 @fixture
-def config_file(tmp_path):
-    path = tmp_path / "config.yaml"
-    config["chgres_cube"]["run_dir"] = tmp_path.as_posix()
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
+def config(tmp_path):
+    afile = tmp_path / "afile"
+    afile.touch()
+    return {
+        "chgres_cube": {
+            "execution": {
+                "batchargs": {
+                    "export": "NONE",
+                    "nodes": 1,
+                    "stdout": "/path/to/file",
+                    "walltime": "00:02:00",
+                },
+                "envcmds": ["cmd1", "cmd2"],
+                "executable": "/path/to/chgres_cube",
+                "mpiargs": ["--export=ALL", "--ntasks $SLURM_CPUS_ON_NODE"],
+                "mpicmd": "srun",
+            },
+            "namelist": {
+                "update_values": {
+                    "config": {
+                        "atm_core_files_input_grid": str(afile),
+                        "atm_files_input_grid": str(afile),
+                        "atm_tracer_files_input_grid": str(afile),
+                        "atm_weight_file": str(afile),
+                        "convert_atm": True,
+                        "data_dir_input_grid": str(afile),
+                        "external_model": "GFS",
+                        "fix_dir_target_grid": "/path/to/dir",
+                        "geogrid_file_input_grid": str(afile),
+                        "grib2_file_input_grid": str(afile),
+                        "mosaic_file_input_grid": str(afile),
+                        "mosaic_file_target_grid": str(afile),
+                        "sfc_files_input_grid": str(afile),
+                        "varmap_file": str(afile),
+                        "vcoord_file_target_grid": str(afile),
+                    }
+                },
+                "validate": True,
+            },
+            "run_dir": str(tmp_path),
+        },
+        "platform": {
+            "account": "me",
+            "scheduler": "slurm",
+        },
+    }
 
 
 @fixture
-def driverobj(config_file, cycle):
-    return chgres_cube.ChgresCube(config=config_file, cycle=cycle, batch=True)
+def driverobj(config, cycle):
+    return ChgresCube(config=config, cycle=cycle, batch=True)
 
 
-# Driver tests
+# Tests
 
 
-def test_ChgresCube(driverobj):
-    assert isinstance(driverobj, chgres_cube.ChgresCube)
+@mark.parametrize(
+    "method",
+    [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runcmd",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_validate",
+        "_write_runscript",
+        "run",
+    ],
+)
+def test_ChgresCube(method):
+    assert getattr(ChgresCube, method) is getattr(Driver, method)
 
 
-def test_ChgresCube_dry_run(config_file, cycle):
-    with patch.object(chgres_cube, "dryrun") as dryrun:
-        driverobj = chgres_cube.ChgresCube(
-            config=config_file, cycle=cycle, batch=True, dry_run=True
-        )
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
-
-
-def test_ChgresCube_namelist_file(driverobj):
-    @external
-    def ready(x):
-        yield x
-        yield asset(x, lambda: True)
-
+def test_ChgresCube_namelist_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
     dst = driverobj._rundir / "fort.41"
     assert not dst.is_file()
-    with patch.object(chgres_cube, "file", new=ready):
-        driverobj.namelist_file()
+    path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()
+    assert logged(caplog, f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
+
+
+def test_ChgresCube_namelist_file_fails_validation(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    driverobj._driver_config["namelist"]["update_values"]["config"]["convert_atm"] = "string"
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert logged(caplog, f"Failed to validate {path}")
+    assert logged(caplog, "  'string' is not of type 'boolean'")
+
+
+def test_ChgresCube_namelist_file_missing_base_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    base_file = str(Path(driverobj._driver_config["run_dir"]) / "missing.nml")
+    driverobj._driver_config["namelist"]["base_file"] = base_file
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
 def test_ChgresCube_provisioned_run_directory(driverobj):
@@ -115,19 +137,6 @@ def test_ChgresCube_provisioned_run_directory(driverobj):
         driverobj.provisioned_run_directory()
     for m in mocks:
         mocks[m].assert_called_once_with()
-
-
-def test_ChgresCube_run_batch(driverobj):
-    with patch.object(driverobj, "_run_via_batch_submission") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_ChgresCube_run_local(driverobj):
-    driverobj._batch = False
-    with patch.object(driverobj, "_run_via_local_execution") as func:
-        driverobj.run()
-    func.assert_called_once_with()
 
 
 def test_ChgresCube_runscript(driverobj):
@@ -139,17 +148,9 @@ def test_ChgresCube_runscript(driverobj):
         assert [type(runscript.call_args.kwargs[x]) for x in args] == types
 
 
-def test_ChgresCube__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["chgres_cube"]
-
-
-def test_ChgresCube__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript.chgres_cube"
+def test_ChgresCube__driver_name(driverobj):
+    assert driverobj._driver_name == "chgres_cube"
 
 
 def test_ChgresCube__taskname(driverobj):
     assert driverobj._taskname("foo") == "20240201 18Z chgres_cube foo"
-
-
-def test_ChgresCube__validate(driverobj):
-    driverobj._validate()

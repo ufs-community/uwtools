@@ -3,63 +3,19 @@
 
 The ``uw`` mode for configuring and running the :ufs-utils:`chgres_cube<chgres-cube>` component.
 
-.. code-block:: text
-
-   $ uw chgres_cube --help
-   usage: uw chgres_cube [-h] [--version] TASK ...
-
-   Execute chgres_cube tasks
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     TASK
-       namelist_file
-         The namelist file
-       provisioned_run_directory
-         Run directory provisioned with all required content
-       run
-         A run
-       runscript
-         The runscript
-       validate
-         Validate the UW driver config
+.. literalinclude:: chgres_cube/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: chgres_cube/help.out
+   :language: text
 
 All tasks take the same arguments. For example:
 
-.. code-block:: text
-
-   $ uw chgres_cube run --help
-   usage: uw chgres_cube run --config-file PATH --cycle CYCLE [-h] [--version] [--batch] [--dry-run]
-                             [--graph-file PATH] [--quiet] [--verbose]
-
-   A run
-
-   Required arguments:
-     --config-file PATH, -c PATH
-         Path to UW YAML config file
-     --cycle CYCLE
-         The cycle in ISO8601 format
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --batch
-         Submit run to batch scheduler
-     --dry-run
-         Only log info, making no changes
-     --graph-file PATH
-         Path to Graphviz DOT output [experimental]
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: chgres_cube/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: chgres_cube/run-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
@@ -67,11 +23,9 @@ Examples
 The examples use a configuration file named ``config.yaml`` with content similar to:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/chgres_cube.yaml
-
+.. literalinclude:: /shared/chgres_cube.yaml
 
 Its contents are described in depth in section :ref:`chgres_cube_yaml`. Each of the values in the ``chgres_cube`` YAML may contain Jinja2 variables/expressions using a ``cycle`` variable, which is a Python ``datetime`` object corresponding to the FV3 cycle being run.
-
 
 * Run ``chgres_cube`` on an interactive node
 
@@ -95,9 +49,10 @@ Its contents are described in depth in section :ref:`chgres_cube_yaml`. Each of 
 
      $ uw chgres_cube run --config-file config.yaml --cycle 2023-12-15T18 --batch --dry-run
 
+.. include:: /shared/key_path.rst
+
 * The ``run`` task depends on the other available tasks and executes them as prerequisites. It is possible to execute any task directly, which entails execution of any of *its* dependencies. For example, to create a ``chgres_cube`` run directory provisioned with all the files, directories, symlinks, etc. required per the configuration file:
 
   .. code-block:: text
 
      $ uw chgres_cube provisioned_run_directory --config-file config.yaml --cycle 2023-12-15T18 --batch
-

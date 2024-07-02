@@ -5,7 +5,7 @@ A driver for sfc_climo_gen.
 from pathlib import Path
 from typing import Optional
 
-from iotaa import asset, dryrun, task, tasks
+from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
@@ -18,17 +18,22 @@ class SfcClimoGen(Driver):
     A driver for sfc_climo_gen.
     """
 
-    def __init__(self, config: Optional[Path] = None, dry_run: bool = False, batch: bool = False):
+    def __init__(
+        self,
+        config: Optional[Path] = None,
+        dry_run: bool = False,
+        batch: bool = False,
+        key_path: Optional[list[str]] = None,
+    ):
         """
         The driver.
 
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
+        :param key_path: Keys leading through the config to the driver's configuration block.
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch)
-        if self._dry_run:
-            dryrun()
+        super().__init__(config=config, dry_run=dry_run, batch=batch, key_path=key_path)
 
     # Workflow tasks
 
@@ -50,6 +55,7 @@ class SfcClimoGen(Driver):
             config_class=NMLConfig,
             config_values=self._driver_config["namelist"],
             path=path,
+            schema=self._namelist_schema(),
         )
 
     @tasks
@@ -63,17 +69,6 @@ class SfcClimoGen(Driver):
             self.runscript(),
         ]
 
-    @task
-    def runscript(self):
-        """
-        The runscript.
-        """
-        path = self._runscript_path
-        yield self._taskname(path.name)
-        yield asset(path, path.is_file)
-        yield None
-        self._write_runscript(path=path, envvars={})
-
     # Private helper methods
 
     @property
@@ -82,11 +77,3 @@ class SfcClimoGen(Driver):
         Returns the name of this driver.
         """
         return STR.sfcclimogen
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s" % (self._driver_name, suffix)

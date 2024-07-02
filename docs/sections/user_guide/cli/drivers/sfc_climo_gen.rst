@@ -3,69 +3,27 @@
 
 The ``uw`` mode for configuring and running the :sfc-climo-gen:`sfc_climo_gen<>` component.
 
-.. code-block:: text
-
-   $ uw sfc_climo_gen --help
-   usage: uw sfc_climo_gen [-h] [--version] TASK ...
-
-   Execute sfc_climo_gen tasks
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-
-   Positional arguments:
-     TASK
-       namelist_file
-         The namelist file
-       provisioned_run_directory
-         Run directory provisioned with all required content
-       run
-         A run
-       runscript
-         The runscript
-       validate
-         Validate the UW driver config
+.. literalinclude:: sfc_climo_gen/help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: sfc_climo_gen/help.out
+   :language: text
 
 All tasks take the same arguments. For example:
 
-.. code-block:: text
-
-   $ uw sfc_climo_gen run --help
-   usage: uw sfc_climo_gen run --config-file PATH [-h] [--version] [--batch] [--dry-run]
-                               [--graph-file PATH] [--quiet] [--verbose]
-
-   A run
-
-   Required arguments:
-     --config-file PATH, -c PATH
-         Path to UW YAML config file
-
-   Optional arguments:
-     -h, --help
-         Show help and exit
-     --version
-         Show version info and exit
-     --batch
-         Submit run to batch scheduler
-     --dry-run
-         Only log info, making no changes
-     --graph-file PATH
-         Path to Graphviz DOT output [experimental]
-     --quiet, -q
-         Print no logging messages
-     --verbose, -v
-         Print all logging messages
+.. literalinclude:: sfc_climo_gen/run-help.cmd
+   :language: text
+   :emphasize-lines: 1
+.. literalinclude:: sfc_climo_gen/run-help.out
+   :language: text
 
 Examples
 ^^^^^^^^
 
-The examples use a configuration file named ``config.yaml`` with content similar to:
+The examples use a configuration file named ``config.yaml`` with contents similar to:
 
 .. highlight:: yaml
-.. literalinclude:: ../../../../shared/sfc_climo_gen.yaml
+.. literalinclude:: /shared/sfc_climo_gen.yaml
 
 Its contents are described in depth in section :ref:`sfc_climo_gen_yaml`.
 
@@ -90,6 +48,8 @@ Its contents are described in depth in section :ref:`sfc_climo_gen_yaml`.
   .. code-block:: text
 
      $ uw sfc_climo_gen run --config-file config.yaml --batch --dry-run
+
+.. include:: /shared/key_path.rst
 
 * The ``run`` task depends on the other available tasks and executes them as prerequisites. It is possible to execute any task directly, which entails execution of any of *its* dependencies. For example, to create an ``sfc_climo_gen`` run directory provisioned with all the files, directories, symlinks, etc. required per the configuration file:
 

@@ -37,7 +37,6 @@ Converts the tagged node to a Python ``float`` value. For example, given ``input
    % uw config realize --input-file input.yaml --output-format yaml
    f2: 5.859
 
-
 ``!int``
 ^^^^^^^^
 
@@ -55,7 +54,6 @@ Converts the tagged node to a Python ``int`` value. For example, given ``input.y
    f1: 3
    f2: 11
    f2: 140
-
 
 ``!include``
 ^^^^^^^^^^^^
@@ -80,7 +78,6 @@ and ``supplemental.yaml``:
       e: 2.718
       pi: 3.141
 
-
 ``!remove``
 ^^^^^^^^^^^
 
@@ -91,7 +88,7 @@ Removes the tagged YAML key/value pair. For example, given ``input.yaml``:
    e: 2.718
    pi: 3.141
 
-and ``supplemental.yaml``:
+and ``update.yaml``:
 
 .. code-block:: yaml
 
@@ -99,5 +96,5 @@ and ``supplemental.yaml``:
 
 .. code-block:: text
 
-   % uw config realize --input-file input.yaml supplemental.yaml --output-format yaml
+   % uw config realize --input-file input.yaml --update-file update.yaml --output-format yaml
    pi: 3.141

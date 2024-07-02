@@ -1,0 +1,26 @@
+usage: uw ungrib [-h] [--version] TASK ...
+
+Execute ungrib tasks
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+
+Positional arguments:
+  TASK
+    gribfiles
+      Symlinks to all the GRIB files
+    namelist_file
+      The namelist file
+    provisioned_run_directory
+      Run directory provisioned with all required content
+    run
+      A run
+    runscript
+      The runscript
+    validate
+      Validate the UW driver config
+    vtable
+      A symlink to the Vtable file

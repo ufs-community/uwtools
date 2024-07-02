@@ -47,12 +47,19 @@ mpas_init:
         config_static_interp: false
       vertical_grid:
         config_blend_bdy_terrain: true
+    validate: true
   run_dir: /path/to/rundir
   streams:
-    path: "{{ user.mpas_app }}/MPAS-Model/streams.init_atmosphere"
-    values:
-      input_filename: conus.init.nc
-      output_filename: foo.nc
+    input:
+      filename_template: conus.static.nc
+      input_interval: initial_only
+      mutable: false
+      type: input
+    output:
+      filename_template: conus.init.nc
+      mutable: false
+      output_interval: initial_only
+      type: output
 platform:
   account: me
   scheduler: slurm

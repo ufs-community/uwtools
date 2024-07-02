@@ -3,59 +3,39 @@
 MPASInit driver tests.
 """
 import datetime as dt
+import logging
 from pathlib import Path
 from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import pytest
-import yaml
-from pytest import fixture, raises
+from iotaa import refs
+from pytest import fixture, mark
 
-from uwtools.drivers import mpas_init
-from uwtools.exceptions import UWConfigError
-from uwtools.scheduler import Slurm
-from uwtools.tests.support import fixture_path
+from uwtools.drivers.mpas_base import MPASBase
+from uwtools.drivers.mpas_init import MPASInit
+from uwtools.logging import log
+from uwtools.tests.drivers.test_mpas import streams_file
+from uwtools.tests.support import fixture_path, logged, regex_logged
 
 # Fixtures
-
-
-@fixture
-def cycle():
-    return dt.datetime(2024, 2, 1, 18)
-
-
-# Driver fixtures
 
 
 @fixture
 def config(tmp_path):
     return {
         "mpas_init": {
-            "execution": {
-                "executable": "mpas_init",
-                "batchargs": {
-                    "walltime": "01:30:00",
-                },
-            },
             "boundary_conditions": {
                 "interval_hours": 1,
                 "length": 1,
                 "offset": 0,
                 "path": str(tmp_path / "input_path"),
             },
-            "namelist": {
-                "base_file": str(fixture_path("simple.nml")),
-                "update_values": {
-                    "nhyd_model": {"config_start_time": "12", "config_stop_time": "12"},
+            "execution": {
+                "batchargs": {
+                    "walltime": "01:30:00",
                 },
-            },
-            "run_dir": str(tmp_path),
-            "streams": {
-                "path": str(tmp_path / "streams.init_atmosphere.in"),
-                "values": {
-                    "world": "user",
-                },
+                "executable": "mpas_init",
             },
             "files_to_link": {
                 "CAM_ABS_DATA.DBL": "src/MPAS-Model/CAM_ABS_DATA.DBL",
@@ -72,6 +52,32 @@ def config(tmp_path):
                 "SOILPARM.TBL": "src/MPAS-Model/SOILPARM.TBL",
                 "VEGPARM.TBL": "src/MPAS-Model/VEGPARM.TBL",
             },
+            "namelist": {
+                "base_file": str(fixture_path("simple.nml")),
+                "update_values": {
+                    "nhyd_model": {"config_start_time": "12", "config_stop_time": "12"},
+                },
+            },
+            "run_dir": str(tmp_path),
+            "streams": {
+                "input": {
+                    "filename_template": "conus.static.nc",
+                    "input_interval": "initial_only",
+                    "mutable": False,
+                    "type": "input",
+                },
+                "output": {
+                    "filename_template": "conus.init.nc",
+                    "files": ["stream_list.atmosphere.output"],
+                    "mutable": False,
+                    "output_interval": "initial_only",
+                    "streams": ["stream1", "stream2"],
+                    "type": "output",
+                    "vars": ["v1", "v2"],
+                    "var_arrays": ["va1", "va2"],
+                    "var_structs": ["vs1", "vs2"],
+                },
+            },
         },
         "platform": {
             "account": "me",
@@ -81,23 +87,40 @@ def config(tmp_path):
 
 
 @fixture
-def config_file(config, tmp_path):
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
+def cycle():
+    return dt.datetime(2024, 2, 1, 18)
 
 
 @fixture
-def driverobj(config_file, cycle):
-    return mpas_init.MPASInit(config=config_file, cycle=cycle, batch=True)
+def driverobj(config, cycle):
+    return MPASInit(config=config, cycle=cycle, batch=True)
 
 
-# Driver tests
+# Tests
 
 
-def test_MPASInit(driverobj):
-    assert isinstance(driverobj, mpas_init.MPASInit)
+@mark.parametrize(
+    "method",
+    [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runcmd",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_taskname",
+        "_validate",
+        "_write_runscript",
+        "run",
+        "runscript",
+        "streams_file",
+    ],
+)
+def test_MPASInit(method):
+    assert getattr(MPASInit, method) is getattr(MPASBase, method)
 
 
 def test_MPASInit_boundary_files(cycle, driverobj):
@@ -115,14 +138,7 @@ def test_MPASInit_boundary_files(cycle, driverobj):
     assert all(link.is_symlink() for link in links)
 
 
-def test_MPASInit_dry_run(config_file, cycle):
-    with patch.object(mpas_init, "dryrun") as dryrun:
-        driverobj = mpas_init.MPASInit(config=config_file, cycle=cycle, batch=True, dry_run=True)
-    assert driverobj._dry_run is True
-    dryrun.assert_called_once_with()
-
-
-@pytest.mark.parametrize(
+@mark.parametrize(
     "key,task,test",
     [("files_to_copy", "files_copied", "is_file"), ("files_to_link", "files_linked", "is_symlink")],
 )
@@ -131,10 +147,7 @@ def test_MPASInit_files_copied_and_linked(config, cycle, key, task, test, tmp_pa
     atm_cfg_dst, sfc_cfg_dst = [x % "{{ cycle.strftime('%H') }}" for x in [atm, sfc]]
     atm_cfg_src, sfc_cfg_src = [str(tmp_path / (x + ".in")) for x in [atm_cfg_dst, sfc_cfg_dst]]
     config["mpas_init"].update({key: {atm_cfg_dst: atm_cfg_src, sfc_cfg_dst: sfc_cfg_src}})
-    path = tmp_path / "config.yaml"
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    driverobj = mpas_init.MPASInit(config=path, cycle=cycle, batch=True)
+    driverobj = MPASInit(config=config, cycle=cycle, batch=True)
     atm_dst, sfc_dst = [tmp_path / (x % cycle.strftime("%H")) for x in [atm, sfc]]
     assert not any(dst.is_file() for dst in [atm_dst, sfc_dst])
     atm_src, sfc_src = [Path(str(x) + ".in") for x in [atm_dst, sfc_dst]]
@@ -156,20 +169,32 @@ def test_MPASInit_namelist_contents(cycle, driverobj):
     assert nml["nhyd_model"]["config_stop_time"] == stop_time.strftime(f)
 
 
-def test_MPASInit_namelist_file(driverobj):
+def test_MPASInit_namelist_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
     dst = driverobj._rundir / "namelist.init_atmosphere"
     assert not dst.is_file()
-    driverobj.namelist_file()
+    path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()
+    assert logged(caplog, f"Wrote config to {path}")
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
-def test_MPASInit_namelist_missing(driverobj):
-    path = driverobj._rundir / "namelist.init_atmosphere"
-    del driverobj._driver_config["namelist"]
-    with raises(UWConfigError) as e:
-        assert driverobj.namelist_file()
-    assert str(e.value) == ("Provide either a 'namelist' YAML block or the %s file" % path)
+def test_MPASInit_namelist_file_fails_validation(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    driverobj._driver_config["namelist"]["update_values"]["nhyd_model"]["foo"] = None
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert logged(caplog, f"Failed to validate {path}")
+    assert logged(caplog, "  None is not of type 'array', 'boolean', 'number', 'string'")
+
+
+def test_MPASInit_namelist_file_missing_base_file(caplog, driverobj):
+    log.setLevel(logging.DEBUG)
+    base_file = str(Path(driverobj._driver_config["run_dir"]) / "missing.nml")
+    driverobj._driver_config["namelist"]["base_file"] = base_file
+    path = Path(refs(driverobj.namelist_file()))
+    assert not path.exists()
+    assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
 def test_MPASInit_provisioned_run_directory(driverobj):
@@ -187,44 +212,13 @@ def test_MPASInit_provisioned_run_directory(driverobj):
         mocks[m].assert_called_once_with()
 
 
-def test_MPASInit_run_batch(driverobj):
-    with patch.object(driverobj, "_run_via_batch_submission") as func:
-        driverobj.run()
-    func.assert_called_once_with()
+def test_MPASInit__driver_name(driverobj):
+    assert driverobj._driver_name == "mpas_init"
 
 
-def test_MPASInit_run_local(driverobj):
-    driverobj._batch = False
-    with patch.object(driverobj, "_run_via_local_execution") as func:
-        driverobj.run()
-    func.assert_called_once_with()
+def test_MPASInit_streams_file(config, driverobj):
+    streams_file(config, driverobj, "mpas_init")
 
 
-def test_MPASInit_runscript(driverobj):
-    with patch.object(driverobj, "_runscript") as runscript:
-        driverobj.runscript()
-        runscript.assert_called_once()
-        args = ("envcmds", "envvars", "execution", "scheduler")
-        types = [list, dict, list, Slurm]
-        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
-
-
-def test_MPASInit_streams_file(driverobj):
-    src = driverobj._driver_config["streams"]["path"]
-    with open(src, "w", encoding="utf-8") as f:
-        f.write("Hello, {{ world }}")
-    assert not (driverobj._rundir / "streams.init_atmosphere").is_file()
-    driverobj.streams_file()
-    assert (driverobj._rundir / "streams.init_atmosphere").is_file()
-
-
-def test_MPASInit__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript.mpas_init"
-
-
-def test_MPASInit__taskname(driverobj):
-    assert driverobj._taskname("foo") == "20240201 18Z mpas_init foo"
-
-
-def test_MPASInit__validate(driverobj):
-    driverobj._validate()
+def test_MPASInit__streams_fn(driverobj):
+    assert driverobj._streams_fn == "streams.init_atmosphere"

@@ -2,11 +2,12 @@
 File handling.
 """
 
+import datetime as dt
 from functools import cached_property
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
-from iotaa import tasks
+from iotaa import dryrun, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import validate_internal
@@ -24,7 +25,9 @@ class FileStager:
         self,
         target_dir: Path,
         config: Optional[Union[dict, Path]] = None,
-        keys: Optional[List[str]] = None,
+        cycle: Optional[dt.datetime] = None,
+        leadtime: Optional[dt.timedelta] = None,
+        keys: Optional[list[str]] = None,
         dry_run: bool = False,
     ) -> None:
         """
@@ -32,15 +35,23 @@ class FileStager:
 
         :param target_dir: Path to target directory
         :param config: YAML-file path, or dict (read stdin if missing or None).
+        :param cycle: A datetime object to make available for use in the config.
+        :param leadtime: A timedelta object to make available for use in the config.
         :param keys: YAML keys leading to file dst/src block
         :param dry_run: Do not copy files
         :raises: UWConfigError if config fails validation.
         """
+        dryrun(enable=dry_run)
         self._target_dir = target_dir
         self._config = YAMLConfig(config=config)
         self._keys = keys or []
-        self._dry_run = dry_run
-        self._config.dereference()
+        self._config.dereference(
+            context={
+                **({"cycle": cycle} if cycle else {}),
+                **({"leadtime": leadtime} if leadtime else {}),
+                **self._config.data,
+            }
+        )
         self._validate()
 
     @cached_property
@@ -55,7 +66,7 @@ class FileStager:
         for key in self._keys:
             nav.append(key)
             if key not in cfg:
-                raise UWConfigError("Config navigation %s failed" % " -> ".join(nav))
+                raise UWConfigError("Failed following YAML key(s): %s" % " -> ".join(nav))
             log.debug("Following config key '%s'", key)
             cfg = cfg[key]
         if not isinstance(cfg, dict):

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
 
-from iotaa import asset, dryrun, task, tasks
+from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import Driver
@@ -25,6 +25,7 @@ class Ungrib(Driver):
         config: Optional[Path] = None,
         dry_run: bool = False,
         batch: bool = False,
+        key_path: Optional[list[str]] = None,
     ):
         """
         The driver.
@@ -33,10 +34,11 @@ class Ungrib(Driver):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param batch: Run component via the batch system?
+        :param key_path: Keys leading through the config to the driver's configuration block.
         """
-        super().__init__(config=config, dry_run=dry_run, batch=batch, cycle=cycle)
-        if self._dry_run:
-            dryrun()
+        super().__init__(
+            config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
+        )
         self._cycle = cycle
 
     # Workflow tasks
@@ -111,17 +113,6 @@ class Ungrib(Driver):
         ]
 
     @task
-    def runscript(self):
-        """
-        The runscript.
-        """
-        path = self._runscript_path
-        yield self._taskname(path.name)
-        yield asset(path, path.is_file)
-        yield None
-        self._write_runscript(path=path, envvars={})
-
-    @task
     def vtable(self):
         """
         A symlink to the Vtable file.
@@ -163,7 +154,7 @@ class Ungrib(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
+        return self._taskname_with_cycle(self._cycle, suffix)
 
 
 def _ext(n):

@@ -1,5 +1,6 @@
 ``uwtools.api.jedi``
-==========================
+====================
 
 .. automodule:: uwtools.api.jedi
-    :members:
+   :inherited-members:
+   :members:

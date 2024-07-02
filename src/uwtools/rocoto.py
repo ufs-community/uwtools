@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass
 from math import log10
 from pathlib import Path
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 from lxml import etree
 from lxml.etree import Element, SubElement, _Element
@@ -307,7 +307,7 @@ class _RocotoXML:
         self._add_workflow_tasks(e, config[STR.tasks])
         self._root: _Element = e
 
-    def _add_workflow_cycledef(self, e: _Element, config: List[dict]) -> None:
+    def _add_workflow_cycledef(self, e: _Element, config: list[dict]) -> None:
         """
         Add <cycledef> element(s) to the <workflow>.
 
@@ -399,7 +399,7 @@ class _RocotoXML:
         for attr, val in config.get(STR.attrs, {}).items():
             e.set(attr, str(val))
 
-    def _tag_name(self, key: str) -> Tuple[str, str]:
+    def _tag_name(self, key: str) -> tuple[str, str]:
         """
         Return the tag and metadata extracted from a metadata-bearing key.
 

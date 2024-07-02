@@ -4,7 +4,7 @@ SOURCEDIR    = .
 SPHINXBUILD  = sphinx-build
 SPHINXOPTS   = -a -n -W
 
-.PHONY: help clean docs linkcheck
+.PHONY: help clean docs examples linkcheck
 
 help:
 	$(SPHINXBUILD) -M help $(SOURCEDIR) $(BUILDDIR) $(SPHINXOPTS)
@@ -15,6 +15,9 @@ clean:
 docs:
 	$(MAKE) linkcheck
 	$(MAKE) html
+
+examples:
+	COLUMNS=80 $(MAKE) -C sections
 
 linkcheck:
 	$(SPHINXBUILD) -b linkcheck $(SPHINXOPTS) -c $(CURDIR) $(CURDIR) build/linkcheck

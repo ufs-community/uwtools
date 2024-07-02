@@ -1,0 +1,22 @@
+usage: uw global_equiv_resol [-h] [--version] TASK ...
+
+Execute global_equiv_resol tasks
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+
+Positional arguments:
+  TASK
+    input_file
+      Ensure the specified input grid file exists
+    provisioned_run_directory
+      Run directory provisioned with all required content
+    run
+      A run
+    runscript
+      The runscript
+    validate
+      Validate the UW driver config

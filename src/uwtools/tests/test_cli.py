@@ -7,11 +7,9 @@ import sys
 from argparse import ArgumentParser as Parser
 from argparse import _SubParsersAction
 from pathlib import Path
-from typing import List
 from unittest.mock import Mock, patch
 
-import pytest
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 import uwtools.api
 import uwtools.api.config
@@ -27,7 +25,7 @@ from uwtools.utils.file import FORMAT
 # Helpers
 
 
-def actions(parser: Parser) -> List[str]:
+def actions(parser: Parser) -> list[str]:
     # Return actions (named subparsers) belonging to the given parser.
     if actions := [x for x in parser._actions if isinstance(x, _SubParsersAction)]:
         return list(actions[0].choices.keys())
@@ -38,10 +36,28 @@ def actions(parser: Parser) -> List[str]:
 
 
 @fixture
+def args_config_realize():
+    return {
+        STR.infile: "in",
+        STR.infmt: "yaml",
+        STR.updatefile: "update",
+        STR.updatefmt: "yaml",
+        STR.outfile: "out",
+        STR.outfmt: "yaml",
+        STR.keypath: "foo.bar",
+        STR.valsneeded: False,
+        STR.total: False,
+        STR.dryrun: False,
+    }
+
+
+@fixture
 def args_dispatch_file():
     return {
         "target_dir": "/target/dir",
         "config_file": "/config/file",
+        "cycle": dt.datetime.now(),
+        "leadtime": dt.timedelta(hours=6),
         "keys": ["a", "b"],
         "dry_run": False,
         "stdin_ok": True,
@@ -145,7 +161,7 @@ def test__add_subparser_template_translate(subparsers):
     assert subparsers.choices[STR.translate]
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "vals",
     [
         (STR.file1path, STR.file1fmt),
@@ -180,7 +196,7 @@ def test__check_file_vs_format_pass_explicit():
     assert args[STR.infmt] == fmt
 
 
-@pytest.mark.parametrize("fmt", FORMAT.formats())
+@mark.parametrize("fmt", FORMAT.formats())
 def test__check_file_vs_format_pass_implicit(fmt):
     # The format is correctly deduced for a file with a known extension.
     args = {STR.infile: f"/path/to/input.{fmt}", STR.infmt: None}
@@ -219,6 +235,26 @@ def test__check_template_render_vals_args_noop_explicit_valsfmt():
     assert cli._check_template_render_vals_args(args) == args
 
 
+@mark.parametrize(
+    "fmt,fn,ok",
+    [
+        (None, "update.txt", False),
+        ("yaml", "udpate.txt", True),
+        (None, "update.yaml", True),
+        ("yaml", "update.yaml", True),
+        ("jpg", "udpate.yaml", True),
+    ],
+)
+def test__check_update(fmt, fn, ok):
+    args = {STR.updatefile: fn, STR.updatefmt: fmt}
+    if ok:
+        assert cli._check_update(args) == args
+    else:
+        with raises(UWError) as e:
+            cli._check_update(args)
+        assert "Cannot deduce format" in str(e.value)
+
+
 def test__check_verbosity_fail(capsys):
     log.setLevel(logging.INFO)
     args = {STR.quiet: True, STR.verbose: True}
@@ -227,7 +263,7 @@ def test__check_verbosity_fail(capsys):
     assert "--quiet may not be used with --verbose" in capsys.readouterr().err
 
 
-@pytest.mark.parametrize("flags", ([STR.quiet], [STR.verbose]))
+@mark.parametrize("flags", ([STR.quiet], [STR.verbose]))
 def test__check_verbosity_ok(flags):
     args = {flag: True for flag in flags}
     assert cli._check_verbosity(args) == args
@@ -238,7 +274,7 @@ def test__dict_from_key_eq_val_strings():
     assert cli._dict_from_key_eq_val_strings(["a=1", "b=2"]) == {"a": "1", "b": "2"}
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "params",
     [
         (STR.compare, "_dispatch_config_compare"),
@@ -266,81 +302,29 @@ def test__dispatch_config_compare():
     )
 
 
-def test__dispatch_config_realize():
-    args = {
-        STR.infile: 1,
-        STR.infmt: 2,
-        STR.outblock: 3,
-        STR.outfile: 4,
-        STR.outfmt: 5,
-        STR.suppfiles: 6,
-        STR.valsneeded: 7,
-        STR.total: 8,
-        STR.dryrun: 9,
-    }
+def test__dispatch_config_realize(args_config_realize):
     with patch.object(cli.uwtools.api.config, "realize") as realize:
-        cli._dispatch_config_realize(args)
+        cli._dispatch_config_realize(args_config_realize)
     realize.assert_called_once_with(
-        input_config=1,
-        input_format=2,
-        output_block=3,
-        output_file=4,
-        output_format=5,
-        supplemental_configs=6,
-        values_needed=7,
-        total=8,
-        dry_run=9,
-        stdin_ok=True,
-    )
-
-
-def test__dispatch_config_realize_fail(caplog):
-    log.setLevel(logging.ERROR)
-    args = {
-        x: None
-        for x in (
-            STR.infile,
-            STR.infmt,
-            STR.outblock,
-            STR.outfile,
-            STR.outfmt,
-            STR.suppfiles,
-            STR.valsneeded,
-            STR.total,
-            STR.dryrun,
-        )
-    }
-    with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
-        assert cli._dispatch_config_realize(args) is False
-    assert regex_logged(caplog, "Config could not be realized")
-
-
-def test__dispatch_config_realize_no_optional():
-    args = {
-        STR.infile: None,
-        STR.infmt: None,
-        STR.outblock: None,
-        STR.outfile: None,
-        STR.outfmt: None,
-        STR.suppfiles: ["/foo.vals"],
-        STR.valsneeded: False,
-        STR.total: False,
-        STR.dryrun: False,
-    }
-    with patch.object(cli.uwtools.api.config, "realize") as realize:
-        cli._dispatch_config_realize(args)
-    realize.assert_called_once_with(
-        input_config=None,
-        input_format=None,
-        output_block=None,
-        output_file=None,
-        output_format=None,
-        supplemental_configs=["/foo.vals"],
+        input_config="in",
+        input_format="yaml",
+        update_config="update",
+        update_format="yaml",
+        output_file="out",
+        output_format="yaml",
+        key_path="foo.bar",
         values_needed=False,
         total=False,
         dry_run=False,
         stdin_ok=True,
     )
+
+
+def test__dispatch_config_realize_fail(caplog, args_config_realize):
+    log.setLevel(logging.ERROR)
+    with patch.object(cli.uwtools.api.config, "realize", side_effect=UWConfigRealizeError):
+        assert cli._dispatch_config_realize(args_config_realize) is False
+    assert regex_logged(caplog, "Config could not be realized")
 
 
 def test__dispatch_config_validate_config_obj():
@@ -357,7 +341,7 @@ def test__dispatch_config_validate_config_obj():
     _validate_yaml.assert_called_once_with(**_validate_yaml_args)
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "action, funcname", [(STR.copy, "_dispatch_file_copy"), (STR.link, "_dispatch_file_link")]
 )
 def test__dispatch_file(action, funcname):
@@ -374,6 +358,8 @@ def test__dispatch_file_copy(args_dispatch_file):
     copy.assert_called_once_with(
         target_dir=args["target_dir"],
         config=args["config_file"],
+        cycle=args["cycle"],
+        leadtime=args["leadtime"],
         keys=args["keys"],
         dry_run=args["dry_run"],
         stdin_ok=args["stdin_ok"],
@@ -387,13 +373,15 @@ def test__dispatch_file_link(args_dispatch_file):
     link.assert_called_once_with(
         target_dir=args["target_dir"],
         config=args["config_file"],
+        cycle=args["cycle"],
+        leadtime=args["leadtime"],
         keys=args["keys"],
         dry_run=args["dry_run"],
         stdin_ok=args["stdin_ok"],
     )
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "params",
     [
         (STR.realize, "_dispatch_rocoto_realize"),
@@ -442,7 +430,7 @@ def test__dispatch_rocoto_validate_xml_no_optional():
     validate.assert_called_once_with(xml_file=None)
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "params",
     [(STR.render, "_dispatch_template_render"), (STR.translate, "_dispatch_template_translate")],
 )
@@ -454,7 +442,7 @@ def test__dispatch_template(params):
     func.assert_called_once_with(args)
 
 
-@pytest.mark.parametrize("valsneeded", [False, True])
+@mark.parametrize("valsneeded", [False, True])
 def test__dispatch_template_render_fail(valsneeded):
     args = {
         STR.infile: 1,
@@ -555,16 +543,20 @@ def test__dispatch_template_translate_no_optional():
     )
 
 
-def test__dispatch_to_driver():
+@mark.parametrize("hours", [0, 24, 168])
+def test__dispatch_to_driver(hours):
     name = "adriver"
     cycle = dt.datetime.now()
+    leadtime = dt.timedelta(hours=hours)
     args: dict = {
         "action": "foo",
         "batch": True,
-        "config_file": "config.yaml",
+        "config_file": "/path/to/config",
         "cycle": cycle,
+        "leadtime": leadtime,
         "dry_run": False,
         "graph_file": None,
+        "key_path": ["foo", "bar"],
         "stdin_ok": True,
     }
     adriver = Mock()
@@ -572,17 +564,19 @@ def test__dispatch_to_driver():
         cli._dispatch_to_driver(name=name, args=args)
         adriver.execute.assert_called_once_with(
             batch=True,
-            config="config.yaml",
+            config="/path/to/config",
             cycle=cycle,
+            leadtime=leadtime,
             dry_run=False,
             graph_file=None,
+            key_path=["foo", "bar"],
             task="foo",
             stdin_ok=True,
         )
 
 
-@pytest.mark.parametrize("quiet", [False, True])
-@pytest.mark.parametrize("verbose", [False, True])
+@mark.parametrize("quiet", [False, True])
+@mark.parametrize("verbose", [False, True])
 def test_main_fail_checks(capsys, quiet, verbose):
     # Using mode 'template render' for testing.
     raw_args = ["testing", STR.template, STR.render]
@@ -601,7 +595,7 @@ def test_main_fail_checks(capsys, quiet, verbose):
                 assert e.value.code == 0
 
 
-@pytest.mark.parametrize("vals", [(True, 0), (False, 1)])
+@mark.parametrize("vals", [(True, 0), (False, 1)])
 def test_main_fail_dispatch(vals):
     # Using mode 'template render' for testing.
     dispatch_retval, exit_status = vals
@@ -648,6 +642,16 @@ def test__parse_args():
 
 def test__switch():
     assert cli._switch("foo_bar") == "--foo-bar"
+
+
+def test__timedelta_from_str(capsys):
+    assert cli._timedelta_from_str("111:222:333").total_seconds() == 111 * 3600 + 222 * 60 + 333
+    assert cli._timedelta_from_str("111:222").total_seconds() == 111 * 3600 + 222 * 60
+    assert cli._timedelta_from_str("111").total_seconds() == 111 * 3600
+    assert cli._timedelta_from_str("01:15:07").total_seconds() == 1 * 3600 + 15 * 60 + 7
+    with raises(SystemExit):
+        cli._timedelta_from_str("foo")
+    assert f"Specify leadtime as {cli.LEADTIME_DESC}" in capsys.readouterr().err
 
 
 def test__version():
