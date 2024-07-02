@@ -113,13 +113,13 @@ def test_ESGGrid_namelist_file_missing_base_file(caplog, driverobj):
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
-def test_ESGGrid_provisioned_run_directory(driverobj):
+def test_ESGGrid_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
         namelist_file=D,
         runscript=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 

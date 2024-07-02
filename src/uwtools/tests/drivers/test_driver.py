@@ -28,7 +28,7 @@ class ConcreteAssets(driver.Assets):
     Driver subclass for testing purposes.
     """
 
-    def provisioned_run_directory(self):
+    def provisioned_rundir(self):
         pass
 
     @property
@@ -52,7 +52,7 @@ class ConcreteDriver(driver.Driver):
     Driver subclass for testing purposes.
     """
 
-    def provisioned_run_directory(self):
+    def provisioned_rundir(self):
         pass
 
     @property
@@ -272,7 +272,7 @@ def test_Driver__run_via_batch_submission(driverobj):
     runscript = driverobj._runscript_path
     executable = Path(driverobj._driver_config["execution"]["executable"])
     executable.touch()
-    with patch.object(driverobj, "provisioned_run_directory") as prd:
+    with patch.object(driverobj, "provisioned_rundir") as prd:
         with patch.object(ConcreteDriver, "_scheduler", new_callable=PropertyMock) as scheduler:
             driverobj._run_via_batch_submission()
             scheduler().submit_job.assert_called_once_with(
@@ -284,7 +284,7 @@ def test_Driver__run_via_batch_submission(driverobj):
 def test_Driver__run_via_local_execution(driverobj):
     executable = Path(driverobj._driver_config["execution"]["executable"])
     executable.touch()
-    with patch.object(driverobj, "provisioned_run_directory") as prd:
+    with patch.object(driverobj, "provisioned_rundir") as prd:
         with patch.object(driver, "execute") as execute:
             driverobj._run_via_local_execution()
             execute.assert_called_once_with(

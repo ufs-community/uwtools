@@ -1,7 +1,7 @@
 ``mpas``
 ==========
 
-The ``uw`` mode for configuring and running the MPAS forecast model. Each listed ``TASK`` may be called to generate the runtime asset(s) it is responsible for, and will call any task it depends on as needed. A ``provisioned_run_directory`` comprises everything needed for a run, and a ``run`` runs the MPAS executable.
+The ``uw`` mode for configuring and running the MPAS forecast model. Each listed ``TASK`` may be called to generate the runtime asset(s) it is responsible for, and will call any task it depends on as needed. A ``provisioned_rundir`` comprises everything needed for a run, and a ``run`` runs the MPAS executable.
 
 .. literalinclude:: mpas/help.cmd
    :language: text
@@ -55,4 +55,4 @@ Its contents are described in depth in section :ref:`mpas_yaml`.
 
   .. code-block:: text
 
-     $ uw mpas provisioned_run_directory --config-file config.yaml --cycle 2025-02-12T12 --batch
+     $ uw mpas provisioned_rundir --config-file config.yaml --cycle 2025-02-12T12 --batch

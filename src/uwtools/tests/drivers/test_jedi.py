@@ -151,7 +151,7 @@ def test_JEDI_files_linked(driverobj):
         )
 
 
-def test_JEDI_provisioned_run_directory(driverobj):
+def test_JEDI_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
         configuration_file=D,
@@ -160,7 +160,7 @@ def test_JEDI_provisioned_run_directory(driverobj):
         runscript=D,
         validate_only=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 

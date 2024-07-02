@@ -12,7 +12,7 @@ Positional arguments:
   TASK
     input_file
       Ensure the specified input grid file exists
-    provisioned_run_directory
+    provisioned_rundir
       Run directory provisioned with all required content
     run
       A run

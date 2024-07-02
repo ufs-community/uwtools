@@ -103,7 +103,7 @@ def test_Ungrib_namelist_file(driverobj):
     assert nml["share"]["end_date"] == "2024-02-02_06:00:00"
 
 
-def test_Ungrib_provisioned_run_directory(driverobj):
+def test_Ungrib_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
         gribfiles=D,
@@ -111,7 +111,7 @@ def test_Ungrib_provisioned_run_directory(driverobj):
         runscript=D,
         vtable=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 

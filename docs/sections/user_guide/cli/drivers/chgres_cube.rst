@@ -55,4 +55,4 @@ Its contents are described in depth in section :ref:`chgres_cube_yaml`. Each of 
 
   .. code-block:: text
 
-     $ uw chgres_cube provisioned_run_directory --config-file config.yaml --cycle 2023-12-15T18 --batch
+     $ uw chgres_cube provisioned_rundir --config-file config.yaml --cycle 2023-12-15T18 --batch

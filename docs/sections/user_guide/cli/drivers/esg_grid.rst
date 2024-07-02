@@ -55,4 +55,4 @@ The driver creates a ``runscript.esg_grid`` file in the directory specified by `
 
   .. code-block:: text
 
-     $ uw esg_grid provisioned_run_directory --config-file config.yaml --batch
+     $ uw esg_grid provisioned_rundir --config-file config.yaml --batch

@@ -55,4 +55,4 @@ Its contents are described in depth in section :ref:`sfc_climo_gen_yaml`.
 
   .. code-block:: text
 
-     $ uw sfc_climo_gen provisioned_run_directory --config-file config.yaml --batch
+     $ uw sfc_climo_gen provisioned_rundir --config-file config.yaml --batch

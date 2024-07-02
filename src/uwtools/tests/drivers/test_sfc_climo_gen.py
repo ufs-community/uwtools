@@ -128,13 +128,13 @@ def test_SfcClimoGen_namelist_file_fails_validation(caplog, driverobj):
     assert logged(caplog, "  'string' is not of type 'integer'")
 
 
-def test_SfcClimoGen_provisioned_run_directory(driverobj):
+def test_SfcClimoGen_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
         namelist_file=D,
         runscript=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 

@@ -55,4 +55,4 @@ Its contents are described in depth in section :ref:`upp_yaml`.
 
   .. code-block:: text
 
-     $ uw upp provisioned_run_directory --config-file config.yaml --cycle 2024-05-06T12 --leadtime 6 --batch
+     $ uw upp provisioned_rundir --config-file config.yaml --cycle 2024-05-06T12 --leadtime 6 --batch

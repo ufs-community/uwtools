@@ -209,7 +209,7 @@ def test_FV3_namelist_file_missing_base_file(caplog, driverobj):
 
 
 @mark.parametrize("domain", ("global", "regional"))
-def test_FV3_provisioned_run_directory(domain, driverobj):
+def test_FV3_provisioned_rundir(domain, driverobj):
     driverobj._driver_config["domain"] = domain
     with patch.multiple(
         driverobj,
@@ -223,7 +223,7 @@ def test_FV3_provisioned_run_directory(domain, driverobj):
         restart_directory=D,
         runscript=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     excluded = ["boundary_files"] if domain == "global" else []
     for m in mocks:
         if m in excluded:

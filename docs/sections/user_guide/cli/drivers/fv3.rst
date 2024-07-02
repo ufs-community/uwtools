@@ -50,4 +50,4 @@ The examples use a configuration file named ``config.yaml``. Its contents are de
 
   .. code-block:: text
 
-     $ uw fv3 provisioned_run_directory --config-file config.yaml --cycle 2024-02-11T12 --batch
+     $ uw fv3 provisioned_rundir --config-file config.yaml --cycle 2024-02-11T12 --batch

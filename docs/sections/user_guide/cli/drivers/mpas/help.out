@@ -18,7 +18,7 @@ Positional arguments:
       Files linked for run
     namelist_file
       The namelist file
-    provisioned_run_directory
+    provisioned_rundir
       Run directory provisioned with all required content
     run
       A run

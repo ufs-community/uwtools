@@ -207,7 +207,7 @@ def test_MPAS_namelist_file_missing_base_file(caplog, driverobj):
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
-def test_MPAS_provisioned_run_directory(driverobj):
+def test_MPAS_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
         boundary_files=D,
@@ -217,7 +217,7 @@ def test_MPAS_provisioned_run_directory(driverobj):
         runscript=D,
         streams_file=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 

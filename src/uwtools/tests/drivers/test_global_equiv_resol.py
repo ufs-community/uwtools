@@ -73,13 +73,13 @@ def test_GlobalEquivResol_input_file(driverobj):
     assert driverobj.input_file().ready()
 
 
-def test_GlobalEquivResol_provisioned_run_directory(driverobj):
+def test_GlobalEquivResol_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
         input_file=D,
         runscript=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 

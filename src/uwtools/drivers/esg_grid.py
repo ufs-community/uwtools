@@ -56,7 +56,7 @@ class ESGGrid(Driver):
         )
 
     @tasks
-    def provisioned_run_directory(self):
+    def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
         """

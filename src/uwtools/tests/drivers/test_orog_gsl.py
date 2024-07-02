@@ -80,11 +80,11 @@ def test_OrogGSL_input_grid_file(driverobj):
     assert path.is_symlink()
 
 
-def test_OrogGSL_provisioned_run_directory(driverobj):
+def test_OrogGSL_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj, input_grid_file=D, runscript=D, topo_data_2p5m=D, topo_data_30s=D
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 

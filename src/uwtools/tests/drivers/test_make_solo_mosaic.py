@@ -65,9 +65,9 @@ def test_MakeSoloMosaic(method):
     assert getattr(MakeSoloMosaic, method) is getattr(Driver, method)
 
 
-def test_MakeSoloMosaic_provisioned_run_directory(driverobj):
+def test_MakeSoloMosaic_provisioned_rundir(driverobj):
     with patch.object(driverobj, "runscript") as runscript:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
         runscript.assert_called_once_with()
 
 

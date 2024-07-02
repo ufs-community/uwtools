@@ -1,7 +1,7 @@
 ``mpas_init``
 =============
 
-The ``uw`` mode for configuring and running the MPAS ``init_atmosphere`` tool. Each listed ``TASK`` may be called to generate the runtime asset(s) it is responsible for, and will call any task it depends on as needed. A ``provisioned_run_directory`` comprises everything needed for a run, and a ``run`` runs the ``init_atmosphere`` executable.
+The ``uw`` mode for configuring and running the MPAS ``init_atmosphere`` tool. Each listed ``TASK`` may be called to generate the runtime asset(s) it is responsible for, and will call any task it depends on as needed. A ``provisioned_rundir`` comprises everything needed for a run, and a ``run`` runs the ``init_atmosphere`` executable.
 
 .. literalinclude:: mpas_init/help.cmd
    :language: text
@@ -55,4 +55,4 @@ Its contents are described in depth in section :ref:`mpas_init_yaml`.
 
   .. code-block:: text
 
-     $ uw mpas_init provisioned_run_directory --config-file config.yaml --cycle 2023-12-18T00 --batch
+     $ uw mpas_init provisioned_rundir --config-file config.yaml --cycle 2023-12-18T00 --batch
