@@ -8,11 +8,11 @@ from pathlib import Path
 from iotaa import asset, task, tasks
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.drivers.driver import DriverWithCycle
+from uwtools.drivers.driver import DriverCycleBased
 from uwtools.utils.tasks import file, filecopy, symlink
 
 
-class JEDIBase(DriverWithCycle):
+class JEDIBase(DriverCycleBased):
     """
     A base class for the JEDI-like drivers.
     """

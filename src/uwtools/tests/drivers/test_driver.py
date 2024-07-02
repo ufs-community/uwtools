@@ -46,27 +46,27 @@ class Common:
         pass
 
 
+class ConcreteAssetsCycleBased(Common, driver.AssetsCycleBased):
+    pass
+
+
+class ConcreteAssetsCycleAndLeadtimeBased(Common, driver.AssetsCycleAndLeadtimeBased):
+    pass
+
+
 class ConcreteAssetsTimeInvariant(Common, driver.AssetsTimeInvariant):
     pass
 
 
-class ConcreteAssetsWithCycle(Common, driver.AssetsWithCycle):
+class ConcreteDriverCycleBased(Common, driver.DriverCycleBased):
     pass
 
 
-class ConcreteAssetsWithCycleAndLeadtime(Common, driver.AssetsWithCycleAndLeadtime):
+class ConcreteDriverCycleAndLeadtimeBased(Common, driver.DriverCycleAndLeadtimeBased):
     pass
 
 
 class ConcreteDriverTimeInvariant(Common, driver.DriverTimeInvariant):
-    pass
-
-
-class ConcreteDriverWithCycle(Common, driver.DriverWithCycle):
-    pass
-
-
-class ConcreteDriverWithCycleAndLeadtime(Common, driver.DriverWithCycleAndLeadtime):
     pass
 
 
@@ -123,23 +123,23 @@ def test_Assets(assetsobj):
     assert Path(assetsobj._driver_config["base_file"]).name == "base.yaml"
 
 
-def test_Assets_repr_time_invariant(config):
-    obj = ConcreteAssetsTimeInvariant(config=config)
-    expected = "concrete in %s" % obj._driver_config["run_dir"]
-    assert repr(obj) == expected
-
-
-def test_Assets_repr_with_cycle(config):
-    obj = ConcreteAssetsWithCycle(config=config, cycle=dt.datetime(2024, 7, 2, 12))
+def test_Assets_repr_cycle_based(config):
+    obj = ConcreteAssetsCycleBased(config=config, cycle=dt.datetime(2024, 7, 2, 12))
     expected = "concrete 2024-07-02T12:00 in %s" % obj._driver_config["run_dir"]
     assert repr(obj) == expected
 
 
-def test_Assets_repr_with_cycle_and_leadtime(config):
-    obj = ConcreteAssetsWithCycleAndLeadtime(
+def test_Assets_repr_cycle_and_leadtime_based(config):
+    obj = ConcreteAssetsCycleAndLeadtimeBased(
         config=config, cycle=dt.datetime(2024, 7, 2, 12), leadtime=dt.timedelta(hours=6)
     )
     expected = "concrete 2024-07-02T12:00 06:00:00 in %s" % obj._driver_config["run_dir"]
+    assert repr(obj) == expected
+
+
+def test_Assets_repr_time_invariant(config):
+    obj = ConcreteAssetsTimeInvariant(config=config)
+    expected = "concrete in %s" % obj._driver_config["run_dir"]
     assert repr(obj) == expected
 
 

@@ -213,28 +213,7 @@ class Assets(ABC):
         validate_internal(schema_name=schema_name, config=self._config)
 
 
-class AssetsTimeInvariant(Assets):
-    """
-    An abstract class to provision assets for time-invariant components.
-    """
-
-    def __init__(
-        self,
-        config: Optional[Path] = None,
-        dry_run: bool = False,
-        key_path: Optional[list[str]] = None,
-    ):
-        """
-        The driver.
-
-        :param config: Path to config file (read stdin if missing or None).
-        :param dry_run: Run in dry-run mode?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
-        super().__init__(config=config, dry_run=dry_run, key_path=key_path)
-
-
-class AssetsWithCycle(Assets):
+class AssetsCycleBased(Assets):
     """
     An abstract class to provision assets for cycle-based components.
     """
@@ -258,7 +237,7 @@ class AssetsWithCycle(Assets):
         self._cycle = cycle
 
 
-class AssetsWithCycleAndLeadtime(Assets):
+class AssetsCycleAndLeadtimeBased(Assets):
     """
     An abstract class to provision assets for cycle-and-leadtime-based components.
     """
@@ -285,6 +264,27 @@ class AssetsWithCycleAndLeadtime(Assets):
         )
         self._cycle = cycle
         self._leadtime = leadtime
+
+
+class AssetsTimeInvariant(Assets):
+    """
+    An abstract class to provision assets for time-invariant components.
+    """
+
+    def __init__(
+        self,
+        config: Optional[Path] = None,
+        dry_run: bool = False,
+        key_path: Optional[list[str]] = None,
+    ):
+        """
+        The driver.
+
+        :param config: Path to config file (read stdin if missing or None).
+        :param dry_run: Run in dry-run mode?
+        :param key_path: Keys leading through the config to the driver's configuration block.
+        """
+        super().__init__(config=config, dry_run=dry_run, key_path=key_path)
 
 
 class Driver(Assets):
@@ -476,30 +476,7 @@ class Driver(Assets):
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
 
 
-class DriverTimeInvariant(Driver):
-    """
-    An abstract class for standalone time-invariant component drivers.
-    """
-
-    def __init__(
-        self,
-        config: Optional[Path] = None,
-        dry_run: bool = False,
-        batch: bool = False,
-        key_path: Optional[list[str]] = None,
-    ):
-        """
-        The driver.
-
-        :param config: Path to config file (read stdin if missing or None).
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
-        super().__init__(config=config, dry_run=dry_run, batch=batch, key_path=key_path)
-
-
-class DriverWithCycle(Driver):
+class DriverCycleBased(Driver):
     """
     An abstract class for standalone cycle-based component drivers.
     """
@@ -527,7 +504,7 @@ class DriverWithCycle(Driver):
         self._cycle = cycle
 
 
-class DriverWithCycleAndLeadtime(Driver):
+class DriverCycleAndLeadtimeBased(Driver):
     """
     An abstract class for standalone cycle-and-leadtime-based component drivers.
     """
@@ -561,6 +538,29 @@ class DriverWithCycleAndLeadtime(Driver):
         )
         self._cycle = cycle
         self._leadtime = leadtime
+
+
+class DriverTimeInvariant(Driver):
+    """
+    An abstract class for standalone time-invariant component drivers.
+    """
+
+    def __init__(
+        self,
+        config: Optional[Path] = None,
+        dry_run: bool = False,
+        batch: bool = False,
+        key_path: Optional[list[str]] = None,
+    ):
+        """
+        The driver.
+
+        :param config: Path to config file (read stdin if missing or None).
+        :param dry_run: Run in dry-run mode?
+        :param batch: Run component via the batch system?
+        :param key_path: Keys leading through the config to the driver's configuration block.
+        """
+        super().__init__(config=config, dry_run=dry_run, batch=batch, key_path=key_path)
 
 
 DriverT = Union[type[Assets], type[Driver]]

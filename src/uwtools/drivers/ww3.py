@@ -7,12 +7,12 @@ from pathlib import Path
 from iotaa import asset, task, tasks
 
 from uwtools.api.template import render
-from uwtools.drivers.driver import AssetsWithCycle
+from uwtools.drivers.driver import AssetsCycleBased
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
 
-class WaveWatchIII(AssetsWithCycle):
+class WaveWatchIII(AssetsCycleBased):
     """
     A library driver for ww3.
     """

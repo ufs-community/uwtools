@@ -7,12 +7,12 @@ from pathlib import Path
 from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.drivers.driver import DriverWithCycleAndLeadtime
+from uwtools.drivers.driver import DriverCycleAndLeadtimeBased
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
 
-class UPP(DriverWithCycleAndLeadtime):
+class UPP(DriverCycleAndLeadtimeBased):
     """
     A driver for UPP.
     """
