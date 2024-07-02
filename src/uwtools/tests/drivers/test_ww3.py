@@ -37,7 +37,7 @@ def cycle():
 
 @fixture
 def driverobj(config, cycle):
-    return WaveWatchIII(config=config, cycle=cycle, batch=True)
+    return WaveWatchIII(config=config, cycle=cycle)
 
 
 # Tests

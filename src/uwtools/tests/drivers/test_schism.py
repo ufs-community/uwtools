@@ -37,7 +37,7 @@ def cycle():
 
 @fixture
 def driverobj(config, cycle):
-    return SCHISM(config=config, cycle=cycle, batch=True)
+    return SCHISM(config=config, cycle=cycle)
 
 
 # Tests

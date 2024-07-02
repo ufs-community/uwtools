@@ -35,7 +35,6 @@ class Assets(ABC):
         config: Optional[Union[dict, Path]],
         cycle: Optional[datetime] = None,
         leadtime: Optional[timedelta] = None,
-        batch: bool = False,
         key_path: Optional[list[str]] = None,
         dry_run: bool = False,
     ) -> None:
@@ -45,7 +44,6 @@ class Assets(ABC):
         :param config: Path to config file (read stdin if missing or None).
         :param cycle: The cycle.
         :param leadtime: The leadtime.
-        :param batch: Run component via the batch system?
         :param key_path: Keys leading through the config to the driver's configuration block.
         :param dry_run: Run in dry-run mode?
         """
@@ -60,7 +58,6 @@ class Assets(ABC):
         for key in key_path or []:
             self._config = self._config[key]
         self._validate()
-        self._batch = batch
         dryrun(enable=dry_run)
 
     def __repr__(self) -> str:
@@ -199,7 +196,14 @@ class Assets(ABC):
 
         :param suffix: Log-string suffix.
         """
-        return "%s %s" % (self._driver_name, suffix)
+        cycle = getattr(self, "_cycle", None)
+        leadtime = getattr(self, "_leadtime", None)
+        timestr = (
+            (cycle + leadtime).strftime("%Y%m%d %H:%M:%S")
+            if cycle and leadtime is not None
+            else cycle.strftime("%Y%m%d %HZ") if cycle else None
+        )
+        return " ".join(filter(None, [timestr, self._driver_name, suffix]))
 
     def _validate(self) -> None:
         """
@@ -207,6 +211,27 @@ class Assets(ABC):
         """
         schema_name = self._driver_name.replace("_", "-")
         validate_internal(schema_name=schema_name, config=self._config)
+
+
+class AssetsTimeInvariant(Assets):
+    """
+    An abstract class to provision assets for time-invariant components.
+    """
+
+    def __init__(
+        self,
+        config: Optional[Path] = None,
+        dry_run: bool = False,
+        key_path: Optional[list[str]] = None,
+    ):
+        """
+        The driver.
+
+        :param config: Path to config file (read stdin if missing or None).
+        :param dry_run: Run in dry-run mode?
+        :param key_path: Keys leading through the config to the driver's configuration block.
+        """
+        super().__init__(config=config, dry_run=dry_run, key_path=key_path)
 
 
 class AssetsWithCycle(Assets):
@@ -219,7 +244,6 @@ class AssetsWithCycle(Assets):
         cycle: datetime,
         config: Optional[Path] = None,
         dry_run: bool = False,
-        batch: bool = False,
         key_path: Optional[list[str]] = None,
     ):
         """
@@ -228,21 +252,10 @@ class AssetsWithCycle(Assets):
         :param cycle: The cycle.
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
         :param key_path: Keys leading through the config to the driver's configuration block.
         """
-        super().__init__(
-            config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
-        )
+        super().__init__(config=config, dry_run=dry_run, cycle=cycle, key_path=key_path)
         self._cycle = cycle
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
 
 
 class AssetsWithCycleAndLeadtime(Assets):
@@ -256,7 +269,6 @@ class AssetsWithCycleAndLeadtime(Assets):
         leadtime: timedelta,
         config: Optional[Path] = None,
         dry_run: bool = False,
-        batch: bool = False,
         key_path: Optional[list[str]] = None,
     ):
         """
@@ -266,37 +278,43 @@ class AssetsWithCycleAndLeadtime(Assets):
         :param leadtime: The leadtime.
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
         :param key_path: Keys leading through the config to the driver's configuration block.
         """
         super().__init__(
-            config=config,
-            dry_run=dry_run,
-            batch=batch,
-            cycle=cycle,
-            key_path=key_path,
-            leadtime=leadtime,
+            config=config, dry_run=dry_run, cycle=cycle, key_path=key_path, leadtime=leadtime
         )
         self._cycle = cycle
         self._leadtime = leadtime
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s %s" % (
-            (self._cycle + self._leadtime).strftime("%Y%m%d %H:%M:%S"),
-            self._driver_name,
-            suffix,
-        )
 
 
 class Driver(Assets):
     """
     An abstract class for standalone component drivers.
     """
+
+    def __init__(
+        self,
+        config: Optional[Path] = None,
+        cycle: Optional[datetime] = None,
+        leadtime: Optional[timedelta] = None,
+        dry_run: bool = False,
+        batch: bool = False,
+        key_path: Optional[list[str]] = None,
+    ):
+        """
+        The driver.
+
+        :param config: Path to config file (read stdin if missing or None).
+        :param cycle: The cycle.
+        :param leadtime: The leadtime.
+        :param dry_run: Run in dry-run mode?
+        :param batch: Run component via the batch system?
+        :param key_path: Keys leading through the config to the driver's configuration block.
+        """
+        super().__init__(
+            config=config, cycle=cycle, leadtime=leadtime, dry_run=dry_run, key_path=key_path
+        )
+        self._batch = batch
 
     # Workflow tasks
 
@@ -508,14 +526,6 @@ class DriverWithCycle(Driver):
         )
         self._cycle = cycle
 
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
-
 
 class DriverWithCycleAndLeadtime(Driver):
     """
@@ -551,18 +561,6 @@ class DriverWithCycleAndLeadtime(Driver):
         )
         self._cycle = cycle
         self._leadtime = leadtime
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s %s" % (
-            (self._cycle + self._leadtime).strftime("%Y%m%d %H:%M:%S"),
-            self._driver_name,
-            suffix,
-        )
 
 
 DriverT = Union[type[Assets], type[Driver]]

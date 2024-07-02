@@ -23,7 +23,7 @@ from uwtools.tests.support import regex_logged
 # Helpers
 
 
-class ConcreteAssets(driver.AssetsWithCycleAndLeadtime):
+class ConcreteAssets(driver.Assets):
     """
     Driver subclass for testing purposes.
     """
@@ -112,7 +112,6 @@ def assetsobj(config):
     return ConcreteAssets(
         config=config,
         dry_run=False,
-        batch=True,
         cycle=dt.datetime(2024, 3, 22, 18),
         leadtime=dt.timedelta(hours=24),
     )
@@ -134,11 +133,10 @@ def driverobj(config):
 
 def test_Assets(assetsobj):
     assert Path(assetsobj._driver_config["base_file"]).name == "base.yaml"
-    assert assetsobj._batch is True
 
 
 def test_Assets_repr(assetsobj):
-    expected = "concrete 2024-03-22T18:00 24:00:00 in %s" % assetsobj._driver_config["run_dir"]
+    expected = "concrete in %s" % assetsobj._driver_config["run_dir"]
     assert repr(assetsobj) == expected
 
 
@@ -182,7 +180,6 @@ def test_key_path(config, tmp_path):
     assetsobj = ConcreteAssets(
         config=config_file,
         dry_run=False,
-        batch=True,
         cycle=dt.datetime(2024, 3, 22, 18),
         key_path=["foo", "bar"],
         leadtime=dt.timedelta(hours=24),
