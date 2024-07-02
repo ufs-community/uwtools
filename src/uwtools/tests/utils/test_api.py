@@ -9,6 +9,7 @@ from pytest import fixture, mark, raises
 
 from uwtools.exceptions import UWError
 from uwtools.tests.drivers.test_driver import ConcreteDriverTimeInvariant as TestDriver
+from uwtools.tests.drivers.test_driver import ConcreteDriverWithCycleAndLeadtime as TestDriverWCL
 from uwtools.utils import api
 
 
@@ -115,11 +116,10 @@ def test_str2path_convert():
     assert result == Path(val)
 
 
-@mark.skip("PM FIXME")
 @mark.parametrize("hours", [0, 24, 168])
 def test__execute(execute_kwargs, hours, tmp_path):
     graph_file = tmp_path / "g.dot"
-    with patch.object(sys.modules[__name__], "TestDriver", wraps=TestDriver) as cd:
+    with patch.object(sys.modules[__name__], "TestDriverWCL", wraps=TestDriverWCL) as cd:
         kwargs = {
             **execute_kwargs,
             "driver_class": cd,
