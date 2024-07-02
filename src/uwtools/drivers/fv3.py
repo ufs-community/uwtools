@@ -42,7 +42,6 @@ class FV3(Driver):
         super().__init__(
             config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
         )
-        self._cycle = cycle
 
     # Workflow tasks
 
@@ -214,4 +213,4 @@ class FV3(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return self._taskname_with_cycle(self._cycle, suffix)
+        return self._taskname_with_cycle(suffix)

@@ -30,6 +30,7 @@ class MPAS(MPASBase):
         endhour = self._driver_config["length"]
         interval = lbcs["interval_hours"]
         symlinks = {}
+        assert self._cycle
         for boundary_hour in range(0, endhour + 1, interval):
             file_date = self._cycle + timedelta(hours=boundary_hour)
             fn = f"lbc.{file_date.strftime('%Y-%m-%d_%H.%M.%S')}.nc"
@@ -51,6 +52,7 @@ class MPAS(MPASBase):
         str_duration = str(duration).replace(" days, ", "")
         namelist = self._driver_config["namelist"]
         update_values = namelist.get("update_values", {})
+        assert self._cycle
         update_values.setdefault("nhyd_model", {}).update(
             {
                 "config_start_time": self._cycle.strftime("%Y-%m-%d_%H:00:00"),

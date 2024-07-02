@@ -46,8 +46,6 @@ class UPP(Driver):
             key_path=key_path,
             leadtime=leadtime,
         )
-        self._cycle = cycle
-        self._leadtime = leadtime
 
     # Workflow tasks
 
@@ -140,4 +138,4 @@ class UPP(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return self._taskname_with_cycle_and_leadtime(self._cycle, self._leadtime, suffix)
+        return self._taskname_with_cycle_and_leadtime(suffix)

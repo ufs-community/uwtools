@@ -40,7 +40,6 @@ class MPASBase(Driver):
         super().__init__(
             config=config, cycle=cycle, dry_run=dry_run, batch=batch, key_path=key_path
         )
-        self._cycle = cycle
 
     # Workflow tasks
 
@@ -147,4 +146,4 @@ class MPASBase(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return self._taskname_with_cycle(self._cycle, suffix)
+        return self._taskname_with_cycle(suffix)

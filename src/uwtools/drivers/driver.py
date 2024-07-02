@@ -7,6 +7,7 @@ import os
 import re
 import stat
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from datetime import datetime, timedelta
 from functools import partial
 from pathlib import Path
@@ -32,28 +33,26 @@ class Assets(ABC):
     def __init__(
         self,
         config: Optional[Union[dict, Path]],
-        dry_run: bool = False,
-        batch: bool = False,
         cycle: Optional[datetime] = None,
         leadtime: Optional[timedelta] = None,
+        batch: bool = False,
         key_path: Optional[list[str]] = None,
+        dry_run: bool = False,
     ) -> None:
         """
         A component driver.
 
         :param config: Path to config file (read stdin if missing or None).
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
         :param cycle: The cycle.
         :param leadtime: The leadtime.
+        :param batch: Run component via the batch system?
         :param key_path: Keys leading through the config to the driver's configuration block.
+        :param dry_run: Run in dry-run mode?
         """
-        dryrun(enable=dry_run)
-        self._config = YAMLConfig(config=config)
-        self._batch = batch
         has_leadtime = leadtime is not None
         if has_leadtime and not cycle:
             raise UWError("When leadtime is specified, cycle is required")
+        self._config = YAMLConfig(config=config)
         self._config.dereference(
             context={
                 **({"cycle": cycle} if cycle else {}),
@@ -61,10 +60,36 @@ class Assets(ABC):
                 **self._config.data,
             }
         )
-        key_path = key_path or []
-        for key in key_path:
+        for key in key_path or []:
             self._config = self._config[key]
         self._validate()
+        self._cycle = cycle
+        self._leadtime = leadtime
+        self._batch = batch
+        dryrun(enable=dry_run)
+
+    def __repr__(self) -> str:
+        cycle = [self._cycle.strftime("%Y-%m-%dT%H:%M")] if self._cycle else []
+        leadtime = [str(self._leadtime)] if self._leadtime is not None else []
+        return " ".join([str(self), *cycle, *leadtime, "in", self._driver_config["run_dir"]])
+
+    def __str__(self) -> str:
+        return self._driver_name
+
+    @property
+    def config(self) -> dict:
+        """
+        Return a copy of the driver config.
+        """
+        return deepcopy(self._driver_config)
+
+    @property
+    def config_full(self) -> dict:
+        """
+        Return a copy of the full input config.
+        """
+        full_config: dict = self._config.data
+        return deepcopy(full_config)
 
     # Workflow tasks
 
@@ -119,12 +144,11 @@ class Assets(ABC):
         """
         Returns the config block specific to this driver.
         """
-        name = self._driver_name
         try:
-            driver_config: dict[str, Any] = self._config[name]
+            driver_config: dict[str, Any] = self._config[self._driver_name]
             return driver_config
         except KeyError as e:
-            raise UWConfigError("Required '%s' block missing in config" % name) from e
+            raise UWConfigError("Required '%s' block missing in config" % self._driver_name) from e
 
     @property
     @abstractmethod
@@ -176,24 +200,25 @@ class Assets(ABC):
         """
         return "%s %s" % (self._driver_name, suffix)
 
-    def _taskname_with_cycle(self, cycle: datetime, suffix: str) -> str:
+    def _taskname_with_cycle(self, suffix: str) -> str:
         """
         Returns a common tag for graph-task log messages.
 
         :param suffix: Log-string suffix.
         """
-        return "%s %s %s" % (cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
+        assert self._cycle
+        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
 
-    def _taskname_with_cycle_and_leadtime(
-        self, cycle: datetime, leadtime: timedelta, suffix: str
-    ) -> str:
+    def _taskname_with_cycle_and_leadtime(self, suffix: str) -> str:
         """
         Returns a common tag for graph-task log messages.
 
         :param suffix: Log-string suffix.
         """
+        assert self._cycle
+        assert self._leadtime is not None
         return "%s %s %s" % (
-            (cycle + leadtime).strftime("%Y%m%d %H:%M:%S"),
+            (self._cycle + self._leadtime).strftime("%Y%m%d %H:%M:%S"),
             self._driver_name,
             suffix,
         )

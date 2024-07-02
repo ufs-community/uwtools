@@ -31,6 +31,7 @@ class MPASInit(MPASBase):
         interval = lbcs["interval_hours"]
         symlinks = {}
         boundary_filepath = lbcs["path"]
+        assert self._cycle
         for boundary_hour in range(0, endhour + 1, interval):
             file_date = self._cycle + timedelta(hours=boundary_hour)
             fn = f"FILE:{file_date.strftime('%Y-%m-%d_%H')}"
@@ -50,6 +51,7 @@ class MPASInit(MPASBase):
         yield asset(path, path.is_file)
         base_file = self._driver_config["namelist"].get("base_file")
         yield file(Path(base_file)) if base_file else None
+        assert self._cycle
         stop_time = self._cycle + timedelta(
             hours=self._driver_config["boundary_conditions"]["length"]
         )

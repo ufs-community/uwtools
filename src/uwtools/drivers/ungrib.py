@@ -39,7 +39,6 @@ class Ungrib(Driver):
         super().__init__(
             config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
         )
-        self._cycle = cycle
 
     # Workflow tasks
 
@@ -53,6 +52,7 @@ class Ungrib(Driver):
         offset = abs(gfs_files["offset"])
         endhour = gfs_files["forecast_length"] + offset
         interval = gfs_files["interval_hours"]
+        assert self._cycle
         cycle_hour = int((self._cycle - timedelta(hours=offset)).strftime("%H"))
         links = []
         for n, boundary_hour in enumerate(range(offset, endhour + 1, interval)):
@@ -71,6 +71,7 @@ class Ungrib(Driver):
         # Do not use offset here. It's relative to the MPAS fcst to run.
         gfs_files = self._driver_config["gfs_files"]
         endhour = gfs_files["forecast_length"]
+        assert self._cycle
         end_date = self._cycle + timedelta(hours=endhour)
         interval = int(gfs_files["interval_hours"]) * 3600  # hour to sec
         d = {
@@ -154,7 +155,7 @@ class Ungrib(Driver):
 
         :param suffix: Log-string suffix.
         """
-        return self._taskname_with_cycle(self._cycle, suffix)
+        return self._taskname_with_cycle(suffix)
 
 
 def _ext(n):
