@@ -142,11 +142,12 @@ class Assets(ABC):
         """
         Returns the config block specific to this driver.
         """
+        name = self._driver_name
         try:
-            driver_config: dict[str, Any] = self._config[self._driver_name]
+            driver_config: dict[str, Any] = self._config[name]
             return driver_config
         except KeyError as e:
-            raise UWConfigError("Required '%s' block missing in config" % self._driver_name) from e
+            raise UWConfigError("Required '%s' block missing in config" % name) from e
 
     @property
     @abstractmethod
