@@ -26,25 +26,7 @@ from uwtools.tests.support import regex_logged
 # Helpers
 
 
-class ConcreteAssetsTimeInvariant(driver.AssetsTimeInvariant):
-
-    @task
-    def atask(self):
-        yield "atask"
-        yield asset("atask", lambda: True)
-
-    def provisioned_run_directory(self):
-        pass
-
-    @property
-    def _driver_name(self) -> str:
-        return "concrete"
-
-    def _validate(self) -> None:
-        pass
-
-
-class ConcreteDriverTimeInvariant(driver.DriverTimeInvariant):
+class Common:
 
     __test__ = False
 
@@ -62,6 +44,30 @@ class ConcreteDriverTimeInvariant(driver.DriverTimeInvariant):
 
     def _validate(self) -> None:
         pass
+
+
+class ConcreteAssetsTimeInvariant(Common, driver.AssetsTimeInvariant):
+    pass
+
+
+class ConcreteAssetsWithCycle(Common, driver.AssetsWithCycle):
+    pass
+
+
+class ConcreteAssetsWithCycleAndLeadtime(Common, driver.AssetsWithCycleAndLeadtime):
+    pass
+
+
+class ConcreteDriverTimeInvariant(Common, driver.DriverTimeInvariant):
+    pass
+
+
+class ConcreteDriverWithCycle(Common, driver.DriverWithCycle):
+    pass
+
+
+class ConcreteDriverWithCycleAndLeadtime(Common, driver.DriverWithCycleAndLeadtime):
+    pass
 
 
 def write(path, s):
