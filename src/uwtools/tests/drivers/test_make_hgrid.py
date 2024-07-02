@@ -31,7 +31,7 @@ def config(tmp_path):
                 },
                 "executable": "/path/to/make_hgrid",
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
         },
         "platform": {
             "account": "myaccount",

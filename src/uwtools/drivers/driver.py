@@ -166,7 +166,7 @@ class Assets(ABC):
         """
         The path to the component's run directory.
         """
-        return Path(self._driver_config["run_dir"])
+        return Path(self._driver_config["rundir"])
 
     def _taskname(self, suffix: str) -> str:
         """

@@ -43,7 +43,7 @@ class FilterTopo(Driver):
         The input grid file.
         """
         src = Path(self._driver_config["config"]["input_grid_file"])
-        dst = Path(self._driver_config["run_dir"]) / src.name
+        dst = Path(self._driver_config["rundir"]) / src.name
         yield self._taskname("Input grid")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)

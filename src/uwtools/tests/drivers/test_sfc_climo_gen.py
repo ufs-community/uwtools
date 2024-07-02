@@ -67,7 +67,7 @@ def config(tmp_path):
                 },
                 "validate": True,
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
         },
         "platform": {
             "account": "me",

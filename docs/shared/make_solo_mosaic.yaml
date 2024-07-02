@@ -11,7 +11,7 @@ make_solo_mosaic:
       cores: 1
       walltime: "00:01:00"
     executable: /path/to/make_solo_mosaic.exe
-  run_dir: /path/to/rundir
+  rundir: /path/to/rundir
 platform:
   account: me
   scheduler: slurm

@@ -33,7 +33,7 @@ def config(tmp_path):
                 "offset": 6,
                 "path": str(tmp_path / "gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}"),
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
             "vtable": str(tmp_path / "Vtable.GFS"),
         },
         "platform": {

@@ -33,7 +33,7 @@ Its contents are described in depth in section :ref:`mpas_yaml`.
 
      $ uw mpas run --config-file config.yaml --cycle 2025-02-12T12
 
-  The driver creates a ``runscript.mpas`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``atmosphere_model``.
+  The driver creates a ``runscript.mpas`` file in the directory specified by ``rundir:`` in the config and runs it, executing ``atmosphere_model``.
 
 * Run ``mpas`` via a batch job
 
@@ -41,7 +41,7 @@ Its contents are described in depth in section :ref:`mpas_yaml`.
 
      $ uw mpas run --config-file config.yaml --cycle 2025-02-12T12 --batch
 
-  The driver creates a ``runscript.mpas`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``mpas:``.
+  The driver creates a ``runscript.mpas`` file in the directory specified by ``rundir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``mpas:``.
 
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 

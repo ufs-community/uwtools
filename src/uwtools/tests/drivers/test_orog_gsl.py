@@ -34,7 +34,7 @@ def config(tmp_path):
                 },
                 "executable": "/path/to/orog_gsl",
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
         },
         "platform": {
             "account": "me",
@@ -74,7 +74,7 @@ def test_OrogGSL(method):
 
 
 def test_OrogGSL_input_grid_file(driverobj):
-    path = Path(driverobj._driver_config["run_dir"]) / "C403_grid.tile7.halo4.nc"
+    path = Path(driverobj._driver_config["rundir"]) / "C403_grid.tile7.halo4.nc"
     assert not path.is_file()
     driverobj.input_grid_file()
     assert path.is_symlink()
@@ -90,14 +90,14 @@ def test_OrogGSL_provisioned_run_directory(driverobj):
 
 
 def test_OrogGSL_topo_data_2p5m(driverobj):
-    path = Path(driverobj._driver_config["run_dir"]) / "geo_em.d01.lat-lon.2.5m.HGT_M.nc"
+    path = Path(driverobj._driver_config["rundir"]) / "geo_em.d01.lat-lon.2.5m.HGT_M.nc"
     assert not path.is_file()
     driverobj.topo_data_2p5m()
     assert path.is_symlink()
 
 
 def test_OrogGSL_topo_data_3os(driverobj):
-    path = Path(driverobj._driver_config["run_dir"]) / "HGT.Beljaars_filtered.lat-lon.30s_res.nc"
+    path = Path(driverobj._driver_config["rundir"]) / "HGT.Beljaars_filtered.lat-lon.30s_res.nc"
     assert not path.is_file()
     driverobj.topo_data_30s()
     assert path.is_symlink()

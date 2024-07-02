@@ -33,7 +33,7 @@ Its contents are described in section :ref:`ioda_yaml`.
 
       $ uw ioda run --config-file config.yaml --cycle 2024-05-22T12
 
-The driver creates a ``runscript.ioda`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``ioda``.
+The driver creates a ``runscript.ioda`` file in the directory specified by ``rundir:`` in the config and runs it, executing ``ioda``.
 
 * Run ``ioda`` via a batch job
 
@@ -41,7 +41,7 @@ The driver creates a ``runscript.ioda`` file in the directory specified by ``run
 
       $ uw ioda run --config-file config.yaml --cycle 2024-05-22T12 --batch
 
-The driver creates a ``runscript.ioda`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``ioda:``.
+The driver creates a ``runscript.ioda`` file in the directory specified by ``rundir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``ioda:``.
 
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 

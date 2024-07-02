@@ -33,7 +33,7 @@ Its contents are described in depth in section :ref:`chgres_cube_yaml`. Each of 
 
      $ uw chgres_cube run --config-file config.yaml --cycle 2023-12-15T18
 
-  The driver creates a ``runscript.chgres_cube`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``chgres_cube``.
+  The driver creates a ``runscript.chgres_cube`` file in the directory specified by ``rundir:`` in the config and runs it, executing ``chgres_cube``.
 
 * Run ``chgres_cube`` via a batch job
 
@@ -41,7 +41,7 @@ Its contents are described in depth in section :ref:`chgres_cube_yaml`. Each of 
 
      $ uw chgres_cube run --config-file config.yaml --cycle 2023-12-15T18 --batch
 
-  The driver creates a ``runscript.chgres_cube`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``chgres_cube:``.
+  The driver creates a ``runscript.chgres_cube`` file in the directory specified by ``rundir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``chgres_cube:``.
 
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 

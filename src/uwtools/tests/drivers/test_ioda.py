@@ -45,7 +45,7 @@ def config(tmp_path):
                 "foo": "/path/to/foo",
                 "bar/baz": "/path/to/baz",
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
         },
         "platform": {
             "account": "me",

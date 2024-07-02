@@ -33,7 +33,7 @@ Its contents are described in depth in section :ref:`upp_yaml`.
 
      $ uw upp run --config-file config.yaml --cycle 2024-05-06T12 --leadtime 6
 
-  The driver creates a ``runscript.upp`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``upp``.
+  The driver creates a ``runscript.upp`` file in the directory specified by ``rundir:`` in the config and runs it, executing ``upp``.
 
 * Run ``upp`` via a batch job
 
@@ -41,7 +41,7 @@ Its contents are described in depth in section :ref:`upp_yaml`.
 
      $ uw upp run --config-file config.yaml --cycle 2024-05-06T12 --leadtime 6 --batch
 
-  The driver creates a ``runscript.upp`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``upp:``.
+  The driver creates a ``runscript.upp`` file in the directory specified by ``rundir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``upp:``.
 
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 

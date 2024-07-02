@@ -33,7 +33,7 @@ Its contents are described in depth in section :ref:`sfc_climo_gen_yaml`.
 
      $ uw sfc_climo_gen run --config-file config.yaml
 
-  The driver creates a ``runscript.sfc_climo_gen`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``sfc_climo_gen``.
+  The driver creates a ``runscript.sfc_climo_gen`` file in the directory specified by ``rundir:`` in the config and runs it, executing ``sfc_climo_gen``.
 
 * Run ``sfc_climo_gen`` via a batch job
 
@@ -41,7 +41,7 @@ Its contents are described in depth in section :ref:`sfc_climo_gen_yaml`.
 
      $ uw sfc_climo_gen run --config-file config.yaml --batch
 
-  The driver creates a ``runscript.sfc_climo_gen`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``sfc_climo_gen:``.
+  The driver creates a ``runscript.sfc_climo_gen`` file in the directory specified by ``rundir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``sfc_climo_gen:``.
 
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 

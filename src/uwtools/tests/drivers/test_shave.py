@@ -32,7 +32,7 @@ def config(tmp_path):
                 "nx": 214,
                 "ny": 128,
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
         },
         "platform": {
             "account": "me",

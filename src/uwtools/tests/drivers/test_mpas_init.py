@@ -58,7 +58,7 @@ def config(tmp_path):
                     "nhyd_model": {"config_start_time": "12", "config_stop_time": "12"},
                 },
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
             "streams": {
                 "input": {
                     "filename_template": "conus.static.nc",
@@ -190,7 +190,7 @@ def test_MPASInit_namelist_file_fails_validation(caplog, driverobj):
 
 def test_MPASInit_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    base_file = str(Path(driverobj._driver_config["run_dir"]) / "missing.nml")
+    base_file = str(Path(driverobj._driver_config["rundir"]) / "missing.nml")
     driverobj._driver_config["namelist"]["base_file"] = base_file
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()

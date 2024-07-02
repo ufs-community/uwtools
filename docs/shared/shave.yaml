@@ -9,7 +9,7 @@ shave:
       cores: 1
       walltime: "00:01:00"
     executable: /path/to/shave
-  run_dir: /path/to/run/dir
+  rundir: /path/to/run/dir
 platform:
   account: me
   scheduler: slurm

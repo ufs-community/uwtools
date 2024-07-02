@@ -49,7 +49,7 @@ execution:
 
 See :ref:`here <execution_yaml>` for details.
 
-run_dir:
-^^^^^^^^
+rundir:
+^^^^^^^
 
 The path to the run directory.

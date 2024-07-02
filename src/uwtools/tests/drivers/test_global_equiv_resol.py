@@ -25,7 +25,7 @@ def config(tmp_path):
                 },
                 "executable": "/path/to/global_equiv_resol.exe",
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
             "input_grid_file": str(tmp_path / "input" / "input_grid_file"),
         },
         "platform": {

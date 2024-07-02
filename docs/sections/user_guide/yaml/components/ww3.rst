@@ -26,7 +26,7 @@ namelist:
 
   Key-value pairs necessary to render all Jinja2 expressions in the input template file named by ``template_file:``.
 
-run_dir:
-^^^^^^^^
+rundir:
+^^^^^^^
 
 The path to the run directory.
