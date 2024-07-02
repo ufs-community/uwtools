@@ -146,6 +146,24 @@ def test_Assets__str__(assetsobj):
     assert str(assetsobj) == "concrete"
 
 
+def test_Assets_config(assetsobj):
+    old = assetsobj._driver_config
+    new = assetsobj.config
+    # The user-accessible object is equivalent to the internal driver config:
+    assert new == old
+    # But they are separate objects:
+    assert not new is old
+
+
+def test_Assets_config_full(assetsobj):
+    old = assetsobj._config
+    new = assetsobj.config_full
+    # The user-accessible object is equivalent to the internal driver config:
+    assert new == old
+    # But they are separate objects:
+    assert not new is old
+
+
 @mark.parametrize("hours", [0, 24, 168])
 def test_Assets_cycle_leadtime_error(config, hours):
     with raises(UWError) as e:
