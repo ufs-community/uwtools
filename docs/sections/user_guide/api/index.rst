@@ -5,6 +5,7 @@ API
    chgres_cube
    config
    esg_grid
+   driver
    file
    filter_topo
    fv3

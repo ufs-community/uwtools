@@ -16,7 +16,7 @@ from uwtools.utils.tasks import file
 
 class WaveWatchIII(Assets):
     """
-    A library driver for ww3.
+    An assets driver for ww3.
     """
 
     def __init__(
