@@ -48,7 +48,7 @@ mpas_init:
       vertical_grid:
         config_blend_bdy_terrain: true
     validate: true
-  run_dir: /path/to/rundir
+  rundir: /path/to/rundir
   streams:
     input:
       filename_template: conus.static.nc

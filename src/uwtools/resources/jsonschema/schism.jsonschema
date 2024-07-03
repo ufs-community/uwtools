@@ -19,13 +19,13 @@
           ],
           "type": "object"
         },
-        "run_dir": {
+        "rundir": {
           "type": "string"
         }
       },
       "required": [
         "namelist",
-        "run_dir"
+        "rundir"
       ],
       "type": "object"
     }

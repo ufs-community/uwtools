@@ -21,7 +21,7 @@ filter_topo:
         topo_field: orog_filt
         topo_file: /path/to/C403_filtered_orog # filter_topo adds a .tile{n}.nc extension
         zero_ocean: true
-  run_dir: /path/to/run/dir
+  rundir: /path/to/run/dir
 platform:
   account: me
   scheduler: slurm

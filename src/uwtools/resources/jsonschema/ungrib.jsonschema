@@ -33,7 +33,7 @@
           ],
           "type": "object"
         },
-        "run_dir": {
+        "rundir": {
           "type": "string"
         },
         "vtable": {
@@ -43,7 +43,7 @@
       "required": [
         "execution",
         "gfs_files",
-        "run_dir",
+        "rundir",
         "vtable"
       ],
       "type": "object"

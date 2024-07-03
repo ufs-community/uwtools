@@ -76,8 +76,8 @@ Supports ``base_file:`` and ``update_values:`` blocks (see :ref:`updating_values
 
 .. include:: /shared/validate_namelist.rst
 
-run_dir:
-^^^^^^^^
+rundir:
+^^^^^^^
 
 The path to the run directory.
 

@@ -44,7 +44,7 @@ def config(tmp_path):
                     }
                 }
             },
-            "run_dir": str(tmp_path / "run"),
+            "rundir": str(tmp_path / "run"),
         }
     }
 
@@ -81,7 +81,7 @@ def test_FilterTopo(method):
 
 
 def test_FilterTopo_input_grid_file(driverobj):
-    path = Path(driverobj._driver_config["run_dir"]) / "C403_grid.tile7.halo4.nc"
+    path = Path(driverobj._driver_config["rundir"]) / "C403_grid.tile7.halo4.nc"
     assert not path.is_file()
     driverobj.input_grid_file()
     assert path.is_symlink()
@@ -94,9 +94,9 @@ def test_FilterTopo_namelist_file(driverobj):
     assert actual == expected
 
 
-def test_FilterTopo_provisioned_run_directory(driverobj):
+def test_FilterTopo_provisioned_rundir(driverobj):
     with patch.multiple(driverobj, input_grid_file=D, namelist_file=D, runscript=D) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 

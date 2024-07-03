@@ -24,7 +24,7 @@ chgres_cube:
         varmap_file: /path/to/varmap_table
         vcoord_file_target_grid: /path/to/global_hyblev.l65.txt
     validate: true
-  run_dir: /path/to/dir
+  rundir: /path/to/dir
 platform:
   account: me
   scheduler: slurm

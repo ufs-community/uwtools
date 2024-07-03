@@ -25,7 +25,7 @@ def config(tmp_path):
                     "dt": 100,
                 },
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
         },
     }
 
@@ -65,12 +65,12 @@ def test_SCHISM_namelist_file(driverobj):
     assert dst.is_file()
 
 
-def test_SCHISM_provisioned_run_directory(driverobj):
+def test_SCHISM_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
         namelist_file=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 

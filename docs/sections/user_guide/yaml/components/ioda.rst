@@ -35,7 +35,7 @@ files_to_link:
 
 Identical to ``files_to_copy:`` except that symbolic links will be created in the run directory instead of copies.
 
-run_dir:
-^^^^^^^^
+rundir:
+^^^^^^^
 
 The path to the run directory.

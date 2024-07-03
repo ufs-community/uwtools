@@ -18,9 +18,8 @@ def test_graph():
     assert support.graph().startswith("digraph")
 
 
-def test_tasks():
     class SomeDriver(DriverTimeInvariant):
-        def provisioned_run_directory(self):
+        def provisioned_rundir(self):
             pass
 
         @external

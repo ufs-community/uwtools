@@ -32,7 +32,7 @@ def config(tmp_path):
                 "nx": 214,
                 "ny": 128,
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
         },
         "platform": {
             "account": "me",
@@ -71,12 +71,12 @@ def test_Shave(method):
     assert getattr(Shave, method) is getattr(Driver, method)
 
 
-def test_Shave_provisioned_run_directory(driverobj):
+def test_Shave_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
         runscript=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 
