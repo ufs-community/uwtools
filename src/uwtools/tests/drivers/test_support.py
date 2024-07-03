@@ -20,7 +20,7 @@ def test_graph():
 
 def test_tasks():
     class SomeDriver(Driver):
-        def provisioned_run_directory(self):
+        def provisioned_rundir(self):
             pass
 
         @external

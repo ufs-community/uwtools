@@ -107,14 +107,14 @@
             }
           ]
         },
-        "run_dir": {
+        "rundir": {
           "type": "string"
         }
       },
       "required": [
         "execution",
         "namelist",
-        "run_dir"
+        "rundir"
       ],
       "type": "object"
     }

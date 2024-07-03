@@ -28,7 +28,7 @@ class ConcreteAssets(driver.Assets):
     Driver subclass for testing purposes.
     """
 
-    def provisioned_run_directory(self):
+    def provisioned_rundir(self):
         pass
 
     @property
@@ -52,7 +52,7 @@ class ConcreteDriver(driver.Driver):
     Driver subclass for testing purposes.
     """
 
-    def provisioned_run_directory(self):
+    def provisioned_rundir(self):
         pass
 
     @property
@@ -89,14 +89,14 @@ def config(tmp_path):
                 "batchargs": {
                     "export": "NONE",
                     "nodes": 1,
-                    "stdout": "{{ concrete.run_dir }}/out",
+                    "stdout": "{{ concrete.rundir }}/out",
                     "walltime": "00:05:00",
                 },
                 "executable": str(tmp_path / "qux"),
                 "mpiargs": ["bar", "baz"],
                 "mpicmd": "foo",
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
             "update_values": {"a": 33},
         },
         "platform": {
@@ -212,13 +212,13 @@ def test_Assets__driver_config_pass(assetobj):
     assert set(assetobj._driver_config.keys()) == {
         "base_file",
         "execution",
-        "run_dir",
+        "rundir",
         "update_values",
     }
 
 
 def test_Assets__rundir(assetobj):
-    assert assetobj._rundir == Path(assetobj._driver_config["run_dir"])
+    assert assetobj._rundir == Path(assetobj._driver_config["rundir"])
 
 
 def test_Assets__validate(assetobj):
@@ -272,7 +272,7 @@ def test_Driver__run_via_batch_submission(driverobj):
     runscript = driverobj._runscript_path
     executable = Path(driverobj._driver_config["execution"]["executable"])
     executable.touch()
-    with patch.object(driverobj, "provisioned_run_directory") as prd:
+    with patch.object(driverobj, "provisioned_rundir") as prd:
         with patch.object(ConcreteDriver, "_scheduler", new_callable=PropertyMock) as scheduler:
             driverobj._run_via_batch_submission()
             scheduler().submit_job.assert_called_once_with(
@@ -284,7 +284,7 @@ def test_Driver__run_via_batch_submission(driverobj):
 def test_Driver__run_via_local_execution(driverobj):
     executable = Path(driverobj._driver_config["execution"]["executable"])
     executable.touch()
-    with patch.object(driverobj, "provisioned_run_directory") as prd:
+    with patch.object(driverobj, "provisioned_rundir") as prd:
         with patch.object(driver, "execute") as execute:
             driverobj._run_via_local_execution()
             execute.assert_called_once_with(
@@ -333,7 +333,7 @@ def test_Driver__driver_config_pass(driverobj):
     assert set(driverobj._driver_config.keys()) == {
         "base_file",
         "execution",
-        "run_dir",
+        "rundir",
         "update_values",
     }
 
@@ -444,8 +444,8 @@ def test_Driver__runscript_done_file(driverobj):
 
 
 def test_Driver__runscript_path(driverobj):
-    run_dir = Path(driverobj._driver_config["run_dir"])
-    assert driverobj._runscript_path == run_dir / "runscript.concrete"
+    rundir = Path(driverobj._driver_config["rundir"])
+    assert driverobj._runscript_path == rundir / "runscript.concrete"
 
 
 def test_Driver__scheduler(driverobj):
@@ -470,18 +470,18 @@ def test_Driver__validate(assetobj):
 
 
 def test_Driver__write_runscript(driverobj):
-    run_dir = driverobj._driver_config["run_dir"]
-    path = Path(run_dir) / "runscript"
+    rundir = driverobj._driver_config["rundir"]
+    path = Path(rundir) / "runscript"
     executable = driverobj._driver_config["execution"]["executable"]
     driverobj._write_runscript(path=path, envvars={"FOO": "bar", "BAZ": "qux"})
     expected = f"""
     #!/bin/bash
 
     #SBATCH --account=me
-    #SBATCH --chdir={run_dir}
+    #SBATCH --chdir={rundir}
     #SBATCH --export=NONE
     #SBATCH --nodes=1
-    #SBATCH --output={run_dir}/out
+    #SBATCH --output={rundir}/out
     #SBATCH --time=00:05:00
 
     export FOO=bar

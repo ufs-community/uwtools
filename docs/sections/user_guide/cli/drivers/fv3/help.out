@@ -24,7 +24,7 @@ Positional arguments:
       The model_configure file
     namelist_file
       The namelist file
-    provisioned_run_directory
+    provisioned_rundir
       Run directory provisioned with all required content
     restart_directory
       The RESTART directory

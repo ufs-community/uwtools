@@ -70,7 +70,7 @@ class Assets(ABC):
 
     @tasks
     @abstractmethod
-    def provisioned_run_directory(self):
+    def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
         """
@@ -166,7 +166,7 @@ class Assets(ABC):
         """
         The path to the component's run directory.
         """
-        return Path(self._driver_config["run_dir"])
+        return Path(self._driver_config["rundir"])
 
     def _taskname(self, suffix: str) -> str:
         """
@@ -240,7 +240,7 @@ class Driver(Assets):
         yield self._taskname("run via batch submission")
         path = Path("%s.submit" % self._runscript_path)
         yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
+        yield self.provisioned_rundir()
         self._scheduler.submit_job(runscript=self._runscript_path, submit_file=path)
 
     @task
@@ -251,7 +251,7 @@ class Driver(Assets):
         yield self._taskname("run via local execution")
         path = self._rundir / self._runscript_done_file
         yield asset(path, path.is_file)
-        yield self.provisioned_run_directory()
+        yield self.provisioned_rundir()
         cmd = "{x} >{x}.out 2>&1".format(x=self._runscript_path)
         execute(cmd=cmd, cwd=self._rundir, log_output=True)
 
