@@ -68,7 +68,7 @@ class Assets(ABC):
             m, s = divmod(r, 60)
             leadtime = "%02d:%02d:%02d" % (h, m, s)
         return " ".join(
-            filter(None, [str(self), cycle, leadtime, "in", self._driver_config["run_dir"]])
+            filter(None, [str(self), cycle, leadtime, "in", self._driver_config["rundir"]])
         )
 
     def __str__(self) -> str:
