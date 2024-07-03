@@ -222,7 +222,7 @@ class AssetsCycleBased(Assets):
     def __init__(
         self,
         cycle: datetime,
-        config: Optional[Path] = None,
+        config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
     ):
@@ -247,7 +247,7 @@ class AssetsCycleAndLeadtimeBased(Assets):
         self,
         cycle: datetime,
         leadtime: timedelta,
-        config: Optional[Path] = None,
+        config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
     ):
@@ -274,7 +274,7 @@ class AssetsTimeInvariant(Assets):
 
     def __init__(
         self,
-        config: Optional[Path] = None,
+        config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
     ):
@@ -297,7 +297,7 @@ class Driver(Assets):
         self,
         cycle: Optional[datetime] = None,
         leadtime: Optional[timedelta] = None,
-        config: Optional[Path] = None,
+        config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
@@ -485,7 +485,7 @@ class DriverCycleBased(Driver):
     def __init__(
         self,
         cycle: datetime,
-        config: Optional[Path] = None,
+        config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
@@ -514,7 +514,7 @@ class DriverCycleAndLeadtimeBased(Driver):
         self,
         cycle: datetime,
         leadtime: timedelta,
-        config: Optional[Path] = None,
+        config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
@@ -548,7 +548,7 @@ class DriverTimeInvariant(Driver):
 
     def __init__(
         self,
-        config: Optional[Path] = None,
+        config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
