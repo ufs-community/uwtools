@@ -17,7 +17,6 @@ def test_graph():
     ready()
     assert support.graph().startswith("digraph")
 
-
     class SomeDriver(DriverTimeInvariant):
         def provisioned_rundir(self):
             pass
