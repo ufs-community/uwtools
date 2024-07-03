@@ -13,10 +13,13 @@ def test_driver(classname):
     assert getattr(driver_api, classname) is getattr(driver_lib, classname)
 
 
-def test_no_extras():
-    for x in dir(driver_api):
-        if not x.startswith("_"):
-            obj = getattr(driver_api, x)
-            if not ismodule(obj):
-                assert isclass(obj)
-                assert x in driver_api._CLASSNAMES
+def test_public_attributes():
+    # Check that the module is not accidentally exposing unexpected public atttributes. Ignore
+    # private attributes and imported modules and assert that what remains is an intentionally
+    # exposed (driver) class.
+    for name in dir(driver_api):
+        obj = getattr(driver_api, name)
+        if name.startswith("_") or ismodule(obj):
+            continue
+        assert isclass(obj)
+        assert name in driver_api._CLASSNAMES
