@@ -2,13 +2,15 @@
 API access to the ``uwtools`` driver base classes.
 """
 
+import importlib
 import sys
-from importlib import import_module
+
+_CLASSNAMES = ["Assets"]
 
 
 def _add_classes():
-    m = import_module("uwtools.drivers.driver")
-    for classname in ["Assets"]:
+    m = importlib.import_module("uwtools.drivers.driver")
+    for classname in _CLASSNAMES:
         setattr(sys.modules[__name__], classname, getattr(m, classname))
         __all__.append(classname)
 
