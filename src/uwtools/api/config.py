@@ -124,14 +124,14 @@ def realize(
     total: bool = False,
     dry_run: bool = False,
     stdin_ok: bool = False,
-) -> None:
+) -> dict:
     """
     NB: This docstring is dynamically replaced: See realize.__doc__ definition below.
     """
     input_config = (
         _YAMLConfig(config=input_config) if isinstance(input_config, dict) else input_config
     )
-    _realize(
+    return _realize(
         input_config=_ensure_data_source(input_config, stdin_ok),
         input_format=input_format,
         update_config=_ensure_data_source(update_config, stdin_ok),
@@ -150,7 +150,9 @@ def realize_to_dict(  # pylint: disable=unused-argument
     input_format: Optional[str] = None,
     update_config: Optional[Union[dict, _Config, Path, str]] = None,
     update_format: Optional[str] = None,
+    key_path: Optional[list[Union[str, int]]] = None,
     values_needed: bool = False,
+    total: bool = False,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> dict:
@@ -159,7 +161,7 @@ def realize_to_dict(  # pylint: disable=unused-argument
 
     See ``realize()`` for details on arguments, etc.
     """
-    return _realize(**{**locals(), "output_file": Path(os.devnull), "output_format": None})
+    return realize(**{**locals(), "output_file": Path(os.devnull), "output_format": None})
 
 
 def validate(
@@ -240,6 +242,7 @@ Recognized file extensions are: {extensions}
 :param total: Require rendering of all Jinja2 variables/expressions
 :param dry_run: Log output instead of writing to output
 :param stdin_ok: OK to read from ``stdin``?
+:return: The ``dict`` representation of the realized config
 :raises: UWConfigRealizeError if ``total`` is ``True`` and any Jinja2 variable/expression was not rendered
 """.format(
     extensions=", ".join(_FORMAT.extensions())
