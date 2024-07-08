@@ -148,21 +148,17 @@ def test_Assets_str(assetsobj):
 
 
 def test_Assets_config(assetsobj):
-    old = assetsobj._driver_config
-    new = assetsobj.config
     # The user-accessible object is equivalent to the internal driver config:
-    assert new == old
+    assert assetsobj.config == assetsobj._driver_config
     # But they are separate objects:
-    assert not new is old
+    assert not assetsobj.config is assetsobj._driver_config
 
 
 def test_Assets_config_full(assetsobj):
-    old = assetsobj._config
-    new = assetsobj.config_full
     # The user-accessible object is equivalent to the internal driver config:
-    assert new == old
+    assert assetsobj.config_full == assetsobj._config
     # But they are separate objects:
-    assert not new is old
+    assert not assetsobj.config_full is assetsobj._config
 
 
 @mark.parametrize("val", (True, False))
