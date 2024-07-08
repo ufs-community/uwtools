@@ -33,7 +33,7 @@ class NMLConfig(Config):
         """
         Returns the field-table representation of the given dict.
 
-        :param cfg: The in-memory config object.
+        :param cfg: A dict object.
         """
 
         def to_od(d):

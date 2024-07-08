@@ -30,7 +30,7 @@ class INIConfig(Config):
         """
         Returns the INI representation of the given dict.
 
-        :param cfg: The in-memory config object.
+        :param cfg: A dict object.
         """
 
         # Configparser adds a newline after each section, presumably to create nice-looking output

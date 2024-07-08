@@ -19,7 +19,7 @@ class FieldTableConfig(YAMLConfig):
         """
         Returns the field-table representation of the given dict.
 
-        :param cfg: The in-memory config object.
+        :param cfg: A dict object.
         """
         lines = []
         for field, settings in cfg.items():

@@ -11,7 +11,7 @@ from typing import Optional, Union
 import yaml
 
 from uwtools.config import jinja2
-from uwtools.config.support import INCLUDE_TAG, depth, log_and_error
+from uwtools.config.support import INCLUDE_TAG, depth, log_and_error, yaml_dump
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import INDENT, log
 
@@ -55,7 +55,7 @@ class Config(ABC, UserDict):
         """
         Returns the string representation of the given dict.
 
-        :param cfg: The in-memory config object.
+        :param cfg: A dict object.
         """
 
     @abstractmethod
@@ -171,7 +171,7 @@ class Config(ABC, UserDict):
 
         def logstate(state: str) -> None:
             log.debug("Dereferencing, %s value:", state)
-            for line in str(self).split("\n"):
+            for line in yaml_dump(self.data).split("\n"):
                 log.debug("%s%s", INDENT, line)
 
         while True:

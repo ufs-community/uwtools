@@ -31,7 +31,7 @@ class SHConfig(Config):
         """
         Returns the field-table representation of the given dict.
 
-        :param cfg: The in-memory config object.
+        :param cfg: A dict object.
         """
         config_check_depths_dump(config_obj=cfg, target_format=FORMAT.sh)
         lines = []

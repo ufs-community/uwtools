@@ -1,4 +1,3 @@
-import math
 from collections import OrderedDict
 from pathlib import Path
 from types import SimpleNamespace as ns
@@ -8,7 +7,14 @@ import yaml
 from f90nml import Namelist  # type: ignore
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import INCLUDE_TAG, UWYAMLConvert, UWYAMLRemove, from_od, log_and_error
+from uwtools.config.support import (
+    INCLUDE_TAG,
+    UWYAMLConvert,
+    UWYAMLRemove,
+    from_od,
+    log_and_error,
+    yaml_dump,
+)
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
@@ -55,7 +61,7 @@ class YAMLConfig(Config):
         :param cfg: The in-memory config object.
         """
         cls._add_yaml_representers()
-        return yaml.dump(cfg, default_flow_style=False, sort_keys=False, width=math.inf).strip()
+        return yaml_dump(cfg)
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """
