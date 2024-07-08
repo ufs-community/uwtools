@@ -13,7 +13,7 @@ from uwtools.config.support import (
     UWYAMLRemove,
     from_od,
     log_and_error,
-    yaml_dump,
+    yaml_to_str,
 )
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import FORMAT
@@ -61,7 +61,7 @@ class YAMLConfig(Config):
         :param cfg: The in-memory config object.
         """
         cls._add_yaml_representers()
-        return yaml_dump(cfg)
+        return yaml_to_str(cfg)
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """

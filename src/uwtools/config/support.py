@@ -67,7 +67,7 @@ def log_and_error(msg: str) -> Exception:
     return UWConfigError(msg)
 
 
-def yaml_dump(cfg: dict) -> str:
+def yaml_to_str(cfg: dict) -> str:
     """
     Returns a uwtools-conventional YAML representation of the given dict.
 
