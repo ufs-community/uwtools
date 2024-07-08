@@ -1,3 +1,4 @@
+import math
 from collections import OrderedDict
 from pathlib import Path
 from types import SimpleNamespace as ns
@@ -49,7 +50,7 @@ class YAMLConfig(Config):
         The string representation of a YAMLConfig object.
         """
         self._add_yaml_representers()
-        return yaml.dump(self.data, default_flow_style=False).strip()
+        return yaml.dump(self.data, default_flow_style=False, width=math.inf).strip()
 
     # Private methods
 
@@ -126,7 +127,7 @@ class YAMLConfig(Config):
         """
         cls._add_yaml_representers()
         with writable(path) as f:
-            yaml.dump(cfg, f, sort_keys=False)
+            yaml.dump(cfg, f, sort_keys=False, width=math.inf)
 
     @staticmethod
     def get_depth_threshold() -> Optional[int]:
