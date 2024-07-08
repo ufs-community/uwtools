@@ -49,10 +49,19 @@ class YAMLConfig(Config):
         """
         The string representation of a YAMLConfig object.
         """
-        self._add_yaml_representers()
-        return yaml.dump(self.data, default_flow_style=False, width=math.inf).strip()
+        return self._dict_to_str(self.data)
 
     # Private methods
+
+    @classmethod
+    def _dict_to_str(cls, cfg: dict) -> str:
+        """
+        Returns the YAML representation of the given dict.
+
+        :param cfg: The in-memory config object.
+        """
+        cls._add_yaml_representers()
+        return yaml.dump(cfg, default_flow_style=False, sort_keys=False, width=math.inf).strip()
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """
@@ -125,9 +134,8 @@ class YAMLConfig(Config):
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to.
         """
-        cls._add_yaml_representers()
         with writable(path) as f:
-            yaml.dump(cfg, f, sort_keys=False, width=math.inf)
+            print(cls._dict_to_str(cfg), file=f)
 
     @staticmethod
     def get_depth_threshold() -> Optional[int]:

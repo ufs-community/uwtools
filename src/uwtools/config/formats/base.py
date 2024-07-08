@@ -5,7 +5,6 @@ import re
 from abc import ABC, abstractmethod
 from collections import UserDict
 from copy import deepcopy
-from io import StringIO
 from pathlib import Path
 from typing import Optional, Union
 
@@ -42,13 +41,11 @@ class Config(ABC, UserDict):
                 % (self.get_depth_threshold(), type(self).__name__, self.depth)
             )
 
-    def __repr__(self) -> str:
-        """
-        Returns the YAML string representation of a Config object.
-        """
-        s = StringIO()
-        yaml.dump(self.data, s)
-        return s.getvalue()
+    # @abstractmethod
+    # def __repr__(self) -> str:
+    #     """
+    #     Returns the string representation of the config.
+    #     """
 
     # Private methods
 

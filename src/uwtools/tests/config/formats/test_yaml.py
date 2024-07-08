@@ -86,6 +86,7 @@ def test_long_line(capsys):
     xs = " ".join("x" * 999)
     expected = f"xs: {xs}"
     cfgobj = YAMLConfig({"xs": xs})
+    assert repr(cfgobj) == expected
     assert str(cfgobj) == expected
     cfgobj.dump()
     assert capsys.readouterr().out.strip() == expected
