@@ -12,6 +12,31 @@ class FieldTableConfig(YAMLConfig):
     an input YAML file.
     """
 
+    # Private methods
+
+    @classmethod
+    def _dict_to_str(cls, cfg: dict) -> str:
+        """
+        Returns the field-table representation of the given dict.
+
+        :param cfg: The in-memory config object.
+        """
+        lines = []
+        for field, settings in cfg.items():
+            lines.append(f' "TRACER", "atmos_mod", "{field}"')
+            for key, value in settings.items():
+                if isinstance(value, dict):
+                    method_string = f'{" ":7}"{key}", "{value.pop("name")}"'
+                    # All control vars go into one set of quotes.
+                    control_vars = [f"{method}={val}" for method, val in value.items()]
+                    # Whitespace after the comma matters.
+                    lines.append(f'{method_string}, "{", ".join(control_vars)}"')
+                else:
+                    # Formatting of variable spacing dependent on key length.
+                    lines.append(f'{" ":11}"{key}", "{value}"')
+            lines[-1] += " /"
+        return "\n".join(lines)
+
     # Public methods
 
     def dump(self, path: Optional[Path] = None) -> None:
@@ -22,8 +47,8 @@ class FieldTableConfig(YAMLConfig):
         """
         self.dump_dict(self.data, path)
 
-    @staticmethod
-    def dump_dict(cfg: dict, path: Optional[Path] = None) -> None:
+    @classmethod
+    def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
         """
         Dumps a provided config dictionary in Field Table format.
 
@@ -45,22 +70,8 @@ class FieldTableConfig(YAMLConfig):
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to.
         """
-        lines = []
-        for field, settings in cfg.items():
-            lines.append(f' "TRACER", "atmos_mod", "{field}"')
-            for key, value in settings.items():
-                if isinstance(value, dict):
-                    method_string = f'{" ":7}"{key}", "{value.pop("name")}"'
-                    # All control vars go into one set of quotes.
-                    control_vars = [f"{method}={val}" for method, val in value.items()]
-                    # Whitespace after the comma matters.
-                    lines.append(f'{method_string}, "{", ".join(control_vars)}"')
-                else:
-                    # Formatting of variable spacing dependent on key length.
-                    lines.append(f'{" ":11}"{key}", "{value}"')
-            lines[-1] += " /"
         with writable(path) as f:
-            print("\n".join(lines), file=f)
+            print(cls._dict_to_str(cfg), file=f)
 
     @staticmethod
     def get_depth_threshold() -> Optional[int]:

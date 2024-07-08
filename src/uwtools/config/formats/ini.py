@@ -23,18 +23,12 @@ class INIConfig(Config):
         super().__init__(config)
         self.parse_include()
 
-    def __repr__(self) -> str:
-        """
-        Returns the string representation of the config.
-        """
-        return self._dict_to_str(self.data)
-
     # Private methods
 
     @classmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
-        Returns the YAML representation of the given dict.
+        Returns the INI representation of the given dict.
 
         :param cfg: The in-memory config object.
         """

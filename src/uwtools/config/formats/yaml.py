@@ -45,12 +45,6 @@ class YAMLConfig(Config):
     Concrete class to handle YAML config files.
     """
 
-    def __repr__(self) -> str:
-        """
-        The string representation of a YAMLConfig object.
-        """
-        return self._dict_to_str(self.data)
-
     # Private methods
 
     @classmethod

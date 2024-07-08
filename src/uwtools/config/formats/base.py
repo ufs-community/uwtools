@@ -41,13 +41,22 @@ class Config(ABC, UserDict):
                 % (self.get_depth_threshold(), type(self).__name__, self.depth)
             )
 
-    # @abstractmethod
-    # def __repr__(self) -> str:
-    #     """
-    #     Returns the string representation of the config.
-    #     """
+    def __repr__(self) -> str:
+        """
+        The string representation of a YAMLConfig object.
+        """
+        return self._dict_to_str(self.data)
 
     # Private methods
+
+    @abstractmethod
+    @classmethod
+    def _dict_to_str(cls, cfg: dict) -> str:
+        """
+        Returns the string representation of the given dict.
+
+        :param cfg: The in-memory config object.
+        """
 
     @abstractmethod
     def _load(self, config_file: Optional[Path]) -> dict:
