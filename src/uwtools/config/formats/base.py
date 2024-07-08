@@ -49,8 +49,8 @@ class Config(ABC, UserDict):
 
     # Private methods
 
-    @abstractmethod
     @classmethod
+    @abstractmethod
     def _dict_to_str(cls, cfg: dict) -> str:
         """
         Returns the string representation of the given dict.
