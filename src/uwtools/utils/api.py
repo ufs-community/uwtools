@@ -13,14 +13,9 @@ from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.exceptions import UWError
 
-# from functools import singledispatch
-# from typing import TypeVar
-
-
 # Public
 
 
-# @singledispatch
 def ensure_data_source(data_source: Any, stdin_ok: bool) -> Any:
     """
     If stdin read is disabled, ensure that a data source was provided.
@@ -35,22 +30,6 @@ def ensure_data_source(data_source: Any, stdin_ok: bool) -> Any:
     if isinstance(data_source, str):
         data_source = Path(data_source)
     return data_source
-
-
-# @ensure_data_source.register
-# def _(data_source: str, stdin_ok: bool) -> Optional[str]:
-#     return ensure_data_source(data_source=Path(data_source), stdin_ok=stdin_ok)
-
-# def ensure_data_source(
-#     data_source: Optional[Union[dict, Config, Path, str]], stdin_ok: bool
-# ) -> Optional[Union[dict, Path]]:
-#     if data_source is None and not stdin_ok:
-#         raise UWError("Set stdin_ok=True to permit read from stdin")
-#     if isinstance(data_source, Config):
-#         return data_source.data
-#     if isinstance(data_source, str):
-#         return Path(data_source)
-#     return data_source
 
 
 def make_execute(
