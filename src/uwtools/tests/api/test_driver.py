@@ -14,7 +14,7 @@ def test_driver(classname):
 
 
 def test_public_attributes():
-    # Check that the module is not accidentally exposing unexpected public atttributes. Ignore
+    # Check that the module is not accidentally exposing unexpected public attributes. Ignore
     # private attributes and imported modules and assert that what remains is an intentionally
     # exposed (driver) class.
     for name in dir(driver_api):
