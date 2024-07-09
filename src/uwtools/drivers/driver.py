@@ -7,6 +7,7 @@ import os
 import re
 import stat
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from datetime import datetime, timedelta
 from functools import partial
 from pathlib import Path
@@ -18,7 +19,7 @@ from iotaa import asset, dryrun, external, task, tasks
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
 from uwtools.config.validator import get_schema_file, validate, validate_internal
-from uwtools.exceptions import UWConfigError, UWError
+from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute
@@ -31,40 +32,62 @@ class Assets(ABC):
 
     def __init__(
         self,
-        config: Optional[Union[dict, Path]],
-        dry_run: bool = False,
-        batch: bool = False,
         cycle: Optional[datetime] = None,
         leadtime: Optional[timedelta] = None,
+        config: Optional[Union[dict, Path]] = None,
+        dry_run: bool = False,
         key_path: Optional[list[str]] = None,
     ) -> None:
         """
         A component driver.
 
-        :param config: Path to config file (read stdin if missing or None).
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
         :param cycle: The cycle.
         :param leadtime: The leadtime.
+        :param config: Path to config file (read stdin if missing or None).
+        :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
         """
-        dryrun(enable=dry_run)
         self._config = YAMLConfig(config=config)
-        self._batch = batch
-        has_leadtime = leadtime is not None
-        if has_leadtime and not cycle:
-            raise UWError("When leadtime is specified, cycle is required")
         self._config.dereference(
             context={
                 **({"cycle": cycle} if cycle else {}),
-                **({"leadtime": leadtime} if has_leadtime else {}),
+                **({"leadtime": leadtime} if leadtime is not None else {}),
                 **self._config.data,
             }
         )
-        key_path = key_path or []
-        for key in key_path:
+        for key in key_path or []:
             self._config = self._config[key]
         self._validate()
+        dryrun(enable=dry_run)
+
+    def __repr__(self) -> str:
+        cycle = self._cycle.strftime("%Y-%m-%dT%H:%M") if hasattr(self, "_cycle") else None
+        leadtime = None
+        if hasattr(self, "_leadtime"):
+            h, r = divmod(self._leadtime.total_seconds(), 3600)
+            m, s = divmod(r, 60)
+            leadtime = "%02d:%02d:%02d" % (h, m, s)
+        return " ".join(
+            filter(None, [str(self), cycle, leadtime, "in", self._driver_config["rundir"]])
+        )
+
+    def __str__(self) -> str:
+        return self._driver_name
+
+    @property
+    def config(self) -> dict:
+        """
+        Return a copy of the driver config.
+        """
+        return deepcopy(self._driver_config)
+
+    @property
+    def config_full(self) -> dict:
+        """
+        Return a copy of the full input config.
+        """
+        full_config: dict = self._config.data
+        return deepcopy(full_config)
 
     # Workflow tasks
 
@@ -174,29 +197,14 @@ class Assets(ABC):
 
         :param suffix: Log-string suffix.
         """
-        return "%s %s" % (self._driver_name, suffix)
-
-    def _taskname_with_cycle(self, cycle: datetime, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s %s" % (cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
-
-    def _taskname_with_cycle_and_leadtime(
-        self, cycle: datetime, leadtime: timedelta, suffix: str
-    ) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s %s" % (
-            (cycle + leadtime).strftime("%Y%m%d %H:%M:%S"),
-            self._driver_name,
-            suffix,
+        cycle = getattr(self, "_cycle", None)
+        leadtime = getattr(self, "_leadtime", None)
+        timestr = (
+            (cycle + leadtime).strftime("%Y%m%d %H:%M:%S")
+            if cycle and leadtime is not None
+            else cycle.strftime("%Y%m%d %HZ") if cycle else None
         )
+        return " ".join(filter(None, [timestr, self._driver_name, suffix]))
 
     def _validate(self) -> None:
         """
@@ -206,10 +214,108 @@ class Assets(ABC):
         validate_internal(schema_name=schema_name, config=self._config)
 
 
+class AssetsCycleBased(Assets):
+    """
+    An abstract class to provision assets for cycle-based components.
+    """
+
+    def __init__(
+        self,
+        cycle: datetime,
+        config: Optional[Union[dict, Path]] = None,
+        dry_run: bool = False,
+        key_path: Optional[list[str]] = None,
+    ):
+        """
+        The driver.
+
+        :param cycle: The cycle.
+        :param config: Path to config file (read stdin if missing or None).
+        :param dry_run: Run in dry-run mode?
+        :param key_path: Keys leading through the config to the driver's configuration block.
+        """
+        super().__init__(cycle=cycle, config=config, dry_run=dry_run, key_path=key_path)
+        self._cycle = cycle
+
+
+class AssetsCycleAndLeadtimeBased(Assets):
+    """
+    An abstract class to provision assets for cycle-and-leadtime-based components.
+    """
+
+    def __init__(
+        self,
+        cycle: datetime,
+        leadtime: timedelta,
+        config: Optional[Union[dict, Path]] = None,
+        dry_run: bool = False,
+        key_path: Optional[list[str]] = None,
+    ):
+        """
+        The driver.
+
+        :param cycle: The cycle.
+        :param leadtime: The leadtime.
+        :param config: Path to config file (read stdin if missing or None).
+        :param dry_run: Run in dry-run mode?
+        :param key_path: Keys leading through the config to the driver's configuration block.
+        """
+        super().__init__(
+            cycle=cycle, leadtime=leadtime, config=config, dry_run=dry_run, key_path=key_path
+        )
+        self._cycle = cycle
+        self._leadtime = leadtime
+
+
+class AssetsTimeInvariant(Assets):
+    """
+    An abstract class to provision assets for time-invariant components.
+    """
+
+    def __init__(
+        self,
+        config: Optional[Union[dict, Path]] = None,
+        dry_run: bool = False,
+        key_path: Optional[list[str]] = None,
+    ):
+        """
+        The driver.
+
+        :param config: Path to config file (read stdin if missing or None).
+        :param dry_run: Run in dry-run mode?
+        :param key_path: Keys leading through the config to the driver's configuration block.
+        """
+        super().__init__(config=config, dry_run=dry_run, key_path=key_path)
+
+
 class Driver(Assets):
     """
     An abstract class for standalone component drivers.
     """
+
+    def __init__(
+        self,
+        cycle: Optional[datetime] = None,
+        leadtime: Optional[timedelta] = None,
+        config: Optional[Union[dict, Path]] = None,
+        dry_run: bool = False,
+        key_path: Optional[list[str]] = None,
+        batch: bool = False,
+    ):
+        """
+        The driver.
+
+        :param cycle: The cycle.
+        :param leadtime: The leadtime.
+        :param config: Path to config file (read stdin if missing or None).
+        :param dry_run: Run in dry-run mode?
+        :param key_path: Keys leading through the config to the driver's configuration block.
+        :param batch: Run component via the batch system?
+        """
+        super().__init__(
+            cycle=cycle, leadtime=leadtime, config=config, dry_run=dry_run, key_path=key_path
+        )
+        self._batch = batch
 
     # Workflow tasks
 
@@ -369,6 +475,93 @@ class Driver(Assets):
         with open(path, "w", encoding="utf-8") as f:
             print(rs, file=f)
         os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
+
+
+class DriverCycleBased(Driver):
+    """
+    An abstract class for standalone cycle-based component drivers.
+    """
+
+    def __init__(
+        self,
+        cycle: datetime,
+        config: Optional[Union[dict, Path]] = None,
+        dry_run: bool = False,
+        key_path: Optional[list[str]] = None,
+        batch: bool = False,
+    ):
+        """
+        The driver.
+
+        :param cycle: The cycle.
+        :param config: Path to config file (read stdin if missing or None).
+        :param dry_run: Run in dry-run mode?
+        :param key_path: Keys leading through the config to the driver's configuration block.
+        :param batch: Run component via the batch system?
+        """
+        super().__init__(
+            cycle=cycle, config=config, dry_run=dry_run, key_path=key_path, batch=batch
+        )
+        self._cycle = cycle
+
+
+class DriverCycleAndLeadtimeBased(Driver):
+    """
+    An abstract class for standalone cycle-and-leadtime-based component drivers.
+    """
+
+    def __init__(
+        self,
+        cycle: datetime,
+        leadtime: timedelta,
+        config: Optional[Union[dict, Path]] = None,
+        dry_run: bool = False,
+        key_path: Optional[list[str]] = None,
+        batch: bool = False,
+    ):
+        """
+        The driver.
+
+        :param cycle: The cycle.
+        :param leadtime: The leadtime.
+        :param config: Path to config file (read stdin if missing or None).
+        :param dry_run: Run in dry-run mode?
+        :param key_path: Keys leading through the config to the driver's configuration block.
+        :param batch: Run component via the batch system?
+        """
+        super().__init__(
+            cycle=cycle,
+            leadtime=leadtime,
+            config=config,
+            dry_run=dry_run,
+            key_path=key_path,
+            batch=batch,
+        )
+        self._cycle = cycle
+        self._leadtime = leadtime
+
+
+class DriverTimeInvariant(Driver):
+    """
+    An abstract class for standalone time-invariant component drivers.
+    """
+
+    def __init__(
+        self,
+        config: Optional[Union[dict, Path]] = None,
+        dry_run: bool = False,
+        key_path: Optional[list[str]] = None,
+        batch: bool = False,
+    ):
+        """
+        The driver.
+
+        :param config: Path to config file (read stdin if missing or None).
+        :param dry_run: Run in dry-run mode?
+        :param key_path: Keys leading through the config to the driver's configuration block.
+        :param batch: Run component via the batch system?
+        """
+        super().__init__(config=config, dry_run=dry_run, key_path=key_path, batch=batch)
 
 
 DriverT = Union[type[Assets], type[Driver]]

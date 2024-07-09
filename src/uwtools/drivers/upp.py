@@ -2,52 +2,20 @@
 A driver for UPP.
 """
 
-from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional
 
 from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverCycleAndLeadtimeBased
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
 
-class UPP(Driver):
+class UPP(DriverCycleAndLeadtimeBased):
     """
     A driver for UPP.
     """
-
-    def __init__(
-        self,
-        cycle: datetime,
-        leadtime: timedelta,
-        config: Optional[Path] = None,
-        dry_run: bool = False,
-        batch: bool = False,
-        key_path: Optional[list[str]] = None,
-    ):
-        """
-        The driver.
-
-        :param cycle: The cycle.
-        :param leadtime: The leadtime.
-        :param config: Path to config file (read stdin if missing or None).
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
-        super().__init__(
-            config=config,
-            dry_run=dry_run,
-            batch=batch,
-            cycle=cycle,
-            key_path=key_path,
-            leadtime=leadtime,
-        )
-        self._cycle = cycle
-        self._leadtime = leadtime
 
     # Workflow tasks
 
@@ -133,11 +101,3 @@ class UPP(Driver):
             "%s < %s" % (execution["executable"], self._namelist_path.name),
         ]
         return " ".join(filter(None, components))
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return self._taskname_with_cycle_and_leadtime(self._cycle, self._leadtime, suffix)
