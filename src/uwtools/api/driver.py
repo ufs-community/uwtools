@@ -5,7 +5,16 @@ API access to the ``uwtools`` driver base classes.
 import importlib
 import sys
 
-_CLASSNAMES = ["Assets"]
+_CLASSNAMES = [
+    "Assets",
+    "AssetsCycleBased",
+    "AssetsCycleAndLeadtimeBased",
+    "AssetsTimeInvariant",
+    "Driver",
+    "DriverCycleBased",
+    "DriverCycleAndLeadtimeBased",
+    "DriverTimeInvariant",
+]
 
 
 def _add_classes():
