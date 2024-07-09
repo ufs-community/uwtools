@@ -1,5 +1,5 @@
 """
-An abstract class for component drivers.
+Abstract classes for component drivers.
 """
 
 import json
@@ -24,6 +24,8 @@ from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute
 
+# NB: Class docstrings are programmatically defined.
+
 
 class Assets(ABC):
     """
@@ -38,9 +40,6 @@ class Assets(ABC):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
     ) -> None:
-        """
-        NB: This docstring is dynamically defined. Do not edit.
-        """
         self._config = YAMLConfig(config=config)
         self._config.dereference(
             context={
@@ -220,9 +219,6 @@ class AssetsCycleBased(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
     ):
-        """
-        NB: This docstring is dynamically defined. Do not edit.
-        """
         super().__init__(cycle=cycle, config=config, dry_run=dry_run, key_path=key_path)
         self._cycle = cycle
 
@@ -240,9 +236,6 @@ class AssetsCycleLeadtimeBased(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
     ):
-        """
-        NB: This docstring is dynamically defined. Do not edit.
-        """
         super().__init__(
             cycle=cycle, leadtime=leadtime, config=config, dry_run=dry_run, key_path=key_path
         )
@@ -261,9 +254,6 @@ class AssetsTimeInvariant(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
     ):
-        """
-        NB: This docstring is dynamically defined. Do not edit.
-        """
         super().__init__(config=config, dry_run=dry_run, key_path=key_path)
 
 
@@ -281,9 +271,6 @@ class Driver(Assets):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
     ):
-        """
-        NB: This docstring is dynamically defined. Do not edit.
-        """
         super().__init__(
             cycle=cycle, leadtime=leadtime, config=config, dry_run=dry_run, key_path=key_path
         )
@@ -462,9 +449,6 @@ class DriverCycleBased(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
     ):
-        """
-        NB: This docstring is dynamically defined. Do not edit.
-        """
         super().__init__(
             cycle=cycle, config=config, dry_run=dry_run, key_path=key_path, batch=batch
         )
@@ -485,9 +469,6 @@ class DriverCycleLeadtimeBased(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
     ):
-        """
-        NB: This docstring is dynamically defined. Do not edit.
-        """
         super().__init__(
             cycle=cycle,
             leadtime=leadtime,
@@ -512,9 +493,6 @@ class DriverTimeInvariant(Driver):
         key_path: Optional[list[str]] = None,
         batch: bool = False,
     ):
-        """
-        NB: This docstring is dynamically defined. Do not edit.
-        """
         super().__init__(config=config, dry_run=dry_run, key_path=key_path, batch=batch)
 
 
@@ -523,7 +501,10 @@ DriverT = Union[type[Assets], type[Driver]]
 
 def _add_docstring(class_: type, omit: Optional[list[str]] = None) -> None:
     """
-    PM WRITEME.
+    Dynamically add docstring to a driver class.
+
+    :param class_: The class to add the docstring to.
+    :param omit: Parameters to omit from the docstring.
     """
     base = """
     The driver.
