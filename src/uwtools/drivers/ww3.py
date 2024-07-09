@@ -14,7 +14,7 @@ from uwtools.utils.tasks import file
 
 class WaveWatchIII(AssetsCycleBased):
     """
-    A library driver for ww3.
+    An assets driver for ww3.
     """
 
     # Workflow tasks
