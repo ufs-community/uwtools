@@ -50,7 +50,7 @@ class ConcreteAssetsCycleBased(Common, driver.AssetsCycleBased):
     pass
 
 
-class ConcreteAssetsCycleAndLeadtimeBased(Common, driver.AssetsCycleAndLeadtimeBased):
+class ConcreteAssetsCycleLeadtimeBased(Common, driver.AssetsCycleLeadtimeBased):
     pass
 
 
@@ -62,7 +62,7 @@ class ConcreteDriverCycleBased(Common, driver.DriverCycleBased):
     pass
 
 
-class ConcreteDriverCycleAndLeadtimeBased(Common, driver.DriverCycleAndLeadtimeBased):
+class ConcreteDriverCycleLeadtimeBased(Common, driver.DriverCycleLeadtimeBased):
     pass
 
 
@@ -130,7 +130,7 @@ def test_Assets_repr_cycle_based(config):
 
 
 def test_Assets_repr_cycle_and_leadtime_based(config):
-    obj = ConcreteAssetsCycleAndLeadtimeBased(
+    obj = ConcreteAssetsCycleLeadtimeBased(
         config=config, cycle=dt.datetime(2024, 7, 2, 12), leadtime=dt.timedelta(hours=6)
     )
     expected = "concrete 2024-07-02T12:00 06:00:00 in %s" % obj._driver_config["rundir"]

@@ -238,7 +238,7 @@ class AssetsCycleBased(Assets):
         self._cycle = cycle
 
 
-class AssetsCycleAndLeadtimeBased(Assets):
+class AssetsCycleLeadtimeBased(Assets):
     """
     An abstract class to provision assets for cycle-and-leadtime-based components.
     """
@@ -505,7 +505,7 @@ class DriverCycleBased(Driver):
         self._cycle = cycle
 
 
-class DriverCycleAndLeadtimeBased(Driver):
+class DriverCycleLeadtimeBased(Driver):
     """
     An abstract class for standalone cycle-and-leadtime-based component drivers.
     """

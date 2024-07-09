@@ -8,7 +8,7 @@ from unittest.mock import patch
 from pytest import fixture, mark, raises
 
 from uwtools.exceptions import UWError
-from uwtools.tests.drivers.test_driver import ConcreteDriverCycleAndLeadtimeBased as TestDriverWCL
+from uwtools.tests.drivers.test_driver import ConcreteDriverCycleLeadtimeBased as TestDriverWCL
 from uwtools.tests.drivers.test_driver import ConcreteDriverTimeInvariant as TestDriver
 from uwtools.utils import api
 
