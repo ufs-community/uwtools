@@ -5,7 +5,7 @@ Tests for uwtools.drivers.support module.
 from iotaa import asset, external, task, tasks
 
 from uwtools.drivers import support
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverTimeInvariant
 
 
 def test_graph():
@@ -17,9 +17,7 @@ def test_graph():
     ready()
     assert support.graph().startswith("digraph")
 
-
-def test_tasks():
-    class SomeDriver(Driver):
+    class SomeDriver(DriverTimeInvariant):
         def provisioned_rundir(self):
             pass
 
