@@ -40,13 +40,6 @@ def test_ensure_data_source_stdin_ok():
     assert api.ensure_data_source(data_source=None, stdin_ok=True) is None
 
 
-def test_ensure_data_source_str_to_path():
-    val = "/some/path"
-    result = api.ensure_data_source(data_source=val, stdin_ok=False)
-    assert isinstance(result, Path)
-    assert result == Path(val)
-
-
 def test_make_execute(execute_kwargs):
     func = api.make_execute(driver_class=ConcreteDriver, with_cycle=False)
     assert func.__name__ == "execute"

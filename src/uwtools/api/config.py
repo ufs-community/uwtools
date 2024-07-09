@@ -50,7 +50,7 @@ def get_fieldtable_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``FieldTableConfig`` object
     """
-    return _FieldTableConfig(config=_ensure_data_source(config, stdin_ok))
+    return _FieldTableConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def get_ini_config(
@@ -64,7 +64,7 @@ def get_ini_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``INIConfig`` object
     """
-    return _INIConfig(config=_ensure_data_source(config, stdin_ok))
+    return _INIConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def get_nml_config(
@@ -79,7 +79,7 @@ def get_nml_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``NMLConfig`` object
     """
-    return _NMLConfig(config=_ensure_data_source(config, stdin_ok))
+    return _NMLConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def get_sh_config(
@@ -94,7 +94,7 @@ def get_sh_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``SHConfig`` object
     """
-    return _SHConfig(config=_ensure_data_source(config, stdin_ok))
+    return _SHConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def get_yaml_config(
@@ -109,7 +109,7 @@ def get_yaml_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``YAMLConfig`` object
     """
-    return _YAMLConfig(config=_ensure_data_source(config, stdin_ok))
+    return _YAMLConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def realize(
@@ -129,9 +129,9 @@ def realize(
     NB: This docstring is dynamically replaced: See realize.__doc__ definition below.
     """
     return _realize(
-        input_config=_ensure_data_source(input_config, stdin_ok),
+        input_config=_ensure_data_source(_str2path(input_config), stdin_ok),
         input_format=input_format,
-        update_config=_ensure_data_source(update_config, stdin_ok),
+        update_config=_ensure_data_source(_str2path(update_config), stdin_ok),
         update_format=update_format,
         output_file=_str2path(output_file),
         output_format=output_format,
@@ -178,7 +178,7 @@ def validate(
     :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise
     """
     return _validate_yaml(
-        schema_file=_str2path(schema_file), config=_ensure_data_source(config, stdin_ok)
+        schema_file=_str2path(schema_file), config=_ensure_data_source(_str2path(config), stdin_ok)
     )
 
 

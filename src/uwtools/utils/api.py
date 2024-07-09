@@ -5,17 +5,19 @@ Support for API modules.
 import datetime as dt
 import re
 from pathlib import Path
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, TypeVar, Union
 
 from uwtools.drivers.driver import DriverT
 from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.exceptions import UWError
 
+T = TypeVar("T")
+
 # Public
 
 
-def ensure_data_source(data_source: Any, stdin_ok: bool) -> Any:
+def ensure_data_source(data_source: T, stdin_ok: bool) -> T:
     """
     If stdin read is disabled, ensure that a data source was provided.
 
@@ -26,8 +28,6 @@ def ensure_data_source(data_source: Any, stdin_ok: bool) -> Any:
     """
     if data_source is None and not stdin_ok:
         raise UWError("Set stdin_ok=True to permit read from stdin")
-    if isinstance(data_source, str):
-        data_source = Path(data_source)
     return data_source
 
 
@@ -191,7 +191,7 @@ def _execute(
     :return: ``True`` if task completes without raising an exception.
     """
     kwargs = dict(
-        config=ensure_data_source(config, stdin_ok),
+        config=ensure_data_source(str2path(config), stdin_ok),
         batch=batch,
         dry_run=dry_run,
         key_path=key_path,
