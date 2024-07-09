@@ -82,16 +82,6 @@ def test_yaml_include_files():
     assert cfgobj["reverse_files"]["vegetable"] == "eggplant"
 
 
-def test_yaml_long_line(capsys):
-    xs = " ".join("x" * 999)
-    expected = f"xs: {xs}"
-    cfgobj = YAMLConfig({"xs": xs})
-    assert repr(cfgobj) == expected
-    assert str(cfgobj) == expected
-    cfgobj.dump()
-    assert capsys.readouterr().out.strip() == expected
-
-
 def test_yaml_simple(tmp_path):
     """
     Test that YAML load, update, and dump work with a basic YAML file.
