@@ -9,6 +9,7 @@ from pytest import mark
 
 from uwtools.api import config
 from uwtools.config.formats.yaml import YAMLConfig
+from uwtools.utils.file import FORMAT
 
 
 def test_compare():
@@ -86,7 +87,7 @@ def test_realize_to_dict():
     with patch.object(config, "realize") as realize:
         config.realize_to_dict(**kwargs)
     realize.assert_called_once_with(
-        **dict({**kwargs, **{"output_file": Path(os.devnull), "output_format": None}})
+        **dict({**kwargs, **{"output_file": Path(os.devnull), "output_format": FORMAT.yaml}})
     )
 
 

@@ -158,7 +158,7 @@ def realize_to_dict(  # pylint: disable=unused-argument
 
     See ``realize()`` for details on arguments, etc.
     """
-    return realize(**{**locals(), "output_file": Path(os.devnull), "output_format": None})
+    return realize(**{**locals(), "output_file": Path(os.devnull), "output_format": _FORMAT.yaml})
 
 
 def validate(
