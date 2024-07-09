@@ -520,14 +520,24 @@ def test_realize_config_values_needed_yaml(caplog):
     assert actual.strip() == dedent(expected).strip()
 
 
-def test__ensure_format_bad():
+def test__ensure_format_bad_no_path_no_format():
     with raises(UWError) as e:
         tools._ensure_format(desc="foo")
     assert str(e.value) == "Either foo path or format name must be specified"
 
 
+def test__ensure_format_bad_dict_no_format():
+    with raises(UWError) as e:
+        tools._ensure_format(desc="foo", config={})
+    assert str(e.value) == "Must specify foo format when foo config is a dict"
+
+
 def test__ensure_format_config_obj():
     assert tools._ensure_format(desc="foo", config=YAMLConfig(config={})) == FORMAT.yaml
+
+
+def test__ensure_format_dict():
+    assert tools._ensure_format(desc="foo", fmt=FORMAT.yaml, config={}) == FORMAT.yaml
 
 
 def test__ensure_format_deduced():
