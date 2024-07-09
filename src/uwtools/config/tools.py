@@ -130,9 +130,7 @@ def _ensure_format(
     if isinstance(config, Path):
         return fmt or get_file_format(config)
     if isinstance(config, dict):
-        if fmt is None:
-            raise UWError(f"Must specify {desc} format when {desc} config is a dict")
-        return fmt
+        return fmt or FORMAT.yaml
     if fmt is None:
         raise UWError(f"Either {desc} path or format name must be specified")
     return fmt
