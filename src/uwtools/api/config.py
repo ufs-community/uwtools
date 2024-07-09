@@ -113,9 +113,9 @@ def get_yaml_config(
 
 
 def realize(
-    input_config: Optional[Union[dict, _Config, Path, str]] = None,
+    input_config: Optional[Union[_Config, Path, dict, str]] = None,
     input_format: Optional[str] = None,
-    update_config: Optional[Union[dict, _Config, Path, str]] = None,
+    update_config: Optional[Union[_Config, Path, dict, str]] = None,
     update_format: Optional[str] = None,
     output_file: Optional[Union[Path, str]] = None,
     output_format: Optional[str] = None,
@@ -128,9 +128,6 @@ def realize(
     """
     NB: This docstring is dynamically replaced: See realize.__doc__ definition below.
     """
-    input_config = (
-        _YAMLConfig(config=input_config) if isinstance(input_config, dict) else input_config
-    )
     return _realize(
         input_config=_ensure_data_source(input_config, stdin_ok),
         input_format=input_format,
@@ -181,7 +178,7 @@ def validate(
     :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise
     """
     return _validate_yaml(
-        schema_file=_ensure_data_source(schema_file, stdin_ok), config=_str2path(config)
+        schema_file=_str2path(schema_file), config=_ensure_data_source(config, stdin_ok)
     )
 
 
