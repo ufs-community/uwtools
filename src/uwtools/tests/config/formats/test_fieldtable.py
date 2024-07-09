@@ -3,7 +3,7 @@
 Tests for uwtools.config.formats.fieldtable module.
 """
 
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.config.formats.fieldtable import FieldTableConfig
 from uwtools.tests.support import fixture_path
@@ -36,8 +36,9 @@ def test_fieldtable_instantiation_depth():
     assert FieldTableConfig(config={1: {2: {3: 4}}})
 
 
-def test_fieldtable_repr(config, ref):
-    assert repr(FieldTableConfig(config=config)).strip() == ref
+@mark.parametrize("func", [repr, str])
+def test_fieldtable_repr_str(config, func, ref):
+    assert func(FieldTableConfig(config=config)).strip() == ref
 
 
 def test_fieldtable_simple(config, ref, tmp_path):
@@ -45,7 +46,3 @@ def test_fieldtable_simple(config, ref, tmp_path):
     FieldTableConfig(config=config).dump(outfile)
     with open(outfile, "r", encoding="utf-8") as out:
         assert out.read().strip() == ref
-
-
-def test_fieldtable_str(config, ref):
-    assert str(FieldTableConfig(config=config)).strip() == ref

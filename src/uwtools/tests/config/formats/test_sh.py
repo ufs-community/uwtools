@@ -3,9 +3,10 @@
 Tests for uwtools.config.formats.sh module.
 """
 
+from textwrap import dedent
 from typing import Any
 
-from pytest import raises
+from pytest import mark, raises
 
 from uwtools.config.formats.sh import SHConfig
 from uwtools.exceptions import UWConfigError
@@ -15,21 +16,21 @@ from uwtools.utils.file import FORMAT
 # Tests
 
 
-def test_get_format():
+def test_sh_get_format():
     assert SHConfig.get_format() == FORMAT.sh
 
 
-def test_get_depth_threshold():
+def test_sh_get_depth_threshold():
     assert SHConfig.get_depth_threshold() == 1
 
 
-def test_instantiation_depth():
+def test_sh_instantiation_depth():
     with raises(UWConfigError) as e:
         SHConfig(config={1: {2: {3: 4}}})
     assert str(e.value) == "Cannot instantiate depth-1 SHConfig with depth-3 config"
 
 
-def test_parse_include():
+def test_sh_parse_include():
     """
     Test that an sh file with no sections handles include tags properly.
     """
@@ -40,7 +41,20 @@ def test_parse_include():
     assert len(cfgobj) == 5
 
 
-def test_sh(salad_base):
+@mark.parametrize("func", [repr, str])
+def test_sh_repr_str(func):
+    config = fixture_path("simple.sh")
+    expected = """
+    base=kale
+    fruit=banana
+    vegetable=tomato
+    how_many=12
+    dressing=balsamic
+    """
+    assert func(SHConfig(config)) == dedent(expected).strip()
+
+
+def test_sh_sh(salad_base):
     """
     Test that sh config load and dump work with a basic sh file.
     """
