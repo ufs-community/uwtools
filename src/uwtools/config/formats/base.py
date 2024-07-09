@@ -43,7 +43,7 @@ class Config(ABC, UserDict):
 
     def __repr__(self) -> str:
         """
-        The string representation of a YAMLConfig object.
+        Returns the string representation of a Config object.
         """
         return self._dict_to_str(self.data)
 
