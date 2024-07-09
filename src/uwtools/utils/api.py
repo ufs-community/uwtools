@@ -7,7 +7,6 @@ import re
 from pathlib import Path
 from typing import Any, Callable, Optional, Union
 
-# from uwtools.config.formats.base import Config
 from uwtools.drivers.driver import DriverT
 from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
