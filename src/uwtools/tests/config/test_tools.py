@@ -527,7 +527,8 @@ def test__ensure_format_bad_no_path_no_format():
 
 
 def test__ensure_format_config_obj():
-    assert tools._ensure_format(desc="foo", config=YAMLConfig(config={})) == FORMAT.yaml
+    config = NMLConfig({"nl": {"n": 88}})
+    assert tools._ensure_format(desc="foo", config=config) == FORMAT.nml
 
 
 def test__ensure_format_dict_explicit():
@@ -539,7 +540,7 @@ def test__ensure_format_dict_implicit():
 
 
 def test__ensure_format_deduced():
-    assert tools._ensure_format(desc="foo", config=Path("/tmp/config.yaml")) == FORMAT.yaml
+    assert tools._ensure_format(desc="foo", config=Path("/tmp/config.nml")) == FORMAT.nml
 
 
 def test__ensure_format_explicitly_specified_no_path():
