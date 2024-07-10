@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from collections import OrderedDict
 from importlib import import_module
 from typing import Type, Union
@@ -64,6 +65,15 @@ def log_and_error(msg: str) -> Exception:
     """
     log.error(msg)
     return UWConfigError(msg)
+
+
+def yaml_to_str(cfg: dict) -> str:
+    """
+    Returns a uwtools-conventional YAML representation of the given dict.
+
+    :param cfg: A dict object.
+    """
+    return yaml.dump(cfg, default_flow_style=False, sort_keys=False, width=math.inf).strip()
 
 
 class UWYAMLTag:

@@ -7,7 +7,14 @@ import yaml
 from f90nml import Namelist  # type: ignore
 
 from uwtools.config.formats.base import Config
-from uwtools.config.support import INCLUDE_TAG, UWYAMLConvert, UWYAMLRemove, from_od, log_and_error
+from uwtools.config.support import (
+    INCLUDE_TAG,
+    UWYAMLConvert,
+    UWYAMLRemove,
+    from_od,
+    log_and_error,
+    yaml_to_str,
+)
 from uwtools.exceptions import UWConfigError
 from uwtools.strings import FORMAT
 from uwtools.utils.file import readable, writable
@@ -44,14 +51,17 @@ class YAMLConfig(Config):
     Concrete class to handle YAML config files.
     """
 
-    def __repr__(self) -> str:
-        """
-        The string representation of a YAMLConfig object.
-        """
-        self._add_yaml_representers()
-        return yaml.dump(self.data, default_flow_style=False).strip()
-
     # Private methods
+
+    @classmethod
+    def _dict_to_str(cls, cfg: dict) -> str:
+        """
+        Returns the YAML representation of the given dict.
+
+        :param cfg: The in-memory config object.
+        """
+        cls._add_yaml_representers()
+        return yaml_to_str(cfg)
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """
@@ -124,9 +134,8 @@ class YAMLConfig(Config):
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to.
         """
-        cls._add_yaml_representers()
         with writable(path) as f:
-            yaml.dump(cfg, f, sort_keys=False)
+            print(cls._dict_to_str(cfg), file=f)
 
     @staticmethod
     def get_depth_threshold() -> Optional[int]:

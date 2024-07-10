@@ -60,6 +60,16 @@ def test_log_and_error(caplog):
     assert logged(caplog, msg)
 
 
+def test_yaml_to_str(capsys):
+    xs = " ".join("x" * 999)
+    expected = f"xs: {xs}"
+    cfgobj = YAMLConfig({"xs": xs})
+    assert repr(cfgobj) == expected
+    assert str(cfgobj) == expected
+    cfgobj.dump()
+    assert capsys.readouterr().out.strip() == expected
+
+
 class Test_UWYAMLConvert:
     """
     Tests for class uwtools.config.support.UWYAMLConvert.
