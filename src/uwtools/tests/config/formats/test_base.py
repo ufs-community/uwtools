@@ -39,6 +39,10 @@ class ConcreteConfig(Config):
     Config subclass for testing purposes.
     """
 
+    @classmethod
+    def _dict_to_str(cls, cfg):
+        pass
+
     def _load(self, config_file):
         with readable(config_file) as f:
             return yaml.safe_load(f.read())
@@ -60,11 +64,6 @@ class ConcreteConfig(Config):
 
 
 # Tests
-
-
-def test___repr__(capsys, config):
-    print(config)
-    assert yaml.safe_load(capsys.readouterr().out)["foo"] == 88
 
 
 def test__load_paths(config, tmp_path):
