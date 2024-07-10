@@ -1,0 +1,26 @@
+usage: uw orog_gsl [-h] [--version] TASK ...
+
+Execute orog_gsl tasks
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+
+Positional arguments:
+  TASK
+    input_grid_file
+      The input grid file
+    provisioned_rundir
+      Run directory provisioned with all required content
+    run
+      A run
+    runscript
+      The runscript
+    topo_data_2p5m
+      Global topographic data on 2.5-minute lat-lon grid
+    topo_data_30s
+      Global topographic data on 30-second lat-lon grid
+    validate
+      Validate the UW driver config

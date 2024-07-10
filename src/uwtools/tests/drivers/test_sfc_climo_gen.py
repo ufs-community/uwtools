@@ -8,21 +8,30 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import yaml
 from iotaa import asset, external, refs
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.drivers import sfc_climo_gen
+from uwtools.drivers.driver import Driver
+from uwtools.drivers.sfc_climo_gen import SfcClimoGen
 from uwtools.logging import log
-from uwtools.scheduler import Slurm
 from uwtools.tests.support import logged
+
+# Helpers
+
+
+@external
+def ready(x):
+    yield x
+    yield asset(x, lambda: True)
+
 
 # Fixtures
 
 
 @fixture
-def config_file(tmp_path):
-    config: dict = {
+def config(tmp_path):
+    return {
         "sfc_climo_gen": {
             "execution": {
                 "batchargs": {
@@ -58,39 +67,44 @@ def config_file(tmp_path):
                 },
                 "validate": True,
             },
-            "run_dir": "/path/to/dir",
+            "rundir": str(tmp_path),
         },
         "platform": {
             "account": "me",
             "scheduler": "slurm",
         },
     }
-    path = tmp_path / "config.yaml"
-    config["sfc_climo_gen"]["run_dir"] = tmp_path.as_posix()
-    with open(path, "w", encoding="utf-8") as f:
-        yaml.dump(config, f)
-    return path
 
 
 @fixture
-def driverobj(config_file):
-    return sfc_climo_gen.SfcClimoGen(config=config_file, batch=True)
-
-
-# Helpers
-
-
-@external
-def ready(x):
-    yield x
-    yield asset(x, lambda: True)
+def driverobj(config):
+    return SfcClimoGen(config=config, batch=True)
 
 
 # Tests
 
 
-def test_SfcClimoGen(driverobj):
-    assert isinstance(driverobj, sfc_climo_gen.SfcClimoGen)
+@mark.parametrize(
+    "method",
+    [
+        "_driver_config",
+        "_resources",
+        "_run_via_batch_submission",
+        "_run_via_local_execution",
+        "_runcmd",
+        "_runscript",
+        "_runscript_done_file",
+        "_runscript_path",
+        "_scheduler",
+        "_taskname",
+        "_validate",
+        "_write_runscript",
+        "run",
+        "runscript",
+    ],
+)
+def test_SfcClimoGen(method):
+    assert getattr(SfcClimoGen, method) is getattr(Driver, method)
 
 
 def test_SfcClimoGen_namelist_file(caplog, driverobj):
@@ -114,50 +128,16 @@ def test_SfcClimoGen_namelist_file_fails_validation(caplog, driverobj):
     assert logged(caplog, "  'string' is not of type 'integer'")
 
 
-def test_SfcClimoGen_provisioned_run_directory(driverobj):
+def test_SfcClimoGen_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
         namelist_file=D,
         runscript=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 
 
-def test_SfcClimoGen_run_batch(driverobj):
-    with patch.object(driverobj, "_run_via_batch_submission") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_SfcClimoGen_run_local(driverobj):
-    driverobj._batch = False
-    with patch.object(driverobj, "_run_via_local_execution") as func:
-        driverobj.run()
-    func.assert_called_once_with()
-
-
-def test_SfcClimoGen_runscript(driverobj):
-    with patch.object(driverobj, "_runscript") as runscript:
-        driverobj.runscript()
-        runscript.assert_called_once()
-        args = ("envcmds", "envvars", "execution", "scheduler")
-        types = [list, dict, list, Slurm]
-        assert [type(runscript.call_args.kwargs[x]) for x in args] == types
-
-
-def test_SfcClimoGen__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["sfc_climo_gen"]
-
-
-def test_SfcClimoGen__runscript_path(driverobj):
-    assert driverobj._runscript_path == driverobj._rundir / "runscript.sfc_climo_gen"
-
-
-def test_SfcClimoGen__taskname(driverobj):
-    assert driverobj._taskname("foo") == "sfc_climo_gen foo"
-
-
-def test_SfcClimoGen__validate(driverobj):
-    driverobj._validate()
+def test_SfcClimoGen__driver_name(driverobj):
+    assert driverobj._driver_name == "sfc_climo_gen"

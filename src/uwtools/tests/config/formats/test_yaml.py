@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring,protected-access
 """
 Tests for uwtools.config.formats.yaml module.
 """
@@ -7,12 +7,14 @@ import datetime
 import filecmp
 import logging
 import sys
+from collections import OrderedDict
 from io import StringIO
 from textwrap import dedent
 from unittest.mock import patch
 
+import f90nml  # type: ignore
 import yaml
-from pytest import raises
+from pytest import mark, raises
 
 from uwtools import exceptions
 from uwtools.config import support
@@ -25,20 +27,20 @@ from uwtools.utils.file import FORMAT, _stdinproxy
 # Tests
 
 
-def test_get_format():
+def test_yaml_get_format():
     assert YAMLConfig.get_format() == FORMAT.yaml
 
 
-def test_get_depth_threshold():
+def test_yaml_get_depth_threshold():
     assert YAMLConfig.get_depth_threshold() is None
 
 
-def test_instantiation_depth():
+def test_yaml_instantiation_depth():
     # Any depth is fine.
     assert YAMLConfig(config={1: {2: {3: 4}}})
 
 
-def test_composite_types():
+def test_yaml_composite_types():
     """
     Test that YAML load and dump work with a YAML file that has multiple data structures and levels.
     """
@@ -56,7 +58,7 @@ def test_composite_types():
     assert models[0]["config"]["vertical_resolution"] == 64
 
 
-def test_include_files():
+def test_yaml_include_files():
     """
     Test that including files via the include constructor works as expected.
     """
@@ -80,7 +82,7 @@ def test_include_files():
     assert cfgobj["reverse_files"]["vegetable"] == "eggplant"
 
 
-def test_simple(tmp_path):
+def test_yaml_simple(tmp_path):
     """
     Test that YAML load, update, and dump work with a basic YAML file.
     """
@@ -105,7 +107,7 @@ def test_simple(tmp_path):
     assert cfgobj == expected
 
 
-def test_constructor_error_no_quotes(tmp_path):
+def test_yaml_constructor_error_no_quotes(tmp_path):
     # Test that Jinja2 template without quotes raises UWConfigError.
     tmpfile = tmp_path / "test.yaml"
     with tmpfile.open("w", encoding="utf-8") as f:
@@ -119,7 +121,7 @@ def test_constructor_error_no_quotes(tmp_path):
     assert "value is enclosed in quotes" in str(e.value)
 
 
-def test_constructor_error_not_dict_from_file(tmp_path):
+def test_yaml_constructor_error_not_dict_from_file(tmp_path):
     # Test that a useful exception is raised if the YAML file input is a non-dict value.
     tmpfile = tmp_path / "test.yaml"
     with tmpfile.open("w", encoding="utf-8") as f:
@@ -129,7 +131,7 @@ def test_constructor_error_not_dict_from_file(tmp_path):
     assert f"Parsed a str value from {tmpfile}, expected a dict" in str(e.value)
 
 
-def test_constructor_error_not_dict_from_stdin():
+def test_yaml_constructor_error_not_dict_from_stdin():
     # Test that a useful exception is raised if the YAML stdin input is a non-dict value.
     with patch.object(sys, "stdin", new=StringIO("a string")):
         with raises(exceptions.UWConfigError) as e:
@@ -137,7 +139,7 @@ def test_constructor_error_not_dict_from_stdin():
     assert "Parsed a str value from stdin, expected a dict" in str(e.value)
 
 
-def test_constructor_error_unregistered_constructor(tmp_path):
+def test_yaml_constructor_error_unregistered_constructor(tmp_path):
     # Test that unregistered constructor raises UWConfigError.
 
     tmpfile = tmp_path / "test.yaml"
@@ -149,7 +151,15 @@ def test_constructor_error_unregistered_constructor(tmp_path):
     assert "Define the constructor before proceeding" in str(e.value)
 
 
-def test_stdin_plus_relpath_failure(caplog):
+@mark.parametrize("func", [repr, str])
+def test_yaml_repr_str(func):
+    config = fixture_path("simple.yaml")
+    with open(config, "r", encoding="utf-8") as f:
+        for actual, expected in zip(func(YAMLConfig(config)).split("\n"), f.readlines()):
+            assert actual.strip() == expected.strip()
+
+
+def test_yaml_stdin_plus_relpath_failure(caplog):
     # Instantiate a YAMLConfig with no input file, triggering a read from stdin. Patch stdin to
     # provide YAML with an include directive specifying a relative path. Since a relative path
     # is meaningless relative to stdin, assert that an appropriate error is logged and exception
@@ -165,7 +175,7 @@ def test_stdin_plus_relpath_failure(caplog):
     assert logged(caplog, msg)
 
 
-def test_unexpected_error(tmp_path):
+def test_yaml_unexpected_error(tmp_path):
     cfgfile = tmp_path / "cfg.yaml"
     with open(cfgfile, "w", encoding="utf-8") as f:
         print("{n: 88}", file=f)
@@ -175,3 +185,25 @@ def test_unexpected_error(tmp_path):
         with raises(UWConfigError) as e:
             YAMLConfig(config=cfgfile)
         assert msg in str(e.value)
+
+
+def test_yaml__add_yaml_representers():
+    YAMLConfig._add_yaml_representers()
+    representers = yaml.Dumper.yaml_representers
+    assert support.UWYAMLConvert in representers
+    assert OrderedDict in representers
+    assert f90nml.Namelist in representers
+
+
+def test_yaml__represent_namelist():
+    YAMLConfig._add_yaml_representers()
+    namelist = f90nml.reads("&namelist\n key = value\n/\n")
+    expected = "{namelist: {key: value}}"
+    assert yaml.dump(namelist, default_flow_style=True).strip() == expected
+
+
+def test_yaml__represent_ordereddict():
+    YAMLConfig._add_yaml_representers()
+    ordereddict_values = OrderedDict([("example", OrderedDict([("key", "value")]))])
+    expected = "{example: {key: value}}"
+    assert yaml.dump(ordereddict_values, default_flow_style=True).strip() == expected

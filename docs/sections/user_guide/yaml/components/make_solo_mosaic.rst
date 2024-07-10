@@ -3,7 +3,7 @@
 make_solo_mosaic
 ================
 
-Structured YAML to run the WRF preprocessing component ``make_solo_mosaic`` is validated by JSON Schema and requires the ``make_solo_mosaic:`` block, described below. If ``make_solo_mosaic`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
+Structured YAML to run the component ``make_solo_mosaic`` is validated by JSON Schema and requires the ``make_solo_mosaic:`` block, described below. If ``make_solo_mosaic`` is to be run via a batch system, the ``platform:`` block, described :ref:`here <platform_yaml>`, is also required.
 
 Documentation for the UFS Utils ``make_solo_mosaic`` program is :ufs-utils:`here <make-solo-mosaic>`.
 
@@ -49,7 +49,7 @@ execution:
 
 See :ref:`here <execution_yaml>` for details.
 
-run_dir:
-^^^^^^^^
+rundir:
+^^^^^^^
 
 The path to the run directory.

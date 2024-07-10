@@ -3,44 +3,20 @@ A base class for MPAS drivers.
 """
 
 from abc import abstractmethod
-from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
 
 from iotaa import asset, task, tasks
 from lxml import etree
 from lxml.etree import Element, SubElement
 
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverCycleBased
 from uwtools.utils.tasks import filecopy, symlink
 
 
-class MPASBase(Driver):
+class MPASBase(DriverCycleBased):
     """
     A base class for MPAS drivers.
     """
-
-    def __init__(
-        self,
-        cycle: datetime,
-        config: Optional[Path] = None,
-        dry_run: bool = False,
-        batch: bool = False,
-        key_path: Optional[List[str]] = None,
-    ):
-        """
-        The driver.
-
-        :param config_file: Path to config file (read stdin if missing or None).
-        :param cycle: The cycle.
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
-        super().__init__(
-            config=config, cycle=cycle, dry_run=dry_run, batch=batch, key_path=key_path
-        )
-        self._cycle = cycle
 
     # Workflow tasks
 
@@ -81,7 +57,7 @@ class MPASBase(Driver):
         """
 
     @tasks
-    def provisioned_run_directory(self):
+    def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
         """
@@ -94,17 +70,6 @@ class MPASBase(Driver):
             self.runscript(),
             self.streams_file(),
         ]
-
-    @task
-    def runscript(self):
-        """
-        The runscript.
-        """
-        path = self._runscript_path
-        yield self._taskname(path.name)
-        yield asset(path, path.is_file)
-        yield None
-        self._write_runscript(path=path, envvars={})
 
     @task
     def streams_file(self):
@@ -147,22 +112,7 @@ class MPASBase(Driver):
 
     @property
     @abstractmethod
-    def _driver_name(self) -> str:
-        """
-        Returns the name of this driver.
-        """
-
-    @property
-    @abstractmethod
     def _streams_fn(self) -> str:
         """
         The streams filename.
         """
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return self._taskname_with_cycle(self._cycle, suffix)

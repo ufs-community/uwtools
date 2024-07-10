@@ -33,7 +33,16 @@ Its contents are described in section :ref:`make_solo_mosaic_yaml`.
 
      $ uw make_solo_mosaic run --config-file config.yaml
 
-  The driver creates a ``runscript.make_solo_mosaic`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``make_solo_mosaic``.
+  The driver creates a ``runscript.make_solo_mosaic`` file in the directory specified by ``rundir:`` in the config and runs it, executing ``make_solo_mosaic``.
+
+..
+  An example runscript:
+
+  .. literalinclude:: make_solo_mosaic/runscript.cmd
+     :language: text
+     :emphasize-lines: 5
+  .. literalinclude:: make_solo_mosaic/runscript.out
+     :language: text
 
 * Run ``make_solo_mosaic`` via a batch job
 
@@ -41,13 +50,7 @@ Its contents are described in section :ref:`make_solo_mosaic_yaml`.
 
      $ uw make_solo_mosaic run --config-file config.yaml --batch
 
-  The driver creates a ``runscript.make_solo_mosaic`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``make_solo_mosaic:``.
-
-  Looking at the run command in ``runscript.make_solo_mosaic`` shows us the specified executable as well as the YAML keys converted to appropriate command line flags.
-
-  .. code-block:: text
-
-     time make_solo_mosaic --num_tiles 1 --dir /path/to/grid/ --tile_file C403_grid.tile7.halo6.nc --periodx 360 --periody 360
+  The driver creates a ``runscript.make_solo_mosaic`` file in the directory specified by ``rundir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``make_solo_mosaic:``.
 
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 

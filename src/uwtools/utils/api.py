@@ -5,10 +5,10 @@ Support for API modules.
 import datetime as dt
 import re
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 from uwtools.config.formats.base import Config
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverT
 from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.exceptions import UWError
@@ -33,7 +33,7 @@ def ensure_data_source(
 
 
 def make_execute(
-    driver_class: type[Driver],
+    driver_class: DriverT,
     with_cycle: Optional[bool] = False,
     with_leadtime: Optional[bool] = False,
 ) -> Callable[..., bool]:
@@ -51,7 +51,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[List[str]] = None,
+        key_path: Optional[list[str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -74,7 +74,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[List[str]] = None,
+        key_path: Optional[list[str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -98,7 +98,7 @@ def make_execute(
         batch: bool = False,
         dry_run: bool = False,
         graph_file: Optional[Union[Path, str]] = None,
-        key_path: Optional[List[str]] = None,
+        key_path: Optional[list[str]] = None,
         stdin_ok: bool = False,
     ) -> bool:
         return _execute(
@@ -133,14 +133,14 @@ def make_execute(
     return execute
 
 
-def make_tasks(driver_class: type[Driver]) -> Callable[..., Dict[str, str]]:
+def make_tasks(driver_class: DriverT) -> Callable[..., dict[str, str]]:
     """
     Returns a function that maps task names to descriptions for the given driver.
 
     :param driver_class: The driver class whose tasks and descriptions to map.
     """
 
-    def tasks() -> Dict[str, str]:
+    def tasks() -> dict[str, str]:
         """
         Returns a mapping from task names to their one-line descriptions.
         """
@@ -162,7 +162,7 @@ def str2path(val: Any) -> Any:
 
 
 def _execute(
-    driver_class: type[Driver],
+    driver_class: DriverT,
     task: str,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
@@ -170,7 +170,7 @@ def _execute(
     batch: bool = False,
     dry_run: bool = False,
     graph_file: Optional[Union[Path, str]] = None,
-    key_path: Optional[List[str]] = None,
+    key_path: Optional[list[str]] = None,
     stdin_ok: bool = False,
 ) -> bool:
     """
@@ -199,7 +199,7 @@ def _execute(
     )
     if cycle:
         kwargs["cycle"] = cycle
-    if leadtime:
+    if leadtime is not None:
         kwargs["leadtime"] = leadtime
     obj = driver_class(**kwargs)
     getattr(obj, task)()

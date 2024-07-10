@@ -3,7 +3,6 @@ Canonical strings used throughout uwtools.
 """
 
 from dataclasses import dataclass, fields
-from typing import Dict, List
 
 
 @dataclass(frozen=True)
@@ -37,14 +36,14 @@ class FORMAT:
     yml: str = _yaml
 
     @staticmethod
-    def extensions() -> List[str]:
+    def extensions() -> list[str]:
         """
         Returns recognized filename extensions.
         """
         return [FORMAT.ini, FORMAT.nml, FORMAT.sh, FORMAT.yaml]
 
     @staticmethod
-    def formats() -> Dict[str, str]:
+    def formats() -> dict[str, str]:
         """
         Returns the recognized format names.
         """
@@ -77,12 +76,14 @@ class STR:
     file2fmt: str = "file_2_format"
     file2path: str = "file_2_path"
     file: str = "file"
+    filtertopo: str = "filter_topo"
     fv3: str = "fv3"
     globalequivresol: str = "global_equiv_resol"
     graphfile: str = "graph_file"
     help: str = "help"
     infile: str = "input_file"
     infmt: str = "input_format"
+    ioda: str = "ioda"
     jedi: str = "jedi"
     keypath: str = "key_path"
     keys: str = "keys"
@@ -95,6 +96,7 @@ class STR:
     model: str = "model"
     mpas: str = "mpas"
     mpasinit: str = "mpas_init"
+    oroggsl: str = "orog_gsl"
     outfile: str = "output_file"
     outfmt: str = "output_format"
     quiet: str = "quiet"
@@ -103,6 +105,7 @@ class STR:
     rocoto: str = "rocoto"
     run: str = "run"
     schemafile: str = "schema_file"
+    schism: str = "schism"
     searchpath: str = "search_path"
     sfcclimogen: str = "sfc_climo_gen"
     shave: str = "shave"

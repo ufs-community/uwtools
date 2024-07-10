@@ -2,4 +2,5 @@
 ===================
 
 .. automodule:: uwtools.api.fv3
-    :members:
+   :inherited-members:
+   :members:

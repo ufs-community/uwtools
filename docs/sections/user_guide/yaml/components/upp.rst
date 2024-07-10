@@ -34,7 +34,7 @@ Identical to ``files_to_copy:`` except that symbolic links will be created in th
 namelist:
 ^^^^^^^^^
 
-Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details).
+Supports ``base_file:`` and ``update_values:`` blocks (see :ref:`updating_values` for details).
 
 The following namelists and variables can be customized:
 
@@ -53,7 +53,7 @@ Read more on the UPP namelists, including variable meanings and appropriate valu
 
 .. include:: /shared/validate_namelist.rst
 
-run_dir:
-^^^^^^^^
+rundir:
+^^^^^^^
 
 The path to the run directory.

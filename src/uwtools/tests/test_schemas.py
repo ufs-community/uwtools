@@ -5,8 +5,7 @@ Granular tests of JSON Schema schemas.
 
 from functools import partial
 
-import pytest
-from pytest import fixture
+from pytest import fixture, mark
 
 from uwtools.tests.support import schema_validator, with_del, with_set
 
@@ -52,6 +51,11 @@ def global_equiv_resol_prop():
     return partial(
         schema_validator, "global-equiv-resol", "properties", "global_equiv_resol", "properties"
     )
+
+
+@fixture
+def ioda_prop():
+    return partial(schema_validator, "ioda", "properties", "ioda", "properties")
 
 
 @fixture
@@ -116,6 +120,11 @@ def sfc_climo_gen_prop():
 
 
 @fixture
+def schism_prop():
+    return partial(schema_validator, "schism", "properties", "schism", "properties")
+
+
+@fixture
 def shave_prop():
     return partial(schema_validator, "shave", "properties", "shave", "properties")
 
@@ -142,13 +151,13 @@ def test_schema_chgres_cube():
     config = {
         "execution": {"executable": "chgres_cube"},
         "namelist": {"base_file": "/path", "validate": True},
-        "run_dir": "/tmp",
+        "rundir": "/tmp",
     }
     errors = schema_validator("chgres-cube", "properties", "chgres_cube")
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("execution", "namelist", "run_dir"):
+    for key in ("execution", "namelist", "rundir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -182,8 +191,8 @@ def test_schema_chgres_cube_namelist_update_values(chgres_cube_prop):
     assert not errors({})
 
 
-def test_schema_chgres_cube_run_dir(chgres_cube_prop):
-    errors = chgres_cube_prop("run_dir")
+def test_schema_chgres_cube_rundir(chgres_cube_prop):
+    errors = chgres_cube_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
@@ -196,13 +205,13 @@ def test_schema_esg_grid():
     config = {
         "execution": {"executable": "esg_grid"},
         "namelist": {"base_file": "/path", "validate": True},
-        "run_dir": "/tmp",
+        "rundir": "/tmp",
     }
     errors = schema_validator("esg-grid", "properties", "esg_grid")
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("execution", "namelist", "run_dir"):
+    for key in ("execution", "namelist", "rundir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -232,7 +241,7 @@ def test_schema_esg_grid_namelist(esg_grid_prop, esg_namelist):
     assert "not valid" in errors({})
 
 
-@pytest.mark.parametrize("key", ["delx", "dely", "lx", "ly", "pazi", "plat", "plon"])
+@mark.parametrize("key", ["delx", "dely", "lx", "ly", "pazi", "plat", "plon"])
 def test_schema_esg_grid_namelist_content(key):
     config: dict = {
         "regional_grid_nml": {
@@ -257,8 +266,8 @@ def test_schema_esg_grid_namelist_content(key):
     assert "is a required property" in errors(with_del(config, "regional_grid_nml", key))
 
 
-def test_schema_esg_grid_run_dir(esg_grid_prop):
-    errors = esg_grid_prop("run_dir")
+def test_schema_esg_grid_rundir(esg_grid_prop):
+    errors = esg_grid_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
@@ -369,6 +378,90 @@ def test_schema_files_to_stage():
     assert "True is not of type 'string'" in errors({"file1": True})
 
 
+# filter-topo
+
+
+def test_schema_filter_topo():
+    config = {
+        "config": {
+            "input_grid_file": "/path/to/grid/file",
+        },
+        "execution": {
+            "executable": "/path/to/filter_topo",
+        },
+        "namelist": {
+            "update_values": {
+                "filter_topo_nml": {
+                    "grid_file": "/path/to/grid/file",
+                    "grid_type": 0,
+                    "mask_field": "land_frac",
+                    "regional": True,
+                    "res": 403,
+                    "stretch_fac": 0.999,
+                    "topo_field": "orog_filt",
+                    "topo_file": "/path/to/topo/file",
+                    "zero_ocean": True,
+                }
+            }
+        },
+        "rundir": "/path/to/run/dir",
+    }
+    errors = schema_validator("filter-topo", "properties", "filter_topo")
+    nmlkeys = ("namelist", "update_values", "filter_topo_nml")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are requried:
+    for key in ["config", "execution", "namelist", "rundir"]:
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Other top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
+    # Top-level rundir key requires a string value:
+    assert "is not of type 'string'" in errors(with_set(config, None, "rundir"))
+    # All config keys are requried:
+    for key in ["input_grid_file"]:
+        assert f"'{key}' is a required property" in errors(with_del(config, "config", key))
+    # Other config keys are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        with_set(config, "bar", "config", "foo")
+    )
+    # Some config keys require string values:
+    for key in ["input_grid_file"]:
+        assert "is not of type 'string'" in errors(with_set(config, None, "config", key))
+    # Namelist filter_topo_nml is required:
+    assert "is a required property" in errors(with_del(config, *nmlkeys))
+    # Additional namelists are not allowed:
+    assert "not allowed" in errors(
+        with_set(config, {}, "namelist", "update_values", "additonal_namelist")
+    )
+    # All filter_topo_nml keys are optional:
+    for key in [
+        "grid_file",
+        "grid_type",
+        "mask_field",
+        "regional",
+        "res",
+        "stretch_fac",
+        "topo_field",
+        "topo_file",
+        "zero_ocean",
+    ]:
+        assert not errors(with_del(config, *nmlkeys, key))
+    # Additional filter_topo_nml keys are allowd:
+    assert not errors(with_set(config, "val", *nmlkeys, "key"))
+    # Some filter_topo_nml keys require boolean values:
+    for key in ["regional", "zero_ocean"]:
+        assert "is not of type 'boolean'" in errors(with_set(config, None, *nmlkeys, key))
+    # Some filter_topo_nml keys require integer values:
+    for key in ["grid_type", "res"]:
+        assert "is not of type 'integer'" in errors(with_set(config, None, *nmlkeys, key))
+    # Some filter_topo_nml keys require number values:
+    for key in ["stretch_fac"]:
+        assert "is not of type 'number'" in errors(with_set(config, None, *nmlkeys, key))
+    # Some filter_topo_nml keys require string values:
+    for key in ["grid_file", "mask_field", "topo_field", "topo_file"]:
+        assert "is not of type 'string'" in errors(with_set(config, None, *nmlkeys, key))
+
+
 # fv3
 
 
@@ -380,7 +473,7 @@ def test_schema_fv3():
         "lateral_boundary_conditions": {"interval_hours": 1, "offset": 0, "path": "/tmp/file"},
         "length": 3,
         "namelist": {"base_file": "/path", "validate": True},
-        "run_dir": "/tmp",
+        "rundir": "/tmp",
     }
     errors = schema_validator("fv3", "properties", "fv3")
     # Basic correctness:
@@ -392,7 +485,7 @@ def test_schema_fv3():
         "lateral_boundary_conditions",
         "length",
         "namelist",
-        "run_dir",
+        "rundir",
     ):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Some top-level keys are optional:
@@ -519,35 +612,79 @@ def test_schema_fv3_namelist_update_values(fv3_prop):
     assert "{} should be non-empty" in errors({"nml": {}})
 
 
-def test_schema_fv3_run_dir(fv3_prop):
-    errors = fv3_prop("run_dir")
+def test_schema_fv3_rundir(fv3_prop):
+    errors = fv3_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
 
 
-# global_equiv_resol
+# global-equiv-resol
 
 
 def test_schema_global_equiv_resol():
     config = {
         "execution": {"executable": "/tmp/global_equiv_resol.exe"},
         "input_grid_file": "/tmp/input_grid_file",
-        "run_dir": "/tmp",
+        "rundir": "/tmp",
     }
     errors = schema_validator("global-equiv-resol", "properties", "global_equiv_resol")
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("execution", "input_grid_file", "run_dir"):
+    for key in ("execution", "input_grid_file", "rundir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
 
 
-@pytest.mark.parametrize("schema_entry", ["run_dir", "input_grid_file"])
+@mark.parametrize("schema_entry", ["rundir", "input_grid_file"])
 def test_schema_global_equiv_resol_paths(global_equiv_resol_prop, schema_entry):
     errors = global_equiv_resol_prop(schema_entry)
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
+# ioda
+
+
+def test_schema_ioda():
+    config = {
+        "configuration_file": {
+            "base_file": "/path/to/ioda.yaml",
+            "update_values": {"foo": "bar", "baz": "qux"},
+        },
+        "execution": {"executable": "/tmp/ioda.exe"},
+        "files_to_copy": {"file1": "src1", "file2": "src2"},
+        "files_to_link": {"link1": "src3", "link2": "src4"},
+        "rundir": "/tmp",
+    }
+    errors = schema_validator("ioda", "properties", "ioda")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("configuration_file", "execution", "rundir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_ioda_configuration_file(ioda_prop):
+    bf = {"base_file": "/path/to/ioda.yaml"}
+    uv = {"update_values": {"foo": "bar", "baz": "qux"}}
+    errors = ioda_prop("configuration_file")
+    # base_file and update_values are ok together:
+    assert not errors({**bf, **uv})
+    # And either is ok alone:
+    assert not errors(bf)
+    assert not errors(uv)
+    # update_values cannot be empty:
+    assert "should be non-empty" in errors({"update_values": {}})
+
+
+def test_schema_ioda_rundir(ioda_prop):
+    errors = ioda_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
@@ -565,13 +702,13 @@ def test_schema_jedi():
         "execution": {"executable": "/tmp/jedi.exe"},
         "files_to_copy": {"file1": "src1", "file2": "src2"},
         "files_to_link": {"link1": "src3", "link2": "src4"},
-        "run_dir": "/tmp",
+        "rundir": "/tmp",
     }
     errors = schema_validator("jedi", "properties", "jedi")
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("configuration_file", "execution", "run_dir"):
+    for key in ("configuration_file", "execution", "rundir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -590,27 +727,27 @@ def test_schema_jedi_configuration_file(jedi_prop):
     assert "should be non-empty" in errors({"update_values": {}})
 
 
-def test_schema_jedi_run_dir(jedi_prop):
-    errors = jedi_prop("run_dir")
+def test_schema_jedi_rundir(jedi_prop):
+    errors = jedi_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
 
 
-# make_hgrid
+# make-hgrid
 
 
 def test_schema_make_hgrid():
     config = {
         "config": {"grid_type": "from_file", "my_grid_file": "/path/to/my_grid_file"},
         "execution": {"executable": "make_hgrid"},
-        "run_dir": "/tmp",
+        "rundir": "/tmp",
     }
     errors = schema_validator("make-hgrid", "properties", "make_hgrid")
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("config", "execution", "run_dir"):
+    for key in ("config", "execution", "rundir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -652,27 +789,27 @@ def test_schema_make_hgrid_grid_type():
         )
 
 
-def test_schema_make_hgrid_run_dir(make_hgrid_prop):
-    errors = make_hgrid_prop("run_dir")
+def test_schema_make_hgrid_rundir(make_hgrid_prop):
+    errors = make_hgrid_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
 
 
-# make_solo_mosaic
+# make-solo-mosaic
 
 
 def test_schema_make_solo_mosaic():
     config = {
         "config": {"dir": "path/to/dir", "num_tiles": 1},
         "execution": {"executable": "make_solo_mosaic"},
-        "run_dir": "/tmp",
+        "rundir": "/tmp",
     }
     errors = schema_validator("make-solo-mosaic", "properties", "make_solo_mosaic")
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("config", "execution", "run_dir"):
+    for key in ("config", "execution", "rundir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -695,8 +832,8 @@ def test_schema_make_solo_mosaic_config(make_solo_mosaic_prop):
         assert "None is not of type" in str(errors({key: None}))
 
 
-def test_schema_make_solo_mosaic_run_dir(make_solo_mosaic_prop):
-    errors = make_solo_mosaic_prop("run_dir")
+def test_schema_make_solo_mosaic_rundir(make_solo_mosaic_prop):
+    errors = make_solo_mosaic_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
@@ -709,14 +846,14 @@ def test_schema_mpas(mpas_streams):
     config = {
         "execution": {"executable": "atmosphere_model"},
         "namelist": {"base_file": "path/to/simple.nml", "validate": True},
-        "run_dir": "path/to/rundir",
+        "rundir": "path/to/rundir",
         "streams": mpas_streams,
     }
     errors = schema_validator("mpas", "properties", "mpas")
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("execution", "namelist", "run_dir", "streams"):
+    for key in ("execution", "namelist", "rundir", "streams"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -789,28 +926,28 @@ def test_schema_mpas_namelist_update_values(mpas_prop):
     assert "{} should be non-empty" in errors({"nml": {}})
 
 
-def test_schema_mpas_run_dir(mpas_prop):
-    errors = mpas_prop("run_dir")
+def test_schema_mpas_rundir(mpas_prop):
+    errors = mpas_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
 
 
-# mpas_init
+# mpas-init
 
 
 def test_schema_mpas_init(mpas_streams):
     config = {
         "execution": {"executable": "mpas_init"},
         "namelist": {"base_file": "path/to/simple.nml", "validate": True},
-        "run_dir": "path/to/rundir",
+        "rundir": "path/to/rundir",
         "streams": mpas_streams,
     }
     errors = schema_validator("mpas-init", "properties", "mpas_init")
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("execution", "namelist", "run_dir", "streams"):
+    for key in ("execution", "namelist", "rundir", "streams"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -877,8 +1014,8 @@ def test_schema_mpas_init_namelist_update_values(mpas_init_prop):
     assert "{} should be non-empty" in errors({"nml": {}})
 
 
-def test_schema_mpas_init_run_dir(mpas_init_prop):
-    errors = mpas_init_prop("run_dir")
+def test_schema_mpas_init_rundir(mpas_init_prop):
+    errors = mpas_init_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
@@ -1026,6 +1163,49 @@ def test_schema_namelist():
     assert "[] is not of type 'object'" in errors({"namelist": []})
 
 
+# orog-gsl
+
+
+def test_schema_orog_gsl():
+    config = {
+        "config": {
+            "halo": 4,
+            "input_grid_file": "/path/to/gridfile",
+            "resolution": 304,
+            "tile": 7,
+            "topo_data_2p5m": "/path/to/topo2p5m",
+            "topo_data_30s": "/path/to/topo30s",
+        },
+        "execution": {
+            "executable": "/path/to/orog_gsl",
+        },
+        "rundir": "/path/to/run/dir",
+    }
+    errors = schema_validator("orog-gsl", "properties", "orog_gsl")
+    # Basic correctness:
+    assert not errors(config)
+    # All config keys are requried:
+    for key in ["halo", "input_grid_file", "resolution", "tile", "topo_data_2p5m", "topo_data_30s"]:
+        assert f"'{key}' is a required property" in errors(with_del(config, "config", key))
+    # Other config keys are not allowed:
+    assert "Additional properties are not allowed" in errors(
+        with_set(config, "bar", "config", "foo")
+    )
+    # Some config keys require integer values:
+    for key in ["halo", "resolution", "tile"]:
+        assert "is not of type 'integer'" in errors(with_set(config, None, "config", key))
+    # Some config keys require string values:
+    for key in ["input_grid_file", "topo_data_2p5m", "topo_data_30s"]:
+        assert "is not of type 'string'" in errors(with_set(config, None, "config", key))
+    # Some top level keys are required:
+    for key in ["config", "execution", "rundir"]:
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Other top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
+    # Top-level rundir key requires a string value:
+    assert "is not of type 'string'" in errors(with_set(config, None, "rundir"))
+
+
 # platform
 
 
@@ -1131,6 +1311,51 @@ def test_schema_rocoto_workflow_cycledef():
     assert "'foo' is not valid" in errors([{"attrs": {"activation_offset": "foo"}, "spec": spec}])
 
 
+# schism
+
+
+def test_schema_schism():
+    config = {
+        "namelist": {
+            "template_file": "/tmp/param.nml",
+            "template_values": {
+                "dt": 100,
+            },
+        },
+        "rundir": "/tmp",
+    }
+    errors = schema_validator("schism", "properties", "schism")
+    # Basic correctness:
+    assert not errors(config)
+    # All top-level keys are required:
+    for key in ("namelist", "rundir"):
+        assert f"'{key}' is a required property" in errors(with_del(config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
+
+
+def test_schema_schism_namelist(schism_prop):
+    errors = schism_prop("namelist")
+    # At least template_file is required:
+    assert "'template_file' is a required property" in errors({})
+    # Just template_file is ok:
+    assert not errors({"template_file": "/path/to/param.nml"})
+    # Both template_file and template_values are ok:
+    assert not errors(
+        {
+            "template_file": "/path/to/param.nml",
+            "template_values": {"dt": 100},
+        }
+    )
+
+
+def test_schema_schism_rundir(schism_prop):
+    errors = schism_prop("rundir")
+    # Must be a string:
+    assert not errors("/some/path")
+    assert "88 is not of type 'string'" in errors(88)
+
+
 # sfc-climo-gen
 
 
@@ -1138,13 +1363,13 @@ def test_schema_sfc_climo_gen():
     config = {
         "execution": {"executable": "sfc_climo_gen"},
         "namelist": {"base_file": "/path", "validate": True},
-        "run_dir": "/tmp",
+        "rundir": "/tmp",
     }
     errors = schema_validator("sfc-climo-gen", "properties", "sfc_climo_gen")
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("execution", "namelist", "run_dir"):
+    for key in ("execution", "namelist", "rundir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -1178,8 +1403,8 @@ def test_schema_sfc_climo_gen_namelist_update_values(sfc_climo_gen_prop):
     assert not errors({})
 
 
-def test_schema_sfc_climo_gen_run_dir(sfc_climo_gen_prop):
-    errors = sfc_climo_gen_prop("run_dir")
+def test_schema_sfc_climo_gen_rundir(sfc_climo_gen_prop):
+    errors = sfc_climo_gen_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
@@ -1197,13 +1422,13 @@ def test_schema_shave():
             "nh4": 1,
         },
         "execution": {"executable": "shave"},
-        "run_dir": "/tmp",
+        "rundir": "/tmp",
     }
     errors = schema_validator("shave", "properties", "shave")
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("config", "execution", "run_dir"):
+    for key in ("config", "execution", "rundir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -1228,8 +1453,8 @@ def test_schema_shave_config_properties():
         assert "None is not of type" in str(errors({key: None}))
 
 
-def test_schema_shave_run_dir(shave_prop):
-    errors = shave_prop("run_dir")
+def test_schema_shave_rundir(shave_prop):
+    errors = shave_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
@@ -1247,21 +1472,21 @@ def test_schema_ungrib():
             "offset": 0,
             "path": "/tmp/gfs.t12z.pgrb2.0p25.f000",
         },
-        "run_dir": "/tmp",
+        "rundir": "/tmp",
         "vtable": "/tmp/Vtable.GFS",
     }
     errors = schema_validator("ungrib", "properties", "ungrib")
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("execution", "gfs_files", "run_dir", "vtable"):
+    for key in ("execution", "gfs_files", "rundir", "vtable"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
 
 
-def test_schema_ungrib_run_dir(ungrib_prop):
-    errors = ungrib_prop("run_dir")
+def test_schema_ungrib_rundir(ungrib_prop):
+    errors = ungrib_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
@@ -1291,13 +1516,13 @@ def test_schema_upp():
             },
             "validate": True,
         },
-        "run_dir": "/path/to/run",
+        "rundir": "/path/to/run",
     }
     errors = schema_validator("upp", "properties", "upp")
     # Basic correctness:
     assert not errors(config)
     # Some top-level keys are required:
-    for key in ("execution", "namelist", "run_dir"):
+    for key in ("execution", "namelist", "rundir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Other top-level keys are optional:
     assert not errors({**config, "files_to_copy": {"dst": "src"}})
@@ -1392,14 +1617,14 @@ def test_schema_upp_namelist(upp_prop):
     )
 
 
-def test_schema_upp_run_dir(upp_prop):
-    errors = upp_prop("run_dir")
+def test_schema_upp_rundir(upp_prop):
+    errors = upp_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)
 
 
-# ungrib
+# ww3
 
 
 def test_schema_ww3():
@@ -1410,13 +1635,13 @@ def test_schema_ww3():
                 "input_forcing_winds": "C",
             },
         },
-        "run_dir": "/tmp",
+        "rundir": "/tmp",
     }
     errors = schema_validator("ww3", "properties", "ww3")
     # Basic correctness:
     assert not errors(config)
     # All top-level keys are required:
-    for key in ("namelist", "run_dir"):
+    for key in ("namelist", "rundir"):
         assert f"'{key}' is a required property" in errors(with_del(config, key))
     # Additional top-level keys are not allowed:
     assert "Additional properties are not allowed" in errors({**config, "foo": "bar"})
@@ -1437,8 +1662,8 @@ def test_schema_ww3_namelist(ww3_prop):
     )
 
 
-def test_schema_ww3_run_dir(ww3_prop):
-    errors = ww3_prop("run_dir")
+def test_schema_ww3_rundir(ww3_prop):
+    errors = ww3_prop("rundir")
     # Must be a string:
     assert not errors("/some/path")
     assert "88 is not of type 'string'" in errors(88)

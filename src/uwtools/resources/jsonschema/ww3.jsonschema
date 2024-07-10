@@ -10,9 +10,7 @@
               "type": "string"
             },
             "template_values": {
-              "additionalProperties": {
-                "type": "string"
-              },
+              "minProperties": 1,
               "type": "object"
             }
           },
@@ -21,13 +19,13 @@
           ],
           "type": "object"
         },
-        "run_dir": {
+        "rundir": {
           "type": "string"
         }
       },
       "required": [
         "namelist",
-        "run_dir"
+        "rundir"
       ],
       "type": "object"
     }

@@ -100,7 +100,7 @@ Drivers for NWP components are available as top-level CLI modes and API modules.
 
 Provided with a valid UW YAML configuration file, and CLI arguments when required, ``uw`` can prepare a fully provisioned run directory and execute a component either directly on the current system, or via a batch job submitted to an HPC scheduler.
 
-Each driver produces a list of available ``TASK`` arguments from its CLI ``--help, -h`` flag. The ``provisioned_run_directory`` will do everything except ``run`` the executable, but any of the tasks may be requested and only the steps required to produce that task will be performed.
+Each driver produces a list of available ``TASK`` arguments from its CLI ``--help, -h`` flag. The ``provisioned_rundir`` will do everything except ``run`` the executable, but any of the tasks may be requested and only the steps required to produce that task will be performed.
 
 Over time, we'll add many other drivers to support a variety of UFS components from pre-processing to post-processing, along with many data assimilation components.
 
@@ -114,6 +114,12 @@ esg_grid
 
 | **CLI**: ``uw esg_grid -h``
 | **API**: ``import uwtools.api.esg_grid``
+
+filter_topo
+"""""""""""
+
+| **CLI**: ``uw filter_topo -h``
+| **API**: ``import uwtools.api.filter_topo``
 
 global_equiv_resol
 """"""""""""""""""
@@ -132,6 +138,12 @@ make_solo_mosaic
 
 | **CLI**: ``uw make_solo_mosaic -h``
 | **API**: ``import uwtools.api.make_solo_mosaic``
+
+orog_gsl
+""""""""
+
+| **CLI**: ``uw orog_gsl -h``
+| **API**: ``import uwtools.api.orog_gsl``
 
 sfc_climo_gen
 """""""""""""
@@ -165,6 +177,12 @@ UPP
 
 Driver for JEDI
 ^^^^^^^^^^^^^^^
+
+IODA
+""""
+
+| **CLI**: ``uw ioda -h``
+| **API**: ``import uwtools.api.ioda``
 
 JEDI
 """"

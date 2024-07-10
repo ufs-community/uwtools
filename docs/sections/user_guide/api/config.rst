@@ -2,4 +2,4 @@
 ======================
 
 .. automodule:: uwtools.api.config
-    :members:
+   :members:
