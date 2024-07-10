@@ -54,7 +54,7 @@ def test_sh_repr_str(func):
     assert func(SHConfig(config)) == dedent(expected).strip()
 
 
-def test_sh_sh(salad_base):
+def test_sh(salad_base):
     """
     Test that sh config load and dump work with a basic sh file.
     """
