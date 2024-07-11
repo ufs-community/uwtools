@@ -52,7 +52,7 @@ def render(
     result = _render(
         values_src=_str2path(values_src),
         values_format=values_format,
-        input_file=_ensure_data_source(input_file, stdin_ok),
+        input_file=_ensure_data_source(_str2path(input_file), stdin_ok),
         output_file=_str2path(output_file),
         overrides=overrides,
         env=env,
@@ -104,7 +104,7 @@ def translate(
     :return: ``True``
     """
     _convert_atparse_to_jinja2(
-        input_file=_ensure_data_source(input_file, stdin_ok),
+        input_file=_ensure_data_source(_str2path(input_file), stdin_ok),
         output_file=_str2path(output_file),
         dry_run=dry_run,
     )
