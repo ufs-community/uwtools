@@ -51,13 +51,13 @@ unittest() {
 }
 
 notebooks() {
- msg Running notebook tests
- (
+  msg Running notebook tests
+  (
     set -eux
     cd ../notebooks
     pytest ./tests
- )
- msg OK
+  )
+  msg OK
 }
 
 test "${CONDA_BUILD:-}" = 1 && cd ../test_files || cd $(dirname $0)/../src
