@@ -36,7 +36,7 @@ kwargs = {
     "version": meta["version"],
 }
 
-# Define dependency packages for devshell installs.
+# Define dependency packages for non-devshell installs.
 
 if not os.environ.get("CONDEV_SHELL"):
     kwargs["install_requires"] = [
