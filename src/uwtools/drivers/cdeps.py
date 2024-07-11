@@ -31,17 +31,6 @@ class CDEPS(AssetsCycleBased):
             self.atm_stream(),
         ]
 
-    @tasks
-    def ocn(self):
-        """
-        It creates data ocean configuration with all required content.
-        """
-        yield self._taskname("data atmosphere configuration")
-        yield [
-            self.ocn_nml(),
-            self.ocn_stream(),
-        ]
-
     @task
     def atm_nml(self):
         """
@@ -54,6 +43,30 @@ class CDEPS(AssetsCycleBased):
         yield None
         path.parent.mkdir(parents=True, exist_ok=True)
         self._model_namelist_file("atm_in", path)
+
+    @task
+    def atm_stream(self):
+        """
+        It creates data atmosphere stream config file (datm.streams).
+        """
+        fn = "datm.streams"
+        yield self._taskname(f"namelist file {fn}")
+        path = self._rundir / fn
+        yield asset(path, path.is_file)
+        temp_path = self._driver_config["atm_streams"]["base_file"]
+        yield file(path=Path(temp_path))
+        self._model_stream_file("atm_streams", path, temp_path)
+
+    @tasks
+    def ocn(self):
+        """
+        It creates data ocean configuration with all required content.
+        """
+        yield self._taskname("data atmosphere configuration")
+        yield [
+            self.ocn_nml(),
+            self.ocn_stream(),
+        ]
 
     @task
     def ocn_nml(self):
@@ -69,19 +82,6 @@ class CDEPS(AssetsCycleBased):
         self._model_namelist_file("ocn_in", path)
 
     @task
-    def atm_stream(self):
-        """
-        It creates data atmosphere stream config file (datm.streams).
-        """
-        fn = "datm.streams"
-        yield self._taskname(f"namelist file {fn}")
-        path = self._rundir / fn
-        yield asset(path, path.is_file)
-        temp_path = self._driver_config["atm_streams"]["base_file"]
-        yield file(path=Path(temp_path))
-        self._model_stream_file("atm_streams", path, temp_path)
-
-    @task
     def ocn_stream(self):
         """
         It creates data ocean stream config file (docn.streams).
@@ -94,20 +94,6 @@ class CDEPS(AssetsCycleBased):
         yield file(path=Path(temp_path))
         self._model_stream_file("ocn_streams", path, temp_path)
 
-    def _model_namelist_file(self, group: str, path: str):
-        self._create_user_updated_config(
-            config_class=NMLConfig,
-            config_values=self._driver_config[group],
-            path=path,
-        )
-
-    def _model_stream_file(self, group: str, path: str, template: str):
-        render(
-            input_file=Path(template),
-            output_file=path,
-            values_src=self._driver_config[group],
-        )
-
     # Private helper methods
 
     @property
@@ -116,6 +102,14 @@ class CDEPS(AssetsCycleBased):
         Returns the name of this driver.
         """
         return STR.cdeps
+
+    def _model_namelist_file(self, group: str, path: Path) -> None:
+        self._create_user_updated_config(
+            config_class=NMLConfig, config_values=self._driver_config[group], path=path
+        )
+
+    def _model_stream_file(self, group: str, path: Path, template: str) -> None:
+        render(input_file=Path(template), output_file=path, values_src=self._driver_config[group])
 
     def _taskname(self, suffix: str) -> str:
         """
