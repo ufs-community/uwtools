@@ -39,7 +39,7 @@ Describes the required parameters to run a ``shave`` configuration.
 
   The j/y dimensions of the compute domain (not including halo)
 
-run_dir:
-^^^^^^^^
+rundir:
+^^^^^^^
 
 The path to the run directory.

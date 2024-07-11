@@ -9,7 +9,7 @@ from unittest.mock import patch
 import yaml
 from pytest import fixture, mark
 
-from uwtools.drivers.driver import Assets
+from uwtools.drivers.driver import AssetsCycleBased
 from uwtools.drivers.schism import SCHISM
 
 # Fixtures
@@ -25,7 +25,7 @@ def config(tmp_path):
                     "dt": 100,
                 },
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
         },
     }
 
@@ -37,7 +37,7 @@ def cycle():
 
 @fixture
 def driverobj(config, cycle):
-    return SCHISM(config=config, cycle=cycle, batch=True)
+    return SCHISM(config=config, cycle=cycle)
 
 
 # Tests
@@ -52,7 +52,7 @@ def driverobj(config, cycle):
     ],
 )
 def test_SCHISM(method):
-    assert getattr(SCHISM, method) is getattr(Assets, method)
+    assert getattr(SCHISM, method) is getattr(AssetsCycleBased, method)
 
 
 def test_SCHISM_namelist_file(driverobj):
@@ -65,12 +65,12 @@ def test_SCHISM_namelist_file(driverobj):
     assert dst.is_file()
 
 
-def test_SCHISM_provisioned_run_directory(driverobj):
+def test_SCHISM_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
         namelist_file=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 

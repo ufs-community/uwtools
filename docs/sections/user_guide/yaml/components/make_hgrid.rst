@@ -195,7 +195,7 @@ Describes the required parameters to run a ``make_hgrid`` configuration.
 
   Specify boundaries for defining meridional regions of varying resolution.
 
-run_dir:
-^^^^^^^^
+rundir:
+^^^^^^^
 
 The path to the run directory.

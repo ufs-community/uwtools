@@ -41,8 +41,8 @@ Describes the GRIB-formatted files to be processed by ``ungrib``.
 
   An absolute-path template to the GRIB-formatted files to be processed by ``ungrib``. The Python ``int`` variables ``cycle_hour`` and ``forecast_hour`` will be interpolated into, e.g., ``/path/to/gfs.t{cycle_hour:02d}z.pgrb2.0p25.f{forecast_hour:03d}``. Note that this is a Python string template rather than a Jinja2 template.
 
-run_dir:
-^^^^^^^^
+rundir:
+^^^^^^^
 
 The path to the run directory.
 

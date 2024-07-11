@@ -9,14 +9,14 @@
         "input_grid_file": {
           "type": "string"
         },
-        "run_dir": {
+        "rundir": {
           "type": "string"
         }
       },
       "required": [
         "execution",
         "input_grid_file",
-        "run_dir"
+        "rundir"
       ],
       "type": "object"
     }

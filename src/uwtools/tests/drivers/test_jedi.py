@@ -55,7 +55,7 @@ def config(tmp_path):
                 "foo": "/path/to/foo",
                 "bar/baz": "/path/to/baz",
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
         },
         "platform": {
             "account": "me",
@@ -103,7 +103,7 @@ def test_JEDI_configuration_file(driverobj):
     base_file = Path(driverobj._driver_config["configuration_file"]["base_file"])
     with open(base_file, "w", encoding="utf-8") as f:
         yaml.dump(basecfg, f)
-    cfgfile = Path(driverobj._driver_config["run_dir"]) / "jedi.yaml"
+    cfgfile = Path(driverobj._driver_config["rundir"]) / "jedi.yaml"
     assert not cfgfile.is_file()
     driverobj.configuration_file()
     assert cfgfile.is_file()
@@ -113,9 +113,9 @@ def test_JEDI_configuration_file(driverobj):
 
 def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    base_file = Path(driverobj._driver_config["run_dir"]) / "missing"
+    base_file = Path(driverobj._driver_config["rundir"]) / "missing"
     driverobj._driver_config["configuration_file"]["base_file"] = base_file
-    cfgfile = Path(driverobj._driver_config["run_dir"]) / "jedi.yaml"
+    cfgfile = Path(driverobj._driver_config["rundir"]) / "jedi.yaml"
     assert not cfgfile.is_file()
     driverobj.configuration_file()
     assert not cfgfile.is_file()
@@ -124,7 +124,7 @@ def test_JEDI_configuration_file_missing_base_file(caplog, driverobj):
 
 def test_JEDI_files_copied(driverobj):
     with patch.object(jedi_base, "filecopy") as filecopy:
-        driverobj._driver_config["run_dir"] = "/path/to/run"
+        driverobj._driver_config["rundir"] = "/path/to/run"
         driverobj.files_copied()
         assert filecopy.call_count == 2
         assert (
@@ -138,7 +138,7 @@ def test_JEDI_files_copied(driverobj):
 
 def test_JEDI_files_linked(driverobj):
     with patch.object(jedi_base, "symlink") as symlink:
-        driverobj._driver_config["run_dir"] = "/path/to/run"
+        driverobj._driver_config["rundir"] = "/path/to/run"
         driverobj.files_linked()
         assert symlink.call_count == 2
         assert (
@@ -151,7 +151,7 @@ def test_JEDI_files_linked(driverobj):
         )
 
 
-def test_JEDI_provisioned_run_directory(driverobj):
+def test_JEDI_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
         configuration_file=D,
@@ -160,7 +160,7 @@ def test_JEDI_provisioned_run_directory(driverobj):
         runscript=D,
         validate_only=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 
@@ -178,7 +178,7 @@ def test_JEDI_validate_only(caplog, driverobj):
             result = Mock(output="", success=True)
             run.return_value = result
             driverobj.validate_only()
-            cfgfile = Path(driverobj._driver_config["run_dir"]) / "jedi.yaml"
+            cfgfile = Path(driverobj._driver_config["rundir"]) / "jedi.yaml"
             cmds = [
                 "module load some-module",
                 "module load jedi-module",

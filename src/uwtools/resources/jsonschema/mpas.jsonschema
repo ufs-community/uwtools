@@ -65,7 +65,7 @@
           },
           "type": "object"
         },
-        "run_dir": {
+        "rundir": {
           "type": "string"
         },
         "streams": {
@@ -75,7 +75,7 @@
       "required": [
         "execution",
         "namelist",
-        "run_dir",
+        "rundir",
         "streams"
       ],
       "type": "object"

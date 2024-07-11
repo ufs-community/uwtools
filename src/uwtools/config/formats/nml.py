@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from io import StringIO
 from pathlib import Path
 from typing import Optional, Union
 
@@ -27,6 +28,27 @@ class NMLConfig(Config):
 
     # Private methods
 
+    @classmethod
+    def _dict_to_str(cls, cfg: dict) -> str:
+        """
+        Returns the field-table representation of the given dict.
+
+        :param cfg: A dict object.
+        """
+
+        def to_od(d):
+            return OrderedDict(
+                {key: to_od(val) if isinstance(val, dict) else val for key, val in d.items()}
+            )
+
+        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.nml)
+        nml: Namelist = Namelist(to_od(cfg)) if not isinstance(cfg, Namelist) else cfg
+        sio = StringIO()
+        nml.write(sio, sort=False)
+        s = sio.getvalue()
+        sio.close()
+        return s.strip()
+
     def _load(self, config_file: Optional[Path]) -> dict:
         """
         Reads and parses a Fortran namelist file.
@@ -49,24 +71,16 @@ class NMLConfig(Config):
         """
         self.dump_dict(cfg=self.data, path=path)
 
-    @staticmethod
-    def dump_dict(cfg: Union[dict, Namelist], path: Optional[Path] = None) -> None:
+    @classmethod
+    def dump_dict(cls, cfg: Union[dict, Namelist], path: Optional[Path] = None) -> None:
         """
         Dumps a provided config dictionary in Fortran namelist format.
 
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to.
         """
-
-        def to_od(d):
-            return OrderedDict(
-                {key: to_od(val) if isinstance(val, dict) else val for key, val in d.items()}
-            )
-
-        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.nml)
-        nml: Namelist = Namelist(to_od(cfg)) if not isinstance(cfg, Namelist) else cfg
         with writable(path) as f:
-            nml.write(f, sort=False)
+            print(cls._dict_to_str(cfg), file=f)
 
     @staticmethod
     def get_depth_threshold() -> Optional[int]:
