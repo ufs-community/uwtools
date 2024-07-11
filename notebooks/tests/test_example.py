@@ -1,4 +1,3 @@
-# test_example.py
 from testbook import testbook
 import os
 import yaml
