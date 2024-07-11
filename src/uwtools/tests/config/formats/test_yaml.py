@@ -167,11 +167,10 @@ def test_yaml_stdin_plus_relpath_failure(caplog):
     log.setLevel(logging.INFO)
     _stdinproxy.cache_clear()
     relpath = "../bar/baz.yaml"
-    with StringIO(f"foo: {support.INCLUDE_TAG} [{relpath}]") as sio, patch.object(
-        sys, "stdin", new=sio
-    ):
-        with raises(UWConfigError) as e:
-            YAMLConfig()
+    with StringIO(f"foo: {support.INCLUDE_TAG} [{relpath}]") as sio:
+        with patch.object(sys, "stdin", new=sio):
+            with raises(UWConfigError) as e:
+                YAMLConfig()
     msg = f"Reading from stdin, a relative path was encountered: {relpath}"
     assert msg in str(e.value)
     assert logged(caplog, msg)
