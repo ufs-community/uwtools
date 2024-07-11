@@ -18,7 +18,7 @@ from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.validator import get_schema_file, validate, validate_internal
+from uwtools.config.validator import get_schema_file, validate, validate_external, validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
@@ -37,6 +37,7 @@ class Assets(ABC):
         config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
+        schema_file: Optional[Path] = None,
     ) -> None:
         """
         A component driver.
@@ -57,7 +58,7 @@ class Assets(ABC):
         )
         for key in key_path or []:
             self._config = self._config[key]
-        self._validate()
+        self._validate(schema_file)
         dryrun(enable=dry_run)
 
     def __repr__(self) -> str:
@@ -206,12 +207,15 @@ class Assets(ABC):
         )
         return " ".join(filter(None, [timestr, self._driver_name, suffix]))
 
-    def _validate(self) -> None:
+    def _validate(self, schema_file: Optional[Path] = None) -> None:
         """
         Perform all necessary schema validation.
         """
         schema_name = self._driver_name.replace("_", "-")
-        validate_internal(schema_name=schema_name, config=self._config)
+        if schema_file:
+            validate_external(...)
+        else:
+            validate_internal(schema_name=schema_name, config=self._config)
 
 
 class AssetsCycleBased(Assets):
@@ -451,12 +455,15 @@ class Driver(Assets):
         """
         return JobScheduler.get_scheduler(self._resources)
 
-    def _validate(self) -> None:
+    def _validate(self, schema_file: Optional[Path] = None) -> None:
         """
         Perform all necessary schema validation.
         """
-        for schema_name in (self._driver_name.replace("_", "-"), "platform"):
-            validate_internal(schema_name=schema_name, config=self._config)
+        if schema_file:
+            validate_external(...)
+        else:
+            for schema_name in (self._driver_name.replace("_", "-"), "platform"):
+                validate_internal(schema_name=schema_name, config=self._config)
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
         """

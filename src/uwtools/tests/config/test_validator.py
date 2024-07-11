@@ -163,10 +163,10 @@ def test_validate_internal_ok(schema_file):
         validator.validate_internal(schema_name="a", config={"color": "blue"})
 
 
-def test_validate_yaml(assets, config, schema):
+def test_validate_external(assets, config, schema):
     schema_file, _, cfgobj = assets
     with patch.object(validator, "validate") as validate:
-        validator.validate_yaml(schema_file=schema_file, config=cfgobj)
+        validator.validate_external(schema_file=schema_file, config=cfgobj)
     validate.assert_called_once_with(schema=schema, config=config)
 
 
