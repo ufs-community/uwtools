@@ -1,7 +1,7 @@
 CHANNELS  = $(addprefix -c ,$(shell tr '\n' ' ' <$(RECIPE_DIR)/channels)) -c local
 METADEPS  = $(addprefix $(RECIPE_DIR)/,meta.yaml) src/uwtools/resources/info.json
 METAJSON  = $(RECIPE_DIR)/meta.json
-TARGETS   = clean-devenv devshell docs env format lint meta package test typecheck unittest test_notebooks
+TARGETS   = clean-devenv devshell docs env format lint meta package test test-notebooks typecheck unittest
 
 export RECIPE_DIR := $(shell cd ./recipe && pwd)
 
@@ -41,14 +41,14 @@ package: meta
 test:
 	recipe/run_test.sh
 
+test-notebooks:
+	recipe/run_test.sh notebooks
+
 typecheck:
 	recipe/run_test.sh typecheck
 
 unittest:
 	recipe/run_test.sh unittest
-
-test_notebooks:
-	recipe/run_test.sh notebooks
 
 $(METAJSON): $(METADEPS)
 	condev-meta
