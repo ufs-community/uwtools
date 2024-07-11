@@ -23,7 +23,7 @@ class CDEPS(AssetsCycleBased):
     @tasks
     def atm(self):
         """
-        It creates data atmosphere configuration with all required content.
+        Create data atmosphere configuration with all required content.
         """
         yield self._taskname("data atmosphere configuration")
         yield [
@@ -34,7 +34,7 @@ class CDEPS(AssetsCycleBased):
     @task
     def atm_nml(self):
         """
-        It creates data atmosphere Fortran namelist file (datm_in).
+        Create data atmosphere Fortran namelist file (datm_in).
         """
         fn = "datm_in"
         yield self._taskname(f"namelist file {fn}")
@@ -47,7 +47,7 @@ class CDEPS(AssetsCycleBased):
     @task
     def atm_stream(self):
         """
-        It creates data atmosphere stream config file (datm.streams).
+        Create data atmosphere stream config file (datm.streams).
         """
         fn = "datm.streams"
         yield self._taskname(f"namelist file {fn}")
@@ -60,7 +60,7 @@ class CDEPS(AssetsCycleBased):
     @tasks
     def ocn(self):
         """
-        It creates data ocean configuration with all required content.
+        Create data ocean configuration with all required content.
         """
         yield self._taskname("data atmosphere configuration")
         yield [
@@ -71,7 +71,7 @@ class CDEPS(AssetsCycleBased):
     @task
     def ocn_nml(self):
         """
-        It creates data ocean Fortran namelist file (docn_in).
+        Create data ocean Fortran namelist file (docn_in).
         """
         fn = "docn_in"
         yield self._taskname(f"namelist file {fn}")
@@ -84,7 +84,7 @@ class CDEPS(AssetsCycleBased):
     @task
     def ocn_stream(self):
         """
-        It creates data ocean stream config file (docn.streams).
+        Create data ocean stream config file (docn.streams).
         """
         fn = "docn.streams"
         yield self._taskname(f"namelist file {fn}")
@@ -104,17 +104,22 @@ class CDEPS(AssetsCycleBased):
         return STR.cdeps
 
     def _model_namelist_file(self, group: str, path: Path) -> None:
+        """
+        Create an atmosphere or ocean namelist file.
+
+        :param group: "atm_in" or "ocn_in".
+        :param path: Path to write namelist to.
+        """
         self._create_user_updated_config(
             config_class=NMLConfig, config_values=self._driver_config[group], path=path
         )
 
     def _model_stream_file(self, group: str, path: Path, template: str) -> None:
+        """
+        Create at atmosphere of ocean stream file, based on a template.
+
+        :param group: "atm_in" or "ocn_in".
+        :param path: Path to write namelist to.
+        :param template: Path to the template file to render.
+        """
         render(input_file=Path(template), output_file=path, values_src=self._driver_config[group])
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return "%s %s %s" % (self._cycle.strftime("%Y%m%d %HZ"), self._driver_name, suffix)
