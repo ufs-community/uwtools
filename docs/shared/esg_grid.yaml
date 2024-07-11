@@ -17,7 +17,7 @@ esg_grid:
         plat: 38.5
         plon: -97.5
     validate: true
-  run_dir: /path/to/esg_grid
+  rundir: /path/to/esg_grid
 platform:
   account: me
   scheduler: slurm

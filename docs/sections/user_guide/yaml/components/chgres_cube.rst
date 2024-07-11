@@ -23,11 +23,11 @@ See :ref:`this page <execution_yaml>` for details.
 namelist
 ^^^^^^^^
 
-Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). Namelist options are described :ufs-utils:`here<global-chgres-cube-namelist-options>`.
+Supports ``base_file:`` and ``update_values:`` blocks (see :ref:`updating_values` for details). Namelist options are described :ufs-utils:`here<global-chgres-cube-namelist-options>`.
 
 .. include:: /shared/validate_namelist.rst
 
-run_dir
-^^^^^^^
+rundir
+^^^^^^
 
 The path to the run directory.

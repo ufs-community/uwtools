@@ -2,4 +2,5 @@
 ======================
 
 .. automodule:: uwtools.api.ungrib
-    :members:
+   :inherited-members:
+   :members:

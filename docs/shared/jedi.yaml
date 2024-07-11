@@ -22,7 +22,7 @@ jedi:
   files_to_link:
     f3: /path/to/f3
     f4: d/f4
-  run_dir: /path/to/run
+  rundir: /path/to/run/dir
 platform:
   account: me
   scheduler: slurm

@@ -9,7 +9,7 @@ from collections.abc import Mapping
 from copy import deepcopy
 from dataclasses import dataclass, fields
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
@@ -21,14 +21,14 @@ class JobScheduler(ABC):
     An abstract class for interacting with HPC schedulers.
     """
 
-    def __init__(self, props: Dict[str, Any]):
+    def __init__(self, props: dict[str, Any]):
         self._props = {k: v for k, v in props.items() if k != "scheduler"}
         self._validate_props()
 
     # Public methods
 
     @property
-    def directives(self) -> List[str]:
+    def directives(self) -> list[str]:
         """
         Returns resource-request scheduler directives.
         """
@@ -90,7 +90,7 @@ class JobScheduler(ABC):
 
     @property
     @abstractmethod
-    def _managed_directives(self) -> Dict[str, Any]:
+    def _managed_directives(self) -> dict[str, Any]:
         """
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
@@ -103,7 +103,7 @@ class JobScheduler(ABC):
         """
 
     @property
-    def _processed_props(self) -> Dict[str, Any]:
+    def _processed_props(self) -> dict[str, Any]:
         """
         Pre-process directives before converting to runscript.
         """
@@ -143,7 +143,7 @@ class LSF(JobScheduler):
         return " "
 
     @property
-    def _managed_directives(self) -> Dict[str, Any]:
+    def _managed_directives(self) -> dict[str, Any]:
         """
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
@@ -168,7 +168,7 @@ class LSF(JobScheduler):
         return "#BSUB"
 
     @property
-    def _processed_props(self) -> Dict[str, Any]:
+    def _processed_props(self) -> dict[str, Any]:
         props = deepcopy(self._props)
         props[_DirectivesOptional.THREADS] = props.get(_DirectivesOptional.THREADS, 1)
         return props
@@ -194,7 +194,7 @@ class PBS(JobScheduler):
         return " "
 
     @property
-    def _managed_directives(self) -> Dict[str, Any]:
+    def _managed_directives(self) -> dict[str, Any]:
         """
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """
@@ -213,7 +213,7 @@ class PBS(JobScheduler):
         }
 
     @staticmethod
-    def _placement(items: Dict[str, Any]) -> Dict[str, Any]:
+    def _placement(items: dict[str, Any]) -> dict[str, Any]:
         """
         Placement logic.
         """
@@ -238,7 +238,7 @@ class PBS(JobScheduler):
         return "#PBS"
 
     @property
-    def _processed_props(self) -> Dict[str, Any]:
+    def _processed_props(self) -> dict[str, Any]:
         props = self._props
         props.update(self._select(props))
         props.update(self._placement(props))
@@ -251,7 +251,7 @@ class PBS(JobScheduler):
         props.pop("select", None)
         return dict(props)
 
-    def _select(self, items: Dict[str, Any]) -> Dict[str, Any]:
+    def _select(self, items: dict[str, Any]) -> dict[str, Any]:
         """
         Select logic.
         """
@@ -285,7 +285,7 @@ class Slurm(JobScheduler):
     """
 
     @property
-    def _managed_directives(self) -> Dict[str, Any]:
+    def _managed_directives(self) -> dict[str, Any]:
         """
         Returns a mapping from canonical names to scheduler-specific CLI switches.
         """

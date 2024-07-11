@@ -33,7 +33,15 @@ Its contents are described in section :ref:`make_hgrid_yaml`.
 
      $ uw make_hgrid run --config-file config.yaml
 
-  The driver creates a ``runscript.make_hgrid`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``make_hgrid``.
+  The driver creates a ``runscript.make_hgrid`` file in the directory specified by ``rundir:`` in the config and runs it, executing ``make_hgrid``.
+
+  An example runscript:
+
+  .. literalinclude:: make_hgrid/runscript.cmd
+     :language: text
+     :emphasize-lines: 5
+  .. literalinclude:: make_hgrid/runscript.out
+     :language: text
 
 * Run ``make_hgrid`` via a batch job
 
@@ -41,13 +49,7 @@ Its contents are described in section :ref:`make_hgrid_yaml`.
 
      $ uw make_hgrid run --config-file config.yaml --batch
 
-  The driver creates a ``runscript.make_hgrid`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``make_hgrid:``.
-
-  Looking at the run command in ``runscript.make_hgrid`` shows us the specified executable as well as the YAML keys converted to appropriate command line flags.
-
-  .. code-block:: text
-
-     time make_hgrid --grid_type gnomonic_ed --do_schmidt --great_circle_algorithm --grid_name C96_foo --halo 1 --nest_grids 1 --istart_nest 10 --iend_nest 87 --jstart_nest 19 --jend_nest 78 --nlon 192 --parent_tile 6 --refine_ratio 2 --stretch_factor 1.0001 --target_lon -97.5 --target_lat 38.5
+  The driver creates a ``runscript.make_hgrid`` file in the directory specified by ``rundir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``make_hgrid:``.
 
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 

@@ -4,7 +4,7 @@ API access to ``uwtools`` file-management tools.
 
 import datetime as dt
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from uwtools.file import FileCopier as _FileCopier
 from uwtools.file import FileLinker as _FileLinker
@@ -16,7 +16,7 @@ def copy(
     config: Optional[Union[dict, Path, str]] = None,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
-    keys: Optional[List[str]] = None,
+    keys: Optional[list[str]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> bool:
@@ -48,7 +48,7 @@ def link(
     config: Optional[Union[dict, Path, str]] = None,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
-    keys: Optional[List[str]] = None,
+    keys: Optional[list[str]] = None,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> bool:

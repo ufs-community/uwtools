@@ -3,36 +3,18 @@ A driver for orog_gsl.
 """
 
 from pathlib import Path
-from typing import List, Optional
 
 from iotaa import asset, task, tasks
 
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverTimeInvariant
 from uwtools.strings import STR
 from uwtools.utils.tasks import symlink
 
 
-class OrogGSL(Driver):
+class OrogGSL(DriverTimeInvariant):
     """
     A driver for orog_gsl.
     """
-
-    def __init__(
-        self,
-        config: Optional[Path] = None,
-        dry_run: bool = False,
-        batch: bool = False,
-        key_path: Optional[List[str]] = None,
-    ):
-        """
-        The driver.
-
-        :param config: Path to config file (read stdin if missing or None).
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
-        super().__init__(config=config, dry_run=dry_run, batch=batch, key_path=key_path)
 
     # Workflow tasks
 
@@ -45,13 +27,13 @@ class OrogGSL(Driver):
             self._driver_config["config"][k] for k in ["resolution", "tile", "halo"]
         )
         src = Path(self._driver_config["config"]["input_grid_file"])
-        dst = Path(self._driver_config["run_dir"]) / fn
+        dst = Path(self._driver_config["rundir"]) / fn
         yield self._taskname("Input grid")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
 
     @tasks
-    def provisioned_run_directory(self):
+    def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
         """
@@ -64,24 +46,13 @@ class OrogGSL(Driver):
         ]
 
     @task
-    def runscript(self):
-        """
-        The runscript.
-        """
-        path = self._runscript_path
-        yield self._taskname(path.name)
-        yield asset(path, path.is_file)
-        yield None
-        self._write_runscript(path)
-
-    @task
     def topo_data_2p5m(self):
         """
         Global topographic data on 2.5-minute lat-lon grid.
         """
         fn = "geo_em.d01.lat-lon.2.5m.HGT_M.nc"
         src = Path(self._driver_config["config"]["topo_data_2p5m"])
-        dst = Path(self._driver_config["run_dir"]) / fn
+        dst = Path(self._driver_config["rundir"]) / fn
         yield self._taskname("Input grid")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)
@@ -93,7 +64,7 @@ class OrogGSL(Driver):
         """
         fn = "HGT.Beljaars_filtered.lat-lon.30s_res.nc"
         src = Path(self._driver_config["config"]["topo_data_30s"])
-        dst = Path(self._driver_config["run_dir"]) / fn
+        dst = Path(self._driver_config["rundir"]) / fn
         yield self._taskname("Input grid")
         yield asset(dst, dst.is_file)
         yield symlink(target=src, linkname=dst)

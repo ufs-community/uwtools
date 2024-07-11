@@ -7,9 +7,10 @@ from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 import yaml
-from pytest import fixture
+from pytest import fixture, mark
 
-from uwtools.drivers import ww3
+from uwtools.drivers.driver import AssetsCycleBased
+from uwtools.drivers.ww3 import WaveWatchIII
 
 # Fixtures
 
@@ -24,7 +25,7 @@ def config(tmp_path):
                     "input_forcing_winds": "C",
                 },
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
         },
     }
 
@@ -36,14 +37,22 @@ def cycle():
 
 @fixture
 def driverobj(config, cycle):
-    return ww3.WaveWatchIII(config=config, cycle=cycle, batch=True)
+    return WaveWatchIII(config=config, cycle=cycle)
 
 
 # Tests
 
 
-def test_WaveWatchIII(driverobj):
-    assert isinstance(driverobj, ww3.WaveWatchIII)
+@mark.parametrize(
+    "method",
+    [
+        "_driver_config",
+        "_taskname",
+        "_validate",
+    ],
+)
+def test_WaveWatchIII(method):
+    assert getattr(WaveWatchIII, method) is getattr(AssetsCycleBased, method)
 
 
 def test_WaveWatchIII_namelist_file(driverobj):
@@ -56,13 +65,13 @@ def test_WaveWatchIII_namelist_file(driverobj):
     assert dst.is_file()
 
 
-def test_WaveWatchIII_provisioned_run_directory(driverobj):
+def test_WaveWatchIII_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
         namelist_file=D,
         restart_directory=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 
@@ -74,9 +83,5 @@ def test_WaveWatchIII_restart_directory(driverobj):
     assert path.is_dir()
 
 
-def test_WaveWatchIII__driver_config(driverobj):
-    assert driverobj._driver_config == driverobj._config["ww3"]
-
-
-def test_WaveWatchIII__validate(driverobj):
-    driverobj._validate()
+def test_WaveWatchIII__driver_name(driverobj):
+    assert driverobj._driver_name == "ww3"

@@ -2,4 +2,5 @@
 ========================
 
 .. automodule:: uwtools.api.orog_gsl
-    :members:
+   :inherited-members:
+   :members:

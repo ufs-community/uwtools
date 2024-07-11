@@ -33,7 +33,7 @@ Its contents are described in section :ref:`orog_gsl_yaml`.
 
      $ uw orog_gsl run --config-file config.yaml
 
-  The driver creates a ``runscript.orog_gsl`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``orog_gsl``.
+  The driver creates a ``runscript.orog_gsl`` file in the directory specified by ``rundir:`` in the config and runs it, executing ``orog_gsl``.
 
 * Run ``orog_gsl`` via a batch job
 
@@ -41,13 +41,7 @@ Its contents are described in section :ref:`orog_gsl_yaml`.
 
      $ uw orog_gsl run --config-file config.yaml --batch
 
-  The driver creates a ``runscript.orog_gsl`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``orog_gsl:``.
-
-  Looking at the run command in ``runscript.orog_gsl`` shows us the specified executable as well as the YAML keys converted to appropriate command line flags.
-
-  .. code-block:: text
-
-     time orog_gsl --num_tiles 1 --dir /path/to/grid/ --tile_file C403_grid.tile7.halo6.nc --periodx 360 --periody 360
+  The driver creates a ``runscript.orog_gsl`` file in the directory specified by ``rundir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``orog_gsl:``.
 
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 

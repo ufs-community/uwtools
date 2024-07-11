@@ -11,9 +11,8 @@ from textwrap import dedent
 from unittest.mock import patch
 
 import f90nml  # type: ignore
-import pytest
 import yaml
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config import tools
 from uwtools.config.formats.ini import INIConfig
@@ -345,6 +344,16 @@ def test_realize_config_remove_yaml_to_yaml_subtree(tmp_path):
         update_config=update_config,
         output_format=FORMAT.yaml,
     )
+
+
+def test_realize_config_scalar_value(capsys):
+    stdinproxy.cache_clear()
+    tools.realize_config(
+        input_config=YAMLConfig(config={"foo": {"bar": "baz"}}),
+        output_format="yaml",
+        key_path=["foo", "bar"],
+    )
+    assert capsys.readouterr().out.strip() == "baz"
 
 
 def test_realize_config_simple_ini(tmp_path):
@@ -816,8 +825,8 @@ def test__realize_config_values_needed_negative_results(caplog, tmp_path):
     assert "No keys have unrendered Jinja2 variables/expressions." in msgs
 
 
-@pytest.mark.parametrize("input_fmt", FORMAT.extensions())
-@pytest.mark.parametrize("other_fmt", FORMAT.extensions())
+@mark.parametrize("input_fmt", FORMAT.extensions())
+@mark.parametrize("other_fmt", FORMAT.extensions())
 def test__validate_format(input_fmt, other_fmt):
     call = lambda: tools._validate_format(
         other_fmt_desc="other", other_fmt=other_fmt, input_fmt=input_fmt

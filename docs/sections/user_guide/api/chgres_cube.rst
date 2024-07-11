@@ -2,4 +2,5 @@
 ===========================
 
 .. automodule:: uwtools.api.chgres_cube
-    :members:
+   :inherited-members:
+   :members:

@@ -2,47 +2,23 @@
 A driver for the FV3 model.
 """
 
-from datetime import datetime
 from pathlib import Path
 from shutil import copy
-from typing import List, Optional
 
 from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverCycleBased
 from uwtools.logging import log
 from uwtools.strings import STR
 from uwtools.utils.tasks import file, filecopy, symlink
 
 
-class FV3(Driver):
+class FV3(DriverCycleBased):
     """
     A driver for the FV3 model.
     """
-
-    def __init__(
-        self,
-        cycle: datetime,
-        config: Optional[Path] = None,
-        dry_run: bool = False,
-        batch: bool = False,
-        key_path: Optional[List[str]] = None,
-    ):
-        """
-        The driver.
-
-        :param cycle: The cycle.
-        :param config: Path to config file (read stdin if missing or None).
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
-        super().__init__(
-            config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
-        )
-        self._cycle = cycle
 
     # Workflow tasks
 
@@ -151,7 +127,7 @@ class FV3(Driver):
         )
 
     @tasks
-    def provisioned_run_directory(self):
+    def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
         """
@@ -207,11 +183,3 @@ class FV3(Driver):
         Returns the name of this driver.
         """
         return STR.fv3
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return self._taskname_with_cycle(self._cycle, suffix)

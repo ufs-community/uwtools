@@ -42,7 +42,7 @@ mpas:
       nhyd_model:
         config_dt: 60
     validate: true
-  run_dir: /path/to/run/directory
+  rundir: /path/to/run/directory
   streams:
     input:
       filename_template: conus.init.nc

@@ -4,8 +4,8 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
 import yaml
+from pytest import mark
 
 from uwtools.api import config
 from uwtools.config.formats.yaml import YAMLConfig
@@ -29,7 +29,7 @@ def test_compare():
     )
 
 
-@pytest.mark.parametrize(
+@mark.parametrize(
     "classname,f",
     [
         ("_FieldTableConfig", config.get_fieldtable_config),
@@ -88,7 +88,7 @@ def test_realize_to_dict():
     )
 
 
-@pytest.mark.parametrize("cfg", [{"foo": "bar"}, YAMLConfig(config={})])
+@mark.parametrize("cfg", [{"foo": "bar"}, YAMLConfig(config={})])
 def test_validate(cfg):
     kwargs: dict = {"schema_file": "schema-file", "config": cfg}
     with patch.object(config, "_validate_yaml", return_value=True) as _validate_yaml:

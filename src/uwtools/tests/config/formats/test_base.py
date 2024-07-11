@@ -7,9 +7,8 @@ import logging
 import os
 from unittest.mock import patch
 
-import pytest
 import yaml
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config import tools
 from uwtools.config.formats.base import Config
@@ -40,6 +39,10 @@ class ConcreteConfig(Config):
     Config subclass for testing purposes.
     """
 
+    @classmethod
+    def _dict_to_str(cls, cfg):
+        pass
+
     def _load(self, config_file):
         with readable(config_file) as f:
             return yaml.safe_load(f.read())
@@ -63,11 +66,6 @@ class ConcreteConfig(Config):
 # Tests
 
 
-def test___repr__(capsys, config):
-    print(config)
-    assert yaml.safe_load(capsys.readouterr().out)["foo"] == 88
-
-
 def test__load_paths(config, tmp_path):
     paths = (tmp_path / fn for fn in ("f1", "f2"))
     for path in paths:
@@ -85,7 +83,7 @@ def test_characterize_values(config):
     assert template == ["  p3: {{ n }}"]
 
 
-@pytest.mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
+@mark.parametrize("fmt", [FORMAT.ini, FORMAT.nml, FORMAT.yaml])
 def test_compare_config(caplog, fmt, salad_base):
     """
     Compare two config objects.
@@ -165,7 +163,7 @@ def test_derefernce_context_override(tmp_path):
     assert config["file"] == "gfs.t06z.atmanl.nc"
 
 
-@pytest.mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
+@mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
 def test_invalid_config(fmt2, tmp_path):
     """
     Test that invalid config files will error when attempting to dump.

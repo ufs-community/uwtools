@@ -2,44 +2,20 @@
 A driver for chgres_cube.
 """
 
-from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
 
 from iotaa import asset, task, tasks
 
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.drivers.driver import Driver
+from uwtools.drivers.driver import DriverCycleBased
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
 
-class ChgresCube(Driver):
+class ChgresCube(DriverCycleBased):
     """
     A driver for chgres_cube.
     """
-
-    def __init__(
-        self,
-        cycle: datetime,
-        config: Optional[Path] = None,
-        dry_run: bool = False,
-        batch: bool = False,
-        key_path: Optional[List[str]] = None,
-    ):
-        """
-        The driver.
-
-        :param cycle: The cycle.
-        :param config: Path to config file (read stdin if missing or None).
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
-        super().__init__(
-            config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
-        )
-        self._cycle = cycle
 
     # Workflow tasks
 
@@ -59,6 +35,7 @@ class ChgresCube(Driver):
         ] + [
             Path(config_files["data_dir_input_grid"]) / config_files[k]
             for k in ("atm_files_input_grid", "grib2_file_input_grid", "sfc_files_input_grid")
+            if k in config_files
         ]
         base_file = self._driver_config["namelist"].get("base_file")
         yield [file(input_path) for input_path in input_paths] + (
@@ -72,7 +49,7 @@ class ChgresCube(Driver):
         )
 
     @tasks
-    def provisioned_run_directory(self):
+    def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
         """
@@ -106,11 +83,3 @@ class ChgresCube(Driver):
         Returns the name of this driver.
         """
         return STR.chgrescube
-
-    def _taskname(self, suffix: str) -> str:
-        """
-        Returns a common tag for graph-task log messages.
-
-        :param suffix: Log-string suffix.
-        """
-        return self._taskname_with_cycle(self._cycle, suffix)

@@ -4,7 +4,7 @@ Support for validating a config using JSON Schema.
 
 import json
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from jsonschema import Draft202012Validator
 from jsonschema.exceptions import ValidationError
@@ -95,7 +95,7 @@ def _prep_config(config: Union[dict, YAMLConfig, Optional[Path]]) -> YAMLConfig:
     return cfgobj
 
 
-def _validation_errors(config: Union[dict, list], schema: dict) -> List[ValidationError]:
+def _validation_errors(config: Union[dict, list], schema: dict) -> list[ValidationError]:
     """
     Identify schema-validation errors.
 

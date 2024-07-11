@@ -70,16 +70,16 @@ The length of the forecast in integer hours.
 model_configure:
 ^^^^^^^^^^^^^^^^
 
-Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<model-configure-file>`.
+Supports ``base_file:`` and ``update_values:`` blocks (see :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<model-configure-file>`.
 
 namelist:
 ^^^^^^^^^
 
-Supports ``base_file:`` and ``update_values:`` blocks (see the :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<namelist-file-input-nml>`.
+Supports ``base_file:`` and ``update_values:`` blocks (see :ref:`updating_values` for details). See FV3 ``model_configure`` documentation :weather-model-io:`here<namelist-file-input-nml>`.
 
 .. include:: /shared/validate_namelist.rst
 
-run_dir:
-^^^^^^^^
+rundir:
+^^^^^^^
 
 The path to the run directory.
