@@ -40,12 +40,10 @@ class INIConfig(Config):
 
         config_check_depths_dump(config_obj=cfg, target_format=FORMAT.ini)
         parser = configparser.ConfigParser()
-        sio = StringIO()
         parser.read_dict(cfg)
-        parser.write(sio)
-        s = sio.getvalue().strip()
-        sio.close()
-        return s
+        with StringIO() as sio:
+            parser.write(sio)
+            return sio.getvalue().strip()
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """
