@@ -277,6 +277,27 @@
                     },
                     "model_maskfile": {
                       "type": "string"
+                    },
+                    "model_meshfile": {
+                      "type": "string"
+                    },
+                    "nx_global": {
+                      "type": "integer"
+                    },
+                    "ny_global": {
+                      "type": "integer"
+                    },
+                    "restfilm": {
+                      "type": "string"
+                    },
+                    "sst_constant_value": {
+                      "type": "number"
+                    },
+                    "skip_restart_read": {
+                      "type": "boolean"
+                    },
+                    "import_data_fields": {
+                      "type": "string"
                     }
                   },
                   "type": "object"
