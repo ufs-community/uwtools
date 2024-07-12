@@ -246,6 +246,10 @@ def test_Assets__validate(assetsobj):
         }
 
 
+def test_Assets__validate_external(assetsobj):
+    pass
+
+
 # Driver Tests
 
 
@@ -492,6 +496,10 @@ def test_Driver__validate(assetsobj):
             "schema_name": "platform",
             "config": assetsobj._config,
         }
+
+
+def test_Driver__validate_external(assetsobj):
+    pass
 
 
 def test_Driver__write_runscript(driverobj):
