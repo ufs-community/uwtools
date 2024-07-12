@@ -528,16 +528,16 @@ class Test_J2Template:
     def test_searchpath_stdin_default(self, searchpath_assets):
         # There is no default search path for reads from stdin:
         a = searchpath_assets
-        with patch.object(jinja2, "readable") as readable:
-            readable.return_value.__enter__.return_value = StringIO(a.s1)
+        with patch.object(jinja2, "readable") as readable, StringIO(a.s1) as sio:
+            readable.return_value.__enter__.return_value = sio
             with raises(TemplateNotFound):
                 J2Template(values={}).render()
 
     def test_searchpath_stdin_explicit(self, searchpath_assets):
         # An explicit search path is honored when reading from stdin:
         a = searchpath_assets
-        with patch.object(jinja2, "readable") as readable:
-            readable.return_value.__enter__.return_value = StringIO(a.s1)
+        with patch.object(jinja2, "readable") as readable, StringIO(a.s1) as sio:
+            readable.return_value.__enter__.return_value = sio
             assert J2Template(values={}, searchpath=[a.d1]).render() == "2"
 
     def test_undeclared_variables(self):

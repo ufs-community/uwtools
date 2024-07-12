@@ -8,11 +8,11 @@ import sys
 _CLASSNAMES = [
     "Assets",
     "AssetsCycleBased",
-    "AssetsCycleAndLeadtimeBased",
+    "AssetsCycleLeadtimeBased",
     "AssetsTimeInvariant",
     "Driver",
     "DriverCycleBased",
-    "DriverCycleAndLeadtimeBased",
+    "DriverCycleLeadtimeBased",
     "DriverTimeInvariant",
 ]
 
