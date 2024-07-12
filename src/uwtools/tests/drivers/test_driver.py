@@ -10,6 +10,7 @@ import json
 import logging
 from pathlib import Path
 from textwrap import dedent
+from typing import Optional
 from unittest.mock import Mock, PropertyMock, patch
 
 import yaml
@@ -42,7 +43,7 @@ class Common:
     def _driver_name(self) -> str:
         return "concrete"
 
-    def _validate(self) -> None:
+    def _validate(self, schema_file: Optional[Path] = None) -> None:
         pass
 
 

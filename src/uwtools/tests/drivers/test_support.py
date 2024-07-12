@@ -2,6 +2,9 @@
 """
 Tests for uwtools.drivers.support module.
 """
+from pathlib import Path
+from typing import Optional
+
 from iotaa import asset, external, task, tasks
 
 from uwtools.drivers import support
@@ -48,7 +51,7 @@ def test_graph():
         def _taskname(self, suffix):
             pass
 
-        def _validate(self):
+        def _validate(self, schema_file: Optional[Path] = None):
             pass
 
     assert support.tasks(SomeDriver) == {

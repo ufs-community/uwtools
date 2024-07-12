@@ -213,7 +213,7 @@ class Assets(ABC):
         """
         schema_name = self._driver_name.replace("_", "-")
         if schema_file:
-            validate_external(...)
+            validate_external(schema_file=schema_file, config=self._config)
         else:
             validate_internal(schema_name=schema_name, config=self._config)
 
@@ -460,7 +460,7 @@ class Driver(Assets):
         Perform all necessary schema validation.
         """
         if schema_file:
-            validate_external(...)
+            validate_external(schema_file=schema_file, config=self._config)
         else:
             for schema_name in (self._driver_name.replace("_", "-"), "platform"):
                 validate_internal(schema_name=schema_name, config=self._config)
