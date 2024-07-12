@@ -47,6 +47,7 @@ class Assets(ABC):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
+        :param schema_file: Path to schema file to use for validation.
         """
         self._config = YAMLConfig(config=config)
         self._config.dereference(
@@ -229,6 +230,7 @@ class AssetsCycleBased(Assets):
         config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
+        schema_file: Optional[Path] = None,
     ):
         """
         The driver.
@@ -237,8 +239,15 @@ class AssetsCycleBased(Assets):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
+        :param schema_file: Path to schema file to use for validation.
         """
-        super().__init__(cycle=cycle, config=config, dry_run=dry_run, key_path=key_path)
+        super().__init__(
+            cycle=cycle,
+            config=config,
+            dry_run=dry_run,
+            key_path=key_path,
+            schema_file=schema_file,
+        )
         self._cycle = cycle
 
 
@@ -254,6 +263,7 @@ class AssetsCycleAndLeadtimeBased(Assets):
         config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
+        schema_file: Optional[Path] = None,
     ):
         """
         The driver.
@@ -263,9 +273,15 @@ class AssetsCycleAndLeadtimeBased(Assets):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
+        :param schema_file: Path to schema file to use for validation.
         """
         super().__init__(
-            cycle=cycle, leadtime=leadtime, config=config, dry_run=dry_run, key_path=key_path
+            cycle=cycle,
+            leadtime=leadtime,
+            config=config,
+            dry_run=dry_run,
+            key_path=key_path,
+            schema_file=schema_file,
         )
         self._cycle = cycle
         self._leadtime = leadtime
@@ -281,6 +297,7 @@ class AssetsTimeInvariant(Assets):
         config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
+        schema_file: Optional[Path] = None,
     ):
         """
         The driver.
@@ -288,8 +305,14 @@ class AssetsTimeInvariant(Assets):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
+        :param schema_file: Path to schema file to use for validation.
         """
-        super().__init__(config=config, dry_run=dry_run, key_path=key_path)
+        super().__init__(
+            config=config,
+            dry_run=dry_run,
+            key_path=key_path,
+            schema_file=schema_file,
+        )
 
 
 class Driver(Assets):
@@ -305,6 +328,7 @@ class Driver(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
+        schema_file: Optional[Path] = None,
     ):
         """
         The driver.
@@ -315,9 +339,15 @@ class Driver(Assets):
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
         :param batch: Run component via the batch system?
+        :param schema_file: Path to schema file to use for validation.
         """
         super().__init__(
-            cycle=cycle, leadtime=leadtime, config=config, dry_run=dry_run, key_path=key_path
+            cycle=cycle,
+            leadtime=leadtime,
+            config=config,
+            dry_run=dry_run,
+            key_path=key_path,
+            schema_file=schema_file,
         )
         self._batch = batch
 
@@ -496,6 +526,7 @@ class DriverCycleBased(Driver):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
+        schema_file: Optional[Path] = None,
     ):
         """
         The driver.
@@ -505,9 +536,15 @@ class DriverCycleBased(Driver):
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
         :param batch: Run component via the batch system?
+        :param schema_file: Path to schema file to use for validation.
         """
         super().__init__(
-            cycle=cycle, config=config, dry_run=dry_run, key_path=key_path, batch=batch
+            cycle=cycle,
+            config=config,
+            dry_run=dry_run,
+            key_path=key_path,
+            batch=batch,
+            schema_file=schema_file,
         )
         self._cycle = cycle
 
@@ -525,6 +562,7 @@ class DriverCycleAndLeadtimeBased(Driver):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
+        schema_file: Optional[Path] = None,
     ):
         """
         The driver.
@@ -535,6 +573,7 @@ class DriverCycleAndLeadtimeBased(Driver):
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
         :param batch: Run component via the batch system?
+        :param schema_file: Path to schema file to use for validation.
         """
         super().__init__(
             cycle=cycle,
@@ -543,6 +582,7 @@ class DriverCycleAndLeadtimeBased(Driver):
             dry_run=dry_run,
             key_path=key_path,
             batch=batch,
+            schema_file=schema_file,
         )
         self._cycle = cycle
         self._leadtime = leadtime
@@ -559,6 +599,7 @@ class DriverTimeInvariant(Driver):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
+        schema_file: Optional[Path] = None,
     ):
         """
         The driver.
@@ -567,8 +608,15 @@ class DriverTimeInvariant(Driver):
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
         :param batch: Run component via the batch system?
+        :param schema_file: Path to schema file to use for validation.
         """
-        super().__init__(config=config, dry_run=dry_run, key_path=key_path, batch=batch)
+        super().__init__(
+            config=config,
+            dry_run=dry_run,
+            key_path=key_path,
+            batch=batch,
+            schema_file=schema_file,
+        )
 
 
 DriverT = Union[type[Assets], type[Driver]]
