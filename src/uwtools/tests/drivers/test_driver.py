@@ -236,7 +236,7 @@ def test_Assets__rundir(assetsobj):
     assert assetsobj._rundir == Path(assetsobj._driver_config["rundir"])
 
 
-def test_Assets__validate(assetsobj):
+def test_Assets__validate_internal(assetsobj):
     with patch.object(assetsobj, "_validate", driver.Assets._validate):
         with patch.object(driver, "validate_internal") as validate_internal:
             assetsobj._validate(assetsobj)
@@ -246,8 +246,15 @@ def test_Assets__validate(assetsobj):
         }
 
 
-def test_Assets__validate_external(assetsobj):
-    pass
+def test_Assets__validate_external(config):
+    schema_file = "/path/to/jsonschema"
+    with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
+        with patch.object(driver, "validate_external") as validate_external: 
+            assetsobj = ConcreteAssetsTimeInvariant(schema_file=schema_file, config=config)
+        assert validate_external.call_args_list[0].kwargs == {
+            "schema_file": schema_file,
+            "config": assetsobj._config,
+        }
 
 
 # Driver Tests
@@ -496,10 +503,6 @@ def test_Driver__validate(assetsobj):
             "schema_name": "platform",
             "config": assetsobj._config,
         }
-
-
-def test_Driver__validate_external(assetsobj):
-    pass
 
 
 def test_Driver__write_runscript(driverobj):
