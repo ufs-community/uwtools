@@ -71,10 +71,10 @@ This tool helps transform legacy configuration files templated with the atparse 
 
 | :any:`CLI documentation with examples<cli_template_translate_examples>`
 
-File Moving
-^^^^^^^^^^^
+File Provisioning
+^^^^^^^^^^^^^^^^^
 
-This tool helps users define the source and location of files to be copied or linked in the same UW YAML language used by UW drivers.
+This tool helps users define the source and destination of files to be copied or linked, in the same UW YAML language used by UW drivers.
 
 | :any:`CLI documentation with examples<cli_file_copy_examples>`
 
