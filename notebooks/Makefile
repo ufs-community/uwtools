@@ -1,4 +1,4 @@
-TARGETS = testbook
+TARGETS = test-nb
 
 .PHONY: $(TARGETS)
 
