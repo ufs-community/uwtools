@@ -1,0 +1,1 @@
+conda install -q -y nb_conda_kernels testbook
