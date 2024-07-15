@@ -3,9 +3,8 @@ import os
 import yaml
 from testbook import testbook
 
-
-# Run the YAML config section of the notebook.
-@testbook("./example.ipynb", execute=range(0, 4))
+# Run all cells of the example notebook.
+@testbook("./example.ipynb", execute=True)
 def test_get_yaml_config(tb):
 
     # Check output text of the cell that prints the YAMLconfig object.
@@ -30,8 +29,8 @@ def test_template_render():
     if os.path.exists(rendered_path):
         os.remove(rendered_path)
 
-    # Run the template rendering section of the notebook.
-    with testbook("./example.ipynb", execute=range(4, 14)) as tb:
+    # Run all cells of the example notebook.
+    with testbook("./example.ipynb", execute=True) as tb:
 
         # Check output text of cells with %%bash cell magics.
         assert (
