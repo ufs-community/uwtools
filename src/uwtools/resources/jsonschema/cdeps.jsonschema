@@ -112,9 +112,6 @@
           },
           "type": "object"
         },
-        "execution": {
-          "$ref": "urn:uwtools:execution"
-        },
         "ocn_in": {
           "additionalProperties": false,
           "anyOf": [
