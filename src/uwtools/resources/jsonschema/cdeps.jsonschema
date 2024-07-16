@@ -5,6 +5,7 @@
       "minProperties": 1,
       "patternProperties": {
         "stream0[1-9]": {
+          "additionalProperties": false,
           "properties": {
             "dtlimit": {
               "type": "number"
@@ -29,7 +30,7 @@
               },
               "type": "array"
             },
-            "stream_lev_dirname": {
+            "stream_lev_dimname": {
               "type": "string"
             },
             "stream_mesh_file": {
