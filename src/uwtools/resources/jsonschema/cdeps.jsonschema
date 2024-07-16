@@ -1,10 +1,10 @@
 {
   "$defs": {
     "streams": {
-      "additonalProperties": false,
+      "additionalProperties": false,
       "minProperties": 1,
       "patternProperties": {
-        "stream0[1-9]": {
+        "^stream0[1-9]$": {
           "additionalProperties": false,
           "properties": {
             "dtlimit": {
@@ -197,7 +197,7 @@
           "type": "object"
         },
         "atm_streams": {
-          "additonalProperties": false,
+          "additionalProperties": false,
           "properties": {
             "streams": {
               "$ref": "#/$defs/streams"
@@ -282,7 +282,7 @@
           "type": "object"
         },
         "ocn_streams": {
-          "additonalProperties": false,
+          "additionalProperties": false,
           "properties": {
             "streams": {
               "$ref": "#/$defs/streams"
