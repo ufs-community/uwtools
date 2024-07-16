@@ -1,4 +1,87 @@
 {
+  "$defs": {
+    "streams": {
+      "additonalProperties": false,
+      "minProperties": 1,
+      "patternProperties": {
+        "stream0[1-9]": {
+          "properties": {
+            "dtlimit": {
+              "type": "number"
+            },
+            "mapalgo": {
+              "type": "string"
+            },
+            "readmdoe": {
+              "enum": [
+                "single"
+              ]
+            },
+            "stream_data_files": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "stream_data_variables": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "stream_lev_dirname": {
+              "type": "string"
+            },
+            "stream_mesh_file": {
+              "type": "string"
+            },
+            "stream_offset": {
+              "type": "integer"
+            },
+            "stream_vectors": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "taxmode": {
+              "type": "string"
+            },
+            "tinterpalgo": {
+              "type": "string"
+            },
+            "yearAlign": {
+              "type": "integer"
+            },
+            "yearFirst": {
+              "type": "integer"
+            },
+            "yearLast": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "dtlimit",
+            "mapalgo",
+            "readmode",
+            "stream_data_files",
+            "stream_data_variables",
+            "stream_lev_dimname",
+            "stream_mesh_file",
+            "stream_offset",
+            "stream_vectors",
+            "taxmode",
+            "tinterpalgo",
+            "yearAlign",
+            "yearFirst",
+            "yearLast"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  },
   "properties": {
     "cdeps": {
       "additionalProperties": false,
@@ -116,79 +199,7 @@
           "additonalProperties": false,
           "properties": {
             "streams": {
-              "additonalProperties": false,
-              "minProperties": 1,
-              "patternProperties": {
-                "stream0[1-9]": {
-                  "properties": {
-                    "dtlimit": {
-                      "type": "number"
-                    },
-                    "mapalgo": {
-                      "type": "string"
-                    },
-                    "readmdoe": {
-                      "enum": [
-                        "single"
-                      ]
-                    },
-                    "stream_data_files": {
-                      "type": "string"
-                    },
-                    "stream_data_variables": {
-                      "type": "string"
-                    },
-                    "stream_lev_dirname": {
-                      "type": "string"
-                    },
-                    "stream_mesh_file": {
-                      "type": "string"
-                    },
-                    "stream_offset": {
-                      "type": "integer"
-                    },
-                    "stream_vectors": {
-                      "items": {
-                        "type": "string"
-                      },
-                      "type": "array"
-                    },
-                    "taxmode": {
-                      "type": "string"
-                    },
-                    "tinterpalgo": {
-                      "type": "string"
-                    },
-                    "yearAlign": {
-                      "type": "integer"
-                    },
-                    "yearFirst": {
-                      "type": "integer"
-                    },
-                    "yearLast": {
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "dtlimit",
-                    "mapalgo",
-                    "readmode",
-                    "stream_data_files",
-                    "stream_data_variables",
-                    "stream_lev_dimname",
-                    "stream_mesh_file",
-                    "stream_offset",
-                    "stream_vectors",
-                    "taxmode",
-                    "tinterpalgo",
-                    "yearAlign",
-                    "yearFirst",
-                    "yearLast"
-                  ],
-                  "type": "object"
-                }
-              },
-              "type": "object"
+              "$ref": "#/$defs/streams"
             },
             "template_file": {
               "type": "string"
@@ -267,6 +278,22 @@
               "type": "object"
             }
           },
+          "type": "object"
+        },
+        "ocn_streams": {
+          "additonalProperties": false,
+          "properties": {
+            "streams": {
+              "$ref": "#/$defs/streams"
+            },
+            "template_file": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "streams",
+            "template_file"
+          ],
           "type": "object"
         }
       }
