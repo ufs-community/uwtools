@@ -147,8 +147,9 @@ def ww3_prop():
 # cdeps
 
 
-def test_schema_cdeps():
-    config = {
+@fixture
+def cdeps_config():
+    return {
         "atm_in": {
             "base_file": "/path/to/atm.nml",
             "update_values": {
@@ -233,31 +234,72 @@ def test_schema_cdeps():
             "template_file": "/path/to/atm.jinja2",
         },
     }
+
+
+def test_schema_cdeps(cdeps_config):
     errors = schema_validator("cdeps", "properties", "cdeps")
     # Basic correctness:
-    assert not errors(config)
+    assert not errors(cdeps_config)
+    # All top-level keys are optional:
+    for key in ["atm_in", "atm_streams", "ocn_in", "ocn_streams"]:
+        assert not errors(with_del(cdeps_config, key))
+    # Additional top-level keys are not allowed:
+    assert "Additional properties are not allowed" in errors(with_set(cdeps_config, "bar", "foo"))
 
 
-#     # # All config keys are requried:
-# # for key in ["halo", "input_grid_file", "resolution", "tile", "topo_data_2p5m", "topo_data_30s"]:
-#     #     assert f"'{key}' is a required property" in errors(with_del(config, "config", key))
-#     # # Other config keys are not allowed:
-#     # assert "Additional properties are not allowed" in errors(
-#     #     with_set(config, "bar", "config", "foo")
-#     # )
-#     # # Some config keys require integer values:
-#     # for key in ["halo", "resolution", "tile"]:
-#     #     assert "is not of type 'integer'" in errors(with_set(config, None, "config", key))
-#     # # Some config keys require string values:
-#     # for key in ["input_grid_file", "topo_data_2p5m", "topo_data_30s"]:
-#     #     assert "is not of type 'string'" in errors(with_set(config, None, "config", key))
-#     # # Some top level keys are required:
-#     # for key in ["config", "execution", "rundir"]:
-#     #     assert f"'{key}' is a required property" in errors(with_del(config, key))
-#     # # Other top-level keys are not allowed:
-#     # assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
-#     # # Top-level rundir key requires a string value:
-#     # assert "is not of type 'string'" in errors(with_set(config, None, "rundir"))
+def test_schema_cdeps_atm_in(cdeps_config):
+    block = cdeps_config["atm_in"]
+    errors = schema_validator("cdeps", "properties", "cdeps", "properties", "atm_in")
+    # Either base_file or update_values is sufficient:
+    for k in ["base_file", "update_values"]:
+        assert not errors(with_del(block, k))
+    # At least one is required:
+    assert "is not valid" in errors(with_del(with_del(block, "base_file"), "update_values"))
+    # The base_file value must be a string:
+    assert "is not of type 'string'" in errors(with_set(block, 1, "base_file"))
+    # The update_values.datm_nml value is required:
+    assert "'datm_nml' is a required property" in errors(
+        with_del(block, "update_values", "datm_nml")
+    )
+    # Additional namelists are not allowed:
+    assert not errors(with_set(block, {}, "update_values", "another_namelist"))
+    # Namelist values must be of the correct types:
+    nmlerr = lambda k, v: errors(with_set(block, v, "update_values", "datm_nml", k))
+    # boolean:
+    ks_boolean = [
+        "export_all",
+        "flds_co2",
+        "flds_presaero",
+        "flds_presndep",
+        "flds_preso3",
+        "flds_wiso",
+        "skip_restart_read",
+    ]
+    for k in ks_boolean:
+        assert "is not of type 'boolean'" in nmlerr(k, None)
+    # integer:
+    ks_integer = ["iradsw", "nx_global", "ny_global"]
+    for k in ks_integer:
+        assert "is not of type 'integer'" in nmlerr(k, None)
+    # enum:
+    ks_enum = ["datamode"]
+    assert "is not one of" in nmlerr("datamode", None)
+    # string:
+    ks_string = [
+        "anomaly_forcing",
+        "bias_correct",
+        "factorfn_data",
+        "factorfn_mesh",
+        "model_maskfile",
+        "model_meshfile",
+        "restfilm",
+    ]
+    for k in ks_string:
+        assert "is not of type 'string'" in nmlerr(k, None)
+    # All namelist keys are optional:
+    for k in ks_boolean + ks_integer + ks_enum + ks_string:
+        assert not errors(with_del(block, "update_values", "datm_nml", k))
+
 
 # chgres-cube
 
