@@ -208,7 +208,7 @@ def cdeps_config():
                     "ny_global": 1,
                     "restfilm": "string",
                     "skip_restart_read": True,
-                    "sst_constand_value": 3.14,
+                    "sst_constant_value": 3.14,
                 },
             },
         },
@@ -299,6 +299,51 @@ def test_schema_cdeps_atm_in(cdeps_config):
     # All namelist keys are optional:
     for k in ks_boolean + ks_integer + ks_enum + ks_string:
         assert not errors(with_del(block, "update_values", "datm_nml", k))
+
+
+def test_schema_cdeps_ocn_in(cdeps_config):
+    block = cdeps_config["ocn_in"]
+    errors = schema_validator("cdeps", "properties", "cdeps", "properties", "ocn_in")
+    # Either base_file or update_values is sufficient:
+    for k in ["base_file", "update_values"]:
+        assert not errors(with_del(block, k))
+    # At least one is required:
+    assert "is not valid" in errors(with_del(with_del(block, "base_file"), "update_values"))
+    # The base_file value must be a string:
+    assert "is not of type 'string'" in errors(with_set(block, 1, "base_file"))
+    # The update_values.docn_nml value is required:
+    assert "'docn_nml' is a required property" in errors(
+        with_del(block, "update_values", "docn_nml")
+    )
+    # Additional namelists are not allowed:
+    assert not errors(with_set(block, {}, "update_values", "another_namelist"))
+    # Namelist values must be of the correct types:
+    nmlerr = lambda k, v: errors(with_set(block, v, "update_values", "docn_nml", k))
+    # boolean:
+    ks_boolean = ["skip_restart_read"]
+    for k in ks_boolean:
+        assert "is not of type 'boolean'" in nmlerr(k, None)
+    # integer:
+    ks_integer = ["nx_global", "ny_global"]
+    for k in ks_integer:
+        assert "is not of type 'integer'" in nmlerr(k, None)
+    # number:
+    ks_number = ["sst_constant_value"]
+    for k in ks_number:
+        assert "is not of type 'number'" in nmlerr(k, None)
+    # string:
+    ks_string = [
+        "datamode",
+        "import_data_fields",
+        "model_maskfile",
+        "model_meshfile",
+        "restfilm",
+    ]
+    for k in ks_string:
+        assert "is not of type 'string'" in nmlerr(k, None)
+    # All namelist keys are optional:
+    for k in ks_boolean + ks_integer + ks_number + ks_string:
+        assert not errors(with_del(block, "update_values", "docn_nml", k))
 
 
 # chgres-cube
