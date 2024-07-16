@@ -181,22 +181,23 @@ def test_schema_cdeps():
                     "mapalgo": "string",
                     "readmode": "single",
                     "stream_data_files": ["string", "string"],
+                    "stream_data_variables": ["string", "string"],
                     "stream_lev_dimname": "string",
                     "stream_mesh_file": "string",
                     "stream_offset": 1,
                     "stream_vectors": ["u", "v"],
                     "taxmode": "string",
                     "tinterpalgo": "string",
-                    "yearAlign": "string",
-                    "yearFirst": "string",
-                    "yearLast": "string",
+                    "yearAlign": 1,
+                    "yearFirst": 1,
+                    "yearLast": 1,
                 }
             },
             "template_file": "/path/to/atm.jinja2",
         },
         "ocn_in": {
             "base_file": "/path/to/ocn.nml",
-            "update_vaules": {
+            "update_values": {
                 "docn_nml": {
                     "datamode": "string",
                     "import_data_fields": "string",
@@ -210,14 +211,33 @@ def test_schema_cdeps():
                 },
             },
         },
-        "ocn_streams": {},
+        "ocn_streams": {
+            "streams": {
+                "stream01": {
+                    "dtlimit": 1.5,
+                    "mapalgo": "string",
+                    "readmode": "single",
+                    "stream_data_files": ["string", "string"],
+                    "stream_data_variables": ["string", "string"],
+                    "stream_lev_dimname": "string",
+                    "stream_mesh_file": "string",
+                    "stream_offset": 1,
+                    "stream_vectors": ["u", "v"],
+                    "taxmode": "string",
+                    "tinterpalgo": "string",
+                    "yearAlign": 1,
+                    "yearFirst": 1,
+                    "yearLast": 1,
+                }
+            },
+            "template_file": "/path/to/atm.jinja2",
+        },
     }
-    assert config
+    errors = schema_validator("cdeps", "properties", "cdeps")
+    # Basic correctness:
+    assert not errors(config)
 
 
-#     # errors = schema_validator("orog-gsl", "properties", "orog_gsl")
-#     # # Basic correctness:
-#     # assert not errors(config)
 #     # # All config keys are requried:
 # # for key in ["halo", "input_grid_file", "resolution", "tile", "topo_data_2p5m", "topo_data_30s"]:
 #     #     assert f"'{key}' is a required property" in errors(with_del(config, "config", key))
