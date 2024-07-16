@@ -146,67 +146,67 @@ def ww3_prop():
 
 # cdeps
 
-def test_schema_cdeps():
-    config = {
-        "atm_in": {
-            "base_file": "/path/to/atm.jinja2",
-            "update_values": {
-                "datm_nml": {
-                    "anomaly_forcing": "string",
-                    "bias_correct": "string",
-                    "datamode": "ATMMESH",
-                    "export_all": True,
-                    "factorfn_data": "string",
-                    "factorfn_mesh": "string",
-                    "flds_co2": True,
-                    "flds_presaero": True,
-                    "flds_presndep": True,
-                    "flds_pres03": True,
-                    "flds_wiso": True,
-                    "iradsw": 1,
-                    "model_maskfile": "string",
-                    "model_meshfile": "string",
-                    "nx_global": 1,
-                    "ny_global": 1,
-                    "restfilm": "string",
-                    "skip_restart_read": True,
-                },
-            },
-        },
-        "ocn_in": {
-            "base_file": "/path/to/ocn.jinja2",
-            "update_vaules": {
-                "docn_nml": {
-                    "datamode": "string",
-                    "model_maskfile": "string",
-                },
-            },
-        },
-                
-    # errors = schema_validator("orog-gsl", "properties", "orog_gsl")
-    # # Basic correctness:
-    # assert not errors(config)
-    # # All config keys are requried:
-    # for key in ["halo", "input_grid_file", "resolution", "tile", "topo_data_2p5m", "topo_data_30s"]:
-    #     assert f"'{key}' is a required property" in errors(with_del(config, "config", key))
-    # # Other config keys are not allowed:
-    # assert "Additional properties are not allowed" in errors(
-    #     with_set(config, "bar", "config", "foo")
-    # )
-    # # Some config keys require integer values:
-    # for key in ["halo", "resolution", "tile"]:
-    #     assert "is not of type 'integer'" in errors(with_set(config, None, "config", key))
-    # # Some config keys require string values:
-    # for key in ["input_grid_file", "topo_data_2p5m", "topo_data_30s"]:
-    #     assert "is not of type 'string'" in errors(with_set(config, None, "config", key))
-    # # Some top level keys are required:
-    # for key in ["config", "execution", "rundir"]:
-    #     assert f"'{key}' is a required property" in errors(with_del(config, key))
-    # # Other top-level keys are not allowed:
-    # assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
-    # # Top-level rundir key requires a string value:
-    # assert "is not of type 'string'" in errors(with_set(config, None, "rundir"))
-    
+# def test_schema_cdeps():
+#     config = {
+#         "atm_in": {
+#             "base_file": "/path/to/atm.jinja2",
+#             "update_values": {
+#                 "datm_nml": {
+#                     "anomaly_forcing": "string",
+#                     "bias_correct": "string",
+#                     "datamode": "ATMMESH",
+#                     "export_all": True,
+#                     "factorfn_data": "string",
+#                     "factorfn_mesh": "string",
+#                     "flds_co2": True,
+#                     "flds_presaero": True,
+#                     "flds_presndep": True,
+#                     "flds_pres03": True,
+#                     "flds_wiso": True,
+#                     "iradsw": 1,
+#                     "model_maskfile": "string",
+#                     "model_meshfile": "string",
+#                     "nx_global": 1,
+#                     "ny_global": 1,
+#                     "restfilm": "string",
+#                     "skip_restart_read": True,
+#                 },
+#             },
+#         },
+#         "ocn_in": {
+#             "base_file": "/path/to/ocn.jinja2",
+#             "update_vaules": {
+#                 "docn_nml": {
+#                     "datamode": "string",
+#                     "model_maskfile": "string",
+#                 },
+#             },
+#         },
+
+#     # errors = schema_validator("orog-gsl", "properties", "orog_gsl")
+#     # # Basic correctness:
+#     # assert not errors(config)
+#     # # All config keys are requried:
+# # for key in ["halo", "input_grid_file", "resolution", "tile", "topo_data_2p5m", "topo_data_30s"]:
+#     #     assert f"'{key}' is a required property" in errors(with_del(config, "config", key))
+#     # # Other config keys are not allowed:
+#     # assert "Additional properties are not allowed" in errors(
+#     #     with_set(config, "bar", "config", "foo")
+#     # )
+#     # # Some config keys require integer values:
+#     # for key in ["halo", "resolution", "tile"]:
+#     #     assert "is not of type 'integer'" in errors(with_set(config, None, "config", key))
+#     # # Some config keys require string values:
+#     # for key in ["input_grid_file", "topo_data_2p5m", "topo_data_30s"]:
+#     #     assert "is not of type 'string'" in errors(with_set(config, None, "config", key))
+#     # # Some top level keys are required:
+#     # for key in ["config", "execution", "rundir"]:
+#     #     assert f"'{key}' is a required property" in errors(with_del(config, key))
+#     # # Other top-level keys are not allowed:
+#     # assert "Additional properties are not allowed" in errors(with_set(config, "bar", "foo"))
+#     # # Top-level rundir key requires a string value:
+#     # assert "is not of type 'string'" in errors(with_set(config, None, "rundir"))
+
 # chgres-cube
 
 

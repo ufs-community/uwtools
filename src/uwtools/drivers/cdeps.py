@@ -53,9 +53,9 @@ class CDEPS(AssetsCycleBased):
         yield self._taskname(f"namelist file {fn}")
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        temp_path = self._driver_config["atm_streams"]["base_file"]
-        yield file(path=Path(temp_path))
-        self._model_stream_file("atm_streams", path, temp_path)
+        template_file = self._driver_config["atm_streams"]["template_file"]
+        yield file(path=Path(template_file))
+        self._model_stream_file("atm_streams", path, template_file)
 
     @tasks
     def ocn(self):
@@ -90,9 +90,9 @@ class CDEPS(AssetsCycleBased):
         yield self._taskname(f"namelist file {fn}")
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        temp_path = self._driver_config["ocn_streams"]["base_file"]
-        yield file(path=Path(temp_path))
-        self._model_stream_file("ocn_streams", path, temp_path)
+        template_file = self._driver_config["ocn_streams"]["template_file"]
+        yield file(path=Path(template_file))
+        self._model_stream_file("ocn_streams", path, template_file)
 
     # Private helper methods
 
@@ -114,12 +114,14 @@ class CDEPS(AssetsCycleBased):
             config_class=NMLConfig, config_values=self._driver_config[group], path=path
         )
 
-    def _model_stream_file(self, group: str, path: Path, template: str) -> None:
+    def _model_stream_file(self, group: str, path: Path, template_file: str) -> None:
         """
         Create at atmosphere of ocean stream file, based on a template.
 
         :param group: "atm_in" or "ocn_in".
         :param path: Path to write namelist to.
-        :param template: Path to the template file to render.
+        :param template_file: Path to the template file to render.
         """
-        render(input_file=Path(template), output_file=path, values_src=self._driver_config[group])
+        render(
+            input_file=Path(template_file), output_file=path, values_src=self._driver_config[group]
+        )
