@@ -13,6 +13,95 @@ from uwtools.tests.support import schema_validator, with_del, with_set
 
 
 @fixture
+def cdeps_config():
+    return {
+        "atm_in": {
+            "base_file": "/path/to/atm.nml",
+            "update_values": {
+                "datm_nml": {
+                    "anomaly_forcing": "string",
+                    "bias_correct": "string",
+                    "datamode": "GFS",
+                    "export_all": True,
+                    "factorfn_data": "string",
+                    "factorfn_mesh": "string",
+                    "flds_co2": True,
+                    "flds_presaero": True,
+                    "flds_presndep": True,
+                    "flds_wiso": True,
+                    "flds_preso3": True,
+                    "iradsw": 1,
+                    "model_maskfile": "string",
+                    "model_meshfile": "string",
+                    "nx_global": 1,
+                    "ny_global": 1,
+                    "restfilm": "string",
+                    "skip_restart_read": True,
+                },
+            },
+        },
+        "atm_streams": {
+            "streams": {
+                "stream01": {
+                    "dtlimit": 1.5,
+                    "mapalgo": "string",
+                    "readmode": "single",
+                    "stream_data_files": ["string", "string"],
+                    "stream_data_variables": ["string", "string"],
+                    "stream_lev_dimname": "string",
+                    "stream_mesh_file": "string",
+                    "stream_offset": 1,
+                    "stream_vectors": ["u", "v"],
+                    "taxmode": "string",
+                    "tinterpalgo": "string",
+                    "yearAlign": 1,
+                    "yearFirst": 1,
+                    "yearLast": 1,
+                }
+            },
+            "template_file": "/path/to/atm.jinja2",
+        },
+        "ocn_in": {
+            "base_file": "/path/to/ocn.nml",
+            "update_values": {
+                "docn_nml": {
+                    "datamode": "string",
+                    "import_data_fields": "string",
+                    "model_maskfile": "string",
+                    "model_meshfile": "string",
+                    "nx_global": 1,
+                    "ny_global": 1,
+                    "restfilm": "string",
+                    "skip_restart_read": True,
+                    "sst_constant_value": 3.14,
+                },
+            },
+        },
+        "ocn_streams": {
+            "streams": {
+                "stream01": {
+                    "dtlimit": 1.5,
+                    "mapalgo": "string",
+                    "readmode": "single",
+                    "stream_data_files": ["string", "string"],
+                    "stream_data_variables": ["string", "string"],
+                    "stream_lev_dimname": "string",
+                    "stream_mesh_file": "string",
+                    "stream_offset": 1,
+                    "stream_vectors": ["u", "v"],
+                    "taxmode": "string",
+                    "tinterpalgo": "string",
+                    "yearAlign": 1,
+                    "yearFirst": 1,
+                    "yearLast": 1,
+                }
+            },
+            "template_file": "/path/to/atm.jinja2",
+        },
+    }
+
+
+@fixture
 def chgres_cube_prop():
     return partial(schema_validator, "chgres-cube", "properties", "chgres_cube", "properties")
 
@@ -147,95 +236,6 @@ def ww3_prop():
 # cdeps
 
 
-@fixture
-def cdeps_config():
-    return {
-        "atm_in": {
-            "base_file": "/path/to/atm.nml",
-            "update_values": {
-                "datm_nml": {
-                    "anomaly_forcing": "string",
-                    "bias_correct": "string",
-                    "datamode": "GFS",
-                    "export_all": True,
-                    "factorfn_data": "string",
-                    "factorfn_mesh": "string",
-                    "flds_co2": True,
-                    "flds_presaero": True,
-                    "flds_presndep": True,
-                    "flds_wiso": True,
-                    "flds_preso3": True,
-                    "iradsw": 1,
-                    "model_maskfile": "string",
-                    "model_meshfile": "string",
-                    "nx_global": 1,
-                    "ny_global": 1,
-                    "restfilm": "string",
-                    "skip_restart_read": True,
-                },
-            },
-        },
-        "atm_streams": {
-            "streams": {
-                "stream01": {
-                    "dtlimit": 1.5,
-                    "mapalgo": "string",
-                    "readmode": "single",
-                    "stream_data_files": ["string", "string"],
-                    "stream_data_variables": ["string", "string"],
-                    "stream_lev_dimname": "string",
-                    "stream_mesh_file": "string",
-                    "stream_offset": 1,
-                    "stream_vectors": ["u", "v"],
-                    "taxmode": "string",
-                    "tinterpalgo": "string",
-                    "yearAlign": 1,
-                    "yearFirst": 1,
-                    "yearLast": 1,
-                }
-            },
-            "template_file": "/path/to/atm.jinja2",
-        },
-        "ocn_in": {
-            "base_file": "/path/to/ocn.nml",
-            "update_values": {
-                "docn_nml": {
-                    "datamode": "string",
-                    "import_data_fields": "string",
-                    "model_maskfile": "string",
-                    "model_meshfile": "string",
-                    "nx_global": 1,
-                    "ny_global": 1,
-                    "restfilm": "string",
-                    "skip_restart_read": True,
-                    "sst_constant_value": 3.14,
-                },
-            },
-        },
-        "ocn_streams": {
-            "streams": {
-                "stream01": {
-                    "dtlimit": 1.5,
-                    "mapalgo": "string",
-                    "readmode": "single",
-                    "stream_data_files": ["string", "string"],
-                    "stream_data_variables": ["string", "string"],
-                    "stream_lev_dimname": "string",
-                    "stream_mesh_file": "string",
-                    "stream_offset": 1,
-                    "stream_vectors": ["u", "v"],
-                    "taxmode": "string",
-                    "tinterpalgo": "string",
-                    "yearAlign": 1,
-                    "yearFirst": 1,
-                    "yearLast": 1,
-                }
-            },
-            "template_file": "/path/to/atm.jinja2",
-        },
-    }
-
-
 def test_schema_cdeps(cdeps_config):
     errors = schema_validator("cdeps", "properties", "cdeps")
     # Basic correctness:
@@ -250,19 +250,6 @@ def test_schema_cdeps(cdeps_config):
 def test_schema_cdeps_atm_in(cdeps_config):
     block = cdeps_config["atm_in"]
     errors = schema_validator("cdeps", "properties", "cdeps", "properties", "atm_in")
-    # Either base_file or update_values is sufficient:
-    for k in ["base_file", "update_values"]:
-        assert not errors(with_del(block, k))
-    # At least one is required:
-    assert "is not valid" in errors(with_del(with_del(block, "base_file"), "update_values"))
-    # The base_file value must be a string:
-    assert "is not of type 'string'" in errors(with_set(block, 1, "base_file"))
-    # The update_values.datm_nml value is required:
-    assert "'datm_nml' is a required property" in errors(
-        with_del(block, "update_values", "datm_nml")
-    )
-    # Additional namelists are not allowed:
-    assert not errors(with_set(block, {}, "update_values", "another_namelist"))
     # Namelist values must be of the correct types:
     nmlerr = lambda k, v: errors(with_set(block, v, "update_values", "datm_nml", k))
     # boolean:
@@ -301,9 +288,50 @@ def test_schema_cdeps_atm_in(cdeps_config):
         assert not errors(with_del(block, "update_values", "datm_nml", k))
 
 
-def test_schema_cdeps_ocn_in(cdeps_config):
-    block = cdeps_config["ocn_in"]
-    errors = schema_validator("cdeps", "properties", "cdeps", "properties", "ocn_in")
+def test_schema_cdeps_atm_streams(cdeps_config):
+    block = cdeps_config["atm_streams"]
+    errors = schema_validator("cdeps", "properties", "cdeps", "properties", "atm_streams")
+    # Both top-level keys are required:
+    for k in ["streams", "template_file"]:
+        assert f"'{k}' is a required property" in errors(with_del(block, k))
+    # Correctly-named stream blocks are ok:
+    for n in range(1, 10):
+        assert not errors(with_set(block, block["streams"]["stream01"], "streams", f"stream0{n}"))
+    # Arbitrarily-named stream blocks are not allowed:
+    assert "does not match any of the regexes" in errors(with_set(block, {}, "streams", "foo"))
+    # template_file must be a string:
+    assert "is not of type 'string'" in errors(with_set(block, 1, "template_file"))
+    # Values must be of the correct types:
+    valerr = lambda k, v: errors(with_set(block, v, "streams", "stream01", k))
+    # enum:
+    ks_enum = ["readmode"]
+    assert "is not one of" in valerr("readmode", None)
+    # integer:
+    ks_integer = ["stream_offset", "yearAlign", "yearFirst", "yearLast"]
+    for k in ks_integer:
+        assert "is not of type 'integer'" in valerr(k, None)
+    # number:
+    ks_number = ["dtlimit"]
+    for k in ks_number:
+        assert "is not of type 'number'" in valerr(k, None)
+    # string:
+    ks_string = ["mapalgo", "stream_lev_dimname", "stream_mesh_file", "taxmode", "tinterpalgo"]
+    for k in ks_string:
+        assert "is not of type 'string'" in valerr(k, None)
+    # string arrays:
+    ks_string_array = ["stream_data_files", "stream_data_variables", "stream_vectors"]
+    for k in ks_string_array:
+        assert "is not of type 'array'" in valerr(k, None)
+        assert "is not of type 'string'" in valerr(k, [1])
+    # All keys are required:
+    for k in ks_enum + ks_integer + ks_number + ks_string + ks_string_array:
+        assert "is a required property" in errors(with_del(block, "streams", "stream01", k))
+
+
+@mark.parametrize("section", ["atm", "ocn"])
+def test_schema_cdeps_nml_common(cdeps_config, section):
+    block = cdeps_config[f"{section}_in"]
+    errors = schema_validator("cdeps", "properties", "cdeps", "properties", f"{section}_in")
     # Either base_file or update_values is sufficient:
     for k in ["base_file", "update_values"]:
         assert not errors(with_del(block, k))
@@ -311,12 +339,17 @@ def test_schema_cdeps_ocn_in(cdeps_config):
     assert "is not valid" in errors(with_del(with_del(block, "base_file"), "update_values"))
     # The base_file value must be a string:
     assert "is not of type 'string'" in errors(with_set(block, 1, "base_file"))
-    # The update_values.docn_nml value is required:
-    assert "'docn_nml' is a required property" in errors(
-        with_del(block, "update_values", "docn_nml")
+    # The update_values.datm_nml value is required:
+    assert f"'d{section}_nml' is a required property" in errors(
+        with_del(block, "update_values", f"d{section}_nml")
     )
     # Additional namelists are not allowed:
     assert not errors(with_set(block, {}, "update_values", "another_namelist"))
+
+
+def test_schema_cdeps_ocn_in(cdeps_config):
+    block = cdeps_config["ocn_in"]
+    errors = schema_validator("cdeps", "properties", "cdeps", "properties", "ocn_in")
     # Namelist values must be of the correct types:
     nmlerr = lambda k, v: errors(with_set(block, v, "update_values", "docn_nml", k))
     # boolean:
