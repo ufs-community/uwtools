@@ -13,7 +13,7 @@
             "mapalgo": {
               "type": "string"
             },
-            "readmdoe": {
+            "readmode": {
               "enum": [
                 "single"
               ]
