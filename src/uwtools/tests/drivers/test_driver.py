@@ -247,9 +247,9 @@ def test_Assets__validate_internal(assetsobj):
 
 
 def test_Assets__validate_external(config):
-    schema_file = "/path/to/jsonschema"
+    schema_file = Path("/path/to/jsonschema")
     with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
-        with patch.object(driver, "validate_external") as validate_external: 
+        with patch.object(driver, "validate_external") as validate_external:
             assetsobj = ConcreteAssetsTimeInvariant(schema_file=schema_file, config=config)
         assert validate_external.call_args_list[0].kwargs == {
             "schema_file": schema_file,
@@ -491,7 +491,7 @@ def test_Driver__scheduler(driverobj):
         JobScheduler.get_scheduler.assert_called_with(driverobj._resources)
 
 
-def test_Driver__validate(assetsobj):
+def test_Driver__validate_internal(assetsobj):
     with patch.object(assetsobj, "_validate", driver.Driver._validate):
         with patch.object(driver, "validate_internal") as validate_internal:
             assetsobj._validate(assetsobj)
@@ -501,6 +501,17 @@ def test_Driver__validate(assetsobj):
         }
         assert validate_internal.call_args_list[1].kwargs == {
             "schema_name": "platform",
+            "config": assetsobj._config,
+        }
+
+
+def test_Driver__validate_external(config):
+    schema_file = Path("/path/to/jsonschema")
+    with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Driver._validate):
+        with patch.object(driver, "validate_external") as validate_external:
+            assetsobj = ConcreteAssetsTimeInvariant(schema_file=schema_file, config=config)
+        assert validate_external.call_args_list[0].kwargs == {
+            "schema_file": schema_file,
             "config": assetsobj._config,
         }
 
