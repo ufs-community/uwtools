@@ -1,5 +1,5 @@
 """
-An abstract class for component drivers.
+Abstract classes for component drivers.
 """
 
 import json
@@ -23,6 +23,8 @@ from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
 from uwtools.utils.processing import execute
+
+# NB: Class docstrings are programmatically defined.
 
 
 class Assets(ABC):
@@ -251,7 +253,7 @@ class AssetsCycleBased(Assets):
         self._cycle = cycle
 
 
-class AssetsCycleAndLeadtimeBased(Assets):
+class AssetsCycleLeadtimeBased(Assets):
     """
     An abstract class to provision assets for cycle-and-leadtime-based components.
     """
@@ -549,7 +551,7 @@ class DriverCycleBased(Driver):
         self._cycle = cycle
 
 
-class DriverCycleAndLeadtimeBased(Driver):
+class DriverCycleLeadtimeBased(Driver):
     """
     An abstract class for standalone cycle-and-leadtime-based component drivers.
     """
@@ -620,3 +622,41 @@ class DriverTimeInvariant(Driver):
 
 
 DriverT = Union[type[Assets], type[Driver]]
+
+
+def _add_docstring(class_: type, omit: Optional[list[str]] = None) -> None:
+    """
+    Dynamically add docstring to a driver class.
+
+    :param class_: The class to add the docstring to.
+    :param omit: Parameters to omit from the docstring.
+    """
+    base = """
+    The driver.
+
+    :param cycle: The cycle.
+    :param leadtime: The leadtime.
+    :param config: Path to config file (read stdin if missing or None).
+    :param dry_run: Run in dry-run mode?
+    :param key_path: Keys leading through the config to the driver's configuration block.
+    :param batch: Run component via the batch system?
+    """
+    setattr(
+        class_,
+        "__doc__",
+        "\n".join(
+            line
+            for line in dedent(base).strip().split("\n")
+            if not any(line.startswith(f":param {o}:") for o in omit or [])
+        ),
+    )
+
+
+_add_docstring(Assets, omit=["batch"])
+_add_docstring(AssetsCycleBased, omit=["batch", "leadtime"])
+_add_docstring(AssetsCycleLeadtimeBased, omit=["batch"])
+_add_docstring(AssetsTimeInvariant, omit=["batch", "cycle", "leadtime"])
+_add_docstring(Driver)
+_add_docstring(DriverCycleBased, omit=["leadtime"])
+_add_docstring(DriverCycleLeadtimeBased)
+_add_docstring(DriverTimeInvariant, omit=["cycle", "leadtime"])

@@ -133,7 +133,7 @@ def test_yaml_constructor_error_not_dict_from_file(tmp_path):
 
 def test_yaml_constructor_error_not_dict_from_stdin():
     # Test that a useful exception is raised if the YAML stdin input is a non-dict value.
-    with patch.object(sys, "stdin", new=StringIO("a string")):
+    with StringIO("a string") as sio, patch.object(sys, "stdin", new=sio):
         with raises(exceptions.UWConfigError) as e:
             YAMLConfig()
     assert "Parsed a str value from stdin, expected a dict" in str(e.value)
@@ -167,9 +167,10 @@ def test_yaml_stdin_plus_relpath_failure(caplog):
     log.setLevel(logging.INFO)
     _stdinproxy.cache_clear()
     relpath = "../bar/baz.yaml"
-    with patch.object(sys, "stdin", new=StringIO(f"foo: {support.INCLUDE_TAG} [{relpath}]")):
-        with raises(UWConfigError) as e:
-            YAMLConfig()
+    with StringIO(f"foo: {support.INCLUDE_TAG} [{relpath}]") as sio:
+        with patch.object(sys, "stdin", new=sio):
+            with raises(UWConfigError) as e:
+                YAMLConfig()
     msg = f"Reading from stdin, a relative path was encountered: {relpath}"
     assert msg in str(e.value)
     assert logged(caplog, msg)
