@@ -6,7 +6,7 @@ from pathlib import Path
 
 from iotaa import asset, task, tasks
 
-from uwtools.api.template import render
+from uwtools.api.template import _render
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.drivers.driver import AssetsCycleBased
 from uwtools.strings import STR
@@ -101,8 +101,8 @@ class CDEPS(AssetsCycleBased):
         """
         yield self._taskname("provisioned run directory")
         yield [
-            self.atm,
-            self.ocn,
+            self.atm(),
+            self.ocn(),
         ]
 
     # Private helper methods
@@ -133,7 +133,7 @@ class CDEPS(AssetsCycleBased):
         :param path: Path to write namelist to.
         :param template_file: Path to the template file to render.
         """
-        render(
+        _render(
             input_file=Path(template_file),
             output_file=path,
             values_src=self._driver_config[group]["streams"],
