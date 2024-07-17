@@ -1,0 +1,4 @@
+&values
+  greeting = "Hello"
+  recipient = "Different World"
+/
