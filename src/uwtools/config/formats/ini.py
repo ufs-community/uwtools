@@ -25,6 +25,26 @@ class INIConfig(Config):
 
     # Private methods
 
+    @classmethod
+    def _dict_to_str(cls, cfg: dict) -> str:
+        """
+        Returns the INI representation of the given dict.
+
+        :param cfg: A dict object.
+        """
+
+        # Configparser adds a newline after each section, presumably to create nice-looking output
+        # when an INI contains multiple sections. Unfortunately, it also adds a newline after the
+        # _final_ section, resulting in an anomalous trailing newline. To avoid this, write first to
+        # memory, then strip the trailing newline.
+
+        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.ini)
+        parser = configparser.ConfigParser()
+        parser.read_dict(cfg)
+        with StringIO() as sio:
+            parser.write(sio)
+            return sio.getvalue().strip()
+
     def _load(self, config_file: Optional[Path]) -> dict:
         """
         Reads and parses an INI file.
@@ -46,31 +66,18 @@ class INIConfig(Config):
 
         :param path: Path to dump config to.
         """
-        config_check_depths_dump(config_obj=self, target_format=FORMAT.ini)
         self.dump_dict(self.data, path)
 
-    @staticmethod
-    def dump_dict(cfg: dict, path: Optional[Path] = None) -> None:
+    @classmethod
+    def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
         """
         Dumps a provided config dictionary in INI format.
 
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to.
         """
-
-        # Configparser adds a newline after each section, presumably to create nice-looking output
-        # when an INI contains multiple sections. Unfortunately, it also adds a newline after the
-        # _final_ section, resulting in an anomalous trailing newline. To avoid this, write first to
-        # memory, then strip the trailing newline.
-
-        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.ini)
-        parser = configparser.ConfigParser()
-        s = StringIO()
-        parser.read_dict(cfg)
-        parser.write(s)
         with writable(path) as f:
-            print(s.getvalue().strip(), file=f)
-        s.close()
+            print(cls._dict_to_str(cfg), file=f)
 
     @staticmethod
     def get_depth_threshold() -> Optional[int]:

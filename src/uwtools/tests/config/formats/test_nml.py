@@ -6,7 +6,7 @@ Tests for uwtools.config.formats.nml module.
 import filecmp
 
 import f90nml  # type: ignore
-from pytest import fixture, raises
+from pytest import fixture, mark, raises
 
 from uwtools.config.formats.nml import NMLConfig
 from uwtools.exceptions import UWConfigError
@@ -24,35 +24,35 @@ def data():
 # Tests
 
 
-def test_dump_dict_dict(data, tmp_path):
+def test_nml_dump_dict_dict(data, tmp_path):
     path = tmp_path / "a.nml"
     NMLConfig.dump_dict(cfg=data, path=path)
     nml = f90nml.read(path)
     assert nml == data
 
 
-def test_dump_dict_Namelist(data, tmp_path):
+def test_nml_dump_dict_Namelist(data, tmp_path):
     path = tmp_path / "a.nml"
     NMLConfig.dump_dict(cfg=f90nml.Namelist(data), path=path)
     nml = f90nml.read(path)
     assert nml == data
 
 
-def test_get_format():
+def test_nml_get_format():
     assert NMLConfig.get_format() == FORMAT.nml
 
 
-def test_get_depth_threshold():
+def test_nml_get_depth_threshold():
     assert NMLConfig.get_depth_threshold() == 2
 
 
-def test_instantiation_depth():
+def test_nml_instantiation_depth():
     with raises(UWConfigError) as e:
         NMLConfig(config={1: {2: {3: 4}}})
     assert str(e.value) == "Cannot instantiate depth-2 NMLConfig with depth-3 config"
 
 
-def test_parse_include():
+def test_nml_parse_include():
     """
     Test that non-YAML handles include tags properly.
     """
@@ -63,7 +63,7 @@ def test_parse_include():
     assert len(cfgobj["config"]) == 5
 
 
-def test_parse_include_mult_sect():
+def test_nml_parse_include_mult_sect():
     """
     Test that non-YAML handles include tags with files that have multiple sections in separate file.
     """
@@ -77,7 +77,14 @@ def test_parse_include_mult_sect():
     assert len(cfgobj["setting"]) == 3
 
 
-def test_simple(salad_base, tmp_path):
+@mark.parametrize("func", [repr, str])
+def test_ini_repr_str(func):
+    config = fixture_path("simple.nml")
+    with open(config, "r", encoding="utf-8") as f:
+        assert func(NMLConfig(config)) == f.read().strip()
+
+
+def test_nml_simple(salad_base, tmp_path):
     """
     Test that namelist load, update, and dump work with a basic namelist file.
     """

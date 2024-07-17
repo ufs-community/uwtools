@@ -520,18 +520,27 @@ def test_realize_config_values_needed_yaml(caplog):
     assert actual.strip() == dedent(expected).strip()
 
 
-def test__ensure_format_bad():
+def test__ensure_format_bad_no_path_no_format():
     with raises(UWError) as e:
         tools._ensure_format(desc="foo")
-    assert str(e.value) == "Either foo file format or name must be specified"
+    assert str(e.value) == "Either foo path or format name must be specified"
 
 
 def test__ensure_format_config_obj():
-    assert tools._ensure_format(desc="foo", config=YAMLConfig(config={})) == FORMAT.yaml
+    config = NMLConfig({"nl": {"n": 88}})
+    assert tools._ensure_format(desc="foo", config=config) == FORMAT.nml
+
+
+def test__ensure_format_dict_explicit():
+    assert tools._ensure_format(desc="foo", fmt=FORMAT.yaml, config={}) == FORMAT.yaml
+
+
+def test__ensure_format_dict_implicit():
+    assert tools._ensure_format(desc="foo", config={}) == FORMAT.yaml
 
 
 def test__ensure_format_deduced():
-    assert tools._ensure_format(desc="foo", config=Path("/tmp/config.yaml")) == FORMAT.yaml
+    assert tools._ensure_format(desc="foo", config=Path("/tmp/config.nml")) == FORMAT.nml
 
 
 def test__ensure_format_explicitly_specified_no_path():
@@ -607,9 +616,8 @@ def test__print_config_section_yaml_not_dict():
 def test__realize_config_input_setup_ini_cfgobj():
     data = {"section": {"foo": "bar"}}
     cfgobj = INIConfig(config=data)
-    input_obj, input_format = tools._realize_config_input_setup(input_config=cfgobj)
+    input_obj = tools._realize_config_input_setup(input_config=cfgobj)
     assert input_obj.data == data
-    assert input_format == FORMAT.ini
 
 
 def test__realize_config_input_setup_ini_file(tmp_path):
@@ -620,9 +628,8 @@ def test__realize_config_input_setup_ini_file(tmp_path):
     path = tmp_path / "config.ini"
     with open(path, "w", encoding="utf-8") as f:
         print(dedent(data).strip(), file=f)
-    input_obj, input_format = tools._realize_config_input_setup(input_config=path)
+    input_obj = tools._realize_config_input_setup(input_config=path)
     assert input_obj.data == {"section": {"foo": "bar"}}
-    assert input_format == FORMAT.ini
 
 
 def test__realize_config_input_setup_ini_stdin(caplog):
@@ -633,22 +640,20 @@ def test__realize_config_input_setup_ini_stdin(caplog):
     """
     stdinproxy.cache_clear()
     log.setLevel(logging.DEBUG)
-    s = StringIO()
-    print(dedent(data).strip(), file=s)
-    s.seek(0)
-    with patch.object(sys, "stdin", new=s):
-        input_obj, input_format = tools._realize_config_input_setup(input_format=FORMAT.ini)
+    with StringIO() as sio:
+        print(dedent(data).strip(), file=sio)
+        sio.seek(0)
+        with patch.object(sys, "stdin", new=sio):
+            input_obj = tools._realize_config_input_setup(input_format=FORMAT.ini)
     assert input_obj.data == {"section": {"foo": "bar", "baz": "88"}}  # note: 88 is str, not int
-    assert input_format == FORMAT.ini
     assert logged(caplog, "Reading input from stdin")
 
 
 def test__realize_config_input_setup_nml_cfgobj():
     data = {"nl": {"pi": 3.14}}
     cfgobj = NMLConfig(config=data)
-    input_obj, input_format = tools._realize_config_input_setup(input_config=cfgobj)
+    input_obj = tools._realize_config_input_setup(input_config=cfgobj)
     assert input_obj.data == data
-    assert input_format == FORMAT.nml
 
 
 def test__realize_config_input_setup_nml_file(tmp_path):
@@ -660,9 +665,8 @@ def test__realize_config_input_setup_nml_file(tmp_path):
     path = tmp_path / "config.nml"
     with open(path, "w", encoding="utf-8") as f:
         print(dedent(data).strip(), file=f)
-    input_obj, input_format = tools._realize_config_input_setup(input_config=path)
+    input_obj = tools._realize_config_input_setup(input_config=path)
     assert input_obj["nl"]["pi"] == 3.14
-    assert input_format == FORMAT.nml
 
 
 def test__realize_config_input_setup_nml_stdin(caplog):
@@ -673,22 +677,20 @@ def test__realize_config_input_setup_nml_stdin(caplog):
     """
     stdinproxy.cache_clear()
     log.setLevel(logging.DEBUG)
-    s = StringIO()
-    print(dedent(data).strip(), file=s)
-    s.seek(0)
-    with patch.object(sys, "stdin", new=s):
-        input_obj, input_format = tools._realize_config_input_setup(input_format=FORMAT.nml)
+    with StringIO() as sio:
+        print(dedent(data).strip(), file=sio)
+        sio.seek(0)
+        with patch.object(sys, "stdin", new=sio):
+            input_obj = tools._realize_config_input_setup(input_format=FORMAT.nml)
     assert input_obj["nl"]["pi"] == 3.14
-    assert input_format == FORMAT.nml
     assert logged(caplog, "Reading input from stdin")
 
 
 def test__realize_config_input_setup_sh_cfgobj():
     data = {"foo": "bar"}
     cfgobj = SHConfig(config=data)
-    input_obj, input_format = tools._realize_config_input_setup(input_config=cfgobj)
+    input_obj = tools._realize_config_input_setup(input_config=cfgobj)
     assert input_obj.data == data
-    assert input_format == FORMAT.sh
 
 
 def test__realize_config_input_setup_sh_file(tmp_path):
@@ -698,9 +700,8 @@ def test__realize_config_input_setup_sh_file(tmp_path):
     path = tmp_path / "config.sh"
     with open(path, "w", encoding="utf-8") as f:
         print(dedent(data).strip(), file=f)
-    input_obj, input_format = tools._realize_config_input_setup(input_config=path)
+    input_obj = tools._realize_config_input_setup(input_config=path)
     assert input_obj.data == {"foo": "bar"}
-    assert input_format == FORMAT.sh
 
 
 def test__realize_config_input_setup_sh_stdin(caplog):
@@ -709,22 +710,20 @@ def test__realize_config_input_setup_sh_stdin(caplog):
     """
     stdinproxy.cache_clear()
     log.setLevel(logging.DEBUG)
-    s = StringIO()
-    print(dedent(data).strip(), file=s)
-    s.seek(0)
-    with patch.object(sys, "stdin", new=s):
-        input_obj, input_format = tools._realize_config_input_setup(input_format=FORMAT.sh)
+    with StringIO() as sio:
+        print(dedent(data).strip(), file=sio)
+        sio.seek(0)
+        with patch.object(sys, "stdin", new=sio):
+            input_obj = tools._realize_config_input_setup(input_format=FORMAT.sh)
     assert input_obj.data == {"foo": "bar"}
-    assert input_format == FORMAT.sh
     assert logged(caplog, "Reading input from stdin")
 
 
 def test__realize_config_input_setup_yaml_cfgobj():
     data = {"foo": "bar"}
     cfgobj = YAMLConfig(config=data)
-    input_obj, input_format = tools._realize_config_input_setup(input_config=cfgobj)
+    input_obj = tools._realize_config_input_setup(input_config=cfgobj)
     assert input_obj.data == data
-    assert input_format == FORMAT.yaml
 
 
 def test__realize_config_input_setup_yaml_file(tmp_path):
@@ -734,9 +733,8 @@ def test__realize_config_input_setup_yaml_file(tmp_path):
     path = tmp_path / "config.yaml"
     with open(path, "w", encoding="utf-8") as f:
         print(dedent(data).strip(), file=f)
-    input_obj, input_format = tools._realize_config_input_setup(input_config=path)
+    input_obj = tools._realize_config_input_setup(input_config=path)
     assert input_obj.data == {"foo": "bar"}
-    assert input_format == FORMAT.yaml
 
 
 def test__realize_config_input_setup_yaml_stdin(caplog):
@@ -745,13 +743,12 @@ def test__realize_config_input_setup_yaml_stdin(caplog):
     """
     stdinproxy.cache_clear()
     log.setLevel(logging.DEBUG)
-    s = StringIO()
-    print(dedent(data).strip(), file=s)
-    s.seek(0)
-    with patch.object(sys, "stdin", new=s):
-        input_obj, input_format = tools._realize_config_input_setup(input_format=FORMAT.yaml)
+    with StringIO() as sio:
+        print(dedent(data).strip(), file=sio)
+        sio.seek(0)
+        with patch.object(sys, "stdin", new=sio):
+            input_obj = tools._realize_config_input_setup(input_format=FORMAT.yaml)
     assert input_obj.data == {"foo": "bar"}
-    assert input_format == FORMAT.yaml
     assert logged(caplog, "Reading input from stdin")
 
 
@@ -776,13 +773,13 @@ def test__realize_config_update_stdin(caplog, realize_config_testobj):
     stdinproxy.cache_clear()
     log.setLevel(logging.DEBUG)
     assert realize_config_testobj[1][2][3] == 88
-    s = StringIO()
-    print("{1: {2: {3: 99}}}", file=s)
-    s.seek(0)
-    with patch.object(sys, "stdin", new=s):
-        o = tools._realize_config_update(
-            input_obj=realize_config_testobj, update_format=FORMAT.yaml
-        )
+    with StringIO() as sio:
+        print("{1: {2: {3: 99}}}", file=sio)
+        sio.seek(0)
+        with patch.object(sys, "stdin", new=sio):
+            o = tools._realize_config_update(
+                input_obj=realize_config_testobj, update_format=FORMAT.yaml
+            )
     assert o[1][2][3] == 99
     assert logged(caplog, "Reading update from stdin")
 
