@@ -4,6 +4,7 @@ Drivers
 .. toctree::
    :maxdepth: 1
 
+   cdeps
    chgres_cube
    esg_grid
    filter_topo

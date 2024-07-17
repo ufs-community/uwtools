@@ -1,0 +1,28 @@
+usage: uw cdeps atm --cycle CYCLE [-h] [--version] [--config-file PATH]
+                    [--dry-run] [--graph-file PATH] [--key-path KEY[.KEY...]]
+                    [--quiet] [--verbose]
+
+Create data atmosphere configuration with all required content
+
+Required arguments:
+  --cycle CYCLE
+      The cycle in ISO8601 format (e.g. 2024-07-17T00)
+
+Optional arguments:
+  -h, --help
+      Show help and exit
+  --version
+      Show version info and exit
+  --config-file PATH, -c PATH
+      Path to UW YAML config file (default: read from stdin)
+  --dry-run
+      Only log info, making no changes
+  --graph-file PATH
+      Path to Graphviz DOT output [experimental]
+  --key-path KEY[.KEY...]
+      Dot-separated path of keys leading through the config to the driver's
+      configuration block
+  --quiet, -q
+      Print no logging messages
+  --verbose, -v
+      Print all logging messages
