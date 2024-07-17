@@ -10,8 +10,8 @@ cdeps:
         flds_presaero: false
         flds_wiso: false
         iradsw: 1
-        model_maskfile: path/to/mesh1.nc
-        model_meshfile: path/to/mesh1.nc
+        model_maskfile: /path/to/mesh1.nc
+        model_meshfile: /path/to/mesh1.nc
         nx_global: 100
         ny_global: 100
         restfilm: 'null'
@@ -22,7 +22,7 @@ cdeps:
         mapalgo: redist
         readmode: single
         stream_data_files:
-          - path/to/data_file1.nc
+          - /path/to/data_file1.nc
         stream_data_variables:
           - var1
         stream_lev_dimname: 'null'
@@ -42,8 +42,8 @@ cdeps:
       docn_nml:
         datamode: some_supported_mode2
         import_data_fields: none
-        model_maskfile: path/to/mesh2.nc
-        model_meshfile: path/to/mesh2.nc
+        model_maskfile: /path/to/mesh2.nc
+        model_meshfile: /path/to/mesh2.nc
         nx_global: 150
         ny_global: 150
         restfilm: 'null'
