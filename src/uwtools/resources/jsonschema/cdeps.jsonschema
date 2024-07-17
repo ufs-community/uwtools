@@ -296,8 +296,14 @@
             "template_file"
           ],
           "type": "object"
+        },
+        "rundir": {
+          "type": "string"
         }
-      }
+      },
+      "required": [
+        "rundir"
+      ]
     }
   },
   "type": "object"

@@ -72,6 +72,7 @@ cdeps:
         yearFirst: 2008
         yearLast: 2008
     template_file: stream.jinja2
+  rundir: /path/to/dir
 platform:
   account: me
   scheduler: slurm
