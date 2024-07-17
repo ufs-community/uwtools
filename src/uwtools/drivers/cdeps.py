@@ -50,7 +50,7 @@ class CDEPS(AssetsCycleBased):
         Create data atmosphere stream config file (datm.streams).
         """
         fn = "datm.streams"
-        yield self._taskname(f"namelist file {fn}")
+        yield self._taskname(f"stream file {fn}")
         path = self._rundir / fn
         yield asset(path, path.is_file)
         template_file = self._driver_config["atm_streams"]["template_file"]
@@ -87,12 +87,23 @@ class CDEPS(AssetsCycleBased):
         Create data ocean stream config file (docn.streams).
         """
         fn = "docn.streams"
-        yield self._taskname(f"namelist file {fn}")
+        yield self._taskname(f"stream file {fn}")
         path = self._rundir / fn
         yield asset(path, path.is_file)
         template_file = self._driver_config["ocn_streams"]["template_file"]
         yield file(path=Path(template_file))
         self._model_stream_file("ocn_streams", path, template_file)
+
+    @tasks
+    def provisioned_rundir(self):
+        """
+        Run directory provisioned with all required content.
+        """
+        yield self._taskname("provisioned run directory")
+        yield [
+            self.atm,
+            self.ocn,
+        ]
 
     # Private helper methods
 
@@ -123,5 +134,7 @@ class CDEPS(AssetsCycleBased):
         :param template_file: Path to the template file to render.
         """
         render(
-            input_file=Path(template_file), output_file=path, values_src=self._driver_config[group]
+            input_file=Path(template_file),
+            output_file=path,
+            values_src=self._driver_config[group]["streams"],
         )

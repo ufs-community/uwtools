@@ -12,93 +12,97 @@ from uwtools.tests.support import schema_validator, with_del, with_set
 # Fixtures
 
 
+CDEPS_CONFIG = {
+    "atm_in": {
+        "base_file": "/path/to/atm.nml",
+        "update_values": {
+            "datm_nml": {
+                "anomaly_forcing": "string",
+                "bias_correct": "string",
+                "datamode": "GFS",
+                "export_all": True,
+                "factorfn_data": "string",
+                "factorfn_mesh": "string",
+                "flds_co2": True,
+                "flds_presaero": True,
+                "flds_presndep": True,
+                "flds_wiso": True,
+                "flds_preso3": True,
+                "iradsw": 1,
+                "model_maskfile": "string",
+                "model_meshfile": "string",
+                "nx_global": 1,
+                "ny_global": 1,
+                "restfilm": "string",
+                "skip_restart_read": True,
+            },
+        },
+    },
+    "atm_streams": {
+        "streams": {
+            "stream01": {
+                "dtlimit": 1.5,
+                "mapalgo": "string",
+                "readmode": "single",
+                "stream_data_files": ["string", "string"],
+                "stream_data_variables": ["string", "string"],
+                "stream_lev_dimname": "string",
+                "stream_mesh_file": "string",
+                "stream_offset": 1,
+                "stream_vectors": ["u", "v"],
+                "taxmode": "string",
+                "tinterpalgo": "string",
+                "yearAlign": 1,
+                "yearFirst": 1,
+                "yearLast": 1,
+            }
+        },
+        "template_file": "/path/to/atm.jinja2",
+    },
+    "ocn_in": {
+        "base_file": "/path/to/ocn.nml",
+        "update_values": {
+            "docn_nml": {
+                "datamode": "string",
+                "import_data_fields": "string",
+                "model_maskfile": "string",
+                "model_meshfile": "string",
+                "nx_global": 1,
+                "ny_global": 1,
+                "restfilm": "string",
+                "skip_restart_read": True,
+                "sst_constant_value": 3.14,
+            },
+        },
+    },
+    "ocn_streams": {
+        "streams": {
+            "stream01": {
+                "dtlimit": 1.5,
+                "mapalgo": "string",
+                "readmode": "single",
+                "stream_data_files": ["string", "string"],
+                "stream_data_variables": ["string", "string"],
+                "stream_lev_dimname": "string",
+                "stream_mesh_file": "string",
+                "stream_offset": 1,
+                "stream_vectors": ["u", "v"],
+                "taxmode": "string",
+                "tinterpalgo": "string",
+                "yearAlign": 1,
+                "yearFirst": 1,
+                "yearLast": 1,
+            }
+        },
+        "template_file": "/path/to/atm.jinja2",
+    },
+    "rundir": "/path/to/run/dir",
+}
+
+
 @fixture
 def cdeps_config():
-    return {
-        "atm_in": {
-            "base_file": "/path/to/atm.nml",
-            "update_values": {
-                "datm_nml": {
-                    "anomaly_forcing": "string",
-                    "bias_correct": "string",
-                    "datamode": "GFS",
-                    "export_all": True,
-                    "factorfn_data": "string",
-                    "factorfn_mesh": "string",
-                    "flds_co2": True,
-                    "flds_presaero": True,
-                    "flds_presndep": True,
-                    "flds_wiso": True,
-                    "flds_preso3": True,
-                    "iradsw": 1,
-                    "model_maskfile": "string",
-                    "model_meshfile": "string",
-                    "nx_global": 1,
-                    "ny_global": 1,
-                    "restfilm": "string",
-                    "skip_restart_read": True,
-                },
-            },
-        },
-        "atm_streams": {
-            "streams": {
-                "stream01": {
-                    "dtlimit": 1.5,
-                    "mapalgo": "string",
-                    "readmode": "single",
-                    "stream_data_files": ["string", "string"],
-                    "stream_data_variables": ["string", "string"],
-                    "stream_lev_dimname": "string",
-                    "stream_mesh_file": "string",
-                    "stream_offset": 1,
-                    "stream_vectors": ["u", "v"],
-                    "taxmode": "string",
-                    "tinterpalgo": "string",
-                    "yearAlign": 1,
-                    "yearFirst": 1,
-                    "yearLast": 1,
-                }
-            },
-            "template_file": "/path/to/atm.jinja2",
-        },
-        "ocn_in": {
-            "base_file": "/path/to/ocn.nml",
-            "update_values": {
-                "docn_nml": {
-                    "datamode": "string",
-                    "import_data_fields": "string",
-                    "model_maskfile": "string",
-                    "model_meshfile": "string",
-                    "nx_global": 1,
-                    "ny_global": 1,
-                    "restfilm": "string",
-                    "skip_restart_read": True,
-                    "sst_constant_value": 3.14,
-                },
-            },
-        },
-        "ocn_streams": {
-            "streams": {
-                "stream01": {
-                    "dtlimit": 1.5,
-                    "mapalgo": "string",
-                    "readmode": "single",
-                    "stream_data_files": ["string", "string"],
-                    "stream_data_variables": ["string", "string"],
-                    "stream_lev_dimname": "string",
-                    "stream_mesh_file": "string",
-                    "stream_offset": 1,
-                    "stream_vectors": ["u", "v"],
-                    "taxmode": "string",
-                    "tinterpalgo": "string",
-                    "yearAlign": 1,
-                    "yearFirst": 1,
-                    "yearLast": 1,
-                }
-            },
-            "template_file": "/path/to/atm.jinja2",
-        },
-    }
+    return CDEPS_CONFIG
 
 
 @fixture
