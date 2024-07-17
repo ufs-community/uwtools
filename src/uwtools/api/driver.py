@@ -9,24 +9,21 @@ from inspect import getfullargspec
 from pathlib import Path
 from typing import Optional, Type, Union
 
-import iotaa as _iotaa
-
 from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
-from uwtools.exceptions import UWError
 from uwtools.logging import log
 from uwtools.utils.api import ensure_data_source
 
 
 def execute(  # pylint: disable=unused-argument
-    driver_class: str,
-    module_name: str,
+    module: str,
+    class_name: str,
     task: str,
+    schema_file: str,
     cycle: Optional[datetime] = None,
     leadtime: Optional[timedelta] = None,
     config: Optional[Union[Path, str]] = None,
-    module_path: Optional[str] = None,
-    schema_file: Optional[str] = None,
+    module_dir: Optional[str] = None,
     batch: Optional[bool] = False,
     dry_run: Optional[bool] = False,
     key_path: Optional[list[str]] = None,
@@ -38,7 +35,7 @@ def execute(  # pylint: disable=unused-argument
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
 
-    :param driver_class: Class of driver object to instantiate.
+    :param class_name: Class of driver object to instantiate.
     :param module_name: Name of driver module.
     :param task: The task to execute.
     :param cycle: The cycle.
@@ -52,8 +49,7 @@ def execute(  # pylint: disable=unused-argument
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
-    if not (class_ := _get_driver_class(driver_class, module_name, module_path)):
-        log.error("msg")
+    if not (class_ := _get_driver_class(class_name, module, module_dir)):
         return False
 
     kwargs = dict(
@@ -69,22 +65,29 @@ def execute(  # pylint: disable=unused-argument
 
     for arg in ["cycle", "leadtime"]:
         if not locals()[arg] and arg in argnames:
-            log.error("msg")
+            log.error(f"{class_name} requires argument {arg}.")
             return False
+        # check if cycle/leadtime provided when not needed
     driverobj = class_(**kwargs)
     getattr(driverobj, task)()
     return True
 
 
-def tasks(driver_class, module_name, module_path) -> dict[str, str]:
+def tasks(
+    class_name: str,
+    module: str,
+    module_dir: Optional[str] = None,
+) -> dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
 
-    :param driver_class: Class of driver object to instantiate.
+    :param class_name: Class of driver object to instantiate.
+    :param module_name: Name of driver module.
+    :param module_path: Path to module file.
     """
-    if not (class_ := _get_driver_class(driver_class, module_name, module_path)):
-        log.error()
-        return False
+    if not (class_ := _get_driver_class(class_name, module, module_dir)):
+        log.error(f"Directory {module_dir} not found.")
+        raise NotADirectoryError
     return _tasks(class_)
 
 
@@ -107,36 +110,33 @@ def _add_classes():
         __all__.append(classname)
 
 
-def _get_driver_class(driver_class, module_name, module_path) -> Optional[Type]:
+def _get_driver_class(
+    class_name: str,
+    module: str,
+    module_dir: Optional[str] = None,
+) -> Optional[Type]:
     """
-    Returns named atribute of the driver class.
+    Returns the driver class.
 
-    :param driver_class: Class of driver object to instantiate.
-    :param module_name: Name of driver module.
-    :param module_path: Path to module file.
+    :param class_name: Class of driver object to instantiate.
+    :param module: Name of driver module.
+    :param module_dir: Path to directory that contains module.
     """
-    if module_path:
-        try:
-            module_spec = importlib.util.spec_from_file_location(
-                module_name, f"{module_path}/{module_name}.py"
-            )
-            module = importlib.util.module_from_spec(module_spec)
-            module_spec.loader.exec_module(module)
-        except UWError:
-            log.error()
-            return None
     try:
-        module = importlib.import_module(module_name)
-    except UWError:
-        log.error()
+        sys.path.insert(0, str(module_dir or Path.cwd()))
+        module_ = importlib.import_module(module)
+    except ModuleNotFoundError:
+        if module_dir:
+            log.error(f"Module {module} not found in {module_dir}")
+        else:
+            log.error(f"No module named {module} on path, including {Path.cwd()}.")
         return None
     try:
-        class_ = getattr(module, driver_class)
-        return class_
-    except UWError:
-        log.error()
+        return getattr(module_, class_name)
+    except AttributeError:
+        log.error(f"Module {module} has no class {class_name}.")
         return None
 
 
-__all__: list[str] = []
+__all__: list[str] = [graph.__name__]
 _add_classes()

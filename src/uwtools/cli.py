@@ -17,6 +17,7 @@ from typing import Any, Callable, NoReturn, Optional
 
 import uwtools.api
 import uwtools.api.config
+import uwtools.api.driver
 import uwtools.api.file
 import uwtools.api.rocoto
 import uwtools.api.template
@@ -49,7 +50,10 @@ def main() -> None:
     try:
         setup_logging(quiet=True)
         args, checks = _parse_args(sys.argv[1:])
-        for check in checks[args[STR.mode]][args[STR.action]]:
+        checks = checks[args[STR.mode]]
+        if STR.action in args:
+            checks = checks[args[STR.action]]
+        for check in checks:
             check(args)
         setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
     except UWError as e:
@@ -57,6 +61,7 @@ def main() -> None:
     try:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         tools: dict[str, Callable[..., bool]] = {
+            STR.byod: _dispatch_byod,
             STR.config: _dispatch_config,
             STR.file: _dispatch_file,
             STR.rocoto: _dispatch_rocoto,
@@ -88,6 +93,58 @@ def main() -> None:
     except UWError as e:
         log.error(str(e))
         sys.exit(1)
+
+
+# Mode byod
+
+
+def _add_subparser_byod(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: byod
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.byod, "Bring your own driver")
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_module_name(required)
+    _add_arg_class_name(required)
+    _add_arg_task(required)
+    _add_arg_schema_file(required)
+    optional = _basic_setup(parser)
+    _add_arg_module_path(optional)
+    _add_arg_config_file(optional)
+    _add_arg_cycle(optional)
+    _add_arg_leadtime(optional)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_key_path(
+        optional,
+        helpmsg="Dot-separated path of keys leading through the config "
+        "to the driver's configuration block",
+    )
+    return _add_args_verbosity(optional)
+
+
+def _dispatch_byod(args: Args) -> bool:
+    """
+    Dispatch logic for byod mode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.driver.execute(
+        class_name=args[STR.classname],
+        module_name=args[STR.modulename],
+        task=args[STR.task],
+        schema_file=args[STR.schemafile],
+        key_path=args[STR.keypath],
+        dry_run=args[STR.dryrun],
+        config=args[STR.cfgfile],
+        module_path=args[STR.modulepath],
+        cycle=args[STR.cycle],
+        leadtime=args[STR.leadtime],
+        batch=args[STR.batch],
+        stdin_ok=True,
+    )
 
 
 # Mode config
@@ -551,6 +608,15 @@ def _add_arg_batch(group: Group) -> None:
     )
 
 
+def _add_arg_class_name(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.classname),
+        help="Name of driver class",
+        required=True,
+        type=str,
+    )
+
+
 def _add_arg_config_file(group: Group, required: bool = False) -> None:
     msg = "Path to UW YAML config file" + ("" if required else " (default: read from stdin)")
     group.add_argument(
@@ -679,6 +745,24 @@ def _add_arg_leadtime(group: Group, required: bool = False) -> None:
     )
 
 
+def _add_arg_module_name(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.modulename),
+        help="Name of driver module",
+        required=True,
+        type=str,
+    )
+
+
+def _add_arg_module_path(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.modulepath),
+        help="Path to directory containing driver module",
+        required=False,
+        type=str,
+    )
+
+
 def _add_arg_output_file(group: Group, required: bool = False) -> None:
     group.add_argument(
         _switch(STR.outfile),
@@ -736,6 +820,15 @@ def _add_arg_target_dir(group: Group, required: bool) -> None:
         metavar="PATH",
         required=required,
         type=Path,
+    )
+
+
+def _add_arg_task(group: Group) -> None:
+    group.add_argument(
+        _switch(STR.task),
+        help="Driver task to execute",
+        required=True,
+        type=str,
     )
 
 
@@ -1025,6 +1118,7 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
     _basic_setup(parser)
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     tools = {
+        STR.byod: partial(_add_subparser_byod, subparsers),
         STR.config: partial(_add_subparser_config, subparsers),
         STR.file: partial(_add_subparser_file, subparsers),
         STR.rocoto: partial(_add_subparser_rocoto, subparsers),
