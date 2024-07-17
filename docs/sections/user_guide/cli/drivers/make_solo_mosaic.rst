@@ -33,7 +33,7 @@ Its contents are described in section :ref:`make_solo_mosaic_yaml`.
 
      $ uw make_solo_mosaic run --config-file config.yaml
 
-  The driver creates a ``runscript.make_solo_mosaic`` file in the directory specified by ``run_dir:`` in the config and runs it, executing ``make_solo_mosaic``.
+  The driver creates a ``runscript.make_solo_mosaic`` file in the directory specified by ``rundir:`` in the config and runs it, executing ``make_solo_mosaic``.
 
 ..
   An example runscript:
@@ -50,7 +50,7 @@ Its contents are described in section :ref:`make_solo_mosaic_yaml`.
 
      $ uw make_solo_mosaic run --config-file config.yaml --batch
 
-  The driver creates a ``runscript.make_solo_mosaic`` file in the directory specified by ``run_dir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``make_solo_mosaic:``.
+  The driver creates a ``runscript.make_solo_mosaic`` file in the directory specified by ``rundir:`` in the config and submits it to the batch system. Running with ``--batch`` requires a correctly configured ``platform:`` block in ``config.yaml``, as well as appropriate settings in the ``execution:`` block under ``make_solo_mosaic:``.
 
 * Specifying the ``--dry-run`` flag results in the driver logging messages about actions it would have taken, without actually taking any.
 

@@ -53,7 +53,7 @@ Read more on the UPP namelists, including variable meanings and appropriate valu
 
 .. include:: /shared/validate_namelist.rst
 
-run_dir:
-^^^^^^^^
+rundir:
+^^^^^^^
 
 The path to the run directory.

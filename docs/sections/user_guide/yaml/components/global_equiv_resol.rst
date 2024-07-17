@@ -25,7 +25,7 @@ input_grid_file:
 
 The path to the input grid file required by the program.
 
-run_dir:
-^^^^^^^^
+rundir:
+^^^^^^^
 
 The path to the run directory.

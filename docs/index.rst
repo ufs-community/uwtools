@@ -71,6 +71,22 @@ This tool helps transform legacy configuration files templated with the atparse 
 
 | :any:`CLI documentation with examples<cli_template_translate_examples>`
 
+File Provisioning
+^^^^^^^^^^^^^^^^^
+
+This tool helps users define the source and destination of files to be copied or linked, in the same UW YAML language used by UW drivers.
+
+| :any:`CLI documentation with examples<cli_file_copy_examples>`
+
+
+There is a video demonstration of the use of the ``uw file`` tool available via YouTube.
+
+.. raw:: html
+
+   <iframe width="560" height="315" src="https://www.youtube.com/embed/b2HXOlt-Ulw?si=rLWatBFu4mvNR65S" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+|
+
 Rocoto Configurability
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -100,7 +116,7 @@ Drivers for NWP components are available as top-level CLI modes and API modules.
 
 Provided with a valid UW YAML configuration file, and CLI arguments when required, ``uw`` can prepare a fully provisioned run directory and execute a component either directly on the current system, or via a batch job submitted to an HPC scheduler.
 
-Each driver produces a list of available ``TASK`` arguments from its CLI ``--help, -h`` flag. The ``provisioned_run_directory`` will do everything except ``run`` the executable, but any of the tasks may be requested and only the steps required to produce that task will be performed.
+Each driver produces a list of available ``TASK`` arguments from its CLI ``--help, -h`` flag. The ``provisioned_rundir`` will do everything except ``run`` the executable, but any of the tasks may be requested and only the steps required to produce that task will be performed.
 
 Over time, we'll add many other drivers to support a variety of UFS components from pre-processing to post-processing, along with many data assimilation components.
 

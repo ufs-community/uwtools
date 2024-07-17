@@ -306,14 +306,14 @@
         "execution": {
           "$ref": "urn:uwtools:execution-serial"
         },
-        "run_dir": {
+        "rundir": {
           "type": "string"
         }
       },
       "required": [
         "config",
         "execution",
-        "run_dir"
+        "rundir"
       ]
     }
   },

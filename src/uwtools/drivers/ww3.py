@@ -2,44 +2,20 @@
 An assets driver for ww3.
 """
 
-from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from iotaa import asset, task, tasks
 
 from uwtools.api.template import render
-from uwtools.drivers.driver import Assets
+from uwtools.drivers.driver import AssetsCycleBased
 from uwtools.strings import STR
 from uwtools.utils.tasks import file
 
 
-class WaveWatchIII(Assets):
+class WaveWatchIII(AssetsCycleBased):
     """
-    A library driver for ww3.
+    An assets driver for ww3.
     """
-
-    def __init__(
-        self,
-        cycle: datetime,
-        config: Optional[Path] = None,
-        dry_run: bool = False,
-        batch: bool = False,
-        key_path: Optional[list[str]] = None,
-    ):
-        """
-        The driver.
-
-        :param cycle: The cycle.
-        :param config: Path to config file (read stdin if missing or None).
-        :param dry_run: Run in dry-run mode?
-        :param batch: Run component via the batch system?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
-        super().__init__(
-            config=config, dry_run=dry_run, batch=batch, cycle=cycle, key_path=key_path
-        )
-        self._cycle = cycle
 
     # Workflow tasks
 
@@ -61,7 +37,7 @@ class WaveWatchIII(Assets):
         )
 
     @tasks
-    def provisioned_run_directory(self):
+    def provisioned_rundir(self):
         """
         Run directory provisioned with all required content.
         """

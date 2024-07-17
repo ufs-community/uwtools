@@ -45,7 +45,7 @@ def config(tmp_path):
                 "foo": "/path/to/foo",
                 "bar/baz": "/path/to/baz",
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
         },
         "platform": {
             "account": "me",
@@ -88,7 +88,7 @@ def test_IODA(method):
     assert getattr(IODA, method) is getattr(JEDIBase, method)
 
 
-def test_IODA_provisioned_run_directory(driverobj):
+def test_IODA_provisioned_rundir(driverobj):
     with patch.multiple(
         driverobj,
         configuration_file=D,
@@ -96,7 +96,7 @@ def test_IODA_provisioned_run_directory(driverobj):
         files_linked=D,
         runscript=D,
     ) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 

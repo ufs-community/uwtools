@@ -66,7 +66,7 @@ def config(tmp_path):
                 },
                 "validate": True,
             },
-            "run_dir": str(tmp_path),
+            "rundir": str(tmp_path),
         },
         "platform": {
             "account": "me",
@@ -125,16 +125,16 @@ def test_ChgresCube_namelist_file_fails_validation(caplog, driverobj):
 
 def test_ChgresCube_namelist_file_missing_base_file(caplog, driverobj):
     log.setLevel(logging.DEBUG)
-    base_file = str(Path(driverobj._driver_config["run_dir"]) / "missing.nml")
+    base_file = str(Path(driverobj._driver_config["rundir"]) / "missing.nml")
     driverobj._driver_config["namelist"]["base_file"] = base_file
     path = Path(refs(driverobj.namelist_file()))
     assert not path.exists()
     assert regex_logged(caplog, "missing.nml: State: Not Ready (external asset)")
 
 
-def test_ChgresCube_provisioned_run_directory(driverobj):
+def test_ChgresCube_provisioned_rundir(driverobj):
     with patch.multiple(driverobj, namelist_file=D, runscript=D) as mocks:
-        driverobj.provisioned_run_directory()
+        driverobj.provisioned_rundir()
     for m in mocks:
         mocks[m].assert_called_once_with()
 
