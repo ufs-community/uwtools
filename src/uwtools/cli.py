@@ -106,12 +106,12 @@ def _add_subparser_byod(subparsers: Subparsers) -> ModeChecks:
     """
     parser = _add_subparser(subparsers, STR.byod, "Bring your own driver")
     required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_module_name(required)
+    _add_arg_module(required)
     _add_arg_class_name(required)
     _add_arg_task(required)
     _add_arg_schema_file(required)
     optional = _basic_setup(parser)
-    _add_arg_module_path(optional)
+    _add_arg_module_dir(optional)
     _add_arg_config_file(optional)
     _add_arg_cycle(optional)
     _add_arg_leadtime(optional)
@@ -133,13 +133,13 @@ def _dispatch_byod(args: Args) -> bool:
     """
     return uwtools.api.driver.execute(
         class_name=args[STR.classname],
-        module_name=args[STR.modulename],
+        module=args[STR.module],
         task=args[STR.task],
         schema_file=args[STR.schemafile],
         key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
         config=args[STR.cfgfile],
-        module_path=args[STR.modulepath],
+        module_dir=args[STR.moduledir],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
         batch=args[STR.batch],
