@@ -50,7 +50,7 @@ class ConcreteAssetsCycleBased(Common, driver.AssetsCycleBased):
     pass
 
 
-class ConcreteAssetsCycleAndLeadtimeBased(Common, driver.AssetsCycleAndLeadtimeBased):
+class ConcreteAssetsCycleLeadtimeBased(Common, driver.AssetsCycleLeadtimeBased):
     pass
 
 
@@ -62,7 +62,7 @@ class ConcreteDriverCycleBased(Common, driver.DriverCycleBased):
     pass
 
 
-class ConcreteDriverCycleAndLeadtimeBased(Common, driver.DriverCycleAndLeadtimeBased):
+class ConcreteDriverCycleLeadtimeBased(Common, driver.DriverCycleLeadtimeBased):
     pass
 
 
@@ -130,7 +130,7 @@ def test_Assets_repr_cycle_based(config):
 
 
 def test_Assets_repr_cycle_and_leadtime_based(config):
-    obj = ConcreteAssetsCycleAndLeadtimeBased(
+    obj = ConcreteAssetsCycleLeadtimeBased(
         config=config, cycle=dt.datetime(2024, 7, 2, 12), leadtime=dt.timedelta(hours=6)
     )
     expected = "concrete 2024-07-02T12:00 06:00:00 in %s" % obj._driver_config["rundir"]
@@ -517,3 +517,15 @@ def test_Driver__write_runscript(driverobj):
     with open(path, "r", encoding="utf-8") as f:
         actual = f.read()
     assert actual.strip() == dedent(expected).strip()
+
+
+def test__add_docstring():
+    class C:
+        pass
+
+    assert getattr(C, "__doc__") is None
+    with patch.object(driver, "C", C, create=True):
+        class_ = driver.C  # type: ignore # pylint: disable=no-member
+        omit = ["cycle", "leadtime", "config", "dry_run", "key_path", "batch"]
+        driver._add_docstring(class_=class_, omit=omit)
+    assert getattr(C, "__doc__").strip() == "The driver."

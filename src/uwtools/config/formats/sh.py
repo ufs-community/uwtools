@@ -1,6 +1,5 @@
 import re
 import shlex
-from io import StringIO
 from pathlib import Path
 from typing import Optional, Union
 
@@ -26,6 +25,19 @@ class SHConfig(Config):
         self.parse_include()
 
     # Private methods
+
+    @classmethod
+    def _dict_to_str(cls, cfg: dict) -> str:
+        """
+        Returns the field-table representation of the given dict.
+
+        :param cfg: A dict object.
+        """
+        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.sh)
+        lines = []
+        for key, value in cfg.items():
+            lines.append("%s=%s" % (key, shlex.quote(str(value))))
+        return "\n".join(lines)
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """
@@ -58,25 +70,16 @@ class SHConfig(Config):
         config_check_depths_dump(config_obj=self, target_format=FORMAT.sh)
         self.dump_dict(self.data, path)
 
-    @staticmethod
-    def dump_dict(cfg: dict, path: Optional[Path] = None) -> None:
+    @classmethod
+    def dump_dict(cls, cfg: dict, path: Optional[Path] = None) -> None:
         """
         Dumps a provided config dictionary in bash format.
 
         :param cfg: The in-memory config object to dump.
         :param path: Path to dump config to.
         """
-
-        # Write first to a StringIO object to avoid creating a partial file in case of problems
-        # rendering or quoting config values.
-
-        config_check_depths_dump(config_obj=cfg, target_format=FORMAT.sh)
-        s = StringIO()
-        for key, value in cfg.items():
-            print("%s=%s" % (key, shlex.quote(str(value))), file=s)
         with writable(path) as f:
-            print(s.getvalue().strip(), file=f)
-        s.close()
+            print(cls._dict_to_str(cfg), file=f)
 
     @staticmethod
     def get_depth_threshold() -> Optional[int]:
