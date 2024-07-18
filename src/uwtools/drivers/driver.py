@@ -632,6 +632,7 @@ def _add_docstring(class_: type, omit: Optional[list[str]] = None) -> None:
     :param dry_run: Run in dry-run mode?
     :param key_path: Keys leading through the config to the driver's configuration block.
     :param batch: Run component via the batch system?
+    :param schema_file: Path to schema file to use to validate an external driver.
     """
     setattr(
         class_,

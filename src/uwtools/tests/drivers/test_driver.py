@@ -549,6 +549,6 @@ def test__add_docstring():
     assert getattr(C, "__doc__") is None
     with patch.object(driver, "C", C, create=True):
         class_ = driver.C  # type: ignore # pylint: disable=no-member
-        omit = ["cycle", "leadtime", "config", "dry_run", "key_path", "batch"]
+        omit = ["cycle", "leadtime", "config", "dry_run", "key_path", "batch", "schema_file"]
         driver._add_docstring(class_=class_, omit=omit)
     assert getattr(C, "__doc__").strip() == "The driver."
