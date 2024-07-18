@@ -248,15 +248,6 @@ class AssetsCycleLeadtimeBased(Assets):
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
     ):
-        """
-        The driver.
-
-        :param cycle: The cycle.
-        :param leadtime: The leadtime.
-        :param config: Path to config file (read stdin if missing or None).
-        :param dry_run: Run in dry-run mode?
-        :param key_path: Keys leading through the config to the driver's configuration block.
-        """
         super().__init__(
             cycle=cycle,
             leadtime=leadtime,
