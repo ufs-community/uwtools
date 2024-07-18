@@ -105,7 +105,7 @@ def _add_subparser_byod(subparsers: Subparsers) -> ModeChecks:
     parser = _add_subparser(subparsers, STR.byod, "Bring your own driver")
     required = parser.add_argument_group(TITLE_REQ_ARG)
     _add_arg_module(required)
-    _add_arg_class_name(required)
+    _add_arg_classname(required)
     _add_arg_task(required)
     _add_arg_schema_file(required)
     optional = _basic_setup(parser)
@@ -130,7 +130,7 @@ def _dispatch_byod(args: Args) -> bool:
     :param args: Parsed command-line args.
     """
     return uwtools.api.driver.execute(
-        class_name=args[STR.classname],
+        classname=args[STR.classname],
         module=args[STR.module],
         task=args[STR.task],
         schema_file=args[STR.schemafile],
@@ -606,7 +606,7 @@ def _add_arg_batch(group: Group) -> None:
     )
 
 
-def _add_arg_class_name(group: Group) -> None:
+def _add_arg_classname(group: Group) -> None:
     group.add_argument(
         _switch(STR.classname),
         help="Name of driver class",

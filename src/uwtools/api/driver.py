@@ -17,7 +17,7 @@ from uwtools.utils.api import ensure_data_source
 
 def execute(  # pylint: disable=unused-argument
     module: str,
-    class_name: str,
+    classname: str,
     task: str,
     schema_file: str,
     cycle: Optional[datetime] = None,
@@ -35,7 +35,7 @@ def execute(  # pylint: disable=unused-argument
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
 
-    :param class_name: Class of driver object to instantiate.
+    :param classname: Class of driver object to instantiate.
     :param module_name: Name of driver module.
     :param task: The task to execute.
     :param cycle: The cycle.
@@ -49,7 +49,7 @@ def execute(  # pylint: disable=unused-argument
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
-    if not (class_ := _get_driver_class(class_name, module, module_dir)):
+    if not (class_ := _get_driver_class(classname, module, module_dir)):
         return False
 
     kwargs = dict(
@@ -65,10 +65,10 @@ def execute(  # pylint: disable=unused-argument
 
     for arg in ["cycle", "leadtime"]:
         if not locals()[arg] and arg in argnames:
-            log.error("%s requires argument %s.", class_name, arg)
+            log.error("%s requires argument %s.", classname, arg)
             return False
         if locals()[arg] and arg not in argnames:
-            log.error("%s is not requried in %s.", arg, class_name)
+            log.error("%s is not requried in %s.", arg, classname)
             return False
     driverobj = class_(**kwargs)
     getattr(driverobj, task)()
@@ -76,18 +76,18 @@ def execute(  # pylint: disable=unused-argument
 
 
 def tasks(
-    class_name: str,
+    classname: str,
     module: str,
     module_dir: Optional[str] = None,
 ) -> dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
 
-    :param class_name: Class of driver object to instantiate.
+    :param classname: Class of driver object to instantiate.
     :param module_name: Name of driver module.
     :param module_path: Path to module file.
     """
-    if not (class_ := _get_driver_class(class_name, module, module_dir)):
+    if not (class_ := _get_driver_class(classname, module, module_dir)):
         log.error("Directory %s not found.", module_dir)
         raise NotADirectoryError
     return _tasks(class_)
@@ -113,14 +113,14 @@ def _add_classes():
 
 
 def _get_driver_class(
-    class_name: str,
+    classname: str,
     module: str,
     module_dir: Optional[str] = None,
 ) -> Optional[Type]:
     """
     Returns the driver class.
 
-    :param class_name: Class of driver object to instantiate.
+    :param classname: Class of driver object to instantiate.
     :param module: Name of driver module.
     :param module_dir: Path to directory that contains module.
     """
@@ -137,10 +137,10 @@ def _get_driver_class(
             log.error("No module named %s on path, including %s.", module, Path.cwd())
         return None
     try:
-        class_: Type = getattr(module_, class_name)
+        class_: Type = getattr(module_, classname)
         return class_
     except AttributeError:
-        log.error("Module %s has no class %s.", module, class_name)
+        log.error("Module %s has no class %s.", module, classname)
         return None
 
 
