@@ -411,19 +411,19 @@ def test_Driver__namelist_schema_default_disable(driverobj):
         assert driverobj._namelist_schema() == {"type": "object"}
 
 
-def test_Driver__resources_fail(driverobj):
+def test_Driver__run_resources_fail(driverobj):
     del driverobj._config["platform"]
     with raises(UWConfigError) as e:
-        assert driverobj._resources
+        assert driverobj._run_resources
     assert str(e.value) == "Required 'platform' block missing in config"
 
 
-def test_Driver__resources_pass(driverobj):
+def test_Driver__run_resources_pass(driverobj):
     account = "me"
     scheduler = "slurm"
     walltime = "00:05:00"
     driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
-    assert driverobj._resources == {
+    assert driverobj._run_resources == {
         "account": account,
         "rundir": driverobj._rundir,
         "scheduler": scheduler,
@@ -488,7 +488,7 @@ def test_Driver__scheduler(driverobj):
     with patch.object(driver, "JobScheduler") as JobScheduler:
         scheduler = JobScheduler.get_scheduler()
         assert driverobj._scheduler == scheduler
-        JobScheduler.get_scheduler.assert_called_with(driverobj._resources)
+        JobScheduler.get_scheduler.assert_called_with(driverobj._run_resources)
 
 
 def test_Driver__validate_internal(assetsobj):
