@@ -49,7 +49,6 @@ class Assets(ABC):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
-        :param schema_file: Path to schema file to use for validation.
         """
         self._config = YAMLConfig(config=config)
         self._config.dereference(
@@ -241,7 +240,6 @@ class AssetsCycleBased(Assets):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
-        :param schema_file: Path to schema file to use for validation.
         """
         super().__init__(
             cycle=cycle,
@@ -275,7 +273,6 @@ class AssetsCycleLeadtimeBased(Assets):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
-        :param schema_file: Path to schema file to use for validation.
         """
         super().__init__(
             cycle=cycle,
@@ -307,7 +304,6 @@ class AssetsTimeInvariant(Assets):
         :param config: Path to config file (read stdin if missing or None).
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
-        :param schema_file: Path to schema file to use for validation.
         """
         super().__init__(
             config=config,
@@ -341,7 +337,6 @@ class Driver(Assets):
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
         :param batch: Run component via the batch system?
-        :param schema_file: Path to schema file to use for validation.
         """
         super().__init__(
             cycle=cycle,
@@ -538,7 +533,6 @@ class DriverCycleBased(Driver):
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
         :param batch: Run component via the batch system?
-        :param schema_file: Path to schema file to use for validation.
         """
         super().__init__(
             cycle=cycle,
@@ -575,7 +569,6 @@ class DriverCycleLeadtimeBased(Driver):
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
         :param batch: Run component via the batch system?
-        :param schema_file: Path to schema file to use for validation.
         """
         super().__init__(
             cycle=cycle,
@@ -610,7 +603,6 @@ class DriverTimeInvariant(Driver):
         :param dry_run: Run in dry-run mode?
         :param key_path: Keys leading through the config to the driver's configuration block.
         :param batch: Run component via the batch system?
-        :param schema_file: Path to schema file to use for validation.
         """
         super().__init__(
             config=config,
