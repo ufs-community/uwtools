@@ -53,7 +53,7 @@ def execute(  # pylint: disable=unused-argument
         return False
 
     kwargs = dict(
-        config=ensure_data_source(config, stdin_ok),
+        config=ensure_data_source(config, bool(stdin_ok)),
         dry_run=dry_run,
         key_path=key_path,
     )
@@ -65,9 +65,11 @@ def execute(  # pylint: disable=unused-argument
 
     for arg in ["cycle", "leadtime"]:
         if not locals()[arg] and arg in argnames:
-            log.error(f"{class_name} requires argument {arg}.")
+            log.error("%s requires argument %s.", class_name, arg)
             return False
-        # check if cycle/leadtime provided when not needed
+        if locals()[arg] and arg not in argnames:
+            log.error("%s is not requried in %s.", arg, class_name)
+            return False
     driverobj = class_(**kwargs)
     getattr(driverobj, task)()
     return True
@@ -86,7 +88,7 @@ def tasks(
     :param module_path: Path to module file.
     """
     if not (class_ := _get_driver_class(class_name, module, module_dir)):
-        log.error(f"Directory {module_dir} not found.")
+        log.error("Directory %s not found.", module_dir)
         raise NotADirectoryError
     return _tasks(class_)
 
@@ -123,18 +125,22 @@ def _get_driver_class(
     :param module_dir: Path to directory that contains module.
     """
     try:
-        sys.path.insert(0, str(module_dir or Path.cwd()))
+        user_path = str(module_dir or Path.cwd())
+        sys.path.insert(0, user_path)
+        if not module_dir:
+            log.info("Added %s search path", user_path)
         module_ = importlib.import_module(module)
     except ModuleNotFoundError:
         if module_dir:
-            log.error(f"Module {module} not found in {module_dir}")
+            log.error("Module %s not found in %s", module, module_dir)
         else:
-            log.error(f"No module named {module} on path, including {Path.cwd()}.")
+            log.error("No module named %s on path, including %s.", module, Path.cwd())
         return None
     try:
-        return getattr(module_, class_name)
+        class_: Type = getattr(module_, class_name)
+        return class_
     except AttributeError:
-        log.error(f"Module {module} has no class {class_name}.")
+        log.error("Module %s has no class %s.", module, class_name)
         return None
 
 

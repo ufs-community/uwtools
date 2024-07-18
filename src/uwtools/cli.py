@@ -50,10 +50,8 @@ def main() -> None:
     try:
         setup_logging(quiet=True)
         args, checks = _parse_args(sys.argv[1:])
-        checks = checks[args[STR.mode]]
-        if STR.action in args:
-            checks = checks[args[STR.action]]
-        for check in checks:
+        args[STR.action] = args[STR.action] if STR.action in args else args[STR.mode]
+        for check in checks[args[STR.mode]][args[STR.action]]:
             check(args)
         setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
     except UWError as e:
@@ -122,7 +120,7 @@ def _add_subparser_byod(subparsers: Subparsers) -> ModeChecks:
         helpmsg="Dot-separated path of keys leading through the config "
         "to the driver's configuration block",
     )
-    return _add_args_verbosity(optional)
+    return {STR.byod: _add_args_verbosity(optional)}
 
 
 def _dispatch_byod(args: Args) -> bool:
@@ -745,18 +743,18 @@ def _add_arg_leadtime(group: Group, required: bool = False) -> None:
     )
 
 
-def _add_arg_module_name(group: Group) -> None:
+def _add_arg_module(group: Group) -> None:
     group.add_argument(
-        _switch(STR.modulename),
+        _switch(STR.module),
         help="Name of driver module",
         required=True,
         type=str,
     )
 
 
-def _add_arg_module_path(group: Group) -> None:
+def _add_arg_module_dir(group: Group) -> None:
     group.add_argument(
-        _switch(STR.modulepath),
+        _switch(STR.moduledir),
         help="Path to directory containing driver module",
         required=False,
         type=str,

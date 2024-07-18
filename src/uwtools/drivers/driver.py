@@ -91,13 +91,6 @@ class Assets(ABC):
 
     # Workflow tasks
 
-    @tasks
-    @abstractmethod
-    def provisioned_rundir(self):
-        """
-        Run directory provisioned with all required content.
-        """
-
     @external
     def validate(self):
         """
@@ -318,6 +311,13 @@ class Driver(Assets):
         self._batch = batch
 
     # Workflow tasks
+
+    @tasks
+    @abstractmethod
+    def provisioned_rundir(self):
+        """
+        Run directory provisioned with all required content.
+        """
 
     @tasks
     def run(self):

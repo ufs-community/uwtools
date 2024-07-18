@@ -1,7 +1,5 @@
 # pylint: disable=missing-function-docstring,protected-access
 
-from inspect import isclass, isfunction, ismodule
-
 from pytest import mark
 
 from uwtools.api import driver as driver_api
