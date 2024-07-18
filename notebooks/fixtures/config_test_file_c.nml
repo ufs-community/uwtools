@@ -1,4 +1,4 @@
-&values
-  greeting = "Hello"
-  recipient = "World"
+&FOO
+  S = "string"
+  N = 88
 /
