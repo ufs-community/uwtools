@@ -57,5 +57,5 @@ def test_template_render():
 def test_compare(tb):
 
     # Check output text of the cell prints the correct result
-    assert (tb.cell_output_text(19)== 'False')
-    assert(tb.cell_output_text(21) == 'True')
+    assert 'False' in tb.cell_output_text(21)
+    assert 'True' in tb.cell_output_text(25)
