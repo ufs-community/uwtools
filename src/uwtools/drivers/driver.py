@@ -489,8 +489,8 @@ class Driver(Assets):
         if schema_file:
             validate_external(schema_file=schema_file, config=self._config)
         else:
-            for schema_name in (self._driver_name.replace("_", "-"), "platform"):
-                validate_internal(schema_name=schema_name, config=self._config)
+            validate_internal(schema_name=self._driver_name.replace("_", "-"), config=self._config)
+        validate_internal(schema_name="platform", config=self._config)
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
         """
