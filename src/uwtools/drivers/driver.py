@@ -323,7 +323,7 @@ class Driver(Assets):
     # Private helper methods
 
     @property
-    def _resources(self) -> dict[str, Any]:
+    def _run_resources(self) -> dict[str, Any]:
         """
         Returns platform configuration data.
         """
@@ -331,11 +331,13 @@ class Driver(Assets):
             platform = self._config["platform"]
         except KeyError as e:
             raise UWConfigError("Required 'platform' block missing in config") from e
+        threads = self._driver_config.get("execution", {}).get("threads")
         return {
             "account": platform["account"],
             "rundir": self._rundir,
             "scheduler": platform["scheduler"],
             "stdout": "%s.out" % self._runscript_path.name,  # config may override
+            **({"threads": threads} if threads else {}),
             **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
 
@@ -408,7 +410,7 @@ class Driver(Assets):
         """
         Returns the job scheduler specified by the platform information.
         """
-        return JobScheduler.get_scheduler(self._resources)
+        return JobScheduler.get_scheduler(self._run_resources)
 
     def _validate(self) -> None:
         """

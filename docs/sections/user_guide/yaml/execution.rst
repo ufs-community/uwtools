@@ -85,4 +85,4 @@ The MPI launch program (``mpiexec``, ``srun``, et al.). This entry is only used 
 threads:
 """"""""
 
-Used to set the ``OMP_NUM_THREADS`` environment variable in the execution environment, to control the number of OpenMP threads to use when running the component. This entry is only used when configuring parallel components.
+For drivers implementing support, sets the ``OMP_NUM_THREADS`` environment variable in the execution environment, to control the number of OpenMP threads to use when running the component. This entry is only used when configuring parallel components.

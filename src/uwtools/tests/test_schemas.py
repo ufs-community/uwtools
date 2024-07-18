@@ -309,6 +309,8 @@ def test_execution_batchargs():
     assert not errors({"--foo": 88, "walltime": "00:05:00"})
     # It just has to be a map:
     assert "[] is not of type 'object'" in errors([])
+    # The "threads" argument is not allowed: It will be propagated, if set, from execution.threads.
+    assert "should not be valid" in errors({"threads": 4, "walltime": "00:05:00"})
 
 
 def test_execution_executable():
@@ -332,9 +334,9 @@ def test_execution_mpiargs():
 def test_execution_threads():
     errors = schema_validator("execution", "properties", "threads")
     # threads must be non-negative, and an integer:
-    assert not errors(0)
+    assert not errors(1)
     assert not errors(4)
-    assert "-1 is less than the minimum of 0" in errors(-1)
+    assert "0 is less than the minimum of 1" in errors(0)
     assert "3.14 is not of type 'integer'" in errors(3.14)
 
 

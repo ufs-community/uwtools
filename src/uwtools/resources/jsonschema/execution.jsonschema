@@ -4,6 +4,9 @@
     "batchargs": {
       "additionalProperties": true,
       "properties": {
+        "threads": {
+          "not": {}
+        },
         "walltime": {
           "type": "string"
         }
@@ -32,7 +35,7 @@
       "type": "string"
     },
     "threads": {
-      "minimum": 0,
+      "minimum": 1,
       "type": "integer"
     }
   },
