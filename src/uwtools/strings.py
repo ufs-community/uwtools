@@ -65,7 +65,7 @@ class STR:
     byod: str = "byod"
     cfgfile: str = "config_file"
     chgrescube: str = "chgres_cube"
-    classname: str = "class_name"
+    classname: str = "classname"
     compare: str = "compare"
     config: str = "config"
     copy: str = "copy"

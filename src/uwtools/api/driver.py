@@ -68,7 +68,7 @@ def execute(  # pylint: disable=unused-argument
             log.error("%s requires argument %s.", classname, arg)
             return False
         if locals()[arg] and arg not in argnames:
-            log.error("%s is not requried in %s.", arg, classname)
+            log.error("%s is not accepted argument in %s.", arg, classname)
             return False
     driverobj = class_(**kwargs)
     getattr(driverobj, task)()
