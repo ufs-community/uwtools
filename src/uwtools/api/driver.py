@@ -20,12 +20,13 @@ def execute(  # pylint: disable=unused-argument
     classname: str,
     task: str,
     schema_file: str,
-    module_dir: Optional[str] = None,
+    module_dir: Optional[Union[Path, str]] = None,
     config: Optional[Union[Path, str]] = None,
     cycle: Optional[datetime] = None,
     leadtime: Optional[timedelta] = None,
     batch: Optional[bool] = False,
     dry_run: Optional[bool] = False,
+    graph_file: Optional[Union[Path, str]] = None,
     key_path: Optional[list[str]] = None,
     stdin_ok: Optional[bool] = False,
 ) -> bool:
@@ -45,13 +46,14 @@ def execute(  # pylint: disable=unused-argument
     :param leadtime: The leadtime.
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run the executable, just report what would have been done.
+    :param graph_file: Write Graphviz DOT output here.
     :param key_path: Path of keys to subsection of config file.
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
     if not (class_ := _get_driver_class(classname, module, module_dir)):
         return False
-    provided = locals()
+    provided = locals().keys()
     accepted = set(getfullargspec(class_).args)
     required = accepted & {"cycle", "leadtime"}
     kwargs = dict(
@@ -77,7 +79,7 @@ def execute(  # pylint: disable=unused-argument
 def tasks(
     classname: str,
     module: str,
-    module_dir: Optional[str] = None,
+    module_dir: Optional[Union[Path, str]] = None,
 ) -> dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
@@ -114,7 +116,7 @@ def _add_classes():
 def _get_driver_class(
     classname: str,
     module: str,
-    module_dir: Optional[str] = None,
+    module_dir: Optional[Union[Path, str]] = None,
 ) -> Optional[Type]:
     """
     Returns the driver class.
@@ -123,24 +125,26 @@ def _get_driver_class(
     :param module: Name of driver module.
     :param module_dir: Path to directory that contains module.
     """
+    class_ = None
+    old_path = list(sys.path)
     try:
         user_path = str(module_dir or Path.cwd())
         sys.path.insert(0, user_path)
         if not module_dir:
             log.info("Added %s search path", user_path)
         module_ = importlib.import_module(module)
+        try:
+            class_: Type = getattr(module_, classname)
+        except AttributeError:
+            log.error("Module %s has no class %s.", module, classname)
     except ModuleNotFoundError:
         if module_dir:
             log.error("Module %s not found in %s", module, module_dir)
         else:
             log.error("No module named %s on path, including %s.", module, Path.cwd())
-        return None
-    try:
-        class_: Type = getattr(module_, classname)
-        return class_
-    except AttributeError:
-        log.error("Module %s has no class %s.", module, classname)
-        return None
+
+    sys.path = old_path
+    return class_
 
 
 __all__: list[str] = [graph.__name__]

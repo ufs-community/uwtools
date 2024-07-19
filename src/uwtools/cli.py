@@ -115,6 +115,7 @@ def _add_subparser_byod(subparsers: Subparsers) -> ModeChecks:
     _add_arg_leadtime(optional)
     _add_arg_batch(optional)
     _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
     _add_arg_key_path(
         optional,
         helpmsg="Dot-separated path of keys leading through the config "
@@ -138,6 +139,7 @@ def _dispatch_byod(args: Args) -> bool:
         dry_run=args[STR.dryrun],
         config=args[STR.cfgfile],
         module_dir=args[STR.moduledir],
+        graph_file=args[STR.graphfile],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
         batch=args[STR.batch],
