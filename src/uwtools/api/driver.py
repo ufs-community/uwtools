@@ -20,10 +20,10 @@ def execute(  # pylint: disable=unused-argument
     classname: str,
     task: str,
     schema_file: str,
+    module_dir: Optional[str] = None,
+    config: Optional[Union[Path, str]] = None,
     cycle: Optional[datetime] = None,
     leadtime: Optional[timedelta] = None,
-    config: Optional[Union[Path, str]] = None,
-    module_dir: Optional[str] = None,
     batch: Optional[bool] = False,
     dry_run: Optional[bool] = False,
     key_path: Optional[list[str]] = None,
@@ -35,14 +35,14 @@ def execute(  # pylint: disable=unused-argument
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
 
+    :param module: Name of driver module.
     :param classname: Class of driver object to instantiate.
-    :param module_name: Name of driver module.
     :param task: The task to execute.
+    :param schema_file: Path to schema file.
+    :param module_dir: Path to module file.
+    :param config: Path to config file (read stdin if missing or None).
     :param cycle: The cycle.
     :param leadtime: The leadtime.
-    :param config: Path to config file (read stdin if missing or None).
-    :param module_path: Path to module file.
-    :param schema_file: Path to schema file.
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run the executable, just report what would have been done.
     :param key_path: Path of keys to subsection of config file.
@@ -56,6 +56,7 @@ def execute(  # pylint: disable=unused-argument
     required = accepted & {"cycle", "leadtime"}
     kwargs = dict(
         config=ensure_data_source(config, bool(stdin_ok)),
+        schema_file=schema_file,
         dry_run=dry_run,
         key_path=key_path,
     )
@@ -63,10 +64,11 @@ def execute(  # pylint: disable=unused-argument
         if arg in required and arg not in provided:
             log.error("%s requires argument %s", classname, arg)
             return False
-        if arg in provided and arg not in accepted:
-            log.warning("%s does not accept argument %s, ignoring", classname, arg)
-        if arg in accepted:
-            kwargs[arg] = provided[arg]
+        if arg in provided:
+            if arg in accepted:
+                kwargs[arg] = provided[arg]
+            else:
+                log.warning("%s does not accept argument %s, ignoring", classname, arg)
     driverobj = class_(**kwargs)
     getattr(driverobj, task)()
     return True
