@@ -332,13 +332,13 @@ def test__dispatch_config_validate_config_obj():
         STR.schemafile: Path("/path/to/a.jsonschema"),
         STR.infile: Path("/path/to/config.yaml"),
     }
-    with patch.object(uwtools.api.config, "_validate_yaml") as _validate_yaml:
+    with patch.object(uwtools.api.config, "_validate_external") as _validate_external:
         cli._dispatch_config_validate(_dispatch_config_validate_args)
-    _validate_yaml_args = {
+    _validate_external_args = {
         STR.schemafile: _dispatch_config_validate_args[STR.schemafile],
         STR.config: _dispatch_config_validate_args[STR.infile],
     }
-    _validate_yaml.assert_called_once_with(**_validate_yaml_args)
+    _validate_external.assert_called_once_with(**_validate_external_args)
 
 
 @mark.parametrize(
