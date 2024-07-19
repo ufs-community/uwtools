@@ -52,20 +52,19 @@ def execute(  # pylint: disable=unused-argument
     if not (class_ := _get_driver_class(classname, module, module_dir)):
         return False
     provided = locals()
-    accepted = getfullargspec(class_).args
-    required = ["cycle", "leadtime"]
+    accepted = set(getfullargspec(class_).args)
+    required = accepted & {"cycle", "leadtime"}
     kwargs = dict(
         config=ensure_data_source(config, bool(stdin_ok)),
         dry_run=dry_run,
         key_path=key_path,
     )
     for arg in ["batch", *required]:
-        if arg in accepted and arg in required and arg not in provided:
+        if arg in required and arg not in provided:
             log.error("%s requires argument %s", classname, arg)
             return False
         if arg in provided and arg not in accepted:
             log.warning("%s does not accept argument %s, ignoring", classname, arg)
-            return False
         if arg in accepted:
             kwargs[arg] = provided[arg]
     driverobj = class_(**kwargs)
