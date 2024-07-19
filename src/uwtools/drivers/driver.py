@@ -456,9 +456,13 @@ class Driver(Assets):
         Write the runscript.
         """
         path.parent.mkdir(parents=True, exist_ok=True)
+        envvars = envvars or {}
+        threads = self._driver_config.get("execution", {}).get("threads")
+        if threads and "OMP_NUM_THREADS" not in envvars:
+            raise UWConfigError("Config specified threads but driver does not set OMP_NUM_THREADS")
         rs = self._runscript(
             envcmds=self._driver_config.get("execution", {}).get("envcmds", []),
-            envvars=envvars or {},
+            envvars=envvars,
             execution=[
                 "time %s" % self._runcmd,
                 "test $? -eq 0 && touch %s" % self._runscript_done_file,

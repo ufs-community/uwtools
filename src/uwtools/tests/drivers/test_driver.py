@@ -545,6 +545,14 @@ def test_Driver__write_runscript(driverobj):
     assert actual.strip() == dedent(expected).strip()
 
 
+def test_Driver__write_runscript_threads_fail(driverobj):
+    path = Path(driverobj._driver_config["rundir"]) / "runscript"
+    driverobj._driver_config["execution"]["threads"] = 4
+    with raises(UWConfigError) as e:
+        driverobj._write_runscript(path=path)
+    assert str(e.value) == "Config specified threads but driver does not set OMP_NUM_THREADS"
+
+
 def test__add_docstring():
     class C:
         pass

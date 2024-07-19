@@ -25,7 +25,6 @@ Example block:
        stderr: /path/to/runscript.err
        stdout: /path/to/runscript.out
        tasks_per_node: 40
-       threads: 8
        walltime: 00:02:00
      envcmds:
        - module use /path/to/modulefiles
@@ -44,9 +43,11 @@ These entries map to job-scheduler directives sent to e.g. Slurm when a batch jo
 
 Shorthand names are provided for certain directives for each scheduler, and can be specified as-so along with appropriate values. Recognized names for each scheduler are:
 
-* LSF: ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``threads``, ``walltime``
-* PBS: ``debug``, ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``threads``, ``walltime``
-* Slurm: ``cores``, ``exclusive``, ``export``, ``jobname``, ``memory``, ``nodes``, ``partition``, ``queue``, ``rundir``, ``stderr``, ``stdout``, ``tasks_per_node``, ``threads``, ``walltime``
+* LSF: ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``walltime``
+* PBS: ``debug``, ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``walltime``
+* Slurm: ``cores``, ``exclusive``, ``export``, ``jobname``, ``memory``, ``nodes``, ``partition``, ``queue``, ``rundir``, ``stderr``, ``stdout``, ``tasks_per_node``, ``walltime``
+
+**NB** To arrange for the ``OMP_NUM_THREADS`` environment variable to be set in the execution environment of components compiled with OpenMP support, set the ``execution:`` block's  ``threads:`` child item. Drivers with appropriate support will set ``OMP_NUM_THREADS`` as well as the corresponding scheduler flag when making a batch-resource request.
 
 Other, arbitrary directive key-value pairs can be provided exactly as they should appear in the batch runscript. For example
 
