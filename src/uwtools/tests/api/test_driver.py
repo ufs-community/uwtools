@@ -6,6 +6,7 @@ from types import SimpleNamespace as ns
 from pathlib import Path
 
 from pytest import fixture, mark
+import pytest
 
 from uwtools.api import driver as driver_api
 from uwtools.drivers import driver as driver_lib
