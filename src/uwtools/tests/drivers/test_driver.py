@@ -10,6 +10,7 @@ import json
 import logging
 from pathlib import Path
 from textwrap import dedent
+from typing import Optional
 from unittest.mock import Mock, PropertyMock, patch
 
 import yaml
@@ -42,7 +43,7 @@ class Common:
     def _driver_name(self) -> str:
         return "concrete"
 
-    def _validate(self) -> None:
+    def _validate(self, schema_file: Optional[Path] = None) -> None:
         pass
 
 
@@ -235,12 +236,23 @@ def test_Assets__rundir(assetsobj):
     assert assetsobj._rundir == Path(assetsobj._driver_config["rundir"])
 
 
-def test_Assets__validate(assetsobj):
+def test_Assets__validate_internal(assetsobj):
     with patch.object(assetsobj, "_validate", driver.Assets._validate):
         with patch.object(driver, "validate_internal") as validate_internal:
             assetsobj._validate(assetsobj)
         assert validate_internal.call_args_list[0].kwargs == {
             "schema_name": "concrete",
+            "config": assetsobj._config,
+        }
+
+
+def test_Assets__validate_external(config):
+    schema_file = Path("/path/to/jsonschema")
+    with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
+        with patch.object(driver, "validate_external") as validate_external:
+            assetsobj = ConcreteAssetsTimeInvariant(schema_file=schema_file, config=config)
+        assert validate_external.call_args_list[0].kwargs == {
+            "schema_file": schema_file,
             "config": assetsobj._config,
         }
 
@@ -479,7 +491,7 @@ def test_Driver__scheduler(driverobj):
         JobScheduler.get_scheduler.assert_called_with(driverobj._resources)
 
 
-def test_Driver__validate(assetsobj):
+def test_Driver__validate_internal(assetsobj):
     with patch.object(assetsobj, "_validate", driver.Driver._validate):
         with patch.object(driver, "validate_internal") as validate_internal:
             assetsobj._validate(assetsobj)
@@ -489,6 +501,17 @@ def test_Driver__validate(assetsobj):
         }
         assert validate_internal.call_args_list[1].kwargs == {
             "schema_name": "platform",
+            "config": assetsobj._config,
+        }
+
+
+def test_Driver__validate_external(config):
+    schema_file = Path("/path/to/jsonschema")
+    with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Driver._validate):
+        with patch.object(driver, "validate_external") as validate_external:
+            assetsobj = ConcreteAssetsTimeInvariant(schema_file=schema_file, config=config)
+        assert validate_external.call_args_list[0].kwargs == {
+            "schema_file": schema_file,
             "config": assetsobj._config,
         }
 
@@ -526,6 +549,6 @@ def test__add_docstring():
     assert getattr(C, "__doc__") is None
     with patch.object(driver, "C", C, create=True):
         class_ = driver.C  # type: ignore # pylint: disable=no-member
-        omit = ["cycle", "leadtime", "config", "dry_run", "key_path", "batch"]
+        omit = ["cycle", "leadtime", "config", "dry_run", "key_path", "batch", "schema_file"]
         driver._add_docstring(class_=class_, omit=omit)
     assert getattr(C, "__doc__").strip() == "The driver."
