@@ -16,7 +16,6 @@ import uwtools.api.config
 import uwtools.api.rocoto
 import uwtools.api.template
 from uwtools import cli
-from uwtools.api import driver as driver_api
 from uwtools.cli import STR
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.logging import log
@@ -163,7 +162,6 @@ def test__add_subparser_template_translate(subparsers):
 
 
 def test__dispatch_byod():
-    # module = "testdriver"
     cycle = dt.datetime.now()
     args: dict = {
         "action": "foo",
@@ -182,9 +180,9 @@ def test__dispatch_byod():
         "module_dir": "path/to/dir",
     }
     testdriver = Mock()
-    with patch.object(cli.uwtools.api.driver, "execute", return_value=testdriver):
+    with patch.object(cli.uwtools.api.driver, "execute", return_value=testdriver) as execute:
         cli._dispatch_byod(args=args)
-        driver_api.execute.assert_called_once_with(
+        execute.assert_called_once_with(
             classname="TestDriver",
             module="testdriver",
             task="eighty_eight",
