@@ -179,8 +179,7 @@ def test__dispatch_byod():
         "schema_file": "path/to/testdriver.jsonschema",
         "module_dir": "path/to/dir",
     }
-    testdriver = Mock()
-    with patch.object(cli.uwtools.api.driver, "execute", return_value=testdriver) as execute:
+    with patch.object(cli.uwtools.api.driver, "execute") as execute:
         cli._dispatch_byod(args=args)
         execute.assert_called_once_with(
             classname="TestDriver",
