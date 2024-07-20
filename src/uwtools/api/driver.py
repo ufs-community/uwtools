@@ -52,21 +52,21 @@ def execute(  # pylint: disable=unused-argument
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
-    if not (class_ := _get_driver_class(classname, module, module_dir)):
+    if not (class_ := _get_driver_class(classname=classname, module=module, module_dir=module_dir)):
         return False
     accepted = set(getfullargspec(class_).args)
     required = accepted & {"cycle", "leadtime"}
     kwargs = dict(
         config=ensure_data_source(config, bool(stdin_ok)),
-        schema_file=schema_file,
         dry_run=dry_run,
         key_path=key_path,
+        schema_file=schema_file,
     )
-    for arg in ["batch", *required]:
+    for arg in sorted(["batch", *required]):
         if arg in accepted:
             kwargs[arg] = locals()[arg]
-    log.debug("Instantiating %s with args: %s", classname, kwargs)
     driverobj = class_(**kwargs)
+    log.debug("Instantiated %s with args: %s", classname, kwargs)
     getattr(driverobj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:

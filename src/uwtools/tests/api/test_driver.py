@@ -3,14 +3,16 @@
 import logging
 from pathlib import Path
 from types import SimpleNamespace as ns
+from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
-from pytest import fixture, mark
+from pytest import fixture, mark, raises
 
 from uwtools.api import driver as driver_api
 from uwtools.drivers import driver as driver_lib
+from uwtools.exceptions import UWError
 from uwtools.logging import log
-from uwtools.tests.support import fixture_path, logged
+from uwtools.tests.support import fixture_path, logged, regex_logged
 
 # Fixtures
 
@@ -27,6 +29,18 @@ def args():
     )
 
 
+@fixture
+def kwargs(args):
+    return dict(
+        classname=args.classname,
+        config=args.config,
+        module=args.module,
+        module_dir=args.module_dir,
+        schema_file=args.schema_file,
+        task=args.task,
+    )
+
+
 # Tests
 
 
@@ -35,10 +49,44 @@ def test_driver(classname):
     assert getattr(driver_api, classname) is getattr(driver_lib, classname)
 
 
-def test_execute_pmtest(args):
-    driver_api.execute(
-        module=args.module, classname=args.classname, task=args.task, schema_file=args.schema_file
+def test_execute_fail_bad_module_dir(kwargs, tmp_path):
+    kwargs["module_dir"] = tmp_path
+    assert driver_api.execute(**kwargs) is False
+
+
+def test_execute_fail_stdin_not_ok(kwargs):
+    kwargs["config"] = None
+    kwargs["stdin_ok"] = False
+    with raises(UWError) as e:
+        driver_api.execute(**kwargs)
+    assert str(e.value) == "Set stdin_ok=True to permit read from stdin"
+
+
+def test_execute_pass(args, caplog, kwargs, tmp_path):
+    log.setLevel(logging.DEBUG)
+    graph_file = tmp_path / "g.dot"
+    graph_code = "DOT code"
+    kwargs["graph_file"] = graph_file
+    with patch.multiple(driver_api, getfullargspec=D, graph=D, _get_driver_class=D) as mocks:
+        mocks["getfullargspec"].return_value = ns(args=["batch", "cycle", "leadtime"])
+        mocks["graph"].return_value = graph_code
+        assert driver_api.execute(**kwargs) is True
+    assert regex_logged(caplog, "Instantiated %s with args" % kwargs["classname"])
+    mocks["_get_driver_class"].assert_called_once_with(
+        classname=args.classname, module=args.module, module_dir=args.module_dir
     )
+    mocked_class = mocks["_get_driver_class"]()
+    mocked_class.assert_called_once_with(
+        batch=False,
+        config=args.config,
+        cycle=None,
+        dry_run=False,
+        key_path=None,
+        leadtime=None,
+        schema_file=args.schema_file,
+    )
+    with open(graph_file, "r", encoding="utf-8") as f:
+        assert f.read().strip() == graph_code
 
 
 def test_tasks(args):
