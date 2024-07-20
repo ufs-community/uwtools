@@ -89,7 +89,17 @@ def test_execute_pass(args, caplog, kwargs, tmp_path):
         assert f.read().strip() == graph_code
 
 
-def test_tasks(args):
+def test_tasks_fail(args, caplog, tmp_path):
+    tasks = driver_api.tasks(classname=args.classname, module=args.module, module_dir=tmp_path)
+    assert tasks == {}
+    assert logged(
+        caplog,
+        "Could not get tasks from class %s in module %s in %s"
+        % (args.classname, args.module, tmp_path),
+    )
+
+
+def test_tasks_pass(args):
     tasks = driver_api.tasks(
         classname=args.classname,
         module=args.module,

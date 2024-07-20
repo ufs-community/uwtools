@@ -83,12 +83,17 @@ def tasks(
     Returns a mapping from task names to their one-line descriptions.
 
     :param classname: Class of driver object to instantiate.
-    :param module_name: Name of driver module.
+    :param module: Name of driver module.
     :param module_path: Path to module file.
     """
     if not (class_ := _get_driver_class(classname, module, module_dir)):
-        log.error("Directory %s not found.", module_dir)
-        raise NotADirectoryError
+        msg = "Could not get tasks from class %s in module %s"
+        vals = [classname, module]
+        if module_dir:
+            msg += " in %s"
+            vals.append(str(module_dir))
+        log.error(msg, *vals)
+        return {}
     return _tasks(class_)
 
 
