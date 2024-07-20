@@ -137,6 +137,16 @@ def test__get_driver_class_explicit_module_dir_fail_bad_path(caplog, args, tmp_p
     assert logged(caplog, "Could not load module %s" % args.module)
 
 
+def test__get_driver_class_explicit_module_dir_fail_bad_spec(caplog, args):
+    log.setLevel(logging.DEBUG)
+    with patch.object(driver_api, "spec_from_file_location", return_value=None):
+        c = driver_api._get_driver_class(
+            classname=args.classname, module=args.module, module_dir=args.module_dir
+        )
+    assert c is None
+    assert logged(caplog, "Could not load module %s" % args.module)
+
+
 def test__get_driver_class_explicit_module_dir_pass(args):
     log.setLevel(logging.DEBUG)
     c = driver_api._get_driver_class(
