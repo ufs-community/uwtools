@@ -12,10 +12,7 @@ from uwtools.drivers import driver as driver_lib
 from uwtools.logging import log
 from uwtools.tests.support import fixture_path, logged
 
-
-@mark.parametrize("classname", driver_api._CLASSNAMES)
-def test_driver(classname):
-    assert getattr(driver_api, classname) is getattr(driver_lib, classname)
+# Fixtures
 
 
 @fixture
@@ -27,6 +24,20 @@ def args():
         module_dir=fixture_path("testdriver.py").parent,
         schema_file=fixture_path("testdriver.jsonschema"),
         task="eighty_eight",
+    )
+
+
+# Tests
+
+
+@mark.parametrize("classname", driver_api._CLASSNAMES)
+def test_driver(classname):
+    assert getattr(driver_api, classname) is getattr(driver_lib, classname)
+
+
+def test_execute_pmtest(args):
+    driver_api.execute(
+        module=args.module, classname=args.classname, task=args.task, schema_file=args.schema_file
     )
 
 
