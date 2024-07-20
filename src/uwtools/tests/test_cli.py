@@ -164,7 +164,10 @@ def test__add_subparser_template_translate(subparsers):
 def test__dispatch_byod():
     cycle = dt.datetime.now()
     args: dict = {
-        # "action": "foo",
+        "module": "testdriver",
+        "classname": "TestDriver",
+        "schema_file": "path/to/testdriver.jsonschema",
+        "module_dir": "path/to/dir",
         "batch": True,
         "config_file": "/path/to/config",
         "cycle": cycle,
@@ -174,10 +177,6 @@ def test__dispatch_byod():
         "key_path": ["foo", "bar"],
         "task": "eighty_eight",
         "stdin_ok": True,
-        "module": "testdriver",
-        "classname": "TestDriver",
-        "schema_file": "path/to/testdriver.jsonschema",
-        "module_dir": "path/to/dir",
     }
     with patch.object(cli.uwtools.api.driver, "execute") as execute:
         cli._dispatch_byod(args=args)
