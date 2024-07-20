@@ -164,7 +164,7 @@ def test__add_subparser_template_translate(subparsers):
 def test__dispatch_byod():
     cycle = dt.datetime.now()
     args: dict = {
-        "action": "foo",
+        # "action": "foo",
         "batch": True,
         "config_file": "/path/to/config",
         "cycle": cycle,
