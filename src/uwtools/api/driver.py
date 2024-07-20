@@ -55,18 +55,23 @@ def execute(  # pylint: disable=unused-argument
     if not (class_ := _get_driver_class(classname=classname, module=module, module_dir=module_dir)):
         return False
     accepted = set(getfullargspec(class_).args)
-    required = accepted & {"cycle", "leadtime"}
+    non_optional = {"cycle", "leadtime"}
+    required = accepted & non_optional
     kwargs = dict(
         config=ensure_data_source(config, bool(stdin_ok)),
         dry_run=dry_run,
         key_path=key_path,
         schema_file=schema_file,
     )
+    for arg in sorted(non_optional):
+        if arg in accepted and locals()[arg] is None:
+            log.error("%s requires argument '%s'", classname, arg)
+            return False
     for arg in sorted(["batch", *required]):
         if arg in accepted:
             kwargs[arg] = locals()[arg]
     driverobj = class_(**kwargs)
-    log.debug("Instantiated %s with args: %s", classname, kwargs)
+    log.debug("Instantiated %s with: %s", classname, kwargs)
     getattr(driverobj, task)()
     if graph_file:
         with open(graph_file, "w", encoding="utf-8") as f:

@@ -1,9 +1,9 @@
 # pylint: disable=missing-function-docstring,protected-access,missing-class-docstring,redefined-outer-name
 
+import datetime as dt
 import logging
 from pathlib import Path
 from types import SimpleNamespace as ns
-from unittest.mock import DEFAULT as D
 from unittest.mock import patch
 
 from pytest import fixture, mark, raises
@@ -62,29 +62,15 @@ def test_execute_fail_stdin_not_ok(kwargs):
     assert str(e.value) == "Set stdin_ok=True to permit read from stdin"
 
 
-def test_execute_pass(args, caplog, kwargs, tmp_path):
+def test_execute_pass(caplog, kwargs, tmp_path):
+    kwargs["cycle"] = dt.datetime.now()
     log.setLevel(logging.DEBUG)
     graph_file = tmp_path / "g.dot"
     graph_code = "DOT code"
     kwargs["graph_file"] = graph_file
-    with patch.multiple(driver_api, getfullargspec=D, graph=D, _get_driver_class=D) as mocks:
-        mocks["getfullargspec"].return_value = ns(args=["batch", "cycle", "leadtime"])
-        mocks["graph"].return_value = graph_code
+    with patch.object(driver_api, "graph", return_value=graph_code):
         assert driver_api.execute(**kwargs) is True
-    assert regex_logged(caplog, "Instantiated %s with args" % kwargs["classname"])
-    mocks["_get_driver_class"].assert_called_once_with(
-        classname=args.classname, module=args.module, module_dir=args.module_dir
-    )
-    mocked_class = mocks["_get_driver_class"]()
-    mocked_class.assert_called_once_with(
-        batch=False,
-        config=args.config,
-        cycle=None,
-        dry_run=False,
-        key_path=None,
-        leadtime=None,
-        schema_file=args.schema_file,
-    )
+    assert regex_logged(caplog, "Instantiated %s with" % kwargs["classname"])
     with open(graph_file, "r", encoding="utf-8") as f:
         assert f.read().strip() == graph_code
 
@@ -97,6 +83,12 @@ def test_tasks_fail(args, caplog, tmp_path):
         "Could not get tasks from class %s in module %s in %s"
         % (args.classname, args.module, tmp_path),
     )
+
+
+def test_tasks_fail_no_cycle(args, caplog, kwargs):
+    log.setLevel(logging.DEBUG)
+    assert driver_api.execute(**kwargs) is False
+    assert logged(caplog, "%s requires argument '%s'" % (args.classname, "cycle"))
 
 
 def test_tasks_pass(args):

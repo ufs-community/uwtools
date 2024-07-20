@@ -1,9 +1,9 @@
 from iotaa import asset, task
 
-from uwtools.drivers.driver import AssetsTimeInvariant
+from uwtools.drivers.driver import AssetsCycleBased
 
 
-class TestDriver(AssetsTimeInvariant):
+class TestDriver(AssetsCycleBased):
     """
     TestDriver.
     """
