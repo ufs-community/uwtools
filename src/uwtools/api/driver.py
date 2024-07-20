@@ -5,6 +5,7 @@ API access to the ``uwtools`` driver base classes.
 import importlib
 import sys
 from datetime import datetime, timedelta
+from importlib.util import module_from_spec, spec_from_file_location
 from inspect import getfullargspec
 from pathlib import Path
 from typing import Optional, Type, Union
@@ -53,7 +54,7 @@ def execute(  # pylint: disable=unused-argument
     """
     if not (class_ := _get_driver_class(classname, module, module_dir)):
         return False
-    provided = locals().keys()
+    provided = locals()
     accepted = set(getfullargspec(class_).args)
     required = accepted & {"cycle", "leadtime"}
     kwargs = dict(
@@ -114,9 +115,7 @@ def _add_classes():
 
 
 def _get_driver_class(
-    classname: str,
-    module: str,
-    module_dir: Optional[Union[Path, str]] = None,
+    classname: str, module: str, module_dir: Optional[Union[Path, str]] = None
 ) -> Optional[Type]:
     """
     Returns the driver class.
@@ -125,26 +124,23 @@ def _get_driver_class(
     :param module: Name of driver module.
     :param module_dir: Path to directory that contains module.
     """
-    class_ = None
-    old_path = list(sys.path)
-    try:
-        user_path = str(module_dir or Path.cwd())
-        sys.path.insert(0, user_path)
-        if not module_dir:
-            log.info("Added %s search path", user_path)
-        module_ = importlib.import_module(module)
-        try:
-            class_: Type = getattr(module_, classname)
-        except AttributeError:
-            log.error("Module %s has no class %s.", module, classname)
-    except ModuleNotFoundError:
-        if module_dir:
-            log.error("Module %s not found in %s", module, module_dir)
-        else:
-            log.error("No module named %s on path, including %s.", module, Path.cwd())
-
-    sys.path = old_path
-    return class_
+    module_dir = Path(module_dir) if module_dir else Path.cwd()
+    file_path = (module_dir / module).with_suffix(".py")
+    if spec := spec_from_file_location(module, file_path):
+        m = module_from_spec(spec)
+        if loader := spec.loader:
+            try:
+                loader.exec_module(m)
+            except Exception:  # pylint: disable=broad-exception-caught
+                log.error("Could not load module %s", module)
+                return None
+        if hasattr(m, classname):
+            c: Type = getattr(m, classname)
+            return c
+        log.error("Module %s has no class %s", module, classname)
+        return None
+    log.error("Could not load module %s", module)
+    return None
 
 
 __all__: list[str] = [graph.__name__]
