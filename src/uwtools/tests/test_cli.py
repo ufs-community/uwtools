@@ -16,6 +16,7 @@ import uwtools.api.config
 import uwtools.api.rocoto
 import uwtools.api.template
 from uwtools import cli
+from uwtools.api import driver as driver_api
 from uwtools.cli import STR
 from uwtools.exceptions import UWConfigRealizeError, UWError, UWTemplateRenderError
 from uwtools.logging import log
@@ -159,6 +160,45 @@ def test__add_subparser_template_render(subparsers):
 def test__add_subparser_template_translate(subparsers):
     cli._add_subparser_template_translate(subparsers)
     assert subparsers.choices[STR.translate]
+
+
+def test__dispatch_byod():
+    # module = "testdriver"
+    cycle = dt.datetime.now()
+    args: dict = {
+        "action": "foo",
+        "batch": True,
+        "config_file": "/path/to/config",
+        "cycle": cycle,
+        "leadtime": None,
+        "dry_run": False,
+        "graph_file": None,
+        "key_path": ["foo", "bar"],
+        "task": "eighty_eight",
+        "stdin_ok": True,
+        "module": "testdriver",
+        "classname": "TestDriver",
+        "schema_file": "path/to/testdriver.jsonschema",
+        "module_dir": "path/to/dir",
+    }
+    testdriver = Mock()
+    with patch.object(cli.uwtools.api.driver, "execute", return_value=testdriver):
+        cli._dispatch_byod(args=args)
+        driver_api.execute.assert_called_once_with(
+            classname="TestDriver",
+            module="testdriver",
+            task="eighty_eight",
+            schema_file="path/to/testdriver.jsonschema",
+            key_path=["foo", "bar"],
+            dry_run=False,
+            config="/path/to/config",
+            module_dir="path/to/dir",
+            graph_file=None,
+            cycle=cycle,
+            leadtime=None,
+            batch=True,
+            stdin_ok=True,
+        )
 
 
 @mark.parametrize(
