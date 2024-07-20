@@ -39,6 +39,44 @@ def test_tasks(args):
     assert tasks["eighty_eight"] == "88"
 
 
+def test__get_driver_class_explicit_module_dir_fail_bad_class(caplog, args):
+    log.setLevel(logging.DEBUG)
+    bad_class = "BadClass"
+    c = driver_api._get_driver_class(
+        classname=bad_class, module=args.module, module_dir=args.module_dir
+    )
+    assert c is None
+    assert logged(caplog, "Module %s has no class %s" % (args.module, bad_class))
+
+
+def test__get_driver_class_explicit_module_dir_fail_bad_name(caplog, args):
+    log.setLevel(logging.DEBUG)
+    bad_name = "bad_name"
+    c = driver_api._get_driver_class(
+        classname=args.classname, module=bad_name, module_dir=args.module_dir
+    )
+    assert c is None
+    assert logged(caplog, "Could not load module %s" % bad_name)
+
+
+def test__get_driver_class_explicit_module_dir_fail_bad_path(caplog, args, tmp_path):
+    log.setLevel(logging.DEBUG)
+    c = driver_api._get_driver_class(
+        classname=args.classname, module=args.module, module_dir=tmp_path
+    )
+    assert c is None
+    assert logged(caplog, "Could not load module %s" % args.module)
+
+
+def test__get_driver_class_explicit_module_dir_pass(args):
+    log.setLevel(logging.DEBUG)
+    c = driver_api._get_driver_class(
+        classname=args.classname, module=args.module, module_dir=args.module_dir
+    )
+    assert c
+    assert c.__name__ == "TestDriver"
+
+
 def test__get_driver_class_implicit_module_dir_fail_bad_class(caplog, args):
     log.setLevel(logging.DEBUG)
     bad_class = "BadClass"
@@ -48,14 +86,6 @@ def test__get_driver_class_implicit_module_dir_fail_bad_class(caplog, args):
     assert logged(caplog, "Module %s has no class %s" % (args.module, bad_class))
 
 
-def test__get_driver_class_implicit_module_dir_fail_bad_path(caplog, args, tmp_path):
-    log.setLevel(logging.DEBUG)
-    with patch.object(Path, "cwd", return_value=tmp_path):
-        c = driver_api._get_driver_class(classname=args.classname, module=args.module)
-    assert c is None
-    assert logged(caplog, "Could not load module %s" % args.module)
-
-
 def test__get_driver_class_implicit_module_dir_fail_bad_name(caplog, args):
     log.setLevel(logging.DEBUG)
     bad_name = "bad_name"
@@ -63,6 +93,14 @@ def test__get_driver_class_implicit_module_dir_fail_bad_name(caplog, args):
         c = driver_api._get_driver_class(classname=args.classname, module=bad_name)
     assert c is None
     assert logged(caplog, "Could not load module %s" % bad_name)
+
+
+def test__get_driver_class_implicit_module_dir_fail_bad_path(caplog, args, tmp_path):
+    log.setLevel(logging.DEBUG)
+    with patch.object(Path, "cwd", return_value=tmp_path):
+        c = driver_api._get_driver_class(classname=args.classname, module=args.module)
+    assert c is None
+    assert logged(caplog, "Could not load module %s" % args.module)
 
 
 def test__get_driver_class_implicit_module_dir_pass(args):
