@@ -37,7 +37,7 @@ def execute(  # pylint: disable=unused-argument
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
 
-    :param module: Name of driver module to load.
+    :param module: Path to driver module.
     :param classname: Name of driver class to instantiate.
     :param task: Name of driver task to execute.
     :param schema_file: Path to schema file.
@@ -115,7 +115,7 @@ def _get_driver_class(module: Union[Path, str], classname: str) -> Optional[Type
     Returns the driver class.
 
     :param module: Name of driver module to load.
-    :param classname: Name of driver class to instantiate
+    :param classname: Name of driver class to instantiate.
     """
     module = str(module)
     if not (m := _get_driver_module_explicit(module)):
