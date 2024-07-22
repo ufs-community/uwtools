@@ -1,4 +1,1 @@
-testdriver:
-  execution:
-    executable: "{{ testdriver.rundir }}/testdriver"
-  rundir: /path/to/rundir/
+testdriver: null
