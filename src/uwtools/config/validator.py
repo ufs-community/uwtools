@@ -60,11 +60,11 @@ def validate_internal(
     log.info("Validating config against internal schema %s", schema_name)
     schema_file = get_schema_file(schema_name)
     log.debug("Using schema file: %s", schema_file)
-    if not validate_yaml(config=config, schema_file=schema_file):
+    if not validate_external(config=config, schema_file=schema_file):
         raise UWConfigError("YAML validation errors")
 
 
-def validate_yaml(
+def validate_external(
     schema_file: Path, config: Union[dict, YAMLConfig, Optional[Path]] = None
 ) -> bool:
     """

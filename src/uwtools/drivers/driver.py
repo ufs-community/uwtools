@@ -18,7 +18,7 @@ from iotaa import asset, dryrun, external, task, tasks
 
 from uwtools.config.formats.base import Config
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.validator import get_schema_file, validate, validate_internal
+from uwtools.config.validator import get_schema_file, validate, validate_external, validate_internal
 from uwtools.exceptions import UWConfigError
 from uwtools.logging import log
 from uwtools.scheduler import JobScheduler
@@ -39,6 +39,7 @@ class Assets(ABC):
         config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
+        schema_file: Optional[Path] = None,
     ) -> None:
         self._config = YAMLConfig(config=config)
         self._config.dereference(
@@ -50,7 +51,7 @@ class Assets(ABC):
         )
         for key in key_path or []:
             self._config = self._config[key]
-        self._validate()
+        self._validate(schema_file)
         dryrun(enable=dry_run)
 
     def __repr__(self) -> str:
@@ -83,13 +84,6 @@ class Assets(ABC):
         return deepcopy(full_config)
 
     # Workflow tasks
-
-    @tasks
-    @abstractmethod
-    def provisioned_rundir(self):
-        """
-        Run directory provisioned with all required content.
-        """
 
     @external
     def validate(self):
@@ -199,12 +193,15 @@ class Assets(ABC):
         )
         return " ".join(filter(None, [timestr, self._driver_name, suffix]))
 
-    def _validate(self) -> None:
+    def _validate(self, schema_file: Optional[Path] = None) -> None:
         """
         Perform all necessary schema validation.
         """
         schema_name = self._driver_name.replace("_", "-")
-        validate_internal(schema_name=schema_name, config=self._config)
+        if schema_file:
+            validate_external(schema_file=schema_file, config=self._config)
+        else:
+            validate_internal(schema_name=schema_name, config=self._config)
 
 
 class AssetsCycleBased(Assets):
@@ -218,8 +215,15 @@ class AssetsCycleBased(Assets):
         config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
+        schema_file: Optional[Path] = None,
     ):
-        super().__init__(cycle=cycle, config=config, dry_run=dry_run, key_path=key_path)
+        super().__init__(
+            cycle=cycle,
+            config=config,
+            dry_run=dry_run,
+            key_path=key_path,
+            schema_file=schema_file,
+        )
         self._cycle = cycle
 
 
@@ -235,9 +239,15 @@ class AssetsCycleLeadtimeBased(Assets):
         config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
+        schema_file: Optional[Path] = None,
     ):
         super().__init__(
-            cycle=cycle, leadtime=leadtime, config=config, dry_run=dry_run, key_path=key_path
+            cycle=cycle,
+            leadtime=leadtime,
+            config=config,
+            dry_run=dry_run,
+            key_path=key_path,
+            schema_file=schema_file,
         )
         self._cycle = cycle
         self._leadtime = leadtime
@@ -253,8 +263,14 @@ class AssetsTimeInvariant(Assets):
         config: Optional[Union[dict, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
+        schema_file: Optional[Path] = None,
     ):
-        super().__init__(config=config, dry_run=dry_run, key_path=key_path)
+        super().__init__(
+            config=config,
+            dry_run=dry_run,
+            key_path=key_path,
+            schema_file=schema_file,
+        )
 
 
 class Driver(Assets):
@@ -270,13 +286,26 @@ class Driver(Assets):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
+        schema_file: Optional[Path] = None,
     ):
         super().__init__(
-            cycle=cycle, leadtime=leadtime, config=config, dry_run=dry_run, key_path=key_path
+            cycle=cycle,
+            leadtime=leadtime,
+            config=config,
+            dry_run=dry_run,
+            key_path=key_path,
+            schema_file=schema_file,
         )
         self._batch = batch
 
     # Workflow tasks
+
+    @tasks
+    @abstractmethod
+    def provisioned_rundir(self):
+        """
+        Run directory provisioned with all required content.
+        """
 
     @tasks
     def run(self):
@@ -410,12 +439,15 @@ class Driver(Assets):
         """
         return JobScheduler.get_scheduler(self._resources)
 
-    def _validate(self) -> None:
+    def _validate(self, schema_file: Optional[Path] = None) -> None:
         """
         Perform all necessary schema validation.
         """
-        for schema_name in (self._driver_name.replace("_", "-"), "platform"):
-            validate_internal(schema_name=schema_name, config=self._config)
+        if schema_file:
+            validate_external(schema_file=schema_file, config=self._config)
+        else:
+            validate_internal(schema_name=self._driver_name.replace("_", "-"), config=self._config)
+        validate_internal(schema_name="platform", config=self._config)
 
     def _write_runscript(self, path: Path, envvars: Optional[dict[str, str]] = None) -> None:
         """
@@ -448,9 +480,15 @@ class DriverCycleBased(Driver):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
+        schema_file: Optional[Path] = None,
     ):
         super().__init__(
-            cycle=cycle, config=config, dry_run=dry_run, key_path=key_path, batch=batch
+            cycle=cycle,
+            config=config,
+            dry_run=dry_run,
+            key_path=key_path,
+            batch=batch,
+            schema_file=schema_file,
         )
         self._cycle = cycle
 
@@ -468,6 +506,7 @@ class DriverCycleLeadtimeBased(Driver):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
+        schema_file: Optional[Path] = None,
     ):
         super().__init__(
             cycle=cycle,
@@ -476,6 +515,7 @@ class DriverCycleLeadtimeBased(Driver):
             dry_run=dry_run,
             key_path=key_path,
             batch=batch,
+            schema_file=schema_file,
         )
         self._cycle = cycle
         self._leadtime = leadtime
@@ -492,8 +532,15 @@ class DriverTimeInvariant(Driver):
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         batch: bool = False,
+        schema_file: Optional[Path] = None,
     ):
-        super().__init__(config=config, dry_run=dry_run, key_path=key_path, batch=batch)
+        super().__init__(
+            config=config,
+            dry_run=dry_run,
+            key_path=key_path,
+            batch=batch,
+            schema_file=schema_file,
+        )
 
 
 DriverT = Union[type[Assets], type[Driver]]
@@ -515,6 +562,7 @@ def _add_docstring(class_: type, omit: Optional[list[str]] = None) -> None:
     :param dry_run: Run in dry-run mode?
     :param key_path: Keys leading through the config to the driver's configuration block.
     :param batch: Run component via the batch system?
+    :param schema_file: Path to schema file to use to validate an external driver.
     """
     setattr(
         class_,

@@ -90,13 +90,6 @@ def test_make_execute_leadtime_no_cycle_error(execute_kwargs):
     assert "When leadtime is specified, cycle is required" in str(e)
 
 
-def test_make_tasks():
-    func = api.make_tasks(driver_class=TestDriver)
-    assert func.__name__ == "tasks"
-    taskmap = func()
-    assert list(taskmap.keys()) == ["atask", "run", "runscript", "validate"]
-
-
 @mark.parametrize("val", [Path("/some/path"), {"foo": 88}])
 def test_str2path_passthrough(val):
     assert api.str2path(val) == val

@@ -94,9 +94,9 @@ def test_realize_to_dict():
 @mark.parametrize("cfg", [{"foo": "bar"}, YAMLConfig(config={})])
 def test_validate(cfg):
     kwargs: dict = {"schema_file": "schema-file", "config": cfg}
-    with patch.object(config, "_validate_yaml", return_value=True) as _validate_yaml:
+    with patch.object(config, "_validate_external", return_value=True) as _validate_external:
         assert config.validate(**kwargs)
-    _validate_yaml.assert_called_once_with(
+    _validate_external.assert_called_once_with(
         schema_file=Path(kwargs["schema_file"]), config=kwargs["config"]
     )
 
@@ -106,6 +106,6 @@ def test_validate_config_file(tmp_path):
     with open(cfg, "w", encoding="utf-8") as f:
         yaml.dump({}, f)
     kwargs: dict = {"schema_file": "schema-file", "config": cfg}
-    with patch.object(config, "_validate_yaml", return_value=True) as _validate_yaml:
+    with patch.object(config, "_validate_external", return_value=True) as _validate_external:
         assert config.validate(**kwargs)
-    _validate_yaml.assert_called_once_with(schema_file=Path(kwargs["schema_file"]), config=cfg)
+    _validate_external.assert_called_once_with(schema_file=Path(kwargs["schema_file"]), config=cfg)
