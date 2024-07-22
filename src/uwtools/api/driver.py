@@ -4,10 +4,12 @@ API access to the ``uwtools`` driver base classes.
 
 import sys
 from datetime import datetime, timedelta
+from functools import partial
 from importlib import import_module
 from importlib.util import module_from_spec, spec_from_file_location
 from inspect import getfullargspec
 from pathlib import Path
+from types import ModuleType
 from typing import Optional, Type, Union
 
 from uwtools.drivers.support import graph
@@ -118,33 +120,50 @@ def _get_driver_class(module: Union[Path, str], classname: str) -> Optional[Type
     :param classname: Name of driver class to instantiate
     """
     module = str(module)
-    m = None
-    for file_path in [module, str(Path.cwd() / module)]:
-        log.debug("Loading module %s from %s", module, file_path)
-        if spec := spec_from_file_location(module, file_path):
-            m = module_from_spec(spec)
-            if loader := spec.loader:
-                try:
-                    loader.exec_module(m)
-                    break
-                except Exception:  # pylint: disable=broad-exception-caught
-                    m = None
-            else:
-                m = None
-    if not m:
-        try:
-            log.debug("Loading module %s from sys.path", module)
-            m = import_module(module)
-        except Exception:  # pylint: disable=broad-exception-caught
-            pass
-    if not m:
-        log.error("Could not load module %s", module)
-        return None
+    explicit = partial(_get_driver_module_explicit, module)
+    if not (m := explicit(module)):
+        if not (m := explicit(str(Path.cwd() / module))):
+            if not (m := _get_driver_module_implicit(module)):
+                log.error("Could not load module %s", module)
+                return None
     if hasattr(m, classname):
         c: Type = getattr(m, classname)
         return c
     log.error("Module %s has no class %s", module, classname)
     return None
+
+
+def _get_driver_module_explicit(module: str, file_path: str) -> Optional[ModuleType]:
+    """
+    Returns the named module found via explicit lookup of given path.
+
+    :param module: Name of driver module to load.
+    :param file_path: Path to search for named module.
+    """
+    log.debug("Loading module %s from %s", module, file_path)
+    if spec := spec_from_file_location(module, file_path):
+        m = module_from_spec(spec)
+        if loader := spec.loader:
+            try:
+                loader.exec_module(m)
+                log.debug("Loaded module %s from %s", module, file_path)
+                return m
+            except Exception:  # pylint: disable=broad-exception-caught
+                pass
+    return None
+
+
+def _get_driver_module_implicit(module: str) -> Optional[ModuleType]:
+    """
+    Returns the named module found via implicit (sys.path-based) lookup.
+
+    :param module: Name of driver module to load.
+    """
+    try:
+        log.debug("Loading module %s from sys.path", module)
+        return import_module(module)
+    except Exception:  # pylint: disable=broad-exception-caught
+        return None
 
 
 __all__: list[str] = [graph.__name__]
