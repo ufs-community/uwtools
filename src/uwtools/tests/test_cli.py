@@ -161,7 +161,7 @@ def test__add_subparser_template_translate(subparsers):
     assert subparsers.choices[STR.translate]
 
 
-def test__dispatch_invoke():
+def test__dispatch_execute():
     cycle = dt.datetime.now()
     args: dict = {
         "module": "testdriver",
@@ -179,7 +179,7 @@ def test__dispatch_invoke():
         "stdin_ok": True,
     }
     with patch.object(cli.uwtools.api.driver, "execute") as execute:
-        cli._dispatch_invoke(args=args)
+        cli._dispatch_execute(args=args)
         execute.assert_called_once_with(
             classname="TestDriver",
             module="testdriver",

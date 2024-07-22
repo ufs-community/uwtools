@@ -60,8 +60,8 @@ def main() -> None:
         log.debug("Command: %s %s", Path(sys.argv[0]).name, " ".join(sys.argv[1:]))
         tools: dict[str, Callable[..., bool]] = {
             STR.config: _dispatch_config,
+            STR.execute: _dispatch_execute,
             STR.file: _dispatch_file,
-            STR.invoke: _dispatch_invoke,
             STR.rocoto: _dispatch_rocoto,
             STR.template: _dispatch_template,
         }
@@ -251,6 +251,60 @@ def _dispatch_config_validate(args: Args) -> bool:
     )
 
 
+# Mode execute
+
+
+def _add_subparser_execute(subparsers: Subparsers) -> ModeChecks:
+    """
+    Subparser for mode: execute
+
+    :param subparsers: Parent parser's subparsers, to add this subparser to.
+    """
+    parser = _add_subparser(subparsers, STR.execute, "Execute external driver.")
+    required = parser.add_argument_group(TITLE_REQ_ARG)
+    _add_arg_module(required)
+    _add_arg_classname(required)
+    _add_arg_task(required)
+    _add_arg_schema_file(required)
+    optional = _basic_setup(parser)
+    _add_arg_module_dir(optional)
+    _add_arg_config_file(optional)
+    _add_arg_cycle(optional)
+    _add_arg_leadtime(optional)
+    _add_arg_batch(optional)
+    _add_arg_dry_run(optional)
+    _add_arg_graph_file(optional)
+    _add_arg_key_path(
+        optional,
+        helpmsg="Dot-separated path of keys leading through the config "
+        "to the driver's configuration block",
+    )
+    return {STR.execute: _add_args_verbosity(optional)}
+
+
+def _dispatch_execute(args: Args) -> bool:
+    """
+    Dispatch logic for execute mode.
+
+    :param args: Parsed command-line args.
+    """
+    return uwtools.api.driver.execute(
+        classname=args[STR.classname],
+        module=args[STR.module],
+        task=args[STR.task],
+        schema_file=args[STR.schemafile],
+        key_path=args[STR.keypath],
+        dry_run=args[STR.dryrun],
+        config=args[STR.cfgfile],
+        module_dir=args[STR.moduledir],
+        graph_file=args[STR.graphfile],
+        cycle=args[STR.cycle],
+        leadtime=args[STR.leadtime],
+        batch=args[STR.batch],
+        stdin_ok=True,
+    )
+
+
 # Mode file
 
 
@@ -350,60 +404,6 @@ def _dispatch_file_link(args: Args) -> bool:
         leadtime=args[STR.leadtime],
         keys=args[STR.keys],
         dry_run=args[STR.dryrun],
-        stdin_ok=True,
-    )
-
-
-# Mode invoke
-
-
-def _add_subparser_invoke(subparsers: Subparsers) -> ModeChecks:
-    """
-    Subparser for mode: invoke
-
-    :param subparsers: Parent parser's subparsers, to add this subparser to.
-    """
-    parser = _add_subparser(subparsers, STR.invoke, "Invoke external driver.")
-    required = parser.add_argument_group(TITLE_REQ_ARG)
-    _add_arg_module(required)
-    _add_arg_classname(required)
-    _add_arg_task(required)
-    _add_arg_schema_file(required)
-    optional = _basic_setup(parser)
-    _add_arg_module_dir(optional)
-    _add_arg_config_file(optional)
-    _add_arg_cycle(optional)
-    _add_arg_leadtime(optional)
-    _add_arg_batch(optional)
-    _add_arg_dry_run(optional)
-    _add_arg_graph_file(optional)
-    _add_arg_key_path(
-        optional,
-        helpmsg="Dot-separated path of keys leading through the config "
-        "to the driver's configuration block",
-    )
-    return {STR.invoke: _add_args_verbosity(optional)}
-
-
-def _dispatch_invoke(args: Args) -> bool:
-    """
-    Dispatch logic for invoke mode.
-
-    :param args: Parsed command-line args.
-    """
-    return uwtools.api.driver.execute(
-        classname=args[STR.classname],
-        module=args[STR.module],
-        task=args[STR.task],
-        schema_file=args[STR.schemafile],
-        key_path=args[STR.keypath],
-        dry_run=args[STR.dryrun],
-        config=args[STR.cfgfile],
-        module_dir=args[STR.moduledir],
-        graph_file=args[STR.graphfile],
-        cycle=args[STR.cycle],
-        leadtime=args[STR.leadtime],
-        batch=args[STR.batch],
         stdin_ok=True,
     )
 
@@ -1119,8 +1119,8 @@ def _parse_args(raw_args: list[str]) -> tuple[Args, Checks]:
     subparsers = _add_subparsers(parser, STR.mode, STR.mode.upper())
     tools = {
         STR.config: partial(_add_subparser_config, subparsers),
+        STR.execute: partial(_add_subparser_execute, subparsers),
         STR.file: partial(_add_subparser_file, subparsers),
-        STR.invoke: partial(_add_subparser_invoke, subparsers),
         STR.rocoto: partial(_add_subparser_rocoto, subparsers),
         STR.template: partial(_add_subparser_template, subparsers),
     }
