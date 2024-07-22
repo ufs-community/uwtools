@@ -161,6 +161,40 @@ def test__add_subparser_template_translate(subparsers):
     assert subparsers.choices[STR.translate]
 
 
+def test__dispatch_execute():
+    cycle = dt.datetime.now()
+    args: dict = {
+        "module": "testdriver",
+        "classname": "TestDriver",
+        "schema_file": "/path/to/testdriver.jsonschema",
+        "batch": True,
+        "config_file": "/path/to/config",
+        "cycle": cycle,
+        "leadtime": None,
+        "dry_run": False,
+        "graph_file": None,
+        "key_path": ["foo", "bar"],
+        "task": "eighty_eight",
+        "stdin_ok": True,
+    }
+    with patch.object(cli.uwtools.api.driver, "execute") as execute:
+        cli._dispatch_execute(args=args)
+        execute.assert_called_once_with(
+            classname="TestDriver",
+            module="testdriver",
+            task="eighty_eight",
+            schema_file="/path/to/testdriver.jsonschema",
+            key_path=["foo", "bar"],
+            dry_run=False,
+            config="/path/to/config",
+            graph_file=None,
+            cycle=cycle,
+            leadtime=None,
+            batch=True,
+            stdin_ok=True,
+        )
+
+
 @mark.parametrize(
     "vals",
     [

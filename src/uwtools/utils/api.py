@@ -132,22 +132,6 @@ def make_execute(
     return execute
 
 
-def make_tasks(driver_class: DriverT) -> Callable[..., dict[str, str]]:
-    """
-    Returns a function that maps task names to descriptions for the given driver.
-
-    :param driver_class: The driver class whose tasks and descriptions to map.
-    """
-
-    def tasks() -> dict[str, str]:
-        """
-        Returns a mapping from task names to their one-line descriptions.
-        """
-        return _tasks(driver_class)
-
-    return tasks
-
-
 def str2path(val: Any) -> Any:
     """
     Return str value as Path, other types unmodified.
