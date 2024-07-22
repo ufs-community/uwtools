@@ -62,7 +62,6 @@ class STR:
 
     action: str = "action"
     batch: str = "batch"
-    byod: str = "byod"
     cfgfile: str = "config_file"
     chgrescube: str = "chgres_cube"
     classname: str = "classname"
@@ -85,6 +84,7 @@ class STR:
     help: str = "help"
     infile: str = "input_file"
     infmt: str = "input_format"
+    invoke: str = "invoke"
     ioda: str = "ioda"
     jedi: str = "jedi"
     keypath: str = "key_path"
