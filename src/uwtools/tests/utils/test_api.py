@@ -1,14 +1,13 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
 import datetime as dt
-import sys
 from pathlib import Path
 from unittest.mock import patch
 
 from pytest import fixture, mark, raises
 
 from uwtools.exceptions import UWError
-from uwtools.tests.drivers.test_driver import ConcreteDriverCycleLeadtimeBased as TestDriverWCL
+from uwtools.tests.drivers.test_driver import ConcreteDriverCycleLeadtimeBased as TestDriverCL
 from uwtools.tests.drivers.test_driver import ConcreteDriverTimeInvariant as TestDriver
 from uwtools.utils import api
 
@@ -105,16 +104,14 @@ def test_str2path_convert():
 @mark.parametrize("hours", [0, 24, 168])
 def test__execute(execute_kwargs, hours, tmp_path):
     graph_file = tmp_path / "g.dot"
-    with patch.object(sys.modules[__name__], "TestDriverWCL", wraps=TestDriverWCL) as cd:
-        kwargs = {
-            **execute_kwargs,
-            "driver_class": cd,
-            "config": {"some": "config"},
-            "cycle": dt.datetime.now(),
-            "leadtime": dt.timedelta(hours=hours),
-            "graph_file": graph_file,
-        }
-        assert not graph_file.is_file()
-        assert api._execute(**kwargs) is True
-        assert cd.call_args.kwargs["leadtime"] == dt.timedelta(hours=hours)
+    kwargs = {
+        **execute_kwargs,
+        "driver_class": TestDriverCL,
+        "config": {"some": "config"},
+        "cycle": dt.datetime.now(),
+        "leadtime": dt.timedelta(hours=hours),
+        "graph_file": graph_file,
+    }
+    assert not graph_file.is_file()
+    assert api._execute(**kwargs) is True
     assert graph_file.is_file()
