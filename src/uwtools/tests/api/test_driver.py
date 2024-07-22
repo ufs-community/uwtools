@@ -72,6 +72,11 @@ def test_execute_pass(caplog, kwargs, tmp_path):
         assert f.read().strip() == graph_code
 
 
+def test_execute_fail_cannot_load_driver_class(kwargs):
+    kwargs["module"] = "bad_module_name"
+    assert driver_api.execute(**kwargs) is False
+
+
 def test_tasks_fail(args, caplog, tmp_path):
     module = tmp_path / "not.py"
     tasks = driver_api.tasks(classname=args.classname, module=module)
