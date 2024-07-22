@@ -1,1 +1,1 @@
-conda install -q -y nb_conda_kernels pytest testbook
+conda install -q -y jupyterlab pytest testbook
