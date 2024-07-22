@@ -79,13 +79,12 @@ def execute(  # pylint: disable=unused-argument
     return True
 
 
-def tasks(classname: str, module: str) -> dict[str, str]:
+def tasks(module: str, classname: str) -> dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
 
-    :param classname: Class of driver object to instantiate.
     :param module: Name of driver module.
-    :param module_path: Path to module file.
+    :param classname: Class of driver object to instantiate.
     """
     if not (class_ := _get_driver_class(module, classname)):
         log.error("Could not get tasks from class %s in module %s", classname, module)
