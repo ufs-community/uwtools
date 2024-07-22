@@ -4,7 +4,6 @@ API access to the ``uwtools`` driver base classes.
 
 import sys
 from datetime import datetime, timedelta
-from functools import partial
 from importlib import import_module
 from importlib.util import module_from_spec, spec_from_file_location
 from inspect import getfullargspec
@@ -119,12 +118,10 @@ def _get_driver_class(module: Union[Path, str], classname: str) -> Optional[Type
     :param classname: Name of driver class to instantiate
     """
     module = str(module)
-    explicit = partial(_get_driver_module_explicit, module)
-    if not (m := explicit(module)):
-        if not (m := explicit(str(Path.cwd() / module))):
-            if not (m := _get_driver_module_implicit(module)):
-                log.error("Could not load module %s", module)
-                return None
+    if not (m := _get_driver_module_explicit(module)):
+        if not (m := _get_driver_module_implicit(module)):
+            log.error("Could not load module %s", module)
+            return None
     if hasattr(m, classname):
         c: Type = getattr(m, classname)
         return c
@@ -132,20 +129,19 @@ def _get_driver_class(module: Union[Path, str], classname: str) -> Optional[Type
     return None
 
 
-def _get_driver_module_explicit(module: str, file_path: str) -> Optional[ModuleType]:
+def _get_driver_module_explicit(module: str) -> Optional[ModuleType]:
     """
     Returns the named module found via explicit lookup of given path.
 
     :param module: Name of driver module to load.
-    :param file_path: Path to search for named module.
     """
-    log.debug("Loading module %s from %s", module, file_path)
-    if spec := spec_from_file_location(module, file_path):
+    log.debug("Loading module %s", module)
+    if spec := spec_from_file_location(Path(module).name, module):
         m = module_from_spec(spec)
         if loader := spec.loader:
             try:
                 loader.exec_module(m)
-                log.debug("Loaded module %s from %s", module, file_path)
+                log.debug("Loaded module %s", module)
                 return m
             except Exception:  # pylint: disable=broad-exception-caught
                 pass

@@ -2,6 +2,8 @@
 
 import datetime as dt
 import logging
+import os
+import sys
 from pathlib import Path
 from types import SimpleNamespace as ns
 from unittest.mock import patch
@@ -142,3 +144,42 @@ def test__get_driver_class_implicit_pass(args):
         c = driver_api._get_driver_class(classname=args.classname, module=args.module)
         assert c
         assert c.__name__ == "TestDriver"
+
+
+def test__get_driver_module_explicit_absolute_fail(args):
+    assert args.module.is_absolute()
+    module = str(args.module.with_suffix(".bad"))
+    assert not driver_api._get_driver_module_explicit(module=module)
+
+
+def test__get_driver_module_explicit_absolute_pass(args):
+    assert args.module.is_absolute()
+    module = str(args.module)
+    assert driver_api._get_driver_module_explicit(module=module)
+
+
+def test__get_driver_module_explicit_relative_fail(args):
+    args.module = Path(os.path.relpath(args.module)).with_suffix(".bad")
+    assert not args.module.is_absolute()
+    module = str(args.module)
+    assert not driver_api._get_driver_module_explicit(module=module)
+
+
+def test__get_driver_module_explicit_relative_pass(args):
+    args.module = Path(os.path.relpath(args.module))
+    assert not args.module.is_absolute()
+    module = str(args.module)
+    assert driver_api._get_driver_module_explicit(module=module)
+
+
+def test__get_driver_module_implicit_pass_full_package():
+    assert driver_api._get_driver_module_implicit("uwtools.tests.fixtures.testdriver")
+
+
+def test__get_driver_module_implicit_pass():
+    with patch.object(sys, "path", [str(fixture_path()), *sys.path]):
+        assert driver_api._get_driver_module_implicit("testdriver")
+
+
+def test__get_driver_module_implicit_fail():
+    assert not driver_api._get_driver_module_implicit("no.such.module")
