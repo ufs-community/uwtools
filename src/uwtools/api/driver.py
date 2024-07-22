@@ -17,15 +17,15 @@ from uwtools.logging import log
 from uwtools.utils.api import ensure_data_source
 
 
-def execute(  # pylint: disable=unused-argument
+def execute(
     module: Union[Path, str],
     classname: str,
     task: str,
     schema_file: str,
     config: Optional[Union[Path, str]] = None,
-    cycle: Optional[datetime] = None,
-    leadtime: Optional[timedelta] = None,
-    batch: Optional[bool] = False,
+    cycle: Optional[datetime] = None,  # pylint: disable=unused-argument
+    leadtime: Optional[timedelta] = None,  # pylint: disable=unused-argument
+    batch: Optional[bool] = False,  # pylint: disable=unused-argument
     dry_run: Optional[bool] = False,
     graph_file: Optional[Union[Path, str]] = None,
     key_path: Optional[list[str]] = None,

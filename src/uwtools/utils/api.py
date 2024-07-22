@@ -4,6 +4,7 @@ Support for API modules.
 
 import datetime as dt
 import re
+from inspect import getfullargspec
 from pathlib import Path
 from typing import Any, Callable, Optional, TypeVar, Union
 
@@ -147,10 +148,10 @@ def str2path(val: Any) -> Any:
 def _execute(
     driver_class: DriverT,
     task: str,
-    cycle: Optional[dt.datetime] = None,
-    leadtime: Optional[dt.timedelta] = None,
     config: Optional[Union[Path, str]] = None,
-    batch: bool = False,
+    cycle: Optional[dt.datetime] = None,  # pylint: disable=unused-argument
+    leadtime: Optional[dt.timedelta] = None,  # pylint: disable=unused-argument
+    batch: bool = False,  # pylint: disable=unused-argument
     dry_run: bool = False,
     graph_file: Optional[Union[Path, str]] = None,
     key_path: Optional[list[str]] = None,
@@ -164,9 +165,9 @@ def _execute(
 
     :param driver_class: Class of driver object to instantiate.
     :param task: The task to execute.
+    :param config: Path to config file (read stdin if missing or None).
     :param cycle: The cycle.
     :param leadtime: The leadtime.
-    :param config: Path to config file (read stdin if missing or None).
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run the executable, just report what would have been done.
     :param graph_file: Write Graphviz DOT output here.
@@ -176,14 +177,13 @@ def _execute(
     """
     kwargs = dict(
         config=ensure_data_source(str2path(config), stdin_ok),
-        batch=batch,
         dry_run=dry_run,
         key_path=key_path,
     )
-    if cycle:
-        kwargs["cycle"] = cycle
-    if leadtime is not None:
-        kwargs["leadtime"] = leadtime
+    accepted = set(getfullargspec(driver_class).args)
+    for arg in ["batch", "cycle", "leadtime"]:
+        if arg in accepted:
+            kwargs[arg] = locals()[arg]
     obj = driver_class(**kwargs)
     getattr(obj, task)()
     if graph_file:
