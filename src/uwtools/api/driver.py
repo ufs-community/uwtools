@@ -127,9 +127,9 @@ def _get_driver_class(
     """
     Returns the driver class.
 
-    :param classname: Class of driver object to instantiate.
-    :param module: Name of driver module.
-    :param module_dir: Path to directory that contains module.
+    :param classname: Name of driver class to instantiate
+    :param module: Name of driver module to load.
+    :param module_dir: Path to directory containing driver module.
     """
     module_dir = Path(module_dir) if module_dir else Path.cwd()
     file_path = (module_dir / module).with_suffix(".py")
