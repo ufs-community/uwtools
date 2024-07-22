@@ -97,7 +97,6 @@ class STR:
     mode: str = "mode"
     model: str = "model"
     module: str = "module"
-    moduledir: str = "module_dir"
     mpas: str = "mpas"
     mpasinit: str = "mpas_init"
     oroggsl: str = "orog_gsl"

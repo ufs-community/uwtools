@@ -2,9 +2,9 @@
 API access to the ``uwtools`` driver base classes.
 """
 
-import importlib
 import sys
 from datetime import datetime, timedelta
+from importlib import import_module
 from importlib.util import module_from_spec, spec_from_file_location
 from inspect import getfullargspec
 from pathlib import Path
@@ -17,11 +17,10 @@ from uwtools.utils.api import ensure_data_source
 
 
 def execute(  # pylint: disable=unused-argument
-    module: str,
+    module: Union[Path, str],
     classname: str,
     task: str,
     schema_file: str,
-    module_dir: Optional[Union[Path, str]] = None,
     config: Optional[Union[Path, str]] = None,
     cycle: Optional[datetime] = None,
     leadtime: Optional[timedelta] = None,
@@ -41,7 +40,6 @@ def execute(  # pylint: disable=unused-argument
     :param classname: Name of driver class to instantiate.
     :param task: Name of driver task to execute.
     :param schema_file: Path to schema file.
-    :param module_dir: Path to directory containing driver module.
     :param config: Path to config file (read stdin if missing or None).
     :param cycle: The cycle.
     :param leadtime: The leadtime.
@@ -52,7 +50,7 @@ def execute(  # pylint: disable=unused-argument
     :param stdin_ok: OK to read from stdin?
     :return: ``True`` if task completes without raising an exception.
     """
-    if not (class_ := _get_driver_class(classname=classname, module=module, module_dir=module_dir)):
+    if not (class_ := _get_driver_class(module, classname)):
         return False
     accepted = set(getfullargspec(class_).args)
     non_optional = {"cycle", "leadtime"}
@@ -79,11 +77,7 @@ def execute(  # pylint: disable=unused-argument
     return True
 
 
-def tasks(
-    classname: str,
-    module: str,
-    module_dir: Optional[Union[Path, str]] = None,
-) -> dict[str, str]:
+def tasks(classname: str, module: str) -> dict[str, str]:
     """
     Returns a mapping from task names to their one-line descriptions.
 
@@ -91,13 +85,8 @@ def tasks(
     :param module: Name of driver module.
     :param module_path: Path to module file.
     """
-    if not (class_ := _get_driver_class(classname, module, module_dir)):
-        msg = "Could not get tasks from class %s in module %s"
-        vals = [classname, module]
-        if module_dir:
-            msg += " in %s"
-            vals.append(str(module_dir))
-        log.error(msg, *vals)
+    if not (class_ := _get_driver_class(module, classname)):
+        log.error("Could not get tasks from class %s in module %s", classname, module)
         return {}
     return _tasks(class_)
 
@@ -115,38 +104,46 @@ _CLASSNAMES = [
 
 
 def _add_classes():
-    m = importlib.import_module("uwtools.drivers.driver")
+    m = import_module("uwtools.drivers.driver")
     for classname in _CLASSNAMES:
         setattr(sys.modules[__name__], classname, getattr(m, classname))
         __all__.append(classname)
 
 
-def _get_driver_class(
-    classname: str, module: str, module_dir: Optional[Union[Path, str]] = None
-) -> Optional[Type]:
+def _get_driver_class(module: Union[Path, str], classname: str) -> Optional[Type]:
     """
     Returns the driver class.
 
-    :param classname: Name of driver class to instantiate
     :param module: Name of driver module to load.
-    :param module_dir: Path to directory containing driver module.
+    :param classname: Name of driver class to instantiate
     """
-    module_dir = Path(module_dir) if module_dir else Path.cwd()
-    file_path = (module_dir / module).with_suffix(".py")
-    if spec := spec_from_file_location(module, file_path):
-        m = module_from_spec(spec)
-        if loader := spec.loader:
-            try:
-                loader.exec_module(m)
-            except Exception:  # pylint: disable=broad-exception-caught
-                log.error("Could not load module %s", module)
-                return None
-        if hasattr(m, classname):
-            c: Type = getattr(m, classname)
-            return c
-        log.error("Module %s has no class %s", module, classname)
+    module = str(module)
+    m = None
+    for file_path in [module, str(Path.cwd() / module)]:
+        log.debug("Loading module %s from %s", module, file_path)
+        if spec := spec_from_file_location(module, file_path):
+            m = module_from_spec(spec)
+            if loader := spec.loader:
+                try:
+                    loader.exec_module(m)
+                    break
+                except Exception:  # pylint: disable=broad-exception-caught
+                    m = None
+            else:
+                m = None
+    if not m:
+        try:
+            log.debug("Loading module %s from sys.path", module)
+            m = import_module(module)
+        except Exception:  # pylint: disable=broad-exception-caught
+            pass
+    if not m:
+        log.error("Could not load module %s", module)
         return None
-    log.error("Could not load module %s", module)
+    if hasattr(m, classname):
+        c: Type = getattr(m, classname)
+        return c
+    log.error("Module %s has no class %s", module, classname)
     return None
 
 

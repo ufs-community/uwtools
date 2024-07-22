@@ -267,7 +267,6 @@ def _add_subparser_execute(subparsers: Subparsers) -> ModeChecks:
     _add_arg_task(required)
     _add_arg_schema_file(required)
     optional = _basic_setup(parser)
-    _add_arg_module_dir(optional)
     _add_arg_config_file(optional)
     _add_arg_cycle(optional)
     _add_arg_leadtime(optional)
@@ -296,7 +295,6 @@ def _dispatch_execute(args: Args) -> bool:
         key_path=args[STR.keypath],
         dry_run=args[STR.dryrun],
         config=args[STR.cfgfile],
-        module_dir=args[STR.moduledir],
         graph_file=args[STR.graphfile],
         cycle=args[STR.cycle],
         leadtime=args[STR.leadtime],
@@ -750,15 +748,6 @@ def _add_arg_module(group: Group) -> None:
         _switch(STR.module),
         help="Name of driver module",
         required=True,
-        type=str,
-    )
-
-
-def _add_arg_module_dir(group: Group) -> None:
-    group.add_argument(
-        _switch(STR.moduledir),
-        help="Path to directory containing driver module",
-        required=False,
         type=str,
     )
 
