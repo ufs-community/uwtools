@@ -50,7 +50,7 @@ def main() -> None:
     try:
         setup_logging(quiet=True)
         args, checks = _parse_args(sys.argv[1:])
-        args[STR.action] = args[STR.action] if STR.action in args else args[STR.mode]
+        args[STR.action] = args.get(STR.action, args[STR.mode])
         for check in checks[args[STR.mode]][args[STR.action]]:
             check(args)
         setup_logging(quiet=args[STR.quiet], verbose=args[STR.verbose])
