@@ -83,7 +83,7 @@ def tasks(module: str, classname: str) -> dict[str, str]:
     Returns a mapping from task names to their one-line descriptions.
 
     :param module: Name of driver module.
-    :param classname: Class of driver object to instantiate.
+    :param classname: Name of driver class to instantiate.
     """
     if not (class_ := _get_driver_class(module, classname)):
         log.error("Could not get tasks from class %s in module %s", classname, module)
