@@ -125,6 +125,12 @@ Drivers for UFS
 
 To prepare a complete forecast, drivers would typically be run in the order shown here (along with additional drivers still in development).
 
+cdeps
+"""""
+
+| **CLI**: ``uw cdeps -h``
+| **API**: ``import uwtools.api.cdeps``
+
 esg_grid
 """"""""
 

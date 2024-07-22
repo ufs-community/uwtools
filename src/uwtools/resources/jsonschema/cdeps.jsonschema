@@ -1,11 +1,92 @@
 {
+  "$defs": {
+    "streams": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "patternProperties": {
+        "^stream0[1-9]$": {
+          "additionalProperties": false,
+          "properties": {
+            "dtlimit": {
+              "type": "number"
+            },
+            "mapalgo": {
+              "type": "string"
+            },
+            "readmode": {
+              "enum": [
+                "single"
+              ]
+            },
+            "stream_data_files": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "stream_data_variables": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "stream_lev_dimname": {
+              "type": "string"
+            },
+            "stream_mesh_file": {
+              "type": "string"
+            },
+            "stream_offset": {
+              "type": "integer"
+            },
+            "stream_vectors": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "taxmode": {
+              "type": "string"
+            },
+            "tinterpalgo": {
+              "type": "string"
+            },
+            "yearAlign": {
+              "type": "integer"
+            },
+            "yearFirst": {
+              "type": "integer"
+            },
+            "yearLast": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "dtlimit",
+            "mapalgo",
+            "readmode",
+            "stream_data_files",
+            "stream_data_variables",
+            "stream_lev_dimname",
+            "stream_mesh_file",
+            "stream_offset",
+            "stream_vectors",
+            "taxmode",
+            "tinterpalgo",
+            "yearAlign",
+            "yearFirst",
+            "yearLast"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  },
   "properties": {
     "cdeps": {
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
-        "execution": {
-          "$ref": "urn:uwtools:execution"
-        },
         "atm_in": {
           "additionalProperties": false,
           "anyOf": [
@@ -36,6 +117,12 @@
                     ]
                   },
                   "properties": {
+                    "anomaly_forcing": {
+                      "type": "string"
+                    },
+                    "bias_correct": {
+                      "type": "string"
+                    },
                     "datamode": {
                       "enum": [
                         "ATMMESH",
@@ -51,12 +138,6 @@
                         "GFS_HAFS",
                         "SIMPLE"
                       ]
-                    },
-                    "anomaly_forcing": {
-                      "type": "string"
-                    },
-                    "bias_correct": {
-                      "type": "string"
                     },
                     "export_all": {
                       "type": "boolean"
@@ -115,132 +196,21 @@
           },
           "type": "object"
         },
-        "patternProperties": {
-          "^d.{0,3}_streams": {
-            "anyOf": [
-              {
-                "required": [
-                  "base_file"
-                ],
-                "required": [
-                  "streams"
-                ]
-              }
-            ],
-            "properties": {
-              "base_file": {
-                "type": "string"
-              },
-              "streams": {
-                "patternProperties": {
-                  "stream0[1-9]": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": [
-                        "array",
-                        "boolean",
-                        "number",
-                        "string"
-                      ]
-                    },
-                    "properties": {
-                      "taxmode": {
-                        "enum": [
-                          "cycle",
-                          "extend",
-                          "limit"
-                        ]
-                      }
-                    },
-                    "properties": {
-                      "mapalgo": {
-                        "enum": [
-                          "bilinear",
-                          "redist",
-                          "nn",
-                          "consf",
-                          "consd",
-                          "none"
-                        ]
-                      }
-                    },
-                    "properties": {
-                      "tinterpalgo": {
-                        "enum": [
-                          "lower",
-                          "upper",
-                          "nearest",
-                          "linear",
-                          "coszen"
-                        ]
-                      }
-                    },
-                    "properties": {
-                      "readmode": {
-                        "enum": [
-                          "single"
-                        ]
-                      }
-                    },
-                    "dtlimit": {
-                      "type": "integer"
-                    },
-                    "stream_offset": {
-                      "type": "integer"
-                    },
-                    "yearFirst": {
-                      "type": "integer"
-                    },
-                    "yearLast": {
-                      "type": "integer"
-                    },
-                    "yearAlign": {
-                      "type": "integer"
-                    },
-                    "stream_vectors": {
-                      "items": [
-                        { "type": "string" }
-                      ]
-                    },
-                    "stream_mesh_file": {
-                      "type": "string"
-                    },
-                    "stream_lev_dimname": {
-                      "type": "string"
-                    },
-                    "stream_data_files": {
-                      "items": [
-                        { "type": "string" }
-                      ]
-                    },
-                    "stream_data_variables": {
-                      "items": [
-                        { "type": "string" }
-                      ]
-                    },
-                    "required": [
-                      "taxmode",
-                      "mapalgo",
-                      "tinterpalgo",
-                      "readmode",
-                      "dtlimit",
-                      "stream_offset",
-                      "yearFirst",
-                      "yearLast",
-                      "yearAlign",
-                      "stream_vectors",
-                      "stream_mesh_file",
-                      "stream_lev_dimname",
-                      "stream_data_files",
-                      "stream_data_variables"
-                    ]
-                  }
-                },
-                "type": "object"
-              }
+        "atm_streams": {
+          "additionalProperties": false,
+          "properties": {
+            "streams": {
+              "$ref": "#/$defs/streams"
             },
-            "type": "object"
-          }
+            "template_file": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "streams",
+            "template_file"
+          ],
+          "type": "object"
         },
         "ocn_in": {
           "additionalProperties": false,
@@ -275,6 +245,9 @@
                     "datamode": {
                       "type": "string"
                     },
+                    "import_data_fields": {
+                      "type": "string"
+                    },
                     "model_maskfile": {
                       "type": "string"
                     },
@@ -290,14 +263,11 @@
                     "restfilm": {
                       "type": "string"
                     },
-                    "sst_constant_value": {
-                      "type": "number"
-                    },
                     "skip_restart_read": {
                       "type": "boolean"
                     },
-                    "import_data_fields": {
-                      "type": "string"
+                    "sst_constant_value": {
+                      "type": "number"
                     }
                   },
                   "type": "object"
@@ -311,15 +281,29 @@
           },
           "type": "object"
         },
-        "run_dir": {
+        "ocn_streams": {
+          "additionalProperties": false,
+          "properties": {
+            "streams": {
+              "$ref": "#/$defs/streams"
+            },
+            "template_file": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "streams",
+            "template_file"
+          ],
+          "type": "object"
+        },
+        "rundir": {
           "type": "string"
         }
       },
       "required": [
-        "execution",
-        "run_dir"
-      ],
-      "type": "object"
+        "rundir"
+      ]
     }
   },
   "type": "object"

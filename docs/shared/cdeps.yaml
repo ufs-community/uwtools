@@ -2,67 +2,77 @@ cdeps:
   atm_in:
     update_values:
       datm_nml:
-        datamode: some_supported_mode1
-        factorfn_data: "null"
-        factorfn_mesh: "null"
+        datamode: GFS
+        export_all: true
+        factorfn_data: 'null'
+        factorfn_mesh: 'null'
         flds_co2: false
         flds_presaero: false
         flds_wiso: false
         iradsw: 1
-        model_maskfile: "path/to/mesh1.nc"
-        model_meshfile: "path/to/mesh1.nc"
+        model_maskfile: /path/to/mesh1.nc
+        model_meshfile: /path/to/mesh1.nc
         nx_global: 100
         ny_global: 100
-        restfilm: "null"
-        export_all: true
+        restfilm: 'null'
   atm_streams:
-    base_file: stream.jinja2 
     streams:
       stream01:
-        taxmode: limit
-        mapalgo: redist
-        tinterpalgo: linear
-        readmode: single
         dtlimit: 1.5
-        stream_offset: 0
-        yearFirst: 2008
-        yearLast: 2008
-        yearAlign: 2008
-        stream_vectors: ['u', 'v']
+        mapalgo: redist
+        readmode: single
+        stream_data_files:
+          - /path/to/data_file1.nc
+        stream_data_variables:
+          - var1
+        stream_lev_dimname: 'null'
         stream_mesh_file: /path/to/mesh1.nc
-        stream_lev_dimname: "null"
-        stream_data_files: path/to/data_file1.nc
-        stream_data_variables: var1
-  ocn_streams:
-    base_file: stream.jinja2
-    streams:
-      stream01:
-        taxmode: limit
-        mapalgo: redist
-        tinterpalgo: linear
-        readmode: single
-        dtlimit: 1.5
         stream_offset: 0
+        stream_vectors:
+          - u
+          - v
+        taxmode: limit
+        tinterpalgo: linear
+        yearAlign: 2008
         yearFirst: 2008
         yearLast: 2008
-        yearAlign: 2008
-        stream_vectors: "null" 
-        stream_mesh_file: /path/to/mesh2.nc
-        stream_lev_dimname: "null"
-        stream_data_files: ['/path/to/data_file2.nc', '/path/to/data_file3.nc']
-        stream_data_variables: ['var2', 'var3']
+    template_file: stream.jinja2
   ocn_in:
     update_values:
       docn_nml:
         datamode: some_supported_mode2
-        model_maskfile: 'path/to/mesh2.nc'
-        model_meshfile: "path/to/mesh2.nc"
+        import_data_fields: none
+        model_maskfile: /path/to/mesh2.nc
+        model_meshfile: /path/to/mesh2.nc
         nx_global: 150
         ny_global: 150
-        restfilm: "null"
-        sst_constant_value: -1.0
+        restfilm: 'null'
         skip_restart_read: true
-        import_data_fields: "none"
+        sst_constant_value: -1
+  ocn_streams:
+    streams:
+      stream01:
+        dtlimit: 1.5
+        mapalgo: redist
+        readmode: single
+        stream_data_files:
+          - /path/to/data_file2.nc
+          - /path/to/data_file3.nc
+        stream_data_variables:
+          - var2
+          - var3
+        stream_lev_dimname: 'null'
+        stream_mesh_file: /path/to/mesh2.nc
+        stream_offset: 0
+        stream_vectors:
+          - 'null'
+        taxmode: limit
+        tinterpalgo: linear
+        yearAlign: 2008
+        yearFirst: 2008
+        yearLast: 2008
+    template_file: stream.jinja2
+  rundir: /path/to/dir
 platform:
   account: me
   scheduler: slurm
