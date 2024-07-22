@@ -3,7 +3,7 @@
 cdeps
 =====
 
-Structured YAML to run :CDEPS:`cdeps<>` is validated by JSON Schema and requires the ``cdeps:`` block, described below.
+Structured YAML to run :cdeps:`CDEPS<index.html>` is validated by JSON Schema and requires the ``cdeps:`` block, described below.
 
 .. include:: /shared/injected_cycle.rst
 
@@ -18,7 +18,7 @@ UW YAML for the ``cdeps:`` Block
 atm_in
 ^^^^^^
 
-Configures the atm namelist file. Supports ``base_file:`` and ``update_values:`` blocks (see :ref:`updating_values` for details). Namelist options are described :cdeps:`??? HERE ???<>`.
+Configures the atm namelist file. Supports ``base_file:`` and ``update_values:`` blocks (see :ref:`updating_values` for details). Namelist options are described :cdeps:`here<streams.html>`.
 
 .. include:: /shared/validate_namelist.rst
 
@@ -29,7 +29,7 @@ Configures the atm streams.
 
   **streams:**
 
-  The ``streams:`` block may contain sub-blocks ``stream01`` through ``stream09``. Each such sub-block specifies a stream configuration to be used to render the Jinja2 template file named by ``template_file:`` (see below). Supported keys and avlues are described :cdeps:`??? HERE ???<>`.
+  The ``streams:`` block may contain sub-blocks ``stream01`` through ``stream09``. Each such sub-block specifies a stream configuration to be used to render the Jinja2 template file named by ``template_file:`` (see below). Supported keys and avlues are described :cdeps:`here<streams.html>`.
 
   **template_file:**
 
@@ -38,7 +38,7 @@ Configures the atm streams.
 ocn_in
 ^^^^^^
 
-Configures the ocn namelist file. Supports ``base_file:`` and ``update_values:`` blocks (see :ref:`updating_values` for details). Namelist options are described :cdeps:`??? HERE ???<>`.
+Configures the ocn namelist file. Supports ``base_file:`` and ``update_values:`` blocks (see :ref:`updating_values` for details). Namelist options are described :cdeps:`here<streams.html>`.
 
 .. include:: /shared/validate_namelist.rst
 
