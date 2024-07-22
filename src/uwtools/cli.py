@@ -746,7 +746,7 @@ def _add_arg_leadtime(group: Group, required: bool = False) -> None:
 def _add_arg_module(group: Group) -> None:
     group.add_argument(
         _switch(STR.module),
-        help="Name of driver module",
+        help="Path to driver module or name of module on sys.path",
         required=True,
         type=str,
     )
