@@ -37,11 +37,11 @@ def execute(  # pylint: disable=unused-argument
     If ``batch`` is specified, a runscript will be written and submitted to the batch system.
     Otherwise, the executable will be run directly on the current system.
 
-    :param module: Name of driver module.
-    :param classname: Class of driver object to instantiate.
-    :param task: The task to execute.
+    :param module: Name of driver module to load.
+    :param classname: Name of driver class to instantiate.
+    :param task: Name of driver task to execute.
     :param schema_file: Path to schema file.
-    :param module_dir: Path to module file.
+    :param module_dir: Path to directory containing driver module.
     :param config: Path to config file (read stdin if missing or None).
     :param cycle: The cycle.
     :param leadtime: The leadtime.
