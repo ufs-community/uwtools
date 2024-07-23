@@ -94,16 +94,6 @@ class CDEPS(AssetsCycleBased):
         yield file(path=Path(template_file))
         self._model_stream_file("ocn_streams", path, template_file)
 
-    @tasks
-    def provisioned_rundir(self):
-        """
-        Run directory provisioned with all required content.
-        """
-        yield self._taskname("provisioned run directory")
-        yield [
-            self.atm(),
-            self.ocn(),
-        ]
 
     # Private helper methods
 
@@ -127,7 +117,7 @@ class CDEPS(AssetsCycleBased):
 
     def _model_stream_file(self, group: str, path: Path, template_file: str) -> None:
         """
-        Create at atmosphere of ocean stream file, based on a template.
+        Create an atmosphere or ocean stream file, based on a template.
 
         :param group: "atm_in" or "ocn_in".
         :param path: Path to write namelist to.
