@@ -1,0 +1,313 @@
+{
+  "$defs": {
+    "streams": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "patternProperties": {
+        "^stream0[1-9]$": {
+          "additionalProperties": false,
+          "properties": {
+            "dtlimit": {
+              "type": "number"
+            },
+            "mapalgo": {
+              "type": "string"
+            },
+            "readmode": {
+              "enum": [
+                "single"
+              ]
+            },
+            "stream_data_files": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "stream_data_variables": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "stream_lev_dimname": {
+              "type": "string"
+            },
+            "stream_mesh_file": {
+              "type": "string"
+            },
+            "stream_offset": {
+              "type": "integer"
+            },
+            "stream_vectors": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "taxmode": {
+              "type": "string"
+            },
+            "tinterpalgo": {
+              "type": "string"
+            },
+            "yearAlign": {
+              "type": "integer"
+            },
+            "yearFirst": {
+              "type": "integer"
+            },
+            "yearLast": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "dtlimit",
+            "mapalgo",
+            "readmode",
+            "stream_data_files",
+            "stream_data_variables",
+            "stream_lev_dimname",
+            "stream_mesh_file",
+            "stream_offset",
+            "stream_vectors",
+            "taxmode",
+            "tinterpalgo",
+            "yearAlign",
+            "yearFirst",
+            "yearLast"
+          ],
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "properties": {
+    "cdeps": {
+      "additionalProperties": false,
+      "properties": {
+        "atm_in": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "properties": {
+                "datm_nml": {
+                  "additionalProperties": {
+                    "type": [
+                      "array",
+                      "boolean",
+                      "number",
+                      "string"
+                    ]
+                  },
+                  "properties": {
+                    "anomaly_forcing": {
+                      "type": "string"
+                    },
+                    "bias_correct": {
+                      "type": "string"
+                    },
+                    "datamode": {
+                      "enum": [
+                        "ATMMESH",
+                        "CFSR",
+                        "CLMNCEP",
+                        "CORE2_IAF",
+                        "CORE2_IAF_JRA",
+                        "CORE2_NYF",
+                        "CPLHIST",
+                        "ERA5",
+                        "GEFS",
+                        "GFS",
+                        "GFS_HAFS",
+                        "SIMPLE"
+                      ]
+                    },
+                    "export_all": {
+                      "type": "boolean"
+                    },
+                    "factorfn_data": {
+                      "type": "string"
+                    },
+                    "factorfn_mesh": {
+                      "type": "string"
+                    },
+                    "flds_co2": {
+                      "type": "boolean"
+                    },
+                    "flds_presaero": {
+                      "type": "boolean"
+                    },
+                    "flds_presndep": {
+                      "type": "boolean"
+                    },
+                    "flds_preso3": {
+                      "type": "boolean"
+                    },
+                    "flds_wiso": {
+                      "type": "boolean"
+                    },
+                    "iradsw": {
+                      "type": "integer"
+                    },
+                    "model_maskfile": {
+                      "type": "string"
+                    },
+                    "model_meshfile": {
+                      "type": "string"
+                    },
+                    "nx_global": {
+                      "type": "integer"
+                    },
+                    "ny_global": {
+                      "type": "integer"
+                    },
+                    "restfilm": {
+                      "type": "string"
+                    },
+                    "skip_restart_read": {
+                      "type": "boolean"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "required": [
+                "datm_nml"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "atm_streams": {
+          "additionalProperties": false,
+          "properties": {
+            "streams": {
+              "$ref": "#/$defs/streams"
+            },
+            "template_file": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "streams",
+            "template_file"
+          ],
+          "type": "object"
+        },
+        "ocn_in": {
+          "additionalProperties": false,
+          "anyOf": [
+            {
+              "required": [
+                "base_file"
+              ]
+            },
+            {
+              "required": [
+                "update_values"
+              ]
+            }
+          ],
+          "properties": {
+            "base_file": {
+              "type": "string"
+            },
+            "update_values": {
+              "properties": {
+                "docn_nml": {
+                  "additionalProperties": {
+                    "type": [
+                      "array",
+                      "boolean",
+                      "number",
+                      "string"
+                    ]
+                  },
+                  "properties": {
+                    "datamode": {
+                      "type": "string"
+                    },
+                    "import_data_fields": {
+                      "type": "string"
+                    },
+                    "model_maskfile": {
+                      "type": "string"
+                    },
+                    "model_meshfile": {
+                      "type": "string"
+                    },
+                    "nx_global": {
+                      "type": "integer"
+                    },
+                    "ny_global": {
+                      "type": "integer"
+                    },
+                    "restfilm": {
+                      "type": "string"
+                    },
+                    "skip_restart_read": {
+                      "type": "boolean"
+                    },
+                    "sst_constant_value": {
+                      "type": "number"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "required": [
+                "docn_nml"
+              ],
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "ocn_streams": {
+          "additionalProperties": false,
+          "properties": {
+            "streams": {
+              "$ref": "#/$defs/streams"
+            },
+            "template_file": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "streams",
+            "template_file"
+          ],
+          "type": "object"
+        },
+        "rundir": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "rundir"
+      ]
+    }
+  },
+  "required": [
+    "cdeps"
+  ],
+  "type": "object"
+}

@@ -49,5 +49,8 @@
       "type": "object"
     }
   },
+  "required": [
+    "ioda"
+  ],
   "type": "object"
 }

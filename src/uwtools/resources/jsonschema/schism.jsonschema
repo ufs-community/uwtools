@@ -29,5 +29,9 @@
       ],
       "type": "object"
     }
-  }
+  },
+  "required": [
+    "schism"
+  ],
+  "type": "object"
 }

@@ -7,6 +7,7 @@ import iotaa
 from pytest import mark
 
 from uwtools.api import (
+    cdeps,
     chgres_cube,
     esg_grid,
     fv3,
@@ -28,6 +29,7 @@ from uwtools.drivers import support
 from uwtools.utils import api
 
 modules = [
+    cdeps,
     chgres_cube,
     esg_grid,
     fv3,
@@ -45,7 +47,7 @@ modules = [
     upp,
     ww3,
 ]
-with_cycle = [chgres_cube, fv3, jedi, mpas, mpas_init, schism, ungrib, upp, ww3]
+with_cycle = [cdeps, chgres_cube, fv3, jedi, mpas, mpas_init, schism, ungrib, upp, ww3]
 with_leadtime = [upp]
 
 

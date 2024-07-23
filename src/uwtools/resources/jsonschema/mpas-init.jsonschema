@@ -82,5 +82,8 @@
       "type": "object"
     }
   },
+  "required": [
+    "mpas_init"
+  ],
   "type": "object"
 }
