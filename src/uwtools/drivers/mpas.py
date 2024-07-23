@@ -48,7 +48,7 @@ class MPAS(MPASBase):
         base_file = self._driver_config["namelist"].get("base_file")
         yield file(Path(base_file)) if base_file else None
         duration = timedelta(hours=self._driver_config["length"])
-        str_duration = str(duration).replace(" days, ", "")
+        str_duration = str(duration).replace(" days, ", "_")
         namelist = self._driver_config["namelist"]
         update_values = namelist.get("update_values", {})
         update_values.setdefault("nhyd_model", {}).update(
