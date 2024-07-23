@@ -4,6 +4,3 @@ ww3:
     template_values:
       input_forcing_winds: "C"
   rundir: /path/to/run/directory
-platform:
-  account: me
-  scheduler: slurm
