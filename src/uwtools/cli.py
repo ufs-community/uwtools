@@ -1081,16 +1081,14 @@ def _dispatch_to_driver(name: str, args: Args) -> bool:
     kwargs = {
         "task": args[STR.action],
         "config": args[STR.cfgfile],
-        "batch": args[STR.batch],
         "dry_run": args[STR.dryrun],
         "graph_file": args[STR.graphfile],
         "key_path": args[STR.keypath],
         "stdin_ok": True,
     }
-    if cycle := args.get(STR.cycle):
-        kwargs[STR.cycle] = cycle
-    if (leadtime := args.get(STR.leadtime)) is not None:
-        kwargs[STR.leadtime] = leadtime
+    for k in [STR.batch, STR.cycle, STR.leadtime]:
+        if k in args:
+            kwargs[k] = args.get(k)
     return execute(**kwargs)
 
 
