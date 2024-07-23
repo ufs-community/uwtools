@@ -196,7 +196,7 @@ def render(
     try:
         rendered = template.render()
     except UndefinedError as e:
-        log.error("Render failed with error: %s", str(e))
+        log.error("Template render failed with error: %s", str(e))
         return None
 
     # Log (dry-run mode) or write the rendered template.
@@ -292,7 +292,7 @@ def _log_missing_values(missing: list[str]) -> None:
 
     :param missing: Variables with no corresponding values.
     """
-    log.error("Required value(s) not provided:")
+    log.error("Required template value(s) not provided:")
     for key in missing:
         log.error(f"{INDENT}{key}")
 
@@ -322,7 +322,7 @@ def _report(args: dict) -> None:
     :param args: The argument names and their values.
     """
     dashes = lambda: log.debug("-" * MSGWIDTH)
-    log.debug("Internal arguments:")
+    log.debug("Internal arguments when rendering template:")
     dashes()
     for varname, value in args.items():
         log.debug("%16s: %s", varname, value)
@@ -349,15 +349,15 @@ def _supplement_values(
         values_format = values_format or get_file_format(values_src)
         values_src_class = format_to_config(values_format)
         values = values_src_class(values_src).data
-        log.debug("Read initial values from %s", values_src)
+        log.debug("Read initial template values from %s", values_src)
     else:
         values = values_src or {}
     if overrides:
         values.update(overrides)
-        log.debug("Supplemented values with overrides: %s", " ".join(overrides))
+        log.debug("Supplemented template values with overrides: %s", " ".join(overrides))
     if env:
         values.update(os.environ)
-        log.debug("Supplemented values with environment variables")
+        log.debug("Supplemented template values with environment variables")
     return values
 
 
