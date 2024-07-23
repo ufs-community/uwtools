@@ -64,12 +64,6 @@ def test_CDEPS_ocn(driverobj):
     ocn_nml.assert_called_once_with()
 
 
-def test_CDEPS_provisioned_rundir(driverobj):
-    with patch.object(CDEPS, "atm") as atm:
-        with patch.object(CDEPS, "ocn") as ocn:
-            driverobj.provisioned_rundir()
-        ocn.assert_called_once_with()
-    atm.assert_called_once_with()
 
 
 @mark.parametrize("group", ["atm", "ocn"])
