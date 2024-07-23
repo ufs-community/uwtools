@@ -65,8 +65,6 @@ def test_CDEPS_ocn(driverobj):
     ocn_nml.assert_called_once_with()
 
 
-
-
 @mark.parametrize("group", ["atm", "ocn"])
 def test_CDEP_streams(driverobj, group):
     dst = driverobj._rundir / f"d{group}.streams"
