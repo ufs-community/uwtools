@@ -53,7 +53,6 @@ def test_CDEPS_nml(caplog, driverobj, group):
     path = Path(refs(task()))
     assert dst.is_file()
     assert logged(caplog, f"Wrote config to {path}")
-    print("@@@", dst)
     assert isinstance(f90nml.read(dst), f90nml.Namelist)
 
 
@@ -108,7 +107,6 @@ def test_CDEP_streams(driverobj, group):
     1
     1
     """
-    print("@@@", path)
     with open(path, "r", encoding="utf-8") as f:
         assert f.read().strip() == dedent(expected).strip()
 
