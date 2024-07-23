@@ -29,7 +29,7 @@ Configures the atm streams.
 
   **streams:**
 
-  The ``streams:`` block may contain sub-blocks ``stream01`` through ``stream09``. Each such sub-block specifies a stream configuration to be used to render the Jinja2 template file named by ``template_file:`` (see below). Supported keys and avlues are described :cdeps:`here<streams.html>`.
+  The ``streams:`` block may contain sub-blocks ``stream01`` through ``stream09``. Each such sub-block specifies a stream configuration to be used to render the Jinja2 template file named by ``template_file:`` (see below). Supported keys and values are described :cdeps:`here<streams.html>`.
 
   **template_file:**
 
