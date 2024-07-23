@@ -77,20 +77,20 @@ def test_CDEP_streams(driverobj, group):
     dst = driverobj._rundir / f"d{group}.streams"
     assert not dst.is_file()
     template = """
-    {{ stream01.dtlimit }}
-    {{ stream01.mapalgo }}
-    {{ stream01.readmode }}
-    {{ " ".join(stream01.stream_data_files) }}
-    {{ " ".join(stream01.stream_data_variables) }}
-    {{ stream01.stream_lev_dimname }}
-    {{ stream01.stream_mesh_file }}
-    {{ stream01.stream_offset }}
-    {{ " ".join(stream01.stream_vectors) }}
-    {{ stream01.taxmode }}
-    {{ stream01.tinterpalgo }}
-    {{ stream01.yearAlign }}
-    {{ stream01.yearFirst }}
-    {{ stream01.yearLast }}
+    {{ streams.stream01.dtlimit }}
+    {{ streams.stream01.mapalgo }}
+    {{ streams.stream01.readmode }}
+    {{ " ".join(streams.stream01.stream_data_files) }}
+    {{ " ".join(streams.stream01.stream_data_variables) }}
+    {{ streams.stream01.stream_lev_dimname }}
+    {{ streams.stream01.stream_mesh_file }}
+    {{ streams.stream01.stream_offset }}
+    {{ " ".join(streams.stream01.stream_vectors) }}
+    {{ streams.stream01.taxmode }}
+    {{ streams.stream01.tinterpalgo }}
+    {{ streams.stream01.yearAlign }}
+    {{ streams.stream01.yearFirst }}
+    {{ streams.stream01.yearLast }}
     """
     template_file = driverobj._rundir / "template.jinja2"
     with open(template_file, "w", encoding="utf-8") as f:
@@ -142,5 +142,5 @@ def test_CDEPS__model_stream_file(driverobj):
         render.assert_called_once_with(
             input_file=template_file,
             output_file=path,
-            values_src=driverobj._driver_config[group]["streams"],
+            values_src=driverobj._driver_config[group],
         )

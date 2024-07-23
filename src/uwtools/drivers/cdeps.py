@@ -136,5 +136,5 @@ class CDEPS(AssetsCycleBased):
         _render(
             input_file=Path(template_file),
             output_file=path,
-            values_src=self._driver_config[group]["streams"],
+            values_src=self._driver_config[group],
         )
