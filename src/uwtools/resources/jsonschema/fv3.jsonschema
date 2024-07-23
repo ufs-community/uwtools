@@ -152,5 +152,8 @@
       "type": "object"
     }
   },
+  "required": [
+    "fv3"
+  ],
   "type": "object"
 }
