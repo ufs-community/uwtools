@@ -292,7 +292,7 @@ def _log_missing_values(missing: list[str]) -> None:
 
     :param missing: Variables with no corresponding values.
     """
-    log.error("Required template value(s) not provided:")
+    log.error("Value(s) required to render template not provided:")
     for key in missing:
         log.error(f"{INDENT}{key}")
 

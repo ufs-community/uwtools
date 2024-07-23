@@ -264,7 +264,7 @@ def test_render_values_missing(caplog, template_file, values_file):
     with open(values_file, "w", encoding="utf-8") as f:
         f.write(yaml.dump(cfgobj))
     render_helper(input_file=template_file, values_file=values_file)
-    assert logged(caplog, "Required template value(s) not provided:")
+    assert logged(caplog, "Value(s) required to render template not provided:")
     assert logged(caplog, "  roses_color")
 
 
@@ -329,7 +329,7 @@ def test__dry_run_template(caplog):
 def test__log_missing_values(caplog):
     missing = ["roses_color", "violets_color"]
     jinja2._log_missing_values(missing)
-    assert logged(caplog, "Required template value(s) not provided:")
+    assert logged(caplog, "Value(s) required to render template not provided:")
     assert logged(caplog, "  roses_color")
     assert logged(caplog, "  violets_color")
 
