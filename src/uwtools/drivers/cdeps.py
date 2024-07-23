@@ -94,16 +94,6 @@ class CDEPS(AssetsCycleBased):
         yield file(path=Path(template_file))
         self._model_stream_file("ocn_streams", path, template_file)
 
-    @tasks
-    def provisioned_rundir(self):
-        """
-        Run directory provisioned with all required content.
-        """
-        yield self._taskname("provisioned run directory")
-        yield [
-            self.atm(),
-            self.ocn(),
-        ]
 
     # Private helper methods
 
