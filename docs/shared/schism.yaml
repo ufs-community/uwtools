@@ -4,6 +4,3 @@ schism:
     template_values:
       dt: 100
   rundir: /path/to/run/directory
-platform:
-  account: me
-  scheduler: slurm
