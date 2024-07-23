@@ -137,5 +137,8 @@
       "type": "object"
     }
   },
+  "required": [
+    "sfc_climo_gen"
+  ],
   "type": "object"
 }

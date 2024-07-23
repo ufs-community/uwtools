@@ -223,5 +223,8 @@
       "type": "object"
     }
   },
+  "required": [
+    "chgres_cube"
+  ],
   "type": "object"
 }

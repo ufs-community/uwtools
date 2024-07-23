@@ -101,5 +101,8 @@
       "type": "object"
     }
   },
+  "required": [
+    "filter_topo"
+  ],
   "type": "object"
 }

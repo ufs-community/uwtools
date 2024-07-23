@@ -44,5 +44,8 @@
       "type": "object"
     }
   },
+  "required": [
+    "shave"
+  ],
   "type": "object"
 }

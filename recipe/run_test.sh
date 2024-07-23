@@ -45,8 +45,7 @@ unittest() {
   msg Running unit tests
   (
     set -eux
-    #pytest --cov=uwtools -n 4 .
-    pytest --cov=uwtools -n 1 .
+    pytest --cov=uwtools -n 4 .
   )
   msg OK
 }

@@ -29,5 +29,9 @@
       ],
       "type": "object"
     }
-  }
+  },
+  "required": [
+    "ww3"
+  ],
+  "type": "object"
 }

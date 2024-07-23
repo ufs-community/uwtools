@@ -94,7 +94,6 @@ class CDEPS(AssetsCycleBased):
         yield file(path=Path(template_file))
         self._model_stream_file("ocn_streams", path, template_file)
 
-
     # Private helper methods
 
     @property
