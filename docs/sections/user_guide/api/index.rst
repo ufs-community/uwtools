@@ -2,6 +2,7 @@ API
 ===
 
 .. toctree::
+   cdeps
    chgres_cube
    config
    esg_grid
