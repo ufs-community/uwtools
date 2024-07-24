@@ -189,7 +189,7 @@ and YAML file ``update.yaml`` with contents:
   .. literalinclude:: config/realize-combo.out
      :language: text
 
-.. note:: Combining configs with incompatible depths is not supported. ``ini`` and ``nml`` configs are depth-2, as they organize their key-value pairs (one level) under top-level sections or namelists (a second level). ``sh`` configs are depth-1, and ``yaml`` configs have arbitrary depth.
+.. note:: Combining configs with incompatible depths is not supported. ``ini`` configs are depth-2, as they organize their key-value pairs (one level) under top-level sections or namelists (a second level). ``sh`` configs are depth-1, and ``yaml`` configs have arbitrary depth.
 
    For example, when attempting to generate a ``sh`` config from the original depth-2 ``config.yaml``:
 
@@ -197,6 +197,14 @@ and YAML file ``update.yaml`` with contents:
       :language: text
       :emphasize-lines: 1
    .. literalinclude:: config/realize-depth-mismatch.out
+      :language: text
+
+   ``nml`` configs are technically depth-2, but in order to support specification of Fortran derived type (aka user-defined type) members, a mapping between arbitrary-depth YAML and Fortran namelist is supported. For example:
+
+   .. literalinclude:: config/realize-nml-derived-type.cmd
+      :language: text
+      :emphasize-lines: 1
+   .. literalinclude:: config/realize-nml-derived-type.out
       :language: text
 
 * It is possible to provide the update config, rather than the input config, on ``stdin``. Usage rules are as follows:
