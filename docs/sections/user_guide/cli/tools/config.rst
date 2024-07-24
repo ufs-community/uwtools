@@ -199,7 +199,12 @@ and YAML file ``update.yaml`` with contents:
    .. literalinclude:: config/realize-depth-mismatch.out
       :language: text
 
-   ``nml`` configs are technically depth-2, but in order to support specification of Fortran derived type (aka user-defined type) members, a mapping between arbitrary-depth YAML and Fortran namelist is supported. For example:
+   ``nml`` configs are technically depth-2, but in order to support specification of Fortran derived type (aka user-defined type) members, a mapping between arbitrary-depth YAML and Fortran namelist is supported. For example, ``derived-type.yaml`` with contents
+
+   .. literalinclude:: config/derived-type.yaml
+     :language: yaml
+
+   would be rendered as a Fortran namelist like this:
 
    .. literalinclude:: config/realize-nml-derived-type.cmd
       :language: text
