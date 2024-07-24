@@ -4,12 +4,12 @@ Tests for uwtools.config.formats.nml module.
 """
 
 import filecmp
+from textwrap import dedent
 
 import f90nml  # type: ignore
-from pytest import fixture, mark, raises
+from pytest import fixture, mark
 
 from uwtools.config.formats.nml import NMLConfig
-from uwtools.exceptions import UWConfigError
 from uwtools.tests.support import fixture_path
 from uwtools.utils.file import FORMAT
 
@@ -22,6 +22,25 @@ def data():
 
 
 # Tests
+
+
+def test_nml_derived_type_dict():
+    nml = NMLConfig(config={"nl": {"o": {"i": 77, "j": 88}}})
+    assert nml["nl"]["o"] == {"i": 77, "j": 88}
+
+
+def test_nml_derived_type_file(tmp_path):
+    s = """
+    &nl
+      o%i = 77
+      o%j = 88
+    /
+    """
+    path = tmp_path / "a.nml"
+    with open(path, "w", encoding="utf-8") as f:
+        print(dedent(s).strip(), file=f)
+    nml = NMLConfig(config=path)
+    assert nml["nl"]["o"] == {"i": 77, "j": 88}
 
 
 def test_nml_dump_dict_dict(data, tmp_path):
@@ -43,13 +62,7 @@ def test_nml_get_format():
 
 
 def test_nml_get_depth_threshold():
-    assert NMLConfig.get_depth_threshold() == 2
-
-
-def test_nml_instantiation_depth():
-    with raises(UWConfigError) as e:
-        NMLConfig(config={1: {2: {3: 4}}})
-    assert str(e.value) == "Cannot instantiate depth-2 NMLConfig with depth-3 config"
+    assert NMLConfig.get_depth_threshold() is None
 
 
 def test_nml_parse_include():
