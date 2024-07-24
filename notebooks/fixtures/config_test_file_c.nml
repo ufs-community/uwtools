@@ -1,4 +1,4 @@
-&FOO
-  S = "string"
-  N = 88
+&values
+  greeting = "Hello"
+  recipient = "World"
 /
