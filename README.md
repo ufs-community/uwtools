@@ -7,7 +7,3 @@ Unified Workflow Tools for use with UFS applications and beyond
 ## Documentation
 
 Comprehensive documentation is available for [the development version](https://uwtools.readthedocs.io/en/main/) and for [the latest release](https://uwtools.readthedocs.io/en/stable/).
-
-## Jupyter Notebook Examples of API Tools
-
-Jupyter notebooks containing examples of how to utilize API access to uwtools is available <a href = "https://mybinder.org/v2/gh/ufs-community/uwtools/notebooks?labpath=notebooks%2Fexample.ipynb" target="_blank" rel="noopener noreferrer">here</a>.
