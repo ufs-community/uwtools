@@ -161,6 +161,40 @@ def test__add_subparser_template_translate(subparsers):
     assert subparsers.choices[STR.translate]
 
 
+def test__dispatch_execute():
+    cycle = dt.datetime.now()
+    args: dict = {
+        "module": "testdriver",
+        "classname": "TestDriver",
+        "schema_file": "/path/to/testdriver.jsonschema",
+        "batch": True,
+        "config_file": "/path/to/config",
+        "cycle": cycle,
+        "leadtime": None,
+        "dry_run": False,
+        "graph_file": None,
+        "key_path": ["foo", "bar"],
+        "task": "eighty_eight",
+        "stdin_ok": True,
+    }
+    with patch.object(cli.uwtools.api.driver, "execute") as execute:
+        cli._dispatch_execute(args=args)
+        execute.assert_called_once_with(
+            classname="TestDriver",
+            module="testdriver",
+            task="eighty_eight",
+            schema_file="/path/to/testdriver.jsonschema",
+            key_path=["foo", "bar"],
+            dry_run=False,
+            config="/path/to/config",
+            graph_file=None,
+            cycle=cycle,
+            leadtime=None,
+            batch=True,
+            stdin_ok=True,
+        )
+
+
 @mark.parametrize(
     "vals",
     [
@@ -332,13 +366,13 @@ def test__dispatch_config_validate_config_obj():
         STR.schemafile: Path("/path/to/a.jsonschema"),
         STR.infile: Path("/path/to/config.yaml"),
     }
-    with patch.object(uwtools.api.config, "_validate_yaml") as _validate_yaml:
+    with patch.object(uwtools.api.config, "_validate_external") as _validate_external:
         cli._dispatch_config_validate(_dispatch_config_validate_args)
-    _validate_yaml_args = {
+    _validate_external_args = {
         STR.schemafile: _dispatch_config_validate_args[STR.schemafile],
         STR.config: _dispatch_config_validate_args[STR.infile],
     }
-    _validate_yaml.assert_called_once_with(**_validate_yaml_args)
+    _validate_external.assert_called_once_with(**_validate_external_args)
 
 
 @mark.parametrize(

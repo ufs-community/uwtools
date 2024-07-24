@@ -21,5 +21,8 @@
       "type": "object"
     }
   },
+  "required": [
+    "global_equiv_resol"
+  ],
   "type": "object"
 }

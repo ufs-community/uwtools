@@ -87,7 +87,7 @@ def driverobj(config, cycle):
     "method",
     [
         "_driver_config",
-        "_resources",
+        "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
         "_runcmd",

@@ -10,6 +10,7 @@ import json
 import logging
 from pathlib import Path
 from textwrap import dedent
+from typing import Optional
 from unittest.mock import Mock, PropertyMock, patch
 
 import yaml
@@ -42,7 +43,7 @@ class Common:
     def _driver_name(self) -> str:
         return "concrete"
 
-    def _validate(self) -> None:
+    def _validate(self, schema_file: Optional[Path] = None) -> None:
         pass
 
 
@@ -50,7 +51,7 @@ class ConcreteAssetsCycleBased(Common, driver.AssetsCycleBased):
     pass
 
 
-class ConcreteAssetsCycleAndLeadtimeBased(Common, driver.AssetsCycleAndLeadtimeBased):
+class ConcreteAssetsCycleLeadtimeBased(Common, driver.AssetsCycleLeadtimeBased):
     pass
 
 
@@ -62,7 +63,7 @@ class ConcreteDriverCycleBased(Common, driver.DriverCycleBased):
     pass
 
 
-class ConcreteDriverCycleAndLeadtimeBased(Common, driver.DriverCycleAndLeadtimeBased):
+class ConcreteDriverCycleLeadtimeBased(Common, driver.DriverCycleLeadtimeBased):
     pass
 
 
@@ -130,7 +131,7 @@ def test_Assets_repr_cycle_based(config):
 
 
 def test_Assets_repr_cycle_and_leadtime_based(config):
-    obj = ConcreteAssetsCycleAndLeadtimeBased(
+    obj = ConcreteAssetsCycleLeadtimeBased(
         config=config, cycle=dt.datetime(2024, 7, 2, 12), leadtime=dt.timedelta(hours=6)
     )
     expected = "concrete 2024-07-02T12:00 06:00:00 in %s" % obj._driver_config["rundir"]
@@ -235,12 +236,23 @@ def test_Assets__rundir(assetsobj):
     assert assetsobj._rundir == Path(assetsobj._driver_config["rundir"])
 
 
-def test_Assets__validate(assetsobj):
+def test_Assets__validate_internal(assetsobj):
     with patch.object(assetsobj, "_validate", driver.Assets._validate):
         with patch.object(driver, "validate_internal") as validate_internal:
             assetsobj._validate(assetsobj)
         assert validate_internal.call_args_list[0].kwargs == {
             "schema_name": "concrete",
+            "config": assetsobj._config,
+        }
+
+
+def test_Assets__validate_external(config):
+    schema_file = Path("/path/to/jsonschema")
+    with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Assets._validate):
+        with patch.object(driver, "validate_external") as validate_external:
+            assetsobj = ConcreteAssetsTimeInvariant(schema_file=schema_file, config=config)
+        assert validate_external.call_args_list[0].kwargs == {
+            "schema_file": schema_file,
             "config": assetsobj._config,
         }
 
@@ -399,23 +411,26 @@ def test_Driver__namelist_schema_default_disable(driverobj):
         assert driverobj._namelist_schema() == {"type": "object"}
 
 
-def test_Driver__resources_fail(driverobj):
+def test_Driver__run_resources_fail(driverobj):
     del driverobj._config["platform"]
     with raises(UWConfigError) as e:
-        assert driverobj._resources
+        assert driverobj._run_resources
     assert str(e.value) == "Required 'platform' block missing in config"
 
 
-def test_Driver__resources_pass(driverobj):
+def test_Driver__run_resources_pass(driverobj):
     account = "me"
     scheduler = "slurm"
     walltime = "00:05:00"
-    driverobj._driver_config["execution"].update({"batchargs": {"walltime": walltime}})
-    assert driverobj._resources == {
+    driverobj._driver_config["execution"].update(
+        {"batchargs": {"threads": 4, "walltime": walltime}}
+    )
+    assert driverobj._run_resources == {
         "account": account,
         "rundir": driverobj._rundir,
         "scheduler": scheduler,
         "stdout": "runscript.concrete.out",
+        "threads": 4,
         "walltime": walltime,
     }
 
@@ -476,10 +491,10 @@ def test_Driver__scheduler(driverobj):
     with patch.object(driver, "JobScheduler") as JobScheduler:
         scheduler = JobScheduler.get_scheduler()
         assert driverobj._scheduler == scheduler
-        JobScheduler.get_scheduler.assert_called_with(driverobj._resources)
+        JobScheduler.get_scheduler.assert_called_with(driverobj._run_resources)
 
 
-def test_Driver__validate(assetsobj):
+def test_Driver__validate_internal(assetsobj):
     with patch.object(assetsobj, "_validate", driver.Driver._validate):
         with patch.object(driver, "validate_internal") as validate_internal:
             assetsobj._validate(assetsobj)
@@ -489,6 +504,17 @@ def test_Driver__validate(assetsobj):
         }
         assert validate_internal.call_args_list[1].kwargs == {
             "schema_name": "platform",
+            "config": assetsobj._config,
+        }
+
+
+def test_Driver__validate_external(config):
+    schema_file = Path("/path/to/jsonschema")
+    with patch.object(ConcreteAssetsTimeInvariant, "_validate", driver.Driver._validate):
+        with patch.object(driver, "validate_external") as validate_external:
+            assetsobj = ConcreteAssetsTimeInvariant(schema_file=schema_file, config=config)
+        assert validate_external.call_args_list[0].kwargs == {
+            "schema_file": schema_file,
             "config": assetsobj._config,
         }
 
@@ -517,3 +543,23 @@ def test_Driver__write_runscript(driverobj):
     with open(path, "r", encoding="utf-8") as f:
         actual = f.read()
     assert actual.strip() == dedent(expected).strip()
+
+
+def test_Driver__write_runscript_threads_fail(driverobj):
+    path = Path(driverobj._driver_config["rundir"]) / "runscript"
+    driverobj._driver_config["execution"]["threads"] = 4
+    with raises(UWConfigError) as e:
+        driverobj._write_runscript(path=path)
+    assert str(e.value) == "Config specified threads but driver does not set OMP_NUM_THREADS"
+
+
+def test__add_docstring():
+    class C:
+        pass
+
+    assert getattr(C, "__doc__") is None
+    with patch.object(driver, "C", C, create=True):
+        class_ = driver.C  # type: ignore # pylint: disable=no-member
+        omit = ["cycle", "leadtime", "config", "dry_run", "key_path", "batch", "schema_file"]
+        driver._add_docstring(class_=class_, omit=omit)
+    assert getattr(C, "__doc__").strip() == "The driver."

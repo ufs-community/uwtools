@@ -31,7 +31,9 @@ def realize(
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True``
     """
-    _realize(config=_ensure_data_source(config, stdin_ok), output_file=_str2path(output_file))
+    _realize(
+        config=_ensure_data_source(_str2path(config), stdin_ok), output_file=_str2path(output_file)
+    )
     return True
 
 
@@ -46,4 +48,4 @@ def validate(
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if the XML conforms to the schema, ``False`` otherwise
     """
-    return _validate(xml_file=_ensure_data_source(xml_file, stdin_ok))
+    return _validate(xml_file=_ensure_data_source(_str2path(xml_file), stdin_ok))

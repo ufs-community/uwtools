@@ -10,7 +10,7 @@
               "type": "string"
             },
             "mosaic_name": {
-              "type": "integer"
+              "type": "string"
             },
             "num_tiles": {
               "type": "integer"
@@ -21,7 +21,7 @@
             "periody": {
               "type": "integer"
             },
-            "tile_name": {
+            "tile_file": {
               "type": "string"
             }
           },
@@ -46,5 +46,8 @@
       "type": "object"
     }
   },
+  "required": [
+    "make_solo_mosaic"
+  ],
   "type": "object"
 }

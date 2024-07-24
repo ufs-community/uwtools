@@ -9,11 +9,12 @@ from typing import Optional, Union
 from uwtools.file import FileCopier as _FileCopier
 from uwtools.file import FileLinker as _FileLinker
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
+from uwtools.utils.api import str2path as _str2path
 
 
 def copy(
     target_dir: Union[Path, str],
-    config: Optional[Union[dict, Path, str]] = None,
+    config: Optional[Union[Path, dict, str]] = None,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
     keys: Optional[list[str]] = None,
@@ -34,7 +35,7 @@ def copy(
     """
     _FileCopier(
         target_dir=Path(target_dir),
-        config=_ensure_data_source(config, stdin_ok),
+        config=_ensure_data_source(_str2path(config), stdin_ok),
         cycle=cycle,
         leadtime=leadtime,
         keys=keys,
@@ -45,7 +46,7 @@ def copy(
 
 def link(
     target_dir: Union[Path, str],
-    config: Optional[Union[dict, Path, str]] = None,
+    config: Optional[Union[Path, dict, str]] = None,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
     keys: Optional[list[str]] = None,
@@ -66,7 +67,7 @@ def link(
     """
     _FileLinker(
         target_dir=Path(target_dir),
-        config=_ensure_data_source(config, stdin_ok),
+        config=_ensure_data_source(_str2path(config), stdin_ok),
         cycle=cycle,
         leadtime=leadtime,
         keys=keys,

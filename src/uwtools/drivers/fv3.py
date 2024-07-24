@@ -67,7 +67,7 @@ class FV3(DriverCycleBased):
         yield self._taskname(fn)
         path = self._rundir / fn
         yield asset(path, path.is_file)
-        yield filecopy(src=self._driver_config["field_table"]["base_file"], dst=path)
+        yield filecopy(src=Path(self._driver_config["field_table"]["base_file"]), dst=path)
 
     @tasks
     def files_copied(self):

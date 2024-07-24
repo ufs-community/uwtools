@@ -12,7 +12,7 @@ from lxml import etree
 from lxml.etree import Element, SubElement, _Element
 
 from uwtools.config.formats.yaml import YAMLConfig
-from uwtools.config.validator import validate_yaml
+from uwtools.config.validator import validate_external as validate_yaml
 from uwtools.exceptions import UWConfigError, UWError
 from uwtools.logging import log
 from uwtools.utils.file import readable, resource_path, writable

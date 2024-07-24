@@ -104,7 +104,7 @@ def test_convert_preserve_whitespace(tmp_path):
 def test_convert_stdin_to_file(txt_atparse, capsys, txt_jinja2, tmp_path):
     outfile = tmp_path / "outfile"
     _stdinproxy.cache_clear()
-    with patch.object(sys, "stdin", new=StringIO(txt_atparse)):
+    with StringIO(txt_atparse) as sio, patch.object(sys, "stdin", new=sio):
         atparse_to_jinja2.convert(output_file=outfile)
     with open(outfile, "r", encoding="utf-8") as f:
         assert f.read().strip() == txt_jinja2
@@ -117,7 +117,7 @@ def test_convert_stdin_to_logging(txt_atparse, caplog, txt_jinja2, tmp_path):
     log.setLevel(logging.INFO)
     outfile = tmp_path / "outfile"
     _stdinproxy.cache_clear()
-    with patch.object(sys, "stdin", new=StringIO(txt_atparse)):
+    with StringIO(txt_atparse) as sio, patch.object(sys, "stdin", new=sio):
         atparse_to_jinja2.convert(output_file=outfile, dry_run=True)
     assert "\n".join(record.message for record in caplog.records) == txt_jinja2
     assert not outfile.is_file()
@@ -125,7 +125,7 @@ def test_convert_stdin_to_logging(txt_atparse, caplog, txt_jinja2, tmp_path):
 
 def test_convert_stdin_to_stdout(txt_atparse, capsys, txt_jinja2):
     _stdinproxy.cache_clear()
-    with patch.object(sys, "stdin", new=StringIO(txt_atparse)):
+    with StringIO(txt_atparse) as sio, patch.object(sys, "stdin", new=sio):
         atparse_to_jinja2.convert()
     streams = capsys.readouterr()
     assert not streams.err

@@ -28,11 +28,11 @@ def assets(tmp_path):
 
 def test_StdinProxy():
     msg = "proxying stdin"
-    with patch.object(sys, "stdin", new=StringIO(msg)):
+    with StringIO(msg) as sio, patch.object(sys, "stdin", new=sio):
         assert sys.stdin.read() == msg
         # Reading from stdin a second time yields no input, as the stream has been exhausted:
         assert sys.stdin.read() == ""
-    with patch.object(sys, "stdin", new=StringIO(msg)):
+    with StringIO(msg) as sio, patch.object(sys, "stdin", new=sio):
         sp = file.StdinProxy()
         assert sp.read() == msg
         # But the stdin proxy can be read multiple times:
@@ -47,14 +47,14 @@ def test__stdinproxy():
     msg0 = "hello world"
     msg1 = "bonjour monde"
     # Unsurprisingly, the first read from stdin finds the expected message:
-    with patch.object(sys, "stdin", new=StringIO(msg0)):
+    with StringIO(msg0) as sio, patch.object(sys, "stdin", new=sio):
         assert file._stdinproxy().read() == msg0
     # But after re-patching stdin with a new message, a second read returns the old message:
-    with patch.object(sys, "stdin", new=StringIO(msg1)):
+    with StringIO(msg1) as sio, patch.object(sys, "stdin", new=sio):
         assert file._stdinproxy().read() == msg0  # <-- the OLD message
     # However, if the cache is cleared, the second message is then read:
     file._stdinproxy.cache_clear()
-    with patch.object(sys, "stdin", new=StringIO(msg1)):
+    with StringIO(msg1) as sio, patch.object(sys, "stdin", new=sio):
         assert file._stdinproxy().read() == msg1  # <-- the NEW message
 
 
@@ -104,9 +104,8 @@ def test_readable_file(tmp_path):
 
 def test_readable_nofile():
     file._stdinproxy.cache_clear()
-    with patch.object(sys, "stdin", new=StringIO("hello")):
-        with file.readable() as f:
-            assert f.read() == "hello"
+    with StringIO("hello") as sio, patch.object(sys, "stdin", new=sio), file.readable() as f:
+        assert f.read() == "hello"
 
 
 def test_resource_path():

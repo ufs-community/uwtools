@@ -187,5 +187,8 @@
       "type": "object"
     }
   },
+  "required": [
+    "upp"
+  ],
   "type": "object"
 }
