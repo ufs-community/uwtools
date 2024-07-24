@@ -212,6 +212,8 @@ and YAML file ``update.yaml`` with contents:
    .. literalinclude:: config/realize-nml-derived-type.out
       :language: text
 
+   Fortran array-item/slice syntax (e.g. ``a(1) = 11``, ``a(2,3) = 22, 33``, etc.) is not currently supported.
+
 * It is possible to provide the update config, rather than the input config, on ``stdin``. Usage rules are as follows:
 
   * Only if either ``--update-file`` or ``--update-config`` are specified will ``uw`` attempt to read and apply update values to the input config.
