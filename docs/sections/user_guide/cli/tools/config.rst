@@ -189,7 +189,7 @@ and YAML file ``update.yaml`` with contents:
   .. literalinclude:: config/realize-combo.out
      :language: text
 
-.. note:: Combining configs with incompatible depths is not supported. ``ini`` configs are depth-2, as they organize their key-value pairs (one level) under top-level sections or namelists (a second level). ``sh`` configs are depth-1, and ``yaml`` configs have arbitrary depth.
+.. note:: Combining configs with incompatible depths is not supported. ``ini`` configs are depth-2, as they organize their key-value pairs (one level) under top-level sections (a second level). ``sh`` configs are depth-1, and ``yaml`` configs have arbitrary depth.
 
    For example, when attempting to generate a ``sh`` config from the original depth-2 ``config.yaml``:
 
