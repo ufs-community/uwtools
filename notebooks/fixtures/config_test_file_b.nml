@@ -1,4 +1,4 @@
-&values
-  greeting = "Hello"
-  recipient = "Different World"
+&FOO
+  S = "string"
+  N = 99
 /

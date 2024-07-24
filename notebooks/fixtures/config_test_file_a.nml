@@ -1,4 +1,1 @@
-&values
-  greeting = "Hello"
-  recipient = "World"
-/
+&foo n=88, s="string" /
