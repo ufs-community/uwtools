@@ -47,7 +47,7 @@ Shorthand names are provided for certain directives for each scheduler, and can 
 * PBS: ``debug``, ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``walltime``
 * Slurm: ``cores``, ``exclusive``, ``export``, ``jobname``, ``memory``, ``nodes``, ``partition``, ``queue``, ``rundir``, ``stderr``, ``stdout``, ``tasks_per_node``, ``walltime``
 
-**NB** To arrange for the ``OMP_NUM_THREADS`` environment variable to be set in the execution environment of components compiled with OpenMP support, set the ``execution:`` block's  ``threads:`` child item. Drivers with appropriate support will set ``OMP_NUM_THREADS`` as well as the corresponding scheduler flag when making a batch-resource request.
+**NB** To enable threading when running components compiled with OpenMP support, set the ``execution:`` block's  ``threads:`` item (see below). Then ``uwtools`` will set the appropriate scheduler flag when making a batch request, and will set the ``OMP_NUM_THREADS`` environment variable in the execution environment.
 
 Other, arbitrary directive key-value pairs can be provided exactly as they should appear in the batch runscript. For example
 
@@ -86,4 +86,4 @@ The MPI launch program (``mpiexec``, ``srun``, et al.). This entry is only used 
 threads:
 """"""""
 
-For drivers implementing support, sets the ``OMP_NUM_THREADS`` environment variable in the execution environment, to control the number of OpenMP threads to use when running the component. This entry is only used when configuring parallel components.
+For drivers implementing support, exports the ``OMP_NUM_THREADS`` environment variable to the execution environment, specifying the number of OpenMP threads to use when running the component. This entry is only used when configuring parallel components.
