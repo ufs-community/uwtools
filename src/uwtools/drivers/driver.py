@@ -352,7 +352,7 @@ class Driver(Assets):
     # Private helper methods
 
     @property
-    def _resources(self) -> dict[str, Any]:
+    def _run_resources(self) -> dict[str, Any]:
         """
         Returns platform configuration data.
         """
@@ -360,11 +360,13 @@ class Driver(Assets):
             platform = self._config["platform"]
         except KeyError as e:
             raise UWConfigError("Required 'platform' block missing in config") from e
+        threads = self._driver_config.get("execution", {}).get("threads")
         return {
             "account": platform["account"],
             "rundir": self._rundir,
             "scheduler": platform["scheduler"],
             "stdout": "%s.out" % self._runscript_path.name,  # config may override
+            **({"threads": threads} if threads else {}),
             **self._driver_config.get("execution", {}).get("batchargs", {}),
         }
 
@@ -437,7 +439,7 @@ class Driver(Assets):
         """
         Returns the job scheduler specified by the platform information.
         """
-        return JobScheduler.get_scheduler(self._resources)
+        return JobScheduler.get_scheduler(self._run_resources)
 
     def _validate(self, schema_file: Optional[Path] = None) -> None:
         """
@@ -454,9 +456,13 @@ class Driver(Assets):
         Write the runscript.
         """
         path.parent.mkdir(parents=True, exist_ok=True)
+        envvars = envvars or {}
+        threads = self._driver_config.get("execution", {}).get("threads")
+        if threads and "OMP_NUM_THREADS" not in envvars:
+            raise UWConfigError("Config specified threads but driver does not set OMP_NUM_THREADS")
         rs = self._runscript(
             envcmds=self._driver_config.get("execution", {}).get("envcmds", []),
-            envvars=envvars or {},
+            envvars=envvars,
             execution=[
                 "time %s" % self._runcmd,
                 "test $? -eq 0 && touch %s" % self._runscript_done_file,
