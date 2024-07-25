@@ -38,20 +38,20 @@
                   "properties": {
                     "atm_core_files_input_grid": {
                       "type": [
-                        "string",
-                        "array"
+                        "array",
+                        "string"
                       ]
                     },
                     "atm_files_input_grid": {
                       "type": [
-                        "string",
-                        "array"
+                        "array",
+                        "string"
                       ]
                     },
                     "atm_tracer_files_input_grid": {
                       "type": [
-                        "string",
-                        "array"
+                        "array",
+                        "string"
                       ]
                     },
                     "atm_weight_file": {
@@ -134,7 +134,10 @@
                       "type": "integer"
                     },
                     "nst_files_input_grid": {
-                      "type": "string"
+                      "type": [
+                        "array",
+                        "string"
+                      ]
                     },
                     "orog_dir_input_grid": {
                       "type": "string"
@@ -144,14 +147,14 @@
                     },
                     "orog_files_input_grid": {
                       "type": [
-                        "string",
-                        "array"
+                        "array",
+                        "string"
                       ]
                     },
                     "orog_files_target_grid": {
                       "type": [
-                        "string",
-                        "array"
+                        "array",
+                        "string"
                       ]
                     },
                     "regional": {
@@ -159,8 +162,8 @@
                     },
                     "sfc_files_input_grid": {
                       "type": [
-                        "string",
-                        "array"
+                        "array",
+                        "string"
                       ]
                     },
                     "sotyp_from_climo": {
@@ -197,6 +200,11 @@
                       "type": "string"
                     }
                   },
+                  "required": [
+                    "mosaic_file_target_grid",
+                    "varmap_file",
+                    "vcoord_file_target_grid"
+                  ],
                   "type": "object"
                 }
               },
