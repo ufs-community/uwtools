@@ -1,6 +1,8 @@
 ``fv3``
 =======
 
+.. include:: /shared/idempotent.rst
+
 The ``uw`` mode for configuring and running FV3.
 
 .. literalinclude:: fv3/help.cmd
