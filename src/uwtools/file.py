@@ -83,7 +83,7 @@ class FileStager:
             log.debug("Following config key '%s'", key)
             cfg = cfg[key]
         if not isinstance(cfg, dict):
-            raise UWConfigError("No file map found at %s" % " -> ".join(self._keys))
+            raise UWConfigError("No file map found at key path: %s" % " -> ".join(self._keys))
         self._check_dst_paths(cfg)
         return cfg
 

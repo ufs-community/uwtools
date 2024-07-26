@@ -97,4 +97,4 @@ def test_FileStager_empty_val(assets, val):
     cfgdict["a"]["b"] = val
     with raises(UWConfigError) as e:
         file.FileStager(target_dir=dstdir, config=cfgdict, keys=["a", "b"])
-    assert str(e.value) == "No file map found at a -> b"
+    assert str(e.value) == "No file map found at key path: a -> b"
