@@ -98,7 +98,7 @@ class FileStager:
         return True
 
 
-class FileCopier(FileStager):
+class Copier(FileStager):
     """
     Stage files by copying.
     """
@@ -113,7 +113,7 @@ class FileCopier(FileStager):
         yield [filecopy(src=Path(v), dst=dst(k)) for k, v in self._file_map.items()]
 
 
-class FileLinker(FileStager):
+class Linker(FileStager):
     """
     Stage files by linking.
     """
