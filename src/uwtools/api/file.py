@@ -8,8 +8,7 @@ from typing import Optional, Union
 
 from iotaa import Asset
 
-from uwtools.file import FileCopier as _FileCopier
-from uwtools.file import FileLinker as _FileLinker
+from uwtools.file import FileCopier, FileLinker
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.api import str2path as _str2path
 
@@ -35,7 +34,7 @@ def copy(
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if all copies were created.
     """
-    copier = _FileCopier(
+    copier = FileCopier(
         target_dir=Path(target_dir) if target_dir else None,
         config=_ensure_data_source(_str2path(config), stdin_ok),
         cycle=cycle,
@@ -68,7 +67,7 @@ def link(
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if all links were created.
     """
-    linker = _FileLinker(
+    linker = FileLinker(
         target_dir=Path(target_dir) if target_dir else None,
         config=_ensure_data_source(_str2path(config), stdin_ok),
         cycle=cycle,
@@ -78,3 +77,6 @@ def link(
     )
     assets: list[Asset] = linker.go()  # type: ignore
     return all(asset.ready() for asset in assets)
+
+
+__all__ = ["FileCopier", "FileLinker", "copy", "link"]
