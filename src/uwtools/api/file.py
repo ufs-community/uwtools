@@ -6,6 +6,8 @@ import datetime as dt
 from pathlib import Path
 from typing import Optional, Union
 
+from iotaa import Asset
+
 from uwtools.file import FileCopier as _FileCopier
 from uwtools.file import FileLinker as _FileLinker
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
@@ -31,17 +33,18 @@ def copy(
     :param keys: YAML keys leading to file dst/src block.
     :param dry_run: Do not copy files.
     :param stdin_ok: OK to read from ``stdin``?
-    :return: ``True`` if all files were copied.
+    :return: ``True`` if all copies were created.
     """
-    _FileCopier(
+    copier = _FileCopier(
         target_dir=Path(target_dir),
         config=_ensure_data_source(_str2path(config), stdin_ok),
         cycle=cycle,
         leadtime=leadtime,
         keys=keys,
         dry_run=dry_run,
-    ).go()
-    return True
+    )
+    assets: list[Asset] = copier.go()  # type: ignore
+    return all(asset.ready() for asset in assets)
 
 
 def link(
@@ -63,14 +66,15 @@ def link(
     :param keys: YAML keys leading to file dst/src block.
     :param dry_run: Do not link files.
     :param stdin_ok: OK to read from ``stdin``?
-    :return: ``True`` if no exception is raised.
+    :return: ``True`` if all links were created.
     """
-    _FileLinker(
+    linker = _FileLinker(
         target_dir=Path(target_dir),
         config=_ensure_data_source(_str2path(config), stdin_ok),
         cycle=cycle,
         leadtime=leadtime,
         keys=keys,
         dry_run=dry_run,
-    ).go()
-    return True
+    )
+    assets: list[Asset] = linker.go()  # type: ignore
+    return all(asset.ready() for asset in assets)
