@@ -15,8 +15,8 @@ from uwtools.utils.api import str2path as _str2path
 
 
 def copy(
-    target_dir: Union[Path, str],
     config: Optional[Union[Path, dict, str]] = None,
+    target_dir: Optional[Union[Path, str]] = None,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
     keys: Optional[list[str]] = None,
@@ -26,8 +26,8 @@ def copy(
     """
     Copy files.
 
-    :param target_dir: Path to target directory.
     :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
+    :param target_dir: Path to target directory.
     :param cycle: A datetime object to make available for use in the config.
     :param leadtime: A timedelta object to make available for use in the config.
     :param keys: YAML keys leading to file dst/src block.
@@ -36,7 +36,7 @@ def copy(
     :return: ``True`` if all copies were created.
     """
     copier = _FileCopier(
-        target_dir=Path(target_dir),
+        target_dir=Path(target_dir) if target_dir else None,
         config=_ensure_data_source(_str2path(config), stdin_ok),
         cycle=cycle,
         leadtime=leadtime,
@@ -48,8 +48,8 @@ def copy(
 
 
 def link(
-    target_dir: Union[Path, str],
     config: Optional[Union[Path, dict, str]] = None,
+    target_dir: Optional[Union[Path, str]] = None,
     cycle: Optional[dt.datetime] = None,
     leadtime: Optional[dt.timedelta] = None,
     keys: Optional[list[str]] = None,
@@ -59,8 +59,8 @@ def link(
     """
     Link files.
 
-    :param target_dir: Path to target directory.
     :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
+    :param target_dir: Path to target directory.
     :param cycle: A datetime object to make available for use in the config.
     :param leadtime: A timedelta object to make available for use in the config.
     :param keys: YAML keys leading to file dst/src block.
@@ -69,7 +69,7 @@ def link(
     :return: ``True`` if all links were created.
     """
     linker = _FileLinker(
-        target_dir=Path(target_dir),
+        target_dir=Path(target_dir) if target_dir else None,
         config=_ensure_data_source(_str2path(config), stdin_ok),
         cycle=cycle,
         leadtime=leadtime,

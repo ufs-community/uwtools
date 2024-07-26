@@ -31,8 +31,7 @@ def test_FileCopier(assets, source):
     config = cfgdict if source == "dict" else cfgfile
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
-    stager = file.FileCopier(target_dir=dstdir, config=config, keys=["a", "b"])
-    stager.go()
+    file.FileCopier(target_dir=dstdir, config=config, keys=["a", "b"]).go()
     assert (dstdir / "foo").is_file()
     assert (dstdir / "subdir" / "bar").is_file()
 
@@ -41,11 +40,26 @@ def test_FileCopier_config_file_dry_run(assets):
     dstdir, cfgdict, _ = assets
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
-    stager = file.FileCopier(target_dir=dstdir, config=cfgdict, keys=["a", "b"], dry_run=True)
-    stager.go()
+    file.FileCopier(target_dir=dstdir, config=cfgdict, keys=["a", "b"], dry_run=True).go()
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
     iotaa.dryrun(False)
+
+
+def test_FileCopier_no_targetdir_abspath_pass(assets):
+    dstdir, cfgdict, _ = assets
+    old = cfgdict["a"]["b"]
+    cfgdict = {str(dstdir / "foo"): old["foo"], str(dstdir / "bar"): old["subdir/bar"]}
+    assets = file.FileCopier(config=cfgdict).go()
+    assert all(asset.ready() for asset in assets)  # type: ignore
+
+
+def test_FileCopier_no_targetdir_relpath_fail(assets):
+    _, cfgdict, _ = assets
+    with raises(UWConfigError) as e:
+        file.FileCopier(config=cfgdict, keys=["a", "b"]).go()
+    errmsg = "Relative path '%s' requires the target directory to be specified"
+    assert errmsg % "foo" in str(e.value)
 
 
 @mark.parametrize("source", ("dict", "file"))
@@ -54,8 +68,7 @@ def test_FileLinker(assets, source):
     config = cfgdict if source == "dict" else cfgfile
     assert not (dstdir / "foo").exists()
     assert not (dstdir / "subdir" / "bar").exists()
-    stager = file.FileLinker(target_dir=dstdir, config=config, keys=["a", "b"])
-    stager.go()
+    file.FileLinker(target_dir=dstdir, config=config, keys=["a", "b"]).go()
     assert (dstdir / "foo").is_symlink()
     assert (dstdir / "subdir" / "bar").is_symlink()
 
