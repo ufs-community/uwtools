@@ -4,32 +4,32 @@ Support for API modules.
 
 import datetime as dt
 import re
+from inspect import getfullargspec
 from pathlib import Path
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional, TypeVar, Union
 
-from uwtools.config.formats.base import Config
 from uwtools.drivers.driver import DriverT
 from uwtools.drivers.support import graph
 from uwtools.drivers.support import tasks as _tasks
 from uwtools.exceptions import UWError
 
+T = TypeVar("T")
+
 # Public
 
 
-def ensure_data_source(
-    data_source: Optional[Union[dict, Config, Path, str]], stdin_ok: bool
-) -> Any:
+def ensure_data_source(data_source: T, stdin_ok: bool) -> T:
     """
-    If stdin read is disabled, ensure that a data source was provided. Convert str -> Path.
+    If stdin read is disabled, ensure that a data source was provided.
 
     :param data_source: Data source as provided to API.
     :param stdin_ok: OK to read from stdin?
-    :return: Data source, with a str converted to Path.
+    :return: Data source.
     :raises: UWError if no data source was provided and stdin read is disabled.
     """
     if data_source is None and not stdin_ok:
         raise UWError("Set stdin_ok=True to permit read from stdin")
-    return str2path(data_source)
+    return data_source
 
 
 def make_execute(
@@ -133,22 +133,6 @@ def make_execute(
     return execute
 
 
-def make_tasks(driver_class: DriverT) -> Callable[..., dict[str, str]]:
-    """
-    Returns a function that maps task names to descriptions for the given driver.
-
-    :param driver_class: The driver class whose tasks and descriptions to map.
-    """
-
-    def tasks() -> dict[str, str]:
-        """
-        Returns a mapping from task names to their one-line descriptions.
-        """
-        return _tasks(driver_class)
-
-    return tasks
-
-
 def str2path(val: Any) -> Any:
     """
     Return str value as Path, other types unmodified.
@@ -164,10 +148,10 @@ def str2path(val: Any) -> Any:
 def _execute(
     driver_class: DriverT,
     task: str,
-    cycle: Optional[dt.datetime] = None,
-    leadtime: Optional[dt.timedelta] = None,
     config: Optional[Union[Path, str]] = None,
-    batch: bool = False,
+    cycle: Optional[dt.datetime] = None,  # pylint: disable=unused-argument
+    leadtime: Optional[dt.timedelta] = None,  # pylint: disable=unused-argument
+    batch: bool = False,  # pylint: disable=unused-argument
     dry_run: bool = False,
     graph_file: Optional[Union[Path, str]] = None,
     key_path: Optional[list[str]] = None,
@@ -181,9 +165,9 @@ def _execute(
 
     :param driver_class: Class of driver object to instantiate.
     :param task: The task to execute.
+    :param config: Path to config file (read stdin if missing or None).
     :param cycle: The cycle.
     :param leadtime: The leadtime.
-    :param config: Path to config file (read stdin if missing or None).
     :param batch: Submit run to the batch system?
     :param dry_run: Do not run the executable, just report what would have been done.
     :param graph_file: Write Graphviz DOT output here.
@@ -192,15 +176,14 @@ def _execute(
     :return: ``True`` if task completes without raising an exception.
     """
     kwargs = dict(
-        config=ensure_data_source(config, stdin_ok),
-        batch=batch,
+        config=ensure_data_source(str2path(config), stdin_ok),
         dry_run=dry_run,
         key_path=key_path,
     )
-    if cycle:
-        kwargs["cycle"] = cycle
-    if leadtime is not None:
-        kwargs["leadtime"] = leadtime
+    accepted = set(getfullargspec(driver_class).args)
+    for arg in ["batch", "cycle", "leadtime"]:
+        if arg in accepted:
+            kwargs[arg] = locals()[arg]
     obj = driver_class(**kwargs)
     getattr(obj, task)()
     if graph_file:

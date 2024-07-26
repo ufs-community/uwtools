@@ -36,9 +36,9 @@ kwargs = {
     "version": meta["version"],
 }
 
-# Define dependency packages for non-conda installs.
+# Define dependency packages for non-devshell installs.
 
-if not os.environ.get("CONDA_PREFIX"):
+if not os.environ.get("CONDEV_SHELL"):
     kwargs["install_requires"] = [
         pkg.replace(" =", "==")
         for pkg in meta["packages"]["run"]

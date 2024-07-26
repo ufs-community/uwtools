@@ -121,7 +121,7 @@ def driverobj(config, cycle):
     "method",
     [
         "_driver_config",
-        "_resources",
+        "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
         "_runcmd",
@@ -186,7 +186,22 @@ def test_MPAS_namelist_file(caplog, driverobj):
     path = Path(refs(driverobj.namelist_file()))
     assert dst.is_file()
     assert logged(caplog, f"Wrote config to {path}")
-    assert isinstance(f90nml.read(dst), f90nml.Namelist)
+    nml = f90nml.read(dst)
+    assert isinstance(nml, f90nml.Namelist)
+
+
+def test_MPAS_namelist_file_long_duration(caplog, config, cycle):
+    log.setLevel(logging.DEBUG)
+    config["mpas"]["length"] = 120
+    driverobj = MPAS(config=config, cycle=cycle)
+    dst = driverobj._rundir / "namelist.atmosphere"
+    assert not dst.is_file()
+    path = Path(refs(driverobj.namelist_file()))
+    assert dst.is_file()
+    assert logged(caplog, f"Wrote config to {path}")
+    nml = f90nml.read(dst)
+    assert isinstance(nml, f90nml.Namelist)
+    assert nml["nhyd_model"]["config_run_duration"] == "5_0:00:00"
 
 
 def test_MPAS_namelist_file_fails_validation(caplog, driverobj):

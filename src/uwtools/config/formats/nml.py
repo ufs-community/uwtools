@@ -43,11 +43,9 @@ class NMLConfig(Config):
 
         config_check_depths_dump(config_obj=cfg, target_format=FORMAT.nml)
         nml: Namelist = Namelist(to_od(cfg)) if not isinstance(cfg, Namelist) else cfg
-        sio = StringIO()
-        nml.write(sio, sort=False)
-        s = sio.getvalue()
-        sio.close()
-        return s.strip()
+        with StringIO() as sio:
+            nml.write(sio, sort=False)
+            return sio.getvalue().strip()
 
     def _load(self, config_file: Optional[Path]) -> dict:
         """
@@ -87,7 +85,7 @@ class NMLConfig(Config):
         """
         Returns the config's depth threshold.
         """
-        return 2
+        return None
 
     @staticmethod
     def get_format() -> str:

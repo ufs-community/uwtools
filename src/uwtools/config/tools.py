@@ -76,9 +76,9 @@ def config_check_depths_update(config_obj: Union[Config, dict], target_format: s
 
 
 def realize_config(
-    input_config: Union[Config, Optional[Path]] = None,
+    input_config: Optional[Union[Config, Path, dict]] = None,
     input_format: Optional[str] = None,
-    update_config: Union[Config, Optional[Path]] = None,
+    update_config: Optional[Union[Config, Path, dict]] = None,
     update_format: Optional[str] = None,
     output_file: Optional[Path] = None,
     output_format: Optional[str] = None,
@@ -90,7 +90,7 @@ def realize_config(
     """
     NB: This docstring is dynamically replaced: See realize_config.__doc__ definition below.
     """
-    input_obj, input_format = _realize_config_input_setup(input_config, input_format)
+    input_obj = _realize_config_input_setup(input_config, input_format)
     input_obj = _realize_config_update(input_obj, update_config, update_format)
     input_obj.dereference()
     output_data, output_format = _realize_config_output_setup(
@@ -114,7 +114,7 @@ def realize_config(
 
 
 def _ensure_format(
-    desc: str, fmt: Optional[str] = None, config: Union[Config, Optional[Path]] = None
+    desc: str, fmt: Optional[str] = None, config: Optional[Union[Config, Path, dict]] = None
 ) -> str:
     """
     Return the given format, or the appropriate format as deduced from the config.
@@ -127,11 +127,12 @@ def _ensure_format(
     """
     if isinstance(config, Config):
         return config.get_format()
+    if isinstance(config, Path):
+        return fmt or get_file_format(config)
+    if isinstance(config, dict):
+        return fmt or FORMAT.yaml
     if fmt is None:
-        if config is not None:
-            fmt = get_file_format(config)
-        else:
-            raise UWError(f"Either {desc} file format or name must be specified")
+        raise UWError(f"Either {desc} path or format name must be specified")
     return fmt
 
 
@@ -161,24 +162,22 @@ def _print_config_section(config: dict, key_path: list[str]) -> None:
 
 
 def _realize_config_input_setup(
-    input_config: Union[Config, Optional[Path]] = None, input_format: Optional[str] = None
-) -> tuple[Config, str]:
+    input_config: Optional[Union[Config, Path, dict]] = None, input_format: Optional[str] = None
+) -> Config:
     """
     Set up config-realize input.
 
     :param input_config: Input config source (None => read stdin).
     :param input_format: Format of the input config.
-    :return: The input Config object and its format name.
+    :return: The input Config object.
     """
+    if isinstance(input_config, Config):
+        return input_config
     input_format = _ensure_format("input", input_format, input_config)
     if not input_config:
         log.debug("Reading input from stdin")
-    input_obj: Config = (
-        input_config
-        if isinstance(input_config, Config)
-        else format_to_config(input_format)(config=input_config)
-    )
-    return input_obj, input_format
+    config_obj: Config = format_to_config(input_format)(config=input_config)
+    return config_obj
 
 
 def _realize_config_output_setup(
@@ -209,7 +208,7 @@ def _realize_config_output_setup(
 
 def _realize_config_update(
     input_obj: Config,
-    update_config: Union[Config, Optional[Path]] = None,
+    update_config: Optional[Union[Config, Path, dict]] = None,
     update_format: Optional[str] = None,
 ) -> Config:
     """

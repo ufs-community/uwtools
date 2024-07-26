@@ -85,7 +85,7 @@ def truetask():
     "method",
     [
         "_driver_config",
-        "_resources",
+        "_run_resources",
         "_run_via_batch_submission",
         "_run_via_local_execution",
         "_runcmd",
@@ -132,7 +132,7 @@ def test_FV3_field_table(driverobj):
     src.touch()
     dst = driverobj._rundir / "field_table"
     assert not dst.is_file()
-    driverobj._driver_config["field_table"] = {"base_file": src}
+    driverobj._driver_config["field_table"] = {"base_file": str(src)}
     driverobj.field_table()
     assert dst.is_file()
 

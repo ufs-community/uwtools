@@ -12,7 +12,6 @@ ioda:
       - module load some-module
       - module load ioda-module
     executable: /path/to/a/ioda/exe
-    mpicmd: time
   files_to_copy:
     d/f2: /path/to/f2
     f1: /path/to/f1

@@ -14,7 +14,7 @@ from uwtools.config.formats.yaml import Config as _Config
 from uwtools.config.formats.yaml import YAMLConfig as _YAMLConfig
 from uwtools.config.tools import compare_configs as _compare
 from uwtools.config.tools import realize_config as _realize
-from uwtools.config.validator import validate_yaml as _validate_yaml
+from uwtools.config.validator import validate_external as _validate_external
 from uwtools.utils.api import ensure_data_source as _ensure_data_source
 from uwtools.utils.api import str2path as _str2path
 from uwtools.utils.file import FORMAT as _FORMAT
@@ -50,7 +50,7 @@ def get_fieldtable_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``FieldTableConfig`` object
     """
-    return _FieldTableConfig(config=_ensure_data_source(config, stdin_ok))
+    return _FieldTableConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def get_ini_config(
@@ -64,7 +64,7 @@ def get_ini_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``INIConfig`` object
     """
-    return _INIConfig(config=_ensure_data_source(config, stdin_ok))
+    return _INIConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def get_nml_config(
@@ -79,7 +79,7 @@ def get_nml_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``NMLConfig`` object
     """
-    return _NMLConfig(config=_ensure_data_source(config, stdin_ok))
+    return _NMLConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def get_sh_config(
@@ -94,7 +94,7 @@ def get_sh_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``SHConfig`` object
     """
-    return _SHConfig(config=_ensure_data_source(config, stdin_ok))
+    return _SHConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def get_yaml_config(
@@ -109,13 +109,13 @@ def get_yaml_config(
     :param stdin_ok: OK to read from ``stdin``?
     :return: An initialized ``YAMLConfig`` object
     """
-    return _YAMLConfig(config=_ensure_data_source(config, stdin_ok))
+    return _YAMLConfig(config=_ensure_data_source(_str2path(config), stdin_ok))
 
 
 def realize(
-    input_config: Optional[Union[dict, _Config, Path, str]] = None,
+    input_config: Optional[Union[_Config, Path, dict, str]] = None,
     input_format: Optional[str] = None,
-    update_config: Optional[Union[dict, _Config, Path, str]] = None,
+    update_config: Optional[Union[_Config, Path, dict, str]] = None,
     update_format: Optional[str] = None,
     output_file: Optional[Union[Path, str]] = None,
     output_format: Optional[str] = None,
@@ -124,17 +124,14 @@ def realize(
     total: bool = False,
     dry_run: bool = False,
     stdin_ok: bool = False,
-) -> None:
+) -> dict:
     """
     NB: This docstring is dynamically replaced: See realize.__doc__ definition below.
     """
-    input_config = (
-        _YAMLConfig(config=input_config) if isinstance(input_config, dict) else input_config
-    )
-    _realize(
-        input_config=_ensure_data_source(input_config, stdin_ok),
+    return _realize(
+        input_config=_ensure_data_source(_str2path(input_config), stdin_ok),
         input_format=input_format,
-        update_config=_ensure_data_source(update_config, stdin_ok),
+        update_config=_ensure_data_source(_str2path(update_config), stdin_ok),
         update_format=update_format,
         output_file=_str2path(output_file),
         output_format=output_format,
@@ -150,7 +147,9 @@ def realize_to_dict(  # pylint: disable=unused-argument
     input_format: Optional[str] = None,
     update_config: Optional[Union[dict, _Config, Path, str]] = None,
     update_format: Optional[str] = None,
+    key_path: Optional[list[Union[str, int]]] = None,
     values_needed: bool = False,
+    total: bool = False,
     dry_run: bool = False,
     stdin_ok: bool = False,
 ) -> dict:
@@ -159,7 +158,7 @@ def realize_to_dict(  # pylint: disable=unused-argument
 
     See ``realize()`` for details on arguments, etc.
     """
-    return _realize(**{**locals(), "output_file": Path(os.devnull), "output_format": None})
+    return realize(**{**locals(), "output_file": Path(os.devnull), "output_format": _FORMAT.yaml})
 
 
 def validate(
@@ -178,8 +177,8 @@ def validate(
     :param stdin_ok: OK to read from ``stdin``?
     :return: ``True`` if the YAML file conforms to the schema, ``False`` otherwise
     """
-    return _validate_yaml(
-        schema_file=_ensure_data_source(schema_file, stdin_ok), config=_str2path(config)
+    return _validate_external(
+        schema_file=_str2path(schema_file), config=_ensure_data_source(_str2path(config), stdin_ok)
     )
 
 
@@ -240,6 +239,7 @@ Recognized file extensions are: {extensions}
 :param total: Require rendering of all Jinja2 variables/expressions
 :param dry_run: Log output instead of writing to output
 :param stdin_ok: OK to read from ``stdin``?
+:return: The ``dict`` representation of the realized config
 :raises: UWConfigRealizeError if ``total`` is ``True`` and any Jinja2 variable/expression was not rendered
 """.format(
     extensions=", ".join(_FORMAT.extensions())

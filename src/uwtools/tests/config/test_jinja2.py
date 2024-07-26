@@ -252,7 +252,7 @@ def test_render_fails(caplog, tmp_path):
     with open(values_file, "w", encoding="utf-8") as f:
         print("constants: {pi: 3.14}", file=f)
     assert render_helper(input_file=input_file, values_file=values_file) is None
-    assert logged(caplog, "Render failed with error: 'dict object' has no attribute 'e'")
+    assert logged(caplog, "Template render failed with error: 'dict object' has no attribute 'e'")
 
 
 def test_render_values_missing(caplog, template_file, values_file):
@@ -264,7 +264,7 @@ def test_render_values_missing(caplog, template_file, values_file):
     with open(values_file, "w", encoding="utf-8") as f:
         f.write(yaml.dump(cfgobj))
     render_helper(input_file=template_file, values_file=values_file)
-    assert logged(caplog, "Required value(s) not provided:")
+    assert logged(caplog, "Value(s) required to render template not provided:")
     assert logged(caplog, "  roses_color")
 
 
@@ -329,7 +329,7 @@ def test__dry_run_template(caplog):
 def test__log_missing_values(caplog):
     missing = ["roses_color", "violets_color"]
     jinja2._log_missing_values(missing)
-    assert logged(caplog, "Required value(s) not provided:")
+    assert logged(caplog, "Value(s) required to render template not provided:")
     assert logged(caplog, "  roses_color")
     assert logged(caplog, "  violets_color")
 
@@ -337,7 +337,7 @@ def test__log_missing_values(caplog):
 def test__report(caplog):
     log.setLevel(logging.DEBUG)
     expected = """
-Internal arguments:
+Internal arguments when rendering template:
 ---------------------------------------------------------------------
              foo: bar
 longish_variable: 88
@@ -528,16 +528,16 @@ class Test_J2Template:
     def test_searchpath_stdin_default(self, searchpath_assets):
         # There is no default search path for reads from stdin:
         a = searchpath_assets
-        with patch.object(jinja2, "readable") as readable:
-            readable.return_value.__enter__.return_value = StringIO(a.s1)
+        with patch.object(jinja2, "readable") as readable, StringIO(a.s1) as sio:
+            readable.return_value.__enter__.return_value = sio
             with raises(TemplateNotFound):
                 J2Template(values={}).render()
 
     def test_searchpath_stdin_explicit(self, searchpath_assets):
         # An explicit search path is honored when reading from stdin:
         a = searchpath_assets
-        with patch.object(jinja2, "readable") as readable:
-            readable.return_value.__enter__.return_value = StringIO(a.s1)
+        with patch.object(jinja2, "readable") as readable, StringIO(a.s1) as sio:
+            readable.return_value.__enter__.return_value = sio
             assert J2Template(values={}, searchpath=[a.d1]).render() == "2"
 
     def test_undeclared_variables(self):

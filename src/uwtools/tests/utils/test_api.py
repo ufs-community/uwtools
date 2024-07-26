@@ -1,14 +1,13 @@
 # pylint: disable=missing-function-docstring,protected-access,redefined-outer-name
 
 import datetime as dt
-import sys
 from pathlib import Path
 from unittest.mock import patch
 
 from pytest import fixture, mark, raises
 
 from uwtools.exceptions import UWError
-from uwtools.tests.drivers.test_driver import ConcreteDriverCycleAndLeadtimeBased as TestDriverWCL
+from uwtools.tests.drivers.test_driver import ConcreteDriverCycleLeadtimeBased as TestDriverCL
 from uwtools.tests.drivers.test_driver import ConcreteDriverTimeInvariant as TestDriver
 from uwtools.utils import api
 
@@ -39,13 +38,6 @@ def test_ensure_data_source_stdin_not_ok():
 
 def test_ensure_data_source_stdin_ok():
     assert api.ensure_data_source(data_source=None, stdin_ok=True) is None
-
-
-def test_ensure_data_source_str_to_path():
-    val = "/some/path"
-    result = api.ensure_data_source(data_source=val, stdin_ok=False)
-    assert isinstance(result, Path)
-    assert result == Path(val)
 
 
 def test_make_execute(execute_kwargs):
@@ -97,13 +89,6 @@ def test_make_execute_leadtime_no_cycle_error(execute_kwargs):
     assert "When leadtime is specified, cycle is required" in str(e)
 
 
-def test_make_tasks():
-    func = api.make_tasks(driver_class=TestDriver)
-    assert func.__name__ == "tasks"
-    taskmap = func()
-    assert list(taskmap.keys()) == ["atask", "run", "runscript", "validate"]
-
-
 @mark.parametrize("val", [Path("/some/path"), {"foo": 88}])
 def test_str2path_passthrough(val):
     assert api.str2path(val) == val
@@ -119,16 +104,14 @@ def test_str2path_convert():
 @mark.parametrize("hours", [0, 24, 168])
 def test__execute(execute_kwargs, hours, tmp_path):
     graph_file = tmp_path / "g.dot"
-    with patch.object(sys.modules[__name__], "TestDriverWCL", wraps=TestDriverWCL) as cd:
-        kwargs = {
-            **execute_kwargs,
-            "driver_class": cd,
-            "config": {"some": "config"},
-            "cycle": dt.datetime.now(),
-            "leadtime": dt.timedelta(hours=hours),
-            "graph_file": graph_file,
-        }
-        assert not graph_file.is_file()
-        assert api._execute(**kwargs) is True
-        assert cd.call_args.kwargs["leadtime"] == dt.timedelta(hours=hours)
+    kwargs = {
+        **execute_kwargs,
+        "driver_class": TestDriverCL,
+        "config": {"some": "config"},
+        "cycle": dt.datetime.now(),
+        "leadtime": dt.timedelta(hours=hours),
+        "graph_file": graph_file,
+    }
+    assert not graph_file.is_file()
+    assert api._execute(**kwargs) is True
     assert graph_file.is_file()

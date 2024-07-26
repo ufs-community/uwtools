@@ -25,7 +25,6 @@ Example block:
        stderr: /path/to/runscript.err
        stdout: /path/to/runscript.out
        tasks_per_node: 40
-       threads: 8
        walltime: 00:02:00
      envcmds:
        - module use /path/to/modulefiles
@@ -44,9 +43,11 @@ These entries map to job-scheduler directives sent to e.g. Slurm when a batch jo
 
 Shorthand names are provided for certain directives for each scheduler, and can be specified as-so along with appropriate values. Recognized names for each scheduler are:
 
-* LSF: ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``threads``, ``walltime``
-* PBS: ``debug``, ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``threads``, ``walltime``
-* Slurm: ``cores``, ``exclusive``, ``export``, ``jobname``, ``memory``, ``nodes``, ``partition``, ``queue``, ``rundir``, ``stderr``, ``stdout``, ``tasks_per_node``, ``threads``, ``walltime``
+* LSF: ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``walltime``
+* PBS: ``debug``, ``jobname``, ``memory``, ``nodes``, ``queue``, ``shell``, ``stdout``, ``tasks_per_node``, ``walltime``
+* Slurm: ``cores``, ``exclusive``, ``export``, ``jobname``, ``memory``, ``nodes``, ``partition``, ``queue``, ``rundir``, ``stderr``, ``stdout``, ``tasks_per_node``, ``walltime``
+
+**NB** To enable threading when running components compiled with OpenMP support, set the ``execution:`` block's  ``threads:`` item (see below). Then ``uwtools`` will set the appropriate scheduler flag when making a batch request, and will set the ``OMP_NUM_THREADS`` environment variable in the execution environment.
 
 Other, arbitrary directive key-value pairs can be provided exactly as they should appear in the batch runscript. For example
 
@@ -85,4 +86,4 @@ The MPI launch program (``mpiexec``, ``srun``, et al.). This entry is only used 
 threads:
 """"""""
 
-Used to set the ``OMP_NUM_THREADS`` environment variable in the execution environment, to control the number of OpenMP threads to use when running the component. This entry is only used when configuring parallel components.
+For drivers implementing support, exports the ``OMP_NUM_THREADS`` environment variable to the execution environment, specifying the number of OpenMP threads to use when running the component. This entry is only used when configuring parallel components.
