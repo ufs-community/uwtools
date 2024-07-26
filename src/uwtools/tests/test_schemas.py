@@ -106,6 +106,66 @@ def cdeps_config():
 
 
 @fixture
+def chgres_cube_config():
+    return {
+        "execution": {
+            "executable": "chgres_cube",
+        },
+        "namelist": {
+            "base_file": "/path",
+            "update_values": {
+                "config": {
+                    "atm_core_files_input_grid": ["a1", "a2"],
+                    "atm_files_input_grid": ["b1", "b2"],
+                    "atm_tracer_files_input_grid": ["c1", "c2"],
+                    "atm_weight_file": "d",
+                    "convert_atm": True,
+                    "convert_nst": True,
+                    "convert_sfc": True,
+                    "cycle_day": 1,
+                    "cycle_hour": 2,
+                    "cycle_mon": 3,
+                    "cycle_year": 4,
+                    "data_dir_input_grid": "e",
+                    "external_model": "GFS",
+                    "fix_dir_target_grid": "f",
+                    "geogrid_file_input_grid": "g",
+                    "grib2_file_input_grid": "h",
+                    "halo_blend": 5,
+                    "halo_bndy": 6,
+                    "input_type": "grib2",
+                    "lai_from_climo": True,
+                    "minmax_vgfrc_from_climo": True,
+                    "mosaic_file_input_grid": "i",
+                    "mosaic_file_target_grid": "j",
+                    "nsoill_out": 7,
+                    "nst_files_input_grid": ["k1", "k2"],
+                    "orog_dir_input_grid": "l",
+                    "orog_dir_target_grid": "m",
+                    "orog_files_input_grid": ["n1", "n2"],
+                    "orog_files_target_grid": ["o1", "o2"],
+                    "regional": 8,
+                    "sfc_files_input_grid": ["p1", "p2"],
+                    "sotyp_from_climo": True,
+                    "tg3_from_soil": True,
+                    "thomp_mp_climo_file": "q",
+                    "tracers": ["r1", "r2"],
+                    "tracers_input": ["s1", "s2"],
+                    "varmap_file": "t",
+                    "vcoord_file_target_grid": "u",
+                    "vgfrc_from_climo": True,
+                    "vgtyp_from_climo": True,
+                    "wam_cold_start": True,
+                    "wam_parm_file": "v",
+                }
+            },
+            "validate": True,
+        },
+        "rundir": "/tmp",
+    }
+
+
+@fixture
 def chgres_cube_prop():
     return partial(schema_validator, "chgres-cube", "properties", "chgres_cube", "properties")
 
@@ -385,66 +445,6 @@ def test_schema_cdeps_streams(cdeps_config, section):
 
 
 # chgres-cube
-
-
-@fixture
-def chgres_cube_config():
-    return {
-        "execution": {
-            "executable": "chgres_cube",
-        },
-        "namelist": {
-            "base_file": "/path",
-            "update_values": {
-                "config": {
-                    "atm_core_files_input_grid": ["a1", "a2"],
-                    "atm_files_input_grid": ["b1", "b2"],
-                    "atm_tracer_files_input_grid": ["c1", "c2"],
-                    "atm_weight_file": "d",
-                    "convert_atm": True,
-                    "convert_nst": True,
-                    "convert_sfc": True,
-                    "cycle_day": 1,
-                    "cycle_hour": 2,
-                    "cycle_mon": 3,
-                    "cycle_year": 4,
-                    "data_dir_input_grid": "e",
-                    "external_model": "GFS",
-                    "fix_dir_target_grid": "f",
-                    "geogrid_file_input_grid": "g",
-                    "grib2_file_input_grid": "h",
-                    "halo_blend": 5,
-                    "halo_bndy": 6,
-                    "input_type": "grib2",
-                    "lai_from_climo": True,
-                    "minmax_vgfrc_from_climo": True,
-                    "mosaic_file_input_grid": "i",
-                    "mosaic_file_target_grid": "j",
-                    "nsoill_out": 7,
-                    "nst_files_input_grid": ["k1", "k2"],
-                    "orog_dir_input_grid": "l",
-                    "orog_dir_target_grid": "m",
-                    "orog_files_input_grid": ["n1", "n2"],
-                    "orog_files_target_grid": ["o1", "o2"],
-                    "regional": 8,
-                    "sfc_files_input_grid": ["p1", "p2"],
-                    "sotyp_from_climo": True,
-                    "tg3_from_soil": True,
-                    "thomp_mp_climo_file": "q",
-                    "tracers": ["r1", "r2"],
-                    "tracers_input": ["s1", "s2"],
-                    "varmap_file": "t",
-                    "vcoord_file_target_grid": "u",
-                    "vgfrc_from_climo": True,
-                    "vgtyp_from_climo": True,
-                    "wam_cold_start": True,
-                    "wam_parm_file": "v",
-                }
-            },
-            "validate": True,
-        },
-        "rundir": "/tmp",
-    }
 
 
 def test_schema_chgres_cube(chgres_cube_config):
