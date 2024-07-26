@@ -1,0 +1,4 @@
+config:
+  resolution:
+    nx: 1440
+    ny: 721

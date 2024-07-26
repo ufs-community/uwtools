@@ -85,7 +85,7 @@ class NMLConfig(Config):
         """
         Returns the config's depth threshold.
         """
-        return 2
+        return None
 
     @staticmethod
     def get_format() -> str:

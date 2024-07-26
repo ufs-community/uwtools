@@ -163,7 +163,7 @@ def test_derefernce_context_override(tmp_path):
     assert config["file"] == "gfs.t06z.atmanl.nc"
 
 
-@mark.parametrize("fmt2", [FORMAT.ini, FORMAT.nml, FORMAT.sh])
+@mark.parametrize("fmt2", [FORMAT.ini, FORMAT.sh])
 def test_invalid_config(fmt2, tmp_path):
     """
     Test that invalid config files will error when attempting to dump.
