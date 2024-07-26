@@ -459,6 +459,7 @@ def test_schema_chgres_cube(chgres_cube_config):
     # "rundir" must be a string:
     assert "'rundir' is a required property" in errors(with_del(chgres_cube_config, "rundir"))
 
+
 def test_schema_chgres_cube_namelist(chgres_cube_config, chgres_cube_prop):
     namelist = chgres_cube_config["namelist"]
     errors = chgres_cube_prop("namelist")
@@ -469,22 +470,83 @@ def test_schema_chgres_cube_namelist(chgres_cube_config, chgres_cube_prop):
     # Just update_values is ok:
     assert not errors(with_del(namelist, "base_file"))
     # config is required with update_values:
-    assert "'config' is a required property" in errors(with_del(namelist, "update_values", "config"))
+    assert "'config' is a required property" in errors(
+        with_del(namelist, "update_values", "config")
+    )
     # A combination of base_file and update_values is ok:
     assert not errors(namelist)
     # At least one is required:
     assert "is not valid" in errors({})
 
 
-@mark.skip("PM FIXME")
-def test_schema_chgres_cube_namelist_update_values(chgres_cube_prop):
+def test_schema_chgres_cube_namelist_update_values(chgres_cube_config, chgres_cube_prop):
+    config = chgres_cube_config["namelist"]["update_values"]["config"]
     errors = chgres_cube_prop("namelist", "properties", "update_values", "properties", "config")
-    # array, boolean, number, and string values are ok:
-    assert not errors({"array": [1, 2, 3], "bool": True, "int": 88, "float": 3.14, "string": "foo"})
-    # Other types are not, e.g.:
-    assert "None is not of type 'array', 'boolean', 'number', 'string'" in errors({"null": None})
-    # No minimum number of entries is required:
-    assert not errors({})
+    # Some entries are required:
+    for key in ["mosaic_file_target_grid", "varmap_file", "vcoord_file_target_grid"]:
+        assert "is a required property" in errors(with_del(config, key))
+    # Additional entries of namelist-compatible types are permitted:
+    for val in [[1, 2, 3], True, 88, 3.14, "bar"]:
+        assert not errors(with_set(config, val, "foo"))
+    # Namelist values must be of the correct type:
+    # boolean:
+    for key in [
+        "convert_atm",
+        "convert_nst",
+        "convert_sfc",
+        "lai_from_climo",
+        "minmax_vgfrc_from_climo",
+        "sotyp_from_climo",
+        "tg3_from_soil",
+        "vgfrc_from_climo",
+        "vgtyp_from_climo",
+        "wam_cold_start",
+    ]:
+        assert "not of type 'boolean'" in errors(with_set(config, None, key))
+    # enum:
+    for key in ["external_model", "input_type"]:
+        assert "is not one of" in errors(with_set(config, None, key))
+    # integer:
+    for key in [
+        "cycle_day",
+        "cycle_hour",
+        "cycle_mon",
+        "cycle_year",
+        "halo_blend",
+        "halo_bndy",
+        "nsoill_out",
+        "regional",
+    ]:
+        assert "not of type 'integer'" in errors(with_set(config, None, key))
+    # string:
+    for key in [
+        "atm_weight_file",
+        "data_dir_input_grid",
+        "fix_dir_target_grid",
+        "geogrid_file_input_grid",
+        "grib2_file_input_grid",
+        "mosaic_file_input_grid",
+        "mosaic_file_target_grid",
+        "orog_dir_input_grid",
+        "orog_dir_target_grid",
+        "thomp_mp_climo_file",
+        "varmap_file",
+        "vcoord_file_target_grid",
+        "wam_parm_file",
+    ]:
+        assert "not of type 'string'" in errors(with_set(config, None, key))
+    # string or array of string:
+    for key in [
+        "atm_core_files_input_grid",
+        "atm_files_input_grid",
+        "atm_tracer_files_input_grid",
+        "nst_files_input_grid",
+        "orog_files_input_grid",
+        "orog_files_target_grid",
+        "sfc_files_input_grid",
+    ]:
+        assert "is not of type 'array', 'string'" in errors(with_set(config, None, key))
+        assert "is not of type 'string'" in errors(with_set(config, [1, 2, 3], key))
 
 
 # esg-grid
