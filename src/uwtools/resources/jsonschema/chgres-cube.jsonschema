@@ -37,18 +37,27 @@
                   },
                   "properties": {
                     "atm_core_files_input_grid": {
+                      "items": {
+                        "type": "string"
+                      },
                       "type": [
                         "array",
                         "string"
                       ]
                     },
                     "atm_files_input_grid": {
+                      "items": {
+                        "type": "string"
+                      },
                       "type": [
                         "array",
                         "string"
                       ]
                     },
                     "atm_tracer_files_input_grid": {
+                      "items": {
+                        "type": "string"
+                      },
                       "type": [
                         "array",
                         "string"
@@ -134,6 +143,9 @@
                       "type": "integer"
                     },
                     "nst_files_input_grid": {
+                      "items": {
+                        "type": "string"
+                      },
                       "type": [
                         "array",
                         "string"
@@ -146,12 +158,18 @@
                       "type": "string"
                     },
                     "orog_files_input_grid": {
+                      "items": {
+                        "type": "string"
+                      },
                       "type": [
                         "array",
                         "string"
                       ]
                     },
                     "orog_files_target_grid": {
+                      "items": {
+                        "type": "string"
+                      },
                       "type": [
                         "array",
                         "string"
@@ -161,6 +179,9 @@
                       "type": "integer"
                     },
                     "sfc_files_input_grid": {
+                      "items": {
+                        "type": "string"
+                      },
                       "type": [
                         "array",
                         "string"
