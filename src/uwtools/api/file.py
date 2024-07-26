@@ -24,14 +24,14 @@ def copy(
     """
     Copy files.
 
-    :param target_dir: Path to target directory
+    :param target_dir: Path to target directory.
     :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
     :param cycle: A datetime object to make available for use in the config.
     :param leadtime: A timedelta object to make available for use in the config.
-    :param keys: YAML keys leading to file dst/src block
-    :param dry_run: Do not copy files
+    :param keys: YAML keys leading to file dst/src block.
+    :param dry_run: Do not copy files.
     :param stdin_ok: OK to read from ``stdin``?
-    :return: ``True`` if no exception is raised
+    :return: ``True`` if all files were copied.
     """
     _FileCopier(
         target_dir=Path(target_dir),
@@ -56,14 +56,14 @@ def link(
     """
     Link files.
 
-    :param target_dir: Path to target directory
+    :param target_dir: Path to target directory.
     :param config: YAML-file path, or ``dict`` (read ``stdin`` if missing or ``None``).
     :param cycle: A datetime object to make available for use in the config.
     :param leadtime: A timedelta object to make available for use in the config.
-    :param keys: YAML keys leading to file dst/src block
-    :param dry_run: Do not link files
+    :param keys: YAML keys leading to file dst/src block.
+    :param dry_run: Do not link files.
     :param stdin_ok: OK to read from ``stdin``?
-    :return: ``True`` if no exception is raised
+    :return: ``True`` if no exception is raised.
     """
     _FileLinker(
         target_dir=Path(target_dir),
