@@ -1,0 +1,4 @@
+&FOO
+  S = "string"
+  N = 88
+/

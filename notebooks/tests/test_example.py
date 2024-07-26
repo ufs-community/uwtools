@@ -50,3 +50,12 @@ def test_template_render():
 
     # Clean up the temporary file after the test is run.
     os.remove(rendered_path)
+
+
+# Run all cells of the example notebook.
+@testbook("./example.ipynb", execute=True)
+def test_compare(tb):
+
+    # Check output text of the cell prints the correct result
+    assert 'False' in tb.cell_output_text(21)
+    assert 'True' in tb.cell_output_text(25)
