@@ -36,12 +36,12 @@ class Assets(ABC):
         self,
         cycle: Optional[datetime] = None,
         leadtime: Optional[timedelta] = None,
-        config: Optional[Union[dict, str, Path]] = None,
+        config: Optional[Union[dict, str, YAMLConfig, Path]] = None,
         dry_run: bool = False,
         key_path: Optional[list[str]] = None,
         schema_file: Optional[Path] = None,
     ) -> None:
-        self._config = YAMLConfig(config=config)
+        self._config = config if isinstance(config, YAMLConfig) else YAMLConfig(config=config)
         self._config.dereference(
             context={
                 **({"cycle": cycle} if cycle else {}),
